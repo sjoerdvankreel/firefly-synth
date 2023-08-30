@@ -8,6 +8,7 @@ namespace infernal::base {
 
 class plugin_engine {  
   runtime_plugin_topo const _topo;
+  float _sample_rate = {};
   param_value*** _state = {};
   host_block _host_block = {};
   plugin_block _plugin_block = {};
@@ -20,7 +21,7 @@ public:
   void process();
   void deactivate();
   host_block& prepare();
-  void activate(int frame_count);
+  void activate(int sample_rate, int max_frame_count);
 };
 
 }

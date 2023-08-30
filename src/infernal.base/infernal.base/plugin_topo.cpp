@@ -29,8 +29,6 @@ plugin_topo(topo)
 {
   for (int m = 0; m < topo.modules.size(); m++)
   {
-    int module_param_index = 0;
-    module_params.emplace_back();
     for (int s = 0; s < topo.modules[m].submodules.size(); s++)
       for(int p = 0; p < topo.modules[m].submodules[s].params.size(); p++)
         module_params[m].push_back(topo.modules[m].submodules[s].params[p]);

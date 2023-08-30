@@ -22,7 +22,6 @@ enum class param_display { toggle, knob, slider };
 struct param_topo {
   std::string id;
   std::string name;
-  std::string desc;
   std::string unit;
   std::string default_;
   param_rate rate;
@@ -53,7 +52,6 @@ struct module_topo {
   int count;
   std::string id;
   std::string name;
-  std::string desc;
   module_scope scope;
   module_output output;
   module_process process;
@@ -74,16 +72,23 @@ struct plugin_topo {
 
 struct runtime_param_topo
 {
+  std::string name;
   int module_type;
   int module_index;
   int module_param_index;
+};
+
+struct runtime_module_topo
+{
+  std::string name;
+  std::vector<param_topo> params;
 };
 
 struct runtime_plugin_topo: 
 plugin_topo
 {
   std::vector<runtime_param_topo> runtime_params = {};
-  std::vector<std::vector<param_topo>> module_params = {};
+  std::vector<runtime_module_topo> runtime_modules = {};
   runtime_plugin_topo(plugin_topo const& topo);
 };
 

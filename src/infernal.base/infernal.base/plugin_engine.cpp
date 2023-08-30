@@ -70,24 +70,26 @@ plugin_engine::
 }
 
 void
-plugin_engine::activate(int frame_count)
+plugin_engine::activate(int sample_rate, int max_frame_count)
 {
+  _sample_rate = sample_rate;
   for (int m = 0; m < _topo.modules.size(); m++)
     for (int i = 0; i < _topo.modules[m].count; i++)
     {
       if (_topo.modules[m].output == module_output::cv)
-        _plugin_block.module_cv[m][i] = new float[frame_count]();
+        _plugin_block.module_cv[m][i] = new float[max_frame_count]();
       else if (_topo.modules[m].output == module_output::audio)
         for(int c = 0; c < _topo.channel_count; c++)
-          _plugin_block.module_audio[m][i][c] = new float[frame_count]();
+          _plugin_block.module_audio[m][i][c] = new float[max_frame_count]();
       for(int p = 0; p < _topo.module_params[m].size(); p++)
-        _plugin_block.accurate_automation[m][i][p] = new float[frame_count]();
+        _plugin_block.accurate_automation[m][i][p] = new float[max_frame_count]();
     }
 }
 
 void
 plugin_engine::deactivate()
 {
+  _sample_rate = 0;
   for (int m = 0; m < _topo.modules.size(); m++)
     for (int i = 0; i < _topo.modules[m].count; i++)
     {

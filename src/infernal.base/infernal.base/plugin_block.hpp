@@ -49,6 +49,7 @@ struct host_block: host_block_base {
 
 struct plugin_block {
   int module_index;
+  float sample_rate;
   float*** module_cv;
   float**** module_audio;
   host_block_base const* host;
