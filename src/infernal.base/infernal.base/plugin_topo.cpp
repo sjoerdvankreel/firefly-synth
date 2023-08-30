@@ -27,27 +27,27 @@ param_topo::from_text(std::string const& text, param_value& value) const
 }
 
 runtime_plugin_topo::
-runtime_plugin_topo(plugin_topo const& topo):
-static_topo(topo)
+runtime_plugin_topo(plugin_topo&& static_topo):
+static_topo(std::move(static_topo))
 {
   int plugin_param_index = 0;
-  for (int m = 0; m < topo.modules.size(); m++)
+  for (int m = 0; m < static_topo.modules.size(); m++)
   {
-    auto const& mod = topo.modules[m];
-    flat_module_topo flat;
-    flat.static_topo = mod;
+    auto& flat = flat_modules[m];
+    auto const& mod = static_topo.modules[m];
+    flat.static_topo = &mod;
     for (int s = 0; s < mod.submodules.size(); s++)
     {
       auto const& submod = mod.submodules[s];
       for (int p = 0; p < submod.params.size(); p++)
-        flat.params.push_back(submod.params[p]);
+        flat.params.push_back(&submod.params[p]);
     }
     flat_modules.emplace_back(std::move(flat));
 
     for(int i = 0; i < mod.count; i++)
     {
       runtime_module_topo rt_module;
-      rt_module.static_topo = mod;
+      rt_module.static_topo = &mod;
       rt_module.name = mod.name;
       if(mod.count > 1) rt_module.name += " " + std::to_string(i);
 
@@ -59,7 +59,7 @@ static_topo(topo)
         {
           runtime_param_topo rtp;
           auto const& param = submod.params[p];
-          rtp.static_topo = param;
+          rtp.static_topo = &param;
           rtp.module_index = i;
           rtp.module_param_index = mod_param_index++;
           rtp.name = rt_module.name + " " + param.name;

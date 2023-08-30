@@ -86,22 +86,22 @@ struct runtime_param_topo
   int module_type;
   int module_index;
   int module_param_index;
-  param_topo static_topo;
+  param_topo const* static_topo;
   INF_DECLARE_MOVE_ONLY(runtime_param_topo);
 };
 
 struct runtime_module_topo
 {
   std::string name;
-  module_topo static_topo;
+  module_topo const* static_topo;
   std::vector<runtime_param_topo> params;
   INF_DECLARE_MOVE_ONLY(runtime_module_topo);
 };
 
 struct flat_module_topo
 {
-  module_topo static_topo;
-  std::vector<param_topo> params;
+  module_topo const* static_topo;
+  std::vector<param_topo const*> params;
   INF_DECLARE_MOVE_ONLY(flat_module_topo);
 };
 
@@ -111,7 +111,7 @@ struct runtime_plugin_topo
   std::vector<flat_module_topo> flat_modules = {};
   std::vector<runtime_param_topo> runtime_params = {};
   std::vector<runtime_module_topo> runtime_modules = {};
-  explicit runtime_plugin_topo(plugin_topo const& topo);
+  explicit runtime_plugin_topo(plugin_topo&& static_topo);
   INF_DECLARE_MOVE_ONLY(runtime_plugin_topo);
 };
 

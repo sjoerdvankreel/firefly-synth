@@ -1,10 +1,12 @@
 #include <infernal.base/plugin_engine.hpp>
+
 #include <limits>
+#include <utility>
 
 namespace infernal::base {
 
 plugin_engine::
-plugin_engine(plugin_topo const& topo) : _topo(topo)
+plugin_engine(plugin_topo&& topo) : _topo(std::move(topo))
 {
   _host_block.notes.reserve(topo.note_limit);
   _host_block.block_automation.reserve(topo.block_automation_limit);
@@ -34,7 +36,7 @@ plugin_engine(plugin_topo const& topo) : _topo(topo)
       int mod_param_count = flat_mod.params.size();
       _state[m][i] = new param_value[mod_param_count];
       for(int p = 0; p < mod_param_count; p++)
-        _state[m][i][p] = flat_mod.params[p].default_value();
+        _state[m][i][p] = flat_mod.params[p]->default_value();
 
       if(static_mods[m].output == module_output::audio)
         _plugin_block.module_audio[m][i] = new float* [_topo.static_topo.channel_count]();
@@ -50,10 +52,10 @@ plugin_engine::
   for (int m = 0; m < _topo.flat_modules.size(); m++)
   {
     auto const& flat_mod_topo = _topo.flat_modules[m].static_topo;
-    for (int i = 0; i < flat_mod_topo.count; i++)
+    for (int i = 0; i < flat_mod_topo->count; i++)
     {
       delete _state[m][i];
-      if (flat_mod_topo.output == module_output::audio)
+      if (flat_mod_topo->output == module_output::audio)
         delete _plugin_block.module_audio[m][i];
       delete _plugin_block.block_automation[m][i];
       delete _plugin_block.accurate_automation[m][i];
@@ -79,11 +81,11 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   for (int m = 0; m < _topo.flat_modules.size(); m++)
   {
     auto const& flat_mod = _topo.flat_modules[m].static_topo;
-    for (int i = 0; i < flat_mod.count; i++)
+    for (int i = 0; i < flat_mod->count; i++)
     {
-      if (flat_mod.output == module_output::cv)
+      if (flat_mod->output == module_output::cv)
         _plugin_block.module_cv[m][i] = new float[max_frame_count]();
-      else if (flat_mod.output == module_output::audio)
+      else if (flat_mod->output == module_output::audio)
         for(int c = 0; c < _topo.static_topo.channel_count; c++)
           _plugin_block.module_audio[m][i][c] = new float[max_frame_count]();
       for(int p = 0; p < _topo.flat_modules[m].params.size(); p++)
@@ -99,14 +101,14 @@ plugin_engine::deactivate()
   for (int m = 0; m < _topo.flat_modules.size(); m++)
   {
     auto const& flat_mod = _topo.flat_modules[m].static_topo;
-    for (int i = 0; i < flat_mod.count; i++)
+    for (int i = 0; i < flat_mod->count; i++)
     {
-      if (flat_mod.output == module_output::cv)
+      if (flat_mod->output == module_output::cv)
       {
         delete _plugin_block.module_cv[m][i];
         _plugin_block.module_cv[m][i] = nullptr;
       }
-      else if (flat_mod.output == module_output::audio)
+      else if (flat_mod->output == module_output::audio)
         for (int c = 0; c < _topo.static_topo.channel_count; c++)
         {
           delete _plugin_block.module_audio[m][i][c];
@@ -141,14 +143,14 @@ plugin_engine::process()
   for(int m = 0; m < _topo.static_topo.modules.size(); m++)
   {
     auto const& flat_mod = _topo.flat_modules[m].static_topo;
-    if (flat_mod.output == module_output::cv)
-      for(int i = 0; i < flat_mod.count; i++)
+    if (flat_mod->output == module_output::cv)
+      for(int i = 0; i < flat_mod->count; i++)
         std::fill(
           _plugin_block.module_cv[m][i], 
           _plugin_block.module_cv[m][i] + _host_block.frame_count, 
           std::numeric_limits<float>::quiet_NaN());
-    else if(flat_mod.output == module_output::audio)
-      for (int i = 0; i < flat_mod.count; i++)
+    else if(flat_mod->output == module_output::audio)
+      for (int i = 0; i < flat_mod->count; i++)
         for(int c = 0; c < _topo.static_topo.channel_count; c++)
           std::fill(
             _plugin_block.module_audio[m][i][c], 
@@ -162,7 +164,7 @@ plugin_engine::process()
     int mt = rt_param.module_type;
     int mi = rt_param.module_index;
     int pi = rt_param.module_param_index;
-    if (_topo.flat_modules[mt].params[pi].rate == param_rate::block)
+    if (_topo.flat_modules[mt].params[pi]->rate == param_rate::block)
       _plugin_block.block_automation[mt][mi][pi] = _state[mt][mi][pi];
     else
       std::fill(

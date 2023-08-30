@@ -16,7 +16,7 @@ class plugin_engine {
 
 public:
   ~plugin_engine();
-  explicit plugin_engine(plugin_topo const& topo);
+  explicit plugin_engine(plugin_topo&& topo);
 
   void process();
   void deactivate();
