@@ -84,6 +84,7 @@ struct runtime_module_topo
 {
   std::string name;
   std::vector<param_topo> params;
+  std::vector<int> param_hashes;
 };
 
 struct runtime_plugin_topo: 
