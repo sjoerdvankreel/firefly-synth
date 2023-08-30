@@ -89,6 +89,7 @@ plugin_topo
 {
   std::vector<runtime_param_topo> runtime_params = {};
   std::vector<runtime_module_topo> runtime_modules = {};
+  std::vector<std::vector<param_topo>> flat_module_params = {};
   runtime_plugin_topo(plugin_topo const& topo);
 };
 
