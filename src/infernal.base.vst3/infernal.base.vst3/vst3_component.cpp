@@ -34,7 +34,7 @@ vst3_component::initialize(FUnknown* context)
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
   addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
-  if(_topo.is_fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
+  if(_topo.static_topo.is_fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
   return kResultTrue;
 }
 
@@ -43,9 +43,9 @@ vst3_component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
-  if (!_topo.is_fx && input_count != 0) return kResultFalse;
+  if (!_topo.static_topo.is_fx && input_count != 0) return kResultFalse;
   if (output_count != 1 || outputs[0] != SpeakerArr::kStereo) return kResultFalse;
-  if(_topo.is_fx && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
+  if(_topo.static_topo.is_fx && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
   return AudioEffect::setBusArrangements(inputs, input_count, outputs, output_count);
 }
 
