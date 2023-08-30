@@ -4,3 +4,6 @@
 [submodule "lib/JUCE"]
 	path = lib/JUCE
 	url = https://github.com/sjoerdvankreel/JUCE.git
+[submodule "lib/pluginterfaces"]
+	path = lib/pluginterfaces
+	url = https://github.com/sjoerdvankreel/vst3_pluginterfaces.git
