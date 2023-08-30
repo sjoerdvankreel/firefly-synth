@@ -2,6 +2,7 @@
 #define INFERNAL_BASE_PLUGIN_TOPO_HPP
 
 #include <infernal.base/plugin_block.hpp>
+#include <infernal.base/plugin_support.hpp>
 
 #include <vector>
 #include <string>
@@ -83,7 +84,9 @@ struct runtime_param_topo
   param_topo static_topo;
 
   runtime_param_topo() = default;
+  runtime_param_topo(runtime_param_topo&&) = default;
   runtime_param_topo(runtime_param_topo const&) = delete;
+  runtime_param_topo& operator = (runtime_param_topo&&) = default;
   runtime_param_topo& operator = (runtime_param_topo const&) = delete;
 };
 
@@ -92,20 +95,14 @@ struct runtime_module_topo
   std::string name;
   module_topo static_topo;
   std::vector<runtime_param_topo> params;
-
-  runtime_module_topo() = default;
-  runtime_module_topo(runtime_module_topo const&) = delete;
-  runtime_module_topo& operator = (runtime_module_topo const&) = delete;
+  INF_DECLARE_MOVE_ONLY(runtime_module_topo);
 };
 
 struct flat_module_topo
 {
   module_topo static_topo;
   std::vector<param_topo> params;
-
-  flat_module_topo() = default;
-  flat_module_topo(flat_module_topo const&) = delete;
-  flat_module_topo& operator = (flat_module_topo const&) = delete;
+  INF_DECLARE_MOVE_ONLY(flat_module_topo);
 };
 
 struct runtime_plugin_topo
@@ -115,9 +112,7 @@ struct runtime_plugin_topo
   std::vector<runtime_param_topo> runtime_params = {};
   std::vector<runtime_module_topo> runtime_modules = {};
   explicit runtime_plugin_topo(plugin_topo const& topo);
-
-  runtime_plugin_topo(runtime_plugin_topo const&) = delete;
-  runtime_plugin_topo& operator = (runtime_plugin_topo const&) = delete;
+  INF_DECLARE_MOVE_ONLY(runtime_plugin_topo);
 };
 
 }

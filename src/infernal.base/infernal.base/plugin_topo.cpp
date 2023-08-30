@@ -1,6 +1,8 @@
 #include <infernal.base/plugin_topo.hpp>
 #include <infernal.base/plugin_support.hpp>
 
+#include <utility>
+
 namespace infernal::base {
 
 param_value
@@ -40,7 +42,7 @@ static_topo(topo)
       for (int p = 0; p < submod.params.size(); p++)
         flat.params.push_back(submod.params[p]);
     }
-    flat_modules.push_back(flat);
+    flat_modules.emplace_back(std::move(flat));
 
     for(int i = 0; i < mod.count; i++)
     {
