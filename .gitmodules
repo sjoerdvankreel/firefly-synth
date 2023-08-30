@@ -7,6 +7,3 @@
 [submodule "lib/pluginterfaces"]
 	path = lib/pluginterfaces
 	url = https://github.com/sjoerdvankreel/vst3_pluginterfaces.git
-[submodule "lib/vst3_public_sdk"]
-	path = lib/vst3_public_sdk
-	url = https://github.com/sjoerdvankreel/vst3_public_sdk.git
