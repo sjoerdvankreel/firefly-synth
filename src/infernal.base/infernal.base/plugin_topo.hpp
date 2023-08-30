@@ -33,6 +33,7 @@ struct param_topo {
   param_storage storage;
   param_display display;
   param_direction direction;
+  INF_DECLARE_MOVE_ONLY(param_topo);
 
   param_value default_value() const;
   std::string to_text(param_value value) const;
@@ -43,11 +44,13 @@ struct submodule_topo {
   int type;
   std::string name;
   std::vector<param_topo> params;
+  INF_DECLARE_MOVE_ONLY(submodule_topo);
 };
 
 struct module_dependency {
   int module_type;
   int module_index;
+  INF_DECLARE_MOVE_ONLY(module_dependency);
 };
 
 struct module_topo {
@@ -60,6 +63,7 @@ struct module_topo {
   module_process process;
   std::vector<submodule_topo> submodules;
   std::vector<module_dependency> dependencies;
+  INF_DECLARE_MOVE_ONLY(module_topo);
 };
 
 struct plugin_topo {
@@ -71,6 +75,7 @@ struct plugin_topo {
   int block_automation_limit;
   int accurate_automation_limit;
   std::vector<module_topo> modules;
+  INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
 struct runtime_param_topo
@@ -82,12 +87,7 @@ struct runtime_param_topo
   int module_index;
   int module_param_index;
   param_topo static_topo;
-
-  runtime_param_topo() = default;
-  runtime_param_topo(runtime_param_topo&&) = default;
-  runtime_param_topo(runtime_param_topo const&) = delete;
-  runtime_param_topo& operator = (runtime_param_topo&&) = default;
-  runtime_param_topo& operator = (runtime_param_topo const&) = delete;
+  INF_DECLARE_MOVE_ONLY(runtime_param_topo);
 };
 
 struct runtime_module_topo
