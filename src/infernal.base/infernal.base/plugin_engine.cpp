@@ -158,11 +158,11 @@ plugin_engine::process()
 
   for(int p = 0; p < _topo.runtime_params.size(); p++)
   {
-    auto param_meta = _topo.runtime_params[p];
-    int mt = param_meta.module_type;
-    int mi = param_meta.module_index;
-    int pi = param_meta.module_param_index;
-    if (_topo.flat_module_params[mt][pi].rate == param_rate::block)
+    auto const& rt_param = _topo.runtime_params[p];
+    int mt = rt_param.module_type;
+    int mi = rt_param.module_index;
+    int pi = rt_param.module_param_index;
+    if (_topo.flat_modules[mt].params[pi].rate == param_rate::block)
       _plugin_block.block_automation[mt][mi][pi] = _state[mt][mi][pi];
     else
       std::fill(
@@ -174,10 +174,10 @@ plugin_engine::process()
   for (int a = 0; a < _host_block.block_automation.size(); a++)
   {
     auto const& event = _host_block.block_automation[a];
-    auto param_meta = _topo.runtime_params[event.runtime_param_index];
-    int mt = param_meta.module_type;
-    int mi = param_meta.module_index;
-    int pi = param_meta.module_param_index;
+    auto const& rt_param = _topo.runtime_params[event.runtime_param_index];
+    int mt = rt_param.module_type;
+    int mi = rt_param.module_index;
+    int pi = rt_param.module_param_index;
     _state[mt][mi][pi] = event.value;
     _plugin_block.block_automation[mt][mi][pi] = event.value;
   }
@@ -187,11 +187,11 @@ plugin_engine::process()
   {
     auto const& event = _host_block.accurate_automation[a];
     auto rpi = event.runtime_param_index;
-    auto param_meta = _topo.runtime_params[rpi];
+    auto const& rt_param = _topo.runtime_params[rpi];
+    int mt = rt_param.module_type;
+    int mi = rt_param.module_index;
+    int mpi = rt_param.module_param_index;
     int prev_frame = _accurate_automation_frames[rpi];
-    int mt = param_meta.module_type;
-    int mi = param_meta.module_index;
-    int mpi = param_meta.module_param_index;
     float frame_count = event.frame_index - prev_frame;
     float start = _plugin_block.accurate_automation[mt][mi][mpi][_accurate_automation_frames[rpi]];
     float range = event.value - start;
@@ -201,12 +201,15 @@ plugin_engine::process()
     _accurate_automation_frames[rpi] = event.frame_index;
   }
 
-  for(int m = 0; m < _topo.modules.size(); m++)
-    for(int i = 0; i < _topo.modules[m].count; i++)
+  for(int m = 0; m < _topo.static_topo.modules.size(); m++)
+  {
+    auto const& static_mod = _topo.static_topo.modules[m];
+    for(int i = 0; i < static_mod.count; i++)
     {
       _plugin_block.module_index = i;
-      _topo.modules[i].process(_plugin_block);
+      static_mod.process(_plugin_block);
     }
+  }
 }
 
 }

@@ -82,6 +82,7 @@ struct runtime_param_topo
   int module_param_index;
   param_topo static_topo;
 
+  runtime_param_topo() = default;
   runtime_param_topo(runtime_param_topo const&) = delete;
   runtime_param_topo& operator = (runtime_param_topo const&) = delete;
 };
@@ -92,6 +93,7 @@ struct runtime_module_topo
   module_topo static_topo;
   std::vector<runtime_param_topo> params;
 
+  runtime_module_topo() = default;
   runtime_module_topo(runtime_module_topo const&) = delete;
   runtime_module_topo& operator = (runtime_module_topo const&) = delete;
 };
@@ -101,6 +103,7 @@ struct flat_module_topo
   module_topo static_topo;
   std::vector<param_topo> params;
 
+  flat_module_topo() = default;
   flat_module_topo(flat_module_topo const&) = delete;
   flat_module_topo& operator = (flat_module_topo const&) = delete;
 };
