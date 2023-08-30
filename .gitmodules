@@ -1,0 +1,15 @@
+[submodule "lib/vst3/base"]
+	path = lib/vst3/base
+	url = https://github.com/sjoerdvankreel/vst3_base.git
+[submodule "lib/vst3/pluginterfaces"]
+	path = lib/vst3/pluginterfaces
+	url = https://github.com/sjoerdvankreel/vst3_pluginterfaces.git
+[submodule "lib/vst3/public.sdk"]
+	path = lib/vst3/public.sdk
+	url = https://github.com/sjoerdvankreel/vst3_public_sdk.git
+[submodule "lib/clap"]
+	path = lib/clap
+	url = https://github.com/sjoerdvankreel/clap.git
+[submodule "lib/JUCE"]
+	path = lib/JUCE
+	url = https://github.com/sjoerdvankreel/JUCE.git
