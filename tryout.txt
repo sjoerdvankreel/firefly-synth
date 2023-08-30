@@ -1,1 +1,2 @@
 clap threadpool
+activate must call deactivate
