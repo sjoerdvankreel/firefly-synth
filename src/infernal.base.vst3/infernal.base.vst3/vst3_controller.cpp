@@ -19,16 +19,15 @@ vst3_controller::initialize(FUnknown* context)
     info.parentUnitId = kRootUnitId;
     info.programListId = kNoProgramListId;
     memset(info.name, 0, sizeof(info.name));
-    auto const& module = _topo.runtime_modules[m];
-    copy_to_vst_string(info.name, 127, module.name.c_str());
+    auto const& rt_mod = _topo.runtime_modules[m];
+    copy_to_vst_string(info.name, 127, rt_mod.name.c_str());
 
-    for (int p = 0; p < module.params.size(); p++)
+    for (int p = 0; p < rt_mod.params.size(); p++)
     {
       ParameterInfo info;
-      auto const& param = module.params[p];
+      auto const& param = rt_mod.params[p].static_topo;
       copy_to_vst_string(info.units, 128, param.unit.c_str());
-      info.defaultNormalizedValue = normalize(module.params[p], module.params[p].default_value());
-      info.
+      info.defaultNormalizedValue = normalize(param, param.default_value());
     }
   }
 
