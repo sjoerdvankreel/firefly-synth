@@ -1,0 +1,9 @@
+[submodule "lib/clap"]
+	path = lib/clap
+	url = https://github.com/sjoerdvankreel/clap.git
+[submodule "lib/JUCE"]
+	path = lib/JUCE
+	url = https://github.com/sjoerdvankreel/JUCE.git
+[submodule "lib/vst3_pluginterfaces"]
+	path = lib/vst3_pluginterfaces
+	url = https://github.com/sjoerdvankreel/vst3_pluginterfaces.git
