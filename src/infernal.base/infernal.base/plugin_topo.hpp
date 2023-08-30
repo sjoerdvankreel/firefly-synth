@@ -77,9 +77,13 @@ struct runtime_param_topo
   int id_hash;
   std::string id;
   std::string name;
+  int module_type;
   int module_index;
   int module_param_index;
   param_topo static_topo;
+
+  runtime_param_topo(runtime_param_topo const&) = delete;
+  runtime_param_topo& operator = (runtime_param_topo const&) = delete;
 };
 
 struct runtime_module_topo
@@ -87,12 +91,18 @@ struct runtime_module_topo
   std::string name;
   module_topo static_topo;
   std::vector<runtime_param_topo> params;
+
+  runtime_module_topo(runtime_module_topo const&) = delete;
+  runtime_module_topo& operator = (runtime_module_topo const&) = delete;
 };
 
 struct flat_module_topo
 {
   module_topo static_topo;
   std::vector<param_topo> params;
+
+  flat_module_topo(flat_module_topo const&) = delete;
+  flat_module_topo& operator = (flat_module_topo const&) = delete;
 };
 
 struct runtime_plugin_topo
@@ -102,6 +112,9 @@ struct runtime_plugin_topo
   std::vector<runtime_param_topo> runtime_params = {};
   std::vector<runtime_module_topo> runtime_modules = {};
   explicit runtime_plugin_topo(plugin_topo const& topo);
+
+  runtime_plugin_topo(runtime_plugin_topo const&) = delete;
+  runtime_plugin_topo& operator = (runtime_plugin_topo const&) = delete;
 };
 
 }
