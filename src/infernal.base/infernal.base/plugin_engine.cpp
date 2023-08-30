@@ -12,30 +12,32 @@ plugin_engine(plugin_topo const& topo) : _topo(topo)
   _accurate_automation_frames.resize(_topo.runtime_params.size());
 
   _plugin_block.host = &_host_block;
-  int mod_type_count = _topo.modules.size();
+  auto const& static_mods = _topo.static_topo.modules;
+  int mod_type_count = static_mods.size();
   _plugin_block.module_cv = new float**[mod_type_count]();
   _plugin_block.module_audio = new float***[mod_type_count]();
   _plugin_block.accurate_automation = new float*** [mod_type_count]();
   _plugin_block.block_automation = new param_value**[mod_type_count]();
 
-  for (int m = 0; m < _topo.modules.size(); m++)
+  for (int m = 0; m < static_mods.size(); m++)
   {
-    int mod_count = _topo.modules[m].count;
+    int mod_count = static_mods[m].count;
     _state[m] = new param_value*[mod_count]();
     _plugin_block.module_cv[m] = new float*[mod_count]();
     _plugin_block.module_audio[m] = new float**[mod_count]();
     _plugin_block.accurate_automation[m] = new float** [mod_count]();
     _plugin_block.block_automation[m] = new param_value*[mod_count]();
 
-    for (int i = 0; i < _topo.modules[m].count; i++)
+    for (int i = 0; i < static_mods[m].count; i++)
     {
-      int mod_param_count = _topo.flat_module_params[m].size();
+      auto const& flat_mod = _topo.flat_modules[m];
+      int mod_param_count = flat_mod.params.size();
       _state[m][i] = new param_value[mod_param_count];
       for(int p = 0; p < mod_param_count; p++)
-        _state[m][i][p] = _topo.flat_module_params[m][p].default_value();
+        _state[m][i][p] = flat_mod.params[p].default_value();
 
-      if(_topo.modules[m].output == module_output::audio)
-        _plugin_block.module_audio[m][i] = new float* [_topo.channel_count]();
+      if(static_mods[m].output == module_output::audio)
+        _plugin_block.module_audio[m][i] = new float* [_topo.static_topo.channel_count]();
       _plugin_block.accurate_automation[m][i] = new float* [mod_param_count]();
       _plugin_block.block_automation[m][i] = new param_value[mod_param_count]();
     }
@@ -45,12 +47,13 @@ plugin_engine(plugin_topo const& topo) : _topo(topo)
 plugin_engine::
 ~plugin_engine()
 {
-  for (int m = 0; m < _topo.modules.size(); m++)
+  for (int m = 0; m < _topo.flat_modules.size(); m++)
   {
-    for (int i = 0; i < _topo.modules[m].count; i++)
+    auto const& flat_mod_topo = _topo.flat_modules[m].static_topo;
+    for (int i = 0; i < flat_mod_topo.count; i++)
     {
       delete _state[m][i];
-      if (_topo.modules[m].output == module_output::audio)
+      if (flat_mod_topo.output == module_output::audio)
         delete _plugin_block.module_audio[m][i];
       delete _plugin_block.block_automation[m][i];
       delete _plugin_block.accurate_automation[m][i];
@@ -73,43 +76,49 @@ void
 plugin_engine::activate(int sample_rate, int max_frame_count)
 {
   _sample_rate = sample_rate;
-  for (int m = 0; m < _topo.modules.size(); m++)
-    for (int i = 0; i < _topo.modules[m].count; i++)
+  for (int m = 0; m < _topo.flat_modules.size(); m++)
+  {
+    auto const& flat_mod = _topo.flat_modules[m].static_topo;
+    for (int i = 0; i < flat_mod.count; i++)
     {
-      if (_topo.modules[m].output == module_output::cv)
+      if (flat_mod.output == module_output::cv)
         _plugin_block.module_cv[m][i] = new float[max_frame_count]();
-      else if (_topo.modules[m].output == module_output::audio)
-        for(int c = 0; c < _topo.channel_count; c++)
+      else if (flat_mod.output == module_output::audio)
+        for(int c = 0; c < _topo.static_topo.channel_count; c++)
           _plugin_block.module_audio[m][i][c] = new float[max_frame_count]();
-      for(int p = 0; p < _topo.flat_module_params[m].size(); p++)
+      for(int p = 0; p < _topo.flat_modules[m].params.size(); p++)
         _plugin_block.accurate_automation[m][i][p] = new float[max_frame_count]();
     }
+  }
 }
 
 void
 plugin_engine::deactivate()
 {
   _sample_rate = 0;
-  for (int m = 0; m < _topo.modules.size(); m++)
-    for (int i = 0; i < _topo.modules[m].count; i++)
+  for (int m = 0; m < _topo.flat_modules.size(); m++)
+  {
+    auto const& flat_mod = _topo.flat_modules[m].static_topo;
+    for (int i = 0; i < flat_mod.count; i++)
     {
-      if (_topo.modules[m].output == module_output::cv)
+      if (flat_mod.output == module_output::cv)
       {
         delete _plugin_block.module_cv[m][i];
         _plugin_block.module_cv[m][i] = nullptr;
       }
-      else if (_topo.modules[m].output == module_output::audio)
-        for (int c = 0; c < _topo.channel_count; c++)
+      else if (flat_mod.output == module_output::audio)
+        for (int c = 0; c < _topo.static_topo.channel_count; c++)
         {
           delete _plugin_block.module_audio[m][i][c];
           _plugin_block.module_audio[m][i][c] = nullptr;
         }
-      for (int p = 0; p < _topo.flat_module_params[m].size(); p++)
+      for (int p = 0; p < _topo.flat_modules[m].params.size(); p++)
       {
         delete _plugin_block.accurate_automation[m][i][p];
         _plugin_block.accurate_automation[m][i][p] = nullptr;
       }
     }
+  }
 }
 
 host_block& 
@@ -129,20 +138,23 @@ plugin_engine::prepare()
 void 
 plugin_engine::process()
 {
-  for(int m = 0; m < _topo.modules.size(); m++)
-    if (_topo.modules[m].output == module_output::cv)
-      for(int i = 0; i < _topo.modules[m].count; i++)
+  for(int m = 0; m < _topo.static_topo.modules.size(); m++)
+  {
+    auto const& flat_mod = _topo.flat_modules[m].static_topo;
+    if (flat_mod.output == module_output::cv)
+      for(int i = 0; i < flat_mod.count; i++)
         std::fill(
           _plugin_block.module_cv[m][i], 
           _plugin_block.module_cv[m][i] + _host_block.frame_count, 
           std::numeric_limits<float>::quiet_NaN());
-    else if(_topo.modules[m].output == module_output::audio)
-      for (int i = 0; i < _topo.modules[m].count; i++)
-        for(int c = 0; c < _topo.channel_count; c++)
+    else if(flat_mod.output == module_output::audio)
+      for (int i = 0; i < flat_mod.count; i++)
+        for(int c = 0; c < _topo.static_topo.channel_count; c++)
           std::fill(
             _plugin_block.module_audio[m][i][c], 
             _plugin_block.module_audio[m][i][c] + _host_block.frame_count, 
             std::numeric_limits<float>::quiet_NaN());
+  }
 
   for(int p = 0; p < _topo.runtime_params.size(); p++)
   {
