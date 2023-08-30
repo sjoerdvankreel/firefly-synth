@@ -10,3 +10,6 @@
 [submodule "lib/public.sdk"]
 	path = lib/public.sdk
 	url = https://github.com/sjoerdvankreel/vst3_public_sdk.git
+[submodule "lib/vst3/base"]
+	path = lib/vst3/base
+	url = https://github.com/sjoerdvankreel/vst3_base.git
