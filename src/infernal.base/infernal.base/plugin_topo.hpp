@@ -79,7 +79,6 @@ struct runtime_param_topo
   std::string name;
   int module_index;
   int module_param_index;
-  int plugin_param_index;
   param_topo static_topo;
 };
 
@@ -90,8 +89,16 @@ struct runtime_module_topo
   std::vector<runtime_param_topo> params;
 };
 
+struct flat_module_topo
+{
+  module_topo static_topo;
+  std::vector<param_topo> params;
+};
+
 struct runtime_plugin_topo
 {
+  plugin_topo static_topo;
+  std::vector<flat_module_topo> flat_modules = {};
   std::vector<runtime_param_topo> runtime_params = {};
   std::vector<runtime_module_topo> runtime_modules = {};
   explicit runtime_plugin_topo(plugin_topo const& topo);

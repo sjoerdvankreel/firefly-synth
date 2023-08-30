@@ -1,4 +1,5 @@
 #include <infernal.base/plugin_topo.hpp>
+#include <infernal.base/plugin_support.hpp>
 
 namespace infernal::base {
 
@@ -25,34 +26,45 @@ param_topo::from_text(std::string const& text, param_value& value) const
 
 runtime_plugin_topo::
 runtime_plugin_topo(plugin_topo const& topo):
-plugin_topo(topo)
+static_topo(topo)
 {
+  int plugin_param_index = 0;
   for (int m = 0; m < topo.modules.size(); m++)
   {
-    std::vector<param_topo> flat_params;
-    for (int s = 0; s < topo.modules[m].submodules.size(); s++)
-      for (int p = 0; p < topo.modules[m].submodules[s].params.size(); p++)
-        flat_params.push_back(topo.modules[m].submodules[s].params[p]);
-    flat_module_params.push_back(flat_params);
-
-    runtime_param_topo runtime_param;
-    runtime_param.module_type = m;
-    runtime_module_topo runtime_module;
-    runtime_module.name = topo.modules[m].name;
-    for (int i = 0; i < topo.modules[m].count; i++)
+    auto const& mod = topo.modules[m];
+    flat_module_topo flat;
+    flat.static_topo = mod;
+    for (int s = 0; s < mod.submodules.size(); s++)
     {
-      int module_param_index = 0;
-      runtime_param.module_index = i;
-      if (topo.modules[m].count > 1)
-        runtime_module.name = topo.modules[m].name + std::string(" ") + std::to_string(i + 1);
-      for (int s = 0; s < topo.modules[m].submodules.size(); s++)
-        for (int p = 0; p < topo.modules[m].submodules[s].params.size(); p++)
+      auto const& submod = mod.submodules[s];
+      for (int p = 0; p < submod.params.size(); p++)
+        flat.params.push_back(submod.params[p]);
+    }
+    flat_modules.push_back(flat);
+
+    for(int i = 0; i < mod.count; i++)
+    {
+      runtime_module_topo rt_module;
+      rt_module.static_topo = mod;
+      rt_module.name = mod.name;
+      if(mod.count > 1) rt_module.name += " " + std::to_string(i);
+
+      int mod_param_index = 0;
+      for(int s = 0; s < mod.submodules.size(); s++)
+      {
+        auto const& submod = mod.submodules[s];
+        for (int p = 0; p < submod.params.size(); p++)
         {
-          runtime_param.module_param_index = module_param_index++;
-          runtime_param.name = runtime_module.name + " " + topo.modules[m].submodules[s].params[p].name;
-          runtime_params.push_back(runtime_param);
+          runtime_param_topo rtp;
+          auto const& param = submod.params[p];
+          rtp.static_topo = param;
+          rtp.module_index = i;
+          rtp.module_param_index = mod_param_index++;
+          rtp.name = rt_module.name + " " + param.name;
+          rtp.id = mod.id + std::to_string(i) + param.id;
+          rtp.id_hash = stable_hash_nonnegative(rtp.id.c_str());
         }
-      runtime_modules.push_back(runtime_module);
+      }
     }
   }
 }
