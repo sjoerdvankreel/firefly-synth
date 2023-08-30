@@ -1,7 +1,6 @@
 @echo off
 setlocal
 
-cd ..
 if not exist build\win mkdir build\win
 cd build\win
 cmake ../..
