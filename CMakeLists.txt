@@ -7,6 +7,8 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
+set(VST3_SRC_DIR "lib/vst3_pluginterfaces")
+
 function(declare_local_target PROJECT_NAME)
   set("${PROJECT_NAME}_SRC_DIR" "src/${PROJECT_NAME}")
   file(GLOB_RECURSE "${PROJECT_NAME}_SRC" "${${PROJECT_NAME}_SRC_DIR}/*.*")
@@ -19,7 +21,11 @@ endfunction()
 
 declare_local_target(infernal.base)
 declare_local_target(infernal.base.clap)
+
 declare_local_target(infernal.base.vst3)
+target_include_directories(infernal.base.vst3 PRIVATE "src/infernal.base")
+target_include_directories(infernal.base.vst3 SYSTEM PRIVATE "${VST3_SRC_DIR}")
+
 declare_local_target(infernal.synth)
 declare_local_target(infernal.synth.clap)
 declare_local_target(infernal.synth.vst3)
