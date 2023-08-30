@@ -7,22 +7,20 @@
 namespace infernal::base {
 
 class plugin_engine {  
-  plugin_topo const _topo;
-  runtime_plugin_topo const _runtime_topo;
+  runtime_plugin_topo const _topo;
   param_value*** _state = {};
   host_block _host_block = {};
   plugin_block _plugin_block = {};
   std::vector<int> _accurate_automation_frames = {};
 
 public:
+  ~plugin_engine();
+  plugin_engine(plugin_topo const& topo);
+
   void process();
   void deactivate();
   host_block& prepare();
   void activate(int frame_count);
-
-protected:
-  ~plugin_engine();
-  plugin_engine(plugin_topo const& topo);
 };
 
 }
