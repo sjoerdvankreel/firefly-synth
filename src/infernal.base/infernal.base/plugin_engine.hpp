@@ -22,6 +22,7 @@ public:
   void deactivate();
   host_block& prepare();
   void activate(int sample_rate, int max_frame_count);
+  runtime_plugin_topo const& topo() const { return _topo; }
 };
 
 }

@@ -26,8 +26,8 @@ vst3_controller::initialize(FUnknown* context)
     {
       ParameterInfo info;
       auto const& param = rt_mod.params[p].static_topo;
-      copy_to_vst_string(info.units, 128, param.unit.c_str());
-      info.defaultNormalizedValue = normalize(param, param.default_value());
+      copy_to_vst_string(info.units, 128, param->unit.c_str());
+      info.defaultNormalizedValue = normalize(*param, param->default_value());
     }
   }
 
