@@ -21,8 +21,8 @@ declare_local_target(infernal.base)
 declare_local_target(infernal.base.clap)
 
 declare_local_target(infernal.base.vst3)
+target_include_directories(infernal.base.vst3 SYSTEM PRIVATE lib/vst3)
 target_include_directories(infernal.base.vst3 PRIVATE src/infernal.base)
-target_include_directories(infernal.base.vst3 SYSTEM PRIVATE lib lib/pluginterfaces lib/public.sdk)
 
 declare_local_target(infernal.synth)
 declare_local_target(infernal.synth.clap)

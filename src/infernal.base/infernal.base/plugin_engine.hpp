@@ -17,12 +17,12 @@ class plugin_engine {
 public:
   void process();
   void deactivate();
+  host_block& prepare();
   void activate(int frame_count);
 
 protected:
   ~plugin_engine();
   plugin_engine(plugin_topo const& topo);
-  virtual void prepare(host_block& block) = 0;
 };
 
 }

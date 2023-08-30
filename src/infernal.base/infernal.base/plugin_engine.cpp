@@ -111,14 +111,23 @@ plugin_engine::deactivate()
     }
 }
 
-void 
-plugin_engine::process()
+host_block& 
+plugin_engine::prepare()
 {
+  _host_block.bpm = 0;
+  _host_block.frame_count = 0;
+  _host_block.stream_time = 0;
+  _host_block.audio_input = nullptr;
+  _host_block.audio_output = nullptr;
   _host_block.notes.clear();
   _host_block.block_automation.clear();
   _host_block.accurate_automation.clear();
-  prepare(_host_block);
+  return _host_block;
+}
 
+void 
+plugin_engine::process()
+{
   for(int m = 0; m < _topo.modules.size(); m++)
     if (_topo.modules[m].output == module_output::cv)
       for(int i = 0; i < _topo.modules[m].count; i++)
