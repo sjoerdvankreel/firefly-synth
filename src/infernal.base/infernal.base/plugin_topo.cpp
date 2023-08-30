@@ -24,7 +24,8 @@ param_topo::from_text(std::string const& text, param_value& value) const
 }
 
 runtime_plugin_topo::
-runtime_plugin_topo(plugin_topo const& topo)
+runtime_plugin_topo(plugin_topo const& topo):
+plugin_topo(topo)
 {
   for (int m = 0; m < topo.modules.size(); m++)
   {

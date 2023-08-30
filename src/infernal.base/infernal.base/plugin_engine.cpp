@@ -4,13 +4,12 @@
 namespace infernal::base {
 
 plugin_engine::
-plugin_engine(plugin_topo const& topo) : 
-_topo(topo), _runtime_topo(topo)
+plugin_engine(plugin_topo const& topo) : _topo(topo)
 {
   _host_block.notes.reserve(topo.note_limit);
   _host_block.block_automation.reserve(topo.block_automation_limit);
   _host_block.accurate_automation.reserve(topo.accurate_automation_limit);
-  _accurate_automation_frames.resize(_runtime_topo.runtime_params.size());
+  _accurate_automation_frames.resize(_topo.runtime_params.size());
 
   _plugin_block.host = &_host_block;
   int mod_type_count = _topo.modules.size();
@@ -30,10 +29,10 @@ _topo(topo), _runtime_topo(topo)
 
     for (int i = 0; i < _topo.modules[m].count; i++)
     {
-      int mod_param_count = _runtime_topo.module_params[m].size();
+      int mod_param_count = _topo.module_params[m].size();
       _state[m][i] = new param_value[mod_param_count];
       for(int p = 0; p < mod_param_count; p++)
-        _state[m][i][p] = _runtime_topo.module_params[m][p].default_value();
+        _state[m][i][p] = _topo.module_params[m][p].default_value();
 
       if(_topo.modules[m].output == module_output::audio)
         _plugin_block.module_audio[m][i] = new float* [_topo.channel_count]();
@@ -81,7 +80,7 @@ plugin_engine::activate(int frame_count)
       else if (_topo.modules[m].output == module_output::audio)
         for(int c = 0; c < _topo.channel_count; c++)
           _plugin_block.module_audio[m][i][c] = new float[frame_count]();
-      for(int p = 0; p < _runtime_topo.module_params[m].size(); p++)
+      for(int p = 0; p < _topo.module_params[m].size(); p++)
         _plugin_block.accurate_automation[m][i][p] = new float[frame_count]();
     }
 }
@@ -103,7 +102,7 @@ plugin_engine::deactivate()
           delete _plugin_block.module_audio[m][i][c];
           _plugin_block.module_audio[m][i][c] = nullptr;
         }
-      for (int p = 0; p < _runtime_topo.module_params[m].size(); p++)
+      for (int p = 0; p < _topo.module_params[m].size(); p++)
       {
         delete _plugin_block.accurate_automation[m][i][p];
         _plugin_block.accurate_automation[m][i][p] = nullptr;
@@ -143,13 +142,13 @@ plugin_engine::process()
             _plugin_block.module_audio[m][i][c] + _host_block.frame_count, 
             std::numeric_limits<float>::quiet_NaN());
 
-  for(int p = 0; p < _runtime_topo.runtime_params.size(); p++)
+  for(int p = 0; p < _topo.runtime_params.size(); p++)
   {
-    auto param_meta = _runtime_topo.runtime_params[p];
+    auto param_meta = _topo.runtime_params[p];
     int mt = param_meta.module_type;
     int mi = param_meta.module_index;
     int pi = param_meta.module_param_index;
-    if (_runtime_topo.module_params[mt][pi].rate == param_rate::block)
+    if (_topo.module_params[mt][pi].rate == param_rate::block)
       _plugin_block.block_automation[mt][mi][pi] = _state[mt][mi][pi];
     else
       std::fill(
@@ -161,7 +160,7 @@ plugin_engine::process()
   for (int a = 0; a < _host_block.block_automation.size(); a++)
   {
     auto const& event = _host_block.block_automation[a];
-    auto param_meta = _runtime_topo.runtime_params[event.runtime_param_index];
+    auto param_meta = _topo.runtime_params[event.runtime_param_index];
     int mt = param_meta.module_type;
     int mi = param_meta.module_index;
     int pi = param_meta.module_param_index;
@@ -174,7 +173,7 @@ plugin_engine::process()
   {
     auto const& event = _host_block.accurate_automation[a];
     auto rpi = event.runtime_param_index;
-    auto param_meta = _runtime_topo.runtime_params[rpi];
+    auto param_meta = _topo.runtime_params[rpi];
     int prev_frame = _accurate_automation_frames[rpi];
     int mt = param_meta.module_type;
     int mi = param_meta.module_index;

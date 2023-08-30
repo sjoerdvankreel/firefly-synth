@@ -79,7 +79,8 @@ struct runtime_param_topo
   int module_param_index;
 };
 
-struct runtime_plugin_topo
+struct runtime_plugin_topo: 
+plugin_topo
 {
   std::vector<runtime_param_topo> runtime_params = {};
   std::vector<std::vector<param_topo>> module_params = {};
