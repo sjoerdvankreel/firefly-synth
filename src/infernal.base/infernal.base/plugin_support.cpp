@@ -38,4 +38,20 @@ param_toggle()
   return result;
 }
 
+param_topo
+param_real(param_rate rate, param_slope slope, param_display display, char const* unit)
+{
+  param_topo result = param_poison();
+  result.unit = unit;
+  result.rate = rate;
+  result.slope = slope;
+  result.display = display;
+  result.stepped_min = 0;
+  result.stepped_max = 0;
+  result.format = param_format::real;
+  result.storage = param_storage::num;
+  result.direction = param_direction::input;
+  return result;
+}
+
 }

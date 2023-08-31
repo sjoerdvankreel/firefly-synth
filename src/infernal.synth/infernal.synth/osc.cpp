@@ -22,6 +22,8 @@ main_topo()
   on.id = "{031051C7-8CAC-4ECD-AC44-3BCD3CCACA97}";
   result.params.emplace_back(std::move(on));
 
+  param_topo gain = param_real(param_rate::accurate, param_slope::linear, param_display::knob, "");
+
   return result;
 }
 
