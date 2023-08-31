@@ -48,7 +48,6 @@ struct host_block final {
 };
 
 struct plugin_block final {
-  int module_index;
   float sample_rate;
   float*** module_cv;
   float**** module_audio;
@@ -56,7 +55,5 @@ struct plugin_block final {
   float**** accurate_automation;
   param_value*** block_automation;
 };
-
-typedef void(*module_process)(plugin_block const& block);
 
 }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <infernal.base/plugin_block.hpp>
 #include <infernal.base/plugin_support.hpp>
+#include <infernal.base/plugin_callbacks.hpp>
 
 #include <vector>
 #include <string>
@@ -52,6 +52,10 @@ struct module_dependency final {
   INF_DECLARE_MOVE_ONLY(module_dependency);
 };
 
+struct module_callbacks final {
+  module_process process;
+};
+
 struct module_topo final {
   int type;
   int count;
@@ -59,7 +63,7 @@ struct module_topo final {
   std::string name;
   module_scope scope;
   module_output output;
-  module_process process;
+  module_callbacks callbacks;
   std::vector<submodule_topo> submodules;
   std::vector<module_dependency> dependencies;
   INF_DECLARE_MOVE_ONLY(module_topo);
