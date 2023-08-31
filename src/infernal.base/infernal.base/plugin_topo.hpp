@@ -40,7 +40,6 @@ struct param_topo final {
 };
 
 struct submodule_topo final {
-  int type;
   std::string name;
   std::vector<param_topo> params;
   INF_DECLARE_MOVE_ONLY(submodule_topo);

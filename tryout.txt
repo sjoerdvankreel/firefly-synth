@@ -1,2 +1,3 @@
 clap threadpool
+validate topo
 activate must call deactivate
