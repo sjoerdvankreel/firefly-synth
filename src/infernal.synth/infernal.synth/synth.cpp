@@ -4,7 +4,7 @@ using namespace infernal::base;
 
 namespace infernal::synth {
 
-static module_topo 
+module_topo 
 osc_topo()
 {
   module_topo result = {};

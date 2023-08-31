@@ -27,10 +27,9 @@ param_topo::from_text(std::string const& text, param_value& value) const
 }
 
 runtime_plugin_topo::
-runtime_plugin_topo(plugin_topo&& static_topo):
-static_topo(std::move(static_topo))
+runtime_plugin_topo(plugin_topo&& static_topo_):
+static_topo(std::move(static_topo_))
 {
-  int plugin_param_index = 0;
   for (int m = 0; m < static_topo.modules.size(); m++)
   {
     auto& flat = flat_modules[m];

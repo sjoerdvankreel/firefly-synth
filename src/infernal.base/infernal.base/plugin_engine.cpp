@@ -8,9 +8,9 @@ namespace infernal::base {
 plugin_engine::
 plugin_engine(plugin_topo&& topo) : _topo(std::move(topo))
 {
-  _host_block.common.notes.reserve(topo.note_limit);
-  _host_block.block_automation.reserve(topo.block_automation_limit);
-  _host_block.accurate_automation.reserve(topo.accurate_automation_limit);
+  _host_block.common.notes.reserve(_topo.static_topo.note_limit);
+  _host_block.block_automation.reserve(_topo.static_topo.block_automation_limit);
+  _host_block.accurate_automation.reserve(_topo.static_topo.accurate_automation_limit);
   _accurate_automation_frames.resize(_topo.runtime_params.size());
 
   _plugin_block.host = &_host_block.common;
@@ -180,7 +180,6 @@ plugin_engine::process()
     auto const& rt_param = _topo.runtime_params[event.runtime_param_index];
     int mt = rt_param.module_type;
     int mi = rt_param.module_index;
-    int pi = rt_param.module_param_index;
     int pt = rt_param.static_topo->type;
     _state[mt][mi][pt] = event.value;
     _plugin_block.block_automation[mt][mi][pt] = event.value;
@@ -194,7 +193,6 @@ plugin_engine::process()
     auto const& rt_param = _topo.runtime_params[rpi];
     int mt = rt_param.module_type;
     int mi = rt_param.module_index;
-    int pi = rt_param.module_param_index;
     int pt = rt_param.static_topo->type;
     int prev_frame = _accurate_automation_frames[rpi];
     float frame_count = event.frame_index - prev_frame;
