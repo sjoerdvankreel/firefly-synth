@@ -85,8 +85,7 @@ struct plugin_topo final {
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
-struct runtime_param_topo final
-{
+struct runtime_param_topo final {
   int id_hash;
   std::string id;
   std::string name;
@@ -97,23 +96,20 @@ struct runtime_param_topo final
   INF_DECLARE_MOVE_ONLY(runtime_param_topo);
 };
 
-struct runtime_module_topo final
-{
+struct runtime_module_topo final {
   std::string name;
   module_topo const* static_topo;
   std::vector<runtime_param_topo> params;
   INF_DECLARE_MOVE_ONLY(runtime_module_topo);
 };
 
-struct flat_module_topo final
-{
+struct flat_module_topo final {
   module_topo const* static_topo;
   std::vector<param_topo const*> params;
   INF_DECLARE_MOVE_ONLY(flat_module_topo);
 };
 
-struct runtime_plugin_topo final
-{
+struct runtime_plugin_topo final {
   plugin_topo static_topo;
   std::vector<flat_module_topo> flat_modules = {};
   std::vector<runtime_param_topo> runtime_params = {};
