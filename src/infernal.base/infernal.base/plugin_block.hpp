@@ -1,12 +1,13 @@
 #pragma once
 
+#include <infernal.base/plugin_shared.hpp>
+
 #include <vector>
 #include <cstdint>
 
 namespace infernal::base {
 
 enum class note_event_type { on, off, cut };
-struct param_value final { union { float real; int step; }; };
 
 struct note_id final {
   int id;

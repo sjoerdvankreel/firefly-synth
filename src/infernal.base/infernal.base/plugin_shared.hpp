@@ -10,5 +10,6 @@
 namespace infernal::base {
 
 int stable_hash_nonnegative(char const* text);
+struct param_value final { union { float real; int step; }; };
 
 }

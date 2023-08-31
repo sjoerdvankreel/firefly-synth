@@ -210,10 +210,7 @@ plugin_engine::process()
   {
     auto const& static_mod = _topo.static_topo.modules[m];
     for(int i = 0; i < static_mod.count; i++)
-    {
-      _plugin_block.module_index = i;
-      static_mod.process(_plugin_block);
-    }
+      static_mod.callbacks.process(static_mod, i, _plugin_block);
   }
 }
 

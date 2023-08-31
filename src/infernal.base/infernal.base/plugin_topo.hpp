@@ -1,12 +1,16 @@
 #pragma once
 
-#include <infernal.base/plugin_support.hpp>
-#include <infernal.base/plugin_callbacks.hpp>
+#include <infernal.base/plugin_shared.hpp>
 
 #include <vector>
 #include <string>
 
 namespace infernal::base {
+
+struct module_topo;
+struct plugin_block;
+typedef void(*module_process)(
+module_topo const& topo, int module_index, plugin_block const& block);
 
 enum class plugin_kind { synth, fx };
 enum class module_scope { voice, global };
