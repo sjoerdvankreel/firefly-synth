@@ -8,6 +8,6 @@
 
 namespace infernal::base {
 
-int stable_hash_nonnegative(char const* text);
+int hash(char const* text);
 
 }

@@ -7,7 +7,7 @@ using namespace Steinberg::Vst;
 namespace infernal::base::vst3 {
 
 void
-copy_to_vst_string(TChar* dest, int count, char const* source)
+to_vst_string(TChar* dest, int count, char const* source)
 {
   memset(dest, 0, sizeof(*dest) * count);
   for (int i = 0; i < count - 1 && i < strlen(source); i++)

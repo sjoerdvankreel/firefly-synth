@@ -5,7 +5,7 @@
 namespace infernal::base {
 
 int 
-stable_hash_nonnegative(char const* text)
+hash(char const* text)
 {
   std::uint32_t h = 0;
   int const multiplier = 33;

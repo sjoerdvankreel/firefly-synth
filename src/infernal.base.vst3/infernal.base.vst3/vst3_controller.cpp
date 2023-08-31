@@ -19,7 +19,7 @@ vst3_controller::initialize(FUnknown* context)
     unit_info.id = unit_id++;
     unit_info.parentUnitId = kRootUnitId;
     unit_info.programListId = kNoProgramListId;
-    copy_to_vst_string(unit_info.name, 128, rt_mod.name.c_str());
+    to_vst_string(unit_info.name, 128, rt_mod.name.c_str());
     addUnit(new Unit(unit_info));
 
     for (int p = 0; p < rt_mod.params.size(); p++)
@@ -27,9 +27,9 @@ vst3_controller::initialize(FUnknown* context)
       ParameterInfo param_info;
       auto const& rt_param = rt_mod.params[p];
       auto const& static_param = rt_mod.params[p].static_topo;
-      copy_to_vst_string(param_info.units, 128, static_param->unit.c_str());
-      copy_to_vst_string(param_info.title, 128, static_param->name.c_str());
-      copy_to_vst_string(param_info.shortTitle, 128, static_param->name.c_str());
+      to_vst_string(param_info.units, 128, static_param->unit.c_str());
+      to_vst_string(param_info.title, 128, static_param->name.c_str());
+      to_vst_string(param_info.shortTitle, 128, static_param->name.c_str());
       param_info.unitId = unit_info.id;
       param_info.id = rt_param.id_hash;
       param_info.stepCount = static_param->stepped_max - static_param->stepped_min;

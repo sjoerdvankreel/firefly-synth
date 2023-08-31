@@ -58,10 +58,10 @@ static_topo(std::move(static_topo_))
           auto const& param = submod.params[p];
           rtp.static_topo = &param;
           rtp.module_index = i;
+          rtp.id_hash = hash(rtp.id.c_str());
           rtp.module_param_index = mod_param_index++;
           rtp.name = rt_module.name + " " + param.name;
           rtp.id = mod.id + std::to_string(i) + param.id;
-          rtp.id_hash = stable_hash_nonnegative(rtp.id.c_str());
           rt_module.params.emplace_back(std::move(rtp));
         }
       }
