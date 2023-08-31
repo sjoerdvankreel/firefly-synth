@@ -1,12 +1,12 @@
-#ifndef INFERNAL_BASE_PLUGIN_ENGINE_HPP
-#define INFERNAL_BASE_PLUGIN_ENGINE_HPP
+#pragma once
 
 #include <infernal.base/plugin_topo.hpp>
 #include <infernal.base/plugin_block.hpp>
 
 namespace infernal::base {
 
-class plugin_engine {  
+class plugin_engine final {   
+
   runtime_plugin_topo const _topo;
   float _sample_rate = {};
   param_value*** _state = {};
@@ -26,4 +26,3 @@ public:
 };
 
 }
-#endif

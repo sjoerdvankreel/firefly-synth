@@ -1,5 +1,4 @@
-#ifndef INFERNAL_BASE_PLUGIN_SUPPORT_HPP
-#define INFERNAL_BASE_PLUGIN_SUPPORT_HPP
+#pragma once
 
 #define INF_DECLARE_MOVE_ONLY(x) \
   x() = default; \
@@ -13,4 +12,3 @@ namespace infernal::base {
 int stable_hash_nonnegative(char const* text);
 
 }
-#endif

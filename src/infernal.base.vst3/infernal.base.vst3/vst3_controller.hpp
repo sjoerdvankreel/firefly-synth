@@ -1,5 +1,4 @@
-#ifndef INFERNAL_BASE_VST3_VST3_CONTROLLER_HPP
-#define INFERNAL_BASE_VST3_VST3_CONTROLLER_HPP
+#pragma once
 
 #include <infernal.base/plugin_topo.hpp>
 #include <public.sdk/source/vst/vsteditcontroller.h>
@@ -8,7 +7,7 @@
 
 namespace infernal::base::vst3 {
 
-class vst3_controller:
+class vst3_controller final:
 public Steinberg::Vst::EditControllerEx1 {
   runtime_plugin_topo const _topo;
 public: 
@@ -17,4 +16,3 @@ public:
 };
 
 }
-#endif 

@@ -1,5 +1,4 @@
-#ifndef INFERNAL_BASE_PLUGIN_TOPO_HPP
-#define INFERNAL_BASE_PLUGIN_TOPO_HPP
+#pragma once
 
 #include <infernal.base/plugin_block.hpp>
 #include <infernal.base/plugin_support.hpp>
@@ -20,7 +19,7 @@ enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_display { toggle, list, knob, slider };
 
-struct param_topo {
+struct param_topo final {
   int stepped_min;
   int stepped_max;
   std::string id;
@@ -40,20 +39,20 @@ struct param_topo {
   bool from_text(std::string const& text, param_value& value) const;
 };
 
-struct submodule_topo {
+struct submodule_topo final {
   int type;
   std::string name;
   std::vector<param_topo> params;
   INF_DECLARE_MOVE_ONLY(submodule_topo);
 };
 
-struct module_dependency {
+struct module_dependency final {
   int module_type;
   int module_index;
   INF_DECLARE_MOVE_ONLY(module_dependency);
 };
 
-struct module_topo {
+struct module_topo final {
   int type;
   int count;
   std::string id;
@@ -66,7 +65,7 @@ struct module_topo {
   INF_DECLARE_MOVE_ONLY(module_topo);
 };
 
-struct plugin_topo {
+struct plugin_topo final {
   bool is_fx;
   plugin_kind kind;
   int polyphony;
@@ -78,7 +77,7 @@ struct plugin_topo {
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
-struct runtime_param_topo
+struct runtime_param_topo final
 {
   int id_hash;
   std::string id;
@@ -90,7 +89,7 @@ struct runtime_param_topo
   INF_DECLARE_MOVE_ONLY(runtime_param_topo);
 };
 
-struct runtime_module_topo
+struct runtime_module_topo final
 {
   std::string name;
   module_topo const* static_topo;
@@ -98,14 +97,14 @@ struct runtime_module_topo
   INF_DECLARE_MOVE_ONLY(runtime_module_topo);
 };
 
-struct flat_module_topo
+struct flat_module_topo final
 {
   module_topo const* static_topo;
   std::vector<param_topo const*> params;
   INF_DECLARE_MOVE_ONLY(flat_module_topo);
 };
 
-struct runtime_plugin_topo
+struct runtime_plugin_topo final
 {
   plugin_topo static_topo;
   std::vector<flat_module_topo> flat_modules = {};
@@ -116,4 +115,4 @@ struct runtime_plugin_topo
 };
 
 }
-#endif
+#pragma once

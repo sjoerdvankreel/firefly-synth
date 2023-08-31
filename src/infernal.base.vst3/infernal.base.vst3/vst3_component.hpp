@@ -1,5 +1,4 @@
-#ifndef INFERNAL_BASE_VST3_VST3_COMPONENT_HPP
-#define INFERNAL_BASE_VST3_VST3_COMPONENT_HPP
+#pragma once
 
 #include <infernal.base/plugin_topo.hpp>
 #include <infernal.base/plugin_engine.hpp>
@@ -8,7 +7,7 @@
 
 namespace infernal::base::vst3 {
 
-class vst3_component:
+class vst3_component final:
 public Steinberg::Vst::AudioEffect {
   plugin_engine _engine;
   using int32 = Steinberg::int32;
@@ -23,4 +22,3 @@ public:
 };
 
 }
-#endif 
