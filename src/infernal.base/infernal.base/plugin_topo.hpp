@@ -18,7 +18,7 @@ enum class param_format { real, step };
 enum class param_storage { num, text };
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
-enum class param_display { toggle, knob, slider };
+enum class param_display { toggle, list, knob, slider };
 
 struct param_topo {
   int stepped_min;
