@@ -16,23 +16,21 @@ enum class plugin_kind { synth, fx };
 enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
 
-enum class param_slope { linear, log };
-enum class param_format { real, step };
 enum class param_storage { num, text };
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
+enum class param_format { step, linear, log };
 enum class param_display { toggle, list, knob, slider };
 
 struct param_topo final {
   int type;
-  int stepped_min;
-  int stepped_max;
+  double min;
+  double max;
   std::string id;
   std::string name;
   std::string unit;
   std::string default_;
   param_rate rate;
-  param_slope slope;
   param_format format;
   param_storage storage;
   param_display display;

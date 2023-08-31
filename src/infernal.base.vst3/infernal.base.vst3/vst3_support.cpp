@@ -18,16 +18,16 @@ param_value
 denormalize(param_topo const& topo, double value)
 {
   param_value result;
-  if(topo.format == param_format::real) result.real = value;
-  else result.step = topo.stepped_min + value * (topo.stepped_max - topo.stepped_min + 1);
+  if(topo.format != param_format::step) result.real = value;
+  else result.step = topo.min + value * (topo.max - topo.min + 1);
   return result;
 }
 
 double 
 normalize(param_topo const& topo, param_value value)
 {
-  if(topo.format == param_format::real) return value.real;
-  return ((float)value.step - topo.stepped_min) / (topo.stepped_max - topo.stepped_min);
+  if(topo.format != param_format::step) return value.real;
+  return (value.step - topo.min) / (topo.max - topo.min);
 }
 
 }

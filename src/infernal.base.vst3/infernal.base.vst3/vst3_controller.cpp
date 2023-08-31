@@ -32,7 +32,6 @@ vst3_controller::initialize(FUnknown* context)
       to_vst_string(param_info.shortTitle, 128, static_param->name.c_str());
       param_info.unitId = unit_info.id;
       param_info.id = rt_param.id_hash;
-      param_info.stepCount = static_param->stepped_max - static_param->stepped_min;
       param_info.defaultNormalizedValue = normalize(*static_param, static_param->default_value());
 
       param_info.flags = ParameterInfo::kNoFlags;
@@ -42,6 +41,10 @@ vst3_controller::initialize(FUnknown* context)
         param_info.flags |= ParameterInfo::kIsReadOnly;
       if(static_param->display == param_display::list)
         param_info.flags |= ParameterInfo::kIsList;
+      param_info.stepCount = 0;
+      if (static_param->format == param_format::step)
+        param_info.stepCount = static_param->max - static_param->min + 1;
+
       parameters.addParameter(param_info);
     }
   }
