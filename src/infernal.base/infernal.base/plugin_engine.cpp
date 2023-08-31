@@ -36,7 +36,7 @@ plugin_engine(plugin_topo&& topo) : _topo(std::move(topo))
       int mod_param_count = flat_mod.params.size();
       _state[m][i] = new param_value[mod_param_count];
       for(int p = 0; p < mod_param_count; p++)
-        _state[m][i][p] = flat_mod.params[p]->default_value();
+        _state[m][i][flat_mod.params[p]->type] = flat_mod.params[p]->default_value();
 
       if(static_mods[m].output == module_output::audio)
         _plugin_block.module_audio[m][i] = new float* [_topo.static_topo.channel_count]();
@@ -164,13 +164,14 @@ plugin_engine::process()
     int mt = rt_param.module_type;
     int mi = rt_param.module_index;
     int pi = rt_param.module_param_index;
+    int pt = rt_param.static_topo->type;
     if (_topo.flat_modules[mt].params[pi]->rate == param_rate::block)
-      _plugin_block.block_automation[mt][mi][pi] = _state[mt][mi][pi];
+      _plugin_block.block_automation[mt][mi][pt] = _state[mt][mi][pt];
     else
       std::fill(
-        _plugin_block.accurate_automation[mt][mi][pi], 
-        _plugin_block.accurate_automation[mt][mi][pi] + _host_block.common.frame_count,
-        _state[mt][mi][pi].real);
+        _plugin_block.accurate_automation[mt][mi][pt],
+        _plugin_block.accurate_automation[mt][mi][pt] + _host_block.common.frame_count,
+        _state[mt][mi][pt].real);
   }
     
   for (int a = 0; a < _host_block.block_automation.size(); a++)
@@ -180,8 +181,9 @@ plugin_engine::process()
     int mt = rt_param.module_type;
     int mi = rt_param.module_index;
     int pi = rt_param.module_param_index;
-    _state[mt][mi][pi] = event.value;
-    _plugin_block.block_automation[mt][mi][pi] = event.value;
+    int pt = rt_param.static_topo->type;
+    _state[mt][mi][pt] = event.value;
+    _plugin_block.block_automation[mt][mi][pt] = event.value;
   }
 
   std::fill(_accurate_automation_frames.begin(), _accurate_automation_frames.end(), 0);
@@ -192,14 +194,15 @@ plugin_engine::process()
     auto const& rt_param = _topo.runtime_params[rpi];
     int mt = rt_param.module_type;
     int mi = rt_param.module_index;
-    int mpi = rt_param.module_param_index;
+    int pi = rt_param.module_param_index;
+    int pt = rt_param.static_topo->type;
     int prev_frame = _accurate_automation_frames[rpi];
     float frame_count = event.frame_index - prev_frame;
-    float start = _plugin_block.accurate_automation[mt][mi][mpi][_accurate_automation_frames[rpi]];
+    float start = _plugin_block.accurate_automation[mt][mi][pt][_accurate_automation_frames[rpi]];
     float range = event.value - start;
     for(int f = prev_frame; f < event.frame_index; f++)
-      _plugin_block.accurate_automation[mt][mi][mpi][f] = start + (f - prev_frame) / frame_count * range;
-    _state[mt][mi][mpi].real = event.value;
+      _plugin_block.accurate_automation[mt][mi][pt][f] = start + (f - prev_frame) / frame_count * range;
+    _state[mt][mi][pt].real = event.value;
     _accurate_automation_frames[rpi] = event.frame_index;
   }
 

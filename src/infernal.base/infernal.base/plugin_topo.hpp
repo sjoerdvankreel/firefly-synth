@@ -20,6 +20,7 @@ enum class param_direction { input, output };
 enum class param_display { toggle, list, knob, slider };
 
 struct param_topo final {
+  int type;
   int stepped_min;
   int stepped_max;
   std::string id;
