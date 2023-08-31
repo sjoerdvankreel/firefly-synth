@@ -16,6 +16,7 @@ plugin_engine(plugin_topo&& topo) : _topo(std::move(topo))
   _plugin_block.host = &_host_block.common;
   auto const& static_mods = _topo.static_topo.modules;
   int mod_type_count = static_mods.size();
+  _state = new param_value**[mod_type_count]();
   _plugin_block.module_cv = new float**[mod_type_count]();
   _plugin_block.module_audio = new float***[mod_type_count]();
   _plugin_block.accurate_automation = new float*** [mod_type_count]();
@@ -68,6 +69,7 @@ plugin_engine::
     delete _plugin_block.accurate_automation[m];
   }
 
+  delete _state;
   delete _plugin_block.module_cv;
   delete _plugin_block.module_audio;
   delete _plugin_block.block_automation;
