@@ -1,17 +1,21 @@
 #include <infernal.base/plugin_support.hpp>
-#include <cmath>
-#include <cstdint>
 
 namespace infernal::base {
 
-int 
-hash(char const* text)
+param_topo
+toggle_topo()
 {
-  std::uint32_t h = 0;
-  int const multiplier = 33;
-  auto utext = reinterpret_cast<std::uint8_t const*>(text);
-  for (auto const* p = utext; *p != '\0'; p++) h = multiplier * h + *p;
-  return std::abs(static_cast<int>(h + (h >> 5)));
+  param_topo result;
+  result.unit = "";
+  result.stepped_min = 0;
+  result.stepped_max = 1;
+  result.rate = param_rate::block;
+  result.slope = param_slope::linear;
+  result.format = param_format::step;
+  result.storage = param_storage::num;
+  result.display = param_display::toggle;
+  result.direction = param_direction::input;
+  return result;
 }
 
 }

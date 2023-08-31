@@ -1,5 +1,6 @@
 #include <infernal.synth/synth.hpp>
 #include <infernal.base/plugin_topo.hpp>
+#include <infernal.base/plugin_support.hpp>
 
 using namespace infernal::base;
 
@@ -14,21 +15,13 @@ main_topo()
   submodule_topo result;
   result.name = "Main";
   
-  param_topo on;
-  on.unit = "";
+  param_topo on = toggle_topo();
   on.name = "On";
   on.default_ = "Off";
-  on.stepped_min = 0;
-  on.stepped_max = 1;
   on.type = osc_param_on;
-  on.rate = param_rate::block;
-  on.slope = param_slope::linear;
-  on.format = param_format::step;
-  on.storage = param_storage::num;
-  on.display = param_display::toggle;
-  on.direction = param_direction::input;
   on.id = "{031051C7-8CAC-4ECD-AC44-3BCD3CCACA97}";
   result.params.emplace_back(std::move(on));
+
   return {};
 }
 

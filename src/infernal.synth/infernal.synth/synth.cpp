@@ -4,19 +4,6 @@ using namespace infernal::base;
 
 namespace infernal::synth {
 
-module_topo 
-osc_topo()
-{
-  module_topo result = {};
-  result.count = 2;
-  result.name = "Osc";
-  result.type = module_type_osc;
-  result.scope = module_scope::voice;
-  result.output = module_output::audio;
-  result.id = "{45C2CCFE-48D9-4231-A327-319DAE5C9366}";
-  return result;
-}
-
 plugin_topo
 synth_topo()
 {
