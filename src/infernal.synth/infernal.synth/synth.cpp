@@ -1,4 +1,4 @@
-#include <infernal.synth/synth_topo.hpp>
+#include <infernal.synth/synth.hpp>
 
 using namespace infernal::base;
 
@@ -8,12 +8,13 @@ static module_topo
 osc_topo()
 {
   module_topo result = {};
-  osc.count = 2;
-  osc.name = "Osc";
-  osc.type = module_type_osc;
-  osc.scope = module_scope::voice;
-  osc.output = module_output::audio;
-  osc.id = "{45C2CCFE-48D9-4231-A327-319DAE5C9366}";
+  result.count = 2;
+  result.name = "Osc";
+  result.type = module_type_osc;
+  result.scope = module_scope::voice;
+  result.output = module_output::audio;
+  result.id = "{45C2CCFE-48D9-4231-A327-319DAE5C9366}";
+  return result;
 }
 
 plugin_topo
@@ -41,8 +42,7 @@ synth_topo()
   osc_main_gain.rate = param_rate::accurate;
 
   submodule_topo osc_pitch = {};
-  osc_pitch.name = ""
-
+  return result;
 }
 
 }
