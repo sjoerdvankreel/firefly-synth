@@ -1,5 +1,4 @@
 #pragma once
-#include <infernal.base/plugin_topo.hpp>
 #include <vector>
 #include <cstdint>
 
@@ -21,12 +20,12 @@ struct note_event final {
 };
 
 struct block_automation_event final {
-  param_value value;
+  double value_01;
   int runtime_param_index;
 };
 
 struct accurate_automation_event final {
-  float value;
+  double value_01;
   int frame_index;
   int runtime_param_index;
 };

@@ -2,33 +2,36 @@
 
 namespace infernal::base {
 
-static param_topo
-param_poison()
+param_topo 
+param_input_block_toggle(char const* id, char const* name, char const* default_, int type)
 {
   param_topo result;
-  result.min = -1;
-  result.max = -2;
-  result.type = -1;
-  result.id = "\0";
-  result.name = "\0";
-  result.unit = "\0";
-  result.default_ = "\0";
-  result.rate = (param_rate)-1;
-  result.display = (param_display)-1;
-  result.storage = (param_storage)-1;
-  result.direction = (param_direction)-1;
+  result.min = 0;
+  result.max = 1;
+  result.id = id;
+  result.unit = "";
+  result.type = type;
+  result.name = name;
+  result.default_ = default_;
+  result.rate = param_rate::block;
+  result.storage = param_storage::num;
+  result.display = param_display::toggle;
+  result.direction = param_direction::input;
   return result;
 }
 
-param_topo
-param_toggle()
+param_topo 
+param_input_accurate_linear(char const* id, char const* name, char const* default_, int type, double min, double max)
 {
-  param_topo result = param_poison();
-  result.min = 0;
-  result.max = 1;
+  param_topo result;
+  result.id = id;
+  result.min = min;
+  result.max = max;
   result.unit = "";
+  result.type = type;
+  result.name = name;
+  result.default_ = default_;
   result.rate = param_rate::block;
-  result.format = param_format::step;
   result.storage = param_storage::num;
   result.display = param_display::toggle;
   result.direction = param_direction::input;

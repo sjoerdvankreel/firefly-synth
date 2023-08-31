@@ -14,6 +14,8 @@ main_topo()
 {
   submodule_topo result;
   result.name = "Main";  
+  result.params.emplace_back(param_input_block_toggle("{031051C7-8CAC-4ECD-AC44-3BCD3CCACA97}", "On", "Off", osc_param_on));
+
   param_topo on(param_toggle());
   on.name = "On";
   on.default_ = "Off";

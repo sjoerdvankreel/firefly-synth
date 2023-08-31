@@ -10,7 +10,6 @@ struct plugin_block;
 
 typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block);
-struct param_value final { union { float real; int step; }; };
 
 enum class plugin_kind { synth, fx };
 enum class module_scope { voice, global };
