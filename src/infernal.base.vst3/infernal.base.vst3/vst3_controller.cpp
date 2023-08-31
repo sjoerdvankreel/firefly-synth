@@ -1,5 +1,5 @@
-#include <infernal.base.vst3/vst3_controller.hpp>
 #include <infernal.base.vst3/vst3_support.hpp>
+#include <infernal.base.vst3/vst3_controller.hpp>
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;

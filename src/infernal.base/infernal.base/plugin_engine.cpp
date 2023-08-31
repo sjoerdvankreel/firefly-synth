@@ -1,5 +1,4 @@
 #include <infernal.base/plugin_engine.hpp>
-
 #include <limits>
 #include <utility>
 

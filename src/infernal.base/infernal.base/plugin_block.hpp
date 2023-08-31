@@ -1,7 +1,5 @@
 #pragma once
-
-#include <infernal.base/plugin_shared.hpp>
-
+#include <infernal.base/plugin_topo.hpp>
 #include <vector>
 #include <cstdint>
 

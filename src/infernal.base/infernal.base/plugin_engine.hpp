@@ -1,5 +1,4 @@
 #pragma once
-
 #include <infernal.base/plugin_topo.hpp>
 #include <infernal.base/plugin_block.hpp>
 

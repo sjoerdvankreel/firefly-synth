@@ -1,5 +1,4 @@
 #include <infernal.base/plugin_topo.hpp>
-
 #include <utility>
 
 namespace infernal::base {

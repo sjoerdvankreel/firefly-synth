@@ -1,8 +1,6 @@
 #pragma once
-
 #include <infernal.base/plugin_topo.hpp>
 #include <infernal.base/plugin_engine.hpp>
-
 #include <public.sdk/source/vst/vstaudioeffect.h>
 
 namespace infernal::base::vst3 {

@@ -1,5 +1,4 @@
 #include <infernal.base.vst3/vst3_support.hpp>
-
 #include <cstring>
 
 using namespace Steinberg;

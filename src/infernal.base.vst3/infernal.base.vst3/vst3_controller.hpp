@@ -1,8 +1,6 @@
 #pragma once
-
 #include <infernal.base/plugin_topo.hpp>
 #include <public.sdk/source/vst/vsteditcontroller.h>
-
 #include <utility>
 
 namespace infernal::base::vst3 {
