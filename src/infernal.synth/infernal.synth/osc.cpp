@@ -8,7 +8,7 @@ namespace infernal::synth {
 enum osc_type { osc_type_saw, osc_type_sine };
 enum osc_param { osc_param_on, osc_param_gain, osc_param_bal, osc_param_oct, osc_param_note, osc_param_cent };
 
-static submodule_topo
+submodule_topo
 main_topo()
 {
   submodule_topo result;
@@ -41,9 +41,6 @@ osc_topo()
   result.scope = module_scope::voice;
   result.output = module_output::audio;
   result.id = "{45C2CCFE-48D9-4231-A327-319DAE5C9366}";
-  result.callbacks = {};
-  result.dependencies = {};
-  result.submodules = {};
   return result;
 }
 
