@@ -32,7 +32,7 @@ struct accurate_automation_event final {
   int runtime_param_index;
 };
 
-struct host_block final {
+struct common_block final {
   float bpm;
   int frame_count;
   std::int64_t stream_time;
@@ -41,7 +41,8 @@ struct host_block final {
   std::vector<note_event> notes;
 };
 
-struct host_event_block final {  
+struct host_block final {
+  common_block common;
   std::vector<block_automation_event> block_automation;
   std::vector<accurate_automation_event> accurate_automation;
 };
@@ -51,7 +52,7 @@ struct plugin_block final {
   float sample_rate;
   float*** module_cv;
   float**** module_audio;
-  host_block const* host;
+  common_block const* host;
   float**** accurate_automation;
   param_value*** block_automation;
 };

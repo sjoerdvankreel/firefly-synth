@@ -8,12 +8,12 @@ namespace infernal::base {
 plugin_engine::
 plugin_engine(plugin_topo&& topo) : _topo(std::move(topo))
 {
-  _host_block.notes.reserve(topo.note_limit);
+  _host_block.common.notes.reserve(topo.note_limit);
   _host_block.block_automation.reserve(topo.block_automation_limit);
   _host_block.accurate_automation.reserve(topo.accurate_automation_limit);
   _accurate_automation_frames.resize(_topo.runtime_params.size());
 
-  _plugin_block.host = &_host_block;
+  _plugin_block.host = &_host_block.common;
   auto const& static_mods = _topo.static_topo.modules;
   int mod_type_count = static_mods.size();
   _plugin_block.module_cv = new float**[mod_type_count]();
@@ -126,12 +126,12 @@ plugin_engine::deactivate()
 host_block& 
 plugin_engine::prepare()
 {
-  _host_block.bpm = 0;
-  _host_block.frame_count = 0;
-  _host_block.stream_time = 0;
-  _host_block.audio_input = nullptr;
-  _host_block.audio_output = nullptr;
-  _host_block.notes.clear();
+  _host_block.common.bpm = 0;
+  _host_block.common.frame_count = 0;
+  _host_block.common.stream_time = 0;
+  _host_block.common.audio_input = nullptr;
+  _host_block.common.audio_output = nullptr;
+  _host_block.common.notes.clear();
   _host_block.block_automation.clear();
   _host_block.accurate_automation.clear();
   return _host_block;
@@ -147,14 +147,14 @@ plugin_engine::process()
       for(int i = 0; i < flat_mod->count; i++)
         std::fill(
           _plugin_block.module_cv[m][i], 
-          _plugin_block.module_cv[m][i] + _host_block.frame_count, 
+          _plugin_block.module_cv[m][i] + _host_block.common.frame_count,
           std::numeric_limits<float>::quiet_NaN());
     else if(flat_mod->output == module_output::audio)
       for (int i = 0; i < flat_mod->count; i++)
         for(int c = 0; c < _topo.static_topo.channel_count; c++)
           std::fill(
             _plugin_block.module_audio[m][i][c], 
-            _plugin_block.module_audio[m][i][c] + _host_block.frame_count, 
+            _plugin_block.module_audio[m][i][c] + _host_block.common.frame_count,
             std::numeric_limits<float>::quiet_NaN());
   }
 
@@ -169,7 +169,7 @@ plugin_engine::process()
     else
       std::fill(
         _plugin_block.accurate_automation[mt][mi][pi], 
-        _plugin_block.accurate_automation[mt][mi][pi] + _host_block.frame_count,
+        _plugin_block.accurate_automation[mt][mi][pi] + _host_block.common.frame_count,
         _state[mt][mi][pi].real);
   }
     
