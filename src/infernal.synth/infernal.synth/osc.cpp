@@ -13,17 +13,25 @@ submodule_topo
 main_topo()
 {
   submodule_topo result;
-  result.name = "Main";
-  
-  param_topo on = param_toggle();
+  result.name = "Main";  
+  param_topo on(param_toggle());
   on.name = "On";
   on.default_ = "Off";
   on.type = osc_param_on;
   on.id = "{031051C7-8CAC-4ECD-AC44-3BCD3CCACA97}";
   result.params.emplace_back(std::move(on));
-
-  param_topo gain = param_real(param_rate::accurate, param_slope::linear, param_display::knob, "");
-
+  param_topo gain(param_real(param_rate::accurate, param_slope::linear, param_display::knob, ""));
+  gain.name = "Gain";
+  gain.default_ = "1";
+  gain.type = osc_param_gain;
+  gain.id = "{3C3A6236-F4CD-4D0C-8FD8-EC60534C42E6}";
+  result.params.emplace_back(std::move(gain));
+  param_topo bal(param_real(param_rate::accurate, param_slope::linear, param_display::knob, ""));
+  bal.name = "Bal";
+  bal.default_ = "0.5";
+  bal.type = osc_param_bal;
+  bal.id = "{EA868FB7-E4A5-4042-8512-42318D86531E}";
+  result.params.emplace_back(std::move(bal));
   return result;
 }
 
