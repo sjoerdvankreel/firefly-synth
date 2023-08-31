@@ -15,14 +15,14 @@ main_topo()
   submodule_topo result;
   result.name = "Main";
   
-  param_topo on = toggle_topo();
+  param_topo on = param_toggle();
   on.name = "On";
   on.default_ = "Off";
   on.type = osc_param_on;
   on.id = "{031051C7-8CAC-4ECD-AC44-3BCD3CCACA97}";
   result.params.emplace_back(std::move(on));
 
-  return {};
+  return result;
 }
 
 module_topo

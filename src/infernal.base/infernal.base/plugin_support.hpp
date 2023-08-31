@@ -3,6 +3,6 @@
 
 namespace infernal::base {
 
-param_topo toggle_topo();
+param_topo param_toggle();
 
 }
