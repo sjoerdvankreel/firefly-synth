@@ -1,5 +1,5 @@
 #pragma once
-#include <infernal.base/plugin_shared.hpp>
+#include <infernal.base/utility.hpp>
 #include <vector>
 #include <string>
 
@@ -7,6 +7,7 @@ namespace infernal::base {
 
 struct plugin_topo;
 struct plugin_block;
+struct param_value final { union { float real; int step; }; };
 
 typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block);

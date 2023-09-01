@@ -2,8 +2,8 @@
 
 namespace infernal::base {
 
+struct param_value;
 struct common_block;
-struct param_value final { union { float real; int step; }; };
 
 struct plugin_block final {
   float sample_rate;
