@@ -13,26 +13,13 @@ hash(char const* text)
   return std::abs(static_cast<int>(h + (h >> 5)));
 }
 
-param_value
-param_topo::default_value() const
-{
-  param_value value;
-  value.step = 0;
-  return value;
-}
 
-std::string 
-param_topo::to_text(param_value value) const
-{
-  return "0";
-}
 
-bool
-param_topo::from_text(std::string const& text, param_value& value) const
-{
-  value.step = 0;
-  return true;
-}
+param_value default_value() const;
+double to_normalized(para_value value) const;
+std::string to_text(param_value value) const;
+param_value from_normalized(double normalized) const;
+bool from_text(std::string const& text, param_value& value) const;
 
 runtime_plugin_topo::
 runtime_plugin_topo(plugin_topo&& static_topo_):

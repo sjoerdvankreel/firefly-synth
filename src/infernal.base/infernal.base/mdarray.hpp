@@ -1,4 +1,5 @@
 #pragma once
+#include <infernal.base/utility.hpp>
 #include <vector>
 
 namespace infernal::base {
@@ -8,6 +9,7 @@ class array2d {
   std::vector<T*> _dim0 = {};
   std::vector<T> _dim1 = {};
 public:
+  INF_DECLARE_MOVE_ONLY(array2d);
 
   T* const* operator[](int i) 
   { return _dim0[i]; }
@@ -36,6 +38,7 @@ class array3d {
   std::vector<T*> _dim1 = {};
   std::vector<T> _dim2 = {};
 public:
+  INF_DECLARE_MOVE_ONLY(array3d);
 
   T* const* const* operator[](int i) 
   { return _dim0[i]; }
@@ -69,6 +72,7 @@ class array4d {
   std::vector<T*> _dim2 = {};
   std::vector<T> _dim3 = {};
 public:
+  INF_DECLARE_MOVE_ONLY(array4d);
 
   T* const* const* const* operator[](int i) 
   { return _dim0[i]; }

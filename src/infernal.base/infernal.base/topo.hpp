@@ -38,8 +38,8 @@ struct param_topo final {
   INF_DECLARE_MOVE_ONLY(param_topo);
 
   param_value default_value() const;
-  double to_normalized(para_value value) const;
   std::string to_text(param_value value) const;
+  double to_normalized(param_value value) const;
   param_value from_normalized(double normalized) const;
   bool from_text(std::string const& text, param_value& value) const;
 };
@@ -53,7 +53,6 @@ struct submodule_topo final {
 struct module_dependency final {
   int module_type;
   int module_index;
-  INF_DECLARE_MOVE_ONLY(module_dependency);
 };
 
 struct module_callbacks final {
