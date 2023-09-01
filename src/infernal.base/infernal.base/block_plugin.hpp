@@ -1,17 +1,20 @@
 #pragma once
+#include <infernal.base/mdarray.hpp>
+#include <infernal.base/utility.hpp>
+#include <infernal.base/param_value.hpp>
 
 namespace infernal::base {
 
-struct param_value;
 struct common_block;
 
 struct plugin_block final {
   float sample_rate;
   common_block const* host;
-  float* const* const* module_cv;
-  float* const* const* const* module_audio;
-  param_value const* const* const* block_automation;
-  float const* const* const* const* accurate_automation;
+  array3d<float> module_cv;
+  array4d<float> module_audio;
+  array4d<float> accurate_automation;
+  array3d<param_value> block_automation;
+  INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
 }

@@ -1,5 +1,6 @@
 #pragma once
 #include <infernal.base/utility.hpp>
+#include <infernal.base/param_value.hpp>
 #include <vector>
 #include <string>
 
@@ -7,7 +8,6 @@ namespace infernal::base {
 
 struct plugin_topo;
 struct plugin_block;
-struct param_value final { union { float real; int step; }; };
 
 typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block);
@@ -38,7 +38,9 @@ struct param_topo final {
   INF_DECLARE_MOVE_ONLY(param_topo);
 
   param_value default_value() const;
+  double to_normalized(para_value value) const;
   std::string to_text(param_value value) const;
+  param_value from_normalized(double normalized) const;
   bool from_text(std::string const& text, param_value& value) const;
 };
 

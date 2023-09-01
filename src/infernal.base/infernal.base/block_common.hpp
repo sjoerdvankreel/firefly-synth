@@ -1,4 +1,5 @@
 #pragma once
+#include <infernal.base/utility.hpp>
 #include <vector>
 #include <cstdint>
 
@@ -26,6 +27,7 @@ struct common_block final {
   float* const* audio_output;
   float const* const* audio_input;
   std::vector<note_event> notes;
+  INF_DECLARE_MOVE_ONLY(common_block);
 };
 
 }
