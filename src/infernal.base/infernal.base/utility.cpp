@@ -1,4 +1,4 @@
-#include <infernal.base/plugin_shared.hpp>
+#include <infernal.base/utility.hpp>
 #include <cmath>
 #include <cstdint>
 
