@@ -22,7 +22,17 @@ enum class param_display { toggle, list, knob, slider };
 
 typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block); 
-  
+
+struct plugin_dimensions final {
+  std::vector<int> module_counts;
+  std::vector<std::vector<int>> module_frame_counts;
+  std::vector<std::vector<int>> module_param_counts;
+  std::vector<std::vector<int>> module_channel_counts;
+  std::vector<std::vector<std::vector<int>>> module_param_frame_counts;
+  std::vector<std::vector<std::vector<int>>> module_channel_frame_counts;
+  INF_DECLARE_MOVE_ONLY(plugin_dimensions);
+}; 
+
 struct param_topo final {
   int type;
   int precision;
@@ -78,6 +88,7 @@ struct plugin_topo final {
   int block_automation_limit;
   int accurate_automation_limit;
   std::vector<module_group_topo> module_groups;
+  plugin_dimensions dimensions(int frame_count);
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 

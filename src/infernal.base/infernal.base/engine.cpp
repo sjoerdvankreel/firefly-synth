@@ -2,59 +2,79 @@
 
 namespace infernal::base {
 
-void
-plugin_engine::activate(int sample_rate, int max_frame_count)
+plugin_engine::
+plugin_engine(plugin_topo&& topo) :
+_topo(std::move(topo)), _desc(_topo) 
 {
-  _sample_rate = sample_rate;
-  _accurate_frames.resize(max_frame_count);
-  //_state.init()
-  host_block _host_block = {};
-  plugin_block _plugin_block = {};
-  array3d<param_value> _state = {};
-  std::vector<int> _accurate_frames = {};
+  _host_block.common = &_common_block;
+  _plugin_block.host = &_common_block;
+}
+
+host_block&
+plugin_engine::prepare()
+{
+  _host_block.common->bpm = 0;
+  _host_block.common->frame_count = 0;
+  _host_block.common->stream_time = 0;
+  _host_block.common->audio_input = nullptr;
+  _host_block.common->audio_output = nullptr;
+  _host_block.common->notes.clear();
+  _host_block.block_events.clear();
+  _host_block.accurate_events.clear();
+  return _host_block;
 }
 
 void
 plugin_engine::deactivate()
 {
   _sample_rate = 0;
-  for (int m = 0; m < _topo.flat_modules.size(); m++)
-  {
-    auto const& flat_mod = _topo.flat_modules[m].static_topo;
-    for (int i = 0; i < flat_mod->count; i++)
-    {
-      if (flat_mod->output == module_output::cv)
-      {
-        delete _plugin_block.module_cv[m][i];
-        _plugin_block.module_cv[m][i] = nullptr;
-      }
-      else if (flat_mod->output == module_output::audio)
-        for (int c = 0; c < _topo.static_topo.channel_count; c++)
-        {
-          delete _plugin_block.module_audio[m][i][c];
-          _plugin_block.module_audio[m][i][c] = nullptr;
-        }
-      for (int p = 0; p < _topo.flat_modules[m].params.size(); p++)
-      {
-        delete _plugin_block.accurate_automation[m][i][p];
-        _plugin_block.accurate_automation[m][i][p] = nullptr;
-      }
-    }
-  }
+  _state = {};
+  _accurate_frames = {};
+  _host_block.block_events.clear();
+  _host_block.accurate_events.clear();
+  _plugin_block.module_cv = {};
+  _plugin_block.module_audio = {};
+  _plugin_block.block_automation = {};
+  _plugin_block.accurate_automation = {};
 }
 
-host_block& 
-plugin_engine::prepare()
+void
+plugin_engine::activate(int sample_rate, int max_frame_count)
 {
-  _host_block.common.bpm = 0;
-  _host_block.common.frame_count = 0;
-  _host_block.common.stream_time = 0;
-  _host_block.common.audio_input = nullptr;
-  _host_block.common.audio_output = nullptr;
-  _host_block.common.notes.clear();
-  _host_block.block_automation.clear();
-  _host_block.accurate_automation.clear();
-  return _host_block;
+  std::vector<int> module_counts;
+  std::vector<std::vector<int>> module_frame_counts;
+  std::vector<std::vector<int>> module_param_counts;
+  std::vector<std::vector<int>> module_channel_counts;
+  std::vector<std::vector<std::vector<int>>> module_param_frame_counts;
+  std::vector<std::vector<std::vector<int>>> module_channel_frame_counts;
+
+  deactivate();
+  int group_count = _topo.module_groups.size();
+  for (int g = 0; g < group_count; g++)
+  {
+    auto const& group = _topo.module_groups[g];
+    module_param_frame_counts.emplace_back();
+    module_channel_frame_counts.emplace_back();
+    module_counts.push_back(group.module_count);
+    module_frame_counts.emplace_back(std::vector<int>(group.module_count, max_frame_count));
+    module_param_counts.emplace_back(std::vector<int>(group.module_count, group.params.size()));
+    module_channel_counts.emplace_back(std::vector<int>(group.module_count, _topo.channel_count));
+    for (int m = 0; m < group.module_count; m++)
+    { 
+      module_param_frame_counts[g].emplace_back(std::vector<int>(group.params.size(), max_frame_count));
+      module_channel_frame_counts[g].emplace_back(std::vector<int>(_topo.channel_count, max_frame_count));
+    }
+  }
+
+  _sample_rate = sample_rate;
+  _accurate_frames.resize(max_frame_count);
+  _state.init(group_count, module_counts, module_param_counts);
+  _host_block.block_events.reserve(_topo.block_automation_limit);
+  _host_block.accurate_events.reserve(_topo.accurate_automation_limit);
+  _plugin_block.module_cv.init(group_count, module_counts, module_frame_counts);
+  _plugin_block.block_automation.init(group_count, module_counts, module_param_counts);
+  _plugin_block.module_audio.init(group_count, module_counts, module_channel_counts, module_channel_frame_counts);
+  _plugin_block.accurate_automation.init(group_count, module_counts, module_param_counts, module_param_frame_counts);
 }
 
 void 

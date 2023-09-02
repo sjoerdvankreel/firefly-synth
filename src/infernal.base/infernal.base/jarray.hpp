@@ -5,10 +5,10 @@
 namespace infernal::base {
 
 template <class T>
-class array3d {
+class jarray3d {
   std::vector<std::vector<std::vector<T>>> _data;
 public:
-  INF_DECLARE_MOVE_ONLY(array3d);
+  INF_DECLARE_MOVE_ONLY(jarray3d);
   void clear() { _data.clear(); }
 
   T* data(int dim0, int dim1) 
@@ -35,10 +35,10 @@ public:
 };
 
 template <class T>
-class array4d {
-  std::vector<array3d<T>> _data;
+class jarray4d {
+  std::vector<jarray3d<T>> _data;
 public:
-  INF_DECLARE_MOVE_ONLY(array4d);
+  INF_DECLARE_MOVE_ONLY(jarray4d);
   void clear() { _data.clear(); }
 
   T* data(int dim0, int dim1, int dim2) 
