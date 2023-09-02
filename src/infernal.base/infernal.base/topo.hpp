@@ -9,9 +9,6 @@ namespace infernal::base {
 struct plugin_topo;
 struct plugin_block;
 
-typedef void(*module_process)(
-plugin_topo const& topo, int module_index, plugin_block const& block);
-
 enum class plugin_kind { synth, fx };
 enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
@@ -22,6 +19,9 @@ enum class param_direction { input, output };
 enum class param_format { step, linear, log };
 enum class param_display { toggle, list, knob, slider };
 
+typedef void(*module_process)(
+plugin_topo const& topo, int module_index, plugin_block const& block); 
+  
 struct param_topo final {
   int type;
   double min;
@@ -44,15 +44,10 @@ struct param_topo final {
   bool from_text(std::string const& text, param_value& value) const;
 };
 
-struct submodule_topo final {
+struct group_topo final {
   std::string name;
-  std::vector<param_topo> params;
-  INF_DECLARE_MOVE_ONLY(submodule_topo);
-};
-
-struct module_dependency final {
-  int module_type;
-  int module_index;
+  std::vector<int> param_types;
+  INF_DECLARE_MOVE_ONLY(group_topo);
 };
 
 struct module_callbacks final {
@@ -67,8 +62,8 @@ struct module_topo final {
   module_scope scope;
   module_output output;
   module_callbacks callbacks;
-  std::vector<submodule_topo> submodules;
-  std::vector<module_dependency> dependencies;
+  std::vector<group_topo> groups;
+  std::vector<param_topo> params;
   INF_DECLARE_MOVE_ONLY(module_topo);
 };
 
@@ -84,37 +79,36 @@ struct plugin_topo final {
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
-struct runtime_param_topo final {
+struct param_mapping final {
+  int module_type;
+  int module_index;
+  int param_type;
+};
+
+struct param_desc final {
   int id_hash;
   std::string id;
   std::string name;
-  int module_type;
-  int module_index;
-  int module_param_index;
-  param_topo const* static_topo;
-  INF_DECLARE_MOVE_ONLY(runtime_param_topo);
+
+  INF_DECLARE_MOVE_ONLY(param_desc);
+  param_desc(module_topo const& module_topo, int module_index, param_topo const& param_topo);
 };
 
-struct runtime_module_topo final {
+struct module_desc final {
   std::string name;
-  module_topo const* static_topo;
-  std::vector<runtime_param_topo> params;
-  INF_DECLARE_MOVE_ONLY(runtime_module_topo);
+  std::vector<param_desc> params;
+  
+  INF_DECLARE_MOVE_ONLY(module_desc);
+  module_desc(module_topo const& topo, int module_index);
 };
 
-struct flat_module_topo final {
-  module_topo const* static_topo;
-  std::vector<param_topo const*> params;
-  INF_DECLARE_MOVE_ONLY(flat_module_topo);
-};
+struct plugin_desc final {
+  std::vector<param_desc> params = {};
+  std::vector<module_desc> modules = {};
+  std::vector<param_mapping> mapping = {};
 
-struct runtime_plugin_topo final {
-  plugin_topo static_topo;
-  std::vector<flat_module_topo> flat_modules = {};
-  std::vector<runtime_param_topo> runtime_params = {};
-  std::vector<runtime_module_topo> runtime_modules = {};
-  explicit runtime_plugin_topo(plugin_topo&& static_topo);
-  INF_DECLARE_MOVE_ONLY(runtime_plugin_topo);
+  INF_DECLARE_MOVE_ONLY(plugin_desc);
+  plugin_desc(plugin_topo const& topo);
 };
 
 }
