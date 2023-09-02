@@ -1,6 +1,6 @@
 #pragma once
-#include <infernal.base/utility.hpp>
 #include <infernal.base/topo.hpp>
+#include <infernal.base/utility.hpp>
 #include <vector>
 #include <string>
 
@@ -16,6 +16,7 @@ struct param_desc final {
   int id_hash = {};
   std::string id = {};
   std::string name = {};
+  param_topo const* topo = {};
 
   INF_DECLARE_MOVE_ONLY(param_desc);
   param_desc(module_group_topo const& module_group, int module_index, param_topo const& param);
@@ -23,6 +24,7 @@ struct param_desc final {
 
 struct module_desc final {
   std::string name = {};
+  module_group_topo const* topo = {};
   std::vector<param_desc> params = {};
   
   INF_DECLARE_MOVE_ONLY(module_desc);

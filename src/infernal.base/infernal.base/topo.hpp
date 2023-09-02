@@ -64,7 +64,6 @@ struct plugin_topo final {
   plugin_kind kind;
   int polyphony;
   int note_limit;
-  int channel_count;
   int block_automation_limit;
   int accurate_automation_limit;
   std::vector<module_group_topo> module_groups;

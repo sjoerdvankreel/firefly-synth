@@ -31,6 +31,7 @@ module_name(module_group_topo const& module_group, int module_index)
 param_desc::
 param_desc(module_group_topo const& module_group, int module_index, param_topo const& param)
 {
+  topo = &param;
   id = module_id(module_group, module_index) + "-" + param.id;
   name = module_name(module_group, module_index) + " " + param.name;
   id_hash = hash(id.c_str());
@@ -39,6 +40,7 @@ param_desc(module_group_topo const& module_group, int module_index, param_topo c
 module_desc::
 module_desc(module_group_topo const& module_group, int module_index)
 {
+  topo = &module_group;
   name = module_name(module_group, module_index);
   for(int i = 0; i < module_group.params.size(); i++)
     params.emplace_back(param_desc(module_group, module_index, module_group.params[i]));
@@ -90,7 +92,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     for(int m = 0; m < group.module_count; m++)
     {
       module_accurate_frame_counts[g].emplace_back();
-      module_audio_frame_counts[g].emplace_back(std::vector<int>(plugin.channel_count, audio_frames));
+      module_audio_frame_counts[g].emplace_back(std::vector<int>(2, audio_frames));
       for(int p = 0; p < group.params.size(); p++)
       {
         int param_frames = group.params[p].rate == param_rate::accurate ? frame_count : 0;
