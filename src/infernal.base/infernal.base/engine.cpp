@@ -63,6 +63,29 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 void 
 plugin_engine::process()
 {
+  for(int g = 0; g < _topo.module_groups.size(); g++)
+  {
+    auto const& group = _topo.module_groups[g];
+    for (int m = 0; m < group.module_count; m++)
+      if(group.output == module_output::cv)
+      {
+        auto& curve = _plugin_block.module_cv[g][m];
+        std::fill(
+          curve.begin(), 
+          curve.begin() + _common_block.frame_count, 
+          std::numeric_limits<float>::quiet_NaN());
+      }
+      else if (group.output == module_output::audio)
+      {
+        auto& audio = _plugin_block.module_audio[g][m];
+        for(int c = 0; c < 2; c++)
+          std::fill(
+            audio[c].begin(),
+            audio[c].begin() + _common_block.frame_count,
+            std::numeric_limits<float>::quiet_NaN());
+      }
+  }
+
   for (int g = 0; g < _topo.module_groups.size(); g++)
   {
     auto const& group = _topo.module_groups[g];
@@ -76,7 +99,7 @@ plugin_engine::process()
           auto& automation = _plugin_block.accurate_automation[g][m][p];
           std::fill(
             automation.begin(), 
-            automation.begin() + _host_block.common->frame_count, 
+            automation.begin() + _common_block.frame_count, 
             param_value::from_real(_state[g][m][p].real).to_normalized(group.params[p]));
         }
       }
