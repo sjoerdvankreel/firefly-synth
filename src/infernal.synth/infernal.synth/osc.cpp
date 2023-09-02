@@ -13,7 +13,10 @@ module_group_topo
 osc_topo()
 {
   module_group_topo result(make_module_group("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, module_scope::voice, module_output::audio));
-  result.params.emplace_back(make_param_toggle());
+  result.params.emplace_back(make_param_toggle("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", "Off", param_direction::input));
+  result.params.emplace_back(make_param_pct("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", "100", 0, 1, param_direction::input, param_rate::accurate, param_display::knob));
+  result.params.emplace_back(make_param_pct("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", "0", -1, 1, param_direction::input, param_rate::accurate, param_display::knob));
+  result.params.emplace_back(make_param_step("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", "0", 0, 9, param_direction::input, param_display::knob));
   return result;
 }
 

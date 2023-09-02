@@ -19,12 +19,17 @@ enum class param_format { step, linear, log };
 enum class param_display { toggle, list, knob, slider };
 
 typedef void(*module_process)(
-plugin_topo const& topo, int module_index, plugin_block const& block); 
+plugin_topo const& topo, int module_index, plugin_block const& block);
+
+struct item_topo final {
+  std::string id;
+  std::string name;
+  INF_DECLARE_MOVE_ONLY(item_topo);
+};
 
 struct param_topo final {
   double min;
   double max;
-  int precision;
   bool percentage;
   std::string id;
   std::string name;
@@ -35,7 +40,7 @@ struct param_topo final {
   param_storage storage;
   param_display display;
   param_direction direction;
-  std::vector<std::string> list;
+  std::vector<item_topo> list;
   INF_DECLARE_MOVE_ONLY(param_topo);
 };
 
