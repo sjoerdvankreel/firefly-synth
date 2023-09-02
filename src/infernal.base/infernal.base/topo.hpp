@@ -22,7 +22,6 @@ typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block); 
 
 struct param_topo final {
-  int type;
   int precision;
   double min;
   double max;
@@ -49,7 +48,6 @@ struct module_callbacks final {
 };
 
 struct module_group_topo final {
-  int type;
   int module_count;
   std::string id;
   std::string name;
