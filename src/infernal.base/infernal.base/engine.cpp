@@ -4,7 +4,7 @@ namespace infernal::base {
 
 plugin_engine::
 plugin_engine(plugin_topo&& topo) :
-_topo(std::move(topo)), _desc(_topo) 
+_topo(std::move(topo)), _desc(_topo), _dims(_topo)
 {
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
@@ -40,34 +40,27 @@ plugin_engine::deactivate()
 
 void
 plugin_engine::activate(int sample_rate, int max_frame_count)
-{
-  std::vector<int> module_counts;
-  std::vector<std::vector<int>> module_frame_counts;
-  std::vector<std::vector<int>> module_param_counts;
-  std::vector<std::vector<int>> module_channel_counts;
-  std::vector<std::vector<std::vector<int>>> module_param_frame_counts;
-  std::vector<std::vector<std::vector<int>>> module_channel_frame_counts;
-
+{  
   deactivate();
-  
-
+  int group_count = _topo.module_groups.size();
+  plugin_frame_dims frame_dims(_topo, max_frame_count);
   _sample_rate = sample_rate;
   _accurate_frames.resize(max_frame_count);
-  _state.init(group_count, module_counts, module_param_counts);
   _host_block.block_events.reserve(_topo.block_automation_limit);
   _host_block.accurate_events.reserve(_topo.accurate_automation_limit);
-  _plugin_block.module_cv.init(group_count, module_counts, module_frame_counts);
-  _plugin_block.block_automation.init(group_count, module_counts, module_param_counts);
-  _plugin_block.module_audio.init(group_count, module_counts, module_channel_counts, module_channel_frame_counts);
-  _plugin_block.accurate_automation.init(group_count, module_counts, module_param_counts, module_param_frame_counts);
+  _state.init(group_count, _dims.module_counts, _dims.module_param_counts);
+  _plugin_block.module_cv.init(group_count, _dims.module_counts, frame_dims.module_frame_counts);
+  _plugin_block.block_automation.init(group_count, _dims.module_counts, _dims.module_param_counts);
+  _plugin_block.module_audio.init(group_count, _dims.module_counts, _dims.module_channel_counts, frame_dims.module_channel_frame_counts);
+  _plugin_block.accurate_automation.init(group_count, _dims.module_counts, _dims.module_param_counts, frame_dims.module_param_frame_counts);
 }
 
 void 
 plugin_engine::process()
 {
-  for(int m = 0; m < _topo.static_topo.modules.size(); m++)
+  int group_count = _topo.module_groups.size();
+  for(int g = 0; g < group_count; g++)
   {
-    auto const& flat_mod = _topo.flat_modules[m].static_topo;
     if (flat_mod->output == module_output::cv)
       for(int i = 0; i < flat_mod->count; i++)
         std::fill(

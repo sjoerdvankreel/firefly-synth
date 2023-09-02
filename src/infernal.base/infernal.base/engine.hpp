@@ -1,7 +1,9 @@
 #pragma once
 #include <infernal.base/topo.hpp>
+#include <infernal.base/desc.hpp>
 #include <infernal.base/jarray.hpp>
 #include <infernal.base/utility.hpp>
+#include <infernal.base/param_value.hpp>
 #include <infernal.base/block_host.hpp>
 #include <infernal.base/block_common.hpp>
 #include <infernal.base/block_plugin.hpp>
@@ -13,6 +15,8 @@ class plugin_engine final {
 
   plugin_topo const _topo;
   plugin_desc const _desc;
+  plugin_dims const _dims; 
+
   float _sample_rate = {};
   host_block _host_block = {};
   plugin_block _plugin_block = {};

@@ -62,8 +62,8 @@ plugin_desc(plugin_topo const& plugin)
     }
 }
 
-plugin_dimensions::
-plugin_dimensions(plugin_topo const& plugin)
+plugin_dims::
+plugin_dims(plugin_topo const& plugin)
 {
   for (int g = 0; g < plugin.module_groups.size(); g++)
   {
@@ -74,8 +74,8 @@ plugin_dimensions(plugin_topo const& plugin)
   }
 }
 
-plugin_frame_dimensions::
-plugin_frame_dimensions(plugin_topo const& plugin, int frame_count)
+plugin_frame_dims::
+plugin_frame_dims(plugin_topo const& plugin, int frame_count)
 {
   int group_count = plugin.module_groups.size();
   for (int g = 0; g < group_count; g++)
