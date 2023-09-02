@@ -1,5 +1,5 @@
 #pragma once
-#include <infernal.base/plugin_topo.hpp>
+#include <infernal.base/topo.hpp>
 
 namespace infernal::synth {
 

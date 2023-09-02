@@ -20,11 +20,14 @@ param_value::to_text(param_topo const& topo) const
   switch (topo.format)
   {
   case param_format::step:
-    stream << step;
+    if(topo.list.size() > 0)
+      stream << topo.list[step];
+    else
+      stream << step;
     break;
   case param_format::log:
   case param_format::linear: 
-    stream << std::setprecision(topo.precision) << real;
+    stream << std::setprecision(topo.precision) << real * (topo.percentage ? 1: 100);
     break;
   default:
     assert(false);
@@ -43,12 +46,19 @@ param_value::from_text(param_topo const& topo, std::string const& text, param_va
   {
   case param_format::step:
     value.step = std::numeric_limits<int>::max();
-    stream >> value.step;
+    if(topo.list.size() > 0)
+    {
+      auto iter = std::find(topo.list.begin(), topo.list.end(), text);
+      if(iter != topo.list.end())
+        value.step = iter - topo.list.begin();
+    } else
+      stream >> value.step;
     return topo.min <= value.step && value.step <= topo.max;
   case param_format::log:
   case param_format::linear:
     value.real = std::numeric_limits<float>::max();
     stream >> value.real;
+    if(topo.percentage) value.real /= 100;
     return topo.min <= value.real && value.real <= topo.max;
   default:
     assert(false);

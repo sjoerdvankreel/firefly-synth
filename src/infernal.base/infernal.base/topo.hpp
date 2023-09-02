@@ -22,9 +22,10 @@ typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block); 
 
 struct param_topo final {
-  int precision;
   double min;
   double max;
+  int precision;
+  bool percentage;
   std::string id;
   std::string name;
   std::string unit;
@@ -34,6 +35,7 @@ struct param_topo final {
   param_storage storage;
   param_display display;
   param_direction direction;
+  std::vector<std::string> list;
   INF_DECLARE_MOVE_ONLY(param_topo);
 };
 
