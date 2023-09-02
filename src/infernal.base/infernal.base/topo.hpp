@@ -23,16 +23,6 @@ enum class param_display { toggle, list, knob, slider };
 typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block); 
 
-struct plugin_dimensions final {
-  std::vector<int> module_counts;
-  std::vector<std::vector<int>> module_frame_counts;
-  std::vector<std::vector<int>> module_param_counts;
-  std::vector<std::vector<int>> module_channel_counts;
-  std::vector<std::vector<std::vector<int>>> module_param_frame_counts;
-  std::vector<std::vector<std::vector<int>>> module_channel_frame_counts;
-  INF_DECLARE_MOVE_ONLY(plugin_dimensions);
-}; 
-
 struct param_topo final {
   int type;
   int precision;
@@ -88,39 +78,7 @@ struct plugin_topo final {
   int block_automation_limit;
   int accurate_automation_limit;
   std::vector<module_group_topo> module_groups;
-  plugin_dimensions dimensions(int frame_count);
   INF_DECLARE_MOVE_ONLY(plugin_topo);
-};
-
-struct param_mapping final {
-  int module_group = {};
-  int module_index = {};
-  int param_index = {};
-};
-
-struct param_desc final {
-  int id_hash = {};
-  std::string id = {};
-  std::string name = {};
-
-  INF_DECLARE_MOVE_ONLY(param_desc);
-  param_desc(module_group_topo const& module_group, int module_index, param_topo const& param);
-};
-
-struct module_desc final {
-  std::string name = {};
-  std::vector<param_desc> params = {};
-  
-  INF_DECLARE_MOVE_ONLY(module_desc);
-  module_desc(module_group_topo const& module_group, int module_index);
-};
-
-struct plugin_desc final {
-  std::vector<module_desc> modules = {};
-  std::vector<param_mapping> param_mappings = {};
-
-  INF_DECLARE_MOVE_ONLY(plugin_desc);
-  plugin_desc(plugin_topo const& plugin);
 };
 
 inline double 
