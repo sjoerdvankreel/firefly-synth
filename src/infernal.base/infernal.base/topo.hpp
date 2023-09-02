@@ -25,12 +25,13 @@ plugin_topo const& topo, int module_index, plugin_block const& block);
   
 struct param_topo final {
   int type;
+  int precision;
   double min;
   double max;
   std::string id;
   std::string name;
   std::string unit;
-  std::string default_;
+  std::string default_text;
   param_rate rate;
   param_format format;
   param_storage storage;
