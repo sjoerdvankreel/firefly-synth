@@ -68,9 +68,10 @@ plugin_dims(plugin_topo const& plugin)
   for (int g = 0; g < plugin.module_groups.size(); g++)
   {
     auto const& group = plugin.module_groups[g];
+    int audio_channels = group.output == module_output::audio ? plugin.channel_count : 0;
     module_counts.push_back(group.module_count);
+    module_audio_counts.emplace_back(std::vector<int>(group.module_count, audio_channels));
     module_param_counts.emplace_back(std::vector<int>(group.module_count, group.params.size()));
-    module_channel_counts.emplace_back(std::vector<int>(group.module_count, plugin.channel_count));
   }
 }
 
@@ -81,13 +82,20 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
   for (int g = 0; g < group_count; g++)
   {
     auto const& group = plugin.module_groups[g];
-    module_param_frame_counts.emplace_back();
-    module_channel_frame_counts.emplace_back();
-    module_frame_counts.emplace_back(std::vector<int>(group.module_count, frame_count));
-    for (int m = 0; m < group.module_count; m++)
+    int cv_frames = group.output == module_output::cv ? frame_count : 0;
+    int audio_frames = group.output == module_output::audio ? frame_count : 0;
+    module_audio_frame_counts.emplace_back();
+    module_accurate_frame_counts.emplace_back();
+    module_cv_frame_counts.emplace_back(std::vector<int>(group.module_count, cv_frames));
+    for(int m = 0; m < group.module_count; m++)
     {
-      module_param_frame_counts[g].emplace_back(std::vector<int>(group.params.size(), frame_count));
-      module_channel_frame_counts[g].emplace_back(std::vector<int>(plugin.channel_count, frame_count));
+      module_accurate_frame_counts[g].emplace_back();
+      module_audio_frame_counts[g].emplace_back(std::vector<int>(plugin.channel_count, audio_frames));
+      for(int p = 0; p < group.params.size(); p++)
+      {
+        int param_frames = group.params[p].rate == param_rate::accurate ? frame_count : 0;
+        module_accurate_frame_counts[g][m].push_back(param_frames);
+      }
     }
   }
 }

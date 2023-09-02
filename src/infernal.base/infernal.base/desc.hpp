@@ -40,16 +40,16 @@ struct plugin_desc final {
 struct plugin_dims final {
   std::vector<int> module_counts;
   std::vector<std::vector<int>> module_param_counts;
-  std::vector<std::vector<int>> module_channel_counts;
+  std::vector<std::vector<int>> module_audio_counts;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& plugin);
 };
 
 struct plugin_frame_dims final {
-  std::vector<std::vector<int>> module_frame_counts;
-  std::vector<std::vector<std::vector<int>>> module_param_frame_counts;
-  std::vector<std::vector<std::vector<int>>> module_channel_frame_counts;
+  std::vector<std::vector<int>> module_cv_frame_counts;
+  std::vector<std::vector<std::vector<int>>> module_audio_frame_counts;
+  std::vector<std::vector<std::vector<int>>> module_accurate_frame_counts;
 
   INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& plugin, int frame_count);

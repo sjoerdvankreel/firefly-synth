@@ -1,6 +1,7 @@
 #pragma once
 #include <infernal.base/utility.hpp>
 #include <vector>
+#include <cassert>
 
 namespace infernal::base {
 

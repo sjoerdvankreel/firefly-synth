@@ -49,10 +49,10 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _host_block.block_events.reserve(_topo.block_automation_limit);
   _host_block.accurate_events.reserve(_topo.accurate_automation_limit);
   _state.init(group_count, _dims.module_counts, _dims.module_param_counts);
-  _plugin_block.module_cv.init(group_count, _dims.module_counts, frame_dims.module_frame_counts);
   _plugin_block.block_automation.init(group_count, _dims.module_counts, _dims.module_param_counts);
-  _plugin_block.module_audio.init(group_count, _dims.module_counts, _dims.module_channel_counts, frame_dims.module_channel_frame_counts);
-  _plugin_block.accurate_automation.init(group_count, _dims.module_counts, _dims.module_param_counts, frame_dims.module_param_frame_counts);
+  _plugin_block.module_cv.init(group_count, _dims.module_counts, frame_dims.module_cv_frame_counts);
+  _plugin_block.module_audio.init(group_count, _dims.module_counts, _dims.module_audio_counts, frame_dims.module_audio_frame_counts);
+  _plugin_block.accurate_automation.init(group_count, _dims.module_counts, _dims.module_param_counts, frame_dims.module_automation_frame_counts);
 }
 
 void 
