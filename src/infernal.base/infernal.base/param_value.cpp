@@ -20,7 +20,9 @@ param_value::to_text(param_topo const& topo) const
   switch (topo.format)
   {
   case param_format::step:
-    if(topo.list.size() > 0)
+    if(topo.display == param_display::toggle)
+      stream << (step == 0? "Off": "On");
+    else if(topo.display == param_display::list)
       stream << topo.list[step];
     else
       stream << step;
@@ -46,7 +48,14 @@ param_value::from_text(param_topo const& topo, std::string const& text, param_va
   {
   case param_format::step:
     value.step = std::numeric_limits<int>::max();
-    if(topo.list.size() > 0)
+    if (topo.display == param_display::toggle)
+    {
+      if(text == "Off")
+        value.step = 0;
+      else if(text == "On")
+        value.step = 1;
+    }
+    else if(topo.display == param_display::list)
     {
       auto iter = std::find(topo.list.begin(), topo.list.end(), text);
       if(iter != topo.list.end())

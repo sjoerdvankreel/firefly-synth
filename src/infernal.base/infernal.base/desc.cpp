@@ -71,9 +71,14 @@ validate(plugin_desc const& desc)
       assert(param.default_text.size() > 0);
       assert(!param.percentage || param.unit == "%");
       assert(param.list.size() == 0 || param.unit == "");
+      assert(param.unit == "" || param.format != param_format::step);
       assert(param.format == param_format::linear || !param.percentage);
       assert(param.precision == 0 || param.format != param_format::step);
+      assert(param.list.size() == 0 || param.display == param_display::list);
       assert((param.list.size() != 0) == (param.format == param_format::step));
+      assert(param.display != param_display::list || param.format == param_format::step);
+      assert(param.display != param_display::toggle || param.format == param_format::step);
+      assert(param.display != param_display::toggle || (param.min == 0 && param.max == 1));
       INF_ASSERT_EXEC(param_ids.insert(param.id).second);
     }
   }
