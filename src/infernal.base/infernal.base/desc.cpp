@@ -49,6 +49,7 @@ module_desc(module_group_topo const& module_group, int module_index)
 plugin_desc::
 plugin_desc(plugin_topo const& plugin)
 {
+  int plugin_param_index = 0;
   for(int g = 0; g < plugin.module_groups.size(); g++)
   {
     auto const& group = plugin.module_groups[g];
@@ -62,6 +63,7 @@ plugin_desc(plugin_topo const& plugin)
         mapping.param = p;
         mapping.module = m;
         param_mappings.push_back(mapping);
+        id_to_index[modules[m].params[p].id_hash, plugin_param_index++];
       }
     }
   }

@@ -1,6 +1,7 @@
 #include <infernal.base.vst3/component.hpp>
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/vst/ivstprocesscontext.h>
+#include <pluginterfaces/vst/ivstparameterchanges.h>
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -9,7 +10,7 @@ namespace infernal::base::vst3 {
 
 component::
 component(plugin_topo&& topo, FUID const& controller_id) :
-_engine(std::move(topo))
+_engine(std::move(topo)), _desc(_engine.topo())
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
@@ -89,6 +90,44 @@ component::process(ProcessData& data)
           block.common->notes.push_back(note);
         }
 
+  ParamValue value;
+  IParamValueQueue* queue;
+  int frame_index = 0;
+  int block_count = 0;
+  int accurate_count = 0;
+  if(data.inputParameterChanges)
+    for(int i = 0; i < data.inputParameterChanges->getParameterCount(); i++)
+      if (queue = data.inputParameterChanges->getParameterData(i))
+      {
+        int param_index = _desc.id_to_index.at(queue->getParameterId());
+        auto const& mapping = _desc.param_mappings[param_index];
+        auto rate = _engine.topo().module_groups[mapping.group].params[mapping.param].rate;
+        if (rate == param_rate::block)
+        {
+          if(block_count++ < _engine.topo().block_automation_limit)
+            if (queue->getPoint(0, frame_index, value) == kResultTrue)
+            {
+              host_block_event event;
+              event.normalized = value;
+              event.plugin_param_index = param_index;
+              block.block_events.push_back(event);
+            }
+        }
+        else if (rate == param_rate::accurate)
+        {
+          if (accurate_count++ < _engine.topo().accurate_automation_limit)
+            for(int p = 0; p < queue->getPointCount(); p++)
+              if (queue->getPoint(p, frame_index, value) == kResultTrue)
+              {
+                host_accurate_event event;
+                event.normalized = value;
+                event.frame_index = frame_index;
+                event.plugin_param_index = param_index;
+                block.accurate_events.push_back(event);
+              }
+        }
+      }
+  
   return kResultOk;
 }
 
