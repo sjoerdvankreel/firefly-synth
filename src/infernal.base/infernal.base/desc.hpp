@@ -7,8 +7,10 @@
 namespace infernal::base {
 
 struct param_mapping final {
+  int group_type = {};
+  int group_index = {};
+  int param_type = {};
   int param_index = {};
-  int module_group = {};
   int module_index = {};
 };
 

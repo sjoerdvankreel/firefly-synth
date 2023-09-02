@@ -11,10 +11,10 @@ public:
   INF_DECLARE_MOVE_ONLY(jarray3d);
   void clear() { _data.clear(); }
 
-  T* data(int dim0, int dim1) 
-  { return _data[dim0][dim1].data(); }
-  T const* data(int dim0, int dim1) const 
-  { return _data[dim0][dim1].data(); }
+  std::vector<std::vector<T>>& operator[](int i) 
+  { return _data[i]; }
+  std::vector<std::vector<T>> const& operator[](int i) const 
+  { return _data[i]; }
 
   void 
   init(std::vector<std::vector<int>> const& dims)
@@ -39,10 +39,10 @@ public:
   INF_DECLARE_MOVE_ONLY(jarray4d);
   void clear() { _data.clear(); }
 
-  T* data(int dim0, int dim1, int dim2) 
-  { return _data[dim0].data(dim1, dim2); }
-  T const* data(int dim0, int dim1, int dim2) const 
-  { return _data[dim0].data(dim1, dim2); }
+  jarray3d<T>& operator[](int i) 
+  { return _data[i]; }
+  jarray3d<T> const& operator[](int i) const 
+  { return _data[i]; }
 
   void 
   init(std::vector<std::vector<std::vector<int>>> const& dims)

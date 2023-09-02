@@ -48,18 +48,23 @@ plugin_desc::
 plugin_desc(plugin_topo const& plugin)
 {
   for(int g = 0; g < plugin.module_groups.size(); g++)
-    for(int m = 0; m < plugin.module_groups[g].module_count; m++)
+  {
+    auto const& group = plugin.module_groups[g];
+    for(int m = 0; m < group.module_count; m++)
     {
-      modules.emplace_back(module_desc(plugin.module_groups[g], m));
-      for(int p = 0; p < plugin.module_groups[m].params.size(); p++)
+      modules.emplace_back(module_desc(group, m));
+      for(int p = 0; p < group.params.size(); p++)
       {
         param_mapping mapping;
+        mapping.group_index = g;
         mapping.param_index = p;
-        mapping.module_group = g;
         mapping.module_index = m;
+        mapping.group_type = group.type;
+        mapping.param_type = group.params[p].type;
         param_mappings.push_back(mapping);
       }
     }
+  }
 }
 
 plugin_dims::
