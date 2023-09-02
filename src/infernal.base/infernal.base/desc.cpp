@@ -1,4 +1,5 @@
 #include <infernal.base/desc.hpp>
+#include <set>
 
 namespace infernal::base {
 
@@ -28,6 +29,56 @@ module_name(module_group_topo const& module_group, int module_index)
   return result;
 }
 
+static void 
+validate(plugin_desc const& desc)
+{
+  std::set<int> plugin_param_hashes;
+  std::set<std::string> plugin_param_ids;
+  assert(desc.id_to_index.size() == desc.param_mappings.size());
+  for (int m = 0; m < desc.modules.size(); m++)
+  {
+    auto const& module = desc.modules[m];
+    for (int p = 0; p < module.params.size(); m++)
+    {
+      auto const& param = module.params[p];
+      assert(param.id_hash >= 0);
+      assert(param.id.size() > 0);
+      assert(param.name.size() > 0);
+      INF_ASSERT_EXEC(plugin_param_ids.insert(param.id).second);
+      INF_ASSERT_EXEC(plugin_param_hashes.insert(param.id_hash).second);
+    }
+  }
+
+  std::set<std::string> param_ids;
+  std::set<std::string> group_ids;
+  for (int g = 0; g < desc.topo->module_groups.size(); g++)
+  {
+    auto const& group = desc.topo->module_groups[g];
+    assert(group.id.size());
+    assert(group.name.size());
+    assert(group.module_count > 0);
+    assert(group.params.size() > 0);
+    assert(group.callbacks.process);
+    assert(group.param_groups.size() > 0);
+    INF_ASSERT_EXEC(group_ids.insert(group.id).second);
+    for (int p = 0; p < group.params.size(); p++)
+    {
+      auto const& param = group.params[p];
+      assert(param.id.size() > 0);
+      assert(param.precision >= 0);
+      assert(param.name.size() > 0);
+      assert(param.max > param.min);
+      assert(param.default_text.size() > 0);
+      assert(!param.percentage || param.unit == "%");
+      assert(param.list.size() == 0 || param.unit == "");
+      assert(param.format == param_format::linear || !param.percentage);
+      assert(param.precision == 0 || param.format != param_format::step);
+      assert((param.list.size() != 0) == (param.format == param_format::step));
+      INF_ASSERT_EXEC(param_ids.insert(param.id).second);
+    }
+  }
+}
+
 param_desc::
 param_desc(module_group_topo const& module_group, int module_index, param_topo const& param)
 {
@@ -49,6 +100,7 @@ module_desc(module_group_topo const& module_group, int module_index)
 plugin_desc::
 plugin_desc(plugin_topo const& plugin)
 {
+  topo = &plugin;
   int plugin_param_index = 0;
   for(int g = 0; g < plugin.module_groups.size(); g++)
   {
@@ -67,6 +119,7 @@ plugin_desc(plugin_topo const& plugin)
       }
     }
   }
+  validate(*this);
 }
 
 plugin_dims::

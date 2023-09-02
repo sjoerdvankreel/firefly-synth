@@ -31,6 +31,7 @@ struct module_desc final {
 };
 
 struct plugin_desc final {
+  plugin_topo const* topo = {};
   std::map<int, int> id_to_index;
   std::vector<module_desc> modules = {};
   std::vector<param_mapping> param_mappings = {};
