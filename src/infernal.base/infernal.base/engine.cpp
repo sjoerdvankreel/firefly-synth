@@ -49,22 +49,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   std::vector<std::vector<std::vector<int>>> module_channel_frame_counts;
 
   deactivate();
-  int group_count = _topo.module_groups.size();
-  for (int g = 0; g < group_count; g++)
-  {
-    auto const& group = _topo.module_groups[g];
-    module_param_frame_counts.emplace_back();
-    module_channel_frame_counts.emplace_back();
-    module_counts.push_back(group.module_count);
-    module_frame_counts.emplace_back(std::vector<int>(group.module_count, max_frame_count));
-    module_param_counts.emplace_back(std::vector<int>(group.module_count, group.params.size()));
-    module_channel_counts.emplace_back(std::vector<int>(group.module_count, _topo.channel_count));
-    for (int m = 0; m < group.module_count; m++)
-    { 
-      module_param_frame_counts[g].emplace_back(std::vector<int>(group.params.size(), max_frame_count));
-      module_channel_frame_counts[g].emplace_back(std::vector<int>(_topo.channel_count, max_frame_count));
-    }
-  }
+  
 
   _sample_rate = sample_rate;
   _accurate_frames.resize(max_frame_count);

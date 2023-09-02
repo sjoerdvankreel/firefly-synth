@@ -62,4 +62,34 @@ plugin_desc(plugin_topo const& plugin)
     }
 }
 
+plugin_dimensions::
+plugin_dimensions(plugin_topo const& plugin)
+{
+  for (int g = 0; g < plugin.module_groups.size(); g++)
+  {
+    auto const& group = plugin.module_groups[g];
+    module_counts.push_back(group.module_count);
+    module_param_counts.emplace_back(std::vector<int>(group.module_count, group.params.size()));
+    module_channel_counts.emplace_back(std::vector<int>(group.module_count, plugin.channel_count));
+  }
+}
+
+plugin_frame_dimensions::
+plugin_frame_dimensions(plugin_topo const& plugin, int frame_count)
+{
+  int group_count = plugin.module_groups.size();
+  for (int g = 0; g < group_count; g++)
+  {
+    auto const& group = plugin.module_groups[g];
+    module_param_frame_counts.emplace_back();
+    module_channel_frame_counts.emplace_back();
+    module_frame_counts.emplace_back(std::vector<int>(group.module_count, frame_count));
+    for (int m = 0; m < group.module_count; m++)
+    {
+      module_param_frame_counts[g].emplace_back(std::vector<int>(group.params.size(), frame_count));
+      module_channel_frame_counts[g].emplace_back(std::vector<int>(plugin.channel_count, frame_count));
+    }
+  }
+}
+
 }

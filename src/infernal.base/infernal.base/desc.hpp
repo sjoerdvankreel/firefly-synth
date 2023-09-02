@@ -52,7 +52,7 @@ struct plugin_frame_dimensions final {
   std::vector<std::vector<std::vector<int>>> module_channel_frame_counts;
 
   INF_DECLARE_MOVE_ONLY(plugin_frame_dimensions);
-  plugin_frame_dimensions(plugin_dimensions const& dimensions, int frame_count);
+  plugin_frame_dimensions(plugin_topo const& plugin, int frame_count);
 };
 
 }
