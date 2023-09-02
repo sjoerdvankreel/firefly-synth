@@ -97,7 +97,7 @@ component::process(ProcessData& data)
   int accurate_count = 0;
   if(data.inputParameterChanges)
     for(int i = 0; i < data.inputParameterChanges->getParameterCount(); i++)
-      if (queue = data.inputParameterChanges->getParameterData(i))
+      if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
         int param_index = _desc.id_to_index.at(queue->getParameterId());
         auto const& mapping = _desc.param_mappings[param_index];

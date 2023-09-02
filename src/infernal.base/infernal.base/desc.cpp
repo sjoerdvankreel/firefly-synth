@@ -63,7 +63,7 @@ plugin_desc(plugin_topo const& plugin)
         mapping.param = p;
         mapping.module = m;
         param_mappings.push_back(mapping);
-        id_to_index[modules[m].params[p].id_hash, plugin_param_index++];
+        id_to_index[modules[m].params[p].id_hash] = plugin_param_index++;
       }
     }
   }
