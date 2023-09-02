@@ -1,7 +1,6 @@
 #pragma once
 #include <infernal.base/utility.hpp>
 #include <vector>
-#include <cassert>
 
 namespace infernal::base {
 
@@ -17,19 +16,17 @@ public:
   T const* data(int dim0, int dim1) const 
   { return _data[dim0][dim1].data(); }
 
-  void init(
-    int dim0, 
-    std::vector<int> const& dim1, 
-    std::vector<std::vector<int>> const& dim2)
+  void 
+  init(std::vector<std::vector<int>> const& dims)
   {
-    for (int i0 = 0; i0 < dim0; i0++)
+    for (int i = 0; i < dims.size(); i++)
     {
       _data.emplace_back();
-      for (int i1 = 0; i1 < dim1[i0]; i1++)
+      for (int j = 0; j < dims[i].size(); j++)
       {
-        _data[i0].emplace_back();
-        for(int i2 = 0; i2 < dim2[i0][i1]; i2++)
-          _data[i0][i1].emplace_back();
+        _data[j].emplace_back();
+        for(int k = 0; k < dims[i][j]; k++)
+          _data[i][j].emplace_back();
       }
     }
   }
@@ -47,16 +44,13 @@ public:
   T const* data(int dim0, int dim1, int dim2) const 
   { return _data[dim0].data(dim1, dim2); }
 
-  void init(
-    int dim0, 
-    std::vector<int> const& dim1, 
-    std::vector<std::vector<int>> const& dim2,
-    std::vector<std::vector<std::vector<int>>> const& dim3)
+  void 
+  init(std::vector<std::vector<std::vector<int>>> const& dims)
   {
-    for (int i0 = 0; i0 < dim0; i0++)
+    for (int i = 0; i < dims.size(); i++)
     {
       _data.emplace_back();
-      _data[i0].init(dim1[i0], dim2[i0], dim3[i0]);
+      _data[i].init(dims[i]);
     }
   }
 };

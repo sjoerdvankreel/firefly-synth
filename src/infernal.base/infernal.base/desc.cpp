@@ -68,9 +68,6 @@ plugin_dims(plugin_topo const& plugin)
   for (int g = 0; g < plugin.module_groups.size(); g++)
   {
     auto const& group = plugin.module_groups[g];
-    int audio_channels = group.output == module_output::audio ? plugin.channel_count : 0;
-    module_counts.push_back(group.module_count);
-    module_audio_counts.emplace_back(std::vector<int>(group.module_count, audio_channels));
     module_param_counts.emplace_back(std::vector<int>(group.module_count, group.params.size()));
   }
 }

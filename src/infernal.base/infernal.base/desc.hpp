@@ -38,9 +38,7 @@ struct plugin_desc final {
 };
 
 struct plugin_dims final {
-  std::vector<int> module_counts;
   std::vector<std::vector<int>> module_param_counts;
-  std::vector<std::vector<int>> module_audio_counts;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& plugin);

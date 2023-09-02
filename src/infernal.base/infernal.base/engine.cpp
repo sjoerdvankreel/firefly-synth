@@ -45,14 +45,14 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   int group_count = _topo.module_groups.size();
   plugin_frame_dims frame_dims(_topo, max_frame_count);
   _sample_rate = sample_rate;
+  _state.init(_dims.module_param_counts);
   _accurate_frames.resize(max_frame_count);
   _host_block.block_events.reserve(_topo.block_automation_limit);
   _host_block.accurate_events.reserve(_topo.accurate_automation_limit);
-  _state.init(group_count, _dims.module_counts, _dims.module_param_counts);
-  _plugin_block.block_automation.init(group_count, _dims.module_counts, _dims.module_param_counts);
-  _plugin_block.module_cv.init(group_count, _dims.module_counts, frame_dims.module_cv_frame_counts);
-  _plugin_block.module_audio.init(group_count, _dims.module_counts, _dims.module_audio_counts, frame_dims.module_audio_frame_counts);
-  _plugin_block.accurate_automation.init(group_count, _dims.module_counts, _dims.module_param_counts, frame_dims.module_automation_frame_counts);
+  _plugin_block.block_automation.init(_dims.module_param_counts);
+  _plugin_block.module_cv.init(frame_dims.module_cv_frame_counts);
+  _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
+  _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
 }
 
 void 
