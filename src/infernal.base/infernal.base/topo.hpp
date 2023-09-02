@@ -44,27 +44,27 @@ struct param_topo final {
   bool from_text(std::string const& text, param_value& value) const;
 };
 
-struct group_topo final {
+struct param_group_topo final {
   std::string name;
   std::vector<int> param_types;
-  INF_DECLARE_MOVE_ONLY(group_topo);
+  INF_DECLARE_MOVE_ONLY(param_group_topo);
 };
 
 struct module_callbacks final {
   module_process process;
 };
 
-struct module_topo final {
+struct module_group_topo final {
   int type;
-  int count;
+  int module_count;
   std::string id;
   std::string name;
   module_scope scope;
   module_output output;
   module_callbacks callbacks;
-  std::vector<group_topo> groups;
   std::vector<param_topo> params;
-  INF_DECLARE_MOVE_ONLY(module_topo);
+  std::vector<param_group_topo> param_groups;
+  INF_DECLARE_MOVE_ONLY(module_group_topo);
 };
 
 struct plugin_topo final {
@@ -75,40 +75,39 @@ struct plugin_topo final {
   int channel_count;
   int block_automation_limit;
   int accurate_automation_limit;
-  std::vector<module_topo> modules;
+  std::vector<module_group_topo> module_groups;
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
 struct param_mapping final {
-  int module_type;
-  int module_index;
-  int param_type;
+  int module_group = {};
+  int module_index = {};
+  int param_index = {};
 };
 
 struct param_desc final {
-  int id_hash;
-  std::string id;
-  std::string name;
+  int id_hash = {};
+  std::string id = {};
+  std::string name = {};
 
   INF_DECLARE_MOVE_ONLY(param_desc);
-  param_desc(module_topo const& module_topo, int module_index, param_topo const& param_topo);
+  param_desc(module_group_topo const& module_group, int module_index, param_topo const& param);
 };
 
 struct module_desc final {
-  std::string name;
-  std::vector<param_desc> params;
+  std::string name = {};
+  std::vector<param_desc> params = {};
   
   INF_DECLARE_MOVE_ONLY(module_desc);
-  module_desc(module_topo const& topo, int module_index);
+  module_desc(module_group_topo const& module_group, int module_index);
 };
 
 struct plugin_desc final {
-  std::vector<param_desc> params = {};
   std::vector<module_desc> modules = {};
-  std::vector<param_mapping> mapping = {};
+  std::vector<param_mapping> param_mappings = {};
 
   INF_DECLARE_MOVE_ONLY(plugin_desc);
-  plugin_desc(plugin_topo const& topo);
+  plugin_desc(plugin_topo const& plugin);
 };
 
 }

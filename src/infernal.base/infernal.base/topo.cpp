@@ -1,70 +1,65 @@
-#include <infernal.base/plugin_topo.hpp>
-#include <utility>
+#include <infernal.base/topo.hpp>
 
 namespace infernal::base {
 
 static int
-hash(char const* text)
+hash(std::string const& text)
 {
   std::uint32_t h = 0;
   int const multiplier = 33;
-  auto utext = reinterpret_cast<std::uint8_t const*>(text);
+  auto utext = reinterpret_cast<std::uint8_t const*>(text.c_str());
   for (auto const* p = utext; *p != '\0'; p++) h = multiplier * h + *p;
   return std::abs(static_cast<int>(h + (h >> 5)));
 }
 
-
-
-param_value default_value() const;
-double to_normalized(para_value value) const;
-std::string to_text(param_value value) const;
-param_value from_normalized(double normalized) const;
-bool from_text(std::string const& text, param_value& value) const;
-
-runtime_plugin_topo::
-runtime_plugin_topo(plugin_topo&& static_topo_):
-static_topo(std::move(static_topo_))
+static std::string
+module_id(module_group_topo const& module_group, int module_index)
 {
-  for (int m = 0; m < static_topo.modules.size(); m++)
-  {
-    auto& flat = flat_modules[m];
-    auto const& mod = static_topo.modules[m];
-    flat.static_topo = &mod;
-    for (int s = 0; s < mod.submodules.size(); s++)
-    {
-      auto const& submod = mod.submodules[s];
-      for (int p = 0; p < submod.params.size(); p++)
-        flat.params.push_back(&submod.params[p]);
-    }
-    flat_modules.emplace_back(std::move(flat));
+  std::string result = module_group.id;
+  result += "-" + module_index;
+  return result;
+}
 
-    for(int i = 0; i < mod.count; i++)
-    {
-      runtime_module_topo rt_module;
-      rt_module.static_topo = &mod;
-      rt_module.name = mod.name;
-      if(mod.count > 1) rt_module.name += " " + std::to_string(i);
+static std::string
+module_name(module_group_topo const& module_group, int module_index)
+{
+  std::string result = module_group.name;
+  if(module_group.module_count > 1) result += std::to_string(module_index + 1);
+  return result;
+}
 
-      int mod_param_index = 0;
-      for(int s = 0; s < mod.submodules.size(); s++)
+param_desc::
+param_desc(module_group_topo const& module_group, int module_index, param_topo const& param)
+{
+  id = module_id(module_group, module_index) + "-" + param.id;
+  name = module_name(module_group, module_index) + " " + param.name;
+  id_hash = hash(id.c_str());
+}
+
+module_desc::
+module_desc(module_group_topo const& module_group, int module_index)
+{
+  name = module_name(module_group, module_index);
+  for(int i = 0; i < module_group.params.size(); i++)
+    params.emplace_back(param_desc(module_group, module_index, module_group.params[i]));
+}
+
+plugin_desc::
+plugin_desc(plugin_topo const& plugin)
+{
+  for(int g = 0; g < plugin.module_groups.size(); g++)
+    for(int m = 0; m < plugin.module_groups[g].module_count; m++)
+    {
+      modules.emplace_back(module_desc(plugin.module_groups[g], m));
+      for(int p = 0; p < plugin.module_groups[m].params.size(); p++)
       {
-        auto const& submod = mod.submodules[s];
-        for (int p = 0; p < submod.params.size(); p++)
-        {
-          runtime_param_topo rtp;
-          auto const& param = submod.params[p];
-          rtp.static_topo = &param;
-          rtp.module_index = i;
-          rtp.id_hash = hash(rtp.id.c_str());
-          rtp.module_param_index = mod_param_index++;
-          rtp.name = rt_module.name + " " + param.name;
-          rtp.id = mod.id + std::to_string(i) + param.id;
-          rt_module.params.emplace_back(std::move(rtp));
-        }
+        param_mapping mapping;
+        mapping.param_index = p;
+        mapping.module_group = g;
+        mapping.module_index = m;
+        param_mappings.push_back(mapping);
       }
-      runtime_modules.emplace_back(std::move(rt_module));
     }
-  }
 }
 
 }

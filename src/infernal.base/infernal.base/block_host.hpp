@@ -8,13 +8,13 @@ struct common_block;
 
 struct host_block_event final {
   double normalized;
-  int runtime_param_index;
+  int plugin_param_index;
 };
 
 struct host_accurate_event final {
   double normalized;
   int frame_index;
-  int runtime_param_index;
+  int plugin_param_index;
 };
 
 struct host_block final {
