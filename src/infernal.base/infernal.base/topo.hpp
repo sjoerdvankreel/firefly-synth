@@ -1,9 +1,7 @@
 #pragma once
 #include <infernal.base/utility.hpp>
-#include <infernal.base/param_value.hpp>
 #include <vector>
 #include <string>
-#include <cassert>
 
 namespace infernal::base {
 
@@ -38,12 +36,6 @@ struct param_topo final {
   param_display display;
   param_direction direction;
   INF_DECLARE_MOVE_ONLY(param_topo);
-
-  param_value default_value() const;
-  std::string to_text(param_value value) const;
-  double to_normalized(param_value value) const;
-  param_value from_normalized(double normalized) const;
-  bool from_text(std::string const& text, param_value& value) const;
 };
 
 struct param_group_topo final {
@@ -81,29 +73,4 @@ struct plugin_topo final {
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
-inline double 
-param_topo::to_normalized(param_value value) const
-{
-  switch (format)
-  {
-  case param_format::log:
-  case param_format::linear: return (value.real - min) / (max - min);
-  case param_format::step: return (value.step - min) / (max - min);
-  default: assert(false); return 0;
-  }
 }
-
-inline param_value 
-param_topo::from_normalized(double normalized) const
-{
-  switch (format)
-  {
-  case param_format::log:
-  case param_format::linear: return param_value::from_real(min + normalized * (max - min));
-  case param_format::step: return param_value::from_step(min + normalized * (max - min));
-  default: assert(false); return {};
-  }
-}
-
-}
-#pragma once
