@@ -1,98 +1,17 @@
-#include <infernal.base/plugin_engine.hpp>
-#include <limits>
-#include <utility>
+#include <infernal.base/engine.hpp>
 
 namespace infernal::base {
-
-plugin_engine::
-plugin_engine(plugin_topo&& topo) : _topo(std::move(topo))
-{
-  _host_block.common.notes.reserve(_topo.static_topo.note_limit);
-  _host_block.block_automation.reserve(_topo.static_topo.block_automation_limit);
-  _host_block.accurate_automation.reserve(_topo.static_topo.accurate_automation_limit);
-  _accurate_automation_frames.resize(_topo.runtime_params.size());
-
-  _plugin_block.host = &_host_block.common;
-  auto const& static_mods = _topo.static_topo.modules;
-  int mod_type_count = static_mods.size();
-  _state = new param_value**[mod_type_count]();
-  _plugin_block.module_cv = new float**[mod_type_count]();
-  _plugin_block.module_audio = new float***[mod_type_count]();
-  _plugin_block.accurate_automation = new float*** [mod_type_count]();
-  _plugin_block.block_automation = new param_value**[mod_type_count]();
-
-  for (int m = 0; m < static_mods.size(); m++)
-  {
-    int mod_count = static_mods[m].count;
-    _state[m] = new param_value*[mod_count]();
-    _plugin_block.module_cv[m] = new float*[mod_count]();
-    _plugin_block.module_audio[m] = new float**[mod_count]();
-    _plugin_block.accurate_automation[m] = new float** [mod_count]();
-    _plugin_block.block_automation[m] = new param_value*[mod_count]();
-
-    for (int i = 0; i < static_mods[m].count; i++)
-    {
-      auto const& flat_mod = _topo.flat_modules[m];
-      int mod_param_count = flat_mod.params.size();
-      _state[m][i] = new param_value[mod_param_count];
-      for(int p = 0; p < mod_param_count; p++)
-        _state[m][i][flat_mod.params[p]->type] = flat_mod.params[p]->default_value();
-
-      if(static_mods[m].output == module_output::audio)
-        _plugin_block.module_audio[m][i] = new float* [_topo.static_topo.channel_count]();
-      _plugin_block.accurate_automation[m][i] = new float* [mod_param_count]();
-      _plugin_block.block_automation[m][i] = new param_value[mod_param_count]();
-    }
-  }
-}
-
-plugin_engine::
-~plugin_engine()
-{
-  for (int m = 0; m < _topo.flat_modules.size(); m++)
-  {
-    auto const& flat_mod_topo = _topo.flat_modules[m].static_topo;
-    for (int i = 0; i < flat_mod_topo->count; i++)
-    {
-      delete _state[m][i];
-      if (flat_mod_topo->output == module_output::audio)
-        delete _plugin_block.module_audio[m][i];
-      delete _plugin_block.block_automation[m][i];
-      delete _plugin_block.accurate_automation[m][i];
-    }
-
-    delete _state[m];
-    delete _plugin_block.module_cv[m];
-    delete _plugin_block.module_audio[m];
-    delete _plugin_block.block_automation[m];
-    delete _plugin_block.accurate_automation[m];
-  }
-
-  delete _state;
-  delete _plugin_block.module_cv;
-  delete _plugin_block.module_audio;
-  delete _plugin_block.block_automation;
-  delete _plugin_block.accurate_automation;
-}
 
 void
 plugin_engine::activate(int sample_rate, int max_frame_count)
 {
   _sample_rate = sample_rate;
-  for (int m = 0; m < _topo.flat_modules.size(); m++)
-  {
-    auto const& flat_mod = _topo.flat_modules[m].static_topo;
-    for (int i = 0; i < flat_mod->count; i++)
-    {
-      if (flat_mod->output == module_output::cv)
-        _plugin_block.module_cv[m][i] = new float[max_frame_count]();
-      else if (flat_mod->output == module_output::audio)
-        for(int c = 0; c < _topo.static_topo.channel_count; c++)
-          _plugin_block.module_audio[m][i][c] = new float[max_frame_count]();
-      for(int p = 0; p < _topo.flat_modules[m].params.size(); p++)
-        _plugin_block.accurate_automation[m][i][p] = new float[max_frame_count]();
-    }
-  }
+  _accurate_frames.resize(max_frame_count);
+  //_state.init()
+  host_block _host_block = {};
+  plugin_block _plugin_block = {};
+  array3d<param_value> _state = {};
+  std::vector<int> _accurate_frames = {};
 }
 
 void

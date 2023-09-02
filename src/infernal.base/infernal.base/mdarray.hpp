@@ -5,101 +5,58 @@
 namespace infernal::base {
 
 template <class T>
-class array2d {
-  std::vector<T*> _dim0 = {};
-  std::vector<T> _dim1 = {};
-public:
-  INF_DECLARE_MOVE_ONLY(array2d);
-
-  T* const* operator[](int i) 
-  { return _dim0[i]; }
-  T const* const* operator[](int i) const
-  { return _dim0[i]; }
-
-  void clear()
-  {
-    _dim0.clear();
-    _dim1.clear();
-  }
-
-  void init(int dim0, int dim1) 
-  {
-    clear();
-    _dim0.resize(dim0);
-    _dim1.resize(dim0 * dim1);
-    for(int i0 = 0; i0 < dim0; i0++)
-      _dim0[i0] = _dim1.data() + i0 * dim1;
-  }
-};
-
-template <class T>
 class array3d {
-  std::vector<T**> _dim0 = {};
-  std::vector<T*> _dim1 = {};
-  std::vector<T> _dim2 = {};
+  std::vector<std::vector<std::vector<T>>> _data;
 public:
   INF_DECLARE_MOVE_ONLY(array3d);
+  void clear() { _data.clear(); }
 
-  T* const* const* operator[](int i) 
-  { return _dim0[i]; }
-  T const* const* const* operator[](int i) const 
-  { return _dim0[i]; }
+  T* data(int dim0, int dim1) 
+  { return _data[dim0][dim1].data(); }
+  T const* data(int dim0, int dim1) const 
+  { return _data[dim0][dim1].data(); }
 
-  void clear() 
+  void init(
+    int dim0, 
+    std::vector<int> const& dim1, 
+    std::vector<std::vector<int>> const& dim2)
   {
-    _dim0.clear();
-    _dim1.clear();
-    _dim2.clear();
-  }
-
-  void init(int dim0, int dim1, int dim2) 
-  {
-    clear();
-    _dim0.resize(dim0);
-    _dim1.resize(dim0 * dim1);
-    _dim2.resize(dim0 * dim1 * dim2);
-    for (int i1 = 0; i1 < dim0 * dim1; i1++)
-      _dim1[i1] = _dim2.data() + i1 * dim2;
-    for(int i0 = 0; i0 < dim0; i0++)
-      _dim0[i0] = _dim1.data() + i0 * dim1;
+    for (int i0 = 0; i0 < dim0; i0++)
+    {
+      _data.emplace_back();
+      for (int i1 = 0; i1 < dim1[i0]; i1++)
+      {
+        _data[i0].emplace_back();
+        for(int i2 = 0; i2 < dim2[i0][i1]; i2++)
+          _data[i0][i1].emplace_back();
+      }
+    }
   }
 };
 
 template <class T>
 class array4d {
-  std::vector<T***> _dim0 = {};
-  std::vector<T**> _dim1 = {};
-  std::vector<T*> _dim2 = {};
-  std::vector<T> _dim3 = {};
+  std::vector<array3d<T>> _data;
 public:
   INF_DECLARE_MOVE_ONLY(array4d);
+  void clear() { _data.clear(); }
 
-  T* const* const* const* operator[](int i) 
-  { return _dim0[i]; }
-  T const* const* const* const* operator[](int i) const 
-  { return _dim0[i]; }
+  T* data(int dim0, int dim1, int dim2) 
+  { return _data[dim0].data(dim1, dim2); }
+  T const* data(int dim0, int dim1, int dim2) const 
+  { return _data[dim0].data(dim1, dim2); }
 
-  void clear() 
+  void init(
+    int dim0, 
+    std::vector<int> const& dim1, 
+    std::vector<std::vector<int>> const& dim2,
+    std::vector<std::vector<std::vector<int>>> const& dim3)
   {
-    _dim0.clear();
-    _dim1.clear();
-    _dim2.clear();
-    _dim3.clear();
-  }
-
-  void init(int dim0, int dim1, int dim2, int dim3) 
-  {
-    clear();
-    _dim0.resize(dim0);
-    _dim1.resize(dim0 * dim1);
-    _dim2.resize(dim0 * dim1 * dim2);
-    _dim3.resize(dim0 * dim1 * dim2 * dim3);
-    for(int i2 = 0; i2 < dim0 * dim1 * dim2; i2++)
-      _dim2[i2] = _dim3.data() + i2 * dim3;
-    for (int i1 = 0; i1 < dim0 * dim1; i1++)
-      _dim1[i1] = _dim2.data() + i1 * dim2;
-    for(int i0 = 0; i0 < dim0; i0++)
-      _dim0[i0] = _dim1.data() + i0 * dim1;
+    for (int i0 = 0; i0 < dim0; i0++)
+    {
+      _data.emplace_back();
+      _data[i0].init(dim1[i0], dim2[i0], dim3[i0]);
+    }
   }
 };
 
