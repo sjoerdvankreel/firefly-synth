@@ -1,4 +1,6 @@
 #include <infernal.base.vst3/component.hpp>
+#include <pluginterfaces/vst/ivstevents.h>
+#include <pluginterfaces/vst/ivstprocesscontext.h>
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -53,6 +55,40 @@ component::setBusArrangements(
 tresult PLUGIN_API
 component::process(ProcessData& data)
 {
+  host_block& block = _engine.prepare();
+  block.common->frame_count = data.numSamples;
+  block.common->audio_output = data.outputs[0].channelBuffers32;
+  block.common->bpm = data.processContext ? data.processContext->tempo : 0;
+  block.common->audio_input = _engine.topo().is_fx? data.inputs[0].channelBuffers32: nullptr;
+  block.common->stream_time = data.processContext ? data.processContext->projectTimeSamples : 0;
+
+  Event vst_event;
+  if (data.inputEvents)
+    for (int i = 0; i < data.inputEvents->getEventCount() && i < _engine.topo().note_limit; i++)
+      if (data.inputEvents->getEvent(i, vst_event))
+        if (vst_event.type == Event::kNoteOnEvent) 
+        {
+          note_event note;
+          note.type = note_event_type::on;
+          note.frame_index = vst_event.sampleOffset;
+          note.velocity = vst_event.noteOn.velocity;
+          note.id.id = vst_event.noteOn.noteId;
+          note.id.key = vst_event.noteOn.pitch;
+          note.id.channel = vst_event.noteOn.channel;
+          block.common->notes.push_back(note);
+        }
+        else if (vst_event.type == Event::kNoteOffEvent)
+        {
+          note_event note;
+          note.type = note_event_type::off;
+          note.frame_index = vst_event.sampleOffset;
+          note.velocity = vst_event.noteOff.velocity;
+          note.id.id = vst_event.noteOff.noteId;
+          note.id.key = vst_event.noteOff.pitch;
+          note.id.channel = vst_event.noteOff.channel;
+          block.common->notes.push_back(note);
+        }
+
   return kResultOk;
 }
 
