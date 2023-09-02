@@ -18,10 +18,7 @@ _topo(std::move(topo)), _desc(_topo), _dims(_topo)
     auto const& group = _topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
       for(int p = 0; p < group.params.size(); p++)
-      { 
-        auto const& param = group.params[p];
-        _state[group.type][m][param.type] = param_value::default_value(param);
-      }
+        _state[g][m][p] = param_value::default_value(group.params[p]);
   }
 }
 
@@ -72,17 +69,15 @@ plugin_engine::process()
     for(int m = 0; m < group.module_count; m++)
       for(int p = 0; p < group.params.size(); p++)
       {
-        auto const& param = group.params[p];
         if(group.params[p].rate == param_rate::block)
-          _plugin_block.block_automation[group.type][m][param.type] 
-            = _state[group.type][m][param.type];
+          _plugin_block.block_automation[g][m][p] = _state[g][m][p];
         else
         {
-          auto& automation = _plugin_block.accurate_automation[group.type][m][param.type];
+          auto& automation = _plugin_block.accurate_automation[g][m][p];
           std::fill(
             automation.begin(), 
             automation.begin() + _host_block.common->frame_count, 
-            param_value::from_real(_state[group.type][m][param.type].real).to_normalized(param));
+            param_value::from_real(_state[g][m][p].real).to_normalized(group.params[p]));
         }
       }
   }
@@ -91,11 +86,11 @@ plugin_engine::process()
   {
     auto const& event = _host_block.block_events[e];
     auto const& mapping = _desc.param_mappings[event.plugin_param_index];
-    auto const& group = _topo.module_groups[mapping.group_index];
-    auto const& param = group.params[mapping.param_index];
+    auto const& group = _topo.module_groups[mapping.group];
+    auto const& param = group.params[mapping.param];
     param_value denormalized = param_value::from_normalized(param, event.normalized);
-    _state[mapping.group_type][mapping.module_index][mapping.param_type] = denormalized;
-    _plugin_block.block_automation[mapping.group_type][mapping.module_index][mapping.param_type] = denormalized;
+    _state[mapping.group][mapping.module][mapping.param] = denormalized;
+    _plugin_block.block_automation[mapping.group][mapping.module][mapping.param] = denormalized;
   }
 
   std::fill(_accurate_frames.begin(), _accurate_frames.end(), 0);
@@ -103,24 +98,21 @@ plugin_engine::process()
   {
     auto const& event = _host_block.accurate_events[e];
     auto const& mapping = _desc.param_mappings[event.plugin_param_index];
-    auto const& group = _topo.module_groups[mapping.group_index];
-    auto const& param = group.params[mapping.param_index];
-    auto& curve = _plugin_block.accurate_automation[mapping.group_type][mapping.module_index][mapping.param_type];
+    auto& curve = _plugin_block.accurate_automation[mapping.group][mapping.module][mapping.param];
     int prev_frame = _accurate_frames[event.plugin_param_index];
     float frame_count = event.frame_index - prev_frame;
-    float start = curve[prev_frame];
-    float range = event.normalized - start;
+    float range = event.normalized - curve[prev_frame];
     for(int f = prev_frame; f < event.frame_index; f++)
-      curve[f] = start + (f - prev_frame) / frame_count * range;
-    _state[mapping.group_type][mapping.module_index][mapping.param_type].real = event.normalized;
+      curve[f] = curve[prev_frame] + (f - prev_frame) / frame_count * range;
+    _state[mapping.group][mapping.module][mapping.param].real = event.normalized;
     _accurate_frames[event.plugin_param_index] = event.frame_index;
   }
 
-  for(int m = 0; m < _topo.static_topo.modules.size(); m++)
+  for(int g = 0; g < _topo.module_groups.size(); g++)
   {
-    auto const& static_mod = _topo.static_topo.modules[m];
-    for(int i = 0; i < static_mod.count; i++)
-      static_mod.callbacks.process(_topo.static_topo, i, _plugin_block);
+    auto const& group = _topo.module_groups[g];
+    for(int m = 0; m < group.module_count; m++)
+      group.callbacks.process(_topo, m, _plugin_block);
   }
 }
 

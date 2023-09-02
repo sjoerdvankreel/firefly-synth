@@ -56,9 +56,9 @@ plugin_desc(plugin_topo const& plugin)
       for(int p = 0; p < group.params.size(); p++)
       {
         param_mapping mapping;
-        mapping.group_index = g;
-        mapping.param_index = p;
-        mapping.module_index = m;
+        mapping.group = g;
+        mapping.param = p;
+        mapping.module = m;
         param_mappings.push_back(mapping);
       }
     }
