@@ -3,6 +3,7 @@
 #include <infernal.base/param_value.hpp>
 #include <vector>
 #include <string>
+#include <cassert>
 
 namespace infernal::base {
 
@@ -109,6 +110,30 @@ struct plugin_desc final {
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(plugin_topo const& plugin);
 };
+
+inline double 
+param_topo::to_normalized(param_value value) const
+{
+  switch (format)
+  {
+  case param_format::log:
+  case param_format::linear: return (value.real - min) / (max - min);
+  case param_format::step: return (value.step - min) / (max - min);
+  default: assert(false); return 0;
+  }
+}
+
+inline param_value 
+param_topo::from_normalized(double normalized) const
+{
+  switch (format)
+  {
+  case param_format::log:
+  case param_format::linear: return param_value::from_real(min + normalized * (max - min));
+  case param_format::step: return param_value::from_step(min + normalized * (max - min));
+  default: assert(false); return {};
+  }
+}
 
 }
 #pragma once
