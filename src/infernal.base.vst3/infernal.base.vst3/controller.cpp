@@ -1,4 +1,5 @@
 #include <infernal.base/desc.hpp>
+#include <infernal.base/param_value.hpp>
 #include <infernal.base.vst3/controller.hpp>
 
 using namespace Steinberg;
@@ -36,23 +37,23 @@ controller::initialize(FUnknown* context)
     {
       ParameterInfo param_info;
       auto const& param = module.params[p];
+      param_info.id = param.id_hash;
+      param_info.unitId = unit_info.id;
       to_vst_string(param_info.units, 128, param.topo->unit.c_str());
       to_vst_string(param_info.title, 128, param.topo->name.c_str());
       to_vst_string(param_info.shortTitle, 128, param.topo->name.c_str());
-      param_info.id = param.id_hash;
-      param_info.unitId = unit_info.id;
-      param_info.defaultNormalizedValue = normalize(*param.topo, param.topo->default_value());
+      param_info.defaultNormalizedValue = param_value::default_value(*param.topo).to_normalized(*param.topo);
 
       param_info.flags = ParameterInfo::kNoFlags;
-      if(static_param->direction == param_direction::input) 
+      if(param.topo->direction == param_direction::input) 
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;
-      if(static_param->display == param_display::list)
+      if(param.topo->display == param_display::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
-      if (static_param->format == param_format::step)
-        param_info.stepCount = static_param->max - static_param->min + 1;
+      if (param.topo->format == param_format::step)
+        param_info.stepCount = param.topo->max - param.topo->min + 1;
 
       parameters.addParameter(param_info);
     }
