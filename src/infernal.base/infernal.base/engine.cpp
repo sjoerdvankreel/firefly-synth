@@ -135,7 +135,7 @@ plugin_engine::process()
   {
     auto const& group = _topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
-      group.callbacks.process(_topo, m, _plugin_block);
+      _engines[g][m]->process(_topo, m, _plugin_block);
   }
 }
 

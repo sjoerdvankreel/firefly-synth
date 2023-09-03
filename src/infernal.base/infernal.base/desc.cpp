@@ -56,9 +56,9 @@ validate(plugin_desc const& desc)
     auto const& group = desc.topo->module_groups[g];
     assert(group.id.size());
     assert(group.name.size());
+    assert(group.engine_factory);
     assert(group.module_count > 0);
     assert(group.params.size() > 0);
-    assert(group.callbacks.process);
     assert(group.param_groups.size() > 0);
     INF_ASSERT_EXEC(group_ids.insert(group.id).second);
     for (int p = 0; p < group.params.size(); p++)

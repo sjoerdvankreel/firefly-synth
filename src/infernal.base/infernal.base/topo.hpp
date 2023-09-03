@@ -2,11 +2,11 @@
 #include <infernal.base/utility.hpp>
 #include <vector>
 #include <string>
+#include <memory>
 
 namespace infernal::base {
 
-struct plugin_topo;
-struct plugin_block;
+class module_engine;
 
 enum class plugin_kind { synth, fx };
 enum class module_scope { voice, global };
@@ -17,9 +17,6 @@ enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_format { step, linear, log };
 enum class param_display { toggle, list, knob, hslider, vslider };
-
-typedef void(*module_process)(
-plugin_topo const& topo, int module_index, plugin_block const& block);
 
 struct item_topo final {
   std::string id;
@@ -57,19 +54,15 @@ struct param_group_topo final {
   INF_DECLARE_MOVE_ONLY(param_group_topo);
 };
 
-struct module_callbacks final {
-  module_process process;
-};
-
 struct module_group_topo final {
   int module_count;
   std::string id;
   std::string name;
   module_scope scope;
   module_output output;
-  module_callbacks callbacks;
   std::vector<param_topo> params;
   std::vector<param_group_topo> param_groups;
+  std::unique_ptr<module_engine>(*engine_factory)(int sample_rate, int max_frame_count);
   INF_DECLARE_MOVE_ONLY(module_group_topo);
 };
 
