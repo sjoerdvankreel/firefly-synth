@@ -14,7 +14,7 @@ public module_engine {
   float _phase = 0;
 public:
   virtual void 
-  process(plugin_topo const& topo, int module_index, plugin_block& block) override;
+  process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
 };
 
 static std::vector<item_topo>
@@ -48,7 +48,7 @@ osc_topo()
 }
 
 void
-osc_engine::process(plugin_topo const& topo, int module_index, plugin_block& block)
+osc_engine::process(plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   auto& output = block.module_audio[module_type_osc][module_index];
   auto const& block_automation = block.block_automation[module_type_osc][module_index];

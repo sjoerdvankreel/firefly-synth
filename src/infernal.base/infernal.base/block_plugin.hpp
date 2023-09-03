@@ -17,4 +17,13 @@ struct plugin_block final {
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
+struct module_block final {
+  int module_index;
+  jarray2d<float>* audio_output;
+  std::vector<float>* cv_output;
+  jarray2d<float> const* accurate_automation;
+  std::vector<param_value> const* block_automation;
+  INF_DECLARE_MOVE_ONLY(module_block);
+};
+
 }

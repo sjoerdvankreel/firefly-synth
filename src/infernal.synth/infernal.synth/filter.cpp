@@ -13,7 +13,7 @@ class filter_engine:
 public module_engine {  
 public:
   virtual void 
-  process(plugin_topo const& topo, int module_index, plugin_block& block) override;
+  process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
 };
 
 static std::vector<item_topo>
@@ -44,7 +44,7 @@ filter_topo()
 }
 
 void
-filter_engine::process(plugin_topo const& topo, int module_index, plugin_block& block)
+filter_engine::process(plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   auto host_out = block.host->audio_output;
   auto const& osc_audio = block.module_audio[module_type::module_type_osc];
@@ -52,7 +52,6 @@ filter_engine::process(plugin_topo const& topo, int module_index, plugin_block& 
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < block.host->frame_count; f++)
         host_out[c][f] += osc_audio[o][c][f];
-
 }
 
 }

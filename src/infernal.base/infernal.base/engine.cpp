@@ -142,7 +142,15 @@ plugin_engine::process()
   {
     auto const& group = _topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
-      _engines[g][m]->process(_topo, m, _plugin_block);
+    {
+      module_block module;
+      module.module_index = m;
+      module.cv_output = &_plugin_block.module_cv[g][m];
+      module.audio_output = &_plugin_block.module_audio[g][m];
+      module.block_automation = &_plugin_block.block_automation[g][m];
+      module.accurate_automation = &_plugin_block.accurate_automation[g][m];
+      _engines[g][m]->process(_topo, _plugin_block, module);
+    }
   }
 }
 
