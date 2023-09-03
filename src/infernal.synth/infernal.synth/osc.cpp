@@ -13,8 +13,7 @@ class osc_engine:
 public module_engine {
   float _phase = 0;
 public:
-  virtual void 
-  process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
+  void process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
 };
 
 static std::vector<item_topo>

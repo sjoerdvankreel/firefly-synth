@@ -14,8 +14,7 @@ public module_engine {
   float in[2] = {};
   float out[2] = {};
 public:
-  virtual void 
-  process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
+  void process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
 };
 
 enum filter_group { filter_group_main };
