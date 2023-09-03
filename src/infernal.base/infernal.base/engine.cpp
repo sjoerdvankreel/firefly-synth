@@ -70,6 +70,12 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 void 
 plugin_engine::process()
 {
+  for(int c = 0; c < 2; c++)
+    std::fill(
+      _common_block.audio_output[c], 
+      _common_block.audio_output[c] + _common_block.frame_count, 
+      0.0f);
+
   for(int g = 0; g < _topo.module_groups.size(); g++)
   {
     auto const& group = _topo.module_groups[g];

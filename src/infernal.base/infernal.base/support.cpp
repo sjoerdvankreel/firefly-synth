@@ -95,6 +95,18 @@ make_param_list(
   return result;
 }
 
+param_topo
+make_param_log(
+  std::string const& id, std::string const& name, std::string const& default_, std::string const& unit,
+  double min, double max, double midpoint, int group, param_config const& config)
+{
+  param_topo result(make_param_base(id, name, default_, group, config));
+  result.min = min;
+  result.max = max;
+  result.unit = unit;
+  return result;
+}
+
 param_config param_config_input_toggle() 
 { return { param_rate ::block, param_format::step, param_storage::num, param_display::toggle, param_direction::input }; }
 param_config param_config_input_step_list() 
@@ -113,6 +125,18 @@ param_config param_config_input_list_hslider()
 { return { param_rate::block, param_format::step, param_storage::list, param_display::hslider, param_direction::input }; }
 param_config param_config_input_list_vslider()
 { return { param_rate::block, param_format::step, param_storage::list, param_display::vslider, param_direction::input }; }
+param_config param_config_input_log_block_knob()
+{ return { param_rate::block, param_format::log, param_storage::num, param_display::knob, param_direction::input }; }
+param_config param_config_input_log_block_hslider()
+{ return { param_rate::block, param_format::log, param_storage::num, param_display::hslider, param_direction::input }; }
+param_config param_config_input_log_block_vslider()
+{ return { param_rate::block, param_format::log, param_storage::num, param_display::vslider, param_direction::input }; }
+param_config param_config_input_log_accurate_knob()
+{ return { param_rate::accurate, param_format::log, param_storage::num, param_display::knob, param_direction::input }; }
+param_config param_config_input_log_accurate_hslider()
+{ return { param_rate::accurate, param_format::log, param_storage::num, param_display::hslider, param_direction::input }; }
+param_config param_config_input_log_accurate_vslider()
+{ return { param_rate::accurate, param_format::log, param_storage::num, param_display::vslider, param_direction::input }; }
 param_config param_config_input_linear_block_knob()
 { return { param_rate::block, param_format::linear, param_storage::num, param_display::knob, param_direction::input }; }
 param_config param_config_input_linear_block_hslider()
