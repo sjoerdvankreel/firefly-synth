@@ -2,6 +2,20 @@
 
 namespace infernal::base {
 
+static param_topo
+make_param_base(
+  std::string const& id, std::string const& name, std::string const& default_, 
+  int group, param_config const& config)
+{
+  param_topo result = {};
+  result.id = id;
+  result.name = name;
+  result.group = group;
+  result.config = config;
+  result.default_text = default_;
+  return result;
+}
+
 std::vector<item_topo>
 note_name_items() 
 {
@@ -21,18 +35,6 @@ note_name_items()
   return result;
 };
 
-static param_topo
-make_param_input_base(
-  std::string const& id, std::string const& name, std::string const& default_)
-{
-  param_topo result = {};
-  result.id = id;
-  result.name = name;
-  result.default_text = default_;
-  result.config.direction = param_direction::input;
-  return result;
-}
-
 module_group_topo 
 make_module_group(
   std::string const& id, std::string const& name, 
@@ -48,66 +50,80 @@ make_module_group(
 }
 
 param_topo
-make_param_input_toggle(
-  std::string const& id, std::string const& name, std::string const& default_)
+make_param_toggle(
+  std::string const& id, std::string const& name, std::string const& default_,
+  int group, param_config const& config)
 {
-  param_topo result(make_param_input_base(id, name, default_));
+  param_topo result(make_param_base(id, name, default_, group, config));
   result.min = 0;
   result.max = 1;
-  result.config.rate = param_rate::block;
-  result.config.format = param_format::step;
-  result.config.storage = param_storage::num;
-  result.config.display = param_display::toggle;
   return result;
 }
 
 param_topo
-make_param_input_step(
-  std::string const& id, std::string const& name, 
-  std::string const& default_, int min, int max, param_display display)
-{
-  param_topo result(make_param_input_base(id, name, default_));
-  result.max = max;
-  result.min = min;
-  result.unit = "";
-  result.config.display = display;
-  result.config.rate = param_rate::block;
-  result.config.format = param_format::step;
-  result.config.storage = param_storage::num;
-  return result;
-}
-
-param_topo
-make_param_input_list(
+make_param_pct(
   std::string const& id, std::string const& name, std::string const& default_,
-  std::vector<item_topo> const& items, param_display display)
+  double min, double max, int group, param_config const& config)
 {
-  param_topo result(make_param_input_base(id, name, default_));
-  result.unit = "";
+  param_topo result(make_param_base(id, name, default_, group, config));
+  result.min = min;
+  result.max = max;
+  result.unit = "%";
+  result.percentage = true;
+  return result;
+}
+
+param_topo
+make_param_step(
+  std::string const& id, std::string const& name, std::string const& default_,
+  int min, int max, int group, param_config const& config)
+{
+  param_topo result(make_param_base(id, name, default_, group, config));
+  result.min = min;
+  result.max = max;
+  return result;
+}
+
+param_topo
+make_param_list(
+  std::string const& id, std::string const& name, std::string const& default_,
+  std::vector<item_topo> const& items, int group, param_config const& config)
+{
+  param_topo result(make_param_base(id, name, default_, group, config));
   result.min = 0;
   result.max = items.size() - 1;
-  result.config.display = display;
-  result.config.rate = param_rate::block;
-  result.config.format = param_format::step;
-  result.config.storage = param_storage::list;
   return result;
 }
 
-param_topo
-make_param_input_pct(
-  std::string const& id, std::string const& name, std::string const& default_,
-  double min, double max, param_rate rate, param_display display)
-{
-  param_topo result(make_param_input_base(id, name, default_));
-  result.max = max;
-  result.min = min;
-  result.unit = "%";
-  result.config.rate = rate;
-  result.percentage = true;
-  result.config.display = display;
-  result.config.storage = param_storage::num;
-  result.config.format = param_format::linear;
-  return result;
-}
+param_config param_config_input_toggle() 
+{ return { param_rate ::block, param_format::step, param_storage::num, param_display::toggle, param_direction::input }; }
+param_config param_config_input_step_list() 
+{ return { param_rate::block, param_format::step, param_storage::num, param_display::list, param_direction::input }; }
+param_config param_config_input_step_knob() 
+{ return { param_rate::block, param_format::step, param_storage::num, param_display::knob, param_direction::input }; }
+param_config param_config_input_step_hslider() 
+{ return { param_rate::block, param_format::step, param_storage::num, param_display::hslider, param_direction::input }; }
+param_config param_config_input_step_vslider() 
+{ return { param_rate::block, param_format::step, param_storage::num, param_display::vslider, param_direction::input }; }
+param_config param_config_input_list_list()
+{ return { param_rate::block, param_format::step, param_storage::list, param_display::list, param_direction::input }; }
+param_config param_config_input_list_knob()
+{ return { param_rate::block, param_format::step, param_storage::list, param_display::knob, param_direction::input }; }
+param_config param_config_input_list_hslider()
+{ return { param_rate::block, param_format::step, param_storage::list, param_display::hslider, param_direction::input }; }
+param_config param_config_input_list_vslider()
+{ return { param_rate::block, param_format::step, param_storage::list, param_display::vslider, param_direction::input }; }
+param_config param_config_input_linear_block_knob()
+{ return { param_rate::block, param_format::linear, param_storage::num, param_display::knob, param_direction::input }; }
+param_config param_config_input_linear_block_hslider()
+{ return { param_rate::block, param_format::linear, param_storage::num, param_display::hslider, param_direction::input }; }
+param_config param_config_input_linear_block_vslider()
+{ return { param_rate::block, param_format::linear, param_storage::num, param_display::vslider, param_direction::input }; }
+param_config param_config_input_linear_accurate_knob()
+{ return { param_rate::accurate, param_format::linear, param_storage::num, param_display::knob, param_direction::input }; }
+param_config param_config_input_linear_accurate_hslider()
+{ return { param_rate::accurate, param_format::linear, param_storage::num, param_display::hslider, param_direction::input }; }
+param_config param_config_input_linear_accurate_vslider()
+{ return { param_rate::accurate, param_format::linear, param_storage::num, param_display::vslider, param_direction::input }; }
 
 }

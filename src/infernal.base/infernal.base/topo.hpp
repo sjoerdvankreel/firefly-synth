@@ -16,7 +16,7 @@ enum class param_storage { num, list };
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_format { step, linear, log };
-enum class param_display { toggle, list, knob, slider };
+enum class param_display { toggle, list, knob, hslider, vslider };
 
 typedef void(*module_process)(
 plugin_topo const& topo, int module_index, plugin_block const& block);
@@ -53,6 +53,7 @@ struct param_topo final {
 struct param_group_topo final {
   int type;
   std::string name;
+  param_group_topo(int type, std::string const& name): type(type), name(name) {}
   INF_DECLARE_MOVE_ONLY(param_group_topo);
 };
 

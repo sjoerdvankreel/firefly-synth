@@ -75,10 +75,11 @@ validate(plugin_desc const& desc)
       assert(param.config.format == param_format::linear || !param.percentage);
       assert((param.list.size() == 0) || param.config.format == param_format::step);
       assert((param.list.size() != 0) == (param.config.display == param_display::list));
+      assert(param.config.display != param_display::toggle || (param.min == 0 && param.max == 1));
       assert(param.config.rate == param_rate::block || param.config.format != param_format::step);
       assert(param.config.display != param_display::list || param.config.format == param_format::step);
       assert(param.config.display != param_display::toggle || param.config.format == param_format::step);
-      assert(param.config.display != param_display::toggle || (param.min == 0 && param.max == 1));
+      assert((param.config.direction == param_direction::input) || (param.config.rate == param_rate::block));
       INF_ASSERT_EXEC(param_ids.insert(param.id).second);
     }
   }
