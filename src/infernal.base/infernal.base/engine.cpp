@@ -138,6 +138,7 @@ plugin_engine::process()
     _accurate_frames[event.plugin_param_index] = event.frame_index;
   }
 
+  _plugin_block.sample_rate = _sample_rate;
   for(int g = 0; g < _topo.module_groups.size(); g++)
   {
     auto const& group = _topo.module_groups[g];
