@@ -8,8 +8,8 @@ _topo(std::move(topo)), _desc(_topo), _dims(_topo)
 {
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
-  _engines.init(_dims.module_counts);
   _state.init(_dims.module_param_counts);
+  _module_engines.init(_dims.module_counts);
   _common_block.notes.reserve(_topo.note_limit);
   _plugin_block.block_automation.init(_dims.module_param_counts);
   _host_block.block_events.reserve(_topo.block_automation_limit);
@@ -42,6 +42,7 @@ plugin_engine::deactivate()
 {
   _sample_rate = 0;
   _accurate_frames = {};
+  _mixdown_engine.reset();
   _host_block.block_events.clear();
   _host_block.accurate_events.clear();
   _plugin_block.module_cv = {};
@@ -49,7 +50,7 @@ plugin_engine::deactivate()
   _plugin_block.accurate_automation = {};
   for(int g = 0; g < _topo.module_groups.size(); g++)
     for(int m = 0; m < _topo.module_groups[g].module_count; m++)
-      _engines[g][m].reset();
+      _module_engines[g][m].reset();
 }
 
 void
@@ -59,12 +60,13 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   plugin_frame_dims frame_dims(_topo, max_frame_count);
   _sample_rate = sample_rate;
   _accurate_frames.resize(max_frame_count);
+  _mixdown_engine = _topo.mixdown_factory(sample_rate, max_frame_count);
   _plugin_block.module_cv.init(frame_dims.module_cv_frame_counts);
   _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
   _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
   for (int g = 0; g < _topo.module_groups.size(); g++)
     for (int m = 0; m < _topo.module_groups[g].module_count; m++)
-      _engines[g][m] = _topo.module_groups[g].engine_factory(sample_rate, max_frame_count);
+      _module_engines[g][m] = _topo.module_groups[g].engine_factory(sample_rate, max_frame_count);
 }
 
 void 
@@ -149,9 +151,10 @@ plugin_engine::process()
         _plugin_block.module_audio[g][m], 
         _plugin_block.accurate_automation[g][m],
         _plugin_block.block_automation[g][m]);
-      _engines[g][m]->process(_topo, _plugin_block, module);
+      _module_engines[g][m]->process(_topo, _plugin_block, module);
     }
   }
+  _mixdown_engine->process(_topo, _plugin_block, _host_block.audio_output);
 }
 
 }

@@ -18,7 +18,13 @@ public:
   process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) = 0;
 };
 
-class plugin_engine final {   
+class mixdown_engine abstract {
+public:
+  virtual void
+  process(plugin_topo const& topo, plugin_block const& plugin, float* const* mixdown) = 0;
+};
+
+class plugin_engine final {
   plugin_topo const _topo;
   plugin_desc const _desc;
   plugin_dims const _dims; 
@@ -28,7 +34,8 @@ class plugin_engine final {
   common_block _common_block = {};
   jarray3d<param_value> _state = {};
   std::vector<int> _accurate_frames = {};
-  jarray2d<std::unique_ptr<module_engine>> _engines = {};
+  std::unique_ptr<mixdown_engine> _mixdown_engine = {};
+  jarray2d<std::unique_ptr<module_engine>> _module_engines = {};
 
 public:
   ~plugin_engine();

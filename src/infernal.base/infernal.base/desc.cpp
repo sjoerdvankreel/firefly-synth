@@ -34,6 +34,7 @@ validate(plugin_desc const& desc)
 {
   std::set<int> plugin_param_hashes;
   std::set<std::string> plugin_param_ids;
+  assert(desc.topo->mixdown_factory);
   assert(desc.id_to_index.size() == desc.param_mappings.size());
   for (int m = 0; m < desc.modules.size(); m++)
   {
