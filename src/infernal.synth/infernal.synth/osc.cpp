@@ -69,10 +69,10 @@ osc_engine::process(plugin_topo const& topo, int module_index, plugin_block& blo
     {
     case osc_type_saw: sample = _phase * 2 - 1; break;
     case osc_type_sine: sample = std::sin(_phase * 2.0f * INF_PI); break;
-    default: assert(false); break;
+    default: assert(false); sample = 0; break;
     }
-    output[0][f] = sample * gain_curve[f];
-    output[1][f] = sample * gain_curve[f];
+    output[0][f] = sample * gain_curve[f] * balance(0, bal_curve[f]);
+    output[1][f] = sample * gain_curve[f] * balance(1, bal_curve[f]);
     float freq = note_to_frequency(oct, note, cent_curve[f]);
     _phase += freq / block.sample_rate;
     _phase -= std::floor(_phase);

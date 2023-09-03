@@ -5,6 +5,13 @@
 namespace infernal::base {
 
 inline float
+balance(int channel, float value)
+{
+  float pan = (value + 1) * 0.5f;
+  return channel == 0 ? 1.0f - pan: pan;
+}
+
+inline float
 note_to_frequency(int oct, int note, float cent)
 {
   float pitch = 12 * oct + note + cent;
