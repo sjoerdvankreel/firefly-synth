@@ -28,20 +28,24 @@ struct item_topo final {
   INF_DECLARE_MOVE_ONLY(item_topo);
 };
 
-struct param_topo final {
-  int group;
-  double min;
-  double max;
-  bool percentage;
-  std::string id;
-  std::string name;
-  std::string unit;
-  std::string default_text;
+struct param_config final {
   param_rate rate;
   param_format format;
   param_storage storage;
   param_display display;
   param_direction direction;
+};
+
+struct param_topo final {
+  int group;
+  double min;
+  double max;
+  bool percentage;
+  param_config config;
+  std::string id;
+  std::string name;
+  std::string unit;
+  std::string default_text;
   std::vector<item_topo> list;
   INF_DECLARE_MOVE_ONLY(param_topo);
 };

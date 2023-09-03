@@ -45,14 +45,14 @@ controller::initialize(FUnknown* context)
       param_info.defaultNormalizedValue = param_value::default_value(*param.topo).to_normalized(*param.topo);
 
       param_info.flags = ParameterInfo::kNoFlags;
-      if(param.topo->direction == param_direction::input) 
+      if(param.topo->config.direction == param_direction::input)
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;
-      if(param.topo->display == param_display::list)
+      if(param.topo->config.display == param_display::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
-      if (param.topo->format == param_format::step)
+      if (param.topo->config.format == param_format::step)
         param_info.stepCount = param.topo->max - param.topo->min + 1;
 
       parameters.addParameter(param_info);

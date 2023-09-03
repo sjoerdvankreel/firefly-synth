@@ -29,7 +29,7 @@ make_param_input_base(
   result.id = id;
   result.name = name;
   result.default_text = default_;
-  result.direction = param_direction::input;
+  result.config.direction = param_direction::input;
   return result;
 }
 
@@ -54,10 +54,10 @@ make_param_input_toggle(
   param_topo result(make_param_input_base(id, name, default_));
   result.min = 0;
   result.max = 1;
-  result.rate = param_rate::block;
-  result.format = param_format::step;
-  result.storage = param_storage::num;
-  result.display = param_display::toggle;
+  result.config.rate = param_rate::block;
+  result.config.format = param_format::step;
+  result.config.storage = param_storage::num;
+  result.config.display = param_display::toggle;
   return result;
 }
 
@@ -70,10 +70,10 @@ make_param_input_step(
   result.max = max;
   result.min = min;
   result.unit = "";
-  result.display = display;
-  result.rate = param_rate::block;
-  result.format = param_format::step;
-  result.storage = param_storage::num;
+  result.config.display = display;
+  result.config.rate = param_rate::block;
+  result.config.format = param_format::step;
+  result.config.storage = param_storage::num;
   return result;
 }
 
@@ -86,10 +86,10 @@ make_param_input_list(
   result.unit = "";
   result.min = 0;
   result.max = items.size() - 1;
-  result.display = display;
-  result.rate = param_rate::block;
-  result.format = param_format::step;
-  result.storage = param_storage::list;
+  result.config.display = display;
+  result.config.rate = param_rate::block;
+  result.config.format = param_format::step;
+  result.config.storage = param_storage::list;
   return result;
 }
 
@@ -102,11 +102,11 @@ make_param_input_pct(
   result.max = max;
   result.min = min;
   result.unit = "%";
-  result.rate = rate;
+  result.config.rate = rate;
   result.percentage = true;
-  result.display = display;
-  result.storage = param_storage::num;
-  result.format = param_format::linear;
+  result.config.display = display;
+  result.config.storage = param_storage::num;
+  result.config.format = param_format::linear;
   return result;
 }
 

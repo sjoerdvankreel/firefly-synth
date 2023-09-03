@@ -35,7 +35,7 @@ param_value::from_real(float real)
 inline double
 param_value::to_normalized(param_topo const& topo) const
 {
-  switch (topo.format)
+  switch (topo.config.format)
   {
   case param_format::log:
   case param_format::linear: return (real - topo.min) / (topo.max - topo.min);
@@ -47,7 +47,7 @@ param_value::to_normalized(param_topo const& topo) const
 inline param_value
 param_value::from_normalized(param_topo const& topo, double normalized)
 {
-  switch (topo.format)
+  switch (topo.config.format)
   {
   case param_format::log:
   case param_format::linear: return from_real(topo.min + normalized * (topo.max - topo.min));

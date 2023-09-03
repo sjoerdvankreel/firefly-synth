@@ -101,7 +101,7 @@ component::process(ProcessData& data)
       {
         int param_index = _desc.id_to_index.at(queue->getParameterId());
         auto const& mapping = _desc.param_mappings[param_index];
-        auto rate = _engine.topo().module_groups[mapping.group].params[mapping.param].rate;
+        auto rate = _engine.topo().module_groups[mapping.group].params[mapping.param].config.rate;
         if (rate == param_rate::block)
         {
           if(block_count++ < _engine.topo().block_automation_limit)
