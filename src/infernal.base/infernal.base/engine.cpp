@@ -6,14 +6,18 @@ plugin_engine::
 plugin_engine(plugin_topo&& topo) :
 _topo(std::move(topo)), _desc(_topo), _dims(_topo)
 {
+  int note_limit_guess = _topo.polyphony * 64;
+  int block_events_guess = _desc.param_mappings.size();
+  int accurate_events_guess = _desc.param_mappings.size() * 64;
+
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
   _state.init(_dims.module_param_counts);
   _module_engines.init(_dims.module_counts);
-  _common_block.notes.reserve(_topo.note_limit);
+  _common_block.notes.reserve(note_limit_guess);
+  _host_block.block_events.reserve(block_events_guess);
+  _host_block.accurate_events.reserve(accurate_events_guess);
   _plugin_block.block_automation.init(_dims.module_param_counts);
-  _host_block.block_events.reserve(_topo.block_automation_limit);
-  _host_block.accurate_events.reserve(_topo.accurate_automation_limit);
   for (int g = 0; g < _topo.module_groups.size(); g++)
   {
     auto const& group = _topo.module_groups[g];

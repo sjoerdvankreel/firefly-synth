@@ -9,7 +9,7 @@ namespace infernal::base {
 class module_engine;
 class mixdown_engine;
 
-enum class plugin_kind { synth, fx };
+enum class plugin_type { synth, fx };
 enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
 
@@ -68,12 +68,8 @@ struct module_group_topo final {
 };
 
 struct plugin_topo final {
-  bool is_fx;
-  plugin_kind kind;
   int polyphony;
-  int note_limit;
-  int block_automation_limit;
-  int accurate_automation_limit;
+  plugin_type type;
   std::vector<module_group_topo> module_groups;
   std::unique_ptr<mixdown_engine>(*mixdown_factory)(int sample_rate, int max_frame_count);
   INF_DECLARE_MOVE_ONLY(plugin_topo);

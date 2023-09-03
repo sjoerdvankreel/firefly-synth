@@ -8,6 +8,8 @@ plugin_topo
 synth_topo()
 {
   plugin_topo result;
+  result.polyphony = 32;
+  result.type = plugin_type::synth;
   return result;
 }
 
