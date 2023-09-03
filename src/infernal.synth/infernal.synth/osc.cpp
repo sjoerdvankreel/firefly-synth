@@ -27,7 +27,7 @@ osc_topo()
   module_group_topo result(make_module_group("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, module_scope::voice, module_output::audio));
   result.param_groups.emplace_back(param_group_topo(osc_group_main, "Main"));
   result.param_groups.emplace_back(param_group_topo(osc_group_pitch, "Pitch"));
-  result.engine_factory = [](int sample_rate, int max_frame_count) { return std::make_unique<osc_engine>(); };
+  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
   result.params.emplace_back(make_param_toggle("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", "Off", osc_group_main, config_input_toggle()));
   result.params.emplace_back(make_param_pct("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", "100", 0, 1, osc_group_main, config_input_linear_accurate_knob()));
   result.params.emplace_back(make_param_pct("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", "0", -1, 1, osc_group_pitch, config_input_linear_accurate_knob()));

@@ -8,6 +8,7 @@ _topo(std::move(topo)), _desc(_topo), _dims(_topo)
 {
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
+  _engines.init(_dims.module_counts);
   _state.init(_dims.module_param_counts);
   _common_block.notes.reserve(_topo.note_limit);
   _plugin_block.block_automation.init(_dims.module_param_counts);
@@ -46,6 +47,9 @@ plugin_engine::deactivate()
   _plugin_block.module_cv = {};
   _plugin_block.module_audio = {};
   _plugin_block.accurate_automation = {};
+  for(int g = 0; g < _topo.module_groups.size(); g++)
+    for(int m = 0; m < _topo.module_groups[g].module_count; m++)
+      _engines[g][m].reset();
 }
 
 void
@@ -58,6 +62,9 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _plugin_block.module_cv.init(frame_dims.module_cv_frame_counts);
   _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
   _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
+  for (int g = 0; g < _topo.module_groups.size(); g++)
+    for (int m = 0; m < _topo.module_groups[g].module_count; m++)
+      _engines[g][m] = _topo.module_groups[g].engine_factory(sample_rate, max_frame_count);
 }
 
 void 

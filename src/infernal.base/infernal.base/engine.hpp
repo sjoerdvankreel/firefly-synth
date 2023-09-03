@@ -36,7 +36,6 @@ public:
   ~plugin_engine();
   INF_DECLARE_MOVE_ONLY(plugin_engine);
   explicit plugin_engine(plugin_topo&& topo);
-
   plugin_topo const& topo() const { return _topo; }
   plugin_desc const& desc() const { return _desc; }
 

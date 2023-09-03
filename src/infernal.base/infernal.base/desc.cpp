@@ -134,6 +134,7 @@ plugin_dims(plugin_topo const& plugin)
   for (int g = 0; g < plugin.module_groups.size(); g++)
   {
     auto const& group = plugin.module_groups[g];
+    module_counts.push_back(group.module_count);
     module_param_counts.emplace_back(std::vector<int>(group.module_count, group.params.size()));
   }
 }
