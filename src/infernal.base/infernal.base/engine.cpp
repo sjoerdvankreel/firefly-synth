@@ -30,8 +30,8 @@ plugin_engine::prepare()
   _host_block.common->frame_count = 0;
   _host_block.common->stream_time = 0;
   _host_block.common->audio_input = nullptr;
-  _host_block.common->audio_output = nullptr;
   _host_block.common->notes.clear();
+  _host_block.audio_output = nullptr;
   _host_block.block_events.clear();
   _host_block.accurate_events.clear();
   return _host_block;
@@ -72,8 +72,8 @@ plugin_engine::process()
 {
   for(int c = 0; c < 2; c++)
     std::fill(
-      _common_block.audio_output[c], 
-      _common_block.audio_output[c] + _common_block.frame_count, 
+      _host_block.audio_output[c], 
+      _host_block.audio_output[c] + _common_block.frame_count,
       0.0f);
 
   for(int g = 0; g < _topo.module_groups.size(); g++)

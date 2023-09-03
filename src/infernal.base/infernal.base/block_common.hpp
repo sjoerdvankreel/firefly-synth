@@ -24,9 +24,8 @@ struct common_block final {
   float bpm;
   int frame_count;
   std::int64_t stream_time;
-  float* const* audio_output;
-  float const* const* audio_input;
   std::vector<note_event> notes;
+  float const* const* audio_input;
   INF_DECLARE_MOVE_ONLY(common_block);
 };
 
