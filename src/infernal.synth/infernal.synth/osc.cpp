@@ -13,7 +13,10 @@ class osc_engine:
 public module_engine {
   float _phase = 0;
 public:
-  void process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
+  void process(
+    plugin_topo const& topo, 
+    plugin_block const& plugin,
+    module_block& module) override;
 };
 
 static std::vector<item_topo>
@@ -47,7 +50,8 @@ osc_topo()
 }
 
 void
-osc_engine::process(plugin_topo const& topo, plugin_block const& plugin, module_block& module)
+osc_engine::process(
+  plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   int on = module.block_automation[osc_param_on].step;
   int oct = module.block_automation[osc_param_oct].step;

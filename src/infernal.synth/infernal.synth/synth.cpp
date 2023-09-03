@@ -9,7 +9,10 @@ class synth_mixdown:
 public mixdown_engine
 {
 public:
-  void process(plugin_topo const& topo, plugin_block const& plugin, float* const* mixdown) override;
+  void process(
+    plugin_topo const& topo, 
+    plugin_block const& plugin, 
+    float* const* mixdown) override;
 };
 
 plugin_topo

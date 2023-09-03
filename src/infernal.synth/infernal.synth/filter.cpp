@@ -14,7 +14,10 @@ public module_engine {
   float in[2] = {};
   float out[2] = {};
 public:
-  void process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) override;
+  void process(
+    plugin_topo const& topo, 
+    plugin_block const& plugin, 
+    module_block& module) override;
 };
 
 enum filter_group { filter_group_main };
@@ -32,7 +35,8 @@ filter_topo()
 }
 
 void
-filter_engine::process(plugin_topo const& topo, plugin_block const& plugin, module_block& module)
+filter_engine::process(
+  plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   int on = module.block_automation[filter_param_on].step; 
   auto const& osc_audio = plugin.module_audio[module_type::module_type_osc];
