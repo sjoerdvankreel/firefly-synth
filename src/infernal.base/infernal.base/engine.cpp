@@ -77,19 +77,13 @@ plugin_engine::process()
       if(group.output == module_output::cv)
       {
         auto& curve = _plugin_block.module_cv[g][m];
-        std::fill(
-          curve.begin(), 
-          curve.begin() + _common_block.frame_count, 
-          std::numeric_limits<float>::quiet_NaN());
+        std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
       }
       else if (group.output == module_output::audio)
       {
         auto& audio = _plugin_block.module_audio[g][m];
         for(int c = 0; c < 2; c++)
-          std::fill(
-            audio[c].begin(),
-            audio[c].begin() + _common_block.frame_count,
-            std::numeric_limits<float>::quiet_NaN());
+          std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
       }
   }
 
