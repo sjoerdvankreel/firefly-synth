@@ -24,8 +24,8 @@ plugin_topo const& topo, int module_index, plugin_block const& block);
 struct item_topo final {
   std::string id;
   std::string name;
+  item_topo(std::string const& id, std::string const& name): id(id), name(name) {}
   INF_DECLARE_MOVE_ONLY(item_topo);
-  item_topo(std::string id, std::string name) : id(id), name(name) {}
 };
 
 struct param_topo final {

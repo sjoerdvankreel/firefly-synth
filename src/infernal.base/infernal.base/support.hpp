@@ -4,8 +4,8 @@
 
 namespace infernal::base {
 
-extern std::vector<item_topo> const
-note_name_topos;
+std::vector<item_topo>
+note_name_items();
 
 module_group_topo 
 make_module_group(

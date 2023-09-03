@@ -57,9 +57,9 @@ param_value::from_text(param_topo const& topo, std::string const& text, param_va
     }
     else if(topo.display == param_display::list)
     {
-      auto iter = std::find(topo.list.begin(), topo.list.end(), text);
-      if(iter != topo.list.end())
-        value.step = iter - topo.list.begin();
+      for(int i = 0; i < topo.list.size(); i++)
+        if(topo.list[i].name == text)
+          value.step = i;
     } else
       stream >> value.step;
     return topo.min <= value.step && value.step <= topo.max;

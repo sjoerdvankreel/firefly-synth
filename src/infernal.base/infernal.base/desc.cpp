@@ -69,11 +69,12 @@ validate(plugin_desc const& desc)
       assert(param.max > param.min);
       assert(param.default_text.size() > 0);
       assert(!param.percentage || param.unit == "%");
+      assert(param.list.size() == 0 || param.min == 0);
       assert(param.list.size() == 0 || param.unit == "");
       assert(param.unit == "" || param.format != param_format::step);
       assert(param.format == param_format::linear || !param.percentage);
-      assert(param.list.size() == 0 || param.display == param_display::list);
-      assert((param.list.size() != 0) == (param.format == param_format::step));
+      assert((param.list.size() == 0) || param.format == param_format::step);
+      assert((param.list.size() != 0) == (param.display == param_display::list));
       assert(param.rate == param_rate::block || param.format != param_format::step);
       assert(param.display != param_display::list || param.format == param_format::step);
       assert(param.display != param_display::toggle || param.format == param_format::step);
