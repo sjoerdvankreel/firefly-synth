@@ -9,12 +9,10 @@ namespace infernal::synth {
 
 class osc_engine: 
 public module_engine {
+  float _phase = 0;
 public:
   virtual void 
-  process(
-    plugin_topo const& topo, 
-    int module_index, 
-    plugin_block const& block) override;
+  process(plugin_topo const& topo, int module_index, plugin_block const& block) override;
 };
 
 enum osc_type { osc_type_saw, osc_type_sine };
@@ -35,6 +33,12 @@ osc_topo()
   result.params.emplace_back(make_param_list("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", "C", note_name_items(), osc_group_pitch, config_input_list_knob()));
   result.params.emplace_back(make_param_pct("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", "0", -1, 1, osc_group_pitch, config_input_linear_accurate_knob()));
   return result;
+}
+
+void
+osc_engine::process(plugin_topo const& topo, int module_index, plugin_block const& block)
+{
+
 }
 
 }
