@@ -65,7 +65,6 @@ validate(plugin_desc const& desc)
     {
       auto const& param = group.params[p];
       assert(param.id.size() > 0);
-      assert(param.precision >= 0);
       assert(param.name.size() > 0);
       assert(param.max > param.min);
       assert(param.default_text.size() > 0);
@@ -73,7 +72,6 @@ validate(plugin_desc const& desc)
       assert(param.list.size() == 0 || param.unit == "");
       assert(param.unit == "" || param.format != param_format::step);
       assert(param.format == param_format::linear || !param.percentage);
-      assert(param.precision == 0 || param.format != param_format::step);
       assert(param.list.size() == 0 || param.display == param_display::list);
       assert((param.list.size() != 0) == (param.format == param_format::step));
       assert(param.rate == param_rate::block || param.format != param_format::step);

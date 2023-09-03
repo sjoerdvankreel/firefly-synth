@@ -12,7 +12,7 @@ enum class plugin_kind { synth, fx };
 enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
 
-enum class param_storage { num, text };
+enum class param_storage { num, list };
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_format { step, linear, log };
@@ -24,7 +24,6 @@ plugin_topo const& topo, int module_index, plugin_block const& block);
 struct item_topo final {
   std::string id;
   std::string name;
-  INF_DECLARE_MOVE_ONLY(item_topo);
 };
 
 struct param_topo final {

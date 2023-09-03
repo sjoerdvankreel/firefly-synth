@@ -2,6 +2,35 @@
 
 namespace infernal::base {
 
+std::vector<item_topo> const
+note_name_topos = {
+ { "{BAE982FB-29FA-4E6A-B8E9-88DED2B71F97}", "C" },
+ { "{F6B7C5C1-2F00-48C3-BB2B-95F6D26C4371}", "C#" },
+ { "{80E1A69D-F1D6-4D34-A7AC-762014D3D547}", "D" },
+ { "{10D8A2F6-AECE-4089-A76F-3187756489BC}", "D#" },
+ { "{98AA08E3-F29E-41F9-AB9A-7FD9CB4C2408}", "E" },
+ { "{3B362152-0D3D-4669-91E2-0C375859C4EC}", "F" },
+ { "{F063ACFF-B00F-496C-8B29-1CA6E85B3A37}", "F#" },
+ { "{1910726E-A4A6-4430-85E4-3355340A310D}", "G" },
+ { "{9136132A-5C63-43FE-8218-D9B17C53F82E}", "G#" },
+ { "{C4E5CD80-527D-4AA8-A1CD-AAC3A5165AB5}", "A" },
+ { "{AC865BAA-5AF9-4C62-883F-140756310CC6}", "A#" },
+ { "{79231D69-2FF6-4A49-B30A-54281EA696D9}", "B" },
+};
+
+static param_topo
+make_param_base(
+  std::string const& id, std::string const& name,
+  std::string const& default_, param_direction direction)
+{
+  param_topo result = {};
+  result.id = id;
+  result.name = name;
+  result.direction = direction;
+  result.default_text = default_;
+  return result;
+}
+
 module_group_topo 
 make_module_group(
   std::string const& id, std::string const& name, 
@@ -21,13 +50,9 @@ make_param_toggle(
   std::string const& id, std::string const& name,
   std::string const& default_, param_direction direction)
 {
-  param_topo result = {};
+  param_topo result(make_param_base(id, name, default_, direction));
   result.min = 0;
   result.max = 1;
-  result.id = id;
-  result.name = name;
-  result.direction = direction;
-  result.default_text = default_;
   result.rate = param_rate::block;
   result.format = param_format::step;
   result.storage = param_storage::num;
@@ -38,20 +63,32 @@ make_param_toggle(
 param_topo
 make_param_step(
   std::string const& id, std::string const& name, std::string const& default_,
-  double min, double max, param_direction direction, param_display display)
+  int min, int max, param_direction direction, param_display display)
 {
-  param_topo result = {};
-  result.id = id;
+  param_topo result(make_param_base(id, name, default_, direction));
   result.max = max;
   result.min = min;
   result.unit = "";
-  result.name = name;
   result.display = display;
-  result.direction = direction;
-  result.default_text = default_;
   result.rate = param_rate::block;
   result.format = param_format::step;
   result.storage = param_storage::num;
+  return result;
+}
+
+param_topo
+make_param_list(
+  std::string const& id, std::string const& name, std::string const& default_,
+  std::vector<item_topo> const& items, param_direction direction, param_display display)
+{
+  param_topo result(make_param_base(id, name, default_, direction));
+  result.unit = "";
+  result.min = 0;
+  result.max = items.size() - 1;
+  result.display = display;
+  result.rate = param_rate::block;
+  result.format = param_format::step;
+  result.storage = param_storage::list;
   return result;
 }
 
@@ -60,17 +97,13 @@ make_param_pct(
   std::string const& id, std::string const& name, std::string const& default_,
   double min, double max, param_direction direction, param_rate rate, param_display display)
 {
-  param_topo result = {};
-  result.id = id;
+  param_topo result(make_param_base(id, name, default_, direction));
   result.max = max;
   result.min = min;
   result.unit = "%";
-  result.name = name;
   result.rate = rate;
   result.percentage = true;
   result.display = display;
-  result.direction = direction;
-  result.default_text = default_;
   result.storage = param_storage::num;
   result.format = param_format::linear;
   return result;

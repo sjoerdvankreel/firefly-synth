@@ -23,13 +23,13 @@ param_value::to_text(param_topo const& topo) const
     if(topo.display == param_display::toggle)
       stream << (step == 0? "Off": "On");
     else if(topo.display == param_display::list)
-      stream << topo.list[step];
+      stream << topo.list[step].name;
     else
       stream << step;
     break;
   case param_format::log:
   case param_format::linear: 
-    stream << std::setprecision(topo.precision) << real * (topo.percentage ? 1: 100);
+    stream << std::setprecision(3) << real * (topo.percentage ? 1: 100);
     break;
   default:
     assert(false);
