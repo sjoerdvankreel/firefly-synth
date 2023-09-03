@@ -1,7 +1,9 @@
+#include <infernal.base/dsp.hpp>
 #include <infernal.base/topo.hpp>
 #include <infernal.base/support.hpp>
 #include <infernal.base/engine.hpp>
 #include <infernal.synth/synth.hpp>
+#include <cmath>
 
 using namespace infernal::base;
 
@@ -12,7 +14,7 @@ public module_engine {
   float _phase = 0;
 public:
   virtual void 
-  process(plugin_topo const& topo, int module_index, plugin_block const& block) override;
+  process(plugin_topo const& topo, int module_index, plugin_block& block) override;
 };
 
 static std::vector<item_topo>
@@ -46,21 +48,34 @@ osc_topo()
 }
 
 void
-osc_engine::process(plugin_topo const& topo, int module_index, plugin_block const& block)
+osc_engine::process(plugin_topo const& topo, int module_index, plugin_block& block)
 {
+  auto& output = block.module_audio[module_type_osc][module_index];
   auto const& block_automation = block.block_automation[module_type_osc][module_index];
   auto const& accurate_automation = block.accurate_automation[module_type_osc][module_index];
   int on = block_automation[osc_param_on].step;
   int oct = block_automation[osc_param_oct].step;
   int note = block_automation[osc_param_note].step;
   int type = block_automation[osc_param_type].step;
-  auto const& bal = accurate_automation[osc_param_bal];
-  auto const& cent = accurate_automation[osc_param_cent];
-  auto const& gain = accurate_automation[osc_param_gain];
+  auto const& bal_curve = accurate_automation[osc_param_bal];
+  auto const& cent_curve = accurate_automation[osc_param_cent];
+  auto const& gain_curve = accurate_automation[osc_param_gain];
 
+  if (!on) return;
   for (int f = 0; f < block.host->frame_count; f++)
   {
-    
+    float sample;
+    switch (type)
+    {
+    case osc_type_saw: sample = _phase * 2 - 1; break;
+    case osc_type_sine: sample = std::sin(_phase * 2.0f * INF_PI); break;
+    default: assert(false); break;
+    }
+    output[0][f] = sample * gain_curve[f];
+    output[1][f] = sample * gain_curve[f];
+    float freq = note_to_frequency(oct, note, cent_curve[f]);
+    _phase += freq / block.sample_rate;
+    _phase -= std::floor(_phase);
   }
 }
 

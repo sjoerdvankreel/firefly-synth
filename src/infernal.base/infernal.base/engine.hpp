@@ -15,7 +15,7 @@ namespace infernal::base {
 class module_engine abstract {
 public:
   virtual void 
-  process(plugin_topo const& topo, int module_index, plugin_block const& block) = 0;
+  process(plugin_topo const& topo, int module_index, plugin_block& block) = 0;
 };
 
 class plugin_engine final {   
