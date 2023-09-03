@@ -22,15 +22,14 @@ note_name_items()
 };
 
 static param_topo
-make_param_base(
-  std::string const& id, std::string const& name,
-  std::string const& default_, param_direction direction)
+make_param_input_base(
+  std::string const& id, std::string const& name, std::string const& default_)
 {
   param_topo result = {};
   result.id = id;
   result.name = name;
-  result.direction = direction;
   result.default_text = default_;
+  result.direction = param_direction::input;
   return result;
 }
 
@@ -49,11 +48,10 @@ make_module_group(
 }
 
 param_topo
-make_param_toggle(
-  std::string const& id, std::string const& name,
-  std::string const& default_, param_direction direction)
+make_param_input_toggle(
+  std::string const& id, std::string const& name, std::string const& default_)
 {
-  param_topo result(make_param_base(id, name, default_, direction));
+  param_topo result(make_param_input_base(id, name, default_));
   result.min = 0;
   result.max = 1;
   result.rate = param_rate::block;
@@ -64,11 +62,11 @@ make_param_toggle(
 }
 
 param_topo
-make_param_step(
-  std::string const& id, std::string const& name, std::string const& default_,
-  int min, int max, param_direction direction, param_display display)
+make_param_input_step(
+  std::string const& id, std::string const& name, 
+  std::string const& default_, int min, int max, param_display display)
 {
-  param_topo result(make_param_base(id, name, default_, direction));
+  param_topo result(make_param_input_base(id, name, default_));
   result.max = max;
   result.min = min;
   result.unit = "";
@@ -80,11 +78,11 @@ make_param_step(
 }
 
 param_topo
-make_param_list(
+make_param_input_list(
   std::string const& id, std::string const& name, std::string const& default_,
-  std::vector<item_topo> const& items, param_direction direction, param_display display)
+  std::vector<item_topo> const& items, param_display display)
 {
-  param_topo result(make_param_base(id, name, default_, direction));
+  param_topo result(make_param_input_base(id, name, default_));
   result.unit = "";
   result.min = 0;
   result.max = items.size() - 1;
@@ -96,11 +94,11 @@ make_param_list(
 }
 
 param_topo
-make_param_pct(
+make_param_input_pct(
   std::string const& id, std::string const& name, std::string const& default_,
-  double min, double max, param_direction direction, param_rate rate, param_display display)
+  double min, double max, param_rate rate, param_display display)
 {
-  param_topo result(make_param_base(id, name, default_, direction));
+  param_topo result(make_param_input_base(id, name, default_));
   result.max = max;
   result.min = min;
   result.unit = "%";

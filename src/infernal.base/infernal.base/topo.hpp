@@ -29,6 +29,7 @@ struct item_topo final {
 };
 
 struct param_topo final {
+  int group;
   double min;
   double max;
   bool percentage;
@@ -46,8 +47,8 @@ struct param_topo final {
 };
 
 struct param_group_topo final {
+  int type;
   std::string name;
-  std::vector<int> param_types;
   INF_DECLARE_MOVE_ONLY(param_group_topo);
 };
 

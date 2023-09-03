@@ -13,20 +13,19 @@ make_module_group(
   int module_count, module_scope scope, module_output output);
 
 param_topo 
-make_param_toggle(
-  std::string const& id, std::string const& name,
-  std::string const& default_, param_direction direction);
+make_param_input_toggle(
+  std::string const& id, std::string const& name, std::string const& default_);
 param_topo
-make_param_step(
+make_param_input_step(
   std::string const& id, std::string const& name, std::string const& default_,
-  int min, int max, param_direction direction, param_display display);
+  int min, int max, param_display display);
 param_topo
-make_param_list(
+make_param_input_list(
   std::string const& id, std::string const& name, std::string const& default_,
-  std::vector<item_topo> const& items, param_direction direction, param_display display);
+  std::vector<item_topo> const& items, param_display display);
 param_topo
-make_param_pct(
+make_param_input_pct(
   std::string const& id, std::string const& name, std::string const& default_,
-  double min, double max, param_direction direction, param_rate rate, param_display display);
+  double min, double max, param_rate rate, param_display display);
 
 }
