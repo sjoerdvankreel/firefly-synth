@@ -46,12 +46,11 @@ filter_topo()
 void
 filter_engine::process(plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
-  auto host_out = block.host->audio_output;
-  auto const& osc_audio = block.module_audio[module_type::module_type_osc];
+  auto const& osc_audio = plugin.module_audio[module_type::module_type_osc];
   for(int o = 0; o < topo.module_groups[module_type_osc].module_count; o++)
     for(int c = 0; c < 2; c++)
-      for(int f = 0; f < block.host->frame_count; f++)
-        host_out[c][f] += osc_audio[o][c][f];
+      for(int f = 0; f < plugin.host->frame_count; f++)
+        module.audio_output[c][f] += osc_audio[o][c][f];
 }
 
 }
