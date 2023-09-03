@@ -1,4 +1,4 @@
-validate topo
+gcc build
+voice manager
 clap threadpool
-activate must call deactivate
 try out some airwindows stuff

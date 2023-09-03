@@ -50,19 +50,16 @@ osc_topo()
 void
 osc_engine::process(plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
-  auto& output = block.module_audio[module_type_osc][module_index];
-  auto const& block_automation = block.block_automation[module_type_osc][module_index];
-  auto const& accurate_automation = block.accurate_automation[module_type_osc][module_index];
-  int on = block_automation[osc_param_on].step;
-  int oct = block_automation[osc_param_oct].step;
-  int note = block_automation[osc_param_note].step;
-  int type = block_automation[osc_param_type].step;
-  auto const& bal_curve = accurate_automation[osc_param_bal];
-  auto const& cent_curve = accurate_automation[osc_param_cent];
-  auto const& gain_curve = accurate_automation[osc_param_gain];
+  int on = (*module.block_automation)[osc_param_on].step;
+  int oct = (*module.block_automation)[osc_param_oct].step;
+  int note = (*module.block_automation)[osc_param_note].step;
+  int type = (*module.block_automation)[osc_param_type].step;
+  auto const& bal_curve = (*module.accurate_automation)[osc_param_bal];
+  auto const& cent_curve = (*module.accurate_automation)[osc_param_cent];
+  auto const& gain_curve = (*module.accurate_automation)[osc_param_gain];
 
   if (!on) return;
-  for (int f = 0; f < block.host->frame_count; f++)
+  for (int f = 0; f < plugin.host->frame_count; f++)
   {
     float sample;
     switch (type)
@@ -71,8 +68,8 @@ osc_engine::process(plugin_topo const& topo, plugin_block const& plugin, module_
     case osc_type_sine: sample = std::sin(_phase * 2.0f * INF_PI); break;
     default: assert(false); sample = 0; break;
     }
-    output[0][f] = sample * gain_curve[f] * balance(0, bal_curve[f]);
-    output[1][f] = sample * gain_curve[f] * balance(1, bal_curve[f]);
+    module.audio_output[0][f] = sample * gain_curve[f] * balance(0, bal_curve[f]);
+    module.audio_output[1][f] = sample * gain_curve[f] * balance(1, bal_curve[f]);
     float freq = note_to_frequency(oct, note, cent_curve[f]);
     _phase += freq / block.sample_rate;
     _phase -= std::floor(_phase);

@@ -18,12 +18,16 @@ struct plugin_block final {
 };
 
 struct module_block final {
-  int module_index;
-  jarray2d<float>* audio_output;
-  std::vector<float>* cv_output;
-  jarray2d<float> const* accurate_automation;
-  std::vector<param_value> const* block_automation;
+  std::vector<float>& cv_output;
+  jarray2d<float>& audio_output;
+  jarray2d<float> const& accurate_automation;
+  std::vector<param_value> const& block_automation;
   INF_DECLARE_MOVE_ONLY(module_block);
+  module_block(
+    std::vector<float>& cv_output, jarray2d<float>& audio_output,
+    jarray2d<float> const& accurate_automation, std::vector<param_value> const& block_automation):
+    cv_output(cv_output), audio_output(audio_output),
+    accurate_automation(accurate_automation), block_automation(block_automation) {}
 };
 
 }
