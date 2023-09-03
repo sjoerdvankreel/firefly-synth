@@ -38,7 +38,10 @@ osc_topo()
 void
 osc_engine::process(plugin_topo const& topo, int module_index, plugin_block const& block)
 {
-
+  for (int f = 0; f < block.host->frame_count; f++)
+  {
+    
+  }
 }
 
 }
