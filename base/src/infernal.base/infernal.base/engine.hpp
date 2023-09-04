@@ -38,7 +38,6 @@ class plugin_engine final {
   jarray2d<std::unique_ptr<module_engine>> _module_engines = {};
 
 public:
-  ~plugin_engine();
   INF_DECLARE_MOVE_ONLY(plugin_engine);
   explicit plugin_engine(plugin_topo&& topo);
   plugin_topo const& topo() const { return _topo; }
