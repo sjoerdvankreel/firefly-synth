@@ -52,7 +52,9 @@ controller::initialize(FUnknown* context)
       if(param.topo->config.display == param_display::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
-      if (param.topo->config.format == param_format::step)
+      if(param.topo->config.display == param_display::toggle)
+        param_info.stepCount = 1;
+      else if (param.topo->config.format == param_format::step)
         param_info.stepCount = param.topo->max - param.topo->min + 1;
 
       parameters.addParameter(param_info);
