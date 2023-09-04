@@ -13,3 +13,6 @@
 [submodule "lib/JUCE"]
 	path = lib/JUCE
 	url = https://github.com/sjoerdvankreel/JUCE.git
+[submodule "lib/vst3/cmake"]
+	path = lib/vst3/cmake
+	url = https://github.com/sjoerdvankreel/vst3_cmake.git
