@@ -20,7 +20,7 @@ public:
     {
       _data.emplace_back();
       for (int j = 0; j < dims[i]; j++)
-        _data[j].emplace_back();
+        _data[i].emplace_back();
     }
   }
 };
