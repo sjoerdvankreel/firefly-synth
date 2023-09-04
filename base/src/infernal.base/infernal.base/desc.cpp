@@ -116,6 +116,7 @@ plugin_desc(plugin_topo const& plugin)
     for(int m = 0; m < group.module_count; m++)
     {
       modules.emplace_back(module_desc(group, m));
+      auto& module = modules[modules.size() - 1];
       for(int p = 0; p < group.params.size(); p++)
       {
         param_mapping mapping;
@@ -123,8 +124,8 @@ plugin_desc(plugin_topo const& plugin)
         mapping.param = p;
         mapping.module = m;
         param_mappings.push_back(mapping);
-        id_to_index[modules[m].params[p].id_hash] = plugin_param_index++;
-        INF_ASSERT_EXEC(param_ids.insert(modules[m].params[p].id).second);
+        id_to_index[module.params[p].id_hash] = plugin_param_index++;
+        INF_ASSERT_EXEC(param_ids.insert(module.params[p].id).second);
       }
     }
   }
