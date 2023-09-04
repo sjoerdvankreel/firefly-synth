@@ -17,7 +17,7 @@ static std::string
 module_id(module_group_topo const& module_group, int module_index)
 {
   std::string result = module_group.id;
-  result += "-" + module_index;
+  result += "-" + std::to_string(module_index);
   return result;
 }
 
@@ -109,6 +109,7 @@ plugin_desc(plugin_topo const& plugin)
 {
   topo = &plugin;
   int plugin_param_index = 0;
+  std::set<std::string> param_ids;
   for(int g = 0; g < plugin.module_groups.size(); g++)
   {
     auto const& group = plugin.module_groups[g];
@@ -123,6 +124,7 @@ plugin_desc(plugin_topo const& plugin)
         mapping.module = m;
         param_mappings.push_back(mapping);
         id_to_index[modules[m].params[p].id_hash] = plugin_param_index++;
+        INF_ASSERT_EXEC(param_ids.insert(modules[m].params[p].id).second);
       }
     }
   }
