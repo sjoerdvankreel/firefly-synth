@@ -11,8 +11,8 @@ namespace infernal::synth {
 
 class filter_engine: 
 public module_engine {  
-  float in[2] = {};
-  float out[2] = {};
+  float _in[2] = { 0, 0 };
+  float _out[2] = { 0, 0 };
 public:
   void process(
     plugin_topo const& topo, 
@@ -39,15 +39,16 @@ filter_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   int on = module.block_automation[filter_param_on].step; 
+  if (!on) return;
+
   auto const& osc_audio = plugin.module_audio[module_type::module_type_osc];
-  auto const& freq_curve = module.accurate_automation[filter_param_freq];
   for(int o = 0; o < topo.module_groups[module_type_osc].module_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
         module.audio_output[c][f] += osc_audio[o][c][f];
   
-  if(!on) return;
   float w = 2 * plugin.sample_rate;
+  auto const& freq_curve = module.accurate_automation[filter_param_freq];
   for (int f = 0; f < plugin.host->frame_count; f++)
   {
     float angle = freq_curve[f] * 2 * INF_PI;

@@ -54,6 +54,8 @@ osc_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   int on = module.block_automation[osc_param_on].step;
+  if (!on) return;
+
   int oct = module.block_automation[osc_param_oct].step;
   int note = module.block_automation[osc_param_note].step;
   int type = module.block_automation[osc_param_type].step;
@@ -61,7 +63,6 @@ osc_engine::process(
   auto const& cent_curve = module.accurate_automation[osc_param_cent];
   auto const& gain_curve = module.accurate_automation[osc_param_gain];
 
-  if (!on) return;
   for (int f = 0; f < plugin.host->frame_count; f++)
   {
     float sample;
@@ -73,8 +74,7 @@ osc_engine::process(
     }
     module.audio_output[0][f] = sample * gain_curve[f] * balance(0, bal_curve[f]);
     module.audio_output[1][f] = sample * gain_curve[f] * balance(1, bal_curve[f]);
-    float freq = note_to_frequency(oct, note, cent_curve[f]);
-    _phase += freq / plugin.sample_rate;
+    _phase += note_to_frequency(oct, note, cent_curve[f]) / plugin.sample_rate;
     _phase -= std::floor(_phase);
   }
 }

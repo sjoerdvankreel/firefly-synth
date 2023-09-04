@@ -1,4 +1,5 @@
 gcc build
 voice manager
 clap threadpool
+fix submodules to commit
 try out some airwindows stuff
