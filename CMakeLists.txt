@@ -14,6 +14,6 @@ add_subdirectory(base)
 
 declare_local_target(STATIC infernal.synth infernal.synth)
 declare_local_target(SHARED infernal.synth.clap infernal.synth.clap)
-declare_vst3_target(${INFERNAL_NAME} infernal.synth)
-declare_vst3_target(${INFERNAL_FX_NAME} infernal.synth)
+declare_vst3_target(${INFERNAL_NAME} infernal.synth.vst3 infernal.synth 0)
+declare_vst3_target(${INFERNAL_FX_NAME} infernal.synth.vst3 infernal.synth 1)
 target_include_directories(infernal.synth PRIVATE base/src/infernal.base)

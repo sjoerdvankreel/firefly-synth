@@ -8,7 +8,7 @@ using namespace Steinberg;
 using namespace Steinberg::Vst;
 using namespace infernal::base::vst3;
 
-#if INF_SYNTH_FX
+#if INF_IS_FX
 #define PLUG_TYPE PlugType::kFx
 #define INF_SYNTH_CONTROLLER_ID "891815F992F548248536BDFFF3EE8938"
 #else

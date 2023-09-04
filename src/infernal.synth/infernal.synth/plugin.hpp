@@ -1,7 +1,7 @@
 #pragma once
 #include <infernal.base/utility.hpp>
 
-#if INF_SYNTH_FX
+#if INF_IS_FX
 #define INF_SYNTH_NAME "Infernal Synth FX"
 #define INF_SYNTH_ID "740EA0FF92D44ABB947C6C94DEF45E2C"
 #else
