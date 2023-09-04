@@ -57,9 +57,9 @@ filter_engine::process(
     float b = (w - angle) * norm;
     for (int c = 0; c < 2; c++)
     {
-      float filtered = module.audio_output[c][f] * a + in[c] * a + out[c] * b;
-      in[c] = module.audio_output[c][f];
-      out[c] = filtered;
+      float filtered = module.audio_output[c][f] * a + _in[c] * a + _out[c] * b;
+      _in[c] = module.audio_output[c][f];
+      _out[c] = filtered;
       module.audio_output[c][f] = filtered;
     }
   }
