@@ -12,7 +12,7 @@ from_vst_string(TChar const* source)
 {
   TChar c;
   std::string result;
-  while(c = *source++)
+  while((c = *source++) != (TChar)0)
     result += (char)c;
   return result;
 }
