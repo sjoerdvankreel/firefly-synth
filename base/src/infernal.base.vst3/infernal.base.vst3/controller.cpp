@@ -7,12 +7,54 @@ using namespace Steinberg::Vst;
 
 namespace infernal::base::vst3 {
 
+static std::string
+from_vst_string(TChar const* source)
+{
+  TChar c;
+  std::string result;
+  while(c = *source++)
+    result += (char)c;
+  return result;
+}
+
 static void
 to_vst_string(TChar* dest, int count, char const* source)
 {
   memset(dest, 0, sizeof(*dest) * count);
   for (int i = 0; i < count - 1 && i < strlen(source); i++)
     dest[i] = source[i];
+}
+
+class parameter_wrapper:
+public Parameter
+{
+  param_topo const* const _topo;
+public:
+  void toString(ParamValue normalized, String128 string) const override;
+  bool fromString(TChar const* string, ParamValue& normalized) const override;
+
+  ParamValue toNormalized(ParamValue plain) const override 
+  { return param_value::from_plain(*_topo, plain).to_normalized(*_topo); }
+  ParamValue toPlain(ParamValue normalized) const override 
+  { return param_value::from_normalized(*_topo, normalized).to_plain(*_topo); }
+  parameter_wrapper(param_topo const* topo, ParameterInfo const& info) : Parameter(info), _topo(topo) {}
+};
+
+void 
+parameter_wrapper::toString(ParamValue normalized, String128 string) const
+{
+  param_value value(param_value::from_normalized(*_topo, normalized));
+  to_vst_string(string, 128, value.to_text(*_topo).c_str());
+}
+
+bool 
+parameter_wrapper::fromString(TChar const* string, ParamValue& normalized) const
+{
+  param_value value;
+  std::string text(from_vst_string(string));
+  if(!param_value::from_text(*_topo, text, value)) return false;
+  normalized = value.to_normalized(*_topo);
+  return true;
 }
 
 tresult PLUGIN_API 

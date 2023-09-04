@@ -13,6 +13,24 @@ param_value::default_value(param_topo const& topo)
   return result;
 }
 
+double 
+param_value::to_plain(param_topo const& topo) const
+{
+  if(topo.config.format == param_format::step)
+    return step;
+  else
+    return real;
+}
+
+param_value 
+param_value::from_plain(param_topo const& topo, double plain)
+{
+  if (topo.config.format == param_format::step)
+    return from_step(plain);
+  else
+    return from_real(plain);
+}
+
 std::string 
 param_value::to_text(param_topo const& topo) const
 {
