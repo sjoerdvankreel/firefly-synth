@@ -25,7 +25,7 @@ to_vst_string(TChar* dest, int count, char const* source)
     dest[i] = source[i];
 }
 
-class parameter_wrapper:
+class param_wrapper:
 public Parameter
 {
   param_topo const* const _topo;
@@ -37,18 +37,18 @@ public:
   { return param_value::from_plain(*_topo, plain).to_normalized(*_topo); }
   ParamValue toPlain(ParamValue normalized) const override 
   { return param_value::from_normalized(*_topo, normalized).to_plain(*_topo); }
-  parameter_wrapper(param_topo const* topo, ParameterInfo const& info) : Parameter(info), _topo(topo) {}
+  param_wrapper(param_topo const* topo, ParameterInfo const& info) : Parameter(info), _topo(topo) {}
 };
 
 void 
-parameter_wrapper::toString(ParamValue normalized, String128 string) const
+param_wrapper::toString(ParamValue normalized, String128 string) const
 {
   param_value value(param_value::from_normalized(*_topo, normalized));
   to_vst_string(string, 128, value.to_text(*_topo).c_str());
 }
 
 bool 
-parameter_wrapper::fromString(TChar const* string, ParamValue& normalized) const
+param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
 {
   param_value value;
   std::string text(from_vst_string(string));
@@ -97,7 +97,7 @@ controller::initialize(FUnknown* context)
       if (param.topo->config.format == param_format::step)
         param_info.stepCount = param.topo->max - param.topo->min;
 
-      parameters.addParameter(param_info);
+      parameters.addParameter(new param_wrapper(module.params[p].topo, param_info));
     }
   }
 
