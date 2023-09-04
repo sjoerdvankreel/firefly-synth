@@ -28,7 +28,7 @@ function(declare_vst3_target VST3_PROJECT_NAME PLUG_PROJECT_NAME)
   declare_local_target(SHARED ${TARGET_NAME} ${PLUG_PROJECT_NAME})
   target_include_directories(${TARGET_NAME} SYSTEM PRIVATE lib/vst3)
   target_include_directories(${TARGET_NAME} PRIVATE "src/${PLUG_PROJECT_NAME}" src/infernal.base src/infernal.base.vst3)
-  target_link_libraries(${TARGET_NAME} infernal.base infernal.base.vst3 ${PLUG_PROJECT_NAME} pluginterfaces sdk sdk_common)
+  target_link_libraries(${TARGET_NAME} ${PLUG_PROJECT_NAME} infernal.base infernal.base.vst3 pluginterfaces sdk sdk_common)
 endfunction()
 
 # VST3 SDK

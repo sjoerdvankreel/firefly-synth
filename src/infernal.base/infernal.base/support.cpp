@@ -107,47 +107,47 @@ make_param_log(
   return result;
 }
 
-param_config param_config_input_toggle() 
+param_config config_input_toggle() 
 { return { param_rate ::block, param_format::step, param_storage::num, param_display::toggle, param_direction::input }; }
-param_config param_config_input_step_list() 
+param_config config_input_step_list() 
 { return { param_rate::block, param_format::step, param_storage::num, param_display::list, param_direction::input }; }
-param_config param_config_input_step_knob() 
+param_config config_input_step_knob() 
 { return { param_rate::block, param_format::step, param_storage::num, param_display::knob, param_direction::input }; }
-param_config param_config_input_step_hslider() 
+param_config config_input_step_hslider() 
 { return { param_rate::block, param_format::step, param_storage::num, param_display::hslider, param_direction::input }; }
-param_config param_config_input_step_vslider() 
+param_config config_input_step_vslider() 
 { return { param_rate::block, param_format::step, param_storage::num, param_display::vslider, param_direction::input }; }
-param_config param_config_input_list_list()
+param_config config_input_list_list()
 { return { param_rate::block, param_format::step, param_storage::list, param_display::list, param_direction::input }; }
-param_config param_config_input_list_knob()
+param_config config_input_list_knob()
 { return { param_rate::block, param_format::step, param_storage::list, param_display::knob, param_direction::input }; }
-param_config param_config_input_list_hslider()
+param_config config_input_list_hslider()
 { return { param_rate::block, param_format::step, param_storage::list, param_display::hslider, param_direction::input }; }
-param_config param_config_input_list_vslider()
+param_config config_input_list_vslider()
 { return { param_rate::block, param_format::step, param_storage::list, param_display::vslider, param_direction::input }; }
-param_config param_config_input_log_block_knob()
+param_config config_input_log_block_knob()
 { return { param_rate::block, param_format::log, param_storage::num, param_display::knob, param_direction::input }; }
-param_config param_config_input_log_block_hslider()
+param_config config_input_log_block_hslider()
 { return { param_rate::block, param_format::log, param_storage::num, param_display::hslider, param_direction::input }; }
-param_config param_config_input_log_block_vslider()
+param_config config_input_log_block_vslider()
 { return { param_rate::block, param_format::log, param_storage::num, param_display::vslider, param_direction::input }; }
-param_config param_config_input_log_accurate_knob()
+param_config config_input_log_accurate_knob()
 { return { param_rate::accurate, param_format::log, param_storage::num, param_display::knob, param_direction::input }; }
-param_config param_config_input_log_accurate_hslider()
+param_config config_input_log_accurate_hslider()
 { return { param_rate::accurate, param_format::log, param_storage::num, param_display::hslider, param_direction::input }; }
-param_config param_config_input_log_accurate_vslider()
+param_config config_input_log_accurate_vslider()
 { return { param_rate::accurate, param_format::log, param_storage::num, param_display::vslider, param_direction::input }; }
-param_config param_config_input_linear_block_knob()
+param_config config_input_linear_block_knob()
 { return { param_rate::block, param_format::linear, param_storage::num, param_display::knob, param_direction::input }; }
-param_config param_config_input_linear_block_hslider()
+param_config config_input_linear_block_hslider()
 { return { param_rate::block, param_format::linear, param_storage::num, param_display::hslider, param_direction::input }; }
-param_config param_config_input_linear_block_vslider()
+param_config config_input_linear_block_vslider()
 { return { param_rate::block, param_format::linear, param_storage::num, param_display::vslider, param_direction::input }; }
-param_config param_config_input_linear_accurate_knob()
+param_config config_input_linear_accurate_knob()
 { return { param_rate::accurate, param_format::linear, param_storage::num, param_display::knob, param_direction::input }; }
-param_config param_config_input_linear_accurate_hslider()
+param_config config_input_linear_accurate_hslider()
 { return { param_rate::accurate, param_format::linear, param_storage::num, param_display::hslider, param_direction::input }; }
-param_config param_config_input_linear_accurate_vslider()
+param_config config_input_linear_accurate_vslider()
 { return { param_rate::accurate, param_format::linear, param_storage::num, param_display::vslider, param_direction::input }; }
 
 }
