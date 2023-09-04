@@ -39,7 +39,7 @@ validate(plugin_desc const& desc)
   for (int m = 0; m < desc.modules.size(); m++)
   {
     auto const& module = desc.modules[m];
-    for (int p = 0; p < module.params.size(); m++)
+    for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
       assert(param.id_hash >= 0);
