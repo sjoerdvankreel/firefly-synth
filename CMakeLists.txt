@@ -2,7 +2,11 @@ cmake_policy(SET CMP0091 NEW)
 cmake_minimum_required(VERSION 3.21)
 project(infernal-synth)
 
-# Config.
+set(INFERNAL_VERSION "2.0")
+set(INFERNAL_NAME "infernal.synth")
+set(INFERNAL_FX_NAME "infernal.synth.fx")
+
+# Config
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_EXTENSIONS OFF)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,6 +21,14 @@ function(declare_local_target LIBRARY_TYPE PROJECT_NAME SOURCE_DIR)
   add_library(${PROJECT_NAME} ${LIBRARY_TYPE} "${${PROJECT_NAME}_SRC}")
   target_include_directories(${PROJECT_NAME} PRIVATE "${${PROJECT_NAME}_SRC_DIR}")
   source_group(TREE "../../${${PROJECT_NAME}_SRC_DIR}" FILES "${${PROJECT_NAME}_SRC}")
+endfunction()
+
+function(declare_vst3_target VST3_PROJECT_NAME PLUG_PROJECT_NAME)
+  set(TARGET_NAME "${VST3_PROJECT_NAME}.${INFERNAL_VERSION}.vst3")
+  declare_local_target(SHARED ${TARGET_NAME} ${PLUG_PROJECT_NAME})
+  target_include_directories(${TARGET_NAME} SYSTEM PRIVATE lib/vst3)
+  target_include_directories(${TARGET_NAME} PRIVATE "src/${PLUG_PROJECT_NAME}" src/infernal.base src/infernal.base.vst3)
+  target_link_libraries(${TARGET_NAME} infernal.base infernal.base.vst3 ${PLUG_PROJECT_NAME} pluginterfaces sdk sdk_common)
 endfunction()
 
 # VST3 SDK
@@ -37,24 +49,12 @@ add_subdirectory(lib/vst3/pluginterfaces)
 declare_local_target(STATIC infernal.base infernal.base)
 declare_local_target(STATIC infernal.base.clap infernal.base.clap)
 declare_local_target(STATIC infernal.base.vst3 infernal.base.vst3)
-
 target_include_directories(infernal.base.vst3 SYSTEM PRIVATE lib/vst3)
 target_include_directories(infernal.base.vst3 PRIVATE src/infernal.base)
 
 # Plugin libraries
 declare_local_target(STATIC infernal.synth infernal.synth)
 declare_local_target(SHARED infernal.synth.clap infernal.synth.clap)
-declare_local_target(SHARED infernal.synth.vst3 infernal.synth.vst3)
-declare_local_target(SHARED infernal.synth.vst3i infernal.synth.vst3)
-
 target_include_directories(infernal.synth PRIVATE src/infernal.base)
-target_include_directories(infernal.synth.vst3 SYSTEM PRIVATE lib/vst3)
-target_include_directories(infernal.synth.vst3i SYSTEM PRIVATE lib/vst3)
-target_include_directories(infernal.synth.vst3 PRIVATE src/infernal.synth src/infernal.base src/infernal.base.vst3)
-target_include_directories(infernal.synth.vst3i PRIVATE src/infernal.synth src/infernal.base src/infernal.base.vst3)
-
-target_compile_definitions(infernal.synth.vst3 PRIVATE INF_SYNTH_FX=1)
-target_compile_definitions(infernal.synth.vst3i PRIVATE INF_SYNTH_FX=0)
-
-target_link_libraries(infernal.synth.vst3 infernal.base infernal.base.vst3 infernal.synth pluginterfaces sdk sdk_common)
-target_link_libraries(infernal.synth.vst3i infernal.base infernal.base.vst3 infernal.synth pluginterfaces sdk sdk_common)
+declare_vst3_target(${INFERNAL_NAME} infernal.synth)
+declare_vst3_target(${INFERNAL_FX_NAME} infernal.synth)
