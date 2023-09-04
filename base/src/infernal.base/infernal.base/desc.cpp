@@ -25,7 +25,7 @@ static std::string
 module_name(module_group_topo const& module_group, int module_index)
 {
   std::string result = module_group.name;
-  if(module_group.module_count > 1) result += std::to_string(module_index + 1);
+  if(module_group.module_count > 1) result += " " + std::to_string(module_index + 1);
   return result;
 }
 
