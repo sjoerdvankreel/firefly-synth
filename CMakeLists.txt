@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.21)
 project(infernal-synth)
 
-include(cmake/infernal.config.cmake)
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+include(infernal.config)
+include(infernal.vst3)
 include(infernal.utility)
 
 set(INFERNAL_VERSION "2.0")
