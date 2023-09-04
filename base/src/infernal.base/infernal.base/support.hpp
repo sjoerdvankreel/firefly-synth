@@ -48,7 +48,7 @@ make_param_step(
 param_topo
 make_param_list(
   std::string const& id, std::string const& name, std::string const& default_,
-  std::vector<item_topo> const& items, int group, param_config const& config);param_topo
+  std::vector<item_topo>&& items, int group, param_config const& config);param_topo
 make_param_log(
   std::string const& id, std::string const& name, std::string const& default_, std::string const& unit,
   double min, double max, double midpoint, int group, param_config const& config);

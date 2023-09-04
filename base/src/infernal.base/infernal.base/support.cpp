@@ -87,11 +87,12 @@ make_param_step(
 param_topo
 make_param_list(
   std::string const& id, std::string const& name, std::string const& default_,
-  std::vector<item_topo> const& items, int group, param_config const& config)
+  std::vector<item_topo>&& items, int group, param_config const& config)
 {
   param_topo result(make_param_base(id, name, default_, group, config));
   result.min = 0;
   result.max = items.size() - 1;
+  result.list = std::move(items);
   return result;
 }
 
