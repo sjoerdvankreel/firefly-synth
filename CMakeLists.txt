@@ -9,28 +9,37 @@ set(CMAKE_CONFIGURATION_TYPES "Debug;Release")
 
 add_compile_options(/W4;/WX;/external:W0;/wd4267;/wd4244;/wd4100;/wd26495;/fp:fast;/arch:AVX)
 
-function(declare_local_target PROJECT_NAME)
-  set("${PROJECT_NAME}_SRC_DIR" "src/${PROJECT_NAME}")
+function(declare_local_target PROJECT_NAME SOURCE_DIR)
+  set("${PROJECT_NAME}_SRC_DIR" "src/${SOURCE_DIR}")
   file(GLOB_RECURSE "${PROJECT_NAME}_SRC" "${${PROJECT_NAME}_SRC_DIR}/*.*")
   add_library(${PROJECT_NAME} STATIC "${${PROJECT_NAME}_SRC}")
   target_include_directories(${PROJECT_NAME} PRIVATE "${${PROJECT_NAME}_SRC_DIR}")
   source_group(TREE "../../${${PROJECT_NAME}_SRC_DIR}" FILES "${${PROJECT_NAME}_SRC}")
 endfunction()
 
-declare_local_target(infernal.base)
-declare_local_target(infernal.base.clap)
-declare_local_target(infernal.base.vst3)
+declare_local_target(infernal.base infernal.base)
+declare_local_target(infernal.base.clap infernal.base.clap)
+declare_local_target(infernal.base.vst3 infernal.base.vst3)
 
-declare_local_target(infernal.synth)
-declare_local_target(infernal.synth.clap)
-declare_local_target(infernal.synth.vst3)
+declare_local_target(infernal.synth infernal.synth)
+declare_local_target(infernal.synth.clap infernal.synth.clap)
+declare_local_target(infernal.synth.vst3 infernal.synth.vst3)
+declare_local_target(infernal.synth.vst3i infernal.synth.vst3)
 
 target_include_directories(infernal.synth PRIVATE src/infernal.base)
 
 target_include_directories(infernal.base.vst3 SYSTEM PRIVATE lib/vst3)
 target_include_directories(infernal.base.vst3 PRIVATE src/infernal.base)
 
+target_compile_definitions(infernal.synth.vst3 PRIVATE INF_SYNTH_FX=1)
 target_include_directories(infernal.synth.vst3 SYSTEM PRIVATE lib/vst3)
 target_include_directories(infernal.synth.vst3 PRIVATE src/infernal.synth)
 target_include_directories(infernal.synth.vst3 PRIVATE src/infernal.base)
 target_include_directories(infernal.synth.vst3 PRIVATE src/infernal.base.vst3)
+
+target_compile_definitions(infernal.synth.vst3i PRIVATE INF_SYNTH_FX=0)
+target_include_directories(infernal.synth.vst3i SYSTEM PRIVATE lib/vst3)
+target_include_directories(infernal.synth.vst3i PRIVATE src/infernal.synth)
+target_include_directories(infernal.synth.vst3i PRIVATE src/infernal.base)
+target_include_directories(infernal.synth.vst3i PRIVATE src/infernal.base.vst3)
+
