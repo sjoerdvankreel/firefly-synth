@@ -13,14 +13,14 @@
 namespace infernal::base {
 
 // single module audio processor fills its own output if any
-class module_engine abstract {
+class module_engine {
 public:
   virtual void 
   process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) = 0;
 };
 
 // plugin level audio processor combines module audio outputs into host audio output
-class mixdown_engine abstract {
+class mixdown_engine {
 public:
   virtual void
   process(plugin_topo const& topo, plugin_block const& plugin, float* const* mixdown) = 0;
