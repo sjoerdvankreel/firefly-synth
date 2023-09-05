@@ -54,7 +54,7 @@ param_value::default_value(param_topo const& topo)
   return result;
 }
 
-inline double
+double
 param_value::to_normalized(param_topo const& topo) const
 {
   double range = topo.max - topo.min;
@@ -67,7 +67,7 @@ param_value::to_normalized(param_topo const& topo) const
   }
 }
 
-inline param_value
+param_value
 param_value::from_normalized(param_topo const& topo, double normalized)
 {
   double range = topo.max - topo.min;
