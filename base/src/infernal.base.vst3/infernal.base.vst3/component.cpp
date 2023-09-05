@@ -121,6 +121,7 @@ component::process(ProcessData& data)
             }
       }
   
+  _engine.process();
   return kResultOk;
 }
 
