@@ -1,4 +1,3 @@
-gcc build
 voice manager
 clap threadpool
 try out some airwindows stuff
