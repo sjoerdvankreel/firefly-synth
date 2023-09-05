@@ -4,6 +4,7 @@
 
 namespace infernal::base {
 
+// 2d jagged array
 template <class T>
 class jarray2d {
   std::vector<std::vector<T>> _data;
@@ -25,6 +26,7 @@ public:
   }
 };
 
+// 3d jagged array
 template <class T>
 class jarray3d {
   std::vector<jarray2d<T>> _data;
@@ -45,6 +47,7 @@ public:
   }
 };
 
+// 4d jagged array
 template <class T>
 class jarray4d {
   std::vector<jarray3d<T>> _data;

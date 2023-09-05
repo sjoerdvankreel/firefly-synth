@@ -18,6 +18,7 @@ enum class param_direction { input, output };
 enum class param_type { step, name, item, linear, log };
 enum class param_display { toggle, list, knob, hslider, vslider };
 
+// item within list (persisted by guid)
 struct item_topo final {
   std::string id;
   std::string name;
@@ -25,6 +26,7 @@ struct item_topo final {
   INF_DECLARE_MOVE_ONLY(item_topo);
 };
 
+// param within module
 struct param_topo final {
   int group;
   double min;
@@ -45,6 +47,7 @@ struct param_topo final {
   bool is_real() const { return type == param_type::log || type == param_type::linear; }
 };
 
+// grouping parameters for gui
 struct param_group_topo final {
   int type;
   std::string name;
@@ -52,6 +55,7 @@ struct param_group_topo final {
   INF_DECLARE_MOVE_ONLY(param_group_topo);
 };
 
+// module group within plugin (may be more than 1 per group)
 struct module_group_topo final {
   int module_count;
   std::string id;
@@ -64,6 +68,7 @@ struct module_group_topo final {
   INF_DECLARE_MOVE_ONLY(module_group_topo);
 };
 
+// plugin definition
 struct plugin_topo final {
   int polyphony;
   plugin_type type;

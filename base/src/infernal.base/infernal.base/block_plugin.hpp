@@ -7,6 +7,7 @@ namespace infernal::base {
 
 struct common_block;
 
+// readonly modules audio and cv state, interpolated automation curves, host block
 struct plugin_block final {
   float sample_rate;
   common_block const* host;
@@ -17,6 +18,7 @@ struct plugin_block final {
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
+// writeable single module audio and cv state, readonly single module interpolated automation curves
 struct module_block final {
   std::vector<float>& cv_output;
   jarray2d<float>& audio_output;

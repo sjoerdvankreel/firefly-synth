@@ -4,8 +4,9 @@
 
 namespace infernal::base {
 
+// nonnegative int from parameter id
 static int
-hash(std::string const& text)
+param_hash(std::string const& text)
 {
   std::uint32_t h = 0;
   int const multiplier = 33;
@@ -30,6 +31,7 @@ module_name(module_group_topo const& module_group, int module_index)
   return result;
 }
 
+// validate assumptions, not all combinations are valid
 static void 
 validate(plugin_desc const& desc)
 {
@@ -140,7 +142,7 @@ param_desc(module_group_topo const& module_group, int module_index, param_topo c
   topo = &param;
   id = module_id(module_group, module_index) + "-" + param.id;
   name = module_name(module_group, module_index) + " " + param.name;
-  id_hash = hash(id.c_str());
+  id_hash = param_hash(id.c_str());
 }
 
 module_desc::

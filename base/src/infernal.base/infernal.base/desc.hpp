@@ -7,12 +7,14 @@
 
 namespace infernal::base {
 
+// mapping plugin level parameter index
 struct param_mapping final {
   int group = {};
   int param = {};
   int module = {};
 };
 
+// runtime parameter descriptor
 struct param_desc final {
   int id_hash = {};
   std::string id = {};
@@ -22,6 +24,7 @@ struct param_desc final {
   param_desc(module_group_topo const& module_group, int module_index, param_topo const& param);
 };
 
+// runtime module descriptor
 struct module_desc final {
   std::string name = {};
   module_group_topo const* topo = {};
@@ -30,6 +33,7 @@ struct module_desc final {
   module_desc(module_group_topo const& module_group, int module_index);
 };
 
+// runtime plugin descriptor
 struct plugin_desc final {
   plugin_topo const* topo = {};
   std::map<int, int> id_to_index;
@@ -39,6 +43,7 @@ struct plugin_desc final {
   plugin_desc(plugin_topo const& plugin);
 };
 
+// runtime plugin topo dimensions
 struct plugin_dims final {
   std::vector<int> module_counts;
   std::vector<std::vector<int>> module_param_counts;
@@ -46,6 +51,7 @@ struct plugin_dims final {
   plugin_dims(plugin_topo const& plugin);
 };
 
+// runtime plugin buffer dimensions
 struct plugin_frame_dims final {
   std::vector<std::vector<int>> module_cv_frame_counts;
   std::vector<std::vector<std::vector<int>>> module_audio_frame_counts;

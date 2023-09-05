@@ -7,12 +7,14 @@ namespace infernal::base {
 
 enum class note_event_type { on, off, cut };
 
+// note id or PCK (port is 0)
 struct note_id final {
   int id;
   short key;
   short channel;
 };
 
+// keyboard event
 struct note_event final {
   note_id id;
   float velocity;
@@ -20,6 +22,7 @@ struct note_event final {
   note_event_type type;
 };
 
+// passed from host to plug
 struct common_block final {
   float bpm;
   int frame_count;
