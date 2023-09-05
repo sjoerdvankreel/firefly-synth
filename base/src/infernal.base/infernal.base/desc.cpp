@@ -1,4 +1,5 @@
 #include <infernal.base/desc.hpp>
+#include <infernal.base/param_value.hpp>
 #include <set>
 
 namespace infernal::base {
@@ -77,13 +78,19 @@ validate(plugin_desc const& desc)
         assert(param.rate == param_rate::block);
       
       if (param.is_real())
+      {
         assert(param.unit.size() > 0);
+        assert(param.min <= param_value::default_value(param).real);
+        assert(param.max >= param_value::default_value(param).real);
+      }
       else 
       {
         assert(!param.percentage);
         assert((int)param.min == param.min);
         assert((int)param.max == param.max);
         assert(param.rate == param_rate::block);
+        assert(param.min <= param_value::default_value(param).step);
+        assert(param.max >= param_value::default_value(param).step);
       }
 
       if (param.percentage)
