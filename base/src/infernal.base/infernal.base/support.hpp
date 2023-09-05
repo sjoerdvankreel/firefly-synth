@@ -7,6 +7,11 @@ namespace infernal::base {
 std::vector<std::string>
 note_names();
 
+module_group_topo
+make_module_group(
+  std::string const& id, std::string const& name,
+  int module_count, module_scope scope, module_output output);
+
 // block-rate input
 param_topo
 param_toggle(
