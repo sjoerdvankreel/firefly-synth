@@ -22,13 +22,13 @@ param_steps(
   std::string const& id, std::string const& name, int group,
   param_display display, int min, int max, int default_);
 param_topo
+param_items(
+  std::string const& id, std::string const& name, int group,
+  param_display display, std::vector<item_topo>&&, std::string const& default_);
+param_topo
 param_names(
   std::string const& id, std::string const& name, int group,
   param_display display, std::vector<std::string> const& names, std::string const& default_);
-param_topo
-param_items(
-  std::string const& id, std::string const& name, int group,
-  param_display display, std::vector<item_topo> const& items, std::string const& default_);
 
 // either block or accurate rate input
 param_topo

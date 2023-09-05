@@ -64,13 +64,14 @@ param_steps(
 param_topo
 param_items(
   std::string const& id, std::string const& name, int group,
-  param_display display, std::vector<item_topo> const& items, std::string const& default_)
+  param_display display, std::vector<item_topo>&& items, std::string const& default_)
 {
   param_topo result(input_param(id, name, group, default_, param_rate::block));
   result.min = 0;
   result.max = items.size() - 1;
   result.display = display;
   result.type = param_type::item;
+  result.items = std::move(items);
   return result;
 }
 
@@ -82,6 +83,7 @@ param_names(
   param_topo result(input_param(id, name, group, default_, param_rate::block));
   result.min = 0;
   result.max = names.size() - 1;
+  result.names = names;
   result.display = display;
   result.type = param_type::name;
   return result;
@@ -92,7 +94,7 @@ param_percentage(
   std::string const& id, std::string const& name, int group,
   param_display display, param_rate rate, double min, double max, double default_)
 {
-  param_topo result(input_param(id, name, group, std::to_string(default_), rate));
+  param_topo result(input_param(id, name, group, std::to_string(default_ * 100), rate));
   result.min = min;
   result.max = max;
   result.unit = "%";

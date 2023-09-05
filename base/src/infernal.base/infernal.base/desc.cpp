@@ -72,7 +72,6 @@ validate(plugin_desc const& desc)
       assert(param.group >= 0);
       assert(param.id.size());
       assert(param.name.size());
-      assert(param.unit.size());
       assert(param.max > param.min);
       assert(param.default_text.size());
 
