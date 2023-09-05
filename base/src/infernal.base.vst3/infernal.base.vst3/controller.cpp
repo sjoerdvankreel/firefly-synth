@@ -77,7 +77,7 @@ controller::initialize(FUnknown* context)
 
     for (int p = 0; p < module.params.size(); p++)
     {
-      ParameterInfo param_info;
+      ParameterInfo param_info = {};
       auto const& param = module.params[p];
       param_info.id = param.id_hash;
       param_info.unitId = unit_info.id;
