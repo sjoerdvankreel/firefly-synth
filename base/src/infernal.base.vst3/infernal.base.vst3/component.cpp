@@ -99,7 +99,7 @@ component::process(ProcessData& data)
       {
         int param_index = _desc.id_to_index.at(queue->getParameterId());
         auto const& mapping = _desc.param_mappings[param_index];
-        auto rate = _engine.topo().module_groups[mapping.group].params[mapping.param].config.rate;
+        auto rate = _engine.topo().module_groups[mapping.group].params[mapping.param].rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
           host_block_event event;

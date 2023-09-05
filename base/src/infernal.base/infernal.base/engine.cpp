@@ -105,7 +105,7 @@ plugin_engine::process()
     for(int m = 0; m < group.module_count; m++)
       for(int p = 0; p < group.params.size(); p++)
       {
-        if(group.params[p].config.rate == param_rate::block)
+        if(group.params[p].rate == param_rate::block)
           _plugin_block.block_automation[g][m][p] = _state[g][m][p];
         else
         {

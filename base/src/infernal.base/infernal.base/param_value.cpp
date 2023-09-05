@@ -24,7 +24,7 @@ param_value::from_real(float real)
 double 
 param_value::to_plain(param_topo const& topo) const
 {
-  if(topo.config.format == param_format::step)
+  if(topo.format == param_format::step)
     return step;
   else
     return real;
@@ -33,7 +33,7 @@ param_value::to_plain(param_topo const& topo) const
 param_value 
 param_value::from_plain(param_topo const& topo, double plain)
 {
-  if (topo.config.format == param_format::step)
+  if (topo.format == param_format::step)
     return from_step(plain);
   else
     return from_real(plain);
@@ -58,7 +58,7 @@ double
 param_value::to_normalized(param_topo const& topo) const
 {
   double range = topo.max - topo.min;
-  switch (topo.config.format)
+  switch (topo.format)
   {
   case param_format::log:
   case param_format::linear: return (real - topo.min) / range;
@@ -71,7 +71,7 @@ param_value
 param_value::from_normalized(param_topo const& topo, double normalized)
 {
   double range = topo.max - topo.min;
-  switch (topo.config.format)
+  switch (topo.format)
   {
   case param_format::log:
   case param_format::linear: return from_real(topo.min + normalized * range);
@@ -86,12 +86,12 @@ param_value::to_text(param_topo const& topo) const
   int prec = topo.percentage ? 3 : 5;
   int mult = topo.percentage ? 100 : 1;
   std::ostringstream stream;
-  switch (topo.config.format)
+  switch (topo.format)
   {
   case param_format::step:
-    if(topo.config.display == param_display::toggle)
+    if(topo.display == param_display::toggle)
       stream << (step == 0? "Off": "On");
-    else if(topo.config.display == param_display::list)
+    else if(topo.display == param_display::list)
       stream << topo.list[step].name;
     else
       stream << step;
@@ -114,18 +114,18 @@ param_value::from_text(param_topo const& topo, std::string const& text, param_va
 {
   int mult = topo.percentage ? 100 : 1;
   std::istringstream stream(text);
-  switch (topo.config.format)
+  switch (topo.format)
   {
   case param_format::step:
     value.step = std::numeric_limits<int>::max();
-    if (topo.config.display == param_display::toggle)
+    if (topo.display == param_display::toggle)
     {
       if(text == "Off")
         value.step = 0;
       else if(text == "On")
         value.step = 1;
     }
-    else if(topo.config.display == param_display::list)
+    else if(topo.display == param_display::list)
     {
       for(int i = 0; i < topo.list.size(); i++)
         if(topo.list[i].name == text)

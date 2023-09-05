@@ -72,15 +72,15 @@ validate(plugin_desc const& desc)
       assert(!param.percentage || param.unit == "%");
       assert(param.list.size() == 0 || param.min == 0);
       assert(param.list.size() == 0 || param.unit == "");
-      assert(param.unit == "" || param.config.format != param_format::step);
-      assert(param.config.format == param_format::linear || !param.percentage);
-      assert((param.list.size() == 0) || param.config.format == param_format::step);
-      assert(param.config.display != param_display::list || param.list.size() != 0);
-      assert(param.config.display != param_display::toggle || (param.min == 0 && param.max == 1));
-      assert(param.config.rate == param_rate::block || param.config.format != param_format::step);
-      assert(param.config.display != param_display::list || param.config.format == param_format::step);
-      assert(param.config.display != param_display::toggle || param.config.format == param_format::step);
-      assert((param.config.direction == param_direction::input) || (param.config.rate == param_rate::block));
+      assert(param.unit == "" || param.format != param_format::step);
+      assert(param.format == param_format::linear || !param.percentage);
+      assert((param.list.size() == 0) || param.format == param_format::step);
+      assert(param.display != param_display::list || param.list.size() != 0);
+      assert(param.display != param_display::toggle || (param.min == 0 && param.max == 1));
+      assert(param.rate == param_rate::block || param.format != param_format::step);
+      assert(param.display != param_display::list || param.format == param_format::step);
+      assert(param.display != param_display::toggle || param.format == param_format::step);
+      assert((param.direction == param_direction::input) || (param.rate == param_rate::block));
       INF_ASSERT_EXEC(param_ids.insert(param.id).second);
     }
   }
@@ -161,7 +161,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       module_audio_frame_counts[g].emplace_back(std::vector<int>(2, audio_frames));
       for(int p = 0; p < group.params.size(); p++)
       {
-        int param_frames = group.params[p].config.rate == param_rate::accurate ? frame_count : 0;
+        int param_frames = group.params[p].rate == param_rate::accurate ? frame_count : 0;
         module_accurate_frame_counts[g][m].push_back(param_frames);
       }
     }
