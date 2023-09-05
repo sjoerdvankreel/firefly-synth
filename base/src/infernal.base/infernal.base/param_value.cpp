@@ -5,6 +5,13 @@
 
 namespace infernal::base {
 
+double
+param_value::default_normalized(param_topo const& topo)
+{
+  param_value result(default_value(topo));
+  return result.to_normalized(topo);
+}
+
 param_value 
 param_value::default_value(param_topo const& topo)
 {
@@ -34,6 +41,8 @@ param_value::from_plain(param_topo const& topo, double plain)
 std::string 
 param_value::to_text(param_topo const& topo) const
 {
+  int prec = topo.percentage ? 3 : 5;
+  int mult = topo.percentage ? 100 : 1;
   std::ostringstream stream;
   switch (topo.config.format)
   {
@@ -47,7 +56,7 @@ param_value::to_text(param_topo const& topo) const
     break;
   case param_format::log:
   case param_format::linear: 
-    stream << std::setprecision(3) << real * (topo.percentage ? 1: 100);
+    stream << std::setprecision(prec) << real * (mult);
     break;
   default:
     assert(false);
@@ -61,6 +70,7 @@ param_value::to_text(param_topo const& topo) const
 bool 
 param_value::from_text(param_topo const& topo, std::string const& text, param_value& value)
 {
+  int mult = topo.percentage ? 100 : 1;
   std::istringstream stream(text);
   switch (topo.config.format)
   {
@@ -85,7 +95,7 @@ param_value::from_text(param_topo const& topo, std::string const& text, param_va
   case param_format::linear:
     value.real = std::numeric_limits<float>::max();
     stream >> value.real;
-    if(topo.percentage) value.real /= 100;
+    value.real /= mult;
     return topo.min <= value.real && value.real <= topo.max;
   default:
     assert(false);

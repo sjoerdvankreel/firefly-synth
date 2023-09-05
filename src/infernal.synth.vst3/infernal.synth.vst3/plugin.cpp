@@ -20,16 +20,20 @@ using namespace infernal::base::vst3;
 #define INF_SYNTH_CONTROLLER_ID "E5EC671A225942D5B03FE8131DB8CD46"
 #endif
 
-static FUnknown* 
-component_factory(void*)
-{ 
-  FUID controller_id = fuid_from_text(INF_SYNTH_CONTROLLER_ID);
-  return static_cast<IAudioProcessor*>(new component(synth_topo(), controller_id)); 
+static FUnknown*
+controller_factory(void*)
+{
+  auto result = new controller(synth_topo());
+  return static_cast<IEditController*>(result);
 }
 
-static FUnknown* 
-controller_factory(void*)
-{ return static_cast<IEditController*>(new controller(synth_topo())); }
+static FUnknown*
+component_factory(void*)
+{ 
+  FUID controller_id(fuid_from_text(INF_SYNTH_CONTROLLER_ID));
+  auto result = new component(synth_topo(), controller_id);
+  return static_cast<IAudioProcessor*>(result);
+}
 
 BEGIN_FACTORY_DEF(INF_SYNTH_VENDOR_NAME, INF_SYNTH_VENDOR_URL, INF_SYNTH_VENDOR_MAIL)
   DEF_CLASS2(

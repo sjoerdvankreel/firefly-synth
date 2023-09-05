@@ -84,7 +84,7 @@ controller::initialize(FUnknown* context)
       to_vst_string(param_info.units, 128, param.topo->unit.c_str());
       to_vst_string(param_info.title, 128, param.topo->name.c_str());
       to_vst_string(param_info.shortTitle, 128, param.topo->name.c_str());
-      param_info.defaultNormalizedValue = param_value::default_value(*param.topo).to_normalized(*param.topo);
+      param_info.defaultNormalizedValue = param_value::default_normalized(*param.topo);
 
       param_info.flags = ParameterInfo::kNoFlags;
       if(param.topo->config.direction == param_direction::input)
