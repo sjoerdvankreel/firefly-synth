@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.25)
+cmake_minimum_required(VERSION 3.21)
 project(infernal-base)
 
 declare_local_target(STATIC infernal.base infernal.base)

@@ -67,6 +67,7 @@ component::process(ProcessData& data)
   if (data.inputEvents)
     for (int i = 0; i < data.inputEvents->getEventCount(); i++)
       if (data.inputEvents->getEvent(i, vst_event))
+      {
         if (vst_event.type == Event::kNoteOnEvent) 
         {
           note_event note;
@@ -89,6 +90,7 @@ component::process(ProcessData& data)
           note.id.channel = vst_event.noteOff.channel;
           block.common->notes.push_back(note);
         }
+      }
 
   ParamValue value;
   IParamValueQueue* queue;
