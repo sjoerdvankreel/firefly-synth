@@ -4,7 +4,7 @@
 
 namespace infernal::base {
 
-std::vector<item_topo>
-note_name_items();
+std::vector<std::string>
+note_name();
 
 }
