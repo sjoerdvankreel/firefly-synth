@@ -65,22 +65,58 @@ validate(plugin_desc const& desc)
     for (int p = 0; p < group.params.size(); p++)
     {
       auto const& param = group.params[p];
-      assert(param.id.size() > 0);
-      assert(param.name.size() > 0);
+
+      assert(param.group >= 0);
+      assert(param.id.size());
+      assert(param.name.size());
+      assert(param.unit.size());
       assert(param.max > param.min);
-      assert(param.default_text.size() > 0);
-      assert(!param.percentage || param.unit == "%");
-      assert(param.list.size() == 0 || param.min == 0);
-      assert(param.list.size() == 0 || param.unit == "");
-      assert(param.unit == "" || param.format != param_format::step);
-      assert(param.format == param_format::linear || !param.percentage);
-      assert((param.list.size() == 0) || param.format == param_format::step);
-      assert(param.display != param_display::list || param.list.size() != 0);
-      assert(param.display != param_display::toggle || (param.min == 0 && param.max == 1));
-      assert(param.rate == param_rate::block || param.format != param_format::step);
-      assert(param.display != param_display::list || param.format == param_format::step);
-      assert(param.display != param_display::toggle || param.format == param_format::step);
-      assert((param.direction == param_direction::input) || (param.rate == param_rate::block));
+      assert(param.default_text.size());
+
+      if (param.direction == param_direction::output)
+        assert(param.rate == param_rate::block);
+      
+      if (param.is_real())
+        assert(param.unit.size() > 0);
+      else 
+      {
+        assert(!param.percentage);
+        assert((int)param.min == param.min);
+        assert((int)param.max == param.max);
+        assert(param.rate == param_rate::block);
+      }
+
+      if (param.percentage)
+      {
+        assert(param.unit == "%");
+        assert(param.type == param_type::linear);
+      }
+
+      if (param.display == param_display::toggle)
+      {
+        assert(param.min == 0);
+        assert(param.max == 1);
+        assert(param.type == param_type::step);
+      }
+      
+      if (param.type == param_type::name)
+      {
+        assert(param.names.size() > 0);
+        assert(param.unit.size() == 0);
+        assert(param.min == 0);
+        assert(param.max == param.names.size() - 1);
+      } else
+        assert(param.names.size() == 0);
+
+      if (param.type == param_type::item)
+      {
+        assert(param.items.size() > 0);
+        assert(param.unit.size() == 0);
+        assert(param.min == 0);
+        assert(param.max == param.items.size() - 1);
+      } else
+        assert(param.items.size() == 0);
+
       INF_ASSERT_EXEC(param_ids.insert(param.id).second);
     }
   }

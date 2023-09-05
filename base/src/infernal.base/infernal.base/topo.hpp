@@ -13,10 +13,9 @@ enum class plugin_type { synth, fx };
 enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
 
-enum class param_storage { item, num };
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
-enum class param_format { step, linear, log };
+enum class param_type { step, name, item, linear, log };
 enum class param_display { toggle, list, knob, hslider, vslider };
 
 struct item_topo final {
@@ -31,17 +30,18 @@ struct param_topo final {
   double min;
   double max;
   bool percentage;
+  param_type type;
   param_rate rate;
-  param_format format;
-  param_storage storage;
   param_display display;
   param_direction direction;
   std::string id;
   std::string name;
   std::string unit;
   std::string default_text;
-  std::vector<item_topo> list;
+  std::vector<item_topo> items;
+  std::vector<std::string> names;
   INF_DECLARE_MOVE_ONLY(param_topo);
+  bool is_real() const { return type == param_type::log || type == param_type::linear; }
 };
 
 struct param_group_topo final {
