@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.21)
+cmake_minimum_required(VERSION 3.25)
 project(infernal-synth)
 
 set(INFERNAL_VERSION "2.0")
