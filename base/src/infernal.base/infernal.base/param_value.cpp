@@ -5,18 +5,19 @@
 
 namespace infernal::base {
 
-double
-param_value::default_normalized(param_topo const& topo)
-{
-  param_value result(default_value(topo));
-  return result.to_normalized(topo);
-}
-
-param_value 
-param_value::default_value(param_topo const& topo)
+param_value
+param_value::from_step(int step)
 {
   param_value result;
-  INF_ASSERT_EXEC(from_text(topo, topo.default_text, result));
+  result.step = step;
+  return result;
+}
+
+param_value
+param_value::from_real(float real)
+{
+  param_value result;
+  result.real = real;
   return result;
 }
 
@@ -36,6 +37,47 @@ param_value::from_plain(param_topo const& topo, double plain)
     return from_step(plain);
   else
     return from_real(plain);
+}
+
+double
+param_value::default_normalized(param_topo const& topo)
+{
+  param_value result(default_value(topo));
+  return result.to_normalized(topo);
+}
+
+param_value
+param_value::default_value(param_topo const& topo)
+{
+  param_value result;
+  INF_ASSERT_EXEC(from_text(topo, topo.default_text, result));
+  return result;
+}
+
+inline double
+param_value::to_normalized(param_topo const& topo) const
+{
+  double range = topo.max - topo.min;
+  switch (topo.config.format)
+  {
+  case param_format::log:
+  case param_format::linear: return (real - topo.min) / range;
+  case param_format::step: return (step - topo.min) / range;
+  default: assert(false); return 0;
+  }
+}
+
+inline param_value
+param_value::from_normalized(param_topo const& topo, double normalized)
+{
+  double range = topo.max - topo.min;
+  switch (topo.config.format)
+  {
+  case param_format::log:
+  case param_format::linear: return from_real(topo.min + normalized * range);
+  case param_format::step: return from_step(topo.min + std::floor(std::min(range, normalized * (range + 1))));
+  default: assert(false); return {};
+  }
 }
 
 std::string 
