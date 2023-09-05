@@ -1,4 +1,5 @@
 #include <infernal.base/support.hpp>
+#include <cmath>
 
 namespace infernal::base {
 
@@ -112,5 +113,8 @@ param_log(
   result.unit = unit;
   result.display = display;
   result.type = param_type::log;
+  result.exp = std::log((midpoint - min) / (max - min)) / std::log(0.5);
   return result;
+}
+
 }

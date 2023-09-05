@@ -93,6 +93,11 @@ validate(plugin_desc const& desc)
         assert(param.max >= param_value::default_value(param).step);
       }
 
+      if (param.type == param_type::log)
+        assert(param.exp != 0);
+      else
+        assert(param.exp == 0);
+
       if (param.percentage)
       {
         assert(param.unit == "%");
