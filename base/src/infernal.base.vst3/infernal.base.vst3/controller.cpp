@@ -94,7 +94,7 @@ controller::initialize(FUnknown* context)
       if(param.topo->display == param_display::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
-      if (param.topo->format == param_format::step)
+      if (!param.topo->is_real())
         param_info.stepCount = param.topo->max - param.topo->min;
 
       parameters.addParameter(new param_wrapper(module.params[p].topo, param_info));
