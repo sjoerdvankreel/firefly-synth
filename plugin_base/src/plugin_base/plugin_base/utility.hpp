@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <cstring>
 #include <cassert>
 
 #define INF_STR_(x) #x
