@@ -46,11 +46,10 @@ controller::initialize(FUnknown* context)
   int unit_id = 1;
   if(EditController::initialize(context) != kResultTrue) 
     return kResultFalse;
-  
-  plugin_desc desc(_topo);
-  for(int m = 0; m < desc.modules.size(); m++)
+
+  for(int m = 0; m < _desc.modules.size(); m++)
   {
-    auto const& module = desc.modules[m];
+    auto const& module = _desc.modules[m];
     UnitInfo unit_info;
     unit_info.id = unit_id++;
     unit_info.parentUnitId = kRootUnitId;
