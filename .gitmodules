@@ -16,3 +16,6 @@
 [submodule "lib/vst3/cmake"]
 	path = lib/vst3/cmake
 	url = https://github.com/sjoerdvankreel/vst3_cmake.git
+[submodule "lib/clap-helpers"]
+	path = lib/clap-helpers
+	url = https://github.com/sjoerdvankreel/clap-helpers.git
