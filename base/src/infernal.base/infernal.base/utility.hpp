@@ -22,10 +22,13 @@ namespace infernal::base {
 template <class T> std::string 
 to_8bit_string(T const* source)
 {
-  T c;
+  T c = *source;
   std::string result;
-  while ((c = *source++) != static_cast<T>('\0'))
+  while (c != static_cast<T>('\0'))
+  {
     result += static_cast<char>(c);
+    c = *++source;
+  }
   return result;
 }
 
