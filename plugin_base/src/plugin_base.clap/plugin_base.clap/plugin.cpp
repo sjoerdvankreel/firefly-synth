@@ -15,7 +15,12 @@ std::int32_t
 plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
   auto iter = _engine.desc().id_to_index.find(param_id);
-  return iter == _engine.desc().id_to_index.end()? -1: iter->second;
+  if (iter == _engine.desc().id_to_index.end())
+  {
+    assert(false);
+    return -1;
+  }
+  return iter->second;
 }
 
 bool
@@ -56,59 +61,80 @@ plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexc
 bool
 plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
+  param_value base_value;
+  int param_index = getParamIndexForParamId(param_id);
+  param_mapping mapping(_engine.desc().param_mappings[param_index]);
+  auto const& param = *_engine.desc().param_at(mapping).topo;
+  if(!param_value::from_text(param, display, base_value)) return false;
+  *value = base_value.to_plain(param);
+  return true;
+}
+
+bool
+plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
+{
+  int param_index = getParamIndexForParamId(param_id);
+  param_mapping mapping(_engine.desc().param_mappings[param_index]);
+  auto const& param = *_engine.desc().param_at(mapping).topo;
+  std::string text = param_value::from_plain(param, value).to_text(param);
+  from_8bit_string(display, size, text.c_str());
   return false;
 }
 
 void
 plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept
 {
-}
-
-bool
-plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
-{
-  return false;
-}
-
-std::uint32_t 
-plugin::notePortsCount(bool is_input) const noexcept
-{
-  return 0;
+  // TODO
 }
 
 bool
 plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
 {
-  return false;
+  if (!is_input || index != 0) return false;
+  info->id = 0;
+  info->preferred_dialect = CLAP_NOTE_DIALECT_CLAP;
+  info->supported_dialects = CLAP_NOTE_DIALECT_CLAP | CLAP_NOTE_DIALECT_MIDI;
+  return true;
 }
 
 std::uint32_t 
 plugin::audioPortsCount(bool is_input) const noexcept
 {
-  return 0;
+  if (!is_input) return 1;
+  return _engine.desc().topo.type == plugin_type::fx? 1: 0;
 }
 
 bool
 plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
 {
-  return false;
-}
-
-void 
-plugin::deactivate() noexcept
-{
-}
-
-clap_process_status
-plugin::process(clap_process const* process) noexcept
-{
-  return 0;
+  if (index != 0) return false;
+  if (is_input && _engine.desc().topo.type == plugin_type::synth) return false;
+  info->id = 0;
+  info->channel_count = 2;
+  info->port_type = CLAP_PORT_STEREO;
+  info->flags = CLAP_AUDIO_PORT_IS_MAIN;
+  info->in_place_pair = CLAP_INVALID_ID;
+  return true;
 }
 
 bool
 plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
 {
-  return false;
+  _engine.activate(sample_rate, max_frame_count);
+  return true;
+}
+
+clap_process_status
+plugin::process(clap_process const* process) noexcept
+{
+  host_block& block = _engine.prepare();
+  block.common->frame_count = process->frames_count;
+  block.common->stream_time = process->steady_time;
+  block.common->bpm = process->transport? process->transport->tempo: 0;
+  block.common->audio_input = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
+  block.audio_output = process->audio_outputs[0].data32;
+  _engine.process();
+  return CLAP_PROCESS_CONTINUE;
 }
 
 }
