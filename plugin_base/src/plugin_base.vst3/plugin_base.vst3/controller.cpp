@@ -27,7 +27,7 @@ void
 param_wrapper::toString(ParamValue normalized, String128 string) const
 {
   param_value value(param_value::from_normalized(*_topo, normalized));
-  from_8bit_string(string, sizeof(String128), value.to_text(*_topo).c_str());
+  from_8bit_string(string, sizeof(String128) / sizeof(string[0]), value.to_text(*_topo).c_str());
 }
 
 bool 
