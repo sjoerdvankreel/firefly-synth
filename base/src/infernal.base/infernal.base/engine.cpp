@@ -6,6 +6,8 @@ plugin_engine::
 plugin_engine(plugin_topo&& topo) :
 _topo(std::move(topo)), _desc(_topo), _dims(_topo)
 {
+  // reserve this much but allocate (on the audio thread!) if necessary
+  // still seems better than dropping events
   int note_limit_guess = _topo.polyphony * 64;
   int block_events_guess = _desc.param_mappings.size();
   int accurate_events_guess = _desc.param_mappings.size() * 64;
