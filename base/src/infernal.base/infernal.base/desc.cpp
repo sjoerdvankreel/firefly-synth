@@ -158,6 +158,7 @@ plugin_desc(plugin_topo const& plugin)
 {
   topo = &plugin;
   int plugin_param_index = 0;
+  int plugin_module_index = 0;
   std::set<std::string> param_ids;
   for(int g = 0; g < plugin.module_groups.size(); g++)
   {
@@ -169,13 +170,15 @@ plugin_desc(plugin_topo const& plugin)
       for(int p = 0; p < group.params.size(); p++)
       {
         param_mapping mapping;
-        mapping.group = g;
-        mapping.param = p;
-        mapping.module = m;
+        mapping.group_in_plugin = g;
+        mapping.param_in_module = p;
+        mapping.module_in_group = m;
+        mapping.module_in_plugin = plugin_module_index;
         param_mappings.push_back(mapping);
         id_to_index[module.params[p].id_hash] = plugin_param_index++;
         INF_ASSERT_EXEC(param_ids.insert(module.params[p].id).second);
       }
+      plugin_module_index++;
     }
   }
   validate(*this);

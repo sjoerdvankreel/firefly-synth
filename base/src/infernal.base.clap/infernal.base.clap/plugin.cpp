@@ -23,8 +23,7 @@ plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
   int param_index = getParamIndexForParamId(param_id);
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
-  param_value base_value(_engine.state()[mapping.group][mapping.module][mapping.param]);
-  *value = base_value.to_plain(_engine.topo().module_groups[mapping.group].params[mapping.param]);
+  *value = mapping.value_at(_engine.state()).to_plain(*_engine.desc().param_at(mapping).topo);
   return true;
 }
 
@@ -32,11 +31,26 @@ bool
 plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexcept
 {
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
-  param_topo const& param = _engine.desc().modules[mapping.]
+  param_desc const& param = _engine.desc().param_at(mapping);
   info->cookie = nullptr;
-  info->default_value = param_value::default_value(param).to_plain(param);
-  info->id = _engine.desc().modules[mapping.group].params[]
-  info-?>
+  info->id = param.id_hash;
+  info->min_value = param.topo->min;
+  info->max_value = param.topo->max;
+  info->default_value = param_value::default_value(*param.topo).to_plain(*param.topo);
+  from_8bit_string(info->name, _engine.desc().param_at(mapping).name.c_str());
+  from_8bit_string(info->module, _engine.desc().modules[mapping.module_in_plugin].name.c_str());
+
+  info->flags = 0;
+  if(param.topo->direction != param_direction::input) 
+    info->flags |= CLAP_PARAM_IS_READONLY;
+  else
+  {
+    info->flags |= CLAP_PARAM_IS_AUTOMATABLE;
+    info->flags |= CLAP_PARAM_REQUIRES_PROCESS;
+  }
+  if(!param.topo->is_real())
+    info->flags |= CLAP_PARAM_IS_STEPPED;
+  return true;
 }
 
 bool

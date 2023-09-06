@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 #include <cassert>
 
 #define INF_STR_(x) #x
@@ -14,3 +15,30 @@
   x(x const&) = delete; \
   x& operator = (x&&) = default; \
   x& operator = (x const&) = delete
+
+namespace infernal::base {
+
+// trims characters outside range
+template <class T> std::string 
+to_8bit_string(T const* source)
+{
+  T c;
+  std::string result;
+  while ((c = *source++) != static_cast<T>('\0'))
+    result += static_cast<char>(c);
+  return result;
+}
+
+template <class T>
+void from_8bit_string(T* dest, int count, char const* source)
+{
+  memset(dest, 0, sizeof(*dest) * count);
+  for (int i = 0; i < count - 1 && i < strlen(source); i++)
+    dest[i] = source[i];
+}
+
+template <class T, int N>
+void from_8bit_string(T(&dest)[N], char const* source)
+{ from_8bit_string(dest, N, source); }
+
+}

@@ -135,11 +135,9 @@ plugin_engine::process()
   {
     auto const& event = _host_block.block_events[e];
     auto const& mapping = _desc.param_mappings[event.plugin_param_index];
-    auto const& group = _topo.module_groups[mapping.group];
-    auto const& param = group.params[mapping.param];
-    param_value denormalized = param_value::from_normalized(param, event.normalized);
-    _state[mapping.group][mapping.module][mapping.param] = denormalized;
-    _plugin_block.block_automation[mapping.group][mapping.module][mapping.param] = denormalized;
+    param_value denormalized = param_value::from_normalized(*_desc.param_at(mapping).topo, event.normalized);
+    mapping.value_at(_state) = denormalized;
+    mapping.value_at(_plugin_block.block_automation) = denormalized;
   }
 
   // process accurate automation values, this is a bit tricky as 
@@ -151,11 +149,9 @@ plugin_engine::process()
   {
     auto const& event = _host_block.accurate_events[e];
     auto const& mapping = _desc.param_mappings[event.plugin_param_index];
-    auto const& group = _topo.module_groups[mapping.group];
-    auto const& param = group.params[mapping.param];
 
     // linear interpolation from previous to current value
-    auto& curve = _plugin_block.accurate_automation[mapping.group][mapping.module][mapping.param];
+    auto& curve = mapping.value_at(_plugin_block.accurate_automation);
     int prev_frame = _accurate_frames[event.plugin_param_index];
     float frame_count = event.frame_index - prev_frame;
     float range = event.normalized - curve[prev_frame];
@@ -163,8 +159,7 @@ plugin_engine::process()
       curve[f] = curve[prev_frame] + (f - prev_frame) / frame_count * range;
 
     // set new state to denormalized and update last event timestamp
-    _state[mapping.group][mapping.module][mapping.param].real 
-      = param_value::from_normalized(param, event.normalized).real;
+    mapping.value_at(_state).real = param_value::from_normalized(*_desc.param_at(mapping).topo, event.normalized).real;
     _accurate_frames[event.plugin_param_index] = event.frame_index;
   }
 

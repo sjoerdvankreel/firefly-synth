@@ -13,6 +13,11 @@ struct param_mapping final {
   int param_in_module = {};
   int module_in_group = {};
   int module_in_plugin = {};
+
+  template <class T> auto& value_at(T& container) const 
+  { return container[group_in_plugin][module_in_group][param_in_module]; }
+  template <class T> auto const& value_at(T const& container) const 
+  { return container[group_in_plugin][module_in_group][param_in_module]; }
 };
 
 // runtime parameter descriptor
@@ -42,6 +47,9 @@ struct plugin_desc final {
   std::vector<param_mapping> param_mappings = {};
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(plugin_topo const& plugin);
+
+  param_desc const& param_at(param_mapping const& mapping) const
+  { return modules[mapping.module_in_plugin].params[mapping.param_in_module]; }
 };
 
 // runtime plugin topo dimensions
