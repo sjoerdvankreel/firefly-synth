@@ -47,9 +47,9 @@ component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
-  if (_engine.topo().type != plugin_type::fx && input_count != 0) return kResultFalse;
+  if (_engine.desc().topo.type != plugin_type::fx && input_count != 0) return kResultFalse;
   if (output_count != 1 || outputs[0] != SpeakerArr::kStereo) return kResultFalse;
-  if((_engine.topo().type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
+  if((_engine.desc().topo.type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
   return AudioEffect::setBusArrangements(inputs, input_count, outputs, output_count);
 }
 
@@ -59,7 +59,7 @@ component::process(ProcessData& data)
   host_block& block = _engine.prepare();
   block.common->frame_count = data.numSamples;
   block.common->bpm = data.processContext ? data.processContext->tempo : 0;
-  block.common->audio_input = _engine.topo().type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
+  block.common->audio_input = _engine.desc().topo.type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
   block.common->stream_time = data.processContext ? data.processContext->projectTimeSamples : 0;
   block.audio_output = data.outputs[0].channelBuffers32;
 

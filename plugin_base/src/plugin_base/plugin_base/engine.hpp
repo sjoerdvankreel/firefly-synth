@@ -33,9 +33,8 @@ class plugin_engine final {
   host_block _host_block = {};
   plugin_block _plugin_block = {};
   common_block _common_block = {};
-  jarray3d<param_value> _state = {};
-  // these keep track of accurate event frame positions per parameter
-  std::vector<int> _accurate_frames = {};
+  jarray3d<param_value> _state = {};  
+  std::vector<int> _accurate_frames = {}; // track accurate event frame positions per parameter
   std::unique_ptr<mixdown_engine> _mixdown_engine = {};
   jarray2d<std::unique_ptr<module_engine>> _module_engines = {};
 
