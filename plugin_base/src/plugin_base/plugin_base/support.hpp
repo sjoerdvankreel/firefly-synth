@@ -24,7 +24,7 @@ param_steps(
 param_topo
 param_items(
   std::string const& id, std::string const& name, int group,
-  param_display display, std::vector<item_topo>&&, std::string const& default_);
+  param_display display, items_topo_factory items_factory, std::string const& default_);
 param_topo
 param_names(
   std::string const& id, std::string const& name, int group,

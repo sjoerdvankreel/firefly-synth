@@ -64,14 +64,14 @@ param_steps(
 param_topo
 param_items(
   std::string const& id, std::string const& name, int group,
-  param_display display, std::vector<item_topo>&& items, std::string const& default_)
+  param_display display, items_topo_factory items_factory, std::string const& default_)
 {
   param_topo result(input_param(id, name, group, default_, param_rate::block));
+  result.items = items_factory();
   result.min = 0;
-  result.max = items.size() - 1;
+  result.max = result.items.size() - 1;
   result.display = display;
   result.type = param_type::item;
-  result.items = std::move(items);
   return result;
 }
 

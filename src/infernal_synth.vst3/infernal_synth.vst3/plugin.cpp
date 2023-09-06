@@ -23,7 +23,7 @@ using namespace infernal::base::vst3;
 static FUnknown*
 controller_factory(void*)
 {
-  auto result = new controller(synth_topo());
+  auto result = new controller(synth_topo);
   return static_cast<IEditController*>(result);
 }
 
@@ -31,7 +31,7 @@ static FUnknown*
 component_factory(void*)
 { 
   FUID controller_id(fuid_from_text(INF_SYNTH_CONTROLLER_ID));
-  auto result = new component(synth_topo(), controller_id);
+  auto result = new component(synth_topo, controller_id);
   return static_cast<IAudioProcessor*>(result);
 }
 

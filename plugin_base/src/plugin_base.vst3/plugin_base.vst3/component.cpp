@@ -9,8 +9,8 @@ using namespace Steinberg::Vst;
 namespace infernal::base::vst3 {
 
 component::
-component(plugin_topo&& topo, FUID const& controller_id) :
-_engine(std::move(topo))
+component(plugin_topo_factory factory, FUID const& controller_id) :
+_engine(factory)
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
@@ -38,7 +38,7 @@ component::initialize(FUnknown* context)
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
   addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
-  if(_engine.topo().type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
+  if(_engine.desc().topo.type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
   return kResultTrue;
 }
 

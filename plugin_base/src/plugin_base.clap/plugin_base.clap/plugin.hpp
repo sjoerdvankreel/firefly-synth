@@ -12,7 +12,7 @@ public ::clap::helpers::Plugin<
 {
   plugin_engine _engine;
 public:
-  plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo&& topo);
+  plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);
   
   bool implementsParams() const noexcept override { return true; }
   bool implementsNotePorts() const noexcept override { return true; }

@@ -27,7 +27,6 @@ public:
 };
 
 class plugin_engine final {
-  plugin_topo const _topo;
   plugin_desc const _desc;
   plugin_dims const _dims; 
   float _sample_rate = {};
@@ -42,14 +41,13 @@ class plugin_engine final {
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_engine);
-  explicit plugin_engine(plugin_topo&& topo);  
+  explicit plugin_engine(plugin_topo_factory factory);
 
   void process();
   void deactivate();
   host_block& prepare();
   void activate(int sample_rate, int max_frame_count);
 
-  plugin_topo const& topo() const { return _topo; }
   plugin_desc const& desc() const { return _desc; }
   jarray3d<param_value> const& state() const { return _state; }
 };

@@ -8,8 +8,8 @@ using namespace infernal::base;
 namespace infernal::base::clap {
 
 plugin::
-plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo&& topo):
-Plugin(desc, host), _engine(std::move(topo)) {}
+plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):
+Plugin(desc, host), _engine(factory) {}
 
 std::int32_t 
 plugin::getParamIndexForParamId(clap_id param_id) const noexcept

@@ -3,12 +3,12 @@
 namespace infernal::base {
 
 plugin_engine::
-plugin_engine(plugin_topo&& topo) :
-_topo(std::move(topo)), _desc(_topo), _dims(_topo)
+plugin_engine(plugin_topo_factory factory) :
+_desc(factory), _dims(_desc.topo)
 {
   // reserve this much but allocate (on the audio thread!) if necessary
   // still seems better than dropping events
-  int note_limit_guess = _topo.polyphony * 64;
+  int note_limit_guess = _desc.topo.polyphony * 64;
   int block_events_guess = _desc.param_mappings.size();
   int accurate_events_guess = _desc.param_mappings.size() * 64;
 
@@ -22,9 +22,9 @@ _topo(std::move(topo)), _desc(_topo), _dims(_topo)
   _host_block.block_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
   _plugin_block.block_automation.init(_dims.module_param_counts);
-  for (int g = 0; g < _topo.module_groups.size(); g++)
+  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
-    auto const& group = _topo.module_groups[g];
+    auto const& group = _desc.topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
       for(int p = 0; p < group.params.size(); p++)
         _state[g][m][p] = param_value::default_value(group.params[p]);
@@ -57,8 +57,8 @@ plugin_engine::deactivate()
   _plugin_block.module_cv = {};
   _plugin_block.module_audio = {};
   _plugin_block.accurate_automation = {};
-  for(int g = 0; g < _topo.module_groups.size(); g++)
-    for(int m = 0; m < _topo.module_groups[g].module_count; m++)
+  for(int g = 0; g < _desc.topo.module_groups.size(); g++)
+    for(int m = 0; m < _desc.topo.module_groups[g].module_count; m++)
       _module_engines[g][m].reset();
 }
 
@@ -69,14 +69,14 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _sample_rate = sample_rate;
 
   // init frame-count dependent memory
-  plugin_frame_dims frame_dims(_topo, max_frame_count);
-  _mixdown_engine = _topo.mixdown_factory(sample_rate, max_frame_count);
+  plugin_frame_dims frame_dims(_desc.topo, max_frame_count);
+  _mixdown_engine = _desc.topo.mixdown_factory(sample_rate, max_frame_count);
   _plugin_block.module_cv.init(frame_dims.module_cv_frame_counts);
   _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
   _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
-  for (int g = 0; g < _topo.module_groups.size(); g++)
-    for (int m = 0; m < _topo.module_groups[g].module_count; m++)
-      _module_engines[g][m] = _topo.module_groups[g].engine_factory(sample_rate, max_frame_count);
+  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
+    for (int m = 0; m < _desc.topo.module_groups[g].module_count; m++)
+      _module_engines[g][m] = _desc.topo.module_groups[g].engine_factory(sample_rate, max_frame_count);
 }
 
 void 
@@ -89,9 +89,9 @@ plugin_engine::process()
       _host_block.audio_output[c] + _common_block.frame_count,
       0.0f);
 
-  for(int g = 0; g < _topo.module_groups.size(); g++)
+  for(int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
-    auto const& group = _topo.module_groups[g];
+    auto const& group = _desc.topo.module_groups[g];
     for (int m = 0; m < group.module_count; m++)
       if(group.output == module_output::cv)
       {
@@ -108,9 +108,9 @@ plugin_engine::process()
       }
   }
 
-  for (int g = 0; g < _topo.module_groups.size(); g++)
+  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
-    auto const& group = _topo.module_groups[g];
+    auto const& group = _desc.topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
       for(int p = 0; p < group.params.size(); p++)
       {
@@ -165,9 +165,9 @@ plugin_engine::process()
 
   // denormalize all interpolated curves even if they where not changed
   // this might be costly for log-scaled parameters
-  for (int g = 0; g < _topo.module_groups.size(); g++)
+  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
-    auto const& group = _topo.module_groups[g];
+    auto const& group = _desc.topo.module_groups[g];
     for (int m = 0; m < group.module_count; m++)
       for (int p = 0; p < group.params.size(); p++)
       {
@@ -184,9 +184,9 @@ plugin_engine::process()
   // run all modules in order
   // each module has access to previous modules audio and cv outputs
   _plugin_block.sample_rate = _sample_rate;
-  for(int g = 0; g < _topo.module_groups.size(); g++)
+  for(int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
-    auto const& group = _topo.module_groups[g];
+    auto const& group = _desc.topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
     {
       module_block module(
@@ -194,12 +194,12 @@ plugin_engine::process()
         _plugin_block.module_audio[g][m], 
         _plugin_block.accurate_automation[g][m],
         _plugin_block.block_automation[g][m]);
-      _module_engines[g][m]->process(_topo, _plugin_block, module);
+      _module_engines[g][m]->process(_desc.topo, _plugin_block, module);
     }
   }
 
   // mixer will combine module outputs into host audio out
-  _mixdown_engine->process(_topo, _plugin_block, _host_block.audio_output);
+  _mixdown_engine->process(_desc.topo, _plugin_block, _host_block.audio_output);
 }
 
 }

@@ -41,12 +41,12 @@ struct module_desc final {
 
 // runtime plugin descriptor
 struct plugin_desc final {
-  plugin_topo const* topo = {};
+  plugin_topo const topo = {};
   std::map<int, int> id_to_index;
   std::vector<module_desc> modules = {};
   std::vector<param_mapping> param_mappings = {};
   INF_DECLARE_MOVE_ONLY(plugin_desc);
-  plugin_desc(plugin_topo const& plugin);
+  plugin_desc(plugin_topo_factory factory);
 
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_in_plugin].params[mapping.param_in_module]; }

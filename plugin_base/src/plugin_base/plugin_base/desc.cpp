@@ -37,7 +37,7 @@ validate(plugin_desc const& desc)
 {
   std::set<int> plugin_param_hashes;
   std::set<std::string> plugin_param_ids;
-  assert(desc.topo->mixdown_factory);
+  assert(desc.topo.mixdown_factory);
   assert(desc.id_to_index.size() == desc.param_mappings.size());
   for (int m = 0; m < desc.modules.size(); m++)
   {
@@ -55,9 +55,9 @@ validate(plugin_desc const& desc)
 
   std::set<std::string> param_ids;
   std::set<std::string> group_ids;
-  for (int g = 0; g < desc.topo->module_groups.size(); g++)
+  for (int g = 0; g < desc.topo.module_groups.size(); g++)
   {
-    auto const& group = desc.topo->module_groups[g];
+    auto const& group = desc.topo.module_groups[g];
     assert(group.id.size());
     assert(group.name.size());
     assert(group.engine_factory);
@@ -154,15 +154,15 @@ module_desc(module_group_topo const& module_group, int module_index)
 }
 
 plugin_desc::
-plugin_desc(plugin_topo const& plugin)
+plugin_desc(plugin_topo_factory factory):
+topo(factory())
 {
-  topo = &plugin;
   int plugin_param_index = 0;
   int plugin_module_index = 0;
   std::set<std::string> param_ids;
-  for(int g = 0; g < plugin.module_groups.size(); g++)
+  for(int g = 0; g < topo.module_groups.size(); g++)
   {
-    auto const& group = plugin.module_groups[g];
+    auto const& group = topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
     {
       modules.emplace_back(module_desc(group, m));
