@@ -2,7 +2,7 @@
 #include <plugin_base/topo.hpp>
 #include <plugin_base/support.hpp>
 #include <plugin_base/engine.hpp>
-#include <infernal.synth/synth.hpp>
+#include <infernal_synth/synth.hpp>
 #include <cmath>
 
 using namespace infernal::base;

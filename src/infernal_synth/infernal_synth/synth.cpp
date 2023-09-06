@@ -1,4 +1,4 @@
-#include <infernal.synth/synth.hpp>
+#include <infernal_synth/synth.hpp>
 #include <plugin_base/engine.hpp>
 
 using namespace infernal::base;

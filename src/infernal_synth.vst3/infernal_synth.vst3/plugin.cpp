@@ -1,5 +1,5 @@
-#include <infernal.synth/synth.hpp>
-#include <infernal.synth/plugin.hpp>
+#include <infernal_synth/synth.hpp>
+#include <infernal_synth/plugin.hpp>
 #include <plugin_base.vst3/support.hpp>
 #include <plugin_base.vst3/component.hpp>
 #include <plugin_base.vst3/controller.hpp>
