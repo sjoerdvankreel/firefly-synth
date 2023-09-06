@@ -42,14 +42,16 @@ class plugin_engine final {
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_engine);
-  explicit plugin_engine(plugin_topo&& topo);
-  plugin_topo const& topo() const { return _topo; }
-  plugin_desc const& desc() const { return _desc; }
+  explicit plugin_engine(plugin_topo&& topo);  
 
   void process();
   void deactivate();
   host_block& prepare();
   void activate(int sample_rate, int max_frame_count);
+
+  plugin_topo const& topo() const { return _topo; }
+  plugin_desc const& desc() const { return _desc; }
+  jarray3d<param_value> const& state() const { return _state; }
 };
 
 }

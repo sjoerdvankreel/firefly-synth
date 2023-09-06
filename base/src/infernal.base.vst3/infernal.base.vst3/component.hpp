@@ -8,7 +8,6 @@ namespace infernal::base::vst3 {
 class component final:
 public Steinberg::Vst::AudioEffect {
   plugin_engine _engine;
-  plugin_desc const _desc;
   using int32 = Steinberg::int32;
   using SpeakerArrangement = Steinberg::Vst::SpeakerArrangement;
 public:

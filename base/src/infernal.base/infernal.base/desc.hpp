@@ -9,9 +9,10 @@ namespace infernal::base {
 
 // mapping plugin level parameter index
 struct param_mapping final {
-  int group = {};
-  int param = {};
-  int module = {};
+  int group_in_plugin = {};
+  int param_in_module = {};
+  int module_in_group = {};
+  int module_in_plugin = {};
 };
 
 // runtime parameter descriptor

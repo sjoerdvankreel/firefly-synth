@@ -5,14 +5,7 @@
 
 namespace infernal::base {
 
-double
-param_value::default_normalized(param_topo const& topo)
-{
-  param_value result(default_value(topo));
-  return result.to_normalized(topo);
-}
-
-// are defaults are text so they can be hardcoded as shown in the ui
+// all defaults are text so they can be hardcoded as shown in the ui
 param_value
 param_value::default_value(param_topo const& topo)
 {

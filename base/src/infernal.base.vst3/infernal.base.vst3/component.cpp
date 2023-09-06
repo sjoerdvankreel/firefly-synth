@@ -10,7 +10,7 @@ namespace infernal::base::vst3 {
 
 component::
 component(plugin_topo&& topo, FUID const& controller_id) :
-_engine(std::move(topo)), _desc(_engine.topo())
+_engine(std::move(topo))
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
@@ -99,8 +99,8 @@ component::process(ProcessData& data)
     for(int i = 0; i < data.inputParameterChanges->getParameterCount(); i++)
       if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
-        int param_index = _desc.id_to_index.at(queue->getParameterId());
-        auto const& mapping = _desc.param_mappings[param_index];
+        int param_index = _engine.desc().id_to_index.at(queue->getParameterId());
+        auto const& mapping = _engine.desc().param_mappings[param_index];
         auto rate = _engine.topo().module_groups[mapping.group].params[mapping.param].rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
