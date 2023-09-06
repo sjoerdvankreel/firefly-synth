@@ -3,7 +3,7 @@
 #include <plugin_base/utility.hpp>
 #include <plugin_base/param_value.hpp>
 
-namespace infernal::base {
+namespace plugin_base {
 
 struct common_block;
 

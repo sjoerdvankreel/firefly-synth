@@ -3,7 +3,7 @@
 #include <sstream>
 #include <iomanip>
 
-namespace infernal::base {
+namespace plugin_base {
 
 // all defaults are text so they can be hardcoded as shown in the ui
 param_value

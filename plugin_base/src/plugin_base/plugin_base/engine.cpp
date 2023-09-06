@@ -1,6 +1,6 @@
 #include <plugin_base/engine.hpp>
 
-namespace infernal::base {
+namespace plugin_base {
 
 plugin_engine::
 plugin_engine(plugin_topo_factory factory) :

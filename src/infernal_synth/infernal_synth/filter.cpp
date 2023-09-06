@@ -5,9 +5,9 @@
 #include <infernal_synth/synth.hpp>
 #include <cmath>
 
-using namespace infernal::base;
+using namespace plugin_base;
 
-namespace infernal::synth {
+namespace infernal_synth {
 
 class filter_engine: 
 public module_engine {  

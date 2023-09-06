@@ -10,7 +10,7 @@
 #include <memory>
 #include <utility>
 
-namespace infernal::base {
+namespace plugin_base {
 
 // single module audio processor fills its own output if any
 class module_engine {

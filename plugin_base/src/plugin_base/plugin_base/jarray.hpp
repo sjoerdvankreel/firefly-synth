@@ -2,7 +2,7 @@
 #include <plugin_base/utility.hpp>
 #include <vector>
 
-namespace infernal::base {
+namespace plugin_base {
 
 // 2d jagged array
 template <class T>

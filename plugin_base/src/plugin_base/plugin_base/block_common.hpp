@@ -3,7 +3,7 @@
 #include <vector>
 #include <cstdint>
 
-namespace infernal::base {
+namespace plugin_base {
 
 enum class note_event_type { on, off, cut };
 

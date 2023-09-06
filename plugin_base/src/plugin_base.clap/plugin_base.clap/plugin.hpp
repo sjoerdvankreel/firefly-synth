@@ -3,7 +3,7 @@
 #include <clap/helpers/plugin.hh>
 #include <cstdint>
 
-namespace infernal::base::clap {
+namespace plugin_base::clap {
 
 class plugin:
 public ::clap::helpers::Plugin<

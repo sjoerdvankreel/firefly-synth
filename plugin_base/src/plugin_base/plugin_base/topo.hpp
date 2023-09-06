@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 
-namespace infernal::base {
+namespace plugin_base {
 
 class module_engine;
 class mixdown_engine;

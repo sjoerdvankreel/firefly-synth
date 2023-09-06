@@ -17,7 +17,7 @@
   x& operator = (x&&) = default; \
   x& operator = (x const&) = delete
 
-namespace infernal::base {
+namespace plugin_base {
 
 // trims characters outside range
 template <class T> std::string 

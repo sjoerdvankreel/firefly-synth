@@ -2,7 +2,7 @@
 #include <cmath>
 #define INF_PI 3.14159265358979323846264338327950288
 
-namespace infernal::base {
+namespace plugin_base {
 
 inline float
 balance(int channel, float value)

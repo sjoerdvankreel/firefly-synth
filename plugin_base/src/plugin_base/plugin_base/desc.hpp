@@ -5,7 +5,7 @@
 #include <vector>
 #include <string>
 
-namespace infernal::base {
+namespace plugin_base {
 
 // mapping plugin level parameter index
 struct param_mapping final {

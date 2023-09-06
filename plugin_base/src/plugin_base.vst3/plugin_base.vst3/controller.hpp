@@ -3,7 +3,7 @@
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <utility>
 
-namespace infernal::base::vst3 {
+namespace plugin_base::vst3 {
 
 class controller final:
 public Steinberg::Vst::EditControllerEx1 {

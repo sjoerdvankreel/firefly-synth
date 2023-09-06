@@ -2,7 +2,7 @@
 #include <plugin_base/param_value.hpp>
 #include <set>
 
-namespace infernal::base {
+namespace plugin_base {
 
 // nonnegative int from parameter id
 static int

@@ -2,7 +2,7 @@
 #include <plugin_base/topo.hpp>
 #include <string>
 
-namespace infernal::base {
+namespace plugin_base {
 
 std::vector<std::string>
 note_names();

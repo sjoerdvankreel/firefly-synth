@@ -6,7 +6,7 @@
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 
-namespace infernal::base::vst3 {
+namespace plugin_base::vst3 {
 
 class param_wrapper:
 public Parameter

@@ -3,9 +3,9 @@
 #include <vector>
 #include <utility>
 
-using namespace infernal::base;
+using namespace plugin_base;
 
-namespace infernal::base::clap {
+namespace plugin_base::clap {
 
 plugin::
 plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):

@@ -9,8 +9,8 @@
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
-using namespace infernal::synth;
-using namespace infernal::base::vst3;
+using namespace infernal_synth;
+using namespace plugin_base::vst3;
 
 #if INF_IS_FX
 #define PLUG_TYPE PlugType::kFx

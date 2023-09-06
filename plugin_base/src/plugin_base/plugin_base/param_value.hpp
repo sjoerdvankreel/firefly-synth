@@ -2,7 +2,7 @@
 #include <plugin_base/topo.hpp>
 #include <cmath>
 
-namespace infernal::base {
+namespace plugin_base {
 
 // internal parameter representation
 // log scale is respected at all times

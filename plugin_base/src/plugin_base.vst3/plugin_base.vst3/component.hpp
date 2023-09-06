@@ -3,7 +3,7 @@
 #include <plugin_base/engine.hpp>
 #include <public.sdk/source/vst/vstaudioeffect.h>
 
-namespace infernal::base::vst3 {
+namespace plugin_base::vst3 {
 
 class component final:
 public Steinberg::Vst::AudioEffect {

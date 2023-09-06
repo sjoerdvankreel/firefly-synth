@@ -3,7 +3,7 @@
 
 using namespace Steinberg;
 
-namespace infernal::base::vst3 {
+namespace plugin_base::vst3 {
 
 FUID 
 fuid_from_text(char const* text)

@@ -1,9 +1,9 @@
 #include <infernal_synth/synth.hpp>
 #include <plugin_base/engine.hpp>
 
-using namespace infernal::base;
+using namespace plugin_base;
 
-namespace infernal::synth {
+namespace infernal_synth {
 
 class synth_mixdown:
 public mixdown_engine

@@ -1,7 +1,7 @@
 #include <plugin_base/support.hpp>
 #include <cmath>
 
-namespace infernal::base {
+namespace plugin_base {
 
 std::vector<std::string>
 note_names() 
