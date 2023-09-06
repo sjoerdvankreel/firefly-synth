@@ -1,7 +1,7 @@
-#include <infernal.base/dsp.hpp>
-#include <infernal.base/topo.hpp>
-#include <infernal.base/support.hpp>
-#include <infernal.base/engine.hpp>
+#include <plugin_base/dsp.hpp>
+#include <plugin_base/topo.hpp>
+#include <plugin_base/support.hpp>
+#include <plugin_base/engine.hpp>
 #include <infernal.synth/synth.hpp>
 #include <cmath>
 

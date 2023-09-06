@@ -1,7 +1,7 @@
 #pragma once
-#include <infernal.base/jarray.hpp>
-#include <infernal.base/utility.hpp>
-#include <infernal.base/param_value.hpp>
+#include <plugin_base/jarray.hpp>
+#include <plugin_base/utility.hpp>
+#include <plugin_base/param_value.hpp>
 
 namespace infernal::base {
 

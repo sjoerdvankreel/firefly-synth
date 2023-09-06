@@ -1,4 +1,4 @@
-#include <infernal.base.vst3/component.hpp>
+#include <plugin_base.vst3/component.hpp>
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/vst/ivstprocesscontext.h>
 #include <pluginterfaces/vst/ivstparameterchanges.h>

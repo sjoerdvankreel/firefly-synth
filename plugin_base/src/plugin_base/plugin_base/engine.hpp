@@ -1,12 +1,12 @@
 #pragma once
-#include <infernal.base/topo.hpp>
-#include <infernal.base/desc.hpp>
-#include <infernal.base/jarray.hpp>
-#include <infernal.base/utility.hpp>
-#include <infernal.base/param_value.hpp>
-#include <infernal.base/block_host.hpp>
-#include <infernal.base/block_common.hpp>
-#include <infernal.base/block_plugin.hpp>
+#include <plugin_base/topo.hpp>
+#include <plugin_base/desc.hpp>
+#include <plugin_base/jarray.hpp>
+#include <plugin_base/utility.hpp>
+#include <plugin_base/param_value.hpp>
+#include <plugin_base/block_host.hpp>
+#include <plugin_base/block_common.hpp>
+#include <plugin_base/block_plugin.hpp>
 #include <memory>
 #include <utility>
 

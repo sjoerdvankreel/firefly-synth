@@ -1,7 +1,7 @@
-#include <infernal.base/desc.hpp>
-#include <infernal.base/utility.hpp>
-#include <infernal.base/param_value.hpp>
-#include <infernal.base.vst3/controller.hpp>
+#include <plugin_base/desc.hpp>
+#include <plugin_base/utility.hpp>
+#include <plugin_base/param_value.hpp>
+#include <plugin_base.vst3/controller.hpp>
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;

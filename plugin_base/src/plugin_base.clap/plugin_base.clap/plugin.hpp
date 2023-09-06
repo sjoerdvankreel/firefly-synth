@@ -1,5 +1,5 @@
 #pragma once
-#include <infernal.base/engine.hpp>
+#include <plugin_base/engine.hpp>
 #include <clap/helpers/plugin.hh>
 #include <cstdint>
 

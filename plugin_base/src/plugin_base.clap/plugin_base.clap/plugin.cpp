@@ -1,5 +1,5 @@
-#include <infernal.base.clap/plugin.hpp>
-#include <infernal.base/param_value.hpp>
+#include <plugin_base.clap/plugin.hpp>
+#include <plugin_base/param_value.hpp>
 #include <vector>
 #include <utility>
 

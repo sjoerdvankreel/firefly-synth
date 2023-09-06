@@ -1,5 +1,5 @@
 #pragma once
-#include <infernal.base/utility.hpp>
+#include <plugin_base/utility.hpp>
 
 #if INF_IS_FX
 #define INF_SYNTH_NAME "Infernal Synth FX"

@@ -1,5 +1,5 @@
-#include <infernal.base/desc.hpp>
-#include <infernal.base/param_value.hpp>
+#include <plugin_base/desc.hpp>
+#include <plugin_base/param_value.hpp>
 #include <set>
 
 namespace infernal::base {

@@ -1,5 +1,5 @@
 #pragma once
-#include <infernal.base/topo.hpp>
+#include <plugin_base/topo.hpp>
 #include <cmath>
 
 namespace infernal::base {

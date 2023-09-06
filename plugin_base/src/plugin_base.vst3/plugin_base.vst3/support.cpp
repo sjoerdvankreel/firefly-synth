@@ -1,5 +1,5 @@
-#include <infernal.base/utility.hpp>
-#include <infernal.base.vst3/support.hpp>
+#include <plugin_base/utility.hpp>
+#include <plugin_base.vst3/support.hpp>
 
 using namespace Steinberg;
 

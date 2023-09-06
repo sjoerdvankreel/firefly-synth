@@ -1,4 +1,4 @@
-#include <infernal.base/support.hpp>
+#include <plugin_base/support.hpp>
 #include <cmath>
 
 namespace infernal::base {

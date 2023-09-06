@@ -1,5 +1,5 @@
 #include <infernal.synth/synth.hpp>
-#include <infernal.base/engine.hpp>
+#include <plugin_base/engine.hpp>
 
 using namespace infernal::base;
 

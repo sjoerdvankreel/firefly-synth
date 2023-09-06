@@ -1,8 +1,8 @@
 #include <infernal.synth/synth.hpp>
 #include <infernal.synth/plugin.hpp>
-#include <infernal.base.vst3/support.hpp>
-#include <infernal.base.vst3/component.hpp>
-#include <infernal.base.vst3/controller.hpp>
+#include <plugin_base.vst3/support.hpp>
+#include <plugin_base.vst3/component.hpp>
+#include <plugin_base.vst3/controller.hpp>
 #include <public.sdk/source/main/pluginfactory.h>
 #include <public.sdk/source/vst/vstaudioeffect.h>
 #include <pluginterfaces/vst/ivsteditcontroller.h>
