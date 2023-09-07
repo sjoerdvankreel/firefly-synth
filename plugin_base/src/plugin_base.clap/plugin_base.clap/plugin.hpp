@@ -12,6 +12,7 @@ public ::clap::helpers::Plugin<
 {
   plugin_engine _engine;
   jarray3d<param_value> _ui_state = {}; // Copy of engine state on the ui thread.
+  std::vector<int> _block_automation_seen = {}; // Only push the first event in per-block automation.
 public:
   plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);
   
