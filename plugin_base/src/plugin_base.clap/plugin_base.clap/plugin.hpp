@@ -18,6 +18,7 @@ public:
   bool implementsNotePorts() const noexcept override { return true; }
   bool implementsAudioPorts() const noexcept override { return true; }
   std::int32_t getParamIndexForParamId(clap_id param_id) const noexcept override;
+  bool getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept override;
 
   bool paramsValue(clap_id param_id, double* value) noexcept override;
   bool paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexcept override;

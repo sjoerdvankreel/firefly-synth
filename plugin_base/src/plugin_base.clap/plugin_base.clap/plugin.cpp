@@ -1,5 +1,7 @@
 #include <plugin_base.clap/plugin.hpp>
 #include <plugin_base/param_value.hpp>
+#include <clap/helpers/plugin.hxx>
+#include <clap/helpers/host-proxy.hxx>
 #include <vector>
 #include <utility>
 
@@ -23,6 +25,13 @@ plugin::getParamIndexForParamId(clap_id param_id) const noexcept
   return iter->second;
 }
 
+bool 
+plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept
+{
+  std::int32_t index = getParamIndexForParamId(param_id);
+  if(index == -1) return false;
+  return index == paramsInfo(index, info);
+}
 bool
 plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
