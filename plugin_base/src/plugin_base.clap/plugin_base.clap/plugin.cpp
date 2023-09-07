@@ -171,6 +171,11 @@ plugin::process(clap_process const* process) noexcept
 
   // if ui thread set new values, make sure we pick them up
   std::atomic_thread_fence(std::memory_order_acquire);
+  for (int i = 0; i < _engine.desc().param_mappings.size(); i++)
+  {
+    auto mapping = _engine.desc().param_mappings[i];
+    mapping.value_at(_engine.state()) = mapping.value_at(_ui_state);
+  }
 
   // make sure we only push per-block events at most 1 time
   std::fill(_block_automation_seen.begin(), _block_automation_seen.end(), 0);
