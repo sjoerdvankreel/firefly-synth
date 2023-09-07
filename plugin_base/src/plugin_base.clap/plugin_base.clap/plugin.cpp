@@ -132,7 +132,7 @@ plugin::process(clap_process const* process) noexcept
   block.common->stream_time = process->steady_time;
   block.common->bpm = process->transport? process->transport->tempo: 0;
   block.common->audio_input = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
-  block.audio_output = process->audio_outputs[0].data32;
+  block.common->audio_output = process->audio_outputs[0].data32;
   _engine.process();
   return CLAP_PROCESS_CONTINUE;
 }

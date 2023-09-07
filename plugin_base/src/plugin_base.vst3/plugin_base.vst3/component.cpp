@@ -61,7 +61,7 @@ component::process(ProcessData& data)
   block.common->bpm = data.processContext ? data.processContext->tempo : 0;
   block.common->audio_input = _engine.desc().topo.type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
   block.common->stream_time = data.processContext ? data.processContext->projectTimeSamples : 0;
-  block.audio_output = data.outputs[0].channelBuffers32;
+  block.common->audio_output = data.outputs[0].channelBuffers32;
 
   Event vst_event;
   if (data.inputEvents)

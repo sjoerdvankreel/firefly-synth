@@ -38,9 +38,9 @@ plugin_engine::prepare()
   _host_block.common->bpm = 0;
   _host_block.common->frame_count = 0;
   _host_block.common->stream_time = 0;
-  _host_block.common->audio_input = nullptr;
   _host_block.common->notes.clear();
-  _host_block.audio_output = nullptr;
+  _host_block.common->audio_input = nullptr;
+  _host_block.common->audio_output = nullptr;
   _host_block.block_events.clear();
   _host_block.accurate_events.clear();
   return _host_block;
@@ -51,7 +51,6 @@ plugin_engine::deactivate()
 {
   // drop frame-count dependent memory
   _sample_rate = 0;
-  _mixdown_engine.reset();
   _host_block.block_events.clear();
   _host_block.accurate_events.clear();
   _plugin_block.module_cv = {};
@@ -70,7 +69,6 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(_desc.topo, max_frame_count);
-  _mixdown_engine = _desc.topo.mixdown_factory(sample_rate, max_frame_count);
   _plugin_block.module_cv.init(frame_dims.module_cv_frame_counts);
   _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
   _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
@@ -85,8 +83,8 @@ plugin_engine::process()
   // clear host audio out
   for(int c = 0; c < 2; c++)
     std::fill(
-      _host_block.audio_output[c], 
-      _host_block.audio_output[c] + _common_block.frame_count,
+      _host_block.common->audio_output[c], 
+      _host_block.common->audio_output[c] + _common_block.frame_count,
       0.0f);
 
   for(int g = 0; g < _desc.topo.module_groups.size(); g++)
@@ -197,9 +195,6 @@ plugin_engine::process()
       _module_engines[g][m]->process(_desc.topo, _plugin_block, module);
     }
   }
-
-  // mixer will combine module outputs into host audio out
-  _mixdown_engine->process(_desc.topo, _plugin_block, _host_block.audio_output);
 }
 
 }

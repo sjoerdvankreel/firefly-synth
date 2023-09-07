@@ -26,7 +26,7 @@ enum filter_param { filter_param_on, filter_param_freq };
 module_group_topo
 filter_topo()
 {
-  module_group_topo result(make_module_group("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, module_scope::voice, module_output::audio));
+  module_group_topo result(make_module_group("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, module_scope::voice, module_output::none));
   result.param_groups.emplace_back(param_group_topo(filter_group_main, "Main"));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
   result.params.emplace_back(param_toggle("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", filter_group_main, false));
@@ -42,7 +42,7 @@ filter_engine::process(
   for(int o = 0; o < topo.module_groups[module_type_osc].module_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
-        module.audio_output[c][f] += osc_audio[o][c][f];
+        plugin.host->audio_output[c][f] += osc_audio[o][c][f];
   int on = module.block_automation[filter_param_on].step;
   if (!on) return;
 
@@ -56,10 +56,10 @@ filter_engine::process(
     float b = (w - angle) * norm;
     for (int c = 0; c < 2; c++)
     {
-      float filtered = module.audio_output[c][f] * a + _in[c] * a + _out[c] * b;
-      _in[c] = module.audio_output[c][f];
+      float filtered = plugin.host->audio_output[c][f] * a + _in[c] * a + _out[c] * b;
+      _in[c] = plugin.host->audio_output[c][f];
       _out[c] = filtered;
-      module.audio_output[c][f] = filtered;
+      plugin.host->audio_output[c][f] = filtered;
     }
   }
 }

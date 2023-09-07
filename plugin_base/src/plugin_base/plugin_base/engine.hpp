@@ -12,18 +12,12 @@
 
 namespace plugin_base {
 
-// single module audio processor fills its own output if any
+// module audio processor fills its own audio/cv output (if any)
+// final module engine is responsible to fill host audio output
 class module_engine {
 public:
   virtual void 
   process(plugin_topo const& topo, plugin_block const& plugin, module_block& module) = 0;
-};
-
-// plugin level audio processor combines module audio outputs into host audio output
-class mixdown_engine {
-public:
-  virtual void
-  process(plugin_topo const& topo, plugin_block const& plugin, float* const* mixdown) = 0;
 };
 
 class plugin_engine final {
@@ -35,7 +29,6 @@ class plugin_engine final {
   common_block _common_block = {};
   jarray3d<param_value> _state = {};  
   std::vector<int> _accurate_frames = {}; // track accurate event frame positions per parameter
-  std::unique_ptr<mixdown_engine> _mixdown_engine = {};
   jarray2d<std::unique_ptr<module_engine>> _module_engines = {};
 
 public:

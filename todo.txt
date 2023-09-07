@@ -1,4 +1,5 @@
 state save
+drop mixer
 voice manager
 clap threadpool
 try out some airwindows stuff

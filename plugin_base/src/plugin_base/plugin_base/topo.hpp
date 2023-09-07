@@ -73,7 +73,6 @@ struct plugin_topo final {
   int polyphony;
   plugin_type type;
   std::vector<module_group_topo> module_groups;
-  std::unique_ptr<mixdown_engine>(*mixdown_factory)(int sample_rate, int max_frame_count);
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
