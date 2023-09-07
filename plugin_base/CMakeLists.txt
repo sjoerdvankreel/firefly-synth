@@ -5,6 +5,13 @@ declare_local_target(STATIC plugin_base plugin_base)
 declare_local_target(STATIC plugin_base.clap plugin_base.clap)
 declare_local_target(STATIC plugin_base.vst3 plugin_base.vst3)
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+target_compile_options(plugin_base.clap PRIVATE /wd4702)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+else()
+message(FATAL_ERROR)
+endif()
+
 target_include_directories(plugin_base.vst3 PRIVATE src/plugin_base)
 target_include_directories(plugin_base.vst3 SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/vst3)
 target_include_directories(plugin_base.clap PRIVATE src/plugin_base)
