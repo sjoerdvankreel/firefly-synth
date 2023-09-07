@@ -1,6 +1,7 @@
 #include <infernal_synth/synth.hpp>
 #include <infernal_synth/plugin.hpp>
 #include <plugin_base.clap/plugin.hpp>
+#include <plugin_base.clap/support.hpp>
 #include <clap/clap.h>
 #include <cstring>
 
@@ -30,33 +31,11 @@ static clap_plugin_descriptor_t const descriptor =
   .features = features
 };
 
-static clap_plugin const*
-create_plugin(clap_plugin_factory const*, clap_host const* host, char const*)
-{
-  // not a leak
-  auto plugin = new plugin_base::clap::plugin(&descriptor, host, synth_topo);
-  return plugin->clapPlugin();
-}
-
-static clap_plugin_factory const factory =
-{
-  .get_plugin_count = [](clap_plugin_factory const*) { return 1u; },
-  .get_plugin_descriptor = [](clap_plugin_factory const*, std::uint32_t) { return &descriptor; },
-  .create_plugin = create_plugin
-};
-
-static void const*
-get_factory(char const* factory_id)
-{
-  if (strcmp(factory_id, CLAP_PLUGIN_FACTORY_ID)) return nullptr;
-  return &factory;
-}
-
 extern "C" CLAP_EXPORT 
 clap_plugin_entry_t const entry = 
 {
   .clap_version = CLAP_VERSION_INIT,
   .init = [](char const*) { return true; },
   .deinit = [](){},
-  .get_factory = get_factory
+  .get_factory = get_plugin_factory<&descriptor, synth_topo>
 };
