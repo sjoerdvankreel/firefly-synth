@@ -11,7 +11,12 @@ namespace plugin_base::clap {
 
 plugin::
 plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):
-Plugin(desc, host), _engine(factory) {}
+Plugin(desc, host), _engine(factory)
+{
+  plugin_dims dims(_engine.desc().topo);
+  _ui_state.init(dims.module_param_counts);
+  _engine.desc().init_default_state(_ui_state);
+}
 
 std::int32_t 
 plugin::getParamIndexForParamId(clap_id param_id) const noexcept
@@ -38,7 +43,7 @@ plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
   int param_index = getParamIndexForParamId(param_id);
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
-  *value = mapping.value_at(_engine.state()).to_plain(*_engine.desc().param_at(mapping).topo);
+  *value = mapping.value_at(_ui_state).to_plain(*_engine.desc().param_at(mapping).topo);
   return true;
 }
 

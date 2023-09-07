@@ -16,19 +16,13 @@ _desc(factory), _dims(_desc.topo)
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
   _state.init(_dims.module_param_counts);
+  _desc.init_default_state(_state);
   _module_engines.init(_dims.module_counts);
   _common_block.notes.reserve(note_limit_guess);
   _accurate_frames.resize(_desc.param_mappings.size());
   _host_block.block_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
   _plugin_block.block_automation.init(_dims.module_param_counts);
-  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
-  {
-    auto const& group = _desc.topo.module_groups[g];
-    for(int m = 0; m < group.module_count; m++)
-      for(int p = 0; p < group.params.size(); p++)
-        _state[g][m][p] = param_value::default_value(group.params[p]);
-  }
 }
 
 host_block&

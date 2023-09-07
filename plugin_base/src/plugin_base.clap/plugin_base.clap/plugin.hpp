@@ -11,6 +11,7 @@ public ::clap::helpers::Plugin<
   ::clap::helpers::CheckingLevel::Maximal>
 {
   plugin_engine _engine;
+  jarray3d<param_value> _ui_state = {}; // Copy of engine state on the ui thread.
 public:
   plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);
   

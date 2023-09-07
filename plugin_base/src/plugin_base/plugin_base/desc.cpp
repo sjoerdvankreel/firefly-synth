@@ -183,6 +183,18 @@ topo(factory())
   validate(*this);
 }
 
+void
+plugin_desc::init_default_state(jarray3d<param_value>& state) const
+{
+  for (int g = 0; g < topo.module_groups.size(); g++)
+  {
+    auto const& group = topo.module_groups[g];
+    for (int m = 0; m < group.module_count; m++)
+      for (int p = 0; p < group.params.size(); p++)
+        state[g][m][p] = param_value::default_value(group.params[p]);
+  }
+}
+
 plugin_dims::
 plugin_dims(plugin_topo const& plugin)
 {
