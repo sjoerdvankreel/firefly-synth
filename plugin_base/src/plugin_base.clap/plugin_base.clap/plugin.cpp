@@ -3,6 +3,7 @@
 #include <clap/helpers/plugin.hxx>
 #include <clap/helpers/host-proxy.hxx>
 #include <vector>
+#include <atomic>
 #include <utility>
 
 using namespace plugin_base;
@@ -99,7 +100,21 @@ plugin::paramsValueToText(clap_id param_id, double value, char* display, std::ui
 void
 plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept
 {
-  // TODO
+  for (std::uint32_t i = 0; i < in->size(in); i++)
+  {
+    auto header = in->get(in, i);
+    if (header->type != CLAP_EVENT_PARAM_VALUE) continue;
+    if (header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
+    auto event = reinterpret_cast<clap_event_param_value const*>(header);
+    int index = getParamIndexForParamId(event->param_id);
+    auto mapping = _engine.desc().param_mappings[index];
+    mapping.value_at(_ui_state) = param_value::from_plain(*_engine.desc().param_at(mapping).topo, event->value);
+    mapping.value_at(_engine.state()) = mapping.value_at(_ui_state);
+  }
+
+  // We just dumped the new values, make sure everyone sees them.
+  if(in->size(in) != 0)
+    std::atomic_thread_fence(std::memory_order_release);
 }
 
 bool
@@ -148,6 +163,9 @@ plugin::process(clap_process const* process) noexcept
   block.common->bpm = process->transport? process->transport->tempo: 0;
   block.common->audio_input = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
   block.common->audio_output = process->audio_outputs[0].data32;
+  
+  paramsFlush(process->in_events, nullptr);
+
   _engine.process();
   return CLAP_PROCESS_CONTINUE;
 }

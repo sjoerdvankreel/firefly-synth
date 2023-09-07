@@ -41,6 +41,8 @@ public:
   void activate(int sample_rate, int max_frame_count);
 
   plugin_desc const& desc() const { return _desc; }
+  // CLAP needs direct write access to the audio thread.
+  jarray3d<param_value>& state() { return _state; }
   jarray3d<param_value> const& state() const { return _state; }
 };
 
