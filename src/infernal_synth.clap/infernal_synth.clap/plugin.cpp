@@ -32,7 +32,7 @@ static clap_plugin_descriptor_t const descriptor =
 };
 
 extern "C" CLAP_EXPORT 
-clap_plugin_entry_t const entry = 
+clap_plugin_entry_t const clap_entry =
 {
   .clap_version = CLAP_VERSION_INIT,
   .init = [](char const*) { return true; },
