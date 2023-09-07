@@ -13,12 +13,8 @@ using namespace plugin_base::clap;
 #define PLUG_FEATURE CLAP_PLUGIN_FEATURE_INSTRUMENT
 #endif
 
-static void const*
-get_factory(char const* factory_id);
 static char const*
 features[] = { PLUG_FEATURE, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
-static clap_plugin const*
-create_plugin(clap_plugin_factory const* factory, clap_host const* host, char const* plugin_id);
 
 static clap_plugin_descriptor_t const descriptor =
 {
@@ -34,6 +30,28 @@ static clap_plugin_descriptor_t const descriptor =
   .features = features
 };
 
+static clap_plugin const*
+create_plugin(clap_plugin_factory const*, clap_host const* host, char const*)
+{
+  // not a leak
+  auto plugin = new plugin_base::clap::plugin(&descriptor, host, synth_topo);
+  return plugin->clapPlugin();
+}
+
+static clap_plugin_factory const factory =
+{
+  .get_plugin_count = [](clap_plugin_factory const*) { return 1u; },
+  .get_plugin_descriptor = [](clap_plugin_factory const*, std::uint32_t) { return &descriptor; },
+  .create_plugin = create_plugin
+};
+
+static void const*
+get_factory(char const* factory_id)
+{
+  if (strcmp(factory_id, CLAP_PLUGIN_FACTORY_ID)) return nullptr;
+  return &factory;
+}
+
 extern "C" CLAP_EXPORT 
 clap_plugin_entry_t const entry = 
 {
@@ -42,21 +60,3 @@ clap_plugin_entry_t const entry =
   .deinit = [](){},
   .get_factory = get_factory
 };
-
-static clap_plugin_factory const factory = 
-{
-  .get_plugin_count = [](clap_plugin_factory const*) { return 1u; },
-  .get_plugin_descriptor = [](clap_plugin_factory const*, std::uint32_t) { return &descriptor; },
-  .create_plugin = create_plugin
-};
-
-static void const* 
-get_factory(char const* factory_id)
-{
-  if(strcmp(factory_id, CLAP_PLUGIN_FACTORY_ID)) return nullptr;
-  return &factory;
-}
-
-static clap_plugin const* 
-create_plugin(clap_plugin_factory const*, clap_host const* host, char const*)
-{ return (new plugin_base::clap::plugin(&descriptor, host, synth_topo))->clapPlugin(); } // not a leak
