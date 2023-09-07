@@ -2,6 +2,7 @@
 #include <plugin_base/topo.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/param_value.hpp>
 #include <map>
 #include <vector>
 #include <string>
