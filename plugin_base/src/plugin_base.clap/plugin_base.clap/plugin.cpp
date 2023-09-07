@@ -31,7 +31,8 @@ plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const no
   std::int32_t index = getParamIndexForParamId(param_id);
   if(index == -1) return false;
   return paramsInfo(index, info);
-}
+} 
+
 bool
 plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
