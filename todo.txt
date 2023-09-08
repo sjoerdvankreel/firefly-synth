@@ -1,5 +1,6 @@
 state save
-drop mixer
 voice manager
 clap threadpool
 try out some airwindows stuff
+allow multiple params per group (i.e. audio matrix output N)
+
