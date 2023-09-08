@@ -7,7 +7,6 @@
 namespace plugin_base {
 
 class module_engine;
-class mixdown_engine;
 
 enum class plugin_type { synth, fx };
 enum class module_scope { voice, global };

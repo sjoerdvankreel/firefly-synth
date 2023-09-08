@@ -19,7 +19,7 @@ struct host_accurate_event final {
   int plugin_param_index;
 };
 
-// output buffers, shared block, automation events
+// shared block, automation events
 struct host_block final {
   common_block* common;
   std::vector<host_block_event> block_events;
