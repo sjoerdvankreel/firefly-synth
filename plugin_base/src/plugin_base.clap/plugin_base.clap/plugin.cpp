@@ -6,6 +6,11 @@
 #include <atomic>
 #include <utility>
 
+// TODO: i am not sure about the memory fences.
+// It seems to work for winx64 but might break down under linux's 
+// unwieldly file-descriptor-event-on-any-thread model.
+// Probably best to replace by regular atomic RW queue.
+
 using namespace plugin_base;
 
 namespace plugin_base::clap {
