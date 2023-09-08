@@ -76,7 +76,7 @@ struct plugin_topo final {
 };
 
 // rather create some more copies than std::move() stuff around
-// all topology is just move-only to prevent accidentail copies
+// all topology is just move-only to prevent accidental copies
 typedef plugin_topo(*plugin_topo_factory)(); 
 typedef std::vector<item_topo>(*items_topo_factory)();
 
