@@ -113,6 +113,7 @@ plugin_engine::process()
         {
           // set accurate automation values to current values (automation may overwrite)
           // note: need to go from actual to normalized values as interpolation must be done as linear
+          // later scale back from normalized to plain values
           auto& automation = _plugin_block.accurate_automation[g][m][p];
           std::fill(
             automation.begin(), 
