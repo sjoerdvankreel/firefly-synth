@@ -1,5 +1,6 @@
 #pragma once
 #include <cmath>
+#include <cassert>
 #define INF_PI 3.14159265358979323846264338327950288
 
 namespace plugin_base {
@@ -7,6 +8,8 @@ namespace plugin_base {
 inline float
 balance(int channel, float value)
 {
+  assert(-1 <= value && value <= 1);
+  assert(channel == 0 || channel == 1);
   float pan = (value + 1) * 0.5f;
   return channel == 0 ? 1.0f - pan: pan;
 }
@@ -14,6 +17,9 @@ balance(int channel, float value)
 inline float
 note_to_frequency(int oct, int note, float cent)
 {
+  assert(0 <= oct && oct <= 9);
+  assert(0 <= note && note <= 11);
+  assert(-1 <= cent && cent <= 1);
   float pitch = 12 * oct + note + cent;
   return 440.0f * std::pow(2.0f, (pitch - 69.0f) / 12.0f);
 }
