@@ -8,7 +8,8 @@ namespace plugin_base::clap {
 
 class plugin:
 public ::clap::helpers::Plugin<
-  ::clap::helpers::MisbehaviourHandler::Terminate, 
+  // I want to use terminate but Maximal fires host-checks on reaper w.r.t. resizing. Not workable.
+  ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>
 {
   plugin_engine _engine;
