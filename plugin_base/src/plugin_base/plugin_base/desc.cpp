@@ -37,6 +37,9 @@ validate(plugin_desc const& desc)
 {
   std::set<int> plugin_param_hashes;
   std::set<std::string> plugin_param_ids;
+ 
+  assert(0 < desc.topo.gui_default_width && desc.topo.gui_default_width <= 3840);
+  assert(0 < desc.topo.gui_aspect_ratio && desc.topo.gui_aspect_ratio <= 21.0 / 9.0);
   assert(desc.id_to_index.size() == desc.param_mappings.size());
   for (int m = 0; m < desc.modules.size(); m++)
   {
