@@ -52,14 +52,6 @@ _desc(factory)
   resized();
 }
 
-void
-plugin_gui::paint(Graphics& g)
-{
-  g.fillAll(Colours::green); // todo black
-  for(int i = 0; i < getChildren().size(); i++)
-    getChildComponent(i)->paint(g);
-}
-
 void 
 plugin_gui::resized()
 {

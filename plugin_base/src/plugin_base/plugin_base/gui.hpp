@@ -14,8 +14,8 @@ public:
   explicit plugin_gui(plugin_topo_factory factory);
 
   void resized() override;
-  void paint(juce::Graphics& g) override;
   plugin_desc const& desc() const { return _desc; }
+  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 };
 
 }
