@@ -6,8 +6,6 @@
 
 namespace plugin_base::vst3 {
 
-class controller;
-
 class editor final:
 public Steinberg::Vst::EditorView {
   plugin_base::vst3::controller* const _controller;
