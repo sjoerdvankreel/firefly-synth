@@ -4,7 +4,9 @@
 #include <plugin_base.vst3/editor.hpp>
 #include <plugin_base.vst3/controller.hpp>
 #include <base/source/fstring.h>
+#include <juce_events/juce_events.h>
 
+using namespace juce;
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 
@@ -42,11 +44,11 @@ param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
   return true;
 }
 
-
 IPlugView* PLUGIN_API 
 controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
+  MessageManager::getInstance();
   return new editor(this, _topo_factory);
 }
 
