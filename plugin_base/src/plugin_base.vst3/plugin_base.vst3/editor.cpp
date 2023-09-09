@@ -20,14 +20,7 @@ editor::attached(void* parent, FIDString type)
   return EditorView::attached(parent, type);
 }
 
-tresult PLUGIN_API 
-editor::onSize(ViewRect* new_size)
-{
-  _gui.setSize(new_size->getWidth(), new_size->getHeight());
-  return EditorView::onSize(new_size);
-}
-
-tresult PLUGIN_API 
+tresult PLUGIN_API
 editor::getSize(ViewRect* new_size)
 {
   new_size->top = 0;
@@ -35,6 +28,20 @@ editor::getSize(ViewRect* new_size)
   new_size->right = _gui.getWidth();
   new_size->bottom = _gui.getHeight();
   return EditorView::getSize(new_size);
+}
+
+tresult PLUGIN_API 
+editor::onSize(ViewRect* new_size)
+{
+  _gui.setSize(new_size->getWidth(), new_size->getHeight());
+  return EditorView::onSize(new_size);
+}
+
+tresult PLUGIN_API
+editor::checkSizeConstraint(ViewRect* rect)
+{
+  rect->bottom = rect->top + rect->getWidth() / _gui.desc().topo.gui_aspect_ratio;
+  return EditorView::checkSizeConstraint(rect);
 }
 
 }

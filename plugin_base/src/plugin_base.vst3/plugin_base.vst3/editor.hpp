@@ -17,7 +17,9 @@ public:
   Steinberg::tresult PLUGIN_API removed() override;
   Steinberg::tresult PLUGIN_API onSize(Steinberg::ViewRect* new_size) override;
   Steinberg::tresult PLUGIN_API getSize(Steinberg::ViewRect* new_size) override;
+  Steinberg::tresult PLUGIN_API checkSizeConstraint(Steinberg::ViewRect* rect) override;
   Steinberg::tresult PLUGIN_API attached(void* parent, Steinberg::FIDString type) override;
+
   Steinberg::tresult PLUGIN_API canResize() override { return Steinberg::kResultTrue; }
   Steinberg::tresult PLUGIN_API isPlatformTypeSupported(Steinberg::FIDString type) override { return Steinberg::kResultTrue; }
 };
