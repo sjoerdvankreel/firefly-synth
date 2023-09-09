@@ -1,5 +1,4 @@
 #pragma once
-#include <plugin_base/topo.hpp>
 #include <plugin_base/desc.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>

@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.21)
 project(infernal_synth)
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
+add_compile_definitions(JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
 
 set(INFERNAL_VERSION "2.0")
 set(INFERNAL_NAME "infernal_synth")

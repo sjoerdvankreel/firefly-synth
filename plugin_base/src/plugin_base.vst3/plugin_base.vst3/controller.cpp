@@ -2,6 +2,7 @@
 #include <plugin_base/utility.hpp>
 #include <plugin_base/param_value.hpp>
 #include <plugin_base.vst3/controller.hpp>
+#include <base/source/fstring.h>
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
@@ -38,6 +39,14 @@ param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
   if(!param_value::from_text(*_topo, text, value)) return false;
   normalized = value.to_normalized(*_topo);
   return true;
+}
+
+
+IPlugView* PLUGIN_API 
+controller::createView(char const* name)
+{
+  if (ConstString(name) != ViewType::kEditor) return nullptr;
+  return new editor(this);
 }
 
 tresult PLUGIN_API 
