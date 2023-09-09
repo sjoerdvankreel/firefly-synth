@@ -9,11 +9,12 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const _desc;
-  void layout();
-
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
   explicit plugin_gui(plugin_topo_factory factory);
+
+  void resized() override;
+  void paint(juce::Graphics& g) override;
   plugin_desc const& desc() const { return _desc; }
 };
 

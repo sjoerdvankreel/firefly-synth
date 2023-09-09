@@ -11,23 +11,38 @@ _desc(factory)
 {
   setOpaque(true);
   setSize(_desc.topo.gui_default_width, _desc.topo.gui_default_width / _desc.topo.gui_aspect_ratio);
-  layout();
+  for (int m = 0; m < _desc.modules.size(); m++) // todo dont leak
+  {
+    auto const& module = _desc.modules[m];
+    for (int p = 0; p < module.params.size(); p++)
+    addChildComponent(new Slider());
+  }
+  resized();
+}
+
+void
+plugin_gui::paint(Graphics& g)
+{
+  g.fillAll(Colours::green); // todo black
+  for(int i = 0; i < getChildren().size(); i++)
+    getChildComponent(i)->paint(g);
 }
 
 void 
-plugin_gui::layout()
+plugin_gui::resized()
 {
   Grid grid;
-  grid.templateRows.add(Grid::TrackInfo());
+  int c = 0;
+  grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
   for (int m = 0; m < _desc.modules.size(); m++)
   {
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
-      grid.templateColumns.add(Grid::TrackInfo());
-      grid.items.add(GridItem(new Slider())); // todo dont leak
+      grid.items.add(GridItem(getChildComponent(c)).withArea(0, c++));
+      grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
     }
-  }
+  } 
   grid.performLayout(getLocalBounds());
 }
 
