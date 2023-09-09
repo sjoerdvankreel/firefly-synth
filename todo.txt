@@ -1,4 +1,5 @@
 gui
+graphs
 state save
 clap queues
 clap threadpool

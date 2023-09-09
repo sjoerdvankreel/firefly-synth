@@ -9,6 +9,8 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const _desc;
+  void layout();
+
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
   explicit plugin_gui(plugin_topo_factory factory);
