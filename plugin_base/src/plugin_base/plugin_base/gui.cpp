@@ -14,6 +14,14 @@ public:
   param_slider(param_topo const* topo);
 };
 
+class param_toggle_button :
+public ToggleButton
+{
+  param_topo const* const _topo;
+public:
+  param_toggle_button(param_topo const* topo): _topo(topo) {}
+};
+
 param_slider::
 param_slider(param_topo const* topo): _topo(topo)
 {
@@ -47,7 +55,12 @@ _desc(factory)
   {
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
-      addAndMakeVisible(new param_slider(_desc.modules[m].params[p].topo));
+    {
+      if(module.params[p].topo->display == param_display::toggle)
+        addAndMakeVisible(new param_toggle_button(_desc.modules[m].params[p].topo));
+      else
+        addAndMakeVisible(new param_slider(_desc.modules[m].params[p].topo));
+    }
   }
   resized();
 }
