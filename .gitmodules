@@ -19,3 +19,6 @@
 [submodule "lib/clap-helpers"]
 	path = lib/clap-helpers
 	url = https://github.com/sjoerdvankreel/clap-helpers.git
+[submodule "lib/readerwriterqueue"]
+	path = lib/readerwriterqueue
+	url = https://github.com/sjoerdvankreel/readerwriterqueue.git
