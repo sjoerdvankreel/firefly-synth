@@ -42,7 +42,7 @@ editor::checkSizeConstraint(ViewRect* new_rect)
 {
   int new_height = new_rect->getWidth() / _gui.desc().topo.gui_aspect_ratio;
   new_rect->bottom = new_rect->top + new_height;
-  return EditorView::checkSizeConstraint(new_rect);
+  return kResultTrue;
 }
 
 }
