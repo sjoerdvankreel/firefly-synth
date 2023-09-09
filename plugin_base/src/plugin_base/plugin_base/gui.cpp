@@ -1,9 +1,41 @@
 #include <plugin_base/gui.hpp>
+#include <plugin_base/topo.hpp>
 #include <vector>
 
 using namespace juce;
 
 namespace plugin_base {
+
+class param_slider:
+public Slider
+{
+  param_topo const* const _topo;
+public: 
+  param_slider(param_topo const* topo);
+};
+
+param_slider::
+param_slider(param_topo const* topo): _topo(topo)
+{
+  setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+  if(!_topo->is_real()) setRange(_topo->min, _topo->max, 1);
+  else setMinAndMaxValues(_topo->min, _topo->max, dontSendNotification);
+  switch (topo->display)
+  {
+  case param_display::vslider:
+    setSliderStyle(Slider::LinearVertical);
+    break;
+  case param_display::hslider:
+    setSliderStyle(Slider::LinearHorizontal);
+    break;
+  case param_display::knob:
+    setSliderStyle(Slider::RotaryVerticalDrag);
+    break;
+  default:
+    // TODO 
+    break;
+  }
+}
 
 plugin_gui::
 plugin_gui(plugin_topo_factory factory) :
@@ -15,11 +47,7 @@ _desc(factory)
   {
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
-    {
-      auto slider = new Slider();
-      slider->setSliderStyle(Slider::LinearBarVertical);
-      addAndMakeVisible(slider);
-    }
+      addAndMakeVisible(new param_slider(_desc.modules[m].params[p].topo));
   }
   resized();
 }
