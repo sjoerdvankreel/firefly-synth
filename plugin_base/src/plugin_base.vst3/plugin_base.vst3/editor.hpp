@@ -1,15 +1,19 @@
 #pragma once
 #include <plugin_base/desc.hpp>
+#include <plugin_base.vst3/controller.hpp>
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <utility>
 
 namespace plugin_base::vst3 {
 
+class controller;
+
 class editor final:
 public Steinberg::Vst::EditorView {
-  plugin_desc const _desc;
+  plugin_base::vst3::controller* const _controller;
 public: 
-  editor(Steinberg::Vst::EditController* controller, plugin_topo_factory factory) : EditorView(controller), _desc(factory) {}
+  editor(plugin_base::vst3::controller* controller) : 
+  EditorView(controller), _controller(controller) {}
 };
 
 }
