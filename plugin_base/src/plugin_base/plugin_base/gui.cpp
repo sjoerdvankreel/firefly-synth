@@ -64,15 +64,21 @@ void
 plugin_gui::resized()
 {
   Grid grid;
-  int c = 1;
+  int c = 0;
   grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
   for (int m = 0; m < _desc.modules.size(); m++)
   {
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
+      GridItem item(getChildComponent(c));
+      item.row.end = 2;
+      item.row.start = 1;
+      item.column.start = c + 1;
+      item.column.end = c + 2;
+      c++;
+      grid.items.add(item);
       grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
-      grid.items.add(GridItem(getChildComponent(c)).withArea(1, c++));
     }
   } 
   grid.performLayout(getLocalBounds());
