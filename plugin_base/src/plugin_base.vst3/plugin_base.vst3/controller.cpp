@@ -47,7 +47,7 @@ IPlugView* PLUGIN_API
 controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
-  return new editor(this);
+  return new editor(this, _topo_factory);
 }
 
 tresult PLUGIN_API 

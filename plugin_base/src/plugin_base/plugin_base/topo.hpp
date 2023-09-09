@@ -71,6 +71,8 @@ struct module_group_topo final {
 struct plugin_topo final {
   int polyphony;
   plugin_type type;
+  int gui_default_width;
+  float gui_aspect_ratio;
   std::vector<module_group_topo> module_groups;
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
