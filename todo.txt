@@ -1,6 +1,9 @@
+gui
 state save
+clap queues
 voice manager
 clap threadpool
+(polyphonic) modulation
 try out some airwindows stuff
 allow multiple params per group (i.e. audio matrix output N)
 
