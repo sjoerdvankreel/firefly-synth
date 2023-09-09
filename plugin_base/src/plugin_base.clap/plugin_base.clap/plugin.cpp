@@ -17,7 +17,7 @@ namespace plugin_base::clap {
 
 plugin::
 plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):
-Plugin(desc, host), _engine(factory)
+Plugin(desc, host), _engine(factory), _topo_factory(factory)
 {
   plugin_dims dims(_engine.desc().topo);
   _ui_state.init(dims.module_param_counts);
@@ -25,7 +25,68 @@ Plugin(desc, host), _engine(factory)
   _block_automation_seen.resize(_engine.desc().param_mappings.size());
 }
 
-std::int32_t 
+bool
+plugin::guiShow() noexcept
+{
+  _gui->setVisible(true);
+  return true;
+}
+
+bool
+plugin::guiHide() noexcept
+{
+  _gui->setVisible(false);
+  return true;
+}
+
+bool
+plugin::guiSetParent(clap_window const* window) noexcept
+{
+  _gui->addToDesktop(0, window->ptr);
+  return true;
+}
+
+bool
+plugin::guiCreate(char const* api, bool is_floating) noexcept
+{
+  _gui = std::make_unique<plugin_gui>(_topo_factory);
+  return true;
+}
+
+bool
+plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
+{
+  _gui->setSize(width, height);
+  return true;
+}
+
+bool
+plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
+{
+  *width = _gui->getWidth();
+  *height = _gui->getHeight();
+  return true;
+}
+
+bool
+plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
+{
+  *height = *width / _gui->desc().topo.gui_aspect_ratio;
+  return true;
+}
+
+bool
+plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
+{
+  hints->preserve_aspect_ratio = true;
+  hints->can_resize_vertically = true;
+  hints->can_resize_horizontally = true;
+  hints->aspect_ratio_height = 1.0;
+  hints->aspect_ratio_width = _gui->desc().topo.gui_aspect_ratio;
+  return true;
+}
+
+std::int32_t
 plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
   auto iter = _engine.desc().id_to_index.find(param_id);
