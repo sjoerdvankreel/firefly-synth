@@ -7,10 +7,10 @@ set(INFERNAL_FX_NAME "infernal_synth.fx")
 
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/plugin_base/cmake")
 include(plugin_base.vst3)
-include(plugin_base.juce)
 include(plugin_base.config)
 include(plugin_base.utility)
 
+add_subdirectory(lib/JUCE)
 add_subdirectory(plugin_base)
 
 declare_local_target(STATIC infernal_synth infernal_synth)
