@@ -38,10 +38,11 @@ editor::onSize(ViewRect* new_size)
 }
 
 tresult PLUGIN_API
-editor::checkSizeConstraint(ViewRect* rect)
+editor::checkSizeConstraint(ViewRect* new_rect)
 {
-  rect->bottom = rect->top + rect->getWidth() / _gui.desc().topo.gui_aspect_ratio;
-  return EditorView::checkSizeConstraint(rect);
+  int new_height = new_rect->getWidth() / _gui.desc().topo.gui_aspect_ratio;
+  new_rect->bottom = new_rect->top + new_height;
+  return EditorView::checkSizeConstraint(new_rect);
 }
 
 }
