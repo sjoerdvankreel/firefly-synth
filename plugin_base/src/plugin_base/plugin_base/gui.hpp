@@ -14,8 +14,6 @@ public juce::Component
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
   explicit plugin_gui(plugin_topo_factory factory);
-
-  void paint(juce::Graphics& g) override;
   plugin_desc const& desc() const { return _desc; }
 };
 
