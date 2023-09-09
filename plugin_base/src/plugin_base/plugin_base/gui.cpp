@@ -15,7 +15,11 @@ _desc(factory)
   {
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
-      addAndMakeVisible(new Slider());
+    {
+      auto slider = new Slider();
+      slider->setSliderStyle(Slider::LinearBarVertical);
+      addAndMakeVisible(slider);
+    }
   }
   resized();
 }
