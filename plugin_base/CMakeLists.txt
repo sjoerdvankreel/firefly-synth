@@ -12,7 +12,7 @@ target_include_directories(plugin_base SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/JU
 target_include_directories(plugin_base.vst3 PRIVATE src/plugin_base)
 target_include_directories(plugin_base.vst3 SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/vst3 ${CMAKE_SOURCE_DIR}/lib/JUCE/modules)
 target_include_directories(plugin_base.clap PRIVATE src/plugin_base)
-target_include_directories(plugin_base.clap SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/clap/include ${CMAKE_SOURCE_DIR}/lib/clap-helpers/include ${CMAKE_SOURCE_DIR}/lib/JUCE/modules)
+target_include_directories(plugin_base.clap SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/clap/include ${CMAKE_SOURCE_DIR}/lib/clap-helpers/include ${CMAKE_SOURCE_DIR}/lib/JUCE/modules ${CMAKE_SOURCE_DIR}/lib/readerwriterqueue)
 
 # disable unreachable code warnings for clap-helper headers
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

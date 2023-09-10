@@ -6,18 +6,16 @@
 #include <atomic>
 #include <utility>
 
-// TODO: i am not sure about the memory fences.
-// It seems to work for winx64 but might break down under linux's 
-// unwieldly file-descriptor-event-on-any-thread model.
-// Probably best to replace by regular atomic RW queue.
-
+using namespace moodycamel;
 using namespace plugin_base;
 
 namespace plugin_base::clap {
 
 plugin::
 plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):
-Plugin(desc, host), _engine(factory), _topo_factory(factory)
+Plugin(desc, host), _engine(factory), _topo_factory(factory), 
+_to_ui_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size)), 
+_from_ui_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size))
 {
   plugin_dims dims(_engine.desc().topo);
   _ui_state.init(dims.module_param_counts);

@@ -2,9 +2,21 @@
 #include <plugin_base/gui.hpp>
 #include <plugin_base/engine.hpp>
 #include <clap/helpers/plugin.hh>
+#include <readerwriterqueue.h>
+#include <memory>
 #include <cstdint>
 
 namespace plugin_base::clap {
+
+inline int constexpr default_queue_size = 4096;
+
+enum class param_queue_event_type { end_edit, begin_edit, value_changing };
+struct param_queue_event
+{
+  int param_index = {};
+  param_value value = {};
+  param_queue_event_type type = {};
+};
 
 class plugin:
 public ::clap::helpers::Plugin<
@@ -17,6 +29,10 @@ public ::clap::helpers::Plugin<
   plugin_topo_factory const _topo_factory = {};
   jarray3d<param_value> _ui_state = {}; // Copy of engine state on the ui thread.
   std::vector<int> _block_automation_seen = {}; // Only push the first event in per-block automation.
+  // These have an initial capacity but *will* allocate if it is exceeded because we push() not try_push().
+  // By pointer rather than value to prevent some compiler warnings regarding padding.
+  std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _to_ui_events;
+  std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _from_ui_events;
 public:
   plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);
   
