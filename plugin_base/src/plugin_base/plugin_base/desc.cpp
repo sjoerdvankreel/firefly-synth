@@ -50,6 +50,7 @@ validate(plugin_desc const& desc)
       assert(param.id_hash >= 0);
       assert(param.id.size() > 0);
       assert(param.name.size() > 0);
+      assert(param.index_in_plugin >= 0);
       INF_ASSERT_EXEC(plugin_param_ids.insert(param.id).second);
       INF_ASSERT_EXEC(plugin_param_hashes.insert(param.id_hash).second);
     }
@@ -138,21 +139,26 @@ validate(plugin_desc const& desc)
 }
 
 param_desc::
-param_desc(module_group_topo const& module_group, int module_index, param_topo const& param)
+param_desc(
+  module_group_topo const& module_group, int module_in_group, 
+  param_topo const& param, int index_in_plugin)
 {
   topo = &param;
-  id = module_id(module_group, module_index) + "-" + param.id;
-  name = module_name(module_group, module_index) + " " + param.name;
+  this->index_in_plugin = index_in_plugin;
+  id = module_id(module_group, module_in_group) + "-" + param.id;
+  name = module_name(module_group, module_in_group) + " " + param.name;
   id_hash = param_hash(id.c_str());
 }
 
 module_desc::
-module_desc(module_group_topo const& module_group, int module_index)
+module_desc(
+  module_group_topo const& module_group, int module_in_group, 
+  int first_param_index_in_plugin)
 {
   topo = &module_group;
-  name = module_name(module_group, module_index);
+  name = module_name(module_group, module_in_group);
   for(int i = 0; i < module_group.params.size(); i++)
-    params.emplace_back(param_desc(module_group, module_index, module_group.params[i]));
+    params.emplace_back(param_desc(module_group, module_in_group, module_group.params[i], first_param_index_in_plugin + i));
 }
 
 plugin_desc::
@@ -167,7 +173,7 @@ topo(factory())
     auto const& group = topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
     {
-      modules.emplace_back(module_desc(group, m));
+      modules.emplace_back(module_desc(group, m, plugin_param_index));
       auto& module = modules[modules.size() - 1];
       for(int p = 0; p < group.params.size(); p++)
       {

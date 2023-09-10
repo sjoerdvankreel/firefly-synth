@@ -27,9 +27,12 @@ struct param_desc final {
   int id_hash = {};
   std::string id = {};
   std::string name = {};
+  int index_in_plugin = {};
   param_topo const* topo = {};
   INF_DECLARE_MOVE_ONLY(param_desc);
-  param_desc(module_group_topo const& module_group, int module_index, param_topo const& param);
+  param_desc(
+    module_group_topo const& module_group, int module_in_group, 
+    param_topo const& param, int index_in_plugin);
 };
 
 // runtime module descriptor
@@ -38,7 +41,9 @@ struct module_desc final {
   module_group_topo const* topo = {};
   std::vector<param_desc> params = {};  
   INF_DECLARE_MOVE_ONLY(module_desc);
-  module_desc(module_group_topo const& module_group, int module_index);
+  module_desc(
+    module_group_topo const& module_group, int module_in_group, 
+    int first_param_index_in_plugin);
 };
 
 // runtime plugin descriptor
