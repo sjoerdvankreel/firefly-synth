@@ -31,6 +31,7 @@ param_value::to_text(param_topo const& topo) const
   int prec = topo.percentage ? 3 : 5;
   int mult = topo.percentage ? 100 : 1;
   stream << std::setprecision(prec) << real * (mult);
+  if(topo.unit.size()) stream << " " << topo.unit;
   return stream.str();
 }
 

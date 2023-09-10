@@ -82,12 +82,18 @@ param_combobox::plugin_value_changed(param_value value)
 void
 param_toggle_button::plugin_value_changed(param_value value)
 { setToggleState(value.step != 0, dontSendNotification); }
-void 
-param_value_label::plugin_value_changed(param_value value)
-{ setText(value.to_text(*_desc->topo), dontSendNotification); }
 void
 param_slider::plugin_value_changed(param_value value)
 { setValue(value.to_plain(*_desc->topo), dontSendNotification); }
+
+void 
+param_value_label::plugin_value_changed(param_value value)
+{ 
+  std::string text = value.to_text(*_desc->topo);
+  if(_desc->topo->text == param_text::both)
+    text = _desc->topo->name + " " + text;
+  setText(text, dontSendNotification); 
+}
 
 void 
 param_slider::valueChanged()

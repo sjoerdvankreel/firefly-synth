@@ -13,8 +13,8 @@ enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
 
 enum class param_rate { accurate, block };
-enum class param_text { none, name, value };
 enum class param_direction { input, output };
+enum class param_text { none, name, value, both };
 enum class param_type { step, name, item, linear, log };
 enum class param_display { toggle, list, knob, hslider, vslider };
 
