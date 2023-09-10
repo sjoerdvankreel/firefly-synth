@@ -35,8 +35,9 @@ void
 plugin::timerCallback()
 {
   param_queue_event e;
-  while (_to_ui_events->try_dequeue(e))
-    _gui->plugin_param_changed(e.param_index, e.value);
+  if(_gui)
+    while (_to_ui_events->try_dequeue(e))
+      _gui->plugin_param_changed(e.param_index, e.value);
 }
 
 bool
