@@ -5,6 +5,7 @@ clap queues
 clap threadpool
 (polyphonic) modulation
 try out some airwindows stuff
+dont fire on mouse-over button
 handle begin-end edit sequences
 manual automation interpolation?
 voice manager including voice-level unison
