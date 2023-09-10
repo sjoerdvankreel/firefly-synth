@@ -53,6 +53,19 @@ controller::createView(char const* name)
 }
 
 tresult PLUGIN_API 
+controller::setParamNormalized(ParamID tag, ParamValue value)
+{
+  if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
+    return kResultFalse;
+  if(_editor == nullptr) return kResultTrue;
+  int param_index = _desc.id_to_index.at(tag);
+  param_mapping mapping = _desc.param_mappings[param_index];
+  param_value base_value = param_value::from_normalized(*_desc.param_at(mapping).topo, value);
+  _editor->plugin_param_changed(param_index, base_value);
+  return kResultTrue;
+}
+
+tresult PLUGIN_API 
 controller::initialize(FUnknown* context)
 {
   int unit_id = 1;
