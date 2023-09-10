@@ -20,6 +20,7 @@ public:
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID tag, Steinberg::Vst::ParamValue value) override;
+  void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 };
 
 }
