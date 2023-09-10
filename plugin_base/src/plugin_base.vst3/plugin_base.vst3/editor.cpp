@@ -52,7 +52,9 @@ editor::ui_param_changing(int param_index, param_value value)
 {
   int param_tag = _controller->desc().index_to_id[param_index];
   param_mapping mapping = _controller->desc().param_mappings[param_index];
-  _controller->performEdit(param_tag, value.to_normalized(*_controller->desc().param_at(mapping).topo));
+  auto normalized = value.to_normalized(*_controller->desc().param_at(mapping).topo);
+  _controller->performEdit(param_tag, normalized);
+  _controller->setParamNormalized(param_tag, normalized);
 }
 
 }
