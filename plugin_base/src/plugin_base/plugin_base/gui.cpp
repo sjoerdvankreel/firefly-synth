@@ -69,6 +69,7 @@ param_slider(param_topo const* topo): _topo(topo)
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
   if(!_topo->is_real()) setRange(_topo->min, _topo->max, 1);
   else setMinAndMaxValues(_topo->min, _topo->max, dontSendNotification);
+  setValue(param_value::default_value(*_topo).to_plain(*_topo), dontSendNotification);
   switch (topo->display)
   {
   case param_display::vslider:
@@ -84,7 +85,6 @@ param_slider(param_topo const* topo): _topo(topo)
     assert(false);
     break;
   }
-  // TODO handle the log stuff
 }
 
 plugin_gui::
