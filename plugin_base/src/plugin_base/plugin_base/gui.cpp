@@ -40,6 +40,8 @@ public Slider
 public: 
   param_slider(plugin_gui* gui, param_desc const* desc);
   void valueChanged() override;
+  void stoppedDragging() override;
+  void startedDragging() override;
   void plugin_value_changed(param_value value) override final;
 };
 
@@ -95,15 +97,38 @@ param_value_label::plugin_value_changed(param_value value)
   setText(text, dontSendNotification); 
 }
 
+
+void 
+param_slider::startedDragging()
+{ _gui->ui_param_end_changes(_desc->index_in_plugin); }
+void 
+param_slider::stoppedDragging()
+{ _gui->ui_param_begin_changes(_desc->index_in_plugin); }
+
 void 
 param_slider::valueChanged()
-{ _gui->ui_param_changed(_desc->index_in_plugin, param_value::from_real(getValue())); }
+{ 
+  auto value = param_value::from_real(getValue());
+  _gui->ui_param_changing(_desc->index_in_plugin, value); 
+}
+
 void 
 param_toggle_button::buttonStateChanged(Button*)
-{ _gui->ui_param_changed(_desc->index_in_plugin, param_value::from_step(getToggleState() ? 1 : 0)); }
+{ 
+  auto value = param_value::from_step(getToggleState() ? 1 : 0);
+  _gui->ui_param_begin_changes(_desc->index_in_plugin);
+  _gui->ui_param_changing(_desc->index_in_plugin, value); 
+  _gui->ui_param_end_changes(_desc->index_in_plugin);
+}
+
 void 
 param_combobox::comboBoxChanged(ComboBox*) 
-{ _gui->ui_param_changed(_desc->index_in_plugin, param_value::from_step(getSelectedItemIndex() + _desc->topo->min)); }
+{ 
+  auto value = param_value::from_step(getSelectedItemIndex() + _desc->topo->min);
+  _gui->ui_param_begin_changes(_desc->index_in_plugin);
+  _gui->ui_param_changing(_desc->index_in_plugin, value);
+  _gui->ui_param_end_changes(_desc->index_in_plugin);
+}
 
 param_name_label::
 param_name_label(param_topo const* topo)
@@ -193,14 +218,30 @@ plugin_gui::add_single_param_plugin_listener(int param_index, single_param_plugi
 { _single_param_plugin_listeners[param_index].push_back(listener); }
 
 void 
-plugin_gui::ui_param_changed(int param_index, param_value value)
+plugin_gui::ui_param_begin_changes(int param_index)
 {
   auto& listeners = _any_param_ui_listeners;
   for(int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_value_changed(param_index, value);
+    listeners[i]->ui_param_begin_changes(param_index);
 }
 
-void 
+void
+plugin_gui::ui_param_end_changes(int param_index)
+{
+  auto& listeners = _any_param_ui_listeners;
+  for (int i = 0; i < listeners.size(); i++)
+    listeners[i]->ui_param_end_changes(param_index);
+}
+
+void
+plugin_gui::ui_param_changing(int param_index, param_value value)
+{
+  auto& listeners = _any_param_ui_listeners;
+  for (int i = 0; i < listeners.size(); i++)
+    listeners[i]->ui_param_changing(param_index, value);
+}
+
+void
 plugin_gui::plugin_param_changed(int param_index, param_value value)
 {
   auto& listeners = _single_param_plugin_listeners[param_index];
