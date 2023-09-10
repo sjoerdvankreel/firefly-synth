@@ -20,6 +20,15 @@ _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_q
   _ui_state.init(dims.module_param_counts);
   _engine.desc().init_default_state(_ui_state);
   _block_automation_seen.resize(_engine.desc().param_mappings.size());
+  startTimerHz(60);
+}
+
+void 
+plugin::timerCallback()
+{
+  param_queue_event e;
+  while (_to_ui_events->try_dequeue(e))
+    _gui->plugin_param_changed(e.param_index, e.value);
 }
 
 bool

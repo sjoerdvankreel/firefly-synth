@@ -23,7 +23,8 @@ public ::clap::helpers::Plugin<
   // I want to use terminate but Maximal fires host-checks on reaper w.r.t. resizing. Not workable.
   ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>,
-public any_param_ui_listener
+public any_param_ui_listener,
+public juce::Timer
 {
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
@@ -36,12 +37,15 @@ public any_param_ui_listener
   std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _to_audio_events;
 
   // Syncing audio <-> main.
+  // We pull in values from audio->main regardless of whether ui is present/visible.
+  void timerCallback() override;
   void push_to_ui(int param_index, double clap_value);
   void push_to_audio(int param_index, param_value base_value);
   void push_to_audio(int param_index, param_queue_event_type type);
   void process_ui_to_audio_events(const clap_output_events_t* out);
 
 public:
+  ~plugin() { stopTimer(); }
   plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);
   
   bool implementsGui() const noexcept override { return true; }
