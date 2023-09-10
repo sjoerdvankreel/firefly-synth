@@ -146,9 +146,11 @@ plugin_engine::process()
     // linear interpolation from previous to current value
     auto& curve = mapping.value_at(_plugin_block.accurate_automation);
     int prev_frame = _accurate_frames[event.plugin_param_index];
-    float frame_count = event.frame_index - prev_frame;
+    float frame_count = event.frame_index - prev_frame + 1;
     float range = event.normalized - curve[prev_frame];
-    for(int f = prev_frame; f < event.frame_index; f++)
+
+    // note: really should be <=
+    for(int f = prev_frame; f <= event.frame_index; f++)
       curve[f] = curve[prev_frame] + (f - prev_frame) / frame_count * range;
 
     // set new state to denormalized and update last event timestamp
