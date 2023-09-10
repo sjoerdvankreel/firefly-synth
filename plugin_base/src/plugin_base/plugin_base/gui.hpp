@@ -32,12 +32,12 @@ public juce::Component
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_topo_factory factory);
-
+  plugin_gui(plugin_topo_factory factory, jarray3d<param_value> const& initial);
+  
   void resized() override;
   plugin_desc const& desc() const { return _desc; }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
-
+    
   void ui_param_end_changes(int param_index);
   void ui_param_begin_changes(int param_index);
   void ui_param_changing(int param_index, param_value value);

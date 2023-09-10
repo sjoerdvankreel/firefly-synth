@@ -62,7 +62,7 @@ plugin::guiDestroy() noexcept
 bool
 plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
-  _gui = std::make_unique<plugin_gui>(_topo_factory);
+  _gui = std::make_unique<plugin_gui>(_topo_factory, _ui_state);
   _gui->add_any_param_ui_listener(this);
   return true;
 }

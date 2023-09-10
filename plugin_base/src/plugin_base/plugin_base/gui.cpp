@@ -29,7 +29,7 @@ public param_base,
 public Label
 {
 public:
-  param_value_label(plugin_gui* gui, param_desc const* desc);
+  param_value_label(plugin_gui* gui, param_desc const* desc, param_value initial);
   void plugin_value_changed(param_value value) override final;
 };
 
@@ -38,7 +38,7 @@ public param_base,
 public Slider
 {
 public: 
-  param_slider(plugin_gui* gui, param_desc const* desc);
+  param_slider(plugin_gui* gui, param_desc const* desc, param_value initial);
   void valueChanged() override;
   void stoppedDragging() override;
   void startedDragging() override;
@@ -52,7 +52,7 @@ public ComboBox::Listener
 {
 public:
   ~param_combobox();
-  param_combobox(plugin_gui* gui, param_desc const* desc);
+  param_combobox(plugin_gui* gui, param_desc const* desc, param_value initial);
   void comboBoxChanged(ComboBox*) override;
   void plugin_value_changed(param_value value) override final;
 };
@@ -65,7 +65,7 @@ public Button::Listener
   bool _checked = false;
 public:
   ~param_toggle_button();
-  param_toggle_button(plugin_gui* gui, param_desc const* desc);
+  param_toggle_button(plugin_gui* gui, param_desc const* desc, param_value initial);
   void buttonClicked(Button*) override {}
   void buttonStateChanged(Button*) override;
   void plugin_value_changed(param_value value) override final;
@@ -137,28 +137,28 @@ param_name_label(param_topo const* topo)
 { setText(topo->name, dontSendNotification); }
 
 param_value_label::
-param_value_label(plugin_gui* gui, param_desc const* desc):
+param_value_label(plugin_gui* gui, param_desc const* desc, param_value initial):
 param_base(gui, desc), Label()
-{ plugin_value_changed(param_value::default_value(*desc->topo)); }
+{ plugin_value_changed(initial); }
 
 param_toggle_button::
 ~param_toggle_button()
 { removeListener(this); }
 param_toggle_button::
-param_toggle_button(plugin_gui* gui, param_desc const* desc):
+param_toggle_button(plugin_gui* gui, param_desc const* desc, param_value initial):
 param_base(gui, desc), ToggleButton()
 { 
   auto value = param_value::default_value(*desc->topo);
   _checked = value.step != 0;
-  plugin_value_changed(value); 
   addListener(this);
+  plugin_value_changed(initial);
 }
 
 param_combobox::
 ~param_combobox()
 { removeListener(this); }
 param_combobox::
-param_combobox(plugin_gui* gui, param_desc const* desc) :
+param_combobox(plugin_gui* gui, param_desc const* desc, param_value initial) :
 param_base(gui, desc), ComboBox()
 {
   switch (desc->topo->type)
@@ -181,11 +181,11 @@ param_base(gui, desc), ComboBox()
   }
   addListener(this);
   setEditableText(false);
-  plugin_value_changed(param_value::default_value(*desc->topo));
+  plugin_value_changed(initial);
 }
 
 param_slider::
-param_slider(plugin_gui* gui, param_desc const* desc) :
+param_slider(plugin_gui* gui, param_desc const* desc, param_value initial) :
 param_base(gui, desc), Slider()
 {
   switch (desc->topo->display)
@@ -210,7 +210,7 @@ param_base(gui, desc), Slider()
     [this](double s, double e, double v) { return param_value::from_normalized(*_desc->topo, v).to_plain(*_desc->topo); },
     [this](double s, double e, double v) { return param_value::from_plain(*_desc->topo, v).to_normalized(*_desc->topo); }));
   setDoubleClickReturnValue(true, param_value::default_value(*_desc->topo).real, ModifierKeys::noModifiers);
-  plugin_value_changed(param_value::default_value(*_desc->topo));
+  plugin_value_changed(initial);
 }
 
 void 
@@ -270,7 +270,7 @@ plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_pl
 }
 
 plugin_gui::
-plugin_gui(plugin_topo_factory factory) :
+plugin_gui(plugin_topo_factory factory, jarray3d<param_value> const& initial) :
 _desc(factory), 
 _single_param_plugin_listeners(_desc.param_mappings.size())
 {
@@ -283,17 +283,17 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
     {
       if(module.params[p].topo->display == param_display::toggle)
       {
-        _children.emplace_back(std::make_unique<param_toggle_button>(this, &_desc.modules[m].params[p]));
+        _children.emplace_back(std::make_unique<param_toggle_button>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
       else if (module.params[p].topo->display == param_display::list)
       {
-        _children.emplace_back(std::make_unique<param_combobox>(this, &_desc.modules[m].params[p]));
+        _children.emplace_back(std::make_unique<param_combobox>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
       else
       {
-        _children.emplace_back(std::make_unique<param_slider>(this, &_desc.modules[m].params[p]));
+        _children.emplace_back(std::make_unique<param_slider>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
       if(module.params[p].topo->text == param_text::none)
@@ -308,7 +308,7 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
       }
       else
       {
-        _children.emplace_back(std::make_unique<param_value_label>(this, &_desc.modules[m].params[p]));
+        _children.emplace_back(std::make_unique<param_value_label>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
     }

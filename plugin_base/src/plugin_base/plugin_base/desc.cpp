@@ -44,6 +44,8 @@ validate(plugin_desc const& desc)
   for (int m = 0; m < desc.modules.size(); m++)
   {
     auto const& module = desc.modules[m];
+    assert(module.group_in_plugin >= 0);
+    assert(module.module_in_group >= 0);
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
@@ -152,10 +154,12 @@ param_desc(
 
 module_desc::
 module_desc(
-  module_group_topo const& module_group, int module_in_group, 
-  int first_param_index_in_plugin)
+  module_group_topo const& module_group, int group_in_plugin, 
+  int module_in_group, int first_param_index_in_plugin)
 {
   topo = &module_group;
+  this->group_in_plugin = group_in_plugin;
+  this->module_in_group = module_in_group;
   name = module_name(module_group, module_in_group);
   for(int i = 0; i < module_group.params.size(); i++)
     params.emplace_back(param_desc(module_group, module_in_group, module_group.params[i], first_param_index_in_plugin + i));
@@ -173,7 +177,7 @@ topo(factory())
     auto const& group = topo.module_groups[g];
     for(int m = 0; m < group.module_count; m++)
     {
-      modules.emplace_back(module_desc(group, m, plugin_param_index));
+      modules.emplace_back(module_desc(group, g, m, plugin_param_index));
       auto& module = modules[modules.size() - 1];
       for(int p = 0; p < group.params.size(); p++)
       {

@@ -38,12 +38,14 @@ struct param_desc final {
 // runtime module descriptor
 struct module_desc final {
   std::string name = {};
+  int group_in_plugin = {};
+  int module_in_group = {};
   module_group_topo const* topo = {};
   std::vector<param_desc> params = {};  
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
-    module_group_topo const& module_group, int module_in_group, 
-    int first_param_index_in_plugin);
+    module_group_topo const& module_group, int group_in_plugin, 
+    int module_in_group, int first_param_index_in_plugin);
 };
 
 // runtime plugin descriptor
