@@ -292,6 +292,7 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
       event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
       event.value = e.value.to_plain(*_engine.desc().param_at(mapping).topo);
       out->try_push(out, &(event.header));
+      break;
     }
     case param_queue_event_type::end_edit:
     case param_queue_event_type::begin_edit:
@@ -304,6 +305,7 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
       event.header.size = sizeof(clap_event_param_gesture);
       event.header.type = (e.type == param_queue_event_type::begin_edit ? CLAP_EVENT_PARAM_GESTURE_BEGIN : CLAP_EVENT_PARAM_GESTURE_END);
       out->try_push(out, &event.header);
+      break;
     }
     default: assert(false); break;
     }

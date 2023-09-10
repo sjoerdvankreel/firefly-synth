@@ -99,10 +99,10 @@ param_value_label::plugin_value_changed(param_value value)
 }
 
 void 
-param_slider::startedDragging()
+param_slider::stoppedDragging()
 { _gui->ui_param_end_changes(_desc->index_in_plugin); }
 void 
-param_slider::stoppedDragging()
+param_slider::startedDragging()
 { _gui->ui_param_begin_changes(_desc->index_in_plugin); }
 
 void 
