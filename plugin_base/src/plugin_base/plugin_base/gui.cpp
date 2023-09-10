@@ -14,6 +14,17 @@ public:
   param_label(param_topo const* topo);
 };
 
+class param_edit
+{
+  plugin_gui* const _gui;
+protected:
+  param_edit(plugin_gui* gui): _gui(gui) {}
+
+public:
+  virtual param_value get_value() const = 0;
+  virtual void set_value(param_value value) = 0;  
+};
+
 class param_slider:
 public Slider
 {
