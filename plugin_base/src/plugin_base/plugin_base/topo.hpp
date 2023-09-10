@@ -13,8 +13,8 @@ enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
 
 enum class param_rate { accurate, block };
+enum class param_text { none, name, value };
 enum class param_direction { input, output };
-enum class param_label { none, name, value };
 enum class param_type { step, name, item, linear, log };
 enum class param_display { toggle, list, knob, hslider, vslider };
 
@@ -35,7 +35,7 @@ struct param_topo final {
   bool percentage;
   param_type type;
   param_rate rate;
-  param_label label;
+  param_text text;
   param_display display;
   param_direction direction;
   std::string id;

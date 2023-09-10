@@ -6,6 +6,14 @@ using namespace juce;
 
 namespace plugin_base {
 
+class param_label:
+public Label
+{
+  param_topo const* const _topo;
+public:
+  param_label(param_topo const* topo);
+};
+
 class param_slider:
 public Slider
 {
@@ -29,6 +37,24 @@ public ToggleButton
 public:
   param_toggle_button(param_topo const* topo);
 };
+
+param_label::
+param_label(param_topo const* topo):
+_topo(topo)
+{
+  switch (topo->text)
+  {
+  case param_text::name:
+    setText(topo->name, dontSendNotification);
+    break;
+  case param_text::value:
+    setText(param_value::default_value(*topo).to_text(*topo), dontSendNotification);
+    break;
+  default:
+    assert(false);
+    break;
+  }
+}
 
 param_toggle_button::
 param_toggle_button(param_topo const* topo) : 
@@ -104,6 +130,10 @@ _desc(factory)
         addAndMakeVisible(new param_combobox(_desc.modules[m].params[p].topo));
       else
         addAndMakeVisible(new param_slider(_desc.modules[m].params[p].topo));
+      if(module.params[p].topo->text == param_text::none)
+        addAndMakeVisible(new Slider());
+      else
+        addAndMakeVisible(new param_label(module.params[p].topo));
     }
   }
   resized();
@@ -115,18 +145,25 @@ plugin_gui::resized()
   Grid grid;
   int c = 0;
   grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
+  grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
   for (int m = 0; m < _desc.modules.size(); m++)
   {
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
-      GridItem item(getChildComponent(c));
-      item.row.end = 2;
-      item.row.start = 1;
-      item.column.start = c + 1;
-      item.column.end = c + 2;
+      GridItem edit_item(getChildComponent(c * 2));
+      edit_item.row.end = 2;
+      edit_item.row.start = 1;
+      edit_item.column.start = c + 1;
+      edit_item.column.end = c + 2;
+      grid.items.add(edit_item);
+      GridItem label_item(getChildComponent(c * 2 + 1));
+      label_item.row.end = 3;
+      label_item.row.start = 2;
+      label_item.column.start = c + 1;
+      label_item.column.end = c + 2;
+      grid.items.add(label_item);
       c++;
-      grid.items.add(item);
       grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
     }
   } 
