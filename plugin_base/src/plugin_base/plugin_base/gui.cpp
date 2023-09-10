@@ -62,6 +62,7 @@ public param_base,
 public ToggleButton,
 public Button::Listener
 {
+  bool _checked = false;
 public:
   ~param_toggle_button();
   param_toggle_button(plugin_gui* gui, param_desc const* desc);
@@ -115,7 +116,9 @@ param_slider::valueChanged()
 void 
 param_toggle_button::buttonStateChanged(Button*)
 { 
+  if(_checked == getToggleState()) return;
   auto value = param_value::from_step(getToggleState() ? 1 : 0);
+  _checked = getToggleState();
   _gui->ui_param_begin_changes(_desc->index_in_plugin);
   _gui->ui_param_changing(_desc->index_in_plugin, value); 
   _gui->ui_param_end_changes(_desc->index_in_plugin);
@@ -146,8 +149,10 @@ param_toggle_button::
 param_toggle_button(plugin_gui* gui, param_desc const* desc):
 param_base(gui, desc), ToggleButton()
 { 
+  auto value = param_value::default_value(*desc->topo);
+  _checked = value.step != 0;
+  plugin_value_changed(value); 
   addListener(this);
-  plugin_value_changed(param_value::default_value(*desc->topo)); 
 }
 
 param_combobox::
