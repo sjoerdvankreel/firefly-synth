@@ -180,6 +180,7 @@ param_base(gui, desc), Slider()
     NormalisableRange<double>(desc->topo->min, desc->topo->max,
     [this](double s, double e, double v) { return param_value::from_normalized(*_desc->topo, v).to_plain(*_desc->topo); },
     [this](double s, double e, double v) { return param_value::from_plain(*_desc->topo, v).to_normalized(*_desc->topo); }));
+  setDoubleClickReturnValue(true, param_value::default_value(*_desc->topo).real, ModifierKeys::noModifiers);
   plugin_value_changed(param_value::default_value(*_desc->topo));
 }
 
