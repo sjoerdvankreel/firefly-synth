@@ -7,6 +7,8 @@ test bitwig & co
 handle output events
 clap test on test-host
 (polyphonic) modulation
+clap fix ui-to-ui-sync
+clap fix log automation
 try out some airwindows stuff
 voice manager including voice-level unison
 manual automation interpolation/zipper noise
