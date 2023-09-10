@@ -32,7 +32,14 @@ public ::clap::helpers::Plugin<
   // These have an initial capacity but *will* allocate if it is exceeded because we push() not try_push().
   // By pointer rather than value to prevent some compiler warnings regarding padding.
   std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _to_ui_events;
-  std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _from_ui_events;
+  std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _to_audio_events;
+
+  // Syncing audio <-> main.
+  void push_to_ui(int param_index, double clap_value);
+  void push_to_audio(int param_index, param_value base_value);
+  void push_to_audio(int param_index, param_queue_event_type type);
+  void process_ui_to_audio_events(const clap_output_events_t* out);
+
 public:
   plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);
   

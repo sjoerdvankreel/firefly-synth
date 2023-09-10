@@ -3,7 +3,6 @@
 #include <clap/helpers/plugin.hxx>
 #include <clap/helpers/host-proxy.hxx>
 #include <vector>
-#include <atomic>
 #include <utility>
 
 using namespace moodycamel;
@@ -15,7 +14,7 @@ plugin::
 plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):
 Plugin(desc, host), _engine(factory), _topo_factory(factory), 
 _to_ui_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size)), 
-_from_ui_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size))
+_to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size))
 {
   plugin_dims dims(_engine.desc().topo);
   _ui_state.init(dims.module_param_counts);
@@ -84,6 +83,39 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
   return true;
 }
 
+void 
+plugin::push_to_audio(int param_index, param_value base_value)
+{
+  param_queue_event e;
+  e.value = base_value;
+  e.param_index = param_index;
+  e.type = param_queue_event_type::value_changing;
+  _to_audio_events->enqueue(e);
+}
+
+void 
+plugin::push_to_audio(int param_index, param_queue_event_type type)
+{
+  param_queue_event e;
+  e.type = type;
+  e.param_index = param_index;
+  _to_audio_events->enqueue(e);
+}
+
+void
+plugin::push_to_ui(int param_index, double clap_value)
+{
+  param_queue_event e;
+  param_mapping mapping = _engine.desc().param_mappings[param_index];
+  if (_engine.desc().param_at(mapping).topo->is_real())
+    e.value.real = clap_value;
+  else
+    e.value.step = clap_value;
+  e.param_index = param_index;
+  e.type = param_queue_event_type::value_changing;
+  _to_ui_events->enqueue(e);
+}
+
 std::int32_t
 plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
@@ -107,9 +139,6 @@ plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const no
 bool
 plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
-  // if audio thread set new values, make sure we pick them up
-  // note: this may be called a *lot* but guaranteed on ui-thread only
-  std::atomic_thread_fence(std::memory_order_acquire);
   int param_index = getParamIndexForParamId(param_id);
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
   *value = mapping.value_at(_ui_state).to_plain(*_engine.desc().param_at(mapping).topo);
@@ -176,14 +205,10 @@ plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) 
     auto event = reinterpret_cast<clap_event_param_value const*>(header);
     int index = getParamIndexForParamId(event->param_id);
     auto mapping = _engine.desc().param_mappings[index];
-    mapping.value_at(_ui_state) = param_value::from_plain(*_engine.desc().param_at(mapping).topo, event->value);
-    mapping.value_at(_engine.state()) = mapping.value_at(_ui_state);
+    mapping.value_at(_engine.state()) = param_value::from_plain(*_engine.desc().param_at(mapping).topo, event->value);
+    push_to_ui(index, event->value);
   }
-
-  // we just set new values, make sure the other thread picks them up
-  // note: this may be called on *either* the audio or ui thread!
-  if(in->size(in) != 0) 
-    std::atomic_thread_fence(std::memory_order_release);
+  process_ui_to_audio_events(out);
 }
 
 bool
@@ -223,6 +248,46 @@ plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_
   return true;
 }
 
+void 
+plugin::process_ui_to_audio_events(const clap_output_events_t* out)
+{
+  param_queue_event e;
+  while (_to_audio_events->try_dequeue(e))
+  {
+    int param_id = _engine.desc().index_to_id[e.param_index];
+    switch(e.type) 
+    {
+    case param_queue_event_type::value_changing:
+    {
+      param_mapping mapping = _engine.desc().param_mappings[e.param_index];
+      mapping.value_at(_engine.state()) = e.value;
+      auto event = clap_event_param_value();
+      event.header.time = 0;
+      event.header.flags = 0;
+      event.param_id = param_id;
+      event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
+      event.header.size = sizeof(clap_event_param_value);
+      event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
+      event.value = e.value.to_plain(*_engine.desc().param_at(mapping).topo);
+      out->try_push(out, &(event.header));
+    }
+    case param_queue_event_type::end_edit:
+    case param_queue_event_type::begin_edit:
+    {
+      auto event = clap_event_param_gesture();
+      event.header.time = 0;
+      event.header.flags = 0;
+      event.param_id = param_id;
+      event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
+      event.header.size = sizeof(clap_event_param_gesture);
+      event.header.type = (e.type == param_queue_event_type::begin_edit ? CLAP_EVENT_PARAM_GESTURE_BEGIN : CLAP_EVENT_PARAM_GESTURE_END);
+      out->try_push(out, &event.header);
+    }
+    default: assert(false); break;
+    }
+  }
+}
+
 clap_process_status
 plugin::process(clap_process const* process) noexcept
 {
@@ -233,13 +298,7 @@ plugin::process(clap_process const* process) noexcept
   block.common->audio_input = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
   block.common->audio_output = process->audio_outputs[0].data32;
 
-  // if ui thread set new values, make sure we pick them up
-  std::atomic_thread_fence(std::memory_order_acquire);
-  for (int i = 0; i < _engine.desc().param_mappings.size(); i++)
-  {
-    auto mapping = _engine.desc().param_mappings[i];
-    mapping.value_at(_engine.state()) = mapping.value_at(_ui_state);
-  }
+  process_ui_to_audio_events(process->out_events);
 
   // make sure we only push per-block events at most 1 time
   std::fill(_block_automation_seen.begin(), _block_automation_seen.end(), 0);
@@ -272,6 +331,7 @@ plugin::process(clap_process const* process) noexcept
       int param_index = getParamIndexForParamId(event->param_id);
       auto mapping = _engine.desc().param_mappings[param_index];
       auto const& param = _engine.desc().param_at(mapping);
+      push_to_ui(param_index, event->value);
       if (param.topo->rate == param_rate::block)
       {
         if (_block_automation_seen[param_index] == 0)
@@ -295,15 +355,6 @@ plugin::process(clap_process const* process) noexcept
   }
 
   _engine.process();
-
-  // by now the audio engine state may have been changed due to events or output parameters
-  // we need to copy everything back onto the ui thread and flush from audio to ui
-  for (int i = 0; i < _engine.desc().param_mappings.size(); i++)
-  {
-    auto mapping = _engine.desc().param_mappings[i];
-    mapping.value_at(_ui_state) = mapping.value_at(_engine.state());
-  }
-  std::atomic_thread_fence(std::memory_order_release);
   return CLAP_PROCESS_CONTINUE;
 }
 
