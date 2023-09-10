@@ -37,7 +37,6 @@ editor::removed()
   _gui->remove_any_param_ui_listener(this);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
-  _controller->editorDestroyed
   return EditorView::removed();
 }
 
