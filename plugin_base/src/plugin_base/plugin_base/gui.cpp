@@ -92,10 +92,6 @@ param_combobox(param_topo const* topo): _topo(topo)
 param_slider::
 param_slider(param_topo const* topo): _topo(topo)
 {
-  setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-  if(!_topo->is_real()) setRange(_topo->min, _topo->max, 1);
-  else setMinAndMaxValues(_topo->min, _topo->max, dontSendNotification);
-  setValue(param_value::default_value(*_topo).to_plain(*_topo), dontSendNotification);
   switch (topo->display)
   {
   case param_display::vslider:
@@ -111,6 +107,13 @@ param_slider(param_topo const* topo): _topo(topo)
     assert(false);
     break;
   }
+  setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+  if (!_topo->is_real()) setRange(_topo->min, _topo->max, 1);
+  else setNormalisableRange(
+    NormalisableRange<double>(_topo->min, _topo->max, 
+    [this](double s, double e, double v) { return param_value::from_normalized(*_topo, v).to_plain(*_topo); },
+    [this](double s, double e, double v) { return param_value::from_plain(*_topo, v).to_normalized(*_topo); }));
+  setValue(param_value::default_value(*_topo).to_plain(*_topo), dontSendNotification);
 }
 
 plugin_gui::
