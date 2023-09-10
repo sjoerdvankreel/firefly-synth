@@ -52,6 +52,17 @@ controller::createView(char const* name)
   return _editor = new editor(this, _topo_factory);
 }
 
+void 
+controller::force_update_value(int param_index, param_value value)
+{
+  int param_tag = desc().index_to_id[param_index];
+  param_mapping mapping = desc().param_mappings[param_index];
+  beginEdit(param_tag);
+  setParamNormalized(param_tag, value.to_normalized(*desc().param_at(mapping).topo));
+  performEdit(param_tag, getParamNormalized(param_tag));
+  endEdit(param_tag);
+}
+
 tresult PLUGIN_API 
 controller::setParamNormalized(ParamID tag, ParamValue value)
 {

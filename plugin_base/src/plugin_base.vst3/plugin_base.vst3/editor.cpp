@@ -47,12 +47,4 @@ editor::checkSizeConstraint(ViewRect* new_rect)
   return kResultTrue;
 }
 
-void
-editor::ui_value_changed(int param_index, param_value value)
-{
-  int param_tag = _controller->desc().index_to_id[param_index];
-  param_mapping mapping = _controller->desc().param_mappings[param_index];
-  getController()->setParamNormalized(param_tag, value.to_normalized(*_controller->desc().param_at(mapping).topo));
-}
-
 }
