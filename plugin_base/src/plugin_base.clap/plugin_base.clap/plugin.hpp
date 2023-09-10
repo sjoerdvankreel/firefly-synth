@@ -22,7 +22,8 @@ class plugin:
 public ::clap::helpers::Plugin<
   // I want to use terminate but Maximal fires host-checks on reaper w.r.t. resizing. Not workable.
   ::clap::helpers::MisbehaviourHandler::Ignore,
-  ::clap::helpers::CheckingLevel::Maximal>
+  ::clap::helpers::CheckingLevel::Maximal>,
+public any_param_ui_listener
 {
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
@@ -53,13 +54,13 @@ public:
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;
+  void guiDestroy() noexcept override;
   bool guiSetParent(clap_window const* window) noexcept override;
   bool guiCreate(char const* api, bool is_floating) noexcept override;
   bool guiSetSize(uint32_t width, uint32_t height) noexcept override;
   bool guiGetSize(uint32_t* width, uint32_t* height) noexcept override;
   bool guiAdjustSize(uint32_t* width, uint32_t* height) noexcept override;
   bool guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept override;
-  void guiDestroy() noexcept override { _gui.reset(); }
   bool guiCanResize() const noexcept override { return true; }
   bool guiIsApiSupported(char const* api, bool is_floating) noexcept override { return !is_floating; }
 
@@ -78,6 +79,10 @@ public:
   void deactivate() noexcept override { _engine.deactivate();  }
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
+
+  void ui_param_changing(int param_index, param_value value) override { push_to_audio(param_index, value); }
+  void ui_param_end_changes(int param_index) override { push_to_audio(param_index, param_queue_event_type::end_edit); }
+  void ui_param_begin_changes(int param_index) override { push_to_audio(param_index, param_queue_event_type::begin_edit); }
 };
 
 }

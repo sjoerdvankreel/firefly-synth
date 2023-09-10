@@ -43,10 +43,18 @@ plugin::guiSetParent(clap_window const* window) noexcept
   return true;
 }
 
+void 
+plugin::guiDestroy() noexcept
+{
+  _gui->remove_any_param_ui_listener(this);
+  _gui.reset();
+}
+
 bool
 plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
   _gui = std::make_unique<plugin_gui>(_topo_factory);
+  _gui->add_any_param_ui_listener(this);
   return true;
 }
 
@@ -107,12 +115,9 @@ plugin::push_to_ui(int param_index, double clap_value)
 {
   param_queue_event e;
   param_mapping mapping = _engine.desc().param_mappings[param_index];
-  if (_engine.desc().param_at(mapping).topo->is_real())
-    e.value.real = clap_value;
-  else
-    e.value.step = clap_value;
   e.param_index = param_index;
   e.type = param_queue_event_type::value_changing;
+  e.value = param_value::from_plain(*_engine.desc().param_at(mapping).topo, clap_value);
   _to_ui_events->enqueue(e);
 }
 
