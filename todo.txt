@@ -3,6 +3,7 @@ graphs
 state save
 clap queues
 clap threadpool
+test bitwig & co
 handle output events
 clap test on test-host
 (polyphonic) modulation
