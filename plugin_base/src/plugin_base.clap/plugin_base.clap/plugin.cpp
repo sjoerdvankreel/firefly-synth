@@ -24,7 +24,7 @@ _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_q
 }
 
 bool
-plugin::init()
+plugin::init() noexcept
 {
   MessageManager::getInstance();
   startTimerHz(60);
