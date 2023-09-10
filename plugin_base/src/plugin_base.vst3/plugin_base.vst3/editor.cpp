@@ -19,7 +19,7 @@ EditorView(controller), _controller(controller)
   for (int g = 0; g < controller->desc().topo.module_groups.size(); g++)
   {
     auto const& group = controller->desc().topo.module_groups[g];
-    for (int m = 0; m < group.module_count; g++)
+    for (int m = 0; m < group.module_count; m++)
       for(int p = 0; p < group.params.size(); p++)
       {
         auto const& param = group.params[p];
@@ -37,6 +37,7 @@ editor::removed()
   _gui->remove_any_param_ui_listener(this);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
+  _controller->editorDestroyed
   return EditorView::removed();
 }
 
