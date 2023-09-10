@@ -5,6 +5,7 @@
 #include <vector>
 #include <utility>
 
+using namespace juce;
 using namespace moodycamel;
 using namespace plugin_base;
 
@@ -20,7 +21,14 @@ _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_q
   _ui_state.init(dims.module_param_counts);
   _engine.desc().init_default_state(_ui_state);
   _block_automation_seen.resize(_engine.desc().param_mappings.size());
+}
+
+bool
+plugin::init()
+{
+  MessageManager::getInstance();
   startTimerHz(60);
+  return true;
 }
 
 void 

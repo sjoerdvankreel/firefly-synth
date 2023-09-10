@@ -80,6 +80,7 @@ public:
   std::uint32_t audioPortsCount(bool is_input) const noexcept override;
   bool audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept override;
 
+  bool init() noexcept override; // Need to start timer on the main thread. Ctor is not guaranteed to run there.
   void deactivate() noexcept override { _engine.deactivate();  }
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
