@@ -183,6 +183,7 @@ topo(factory())
         mapping.module_in_group = m;
         mapping.module_in_plugin = plugin_module_index;
         param_mappings.push_back(mapping);
+        index_to_id.push_back(module.params[p].id_hash);
         id_to_index[module.params[p].id_hash] = plugin_param_index++;
         INF_ASSERT_EXEC(param_ids.insert(module.params[p].id).second);
       }

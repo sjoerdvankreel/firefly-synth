@@ -49,7 +49,8 @@ struct module_desc final {
 // runtime plugin descriptor
 struct plugin_desc final {
   plugin_topo const topo = {};
-  std::map<int, int> id_to_index;
+  std::vector<int> index_to_id = {};
+  std::map<int, int> id_to_index = {};
   std::vector<module_desc> modules = {};
   std::vector<param_mapping> param_mappings = {};
   INF_DECLARE_MOVE_ONLY(plugin_desc);

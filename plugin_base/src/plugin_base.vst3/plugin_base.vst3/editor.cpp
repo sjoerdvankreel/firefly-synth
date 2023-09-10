@@ -7,6 +7,7 @@ namespace plugin_base::vst3 {
 tresult PLUGIN_API 
 editor::removed()
 {
+  _gui.remove_any_param_ui_listener(this);
   _gui.setVisible(false);
   _gui.removeFromDesktop();
   return EditorView::removed();
@@ -17,6 +18,7 @@ editor::attached(void* parent, FIDString type)
 {
   _gui.addToDesktop(0, parent);
   _gui.setVisible(true);
+  _gui.add_any_param_ui_listener(this);
   return EditorView::attached(parent, type);
 }
 
@@ -43,6 +45,14 @@ editor::checkSizeConstraint(ViewRect* new_rect)
   int new_height = new_rect->getWidth() / _gui.desc().topo.gui_aspect_ratio;
   new_rect->bottom = new_rect->top + new_height;
   return kResultTrue;
+}
+
+void
+editor::ui_value_changed(int param_index, param_value value)
+{
+  int param_tag = _controller->desc().index_to_id[param_index];
+  param_mapping mapping = _controller->desc().param_mappings[param_index];
+  getController()->setParamNormalized(param_tag, value.to_normalized(*_controller->desc().param_at(mapping).topo));
 }
 
 }
