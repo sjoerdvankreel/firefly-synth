@@ -24,8 +24,9 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const _desc;
+  std::vector<std::unique_ptr<juce::Component>> _children;
   std::vector<any_param_ui_listener*> _any_param_ui_listeners;
-  std::vector<std::vector<single_param_plugin_listener*>> _single_param_plugin_listeners; 
+  std::vector<std::vector<single_param_plugin_listener*>> _single_param_plugin_listeners;
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);

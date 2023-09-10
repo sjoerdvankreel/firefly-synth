@@ -98,7 +98,6 @@ param_value_label::plugin_value_changed(param_value value)
   setText(text, dontSendNotification); 
 }
 
-
 void 
 param_slider::startedDragging()
 { _gui->ui_param_end_changes(_desc->index_in_plugin); }
@@ -277,23 +276,41 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
 {
   setOpaque(true);
   setSize(_desc.topo.gui_default_width, _desc.topo.gui_default_width / _desc.topo.gui_aspect_ratio);
-  for (int m = 0; m < _desc.modules.size(); m++) // todo dont leak
+  for (int m = 0; m < _desc.modules.size(); m++)
   {
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
       if(module.params[p].topo->display == param_display::toggle)
-        addAndMakeVisible(new param_toggle_button(this, &_desc.modules[m].params[p]));
+      {
+        _children.emplace_back(std::make_unique<param_toggle_button>(this, &_desc.modules[m].params[p]));
+        addAndMakeVisible(_children[_children.size() - 1].get());
+      }
       else if (module.params[p].topo->display == param_display::list)
-        addAndMakeVisible(new param_combobox(this, &_desc.modules[m].params[p]));
+      {
+        _children.emplace_back(std::make_unique<param_combobox>(this, &_desc.modules[m].params[p]));
+        addAndMakeVisible(_children[_children.size() - 1].get());
+      }
       else
-        addAndMakeVisible(new param_slider(this, &_desc.modules[m].params[p]));
+      {
+        _children.emplace_back(std::make_unique<param_slider>(this, &_desc.modules[m].params[p]));
+        addAndMakeVisible(_children[_children.size() - 1].get());
+      }
       if(module.params[p].topo->text == param_text::none)
-        addAndMakeVisible(new Label());
+      {
+        _children.emplace_back(std::make_unique<Label>());
+        addAndMakeVisible(_children[_children.size() - 1].get());
+      }
       else if (module.params[p].topo->text == param_text::name)
-        addAndMakeVisible(new param_name_label(module.params[p].topo));
+      {
+        _children.emplace_back(std::make_unique<param_name_label>(module.params[p].topo));
+        addAndMakeVisible(_children[_children.size() - 1].get());
+      }
       else
-        addAndMakeVisible(new param_value_label(this, &_desc.modules[m].params[p]));
+      {
+        _children.emplace_back(std::make_unique<param_value_label>(this, &_desc.modules[m].params[p]));
+        addAndMakeVisible(_children[_children.size() - 1].get());
+      }
     }
   }
   resized();
