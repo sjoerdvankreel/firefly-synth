@@ -14,13 +14,54 @@ public:
   param_slider(param_topo const* topo);
 };
 
+class param_combobox :
+  public ComboBox
+{
+  param_topo const* const _topo;
+public:
+  param_combobox(param_topo const* topo);
+};
+
 class param_toggle_button :
 public ToggleButton
 {
   param_topo const* const _topo;
 public:
-  param_toggle_button(param_topo const* topo): _topo(topo) {}
+  param_toggle_button(param_topo const* topo);
 };
+
+param_toggle_button::
+param_toggle_button(param_topo const* topo) : 
+_topo(topo) 
+{
+  bool on = param_value::default_value(*topo).step != 0;
+  setToggleState(on, dontSendNotification);
+}
+
+param_combobox::
+param_combobox(param_topo const* topo): _topo(topo)
+{
+  switch (topo->type)
+  {
+  case param_type::name:
+    for (int i = 0; i < topo->names.size(); i++)
+      addItem(topo->names[i], i + 1);
+    break;
+  case param_type::item:
+    for (int i = 0; i < topo->items.size(); i++)
+      addItem(topo->items[i].name, i + 1);
+    break;
+  case param_type::step:
+    for (int i = topo->min; i <= topo->max; i++)
+      addItem(std::to_string(i), topo->min + i + 1);
+    break;
+  default:
+    assert(false);
+    break;
+  }
+  setEditableText(false);
+  setSelectedItemIndex(param_value::default_value(*topo).step + topo->min);
+}
 
 param_slider::
 param_slider(param_topo const* topo): _topo(topo)
@@ -40,9 +81,10 @@ param_slider(param_topo const* topo): _topo(topo)
     setSliderStyle(Slider::RotaryVerticalDrag);
     break;
   default:
-    // TODO 
+    assert(false);
     break;
   }
+  // TODO handle the log stuff
 }
 
 plugin_gui::
@@ -58,6 +100,8 @@ _desc(factory)
     {
       if(module.params[p].topo->display == param_display::toggle)
         addAndMakeVisible(new param_toggle_button(_desc.modules[m].params[p].topo));
+      else if (module.params[p].topo->display == param_display::list)
+        addAndMakeVisible(new param_combobox(_desc.modules[m].params[p].topo));
       else
         addAndMakeVisible(new param_slider(_desc.modules[m].params[p].topo));
     }
