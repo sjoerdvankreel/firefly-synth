@@ -78,7 +78,11 @@ param_value::from_text(param_topo const& topo, std::string const& text, param_va
 
   value.real = std::numeric_limits<float>::max();
   stream >> value.real;
-  value.real /= topo.percentage ? 100 : 1;
+  if(topo.type == param_type::linear)
+    value.real /= topo.percentage ? 100 : 1;
+  else if (topo.type == param_type::log)
+    value.real = value.to_normalized(topo);
+  else assert(false);
   return topo.min <= value.real && value.real <= topo.max;
 }
 

@@ -31,7 +31,9 @@ struct param_topo final {
   int group;
   double min;
   double max;
-  double exp;
+  double log_exp;
+  double log_min;
+  double log_max;
   bool percentage;
   param_type type;
   param_rate rate;

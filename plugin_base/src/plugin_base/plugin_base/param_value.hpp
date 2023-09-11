@@ -64,7 +64,9 @@ param_value::to_normalized(param_topo const& topo) const
     return (step - topo.min) / range;
   if (topo.type == param_type::linear)
     return (real - topo.min) / range;
-  double result = std::pow((real - topo.min) * (1 / (topo.max - topo.min)), 1 / topo.exp);
+  double log_range = topo.log_max - topo.log_min;
+  double lin_real = topo.log_min + real * range;
+  double result = std::pow((lin_real - topo.log_min) * (1 / log_range), 1 / topo.log_exp);
   return result;
 }
 
@@ -76,7 +78,8 @@ param_value::from_normalized(param_topo const& topo, double normalized)
     return from_step(topo.min + std::floor(std::min(range, normalized * (range + 1))));
   if (topo.type == param_type::linear)
     return from_real(topo.min + normalized * range);
-  double result = std::pow(normalized, topo.exp) * range + topo.min;
+  double log_range = topo.log_max - topo.log_min;
+  double result = std::pow(normalized, topo.log_exp) * log_range + topo.log_min;
   return from_real(result);
 }
 

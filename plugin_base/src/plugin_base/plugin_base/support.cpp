@@ -124,14 +124,16 @@ param_topo
 param_log(
   std::string const& id, std::string const& name, int group,
   param_display display, param_text text, param_rate rate,
-  double min, double max, double default_, double midpoint, std::string const& unit)
+  double log_min, double log_max, double log_midpoint, double log_default_, std::string const& unit)
 {
-  param_topo result(input_param(id, name, group, std::to_string(default_), display, text, rate));
-  result.min = min;
-  result.max = max;
+  param_topo result(input_param(id, name, group, std::to_string(log_default_), display, text, rate));
+  result.min = 0;
+  result.max = 1;
   result.unit = unit;
+  result.log_min = log_min;
+  result.log_max = log_max;
   result.type = param_type::log;
-  result.exp = std::log((midpoint - min) / (max - min)) / std::log(0.5);
+  result.log_exp = std::log((log_midpoint - log_min) / (log_max - log_min)) / std::log(0.5);
   return result;
 }
 

@@ -100,9 +100,18 @@ validate(plugin_desc const& desc)
       }
 
       if (param.type == param_type::log)
-        assert(param.exp != 0);
+      {
+        assert(!param.percentage);
+        assert(param.log_exp != 0);
+        assert(param.log_min > 0);
+        assert(param.log_max > param.log_min);
+      }
       else
-        assert(param.exp == 0);
+      {
+        assert(param.log_exp == 0);
+        assert(param.log_min == 0);
+        assert(param.log_max == 0);
+      }
 
       if (param.percentage)
       {
