@@ -35,9 +35,12 @@ void
 plugin::timerCallback()
 {
   param_queue_event e;
-  if(_gui)
-    while (_to_ui_events->try_dequeue(e))
-      _gui->plugin_param_changed(e.param_index, e.value);
+  while (_to_ui_events->try_dequeue(e))
+  {
+    param_mapping mapping = _engine.desc().param_mappings[e.param_index];
+    mapping.value_at(_ui_state) = e.value;
+    if(_gui) _gui->plugin_param_changed(e.param_index, e.value);
+  }
 }
 
 bool
@@ -107,6 +110,18 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
   hints->aspect_ratio_height = 1.0;
   hints->aspect_ratio_width = _gui->desc().topo.gui_aspect_ratio;
   return true;
+}
+
+void 
+plugin::ui_param_changing(int param_index, param_value value) 
+{ 
+  push_to_audio(param_index, value);
+
+  // Update ui thread state and notify the gui about it's own change
+  // since multiple controls may depend on the same parameter.
+  param_mapping mapping = _engine.desc().param_mappings[param_index];
+  mapping.value_at(_ui_state) = value;
+  _gui->plugin_param_changed(param_index, value);
 }
 
 void 
