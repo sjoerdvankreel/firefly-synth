@@ -48,5 +48,5 @@ param_topo
 param_log(
   std::string const& id, std::string const& name, int group,
   param_display display, param_text text, param_rate rate,
-  double log_min, double log_max, double log_midpoint, double log_default_, std::string const& unit);
+  double min, double max, double default_, double midpoint, std::string const& unit);
 }
