@@ -241,12 +241,12 @@ plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexc
 bool
 plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
-  plain_value plain;
+  normalized_value normalized;
   int param_index = getParamIndexForParamId(param_id);
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
   auto const& param = *_engine.desc().param_at(mapping).topo;
-  if(!param.text_to_plain(display, plain)) return false;
-  *value = base_value.to_plain(param);
+  if(!param.text_to_normalized(display, normalized)) return false;
+  *value = normalized_to_clap(param, normalized).value();
   return true;
 }
 
@@ -256,9 +256,10 @@ plugin::paramsValueToText(clap_id param_id, double value, char* display, std::ui
   int param_index = getParamIndexForParamId(param_id);
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
   auto const& param = *_engine.desc().param_at(mapping).topo;
-  std::string text = param_value::from_plain(param, value).to_text(param);
+  normalized_value normalized = clap_to_normalized(param, clap_value(value));
+  std::string text = param.normalized_to_text(normalized);
   from_8bit_string(display, size, text.c_str());
-  return false;
+  return true;
 }
 
 void
@@ -272,8 +273,9 @@ plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) 
     auto event = reinterpret_cast<clap_event_param_value const*>(header);
     int index = getParamIndexForParamId(event->param_id);
     auto mapping = _engine.desc().param_mappings[index];
-    mapping.value_at(_engine.state()) = param_value::from_plain(*_engine.desc().param_at(mapping).topo, event->value);
-    push_to_ui(index, event->value);
+    auto const& topo = *_engine.desc().param_at(mapping).topo;
+    mapping.value_at(_engine.state()) = topo.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
+    push_to_ui(index, clap_value(event->value));
   }
   process_ui_to_audio_events(out);
 }
@@ -327,7 +329,8 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
     case param_queue_event_type::value_changing:
     {
       param_mapping mapping = _engine.desc().param_mappings[e.param_index];
-      mapping.value_at(_engine.state()) = e.value;
+      auto const& topo = *_engine.desc().param_at(mapping).topo;
+      mapping.value_at(_engine.state()) = e.plain;
       auto event = clap_event_param_value();
       event.header.time = 0;
       event.header.flags = 0;
@@ -335,7 +338,7 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_value);
       event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
-      event.value = e.value.to_plain(*_engine.desc().param_at(mapping).topo);
+      event.value = normalized_to_clap(topo, topo.plain_to_normalized(e.plain)).value();
       out->try_push(out, &(event.header));
       break;
     }
@@ -400,14 +403,14 @@ plugin::process(clap_process const* process) noexcept
       int param_index = getParamIndexForParamId(event->param_id);
       auto mapping = _engine.desc().param_mappings[param_index];
       auto const& param = _engine.desc().param_at(mapping);
-      push_to_ui(param_index, event->value);
+      push_to_ui(param_index, clap_value(event->value));
       if (param.topo->rate == param_rate::block)
       {
         if (_block_automation_seen[param_index] == 0)
         {
           host_block_event block_event;
           block_event.plugin_param_index = param_index;
-          block_event.normalized = param_value::from_plain(*param.topo, event->value).to_normalized(*param.topo);
+          block_event.normalized = clap_to_normalized(*param.topo, clap_value(event->value));
           block.block_events.push_back(block_event);
           _block_automation_seen[param_index] = 1;
         }
@@ -415,7 +418,7 @@ plugin::process(clap_process const* process) noexcept
         host_accurate_event accurate_event;
         accurate_event.frame_index = header->time;
         accurate_event.plugin_param_index = param_index;
-        accurate_event.normalized = param_value::from_plain(*param.topo, event->value).to_normalized(*param.topo);
+        accurate_event.normalized = clap_to_normalized(*param.topo, clap_value(event->value));
         block.accurate_events.push_back(accurate_event);
       }
     }
