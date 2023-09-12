@@ -427,6 +427,17 @@ plugin::process(clap_process const* process) noexcept
   }
 
   _engine.process();
+
+  for (int e = 0; e < block.output_events.size(); e++)
+  {
+    param_queue_event to_ui_event = {};
+    auto const& out_event = block.output_events[e];
+    auto mapping = _engine.desc().param_mappings[out_event.plugin_param_index];
+    to_ui_event.param_index = out_event.plugin_param_index;
+    to_ui_event.plain = _engine.desc().param_at(mapping).topo->normalized_to_plain(out_event.normalized);
+    _to_ui_events->enqueue(to_ui_event);
+  }
+
   return CLAP_PROCESS_CONTINUE;
 }
 
