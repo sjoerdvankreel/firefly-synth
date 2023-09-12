@@ -4,6 +4,7 @@
 #include <plugin_base/engine.hpp>
 #include <infernal_synth/synth.hpp>
 #include <cmath>
+#include <algorithm>
 
 using namespace plugin_base;
 
@@ -67,7 +68,7 @@ filter_engine::process(
   }
 
   auto const& param = topo.module_groups[module_type_filter].params[filter_param_out_gain];
-  module.output_values[filter_param_out_gain] = param.raw_to_plain(std::abs(max_out));
+  module.output_values[filter_param_out_gain] = param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f));
 }
 
 }
