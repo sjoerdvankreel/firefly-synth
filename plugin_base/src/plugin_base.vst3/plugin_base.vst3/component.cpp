@@ -122,6 +122,16 @@ component::process(ProcessData& data)
       }
   
   _engine.process();
+
+  int unused_index = 0;
+  for (int e = 0; e < block.output_events.size(); e++)
+  {
+    auto const& event = block.output_events[e];
+    int param_tag = _engine.desc().index_to_id[event.plugin_param_index];
+    queue = data.outputParameterChanges->addParameterData(param_tag, unused_index);
+    queue->addPoint(0, event.normalized.value(), unused_index);
+  }
+
   return kResultOk;
 }
 

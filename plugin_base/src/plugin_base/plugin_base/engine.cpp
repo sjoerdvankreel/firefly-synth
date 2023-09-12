@@ -21,6 +21,7 @@ _desc(factory), _dims(_desc.topo)
   _common_block.notes.reserve(note_limit_guess);
   _accurate_frames.resize(_desc.param_mappings.size());
   _host_block.block_events.reserve(block_events_guess);
+  _host_block.output_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
   _plugin_block.block_automation.init(_dims.module_param_counts);
 }
@@ -36,6 +37,7 @@ plugin_engine::prepare()
   _host_block.common->audio_input = nullptr;
   _host_block.common->audio_output = nullptr;
   _host_block.block_events.clear();
+  _host_block.output_events.clear();
   _host_block.accurate_events.clear();
   return _host_block;
 }
@@ -46,6 +48,7 @@ plugin_engine::deactivate()
   // drop frame-count dependent memory
   _sample_rate = 0;
   _host_block.block_events.clear();
+  _host_block.output_events.clear();
   _host_block.accurate_events.clear();
   _plugin_block.module_cv = {};
   _plugin_block.module_audio = {};
@@ -185,10 +188,32 @@ plugin_engine::process()
       module_block module(
         _plugin_block.module_cv[g][m], 
         _plugin_block.module_audio[g][m], 
+        _state[g][m],
         _plugin_block.accurate_automation[g][m],
         _plugin_block.block_automation[g][m]);
       _module_engines[g][m]->process(_desc.topo, _plugin_block, module);
     }
+  }
+
+  // push output events, we don't check if anything changed
+  // just push events for all output parameters using the current value
+  int plugin_param_index = 0;
+  _host_block.output_events.clear();
+  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
+  {
+    auto const& group = _desc.topo.module_groups[g];
+    for (int m = 0; m < group.module_count; m++)
+      for (int p = 0; p < group.params.size(); p++)
+      {
+        auto const& param = group.params[p];
+        if (param.direction == param_direction::output)
+        {
+          host_block_event output_event;
+          output_event.plugin_param_index = plugin_param_index++;
+          output_event.normalized = param.plain_to_normalized(_state[g][m][p]);
+          _host_block.output_events.push_back(output_event);
+        }
+      }
   }
 }
 
