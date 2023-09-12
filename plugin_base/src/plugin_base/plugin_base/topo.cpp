@@ -26,6 +26,22 @@ param_topo::default_plain() const
   return result;
 }
 
+std::string 
+param_topo::normalized_to_text(normalized_value normalized) const
+{
+  plain_value plain(normalized_to_plain(normalized));
+  return plain_to_text(plain);
+}
+
+bool 
+param_topo::text_to_normalized(std::string const& textual, normalized_value& normalized) const
+{
+  plain_value plain;
+  if(!text_to_plain(textual, plain)) return false;
+  normalized = plain_to_normalized(plain);
+  return true;
+}
+
 std::string
 param_topo::plain_to_text(plain_value plain) const
 {

@@ -30,17 +30,18 @@ public:
 void 
 param_wrapper::toString(ParamValue normalized, String128 string) const
 {
-  plain_value plain(_topo->normalized_to_plain(normalized_value(normalized)));
-  from_8bit_string(string, sizeof(String128) / sizeof(string[0]), _topo->plain_to_text(plain).c_str());
+  normalized_value base_normalized(normalized);
+  auto text = _topo->normalized_to_text(base_normalized);
+  from_8bit_string(string, sizeof(String128) / sizeof(string[0]), text.c_str());
 }
 
 bool 
 param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
 {
-  plain_value plain;
+  normalized_value base_normalized;
   std::string text(to_8bit_string(string));
-  if(!_topo->text_to_plain(text, plain)) return false;
-  normalized = _topo->plain_to_normalized(plain).value();
+  if(!_topo->text_to_normalized(text, base_normalized)) return false;
+  normalized = base_normalized.value();
   return true;
 }
 

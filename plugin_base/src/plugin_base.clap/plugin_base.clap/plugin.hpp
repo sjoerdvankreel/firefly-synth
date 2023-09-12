@@ -10,6 +10,18 @@ namespace plugin_base::clap {
 
 inline int constexpr default_queue_size = 4096;
 
+// Yet another format alongside normalized_value and plain_value.
+// For linear and log, we map to normalized. But for stepped, clap
+// requires min and max to be integers, so we map to plain.
+class clap_value {
+  double _value;
+public:
+  inline double value() const { return _value; }
+  explicit clap_value(double value) : _value(value) {}
+  clap_value(clap_value const&) = default;
+  clap_value& operator=(clap_value const&) = default;
+};
+
 enum class param_queue_event_type { end_edit, begin_edit, value_changing };
 struct param_queue_event
 {
@@ -39,7 +51,7 @@ public juce::Timer
   // Syncing audio <-> main.
   // We pull in values from audio->main regardless of whether ui is present/visible.
   void timerCallback() override;
-  void push_to_ui(int param_index, double clap_value);
+  void push_to_ui(int param_index, clap_value clap);
   void push_to_audio(int param_index, plain_value plain);
   void push_to_audio(int param_index, param_queue_event_type type);
   void process_ui_to_audio_events(const clap_output_events_t* out);

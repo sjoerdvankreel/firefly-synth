@@ -65,9 +65,11 @@ struct param_topo final {
   normalized_value raw_to_normalized(double raw) const;
   double normalized_to_raw(normalized_value normalized) const;
 
-  // Parse/format plain <-> textual.
+  // Parse/format text.
   std::string plain_to_text(plain_value plain) const;
+  std::string normalized_to_text(normalized_value normalized) const;
   bool text_to_plain(std::string const& textual, plain_value& plain) const;
+  bool text_to_normalized(std::string const& textual, normalized_value& normalized) const;
 
   bool is_real() const { return type == param_type::log || type == param_type::linear; }
 };

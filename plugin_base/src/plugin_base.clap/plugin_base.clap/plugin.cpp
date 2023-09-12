@@ -1,5 +1,5 @@
+#include <plugin_base/value.hpp>
 #include <plugin_base.clap/plugin.hpp>
-#include <plugin_base/param_value.hpp>
 #include <clap/helpers/plugin.hxx>
 #include <clap/helpers/host-proxy.hxx>
 #include <vector>
@@ -10,6 +10,24 @@ using namespace moodycamel;
 using namespace plugin_base;
 
 namespace plugin_base::clap {
+
+static inline normalized_value
+clap_to_normalized(param_topo const& topo, clap_value clap)
+{
+  if(topo.is_real())
+    return normalized_value(clap.value());
+  else
+    return normalized_value(topo.raw_to_normalized(clap.value()));
+}
+
+static inline clap_value
+normalized_to_clap(param_topo const& topo, normalized_value normalized)
+{
+  if(topo.is_real())
+    return clap_value(normalized.value());
+  else
+    return clap_value(topo.normalized_to_raw(normalized));
+}
 
 plugin::
 plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):
@@ -38,8 +56,8 @@ plugin::timerCallback()
   while (_to_ui_events->try_dequeue(e))
   {
     param_mapping mapping = _engine.desc().param_mappings[e.param_index];
-    mapping.value_at(_ui_state) = e.value;
-    if(_gui) _gui->plugin_param_changed(e.param_index, e.value);
+    mapping.value_at(_ui_state) = e.plain;
+    if(_gui) _gui->plugin_param_changed(e.param_index, e.plain);
   }
 }
 
@@ -144,13 +162,14 @@ plugin::push_to_audio(int param_index, param_queue_event_type type)
 }
 
 void
-plugin::push_to_ui(int param_index, double clap_value)
+plugin::push_to_ui(int param_index, clap_value clap)
 {
   param_queue_event e;
   param_mapping mapping = _engine.desc().param_mappings[param_index];
+  auto const& topo = *_engine.desc().param_at(mapping).topo;
   e.param_index = param_index;
   e.type = param_queue_event_type::value_changing;
-  e.value = param_value::from_plain(*_engine.desc().param_at(mapping).topo, clap_value);
+  e.plain = topo.normalized_to_plain(clap_to_normalized(topo, clap));
   _to_ui_events->enqueue(e);
 }
 
@@ -179,7 +198,8 @@ plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
   int param_index = getParamIndexForParamId(param_id);
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
-  *value = mapping.value_at(_ui_state).to_plain(*_engine.desc().param_at(mapping).topo);
+  auto const& topo = *_engine.desc().param_at(mapping).topo;
+  *value = normalized_to_clap(topo, topo.plain_to_normalized(mapping.value_at(_ui_state))).value();
   return true;
 }
 
@@ -190,9 +210,6 @@ plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexc
   param_desc const& param = _engine.desc().param_at(mapping);
   info->cookie = nullptr;
   info->id = param.id_hash;
-  info->min_value = param.topo->min;
-  info->max_value = param.topo->max;
-  info->default_value = param_value::default_value(*param.topo).to_plain(*param.topo);
   from_8bit_string(info->name, _engine.desc().param_at(mapping).name.c_str());
   from_8bit_string(info->module, _engine.desc().modules[mapping.module_in_plugin].name.c_str());
 
@@ -204,19 +221,31 @@ plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexc
     info->flags |= CLAP_PARAM_IS_AUTOMATABLE;
     info->flags |= CLAP_PARAM_REQUIRES_PROCESS;
   }
-  if(!param.topo->is_real())
+
+  // this is what the clap_value is all about
+  info->default_value = normalized_to_clap(*param.topo, param.topo->default_normalized()).value();
+  if (param.topo->is_real())
+  {
+    info->min_value = 0;
+    info->max_value = 1;
+  }
+  else
+  {
+    info->min_value = param.topo->min;
+    info->max_value = param.topo->max;
     info->flags |= CLAP_PARAM_IS_STEPPED;
+  }
   return true;
 }
 
 bool
 plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
-  param_value base_value;
+  plain_value plain;
   int param_index = getParamIndexForParamId(param_id);
   param_mapping mapping(_engine.desc().param_mappings[param_index]);
   auto const& param = *_engine.desc().param_at(mapping).topo;
-  if(!param_value::from_text(param, display, base_value)) return false;
+  if(!param.text_to_plain(display, plain)) return false;
   *value = base_value.to_plain(param);
   return true;
 }
