@@ -56,9 +56,6 @@ public juce::Timer
   void push_to_audio(int param_index, param_queue_event_type type);
   void process_ui_to_audio_events(const clap_output_events_t* out);
 
-  // Helper for gui in/block out events.
-  clap_event_param_value untimed_event_param_value(int param_index, plain_value plain) const;
-
 public:
   ~plugin() { stopTimer(); }
   plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);

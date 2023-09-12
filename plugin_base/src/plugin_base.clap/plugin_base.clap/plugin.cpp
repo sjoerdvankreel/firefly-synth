@@ -203,22 +203,6 @@ plugin::paramsValue(clap_id param_id, double* value) noexcept
   return true;
 }
 
-clap_event_param_value
-plugin::untimed_event_param_value(int param_index, plain_value plain) const
-{
-  param_mapping mapping = _engine.desc().param_mappings[param_index];
-  auto const& topo = *_engine.desc().param_at(mapping).topo;
-  auto result = clap_event_param_value();
-  result.header.time = 0;
-  result.header.flags = 0;
-  result.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
-  result.header.size = sizeof(clap_event_param_value);
-  result.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
-  result.param_id = _engine.desc().index_to_id[param_index];
-  result.value = normalized_to_clap(topo, topo.plain_to_normalized(plain)).value();
-  return result;
-}
-
 bool
 plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexcept
 {
@@ -345,9 +329,17 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
     case param_queue_event_type::value_changing:
     {
       param_mapping mapping = _engine.desc().param_mappings[e.param_index];
+      auto const& topo = *_engine.desc().param_at(mapping).topo;
       mapping.value_at(_engine.state()) = e.plain;
-      auto event_param_value = untimed_event_param_value(e.param_index, e.plain);
-      out->try_push(out, &(event_param_value.header));
+      auto event = clap_event_param_value();
+      event.header.time = 0;
+      event.header.flags = 0;
+      event.param_id = param_id;
+      event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
+      event.header.size = sizeof(clap_event_param_value);
+      event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
+      event.value = normalized_to_clap(topo, topo.plain_to_normalized(e.plain)).value();
+      out->try_push(out, &(event.header));
       break;
     }
     case param_queue_event_type::end_edit:
@@ -435,17 +427,6 @@ plugin::process(clap_process const* process) noexcept
   }
 
   _engine.process();
-
-  for (int e = 0; e < block.output_events.size(); e++)
-  {
-    auto const& event = block.output_events[e];
-    auto mapping = _engine.desc().param_mappings[event.plugin_param_index];
-    auto const& topo = *_engine.desc().param_at(mapping).topo;
-    plain_value plain = topo.normalized_to_plain(event.normalized);
-    auto event_param_value = untimed_event_param_value(event.plugin_param_index, plain);
-    process->out_events->try_push(process->out_events, &event_param_value.header);
-  }
-
   return CLAP_PROCESS_CONTINUE;
 }
 
