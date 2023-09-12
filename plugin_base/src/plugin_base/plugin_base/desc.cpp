@@ -57,7 +57,7 @@ validate(plugin_desc const& desc)
       INF_ASSERT_EXEC(plugin_param_hashes.insert(param.id_hash).second);
     }
   }
-
+ 
   std::set<std::string> param_ids;
   std::set<std::string> group_ids;
   for (int g = 0; g < desc.topo.module_groups.size(); g++)
@@ -85,7 +85,8 @@ validate(plugin_desc const& desc)
       
       if (param.is_real())
       {
-        assert(param.unit.size() > 0);
+        if(param.percentage != param_percentage::no_unit)
+          assert(param.unit.size() > 0);
         assert(param.min <= param.default_plain().real());
         assert(param.max >= param.default_plain().real());
       }
