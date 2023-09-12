@@ -1,18 +1,16 @@
-*123*
 gui
 graphs
 state save
-clap queues
 clap threadpool
-test bitwig & co
 host context menu
-handle output events
-clap test on test-host
 (polyphonic) modulation
-clap fix ui-to-ui-sync
-clap fix log automation
 try out some airwindows stuff
-separate normalized / plain structs
 voice manager including voice-level unison
 manual automation interpolation/zipper noise
 allow multiple params per group (i.e. audio matrix output N)
+linux, renoise, bitwig, cbb
+
+clap fix log automation
+clap fix ui-to-ui-sync
+handle output events
+clap queues

@@ -132,7 +132,7 @@ param_topo::plain_to_normalized(plain_value plain) const
   if (!is_real())
     return normalized_value((plain.step() - min) / range);
   if (type == param_type::linear)
-    return normalized_value(plain.real() - min / range);
+    return normalized_value((plain.real() - min) / range);
   return normalized_value(std::pow((plain.real() - min) * (1 / range), 1 / exp));
 }
 
