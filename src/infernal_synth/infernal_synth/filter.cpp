@@ -66,8 +66,8 @@ filter_engine::process(
     }
   }
 
-  //auto const& param = topo.module_groups[module_type_filter].params[filter_param_out_gain];
-  //module.output_values[filter_param_out_gain] = param.raw_to_plain(std::abs(max_out));
+  auto const& param = topo.module_groups[module_type_filter].params[filter_param_out_gain];
+  module.output_values[filter_param_out_gain] = param.raw_to_plain(std::abs(max_out));
 }
 
 }
