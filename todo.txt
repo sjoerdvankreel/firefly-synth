@@ -2,6 +2,7 @@ gui
 graphs
 antialias
 state save
+drop the juce sources from plugins
 clap threadpool
 textual outputs
 readonly outputs
