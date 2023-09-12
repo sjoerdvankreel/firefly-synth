@@ -1,4 +1,5 @@
 #pragma once
+#include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
 #include <vector>
 
@@ -8,15 +9,15 @@ struct common_block;
 
 // once per block automation
 struct host_block_event final {
-  double normalized;
   int plugin_param_index;
+  normalized_value normalized;
 };
 
 // sample accurate automation
 struct host_accurate_event final {
-  double normalized;
   int frame_index;
   int plugin_param_index;
+  normalized_value normalized;
 };
 
 // shared block, automation events

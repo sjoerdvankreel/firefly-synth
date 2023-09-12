@@ -1,0 +1,99 @@
+#include <plugin_base/topo.hpp>
+#include <sstream>
+#include <iomanip>
+
+namespace plugin_base {
+
+double 
+param_topo::default_raw() const
+{
+  plain_value plain(default_plain());
+  return plain_to_raw(plain);
+}
+
+normalized_value 
+param_topo::default_normalized() const
+{
+  plain_value plain(default_plain());
+  return plain_to_normalized(plain);
+}
+
+plain_value
+param_topo::default_plain() const
+{
+  plain_value result;
+  INF_ASSERT_EXEC(text_to_plain(default_text, result));
+  return result;
+}
+
+std::string
+param_topo::plain_to_text(plain_value plain) const
+{
+  if (display == param_display::toggle)
+    return plain.step() == 0 ? "Off" : "On";
+  switch (type)
+  {
+  case param_type::name: return names[plain.step()];
+  case param_type::item: return items[plain.step()].name;
+  case param_type::step: return std::to_string(plain.step());
+  default: break;
+  }
+
+  std::ostringstream stream;
+  int prec = percentage ? 3 : 5;
+  int mult = percentage ? 100 : 1;
+  stream << std::setprecision(prec) << plain.real() * (mult);
+  if (unit.size()) stream << " " << unit;
+  return stream.str();
+}
+
+bool 
+param_topo::text_to_plain(std::string const& textual, plain_value& plain) const
+{
+  if (display == param_display::toggle)
+  {
+    if (textual == "Off") plain = plain_value::from_step(0);
+    else if (textual == "On") plain = plain_value::from_step(1);
+    else return false;
+    return true;
+  }
+
+  if (type == param_type::name)
+  {
+    for (int i = 0; i < names.size(); i++)
+      if (names[i] == textual)
+      {
+        plain = plain_value::from_step(i);
+        return true;
+      }
+    return false;
+  }
+
+  if (type == param_type::item)
+  {
+    for (int i = 0; i < items.size(); i++)
+      if (items[i].name == textual)
+      {
+        plain = plain_value::from_step(i);
+        return true;
+      }
+    return false;
+  }
+
+  std::istringstream stream(textual);
+  if (type == param_type::step)
+  {
+    int step = std::numeric_limits<int>::max();
+    stream >> step;
+    plain = plain_value::from_step(step);
+    return min <= step && step <= max;
+  }
+
+  float real = std::numeric_limits<float>::max();
+  stream >> real;
+  real /= percentage ? 100 : 1;
+  plain = plain_value::from_real(real);
+  return min <= real && real <= max;
+}
+
+}

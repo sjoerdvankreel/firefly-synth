@@ -1,5 +1,6 @@
 #pragma once
 #include <plugin_base/desc.hpp>
+#include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <vector>
@@ -9,7 +10,7 @@ namespace plugin_base {
 class single_param_plugin_listener
 {
 public:
-  virtual void plugin_value_changed(param_value value) = 0;
+  virtual void plugin_value_changed(plain_value value) = 0;
 };
 
 class any_param_ui_listener
@@ -17,7 +18,7 @@ class any_param_ui_listener
 public:
   virtual void ui_param_end_changes(int param_index) = 0;
   virtual void ui_param_begin_changes(int param_index) = 0;
-  virtual void ui_param_changing(int param_index, param_value value) = 0;
+  virtual void ui_param_changing(int param_index, plain_value value) = 0;
 };
 
 class plugin_gui:
@@ -32,7 +33,7 @@ public juce::Component
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_topo_factory factory, jarray3d<param_value> const& initial);
+  plugin_gui(plugin_topo_factory factory, jarray3d<plain_value> const& initial);
   
   void resized() override;
   plugin_desc const& desc() const { return _desc; }
@@ -40,8 +41,8 @@ public:
     
   void ui_param_end_changes(int param_index);
   void ui_param_begin_changes(int param_index);
-  void ui_param_changing(int param_index, param_value value);
-  void plugin_param_changed(int param_index, param_value value);
+  void ui_param_changing(int param_index, plain_value value);
+  void plugin_param_changed(int param_index, plain_value value);
   void add_any_param_ui_listener(any_param_ui_listener* listener);
   void remove_any_param_ui_listener(any_param_ui_listener* listener);
   void add_single_param_plugin_listener(int param_index, single_param_plugin_listener* listener);

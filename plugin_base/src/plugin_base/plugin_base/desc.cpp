@@ -1,5 +1,5 @@
 #include <plugin_base/desc.hpp>
-#include <plugin_base/param_value.hpp>
+#include <plugin_base/value.hpp>
 #include <set>
 
 namespace plugin_base {
@@ -86,8 +86,8 @@ validate(plugin_desc const& desc)
       if (param.is_real())
       {
         assert(param.unit.size() > 0);
-        assert(param.min <= param_value::default_value(param).real);
-        assert(param.max >= param_value::default_value(param).real);
+        assert(param.min <= param.default_plain().real());
+        assert(param.max >= param.default_plain().real());
       }
       else 
       {
@@ -95,8 +95,8 @@ validate(plugin_desc const& desc)
         assert((int)param.min == param.min);
         assert((int)param.max == param.max);
         assert(param.rate == param_rate::block);
-        assert(param.min <= param_value::default_value(param).step);
-        assert(param.max >= param_value::default_value(param).step);
+        assert(param.min <= param.default_plain().step());
+        assert(param.max >= param.default_plain().step());
       }
 
       if (param.type == param_type::log)
@@ -198,14 +198,14 @@ topo(factory())
 }
 
 void
-plugin_desc::init_default_state(jarray3d<param_value>& state) const
+plugin_desc::init_default_state(jarray3d<plain_value>& state) const
 {
   for (int g = 0; g < topo.module_groups.size(); g++)
   {
     auto const& group = topo.module_groups[g];
     for (int m = 0; m < group.module_count; m++)
       for (int p = 0; p < group.params.size(); p++)
-        state[g][m][p] = param_value::default_value(group.params[p]);
+        state[g][m][p] = group.params[p].default_plain();
   }
 }
 

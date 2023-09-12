@@ -118,7 +118,7 @@ plugin_engine::process()
           std::fill(
             automation.begin(), 
             automation.begin() + _common_block.frame_count, 
-            param_value::from_real(_state[g][m][p].real).to_normalized(group.params[p]));
+            (float)group.params[p].raw_to_normalized(_state[g][m][p].real()).value());
         }
       }
   }
@@ -128,9 +128,9 @@ plugin_engine::process()
   {
     auto const& event = _host_block.block_events[e];
     auto const& mapping = _desc.param_mappings[event.plugin_param_index];
-    param_value denormalized = param_value::from_normalized(*_desc.param_at(mapping).topo, event.normalized);
-    mapping.value_at(_state) = denormalized;
-    mapping.value_at(_plugin_block.block_automation) = denormalized;
+    plain_value plain = _desc.param_at(mapping).topo->normalized_to_plain(event.normalized);
+    mapping.value_at(_state) = plain;
+    mapping.value_at(_plugin_block.block_automation) = plain;
   }
 
   // process accurate automation values, this is a bit tricky as 
@@ -147,14 +147,14 @@ plugin_engine::process()
     auto& curve = mapping.value_at(_plugin_block.accurate_automation);
     int prev_frame = _accurate_frames[event.plugin_param_index];
     float frame_count = event.frame_index - prev_frame + 1;
-    float range = event.normalized - curve[prev_frame];
+    float range = event.normalized.value() - curve[prev_frame];
 
     // note: really should be <=
     for(int f = prev_frame; f <= event.frame_index; f++)
       curve[f] = curve[prev_frame] + (f - prev_frame) / frame_count * range;
 
     // set new state to denormalized and update last event timestamp
-    mapping.value_at(_state).real = param_value::from_normalized(*_desc.param_at(mapping).topo, event.normalized).real;
+    mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).topo->normalized_to_plain(event.normalized).real());
     _accurate_frames[event.plugin_param_index] = event.frame_index;
   }
 
@@ -168,11 +168,9 @@ plugin_engine::process()
       {
         auto const& param = group.params[p];
         if(param.rate == param_rate::accurate)
-        {
           for(int f = 0; f < _common_block.frame_count; f++)
-            _plugin_block.accurate_automation[g][m][p][f] = param_value::from_normalized(
-              param, _plugin_block.accurate_automation[g][m][p][f]).real;
-        }
+            _plugin_block.accurate_automation[g][m][p][f] = param.normalized_to_plain(
+              normalized_value(_plugin_block.accurate_automation[g][m][p][f])).real();
       }
   }
 

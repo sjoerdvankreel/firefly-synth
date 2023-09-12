@@ -1,8 +1,8 @@
 #pragma once
 #include <plugin_base/topo.hpp>
+#include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base/param_value.hpp>
 #include <map>
 #include <vector>
 #include <string>
@@ -58,7 +58,7 @@ struct plugin_desc final {
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(plugin_topo_factory factory);
 
-  void init_default_state(jarray3d<param_value>& state) const;
+  void init_default_state(jarray3d<plain_value>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_in_plugin].params[mapping.param_in_module]; }
 };
