@@ -37,7 +37,7 @@ param_names(
 param_topo
 param_percentage(
   std::string const& id, std::string const& name, int group,
-  param_display display, param_text text, param_rate rate,
+  param_display display, param_text text, param_rate rate, bool unit,
   double min, double max, double default_);
 param_topo
 param_linear(

@@ -17,6 +17,8 @@ enum class module_output { none, cv, audio };
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_text { none, name, value, both };
+// No_display maps times 100 but doesnt have the unit value. Useful for osc cents.
+enum class param_percentage { off, on, no_unit };
 enum class param_type { step, name, item, linear, log };
 enum class param_display { toggle, list, knob, hslider, vslider };
 
@@ -34,12 +36,12 @@ struct param_topo final {
   double min;
   double max;
   double exp;
-  bool percentage;
   param_type type;
   param_rate rate;
   param_text text;
   param_display display;
   param_direction direction;
+  param_percentage percentage;
   std::string id;
   std::string name;
   std::string unit;

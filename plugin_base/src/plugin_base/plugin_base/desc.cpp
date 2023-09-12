@@ -91,10 +91,10 @@ validate(plugin_desc const& desc)
       }
       else 
       {
-        assert(!param.percentage);
         assert((int)param.min == param.min);
         assert((int)param.max == param.max);
         assert(param.rate == param_rate::block);
+        assert(param.percentage == param_percentage::off);
         assert(param.min <= param.default_plain().step());
         assert(param.max >= param.default_plain().step());
       }
@@ -104,10 +104,11 @@ validate(plugin_desc const& desc)
       else
         assert(param.exp == 0);
 
-      if (param.percentage)
+      if (param.percentage != param_percentage::off)
       {
-        assert(param.unit == "%");
         assert(param.type == param_type::linear);
+        if(param.percentage == param_percentage::on)
+          assert(param.unit == "%");
       }
 
       if (param.display == param_display::toggle)
