@@ -1,6 +1,6 @@
 #include <plugin_base/desc.hpp>
+#include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base/param_value.hpp>
 #include <plugin_base.vst3/editor.hpp>
 #include <plugin_base.vst3/controller.hpp>
 #include <base/source/fstring.h>
@@ -21,26 +21,26 @@ public:
   bool fromString(TChar const* string, ParamValue& normalized) const override;
 
   ParamValue toNormalized(ParamValue plain) const override 
-  { return param_value::from_plain(*_topo, plain).to_normalized(*_topo); }
+  { return _topo->raw_to_normalized(plain).value(); }
   ParamValue toPlain(ParamValue normalized) const override 
-  { return param_value::from_normalized(*_topo, normalized).to_plain(*_topo); }
+  { return _topo->normalized_to_raw(normalized_value(normalized)); }
   param_wrapper(param_topo const* topo, ParameterInfo const& info) : Parameter(info), _topo(topo) {}
 };
 
 void 
 param_wrapper::toString(ParamValue normalized, String128 string) const
 {
-  param_value value(param_value::from_normalized(*_topo, normalized));
-  from_8bit_string(string, sizeof(String128) / sizeof(string[0]), value.to_text(*_topo).c_str());
+  plain_value plain(_topo->normalized_to_plain(normalized_value(normalized)));
+  from_8bit_string(string, sizeof(String128) / sizeof(string[0]), _topo->plain_to_text(plain).c_str());
 }
 
 bool 
 param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
 {
-  param_value value;
+  plain_value plain;
   std::string text(to_8bit_string(string));
-  if(!param_value::from_text(*_topo, text, value)) return false;
-  normalized = value.to_normalized(*_topo);
+  if(!_topo->text_to_plain(text, plain)) return false;
+  normalized = _topo->plain_to_normalized(plain).value();
   return true;
 }
 
@@ -60,8 +60,8 @@ controller::setParamNormalized(ParamID tag, ParamValue value)
   if(_editor == nullptr) return kResultTrue;
   int param_index = _desc.id_to_index.at(tag);
   param_mapping mapping = _desc.param_mappings[param_index];
-  param_value base_value = param_value::from_normalized(*_desc.param_at(mapping).topo, value);
-  _editor->plugin_param_changed(param_index, base_value);
+  plain_value plain = _desc.param_at(mapping).topo->normalized_to_plain(normalized_value(value));
+  _editor->plugin_param_changed(param_index, plain);
   return kResultTrue;
 }
 
@@ -91,7 +91,7 @@ controller::initialize(FUnknown* context)
       from_8bit_string(param_info.units, param.topo->unit.c_str());
       from_8bit_string(param_info.title, param.topo->name.c_str());
       from_8bit_string(param_info.shortTitle, param.topo->name.c_str());
-      param_info.defaultNormalizedValue = param_value::default_value(*param.topo).to_normalized(*param.topo);
+      param_info.defaultNormalizedValue = param.topo->default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;
       if(param.topo->direction == param_direction::input)

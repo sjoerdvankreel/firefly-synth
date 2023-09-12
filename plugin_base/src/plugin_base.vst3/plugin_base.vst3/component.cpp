@@ -105,8 +105,8 @@ component::process(ProcessData& data)
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
           host_block_event event;
-          event.normalized = value;
           event.plugin_param_index = param_index;
+          event.normalized = normalized_value(value);
           block.block_events.push_back(event);
         }
         else if (rate == param_rate::accurate)
@@ -114,9 +114,9 @@ component::process(ProcessData& data)
             if (queue->getPoint(p, frame_index, value) == kResultTrue)
             {
               host_accurate_event event;
-              event.normalized = value;
               event.frame_index = frame_index;
               event.plugin_param_index = param_index;
+              event.normalized = normalized_value(value);
               block.accurate_events.push_back(event);
             }
       }

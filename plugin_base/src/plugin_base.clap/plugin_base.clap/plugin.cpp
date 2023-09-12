@@ -113,22 +113,22 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 }
 
 void 
-plugin::ui_param_changing(int param_index, param_value value) 
+plugin::ui_param_changing(int param_index, plain_value plain) 
 { 
-  push_to_audio(param_index, value);
+  push_to_audio(param_index, plain);
 
   // Update ui thread state and notify the gui about it's own change
   // since multiple controls may depend on the same parameter.
   param_mapping mapping = _engine.desc().param_mappings[param_index];
-  mapping.value_at(_ui_state) = value;
-  _gui->plugin_param_changed(param_index, value);
+  mapping.value_at(_ui_state) = plain;
+  _gui->plugin_param_changed(param_index, plain);
 }
 
 void 
-plugin::push_to_audio(int param_index, param_value base_value)
+plugin::push_to_audio(int param_index, plain_value plain)
 {
   param_queue_event e;
-  e.value = base_value;
+  e.plain = plain;
   e.param_index = param_index;
   e.type = param_queue_event_type::value_changing;
   _to_audio_events->enqueue(e);

@@ -43,7 +43,7 @@ filter_engine::process(
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
         plugin.host->audio_output[c][f] += osc_audio[o][c][f];
-  int on = module.block_automation[filter_param_on].step;
+  int on = module.block_automation[filter_param_on].step();
   if (!on) return;
 
   float w = 2 * plugin.sample_rate;

@@ -53,12 +53,12 @@ void
 osc_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
-  int on = module.block_automation[osc_param_on].step;
+  int on = module.block_automation[osc_param_on].step();
   if (!on) return;
 
-  int oct = module.block_automation[osc_param_oct].step;
-  int note = module.block_automation[osc_param_note].step;
-  int type = module.block_automation[osc_param_type].step;
+  int oct = module.block_automation[osc_param_oct].step();
+  int note = module.block_automation[osc_param_note].step();
+  int type = module.block_automation[osc_param_type].step();
   auto const& bal_curve = module.accurate_automation[osc_param_bal];
   auto const& cent_curve = module.accurate_automation[osc_param_cent];
   auto const& gain_curve = module.accurate_automation[osc_param_gain];

@@ -14,7 +14,7 @@ enum class param_queue_event_type { end_edit, begin_edit, value_changing };
 struct param_queue_event
 {
   int param_index = {};
-  param_value value = {};
+  plain_value plain = {};
   param_queue_event_type type = {};
 };
 
@@ -29,7 +29,7 @@ public juce::Timer
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
   plugin_topo_factory const _topo_factory = {};
-  jarray3d<param_value> _ui_state = {}; // Copy of engine state on the ui thread.
+  jarray3d<plain_value> _ui_state = {}; // Copy of engine state on the ui thread.
   std::vector<int> _block_automation_seen = {}; // Only push the first event in per-block automation.
   // These have an initial capacity but *will* allocate if it is exceeded because we push() not try_push().
   // By pointer rather than value to prevent some compiler warnings regarding padding.
@@ -40,7 +40,7 @@ public juce::Timer
   // We pull in values from audio->main regardless of whether ui is present/visible.
   void timerCallback() override;
   void push_to_ui(int param_index, double clap_value);
-  void push_to_audio(int param_index, param_value base_value);
+  void push_to_audio(int param_index, plain_value plain);
   void push_to_audio(int param_index, param_queue_event_type type);
   void process_ui_to_audio_events(const clap_output_events_t* out);
 
@@ -85,7 +85,7 @@ public:
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
-  void ui_param_changing(int param_index, param_value value) override;
+  void ui_param_changing(int param_index, plain_value plain) override;
   void ui_param_end_changes(int param_index) override { push_to_audio(param_index, param_queue_event_type::end_edit); }
   void ui_param_begin_changes(int param_index) override { push_to_audio(param_index, param_queue_event_type::begin_edit); }
 };

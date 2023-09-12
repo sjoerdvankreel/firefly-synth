@@ -14,7 +14,7 @@ EditorView(controller), _controller(controller)
   // to deal with processor-controller-ui_controls as is
   int plugin_param_index = 0;
   plugin_dims dims(controller->desc().topo);
-  jarray3d<param_value> ui_initial_values;
+  jarray3d<plain_value> ui_initial_values;
   ui_initial_values.init(dims.module_param_counts);
   for (int g = 0; g < controller->desc().topo.module_groups.size(); g++)
   {
@@ -25,7 +25,7 @@ EditorView(controller), _controller(controller)
         auto const& param = group.params[p];
         int param_tag = _controller->desc().index_to_id[plugin_param_index++];
         double normalized = _controller->getParamNormalized(param_tag);
-        ui_initial_values[g][m][p] = param_value::from_normalized(param, normalized);
+        ui_initial_values[g][m][p] = param.normalized_to_plain(normalized_value(normalized));
       }
   }
   _gui = std::make_unique<plugin_gui>(factory, ui_initial_values);
@@ -75,11 +75,11 @@ editor::checkSizeConstraint(ViewRect* new_rect)
 }
 
 void 
-editor::ui_param_changing(int param_index, param_value value)
+editor::ui_param_changing(int param_index, plain_value plain)
 {
   int param_tag = _controller->desc().index_to_id[param_index];
   param_mapping mapping = _controller->desc().param_mappings[param_index];
-  auto normalized = value.to_normalized(*_controller->desc().param_at(mapping).topo);
+  auto normalized = _controller->desc().param_at(mapping).topo->plain_to_normalized(plain).value();
   _controller->performEdit(param_tag, normalized);
   _controller->setParamNormalized(param_tag, normalized);
 }

@@ -10,7 +10,7 @@ namespace plugin_base {
 class single_param_plugin_listener
 {
 public:
-  virtual void plugin_value_changed(plain_value value) = 0;
+  virtual void plugin_value_changed(plain_value plain) = 0;
 };
 
 class any_param_ui_listener
@@ -18,7 +18,7 @@ class any_param_ui_listener
 public:
   virtual void ui_param_end_changes(int param_index) = 0;
   virtual void ui_param_begin_changes(int param_index) = 0;
-  virtual void ui_param_changing(int param_index, plain_value value) = 0;
+  virtual void ui_param_changing(int param_index, plain_value plain) = 0;
 };
 
 class plugin_gui:
@@ -41,8 +41,8 @@ public:
     
   void ui_param_end_changes(int param_index);
   void ui_param_begin_changes(int param_index);
-  void ui_param_changing(int param_index, plain_value value);
-  void plugin_param_changed(int param_index, plain_value value);
+  void ui_param_changing(int param_index, plain_value plain);
+  void plugin_param_changed(int param_index, plain_value plain);
   void add_any_param_ui_listener(any_param_ui_listener* listener);
   void remove_any_param_ui_listener(any_param_ui_listener* listener);
   void add_single_param_plugin_listener(int param_index, single_param_plugin_listener* listener);

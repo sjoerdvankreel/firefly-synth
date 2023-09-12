@@ -30,7 +30,7 @@ public Label
 {
 public:
   param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void plugin_value_changed(plain_value value) override final;
+  void plugin_value_changed(plain_value plain) override final;
 };
 
 class param_slider:
@@ -42,7 +42,7 @@ public:
   void valueChanged() override;
   void stoppedDragging() override;
   void startedDragging() override;
-  void plugin_value_changed(plain_value value) override final;
+  void plugin_value_changed(plain_value plain) override final;
 };
 
 class param_combobox :
@@ -54,7 +54,7 @@ public:
   ~param_combobox();
   param_combobox(plugin_gui* gui, param_desc const* desc, plain_value initial);
   void comboBoxChanged(ComboBox*) override;
-  void plugin_value_changed(plain_value value) override final;
+  void plugin_value_changed(plain_value plain) override final;
 };
 
 class param_toggle_button :
@@ -68,7 +68,7 @@ public:
   param_toggle_button(plugin_gui* gui, param_desc const* desc, plain_value initial);
   void buttonClicked(Button*) override {}
   void buttonStateChanged(Button*) override;
-  void plugin_value_changed(plain_value value) override final;
+  void plugin_value_changed(plain_value plain) override final;
 };
 
 param_base::
@@ -80,19 +80,19 @@ param_base::
 { _gui->remove_single_param_plugin_listener(_desc->index_in_plugin, this); }
 
 void
-param_combobox::plugin_value_changed(plain_value value)
-{ setSelectedItemIndex(value.step() - _desc->topo->min); }
+param_combobox::plugin_value_changed(plain_value plain)
+{ setSelectedItemIndex(plain.step() - _desc->topo->min); }
 void
-param_toggle_button::plugin_value_changed(plain_value value)
-{ setToggleState(value.step() != 0, dontSendNotification); }
+param_toggle_button::plugin_value_changed(plain_value plain)
+{ setToggleState(plain.step() != 0, dontSendNotification); }
 void
-param_slider::plugin_value_changed(plain_value value)
-{ setValue(_desc->topo->plain_to_raw(value), dontSendNotification); }
+param_slider::plugin_value_changed(plain_value plain)
+{ setValue(_desc->topo->plain_to_raw(plain), dontSendNotification); }
 
 void 
-param_value_label::plugin_value_changed(plain_value value)
+param_value_label::plugin_value_changed(plain_value plain)
 { 
-  std::string text = _desc->topo->plain_to_text(value);
+  std::string text = _desc->topo->plain_to_text(plain);
   if(_desc->topo->text == param_text::both)
     text = _desc->topo->name + " " + text;
   setText(text, dontSendNotification); 
@@ -238,19 +238,19 @@ plugin_gui::ui_param_end_changes(int param_index)
 }
 
 void
-plugin_gui::ui_param_changing(int param_index, plain_value value)
+plugin_gui::ui_param_changing(int param_index, plain_value plain)
 {
   auto& listeners = _any_param_ui_listeners;
   for (int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_param_changing(param_index, value);
+    listeners[i]->ui_param_changing(param_index, plain);
 }
 
 void
-plugin_gui::plugin_param_changed(int param_index, plain_value value)
+plugin_gui::plugin_param_changed(int param_index, plain_value plain)
 {
   auto& listeners = _single_param_plugin_listeners[param_index];
   for(int i = 0; i < listeners.size(); i++)
-    listeners[i]->plugin_value_changed(value);
+    listeners[i]->plugin_value_changed(plain);
 }
 
 void 
