@@ -209,10 +209,11 @@ plugin_engine::process()
         if (param.direction == param_direction::output)
         {
           host_block_event output_event;
-          output_event.plugin_param_index = plugin_param_index++;
+          output_event.plugin_param_index = plugin_param_index;
           output_event.normalized = param.plain_to_normalized(_state[g][m][p]);
           _host_block.output_events.push_back(output_event);
         }
+        plugin_param_index++;
       }
   }
 }
