@@ -30,12 +30,13 @@ struct item_topo final {
   INF_DECLARE_MOVE_ONLY(item_topo);
 };
 
-// param within module
+// param within module (may be more than 1, e.g. "Input N Source", useful for mod matrices)
 struct param_topo final {
+  int count;
+  int section; // ui section
   double min;
   double max;
   double exp;
-  int section; // ui section
   param_type type;
   param_rate rate;
   param_edit edit;
@@ -84,9 +85,9 @@ struct param_section_topo final {
   INF_DECLARE_MOVE_ONLY(param_section_topo);
 };
 
-// module group within plugin (may be more than 1 per group, e.g. "Osc N")
-struct module_group_topo final {
-  int module_count;
+// module within plugin (may be more than 1, e.g. "Osc N")
+struct module_topo final {
+  int count;
   std::string id;
   std::string name;
   module_scope scope;
@@ -94,7 +95,7 @@ struct module_group_topo final {
   std::vector<param_topo> params;
   std::vector<param_section_topo> param_sections;
   std::unique_ptr<module_engine>(*engine_factory)(int sample_rate, int max_frame_count);
-  INF_DECLARE_MOVE_ONLY(module_group_topo);
+  INF_DECLARE_MOVE_ONLY(module_topo);
 };
 
 // plugin definition
@@ -103,7 +104,7 @@ struct plugin_topo final {
   plugin_type type;
   int gui_default_width;
   float gui_aspect_ratio;
-  std::vector<module_group_topo> module_groups;
+  std::vector<module_topo> modules;
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
