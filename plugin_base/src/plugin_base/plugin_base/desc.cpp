@@ -87,10 +87,12 @@ validate_desc(plugin_desc const& desc)
       assert(param.id_hash >= 0);
       assert(param.id.size() > 0);
       assert(param.name.size() > 0);
+      assert(param.param_index_in_module >= 0);
+      assert(param.param_index_in_module < module.params.size());
       assert(param.param_index_in_topo >= 0);
       assert(param.param_index_in_topo < param.topo->count);
       assert(param.topo_index_in_module >= 0);
-      assert(param.topo_index_in_module < module.params.size());
+      assert(param.topo_index_in_module < module.topo->params.size());
       assert(param.global_param_index == global_param_index++);
       INF_ASSERT_EXEC(all_ids.insert(param.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.id_hash).second);
@@ -210,13 +212,16 @@ validate_topo(plugin_topo const& topo)
 
 param_desc::
 param_desc(
-  module_topo const& module, param_topo const& param, int global_param_index,
-  int module_index_in_topo, int topo_index_in_module, int param_index_in_topo)
+  module_topo const& module, param_topo const& param, 
+  int global_param_index, int module_index_in_topo, 
+  int topo_index_in_module, int param_index_in_topo, 
+  int param_index_in_module)
 {
   topo = &param;
   this->global_param_index = global_param_index;
   this->param_index_in_topo = param_index_in_topo;
   this->topo_index_in_module = topo_index_in_module;
+  this->param_index_in_module = param_index_in_module;
   id = module_id(module, module_index_in_topo) + "-" + param_id(param, param_index_in_topo);
   name = module_name(module, module_index_in_topo) + " " + param_name(param, param_index_in_topo);
   id_hash = stable_hash(id.c_str());
@@ -229,6 +234,7 @@ module_desc(
   int topo_index_in_plugin, int module_index_in_topo)
 {
   topo = &module;
+  int param_index_in_module = 0;
   this->global_module_index = global_module_index;
   this->topo_index_in_plugin = topo_index_in_plugin;
   this->module_index_in_topo = module_index_in_topo;
@@ -239,7 +245,7 @@ module_desc(
   {
     auto const& param = module.params[p];
     for(int i = 0; i < param.count; i++)
-      params.emplace_back(param_desc(module, param, global_param_index_start++, module_index_in_topo, p, i));
+      params.emplace_back(param_desc(module, param, global_param_index_start++, module_index_in_topo, p, i, param_index_in_module++));
   }
 }
 
@@ -263,7 +269,6 @@ topo(factory())
   }
 
   global_param_index = 0;
-  global_module_index = 0;
   for(int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
@@ -271,21 +276,21 @@ topo(factory())
     {
       auto const& param = module.params[p];
       param_mapping mapping;
+      mapping.global_module_index = m;
+      mapping.param_index_in_module = p;
       mapping.global_param_index = global_param_index++;
-      mapping.global_module_index = global_module_index;
       mapping.param_index_in_topo = param.param_index_in_topo;
       mapping.param_topo_index_in_module = param.topo_index_in_module;
       mapping.module_index_in_topo = module.module_index_in_topo;
       mapping.module_topo_index_in_plugin = module.topo_index_in_plugin;
       global_param_index_to_param_id.push_back(param.id_hash);
       param_id_to_global_param_index[param.id_hash] = global_param_mappings.size();
-      global_param_mappings.push_back(mapping);
+      global_param_mappings.push_back(std::move(mapping));
     }
-    global_module_index++;
   }
 
+  global_module_count = modules.size();
   global_param_count = global_param_index;
-  global_module_count = global_module_index;
   validate_desc(*this);
 }
 

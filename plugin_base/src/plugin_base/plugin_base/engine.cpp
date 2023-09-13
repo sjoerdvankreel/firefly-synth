@@ -105,7 +105,7 @@ plugin_engine::process()
         auto& audio = _plugin_block.module_audio[m][mi];
         for(int c = 0; c < 2; c++)
           std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
-      } else assert(false);
+      } else assert(module.output == module_output::none);
   }
 
   for (int m = 0; m < _desc.topo.modules.size(); m++)

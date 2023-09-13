@@ -81,7 +81,7 @@ void
 editor::ui_param_changing(int param_index, plain_value plain)
 {
   int param_tag = _controller->desc().global_param_index_to_param_id[param_index];
-  param_mapping mapping = _controller->desc().global_param_mappings[param_index];
+  param_mapping const& mapping = _controller->desc().global_param_mappings[param_index];
   auto normalized = _controller->desc().param_at(mapping).topo->plain_to_normalized(plain).value();
   _controller->performEdit(param_tag, normalized);
   _controller->setParamNormalized(param_tag, normalized);

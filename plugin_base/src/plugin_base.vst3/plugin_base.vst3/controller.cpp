@@ -60,7 +60,7 @@ controller::setParamNormalized(ParamID tag, ParamValue value)
     return kResultFalse;
   if(_editor == nullptr) return kResultTrue;
   int param_index = _desc.param_id_to_global_param_index.at(tag);
-  param_mapping mapping = _desc.global_param_mappings[param_index];
+  param_mapping const& mapping = _desc.global_param_mappings[param_index];
   plain_value plain = _desc.param_at(mapping).topo->normalized_to_plain(normalized_value(value));
   _editor->plugin_param_changed(param_index, plain);
   return kResultTrue;
