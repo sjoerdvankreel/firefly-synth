@@ -11,6 +11,8 @@ namespace plugin_base {
 
 // mapping plugin level parameter index
 struct param_mapping final {
+  int global_param_index = {};
+  int global_module_index = {};
   int param_index_in_topo = {};
   int param_topo_index_in_module = {};
   int module_index_in_topo = {};

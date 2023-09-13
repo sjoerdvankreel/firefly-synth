@@ -41,7 +41,7 @@ public juce::Timer
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
   plugin_topo_factory const _topo_factory = {};
-  jarray3d<plain_value> _ui_state = {}; // Copy of engine state on the ui thread.
+  jarray4d<plain_value> _ui_state = {}; // Copy of engine state on the ui thread.
   std::vector<int> _block_automation_seen = {}; // Only push the first event in per-block automation.
   // These have an initial capacity but *will* allocate if it is exceeded because we push() not try_push().
   // By pointer rather than value to prevent some compiler warnings regarding padding.
@@ -85,7 +85,7 @@ public:
   bool paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept override;
   void paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept override;
   bool paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept override;
-  std::uint32_t paramsCount() const noexcept override { return _engine.desc().param_mappings.size(); }
+  std::uint32_t paramsCount() const noexcept override { return _engine.desc().global_param_count; }
 
   std::uint32_t notePortsCount(bool is_input) const noexcept override { return is_input? 1: 0;}
   bool notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept override;

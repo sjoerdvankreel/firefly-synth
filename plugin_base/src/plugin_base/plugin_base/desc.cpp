@@ -246,19 +246,21 @@ topo(factory())
 {
   validate_topo(topo);
 
+  int global_param_index = 0;
   int global_module_index = 0;
-  int global_param_index_start = 0;
   for(int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
     for(int i = 0; i < module.count; i++)
     {
-      modules.emplace_back(module_desc(module, global_module_index++, global_param_index_start, m, i));
+      modules.emplace_back(module_desc(module, global_module_index++, global_param_index, m, i));
       for(int p = 0; p < module.params.size(); p++)
-        global_param_index_start += module.params[p].count;
+        global_param_index += module.params[p].count;
     }
   }
 
+  global_param_index = 0;
+  global_module_index = 0;
   for(int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
@@ -266,6 +268,8 @@ topo(factory())
     {
       auto const& param = module.params[p];
       param_mapping mapping;
+      mapping.global_param_index = global_param_index++;
+      mapping.global_module_index = global_module_index;
       mapping.param_index_in_topo = param.param_index_in_topo;
       mapping.param_topo_index_in_module = param.topo_index_in_module;
       mapping.module_index_in_topo = module.module_index_in_topo;
@@ -274,6 +278,7 @@ topo(factory())
       param_id_to_global_param_index[param.id_hash] = global_param_mappings.size();
       global_param_mappings.push_back(mapping);
     }
+    global_module_index++;
   }
 
   validate_desc(*this);
