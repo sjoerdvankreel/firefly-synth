@@ -112,7 +112,7 @@ validate(plugin_desc const& desc)
           assert(param.unit == "%");
       }
 
-      if (param.display == param_display::toggle)
+      if (param.edit == param_edit::toggle)
       {
         assert(param.min == 0);
         assert(param.max == 1);

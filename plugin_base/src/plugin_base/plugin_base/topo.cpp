@@ -45,7 +45,7 @@ param_topo::text_to_normalized(std::string const& textual, normalized_value& nor
 std::string
 param_topo::plain_to_text(plain_value plain) const
 {
-  if (display == param_display::toggle)
+  if (edit == param_edit::toggle)
     return plain.step() == 0 ? "Off" : "On";
   switch (type)
   {
@@ -66,7 +66,7 @@ param_topo::plain_to_text(plain_value plain) const
 bool 
 param_topo::text_to_plain(std::string const& textual, plain_value& plain) const
 {
-  if (display == param_display::toggle)
+  if (edit == param_edit::toggle)
   {
     if (textual == "Off") plain = plain_value::from_step(0);
     else if (textual == "On") plain = plain_value::from_step(1);

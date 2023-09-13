@@ -99,7 +99,7 @@ controller::initialize(FUnknown* context)
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;
-      if(param.topo->display == param_display::list)
+      if(param.topo->edit == param_edit::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
       if (!param.topo->is_real())

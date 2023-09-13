@@ -237,15 +237,15 @@ param_slider::
 param_slider(plugin_gui* gui, param_desc const* desc, plain_value initial) :
 param_base(gui, desc), Slider()
 {
-  switch (desc->topo->display)
+  switch (desc->topo->edit)
   {
-  case param_display::vslider:
+  case param_edit::vslider:
     setSliderStyle(Slider::LinearVertical);
     break;
-  case param_display::hslider:
+  case param_edit::hslider:
     setSliderStyle(Slider::LinearHorizontal);
     break;
-  case param_display::knob:
+  case param_edit::knob:
     setSliderStyle(Slider::RotaryVerticalDrag);
     break;
   default:
@@ -330,17 +330,17 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
-      if(module.params[p].topo->display == param_display::toggle)
+      if(module.params[p].topo->edit == param_edit::toggle)
       {
         _children.emplace_back(std::make_unique<param_toggle_button>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (module.params[p].topo->display == param_display::list)
+      else if (module.params[p].topo->edit == param_edit::list)
       {
         _children.emplace_back(std::make_unique<param_combobox>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (module.params[p].topo->display == param_display::text)
+      else if (module.params[p].topo->edit == param_edit::text)
       {
         _children.emplace_back(std::make_unique<param_textbox>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
