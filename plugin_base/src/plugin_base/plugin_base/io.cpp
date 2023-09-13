@@ -22,7 +22,8 @@ io_store_file(
   jarray4d<plain_value> const& state, 
   std::filesystem::path const& path)
 {
-  std::ofstream stream(path, std::ios::out);
+  // really is binary -- we handled all the cr/lf already, don't duplicate
+  std::ofstream stream(path, std::ios::out | std::ios::binary);
   if(stream.bad()) return false;
   auto data(io_store(topo, state));
   stream.write(data.data(), data.size());
@@ -34,7 +35,7 @@ io_store(
   plugin_topo const& topo, 
   jarray4d<plain_value> const& state)
 {
-  var modules;
+  var module_topos_json;
   auto root_json = std::make_unique<DynamicObject>();
   root_json->setProperty("id", var(String(topo.id)));
   root_json->setProperty("name", var(String(topo.name)));
@@ -44,16 +45,25 @@ io_store(
   root_json->setProperty("module_count", var((int)topo.modules.size()));
   for (int m = 0; m < topo.modules.size(); m++)
   {
+    var modules_json;
     auto const& module_topo = topo.modules[m];
-    auto module_json = std::make_unique<DynamicObject>();
-    module_json->setProperty("count", var(module_topo.count));
-    module_json->setProperty("id", var(String(module_topo.id)));
-    module_json->setProperty("name", var(String(module_topo.name)));
-    module_json->setProperty("scope", var((int)module_topo.scope));
-    module_json->setProperty("output", var((int)module_topo.output));
-    modules.append(var(module_json.release()));
+    auto module_topo_json = std::make_unique<DynamicObject>();
+    module_topo_json->setProperty("count", var(module_topo.count));
+    module_topo_json->setProperty("id", var(String(module_topo.id)));
+    module_topo_json->setProperty("name", var(String(module_topo.name)));
+    module_topo_json->setProperty("scope", var((int)module_topo.scope));
+    module_topo_json->setProperty("output", var((int)module_topo.output));
+    module_topo_json->setProperty("param_count", var((int)module_topo.params.size()));
+    for (int mi = 0; mi < module_topo.count; mi++)
+    {
+      auto module_json = std::make_unique<DynamicObject>();
+      module_json->setProperty("INDEX", mi);
+      modules_json.append(var(module_json.release()));
+    }
+    module_topo_json->setProperty("instances", modules_json);
+    module_topos_json.append(var(module_topo_json.release()));
   }
-  root_json->setProperty("modules", modules);
+  root_json->setProperty("modules", module_topos_json);
   std::string json = JSON::toString(var(root_json.release())).toStdString();
   return std::vector<char>(json.begin(), json.end());
 }
