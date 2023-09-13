@@ -7,6 +7,7 @@
 #include <plugin_base/block_common.hpp>
 #include <plugin_base/block_plugin.hpp>
 #include <memory>
+#include <chrono>
 #include <utility>
 
 namespace plugin_base {
@@ -27,8 +28,8 @@ class plugin_engine final {
   plugin_block _plugin_block = {};
   common_block _common_block = {};
   jarray3d<plain_value> _state = {};
-  std::int64_t _prev_output_time = {}; // Dont update output too often.
   std::vector<int> _accurate_frames = {}; // track accurate event frame positions per parameter
+  std::chrono::milliseconds _activated_at_ms = {}; // dont push output params too often
   jarray2d<std::unique_ptr<module_engine>> _module_engines = {};
 
 public:

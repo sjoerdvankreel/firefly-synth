@@ -47,6 +47,7 @@ plugin_engine::deactivate()
 {
   // drop frame-count dependent memory
   _sample_rate = 0;
+  _activated_at_ms = {};
   _host_block.block_events.clear();
   _host_block.output_events.clear();
   _host_block.accurate_events.clear();
@@ -63,6 +64,10 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 {  
   deactivate();
   _sample_rate = sample_rate;
+
+  // set activation time
+  auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
+  _activated_at_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(_desc.topo, max_frame_count);
@@ -197,14 +202,14 @@ plugin_engine::process()
 
   // update output values 3 times a second
   _host_block.output_events.clear();
-  std::int64_t frames_since_update = _common_block.stream_time - _prev_output_time;
-  double millis_since_update = frames_since_update / _sample_rate * 1000.0;
-  if(millis_since_update < 333) return;
+  auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
+  auto now_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
+  if((now_millis - _activated_at_ms).count() < 333) return;
 
   // push output events, we don't check if anything changed
   // just push events for all output parameters using the current value
   int plugin_param_index = 0;
-  _prev_output_time = _common_block.stream_time;
+  _activated_at_ms = now_millis;
   for (int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
     auto const& group = _desc.topo.module_groups[g];
