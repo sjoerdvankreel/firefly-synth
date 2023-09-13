@@ -1,6 +1,7 @@
 gui
 graphs
 antialias
+drop param_instance_count
 state save + load with warnings/errors + load with warning/error ui
 clap threadpool
 host context menu
