@@ -18,8 +18,8 @@ class plain_value final {
     plain_value v; v._real = real; return v; 
   }
 public:
+  int step() const { return _step; }
   float real() const { return _real; }
-  float step() const { return _step; }
   void real_unchecked(float raw) { _real = raw; }
 
   friend struct param_topo;
