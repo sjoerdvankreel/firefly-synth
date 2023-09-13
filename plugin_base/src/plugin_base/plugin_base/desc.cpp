@@ -64,6 +64,7 @@ validate_desc(plugin_desc const& desc)
   assert(desc.global_param_index_to_param_id.size() == desc.global_param_count);
 
   int global_param_index = 0;
+  (void)global_param_index;
   for (int m = 0; m < desc.modules.size(); m++)
   {
     auto const& module = desc.modules[m];
@@ -124,6 +125,7 @@ validate_topo(plugin_topo const& topo)
     for (int s = 0; s < module.param_sections.size(); s++)
     {
       auto const& section = module.param_sections[s];
+      (void)section;
       assert(section.name.size());
       assert(section.section >= 0);
       assert(section.section < module.param_sections.size());
@@ -132,6 +134,7 @@ validate_topo(plugin_topo const& topo)
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
+      (void)param;
       assert(param.count > 0);
       assert(param.count <= 1024);
       assert(param.id.size());
