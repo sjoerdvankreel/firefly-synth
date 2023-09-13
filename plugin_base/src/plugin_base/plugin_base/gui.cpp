@@ -71,6 +71,21 @@ public:
   void plugin_value_changed(plain_value plain) override final;
 };
 
+class param_textbox :
+public param_base,
+public TextEditor,
+public TextEditor::Listener
+{
+public:
+  ~param_textbox();
+  param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial);
+  void plugin_value_changed(plain_value plain) override final;
+  void textEditorFocusLost(TextEditor&) override;
+  void textEditorTextChanged(TextEditor&) override;
+  void textEditorReturnKeyPressed(TextEditor&) override;
+  void textEditorEscapeKeyPressed(TextEditor&) override;
+};
+
 param_base::
 param_base(plugin_gui* gui, param_desc const* desc) : 
 _gui(gui), _desc(desc)
@@ -79,6 +94,9 @@ param_base::
 ~param_base()
 { _gui->remove_single_param_plugin_listener(_desc->index_in_plugin, this); }
 
+void
+param_textbox::plugin_value_changed(plain_value plain)
+{ setText(_desc->topo->plain_to_text(plain), false); }
 void
 param_combobox::plugin_value_changed(plain_value plain)
 { setSelectedItemIndex(plain.step() - _desc->topo->min); }
@@ -132,6 +150,26 @@ param_combobox::comboBoxChanged(ComboBox*)
   _gui->ui_param_end_changes(_desc->index_in_plugin);
 }
 
+void 
+param_textbox::textEditorFocusLost(TextEditor&)
+{
+}
+
+void 
+param_textbox::textEditorTextChanged(TextEditor&)
+{
+}
+
+void 
+param_textbox::textEditorReturnKeyPressed(TextEditor&)
+{
+}
+
+void 
+param_textbox::textEditorEscapeKeyPressed(TextEditor&)
+{
+}
+
 param_name_label::
 param_name_label(param_topo const* topo)
 { setText(topo->name, dontSendNotification); }
@@ -140,6 +178,17 @@ param_value_label::
 param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial):
 param_base(gui, desc), Label()
 { plugin_value_changed(initial); }
+
+param_textbox::
+~param_textbox()
+{ removeListener(this); }
+param_textbox::
+param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial) :
+param_base(gui, desc), TextEditor()
+{
+  addListener(this);
+  plugin_value_changed(initial);
+}
 
 param_toggle_button::
 ~param_toggle_button()
@@ -289,6 +338,11 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
       else if (module.params[p].topo->display == param_display::list)
       {
         _children.emplace_back(std::make_unique<param_combobox>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
+        addAndMakeVisible(_children[_children.size() - 1].get());
+      }
+      else if (module.params[p].topo->display == param_display::text)
+      {
+        _children.emplace_back(std::make_unique<param_textbox>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
       else

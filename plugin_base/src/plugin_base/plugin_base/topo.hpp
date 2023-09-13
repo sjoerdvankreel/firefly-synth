@@ -20,7 +20,7 @@ enum class param_text { none, name, value, both };
 // No_display maps times 100 but doesnt have the unit value. Useful for osc cents.
 enum class param_percentage { off, on, no_unit };
 enum class param_type { step, name, item, linear, log };
-enum class param_display { toggle, list, knob, hslider, vslider };
+enum class param_display { toggle, list, text, knob, hslider, vslider };
 
 // item within list (persisted by guid)
 struct item_topo final {
