@@ -56,6 +56,8 @@ struct module_desc final {
 // runtime plugin descriptor
 struct plugin_desc final {
   plugin_topo const topo = {};
+  int global_param_count = {};
+  int global_module_count = {};
   std::vector<module_desc> modules = {};
   std::vector<param_mapping> global_param_mappings = {};
   std::vector<int> global_param_index_to_param_id = {};

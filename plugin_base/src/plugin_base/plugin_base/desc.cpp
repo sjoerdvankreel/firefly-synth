@@ -55,8 +55,14 @@ validate_desc(plugin_desc const& desc)
   std::set<int> all_hashes;
   std::set<std::string> all_ids;
 
-  assert(desc.global_param_index_to_param_id.size() == desc.global_param_mappings.size());
-  assert(desc.param_id_to_global_param_index.size() == desc.global_param_mappings.size());
+  assert(desc.global_module_count > 0);
+  assert(desc.modules.size() == desc.global_module_count);
+
+  assert(desc.global_param_count > 0);
+  assert(desc.global_param_mappings.size() == desc.global_param_count);
+  assert(desc.param_id_to_global_param_index.size() == desc.global_param_count);
+  assert(desc.global_param_index_to_param_id.size() == desc.global_param_count);
+
   for (int m = 0; m < desc.modules.size(); m++)
   {
     auto const& module = desc.modules[m];

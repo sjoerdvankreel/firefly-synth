@@ -27,7 +27,7 @@ class plugin_engine final {
   host_block _host_block = {};
   plugin_block _plugin_block = {};
   common_block _common_block = {};
-  jarray3d<plain_value> _state = {};
+  jarray4d<plain_value> _state = {};
   std::vector<int> _accurate_frames = {}; // track accurate event frame positions per parameter
   std::chrono::milliseconds _activated_at_ms = {}; // dont push output params too often
   jarray2d<std::unique_ptr<module_engine>> _module_engines = {};
@@ -43,8 +43,8 @@ public:
 
   plugin_desc const& desc() const { return _desc; }
   // CLAP needs direct write access to the audio thread.
-  jarray3d<plain_value>& state() { return _state; }
-  jarray3d<plain_value> const& state() const { return _state; }
+  jarray4d<plain_value>& state() { return _state; }
+  jarray4d<plain_value> const& state() const { return _state; }
 };
 
 }

@@ -9,8 +9,8 @@ _desc(factory), _dims(_desc.topo)
   // reserve this much but allocate (on the audio thread!) if necessary
   // still seems better than dropping events
   int note_limit_guess = _desc.topo.polyphony * 64;
-  int block_events_guess = _desc.param_mappings.size();
-  int accurate_events_guess = _desc.param_mappings.size() * 64;
+  int block_events_guess = _desc.global_param_count;
+  int accurate_events_guess = _desc.global_param_count * 64;
 
   // init everything that is not frame-count dependent
   _host_block.common = &_common_block;
@@ -19,7 +19,7 @@ _desc(factory), _dims(_desc.topo)
   _desc.init_default_state(_state);
   _module_engines.init(_dims.module_counts);
   _common_block.notes.reserve(note_limit_guess);
-  _accurate_frames.resize(_desc.param_mappings.size());
+  _accurate_frames.resize(_desc.global_param_count);
   _host_block.block_events.reserve(block_events_guess);
   _host_block.output_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
@@ -54,9 +54,9 @@ plugin_engine::deactivate()
   _plugin_block.module_cv = {};
   _plugin_block.module_audio = {};
   _plugin_block.accurate_automation = {};
-  for(int g = 0; g < _desc.topo.module_groups.size(); g++)
-    for(int m = 0; m < _desc.topo.module_groups[g].module_count; m++)
-      _module_engines[g][m].reset();
+  for(int m = 0; m < _desc.topo.modules.size(); m++)
+    for(int mi = 0; mi < _desc.topo.modules[m].count; mi++)
+      _module_engines[m][mi].reset();
 }
 
 void
@@ -74,9 +74,9 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _plugin_block.module_cv.init(frame_dims.module_cv_frame_counts);
   _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
   _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
-  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
-    for (int m = 0; m < _desc.topo.module_groups[g].module_count; m++)
-      _module_engines[g][m] = _desc.topo.module_groups[g].engine_factory(sample_rate, max_frame_count);
+  for (int m = 0; m < _desc.topo.modules.size(); m++)
+    for (int mi = 0; mi < _desc.topo.modules[m].count; mi++)
+      _module_engines[m][mi] = _desc.topo.modules[m].engine_factory(sample_rate, max_frame_count);
 }
 
 void 
