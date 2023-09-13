@@ -10,7 +10,7 @@ EditorView(controller), _controller(controller)
 {
   // pull the controller values to the ui (both live on the same thread)
   // alternatively we could keep yet another copy of ui-thread values
-  // in group-module-param format but it's complicated enough already
+  // in module-index-param-index format but it's complicated enough already
   // to deal with processor-controller-ui_controls as is
   int global_param_index = 0;
   plugin_dims dims(controller->desc().topo);
