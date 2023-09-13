@@ -13,8 +13,8 @@ synth_topo()
   result.type = plugin_type::synth;
   result.gui_default_width = 800;
   result.gui_aspect_ratio = 4.0f /3.0f;
-  result.module_groups.emplace_back(osc_topo());
-  result.module_groups.emplace_back(filter_topo());
+  result.modules.emplace_back(osc_topo());
+  result.modules.emplace_back(filter_topo());
   return result;
 }
 
