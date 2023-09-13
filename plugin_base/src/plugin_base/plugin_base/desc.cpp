@@ -86,7 +86,8 @@ validate_desc(plugin_desc const& desc)
       assert(param.topo);
       assert(param.id_hash >= 0);
       assert(param.id.size() > 0);
-      assert(param.name.size() > 0);
+      assert(param.short_name.size() > 0);
+      assert(param.short_name.size() > param.full_name.size());
       assert(param.param_index_in_module >= 0);
       assert(param.param_index_in_module < module.params.size());
       assert(param.param_index_in_topo >= 0);
@@ -223,7 +224,8 @@ param_desc(
   this->topo_index_in_module = topo_index_in_module;
   this->param_index_in_module = param_index_in_module;
   id = module_id(module, module_index_in_topo) + "-" + param_id(param, param_index_in_topo);
-  name = module_name(module, module_index_in_topo) + " " + param_name(param, param_index_in_topo);
+  short_name = param_name(param, param_index_in_topo);
+  full_name = module_name(module, module_index_in_topo) + " " + short_name;
   id_hash = stable_hash(id.c_str());
 }
 

@@ -90,8 +90,8 @@ controller::initialize(FUnknown* context)
       param_info.id = param.id_hash;
       param_info.unitId = unit_info.id;
       from_8bit_string(param_info.units, param.topo->unit.c_str());
-      from_8bit_string(param_info.title, param.topo->name.c_str());
-      from_8bit_string(param_info.shortTitle, param.topo->name.c_str());
+      from_8bit_string(param_info.title, param.full_name.c_str());
+      from_8bit_string(param_info.shortTitle, param.full_name.c_str());
       param_info.defaultNormalizedValue = param.topo->default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;

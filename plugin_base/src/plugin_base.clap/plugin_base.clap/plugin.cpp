@@ -210,7 +210,7 @@ plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexc
   param_desc const& param = _engine.desc().param_at(mapping);
   info->cookie = nullptr;
   info->id = param.id_hash;
-  from_8bit_string(info->name, _engine.desc().param_at(mapping).name.c_str());
+  from_8bit_string(info->name, _engine.desc().param_at(mapping).full_name.c_str());
   from_8bit_string(info->module, _engine.desc().modules[mapping.global_module_index].name.c_str());
 
   info->flags = 0;

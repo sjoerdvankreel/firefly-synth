@@ -21,7 +21,7 @@ class param_name_label:
 public Label
 {
 public:
-  param_name_label(param_topo const* topo);
+  param_name_label(param_desc const* desc);
 };
 
 class param_value_label:
@@ -117,7 +117,7 @@ param_value_label::plugin_value_changed(plain_value plain)
 { 
   std::string text = _desc->topo->plain_to_text(plain);
   if(_desc->topo->label == param_label::both)
-    text = _desc->topo->name + " " + text;
+    text = _desc->short_name + " " + text;
   setText(text, dontSendNotification); 
 }
 
@@ -162,8 +162,8 @@ param_textbox::textEditorTextChanged(TextEditor&)
 }
 
 param_name_label::
-param_name_label(param_topo const* topo)
-{ setText(topo->name, dontSendNotification); }
+param_name_label(param_desc const* desc)
+{ setText(desc->short_name, dontSendNotification); }
 
 param_value_label::
 param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial):
@@ -362,7 +362,7 @@ _single_param_plugin_listeners(_desc.global_param_count)
       }
       else if (param.topo->label == param_label::name)
       {
-        _children.emplace_back(std::make_unique<param_name_label>(param.topo));
+        _children.emplace_back(std::make_unique<param_name_label>(&param));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
       else

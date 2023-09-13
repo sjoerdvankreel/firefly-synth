@@ -32,7 +32,8 @@ struct param_mapping final {
 struct param_desc final {
   int id_hash = {};
   std::string id = {};
-  std::string name = {};
+  std::string full_name = {};
+  std::string short_name = {};
   param_topo const* topo = {};
   int global_param_index = {};
   int param_index_in_topo = {};
