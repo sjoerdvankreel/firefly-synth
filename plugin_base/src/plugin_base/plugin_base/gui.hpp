@@ -42,6 +42,10 @@ public:
   void ui_param_end_changes(int param_index);
   void ui_param_begin_changes(int param_index);
   void ui_param_changing(int param_index, plain_value plain);
+
+  // Calls begin-changing-end. Should be the standard behaviour for anything but sliders.
+  void ui_param_immediate_changed(int param_index, plain_value plain);
+
   void plugin_param_changed(int param_index, plain_value plain);
   void add_any_param_ui_listener(any_param_ui_listener* listener);
   void remove_any_param_ui_listener(any_param_ui_listener* listener);

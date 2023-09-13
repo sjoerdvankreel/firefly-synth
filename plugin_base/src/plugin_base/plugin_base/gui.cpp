@@ -76,14 +76,15 @@ public param_base,
 public TextEditor,
 public TextEditor::Listener
 {
+  std::string _last_parsed;
 public:
   ~param_textbox();
   param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial);
   void plugin_value_changed(plain_value plain) override final;
-  void textEditorFocusLost(TextEditor&) override;
   void textEditorTextChanged(TextEditor&) override;
-  void textEditorReturnKeyPressed(TextEditor&) override;
-  void textEditorEscapeKeyPressed(TextEditor&) override;
+  void textEditorFocusLost(TextEditor&) override { setText(_last_parsed, false); }
+  void textEditorReturnKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
+  void textEditorEscapeKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
 };
 
 param_base::
@@ -95,9 +96,6 @@ param_base::
 { _gui->remove_single_param_plugin_listener(_desc->index_in_plugin, this); }
 
 void
-param_textbox::plugin_value_changed(plain_value plain)
-{ setText(_desc->topo->plain_to_text(plain), false); }
-void
 param_combobox::plugin_value_changed(plain_value plain)
 { setSelectedItemIndex(plain.step() - _desc->topo->min); }
 void
@@ -107,7 +105,14 @@ void
 param_slider::plugin_value_changed(plain_value plain)
 { setValue(_desc->topo->plain_to_raw(plain), dontSendNotification); }
 
-void 
+void
+param_textbox::plugin_value_changed(plain_value plain)
+{
+  _last_parsed = _desc->topo->plain_to_text(plain);
+  setText(_last_parsed, false);
+}
+
+void
 param_value_label::plugin_value_changed(plain_value plain)
 { 
   std::string text = _desc->topo->plain_to_text(plain);
@@ -131,43 +136,29 @@ param_slider::valueChanged()
 }
 
 void 
+param_combobox::comboBoxChanged(ComboBox*) 
+{ 
+  plain_value plain = _desc->topo->raw_to_plain(getSelectedItemIndex() + _desc->topo->min);
+  _gui->ui_param_immediate_changed(_desc->index_in_plugin, plain);
+}
+
+void 
 param_toggle_button::buttonStateChanged(Button*)
 { 
   if(_checked == getToggleState()) return;
-  auto value = _desc->topo->raw_to_plain(getToggleState() ? 1 : 0);
+  plain_value plain = _desc->topo->raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
-  _gui->ui_param_begin_changes(_desc->index_in_plugin);
-  _gui->ui_param_changing(_desc->index_in_plugin, value); 
-  _gui->ui_param_end_changes(_desc->index_in_plugin);
-}
-
-void 
-param_combobox::comboBoxChanged(ComboBox*) 
-{ 
-  auto value = _desc->topo->raw_to_plain(getSelectedItemIndex() + _desc->topo->min);
-  _gui->ui_param_begin_changes(_desc->index_in_plugin);
-  _gui->ui_param_changing(_desc->index_in_plugin, value);
-  _gui->ui_param_end_changes(_desc->index_in_plugin);
-}
-
-void 
-param_textbox::textEditorFocusLost(TextEditor&)
-{
+  _gui->ui_param_immediate_changed(_desc->index_in_plugin, plain);
 }
 
 void 
 param_textbox::textEditorTextChanged(TextEditor&)
 {
-}
-
-void 
-param_textbox::textEditorReturnKeyPressed(TextEditor&)
-{
-}
-
-void 
-param_textbox::textEditorEscapeKeyPressed(TextEditor&)
-{
+  plain_value plain;
+  std::string text(getText().toStdString());
+  if(!_desc->topo->text_to_plain(text, plain)) return;
+  _last_parsed = text;
+  _gui->ui_param_immediate_changed(_desc->index_in_plugin, plain);
 }
 
 param_name_label::
@@ -269,6 +260,14 @@ plugin_gui::add_any_param_ui_listener(any_param_ui_listener* listener)
 void 
 plugin_gui::add_single_param_plugin_listener(int param_index, single_param_plugin_listener* listener)
 { _single_param_plugin_listeners[param_index].push_back(listener); }
+
+void 
+plugin_gui::ui_param_immediate_changed(int param_index, plain_value plain)
+{
+  ui_param_begin_changes(param_index);
+  ui_param_changing(param_index, plain);
+  ui_param_end_changes(param_index);
+}
 
 void 
 plugin_gui::ui_param_begin_changes(int param_index)
