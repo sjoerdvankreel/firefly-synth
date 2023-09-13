@@ -152,7 +152,7 @@ plugin_engine::process()
   for (int e = 0; e < _host_block.accurate_events.size(); e++)
   {
     auto const& event = _host_block.accurate_events[e];
-    auto const& mapping = _desc.param_mappings[event.global_param_index];
+    auto const& mapping = _desc.global_param_mappings[event.global_param_index];
 
     // linear interpolation from previous to current value
     auto& curve = mapping.value_at(_plugin_block.accurate_automation);
@@ -171,35 +171,36 @@ plugin_engine::process()
 
   // denormalize all interpolated curves even if they where not changed
   // this might be costly for log-scaled parameters
-  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
+  for (int m = 0; m < _desc.topo.modules.size(); m++)
   {
-    auto const& group = _desc.topo.module_groups[g];
-    for (int m = 0; m < group.module_count; m++)
-      for (int p = 0; p < group.params.size(); p++)
+    auto const& module = _desc.topo.modules[m];
+    for (int mi = 0; mi < module.count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
       {
-        auto const& param = group.params[p];
-        if(param.rate == param_rate::accurate)
-          for(int f = 0; f < _common_block.frame_count; f++)
-            _plugin_block.accurate_automation[g][m][p][f] = param.normalized_to_plain(
-              normalized_value(_plugin_block.accurate_automation[g][m][p][f])).real();
+        auto const& param = module.params[p];
+        for(int pi = 0; pi < param.count; pi++)
+          if(param.rate == param_rate::accurate)
+            for(int f = 0; f < _common_block.frame_count; f++)
+              _plugin_block.accurate_automation[m][mi][p][pi][f] = param.normalized_to_plain(
+                normalized_value(_plugin_block.accurate_automation[m][mi][p][pi][f])).real();
       }
   }
 
   // run all modules in order
   // each module has access to previous modules audio and cv outputs
   _plugin_block.sample_rate = _sample_rate;
-  for(int g = 0; g < _desc.topo.module_groups.size(); g++)
+  for(int m = 0; m < _desc.topo.modules.size(); m++)
   {
-    auto const& group = _desc.topo.module_groups[g];
-    for(int m = 0; m < group.module_count; m++)
+    auto const& module = _desc.topo.modules[m];
+    for(int mi = 0; mi < module.count; mi++)
     {
-      module_block module(
-        _plugin_block.module_cv[g][m], 
-        _plugin_block.module_audio[g][m], 
-        _state[g][m],
-        _plugin_block.accurate_automation[g][m],
-        _plugin_block.block_automation[g][m]);
-      _module_engines[g][m]->process(_desc.topo, _plugin_block, module);
+      module_block block(
+        _plugin_block.module_cv[m][mi], 
+        _plugin_block.module_audio[m][mi], 
+        _state[m][mi],
+        _plugin_block.accurate_automation[m][mi],
+        _plugin_block.block_automation[m][mi]);
+      _module_engines[m][mi]->process(_desc.topo, _plugin_block, block);
     }
   }
 
@@ -213,21 +214,24 @@ plugin_engine::process()
   // just push events for all output parameters using the current value
   int global_param_index = 0;
   _activated_at_ms = now_millis;
-  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
+  for (int m = 0; m < _desc.topo.modules.size(); m++)
   {
-    auto const& group = _desc.topo.module_groups[g];
-    for (int m = 0; m < group.module_count; m++)
-      for (int p = 0; p < group.params.size(); p++)
+    auto const& module = _desc.topo.modules[m];
+    for (int mi = 0; mi < module.count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
       {
-        auto const& param = group.params[p];
-        if (param.direction == param_direction::output)
+        auto const& param = module.params[p];
+        for(int pi = 0; pi < param.count; pi++)
         {
-          host_block_event output_event;
-          output_event.global_param_index = global_param_index;
-          output_event.normalized = param.plain_to_normalized(_state[g][m][p]);
-          _host_block.output_events.push_back(output_event);
+          if (param.direction == param_direction::output)
+          {
+            host_block_event output_event;
+            output_event.global_param_index = global_param_index;
+            output_event.normalized = param.plain_to_normalized(_state[m][mi][p][pi]);
+            _host_block.output_events.push_back(output_event);
+          }
+          global_param_index++;
         }
-        global_param_index++;
       }
   }
 }
