@@ -16,37 +16,37 @@ make_module_group(
 param_topo
 param_toggle(
   std::string const& id, std::string const& name, int group, 
-  param_direction direction, param_text text, bool default_);
+  param_direction direction, param_label label, bool default_);
 param_topo
 param_steps(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text,
+  param_direction direction, param_display display, param_label label,
   int min, int max, int default_);
 param_topo
 param_items(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text,
+  param_direction direction, param_display display, param_label label,
   items_topo_factory items_factory, std::string const& default_);
 param_topo
 param_names(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text,
+  param_direction direction, param_display display, param_label label,
   std::vector<std::string> const& names, std::string const& default_);
 
 // either block or accurate rate
 param_topo
 param_percentage(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text, param_rate rate, bool unit,
+  param_direction direction, param_display display, param_label label, param_rate rate, bool unit,
   double min, double max, double default_);
 param_topo
 param_linear(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text, param_rate rate,
+  param_direction direction, param_display display, param_label label, param_rate rate,
   double min, double max, double default_, std::string const& unit);
 param_topo
 param_log(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text, param_rate rate,
+  param_direction direction, param_display display, param_label label, param_rate rate,
   double min, double max, double default_, double midpoint, std::string const& unit);
 }

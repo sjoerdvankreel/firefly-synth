@@ -111,7 +111,7 @@ void
 param_value_label::plugin_value_changed(plain_value plain)
 { 
   std::string text = _desc->topo->plain_to_text(plain);
-  if(_desc->topo->text == param_text::both)
+  if(_desc->topo->label == param_label::both)
     text = _desc->topo->name + " " + text;
   setText(text, dontSendNotification); 
 }
@@ -350,12 +350,12 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
         _children.emplace_back(std::make_unique<param_slider>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      if(module.params[p].topo->text == param_text::none)
+      if(module.params[p].topo->label == param_label::none)
       {
         _children.emplace_back(std::make_unique<Label>());
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (module.params[p].topo->text == param_text::name)
+      else if (module.params[p].topo->label == param_label::name)
       {
         _children.emplace_back(std::make_unique<param_name_label>(module.params[p].topo));
         addAndMakeVisible(_children[_children.size() - 1].get());

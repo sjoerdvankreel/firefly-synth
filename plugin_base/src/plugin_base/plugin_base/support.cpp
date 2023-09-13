@@ -10,13 +10,13 @@ note_names()
 static param_topo
 param_base(
   std::string const& id, std::string const& name, int group, std::string const& default_, 
-  param_direction direction, param_display display, param_text text, param_rate rate)
+  param_direction direction, param_display display, param_label label, param_rate rate)
 {
   param_topo result = {};
   result.id = id;
   result.name = name;
   result.rate = rate;
-  result.text = text;
+  result.label = label;
   result.group = group;
   result.display = display;
   result.direction = direction;
@@ -41,9 +41,9 @@ make_module_group(
 param_topo
 param_toggle(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_text text, bool default_)
+  param_direction direction, param_label label, bool default_)
 {
-  param_topo result(param_base(id, name, group, default_? "On": "Off", direction, param_display::toggle, text, param_rate::block));
+  param_topo result(param_base(id, name, group, default_? "On": "Off", direction, param_display::toggle, label, param_rate::block));
   result.min = 0;
   result.max = 1;
   result.type = param_type::step;
@@ -53,10 +53,10 @@ param_toggle(
 param_topo
 param_steps(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text,
+  param_direction direction, param_display display, param_label label,
   int min, int max, int default_)
 {
-  param_topo result(param_base(id, name, group, std::to_string(default_), direction, display, text, param_rate::block));
+  param_topo result(param_base(id, name, group, std::to_string(default_), direction, display, label, param_rate::block));
   result.min = min;
   result.max = max;
   result.type = param_type::step;
@@ -66,10 +66,10 @@ param_steps(
 param_topo
 param_items(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text,
+  param_direction direction, param_display display, param_label label,
   items_topo_factory items_factory, std::string const& default_)
 {
-  param_topo result(param_base(id, name, group, default_, direction, display, text, param_rate::block));
+  param_topo result(param_base(id, name, group, default_, direction, display, label, param_rate::block));
   result.items = items_factory();
   result.min = 0;
   result.max = result.items.size() - 1;
@@ -80,10 +80,10 @@ param_items(
 param_topo
 param_names(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text,
+  param_direction direction, param_display display, param_label label,
   std::vector<std::string> const& names, std::string const& default_)
 {
-  param_topo result(param_base(id, name, group, default_, direction, display, text, param_rate::block));
+  param_topo result(param_base(id, name, group, default_, direction, display, label, param_rate::block));
   result.min = 0;
   result.max = names.size() - 1;
   result.names = names;
@@ -94,10 +94,10 @@ param_names(
 param_topo
 param_percentage(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text, param_rate rate, bool unit,
+  param_direction direction, param_display display, param_label label, param_rate rate, bool unit,
   double min, double max, double default_)
 {
-  param_topo result(param_base(id, name, group, std::to_string(default_ * 100), direction, display, text, rate));
+  param_topo result(param_base(id, name, group, std::to_string(default_ * 100), direction, display, label, rate));
   result.min = min;
   result.max = max;
   result.unit = unit? "%": "";
@@ -109,10 +109,10 @@ param_percentage(
 param_topo
 param_linear(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text, param_rate rate,
+  param_direction direction, param_display display, param_label label, param_rate rate,
   double min, double max, double default_, std::string const& unit)
 {
-  param_topo result(param_base(id, name, group, std::to_string(default_), direction, display, text, rate));
+  param_topo result(param_base(id, name, group, std::to_string(default_), direction, display, label, rate));
   result.min = min;
   result.max = max;
   result.unit = unit;
@@ -123,10 +123,10 @@ param_linear(
 param_topo
 param_log(
   std::string const& id, std::string const& name, int group,
-  param_direction direction, param_display display, param_text text, param_rate rate,
+  param_direction direction, param_display display, param_label label, param_rate rate,
   double min, double max, double default_, double midpoint, std::string const& unit)
 {
-  param_topo result(param_base(id, name, group, std::to_string(default_), direction, display, text, rate));
+  param_topo result(param_base(id, name, group, std::to_string(default_), direction, display, label, rate));
   result.min = min;
   result.max = max;
   result.unit = unit;
