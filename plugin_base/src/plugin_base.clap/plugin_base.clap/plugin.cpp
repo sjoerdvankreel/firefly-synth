@@ -396,6 +396,7 @@ plugin::process(clap_process const* process) noexcept
       note.frame_index = header->time;
       note.id.channel = event->channel;
       block.common->notes.push_back(note);
+      break;
     }
     case CLAP_EVENT_PARAM_VALUE:
     {
@@ -421,6 +422,7 @@ plugin::process(clap_process const* process) noexcept
         accurate_event.normalized = clap_to_normalized(*param.topo, clap_value(event->value));
         block.accurate_events.push_back(accurate_event);
       }
+      break;
     }
     default: break;
     }
