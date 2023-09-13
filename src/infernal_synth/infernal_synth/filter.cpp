@@ -21,18 +21,18 @@ public:
     module_block& module) override;
 };
 
-enum filter_group { filter_group_main };
+enum filter_section { filter_section_main };
 enum filter_param { filter_param_on, filter_param_freq, filter_param_out_gain };
 
 module_group_topo
 filter_topo()
 {
   module_group_topo result(make_module_group("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, module_scope::voice, module_output::none));
-  result.param_groups.emplace_back(param_group_topo(filter_group_main, "Main"));
+  result.param_sections.emplace_back(param_section_topo(filter_section_main, "Main"));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
-  result.params.emplace_back(param_toggle("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", filter_group_main, param_direction::input, param_label::both, false));
-  result.params.emplace_back(param_log("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", filter_group_main, param_direction::input, param_edit::knob, param_label::both, param_rate::accurate, 20, 20000, 1000, 1000, "Hz"));
-  result.params.emplace_back(param_percentage("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", filter_group_main, param_direction::output, param_edit::text, param_label::both, param_rate::block, true, 0, 1, 0));
+  result.params.emplace_back(param_toggle("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", filter_section_main, param_direction::input, param_label::both, false));
+  result.params.emplace_back(param_log("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", filter_section_main, param_direction::input, param_edit::knob, param_label::both, param_rate::accurate, 20, 20000, 1000, 1000, "Hz"));
+  result.params.emplace_back(param_percentage("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", filter_section_main, param_direction::output, param_edit::text, param_label::both, param_rate::block, true, 0, 1, 0));
   return result;
 }
 

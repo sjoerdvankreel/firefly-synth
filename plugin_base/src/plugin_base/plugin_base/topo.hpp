@@ -32,10 +32,10 @@ struct item_topo final {
 
 // param within module
 struct param_topo final {
-  int group;
   double min;
   double max;
   double exp;
+  int section; // ui section
   param_type type;
   param_rate rate;
   param_edit edit;
@@ -77,14 +77,14 @@ struct param_topo final {
 };
 
 // grouping parameters for gui
-struct param_group_topo final {
-  int type;
+struct param_section_topo final {
+  int section;
   std::string name;
-  param_group_topo(int type, std::string const& name): type(type), name(name) {}
-  INF_DECLARE_MOVE_ONLY(param_group_topo);
+  param_section_topo(int section, std::string const& name): section(section), name(name) {}
+  INF_DECLARE_MOVE_ONLY(param_section_topo);
 };
 
-// module group within plugin (may be more than 1 per group)
+// module group within plugin (may be more than 1 per group, e.g. "Osc N")
 struct module_group_topo final {
   int module_count;
   std::string id;
@@ -92,7 +92,7 @@ struct module_group_topo final {
   module_scope scope;
   module_output output;
   std::vector<param_topo> params;
-  std::vector<param_group_topo> param_groups;
+  std::vector<param_section_topo> param_sections;
   std::unique_ptr<module_engine>(*engine_factory)(int sample_rate, int max_frame_count);
   INF_DECLARE_MOVE_ONLY(module_group_topo);
 };

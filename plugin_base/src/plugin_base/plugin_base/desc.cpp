@@ -68,15 +68,15 @@ validate(plugin_desc const& desc)
     assert(group.engine_factory);
     assert(group.module_count > 0);
     assert(group.params.size() > 0);
-    assert(group.param_groups.size() > 0);
+    assert(group.param_sections.size() > 0);
     INF_ASSERT_EXEC(group_ids.insert(group.id).second);
     for (int p = 0; p < group.params.size(); p++)
     {
       auto const& param = group.params[p];
 
-      assert(param.group >= 0);
       assert(param.id.size());
       assert(param.name.size());
+      assert(param.section >= 0);
       assert(param.max > param.min);
       assert(param.default_text.size());
 
