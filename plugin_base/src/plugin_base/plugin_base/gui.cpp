@@ -349,6 +349,8 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
         _children.emplace_back(std::make_unique<param_slider>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
+      _children[_children.size()-1]->setEnabled(module.params[p].topo->direction == param_direction::input);
+
       if(module.params[p].topo->label == param_label::none)
       {
         _children.emplace_back(std::make_unique<Label>());

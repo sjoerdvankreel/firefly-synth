@@ -3,8 +3,6 @@ graphs
 antialias
 state save
 clap threadpool
-textual outputs
-readonly outputs
 rate limit outputs
 host context menu
 (polyphonic) modulation

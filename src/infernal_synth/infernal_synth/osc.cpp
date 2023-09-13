@@ -44,7 +44,7 @@ osc_topo()
   result.params.emplace_back(param_percentage("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", osc_group_main, param_direction::input, param_edit::knob, param_label::both, param_rate::accurate, true, 0, 1, 1));
   result.params.emplace_back(param_percentage("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", osc_group_pitch, param_direction::input, param_edit::knob, param_label::both, param_rate::accurate, true, -1, 1, 0));
   result.params.emplace_back(param_steps("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", osc_group_pitch, param_direction::input, param_edit::list, param_label::both, 0, 9, 4));
-  result.params.emplace_back(param_names("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", osc_group_pitch, param_direction::input, param_edit::list, param_label::both, note_names(), "C"));
+  result.params.emplace_back(param_names("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", osc_group_pitch, param_direction::input, param_edit::text, param_label::both, note_names(), "C"));
   result.params.emplace_back(param_percentage("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", osc_group_pitch, param_direction::input, param_edit::knob, param_label::both, param_rate::accurate, false, -1, 1, 0));
   return result;
 }
