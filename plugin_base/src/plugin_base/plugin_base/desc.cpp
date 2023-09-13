@@ -63,6 +63,7 @@ validate_desc(plugin_desc const& desc)
   assert(desc.param_id_to_global_param_index.size() == desc.global_param_count);
   assert(desc.global_param_index_to_param_id.size() == desc.global_param_count);
 
+  int global_param_index = 0;
   for (int m = 0; m < desc.modules.size(); m++)
   {
     auto const& module = desc.modules[m];
@@ -71,7 +72,7 @@ validate_desc(plugin_desc const& desc)
     assert(module.name.size());
     assert(module.params.size());
     assert(module.id_hash >= 0);
-    assert(module.topo_index_in_plugin >= 0);
+    assert(module.global_module_index == m);
     assert(module.topo_index_in_plugin < desc.modules.size());
     assert(module.module_index_in_topo >= 0);
     assert(module.module_index_in_topo < module.topo->count);
@@ -89,6 +90,7 @@ validate_desc(plugin_desc const& desc)
       assert(param.param_index_in_topo < param.topo->count);
       assert(param.topo_index_in_module >= 0);
       assert(param.topo_index_in_module < module.params.size());
+      assert(param.global_param_index == global_param_index++);
       INF_ASSERT_EXEC(all_ids.insert(param.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.id_hash).second);
     }
@@ -205,10 +207,11 @@ validate_topo(plugin_topo const& topo)
 
 param_desc::
 param_desc(
-  module_topo const& module, param_topo const& param,
+  module_topo const& module, param_topo const& param, int global_param_index,
   int module_index_in_topo, int topo_index_in_module, int param_index_in_topo)
 {
   topo = &param;
+  this->global_param_index = global_param_index;
   this->param_index_in_topo = param_index_in_topo;
   this->topo_index_in_module = topo_index_in_module;
   id = module_id(module, module_index_in_topo) + "-" + param_id(param, param_index_in_topo);
@@ -218,10 +221,12 @@ param_desc(
 
 module_desc::
 module_desc(
-  module_topo const& module,
+  module_topo const& module, 
+  int global_module_index, int global_param_index_start,
   int topo_index_in_plugin, int module_index_in_topo)
 {
   topo = &module;
+  this->global_module_index = global_module_index;
   this->topo_index_in_plugin = topo_index_in_plugin;
   this->module_index_in_topo = module_index_in_topo;
   id = module_id(module, module_index_in_topo);
@@ -231,7 +236,7 @@ module_desc(
   {
     auto const& param = module.params[p];
     for(int i = 0; i < param.count; i++)
-      params.emplace_back(param_desc(module, param, module_index_in_topo, p, i));
+      params.emplace_back(param_desc(module, param, global_param_index_start++, module_index_in_topo, p, i));
   }
 }
 
@@ -241,11 +246,17 @@ topo(factory())
 {
   validate_topo(topo);
 
+  int global_module_index = 0;
+  int global_param_index_start = 0;
   for(int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
     for(int i = 0; i < module.count; i++)
-      modules.emplace_back(module_desc(module, m, i));
+    {
+      modules.emplace_back(module_desc(module, global_module_index++, global_param_index_start, m, i));
+      for(int p = 0; p < module.params.size(); p++)
+        global_param_index_start += module.params[p].count;
+    }
   }
 
   for(int m = 0; m < modules.size(); m++)

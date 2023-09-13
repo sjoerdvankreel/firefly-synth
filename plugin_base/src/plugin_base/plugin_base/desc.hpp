@@ -30,12 +30,14 @@ struct param_desc final {
   std::string id = {};
   std::string name = {};
   param_topo const* topo = {};
+  int global_param_index = {};
   int param_index_in_topo = {};
   int topo_index_in_module = {};
   INF_DECLARE_MOVE_ONLY(param_desc);
   param_desc(
     module_topo const& module, param_topo const& param, 
-    int module_index_in_topo, int topo_index_in_module, int param_index_in_topo);
+    int global_param_index, int module_index_in_topo, 
+    int topo_index_in_module, int param_index_in_topo);
 };
 
 // runtime module descriptor
@@ -44,12 +46,14 @@ struct module_desc final {
   std::string id = {};
   std::string name = {};
   module_topo const* topo = {};
+  int global_module_index = {};
   int module_index_in_topo = {};
   int topo_index_in_plugin = {};
   std::vector<param_desc> params = {};
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
     module_topo const& module, 
+    int global_module_index, int global_param_index_start,
     int topo_index_in_plugin, int module_index_in_topo);
 };
 
