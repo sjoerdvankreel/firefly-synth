@@ -87,7 +87,7 @@ validate_desc(plugin_desc const& desc)
       assert(param.id_hash >= 0);
       assert(param.id.size() > 0);
       assert(param.short_name.size() > 0);
-      assert(param.short_name.size() > param.full_name.size());
+      assert(param.short_name.size() < param.full_name.size());
       assert(param.param_index_in_module >= 0);
       assert(param.param_index_in_module < module.params.size());
       assert(param.param_index_in_topo >= 0);
