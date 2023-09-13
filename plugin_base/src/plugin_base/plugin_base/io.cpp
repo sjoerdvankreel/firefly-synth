@@ -70,21 +70,25 @@ io_store(
     }
     module_topo_json->setProperty("params", param_topos_json);
 
-    var modules_json;
+    var module_instances_json;
     for (int mi = 0; mi < module_topo.count; mi++)
     {
-      auto module_json = std::make_unique<DynamicObject>();
-      module_json->setProperty("INDEX", mi);
-      modules_json.append(var(module_json.release()));
+      auto module_instance_json = std::make_unique<DynamicObject>();
+      for (int p = 0; p < module_topo.params.size(); p++)
+      {
+        auto const& param_topo = module_topo.params[p];        
+        module_instance_json->setProperty(String(param_topo.id), var(123));
+      }
+      module_instances_json.append(var(module_instance_json.release()));
     }
-    module_topo_json->setProperty("instances", modules_json);
+    module_topo_json->setProperty("instances", module_instances_json);
     module_topos_json.append(var(module_topo_json.release()));
   }
+
   root_json->setProperty("modules", module_topos_json);
   std::string json = JSON::toString(var(root_json.release())).toStdString();
   return std::vector<char>(json.begin(), json.end());
 }
-
 
 bool 
 io_load(
