@@ -89,44 +89,47 @@ plugin_engine::process()
       _host_block.common->audio_output[c] + _common_block.frame_count,
       0.0f);
 
-  for(int g = 0; g < _desc.topo.module_groups.size(); g++)
+  for(int m = 0; m < _desc.topo.modules.size(); m++)
   {
-    auto const& group = _desc.topo.module_groups[g];
-    for (int m = 0; m < group.module_count; m++)
-      if(group.output == module_output::cv)
+    auto const& module = _desc.topo.modules[m];
+    for (int mi = 0; mi < module.count; mi++)
+      if(module.output == module_output::cv)
       {
         // clear module cv output
-        auto& curve = _plugin_block.module_cv[g][m];
+        auto& curve = _plugin_block.module_cv[m][mi];
         std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
       }
-      else if (group.output == module_output::audio)
+      else if (module.output == module_output::audio)
       {
         // clear module audio output
-        auto& audio = _plugin_block.module_audio[g][m];
+        auto& audio = _plugin_block.module_audio[m][mi];
         for(int c = 0; c < 2; c++)
           std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
-      }
+      } else assert(false);
   }
 
-  for (int g = 0; g < _desc.topo.module_groups.size(); g++)
+  for (int m = 0; m < _desc.topo.modules.size(); m++)
   {
-    auto const& group = _desc.topo.module_groups[g];
-    for(int m = 0; m < group.module_count; m++)
-      for(int p = 0; p < group.params.size(); p++)
+    auto const& module = _desc.topo.modules[m];
+    for(int mi = 0; mi < module.count; mi++)
+      for(int p = 0; p < module.params.size(); p++)
       {
         // set per-block automation values to current values (automation may overwrite)
-        if(group.params[p].rate == param_rate::block)
-          _plugin_block.block_automation[g][m][p] = _state[g][m][p];
+        auto const& param = module.params[p];
+        if(param.rate == param_rate::block)
+          for(int pi = 0; pi < param.count; pi++)
+          _plugin_block.block_automation[m][mi][p][pi] = _state[m][mi][p][pi];
         else
-        {
-          // set accurate automation values to current values (automation may overwrite)
-          // note: need to go from actual to normalized values as interpolation must be done as linear
-          // later scale back from normalized to plain values
-          auto& automation = _plugin_block.accurate_automation[g][m][p];
-          std::fill(
-            automation.begin(), 
-            automation.begin() + _common_block.frame_count, 
-            (float)group.params[p].raw_to_normalized(_state[g][m][p].real()).value());
+          for (int pi = 0; pi < param.count; pi++)
+          {
+            // set accurate automation values to current values (automation may overwrite)
+            // note: need to go from actual to normalized values as interpolation must be done as linear
+            // later scale back from normalized to plain values
+            auto& automation = _plugin_block.accurate_automation[m][mi][p][pi];
+            std::fill(
+              automation.begin(), 
+              automation.begin() + _common_block.frame_count, 
+              (float)param.raw_to_normalized(_state[m][mi][p][pi].real()).value());
         }
       }
   }
@@ -135,7 +138,7 @@ plugin_engine::process()
   for (int e = 0; e < _host_block.block_events.size(); e++)
   {
     auto const& event = _host_block.block_events[e];
-    auto const& mapping = _desc.param_mappings[event.plugin_param_index];
+    auto const& mapping = _desc.global_param_mappings[event.global_param_index];
     plain_value plain = _desc.param_at(mapping).topo->normalized_to_plain(event.normalized);
     mapping.value_at(_state) = plain;
     mapping.value_at(_plugin_block.block_automation) = plain;
@@ -149,11 +152,11 @@ plugin_engine::process()
   for (int e = 0; e < _host_block.accurate_events.size(); e++)
   {
     auto const& event = _host_block.accurate_events[e];
-    auto const& mapping = _desc.param_mappings[event.plugin_param_index];
+    auto const& mapping = _desc.param_mappings[event.global_param_index];
 
     // linear interpolation from previous to current value
     auto& curve = mapping.value_at(_plugin_block.accurate_automation);
-    int prev_frame = _accurate_frames[event.plugin_param_index];
+    int prev_frame = _accurate_frames[event.global_param_index];
     float frame_count = event.frame_index - prev_frame + 1;
     float range = event.normalized.value() - curve[prev_frame];
 
@@ -163,7 +166,7 @@ plugin_engine::process()
 
     // set new state to denormalized and update last event timestamp
     mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).topo->normalized_to_plain(event.normalized).real());
-    _accurate_frames[event.plugin_param_index] = event.frame_index;
+    _accurate_frames[event.global_param_index] = event.frame_index;
   }
 
   // denormalize all interpolated curves even if they where not changed
@@ -208,7 +211,7 @@ plugin_engine::process()
 
   // push output events, we don't check if anything changed
   // just push events for all output parameters using the current value
-  int plugin_param_index = 0;
+  int global_param_index = 0;
   _activated_at_ms = now_millis;
   for (int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
@@ -220,11 +223,11 @@ plugin_engine::process()
         if (param.direction == param_direction::output)
         {
           host_block_event output_event;
-          output_event.plugin_param_index = plugin_param_index;
+          output_event.global_param_index = global_param_index;
           output_event.normalized = param.plain_to_normalized(_state[g][m][p]);
           _host_block.output_events.push_back(output_event);
         }
-        plugin_param_index++;
+        global_param_index++;
       }
   }
 }

@@ -12,7 +12,7 @@ EditorView(controller), _controller(controller)
   // alternatively we could keep yet another copy of ui-thread values
   // in group-module-param format but it's complicated enough already
   // to deal with processor-controller-ui_controls as is
-  int plugin_param_index = 0;
+  int global_param_index = 0;
   plugin_dims dims(controller->desc().topo);
   jarray3d<plain_value> ui_initial_values;
   ui_initial_values.init(dims.module_param_counts);
@@ -23,7 +23,7 @@ EditorView(controller), _controller(controller)
       for(int p = 0; p < group.params.size(); p++)
       {
         auto const& param = group.params[p];
-        int param_tag = _controller->desc().index_to_id[plugin_param_index++];
+        int param_tag = _controller->desc().index_to_id[global_param_index++];
         double normalized = _controller->getParamNormalized(param_tag);
         ui_initial_values[g][m][p] = param.normalized_to_plain(normalized_value(normalized));
       }
