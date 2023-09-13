@@ -12,6 +12,7 @@ synth_topo()
   plugin_topo result;
   result.polyphony = 32;
   result.id = INF_SYNTH_ID;
+  result.name = INF_SYNTH_NAME;
   result.type = plugin_type::synth;
   result.gui_default_width = 800;
   result.gui_aspect_ratio = 4.0f /3.0f;

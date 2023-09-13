@@ -55,15 +55,16 @@ component::setBusArrangements(
 }
 
 tresult PLUGIN_API
-component::setState(IBStream* state)
+component::getState(IBStream* state)
 {
+  io_store_file(_engine.desc().topo, _engine.state(), "C:\\temp\\plug.json");
   return kResultFalse;
 }
 
 tresult PLUGIN_API
-component::getState(IBStream* state)
+component::setState(IBStream* state)
 {
-  io_store(_engine.desc().topo, _engine.state());
+  io_load(_engine.desc().topo, {}, _engine.state());
   return kResultFalse;
 }
 

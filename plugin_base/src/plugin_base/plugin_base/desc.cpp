@@ -109,6 +109,7 @@ validate_topo(plugin_topo const& topo)
   std::set<std::string> module_ids;
 
   assert(topo.id.size());
+  assert(topo.name.size());
   assert(topo.modules.size());
   assert(topo.version_major >= 0);
   assert(topo.version_minor >= 0);

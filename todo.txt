@@ -1,7 +1,7 @@
 gui
 graphs
 antialias
-state save
+state save + load with warnings + load with warning ui + checksum
 clap threadpool
 host context menu
 (polyphonic) modulation

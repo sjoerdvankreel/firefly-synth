@@ -102,6 +102,7 @@ struct module_topo final {
 struct plugin_topo final {
   int polyphony;
   std::string id;
+  std::string name;
   plugin_type type;
   int version_major;
   int version_minor;
