@@ -11,6 +11,8 @@ public Steinberg::Vst::AudioEffect {
   using SpeakerArrangement = Steinberg::Vst::SpeakerArrangement;
 public:
   component(plugin_topo_factory factory, Steinberg::FUID const& controller_id);
+  Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* state) override;
+  Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;
   Steinberg::tresult PLUGIN_API process(Steinberg::Vst::ProcessData& data) override;
   Steinberg::tresult PLUGIN_API setupProcessing(Steinberg::Vst::ProcessSetup& setup) override;

@@ -1,3 +1,4 @@
+#include <plugin_base/io.hpp>
 #include <plugin_base.vst3/component.hpp>
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/vst/ivstprocesscontext.h>
@@ -51,6 +52,19 @@ component::setBusArrangements(
   if (output_count != 1 || outputs[0] != SpeakerArr::kStereo) return kResultFalse;
   if((_engine.desc().topo.type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
   return AudioEffect::setBusArrangements(inputs, input_count, outputs, output_count);
+}
+
+tresult PLUGIN_API
+component::setState(IBStream* state)
+{
+  return kResultFalse;
+}
+
+tresult PLUGIN_API
+component::getState(IBStream* state)
+{
+  io_store(_engine.desc().topo, _engine.state());
+  return kResultFalse;
 }
 
 tresult PLUGIN_API
