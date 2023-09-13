@@ -284,6 +284,8 @@ topo(factory())
     global_module_index++;
   }
 
+  global_param_count = global_param_index;
+  global_module_count = global_module_index;
   validate_desc(*this);
 }
 
@@ -326,7 +328,7 @@ plugin_dims(plugin_topo const& plugin)
 plugin_frame_dims::
 plugin_frame_dims(plugin_topo const& plugin, int frame_count)
 {
-  for (int m = 0; plugin.modules.size(); m++)
+  for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
     int cv_frames = module.output == module_output::cv ? frame_count : 0;
