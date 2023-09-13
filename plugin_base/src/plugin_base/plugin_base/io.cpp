@@ -81,20 +81,24 @@ io_store(
         auto param_json = std::make_unique<DynamicObject>();
         param_json->setProperty("param_id", String(param_topo.id));
         for (int pi = 0; pi < param_topo.count; pi++)
+        {
+          auto param_instance_json = std::make_unique<DynamicObject>();
           switch (param_topo.type)
           {
           case param_type::log:
           case param_type::step:
           case param_type::name:
           case param_type::linear:
-            param_instances.append(var(String(param_topo.plain_to_text(state[m][mi][p][pi]))));
+            param_instance_json->setProperty("value", var(String(param_topo.plain_to_text(state[m][mi][p][pi]))));
             break;
           case param_type::item:
-            param_instances.append(var(String(param_topo.items[state[m][mi][p][pi].step()].id)));
+            param_instance_json->setProperty("value", var(String(param_topo.items[state[m][mi][p][pi].step()].id)));
             break;
           default:
             assert(false);
           }
+          param_instances.append(var(param_instance_json.release()));
+        }
         param_json->setProperty("param_instances", param_instances);
         module_instance_json.append(var(param_json.release()));
       }
