@@ -195,10 +195,16 @@ plugin_engine::process()
     }
   }
 
+  // update output values 3 times a second
+  _host_block.output_events.clear();
+  std::int64_t frames_since_update = _common_block.stream_time - _prev_output_time;
+  double millis_since_update = frames_since_update / _sample_rate * 1000.0;
+  if(millis_since_update < 333) return;
+
   // push output events, we don't check if anything changed
   // just push events for all output parameters using the current value
   int plugin_param_index = 0;
-  _host_block.output_events.clear();
+  _prev_output_time = _common_block.stream_time;
   for (int g = 0; g < _desc.topo.module_groups.size(); g++)
   {
     auto const& group = _desc.topo.module_groups[g];

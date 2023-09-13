@@ -3,7 +3,6 @@ graphs
 antialias
 state save
 clap threadpool
-rate limit outputs
 host context menu
 (polyphonic) modulation
 try out some airwindows stuff
