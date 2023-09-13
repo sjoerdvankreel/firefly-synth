@@ -21,13 +21,18 @@ public:
   Steinberg::tresult PLUGIN_API checkSizeConstraint(Steinberg::ViewRect* rect) override;
   Steinberg::tresult PLUGIN_API attached(void* parent, Steinberg::FIDString type) override;
 
-  void ui_param_changing(int param_index, plain_value plain) override;
-  void plugin_param_changed(int param_index, plain_value plain) { _gui->plugin_param_changed(param_index, plain); }
-  void ui_param_end_changes(int param_index) override { _controller->endEdit(_controller->desc().index_to_id[param_index]); }
-  void ui_param_begin_changes(int param_index) override { _controller->beginEdit(_controller->desc().index_to_id[param_index]); }
+  Steinberg::tresult PLUGIN_API canResize() override 
+  { return Steinberg::kResultTrue; }
+  Steinberg::tresult PLUGIN_API isPlatformTypeSupported(Steinberg::FIDString type) override 
+  { return Steinberg::kResultTrue; }
 
-  Steinberg::tresult PLUGIN_API canResize() override { return Steinberg::kResultTrue; }
-  Steinberg::tresult PLUGIN_API isPlatformTypeSupported(Steinberg::FIDString type) override { return Steinberg::kResultTrue; }
+  void ui_param_changing(int param_index, plain_value plain) override;
+  void plugin_param_changed(int param_index, plain_value plain)
+  { _gui->plugin_param_changed(param_index, plain); }
+  void ui_param_end_changes(int param_index) override 
+  { _controller->endEdit(_controller->desc().global_param_index_to_param_id[param_index]); }
+  void ui_param_begin_changes(int param_index) override 
+  { _controller->beginEdit(_controller->desc().global_param_index_to_param_id[param_index]); }
 };
 
 }

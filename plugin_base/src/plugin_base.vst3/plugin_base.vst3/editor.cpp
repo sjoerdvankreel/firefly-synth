@@ -14,18 +14,21 @@ EditorView(controller), _controller(controller)
   // to deal with processor-controller-ui_controls as is
   int global_param_index = 0;
   plugin_dims dims(controller->desc().topo);
-  jarray3d<plain_value> ui_initial_values;
+  jarray4d<plain_value> ui_initial_values;
   ui_initial_values.init(dims.module_param_counts);
-  for (int g = 0; g < controller->desc().topo.module_groups.size(); g++)
+  for (int m = 0; m < controller->desc().topo.modules.size(); m++)
   {
-    auto const& group = controller->desc().topo.module_groups[g];
-    for (int m = 0; m < group.module_count; m++)
-      for(int p = 0; p < group.params.size(); p++)
+    auto const& module = controller->desc().topo.modules[m];
+    for (int mi = 0; mi < module.count; mi++)
+      for(int p = 0; p < module.params.size(); p++)
       {
-        auto const& param = group.params[p];
-        int param_tag = _controller->desc().index_to_id[global_param_index++];
-        double normalized = _controller->getParamNormalized(param_tag);
-        ui_initial_values[g][m][p] = param.normalized_to_plain(normalized_value(normalized));
+        auto const& param = module.params[p];
+        for(int pi = 0; pi < param.count; pi++)
+        {
+          int param_tag = _controller->desc().global_param_index_to_param_id[global_param_index++];
+          double normalized = _controller->getParamNormalized(param_tag);
+          ui_initial_values[m][mi][p][pi] = param.normalized_to_plain(normalized_value(normalized));
+        }
       }
   }
   _gui = std::make_unique<plugin_gui>(factory, ui_initial_values);
@@ -77,8 +80,8 @@ editor::checkSizeConstraint(ViewRect* new_rect)
 void 
 editor::ui_param_changing(int param_index, plain_value plain)
 {
-  int param_tag = _controller->desc().index_to_id[param_index];
-  param_mapping mapping = _controller->desc().param_mappings[param_index];
+  int param_tag = _controller->desc().global_param_index_to_param_id[param_index];
+  param_mapping mapping = _controller->desc().global_param_mappings[param_index];
   auto normalized = _controller->desc().param_at(mapping).topo->plain_to_normalized(plain).value();
   _controller->performEdit(param_tag, normalized);
   _controller->setParamNormalized(param_tag, normalized);
