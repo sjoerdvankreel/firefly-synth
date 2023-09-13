@@ -9,5 +9,3 @@ try out some airwindows stuff
 voice manager including voice-level unison
 manual automation interpolation/zipper noise
 linux, renoise, bitwig, cbb
-
-do something with out values

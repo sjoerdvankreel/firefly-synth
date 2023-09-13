@@ -70,7 +70,7 @@ filter_engine::process(
   }
 
   auto const& param = topo.modules[module_type_filter].params[filter_param_out_gain];
-  module.output_values[filter_param_out_gain][0] = param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f));
+  module.output_values.set_value(filter_param_out_gain, 0, param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f)));
 }
 
 }

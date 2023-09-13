@@ -7,6 +7,25 @@ namespace plugin_base {
 
 struct common_block;
 
+class module_output_values final {
+  friend class audio_engine;
+  module_topo const* const _module;
+  jarray2d<plain_value>* const _values;
+public:
+  INF_DECLARE_MOVE_ONLY(module_output_values);
+  module_output_values(module_topo const* module, jarray2d<plain_value>* values):
+  _module(module), _values(values) {}
+  
+  void 
+  set_value(int param_type, int param_index, plain_value plain) const
+  {
+    assert(param_index >= 0);
+    assert(param_index < _module->params[param_type].count);
+    assert(_module->params[param_type].direction == param_direction::output);
+    (*_values)[param_type][param_index] = plain;
+  }
+};
+
 // readonly modules audio and cv state, interpolated automation curves, host block
 struct plugin_block final {
   float sample_rate;
@@ -19,19 +38,18 @@ struct plugin_block final {
 };
 
 // writeable single module audio and cv state, output parameters, readonly single module interpolated automation curves
-// note - output params is just a reference to all block-rate parameters for this module - don't touch the inputs!
 // note - i really dont like reference members in structs, but pointers have awkward usage code for indexers: (*cv_output)[0]
 struct module_block final {
   std::vector<float>& cv_output;
   jarray2d<float>& audio_output;
-  jarray2d<plain_value>& output_values;
+  module_output_values& output_values;
   jarray3d<float> const& accurate_automation;
   jarray2d<plain_value> const& block_automation;
   INF_DECLARE_MOVE_ONLY(module_block);
   module_block(
     std::vector<float>& cv_output, 
     jarray2d<float>& audio_output, 
-    jarray2d<plain_value>& output_values,
+    module_output_values& output_values,
     jarray3d<float> const& accurate_automation,
     jarray2d<plain_value> const& block_automation):
     cv_output(cv_output), 

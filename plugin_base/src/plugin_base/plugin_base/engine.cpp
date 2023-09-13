@@ -194,10 +194,11 @@ plugin_engine::process()
     auto const& module = _desc.topo.modules[m];
     for(int mi = 0; mi < module.count; mi++)
     {
+      module_output_values output_values(&module, &_state[m][mi]);
       module_block block(
         _plugin_block.module_cv[m][mi], 
         _plugin_block.module_audio[m][mi], 
-        _state[m][mi],
+        output_values,
         _plugin_block.accurate_automation[m][mi],
         _plugin_block.block_automation[m][mi]);
       _module_engines[m][mi]->process(_desc.topo, _plugin_block, block);
