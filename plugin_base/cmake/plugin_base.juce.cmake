@@ -1,3 +1,7 @@
+add_definitions(-DJUCE_USE_CURL=0)
+add_definitions(-DJUCE_DISPLAY_SPLASH_SCREEN=0)
+add_definitions(-DJUCE_MODAL_LOOPS_PERMITTED=0)
+
 set(JUCE_MODULES_ONLY ON)
 set(JUCE_ENABLE_MODULE_SOURCE_GROUPS ON)
 add_subdirectory(${CMAKE_SOURCE_DIR}/lib/JUCE)

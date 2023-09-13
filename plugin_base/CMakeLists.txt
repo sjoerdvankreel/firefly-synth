@@ -18,3 +18,8 @@ target_include_directories(plugin_base.clap SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/l
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 target_compile_options(plugin_base.clap PRIVATE /wd4702)
 endif()
+
+# disable gcc warnings for juce
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+target_compile_options(plugin_base.juce PRIVATE -Wno-suggest-override)
+endif()
