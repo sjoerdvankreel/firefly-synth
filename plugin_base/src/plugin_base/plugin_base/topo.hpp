@@ -101,7 +101,10 @@ struct module_topo final {
 // plugin definition
 struct plugin_topo final {
   int polyphony;
+  std::string id;
   plugin_type type;
+  int version_major;
+  int version_minor;
   int gui_default_width;
   float gui_aspect_ratio;
   std::vector<module_topo> modules;

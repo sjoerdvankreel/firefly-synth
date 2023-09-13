@@ -108,7 +108,10 @@ validate_topo(plugin_topo const& topo)
   std::set<std::string> param_ids;
   std::set<std::string> module_ids;
 
+  assert(topo.id.size());
   assert(topo.modules.size());
+  assert(topo.version_major >= 0);
+  assert(topo.version_minor >= 0);
   assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
   assert(0 < topo.gui_default_width && topo.gui_default_width <= 3840);
   assert(0 < topo.gui_aspect_ratio && topo.gui_aspect_ratio <= 21.0 / 9.0);
