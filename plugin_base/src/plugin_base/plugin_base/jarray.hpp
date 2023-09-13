@@ -68,4 +68,25 @@ public:
   }
 };
 
+// 5d jagged array
+template <class T>
+class jarray5d {
+  std::vector<jarray4d<T>> _data;
+public:
+  INF_DECLARE_MOVE_ONLY(jarray5d);
+  void clear() { _data.clear(); }
+  jarray4d<T>& operator[](int i) { return _data[i]; }
+  jarray4d<T> const& operator[](int i) const { return _data[i]; }
+
+  void 
+  init(std::vector<std::vector<std::vector<std::vector<int>>>> const& dims)
+  {
+    for (int i = 0; i < dims.size(); i++)
+    {
+      _data.emplace_back();
+      _data[i].init(dims[i]);
+    }
+  }
+};
+
 }

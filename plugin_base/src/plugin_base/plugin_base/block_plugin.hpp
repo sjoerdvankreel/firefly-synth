@@ -13,8 +13,8 @@ struct plugin_block final {
   common_block const* host;
   jarray3d<float> module_cv;
   jarray4d<float> module_audio;
-  jarray4d<float> accurate_automation;
-  jarray3d<plain_value> block_automation;
+  jarray5d<float> accurate_automation;
+  jarray4d<plain_value> block_automation;
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
@@ -24,16 +24,16 @@ struct plugin_block final {
 struct module_block final {
   std::vector<float>& cv_output;
   jarray2d<float>& audio_output;
-  std::vector<plain_value>& output_values;
-  jarray2d<float> const& accurate_automation;
-  std::vector<plain_value> const& block_automation;
+  jarray2d<plain_value>& output_values;
+  jarray3d<float> const& accurate_automation;
+  jarray2d<plain_value> const& block_automation;
   INF_DECLARE_MOVE_ONLY(module_block);
   module_block(
     std::vector<float>& cv_output, 
     jarray2d<float>& audio_output, 
-    std::vector<plain_value>& output_values,
-    jarray2d<float> const& accurate_automation, 
-    std::vector<plain_value> const& block_automation):
+    jarray2d<plain_value>& output_values,
+    jarray3d<float> const& accurate_automation,
+    jarray2d<plain_value> const& block_automation):
     cv_output(cv_output), 
     audio_output(audio_output),
     output_values(output_values),
