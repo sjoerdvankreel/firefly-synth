@@ -90,10 +90,10 @@ public:
 param_base::
 param_base(plugin_gui* gui, param_desc const* desc) : 
 _gui(gui), _desc(desc)
-{ _gui->add_single_param_plugin_listener(_desc->index_in_plugin, this); }
+{ _gui->add_single_param_plugin_listener(_desc->global_param_index, this); }
 param_base::
 ~param_base()
-{ _gui->remove_single_param_plugin_listener(_desc->index_in_plugin, this); }
+{ _gui->remove_single_param_plugin_listener(_desc->global_param_index, this); }
 
 void
 param_combobox::plugin_value_changed(plain_value plain)
@@ -123,23 +123,23 @@ param_value_label::plugin_value_changed(plain_value plain)
 
 void 
 param_slider::stoppedDragging()
-{ _gui->ui_param_end_changes(_desc->index_in_plugin); }
+{ _gui->ui_param_end_changes(_desc->global_param_index); }
 void 
 param_slider::startedDragging()
-{ _gui->ui_param_begin_changes(_desc->index_in_plugin); }
+{ _gui->ui_param_begin_changes(_desc->global_param_index); }
 
 void 
 param_slider::valueChanged()
 { 
   auto value = _desc->topo->raw_to_plain(getValue());
-  _gui->ui_param_changing(_desc->index_in_plugin, value); 
+  _gui->ui_param_changing(_desc->global_param_index, value);
 }
 
 void 
 param_combobox::comboBoxChanged(ComboBox*) 
 { 
   plain_value plain = _desc->topo->raw_to_plain(getSelectedItemIndex() + _desc->topo->min);
-  _gui->ui_param_immediate_changed(_desc->index_in_plugin, plain);
+  _gui->ui_param_immediate_changed(_desc->global_param_index, plain);
 }
 
 void 
@@ -148,7 +148,7 @@ param_toggle_button::buttonStateChanged(Button*)
   if(_checked == getToggleState()) return;
   plain_value plain = _desc->topo->raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
-  _gui->ui_param_immediate_changed(_desc->index_in_plugin, plain);
+  _gui->ui_param_immediate_changed(_desc->global_param_index, plain);
 }
 
 void 
@@ -158,7 +158,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
   std::string text(getText().toStdString());
   if(!_desc->topo->text_to_plain(text, plain)) return;
   _last_parsed = text;
-  _gui->ui_param_immediate_changed(_desc->index_in_plugin, plain);
+  _gui->ui_param_immediate_changed(_desc->global_param_index, plain);
 }
 
 param_name_label::
@@ -318,9 +318,9 @@ plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_pl
 }
 
 plugin_gui::
-plugin_gui(plugin_topo_factory factory, jarray3d<plain_value> const& initial) :
+plugin_gui(plugin_topo_factory factory, jarray4d<plain_value> const& initial) :
 _desc(factory), 
-_single_param_plugin_listeners(_desc.param_mappings.size())
+_single_param_plugin_listeners(_desc.global_param_count)
 {
   setOpaque(true);
   setSize(_desc.topo.gui_default_width, _desc.topo.gui_default_width / _desc.topo.gui_aspect_ratio);
@@ -329,41 +329,45 @@ _single_param_plugin_listeners(_desc.param_mappings.size())
     auto const& module = _desc.modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
-      if(module.params[p].topo->edit == param_edit::toggle)
+      auto const& param = module.params[p];
+      plain_value initial_value = initial
+        [module.topo_index_in_plugin][module.module_index_in_topo]
+        [param.topo_index_in_module][param.param_index_in_topo];
+      if(param.topo->edit == param_edit::toggle)
       {
-        _children.emplace_back(std::make_unique<param_toggle_button>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
+        _children.emplace_back(std::make_unique<param_toggle_button>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (module.params[p].topo->edit == param_edit::list)
+      else if (param.topo->edit == param_edit::list)
       {
-        _children.emplace_back(std::make_unique<param_combobox>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
+        _children.emplace_back(std::make_unique<param_combobox>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (module.params[p].topo->edit == param_edit::text)
+      else if (param.topo->edit == param_edit::text)
       {
-        _children.emplace_back(std::make_unique<param_textbox>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
+        _children.emplace_back(std::make_unique<param_textbox>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
       else
       {
-        _children.emplace_back(std::make_unique<param_slider>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
+        _children.emplace_back(std::make_unique<param_slider>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      _children[_children.size()-1]->setEnabled(module.params[p].topo->direction == param_direction::input);
+      _children[_children.size()-1]->setEnabled(param.topo->direction == param_direction::input);
 
-      if(module.params[p].topo->label == param_label::none)
+      if(param.topo->label == param_label::none)
       {
         _children.emplace_back(std::make_unique<Label>());
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (module.params[p].topo->label == param_label::name)
+      else if (param.topo->label == param_label::name)
       {
-        _children.emplace_back(std::make_unique<param_name_label>(module.params[p].topo));
+        _children.emplace_back(std::make_unique<param_name_label>(param.topo));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
       else
       {
-        _children.emplace_back(std::make_unique<param_value_label>(this, &_desc.modules[m].params[p], initial[module.group_in_plugin][module.module_in_group][p]));
+        _children.emplace_back(std::make_unique<param_value_label>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
     }

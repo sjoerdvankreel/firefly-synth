@@ -33,7 +33,7 @@ public juce::Component
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_topo_factory factory, jarray3d<plain_value> const& initial);
+  plugin_gui(plugin_topo_factory factory, jarray4d<plain_value> const& initial);
   
   void resized() override;
   plugin_desc const& desc() const { return _desc; }
