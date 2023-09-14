@@ -13,17 +13,17 @@ namespace plugin_base {
 struct param_mapping final {
   int param_slot_index = {};
   int param_topo_index = {};
+  int module_slot_index = {};
   int global_param_index = {};
   int global_module_index = {};
   int param_index_in_module = {};
-  int module_index_in_topo = {};
   int module_topo_index_in_plugin = {};
   INF_DECLARE_MOVE_ONLY(param_mapping);
 
   template <class T> auto& value_at(T& container) const 
-  { return container[module_topo_index_in_plugin][module_index_in_topo][param_topo_index][param_slot_index]; }
+  { return container[module_topo_index_in_plugin][module_slot_index][param_topo_index][param_slot_index]; }
   template <class T> auto const& value_at(T const& container) const 
-  { return container[module_topo_index_in_plugin][module_index_in_topo][param_topo_index][param_slot_index]; }
+  { return container[module_topo_index_in_plugin][module_slot_index][param_topo_index][param_slot_index]; }
 };
 
 // runtime parameter descriptor
@@ -40,7 +40,7 @@ struct param_desc final {
   INF_DECLARE_MOVE_ONLY(param_desc);
   param_desc(
     module_topo const& module, param_topo const& param, 
-    int global_param_index, int module_index_in_topo, 
+    int global_param_index, int module_slot_index,
     int param_topo_index, int param_slot_index,
     int param_index_in_module);
 };
@@ -52,14 +52,14 @@ struct module_desc final {
   std::string name = {};
   module_topo const* topo = {};
   int global_module_index = {};
-  int module_index_in_topo = {};
+  int module_slot_index = {};
   int topo_index_in_plugin = {};
   std::vector<param_desc> params = {};
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
     module_topo const& module, 
     int global_module_index, int global_param_index_start,
-    int topo_index_in_plugin, int module_index_in_topo);
+    int topo_index_in_plugin, int module_slot_index);
 };
 
 // runtime plugin descriptor
