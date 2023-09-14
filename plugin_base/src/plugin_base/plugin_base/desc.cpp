@@ -92,8 +92,8 @@ validate_desc(plugin_desc const& desc)
       assert(param.param_slot_index < param.topo->slot_count);
       assert(param.param_index_in_module >= 0);
       assert(param.param_index_in_module < module.params.size());
-      assert(param.topo_index_in_module >= 0);
-      assert(param.topo_index_in_module < module.topo->params.size());
+      assert(param.param_topo_index >= 0);
+      assert(param.param_topo_index < module.topo->params.size());
       assert(param.global_param_index == global_param_index++);
       INF_ASSERT_EXEC(all_ids.insert(param.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.id_hash).second);
@@ -219,13 +219,13 @@ param_desc::
 param_desc(
   module_topo const& module, param_topo const& param, 
   int global_param_index, int module_index_in_topo, 
-  int topo_index_in_module, int param_slot_index,
+  int param_topo_index, int param_slot_index,
   int param_index_in_module)
 {
   topo = &param;
   this->param_slot_index = param_slot_index;
+  this->param_topo_index = param_topo_index;
   this->global_param_index = global_param_index;
-  this->topo_index_in_module = topo_index_in_module;
   this->param_index_in_module = param_index_in_module;
   id = module_id(module, module_index_in_topo) + "-" + param_id(param, param_slot_index);
   short_name = param_name(param, param_slot_index);
@@ -286,7 +286,7 @@ topo(factory())
       mapping.param_index_in_module = p;
       mapping.global_param_index = global_param_index++;
       mapping.param_slot_index = param.param_slot_index;
-      mapping.param_topo_index_in_module = param.topo_index_in_module;
+      mapping.param_topo_index = param.param_topo_index;
       mapping.module_index_in_topo = module.module_index_in_topo;
       mapping.module_topo_index_in_plugin = module.topo_index_in_plugin;
       global_param_index_to_param_id.push_back(param.id_hash);

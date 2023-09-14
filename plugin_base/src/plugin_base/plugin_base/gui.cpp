@@ -331,8 +331,7 @@ _single_param_plugin_listeners(_desc.global_param_count)
     {
       auto const& param = module.params[p];
       plain_value initial_value = initial
-        [module.topo_index_in_plugin][module.module_index_in_topo]
-        [param.topo_index_in_module][param.param_slot_index];
+        [module.topo_index_in_plugin][module.module_index_in_topo][param.param_topo_index][param.param_slot_index];
       if(param.topo->edit == param_edit::toggle)
       {
         _children.emplace_back(std::make_unique<param_toggle_button>(this, &param, initial_value));
