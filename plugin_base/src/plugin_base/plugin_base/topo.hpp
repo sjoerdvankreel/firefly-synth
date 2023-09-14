@@ -99,6 +99,7 @@ struct module_topo final {
   std::vector<param_topo> params;
   std::vector<section_topo> sections;
   module_engine_factory engine_factory;
+
   INF_DECLARE_MOVE_ONLY(module_topo);
 };
 
@@ -113,6 +114,7 @@ struct plugin_topo final {
   int gui_default_width;
   float gui_aspect_ratio;
   std::vector<module_topo> modules;
+
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
 
