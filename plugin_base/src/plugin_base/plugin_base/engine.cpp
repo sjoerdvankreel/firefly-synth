@@ -15,12 +15,12 @@ _desc(std::move(topo)), _dims(*_desc.topo)
   // init everything that is not frame-count dependent
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
-  _state.init(_dims.params);
+  _state.resize(_dims.params);
   _desc.init_default_state(_state);
-  _module_engines.init(_dims.modules);
+  _module_engines.resize(_dims.modules);
   _common_block.notes.reserve(note_limit_guess);
   _accurate_frames.resize(_desc.param_global_count);
-  _plugin_block.block_automation.init(_dims.params);
+  _plugin_block.block_automation.resize(_dims.params);
   _host_block.block_events.reserve(block_events_guess);
   _host_block.output_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
@@ -71,9 +71,9 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(*_desc.topo, max_frame_count);
-  _plugin_block.module_cv.init(frame_dims.cv);
-  _plugin_block.module_audio.init(frame_dims.audio);
-  _plugin_block.accurate_automation.init(frame_dims.accurate);
+  _plugin_block.module_cv.resize(frame_dims.cv);
+  _plugin_block.module_audio.resize(frame_dims.audio);
+  _plugin_block.accurate_automation.resize(frame_dims.accurate);
   for (int m = 0; m < _desc.topo->modules.size(); m++)
     for (int mi = 0; mi < _desc.topo->modules[m].slot_count; mi++)
       _module_engines[m][mi] = _desc.topo->modules[m].engine_factory(sample_rate, max_frame_count);

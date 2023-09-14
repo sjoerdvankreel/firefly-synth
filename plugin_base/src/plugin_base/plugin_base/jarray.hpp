@@ -10,7 +10,7 @@ class jarray2d {
   std::vector<std::vector<T>> _data;
 public:
   INF_DECLARE_MOVE_ONLY(jarray2d);
-  void init(std::vector<int> const& dims);
+  void resize(std::vector<int> const& dims);
 
   void clear() { _data.clear(); }
   std::vector<T>& operator[](int i) { return _data[i]; }
@@ -23,7 +23,7 @@ class jarray3d {
   std::vector<jarray2d<T>> _data;
 public:
   INF_DECLARE_MOVE_ONLY(jarray3d);
-  void init(std::vector<std::vector<int>> const& dims);
+  void resize(std::vector<std::vector<int>> const& dims);
 
   void clear() { _data.clear(); }
   jarray2d<T>& operator[](int i) { return _data[i]; }
@@ -36,7 +36,7 @@ class jarray4d {
   std::vector<jarray3d<T>> _data;
 public:
   INF_DECLARE_MOVE_ONLY(jarray4d);
-  void init(std::vector<std::vector<std::vector<int>>> const& dims);
+  void resize(std::vector<std::vector<std::vector<int>>> const& dims);
 
   void clear() { _data.clear(); }
   jarray3d<T>& operator[](int i) { return _data[i]; }
@@ -49,7 +49,7 @@ class jarray5d {
   std::vector<jarray4d<T>> _data;
 public:
   INF_DECLARE_MOVE_ONLY(jarray5d);
-  void init(std::vector<std::vector<std::vector<std::vector<int>>>> const& dims);
+  void resize(std::vector<std::vector<std::vector<std::vector<int>>>> const& dims);
 
   void clear() { _data.clear(); }
   jarray4d<T>& operator[](int i) { return _data[i]; }
@@ -57,7 +57,7 @@ public:
 };
 
 template <class T> void
-jarray2d<T>::init(std::vector<int> const& dims)
+jarray2d<T>::resize(std::vector<int> const& dims)
 {
   _data.resize(dims.size());
   for (int i = 0; i < dims.size(); i++)
@@ -65,27 +65,27 @@ jarray2d<T>::init(std::vector<int> const& dims)
 }
 
 template <class T> void
-jarray3d<T>::init(std::vector<std::vector<int>> const& dims)
+jarray3d<T>::resize(std::vector<std::vector<int>> const& dims)
 {
   _data.resize(dims.size());
   for (int i = 0; i < dims.size(); i++)
-    _data[i].init(dims[i]);
+    _data[i].resize(dims[i]);
 }
 
 template <class T> void
-jarray4d<T>::init(std::vector<std::vector<std::vector<int>>> const& dims)
+jarray4d<T>::resize(std::vector<std::vector<std::vector<int>>> const& dims)
 {
   _data.resize(dims.size());
   for (int i = 0; i < dims.size(); i++)
-    _data[i].init(dims[i]);
+    _data[i].resize(dims[i]);
 }
 
 template <class T> void
-jarray5d<T>::init(std::vector<std::vector<std::vector<std::vector<int>>>> const& dims)
+jarray5d<T>::resize(std::vector<std::vector<std::vector<std::vector<int>>>> const& dims)
 {
   _data.resize(dims.size());
   for (int i = 0; i < dims.size(); i++)
-    _data[i].init(dims[i]);
+    _data[i].resize(dims[i]);
 }
 
 }
