@@ -37,6 +37,7 @@ struct param_desc final {
   int param_local_index = {};
   int param_global_index = {};
   param_topo const* topo = {};
+
   INF_DECLARE_MOVE_ONLY(param_desc);
   param_desc(
     module_topo const& module, 
@@ -56,6 +57,7 @@ struct module_desc final {
   int module_global_index = {};
   module_topo const* topo = {};
   std::vector<param_desc> params = {};
+
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
     module_topo const& module, 
@@ -69,9 +71,10 @@ struct plugin_desc final {
   int param_global_count = {};
   int module_global_count = {};
   std::vector<module_desc> modules = {};
-  std::vector<param_mapping> param_mappings = {};
   std::vector<int> param_index_to_id = {};
   std::map<int, int> param_id_to_index = {};
+  std::vector<param_mapping> param_mappings = {};
+
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(plugin_topo_factory factory);
 
@@ -84,6 +87,7 @@ struct plugin_desc final {
 struct plugin_dims final {
   std::vector<int> module_counts;
   std::vector<std::vector<std::vector<int>>> module_param_counts;
+
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& plugin);
 };
@@ -93,6 +97,7 @@ struct plugin_frame_dims final {
   std::vector<std::vector<int>> module_cv_frame_counts;
   std::vector<std::vector<std::vector<int>>> module_audio_frame_counts;
   std::vector<std::vector<std::vector<std::vector<int>>>> module_accurate_frame_counts;
+
   INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& plugin, int frame_count);
 };
