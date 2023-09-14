@@ -15,7 +15,7 @@ EditorView(controller), _controller(controller)
   int param_global_index = 0;
   plugin_dims dims(controller->desc().topo);
   jarray4d<plain_value> ui_initial_values;
-  ui_initial_values.init(dims.module_param_counts);
+  ui_initial_values.init(dims.param_slots);
   for (int m = 0; m < controller->desc().topo.modules.size(); m++)
   {
     auto const& module = controller->desc().topo.modules[m];

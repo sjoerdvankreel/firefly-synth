@@ -40,10 +40,8 @@ struct param_desc final {
 
   INF_DECLARE_MOVE_ONLY(param_desc);
   param_desc(
-    module_topo const& module, 
-    int module_slot_index,
-    param_topo const& param,
-    int topo_index, int slot_index,
+    module_topo const& module, int module_slot_index,
+    param_topo const& param, int topo_index, int slot_index, 
     int local_index, int global_index);
 };
 
@@ -60,8 +58,7 @@ struct module_desc final {
 
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
-    module_topo const& module, 
-    int topo_index, int slot_index,
+    module_topo const& module, int topo_index, int slot_index, 
     int global_index, int param_global_index_start);
 };
 
@@ -85,8 +82,8 @@ struct plugin_desc final {
 
 // runtime plugin topo dimensions
 struct plugin_dims final {
-  std::vector<int> module_counts;
-  std::vector<std::vector<std::vector<int>>> module_param_counts;
+  std::vector<int> module_slots;
+  std::vector<std::vector<std::vector<int>>> param_slots;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& plugin);

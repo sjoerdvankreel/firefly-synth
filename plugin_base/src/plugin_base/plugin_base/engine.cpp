@@ -15,15 +15,15 @@ _desc(factory), _dims(_desc.topo)
   // init everything that is not frame-count dependent
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
-  _state.init(_dims.module_param_counts);
+  _state.init(_dims.param_slots);
   _desc.init_default_state(_state);
-  _module_engines.init(_dims.module_counts);
+  _module_engines.init(_dims.module_slots);
   _common_block.notes.reserve(note_limit_guess);
   _accurate_frames.resize(_desc.param_global_count);
+  _plugin_block.block_automation.init(_dims.param_slots);
   _host_block.block_events.reserve(block_events_guess);
   _host_block.output_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
-  _plugin_block.block_automation.init(_dims.module_param_counts);
 }
 
 host_block&

@@ -217,10 +217,8 @@ validate_topo(plugin_topo const& topo)
 
 param_desc::
 param_desc(
-  module_topo const& module,
-  int module_slot_index,
-  param_topo const& param,
-  int topo_index, int slot_index,
+  module_topo const& module, int module_slot_index,
+  param_topo const& param, int topo_index, int slot_index,
   int local_index, int global_index)
 {
   topo = &param;
@@ -236,8 +234,7 @@ param_desc(
 
 module_desc::
 module_desc(
-  module_topo const& module,
-  int topo_index, int slot_index,
+  module_topo const& module, int topo_index, int slot_index,
   int global_index, int param_global_index_start)
 {
   topo = &module;
@@ -323,15 +320,15 @@ plugin_dims(plugin_topo const& plugin)
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
-    module_counts.push_back(module.slot_count);
-    module_param_counts.emplace_back();
+    module_slots.push_back(module.slot_count);
+    param_slots.emplace_back();
     for(int mi = 0; mi < module.slot_count; mi++)
     {
-      module_param_counts[m].emplace_back();
+      param_slots[m].emplace_back();
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        module_param_counts[m][mi].push_back(param.slot_count);
+        param_slots[m][mi].push_back(param.slot_count);
       }
     }
   }
