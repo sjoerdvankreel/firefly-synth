@@ -344,16 +344,16 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     int audio_frames = module.output == module_output::audio ? frame_count : 0;
     audio.emplace_back();
     accurate.emplace_back();
-    cv.emplace_back(std::vector<int>(module.slot_count, cv_frames));
+    cv.emplace_back(module.slot_count, cv_frames);
     for (int mi = 0; mi < module.slot_count; mi++)
     {
       accurate[m].emplace_back();
-      audio[m].emplace_back(std::vector<int>(2, audio_frames));
+      audio[m].emplace_back(2, audio_frames);
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         int param_frames = param.rate == param_rate::accurate ? frame_count : 0;
-        accurate[m][mi].push_back(std::vector<int>(param.slot_count, param_frames));
+        accurate[m][mi].emplace_back(param.slot_count, param_frames);
       }
     }
   }

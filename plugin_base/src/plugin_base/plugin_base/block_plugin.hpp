@@ -40,14 +40,14 @@ struct plugin_block final {
 // writeable single module audio and cv state, output parameters, readonly single module interpolated automation curves
 // note - i really dont like reference members in structs, but pointers have awkward usage code for indexers: (*cv_output)[0]
 struct module_block final {
-  std::vector<float>& cv_output;
+  jarray1d<float>& cv_output;
   jarray2d<float>& audio_output;
   module_output_values& output_values;
   jarray3d<float> const& accurate_automation;
   jarray2d<plain_value> const& block_automation;
   INF_DECLARE_MOVE_ONLY(module_block);
   module_block(
-    std::vector<float>& cv_output, 
+    jarray1d<float>& cv_output, 
     jarray2d<float>& audio_output, 
     module_output_values& output_values,
     jarray3d<float> const& accurate_automation,

@@ -82,8 +82,8 @@ struct plugin_desc final {
 
 // runtime plugin topo dimensions
 struct plugin_dims final {
-  std::vector<int> modules;
-  std::vector<std::vector<std::vector<int>>> params;
+  jarray3d<int> params;
+  jarray1d<int> modules;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& topo);
@@ -91,9 +91,9 @@ struct plugin_dims final {
 
 // runtime plugin buffer dimensions
 struct plugin_frame_dims final {
-  std::vector<std::vector<int>> cv;
-  std::vector<std::vector<std::vector<int>>> audio;
-  std::vector<std::vector<std::vector<std::vector<int>>>> accurate;
+  jarray2d<int> cv;
+  jarray3d<int> audio;
+  jarray4d<int> accurate;
 
   INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& topo, int frame_count);
