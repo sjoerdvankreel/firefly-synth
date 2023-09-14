@@ -17,7 +17,7 @@ public:
   { assert(0 <= value && value <= 1); }
 };
 
-// linear
+// linear with min/max
 class plain_value final {
   friend struct param_topo;
   union { float _real; int _step; };
