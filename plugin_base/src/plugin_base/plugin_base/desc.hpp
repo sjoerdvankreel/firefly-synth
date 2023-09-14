@@ -13,10 +13,10 @@ namespace plugin_base {
 struct param_mapping final {
   int param_topo_index = {};
   int param_slot_index = {};
+  int param_global_index = {};
   int module_topo_index = {};
   int module_slot_index = {};
-  int param_global_index = {};
-  int global_module_index = {};
+  int module_global_index = {};
   int param_index_in_module = {};
   INF_DECLARE_MOVE_ONLY(param_mapping);
 
@@ -51,14 +51,14 @@ struct module_desc final {
   std::string id = {};
   std::string name = {};
   module_topo const* topo = {};
-  int global_module_index = {};
+  int module_global_index = {};
   int module_slot_index = {};
   int module_topo_index = {};
   std::vector<param_desc> params = {};
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
     module_topo const& module, 
-    int global_module_index, int param_global_index_start,
+    int module_global_index, int param_global_index_start,
     int module_topo_index, int module_slot_index);
 };
 
@@ -76,7 +76,7 @@ struct plugin_desc final {
 
   void init_default_state(jarray4d<plain_value>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
-  { return modules[mapping.global_module_index].params[mapping.param_index_in_module]; }
+  { return modules[mapping.module_global_index].params[mapping.param_index_in_module]; }
 };
 
 // runtime plugin topo dimensions

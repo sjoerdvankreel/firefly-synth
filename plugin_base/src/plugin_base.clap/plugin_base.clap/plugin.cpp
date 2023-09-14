@@ -211,7 +211,7 @@ plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexc
   info->cookie = nullptr;
   info->id = param.id_hash;
   from_8bit_string(info->name, _engine.desc().param_at(mapping).full_name.c_str());
-  from_8bit_string(info->module, _engine.desc().modules[mapping.global_module_index].name.c_str());
+  from_8bit_string(info->module, _engine.desc().modules[mapping.module_global_index].name.c_str());
 
   info->flags = 0;
   if(param.topo->direction != param_direction::input) 
