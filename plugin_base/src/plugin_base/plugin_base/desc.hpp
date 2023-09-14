@@ -91,9 +91,9 @@ struct plugin_dims final {
 
 // runtime plugin buffer dimensions
 struct plugin_frame_dims final {
-  std::vector<std::vector<int>> module_cv_frame_counts;
-  std::vector<std::vector<std::vector<int>>> module_audio_frame_counts;
-  std::vector<std::vector<std::vector<std::vector<int>>>> module_accurate_frame_counts;
+  std::vector<std::vector<int>> cv;
+  std::vector<std::vector<std::vector<int>>> audio;
+  std::vector<std::vector<std::vector<std::vector<int>>>> accurate;
 
   INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& plugin, int frame_count);

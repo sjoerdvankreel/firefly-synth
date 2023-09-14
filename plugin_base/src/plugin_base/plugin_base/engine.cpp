@@ -71,9 +71,9 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(_desc.topo, max_frame_count);
-  _plugin_block.module_cv.init(frame_dims.module_cv_frame_counts);
-  _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
-  _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
+  _plugin_block.module_cv.init(frame_dims.cv);
+  _plugin_block.module_audio.init(frame_dims.audio);
+  _plugin_block.accurate_automation.init(frame_dims.accurate);
   for (int m = 0; m < _desc.topo.modules.size(); m++)
     for (int mi = 0; mi < _desc.topo.modules[m].slot_count; mi++)
       _module_engines[m][mi] = _desc.topo.modules[m].engine_factory(sample_rate, max_frame_count);
