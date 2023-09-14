@@ -32,11 +32,11 @@ struct item_topo final {
 
 // param within module (may be more than 1, e.g. "Input N Source", useful for mod matrices)
 struct param_topo final {
-  int count;
-  int section; // ui section
   double min;
   double max;
   double exp;
+  int section; // ui section
+  int slot_count;
   param_type type;
   param_rate rate;
   param_edit edit;
@@ -87,7 +87,7 @@ struct param_section_topo final {
 
 // module within plugin (may be more than 1, e.g. "Osc N")
 struct module_topo final {
-  int count;
+  int slot_count;
   std::string id;
   std::string name;
   module_scope scope;

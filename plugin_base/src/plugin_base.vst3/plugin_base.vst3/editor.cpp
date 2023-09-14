@@ -10,7 +10,7 @@ EditorView(controller), _controller(controller)
 {
   // pull the controller values to the ui (both live on the same thread)
   // alternatively we could keep yet another copy of ui-thread values
-  // in module-index-param-index format but it's complicated enough already
+  // in module-slot-param-slot format but it's complicated enough already
   // to deal with processor-controller-ui_controls as is
   int global_param_index = 0;
   plugin_dims dims(controller->desc().topo);
@@ -19,11 +19,11 @@ EditorView(controller), _controller(controller)
   for (int m = 0; m < controller->desc().topo.modules.size(); m++)
   {
     auto const& module = controller->desc().topo.modules[m];
-    for (int mi = 0; mi < module.count; mi++)
+    for (int mi = 0; mi < module.slot_count; mi++)
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        for(int pi = 0; pi < param.count; pi++)
+        for(int pi = 0; pi < param.slot_count; pi++)
         {
           int param_tag = _controller->desc().global_param_index_to_param_id[global_param_index++];
           double normalized = _controller->getParamNormalized(param_tag);

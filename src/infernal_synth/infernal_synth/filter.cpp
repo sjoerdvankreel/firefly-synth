@@ -44,7 +44,7 @@ filter_engine::process(
   float max_out = 0.0f;
   auto const& osc_audio = plugin.module_audio[module_type::module_type_osc];
   auto const& osc_gain_curves = module.accurate_automation[filter_param_osc_gain];
-  for(int o = 0; o < topo.modules[module_type_osc].count; o++)
+  for(int o = 0; o < topo.modules[module_type_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
         plugin.host->audio_output[c][f] += osc_audio[o][c][f] * osc_gain_curves[o][f];
@@ -70,7 +70,7 @@ filter_engine::process(
   }
 
   auto const& param = topo.modules[module_type_filter].params[filter_param_out_gain];
-  module.output_values.set_value(filter_param_out_gain, 0, param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f)));
+  module.output_values.set(filter_param_out_gain, 0, param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f)));
 }
 
 }

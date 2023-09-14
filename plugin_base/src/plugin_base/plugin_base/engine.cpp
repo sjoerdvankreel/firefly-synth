@@ -55,7 +55,7 @@ plugin_engine::deactivate()
   _plugin_block.module_audio = {};
   _plugin_block.accurate_automation = {};
   for(int m = 0; m < _desc.topo.modules.size(); m++)
-    for(int mi = 0; mi < _desc.topo.modules[m].count; mi++)
+    for(int mi = 0; mi < _desc.topo.modules[m].slot_count; mi++)
       _module_engines[m][mi].reset();
 }
 
@@ -75,7 +75,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _plugin_block.module_audio.init(frame_dims.module_audio_frame_counts);
   _plugin_block.accurate_automation.init(frame_dims.module_accurate_frame_counts);
   for (int m = 0; m < _desc.topo.modules.size(); m++)
-    for (int mi = 0; mi < _desc.topo.modules[m].count; mi++)
+    for (int mi = 0; mi < _desc.topo.modules[m].slot_count; mi++)
       _module_engines[m][mi] = _desc.topo.modules[m].engine_factory(sample_rate, max_frame_count);
 }
 
@@ -92,7 +92,7 @@ plugin_engine::process()
   for(int m = 0; m < _desc.topo.modules.size(); m++)
   {
     auto const& module = _desc.topo.modules[m];
-    for (int mi = 0; mi < module.count; mi++)
+    for (int mi = 0; mi < module.slot_count; mi++)
       if(module.output == module_output::cv)
       {
         // clear module cv output
@@ -111,16 +111,16 @@ plugin_engine::process()
   for (int m = 0; m < _desc.topo.modules.size(); m++)
   {
     auto const& module = _desc.topo.modules[m];
-    for(int mi = 0; mi < module.count; mi++)
+    for(int mi = 0; mi < module.slot_count; mi++)
       for(int p = 0; p < module.params.size(); p++)
       {
         // set per-block automation values to current values (automation may overwrite)
         auto const& param = module.params[p];
         if(param.rate == param_rate::block)
-          for(int pi = 0; pi < param.count; pi++)
+          for(int pi = 0; pi < param.slot_count; pi++)
           _plugin_block.block_automation[m][mi][p][pi] = _state[m][mi][p][pi];
         else
-          for (int pi = 0; pi < param.count; pi++)
+          for (int pi = 0; pi < param.slot_count; pi++)
           {
             // set accurate automation values to current values (automation may overwrite)
             // note: need to go from actual to normalized values as interpolation must be done as linear
@@ -174,11 +174,11 @@ plugin_engine::process()
   for (int m = 0; m < _desc.topo.modules.size(); m++)
   {
     auto const& module = _desc.topo.modules[m];
-    for (int mi = 0; mi < module.count; mi++)
+    for (int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        for(int pi = 0; pi < param.count; pi++)
+        for(int pi = 0; pi < param.slot_count; pi++)
           if(param.rate == param_rate::accurate)
             for(int f = 0; f < _common_block.frame_count; f++)
               _plugin_block.accurate_automation[m][mi][p][pi][f] = param.normalized_to_plain(
@@ -192,7 +192,7 @@ plugin_engine::process()
   for(int m = 0; m < _desc.topo.modules.size(); m++)
   {
     auto const& module = _desc.topo.modules[m];
-    for(int mi = 0; mi < module.count; mi++)
+    for(int mi = 0; mi < module.slot_count; mi++)
     {
       module_output_values output_values(&module, &_state[m][mi]);
       module_block block(
@@ -218,11 +218,11 @@ plugin_engine::process()
   for (int m = 0; m < _desc.topo.modules.size(); m++)
   {
     auto const& module = _desc.topo.modules[m];
-    for (int mi = 0; mi < module.count; mi++)
+    for (int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        for(int pi = 0; pi < param.count; pi++)
+        for(int pi = 0; pi < param.slot_count; pi++)
         {
           if (param.direction == param_direction::output)
           {

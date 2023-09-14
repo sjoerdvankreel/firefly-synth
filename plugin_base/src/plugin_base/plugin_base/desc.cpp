@@ -16,34 +16,34 @@ stable_hash(std::string const& text)
 }
 
 static std::string
-module_id(module_topo const& module, int index)
+module_id(module_topo const& module, int slot_index)
 {
   std::string result = module.id;
-  result += "-" + std::to_string(index);
+  result += "-" + std::to_string(slot_index);
   return result;
 }
 
 static std::string
-module_name(module_topo const& module, int index)
+module_name(module_topo const& module, int slot_index)
 {
   std::string result = module.name;
-  if(module.count > 1) result += " " + std::to_string(index + 1);
+  if(module.slot_count > 1) result += " " + std::to_string(slot_index + 1);
   return result;
 }
 
 static std::string
-param_id(param_topo const& param, int index)
+param_id(param_topo const& param, int slot_index)
 {
   std::string result = param.id;
-  result += "-" + std::to_string(index);
+  result += "-" + std::to_string(slot_index);
   return result;
 }
 
 static std::string
-param_name(param_topo const& param, int index)
+param_name(param_topo const& param, int slot_index)
 {
   std::string result = param.name;
-  if (param.count > 1) result += " " + std::to_string(index + 1);
+  if (param.slot_count > 1) result += " " + std::to_string(slot_index + 1);
   return result;
 }
 
@@ -76,7 +76,7 @@ validate_desc(plugin_desc const& desc)
     assert(module.global_module_index == m);
     assert(module.topo_index_in_plugin < desc.modules.size());
     assert(module.module_index_in_topo >= 0);
-    assert(module.module_index_in_topo < module.topo->count);
+    assert(module.module_index_in_topo < module.topo->slot_count);
     INF_ASSERT_EXEC(all_ids.insert(module.id).second);
     INF_ASSERT_EXEC(all_hashes.insert(module.id_hash).second);
 
@@ -88,10 +88,10 @@ validate_desc(plugin_desc const& desc)
       assert(param.id.size() > 0);
       assert(param.short_name.size() > 0);
       assert(param.short_name.size() < param.full_name.size());
+      assert(param.param_slot_index >= 0);
+      assert(param.param_slot_index < param.topo->slot_count);
       assert(param.param_index_in_module >= 0);
       assert(param.param_index_in_module < module.params.size());
-      assert(param.param_index_in_topo >= 0);
-      assert(param.param_index_in_topo < param.topo->count);
       assert(param.topo_index_in_module >= 0);
       assert(param.topo_index_in_module < module.topo->params.size());
       assert(param.global_param_index == global_param_index++);
@@ -120,11 +120,11 @@ validate_topo(plugin_topo const& topo)
   for (int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
-    assert(module.count > 0);
-    assert(module.engine_factory);
     assert(module.id.size());
     assert(module.name.size());
     assert(module.params.size());
+    assert(module.slot_count > 0);
+    assert(module.engine_factory);
     assert(module.param_sections.size());
     assert(module.param_sections.size() <= module.params.size());
     INF_ASSERT_EXEC(module_ids.insert(module.id).second);
@@ -142,14 +142,14 @@ validate_topo(plugin_topo const& topo)
     {
       auto const& param = module.params[p];
       (void)param;
-      assert(param.count > 0);
-      assert(param.count <= 1024);
       assert(param.id.size());
       assert(param.name.size());
       assert(param.section >= 0);
-      assert(param.section < module.param_sections.size());
+      assert(param.slot_count > 0);
       assert(param.max > param.min);
+      assert(param.slot_count <= 1024);
       assert(param.default_text.size());
+      assert(param.section < module.param_sections.size());
 
       if (param.direction == param_direction::output)
         assert(param.rate == param_rate::block);
@@ -219,16 +219,16 @@ param_desc::
 param_desc(
   module_topo const& module, param_topo const& param, 
   int global_param_index, int module_index_in_topo, 
-  int topo_index_in_module, int param_index_in_topo, 
+  int topo_index_in_module, int param_slot_index,
   int param_index_in_module)
 {
   topo = &param;
+  this->param_slot_index = param_slot_index;
   this->global_param_index = global_param_index;
-  this->param_index_in_topo = param_index_in_topo;
   this->topo_index_in_module = topo_index_in_module;
   this->param_index_in_module = param_index_in_module;
-  id = module_id(module, module_index_in_topo) + "-" + param_id(param, param_index_in_topo);
-  short_name = param_name(param, param_index_in_topo);
+  id = module_id(module, module_index_in_topo) + "-" + param_id(param, param_slot_index);
+  short_name = param_name(param, param_slot_index);
   full_name = module_name(module, module_index_in_topo) + " " + short_name;
   id_hash = stable_hash(id.c_str());
 }
@@ -250,7 +250,7 @@ module_desc(
   for(int p = 0; p < module.params.size(); p++)
   {
     auto const& param = module.params[p];
-    for(int i = 0; i < param.count; i++)
+    for(int i = 0; i < param.slot_count; i++)
       params.emplace_back(param_desc(module, param, global_param_index_start++, module_index_in_topo, p, i, param_index_in_module++));
   }
 }
@@ -266,11 +266,11 @@ topo(factory())
   for(int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
-    for(int i = 0; i < module.count; i++)
+    for(int i = 0; i < module.slot_count; i++)
     {
       modules.emplace_back(module_desc(module, global_module_index++, global_param_index, m, i));
       for(int p = 0; p < module.params.size(); p++)
-        global_param_index += module.params[p].count;
+        global_param_index += module.params[p].slot_count;
     }
   }
 
@@ -285,7 +285,7 @@ topo(factory())
       mapping.global_module_index = m;
       mapping.param_index_in_module = p;
       mapping.global_param_index = global_param_index++;
-      mapping.param_index_in_topo = param.param_index_in_topo;
+      mapping.param_slot_index = param.param_slot_index;
       mapping.param_topo_index_in_module = param.topo_index_in_module;
       mapping.module_index_in_topo = module.module_index_in_topo;
       mapping.module_topo_index_in_plugin = module.topo_index_in_plugin;
@@ -306,11 +306,11 @@ plugin_desc::init_default_state(jarray4d<plain_value>& state) const
   for (int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
-    for(int mi = 0; mi < module.count; mi++)
+    for(int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        for(int pi = 0; pi < param.count; pi++)
+        for(int pi = 0; pi < param.slot_count; pi++)
           state[m][mi][p][pi] = param.default_plain();
       } 
   }
@@ -322,15 +322,15 @@ plugin_dims(plugin_topo const& plugin)
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
-    module_counts.push_back(module.count);
+    module_counts.push_back(module.slot_count);
     module_param_counts.emplace_back();
-    for(int mi = 0; mi < module.count; mi++)
+    for(int mi = 0; mi < module.slot_count; mi++)
     {
       module_param_counts[m].emplace_back();
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        module_param_counts[m][mi].push_back(param.count);
+        module_param_counts[m][mi].push_back(param.slot_count);
       }
     }
   }
@@ -346,8 +346,8 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     int audio_frames = module.output == module_output::audio ? frame_count : 0;
     module_audio_frame_counts.emplace_back();
     module_accurate_frame_counts.emplace_back();
-    module_cv_frame_counts.emplace_back(std::vector<int>(module.count, cv_frames));
-    for (int mi = 0; mi < module.count; mi++)
+    module_cv_frame_counts.emplace_back(std::vector<int>(module.slot_count, cv_frames));
+    for (int mi = 0; mi < module.slot_count; mi++)
     {
       module_accurate_frame_counts[m].emplace_back();
       module_audio_frame_counts[m].emplace_back(std::vector<int>(2, audio_frames));
@@ -355,7 +355,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       {
         auto const& param = module.params[p];
         int param_frames = param.rate == param_rate::accurate ? frame_count : 0;
-        module_accurate_frame_counts[m][mi].push_back(std::vector<int>(param.count, param_frames));
+        module_accurate_frame_counts[m][mi].push_back(std::vector<int>(param.slot_count, param_frames));
       }
     }
   }

@@ -17,12 +17,12 @@ public:
   _module(module), _values(values) {}
   
   void 
-  set_value(int param_type, int param_index, plain_value plain) const
+  set(int topo_index, int slot_index, plain_value plain) const
   {
-    assert(param_index >= 0);
-    assert(param_index < _module->params[param_type].count);
-    assert(_module->params[param_type].direction == param_direction::output);
-    (*_values)[param_type][param_index] = plain;
+    assert(slot_index >= 0);
+    assert(slot_index < _module->params[topo_index].slot_count);
+    assert(_module->params[topo_index].direction == param_direction::output);
+    (*_values)[topo_index][slot_index] = plain;
   }
 };
 
