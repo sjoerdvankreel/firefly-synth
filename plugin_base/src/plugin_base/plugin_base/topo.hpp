@@ -10,10 +10,6 @@
 
 namespace plugin_base {
 
-class module_engine;
-typedef std::unique_ptr<module_engine>(*
-module_engine_factory)(int sample_rate, int max_frame_count);
-
 enum class plugin_type { synth, fx };
 enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
@@ -24,6 +20,10 @@ enum class param_label { none, name, value, both };
 enum class param_display { normal, pct, pct_no_unit };
 enum class param_type { step, name, item, linear, log };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
+
+class module_engine;
+typedef std::unique_ptr<module_engine>(*
+module_engine_factory)(int sample_rate, int max_frame_count);
 
 // item in list
 struct item_topo final {
@@ -42,16 +42,16 @@ struct param_topo final {
   double exp;
   int section;
   int slot_count;
+  std::string id;
+  std::string name;
+  std::string unit;
+  std::string default_;
   param_dir dir;
   param_type type;
   param_rate rate;
   param_edit edit;
   param_label label;
   param_display display;
-  std::string id;
-  std::string name;
-  std::string unit;
-  std::string default_text;
   std::vector<item_topo> items;
   std::vector<std::string> names;
 
@@ -115,9 +115,6 @@ struct plugin_topo final {
   std::vector<module_topo> modules;
   INF_DECLARE_MOVE_ONLY(plugin_topo);
 };
-
-// TODO
-typedef std::vector<item_topo>(*items_topo_factory)();
 
 inline normalized_value
 param_topo::raw_to_normalized(double raw) const

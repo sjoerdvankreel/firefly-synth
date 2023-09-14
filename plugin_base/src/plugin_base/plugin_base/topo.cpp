@@ -22,7 +22,7 @@ plain_value
 param_topo::default_plain() const
 {
   plain_value result;
-  INF_ASSERT_EXEC(text_to_plain(default_text, result));
+  INF_ASSERT_EXEC(text_to_plain(default_, result));
   return result;
 }
 

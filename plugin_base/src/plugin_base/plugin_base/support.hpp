@@ -26,7 +26,7 @@ param_topo
 param_items(
   std::string const& id, std::string const& name, int slot_count, int section,
   param_dir dir, param_edit edit, param_label label,
-  items_topo_factory items_factory, std::string const& default_);
+  std::vector<item_topo>&& items, std::string const& default_);
 param_topo
 param_names(
   std::string const& id, std::string const& name, int slot_count, int section,

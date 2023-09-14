@@ -148,7 +148,7 @@ validate_topo(plugin_topo const& topo)
       assert(param.slot_count > 0);
       assert(param.max > param.min);
       assert(param.slot_count <= 1024);
-      assert(param.default_text.size());
+      assert(param.default_.size());
       assert(param.section < module.sections.size());
 
       if (param.dir == param_dir::output)

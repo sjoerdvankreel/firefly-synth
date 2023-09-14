@@ -20,8 +20,8 @@ param_base(
   result.rate = rate;
   result.label = label;
   result.section = section;
+  result.default_ = default_;
   result.slot_count = slot_count;
-  result.default_text = default_;
   return result;
 }
 
@@ -68,10 +68,10 @@ param_topo
 param_items(
   std::string const& id, std::string const& name, int slot_count, int section,
   param_dir dir, param_edit edit, param_label label,
-  items_topo_factory items_factory, std::string const& default_)
+  std::vector<item_topo>&& items, std::string const& default_)
 {
   param_topo result(param_base(id, name, slot_count, section, default_, dir, edit, label, param_rate::block));
-  result.items = items_factory();
+  result.items = std::move(items);
   result.min = 0;
   result.max = result.items.size() - 1;
   result.type = param_type::item;
