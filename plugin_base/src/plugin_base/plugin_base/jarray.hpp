@@ -13,19 +13,26 @@ template <class T>
 struct jarray_traits<T, 1> {
   typedef int dims_type;
   typedef T element_type;
+  static void resize(std::vector<element_type>& v, dims_type const& dims) { v.resize(dims); }
 };
 
 template <class T, int Dims>
 struct jarray_traits {
   typedef jarray<int, Dims - 1> dims_type;
   typedef jarray<T, Dims - 1> element_type;
+  static void resize(std::vector<element_type>& v, dims_type const& dims)
+  {
+    v.resize(dims.size());
+    for (int i = 0; i < dims.size(); i++)
+      v[i].resize(dims[i]);
+  }
 };
 
 template <class T>
 class jarray<T, 1> {
   std::vector<typename jarray_traits<T, 1>::element_type> _data;
 public:
-  void resize(typename jarray_traits<T, 1>::dims_type const& dims);
+  void resize(typename jarray_traits<T, 1>::dims_type const& dims) { jarray_traits<T, 1>::resize(_data, dims); }
   INF_DECLARE_MOVE_ONLY(jarray);
   explicit jarray(std::size_t size, typename jarray_traits<T, 1>::element_type const& val) : _data(size, val) {}
 
@@ -45,7 +52,7 @@ template <class T, int Dims>
 class jarray {
   std::vector<typename jarray_traits<T, Dims>::element_type> _data;
 public:
-  void resize(typename jarray_traits<T, Dims>::dims_type const& dims);
+  void resize(typename jarray_traits<T, Dims>::dims_type const& dims){ jarray_traits<T, Dims>::resize(_data, dims); }
   INF_DECLARE_MOVE_ONLY(jarray);
   explicit jarray(std::size_t size, typename jarray_traits<T, Dims>::element_type const& val) : _data(size, val) {}
 
@@ -60,19 +67,5 @@ public:
   void push_back(typename jarray_traits<T, Dims>::element_type const& val) { _data.push_back(val); }
   template <class... U> decltype(auto) emplace_back(U&&... args) { _data.emplace_back(std::forward<U>(args)...); }
 };
-
-template <class T> void
-jarray<T, 1>::resize(typename jarray_traits<T, 1>::dims_type const& dims)
-{
-  _data.resize(dims);
-}
-
-template <class T, int Dims> void
-jarray<T, Dims>::resize(typename jarray_traits<T, Dims>::dims_type const& dims)
-{
-  _data.resize(dims.size());
-  for (int i = 0; i < dims.size(); i++)
-    _data[i].resize(dims[i]);
-}
 
 }
