@@ -20,8 +20,8 @@ enum class module_output { none, cv, audio };
 
 enum class param_dir { input, output };
 enum class param_rate { accurate, block };
-enum class param_percentage { off, on, no_unit };
 enum class param_label { none, name, value, both };
+enum class param_display { normal, pct, pct_no_unit };
 enum class param_type { step, name, item, linear, log };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
 
@@ -42,16 +42,16 @@ struct param_topo final {
   double exp;
   int section;
   int slot_count;
-  std::string id;
-  std::string name;
-  std::string unit;
-  std::string default_text;
   param_dir dir;
   param_type type;
   param_rate rate;
   param_edit edit;
   param_label label;
-  param_percentage percentage;
+  param_display display;
+  std::string id;
+  std::string name;
+  std::string unit;
+  std::string default_text;
   std::vector<item_topo> items;
   std::vector<std::string> names;
 

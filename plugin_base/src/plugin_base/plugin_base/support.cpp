@@ -93,7 +93,7 @@ param_names(
 }
 
 param_topo
-param_percentage(
+param_pct(
   std::string const& id, std::string const& name, int slot_count, int section,
   param_dir dir, param_edit edit, param_label label, param_rate rate, bool unit,
   double min, double max, double default_)
@@ -103,7 +103,7 @@ param_percentage(
   result.max = max;
   result.unit = unit? "%": "";
   result.type = param_type::linear;
-  result.percentage = unit ? param_percentage::on : param_percentage::no_unit;
+  result.display = unit ? param_display::pct : param_display::pct_no_unit;
   return result;
 }
 

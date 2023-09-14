@@ -56,8 +56,8 @@ param_topo::plain_to_text(plain_value plain) const
   }
 
   std::ostringstream stream;
-  int prec = percentage != param_percentage::off ? 3 : 5;
-  int mult = percentage != param_percentage::off ? 100 : 1;
+  int prec = display != param_display::normal ? 3 : 5;
+  int mult = display != param_display::normal ? 100 : 1;
   stream << std::setprecision(prec) << plain.real() * (mult);
   if (unit.size()) stream << " " << unit;
   return stream.str();
@@ -107,7 +107,7 @@ param_topo::text_to_plain(std::string const& textual, plain_value& plain) const
 
   float real = std::numeric_limits<float>::max();
   stream >> real;
-  real /= (percentage == param_percentage::off) ? 1 : 100;
+  real /= (display == param_display::normal) ? 1 : 100;
   plain = plain_value::from_real(real);
   return min <= real && real <= max;
 }

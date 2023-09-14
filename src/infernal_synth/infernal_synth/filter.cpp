@@ -32,8 +32,8 @@ filter_topo()
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
   result.params.emplace_back(param_toggle("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", 1, filter_section_main, param_dir::input, param_label::both, false));
   result.params.emplace_back(param_log("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", 1, filter_section_main, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, 20, 20000, 1000, 1000, "Hz"));
-  result.params.emplace_back(param_percentage("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", 2, filter_section_main, param_dir::input, param_edit::vslider, param_label::both, param_rate::accurate, true, 0, 1, 0.5));
-  result.params.emplace_back(param_percentage("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1, filter_section_main, param_dir::output, param_edit::text, param_label::both, param_rate::block, true, 0, 1, 0));
+  result.params.emplace_back(param_pct("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", 2, filter_section_main, param_dir::input, param_edit::vslider, param_label::both, param_rate::accurate, true, 0, 1, 0.5));
+  result.params.emplace_back(param_pct("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1, filter_section_main, param_dir::output, param_edit::text, param_label::both, param_rate::block, true, 0, 1, 0));
   return result;
 }
 

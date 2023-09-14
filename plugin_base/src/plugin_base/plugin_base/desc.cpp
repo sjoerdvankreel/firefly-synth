@@ -156,7 +156,7 @@ validate_topo(plugin_topo const& topo)
 
       if (param.is_real())
       {
-        if (param.percentage != param_percentage::no_unit)
+        if (param.display != param_display::pct_no_unit)
           assert(param.unit.size() > 0);
         assert(param.min <= param.default_plain().real());
         assert(param.max >= param.default_plain().real());
@@ -166,7 +166,7 @@ validate_topo(plugin_topo const& topo)
         assert((int)param.min == param.min);
         assert((int)param.max == param.max);
         assert(param.rate == param_rate::block);
-        assert(param.percentage == param_percentage::off);
+        assert(param.display == param_display::normal);
         assert(param.min <= param.default_plain().step());
         assert(param.max >= param.default_plain().step());
       }
@@ -176,10 +176,10 @@ validate_topo(plugin_topo const& topo)
       else
         assert(param.exp == 0);
 
-      if (param.percentage != param_percentage::off)
+      if (param.display != param_display::normal)
       {
         assert(param.type == param_type::linear);
-        if (param.percentage == param_percentage::on)
+        if (param.display == param_display::pct)
           assert(param.unit == "%");
       }
 

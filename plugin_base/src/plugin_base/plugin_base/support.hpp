@@ -35,7 +35,7 @@ param_names(
 
 // either block or accurate rate
 param_topo
-param_percentage(
+param_pct(
   std::string const& id, std::string const& name, int slot_count, int section,
   param_dir dir, param_edit edit, param_label label, param_rate rate, bool unit,
   double min, double max, double default_);
