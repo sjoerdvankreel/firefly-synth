@@ -299,7 +299,7 @@ topo(std::move(topo_))
 }
 
 void
-plugin_desc::init_default_state(jarray4d<plain_value>& state) const
+plugin_desc::init_default_state(jarray<plain_value, 4>& state) const
 {
   for (int m = 0; m < topo->modules.size(); m++)
   {

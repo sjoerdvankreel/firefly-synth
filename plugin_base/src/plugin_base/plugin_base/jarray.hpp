@@ -58,11 +58,4 @@ jarray<T, Dims>::resize(jarray<int, Dims - 1> const& dims)
     _data[i].resize(dims[i]);
 }
 
-template <class T> using jarray1d = jarray<T, 1>;
-template <class T> using jarray2d = jarray<T, 2>;
-template <class T> using jarray3d = jarray<T, 3>;
-template <class T> using jarray4d = jarray<T, 4>;
-template <class T> using jarray5d = jarray<T, 5>;
-
-
 }

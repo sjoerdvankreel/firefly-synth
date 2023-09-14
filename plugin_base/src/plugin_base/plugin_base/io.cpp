@@ -11,7 +11,7 @@ bool
 io_load_file(
   plugin_topo const& topo, 
   std::filesystem::path const& path, 
-  jarray4d<plain_value>& state)
+  jarray<plain_value, 4>& state)
 {
   return {};
 }
@@ -19,7 +19,7 @@ io_load_file(
 bool  
 io_store_file(
   plugin_topo const& topo, 
-  jarray4d<plain_value> const& state, 
+  jarray<plain_value, 4> const& state, 
   std::filesystem::path const& path)
 {
   // really is binary -- we handled all the cr/lf already, don't duplicate
@@ -33,7 +33,7 @@ io_store_file(
 std::vector<char>
 io_store(
   plugin_topo const& topo, 
-  jarray4d<plain_value> const& state)
+  jarray<plain_value, 4> const& state)
 {
   auto root_json = std::make_unique<DynamicObject>();
   root_json->setProperty("plugin_id", var(String(topo.id)));
@@ -106,7 +106,7 @@ bool
 io_load(
   plugin_topo const& topo, 
   std::vector<char> const& blob,
-  jarray4d<plain_value>& state)
+  jarray<plain_value, 4>& state)
 {
   return {};
 }

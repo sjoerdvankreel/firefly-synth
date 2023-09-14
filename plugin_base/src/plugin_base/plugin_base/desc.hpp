@@ -75,15 +75,15 @@ struct plugin_desc final {
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(std::unique_ptr<plugin_topo>&& topo_);
 
-  void init_default_state(jarray4d<plain_value>& state) const;
+  void init_default_state(jarray<plain_value, 4>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global_index].params[mapping.param_local_index]; }
 };
 
 // runtime plugin topo dimensions
 struct plugin_dims final {
-  jarray3d<int> params;
-  jarray1d<int> modules;
+  jarray<int, 3> params;
+  jarray<int, 1> modules;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& topo);
@@ -91,9 +91,9 @@ struct plugin_dims final {
 
 // runtime plugin buffer dimensions
 struct plugin_frame_dims final {
-  jarray2d<int> cv;
-  jarray3d<int> audio;
-  jarray4d<int> accurate;
+  jarray<int, 2> cv;
+  jarray<int, 3> audio;
+  jarray<int, 4> accurate;
 
   INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& topo, int frame_count);

@@ -31,7 +31,7 @@ public juce::Component
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_desc const* desc, jarray4d<plain_value> const& initial);
+  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial);
   
   void resized() override;
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }

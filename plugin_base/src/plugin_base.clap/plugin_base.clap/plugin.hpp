@@ -38,7 +38,7 @@ public juce::Timer
 {
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
-  jarray4d<plain_value> _ui_state = {}; // Copy of engine state on the ui thread.
+  jarray<plain_value, 4> _ui_state = {}; // Copy of engine state on the ui thread.
   std::vector<int> _block_automation_seen = {}; // Only push the first event in per-block automation.
   // These have an initial capacity but *will* allocate if it is exceeded because we push() not try_push().
   // By pointer rather than value to prevent some compiler warnings regarding padding.

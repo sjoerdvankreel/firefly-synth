@@ -318,7 +318,7 @@ plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_pl
 }
 
 plugin_gui::
-plugin_gui(plugin_desc const* desc, jarray4d<plain_value> const& initial) :
+plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial) :
 _desc(desc), 
 _single_param_plugin_listeners(desc->param_global_count)
 {

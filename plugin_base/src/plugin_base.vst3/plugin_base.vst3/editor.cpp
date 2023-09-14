@@ -14,7 +14,7 @@ EditorView(controller), _controller(controller)
   // to deal with processor-controller-ui_controls as is
   int param_global_index = 0;
   plugin_dims dims(*controller->desc().topo);
-  jarray4d<plain_value> ui_initial_values;
+  jarray<plain_value, 4> ui_initial_values;
   ui_initial_values.resize(dims.params);
   for (int m = 0; m < controller->desc().topo->modules.size(); m++)
   {
