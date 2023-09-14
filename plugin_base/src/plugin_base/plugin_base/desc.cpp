@@ -59,9 +59,9 @@ validate_desc(plugin_desc const& desc)
   assert(desc.modules.size() == desc.global_module_count);
 
   assert(desc.global_param_count > 0);
-  assert(desc.global_param_mappings.size() == desc.global_param_count);
-  assert(desc.param_id_to_global_param_index.size() == desc.global_param_count);
-  assert(desc.global_param_index_to_param_id.size() == desc.global_param_count);
+  assert(desc.param_mappings.size() == desc.global_param_count);
+  assert(desc.param_id_to_index.size() == desc.global_param_count);
+  assert(desc.param_index_to_id.size() == desc.global_param_count);
 
   int param_global_index = 0;
   (void)param_global_index;
@@ -289,9 +289,9 @@ topo(factory())
       mapping.param_topo_index = param.param_topo_index;
       mapping.module_slot_index = module.module_slot_index;
       mapping.module_topo_index = module.module_topo_index;
-      global_param_index_to_param_id.push_back(param.id_hash);
-      param_id_to_global_param_index[param.id_hash] = global_param_mappings.size();
-      global_param_mappings.push_back(std::move(mapping));
+      param_index_to_id.push_back(param.id_hash);
+      param_id_to_index[param.id_hash] = param_mappings.size();
+      param_mappings.push_back(std::move(mapping));
     }
   }
 

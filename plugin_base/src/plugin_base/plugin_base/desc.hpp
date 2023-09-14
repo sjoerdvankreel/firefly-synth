@@ -68,9 +68,9 @@ struct plugin_desc final {
   int global_param_count = {};
   int global_module_count = {};
   std::vector<module_desc> modules = {};
-  std::vector<param_mapping> global_param_mappings = {};
-  std::vector<int> global_param_index_to_param_id = {};
-  std::map<int, int> param_id_to_global_param_index = {};
+  std::vector<param_mapping> param_mappings = {};
+  std::vector<int> param_index_to_id = {};
+  std::map<int, int> param_id_to_index = {};
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(plugin_topo_factory factory);
 

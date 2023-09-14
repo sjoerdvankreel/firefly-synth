@@ -114,8 +114,8 @@ component::process(ProcessData& data)
     for(int i = 0; i < data.inputParameterChanges->getParameterCount(); i++)
       if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
-        int param_global_index = _engine.desc().param_id_to_global_param_index.at(queue->getParameterId());
-        auto const& mapping = _engine.desc().global_param_mappings[param_global_index];
+        int param_global_index = _engine.desc().param_id_to_index.at(queue->getParameterId());
+        auto const& mapping = _engine.desc().param_mappings[param_global_index];
         auto rate = _engine.desc().param_at(mapping).topo->rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
@@ -142,7 +142,7 @@ component::process(ProcessData& data)
   for (int e = 0; e < block.output_events.size(); e++)
   {
     auto const& event = block.output_events[e];
-    int param_tag = _engine.desc().global_param_index_to_param_id[event.param_global_index];
+    int param_tag = _engine.desc().param_index_to_id[event.param_global_index];
     queue = data.outputParameterChanges->addParameterData(param_tag, unused_index);
     queue->addPoint(0, event.normalized.value(), unused_index);
   }
