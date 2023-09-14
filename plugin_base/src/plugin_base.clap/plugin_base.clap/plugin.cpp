@@ -214,7 +214,7 @@ plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexc
   from_8bit_string(info->module, _engine.desc().modules[mapping.module_global_index].name.c_str());
 
   info->flags = 0;
-  if(param.topo->direction != param_direction::input) 
+  if(param.topo->dir != param_dir::input)
     info->flags |= CLAP_PARAM_IS_READONLY;
   else
   {

@@ -21,7 +21,7 @@ public:
   {
     assert(slot_index >= 0);
     assert(slot_index < _module->params[topo_index].slot_count);
-    assert(_module->params[topo_index].direction == param_direction::output);
+    assert(_module->params[topo_index].dir == param_dir::output);
     (*_values)[topo_index][slot_index] = plain;
   }
 };

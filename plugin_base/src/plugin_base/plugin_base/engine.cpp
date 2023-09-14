@@ -224,7 +224,7 @@ plugin_engine::process()
         auto const& param = module.params[p];
         for(int pi = 0; pi < param.slot_count; pi++)
         {
-          if (param.direction == param_direction::output)
+          if (param.dir == param_dir::output)
           {
             host_block_event output_event;
             output_event.param_global_index = global_param_index;

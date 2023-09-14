@@ -95,7 +95,7 @@ controller::initialize(FUnknown* context)
       param_info.defaultNormalizedValue = param.topo->default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;
-      if(param.topo->direction == param_direction::input)
+      if(param.topo->dir == param_dir::input)
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;

@@ -64,7 +64,7 @@ io_store(
       param_topo_json->setProperty("param_rate", var((int)param_topo.rate));
       param_topo_json->setProperty("param_type", var((int)param_topo.type));
       param_topo_json->setProperty("param_instance_count", var(param_topo.slot_count));
-      param_topo_json->setProperty("param_direction", var((int)param_topo.direction));
+      param_topo_json->setProperty("param_dir", var((int)param_topo.dir));
       param_topos_json.append(var(param_topo_json.release()));
     }
     module_topo_json->setProperty("module_params", param_topos_json);
@@ -76,7 +76,7 @@ io_store(
       for (int p = 0; p < module_topo.params.size(); p++)
       {
         auto const& param_topo = module_topo.params[p];
-        if(param_topo.direction == param_direction::output) continue;
+        if(param_topo.dir == param_dir::output) continue;
         var param_instances;
         auto param_json = std::make_unique<DynamicObject>();
         param_json->setProperty("param_id", String(param_topo.id));

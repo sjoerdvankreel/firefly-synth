@@ -18,8 +18,8 @@ enum class plugin_type { synth, fx };
 enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
 
+enum class param_dir { input, output };
 enum class param_rate { accurate, block };
-enum class param_direction { input, output };
 enum class param_percentage { off, on, no_unit };
 enum class param_label { none, name, value, both };
 enum class param_type { step, name, item, linear, log };
@@ -46,11 +46,11 @@ struct param_topo final {
   std::string name;
   std::string unit;
   std::string default_text;
+  param_dir dir;
   param_type type;
   param_rate rate;
   param_edit edit;
   param_label label;
-  param_direction direction;
   param_percentage percentage;
   std::vector<item_topo> items;
   std::vector<std::string> names;

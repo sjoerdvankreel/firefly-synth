@@ -151,7 +151,7 @@ validate_topo(plugin_topo const& topo)
       assert(param.default_text.size());
       assert(param.section < module.sections.size());
 
-      if (param.direction == param_direction::output)
+      if (param.dir == param_dir::output)
         assert(param.rate == param_rate::block);
 
       if (param.is_real())

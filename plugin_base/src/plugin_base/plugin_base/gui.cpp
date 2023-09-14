@@ -352,7 +352,7 @@ _single_param_plugin_listeners(desc->param_global_count)
         _children.emplace_back(std::make_unique<param_slider>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      _children[_children.size()-1]->setEnabled(param.topo->direction == param_direction::input);
+      _children[_children.size()-1]->setEnabled(param.topo->dir == param_dir::input);
 
       if(param.topo->label == param_label::none)
       {
