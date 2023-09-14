@@ -320,7 +320,7 @@ plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_pl
 plugin_gui::
 plugin_gui(plugin_topo_factory factory, jarray4d<plain_value> const& initial) :
 _desc(factory), 
-_single_param_plugin_listeners(_desc.global_param_count)
+_single_param_plugin_listeners(_desc.param_global_count)
 {
   setOpaque(true);
   setSize(_desc.topo.gui_default_width, _desc.topo.gui_default_width / _desc.topo.gui_aspect_ratio);

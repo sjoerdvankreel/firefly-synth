@@ -55,13 +55,12 @@ validate_desc(plugin_desc const& desc)
   std::set<int> all_hashes;
   std::set<std::string> all_ids;
 
-  assert(desc.global_module_count > 0);
-  assert(desc.modules.size() == desc.global_module_count);
-
-  assert(desc.global_param_count > 0);
-  assert(desc.param_mappings.size() == desc.global_param_count);
-  assert(desc.param_id_to_index.size() == desc.global_param_count);
-  assert(desc.param_index_to_id.size() == desc.global_param_count);
+  assert(desc.module_global_count > 0);
+  assert(desc.modules.size() == desc.module_global_count);
+  assert(desc.param_global_count > 0);
+  assert(desc.param_mappings.size() == desc.param_global_count);
+  assert(desc.param_id_to_index.size() == desc.param_global_count);
+  assert(desc.param_index_to_id.size() == desc.param_global_count);
 
   int param_global_index = 0;
   (void)param_global_index;
@@ -296,8 +295,8 @@ topo(factory())
     }
   }
 
-  global_module_count = modules.size();
-  global_param_count = param_global_index;
+  module_global_count = modules.size();
+  param_global_count = param_global_index;
   validate_desc(*this);
 }
 

@@ -9,8 +9,8 @@ _desc(factory), _dims(_desc.topo)
   // reserve this much but allocate (on the audio thread!) if necessary
   // still seems better than dropping events
   int note_limit_guess = _desc.topo.polyphony * 64;
-  int block_events_guess = _desc.global_param_count;
-  int accurate_events_guess = _desc.global_param_count * 64;
+  int block_events_guess = _desc.param_global_count;
+  int accurate_events_guess = _desc.param_global_count * 64;
 
   // init everything that is not frame-count dependent
   _host_block.common = &_common_block;
@@ -19,7 +19,7 @@ _desc(factory), _dims(_desc.topo)
   _desc.init_default_state(_state);
   _module_engines.init(_dims.module_counts);
   _common_block.notes.reserve(note_limit_guess);
-  _accurate_frames.resize(_desc.global_param_count);
+  _accurate_frames.resize(_desc.param_global_count);
   _host_block.block_events.reserve(block_events_guess);
   _host_block.output_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);

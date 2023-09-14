@@ -38,7 +38,7 @@ _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_q
   plugin_dims dims(_engine.desc().topo);
   _ui_state.init(dims.module_param_counts);
   _engine.desc().init_default_state(_ui_state);
-  _block_automation_seen.resize(_engine.desc().global_param_count);
+  _block_automation_seen.resize(_engine.desc().param_global_count);
 }
 
 bool
