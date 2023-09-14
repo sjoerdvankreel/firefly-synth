@@ -29,13 +29,13 @@ struct param_mapping final {
 // runtime parameter descriptor
 struct param_desc final {
   int id_hash = {};
+  int topo_index = {};
+  int slot_index = {};
+  int local_index = {};
+  int global_index = {};
   std::string id = {};
   std::string full_name = {};
   std::string short_name = {};
-  int param_topo_index = {};
-  int param_slot_index = {};
-  int param_local_index = {};
-  int param_global_index = {};
   param_topo const* topo = {};
 
   INF_DECLARE_MOVE_ONLY(param_desc);
@@ -43,26 +43,26 @@ struct param_desc final {
     module_topo const& module, 
     int module_slot_index,
     param_topo const& param,
-    int param_topo_index, int param_slot_index,
-    int param_local_index, int param_global_index);
+    int topo_index, int slot_index,
+    int local_index, int global_index);
 };
 
 // runtime module descriptor
 struct module_desc final {
   int id_hash = {};
+  int topo_index = {};
+  int slot_index = {};
+  int global_index = {};
   std::string id = {};
   std::string name = {};
-  int module_topo_index = {};
-  int module_slot_index = {};
-  int module_global_index = {};
   module_topo const* topo = {};
   std::vector<param_desc> params = {};
 
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
     module_topo const& module, 
-    int module_topo_index, int module_slot_index,
-    int module_global_index, int param_global_index_start);
+    int topo_index, int slot_index,
+    int global_index, int param_global_index_start);
 };
 
 // runtime plugin descriptor

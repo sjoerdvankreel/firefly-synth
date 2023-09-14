@@ -72,10 +72,11 @@ validate_desc(plugin_desc const& desc)
     assert(module.name.size());
     assert(module.params.size());
     assert(module.id_hash >= 0);
-    assert(module.module_global_index == m);
-    assert(module.module_topo_index < desc.modules.size());
-    assert(module.module_slot_index >= 0);
-    assert(module.module_slot_index < module.topo->slot_count);
+    assert(module.global_index == m);
+    assert(module.topo_index >= 0);
+    assert(module.topo_index < module.topo->slot_count);
+    assert(module.slot_index >= 0);
+    assert(module.slot_index < desc.modules.size());
     INF_ASSERT_EXEC(all_ids.insert(module.id).second);
     INF_ASSERT_EXEC(all_hashes.insert(module.id_hash).second);
 
@@ -87,13 +88,13 @@ validate_desc(plugin_desc const& desc)
       assert(param.id.size() > 0);
       assert(param.short_name.size() > 0);
       assert(param.short_name.size() < param.full_name.size());
-      assert(param.param_slot_index >= 0);
-      assert(param.param_slot_index < param.topo->slot_count);
-      assert(param.param_local_index >= 0);
-      assert(param.param_local_index < module.params.size());
-      assert(param.param_topo_index >= 0);
-      assert(param.param_topo_index < module.topo->params.size());
-      assert(param.param_global_index == param_global_index++);
+      assert(param.slot_index >= 0);
+      assert(param.slot_index < param.topo->slot_count);
+      assert(param.local_index >= 0);
+      assert(param.local_index < module.params.size());
+      assert(param.topo_index >= 0);
+      assert(param.topo_index < module.topo->params.size());
+      assert(param.global_index == param_global_index++);
       INF_ASSERT_EXEC(all_ids.insert(param.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.id_hash).second);
     }
@@ -219,39 +220,39 @@ param_desc(
   module_topo const& module,
   int module_slot_index,
   param_topo const& param,
-  int param_topo_index, int param_slot_index,
-  int param_local_index, int param_global_index)
+  int topo_index, int slot_index,
+  int local_index, int global_index)
 {
   topo = &param;
-  this->param_topo_index = param_topo_index;
-  this->param_slot_index = param_slot_index;
-  this->param_local_index = param_local_index;
-  this->param_global_index = param_global_index;
-  short_name = param_name(param, param_slot_index);
+  this->topo_index = topo_index;
+  this->slot_index = slot_index;
+  this->local_index = local_index;
+  this->global_index = global_index;
+  short_name = param_name(param, slot_index);
   full_name = module_name(module, module_slot_index) + " " + short_name;
-  id = module_id(module, module_slot_index) + "-" + param_id(param, param_slot_index);
+  id = module_id(module, module_slot_index) + "-" + param_id(param, slot_index);
   id_hash = stable_hash(id.c_str());
 }
 
 module_desc::
 module_desc(
   module_topo const& module,
-  int module_topo_index, int module_slot_index,
-  int module_global_index, int param_global_index_start)
+  int topo_index, int slot_index,
+  int global_index, int param_global_index_start)
 {
   topo = &module;
   int param_local_index = 0;
-  this->module_topo_index = module_topo_index;
-  this->module_slot_index = module_slot_index;
-  this->module_global_index = module_global_index;
-  id = module_id(module, module_slot_index);
-  name = module_name(module, module_slot_index);
+  this->topo_index = topo_index;
+  this->slot_index = slot_index;
+  this->global_index = global_index;
+  id = module_id(module, slot_index);
+  name = module_name(module, slot_index);
   id_hash = stable_hash(id);
   for(int p = 0; p < module.params.size(); p++)
   {
     auto const& param = module.params[p];
     for(int i = 0; i < param.slot_count; i++)
-      params.emplace_back(param_desc(module, module_slot_index, param, p, i, param_local_index++, param_global_index_start++));
+      params.emplace_back(param_desc(module, slot_index, param, p, i, param_local_index++, param_global_index_start++));
   }
 }
 
@@ -285,10 +286,10 @@ topo(factory())
       mapping.module_global_index = m;
       mapping.param_local_index = p;
       mapping.param_global_index = param_global_index++;
-      mapping.param_slot_index = param.param_slot_index;
-      mapping.param_topo_index = param.param_topo_index;
-      mapping.module_slot_index = module.module_slot_index;
-      mapping.module_topo_index = module.module_topo_index;
+      mapping.param_slot_index = param.slot_index;
+      mapping.param_topo_index = param.topo_index;
+      mapping.module_slot_index = module.slot_index;
+      mapping.module_topo_index = module.topo_index;
       param_index_to_id.push_back(param.id_hash);
       param_id_to_index[param.id_hash] = param_mappings.size();
       param_mappings.push_back(std::move(mapping));
