@@ -55,9 +55,9 @@ plugin::timerCallback()
   param_queue_event e;
   while (_to_ui_events->try_dequeue(e))
   {
-    param_mapping const& mapping = _engine.desc().global_param_mappings[e.param_index];
+    param_mapping const& mapping = _engine.desc().global_param_mappings[e.param_global_index];
     mapping.value_at(_ui_state) = e.plain;
-    if(_gui) _gui->plugin_param_changed(e.param_index, e.plain);
+    if(_gui) _gui->plugin_param_changed(e.param_global_index, e.plain);
   }
 }
 
@@ -143,31 +143,31 @@ plugin::ui_param_changing(int param_index, plain_value plain)
 }
 
 void 
-plugin::push_to_audio(int param_index, plain_value plain)
+plugin::push_to_audio(int param_global_index, plain_value plain)
 {
   param_queue_event e;
   e.plain = plain;
-  e.param_index = param_index;
+  e.param_global_index = param_global_index;
   e.type = param_queue_event_type::value_changing;
   _to_audio_events->enqueue(e);
 }
 
 void 
-plugin::push_to_audio(int param_index, param_queue_event_type type)
+plugin::push_to_audio(int param_global_index, param_queue_event_type type)
 {
   param_queue_event e;
   e.type = type;
-  e.param_index = param_index;
+  e.param_global_index = param_global_index;
   _to_audio_events->enqueue(e);
 }
 
 void
-plugin::push_to_ui(int param_index, clap_value clap)
+plugin::push_to_ui(int param_global_index, clap_value clap)
 {
   param_queue_event e;
-  param_mapping const& mapping = _engine.desc().global_param_mappings[param_index];
+  param_mapping const& mapping = _engine.desc().global_param_mappings[param_global_index];
   auto const& topo = *_engine.desc().param_at(mapping).topo;
-  e.param_index = param_index;
+  e.param_global_index = param_global_index;
   e.type = param_queue_event_type::value_changing;
   e.plain = topo.normalized_to_plain(clap_to_normalized(topo, clap));
   _to_ui_events->enqueue(e);
@@ -323,12 +323,12 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
   param_queue_event e;
   while (_to_audio_events->try_dequeue(e))
   {
-    int param_id = _engine.desc().global_param_index_to_param_id[e.param_index];
+    int param_id = _engine.desc().global_param_index_to_param_id[e.param_global_index];
     switch(e.type) 
     {
     case param_queue_event_type::value_changing:
     {
-      param_mapping const& mapping = _engine.desc().global_param_mappings[e.param_index];
+      param_mapping const& mapping = _engine.desc().global_param_mappings[e.param_global_index];
       auto const& topo = *_engine.desc().param_at(mapping).topo;
       mapping.value_at(_engine.state()) = e.plain;
       auto event = clap_event_param_value();
@@ -410,7 +410,7 @@ plugin::process(clap_process const* process) noexcept
         if (_block_automation_seen[param_index] == 0)
         {
           host_block_event block_event;
-          block_event.global_param_index = param_index;
+          block_event.param_global_index = param_index;
           block_event.normalized = clap_to_normalized(*param.topo, clap_value(event->value));
           block.block_events.push_back(block_event);
           _block_automation_seen[param_index] = 1;
@@ -418,7 +418,7 @@ plugin::process(clap_process const* process) noexcept
       } else {
         host_accurate_event accurate_event;
         accurate_event.frame_index = header->time;
-        accurate_event.global_param_index = param_index;
+        accurate_event.param_global_index = param_index;
         accurate_event.normalized = clap_to_normalized(*param.topo, clap_value(event->value));
         block.accurate_events.push_back(accurate_event);
       }
@@ -434,8 +434,8 @@ plugin::process(clap_process const* process) noexcept
   {
     param_queue_event to_ui_event = {};
     auto const& out_event = block.output_events[e];
-    auto const& mapping = _engine.desc().global_param_mappings[out_event.global_param_index];
-    to_ui_event.param_index = out_event.global_param_index;
+    auto const& mapping = _engine.desc().global_param_mappings[out_event.param_global_index];
+    to_ui_event.param_global_index = out_event.param_global_index;
     to_ui_event.plain = _engine.desc().param_at(mapping).topo->normalized_to_plain(out_event.normalized);
     _to_ui_events->enqueue(to_ui_event);
   }

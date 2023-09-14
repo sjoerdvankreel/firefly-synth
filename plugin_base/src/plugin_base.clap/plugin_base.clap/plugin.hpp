@@ -25,8 +25,8 @@ public:
 enum class param_queue_event_type { end_edit, begin_edit, value_changing };
 struct param_queue_event
 {
-  int param_index = {};
   plain_value plain = {};
+  int param_global_index = {};
   param_queue_event_type type = {};
 };
 

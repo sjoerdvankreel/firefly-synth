@@ -12,7 +12,7 @@ EditorView(controller), _controller(controller)
   // alternatively we could keep yet another copy of ui-thread values
   // in module-slot-param-slot format but it's complicated enough already
   // to deal with processor-controller-ui_controls as is
-  int global_param_index = 0;
+  int param_global_index = 0;
   plugin_dims dims(controller->desc().topo);
   jarray4d<plain_value> ui_initial_values;
   ui_initial_values.init(dims.module_param_counts);
@@ -25,7 +25,7 @@ EditorView(controller), _controller(controller)
         auto const& param = module.params[p];
         for(int pi = 0; pi < param.slot_count; pi++)
         {
-          int param_tag = _controller->desc().global_param_index_to_param_id[global_param_index++];
+          int param_tag = _controller->desc().global_param_index_to_param_id[param_global_index++];
           double normalized = _controller->getParamNormalized(param_tag);
           ui_initial_values[m][mi][p][pi] = param.normalized_to_plain(normalized_value(normalized));
         }

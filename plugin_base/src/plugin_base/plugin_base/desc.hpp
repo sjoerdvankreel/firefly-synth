@@ -15,7 +15,7 @@ struct param_mapping final {
   int param_slot_index = {};
   int module_topo_index = {};
   int module_slot_index = {};
-  int global_param_index = {};
+  int param_global_index = {};
   int global_module_index = {};
   int param_index_in_module = {};
   INF_DECLARE_MOVE_ONLY(param_mapping);
@@ -35,12 +35,12 @@ struct param_desc final {
   param_topo const* topo = {};
   int param_slot_index = {};
   int param_topo_index = {};
-  int global_param_index = {};
+  int param_global_index = {};
   int param_index_in_module = {};
   INF_DECLARE_MOVE_ONLY(param_desc);
   param_desc(
     module_topo const& module, param_topo const& param, 
-    int global_param_index, int module_slot_index,
+    int param_global_index, int module_slot_index,
     int param_topo_index, int param_slot_index,
     int param_index_in_module);
 };
@@ -58,7 +58,7 @@ struct module_desc final {
   INF_DECLARE_MOVE_ONLY(module_desc);
   module_desc(
     module_topo const& module, 
-    int global_module_index, int global_param_index_start,
+    int global_module_index, int param_global_index_start,
     int module_topo_index, int module_slot_index);
 };
 

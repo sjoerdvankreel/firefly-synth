@@ -138,7 +138,7 @@ plugin_engine::process()
   for (int e = 0; e < _host_block.block_events.size(); e++)
   {
     auto const& event = _host_block.block_events[e];
-    auto const& mapping = _desc.global_param_mappings[event.global_param_index];
+    auto const& mapping = _desc.global_param_mappings[event.param_global_index];
     plain_value plain = _desc.param_at(mapping).topo->normalized_to_plain(event.normalized);
     mapping.value_at(_state) = plain;
     mapping.value_at(_plugin_block.block_automation) = plain;
@@ -152,11 +152,11 @@ plugin_engine::process()
   for (int e = 0; e < _host_block.accurate_events.size(); e++)
   {
     auto const& event = _host_block.accurate_events[e];
-    auto const& mapping = _desc.global_param_mappings[event.global_param_index];
+    auto const& mapping = _desc.global_param_mappings[event.param_global_index];
 
     // linear interpolation from previous to current value
     auto& curve = mapping.value_at(_plugin_block.accurate_automation);
-    int prev_frame = _accurate_frames[event.global_param_index];
+    int prev_frame = _accurate_frames[event.param_global_index];
     float frame_count = event.frame_index - prev_frame + 1;
     float range = event.normalized.value() - curve[prev_frame];
 
@@ -166,7 +166,7 @@ plugin_engine::process()
 
     // set new state to denormalized and update last event timestamp
     mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).topo->normalized_to_plain(event.normalized).real());
-    _accurate_frames[event.global_param_index] = event.frame_index;
+    _accurate_frames[event.param_global_index] = event.frame_index;
   }
 
   // denormalize all interpolated curves even if they where not changed
@@ -227,7 +227,7 @@ plugin_engine::process()
           if (param.direction == param_direction::output)
           {
             host_block_event output_event;
-            output_event.global_param_index = global_param_index;
+            output_event.param_global_index = global_param_index;
             output_event.normalized = param.plain_to_normalized(_state[m][mi][p][pi]);
             _host_block.output_events.push_back(output_event);
           }
