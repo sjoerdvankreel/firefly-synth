@@ -117,7 +117,6 @@ struct plugin_topo final {
 };
 
 // TODO
-typedef plugin_topo(*plugin_topo_factory)();
 typedef std::vector<item_topo>(*items_topo_factory)();
 
 inline normalized_value

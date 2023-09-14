@@ -50,7 +50,7 @@ controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
   MessageManager::getInstance();
-  return _editor = new editor(this, _topo_factory);
+  return _editor = new editor(this);
 }
 
 tresult PLUGIN_API 

@@ -10,8 +10,8 @@ using namespace Steinberg::Vst;
 namespace plugin_base::vst3 {
 
 component::
-component(plugin_topo_factory factory, FUID const& controller_id) :
-_engine(factory)
+component(std::unique_ptr<plugin_topo>&& topo, FUID const& controller_id) :
+_engine(std::move(topo))
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
@@ -39,7 +39,7 @@ component::initialize(FUnknown* context)
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
   addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
-  if(_engine.desc().topo.type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
+  if(_engine.desc().topo->type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
   return kResultTrue;
 }
 
@@ -48,23 +48,23 @@ component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
-  if (_engine.desc().topo.type != plugin_type::fx && input_count != 0) return kResultFalse;
+  if (_engine.desc().topo->type != plugin_type::fx && input_count != 0) return kResultFalse;
   if (output_count != 1 || outputs[0] != SpeakerArr::kStereo) return kResultFalse;
-  if((_engine.desc().topo.type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
+  if((_engine.desc().topo->type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
   return AudioEffect::setBusArrangements(inputs, input_count, outputs, output_count);
 }
 
 tresult PLUGIN_API
 component::getState(IBStream* state)
 {
-  io_store_file(_engine.desc().topo, _engine.state(), "C:\\temp\\plug.json");
+  io_store_file(*_engine.desc().topo, _engine.state(), "C:\\temp\\plug.json");
   return kResultFalse;
 }
 
 tresult PLUGIN_API
 component::setState(IBStream* state)
 {
-  io_load(_engine.desc().topo, {}, _engine.state());
+  io_load(*_engine.desc().topo, {}, _engine.state());
   return kResultFalse;
 }
 
@@ -74,7 +74,7 @@ component::process(ProcessData& data)
   host_block& block = _engine.prepare();
   block.common->frame_count = data.numSamples;
   block.common->bpm = data.processContext ? data.processContext->tempo : 0;
-  block.common->audio_input = _engine.desc().topo.type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
+  block.common->audio_input = _engine.desc().topo->type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
   block.common->stream_time = data.processContext ? data.processContext->projectTimeSamples : 0;
   block.common->audio_output = data.outputs[0].channelBuffers32;
 

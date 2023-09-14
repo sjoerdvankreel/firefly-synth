@@ -30,12 +30,12 @@ normalized_to_clap(param_topo const& topo, normalized_value normalized)
 }
 
 plugin::
-plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory):
-Plugin(desc, host), _engine(factory), _topo_factory(factory), 
+plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo):
+Plugin(desc, host), _engine(std::move(topo)),
 _to_ui_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size)), 
 _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size))
 {
-  plugin_dims dims(_engine.desc().topo);
+  plugin_dims dims(*_engine.desc().topo);
   _ui_state.init(dims.params);
   _engine.desc().init_default_state(_ui_state);
   _block_automation_seen.resize(_engine.desc().param_global_count);
@@ -92,7 +92,7 @@ plugin::guiDestroy() noexcept
 bool
 plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
-  _gui = std::make_unique<plugin_gui>(_topo_factory, _ui_state);
+  _gui = std::make_unique<plugin_gui>(&_engine.desc(), _ui_state);
   _gui->add_any_param_ui_listener(this);
   return true;
 }
@@ -115,7 +115,7 @@ plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 bool
 plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
-  *height = *width / _gui->desc().topo.gui_aspect_ratio;
+  *height = *width / _engine.desc().topo->gui_aspect_ratio;
   return true;
 }
 
@@ -126,7 +126,7 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
   hints->can_resize_vertically = true;
   hints->can_resize_horizontally = true;
   hints->aspect_ratio_height = 1.0;
-  hints->aspect_ratio_width = _gui->desc().topo.gui_aspect_ratio;
+  hints->aspect_ratio_width = _engine.desc().topo->gui_aspect_ratio;
   return true;
 }
 
@@ -294,14 +294,14 @@ std::uint32_t
 plugin::audioPortsCount(bool is_input) const noexcept
 {
   if (!is_input) return 1;
-  return _engine.desc().topo.type == plugin_type::fx? 1: 0;
+  return _engine.desc().topo->type == plugin_type::fx? 1: 0;
 }
 
 bool
 plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
 {
   if (index != 0) return false;
-  if (is_input && _engine.desc().topo.type == plugin_type::synth) return false;
+  if (is_input && _engine.desc().topo->type == plugin_type::synth) return false;
   info->id = 0;
   info->channel_count = 2;
   info->port_type = CLAP_PORT_STEREO;

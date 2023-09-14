@@ -254,16 +254,16 @@ module_desc(
 }
 
 plugin_desc::
-plugin_desc(plugin_topo_factory factory):
-topo(factory())
+plugin_desc(std::unique_ptr<plugin_topo>&& topo_):
+topo(std::move(topo_))
 {
-  validate_topo(topo);
+  validate_topo(*topo);
 
   int param_global_index = 0;
   int module_global_index = 0;
-  for(int m = 0; m < topo.modules.size(); m++)
+  for(int m = 0; m < topo->modules.size(); m++)
   {
-    auto const& module = topo.modules[m];
+    auto const& module = topo->modules[m];
     for(int i = 0; i < module.slot_count; i++)
     {
       modules.emplace_back(module_desc(module, m, i, module_global_index++, param_global_index));
@@ -301,9 +301,9 @@ topo(factory())
 void
 plugin_desc::init_default_state(jarray4d<plain_value>& state) const
 {
-  for (int m = 0; m < topo.modules.size(); m++)
+  for (int m = 0; m < topo->modules.size(); m++)
   {
-    auto const& module = topo.modules[m];
+    auto const& module = topo->modules[m];
     for(int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {

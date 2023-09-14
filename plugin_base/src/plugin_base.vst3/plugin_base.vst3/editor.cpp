@@ -5,7 +5,7 @@ using namespace Steinberg;
 namespace plugin_base::vst3 {
 
 editor::
-editor(plugin_base::vst3::controller* controller, plugin_topo_factory factory) : 
+editor(plugin_base::vst3::controller* controller) : 
 EditorView(controller), _controller(controller)
 {
   // pull the controller values to the ui (both live on the same thread)
@@ -13,12 +13,12 @@ EditorView(controller), _controller(controller)
   // in module-slot-param-slot format but it's complicated enough already
   // to deal with processor-controller-ui_controls as is
   int param_global_index = 0;
-  plugin_dims dims(controller->desc().topo);
+  plugin_dims dims(*controller->desc().topo);
   jarray4d<plain_value> ui_initial_values;
   ui_initial_values.init(dims.params);
-  for (int m = 0; m < controller->desc().topo.modules.size(); m++)
+  for (int m = 0; m < controller->desc().topo->modules.size(); m++)
   {
-    auto const& module = controller->desc().topo.modules[m];
+    auto const& module = controller->desc().topo->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
       for(int p = 0; p < module.params.size(); p++)
       {
@@ -31,7 +31,7 @@ EditorView(controller), _controller(controller)
         }
       }
   }
-  _gui = std::make_unique<plugin_gui>(factory, ui_initial_values);
+  _gui = std::make_unique<plugin_gui>(&controller->desc(), ui_initial_values);
 }
 
 tresult PLUGIN_API 
@@ -72,7 +72,7 @@ editor::onSize(ViewRect* new_size)
 tresult PLUGIN_API
 editor::checkSizeConstraint(ViewRect* new_rect)
 {
-  int new_height = new_rect->getWidth() / _gui->desc().topo.gui_aspect_ratio;
+  int new_height = new_rect->getWidth() / _controller->desc().topo->gui_aspect_ratio;
   new_rect->bottom = new_rect->top + new_height;
   return kResultTrue;
 }

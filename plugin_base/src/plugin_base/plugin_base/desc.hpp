@@ -64,16 +64,16 @@ struct module_desc final {
 
 // runtime plugin descriptor
 struct plugin_desc final {
-  plugin_topo const topo = {};
   int param_global_count = {};
   int module_global_count = {};
   std::vector<module_desc> modules = {};
+  std::unique_ptr<plugin_topo> topo = {};
   std::vector<int> param_index_to_id = {};
   std::map<int, int> param_id_to_index = {};
   std::vector<param_mapping> param_mappings = {};
 
   INF_DECLARE_MOVE_ONLY(plugin_desc);
-  plugin_desc(plugin_topo_factory factory);
+  plugin_desc(std::unique_ptr<plugin_topo>&& topo_);
 
   void init_default_state(jarray4d<plain_value>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
@@ -86,7 +86,7 @@ struct plugin_dims final {
   std::vector<std::vector<std::vector<int>>> params;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
-  plugin_dims(plugin_topo const& plugin);
+  plugin_dims(plugin_topo const& topo);
 };
 
 // runtime plugin buffer dimensions
@@ -96,7 +96,7 @@ struct plugin_frame_dims final {
   std::vector<std::vector<std::vector<std::vector<int>>>> accurate;
 
   INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
-  plugin_frame_dims(plugin_topo const& plugin, int frame_count);
+  plugin_frame_dims(plugin_topo const& topo, int frame_count);
 };
 
 }

@@ -318,15 +318,15 @@ plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_pl
 }
 
 plugin_gui::
-plugin_gui(plugin_topo_factory factory, jarray4d<plain_value> const& initial) :
-_desc(factory), 
-_single_param_plugin_listeners(_desc.param_global_count)
+plugin_gui(plugin_desc const* desc, jarray4d<plain_value> const& initial) :
+_desc(desc), 
+_single_param_plugin_listeners(desc->param_global_count)
 {
   setOpaque(true);
-  setSize(_desc.topo.gui_default_width, _desc.topo.gui_default_width / _desc.topo.gui_aspect_ratio);
-  for (int m = 0; m < _desc.modules.size(); m++)
+  setSize(_desc->topo->gui_default_width, _desc->topo->gui_default_width / _desc->topo->gui_aspect_ratio);
+  for (int m = 0; m < _desc->modules.size(); m++)
   {
-    auto const& module = _desc.modules[m];
+    auto const& module = _desc->modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
@@ -381,9 +381,9 @@ plugin_gui::resized()
   int c = 0;
   grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
   grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
-  for (int m = 0; m < _desc.modules.size(); m++)
+  for (int m = 0; m < _desc->modules.size(); m++)
   {
-    auto const& module = _desc.modules[m];
+    auto const& module = _desc->modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
       GridItem edit_item(getChildComponent(c * 2));

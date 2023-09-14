@@ -10,9 +10,7 @@ namespace plugin_base::clap {
 
 inline int constexpr default_queue_size = 4096;
 
-// Yet another format alongside normalized_value and plain_value.
-// For linear and log, we map to normalized. But for stepped, clap
-// requires min and max to be integers, so we map to plain.
+// linear and log map to normalized, step maps to plain
 class clap_value {
   double _value;
 public:
@@ -40,7 +38,6 @@ public juce::Timer
 {
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
-  plugin_topo_factory const _topo_factory = {};
   jarray4d<plain_value> _ui_state = {}; // Copy of engine state on the ui thread.
   std::vector<int> _block_automation_seen = {}; // Only push the first event in per-block automation.
   // These have an initial capacity but *will* allocate if it is exceeded because we push() not try_push().
@@ -58,7 +55,7 @@ public juce::Timer
 
 public:
   ~plugin() { stopTimer(); }
-  plugin(clap_plugin_descriptor const* desc, clap_host const* host, plugin_topo_factory factory);
+  plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo);
   
   bool implementsGui() const noexcept override { return true; }
   bool implementsParams() const noexcept override { return true; }

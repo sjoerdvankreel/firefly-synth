@@ -34,7 +34,7 @@ class plugin_engine final {
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_engine);
-  explicit plugin_engine(plugin_topo_factory factory);
+  explicit plugin_engine(std::unique_ptr<plugin_topo>&& topo);
 
   void process();
   void deactivate();

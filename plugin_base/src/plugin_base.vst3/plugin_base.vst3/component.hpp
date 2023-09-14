@@ -10,7 +10,7 @@ public Steinberg::Vst::AudioEffect {
   using int32 = Steinberg::int32;
   using SpeakerArrangement = Steinberg::Vst::SpeakerArrangement;
 public:
-  component(plugin_topo_factory factory, Steinberg::FUID const& controller_id);
+  component(std::unique_ptr<plugin_topo>&& topo, Steinberg::FUID const& controller_id);
   Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* state) override;
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;

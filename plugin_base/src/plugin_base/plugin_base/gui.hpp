@@ -24,19 +24,16 @@ public:
 class plugin_gui:
 public juce::Component
 {
-  plugin_desc const _desc;
+  plugin_desc const* const _desc;
   std::vector<any_param_ui_listener*> _any_param_ui_listeners = {};
   std::vector<std::vector<single_param_plugin_listener*>> _single_param_plugin_listeners = {};
-  // Note - mind reverse order of destruction. 
-  // Param_* controls must deregister their event listeners before the respective listener vectors are destroyed.
-  std::vector<std::unique_ptr<juce::Component>> _children = {};
+  std::vector<std::unique_ptr<juce::Component>> _children = {}; // must be destructed first
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_topo_factory factory, jarray4d<plain_value> const& initial);
+  plugin_gui(plugin_desc const* desc, jarray4d<plain_value> const& initial);
   
   void resized() override;
-  plugin_desc const& desc() const { return _desc; }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
     
   void ui_param_end_changes(int param_index);
