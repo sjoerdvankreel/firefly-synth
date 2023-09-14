@@ -125,17 +125,17 @@ validate_topo(plugin_topo const& topo)
     assert(module.params.size());
     assert(module.slot_count > 0);
     assert(module.engine_factory);
-    assert(module.param_sections.size());
-    assert(module.param_sections.size() <= module.params.size());
+    assert(module.sections.size());
+    assert(module.sections.size() <= module.params.size());
     INF_ASSERT_EXEC(module_ids.insert(module.id).second);
 
-    for (int s = 0; s < module.param_sections.size(); s++)
+    for (int s = 0; s < module.sections.size(); s++)
     {
-      auto const& section = module.param_sections[s];
+      auto const& section = module.sections[s];
       (void)section;
       assert(section.name.size());
       assert(section.section >= 0);
-      assert(section.section < module.param_sections.size());
+      assert(section.section < module.sections.size());
     }
 
     for (int p = 0; p < module.params.size(); p++)
@@ -149,7 +149,7 @@ validate_topo(plugin_topo const& topo)
       assert(param.max > param.min);
       assert(param.slot_count <= 1024);
       assert(param.default_text.size());
-      assert(param.section < module.param_sections.size());
+      assert(param.section < module.sections.size());
 
       if (param.direction == param_direction::output)
         assert(param.rate == param_rate::block);

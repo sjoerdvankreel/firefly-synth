@@ -28,6 +28,7 @@ type_items()
   return result;
 }
 
+// todo drop the osc_prefixes
 enum osc_type { osc_type_saw, osc_type_sine };
 enum osc_section { osc_section_main, osc_section_pitch };
 enum osc_param { osc_param_on, osc_param_type, osc_param_gain, osc_param_bal, osc_param_oct, osc_param_note, osc_param_cent };
@@ -36,8 +37,8 @@ module_topo
 osc_topo()
 {
   module_topo result(make_module("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, module_scope::voice, module_output::audio));
-  result.param_sections.emplace_back(param_section_topo(osc_section_main, "Main"));
-  result.param_sections.emplace_back(param_section_topo(osc_section_pitch, "Pitch"));
+  result.sections.emplace_back(section_topo(osc_section_main, "Main"));
+  result.sections.emplace_back(section_topo(osc_section_pitch, "Pitch"));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
   result.params.emplace_back(param_toggle("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", 1, osc_section_main, param_direction::input, param_label::both, false));
   result.params.emplace_back(param_items("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", 1, osc_section_main, param_direction::input, param_edit::list, param_label::both, type_items, "Saw"));

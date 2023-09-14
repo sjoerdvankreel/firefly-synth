@@ -28,7 +28,7 @@ module_topo
 filter_topo()
 {
   module_topo result(make_module("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, module_scope::voice, module_output::none));
-  result.param_sections.emplace_back(param_section_topo(filter_section_main, "Main"));
+  result.sections.emplace_back(section_topo(filter_section_main, "Main"));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
   result.params.emplace_back(param_toggle("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", 1, filter_section_main, param_direction::input, param_label::both, false));
   result.params.emplace_back(param_log("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", 1, filter_section_main, param_direction::input, param_edit::knob, param_label::both, param_rate::accurate, 20, 20000, 1000, 1000, "Hz"));

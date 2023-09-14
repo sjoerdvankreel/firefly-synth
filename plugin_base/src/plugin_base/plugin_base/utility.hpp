@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string>
 #include <cstring>
 #include <cassert>
@@ -30,18 +31,18 @@ to_8bit_string(T const* source)
   return result;
 }
 
-template <class T, int N>
-void from_8bit_string(T(&dest)[N], char const* source)
-{
-  from_8bit_string(dest, N, source);
-}
-
 template <class T>
 void from_8bit_string(T* dest, int count, char const* source)
 {
   memset(dest, 0, sizeof(*dest) * count);
   for (int i = 0; i < count - 1 && i < strlen(source); i++)
     dest[i] = source[i];
+}
+
+template <class T, int N>
+void from_8bit_string(T(&dest)[N], char const* source)
+{
+  from_8bit_string(dest, N, source);
 }
 
 }
