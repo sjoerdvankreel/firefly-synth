@@ -90,8 +90,8 @@ validate_desc(plugin_desc const& desc)
       assert(param.short_name.size() < param.full_name.size());
       assert(param.param_slot_index >= 0);
       assert(param.param_slot_index < param.topo->slot_count);
-      assert(param.param_index_in_module >= 0);
-      assert(param.param_index_in_module < module.params.size());
+      assert(param.param_local_index >= 0);
+      assert(param.param_local_index < module.params.size());
       assert(param.param_topo_index >= 0);
       assert(param.param_topo_index < module.topo->params.size());
       assert(param.param_global_index == param_global_index++);
@@ -220,13 +220,13 @@ param_desc(
   module_topo const& module, param_topo const& param, 
   int param_global_index, int module_slot_index,
   int param_topo_index, int param_slot_index,
-  int param_index_in_module)
+  int param_local_index)
 {
   topo = &param;
   this->param_slot_index = param_slot_index;
   this->param_topo_index = param_topo_index;
   this->param_global_index = param_global_index;
-  this->param_index_in_module = param_index_in_module;
+  this->param_local_index = param_local_index;
   id = module_id(module, module_slot_index) + "-" + param_id(param, param_slot_index);
   short_name = param_name(param, param_slot_index);
   full_name = module_name(module, module_slot_index) + " " + short_name;
@@ -240,7 +240,7 @@ module_desc(
   int module_topo_index, int module_slot_index)
 {
   topo = &module;
-  int param_index_in_module = 0;
+  int param_local_index = 0;
   this->module_global_index = module_global_index;
   this->module_topo_index = module_topo_index;
   this->module_slot_index = module_slot_index;
@@ -251,7 +251,7 @@ module_desc(
   {
     auto const& param = module.params[p];
     for(int i = 0; i < param.slot_count; i++)
-      params.emplace_back(param_desc(module, param, param_global_index_start++, module_slot_index, p, i, param_index_in_module++));
+      params.emplace_back(param_desc(module, param, param_global_index_start++, module_slot_index, p, i, param_local_index++));
   }
 }
 
@@ -283,7 +283,7 @@ topo(factory())
       auto const& param = module.params[p];
       param_mapping mapping;
       mapping.module_global_index = m;
-      mapping.param_index_in_module = p;
+      mapping.param_local_index = p;
       mapping.param_global_index = param_global_index++;
       mapping.param_slot_index = param.param_slot_index;
       mapping.param_topo_index = param.param_topo_index;

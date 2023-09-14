@@ -13,11 +13,11 @@ namespace plugin_base {
 struct param_mapping final {
   int param_topo_index = {};
   int param_slot_index = {};
+  int param_local_index = {};
   int param_global_index = {};
   int module_topo_index = {};
   int module_slot_index = {};
   int module_global_index = {};
-  int param_index_in_module = {};
   INF_DECLARE_MOVE_ONLY(param_mapping);
 
   template <class T> auto& value_at(T& container) const 
@@ -36,13 +36,13 @@ struct param_desc final {
   int param_slot_index = {};
   int param_topo_index = {};
   int param_global_index = {};
-  int param_index_in_module = {};
+  int param_local_index = {};
   INF_DECLARE_MOVE_ONLY(param_desc);
   param_desc(
     module_topo const& module, param_topo const& param, 
     int param_global_index, int module_slot_index,
     int param_topo_index, int param_slot_index,
-    int param_index_in_module);
+    int param_local_index);
 };
 
 // runtime module descriptor
@@ -76,7 +76,7 @@ struct plugin_desc final {
 
   void init_default_state(jarray4d<plain_value>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
-  { return modules[mapping.module_global_index].params[mapping.param_index_in_module]; }
+  { return modules[mapping.module_global_index].params[mapping.param_local_index]; }
 };
 
 // runtime plugin topo dimensions
