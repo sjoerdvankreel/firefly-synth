@@ -74,9 +74,9 @@ validate_desc(plugin_desc const& desc)
     assert(module.id_hash >= 0);
     assert(module.global_index == m);
     assert(module.topo_index >= 0);
-    assert(module.topo_index < module.topo->slot_count);
+    assert(module.topo_index < desc.topo->modules.size());
     assert(module.slot_index >= 0);
-    assert(module.slot_index < desc.modules.size());
+    assert(module.slot_index < module.topo->slot_count);
     INF_ASSERT_EXEC(all_ids.insert(module.id).second);
     INF_ASSERT_EXEC(all_hashes.insert(module.id_hash).second);
 
