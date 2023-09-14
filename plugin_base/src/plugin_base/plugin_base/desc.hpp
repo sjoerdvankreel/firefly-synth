@@ -82,8 +82,8 @@ struct plugin_desc final {
 
 // runtime plugin topo dimensions
 struct plugin_dims final {
-  std::vector<int> module_slots;
-  std::vector<std::vector<std::vector<int>>> param_slots;
+  std::vector<int> modules;
+  std::vector<std::vector<std::vector<int>>> params;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& plugin);

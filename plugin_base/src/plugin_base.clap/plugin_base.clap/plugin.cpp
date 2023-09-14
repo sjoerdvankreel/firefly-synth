@@ -36,7 +36,7 @@ _to_ui_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queu
 _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size))
 {
   plugin_dims dims(_engine.desc().topo);
-  _ui_state.init(dims.param_slots);
+  _ui_state.init(dims.params);
   _engine.desc().init_default_state(_ui_state);
   _block_automation_seen.resize(_engine.desc().param_global_count);
 }
