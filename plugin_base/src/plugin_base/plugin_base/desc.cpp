@@ -217,33 +217,34 @@ validate_topo(plugin_topo const& topo)
 
 param_desc::
 param_desc(
-  module_topo const& module, param_topo const& param, 
-  int param_global_index, int module_slot_index,
+  module_topo const& module,
+  int module_slot_index,
+  param_topo const& param,
   int param_topo_index, int param_slot_index,
-  int param_local_index)
+  int param_local_index, int param_global_index)
 {
   topo = &param;
-  this->param_slot_index = param_slot_index;
   this->param_topo_index = param_topo_index;
-  this->param_global_index = param_global_index;
+  this->param_slot_index = param_slot_index;
   this->param_local_index = param_local_index;
-  id = module_id(module, module_slot_index) + "-" + param_id(param, param_slot_index);
+  this->param_global_index = param_global_index;
   short_name = param_name(param, param_slot_index);
   full_name = module_name(module, module_slot_index) + " " + short_name;
+  id = module_id(module, module_slot_index) + "-" + param_id(param, param_slot_index);
   id_hash = stable_hash(id.c_str());
 }
 
 module_desc::
 module_desc(
-  module_topo const& module, 
-  int module_global_index, int param_global_index_start,
-  int module_topo_index, int module_slot_index)
+  module_topo const& module,
+  int module_topo_index, int module_slot_index,
+  int module_global_index, int param_global_index_start)
 {
   topo = &module;
   int param_local_index = 0;
-  this->module_global_index = module_global_index;
   this->module_topo_index = module_topo_index;
   this->module_slot_index = module_slot_index;
+  this->module_global_index = module_global_index;
   id = module_id(module, module_slot_index);
   name = module_name(module, module_slot_index);
   id_hash = stable_hash(id);
@@ -251,7 +252,7 @@ module_desc(
   {
     auto const& param = module.params[p];
     for(int i = 0; i < param.slot_count; i++)
-      params.emplace_back(param_desc(module, param, param_global_index_start++, module_slot_index, p, i, param_local_index++));
+      params.emplace_back(param_desc(module, module_slot_index, param, p, i, param_local_index++, param_global_index_start++));
   }
 }
 
@@ -268,7 +269,7 @@ topo(factory())
     auto const& module = topo.modules[m];
     for(int i = 0; i < module.slot_count; i++)
     {
-      modules.emplace_back(module_desc(module, module_global_index++, param_global_index, m, i));
+      modules.emplace_back(module_desc(module, m, i, module_global_index++, param_global_index));
       for(int p = 0; p < module.params.size(); p++)
         param_global_index += module.params[p].slot_count;
     }
