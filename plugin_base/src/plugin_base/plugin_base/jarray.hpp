@@ -6,52 +6,69 @@ namespace plugin_base {
 
 template <class T, int Dims>
 class jarray;
+template <class T, int Dims>
+struct jarray_traits;
+
+template <class T>
+struct jarray_traits<T, 1> {
+  typedef T element_type;
+  typedef int resize_type;
+};
+
+template <class T, int N>
+struct jarray_traits {
+  typedef jarray<T, N - 1> element_type;
+  typedef jarray<int, N - 1> resize_type;
+};
 
 template <class T>
 class jarray<T, 1> {
-  std::vector<T> _data;
+  std::vector<typename jarray_traits<T, 1>::element_type> _data;
 public:
-  void resize(int dims);
+  void resize(typename jarray_traits<T, 1>::resize_type const& dims);
   INF_DECLARE_MOVE_ONLY(jarray);
-  explicit jarray(std::size_t size, T const& val) : _data(size, val) {}
+  explicit jarray(std::size_t size, typename jarray_traits<T, 1>::element_type const& val) : _data(size, val) {}
 
   decltype(_data.end()) end() { return _data.end(); }
   decltype(_data.begin()) begin() { return _data.begin(); }
 
-  T& operator[](int i) { return _data[i]; }
-  T const& operator[](int i) const { return _data[i]; }
+  typename jarray_traits<T, 1>::element_type& operator[](int i) { return _data[i]; }
+  typename jarray_traits<T, 1>::element_type const& operator[](int i) const { return _data[i]; }
 
   void clear() { _data.clear(); }
   std::size_t size() const { return _data.size(); }
-  void emplace_back(T&& val) { _data.emplace_back(val); }
-  void push_back(T const& val) { _data.push_back(val); }
+  void push_back(typename jarray_traits<T, 1>::element_type const& val) { _data.push_back(val); }
+  template <class... U> void emplace_back(U&&... args) { _data.emplace_back(std::forward<U>(args)...); }
 };
 
 template <class T, int Dims>
 class jarray {
-  std::vector<jarray<T, Dims - 1>> _data;
+  std::vector<typename jarray_traits<T, Dims>::element_type> _data;
 public:
-  void resize(jarray<int, Dims - 1> const& dims);
+  void resize(typename jarray_traits<T, Dims>::resize_type const& dims);
   INF_DECLARE_MOVE_ONLY(jarray);
-  explicit jarray(std::size_t size, jarray<T, Dims - 1> const& val) : _data(size, val) {}
+  explicit jarray(std::size_t size, typename jarray_traits<T, Dims>::element_type const& val) : _data(size, val) {}
 
-  jarray<T, Dims - 1>& operator[](int i) { return _data[i]; }
-  jarray<T, Dims - 1> const& operator[](int i) const { return _data[i]; }
+  decltype(_data.end()) end() { return _data.end(); }
+  decltype(_data.begin()) begin() { return _data.begin(); }
+
+  typename jarray_traits<T, Dims>::element_type& operator[](int i) { return _data[i]; }
+  typename jarray_traits<T, Dims>::element_type const& operator[](int i) const { return _data[i]; }
 
   void clear() { _data.clear(); }
   std::size_t size() const { return _data.size(); }
-  void push_back(jarray<T, Dims - 1> const& val) { _data.push_back(val); }
+  void push_back(typename jarray_traits<T, Dims>::element_type const& val) { _data.push_back(val); }
   template <class... U> void emplace_back(U&&... args) { _data.emplace_back(std::forward<U>(args)...); }
 };
 
 template <class T> void
-jarray<T, 1>::resize(int dims)
+jarray<T, 1>::resize(typename jarray_traits<T, 1>::resize_type const& dims)
 {
   _data.resize(dims);
 }
 
 template <class T, int Dims> void
-jarray<T, Dims>::resize(jarray<int, Dims - 1> const& dims)
+jarray<T, Dims>::resize(typename jarray_traits<T, Dims>::resize_type const& dims)
 {
   _data.resize(dims.size());
   for (int i = 0; i < dims.size(); i++)
