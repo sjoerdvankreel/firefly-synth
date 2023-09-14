@@ -74,7 +74,7 @@ validate_desc(plugin_desc const& desc)
     assert(module.params.size());
     assert(module.id_hash >= 0);
     assert(module.global_module_index == m);
-    assert(module.topo_index_in_plugin < desc.modules.size());
+    assert(module.module_topo_index < desc.modules.size());
     assert(module.module_slot_index >= 0);
     assert(module.module_slot_index < module.topo->slot_count);
     INF_ASSERT_EXEC(all_ids.insert(module.id).second);
@@ -237,12 +237,12 @@ module_desc::
 module_desc(
   module_topo const& module, 
   int global_module_index, int global_param_index_start,
-  int topo_index_in_plugin, int module_slot_index)
+  int module_topo_index, int module_slot_index)
 {
   topo = &module;
   int param_index_in_module = 0;
   this->global_module_index = global_module_index;
-  this->topo_index_in_plugin = topo_index_in_plugin;
+  this->module_topo_index = module_topo_index;
   this->module_slot_index = module_slot_index;
   id = module_id(module, module_slot_index);
   name = module_name(module, module_slot_index);
@@ -288,7 +288,7 @@ topo(factory())
       mapping.param_slot_index = param.param_slot_index;
       mapping.param_topo_index = param.param_topo_index;
       mapping.module_slot_index = module.module_slot_index;
-      mapping.module_topo_index_in_plugin = module.topo_index_in_plugin;
+      mapping.module_topo_index = module.module_topo_index;
       global_param_index_to_param_id.push_back(param.id_hash);
       param_id_to_global_param_index[param.id_hash] = global_param_mappings.size();
       global_param_mappings.push_back(std::move(mapping));
