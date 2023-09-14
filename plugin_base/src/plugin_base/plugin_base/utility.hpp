@@ -17,7 +17,6 @@
 
 namespace plugin_base {
 
-// trims characters outside range
 template <class T> std::string 
 to_8bit_string(T const* source)
 {
@@ -31,6 +30,12 @@ to_8bit_string(T const* source)
   return result;
 }
 
+template <class T, int N>
+void from_8bit_string(T(&dest)[N], char const* source)
+{
+  from_8bit_string(dest, N, source);
+}
+
 template <class T>
 void from_8bit_string(T* dest, int count, char const* source)
 {
@@ -38,9 +43,5 @@ void from_8bit_string(T* dest, int count, char const* source)
   for (int i = 0; i < count - 1 && i < strlen(source); i++)
     dest[i] = source[i];
 }
-
-template <class T, int N>
-void from_8bit_string(T(&dest)[N], char const* source)
-{ from_8bit_string(dest, N, source); }
 
 }
