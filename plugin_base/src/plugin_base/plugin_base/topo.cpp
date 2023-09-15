@@ -20,7 +20,8 @@ param_topo::normalized_to_text(normalized_value normalized) const
 }
 
 bool 
-param_topo::text_to_normalized(std::string const& textual, normalized_value& normalized) const
+param_topo::text_to_normalized(
+  std::string const& textual, normalized_value& normalized) const
 {
   plain_value plain;
   if(!text_to_plain(textual, plain)) return false;
@@ -50,7 +51,8 @@ param_topo::plain_to_text(plain_value plain) const
 }
 
 bool 
-param_topo::text_to_plain(std::string const& textual, plain_value& plain) const
+param_topo::text_to_plain(
+  std::string const& textual, plain_value& plain) const
 {
   if (edit == param_edit::toggle)
   {
