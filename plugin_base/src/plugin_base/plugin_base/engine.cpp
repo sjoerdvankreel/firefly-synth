@@ -22,7 +22,7 @@ _desc(std::move(topo)), _dims(*_desc.plugin)
   _accurate_frames.resize(_desc.param_count);
   _plugin_block.block_automation.resize(_dims.params);
   _host_block.block_events.reserve(block_events_guess);
-  _host_block.output_events.reserve(block_events_guess);
+  _host_block.out_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
 }
 
@@ -37,7 +37,7 @@ plugin_engine::prepare()
   _host_block.common->audio_in = nullptr;
   _host_block.common->audio_out = nullptr;
   _host_block.block_events.clear();
-  _host_block.output_events.clear();
+  _host_block.out_events.clear();
   _host_block.accurate_events.clear();
   return _host_block;
 }
@@ -49,7 +49,7 @@ plugin_engine::deactivate()
   _sample_rate = 0;
   _activated_at_ms = {};
   _host_block.block_events.clear();
-  _host_block.output_events.clear();
+  _host_block.out_events.clear();
   _host_block.accurate_events.clear();
   _plugin_block.module_cv = {};
   _plugin_block.module_audio = {};
@@ -206,7 +206,7 @@ plugin_engine::process()
   }
 
   // update output values 3 times a second
-  _host_block.output_events.clear();
+  _host_block.out_events.clear();
   auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
   auto now_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
   if((now_millis - _activated_at_ms).count() < 333) return;
@@ -226,10 +226,10 @@ plugin_engine::process()
         {
           if (param.dir == param_dir::output)
           {
-            host_block_event output_event;
+            block_event output_event;
             output_event.param = global_param_index;
             output_event.normalized = param.plain_to_normalized(_state[m][mi][p][pi]);
-            _host_block.output_events.push_back(output_event);
+            _host_block.out_events.push_back(output_event);
           }
           global_param_index++;
         }

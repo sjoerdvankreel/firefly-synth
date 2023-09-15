@@ -10,13 +10,13 @@ namespace plugin_base {
 struct common_block;
 
 // once per block automation
-struct host_block_event final {
+struct block_event final {
   int param;
   normalized_value normalized;
 };
 
 // sample accurate automation
-struct host_accurate_event final {
+struct accurate_event final {
   int frame;
   int param;
   normalized_value normalized;
@@ -25,9 +25,9 @@ struct host_accurate_event final {
 // shared block, automation events
 struct host_block final {
   common_block* common;
-  std::vector<host_block_event> block_events;
-  std::vector<host_block_event> output_events;
-  std::vector<host_accurate_event> accurate_events;
+  std::vector<block_event> out_events;
+  std::vector<block_event> block_events;
+  std::vector<accurate_event> accurate_events;
   INF_DECLARE_MOVE_ONLY(host_block);
 };
 

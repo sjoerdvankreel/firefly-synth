@@ -119,7 +119,7 @@ component::process(ProcessData& data)
         auto rate = _engine.desc().param_at(mapping).param->rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
-          host_block_event event;
+          block_event event;
           event.normalized = normalized_value(value);
           event.param = param_global_index;
           block.block_events.push_back(event);
@@ -128,7 +128,7 @@ component::process(ProcessData& data)
           for(int p = 0; p < queue->getPointCount(); p++)
             if (queue->getPoint(p, frame_index, value) == kResultTrue)
             {
-              host_accurate_event event;
+              accurate_event event;
               event.frame = frame_index;
               event.normalized = normalized_value(value);
               event.param = param_global_index;
@@ -139,9 +139,9 @@ component::process(ProcessData& data)
   _engine.process();
 
   int unused_index = 0;
-  for (int e = 0; e < block.output_events.size(); e++)
+  for (int e = 0; e < block.out_events.size(); e++)
   {
-    auto const& event = block.output_events[e];
+    auto const& event = block.out_events[e];
     int param_tag = _engine.desc().index_to_id[event.param];
     queue = data.outputParameterChanges->addParameterData(param_tag, unused_index);
     queue->addPoint(0, event.normalized.value(), unused_index);

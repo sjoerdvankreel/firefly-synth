@@ -409,14 +409,14 @@ plugin::process(clap_process const* process) noexcept
       {
         if (_block_automation_seen[param_index] == 0)
         {
-          host_block_event block_event;
+          block_event block_event;
           block_event.param = param_index;
           block_event.normalized = clap_to_normalized(*param.param, clap_value(event->value));
           block.block_events.push_back(block_event);
           _block_automation_seen[param_index] = 1;
         }
       } else {
-        host_accurate_event accurate_event;
+        accurate_event accurate_event;
         accurate_event.frame = header->time;
         accurate_event.param = param_index;
         accurate_event.normalized = clap_to_normalized(*param.param, clap_value(event->value));
@@ -430,10 +430,10 @@ plugin::process(clap_process const* process) noexcept
 
   _engine.process();
 
-  for (int e = 0; e < block.output_events.size(); e++)
+  for (int e = 0; e < block.out_events.size(); e++)
   {
     param_queue_event to_ui_event = {};
-    auto const& out_event = block.output_events[e];
+    auto const& out_event = block.out_events[e];
     auto const& mapping = _engine.desc().mappings[out_event.param];
     to_ui_event.param_global_index = out_event.param;
     to_ui_event.plain = _engine.desc().param_at(mapping).param->normalized_to_plain(out_event.normalized);
