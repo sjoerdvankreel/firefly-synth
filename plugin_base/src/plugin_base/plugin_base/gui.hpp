@@ -12,7 +12,7 @@ namespace plugin_base {
 class plugin_listener
 {
 public:
-  virtual void plugin_value_changed(plain_value plain) = 0;
+  virtual void value_changed(plain_value plain) = 0;
 };
 
 class ui_listener

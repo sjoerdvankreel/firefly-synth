@@ -30,7 +30,7 @@ public Label
 {
 public:
   param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void plugin_value_changed(plain_value plain) override final;
+  void value_changed(plain_value plain) override final;
 };
 
 class param_slider:
@@ -42,7 +42,7 @@ public:
   void valueChanged() override;
   void stoppedDragging() override;
   void startedDragging() override;
-  void plugin_value_changed(plain_value plain) override final;
+  void value_changed(plain_value plain) override final;
 };
 
 class param_combobox :
@@ -54,7 +54,7 @@ public:
   ~param_combobox();
   param_combobox(plugin_gui* gui, param_desc const* desc, plain_value initial);
   void comboBoxChanged(ComboBox*) override;
-  void plugin_value_changed(plain_value plain) override final;
+  void value_changed(plain_value plain) override final;
 };
 
 class param_toggle_button :
@@ -68,7 +68,7 @@ public:
   param_toggle_button(plugin_gui* gui, param_desc const* desc, plain_value initial);
   void buttonClicked(Button*) override {}
   void buttonStateChanged(Button*) override;
-  void plugin_value_changed(plain_value plain) override final;
+  void value_changed(plain_value plain) override final;
 };
 
 class param_textbox :
@@ -80,7 +80,7 @@ public TextEditor::Listener
 public:
   ~param_textbox();
   param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void plugin_value_changed(plain_value plain) override final;
+  void value_changed(plain_value plain) override final;
   void textEditorTextChanged(TextEditor&) override;
   void textEditorFocusLost(TextEditor&) override { setText(_last_parsed, false); }
   void textEditorReturnKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
@@ -96,24 +96,24 @@ param_base::
 { _gui->remove_plugin_listener(_desc->global, this); }
 
 void
-param_combobox::plugin_value_changed(plain_value plain)
+param_combobox::value_changed(plain_value plain)
 { setSelectedItemIndex(plain.step() - _desc->param->min); }
 void
-param_toggle_button::plugin_value_changed(plain_value plain)
+param_toggle_button::value_changed(plain_value plain)
 { setToggleState(plain.step() != 0, dontSendNotification); }
 void
-param_slider::plugin_value_changed(plain_value plain)
+param_slider::value_changed(plain_value plain)
 { setValue(_desc->param->plain_to_raw(plain), dontSendNotification); }
 
 void
-param_textbox::plugin_value_changed(plain_value plain)
+param_textbox::value_changed(plain_value plain)
 {
   _last_parsed = _desc->param->plain_to_text(plain);
   setText(_last_parsed, false);
 }
 
 void
-param_value_label::plugin_value_changed(plain_value plain)
+param_value_label::value_changed(plain_value plain)
 { 
   std::string text = _desc->param->plain_to_text(plain);
   if(_desc->param->label == param_label::both)
@@ -168,7 +168,7 @@ param_name_label(param_desc const* desc)
 param_value_label::
 param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial):
 param_base(gui, desc), Label()
-{ plugin_value_changed(initial); }
+{ value_changed(initial); }
 
 param_textbox::
 ~param_textbox()
@@ -178,7 +178,7 @@ param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial) :
 param_base(gui, desc), TextEditor()
 {
   addListener(this);
-  plugin_value_changed(initial);
+  value_changed(initial);
 }
 
 param_toggle_button::
@@ -191,7 +191,7 @@ param_base(gui, desc), ToggleButton()
   auto value = desc->param->default_plain();
   _checked = value.step() != 0;
   addListener(this);
-  plugin_value_changed(initial);
+  value_changed(initial);
 }
 
 param_combobox::
@@ -221,7 +221,7 @@ param_base(gui, desc), ComboBox()
   }
   addListener(this);
   setEditableText(false);
-  plugin_value_changed(initial);
+  value_changed(initial);
 }
 
 param_slider::
@@ -250,7 +250,7 @@ param_base(gui, desc), Slider()
     [this](double s, double e, double v) { return _desc->param->normalized_to_raw(normalized_value(v)); },
     [this](double s, double e, double v) { return _desc->param->raw_to_normalized(v).value(); }));
   setDoubleClickReturnValue(true, _desc->param->default_raw(), ModifierKeys::noModifiers);
-  plugin_value_changed(initial);
+  value_changed(initial);
 }
 
 void 
@@ -298,7 +298,7 @@ plugin_gui::plugin_param_changed(int param_index, plain_value plain)
 {
   auto& listeners = _plugin_listeners[param_index];
   for(int i = 0; i < listeners.size(); i++)
-    listeners[i]->plugin_value_changed(plain);
+    listeners[i]->value_changed(plain);
 }
 
 void 
