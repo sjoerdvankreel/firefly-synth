@@ -1,5 +1,6 @@
 #include <infernal_synth/synth.hpp>
 #include <infernal_synth/plugin.hpp>
+
 #include <plugin_base/engine.hpp>
 
 using namespace plugin_base;
@@ -15,7 +16,7 @@ synth_topo()
   result->name = INF_SYNTH_NAME;
   result->type = plugin_type::synth;
   result->gui_default_width = 800;
-  result->gui_aspect_ratio = 4.0f /3.0f;
+  result->gui_aspect_ratio = 4.0f / 3.0f;
   result->modules.emplace_back(osc_topo());
   result->modules.emplace_back(filter_topo());
   result->version_minor = INF_SYNTH_VERSION_MINOR;

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <plugin_base/utility.hpp>
 
 #if INF_IS_FX
