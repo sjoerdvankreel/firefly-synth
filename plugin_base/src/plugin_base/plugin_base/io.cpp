@@ -7,6 +7,8 @@ using namespace juce;
 
 namespace plugin_base {
 
+// TODO tag with file version and magic
+
 bool 
 io_load_file(
   plugin_topo const& topo, 
