@@ -31,15 +31,15 @@ host_block&
 plugin_engine::prepare()
 {
   // host calls this and should provide the current block values
-  _host_block.common->bpm = 0;
-  _host_block.common->frame_count = 0;
-  _host_block.common->stream_time = 0;
-  _host_block.common->notes.clear();
-  _host_block.common->audio_in = nullptr;
-  _host_block.common->audio_out = nullptr;
   _host_block.events.out.clear();
   _host_block.events.block.clear();
   _host_block.events.accurate.clear();
+  _host_block.common->notes.clear();
+  _host_block.common->bpm = 0;
+  _host_block.common->frame_count = 0;
+  _host_block.common->stream_time = 0;
+  _host_block.common->audio_in = nullptr;
+  _host_block.common->audio_out = nullptr;
   return _host_block;
 }
 
@@ -49,12 +49,12 @@ plugin_engine::deactivate()
   // drop frame-count dependent memory
   _sample_rate = 0;
   _activated_at_ms = {};
-  _host_block.events.block.clear();
-  _host_block.events.out.clear();
-  _host_block.events.accurate.clear();
   _plugin_block.out.cv = {};
   _plugin_block.out.audio = {};
   _plugin_block.in.accurate = {};
+  _host_block.events.out.clear();
+  _host_block.events.block.clear();
+  _host_block.events.accurate.clear();
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
     for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _module_engines[m][mi].reset();
@@ -90,32 +90,32 @@ plugin_engine::process()
       _host_block.common->audio_out[c] + _common_block.frame_count,
       0.0f);
 
+  // clear module cv/audio out
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
       if(module.output == module_output::cv)
       {
-        // clear module cv output
         auto& curve = _plugin_block.out.cv[m][mi];
         std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
       }
       else if (module.output == module_output::audio)
       {
-        // clear module audio output
         auto& audio = _plugin_block.out.audio[m][mi];
         for(int c = 0; c < 2; c++)
           std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
       } else assert(module.output == module_output::none);
   }
 
+  // set automation values to state, automation may overwrite
+  // accurate goes from plain to normalized as interpolation must be done in normalized
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
     for(int mi = 0; mi < module.slot_count; mi++)
       for(int p = 0; p < module.params.size(); p++)
       {
-        // set per-block automation values to current values (automation may overwrite)
         auto const& param = module.params[p];
         if(param.rate == param_rate::block)
           for(int pi = 0; pi < param.slot_count; pi++)
@@ -123,9 +123,6 @@ plugin_engine::process()
         else
           for (int pi = 0; pi < param.slot_count; pi++)
           {
-            // set accurate automation values to current values (automation may overwrite)
-            // note: need to go from actual to normalized values as interpolation must be done as linear
-            // later scale back from normalized to plain values
             auto& automation = _plugin_block.in.accurate[m][mi][p][pi];
             std::fill(
               automation.begin(), 
