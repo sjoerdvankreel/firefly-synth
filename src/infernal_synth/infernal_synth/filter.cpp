@@ -55,7 +55,7 @@ filter_engine::process(
   auto const& freq_curve = module.accurate_automation[filter_param_freq][0];
   for (int f = 0; f < plugin.host->frame_count; f++)
   {
-    float angle = freq_curve[f] * 2 * INF_PI;
+    float angle = freq_curve[f] * 2 * pi32;
     float norm = 1 / (angle + w);
     float a = angle * norm;
     float b = (w - angle) * norm;
