@@ -4,13 +4,13 @@ namespace plugin_base {
 
 plugin_engine::
 plugin_engine(std::unique_ptr<plugin_topo>&& topo) :
-_desc(std::move(topo)), _dims(*_desc.topo)
+_desc(std::move(topo)), _dims(*_desc.plugin)
 {
   // reserve this much but allocate (on the audio thread!) if necessary
   // still seems better than dropping events
-  int note_limit_guess = _desc.topo->polyphony * 64;
-  int block_events_guess = _desc.param_global_count;
-  int accurate_events_guess = _desc.param_global_count * 64;
+  int note_limit_guess = _desc.plugin->polyphony * 64;
+  int block_events_guess = _desc.param_count;
+  int accurate_events_guess = _desc.param_count * 64;
 
   // init everything that is not frame-count dependent
   _host_block.common = &_common_block;
@@ -19,7 +19,7 @@ _desc(std::move(topo)), _dims(*_desc.topo)
   _desc.init_default_state(_state);
   _module_engines.resize(_dims.modules);
   _common_block.notes.reserve(note_limit_guess);
-  _accurate_frames.resize(_desc.param_global_count);
+  _accurate_frames.resize(_desc.param_count);
   _plugin_block.block_automation.resize(_dims.params);
   _host_block.block_events.reserve(block_events_guess);
   _host_block.output_events.reserve(block_events_guess);
@@ -54,8 +54,8 @@ plugin_engine::deactivate()
   _plugin_block.module_cv = {};
   _plugin_block.module_audio = {};
   _plugin_block.accurate_automation = {};
-  for(int m = 0; m < _desc.topo->modules.size(); m++)
-    for(int mi = 0; mi < _desc.topo->modules[m].slot_count; mi++)
+  for(int m = 0; m < _desc.plugin->modules.size(); m++)
+    for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _module_engines[m][mi].reset();
 }
 
@@ -70,13 +70,13 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _activated_at_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
 
   // init frame-count dependent memory
-  plugin_frame_dims frame_dims(*_desc.topo, max_frame_count);
+  plugin_frame_dims frame_dims(*_desc.plugin, max_frame_count);
   _plugin_block.module_cv.resize(frame_dims.cv);
   _plugin_block.module_audio.resize(frame_dims.audio);
   _plugin_block.accurate_automation.resize(frame_dims.accurate);
-  for (int m = 0; m < _desc.topo->modules.size(); m++)
-    for (int mi = 0; mi < _desc.topo->modules[m].slot_count; mi++)
-      _module_engines[m][mi] = _desc.topo->modules[m].engine_factory(sample_rate, max_frame_count);
+  for (int m = 0; m < _desc.plugin->modules.size(); m++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+      _module_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
 }
 
 void 
@@ -89,9 +89,9 @@ plugin_engine::process()
       _host_block.common->audio_output[c] + _common_block.frame_count,
       0.0f);
 
-  for(int m = 0; m < _desc.topo->modules.size(); m++)
+  for(int m = 0; m < _desc.plugin->modules.size(); m++)
   {
-    auto const& module = _desc.topo->modules[m];
+    auto const& module = _desc.plugin->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
       if(module.output == module_output::cv)
       {
@@ -108,9 +108,9 @@ plugin_engine::process()
       } else assert(module.output == module_output::none);
   }
 
-  for (int m = 0; m < _desc.topo->modules.size(); m++)
+  for (int m = 0; m < _desc.plugin->modules.size(); m++)
   {
-    auto const& module = _desc.topo->modules[m];
+    auto const& module = _desc.plugin->modules[m];
     for(int mi = 0; mi < module.slot_count; mi++)
       for(int p = 0; p < module.params.size(); p++)
       {
@@ -139,7 +139,7 @@ plugin_engine::process()
   {
     auto const& event = _host_block.block_events[e];
     auto const& mapping = _desc.param_mappings[event.param_global_index];
-    plain_value plain = _desc.param_at(mapping).topo->normalized_to_plain(event.normalized);
+    plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(event.normalized);
     mapping.value_at(_state) = plain;
     mapping.value_at(_plugin_block.block_automation) = plain;
   }
@@ -165,15 +165,15 @@ plugin_engine::process()
       curve[f] = curve[prev_frame] + (f - prev_frame) / frame_count * range;
 
     // set new state to denormalized and update last event timestamp
-    mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).topo->normalized_to_plain(event.normalized).real());
+    mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).param->normalized_to_plain(event.normalized).real());
     _accurate_frames[event.param_global_index] = event.frame_index;
   }
 
   // denormalize all interpolated curves even if they where not changed
   // this might be costly for log-scaled parameters
-  for (int m = 0; m < _desc.topo->modules.size(); m++)
+  for (int m = 0; m < _desc.plugin->modules.size(); m++)
   {
-    auto const& module = _desc.topo->modules[m];
+    auto const& module = _desc.plugin->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {
@@ -189,9 +189,9 @@ plugin_engine::process()
   // run all modules in order
   // each module has access to previous modules audio and cv outputs
   _plugin_block.sample_rate = _sample_rate;
-  for(int m = 0; m < _desc.topo->modules.size(); m++)
+  for(int m = 0; m < _desc.plugin->modules.size(); m++)
   {
-    auto const& module = _desc.topo->modules[m];
+    auto const& module = _desc.plugin->modules[m];
     for(int mi = 0; mi < module.slot_count; mi++)
     {
       module_output_values output_values(&module, &_state[m][mi]);
@@ -201,7 +201,7 @@ plugin_engine::process()
         output_values,
         _plugin_block.accurate_automation[m][mi],
         _plugin_block.block_automation[m][mi]);
-      _module_engines[m][mi]->process(*_desc.topo, _plugin_block, block);
+      _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
     }
   }
 
@@ -215,9 +215,9 @@ plugin_engine::process()
   // just push events for all output parameters using the current value
   int global_param_index = 0;
   _activated_at_ms = now_millis;
-  for (int m = 0; m < _desc.topo->modules.size(); m++)
+  for (int m = 0; m < _desc.plugin->modules.size(); m++)
   {
-    auto const& module = _desc.topo->modules[m];
+    auto const& module = _desc.plugin->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {

@@ -90,58 +90,58 @@ public:
 param_base::
 param_base(plugin_gui* gui, param_desc const* desc) : 
 _gui(gui), _desc(desc)
-{ _gui->add_single_param_plugin_listener(_desc->global_index, this); }
+{ _gui->add_single_param_plugin_listener(_desc->global, this); }
 param_base::
 ~param_base()
-{ _gui->remove_single_param_plugin_listener(_desc->global_index, this); }
+{ _gui->remove_single_param_plugin_listener(_desc->global, this); }
 
 void
 param_combobox::plugin_value_changed(plain_value plain)
-{ setSelectedItemIndex(plain.step() - _desc->topo->min); }
+{ setSelectedItemIndex(plain.step() - _desc->param->min); }
 void
 param_toggle_button::plugin_value_changed(plain_value plain)
 { setToggleState(plain.step() != 0, dontSendNotification); }
 void
 param_slider::plugin_value_changed(plain_value plain)
-{ setValue(_desc->topo->plain_to_raw(plain), dontSendNotification); }
+{ setValue(_desc->param->plain_to_raw(plain), dontSendNotification); }
 
 void
 param_textbox::plugin_value_changed(plain_value plain)
 {
-  _last_parsed = _desc->topo->plain_to_text(plain);
+  _last_parsed = _desc->param->plain_to_text(plain);
   setText(_last_parsed, false);
 }
 
 void
 param_value_label::plugin_value_changed(plain_value plain)
 { 
-  std::string text = _desc->topo->plain_to_text(plain);
-  if(_desc->topo->label == param_label::both)
+  std::string text = _desc->param->plain_to_text(plain);
+  if(_desc->param->label == param_label::both)
     text = _desc->short_name + " " + text;
   setText(text, dontSendNotification); 
 }
 
 void 
 param_slider::stoppedDragging()
-{ _gui->ui_param_end_changes(_desc->global_index); }
+{ _gui->ui_param_end_changes(_desc->global); }
 void 
 param_slider::startedDragging()
-{ _gui->ui_param_begin_changes(_desc->global_index); }
+{ _gui->ui_param_begin_changes(_desc->global); }
 
 void 
 param_slider::valueChanged()
 { 
-  auto value = _desc->topo->raw_to_plain(getValue());
-  _gui->ui_param_changing(_desc->global_index, value);
+  auto value = _desc->param->raw_to_plain(getValue());
+  _gui->ui_param_changing(_desc->global, value);
 }
 
 void 
 param_toggle_button::buttonStateChanged(Button*)
 { 
   if(_checked == getToggleState()) return;
-  plain_value plain = _desc->topo->raw_to_plain(getToggleState() ? 1 : 0);
+  plain_value plain = _desc->param->raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
-  _gui->ui_param_immediate_changed(_desc->global_index, plain);
+  _gui->ui_param_immediate_changed(_desc->global, plain);
 }
 
 void 
@@ -149,16 +149,16 @@ param_textbox::textEditorTextChanged(TextEditor&)
 {
   plain_value plain;
   std::string text(getText().toStdString());
-  if(!_desc->topo->text_to_plain(text, plain)) return;
+  if(!_desc->param->text_to_plain(text, plain)) return;
   _last_parsed = text;
-  _gui->ui_param_immediate_changed(_desc->global_index, plain);
+  _gui->ui_param_immediate_changed(_desc->global, plain);
 }
 
 void
 param_combobox::comboBoxChanged(ComboBox*)
 {
-  plain_value plain = _desc->topo->raw_to_plain(getSelectedItemIndex() + _desc->topo->min);
-  _gui->ui_param_immediate_changed(_desc->global_index, plain);
+  plain_value plain = _desc->param->raw_to_plain(getSelectedItemIndex() + _desc->param->min);
+  _gui->ui_param_immediate_changed(_desc->global, plain);
 }
 
 param_name_label::
@@ -188,7 +188,7 @@ param_toggle_button::
 param_toggle_button(plugin_gui* gui, param_desc const* desc, plain_value initial):
 param_base(gui, desc), ToggleButton()
 { 
-  auto value = desc->topo->default_plain();
+  auto value = desc->param->default_plain();
   _checked = value.step() != 0;
   addListener(this);
   plugin_value_changed(initial);
@@ -201,19 +201,19 @@ param_combobox::
 param_combobox(plugin_gui* gui, param_desc const* desc, plain_value initial) :
 param_base(gui, desc), ComboBox()
 {
-  switch (desc->topo->type)
+  switch (desc->param->type)
   {
   case param_type::name:
-    for (int i = 0; i < desc->topo->names.size(); i++)
-      addItem(desc->topo->names[i], i + 1);
+    for (int i = 0; i < desc->param->names.size(); i++)
+      addItem(desc->param->names[i], i + 1);
     break;
   case param_type::item:
-    for (int i = 0; i < desc->topo->items.size(); i++)
-      addItem(desc->topo->items[i].name, i + 1);
+    for (int i = 0; i < desc->param->items.size(); i++)
+      addItem(desc->param->items[i].name, i + 1);
     break;
   case param_type::step:
-    for (int i = desc->topo->min; i <= desc->topo->max; i++)
-      addItem(std::to_string(i), desc->topo->min + i + 1);
+    for (int i = desc->param->min; i <= desc->param->max; i++)
+      addItem(std::to_string(i), desc->param->min + i + 1);
     break;
   default:
     assert(false);
@@ -228,7 +228,7 @@ param_slider::
 param_slider(plugin_gui* gui, param_desc const* desc, plain_value initial) :
 param_base(gui, desc), Slider()
 {
-  switch (desc->topo->edit)
+  switch (desc->param->edit)
   {
   case param_edit::vslider:
     setSliderStyle(Slider::LinearVertical);
@@ -244,12 +244,12 @@ param_base(gui, desc), Slider()
     break;
   }
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-  if (!desc->topo->is_real()) setRange(desc->topo->min, desc->topo->max, 1);
+  if (!desc->param->is_real()) setRange(desc->param->min, desc->param->max, 1);
   else setNormalisableRange(
-    NormalisableRange<double>(desc->topo->min, desc->topo->max,
-    [this](double s, double e, double v) { return _desc->topo->normalized_to_raw(normalized_value(v)); },
-    [this](double s, double e, double v) { return _desc->topo->raw_to_normalized(v).value(); }));
-  setDoubleClickReturnValue(true, _desc->topo->default_raw(), ModifierKeys::noModifiers);
+    NormalisableRange<double>(desc->param->min, desc->param->max,
+    [this](double s, double e, double v) { return _desc->param->normalized_to_raw(normalized_value(v)); },
+    [this](double s, double e, double v) { return _desc->param->raw_to_normalized(v).value(); }));
+  setDoubleClickReturnValue(true, _desc->param->default_raw(), ModifierKeys::noModifiers);
   plugin_value_changed(initial);
 }
 
@@ -320,10 +320,10 @@ plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_pl
 plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial) :
 _desc(desc), 
-_single_param_plugin_listeners(desc->param_global_count)
+_single_param_plugin_listeners(desc->param_count)
 {
   setOpaque(true);
-  setSize(_desc->topo->gui_default_width, _desc->topo->gui_default_width / _desc->topo->gui_aspect_ratio);
+  setSize(_desc->plugin->gui_default_width, _desc->plugin->gui_default_width / _desc->plugin->gui_aspect_ratio);
   for (int m = 0; m < _desc->modules.size(); m++)
   {
     auto const& module = _desc->modules[m];
@@ -331,18 +331,18 @@ _single_param_plugin_listeners(desc->param_global_count)
     {
       auto const& param = module.params[p];
       plain_value initial_value = initial
-        [module.topo_index][module.slot_index][param.topo_index][param.slot_index];
-      if(param.topo->edit == param_edit::toggle)
+        [module.topo][module.slot][param.topo][param.slot];
+      if(param.param->edit == param_edit::toggle)
       {
         _children.emplace_back(std::make_unique<param_toggle_button>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (param.topo->edit == param_edit::list)
+      else if (param.param->edit == param_edit::list)
       {
         _children.emplace_back(std::make_unique<param_combobox>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (param.topo->edit == param_edit::text)
+      else if (param.param->edit == param_edit::text)
       {
         _children.emplace_back(std::make_unique<param_textbox>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
@@ -352,14 +352,14 @@ _single_param_plugin_listeners(desc->param_global_count)
         _children.emplace_back(std::make_unique<param_slider>(this, &param, initial_value));
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      _children[_children.size()-1]->setEnabled(param.topo->dir == param_dir::input);
+      _children[_children.size()-1]->setEnabled(param.param->dir == param_dir::input);
 
-      if(param.topo->label == param_label::none)
+      if(param.param->label == param_label::none)
       {
         _children.emplace_back(std::make_unique<Label>());
         addAndMakeVisible(_children[_children.size() - 1].get());
       }
-      else if (param.topo->label == param_label::name)
+      else if (param.param->label == param_label::name)
       {
         _children.emplace_back(std::make_unique<param_name_label>(&param));
         addAndMakeVisible(_children[_children.size() - 1].get());
