@@ -194,13 +194,12 @@ plugin_engine::process()
     auto const& module = _desc.plugin->modules[m];
     for(int mi = 0; mi < module.slot_count; mi++)
     {
-      module_output_values output_values(&module, &_state[m][mi]);
-      module_block block(
-        _plugin_block.out.cv[m][mi], 
-        _plugin_block.out.audio[m][mi], 
-        output_values,
-        _plugin_block.in.accurate[m][mi],
-        _plugin_block.in.block[m][mi]);
+      module_block block;
+      block.out.params_ = &_state[m][mi];
+      block.out.cv_ = &_plugin_block.out.cv[m][mi];
+      block.out.audio_ = &_plugin_block.out.audio[m][mi];
+      block.in.block_ = &_plugin_block.in.block[m][mi];
+      block.in.accurate_ = &_plugin_block.in.accurate[m][mi];
       _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
     }
   }
