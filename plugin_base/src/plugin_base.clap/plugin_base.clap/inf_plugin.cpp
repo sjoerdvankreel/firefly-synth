@@ -205,6 +205,30 @@ inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
 }
 
 bool
+inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
+{
+  normalized_value normalized;
+  int index = getParamIndexForParamId(param_id);
+  param_mapping const& mapping(_engine.desc().mappings[index]);
+  auto const& param = *_engine.desc().param_at(mapping).param;
+  if (!param.text_to_normalized(display, normalized)) return false;
+  *value = normalized_to_clap(param, normalized).value();
+  return true;
+}
+
+bool
+inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
+{
+  int index = getParamIndexForParamId(param_id);
+  param_mapping const& mapping(_engine.desc().mappings[index]);
+  auto const& param = *_engine.desc().param_at(mapping).param;
+  normalized_value normalized = clap_to_normalized(param, clap_value(value));
+  std::string text = param.normalized_to_text(normalized);
+  from_8bit_string(display, size, text.c_str());
+  return true;
+}
+
+bool
 inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 {
   param_mapping const& mapping(_engine.desc().mappings[index]);
@@ -236,30 +260,6 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
     info->max_value = param.param->max;
     info->flags |= CLAP_PARAM_IS_STEPPED;
   }
-  return true;
-}
-
-bool
-inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
-{
-  normalized_value normalized;
-  int index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[index]);
-  auto const& param = *_engine.desc().param_at(mapping).param;
-  if(!param.text_to_normalized(display, normalized)) return false;
-  *value = normalized_to_clap(param, normalized).value();
-  return true;
-}
-
-bool
-inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
-{
-  int index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[index]);
-  auto const& param = *_engine.desc().param_at(mapping).param;
-  normalized_value normalized = clap_to_normalized(param, clap_value(value));
-  std::string text = param.normalized_to_text(normalized);
-  from_8bit_string(display, size, text.c_str());
   return true;
 }
 
@@ -365,11 +365,11 @@ clap_process_status
 inf_plugin::process(clap_process const* process) noexcept
 {
   host_block& block = _engine.prepare();
-  block.common->frame_count = process->frames_count;
   block.common->stream_time = process->steady_time;
+  block.common->frame_count = process->frames_count;
+  block.common->audio_out = process->audio_outputs[0].data32;
   block.common->bpm = process->transport? process->transport->tempo: 0;
   block.common->audio_in = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
-  block.common->audio_out = process->audio_outputs[0].data32;
 
   process_ui_to_audio_events(process->out_events);
 
@@ -430,7 +430,6 @@ inf_plugin::process(clap_process const* process) noexcept
   }
 
   _engine.process();
-
   for (int e = 0; e < block.events.out.size(); e++)
   {
     sync_event to_ui_event = {};
@@ -440,7 +439,6 @@ inf_plugin::process(clap_process const* process) noexcept
     to_ui_event.plain = _engine.desc().param_at(mapping).param->normalized_to_plain(out_event.normalized);
     _to_ui_events->enqueue(to_ui_event);
   }
-
   return CLAP_PROCESS_CONTINUE;
 }
 

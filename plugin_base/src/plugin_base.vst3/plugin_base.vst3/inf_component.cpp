@@ -146,7 +146,6 @@ inf_component::process(ProcessData& data)
     queue = data.outputParameterChanges->addParameterData(id, unused_index);
     queue->addPoint(0, event.normalized.value(), unused_index);
   }
-
   return kResultOk;
 }
 
