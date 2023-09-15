@@ -67,7 +67,7 @@ validate_desc(plugin_desc const& desc)
   for (int m = 0; m < desc.modules.size(); m++)
   {
     auto const& module = desc.modules[m];
-    assert(module.topo);
+    assert(module.module);
     assert(module.id.size());
     assert(module.name.size());
     assert(module.params.size());
@@ -83,7 +83,7 @@ validate_desc(plugin_desc const& desc)
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
-      assert(param.topo);
+      assert(param.param);
       assert(param.id_hash >= 0);
       assert(param.id.size() > 0);
       assert(param.short_name.size() > 0);
