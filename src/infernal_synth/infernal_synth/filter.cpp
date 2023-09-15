@@ -22,8 +22,8 @@ public:
     module_block& module) override;
 };
 
-enum filter_section { section_main };
-enum filter_param { param_on, param_freq, param_osc_gain, param_out_gain };
+enum { section_main };
+enum { param_on, param_freq, param_osc_gain, param_out_gain };
 
 module_topo
 filter_topo()
@@ -48,20 +48,19 @@ filter_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   float max_out = 0.0f;
-  auto const& osc_audio = plugin.out.audio[module_type::module_osc];
-  auto const& osc_gain_curves = module.in.accurate()[param_osc_gain];
+  auto const& osc_audio = plugin.out.audio[module_osc];
+  auto const& osc_gain = module.in.accurate()[param_osc_gain];
   for(int o = 0; o < topo.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
-        plugin.host->audio_out[c][f] += osc_audio[o][c][f] * osc_gain_curves[o][f];
-  int on = module.in.block()[param_on][0].step();
-  if (!on) return;
+        plugin.host->audio_out[c][f] += osc_audio[o][c][f] * osc_gain[o][f];
+  if(module.in.block()[param_on][0].step() == 0) return;
 
   float w = 2 * plugin.sample_rate;
-  auto const& freq_curve = module.in.accurate()[param_freq][0];
+  auto const& freq = module.in.accurate()[param_freq][0];
   for (int f = 0; f < plugin.host->frame_count; f++)
   {
-    float angle = freq_curve[f] * 2 * pi32;
+    float angle = freq[f] * 2 * pi32;
     float norm = 1 / (angle + w);
     float a = angle * norm;
     float b = (w - angle) * norm;

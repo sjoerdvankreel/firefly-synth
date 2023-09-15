@@ -4,7 +4,7 @@
 
 namespace infernal_synth {
 
-enum module_type { module_osc, module_filter };
+enum { module_osc, module_filter };
 
 plugin_base::module_topo osc_topo();
 plugin_base::module_topo filter_topo();
