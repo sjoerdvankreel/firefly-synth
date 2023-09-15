@@ -1,7 +1,9 @@
 #include <plugin_base/value.hpp>
-#include <plugin_base.clap/plugin.hpp>
+#include <plugin_base.clap/inf_plugin.hpp>
+
 #include <clap/helpers/plugin.hxx>
 #include <clap/helpers/host-proxy.hxx>
+
 #include <vector>
 #include <utility>
 
@@ -29,11 +31,13 @@ normalized_to_clap(param_topo const& topo, normalized_value normalized)
     return clap_value(topo.normalized_to_raw(normalized));
 }
 
-plugin::
-plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo):
+inf_plugin::
+inf_plugin(
+  clap_plugin_descriptor const* desc, 
+  clap_host const* host, std::unique_ptr<plugin_topo>&& topo):
 Plugin(desc, host), _engine(std::move(topo)),
-_to_ui_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size)), 
-_to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_queue_size>>(default_queue_size))
+_to_ui_events(std::make_unique<event_queue>(default_q_size)), 
+_to_audio_events(std::make_unique<event_queue>(default_q_size))
 {
   plugin_dims dims(*_engine.desc().plugin);
   _ui_state.resize(dims.params);
@@ -42,7 +46,7 @@ _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_q
 }
 
 bool
-plugin::init() noexcept
+inf_plugin::init() noexcept
 {
   MessageManager::getInstance();
   startTimerHz(60);
@@ -50,9 +54,9 @@ plugin::init() noexcept
 }
 
 void 
-plugin::timerCallback()
+inf_plugin::timerCallback()
 {
-  param_queue_event e;
+  sync_event e;
   while (_to_ui_events->try_dequeue(e))
   {
     param_mapping const& mapping = _engine.desc().mappings[e.index];
@@ -62,35 +66,35 @@ plugin::timerCallback()
 }
 
 bool
-plugin::guiShow() noexcept
+inf_plugin::guiShow() noexcept
 {
   _gui->setVisible(true);
   return true;
 }
 
 bool
-plugin::guiHide() noexcept
+inf_plugin::guiHide() noexcept
 {
   _gui->setVisible(false);
   return true;
 }
 
 bool
-plugin::guiSetParent(clap_window const* window) noexcept
+inf_plugin::guiSetParent(clap_window const* window) noexcept
 {
   _gui->addToDesktop(0, window->ptr);
   return true;
 }
 
 void 
-plugin::guiDestroy() noexcept
+inf_plugin::guiDestroy() noexcept
 {
   _gui->remove_ui_listener(this);
   _gui.reset();
 }
 
 bool
-plugin::guiCreate(char const* api, bool is_floating) noexcept
+inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
   _gui = std::make_unique<plugin_gui>(&_engine.desc(), _ui_state);
   _gui->add_ui_listener(this);
@@ -98,14 +102,14 @@ plugin::guiCreate(char const* api, bool is_floating) noexcept
 }
 
 bool
-plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
+inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 {
   _gui->setSize(width, height);
   return true;
 }
 
 bool
-plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
+inf_plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 {
   *width = _gui->getWidth();
   *height = _gui->getHeight();
@@ -113,14 +117,14 @@ plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 }
 
 bool
-plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
+inf_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
   *height = *width / _engine.desc().plugin->gui_aspect_ratio;
   return true;
 }
 
 bool
-plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
+inf_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 {
   hints->preserve_aspect_ratio = true;
   hints->can_resize_vertically = true;
@@ -131,50 +135,47 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 }
 
 void 
-plugin::ui_changing(int index, plain_value plain)
+inf_plugin::ui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
-
-  // Update ui thread state and notify the gui about it's own change
-  // since multiple controls may depend on the same parameter.
   param_mapping const& mapping = _engine.desc().mappings[index];
   mapping.value_at(_ui_state) = plain;
   _gui->plugin_changed(index, plain);
 }
 
 void 
-plugin::push_to_audio(int index, plain_value plain)
+inf_plugin::push_to_audio(int index, plain_value plain)
 {
-  param_queue_event e;
+  sync_event e;
   e.plain = plain;
   e.index = index;
-  e.type = param_queue_event_type::value_changing;
+  e.type = sync_event::type_t::value_changing;
   _to_audio_events->enqueue(e);
 }
 
 void 
-plugin::push_to_audio(int index, param_queue_event_type type)
+inf_plugin::push_to_audio(int index, sync_event::type_t type)
 {
-  param_queue_event e;
+  sync_event e;
   e.type = type;
   e.index = index;
   _to_audio_events->enqueue(e);
 }
 
 void
-plugin::push_to_ui(int index, clap_value clap)
+inf_plugin::push_to_ui(int index, clap_value clap)
 {
-  param_queue_event e;
+  sync_event e;
   param_mapping const& mapping = _engine.desc().mappings[index];
   auto const& topo = *_engine.desc().param_at(mapping).param;
   e.index = index;
-  e.type = param_queue_event_type::value_changing;
+  e.type = sync_event::type_t::value_changing;
   e.plain = topo.normalized_to_plain(clap_to_normalized(topo, clap));
   _to_ui_events->enqueue(e);
 }
 
 std::int32_t
-plugin::getParamIndexForParamId(clap_id param_id) const noexcept
+inf_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
   auto iter = _engine.desc().id_to_index.find(param_id);
   if (iter == _engine.desc().id_to_index.end())
@@ -186,7 +187,7 @@ plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 }
 
 bool 
-plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept
+inf_plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept
 {
   std::int32_t index = getParamIndexForParamId(param_id);
   if(index == -1) return false;
@@ -194,7 +195,7 @@ plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const no
 } 
 
 bool
-plugin::paramsValue(clap_id param_id, double* value) noexcept
+inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
   int index = getParamIndexForParamId(param_id);
   param_mapping const& mapping(_engine.desc().mappings[index]);
@@ -204,7 +205,7 @@ plugin::paramsValue(clap_id param_id, double* value) noexcept
 }
 
 bool
-plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
+inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 {
   param_mapping const& mapping(_engine.desc().mappings[index]);
   param_desc const& param = _engine.desc().param_at(mapping);
@@ -239,7 +240,7 @@ plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 }
 
 bool
-plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
+inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
   normalized_value normalized;
   int index = getParamIndexForParamId(param_id);
@@ -251,7 +252,7 @@ plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) 
 }
 
 bool
-plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
+inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
 {
   int index = getParamIndexForParamId(param_id);
   param_mapping const& mapping(_engine.desc().mappings[index]);
@@ -263,7 +264,7 @@ plugin::paramsValueToText(clap_id param_id, double value, char* display, std::ui
 }
 
 void
-plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept
+inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept
 {
   for (std::uint32_t i = 0; i < in->size(in); i++)
   {
@@ -281,7 +282,7 @@ plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) 
 }
 
 bool
-plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
+inf_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
 {
   if (!is_input || index != 0) return false;
   info->id = 0;
@@ -291,14 +292,14 @@ plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* i
 }
 
 std::uint32_t 
-plugin::audioPortsCount(bool is_input) const noexcept
+inf_plugin::audioPortsCount(bool is_input) const noexcept
 {
   if (!is_input) return 1;
   return _engine.desc().plugin->type == plugin_type::fx? 1: 0;
 }
 
 bool
-plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
+inf_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
 {
   if (index != 0) return false;
   if (is_input && _engine.desc().plugin->type == plugin_type::synth) return false;
@@ -311,22 +312,22 @@ plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info*
 }
 
 bool
-plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
+inf_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
 {
   _engine.activate(sample_rate, max_frame_count);
   return true;
 }
 
 void 
-plugin::process_ui_to_audio_events(const clap_output_events_t* out)
+inf_plugin::process_ui_to_audio_events(const clap_output_events_t* out)
 {
-  param_queue_event e;
+  sync_event e;
   while (_to_audio_events->try_dequeue(e))
   {
     int param_id = _engine.desc().index_to_id[e.index];
     switch(e.type) 
     {
-    case param_queue_event_type::value_changing:
+    case sync_event::type_t::value_changing:
     {
       param_mapping const& mapping = _engine.desc().mappings[e.index];
       auto const& topo = *_engine.desc().param_at(mapping).param;
@@ -342,8 +343,8 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
       out->try_push(out, &(event.header));
       break;
     }
-    case param_queue_event_type::end_edit:
-    case param_queue_event_type::begin_edit:
+    case sync_event::type_t::end_edit:
+    case sync_event::type_t::begin_edit:
     {
       auto event = clap_event_param_gesture();
       event.header.time = 0;
@@ -351,7 +352,7 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
       event.param_id = param_id;
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_gesture);
-      event.header.type = (e.type == param_queue_event_type::begin_edit ? CLAP_EVENT_PARAM_GESTURE_BEGIN : CLAP_EVENT_PARAM_GESTURE_END);
+      event.header.type = (e.type == sync_event::type_t::begin_edit ? CLAP_EVENT_PARAM_GESTURE_BEGIN : CLAP_EVENT_PARAM_GESTURE_END);
       out->try_push(out, &event.header);
       break;
     }
@@ -361,7 +362,7 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
 }
 
 clap_process_status
-plugin::process(clap_process const* process) noexcept
+inf_plugin::process(clap_process const* process) noexcept
 {
   host_block& block = _engine.prepare();
   block.common->frame_count = process->frames_count;
@@ -387,9 +388,9 @@ plugin::process(clap_process const* process) noexcept
     {
       note_event note = {};
       auto event = reinterpret_cast<clap_event_note_t const*>(header);
-      if (header->type == CLAP_EVENT_NOTE_ON) note.type = note_event::type::on;
-      else if (header->type == CLAP_EVENT_NOTE_OFF) note.type = note_event::type::off;
-      else if (header->type == CLAP_EVENT_NOTE_CHOKE) note.type = note_event::type::cut;
+      if (header->type == CLAP_EVENT_NOTE_ON) note.type = note_event::type_t::on;
+      else if (header->type == CLAP_EVENT_NOTE_OFF) note.type = note_event::type_t::off;
+      else if (header->type == CLAP_EVENT_NOTE_CHOKE) note.type = note_event::type_t::cut;
       note.id.key = event->key;
       note.id.id = event->note_id;
       note.velocity = event->velocity;
@@ -432,7 +433,7 @@ plugin::process(clap_process const* process) noexcept
 
   for (int e = 0; e < block.events.out.size(); e++)
   {
-    param_queue_event to_ui_event = {};
+    sync_event to_ui_event = {};
     auto const& out_event = block.events.out[e];
     auto const& mapping = _engine.desc().mappings[out_event.param];
     to_ui_event.index = out_event.param;

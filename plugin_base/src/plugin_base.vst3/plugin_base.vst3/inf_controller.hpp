@@ -15,9 +15,12 @@ class inf_controller final:
 public Steinberg::Vst::EditControllerEx1 {
   plugin_desc const _desc;
   inf_editor* _editor = {};
+
 public: 
-  plugin_desc const& desc() const { return _desc; }
+  INF_DECLARE_MOVE_ONLY(inf_controller);
   inf_controller(std::unique_ptr<plugin_topo>&& topo) : _desc(std::move(topo)) {}
+
+  plugin_desc const& desc() const { return _desc; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;

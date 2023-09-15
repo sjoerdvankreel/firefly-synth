@@ -1,6 +1,8 @@
 #pragma once
+
 #include <plugin_base/gui.hpp>
 #include <plugin_base/engine.hpp>
+
 #include <clap/helpers/plugin.hh>
 #include <readerwriterqueue.h>
 #include <memory>
@@ -8,62 +10,57 @@
 
 namespace plugin_base::clap {
 
-inline int constexpr default_queue_size = 4096;
+inline int constexpr default_q_size = 4096;
 
 // linear and log map to normalized, step maps to plain
 class clap_value {
   double _value;
 public:
-  inline double value() const { return _value; }
-  explicit clap_value(double value) : _value(value) {}
   clap_value(clap_value const&) = default;
   clap_value& operator=(clap_value const&) = default;
+  inline double value() const { return _value; }
+  explicit clap_value(double value) : _value(value) {}
 };
 
-enum class param_queue_event_type { end_edit, begin_edit, value_changing };
-struct param_queue_event
+// sync audio <-> ui
+struct sync_event
 {
   int index = {};
   plain_value plain = {};
-  param_queue_event_type type = {};
+  enum class type_t { end_edit, begin_edit, value_changing } type;
 };
 
-class plugin:
+class inf_plugin:
 public ::clap::helpers::Plugin<
-  // I want to use terminate but Maximal fires host-checks on reaper w.r.t. resizing. Not workable.
   ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>,
-public ui_listener,
-public juce::Timer
+public ui_listener, public juce::Timer
 {
+  typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
+
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
-  jarray<plain_value, 4> _ui_state = {}; // Copy of engine state on the ui thread.
-  std::vector<int> _block_automation_seen = {}; // Only push the first event in per-block automation.
-  // These have an initial capacity but *will* allocate if it is exceeded because we push() not try_push().
-  // By pointer rather than value to prevent some compiler warnings regarding padding.
-  std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _to_ui_events;
-  std::unique_ptr<moodycamel::ReaderWriterQueue<param_queue_event, default_queue_size>> _to_audio_events;
+  jarray<plain_value, 4> _ui_state = {};
+  std::vector<int> _block_automation_seen = {};
+  std::unique_ptr<event_queue> _to_ui_events = {};
+  std::unique_ptr<event_queue> _to_audio_events = {};
 
-  // Syncing audio <-> main.
-  // We pull in values from audio->main regardless of whether ui is present/visible.
+  // Pull in values from audio->main regardless of whether ui is present.
   void timerCallback() override;
   void push_to_ui(int index, clap_value clap);
   void push_to_audio(int index, plain_value plain);
-  void push_to_audio(int index, param_queue_event_type type);
-  void process_ui_to_audio_events(const clap_output_events_t* out);
+  void push_to_audio(int index, sync_event::type_t type);
+  void process_ui_to_audio_events(clap_output_events_t const* out);
 
 public:
-  ~plugin() { stopTimer(); }
-  plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo);
+  ~inf_plugin() { stopTimer(); }
+  INF_DECLARE_MOVE_ONLY(inf_plugin);
+  inf_plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo);
   
   bool implementsGui() const noexcept override { return true; }
   bool implementsParams() const noexcept override { return true; }
   bool implementsNotePorts() const noexcept override { return true; }
   bool implementsAudioPorts() const noexcept override { return true; }
-
-  std::int32_t getParamIndexForParamId(clap_id param_id) const noexcept override;
-  bool getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept override;
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;
@@ -76,6 +73,9 @@ public:
   bool guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept override;
   bool guiCanResize() const noexcept override { return true; }
   bool guiIsApiSupported(char const* api, bool is_floating) noexcept override { return !is_floating; }
+
+  std::int32_t getParamIndexForParamId(clap_id param_id) const noexcept override;
+  bool getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept override;
 
   bool paramsValue(clap_id param_id, double* value) noexcept override;
   bool paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept override;
@@ -95,8 +95,8 @@ public:
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
   void ui_changing(int index, plain_value plain) override;
-  void ui_end_changes(int index) override { push_to_audio(index, param_queue_event_type::end_edit); }
-  void ui_begin_changes(int index) override { push_to_audio(index, param_queue_event_type::begin_edit); }
+  void ui_end_changes(int index) override { push_to_audio(index, sync_event::type_t::end_edit); }
+  void ui_begin_changes(int index) override { push_to_audio(index, sync_event::type_t::begin_edit); }
 };
 
 }

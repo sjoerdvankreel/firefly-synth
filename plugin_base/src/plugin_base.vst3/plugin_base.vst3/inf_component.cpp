@@ -87,23 +87,23 @@ inf_component::process(ProcessData& data)
         if (vst_event.type == Event::kNoteOnEvent) 
         {
           note_event note;
-          note.type = note_event::type::on;
+          note.type = note_event::type_t::on;
           note.frame = vst_event.sampleOffset;
-          note.velocity = vst_event.noteOn.velocity;
           note.id.id = vst_event.noteOn.noteId;
           note.id.key = vst_event.noteOn.pitch;
           note.id.channel = vst_event.noteOn.channel;
+          note.velocity = vst_event.noteOn.velocity;
           block.common->notes.push_back(note);
         }
         else if (vst_event.type == Event::kNoteOffEvent)
         {
           note_event note;
-          note.type = note_event::type::off;
+          note.type = note_event::type_t::off;
           note.frame = vst_event.sampleOffset;
-          note.velocity = vst_event.noteOff.velocity;
           note.id.id = vst_event.noteOff.noteId;
           note.id.key = vst_event.noteOff.pitch;
           note.id.channel = vst_event.noteOff.channel;
+          note.velocity = vst_event.noteOff.velocity;
           block.common->notes.push_back(note);
         }
       }
@@ -121,8 +121,8 @@ inf_component::process(ProcessData& data)
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
           block_event event;
-          event.normalized = normalized_value(value);
           event.param = param_index;
+          event.normalized = normalized_value(value);
           block.events.block.push_back(event);
         }
         else if (rate == param_rate::accurate)
@@ -131,8 +131,8 @@ inf_component::process(ProcessData& data)
             {
               accurate_event event;
               event.frame = frame_index;
-              event.normalized = normalized_value(value);
               event.param = param_index;
+              event.normalized = normalized_value(value);
               block.events.accurate.push_back(event);
             }
       }
@@ -142,8 +142,8 @@ inf_component::process(ProcessData& data)
   for (int e = 0; e < block.events.out.size(); e++)
   {
     auto const& event = block.events.out[e];
-    int param_tag = _engine.desc().index_to_id[event.param];
-    queue = data.outputParameterChanges->addParameterData(param_tag, unused_index);
+    int id = _engine.desc().index_to_id[event.param];
+    queue = data.outputParameterChanges->addParameterData(id, unused_index);
     queue->addPoint(0, event.normalized.value(), unused_index);
   }
 

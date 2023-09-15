@@ -1,7 +1,7 @@
 #pragma once
 
 #include <plugin_base/topo.hpp>
-#include <plugin_base.clap/plugin.hpp>
+#include <plugin_base.clap/inf_plugin.hpp>
 
 #include <cstring>
 
@@ -18,7 +18,7 @@ get_plugin_factory(char const* factory_id)
   result.get_plugin_count = [](clap_plugin_factory const*) { return 1u; };
   result.get_plugin_descriptor = [](clap_plugin_factory const*, std::uint32_t) { return Descriptor; };
   result.create_plugin = [](clap_plugin_factory const*, clap_host const* host, char const*) 
-  { return (new plugin(Descriptor, host, TopoFactory()))->clapPlugin(); };
+  { return (new inf_plugin(Descriptor, host, TopoFactory()))->clapPlugin(); };
   return &result;
 }
 

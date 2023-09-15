@@ -1,7 +1,9 @@
 #include <infernal_synth/synth.hpp>
 #include <infernal_synth/plugin.hpp>
-#include <plugin_base.clap/plugin.hpp>
+
 #include <plugin_base.clap/support.hpp>
+#include <plugin_base.clap/inf_plugin.hpp>
+
 #include <clap/clap.h>
 #include <cstring>
 

@@ -21,7 +21,7 @@ struct note_event final {
   int frame;
   note_id id;
   float velocity;
-  enum class type { on, off, cut } type;
+  enum class type_t { on, off, cut } type;
 };
 
 // once per block automation

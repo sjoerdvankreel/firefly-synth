@@ -1,6 +1,7 @@
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
+
 #include <plugin_base.vst3/inf_editor.hpp>
 #include <plugin_base.vst3/inf_controller.hpp>
 

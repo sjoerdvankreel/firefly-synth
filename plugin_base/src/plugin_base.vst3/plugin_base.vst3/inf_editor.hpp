@@ -13,7 +13,9 @@ public Steinberg::Vst::EditorView, public ui_listener
 {
   std::unique_ptr<plugin_gui> _gui = {};
   inf_controller* const _controller = {};
+
 public: 
+  INF_DECLARE_MOVE_ONLY(inf_editor);
   inf_editor(inf_controller* controller);
 
   Steinberg::tresult PLUGIN_API removed() override;
