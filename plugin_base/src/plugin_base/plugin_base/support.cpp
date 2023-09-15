@@ -1,4 +1,5 @@
 #include <plugin_base/support.hpp>
+
 #include <cmath>
 
 namespace plugin_base {
