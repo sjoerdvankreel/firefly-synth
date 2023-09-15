@@ -94,9 +94,9 @@ public:
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
-  void changing(int index, plain_value plain) override;
-  void end_changes(int index) override { push_to_audio(index, param_queue_event_type::end_edit); }
-  void begin_changes(int index) override { push_to_audio(index, param_queue_event_type::begin_edit); }
+  void ui_changing(int index, plain_value plain) override;
+  void ui_end_changes(int index) override { push_to_audio(index, param_queue_event_type::end_edit); }
+  void ui_begin_changes(int index) override { push_to_audio(index, param_queue_event_type::begin_edit); }
 };
 
 }

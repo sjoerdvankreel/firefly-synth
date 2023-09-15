@@ -57,7 +57,7 @@ plugin::timerCallback()
   {
     param_mapping const& mapping = _engine.desc().mappings[e.index];
     mapping.value_at(_ui_state) = e.plain;
-    if(_gui) _gui->plugin_param_changed(e.index, e.plain);
+    if(_gui) _gui->plugin_changed(e.index, e.plain);
   }
 }
 
@@ -131,7 +131,7 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 }
 
 void 
-plugin::changing(int index, plain_value plain)
+plugin::ui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
 
@@ -139,7 +139,7 @@ plugin::changing(int index, plain_value plain)
   // since multiple controls may depend on the same parameter.
   param_mapping const& mapping = _engine.desc().mappings[index];
   mapping.value_at(_ui_state) = plain;
-  _gui->plugin_param_changed(index, plain);
+  _gui->plugin_changed(index, plain);
 }
 
 void 
