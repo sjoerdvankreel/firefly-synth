@@ -1,5 +1,6 @@
 #include <plugin_base/io.hpp>
-#include <plugin_base.vst3/component.hpp>
+#include <plugin_base.vst3/vst_component.hpp>
+
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/vst/ivstprocesscontext.h>
 #include <pluginterfaces/vst/ivstparameterchanges.h>
@@ -9,8 +10,8 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
-component::
-component(std::unique_ptr<plugin_topo>&& topo, FUID const& controller_id) :
+vst_component::
+vst_component(std::unique_ptr<plugin_topo>&& topo, FUID const& controller_id) :
 _engine(std::move(topo))
 {
   setControllerClass(controller_id);
@@ -20,21 +21,35 @@ _engine(std::move(topo))
 }
 
 tresult PLUGIN_API
-component::canProcessSampleSize(int32 symbolic_size)
+vst_component::canProcessSampleSize(int32 symbolic_size)
 {
   if (symbolic_size == kSample32) return kResultTrue;
   return kResultFalse;
 }
 
 tresult PLUGIN_API
-component::setupProcessing(ProcessSetup& setup)
+vst_component::setupProcessing(ProcessSetup& setup)
 {
   _engine.activate(setup.sampleRate, setup.maxSamplesPerBlock);
   return AudioEffect::setupProcessing(setup);
 }
 
 tresult PLUGIN_API
-component::initialize(FUnknown* context)
+vst_component::getState(IBStream* state)
+{
+  io_store_file(*_engine.desc().plugin, _engine.state(), "C:\\temp\\plug.json");
+  return kResultFalse;
+}
+
+tresult PLUGIN_API
+vst_component::setState(IBStream* state)
+{
+  io_load(*_engine.desc().plugin, {}, _engine.state());
+  return kResultFalse;
+}
+
+tresult PLUGIN_API
+vst_component::initialize(FUnknown* context)
 {
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
@@ -44,7 +59,7 @@ component::initialize(FUnknown* context)
 }
 
 tresult PLUGIN_API
-component::setBusArrangements(
+vst_component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
@@ -55,28 +70,14 @@ component::setBusArrangements(
 }
 
 tresult PLUGIN_API
-component::getState(IBStream* state)
-{
-  io_store_file(*_engine.desc().plugin, _engine.state(), "C:\\temp\\plug.json");
-  return kResultFalse;
-}
-
-tresult PLUGIN_API
-component::setState(IBStream* state)
-{
-  io_load(*_engine.desc().plugin, {}, _engine.state());
-  return kResultFalse;
-}
-
-tresult PLUGIN_API
-component::process(ProcessData& data)
+vst_component::process(ProcessData& data)
 {
   host_block& block = _engine.prepare();
   block.common->frame_count = data.numSamples;
-  block.common->bpm = data.processContext ? data.processContext->tempo : 0;
-  block.common->audio_in = _engine.desc().plugin->type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
-  block.common->stream_time = data.processContext ? data.processContext->projectTimeSamples : 0;
   block.common->audio_out = data.outputs[0].channelBuffers32;
+  block.common->bpm = data.processContext ? data.processContext->tempo : 0;
+  block.common->stream_time = data.processContext ? data.processContext->projectTimeSamples : 0;
+  block.common->audio_in = _engine.desc().plugin->type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
 
   Event vst_event;
   if (data.inputEvents)
@@ -114,14 +115,14 @@ component::process(ProcessData& data)
     for(int i = 0; i < data.inputParameterChanges->getParameterCount(); i++)
       if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
-        int param_global_index = _engine.desc().id_to_index.at(queue->getParameterId());
-        auto const& mapping = _engine.desc().mappings[param_global_index];
+        int param_index = _engine.desc().id_to_index.at(queue->getParameterId());
+        auto const& mapping = _engine.desc().mappings[param_index];
         auto rate = _engine.desc().param_at(mapping).param->rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
           block_event event;
           event.normalized = normalized_value(value);
-          event.param = param_global_index;
+          event.param = param_index;
           block.events.block.push_back(event);
         }
         else if (rate == param_rate::accurate)
@@ -131,13 +132,12 @@ component::process(ProcessData& data)
               accurate_event event;
               event.frame = frame_index;
               event.normalized = normalized_value(value);
-              event.param = param_global_index;
+              event.param = param_index;
               block.events.accurate.push_back(event);
             }
       }
   
   _engine.process();
-
   int unused_index = 0;
   for (int e = 0; e < block.events.out.size(); e++)
   {

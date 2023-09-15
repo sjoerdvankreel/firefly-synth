@@ -1,8 +1,9 @@
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base.vst3/editor.hpp>
-#include <plugin_base.vst3/controller.hpp>
+#include <plugin_base.vst3/vst_editor.hpp>
+#include <plugin_base.vst3/vst_controller.hpp>
+
 #include <base/source/fstring.h>
 #include <juce_events/juce_events.h>
 
@@ -17,21 +18,20 @@ public Parameter
 {
   param_topo const* const _topo;
 public:
-  void toString(ParamValue normalized, String128 string) const override;
-  bool fromString(TChar const* string, ParamValue& normalized) const override;
-
   ParamValue toNormalized(ParamValue plain) const override 
   { return _topo->raw_to_normalized(plain).value(); }
   ParamValue toPlain(ParamValue normalized) const override 
   { return _topo->normalized_to_raw(normalized_value(normalized)); }
+
+  void toString(ParamValue normalized, String128 string) const override;
+  bool fromString(TChar const* string, ParamValue& normalized) const override;
   param_wrapper(param_topo const* topo, ParameterInfo const& info) : Parameter(info), _topo(topo) {}
 };
 
 void 
 param_wrapper::toString(ParamValue normalized, String128 string) const
 {
-  normalized_value base_normalized(normalized);
-  auto text = _topo->normalized_to_text(base_normalized);
+  auto text = _topo->normalized_to_text(normalized_value(normalized));
   from_8bit_string(string, sizeof(String128) / sizeof(string[0]), text.c_str());
 }
 
@@ -46,28 +46,28 @@ param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
 }
 
 IPlugView* PLUGIN_API 
-controller::createView(char const* name)
+vst_controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
   MessageManager::getInstance();
-  return _editor = new editor(this);
+  return _editor = new vst_editor(this);
 }
 
 tresult PLUGIN_API 
-controller::setParamNormalized(ParamID tag, ParamValue value)
+vst_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
   if(_editor == nullptr) return kResultTrue;
   int index = _desc.id_to_index.at(tag);
   param_mapping const& mapping = _desc.mappings[index];
-  plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(normalized_value(value));
+  plain_value plain = _desc.normalized_to_plain_at(mapping, normalized_value(value));
   _editor->plugin_param_changed(index, plain);
   return kResultTrue;
 }
 
 tresult PLUGIN_API 
-controller::initialize(FUnknown* context)
+vst_controller::initialize(FUnknown* context)
 {
   int unit_id = 1;
   if(EditController::initialize(context) != kResultTrue) 
@@ -89,8 +89,8 @@ controller::initialize(FUnknown* context)
       auto const& param = module.params[p];
       param_info.id = param.id_hash;
       param_info.unitId = unit_info.id;
-      from_8bit_string(param_info.units, param.param->unit.c_str());
       from_8bit_string(param_info.title, param.full_name.c_str());
+      from_8bit_string(param_info.units, param.param->unit.c_str());
       from_8bit_string(param_info.shortTitle, param.full_name.c_str());
       param_info.defaultNormalizedValue = param.param->default_normalized().value();
 
@@ -104,7 +104,6 @@ controller::initialize(FUnknown* context)
       param_info.stepCount = 0;
       if (!param.param->is_real())
         param_info.stepCount = param.param->max - param.param->min;
-
       parameters.addParameter(new param_wrapper(module.params[p].param, param_info));
     }
   }

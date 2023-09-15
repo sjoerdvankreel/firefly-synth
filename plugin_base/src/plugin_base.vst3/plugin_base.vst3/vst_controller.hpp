@@ -1,6 +1,7 @@
 #pragma once
 
 #include <plugin_base/desc.hpp>
+#include <plugin_base/utility.hpp>
 
 #include <pluginterfaces/gui/iplugview.h>
 #include <public.sdk/source/vst/vsteditcontroller.h>
@@ -8,15 +9,15 @@
 
 namespace plugin_base::vst3 {
 
-class editor;
+class vst_editor;
 
-class controller final:
+class vst_controller final:
 public Steinberg::Vst::EditControllerEx1 {
-  editor* _editor = {};
   plugin_desc const _desc;
+  vst_editor* _editor = {};
 public: 
   plugin_desc const& desc() const { return _desc; }
-  controller(std::unique_ptr<plugin_topo>&& topo) : _desc(std::move(topo)) {}
+  vst_controller(std::unique_ptr<plugin_topo>&& topo) : _desc(std::move(topo)) {}
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;

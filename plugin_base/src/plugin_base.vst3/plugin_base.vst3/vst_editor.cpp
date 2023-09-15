@@ -1,11 +1,11 @@
-#include <plugin_base.vst3/editor.hpp>
+#include <plugin_base.vst3/vst_editor.hpp>
 
 using namespace Steinberg;
 
 namespace plugin_base::vst3 {
 
-editor::
-editor(plugin_base::vst3::controller* controller) : 
+vst_editor::
+vst_editor(vst_controller* controller) :
 EditorView(controller), _controller(controller)
 {
   // TODO somehow move this to base
@@ -36,7 +36,7 @@ EditorView(controller), _controller(controller)
 }
 
 tresult PLUGIN_API 
-editor::removed()
+vst_editor::removed()
 {
   _gui->remove_ui_listener(this);
   _gui->setVisible(false);
@@ -45,7 +45,7 @@ editor::removed()
 }
 
 tresult PLUGIN_API
-editor::attached(void* parent, FIDString type)
+vst_editor::attached(void* parent, FIDString type)
 {
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
@@ -54,7 +54,7 @@ editor::attached(void* parent, FIDString type)
 }
 
 tresult PLUGIN_API
-editor::getSize(ViewRect* new_size)
+vst_editor::getSize(ViewRect* new_size)
 {
   new_size->top = 0;
   new_size->left = 0;
@@ -64,14 +64,14 @@ editor::getSize(ViewRect* new_size)
 }
 
 tresult PLUGIN_API 
-editor::onSize(ViewRect* new_size)
+vst_editor::onSize(ViewRect* new_size)
 {
   _gui->setSize(new_size->getWidth(), new_size->getHeight());
   return EditorView::onSize(new_size);
 }
 
 tresult PLUGIN_API
-editor::checkSizeConstraint(ViewRect* new_rect)
+vst_editor::checkSizeConstraint(ViewRect* new_rect)
 {
   int new_height = new_rect->getWidth() / _controller->desc().plugin->gui_aspect_ratio;
   new_rect->bottom = new_rect->top + new_height;
@@ -79,13 +79,13 @@ editor::checkSizeConstraint(ViewRect* new_rect)
 }
 
 void 
-editor::ui_changing(int index, plain_value plain)
+vst_editor::ui_changing(int index, plain_value plain)
 {
-  int param_tag = _controller->desc().index_to_id[index];
+  int id = _controller->desc().index_to_id[index];
   param_mapping const& mapping = _controller->desc().mappings[index];
-  auto normalized = _controller->desc().param_at(mapping).param->plain_to_normalized(plain).value();
-  _controller->performEdit(param_tag, normalized);
-  _controller->setParamNormalized(param_tag, normalized);
+  auto normalized = _controller->desc().plain_to_normalized_at(mapping, plain).value();
+  _controller->performEdit(id, normalized);
+  _controller->setParamNormalized(id, normalized);
 }
 
 }

@@ -1,8 +1,10 @@
 #include <infernal_synth/synth.hpp>
 #include <infernal_synth/plugin.hpp>
+
 #include <plugin_base.vst3/support.hpp>
-#include <plugin_base.vst3/component.hpp>
-#include <plugin_base.vst3/controller.hpp>
+#include <plugin_base.vst3/vst_component.hpp>
+#include <plugin_base.vst3/vst_controller.hpp>
+
 #include <public.sdk/source/main/pluginfactory.h>
 #include <public.sdk/source/vst/vstaudioeffect.h>
 #include <pluginterfaces/vst/ivsteditcontroller.h>
@@ -23,7 +25,7 @@ using namespace plugin_base::vst3;
 static FUnknown*
 controller_factory(void*)
 {
-  auto result = new controller(synth_topo());
+  auto result = new vst_controller(synth_topo());
   return static_cast<IEditController*>(result);
 }
 
@@ -31,7 +33,7 @@ static FUnknown*
 component_factory(void*)
 { 
   FUID controller_id(fuid_from_text(INF_SYNTH_CONTROLLER_ID));
-  auto result = new component(synth_topo(), controller_id);
+  auto result = new vst_component(synth_topo(), controller_id);
   return static_cast<IAudioProcessor*>(result);
 }
 
