@@ -78,6 +78,20 @@ struct plugin_desc final {
   void init_defaults(jarray<plain_value, 4>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; }
+
+  // utility forwarding to topo
+  plain_value raw_to_plain_at(param_mapping const& mapping, double raw) const 
+  { return param_at(mapping).param->raw_to_plain(raw); }
+  double plain_to_raw_at(param_mapping const& mapping, plain_value plain) const 
+  { return param_at(mapping).param->plain_to_raw(plain); }
+  normalized_value raw_to_normalized_at(param_mapping const& mapping, double raw) const 
+  { return param_at(mapping).param->raw_to_normalized(raw); }
+  double normalized_to_raw_at(param_mapping const& mapping, normalized_value normalized) const 
+  { return param_at(mapping).param->normalized_to_raw(normalized); }
+  normalized_value plain_to_normalized_at(param_mapping const& mapping, plain_value plain) const 
+  { return param_at(mapping).param->plain_to_normalized(plain); }
+  plain_value normalized_to_plain_at(param_mapping const& mapping, normalized_value normalized) const 
+  { return param_at(mapping).param->normalized_to_plain(normalized); }
 };
 
 // runtime plugin topo dimensions
