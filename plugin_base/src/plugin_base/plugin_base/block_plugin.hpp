@@ -27,48 +27,53 @@ public:
   }
 };
 
-// module output
+// all modules cv/audio
 struct plugin_out final {
   jarray<float, 3> cv = {};
   jarray<float, 4> audio = {};
   INF_DECLARE_MOVE_ONLY(plugin_out);
 };
 
-// automation input
-struct automation_in final {
+// all modules automation
+struct plugin_in final {
   jarray<float, 5> accurate = {};
   jarray<plain_value, 4> block = {};
-  INF_DECLARE_MOVE_ONLY(automation_in);
+  INF_DECLARE_MOVE_ONLY(plugin_in);
 };
 
 // global process call in/out
 struct plugin_block final {
+  plugin_in in = {};
   plugin_out out = {};
-  automation_in in = {};
   float sample_rate = {};
   common_block const* host = {};
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
-// module process call in/out
+// single module cv/audio
+struct module_out final {
+  jarray<float, 1>* cv_ = {};
+  jarray<float, 2>* audio_ = {};
+  jarray<float, 1>& cv() const { return *cv_; }
+  jarray<float, 2>& audio() const { return *audio_; }
+  INF_DECLARE_MOVE_ONLY(module_out);
+};
+
+// single module automation
+struct module_in final {
+  jarray<float, 3> const* accurate_ = {};
+  jarray<plain_value, 2> const* block_ = {};
+  jarray<float, 3> const& accurate() { return *accurate_; }
+  jarray<plain_value, 2> const& block() { return *block_; }
+  INF_DECLARE_MOVE_ONLY(module_in);
+};
+
+// single module process call in/out
 struct module_block final {
-  jarray<float, 1>& cv_output;
-  jarray<float, 2>& audio_output;
+  module_in in;
+  module_out out;
   module_output_values& output_values;
-  jarray<float, 3> const& accurate_automation;
-  jarray<plain_value, 2> const& block_automation;
   INF_DECLARE_MOVE_ONLY(module_block);
-  module_block(
-    jarray<float, 1>& cv_output, 
-    jarray<float, 2>& audio_output, 
-    module_output_values& output_values,
-    jarray<float, 3> const& accurate_automation,
-    jarray<plain_value, 2> const& block_automation):
-    cv_output(cv_output), 
-    audio_output(audio_output),
-    output_values(output_values),
-    accurate_automation(accurate_automation), 
-    block_automation(block_automation) {}
 };
 
 }

@@ -43,16 +43,16 @@ filter_engine::process(
 {
   float max_out = 0.0f;
   auto const& osc_audio = plugin.out.audio[module_type::module_type_osc];
-  auto const& osc_gain_curves = module.accurate_automation[filter_param_osc_gain];
+  auto const& osc_gain_curves = module.in.accurate()[filter_param_osc_gain];
   for(int o = 0; o < topo.modules[module_type_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
         plugin.host->audio_out[c][f] += osc_audio[o][c][f] * osc_gain_curves[o][f];
-  int on = module.block_automation[filter_param_on][0].step();
+  int on = module.in.block()[filter_param_on][0].step();
   if (!on) return;
 
   float w = 2 * plugin.sample_rate;
-  auto const& freq_curve = module.accurate_automation[filter_param_freq][0];
+  auto const& freq_curve = module.in.accurate()[filter_param_freq][0];
   for (int f = 0; f < plugin.host->frame_count; f++)
   {
     float angle = freq_curve[f] * 2 * pi32;

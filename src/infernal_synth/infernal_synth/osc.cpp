@@ -54,15 +54,15 @@ void
 osc_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
-  int on = module.block_automation[osc_param_on][0].step();
+  int on = module.in.block()[osc_param_on][0].step();
   if (!on) return;
 
-  int oct = module.block_automation[osc_param_oct][0].step();
-  int note = module.block_automation[osc_param_note][0].step();
-  int type = module.block_automation[osc_param_type][0].step();
-  auto const& bal_curve = module.accurate_automation[osc_param_bal][0];
-  auto const& cent_curve = module.accurate_automation[osc_param_cent][0];
-  auto const& gain_curve = module.accurate_automation[osc_param_gain][0];
+  int oct = module.in.block()[osc_param_oct][0].step();
+  int note = module.in.block()[osc_param_note][0].step();
+  int type = module.in.block()[osc_param_type][0].step();
+  auto const& bal_curve = module.in.accurate()[osc_param_bal][0];
+  auto const& cent_curve = module.in.accurate()[osc_param_cent][0];
+  auto const& gain_curve = module.in.accurate()[osc_param_gain][0];
 
   for (int f = 0; f < plugin.host->frame_count; f++)
   {
@@ -73,8 +73,8 @@ osc_engine::process(
     case osc_type_sine: sample = std::sin(_phase * 2.0f * pi32); break;
     default: assert(false); sample = 0; break;
     }
-    module.audio_output[0][f] = sample * gain_curve[f] * balance(0, bal_curve[f]);
-    module.audio_output[1][f] = sample * gain_curve[f] * balance(1, bal_curve[f]);
+    module.out.audio()[0][f] = sample * gain_curve[f] * balance(0, bal_curve[f]);
+    module.out.audio()[1][f] = sample * gain_curve[f] * balance(1, bal_curve[f]);
     _phase += note_to_frequency(oct, note, cent_curve[f]) / plugin.sample_rate;
     _phase -= std::floor(_phase);
   }
