@@ -8,17 +8,18 @@ editor::
 editor(plugin_base::vst3::controller* controller) : 
 EditorView(controller), _controller(controller)
 {
+  // TODO somehow move this to base
   // pull the controller values to the ui (both live on the same thread)
   // alternatively we could keep yet another copy of ui-thread values
   // in module-slot-param-slot format but it's complicated enough already
   // to deal with processor-controller-ui_controls as is
   int param_global_index = 0;
-  plugin_dims dims(*controller->desc().topo);
+  plugin_dims dims(*controller->desc().plugin);
   jarray<plain_value, 4> ui_initial_values;
   ui_initial_values.resize(dims.params);
-  for (int m = 0; m < controller->desc().topo->modules.size(); m++)
+  for (int m = 0; m < controller->desc().plugin->modules.size(); m++)
   {
-    auto const& module = controller->desc().topo->modules[m];
+    auto const& module = controller->desc().plugin->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
       for(int p = 0; p < module.params.size(); p++)
       {
@@ -72,7 +73,7 @@ editor::onSize(ViewRect* new_size)
 tresult PLUGIN_API
 editor::checkSizeConstraint(ViewRect* new_rect)
 {
-  int new_height = new_rect->getWidth() / _controller->desc().topo->gui_aspect_ratio;
+  int new_height = new_rect->getWidth() / _controller->desc().plugin->gui_aspect_ratio;
   new_rect->bottom = new_rect->top + new_height;
   return kResultTrue;
 }
@@ -82,7 +83,7 @@ editor::ui_param_changing(int param_index, plain_value plain)
 {
   int param_tag = _controller->desc().param_index_to_id[param_index];
   param_mapping const& mapping = _controller->desc().param_mappings[param_index];
-  auto normalized = _controller->desc().param_at(mapping).topo->plain_to_normalized(plain).value();
+  auto normalized = _controller->desc().param_at(mapping).param->plain_to_normalized(plain).value();
   _controller->performEdit(param_tag, normalized);
   _controller->setParamNormalized(param_tag, normalized);
 }

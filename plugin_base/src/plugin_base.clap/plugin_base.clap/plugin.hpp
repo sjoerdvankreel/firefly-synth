@@ -82,7 +82,7 @@ public:
   bool paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept override;
   void paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept override;
   bool paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept override;
-  std::uint32_t paramsCount() const noexcept override { return _engine.desc().param_global_count; }
+  std::uint32_t paramsCount() const noexcept override { return _engine.desc().param_count; }
 
   std::uint32_t notePortsCount(bool is_input) const noexcept override { return is_input? 1: 0;}
   bool notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept override;

@@ -61,7 +61,7 @@ controller::setParamNormalized(ParamID tag, ParamValue value)
   if(_editor == nullptr) return kResultTrue;
   int param_index = _desc.param_id_to_index.at(tag);
   param_mapping const& mapping = _desc.param_mappings[param_index];
-  plain_value plain = _desc.param_at(mapping).topo->normalized_to_plain(normalized_value(value));
+  plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(normalized_value(value));
   _editor->plugin_param_changed(param_index, plain);
   return kResultTrue;
 }
@@ -89,23 +89,23 @@ controller::initialize(FUnknown* context)
       auto const& param = module.params[p];
       param_info.id = param.id_hash;
       param_info.unitId = unit_info.id;
-      from_8bit_string(param_info.units, param.topo->unit.c_str());
+      from_8bit_string(param_info.units, param.param->unit.c_str());
       from_8bit_string(param_info.title, param.full_name.c_str());
       from_8bit_string(param_info.shortTitle, param.full_name.c_str());
-      param_info.defaultNormalizedValue = param.topo->default_normalized().value();
+      param_info.defaultNormalizedValue = param.param->default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;
-      if(param.topo->dir == param_dir::input)
+      if(param.param->dir == param_dir::input)
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;
-      if(param.topo->edit == param_edit::list)
+      if(param.param->edit == param_edit::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
-      if (!param.topo->is_real())
-        param_info.stepCount = param.topo->max - param.topo->min;
+      if (!param.param->is_real())
+        param_info.stepCount = param.param->max - param.param->min;
 
-      parameters.addParameter(new param_wrapper(module.params[p].topo, param_info));
+      parameters.addParameter(new param_wrapper(module.params[p].param, param_info));
     }
   }
 

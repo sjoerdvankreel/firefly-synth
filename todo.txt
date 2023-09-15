@@ -11,4 +11,5 @@ voice manager including voice-level unison
 manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
+provide utility functions for desc->param_at->normalized_to_plain etc
 linux, renoise, bitwig, cbb
