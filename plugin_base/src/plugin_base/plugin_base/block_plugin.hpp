@@ -28,10 +28,10 @@ public:
 };
 
 // module output
-struct module_out final {
+struct plugin_out final {
   jarray<float, 3> cv = {};
   jarray<float, 4> audio = {};
-  INF_DECLARE_MOVE_ONLY(module_out);
+  INF_DECLARE_MOVE_ONLY(plugin_out);
 };
 
 // automation input
@@ -41,17 +41,16 @@ struct automation_in final {
   INF_DECLARE_MOVE_ONLY(automation_in);
 };
 
-// process call in/out
+// global process call in/out
 struct plugin_block final {
-  module_out out = {};
+  plugin_out out = {};
   automation_in in = {};
   float sample_rate = {};
   common_block const* host = {};
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
-// writeable single module audio and cv state, output parameters, readonly single module interpolated automation curves
-// note - i really dont like reference members in structs, but pointers have awkward usage code for indexers: (*cv_output)[0]
+// module process call in/out
 struct module_block final {
   jarray<float, 1>& cv_output;
   jarray<float, 2>& audio_output;
