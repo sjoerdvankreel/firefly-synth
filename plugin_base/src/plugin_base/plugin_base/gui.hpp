@@ -32,6 +32,9 @@ public juce::Component
   std::vector<std::unique_ptr<juce::Component>> _children = {}; // must be destructed first
 
 public:
+  INF_DECLARE_MOVE_ONLY(plugin_gui);
+  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial);
+
   void resized() override;
   void paint(juce::Graphics& g) override 
   { g.fillAll(juce::Colours::black); }
@@ -42,19 +45,10 @@ public:
   void ui_changing(int index, plain_value plain);
   void plugin_changed(int index, plain_value plain);
 
-  void add_ui_listener(ui_listener* listener)
-  {
-    _ui_listeners.push_back(listener);
-  }
   void remove_ui_listener(ui_listener* listener);
-  void add_plugin_listener(int index, plugin_listener* listener)
-  {
-    _plugin_listeners[index].push_back(listener);
-  }
   void remove_plugin_listener(int index, plugin_listener* listener);
-
-  INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial);
+  void add_ui_listener(ui_listener* listener) { _ui_listeners.push_back(listener); }
+  void add_plugin_listener(int index, plugin_listener* listener) { _plugin_listeners[index].push_back(listener); }
 };
 
 }
