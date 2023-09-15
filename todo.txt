@@ -9,4 +9,6 @@ host context menu
 try out some airwindows stuff
 voice manager including voice-level unison
 manual automation interpolation/zipper noise
+am/fm/lfos/modmatrix
+am/fm->select relevant sources
 linux, renoise, bitwig, cbb
