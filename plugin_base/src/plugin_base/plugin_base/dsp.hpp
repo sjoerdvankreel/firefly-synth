@@ -1,6 +1,8 @@
 #pragma once
+
 #include <cmath>
 #include <cassert>
+
 #define INF_PI 3.14159265358979323846264338327950288
 
 namespace plugin_base {

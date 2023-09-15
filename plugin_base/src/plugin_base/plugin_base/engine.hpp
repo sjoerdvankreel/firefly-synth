@@ -1,4 +1,5 @@
 #pragma once
+
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
@@ -6,6 +7,7 @@
 #include <plugin_base/block_host.hpp>
 #include <plugin_base/block_common.hpp>
 #include <plugin_base/block_plugin.hpp>
+
 #include <memory>
 #include <chrono>
 #include <utility>

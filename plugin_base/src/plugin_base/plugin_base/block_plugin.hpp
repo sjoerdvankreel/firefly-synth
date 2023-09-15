@@ -1,4 +1,5 @@
 #pragma once
+
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>

@@ -1,5 +1,7 @@
 #pragma once
+
 #include <plugin_base/utility.hpp>
+
 #include <vector>
 #include <cstdint>
 

@@ -1,6 +1,8 @@
 #pragma once
+
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
+
 #include <vector>
 
 namespace plugin_base {
