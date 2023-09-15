@@ -55,9 +55,9 @@ plugin::timerCallback()
   param_queue_event e;
   while (_to_ui_events->try_dequeue(e))
   {
-    param_mapping const& mapping = _engine.desc().mappings[e.param_global_index];
+    param_mapping const& mapping = _engine.desc().mappings[e.index];
     mapping.value_at(_ui_state) = e.plain;
-    if(_gui) _gui->plugin_param_changed(e.param_global_index, e.plain);
+    if(_gui) _gui->plugin_param_changed(e.index, e.plain);
   }
 }
 
@@ -131,43 +131,43 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 }
 
 void 
-plugin::ui_param_changing(int param_index, plain_value plain) 
+plugin::ui_param_changing(int index, plain_value plain)
 { 
-  push_to_audio(param_index, plain);
+  push_to_audio(index, plain);
 
   // Update ui thread state and notify the gui about it's own change
   // since multiple controls may depend on the same parameter.
-  param_mapping const& mapping = _engine.desc().mappings[param_index];
+  param_mapping const& mapping = _engine.desc().mappings[index];
   mapping.value_at(_ui_state) = plain;
-  _gui->plugin_param_changed(param_index, plain);
+  _gui->plugin_param_changed(index, plain);
 }
 
 void 
-plugin::push_to_audio(int param_global_index, plain_value plain)
+plugin::push_to_audio(int index, plain_value plain)
 {
   param_queue_event e;
   e.plain = plain;
-  e.param_global_index = param_global_index;
+  e.index = index;
   e.type = param_queue_event_type::value_changing;
   _to_audio_events->enqueue(e);
 }
 
 void 
-plugin::push_to_audio(int param_global_index, param_queue_event_type type)
+plugin::push_to_audio(int index, param_queue_event_type type)
 {
   param_queue_event e;
   e.type = type;
-  e.param_global_index = param_global_index;
+  e.index = index;
   _to_audio_events->enqueue(e);
 }
 
 void
-plugin::push_to_ui(int param_global_index, clap_value clap)
+plugin::push_to_ui(int index, clap_value clap)
 {
   param_queue_event e;
-  param_mapping const& mapping = _engine.desc().mappings[param_global_index];
+  param_mapping const& mapping = _engine.desc().mappings[index];
   auto const& topo = *_engine.desc().param_at(mapping).param;
-  e.param_global_index = param_global_index;
+  e.index = index;
   e.type = param_queue_event_type::value_changing;
   e.plain = topo.normalized_to_plain(clap_to_normalized(topo, clap));
   _to_ui_events->enqueue(e);
@@ -196,17 +196,17 @@ plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const no
 bool
 plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
-  int param_index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[param_index]);
+  int index = getParamIndexForParamId(param_id);
+  param_mapping const& mapping(_engine.desc().mappings[index]);
   auto const& topo = *_engine.desc().param_at(mapping).param;
   *value = normalized_to_clap(topo, topo.plain_to_normalized(mapping.value_at(_ui_state))).value();
   return true;
 }
 
 bool
-plugin::paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexcept
+plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 {
-  param_mapping const& mapping(_engine.desc().mappings[param_index]);
+  param_mapping const& mapping(_engine.desc().mappings[index]);
   param_desc const& param = _engine.desc().param_at(mapping);
   info->cookie = nullptr;
   info->id = param.id_hash;
@@ -242,8 +242,8 @@ bool
 plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
   normalized_value normalized;
-  int param_index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[param_index]);
+  int index = getParamIndexForParamId(param_id);
+  param_mapping const& mapping(_engine.desc().mappings[index]);
   auto const& param = *_engine.desc().param_at(mapping).param;
   if(!param.text_to_normalized(display, normalized)) return false;
   *value = normalized_to_clap(param, normalized).value();
@@ -253,8 +253,8 @@ plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) 
 bool
 plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
 {
-  int param_index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[param_index]);
+  int index = getParamIndexForParamId(param_id);
+  param_mapping const& mapping(_engine.desc().mappings[index]);
   auto const& param = *_engine.desc().param_at(mapping).param;
   normalized_value normalized = clap_to_normalized(param, clap_value(value));
   std::string text = param.normalized_to_text(normalized);
@@ -323,12 +323,12 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
   param_queue_event e;
   while (_to_audio_events->try_dequeue(e))
   {
-    int param_id = _engine.desc().index_to_id[e.param_global_index];
+    int param_id = _engine.desc().index_to_id[e.index];
     switch(e.type) 
     {
     case param_queue_event_type::value_changing:
     {
-      param_mapping const& mapping = _engine.desc().mappings[e.param_global_index];
+      param_mapping const& mapping = _engine.desc().mappings[e.index];
       auto const& topo = *_engine.desc().param_at(mapping).param;
       mapping.value_at(_engine.state()) = e.plain;
       auto event = clap_event_param_value();
@@ -401,24 +401,24 @@ plugin::process(clap_process const* process) noexcept
     case CLAP_EVENT_PARAM_VALUE:
     {
       auto event = reinterpret_cast<clap_event_param_value const*>(header);
-      int param_index = getParamIndexForParamId(event->param_id);
-      auto const& mapping = _engine.desc().mappings[param_index];
+      int index = getParamIndexForParamId(event->param_id);
+      auto const& mapping = _engine.desc().mappings[index];
       auto const& param = _engine.desc().param_at(mapping);
-      push_to_ui(param_index, clap_value(event->value));
+      push_to_ui(index, clap_value(event->value));
       if (param.param->rate == param_rate::block)
       {
-        if (_block_automation_seen[param_index] == 0)
+        if (_block_automation_seen[index] == 0)
         {
           block_event block_event;
-          block_event.param = param_index;
+          block_event.param = index;
           block_event.normalized = clap_to_normalized(*param.param, clap_value(event->value));
           block.block_events.push_back(block_event);
-          _block_automation_seen[param_index] = 1;
+          _block_automation_seen[index] = 1;
         }
       } else {
         accurate_event accurate_event;
         accurate_event.frame = header->time;
-        accurate_event.param = param_index;
+        accurate_event.param = index;
         accurate_event.normalized = clap_to_normalized(*param.param, clap_value(event->value));
         block.accurate_events.push_back(accurate_event);
       }
@@ -435,7 +435,7 @@ plugin::process(clap_process const* process) noexcept
     param_queue_event to_ui_event = {};
     auto const& out_event = block.out_events[e];
     auto const& mapping = _engine.desc().mappings[out_event.param];
-    to_ui_event.param_global_index = out_event.param;
+    to_ui_event.index = out_event.param;
     to_ui_event.plain = _engine.desc().param_at(mapping).param->normalized_to_plain(out_event.normalized);
     _to_ui_events->enqueue(to_ui_event);
   }

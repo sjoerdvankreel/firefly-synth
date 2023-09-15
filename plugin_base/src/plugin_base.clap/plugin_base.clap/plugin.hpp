@@ -23,8 +23,8 @@ public:
 enum class param_queue_event_type { end_edit, begin_edit, value_changing };
 struct param_queue_event
 {
+  int index = {};
   plain_value plain = {};
-  int param_global_index = {};
   param_queue_event_type type = {};
 };
 
@@ -48,9 +48,9 @@ public juce::Timer
   // Syncing audio <-> main.
   // We pull in values from audio->main regardless of whether ui is present/visible.
   void timerCallback() override;
-  void push_to_ui(int param_index, clap_value clap);
-  void push_to_audio(int param_index, plain_value plain);
-  void push_to_audio(int param_index, param_queue_event_type type);
+  void push_to_ui(int index, clap_value clap);
+  void push_to_audio(int index, plain_value plain);
+  void push_to_audio(int index, param_queue_event_type type);
   void process_ui_to_audio_events(const clap_output_events_t* out);
 
 public:
@@ -78,7 +78,7 @@ public:
   bool guiIsApiSupported(char const* api, bool is_floating) noexcept override { return !is_floating; }
 
   bool paramsValue(clap_id param_id, double* value) noexcept override;
-  bool paramsInfo(std::uint32_t param_index, clap_param_info* info) const noexcept override;
+  bool paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept override;
   bool paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept override;
   void paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept override;
   bool paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept override;
@@ -94,9 +94,9 @@ public:
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
-  void ui_param_changing(int param_index, plain_value plain) override;
-  void ui_param_end_changes(int param_index) override { push_to_audio(param_index, param_queue_event_type::end_edit); }
-  void ui_param_begin_changes(int param_index) override { push_to_audio(param_index, param_queue_event_type::begin_edit); }
+  void ui_param_changing(int index, plain_value plain) override;
+  void ui_param_end_changes(int index) override { push_to_audio(index, param_queue_event_type::end_edit); }
+  void ui_param_begin_changes(int index) override { push_to_audio(index, param_queue_event_type::begin_edit); }
 };
 
 }

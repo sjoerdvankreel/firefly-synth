@@ -79,10 +79,10 @@ editor::checkSizeConstraint(ViewRect* new_rect)
 }
 
 void 
-editor::ui_param_changing(int param_index, plain_value plain)
+editor::ui_param_changing(int index, plain_value plain)
 {
-  int param_tag = _controller->desc().index_to_id[param_index];
-  param_mapping const& mapping = _controller->desc().mappings[param_index];
+  int param_tag = _controller->desc().index_to_id[index];
+  param_mapping const& mapping = _controller->desc().mappings[index];
   auto normalized = _controller->desc().param_at(mapping).param->plain_to_normalized(plain).value();
   _controller->performEdit(param_tag, normalized);
   _controller->setParamNormalized(param_tag, normalized);

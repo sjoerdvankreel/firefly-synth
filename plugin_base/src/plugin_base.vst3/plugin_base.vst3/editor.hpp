@@ -26,13 +26,13 @@ public:
   Steinberg::tresult PLUGIN_API isPlatformTypeSupported(Steinberg::FIDString type) override 
   { return Steinberg::kResultTrue; }
 
-  void ui_param_changing(int param_index, plain_value plain) override;
-  void plugin_param_changed(int param_index, plain_value plain)
-  { _gui->plugin_param_changed(param_index, plain); }
-  void ui_param_end_changes(int param_index) override 
-  { _controller->endEdit(_controller->desc().index_to_id[param_index]); }
-  void ui_param_begin_changes(int param_index) override 
-  { _controller->beginEdit(_controller->desc().index_to_id[param_index]); }
+  void ui_param_changing(int index, plain_value plain) override;
+  void plugin_param_changed(int index, plain_value plain)
+  { _gui->plugin_param_changed(index, plain); }
+  void ui_param_end_changes(int index) override
+  { _controller->endEdit(_controller->desc().index_to_id[index]); }
+  void ui_param_begin_changes(int index) override
+  { _controller->beginEdit(_controller->desc().index_to_id[index]); }
 };
 
 }
