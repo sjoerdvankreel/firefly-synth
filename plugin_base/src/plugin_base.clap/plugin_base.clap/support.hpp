@@ -7,7 +7,7 @@ namespace plugin_base::clap {
 
 template <
   clap_plugin_descriptor_t const* Descriptor,
-  std::unique_ptr<plugin_base::plugin_topo>(*TopoFactory)()>
+  std::unique_ptr<plugin_topo>(*TopoFactory)()>
 void const* 
 get_plugin_factory(char const* factory_id)
 {
