@@ -15,7 +15,7 @@ public:
   virtual void plugin_value_changed(plain_value plain) = 0;
 };
 
-class any_param_ui_listener
+class ui_listener
 {
 public:
   virtual void ui_param_end_changes(int param_index) = 0;
@@ -27,7 +27,7 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const* const _desc;
-  std::vector<any_param_ui_listener*> _any_param_ui_listeners = {};
+  std::vector<ui_listener*> _ui_listeners = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   std::vector<std::unique_ptr<juce::Component>> _children = {}; // must be destructed first
 
@@ -46,8 +46,8 @@ public:
   void ui_param_immediate_changed(int param_index, plain_value plain);
 
   void plugin_param_changed(int param_index, plain_value plain);
-  void add_any_param_ui_listener(any_param_ui_listener* listener);
-  void remove_any_param_ui_listener(any_param_ui_listener* listener);
+  void add_ui_listener(ui_listener* listener);
+  void remove_ui_listener(ui_listener* listener);
   void add_plugin_listener(int param_index, plugin_listener* listener);
   void remove_plugin_listener(int param_index, plugin_listener* listener);
 };

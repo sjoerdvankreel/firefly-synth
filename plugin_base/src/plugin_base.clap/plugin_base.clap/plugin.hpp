@@ -33,7 +33,7 @@ public ::clap::helpers::Plugin<
   // I want to use terminate but Maximal fires host-checks on reaper w.r.t. resizing. Not workable.
   ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>,
-public any_param_ui_listener,
+public ui_listener,
 public juce::Timer
 {
   plugin_engine _engine;

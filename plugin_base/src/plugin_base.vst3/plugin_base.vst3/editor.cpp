@@ -38,7 +38,7 @@ EditorView(controller), _controller(controller)
 tresult PLUGIN_API 
 editor::removed()
 {
-  _gui->remove_any_param_ui_listener(this);
+  _gui->remove_ui_listener(this);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
   return EditorView::removed();
@@ -49,7 +49,7 @@ editor::attached(void* parent, FIDString type)
 {
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
-  _gui->add_any_param_ui_listener(this);
+  _gui->add_ui_listener(this);
   return EditorView::attached(parent, type);
 }
 

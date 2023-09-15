@@ -85,7 +85,7 @@ plugin::guiSetParent(clap_window const* window) noexcept
 void 
 plugin::guiDestroy() noexcept
 {
-  _gui->remove_any_param_ui_listener(this);
+  _gui->remove_ui_listener(this);
   _gui.reset();
 }
 
@@ -93,7 +93,7 @@ bool
 plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
   _gui = std::make_unique<plugin_gui>(&_engine.desc(), _ui_state);
-  _gui->add_any_param_ui_listener(this);
+  _gui->add_ui_listener(this);
   return true;
 }
 

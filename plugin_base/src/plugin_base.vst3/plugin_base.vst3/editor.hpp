@@ -8,7 +8,7 @@ namespace plugin_base::vst3 {
 
 class editor final:
 public Steinberg::Vst::EditorView,
-public plugin_base::any_param_ui_listener 
+public plugin_base::ui_listener 
 {
   std::unique_ptr<plugin_gui> _gui = {};
   plugin_base::vst3::controller* const _controller = {};
