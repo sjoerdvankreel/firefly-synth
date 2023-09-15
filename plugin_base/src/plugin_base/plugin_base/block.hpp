@@ -4,9 +4,58 @@
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
 
+#include <vector>
+#include <cstdint>
+
 namespace plugin_base {
 
-struct common_block;
+// note id or PCK (port is 0)
+struct note_id final {
+  int id;
+  short key;
+  short channel;
+};
+
+// keyboard event
+struct note_event final {
+  int frame;
+  note_id id;
+  float velocity;
+  enum class type { on, off, cut } type;
+};
+
+// once per block automation
+struct block_event final {
+  int param;
+  normalized_value normalized;
+};
+
+// sample accurate automation
+struct accurate_event final {
+  int frame;
+  int param;
+  normalized_value normalized;
+};
+
+// passed from host to plug
+struct common_block final {
+  float bpm;
+  int frame_count;
+  float* const* audio_out;
+  float const* const* audio_in;
+  std::int64_t stream_time;
+  std::vector<note_event> notes;
+  INF_DECLARE_MOVE_ONLY(common_block);
+};
+
+// shared block, automation events
+struct host_block final {
+  common_block* common;
+  std::vector<block_event> out_events;
+  std::vector<block_event> block_events;
+  std::vector<accurate_event> accurate_events;
+  INF_DECLARE_MOVE_ONLY(host_block);
+};
 
 // all modules automation
 struct plugin_in final {
