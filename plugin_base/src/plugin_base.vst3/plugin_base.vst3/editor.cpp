@@ -79,7 +79,7 @@ editor::checkSizeConstraint(ViewRect* new_rect)
 }
 
 void 
-editor::ui_param_changing(int index, plain_value plain)
+editor::changing(int index, plain_value plain)
 {
   int param_tag = _controller->desc().index_to_id[index];
   param_mapping const& mapping = _controller->desc().mappings[index];

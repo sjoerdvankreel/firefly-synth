@@ -18,9 +18,9 @@ public:
 class ui_listener
 {
 public:
-  virtual void ui_param_end_changes(int param_index) = 0;
-  virtual void ui_param_begin_changes(int param_index) = 0;
-  virtual void ui_param_changing(int param_index, plain_value plain) = 0;
+  virtual void end_changes(int index) = 0;
+  virtual void begin_changes(int index) = 0;
+  virtual void changing(int index, plain_value plain) = 0;
 };
 
 class plugin_gui:
@@ -38,18 +38,18 @@ public:
   void resized() override;
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
     
-  void ui_param_end_changes(int param_index);
-  void ui_param_begin_changes(int param_index);
-  void ui_param_changing(int param_index, plain_value plain);
+  void end_changes(int index);
+  void begin_changes(int index);
+  void changing(int index, plain_value plain);
 
   // Calls begin-changing-end. Should be the standard behaviour for anything but sliders.
-  void ui_param_immediate_changed(int param_index, plain_value plain);
+  void ui_param_immediate_changed(int index, plain_value plain);
 
-  void plugin_param_changed(int param_index, plain_value plain);
+  void plugin_param_changed(int index, plain_value plain);
   void add_ui_listener(ui_listener* listener);
   void remove_ui_listener(ui_listener* listener);
-  void add_plugin_listener(int param_index, plugin_listener* listener);
-  void remove_plugin_listener(int param_index, plugin_listener* listener);
+  void add_plugin_listener(int index, plugin_listener* listener);
+  void remove_plugin_listener(int index, plugin_listener* listener);
 };
 
 }

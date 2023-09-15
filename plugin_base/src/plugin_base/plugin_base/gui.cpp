@@ -123,16 +123,16 @@ param_value_label::value_changed(plain_value plain)
 
 void 
 param_slider::stoppedDragging()
-{ _gui->ui_param_end_changes(_desc->global); }
+{ _gui->end_changes(_desc->global); }
 void 
 param_slider::startedDragging()
-{ _gui->ui_param_begin_changes(_desc->global); }
+{ _gui->begin_changes(_desc->global); }
 
 void 
 param_slider::valueChanged()
 { 
   auto value = _desc->param->raw_to_plain(getValue());
-  _gui->ui_param_changing(_desc->global, value);
+  _gui->changing(_desc->global, value);
 }
 
 void 
@@ -258,45 +258,45 @@ plugin_gui::add_ui_listener(ui_listener* listener)
 { _ui_listeners.push_back(listener); }
 
 void 
-plugin_gui::add_plugin_listener(int param_index, plugin_listener* listener)
-{ _plugin_listeners[param_index].push_back(listener); }
+plugin_gui::add_plugin_listener(int index, plugin_listener* listener)
+{ _plugin_listeners[index].push_back(listener); }
 
 void 
-plugin_gui::ui_param_immediate_changed(int param_index, plain_value plain)
+plugin_gui::ui_param_immediate_changed(int index, plain_value plain)
 {
-  ui_param_begin_changes(param_index);
-  ui_param_changing(param_index, plain);
-  ui_param_end_changes(param_index);
+  begin_changes(index);
+  changing(index, plain);
+  end_changes(index);
 }
 
 void 
-plugin_gui::ui_param_begin_changes(int param_index)
+plugin_gui::begin_changes(int index)
 {
   auto& listeners = _ui_listeners;
   for(int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_param_begin_changes(param_index);
+    listeners[i]->begin_changes(index);
 }
 
 void
-plugin_gui::ui_param_end_changes(int param_index)
+plugin_gui::end_changes(int index)
 {
   auto& listeners = _ui_listeners;
   for (int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_param_end_changes(param_index);
+    listeners[i]->end_changes(index);
 }
 
 void
-plugin_gui::ui_param_changing(int param_index, plain_value plain)
+plugin_gui::changing(int index, plain_value plain)
 {
   auto& listeners = _ui_listeners;
   for (int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_param_changing(param_index, plain);
+    listeners[i]->changing(index, plain);
 }
 
 void
-plugin_gui::plugin_param_changed(int param_index, plain_value plain)
+plugin_gui::plugin_param_changed(int index, plain_value plain)
 {
-  auto& listeners = _plugin_listeners[param_index];
+  auto& listeners = _plugin_listeners[index];
   for(int i = 0; i < listeners.size(); i++)
     listeners[i]->value_changed(plain);
 }
@@ -310,9 +310,9 @@ plugin_gui::remove_ui_listener(ui_listener* listener)
 }
 
 void 
-plugin_gui::remove_plugin_listener(int param_index, plugin_listener* listener)
+plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
 {
-  auto& listeners = _plugin_listeners[param_index];
+  auto& listeners = _plugin_listeners[index];
   auto iter = std::find(listeners.begin(), listeners.end(), listener);
   if (iter != listeners.end()) listeners.erase(iter);
 }

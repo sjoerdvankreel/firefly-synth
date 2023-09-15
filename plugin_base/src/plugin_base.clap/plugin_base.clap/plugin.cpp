@@ -131,7 +131,7 @@ plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 }
 
 void 
-plugin::ui_param_changing(int index, plain_value plain)
+plugin::changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
 
