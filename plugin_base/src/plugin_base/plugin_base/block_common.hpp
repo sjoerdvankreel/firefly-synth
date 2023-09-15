@@ -7,8 +7,6 @@
 
 namespace plugin_base {
 
-enum class note_event_type { on, off, cut };
-
 // note id or PCK (port is 0)
 struct note_id final {
   int id;
@@ -18,10 +16,10 @@ struct note_id final {
 
 // keyboard event
 struct note_event final {
+  int frame;
   note_id id;
   float velocity;
-  int frame_index;
-  note_event_type type;
+  enum class type { on, off, cut } type;
 };
 
 // passed from host to plug

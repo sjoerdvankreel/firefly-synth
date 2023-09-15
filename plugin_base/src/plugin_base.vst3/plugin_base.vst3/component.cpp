@@ -86,8 +86,8 @@ component::process(ProcessData& data)
         if (vst_event.type == Event::kNoteOnEvent) 
         {
           note_event note;
-          note.type = note_event_type::on;
-          note.frame_index = vst_event.sampleOffset;
+          note.type = note_event::type::on;
+          note.frame = vst_event.sampleOffset;
           note.velocity = vst_event.noteOn.velocity;
           note.id.id = vst_event.noteOn.noteId;
           note.id.key = vst_event.noteOn.pitch;
@@ -97,8 +97,8 @@ component::process(ProcessData& data)
         else if (vst_event.type == Event::kNoteOffEvent)
         {
           note_event note;
-          note.type = note_event_type::off;
-          note.frame_index = vst_event.sampleOffset;
+          note.type = note_event::type::off;
+          note.frame = vst_event.sampleOffset;
           note.velocity = vst_event.noteOff.velocity;
           note.id.id = vst_event.noteOff.noteId;
           note.id.key = vst_event.noteOff.pitch;

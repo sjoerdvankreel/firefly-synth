@@ -387,13 +387,13 @@ plugin::process(clap_process const* process) noexcept
     {
       note_event note = {};
       auto event = reinterpret_cast<clap_event_note_t const*>(header);
-      if (header->type == CLAP_EVENT_NOTE_ON) note.type = note_event_type::on;
-      else if (header->type == CLAP_EVENT_NOTE_OFF) note.type = note_event_type::off;
-      else if (header->type == CLAP_EVENT_NOTE_CHOKE) note.type = note_event_type::cut;
+      if (header->type == CLAP_EVENT_NOTE_ON) note.type = note_event::type::on;
+      else if (header->type == CLAP_EVENT_NOTE_OFF) note.type = note_event::type::off;
+      else if (header->type == CLAP_EVENT_NOTE_CHOKE) note.type = note_event::type::cut;
       note.id.key = event->key;
       note.id.id = event->note_id;
       note.velocity = event->velocity;
-      note.frame_index = header->time;
+      note.frame = header->time;
       note.id.channel = event->channel;
       block.common->notes.push_back(note);
       break;
