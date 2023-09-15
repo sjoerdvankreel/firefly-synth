@@ -138,7 +138,7 @@ plugin_engine::process()
   for (int e = 0; e < _host_block.block_events.size(); e++)
   {
     auto const& event = _host_block.block_events[e];
-    auto const& mapping = _desc.param_mappings[event.param_global_index];
+    auto const& mapping = _desc.mappings[event.param_global_index];
     plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(event.normalized);
     mapping.value_at(_state) = plain;
     mapping.value_at(_plugin_block.block_automation) = plain;
@@ -152,7 +152,7 @@ plugin_engine::process()
   for (int e = 0; e < _host_block.accurate_events.size(); e++)
   {
     auto const& event = _host_block.accurate_events[e];
-    auto const& mapping = _desc.param_mappings[event.param_global_index];
+    auto const& mapping = _desc.mappings[event.param_global_index];
 
     // linear interpolation from previous to current value
     auto& curve = mapping.value_at(_plugin_block.accurate_automation);

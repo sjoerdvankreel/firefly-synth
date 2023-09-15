@@ -115,7 +115,7 @@ component::process(ProcessData& data)
       if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
         int param_global_index = _engine.desc().param_id_to_index.at(queue->getParameterId());
-        auto const& mapping = _engine.desc().param_mappings[param_global_index];
+        auto const& mapping = _engine.desc().mappings[param_global_index];
         auto rate = _engine.desc().param_at(mapping).param->rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {

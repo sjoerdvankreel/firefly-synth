@@ -70,7 +70,7 @@ struct plugin_desc final {
   std::unique_ptr<plugin_topo> plugin = {};
 
   // TODO rename these
-  std::vector<param_mapping> param_mappings = {};
+  std::vector<param_mapping> mappings = {};
   std::vector<int> param_index_to_id = {};
   std::map<int, int> param_id_to_index = {};
 
