@@ -42,9 +42,15 @@ public:
   void ui_changing(int index, plain_value plain);
   void plugin_changed(int index, plain_value plain);
 
-  void add_ui_listener(ui_listener* listener);
+  void add_ui_listener(ui_listener* listener)
+  {
+    _ui_listeners.push_back(listener);
+  }
   void remove_ui_listener(ui_listener* listener);
-  void add_plugin_listener(int index, plugin_listener* listener);
+  void add_plugin_listener(int index, plugin_listener* listener)
+  {
+    _plugin_listeners[index].push_back(listener);
+  }
   void remove_plugin_listener(int index, plugin_listener* listener);
 
   INF_DECLARE_MOVE_ONLY(plugin_gui);

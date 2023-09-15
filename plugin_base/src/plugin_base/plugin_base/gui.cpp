@@ -12,104 +12,96 @@ public plugin_listener
 protected:
   plugin_gui* const _gui;
   param_desc const* const _desc;
-  param_base(plugin_gui* gui, param_desc const* desc);
+  param_base(plugin_gui* gui, param_desc const* desc): 
+  _gui(gui), _desc(desc) 
+  { _gui->add_plugin_listener(_desc->global, this); }
 public:
-  virtual ~param_base();
+  virtual ~param_base() 
+  { _gui->remove_plugin_listener(_desc->global, this); }
 };
 
 class param_name_label:
 public Label
 {
 public:
-  param_name_label(param_desc const* desc);
+  param_name_label(param_desc const* desc) 
+  { setText(desc->short_name, dontSendNotification);  }
 };
 
 class param_value_label:
-public param_base,
-public Label
+public param_base, public Label
 {
 public:
-  param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial);
   void plugin_changed(plain_value plain) override final;
+  param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial):
+  param_base(gui, desc), Label() { plugin_changed(initial); }
 };
 
 class param_slider:
-public param_base, 
-public Slider
+public param_base, public Slider
 {
 public: 
   param_slider(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void valueChanged() override;
-  void stoppedDragging() override;
-  void startedDragging() override;
-  void plugin_changed(plain_value plain) override final;
+  void valueChanged() override
+  { _gui->ui_changing(_desc->global, _desc->param->raw_to_plain(getValue())); }
+  void plugin_changed(plain_value plain) override final 
+  { setValue(_desc->param->plain_to_raw(plain), dontSendNotification); }
+  void stoppedDragging() override { _gui->ui_end_changes(_desc->global); }
+  void startedDragging() override { _gui->ui_begin_changes(_desc->global); }
 };
 
 class param_combobox :
-public param_base,
-public ComboBox,
-public ComboBox::Listener
+public param_base, public ComboBox, public ComboBox::Listener
 {
 public:
-  ~param_combobox();
+  ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void comboBoxChanged(ComboBox*) override;
-  void plugin_changed(plain_value plain) override final;
+  void plugin_changed(plain_value plain) override final
+  { setSelectedItemIndex(plain.step() - _desc->param->min); }
+  void comboBoxChanged(ComboBox*) override final
+  { _gui->ui_changed(_desc->global, 
+    _desc->param->raw_to_plain(getSelectedItemIndex() + _desc->param->min)); }
 };
 
 class param_toggle_button :
-public param_base,
-public ToggleButton,
-public Button::Listener
+public param_base, public ToggleButton, public Button::Listener
 {
   bool _checked = false;
 public:
-  ~param_toggle_button();
+  ~param_toggle_button() { removeListener(this); }
   param_toggle_button(plugin_gui* gui, param_desc const* desc, plain_value initial);
+  
   void buttonClicked(Button*) override {}
   void buttonStateChanged(Button*) override;
-  void plugin_changed(plain_value plain) override final;
+  void plugin_changed(plain_value plain) override final 
+  { setToggleState(plain.step() != 0, dontSendNotification); }
 };
 
 class param_textbox :
-public param_base,
-public TextEditor,
-public TextEditor::Listener
+public param_base, public TextEditor, public TextEditor::Listener
 {
   std::string _last_parsed;
 public:
-  ~param_textbox();
+  ~param_textbox() { removeListener(this); }
   param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void plugin_changed(plain_value plain) override final;
+
   void textEditorTextChanged(TextEditor&) override;
+  void plugin_changed(plain_value plain) override final
+  { setText(_last_parsed = _desc->param->plain_to_text(plain), false); }
+
   void textEditorFocusLost(TextEditor&) override { setText(_last_parsed, false); }
   void textEditorReturnKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
   void textEditorEscapeKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
 };
 
-param_base::
-param_base(plugin_gui* gui, param_desc const* desc) : 
-_gui(gui), _desc(desc)
-{ _gui->add_plugin_listener(_desc->global, this); }
-param_base::
-~param_base()
-{ _gui->remove_plugin_listener(_desc->global, this); }
-
 void
-param_combobox::plugin_changed(plain_value plain)
-{ setSelectedItemIndex(plain.step() - _desc->param->min); }
-void
-param_toggle_button::plugin_changed(plain_value plain)
-{ setToggleState(plain.step() != 0, dontSendNotification); }
-void
-param_slider::plugin_changed(plain_value plain)
-{ setValue(_desc->param->plain_to_raw(plain), dontSendNotification); }
-
-void
-param_textbox::plugin_changed(plain_value plain)
+param_textbox::textEditorTextChanged(TextEditor&)
 {
-  _last_parsed = _desc->param->plain_to_text(plain);
-  setText(_last_parsed, false);
+  plain_value plain;
+  std::string text(getText().toStdString());
+  if (!_desc->param->text_to_plain(text, plain)) return;
+  _last_parsed = text;
+  _gui->ui_changed(_desc->global, plain);
 }
 
 void
@@ -122,20 +114,6 @@ param_value_label::plugin_changed(plain_value plain)
 }
 
 void 
-param_slider::stoppedDragging()
-{ _gui->ui_end_changes(_desc->global); }
-void 
-param_slider::startedDragging()
-{ _gui->ui_begin_changes(_desc->global); }
-
-void 
-param_slider::valueChanged()
-{ 
-  auto value = _desc->param->raw_to_plain(getValue());
-  _gui->ui_changing(_desc->global, value);
-}
-
-void 
 param_toggle_button::buttonStateChanged(Button*)
 { 
   if(_checked == getToggleState()) return;
@@ -144,35 +122,6 @@ param_toggle_button::buttonStateChanged(Button*)
   _gui->ui_changed(_desc->global, plain);
 }
 
-void 
-param_textbox::textEditorTextChanged(TextEditor&)
-{
-  plain_value plain;
-  std::string text(getText().toStdString());
-  if(!_desc->param->text_to_plain(text, plain)) return;
-  _last_parsed = text;
-  _gui->ui_changed(_desc->global, plain);
-}
-
-void
-param_combobox::comboBoxChanged(ComboBox*)
-{
-  plain_value plain = _desc->param->raw_to_plain(getSelectedItemIndex() + _desc->param->min);
-  _gui->ui_changed(_desc->global, plain);
-}
-
-param_name_label::
-param_name_label(param_desc const* desc)
-{ setText(desc->short_name, dontSendNotification); }
-
-param_value_label::
-param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial):
-param_base(gui, desc), Label()
-{ plugin_changed(initial); }
-
-param_textbox::
-~param_textbox()
-{ removeListener(this); }
 param_textbox::
 param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial) :
 param_base(gui, desc), TextEditor()
@@ -181,9 +130,6 @@ param_base(gui, desc), TextEditor()
   plugin_changed(initial);
 }
 
-param_toggle_button::
-~param_toggle_button()
-{ removeListener(this); }
 param_toggle_button::
 param_toggle_button(plugin_gui* gui, param_desc const* desc, plain_value initial):
 param_base(gui, desc), ToggleButton()
@@ -194,9 +140,6 @@ param_base(gui, desc), ToggleButton()
   plugin_changed(initial);
 }
 
-param_combobox::
-~param_combobox()
-{ removeListener(this); }
 param_combobox::
 param_combobox(plugin_gui* gui, param_desc const* desc, plain_value initial) :
 param_base(gui, desc), ComboBox()
@@ -254,14 +197,6 @@ param_base(gui, desc), Slider()
 }
 
 void 
-plugin_gui::add_ui_listener(ui_listener* listener)
-{ _ui_listeners.push_back(listener); }
-
-void 
-plugin_gui::add_plugin_listener(int index, plugin_listener* listener)
-{ _plugin_listeners[index].push_back(listener); }
-
-void 
 plugin_gui::ui_changed(int index, plain_value plain)
 {
   ui_begin_changes(index);
@@ -272,50 +207,46 @@ plugin_gui::ui_changed(int index, plain_value plain)
 void 
 plugin_gui::ui_begin_changes(int index)
 {
-  auto& listeners = _ui_listeners;
-  for(int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_begin_changes(index);
+  for(int i = 0; i < _ui_listeners.size(); i++)
+    _ui_listeners[i]->ui_begin_changes(index);
 }
 
 void
 plugin_gui::ui_end_changes(int index)
 {
-  auto& listeners = _ui_listeners;
-  for (int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_end_changes(index);
+  for (int i = 0; i < _ui_listeners.size(); i++)
+    _ui_listeners[i]->ui_end_changes(index);
 }
 
 void
 plugin_gui::ui_changing(int index, plain_value plain)
 {
-  auto& listeners = _ui_listeners;
-  for (int i = 0; i < listeners.size(); i++)
-    listeners[i]->ui_changing(index, plain);
+  for (int i = 0; i < _ui_listeners.size(); i++)
+    _ui_listeners[i]->ui_changing(index, plain);
 }
 
 void
 plugin_gui::plugin_changed(int index, plain_value plain)
 {
-  auto& listeners = _plugin_listeners[index];
-  for(int i = 0; i < listeners.size(); i++)
-    listeners[i]->plugin_changed(plain);
+  for(int i = 0; i < _plugin_listeners[index].size(); i++)
+    _plugin_listeners[index][i]->plugin_changed(plain);
 }
 
 void 
 plugin_gui::remove_ui_listener(ui_listener* listener)
 {
-  auto& listeners = _ui_listeners;
-  auto iter = std::find(listeners.begin(), listeners.end(), listener);
-  if(iter != listeners.end()) listeners.erase(iter);
+  auto iter = std::find(_ui_listeners.begin(), _ui_listeners.end(), listener);
+  if(iter != _ui_listeners.end()) _ui_listeners.erase(iter);
 }
 
 void 
 plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
 {
-  auto& listeners = _plugin_listeners[index];
-  auto iter = std::find(listeners.begin(), listeners.end(), listener);
-  if (iter != listeners.end()) listeners.erase(iter);
+  auto iter = std::find(_plugin_listeners[index].begin(), _plugin_listeners[index].end(), listener);
+  if (iter != _plugin_listeners[index].end()) _plugin_listeners[index].erase(iter);
 }
+
+// TODO ! un-uglify it from here
 
 plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial) :
