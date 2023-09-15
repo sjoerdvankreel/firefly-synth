@@ -9,7 +9,7 @@
 
 namespace plugin_base {
 
-class single_param_plugin_listener
+class plugin_listener
 {
 public:
   virtual void plugin_value_changed(plain_value plain) = 0;
@@ -28,7 +28,7 @@ public juce::Component
 {
   plugin_desc const* const _desc;
   std::vector<any_param_ui_listener*> _any_param_ui_listeners = {};
-  std::vector<std::vector<single_param_plugin_listener*>> _single_param_plugin_listeners = {};
+  std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   std::vector<std::unique_ptr<juce::Component>> _children = {}; // must be destructed first
 
 public:
@@ -48,8 +48,8 @@ public:
   void plugin_param_changed(int param_index, plain_value plain);
   void add_any_param_ui_listener(any_param_ui_listener* listener);
   void remove_any_param_ui_listener(any_param_ui_listener* listener);
-  void add_single_param_plugin_listener(int param_index, single_param_plugin_listener* listener);
-  void remove_single_param_plugin_listener(int param_index, single_param_plugin_listener* listener);
+  void add_plugin_listener(int param_index, plugin_listener* listener);
+  void remove_plugin_listener(int param_index, plugin_listener* listener);
 };
 
 }

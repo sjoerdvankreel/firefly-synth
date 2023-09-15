@@ -7,7 +7,7 @@ using namespace juce;
 namespace plugin_base {
 
 class param_base:
-public single_param_plugin_listener
+public plugin_listener
 {
 protected:
   plugin_gui* const _gui;
@@ -90,10 +90,10 @@ public:
 param_base::
 param_base(plugin_gui* gui, param_desc const* desc) : 
 _gui(gui), _desc(desc)
-{ _gui->add_single_param_plugin_listener(_desc->global, this); }
+{ _gui->add_plugin_listener(_desc->global, this); }
 param_base::
 ~param_base()
-{ _gui->remove_single_param_plugin_listener(_desc->global, this); }
+{ _gui->remove_plugin_listener(_desc->global, this); }
 
 void
 param_combobox::plugin_value_changed(plain_value plain)
@@ -258,8 +258,8 @@ plugin_gui::add_any_param_ui_listener(any_param_ui_listener* listener)
 { _any_param_ui_listeners.push_back(listener); }
 
 void 
-plugin_gui::add_single_param_plugin_listener(int param_index, single_param_plugin_listener* listener)
-{ _single_param_plugin_listeners[param_index].push_back(listener); }
+plugin_gui::add_plugin_listener(int param_index, plugin_listener* listener)
+{ _plugin_listeners[param_index].push_back(listener); }
 
 void 
 plugin_gui::ui_param_immediate_changed(int param_index, plain_value plain)
@@ -296,7 +296,7 @@ plugin_gui::ui_param_changing(int param_index, plain_value plain)
 void
 plugin_gui::plugin_param_changed(int param_index, plain_value plain)
 {
-  auto& listeners = _single_param_plugin_listeners[param_index];
+  auto& listeners = _plugin_listeners[param_index];
   for(int i = 0; i < listeners.size(); i++)
     listeners[i]->plugin_value_changed(plain);
 }
@@ -310,9 +310,9 @@ plugin_gui::remove_any_param_ui_listener(any_param_ui_listener* listener)
 }
 
 void 
-plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_plugin_listener* listener)
+plugin_gui::remove_plugin_listener(int param_index, plugin_listener* listener)
 {
-  auto& listeners = _single_param_plugin_listeners[param_index];
+  auto& listeners = _plugin_listeners[param_index];
   auto iter = std::find(listeners.begin(), listeners.end(), listener);
   if (iter != listeners.end()) listeners.erase(iter);
 }
@@ -320,7 +320,7 @@ plugin_gui::remove_single_param_plugin_listener(int param_index, single_param_pl
 plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial) :
 _desc(desc), 
-_single_param_plugin_listeners(desc->param_count)
+_plugin_listeners(desc->param_count)
 {
   setOpaque(true);
   setSize(_desc->plugin->gui_default_width, _desc->plugin->gui_default_width / _desc->plugin->gui_aspect_ratio);
