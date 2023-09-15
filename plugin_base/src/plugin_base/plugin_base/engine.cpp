@@ -34,8 +34,8 @@ plugin_engine::prepare()
   _host_block.common->frame_count = 0;
   _host_block.common->stream_time = 0;
   _host_block.common->notes.clear();
-  _host_block.common->audio_input = nullptr;
-  _host_block.common->audio_output = nullptr;
+  _host_block.common->audio_in = nullptr;
+  _host_block.common->audio_out = nullptr;
   _host_block.block_events.clear();
   _host_block.output_events.clear();
   _host_block.accurate_events.clear();
@@ -85,8 +85,8 @@ plugin_engine::process()
   // clear host audio out
   for(int c = 0; c < 2; c++)
     std::fill(
-      _host_block.common->audio_output[c], 
-      _host_block.common->audio_output[c] + _common_block.frame_count,
+      _host_block.common->audio_out[c], 
+      _host_block.common->audio_out[c] + _common_block.frame_count,
       0.0f);
 
   for(int m = 0; m < _desc.plugin->modules.size(); m++)

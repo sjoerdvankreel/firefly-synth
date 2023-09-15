@@ -47,7 +47,7 @@ filter_engine::process(
   for(int o = 0; o < topo.modules[module_type_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
-        plugin.host->audio_output[c][f] += osc_audio[o][c][f] * osc_gain_curves[o][f];
+        plugin.host->audio_out[c][f] += osc_audio[o][c][f] * osc_gain_curves[o][f];
   int on = module.block_automation[filter_param_on][0].step();
   if (!on) return;
 
@@ -61,10 +61,10 @@ filter_engine::process(
     float b = (w - angle) * norm;
     for (int c = 0; c < 2; c++)
     {
-      float filtered = plugin.host->audio_output[c][f] * a + _in[c] * a + _out[c] * b;
-      _in[c] = plugin.host->audio_output[c][f];
+      float filtered = plugin.host->audio_out[c][f] * a + _in[c] * a + _out[c] * b;
+      _in[c] = plugin.host->audio_out[c][f];
       _out[c] = filtered;
-      plugin.host->audio_output[c][f] = filtered;
+      plugin.host->audio_out[c][f] = filtered;
       max_out = std::max(max_out, filtered);
     }
   }

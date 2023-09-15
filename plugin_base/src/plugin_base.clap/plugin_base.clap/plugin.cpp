@@ -367,8 +367,8 @@ plugin::process(clap_process const* process) noexcept
   block.common->frame_count = process->frames_count;
   block.common->stream_time = process->steady_time;
   block.common->bpm = process->transport? process->transport->tempo: 0;
-  block.common->audio_input = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
-  block.common->audio_output = process->audio_outputs[0].data32;
+  block.common->audio_in = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
+  block.common->audio_out = process->audio_outputs[0].data32;
 
   process_ui_to_audio_events(process->out_events);
 
