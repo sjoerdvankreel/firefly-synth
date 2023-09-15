@@ -37,7 +37,7 @@ struct accurate_event final {
   normalized_value normalized;
 };
 
-// passed from host to plug
+// shared host/plug
 struct common_block final {
   float bpm;
   int frame_count;
@@ -48,12 +48,18 @@ struct common_block final {
   INF_DECLARE_MOVE_ONLY(common_block);
 };
 
+// shared host/plug
+struct host_events final {
+  std::vector<block_event> out;
+  std::vector<block_event> block;
+  std::vector<accurate_event> accurate;
+  INF_DECLARE_MOVE_ONLY(host_events);
+};
+
 // shared block, automation events
 struct host_block final {
+  host_events events;
   common_block* common;
-  std::vector<block_event> out_events;
-  std::vector<block_event> block_events;
-  std::vector<accurate_event> accurate_events;
   INF_DECLARE_MOVE_ONLY(host_block);
 };
 
