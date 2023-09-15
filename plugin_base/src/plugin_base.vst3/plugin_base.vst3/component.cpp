@@ -121,7 +121,7 @@ component::process(ProcessData& data)
         {
           host_block_event event;
           event.normalized = normalized_value(value);
-          event.param_global_index = param_global_index;
+          event.param = param_global_index;
           block.block_events.push_back(event);
         }
         else if (rate == param_rate::accurate)
@@ -129,9 +129,9 @@ component::process(ProcessData& data)
             if (queue->getPoint(p, frame_index, value) == kResultTrue)
             {
               host_accurate_event event;
-              event.frame_index = frame_index;
+              event.frame = frame_index;
               event.normalized = normalized_value(value);
-              event.param_global_index = param_global_index;
+              event.param = param_global_index;
               block.accurate_events.push_back(event);
             }
       }
@@ -142,7 +142,7 @@ component::process(ProcessData& data)
   for (int e = 0; e < block.output_events.size(); e++)
   {
     auto const& event = block.output_events[e];
-    int param_tag = _engine.desc().index_to_id[event.param_global_index];
+    int param_tag = _engine.desc().index_to_id[event.param];
     queue = data.outputParameterChanges->addParameterData(param_tag, unused_index);
     queue->addPoint(0, event.normalized.value(), unused_index);
   }

@@ -11,14 +11,14 @@ struct common_block;
 
 // once per block automation
 struct host_block_event final {
-  int param_global_index;
+  int param;
   normalized_value normalized;
 };
 
 // sample accurate automation
 struct host_accurate_event final {
-  int frame_index;
-  int param_global_index;
+  int frame;
+  int param;
   normalized_value normalized;
 };
 
