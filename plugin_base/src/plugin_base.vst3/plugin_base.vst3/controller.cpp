@@ -59,7 +59,7 @@ controller::setParamNormalized(ParamID tag, ParamValue value)
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
   if(_editor == nullptr) return kResultTrue;
-  int param_index = _desc.param_id_to_index.at(tag);
+  int param_index = _desc.id_to_index.at(tag);
   param_mapping const& mapping = _desc.mappings[param_index];
   plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(normalized_value(value));
   _editor->plugin_param_changed(param_index, plain);

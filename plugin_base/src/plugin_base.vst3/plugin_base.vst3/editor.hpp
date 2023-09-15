@@ -30,9 +30,9 @@ public:
   void plugin_param_changed(int param_index, plain_value plain)
   { _gui->plugin_param_changed(param_index, plain); }
   void ui_param_end_changes(int param_index) override 
-  { _controller->endEdit(_controller->desc().param_index_to_id[param_index]); }
+  { _controller->endEdit(_controller->desc().index_to_id[param_index]); }
   void ui_param_begin_changes(int param_index) override 
-  { _controller->beginEdit(_controller->desc().param_index_to_id[param_index]); }
+  { _controller->beginEdit(_controller->desc().index_to_id[param_index]); }
 };
 
 }

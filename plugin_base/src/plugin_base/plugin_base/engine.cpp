@@ -16,7 +16,7 @@ _desc(std::move(topo)), _dims(*_desc.plugin)
   _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
   _state.resize(_dims.params);
-  _desc.init_default_state(_state);
+  _desc.init_defaults(_state);
   _module_engines.resize(_dims.modules);
   _common_block.notes.reserve(note_limit_guess);
   _accurate_frames.resize(_desc.param_count);

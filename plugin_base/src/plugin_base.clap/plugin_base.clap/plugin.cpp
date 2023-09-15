@@ -37,7 +37,7 @@ _to_audio_events(std::make_unique<ReaderWriterQueue<param_queue_event, default_q
 {
   plugin_dims dims(*_engine.desc().plugin);
   _ui_state.resize(dims.params);
-  _engine.desc().init_default_state(_ui_state);
+  _engine.desc().init_defaults(_ui_state);
   _block_automation_seen.resize(_engine.desc().param_count);
 }
 
@@ -176,8 +176,8 @@ plugin::push_to_ui(int param_global_index, clap_value clap)
 std::int32_t
 plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
-  auto iter = _engine.desc().param_id_to_index.find(param_id);
-  if (iter == _engine.desc().param_id_to_index.end())
+  auto iter = _engine.desc().id_to_index.find(param_id);
+  if (iter == _engine.desc().id_to_index.end())
   {
     assert(false);
     return -1;
@@ -323,7 +323,7 @@ plugin::process_ui_to_audio_events(const clap_output_events_t* out)
   param_queue_event e;
   while (_to_audio_events->try_dequeue(e))
   {
-    int param_id = _engine.desc().param_index_to_id[e.param_global_index];
+    int param_id = _engine.desc().index_to_id[e.param_global_index];
     switch(e.type) 
     {
     case param_queue_event_type::value_changing:

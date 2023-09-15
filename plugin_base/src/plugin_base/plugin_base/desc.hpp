@@ -66,19 +66,16 @@ struct module_desc final {
 struct plugin_desc final {
   int param_count = {};
   int module_count = {};
+  std::vector<int> index_to_id = {};
+  std::map<int, int> id_to_index = {};
   std::vector<module_desc> modules = {};
   std::unique_ptr<plugin_topo> plugin = {};
-
-  // TODO rename these
   std::vector<param_mapping> mappings = {};
-  std::vector<int> param_index_to_id = {};
-  std::map<int, int> param_id_to_index = {};
 
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);
 
-  // TODO and this
-  void init_default_state(jarray<plain_value, 4>& state) const;
+  void init_defaults(jarray<plain_value, 4>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; }
 };

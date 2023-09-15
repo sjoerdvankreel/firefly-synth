@@ -59,8 +59,8 @@ validate_desc(plugin_desc const& desc)
   assert(desc.module_count > 0);
   assert(desc.modules.size() == desc.module_count);
   assert(desc.mappings.size() == desc.param_count);
-  assert(desc.param_id_to_index.size() == desc.param_count);
-  assert(desc.param_index_to_id.size() == desc.param_count);
+  assert(desc.id_to_index.size() == desc.param_count);
+  assert(desc.index_to_id.size() == desc.param_count);
 
   int param_global = 0;
   (void)param_global;
@@ -285,8 +285,8 @@ plugin(std::move(plugin_))
       mapping.param_topo = param.topo;
       mapping.module_slot = module.slot;
       mapping.module_topo = module.topo;
-      param_index_to_id.push_back(param.id_hash);
-      param_id_to_index[param.id_hash] = mappings.size();
+      index_to_id.push_back(param.id_hash);
+      id_to_index[param.id_hash] = mappings.size();
       mappings.push_back(std::move(mapping));
     }
   }
@@ -297,7 +297,7 @@ plugin(std::move(plugin_))
 }
 
 void
-plugin_desc::init_default_state(jarray<plain_value, 4>& state) const
+plugin_desc::init_defaults(jarray<plain_value, 4>& state) const
 {
   for (int m = 0; m < plugin->modules.size(); m++)
   {

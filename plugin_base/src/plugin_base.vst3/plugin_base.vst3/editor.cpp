@@ -26,7 +26,7 @@ EditorView(controller), _controller(controller)
         auto const& param = module.params[p];
         for(int pi = 0; pi < param.slot_count; pi++)
         {
-          int param_tag = _controller->desc().param_index_to_id[param_global_index++];
+          int param_tag = _controller->desc().index_to_id[param_global_index++];
           double normalized = _controller->getParamNormalized(param_tag);
           ui_initial_values[m][mi][p][pi] = param.normalized_to_plain(normalized_value(normalized));
         }
@@ -81,7 +81,7 @@ editor::checkSizeConstraint(ViewRect* new_rect)
 void 
 editor::ui_param_changing(int param_index, plain_value plain)
 {
-  int param_tag = _controller->desc().param_index_to_id[param_index];
+  int param_tag = _controller->desc().index_to_id[param_index];
   param_mapping const& mapping = _controller->desc().mappings[param_index];
   auto normalized = _controller->desc().param_at(mapping).param->plain_to_normalized(plain).value();
   _controller->performEdit(param_tag, normalized);
