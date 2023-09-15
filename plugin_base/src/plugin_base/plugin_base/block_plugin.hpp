@@ -27,14 +27,26 @@ public:
   }
 };
 
-// readonly modules audio and cv state, interpolated automation curves, host block
+// module output
+struct module_out final {
+  jarray<float, 3> cv = {};
+  jarray<float, 4> audio = {};
+  INF_DECLARE_MOVE_ONLY(module_out);
+};
+
+// automation input
+struct automation_in final {
+  jarray<float, 5> accurate = {};
+  jarray<plain_value, 4> block = {};
+  INF_DECLARE_MOVE_ONLY(automation_in);
+};
+
+// process call in/out
 struct plugin_block final {
-  float sample_rate;
-  common_block const* host;
-  jarray<float, 3> module_cv;
-  jarray<float, 4> module_audio;
-  jarray<float, 5> accurate_automation;
-  jarray<plain_value, 4> block_automation;
+  module_out out = {};
+  automation_in in = {};
+  float sample_rate = {};
+  common_block const* host = {};
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 

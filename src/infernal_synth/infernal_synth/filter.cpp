@@ -42,7 +42,7 @@ filter_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   float max_out = 0.0f;
-  auto const& osc_audio = plugin.module_audio[module_type::module_type_osc];
+  auto const& osc_audio = plugin.out.audio[module_type::module_type_osc];
   auto const& osc_gain_curves = module.accurate_automation[filter_param_osc_gain];
   for(int o = 0; o < topo.modules[module_type_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)

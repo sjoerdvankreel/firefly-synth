@@ -20,7 +20,7 @@ _desc(std::move(topo)), _dims(*_desc.plugin)
   _module_engines.resize(_dims.modules);
   _common_block.notes.reserve(note_limit_guess);
   _accurate_frames.resize(_desc.param_count);
-  _plugin_block.block_automation.resize(_dims.params);
+  _plugin_block.in.block.resize(_dims.params);
   _host_block.block_events.reserve(block_events_guess);
   _host_block.out_events.reserve(block_events_guess);
   _host_block.accurate_events.reserve(accurate_events_guess);
@@ -51,9 +51,9 @@ plugin_engine::deactivate()
   _host_block.block_events.clear();
   _host_block.out_events.clear();
   _host_block.accurate_events.clear();
-  _plugin_block.module_cv = {};
-  _plugin_block.module_audio = {};
-  _plugin_block.accurate_automation = {};
+  _plugin_block.out.cv = {};
+  _plugin_block.out.audio = {};
+  _plugin_block.in.accurate = {};
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
     for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _module_engines[m][mi].reset();
@@ -71,9 +71,9 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(*_desc.plugin, max_frame_count);
-  _plugin_block.module_cv.resize(frame_dims.cv);
-  _plugin_block.module_audio.resize(frame_dims.audio);
-  _plugin_block.accurate_automation.resize(frame_dims.accurate);
+  _plugin_block.out.cv.resize(frame_dims.cv);
+  _plugin_block.out.audio.resize(frame_dims.audio);
+  _plugin_block.in.accurate.resize(frame_dims.accurate);
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _module_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
@@ -96,13 +96,13 @@ plugin_engine::process()
       if(module.output == module_output::cv)
       {
         // clear module cv output
-        auto& curve = _plugin_block.module_cv[m][mi];
+        auto& curve = _plugin_block.out.cv[m][mi];
         std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
       }
       else if (module.output == module_output::audio)
       {
         // clear module audio output
-        auto& audio = _plugin_block.module_audio[m][mi];
+        auto& audio = _plugin_block.out.audio[m][mi];
         for(int c = 0; c < 2; c++)
           std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
       } else assert(module.output == module_output::none);
@@ -118,14 +118,14 @@ plugin_engine::process()
         auto const& param = module.params[p];
         if(param.rate == param_rate::block)
           for(int pi = 0; pi < param.slot_count; pi++)
-          _plugin_block.block_automation[m][mi][p][pi] = _state[m][mi][p][pi];
+          _plugin_block.in.block[m][mi][p][pi] = _state[m][mi][p][pi];
         else
           for (int pi = 0; pi < param.slot_count; pi++)
           {
             // set accurate automation values to current values (automation may overwrite)
             // note: need to go from actual to normalized values as interpolation must be done as linear
             // later scale back from normalized to plain values
-            auto& automation = _plugin_block.accurate_automation[m][mi][p][pi];
+            auto& automation = _plugin_block.in.accurate[m][mi][p][pi];
             std::fill(
               automation.begin(), 
               automation.begin() + _common_block.frame_count, 
@@ -141,7 +141,7 @@ plugin_engine::process()
     auto const& mapping = _desc.mappings[event.param];
     plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(event.normalized);
     mapping.value_at(_state) = plain;
-    mapping.value_at(_plugin_block.block_automation) = plain;
+    mapping.value_at(_plugin_block.in.block) = plain;
   }
 
   // process accurate automation values, this is a bit tricky as 
@@ -155,7 +155,7 @@ plugin_engine::process()
     auto const& mapping = _desc.mappings[event.param];
 
     // linear interpolation from previous to current value
-    auto& curve = mapping.value_at(_plugin_block.accurate_automation);
+    auto& curve = mapping.value_at(_plugin_block.in.accurate);
     int prev_frame = _accurate_frames[event.param];
     float frame_count = event.frame - prev_frame + 1;
     float range = event.normalized.value() - curve[prev_frame];
@@ -181,8 +181,8 @@ plugin_engine::process()
         for(int pi = 0; pi < param.slot_count; pi++)
           if(param.rate == param_rate::accurate)
             for(int f = 0; f < _common_block.frame_count; f++)
-              _plugin_block.accurate_automation[m][mi][p][pi][f] = param.normalized_to_plain(
-                normalized_value(_plugin_block.accurate_automation[m][mi][p][pi][f])).real();
+              _plugin_block.in.accurate[m][mi][p][pi][f] = param.normalized_to_plain(
+                normalized_value(_plugin_block.in.accurate[m][mi][p][pi][f])).real();
       }
   }
 
@@ -196,11 +196,11 @@ plugin_engine::process()
     {
       module_output_values output_values(&module, &_state[m][mi]);
       module_block block(
-        _plugin_block.module_cv[m][mi], 
-        _plugin_block.module_audio[m][mi], 
+        _plugin_block.out.cv[m][mi], 
+        _plugin_block.out.audio[m][mi], 
         output_values,
-        _plugin_block.accurate_automation[m][mi],
-        _plugin_block.block_automation[m][mi]);
+        _plugin_block.in.accurate[m][mi],
+        _plugin_block.in.block[m][mi]);
       _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
     }
   }
