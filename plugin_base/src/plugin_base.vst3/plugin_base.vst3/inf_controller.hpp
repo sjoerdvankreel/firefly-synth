@@ -9,15 +9,15 @@
 
 namespace plugin_base::vst3 {
 
-class vst_editor;
+class inf_editor;
 
-class vst_controller final:
+class inf_controller final:
 public Steinberg::Vst::EditControllerEx1 {
   plugin_desc const _desc;
-  vst_editor* _editor = {};
+  inf_editor* _editor = {};
 public: 
   plugin_desc const& desc() const { return _desc; }
-  vst_controller(std::unique_ptr<plugin_topo>&& topo) : _desc(std::move(topo)) {}
+  inf_controller(std::unique_ptr<plugin_topo>&& topo) : _desc(std::move(topo)) {}
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;

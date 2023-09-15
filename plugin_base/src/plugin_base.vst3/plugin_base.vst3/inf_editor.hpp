@@ -1,20 +1,20 @@
 #pragma once
 
 #include <plugin_base/gui.hpp>
-#include <plugin_base.vst3/vst_controller.hpp>
+#include <plugin_base.vst3/inf_controller.hpp>
 
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <utility>
 
 namespace plugin_base::vst3 {
 
-class vst_editor final:
+class inf_editor final:
 public Steinberg::Vst::EditorView, public ui_listener 
 {
   std::unique_ptr<plugin_gui> _gui = {};
-  vst_controller* const _controller = {};
+  inf_controller* const _controller = {};
 public: 
-  vst_editor(vst_controller* controller);
+  inf_editor(inf_controller* controller);
 
   Steinberg::tresult PLUGIN_API removed() override;
   Steinberg::tresult PLUGIN_API onSize(Steinberg::ViewRect* new_size) override;

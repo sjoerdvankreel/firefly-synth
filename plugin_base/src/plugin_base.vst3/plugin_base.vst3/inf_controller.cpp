@@ -1,8 +1,8 @@
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base.vst3/vst_editor.hpp>
-#include <plugin_base.vst3/vst_controller.hpp>
+#include <plugin_base.vst3/inf_editor.hpp>
+#include <plugin_base.vst3/inf_controller.hpp>
 
 #include <base/source/fstring.h>
 #include <juce_events/juce_events.h>
@@ -46,15 +46,15 @@ param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
 }
 
 IPlugView* PLUGIN_API 
-vst_controller::createView(char const* name)
+inf_controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
   MessageManager::getInstance();
-  return _editor = new vst_editor(this);
+  return _editor = new inf_editor(this);
 }
 
 tresult PLUGIN_API 
-vst_controller::setParamNormalized(ParamID tag, ParamValue value)
+inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
@@ -67,7 +67,7 @@ vst_controller::setParamNormalized(ParamID tag, ParamValue value)
 }
 
 tresult PLUGIN_API 
-vst_controller::initialize(FUnknown* context)
+inf_controller::initialize(FUnknown* context)
 {
   int unit_id = 1;
   if(EditController::initialize(context) != kResultTrue) 

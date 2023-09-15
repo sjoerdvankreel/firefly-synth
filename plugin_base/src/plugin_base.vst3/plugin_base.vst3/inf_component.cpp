@@ -1,5 +1,5 @@
 #include <plugin_base/io.hpp>
-#include <plugin_base.vst3/vst_component.hpp>
+#include <plugin_base.vst3/inf_component.hpp>
 
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/vst/ivstprocesscontext.h>
@@ -10,8 +10,8 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
-vst_component::
-vst_component(std::unique_ptr<plugin_topo>&& topo, FUID const& controller_id) :
+inf_component::
+inf_component(std::unique_ptr<plugin_topo>&& topo, FUID const& controller_id) :
 _engine(std::move(topo))
 {
   setControllerClass(controller_id);
@@ -21,35 +21,35 @@ _engine(std::move(topo))
 }
 
 tresult PLUGIN_API
-vst_component::canProcessSampleSize(int32 symbolic_size)
+inf_component::canProcessSampleSize(int32 symbolic_size)
 {
   if (symbolic_size == kSample32) return kResultTrue;
   return kResultFalse;
 }
 
 tresult PLUGIN_API
-vst_component::setupProcessing(ProcessSetup& setup)
+inf_component::setupProcessing(ProcessSetup& setup)
 {
   _engine.activate(setup.sampleRate, setup.maxSamplesPerBlock);
   return AudioEffect::setupProcessing(setup);
 }
 
 tresult PLUGIN_API
-vst_component::getState(IBStream* state)
+inf_component::getState(IBStream* state)
 {
   io_store_file(*_engine.desc().plugin, _engine.state(), "C:\\temp\\plug.json");
   return kResultFalse;
 }
 
 tresult PLUGIN_API
-vst_component::setState(IBStream* state)
+inf_component::setState(IBStream* state)
 {
   io_load(*_engine.desc().plugin, {}, _engine.state());
   return kResultFalse;
 }
 
 tresult PLUGIN_API
-vst_component::initialize(FUnknown* context)
+inf_component::initialize(FUnknown* context)
 {
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
@@ -59,7 +59,7 @@ vst_component::initialize(FUnknown* context)
 }
 
 tresult PLUGIN_API
-vst_component::setBusArrangements(
+inf_component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
@@ -70,7 +70,7 @@ vst_component::setBusArrangements(
 }
 
 tresult PLUGIN_API
-vst_component::process(ProcessData& data)
+inf_component::process(ProcessData& data)
 {
   host_block& block = _engine.prepare();
   block.common->frame_count = data.numSamples;

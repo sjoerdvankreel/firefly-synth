@@ -7,12 +7,12 @@
 
 namespace plugin_base::vst3 {
 
-class vst_component final:
+class inf_component final:
 public Steinberg::Vst::AudioEffect {
   plugin_engine _engine;
 public:
-  INF_DECLARE_MOVE_ONLY(vst_component);
-  vst_component(std::unique_ptr<plugin_topo>&& topo, Steinberg::FUID const& controller_id);
+  INF_DECLARE_MOVE_ONLY(inf_component);
+  inf_component(std::unique_ptr<plugin_topo>&& topo, Steinberg::FUID const& controller_id);
 
   Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* state) override;
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;

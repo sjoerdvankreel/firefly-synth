@@ -1,11 +1,11 @@
-#include <plugin_base.vst3/vst_editor.hpp>
+#include <plugin_base.vst3/inf_editor.hpp>
 
 using namespace Steinberg;
 
 namespace plugin_base::vst3 {
 
-vst_editor::
-vst_editor(vst_controller* controller) :
+inf_editor::
+inf_editor(inf_controller* controller) :
 EditorView(controller), _controller(controller)
 {
   // TODO somehow move this to base
@@ -36,7 +36,7 @@ EditorView(controller), _controller(controller)
 }
 
 tresult PLUGIN_API 
-vst_editor::removed()
+inf_editor::removed()
 {
   _gui->remove_ui_listener(this);
   _gui->setVisible(false);
@@ -45,7 +45,7 @@ vst_editor::removed()
 }
 
 tresult PLUGIN_API
-vst_editor::attached(void* parent, FIDString type)
+inf_editor::attached(void* parent, FIDString type)
 {
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
@@ -54,7 +54,7 @@ vst_editor::attached(void* parent, FIDString type)
 }
 
 tresult PLUGIN_API
-vst_editor::getSize(ViewRect* new_size)
+inf_editor::getSize(ViewRect* new_size)
 {
   new_size->top = 0;
   new_size->left = 0;
@@ -64,14 +64,14 @@ vst_editor::getSize(ViewRect* new_size)
 }
 
 tresult PLUGIN_API 
-vst_editor::onSize(ViewRect* new_size)
+inf_editor::onSize(ViewRect* new_size)
 {
   _gui->setSize(new_size->getWidth(), new_size->getHeight());
   return EditorView::onSize(new_size);
 }
 
 tresult PLUGIN_API
-vst_editor::checkSizeConstraint(ViewRect* new_rect)
+inf_editor::checkSizeConstraint(ViewRect* new_rect)
 {
   int new_height = new_rect->getWidth() / _controller->desc().plugin->gui_aspect_ratio;
   new_rect->bottom = new_rect->top + new_height;
@@ -79,7 +79,7 @@ vst_editor::checkSizeConstraint(ViewRect* new_rect)
 }
 
 void 
-vst_editor::ui_changing(int index, plain_value plain)
+inf_editor::ui_changing(int index, plain_value plain)
 {
   int id = _controller->desc().index_to_id[index];
   param_mapping const& mapping = _controller->desc().mappings[index];
