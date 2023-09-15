@@ -4,20 +4,6 @@
 
 namespace plugin_base {
 
-double 
-param_topo::default_raw() const
-{
-  plain_value plain(default_plain());
-  return plain_to_raw(plain);
-}
-
-normalized_value 
-param_topo::default_normalized() const
-{
-  plain_value plain(default_plain());
-  return plain_to_normalized(plain);
-}
-
 plain_value
 param_topo::default_plain() const
 {

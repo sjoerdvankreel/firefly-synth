@@ -56,13 +56,7 @@ struct param_topo final {
   std::vector<std::string> names;
 
   INF_DECLARE_MOVE_ONLY(param_topo);
-  bool is_real() const 
-  { return type == param_type::log || type == param_type::linear; }
-
-  // parse default text
-  double default_raw() const;
-  plain_value default_plain() const;
-  normalized_value default_normalized() const;
+  bool is_real() const { return type == param_type::log || type == param_type::linear; }
 
   // representation conversion
   plain_value raw_to_plain(double raw) const;
@@ -77,6 +71,11 @@ struct param_topo final {
   std::string normalized_to_text(normalized_value normalized) const;
   bool text_to_plain(std::string const& textual, plain_value& plain) const;
   bool text_to_normalized(std::string const& textual, normalized_value& normalized) const;
+
+  // parse default text
+  plain_value default_plain() const;
+  double default_raw() const { return plain_to_raw(default_plain()); }
+  normalized_value default_normalized() const { return plain_to_normalized(default_plain()); }
 };
 
 // gui section
