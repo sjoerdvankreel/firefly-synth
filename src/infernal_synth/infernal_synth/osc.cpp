@@ -29,7 +29,6 @@ type_items()
   return result;
 }
 
-// todo drop the osc_prefixes
 enum { type_saw, type_sine };
 enum { section_main, section_pitch };
 enum { param_on, param_type, param_gain, param_bal, param_oct, param_note, param_cent };
