@@ -303,6 +303,12 @@ _plugin_listeners(desc->param_count)
       }
     }
   }
+  _children.emplace_back(std::make_unique<TextButton>());
+  addAndMakeVisible(_children[_children.size() - 1].get());
+  ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Load");
+  _children.emplace_back(std::make_unique<TextButton>());
+  addAndMakeVisible(_children[_children.size() - 1].get());
+  ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Save");
   resized();
 }
 
@@ -318,6 +324,7 @@ plugin_gui::resized()
     auto const& module = _desc->modules[m];
     for (int p = 0; p < module.params.size(); p++)
     {
+      grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
       GridItem edit_item(getChildComponent(c * 2));
       edit_item.row.end = 2;
       edit_item.row.start = 1;
@@ -331,9 +338,22 @@ plugin_gui::resized()
       label_item.column.end = c + 2;
       grid.items.add(label_item);
       c++;
-      grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
     }
   } 
+  grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
+  GridItem load_item(getChildComponent(getChildren().size() - 2));
+  load_item.row.end = 2;
+  load_item.row.start = 1;
+  load_item.column.start = c + 1;
+  load_item.column.end = c + 2;
+  grid.items.add(load_item);
+  GridItem save_item(getChildComponent(getChildren().size() - 1));
+  save_item.row.end = 3;
+  save_item.row.start = 2;
+  save_item.column.start = c + 1;
+  save_item.column.end = c + 2;
+  grid.items.add(save_item);
+  c++;
   grid.performLayout(getLocalBounds());
 }
 
