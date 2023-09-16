@@ -60,6 +60,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     auto module = std::make_unique<DynamicObject>();
     module->setProperty("id", String(module_topo.id));
     module->setProperty("name", String(module_topo.name));
+    module->setProperty("slot_count", module_topo.slot_count);
     for (int p = 0; p < module_topo.params.size(); p++)
     {
       auto const& param_topo = module_topo.params[p];
@@ -67,6 +68,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
       auto param = std::make_unique<DynamicObject>();
       param->setProperty("id", String(param_topo.id));
       param->setProperty("name", String(param_topo.name));
+      param->setProperty("slot_count", param_topo.slot_count);
       params.append(var(param.release()));
     }
     module->setProperty("params", params);
@@ -158,6 +160,12 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
       continue;
     }
 
+    // check for changed module slot count
+    var module_slot_count = plugin["modules"][m]["slot_count"];
+    auto const& new_module = _desc->plugin->modules[module_iter->second];
+    if ((int)module_slot_count != new_module.slot_count)
+      result.warnings.push_back("Module '" + new_module.name + "' changed slot count.");
+
     for (int p = 0; p < plugin["modules"][m]["params"].size(); p++)
     {
       // check for old param not found
@@ -169,9 +177,16 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
         result.warnings.push_back("Param '" + module_name + " " + param_name + "' was deleted.");
         continue;
       }
+
+      // check for changed param slot count
+      var param_slot_count = plugin["modules"][m]["params"][p]["slot_count"];
+      auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
+      if ((int)param_slot_count != new_param.slot_count)
+        result.warnings.push_back("Param '" + new_module.name + " " + new_param.name + "' slot count changed.");
     }
   }
 
+/*
   // copy over old state, push parse errors as we go
   for (int m = 0; m < plugin["state"].size(); m++)
   {
@@ -197,6 +212,7 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
           result.warnings.push_back("Param '" + new_module.name + " " + new_param.name + "' slot count changed.");
       }
   }
+*/
 
   /*
   // good to go, init state to default, 
