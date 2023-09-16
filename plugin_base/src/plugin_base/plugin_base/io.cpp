@@ -1,4 +1,5 @@
 #include <plugin_base/io.hpp>
+#include <plugin_base/desc.hpp>
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
 
@@ -121,8 +122,8 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   var root;
   std::string json(data.size(), '\0');
   std::copy(data.begin(), data.end(), json.begin());
-  auto result = JSON::parse(String(json), root);
-  if(!result.wasOk()) return io_result("Invalid json.");
+  auto parse_result = JSON::parse(String(json), root);
+  if(!parse_result.wasOk()) return io_result("Invalid json.");
   if(!root.hasProperty("plugin")) return io_result("Invalid plugin.");
   if(!root.hasProperty("checksum")) return io_result("Invalid checksum.");
   if(!root.hasProperty("magic") || root["magic"] != magic) return io_result("Invalid magic.");
@@ -131,7 +132,21 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   var plugin = root["plugin"];
   if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
 
-  return io_result();
+  jarray<bool, 4> seen;
+  plugin_dims dims(*_topo);
+  seen.resize(dims.params);
+
+  io_result result;
+  for(int m = 0; m < plugin["state"].size(); m++)
+    for(int mi = 0; mi < plugin["state"][m]["slots"].size(); mi++)
+      for(int p = 0; p < plugin["state"][m]["slots"][mi]["params"].size(); p++)
+        for (int pi = 0; pi < plugin["state"][m]["slots"][mi]["params"][p]["slots"].size(); pi++)
+        {
+          std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
+          (void)text;
+        }      
+
+  return result;
 }
 
 }
