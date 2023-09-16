@@ -10,10 +10,17 @@
 
 namespace plugin_base {
 
-// TODO make class accept const topo*
-std::vector<char> io_store(plugin_topo const& topo, jarray<plain_value, 4> const& state);
-bool io_load(plugin_topo const& topo, std::vector<char> const& blob, jarray<plain_value, 4>& state);
-bool io_load_file(plugin_topo const& topo, std::filesystem::path const& path, jarray<plain_value, 4>& state);
-bool io_store_file(plugin_topo const& topo, jarray<plain_value, 4> const& state, std::filesystem::path const& path);
+class plugin_io final
+{
+  plugin_topo const* const _topo;
+public:
+  INF_DECLARE_MOVE_ONLY(plugin_io);
+  plugin_io(plugin_topo const* topo): _topo(topo) {}
+
+  std::vector<char> store(jarray<plain_value, 4> const& state) const;
+  bool load(std::vector<char> const& data, jarray<plain_value, 4>& state) const;
+  bool load_file(std::filesystem::path const& path, jarray<plain_value, 4>& state) const;
+  bool store_file(jarray<plain_value, 4> const& state, std::filesystem::path const& path) const;
+};
 
 }

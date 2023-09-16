@@ -35,20 +35,6 @@ inf_component::setupProcessing(ProcessSetup& setup)
 }
 
 tresult PLUGIN_API
-inf_component::getState(IBStream* state)
-{
-  io_store_file(*_engine.desc().plugin, _engine.state(), "C:\\temp\\plug.json");
-  return kResultFalse;
-}
-
-tresult PLUGIN_API
-inf_component::setState(IBStream* state)
-{
-  io_load(*_engine.desc().plugin, {}, _engine.state());
-  return kResultFalse;
-}
-
-tresult PLUGIN_API
 inf_component::initialize(FUnknown* context)
 {
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
