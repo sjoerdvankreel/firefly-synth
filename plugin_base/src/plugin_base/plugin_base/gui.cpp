@@ -308,7 +308,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
     plugin_io io(_desc->plugin.get());
     if(io.load_file("c:\\temp\\plug.json", *_ui_state)) return;
-    MessageBoxOptions options = MessageBoxOptions().withMessage("FAIL").withTitle("FAIL");
+    MessageBoxOptions options = MessageBoxOptions().withMessage("FAIL").withTitle("FAIL").withButton("FAIL");
     AlertWindow::showAsync(options, [](int){});
   };
   _children.emplace_back(std::make_unique<TextButton>());

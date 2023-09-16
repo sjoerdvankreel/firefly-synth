@@ -38,10 +38,19 @@ std::vector<char>
 plugin_io::save(jarray<plain_value, 4> const& state) const
 {
   auto root = std::make_unique<DynamicObject>();
+  
   auto format = std::make_unique<DynamicObject>();
   format->setProperty("magic", var(format_magic));
   format->setProperty("version", var(format_version));
   root->setProperty("format", var(format.release()));
+
+  auto plugin = std::make_unique<DynamicObject>();
+  plugin->setProperty("id", String(_topo->id));
+  plugin->setProperty("name", String(_topo->name));
+  plugin->setProperty("version_major", _topo->version_major);
+  plugin->setProperty("version_minor", _topo->version_minor);
+  root->setProperty("plugin", var(plugin.release()));
+
   std::string json = JSON::toString(var(root.release())).toStdString();
   return std::vector<char>(json.begin(), json.end());
 }
