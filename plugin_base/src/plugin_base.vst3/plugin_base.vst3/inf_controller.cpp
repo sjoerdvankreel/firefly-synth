@@ -46,6 +46,15 @@ param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
   return true;
 }
 
+inf_controller::
+inf_controller(std::unique_ptr<plugin_topo>&& topo) : 
+_desc(std::move(topo)) 
+{ 
+  plugin_dims dims(*_desc.plugin);
+  _ui_state.resize(dims.params);
+  _desc.init_defaults(_ui_state); 
+}
+
 IPlugView* PLUGIN_API 
 inf_controller::createView(char const* name)
 {
@@ -59,10 +68,11 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
-  if(_editor == nullptr) return kResultTrue;
   int index = _desc.id_to_index.at(tag);
   param_mapping const& mapping = _desc.mappings[index];
   plain_value plain = _desc.normalized_to_plain_at(mapping, normalized_value(value));
+  mapping.value_at(_ui_state) = plain;
+  if (_editor == nullptr) return kResultTrue;
   _editor->plugin_param_changed(index, plain);
   return kResultTrue;
 }

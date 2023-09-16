@@ -6,34 +6,8 @@ namespace plugin_base::vst3 {
 
 inf_editor::
 inf_editor(inf_controller* controller) :
-EditorView(controller), _controller(controller)
-{
-  // TODO somehow move this to base
-  // pull the controller values to the ui (both live on the same thread)
-  // alternatively we could keep yet another copy of ui-thread values
-  // in module-slot-param-slot format but it's complicated enough already
-  // to deal with processor-controller-ui_controls as is
-  int param_global_index = 0;
-  plugin_dims dims(*controller->desc().plugin);
-  jarray<plain_value, 4> ui_initial_values;
-  ui_initial_values.resize(dims.params);
-  for (int m = 0; m < controller->desc().plugin->modules.size(); m++)
-  {
-    auto const& module = controller->desc().plugin->modules[m];
-    for (int mi = 0; mi < module.slot_count; mi++)
-      for(int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        for(int pi = 0; pi < param.slot_count; pi++)
-        {
-          int param_tag = _controller->desc().index_to_id[param_global_index++];
-          double normalized = _controller->getParamNormalized(param_tag);
-          ui_initial_values[m][mi][p][pi] = param.normalized_to_plain(normalized_value(normalized));
-        }
-      }
-  }
-  _gui = std::make_unique<plugin_gui>(&controller->desc(), ui_initial_values);
-}
+EditorView(controller), _controller(controller),
+_gui(std::make_unique<plugin_gui>(&controller->desc(), controller->ui_state())) {}
 
 tresult PLUGIN_API 
 inf_editor::removed()

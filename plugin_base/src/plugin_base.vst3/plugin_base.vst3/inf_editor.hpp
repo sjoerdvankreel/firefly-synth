@@ -11,8 +11,8 @@ namespace plugin_base::vst3 {
 class inf_editor final:
 public Steinberg::Vst::EditorView, public ui_listener 
 {
-  std::unique_ptr<plugin_gui> _gui = {};
   inf_controller* const _controller = {};
+  std::unique_ptr<plugin_gui> _gui = {};
 
 public: 
   INF_DECLARE_MOVE_ONLY(inf_editor);
