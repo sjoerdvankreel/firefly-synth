@@ -19,10 +19,9 @@ public Steinberg::Vst::EditControllerEx1 {
 public: 
   INF_DECLARE_MOVE_ONLY(inf_controller);
   inf_controller(std::unique_ptr<plugin_topo>&& topo) : _desc(std::move(topo)) {}
-
-  plugin_desc const& desc() const { return _desc; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
+  plugin_desc const& desc() const { return _desc; }
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID tag, Steinberg::Vst::ParamValue value) override;

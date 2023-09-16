@@ -48,6 +48,8 @@ _to_audio_events(std::make_unique<event_queue>(default_q_size))
 bool
 inf_plugin::init() noexcept
 {
+  // Need to start timer on the main thread. 
+  // Constructor is not guaranteed to run there.
   MessageManager::getInstance();
   startTimerHz(60);
   return true;
