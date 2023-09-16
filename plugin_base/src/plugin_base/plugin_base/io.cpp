@@ -126,11 +126,17 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   if(!root.hasProperty("plugin")) return io_result("Invalid plugin.");
   if(!root.hasProperty("checksum")) return io_result("Invalid checksum.");
   if(!root.hasProperty("magic") || root["magic"] != magic) return io_result("Invalid magic.");
-  if(!root.hasProperty("version") || (int)root["version"] > version) return io_result("Invalid version");  
+  if(!root.hasProperty("version") || (int)root["version"] > version) return io_result("Invalid version.");  
 
   io_result result;
   var plugin = root["plugin"];
+  if(plugin["id"] != _topo->id) return io_result("Invalid plugin id.");
+
+
   // TODO if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
+
+  // push warnings for topo changes
+  //for(int m = 0; m < )
 
   /*
   // good to go, init state to default, 

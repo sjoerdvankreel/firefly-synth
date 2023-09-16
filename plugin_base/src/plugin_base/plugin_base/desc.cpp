@@ -151,6 +151,14 @@ validate_plugin_desc(plugin_desc const& desc)
   assert(desc.mappings.size() == desc.param_count);
   assert(desc.param_tag_to_index.size() == desc.param_count);
   assert(desc.param_index_to_tag.size() == desc.param_count);
+  assert(desc.param_id_to_index.size() == desc.plugin->modules.size());
+  assert(desc.module_id_to_index.size() == desc.plugin->modules.size());
+
+  for(int m = 0; m < desc.plugin->modules.size(); m++)
+  {
+    auto const& mod = desc.plugin->modules[m];
+    assert(desc.param_id_to_index.at(mod.id).size() == mod.params.size());
+  }
 
   for (int m = 0; m < desc.modules.size(); m++)
   {
@@ -243,6 +251,9 @@ plugin(std::move(plugin_))
   for(int m = 0; m < plugin->modules.size(); m++)
   {
     auto const& module = plugin->modules[m];
+    module_id_to_index[module.id] = m;
+    for(int p = 0; p < module.params.size(); p++)
+      param_id_to_index[module.id][module.params[p].id] = p;
     for(int i = 0; i < module.slot_count; i++)
     {
       modules.emplace_back(module_desc(module, m, i, module_global++, param_global));

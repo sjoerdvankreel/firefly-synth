@@ -71,6 +71,8 @@ struct plugin_desc final {
   std::vector<param_mapping> mappings = {};
   std::vector<int> param_index_to_tag = {};
   std::map<int, int> param_tag_to_index = {};
+  std::map<std::string, int> module_id_to_index = {};
+  std::map<std::string, std::map<std::string, int>> param_id_to_index = {};
 
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);
