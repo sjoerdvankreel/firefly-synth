@@ -8,6 +8,9 @@ using namespace juce;
 
 namespace plugin_base {
 
+// TODO checksum
+// TODO filter out params
+
 static int const format_version = 1;
 static std::string const format_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
@@ -50,6 +53,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
   plugin->setProperty("version_major", _topo->version_major);
   plugin->setProperty("version_minor", _topo->version_minor);
   
+  // store some topo info so we can provide meaningful warnings
   var modules;
   for (int m = 0; m < _topo->modules.size(); m++)
   {
@@ -72,6 +76,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
   plugin->setProperty("modules", modules); 
   root->setProperty("plugin", var(plugin.release()));
 
+  // dump the textual values in 4d format
   var module_states;
   for (int m = 0; m < _topo->modules.size(); m++)
   {
@@ -80,7 +85,19 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     auto module_state = std::make_unique<DynamicObject>();
     for (int mi = 0; mi < module_topo.slot_count; mi++)
     {
+      var param_states;
       auto module_slot_state = std::make_unique<DynamicObject>();
+      for (int p = 0; p < module_topo.params.size(); p++)
+      {
+        var param_slot_states;
+        auto const& param_topo = module_topo.params[p];
+        auto param_state = std::make_unique<DynamicObject>();
+        for (int pi = 0; pi < param_topo.slot_count; pi++)
+          param_slot_states.append(var(String(param_topo.plain_to_text(state[m][mi][p][pi]))));
+        param_state->setProperty("slots", param_slot_states);
+        param_states.append(var(param_state.release()));
+      }
+      module_slot_state->setProperty("params", param_states);
       module_slot_states.append(var(module_slot_state.release()));
     }
     module_state->setProperty("slots", module_slot_states);
