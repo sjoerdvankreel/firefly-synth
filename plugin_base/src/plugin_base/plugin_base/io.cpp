@@ -132,8 +132,8 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   var plugin = root["plugin"];
   // TODO if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
 
-  // run through the old version, report anything we cant map as warnings
-  // not-found new parameters will just be defaulted
+  // good to go
+  // init state to default, overwrite with old values
   for(int m = 0; m < plugin["state"].size(); m++)
   {
     // mapping old to new module
@@ -150,8 +150,8 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
     }
 
     // check for changed slot count
-    auto new_module_name = _topo->modules[new_module_index].name;
     var old_module_slots = plugin["state"][m]["slots"];
+    auto new_module_name = _topo->modules[new_module_index].name;
     if (old_module_slots.size() != _topo->modules[new_module_index].slot_count)
       result.warnings.push_back("Module '" + new_module_name + "' changed slot count.");
 
@@ -172,8 +172,8 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
         }
 
         // check for changed slot count
-        auto new_param_name = _topo->modules[new_module_index].params[new_param_index].name;
         var old_param_slots = old_module_slots[mi]["params"][p]["slots"];
+        auto new_param_name = _topo->modules[new_module_index].params[new_param_index].name;
         if (old_param_slots.size() != _topo->modules[new_module_index].params[new_param_index].slot_count)
           result.warnings.push_back("Param '" + new_module_name + " " + new_param_name +  "' changed slot count.");
 
