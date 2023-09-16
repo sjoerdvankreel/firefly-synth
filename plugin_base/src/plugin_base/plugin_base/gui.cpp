@@ -307,8 +307,12 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Load");
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
     plugin_io io(_desc->plugin.get());
-    if(io.load_file("c:\\temp\\plug.json", *_ui_state)) return;
-    MessageBoxOptions options = MessageBoxOptions().withMessage("FAIL").withTitle("FAIL").withButton("FAIL");
+    auto res = io.load_file("c:\\temp\\plug.json", *_ui_state);
+    std::string stuff; 
+    stuff += "error: " + res.error + "\r\n";
+    for(int i = 0; i < res.warnings.size(); i++)
+      stuff += "warn: " + res.warnings[i] + "\r\n";
+    MessageBoxOptions options = MessageBoxOptions().withMessage(String(stuff)).withTitle("RESULT").withButton("OK");
     AlertWindow::showAsync(options, [](int){});
   };
   _children.emplace_back(std::make_unique<TextButton>());

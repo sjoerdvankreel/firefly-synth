@@ -1,5 +1,6 @@
 #include <plugin_base/io.hpp>
 #include <juce_core/juce_core.h>
+#include <juce_cryptography/juce_cryptography.h>
 
 #include <memory>
 #include <fstream>
@@ -8,10 +9,9 @@ using namespace juce;
 
 namespace plugin_base {
 
-// TODO checksum
-
-static int const format_version = 1;
-static std::string const format_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
+// file format
+static int const version = 1;
+static std::string const magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
 bool
 plugin_io::save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const
@@ -23,16 +23,18 @@ plugin_io::save_file(std::filesystem::path const& path, jarray<plain_value, 4> c
   return !stream.bad();
 }
 
-bool
+io_result
 plugin_io::load_file(std::filesystem::path const& path, jarray<plain_value, 4>& state) const
 {
+  io_result failed("Could not read file.");
   std::ifstream stream(path, std::ios::binary | std::ios::ate);
-  if(stream.bad()) return false;
+  if(stream.bad()) return failed;
   std::streamsize size = stream.tellg();
+  if(size <= 0) return failed;
   stream.seekg(0, std::ios::beg);
   std::vector<char> data(size, 0);
   stream.read(data.data(), size);
-  if (stream.bad()) return false;
+  if (stream.bad()) return failed;
   return load(data, state);
 }
 
@@ -40,11 +42,8 @@ std::vector<char>
 plugin_io::save(jarray<plain_value, 4> const& state) const
 {
   auto root = std::make_unique<DynamicObject>();
-  
-  auto format = std::make_unique<DynamicObject>();
-  format->setProperty("magic", var(format_magic));
-  format->setProperty("version", var(format_version));
-  root->setProperty("format", var(format.release()));
+  root->setProperty("magic", var(magic));
+  root->setProperty("version", var(version));
 
   auto plugin = std::make_unique<DynamicObject>();
   plugin->setProperty("id", String(_topo->id));
@@ -74,7 +73,6 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     modules.append(var(module.release()));
   }  
   plugin->setProperty("modules", modules); 
-  root->setProperty("plugin", var(plugin.release()));
 
   // dump the textual values in 4d format
   var module_states;
@@ -103,25 +101,31 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     }
     module_state->setProperty("slots", module_slot_states);
     module_states.append(var(module_state.release()));
-  }
-  root->setProperty("state", module_states);
+  }  
+  plugin->setProperty("state", module_states);
 
+  // checksum so on load we can assume integrity of the plugin block 
+  // instead of doing lots of structural json validation
+  var plugin_var(plugin.release());
+  String plugin_text(JSON::toString(plugin_var));
+  root->setProperty("checksum", var(MD5(plugin_text.toUTF8()).toHexString()));
+
+  root->setProperty("plugin", plugin_var);
   std::string json = JSON::toString(var(root.release())).toStdString();
   return std::vector<char>(json.begin(), json.end());
 }
 
-bool 
+io_result 
 plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) const
 {
   var root;
   std::string json(data.size(), '\0');
   std::copy(data.begin(), data.end(), json.begin());
   auto result = JSON::parse(String(json), root);
-  if(!result.wasOk()) return false;
-  var format = root["format"];
-  if(format["magic"] != String(format_magic)) return false;
-  if((int)format["version"] != format_version) return false;
-  return true;
+  if(!result.wasOk()) return io_result("Invalid json.");
+  if(!root.hasProperty("magic") || root["magic"] != magic) return io_result("Invalid magic.");
+  if(!root.hasProperty("version") || (int)root["version"] > version) return io_result("Invalid version");
+  return io_result();
 }
 
 }
