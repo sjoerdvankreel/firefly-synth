@@ -9,7 +9,6 @@ using namespace juce;
 namespace plugin_base {
 
 // TODO checksum
-// TODO filter out params
 
 static int const format_version = 1;
 static std::string const format_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
@@ -65,6 +64,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     for (int p = 0; p < module_topo.params.size(); p++)
     {
       auto const& param_topo = module_topo.params[p];
+      if(param_topo.dir == param_dir::output) continue;
       auto param = std::make_unique<DynamicObject>();
       param->setProperty("id", String(param_topo.id));
       param->setProperty("name", String(param_topo.name));
@@ -91,6 +91,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
       {
         var param_slot_states;
         auto const& param_topo = module_topo.params[p];
+        if(param_topo.dir == param_dir::output) continue;
         auto param_state = std::make_unique<DynamicObject>();
         for (int pi = 0; pi < param_topo.slot_count; pi++)
           param_slot_states.append(var(String(param_topo.plain_to_text(state[m][mi][p][pi]))));
