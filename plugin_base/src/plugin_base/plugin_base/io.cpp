@@ -123,8 +123,14 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   std::copy(data.begin(), data.end(), json.begin());
   auto result = JSON::parse(String(json), root);
   if(!result.wasOk()) return io_result("Invalid json.");
+  if(!root.hasProperty("plugin")) return io_result("Invalid plugin.");
+  if(!root.hasProperty("checksum")) return io_result("Invalid checksum.");
   if(!root.hasProperty("magic") || root["magic"] != magic) return io_result("Invalid magic.");
-  if(!root.hasProperty("version") || (int)root["version"] > version) return io_result("Invalid version");
+  if(!root.hasProperty("version") || (int)root["version"] > version) return io_result("Invalid version");  
+
+  var plugin = root["plugin"];
+  if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
+
   return io_result();
 }
 
