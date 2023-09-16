@@ -1,5 +1,4 @@
 #include <plugin_base/io.hpp>
-#include <plugin_base/desc.hpp>
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
 
@@ -131,10 +130,6 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
 
   var plugin = root["plugin"];
   if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
-
-  jarray<bool, 4> seen;
-  plugin_dims dims(*_topo);
-  seen.resize(dims.params);
 
   io_result result;
   for(int m = 0; m < plugin["state"].size(); m++)
