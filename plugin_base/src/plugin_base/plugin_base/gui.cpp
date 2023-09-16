@@ -306,7 +306,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Load");
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    plugin_io io(_desc->plugin.get());
+    plugin_io io(_desc);
     auto res = io.load_file("c:\\temp\\plug.json", *_ui_state);
     std::string stuff; 
     stuff += "error: " + res.error + "\r\n";
@@ -319,7 +319,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Save");
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    plugin_io io(_desc->plugin.get());
+    plugin_io io(_desc);
     io.save_file("c:\\temp\\plug.json", *_ui_state);
   };
   resized();

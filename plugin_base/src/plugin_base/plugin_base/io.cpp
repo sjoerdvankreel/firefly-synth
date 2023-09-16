@@ -46,17 +46,17 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
   root->setProperty("version", var(version));
 
   auto plugin = std::make_unique<DynamicObject>();
-  plugin->setProperty("id", String(_topo->id));
-  plugin->setProperty("name", String(_topo->name));
-  plugin->setProperty("version_major", _topo->version_major);
-  plugin->setProperty("version_minor", _topo->version_minor);
+  plugin->setProperty("id", String(_desc->plugin->id));
+  plugin->setProperty("name", String(_desc->plugin->name));
+  plugin->setProperty("version_major", _desc->plugin->version_major);
+  plugin->setProperty("version_minor", _desc->plugin->version_minor);
   
   // store some topo info so we can provide meaningful warnings
   var modules;
-  for (int m = 0; m < _topo->modules.size(); m++)
+  for (int m = 0; m < _desc->plugin->modules.size(); m++)
   {
     var params;
-    auto const& module_topo = _topo->modules[m];
+    auto const& module_topo = _desc->plugin->modules[m];
     auto module = std::make_unique<DynamicObject>();
     module->setProperty("id", String(module_topo.id));
     module->setProperty("name", String(module_topo.name));
@@ -76,10 +76,10 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
 
   // dump the textual values in 4d format
   var module_states;
-  for (int m = 0; m < _topo->modules.size(); m++)
+  for (int m = 0; m < _desc->plugin->modules.size(); m++)
   {
     var module_slot_states;
-    auto const& module_topo = _topo->modules[m];
+    auto const& module_topo = _desc->plugin->modules[m];
     auto module_state = std::make_unique<DynamicObject>();
     for (int mi = 0; mi < module_topo.slot_count; mi++)
     {
@@ -130,13 +130,16 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
 
   io_result result;
   var plugin = root["plugin"];
-  if(plugin["id"] != _topo->id) return io_result("Invalid plugin id.");
-
+  if(plugin["id"] != _desc->plugin->id) return io_result("Invalid plugin id.");
+  if((int)plugin["version_major"] > _desc->plugin->version_major) return io_result("Invalid plugin version.");
+  if((int)plugin["version_major"] == _desc->plugin->version_major && (int)plugin["version_minor"] > _desc->plugin->version_minor) return io_result("Invalid plugin version.");
 
   // TODO if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
 
   // push warnings for topo changes
-  //for(int m = 0; m < )
+  for(int m = 0; m < plugin["modules"].size(); m++)
+  {
+  }
 
   /*
   // good to go, init state to default, 
