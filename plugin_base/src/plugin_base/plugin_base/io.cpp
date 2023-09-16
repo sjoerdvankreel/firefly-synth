@@ -53,19 +53,24 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
   var modules;
   for (int m = 0; m < _topo->modules.size(); m++)
   {
+    var params;
     auto const& module_topo = _topo->modules[m];
     auto module = std::make_unique<DynamicObject>();
     module->setProperty("id", String(module_topo.id));
     module->setProperty("name", String(module_topo.name));
-
-    var params;
-    //for(int p = 0; p > )
+    for (int p = 0; p < module_topo.params.size(); p++)
+    {
+      auto const& param_topo = module_topo.params[p];
+      auto param = std::make_unique<DynamicObject>();
+      param->setProperty("id", String(param_topo.id));
+      param->setProperty("name", String(param_topo.name));
+      params.append(var(param.release()));
+    }
     module->setProperty("params", params);
     modules.append(var(module.release()));
   }  
   plugin->setProperty("modules", modules); 
   root->setProperty("plugin", var(plugin.release()));
-
   std::string json = JSON::toString(var(root.release())).toStdString();
   return std::vector<char>(json.begin(), json.end());
 }
