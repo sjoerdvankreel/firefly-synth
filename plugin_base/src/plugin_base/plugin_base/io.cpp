@@ -122,23 +122,51 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   std::string json(data.size(), '\0');
   std::copy(data.begin(), data.end(), json.begin());
   auto parse_result = JSON::parse(String(json), root);
-  if(!parse_result.wasOk()) return io_result("Invalid json.");
-  if(!root.hasProperty("plugin")) return io_result("Invalid plugin.");
-  if(!root.hasProperty("checksum")) return io_result("Invalid checksum.");
-  if(!root.hasProperty("magic") || root["magic"] != magic) return io_result("Invalid magic.");
-  if(!root.hasProperty("version") || (int)root["version"] > version) return io_result("Invalid version.");  
+  if(!parse_result.wasOk()) 
+    return io_result("Invalid json.");
+  if(!root.hasProperty("plugin")) 
+    return io_result("Invalid plugin.");
+  if(!root.hasProperty("checksum")) 
+    return io_result("Invalid checksum.");
+  if(!root.hasProperty("magic") || root["magic"] != magic) 
+    return io_result("Invalid magic.");
+  if(!root.hasProperty("version") || (int)root["version"] > version) 
+    return io_result("Invalid version.");  
 
   io_result result;
   var plugin = root["plugin"];
-  if(plugin["id"] != _desc->plugin->id) return io_result("Invalid plugin id.");
-  if((int)plugin["version_major"] > _desc->plugin->version_major) return io_result("Invalid plugin version.");
-  if((int)plugin["version_major"] == _desc->plugin->version_major && (int)plugin["version_minor"] > _desc->plugin->version_minor) return io_result("Invalid plugin version.");
+  if(plugin["id"] != _desc->plugin->id) 
+    return io_result("Invalid plugin id.");
+  if((int)plugin["version_major"] > _desc->plugin->version_major) 
+    return io_result("Invalid plugin version.");
+  if((int)plugin["version_major"] == _desc->plugin->version_major)
+    if((int)plugin["version_minor"] > _desc->plugin->version_minor) 
+      return io_result("Invalid plugin version.");
 
   // TODO if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
 
   // push warnings for topo changes
   for(int m = 0; m < plugin["modules"].size(); m++)
   {
+    auto module_id = plugin["modules"][m]["id"].toString().toStdString();
+    auto module_name = plugin["modules"][m]["name"].toString().toStdString();
+    auto module_iter = _desc->module_id_to_index.find(module_id);
+    if (module_iter == _desc->module_id_to_index.end())
+    {
+      result.warnings.push_back("Module '" + module_name + "' was deleted.");
+      continue;
+    }
+    for (int p = 0; p < plugin["modules"][m]["params"].size(); p++)
+    {
+      auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
+      auto param_name = plugin["modules"][m]["params"][p]["name"].toString().toStdString();
+      auto param_iter = _desc->param_id_to_index.at(module_id).find(param_id);
+      if (param_iter == _desc->param_id_to_index.at(module_id).end())
+      {
+        result.warnings.push_back("Param '" + module_name + " " + param_name + "' was deleted.");
+        continue;
+      }
+    }
   }
 
   /*
