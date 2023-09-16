@@ -17,10 +17,10 @@ public:
   INF_DECLARE_MOVE_ONLY(plugin_io);
   plugin_io(plugin_topo const* topo): _topo(topo) {}
 
-  std::vector<char> store(jarray<plain_value, 4> const& state) const;
+  std::vector<char> save(jarray<plain_value, 4> const& state) const;
   bool load(std::vector<char> const& data, jarray<plain_value, 4>& state) const;
   bool load_file(std::filesystem::path const& path, jarray<plain_value, 4>& state) const;
-  bool store_file(jarray<plain_value, 4> const& state, std::filesystem::path const& path) const;
+  bool save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const;
 };
 
 }

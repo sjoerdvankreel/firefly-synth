@@ -23,6 +23,7 @@ public:
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   plugin_desc const& desc() const { return _desc; }
+  jarray<plain_value, 4>& ui_state() { return _ui_state; }
   jarray<plain_value, 4> const& ui_state() const { return _ui_state; }
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;

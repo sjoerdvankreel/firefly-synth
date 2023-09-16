@@ -7,7 +7,7 @@ namespace plugin_base::vst3 {
 inf_editor::
 inf_editor(inf_controller* controller) :
 EditorView(controller), _controller(controller),
-_gui(std::make_unique<plugin_gui>(&controller->desc(), controller->ui_state())) {}
+_gui(std::make_unique<plugin_gui>(&controller->desc(), &controller->ui_state())) {}
 
 tresult PLUGIN_API 
 inf_editor::removed()

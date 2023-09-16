@@ -98,7 +98,7 @@ inf_plugin::guiDestroy() noexcept
 bool
 inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
-  _gui = std::make_unique<plugin_gui>(&_engine.desc(), _ui_state);
+  _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_ui_state);
   _gui->add_ui_listener(this);
   return true;
 }

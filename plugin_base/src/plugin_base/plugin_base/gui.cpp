@@ -1,3 +1,4 @@
+#include <plugin_base/io.hpp>
 #include <plugin_base/gui.hpp>
 #include <plugin_base/topo.hpp>
 
@@ -250,9 +251,8 @@ plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
 // TODO ! un-uglify it from here
 
 plugin_gui::
-plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial) :
-_desc(desc), 
-_plugin_listeners(desc->param_count)
+plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
+_desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
   setOpaque(true);
   setSize(_desc->plugin->gui_default_width, _desc->plugin->gui_default_width / _desc->plugin->gui_aspect_ratio);
@@ -262,8 +262,7 @@ _plugin_listeners(desc->param_count)
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
-      plain_value initial_value = initial
-        [module.topo][module.slot][param.topo][param.slot];
+      plain_value initial_value = (*_ui_state)[module.topo][module.slot][param.topo][param.slot];
       if(param.param->edit == param_edit::toggle)
       {
         _children.emplace_back(std::make_unique<param_toggle_button>(this, &param, initial_value));
@@ -306,9 +305,19 @@ _plugin_listeners(desc->param_count)
   _children.emplace_back(std::make_unique<TextButton>());
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Load");
+  ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
+    plugin_io io(_desc->plugin.get());
+    if(io.load_file("c:\\temp\\plug.json", *_ui_state)) return;
+    MessageBoxOptions options = MessageBoxOptions().withMessage("FAIL").withTitle("FAIL");
+    AlertWindow::showAsync(options, [](int){});
+  };
   _children.emplace_back(std::make_unique<TextButton>());
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Save");
+  ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
+    plugin_io io(_desc->plugin.get());
+    io.save_file("c:\\temp\\plug.json", *_ui_state);
+  };
   resized();
 }
 

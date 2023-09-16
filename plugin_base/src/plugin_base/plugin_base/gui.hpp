@@ -27,13 +27,14 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const* const _desc;
+  jarray<plain_value, 4>* const _ui_state;
   std::vector<ui_listener*> _ui_listeners = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   std::vector<std::unique_ptr<juce::Component>> _children = {}; // must be destructed first
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const& initial);
+  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state);
 
   void resized() override;
   void paint(juce::Graphics& g) override 

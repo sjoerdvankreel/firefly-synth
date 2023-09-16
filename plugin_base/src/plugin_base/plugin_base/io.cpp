@@ -12,11 +12,11 @@ static int const format_version = 1;
 static std::string const format_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
 bool
-plugin_io::store_file(jarray<plain_value, 4> const& state, std::filesystem::path const& path) const
+plugin_io::save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const
 {
   std::ofstream stream(path, std::ios::out | std::ios::binary);
   if (stream.bad()) return false;
-  auto data(store(state));
+  auto data(save(state));
   stream.write(data.data(), data.size());
   return !stream.bad();
 }
@@ -35,7 +35,7 @@ plugin_io::load_file(std::filesystem::path const& path, jarray<plain_value, 4>& 
 }
 
 std::vector<char>
-plugin_io::store(jarray<plain_value, 4> const& state) const
+plugin_io::save(jarray<plain_value, 4> const& state) const
 {
   auto root = std::make_unique<DynamicObject>();
   auto format = std::make_unique<DynamicObject>();
