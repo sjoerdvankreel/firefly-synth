@@ -148,6 +148,7 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   // push warnings for topo changes
   for(int m = 0; m < plugin["modules"].size(); m++)
   {
+    // check for old module not found
     auto module_id = plugin["modules"][m]["id"].toString().toStdString();
     auto module_name = plugin["modules"][m]["name"].toString().toStdString();
     auto module_iter = _desc->module_id_to_index.find(module_id);
@@ -156,8 +157,10 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
       result.warnings.push_back("Module '" + module_name + "' was deleted.");
       continue;
     }
+
     for (int p = 0; p < plugin["modules"][m]["params"].size(); p++)
     {
+      // check for old param not found
       auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
       auto param_name = plugin["modules"][m]["params"][p]["name"].toString().toStdString();
       auto param_iter = _desc->param_id_to_index.at(module_id).find(param_id);
@@ -169,8 +172,10 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
     }
   }
 
+  // copy over old state, push parse errors as we go
   for (int m = 0; m < plugin["state"].size(); m++)
   {
+    // check for changed module slot count
     auto module_id = plugin["modules"][m]["id"].toString().toStdString();
     auto module_iter = _desc->module_id_to_index.find(module_id);
     if(module_iter == _desc->module_id_to_index.end()) continue;
@@ -178,6 +183,19 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
     auto const& new_module = _desc->plugin->modules[module_iter->second];
     if (module_slots.size() != new_module.slot_count)
       result.warnings.push_back("Module '" + new_module.name + "' slot count changed.");
+
+    for(int mi = 0; mi < module_slots.size() && mi < new_module.slot_count; mi++)
+      for (int p = 0; p < module_slots[mi]["params"].size(); p++)
+      {
+        // check for changed param slot count
+        auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
+        auto param_iter = _desc->param_id_to_index.at(module_id).find(param_id);
+        if (param_iter == _desc->param_id_to_index.at(module_id).end()) continue;
+        var param_slots = plugin["state"][m]["slots"][mi]["params"]["slots"];
+        auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
+        if (param_slots.size() != new_param.slot_count)
+          result.warnings.push_back("Param '" + new_module.name + " " + new_param.name + "' slot count changed.");
+      }
   }
 
   /*
