@@ -149,8 +149,8 @@ validate_plugin_desc(plugin_desc const& desc)
   assert(desc.module_count > 0);
   assert(desc.modules.size() == desc.module_count);
   assert(desc.mappings.size() == desc.param_count);
-  assert(desc.id_to_index.size() == desc.param_count);
-  assert(desc.index_to_id.size() == desc.param_count);
+  assert(desc.param_tag_to_index.size() == desc.param_count);
+  assert(desc.param_index_to_tag.size() == desc.param_count);
 
   for (int m = 0; m < desc.modules.size(); m++)
   {
@@ -266,8 +266,8 @@ plugin(std::move(plugin_))
       mapping.param_slot = param.slot;
       mapping.param_topo = param.topo;
       mapping.param_global = param_global++;
-      index_to_id.push_back(param.id_hash);
-      id_to_index[param.id_hash] = mappings.size();
+      param_index_to_tag.push_back(param.id_hash);
+      param_tag_to_index[param.id_hash] = mappings.size();
       mappings.push_back(std::move(mapping));
     }
   }

@@ -132,31 +132,32 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
   var plugin = root["plugin"];
   // TODO if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) return io_result("Invalid checksum.");
 
-  // good to go
-  // init state to default, overwrite with old values
+  /*
+  // good to go, init state to default, 
+  // overwrite with old values and report warnings
   for(int m = 0; m < plugin["state"].size(); m++)
   {
     // mapping old to new module
     int new_module_index = -1;
-    var old_module = plugin["modules"][m];
-    auto old_module_name = old_module["name"].toString().toStdString();
     for(int mn = 0; mn < _topo->modules.size(); mn++)
-      if(_topo->modules[mn].id == old_module["id"])
-        new_module_index = mn;   
+      if(_topo->modules[mn].id == plugin["modules"][m]["id"])
+        new_module_index = mn;
     if (new_module_index == -1)
     {
+      auto old_module_name = plugin["modules"][m]["name"].toString().toStdString();
       result.warnings.push_back("Module '" + old_module_name + "' was deleted.");
       continue;
     }
 
     // check for changed slot count
-    var old_module_slots = plugin["state"][m]["slots"];
-    auto new_module_name = _topo->modules[new_module_index].name;
-    if (old_module_slots.size() != _topo->modules[new_module_index].slot_count)
+    if (plugin["state"][m]["slots"].size() != _topo->modules[new_module_index].slot_count)
+    {
+      auto new_module_name = _topo->modules[new_module_index].name;
       result.warnings.push_back("Module '" + new_module_name + "' changed slot count.");
+    }
 
-    for(int mi = 0; mi < old_module_slots.size() && mi < _topo->modules[new_module_index].slot_count; mi++)
-      for(int p = 0; p < old_module_slots[mi]["params"].size(); p++)
+    for(int mi = 0; mi < plugin["state"][m]["slots"].size() && mi < _topo->modules[new_module_index].slot_count; mi++)
+      for(int p = 0; p < plugin["state"][m]["slots"][mi]["params"].size(); p++)
       {
         // mapping old to new parameter
         int new_param_index = -1;
@@ -172,18 +173,19 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
         }
 
         // check for changed slot count
-        var old_param_slots = old_module_slots[mi]["params"][p]["slots"];
+        var old_param_slots = plugin["state"][m]["slots"][mi]["params"][p]["slots"];
         auto new_param_name = _topo->modules[new_module_index].params[new_param_index].name;
         if (old_param_slots.size() != _topo->modules[new_module_index].params[new_param_index].slot_count)
           result.warnings.push_back("Param '" + new_module_name + " " + new_param_name +  "' changed slot count.");
 
-        for (int pi = 0; pi < old_module_slots[mi]["params"][p]["slots"].size(); pi++)
+        for (int pi = 0; pi < plugin["state"][m]["slots"][mi]["params"][p]["slots"].size(); pi++)
         {
-          std::string text = old_module_slots[mi]["params"][p]["slots"][pi].toString().toStdString();
+          std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
           (void)text;
         }      
       }
   }
+  */
 
   return result;
 }

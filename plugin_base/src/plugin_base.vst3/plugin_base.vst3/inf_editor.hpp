@@ -28,8 +28,8 @@ public:
 
   void ui_changing(int index, plain_value plain) override;
   void plugin_param_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
-  void ui_end_changes(int index) override { _controller->endEdit(_controller->desc().index_to_id[index]); }
-  void ui_begin_changes(int index) override { _controller->beginEdit(_controller->desc().index_to_id[index]); }
+  void ui_end_changes(int index) override { _controller->endEdit(_controller->desc().param_index_to_tag[index]); }
+  void ui_begin_changes(int index) override { _controller->beginEdit(_controller->desc().param_index_to_tag[index]); }
 };
 
 }

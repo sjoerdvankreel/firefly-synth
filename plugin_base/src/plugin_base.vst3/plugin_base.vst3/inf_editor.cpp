@@ -55,11 +55,11 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
 void 
 inf_editor::ui_changing(int index, plain_value plain)
 {
-  int id = _controller->desc().index_to_id[index];
+  int tag = _controller->desc().param_index_to_tag[index];
   param_mapping const& mapping = _controller->desc().mappings[index];
   auto normalized = _controller->desc().plain_to_normalized_at(mapping, plain).value();
-  _controller->performEdit(id, normalized);
-  _controller->setParamNormalized(id, normalized);
+  _controller->performEdit(tag, normalized);
+  _controller->setParamNormalized(tag, normalized);
 }
 
 }

@@ -66,11 +66,11 @@ struct module_desc final {
 struct plugin_desc final {
   int param_count = {};
   int module_count = {};
-  std::vector<int> index_to_id = {};
-  std::map<int, int> id_to_index = {};
   std::vector<module_desc> modules = {};
   std::unique_ptr<plugin_topo> plugin = {};
   std::vector<param_mapping> mappings = {};
+  std::vector<int> param_index_to_tag = {};
+  std::map<int, int> param_tag_to_index = {};
 
   INF_DECLARE_MOVE_ONLY(plugin_desc);
   plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);

@@ -179,8 +179,8 @@ inf_plugin::push_to_ui(int index, clap_value clap)
 std::int32_t
 inf_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
-  auto iter = _engine.desc().id_to_index.find(param_id);
-  if (iter == _engine.desc().id_to_index.end())
+  auto iter = _engine.desc().param_tag_to_index.find(param_id);
+  if (iter == _engine.desc().param_tag_to_index.end())
   {
     assert(false);
     return -1;
@@ -326,7 +326,7 @@ inf_plugin::process_ui_to_audio_events(const clap_output_events_t* out)
   sync_event e;
   while (_to_audio_events->try_dequeue(e))
   {
-    int param_id = _engine.desc().index_to_id[e.index];
+    int tag = _engine.desc().param_index_to_tag[e.index];
     switch(e.type) 
     {
     case sync_event::type_t::value_changing:
@@ -335,9 +335,9 @@ inf_plugin::process_ui_to_audio_events(const clap_output_events_t* out)
       auto const& topo = *_engine.desc().param_at(mapping).param;
       mapping.value_at(_engine.state()) = e.plain;
       auto event = clap_event_param_value();
+      event.param_id = tag;
       event.header.time = 0;
       event.header.flags = 0;
-      event.param_id = param_id;
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_value);
       event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
@@ -349,9 +349,9 @@ inf_plugin::process_ui_to_audio_events(const clap_output_events_t* out)
     case sync_event::type_t::begin_edit:
     {
       auto event = clap_event_param_gesture();
+      event.param_id = tag;
       event.header.time = 0;
       event.header.flags = 0;
-      event.param_id = param_id;
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_gesture);
       event.header.type = (e.type == sync_event::type_t::begin_edit ? CLAP_EVENT_PARAM_GESTURE_BEGIN : CLAP_EVENT_PARAM_GESTURE_END);
