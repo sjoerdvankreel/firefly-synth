@@ -169,6 +169,17 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
     }
   }
 
+  for (int m = 0; m < plugin["state"].size(); m++)
+  {
+    auto module_id = plugin["modules"][m]["id"].toString().toStdString();
+    auto module_iter = _desc->module_id_to_index.find(module_id);
+    if(module_iter == _desc->module_id_to_index.end()) continue;
+    var module_slots = plugin["state"][m]["slots"];
+    auto const& new_module = _desc->plugin->modules[module_iter->second];
+    if (module_slots.size() != new_module.slot_count)
+      result.warnings.push_back("Module '" + new_module.name + "' slot count changed.");
+  }
+
   /*
   // good to go, init state to default, 
   // overwrite with old values and report warnings
