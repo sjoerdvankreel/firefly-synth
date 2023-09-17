@@ -210,16 +210,32 @@ plugin_engine::process()
   // run all modules in order
   _plugin_block.sample_rate = _sample_rate;
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
+  {
+    auto const& module = _desc.plugin->modules[m];
+    bool is_voice = module.scope == module_scope::voice;
     for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
-      module_block block;
+      module_block block = {};
       block.out.params_ = &_state[m][mi];
-      block.out.cv_ = &_plugin_block.out.cv[m][mi];
-      block.out.audio_ = &_plugin_block.out.audio[m][mi];
       block.in.block_ = &_plugin_block.in.block[m][mi];
       block.in.accurate_ = &_plugin_block.in.accurate[m][mi];
-      _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
+      if (!is_voice)
+      {
+        block.out.cv_ = &_plugin_block.out.global_cv[m][mi];
+        block.out.audio_ = &_plugin_block.out.global_audio[m][mi];
+        _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
+      }
+      else for(int v = 0; v < voice_count; v++)
+      {
+        module_voice_in voice_in = {};
+        block.in.voice = &voice_in;
+        block.out.voice_ = &_plugin_block.out.voices[v];
+        voice_in.cv_ = &_plugin_block.out.voice_cv[v];
+        voice_in.audio_ = &_plugin_block.out.voice_audio[v];
+        _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
+      }
     }
+  }
 
   // update output params 3 times a second
   _host_block.events.out.clear();
