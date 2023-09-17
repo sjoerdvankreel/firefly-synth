@@ -1,8 +1,7 @@
 gui
 graphs
 antialias
-drop param_instance_count
-state save + load with warnings/errors + load with warning/error ui
+state save
 clap threadpool
 host context menu
 (polyphonic) modulation
@@ -11,6 +10,4 @@ voice manager including voice-level unison
 manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
-provide utility functions for desc->param_at->normalized_to_plain etc
 linux, renoise, bitwig, cbb
-fix todos
