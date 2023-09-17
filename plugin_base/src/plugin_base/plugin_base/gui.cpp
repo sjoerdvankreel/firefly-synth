@@ -320,16 +320,16 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Load");
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    // todo dont leak
-    juce::FileChooser* chooser = new juce::FileChooser("load");
-    chooser->launchAsync(FileBrowserComponent::openMode, [this](const FileChooser & chsr) {
+    auto chooser = std::make_shared<FileChooser>("Save");
+    chooser->launchAsync(FileBrowserComponent::openMode, [this, chooser](FileChooser const&) {
       plugin_io io(_desc);
-      auto res = io.load_file(chsr.getResult().getFullPathName().toStdString(), *_ui_state);
-      std::string stuff; 
-      stuff += "error: " + res.error + "\r\n";
-      for(int i = 0; i < res.warnings.size(); i++)
-        stuff += "warn: " + res.warnings[i] + "\r\n";
-      MessageBoxOptions options = MessageBoxOptions().withMessage(String(stuff)).withTitle("RESULT").withButton("OK");
+      std::string message;
+      std::string path = chooser->getResult().getFullPathName().toStdString();
+      auto result = io.load_file(path, *_ui_state);
+      message += "error: " + result.error + "\r\n";
+      for(int i = 0; i < result.warnings.size(); i++)
+        message += "warn: " + result.warnings[i] + "\r\n";
+      MessageBoxOptions options = MessageBoxOptions().withMessage(String(message)).withTitle("RESULT").withButton("OK");
       AlertWindow::showAsync(options, [](int){
       });
     });
@@ -338,11 +338,11 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Save");
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    // todo dont leak
-    juce::FileChooser* chooser = new juce::FileChooser("save");
-    chooser->launchAsync(FileBrowserComponent::saveMode, [this](const FileChooser& chsr) {
+    auto chooser = std::make_shared<FileChooser>("Save");
+    chooser->launchAsync(FileBrowserComponent::saveMode, [this, chooser](FileChooser const&) {
       plugin_io io(_desc);
-      io.save_file(chsr.getResult().getFullPathName().toStdString(), *_ui_state);
+      std::string path = chooser->getResult().getFullPathName().toStdString();
+      io.save_file(path, *_ui_state);
     });
   };
   resized();
