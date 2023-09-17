@@ -110,6 +110,14 @@ plugin_engine::process()
       _host_block->audio_out[c] + _common_block.frame_count,
       0.0f);
 
+  // clear voices audio out
+  for(int v = 0; v < _plugin_block.voices_audio_out.size(); v++)
+    for(int c = 0; c < 2; c++)
+      std::fill(
+        _plugin_block.voices_audio_out[v][c].begin(),
+        _plugin_block.voices_audio_out[v][c].begin() + _common_block.frame_count,
+        0.0f);
+
   // take voices starting this block, grab oldest when out
   // TODO monophonic portamento
   for (int e = 0; e < _host_block->events.notes.size(); e++)
