@@ -10,3 +10,4 @@ manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
 linux, renoise, bitwig, cbb
+renoise not call setcomponentstate?
