@@ -29,7 +29,7 @@ module_topo
 filter_topo()
 {
   module_topo result(make_module("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, 
-    module_scope::voice, module_output::none));
+    module_scope::global, module_output::none));
   result.sections.emplace_back(section_topo(section_main, "Main"));
   result.params.emplace_back(param_toggle("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", 1, 
     section_main, param_dir::input, param_label::both, false));
@@ -53,7 +53,7 @@ filter_engine::process(
   for(int o = 0; o < topo.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
-        plugin.host->audio_out[c][f] += osc_audio[o][c][f] * osc_gain[o][f];
+        module.out.voice()[c][f] += osc_audio[o][c][f] * osc_gain[o][f];
   if(module.in.block()[param_on][0].step() == 0) return;
 
   float w = 2 * plugin.sample_rate;

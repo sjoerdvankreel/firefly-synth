@@ -110,9 +110,11 @@ struct module_in final {
 struct module_out final {
   jarray<float, 1>* cv_ = {};
   jarray<float, 2>* audio_ = {};
+  jarray<float, 2>* voice_ = {};
   jarray<plain_value, 2>* params_ = {};
   jarray<float, 1>& cv() const { return *cv_; }
   jarray<float, 2>& audio() const { return *audio_; }
+  jarray<float, 2>& voice() const { return *voice_; }
   jarray<plain_value, 2>& params() const { return *params_; }
   INF_DECLARE_MOVE_ONLY(module_out);
 };
