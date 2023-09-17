@@ -227,6 +227,13 @@ plugin_gui::ui_changing(int index, plain_value plain)
     _ui_listeners[i]->ui_changing(index, plain);
 }
 
+void 
+plugin_gui::ui_loaded(jarray<plain_value, 4> const& new_state)
+{
+  for (int i = 0; i < _ui_listeners.size(); i++)
+    _ui_listeners[i]->ui_loaded(new_state);
+}
+
 void
 plugin_gui::plugin_changed(int index, plain_value plain)
 {
@@ -316,7 +323,9 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
       for(int i = 0; i < res.warnings.size(); i++)
         stuff += "warn: " + res.warnings[i] + "\r\n";
       MessageBoxOptions options = MessageBoxOptions().withMessage(String(stuff)).withTitle("RESULT").withButton("OK");
-      AlertWindow::showAsync(options, [](int){});
+      AlertWindow::showAsync(options, [this, res = std::move(res)](int){
+        this->ui_loaded(res.state);
+      });
     });
   };
   _children.emplace_back(std::make_unique<TextButton>());
