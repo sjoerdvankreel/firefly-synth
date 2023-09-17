@@ -72,8 +72,10 @@ struct plugin_in final {
 
 // all modules cv/audio
 struct plugin_out final {
-  jarray<float, 3> cv = {};
-  jarray<float, 4> audio = {};
+  jarray<float, 4> voice_cv = {};
+  jarray<float, 3> global_cv = {};
+  jarray<float, 5> voice_audio = {};
+  jarray<float, 4> global_audio = {};
   INF_DECLARE_MOVE_ONLY(plugin_out);
 };
 
@@ -89,9 +91,13 @@ struct plugin_block final {
 // single module automation
 struct module_in final {
   jarray<float, 3> const* accurate_ = {};
+  jarray<float, 3> const* voice_cv_ = {};
+  jarray<float, 4> const* voice_audio_ = {};
   jarray<plain_value, 2> const* block_ = {};
-  jarray<float, 3> const& accurate() { return *accurate_; }
-  jarray<plain_value, 2> const& block() { return *block_; }
+  jarray<float, 3> const& voice_cv() const { return *voice_cv_; }
+  jarray<float, 3> const& accurate() const { return *accurate_; }
+  jarray<plain_value, 2> const& block() const { return *block_; }
+  jarray<float, 4> const& voice_audio() const { return *voice_audio_; }
   INF_DECLARE_MOVE_ONLY(module_in);
 };
 

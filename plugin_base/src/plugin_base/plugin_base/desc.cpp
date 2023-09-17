@@ -49,6 +49,90 @@ stable_hash(std::string const& text)
 }
 
 static void
+validate_dims(plugin_topo const& plugin, plugin_dims const& dims)
+{
+  assert(dims.params.size() == plugin.modules.size());
+  assert(dims.modules.size() == plugin.modules.size());
+  for (int m = 0; m < plugin.modules.size(); m++)
+  {
+    auto const& module = plugin.modules[m];
+    assert(dims.modules[m] == module.slot_count);
+    assert(dims.params[m].size() == module.slot_count);
+    for (int mi = 0; mi < module.slot_count; mi++)
+    {
+      assert(dims.params[m][mi].size() == module.params.size());
+      for (int p = 0; p < module.params.size(); p++)
+        assert(dims.params[m][mi][p] == module.params[m].slot_count);
+    }
+  }
+}
+
+static void
+validate_frame_dims(
+  plugin_topo const& plugin, plugin_frame_dims const& dims, int frame_count)
+{
+  assert(dims.voice_cv.size() == plugin.polyphony);
+  assert(dims.voice_audio.size() == plugin.polyphony);
+  for (int v = 0; v < plugin.polyphony; v++)
+  {
+    assert(dims.voice_cv[v].size() == plugin.modules.size());
+    assert(dims.voice_audio[v].size() == plugin.modules.size());
+    for (int m = 0; m < plugin.modules.size(); m++)
+    {
+      auto const& module = plugin.modules[m];
+      bool is_cv = module.output == module_output::cv;
+      bool is_voice = module.scope == module_scope::voice;
+      bool is_audio = module.output == module_output::audio;
+      int cv_frames = is_cv && is_voice ? frame_count : 0;
+      int audio_frames = is_audio && is_voice ? frame_count : 0;
+      assert(dims.voice_cv[v][m].size() == module.slot_count);
+      assert(dims.voice_audio[v][m].size() == module.slot_count);
+      for (int mi = 0; mi < module.slot_count; mi++)
+      {
+        assert(dims.voice_cv[v][m][mi] == cv_frames);
+        assert(dims.voice_audio[v][m][mi].size() == 2);
+        for(int c = 0; c < 2; c++)
+          assert(dims.voice_audio[v][m][mi][c] == audio_frames);
+      }
+    }
+  }
+
+  assert(dims.accurate.size() == plugin.modules.size());
+  assert(dims.global_cv.size() == plugin.modules.size());
+  assert(dims.global_audio.size() == plugin.modules.size());
+  for (int m = 0; m < plugin.modules.size(); m++)
+  {
+    auto const& module = plugin.modules[m];
+    bool is_cv = module.output == module_output::cv;
+    bool is_audio = module.output == module_output::audio;
+    bool is_global = module.scope == module_scope::global;
+    int cv_frames = is_cv && is_global ? frame_count : 0;
+    int audio_frames = is_audio && is_global ? frame_count : 0;
+    assert(dims.accurate[m].size() == module.slot_count);
+    assert(dims.global_cv[m].size() == module.slot_count);
+    assert(dims.global_audio[m].size() == module.slot_count);
+
+    for (int mi = 0; mi < module.slot_count; mi++)
+    {
+      assert(dims.global_cv[m][mi] == cv_frames);
+      assert(dims.global_audio[m][mi].size() == 2);
+      for(int c = 0; c < 2; c++)
+        assert(dims.global_audio[m][mi][c] == audio_frames);
+
+      assert(dims.accurate[m][mi].size() == module.params.size());
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        int accurate_frames = param.rate == param_rate::accurate? frame_count: 0;
+        assert(dims.accurate[m][mi][p].size() == param.slot_count);
+        for(int pi = 0; pi < param.slot_count; pi++)
+          assert(dims.accurate[m][mi][p][pi] == accurate_frames);
+      }
+    }
+  }
+}
+
+static void
 validate_module_desc(plugin_desc const& plugin_desc, module_desc const& desc)
 {
   assert(desc.module);
@@ -318,23 +402,45 @@ plugin_dims(plugin_topo const& plugin)
         params[m][mi].push_back(module.params[p].slot_count);
     }
   }
+  validate_dims(plugin, *this);
 }
 
 plugin_frame_dims::
 plugin_frame_dims(plugin_topo const& plugin, int frame_count)
 {
+  for (int v = 0; v < plugin.polyphony; v++)
+  {
+    voice_cv.emplace_back();
+    voice_audio.emplace_back();
+    for (int m = 0; m < plugin.modules.size(); m++)
+    {
+      auto const& module = plugin.modules[m];
+      bool is_cv = module.output == module_output::cv;
+      bool is_audio = module.output == module_output::audio;
+      bool is_voice = module.scope == module_scope::voice;
+      int cv_frames = is_cv && is_voice ? frame_count : 0;
+      int audio_frames = is_audio && is_voice ? frame_count : 0;
+      voice_cv[v].emplace_back(module.slot_count, cv_frames);
+      for (int mi = 0; mi < module.slot_count; mi++)
+        voice_audio[v][m].emplace_back(2, audio_frames);
+    }
+  }
+
   for (int m = 0; m < plugin.modules.size(); m++)
   {
-    audio.emplace_back();
-    accurate.emplace_back();
     auto const& module = plugin.modules[m];
-    int cv_frames = module.output == module_output::cv ? frame_count : 0;
-    int audio_frames = module.output == module_output::audio ? frame_count : 0;
-    cv.emplace_back(module.slot_count, cv_frames);
+    bool is_cv = module.output == module_output::cv;
+    bool is_audio = module.output == module_output::audio;
+    bool is_global = module.scope == module_scope::global;
+    int cv_frames = is_cv && is_global ? frame_count : 0;
+    int audio_frames = is_audio && is_global ? frame_count : 0;
+    accurate.emplace_back();
+    global_audio.emplace_back();
+    global_cv.emplace_back(module.slot_count, cv_frames);
     for (int mi = 0; mi < module.slot_count; mi++)
     {
       accurate[m].emplace_back();
-      audio[m].emplace_back(2, audio_frames);
+      global_audio[m].emplace_back(2, audio_frames);
       for (int p = 0; p < module.params.size(); p++)
       {
         int param_frames = module.params[p].rate == param_rate::accurate ? frame_count : 0;
@@ -342,6 +448,8 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       }
     }
   }
+
+  validate_frame_dims(plugin, *this, frame_count);
 }
 
 }

@@ -49,12 +49,14 @@ plugin_engine::deactivate()
   // drop frame-count dependent memory
   _sample_rate = 0;
   _activated_at_ms = {};
-  _plugin_block.out.cv = {};
-  _plugin_block.out.audio = {};
-  _plugin_block.in.accurate = {};
   _host_block.events.out.clear();
   _host_block.events.block.clear();
   _host_block.events.accurate.clear();
+  _plugin_block.in.accurate = {};
+  _plugin_block.out.voice_cv = {};
+  _plugin_block.out.voice_audio = {};
+  _plugin_block.out.global_cv = {};
+  _plugin_block.out.global_audio = {};
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
     for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _module_engines[m][mi].reset();
@@ -72,8 +74,10 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(*_desc.plugin, max_frame_count);
-  _plugin_block.out.cv.resize(frame_dims.cv);
-  _plugin_block.out.audio.resize(frame_dims.audio);
+  _plugin_block.out.voice_cv.resize(frame_dims.voice_cv);
+  _plugin_block.out.voice_audio.resize(frame_dims.voice_audio);
+  _plugin_block.out.global_cv.resize(frame_dims.global_cv);
+  _plugin_block.out.global_audio.resize(frame_dims.global_audio);
   _plugin_block.in.accurate.resize(frame_dims.accurate);
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)

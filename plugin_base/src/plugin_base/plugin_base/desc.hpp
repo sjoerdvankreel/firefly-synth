@@ -117,8 +117,10 @@ struct plugin_dims final {
 
 // runtime plugin buffer dimensions
 struct plugin_frame_dims final {
-  jarray<int, 2> cv;
-  jarray<int, 3> audio;
+  jarray<int, 3> voice_cv;
+  jarray<int, 2> global_cv;
+  jarray<int, 4> voice_audio;
+  jarray<int, 3> global_audio;
   jarray<int, 4> accurate;
 
   INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
