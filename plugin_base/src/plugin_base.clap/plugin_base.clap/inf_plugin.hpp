@@ -2,6 +2,7 @@
 
 #include <plugin_base/gui.hpp>
 #include <plugin_base/engine.hpp>
+#include <plugin_base/block_host.hpp>
 
 #include <clap/helpers/plugin.hh>
 #include <readerwriterqueue.h>

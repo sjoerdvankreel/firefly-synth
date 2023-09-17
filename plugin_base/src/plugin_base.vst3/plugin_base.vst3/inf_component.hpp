@@ -2,6 +2,7 @@
 
 #include <plugin_base/engine.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/block_host.hpp>
 
 #include <public.sdk/source/vst/vstaudioeffect.h>
 

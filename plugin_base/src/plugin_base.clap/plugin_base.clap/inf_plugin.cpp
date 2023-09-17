@@ -1,6 +1,5 @@
 #include <plugin_base/io.hpp>
 #include <plugin_base/value.hpp>
-#include <plugin_base/block_host.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 
 #include <clap/helpers/plugin.hxx>

@@ -1,5 +1,4 @@
 #include <plugin_base/io.hpp>
-#include <plugin_base/block_host.hpp>
 #include <plugin_base.vst3/inf_component.hpp>
 
 #include <pluginterfaces/base/ibstream.h>
