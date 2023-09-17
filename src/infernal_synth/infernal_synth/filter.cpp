@@ -64,7 +64,7 @@ filter_engine::process(
     float b = (w - angle) * norm;
     for (int c = 0; c < 2; c++)
     {
-      float filtered = plugin.host->audio_out[c][f] * a + _in[c] * a + _out[c] * b;
+      float filtered = module.out.voice()[c][f] * a + _in[c] * a + _out[c] * b;
       _in[c] = module.out.voice()[c][f];
       _out[c] = filtered;
       module.out.voice()[c][f] = filtered;
