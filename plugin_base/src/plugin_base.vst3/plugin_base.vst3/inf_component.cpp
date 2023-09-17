@@ -1,6 +1,8 @@
 #include <plugin_base/io.hpp>
 #include <plugin_base.vst3/inf_component.hpp>
 
+#include <base/source/fstreamer.h>
+#include <pluginterfaces/base/ibstream.h>
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/vst/ivstprocesscontext.h>
 #include <pluginterfaces/vst/ivstparameterchanges.h>
@@ -32,6 +34,26 @@ inf_component::setupProcessing(ProcessSetup& setup)
 {
   _engine.activate(setup.sampleRate, setup.maxSamplesPerBlock);
   return AudioEffect::setupProcessing(setup);
+}
+
+tresult PLUGIN_API
+inf_component::getState(IBStream* state)
+{
+  plugin_io io(&_engine.desc());
+  std::vector<char> data(io.save(_engine.state()));
+  return state->write(data.data(), data.size());
+}
+
+tresult PLUGIN_API
+inf_component::setState(IBStream* state)
+{
+  char byte;
+  std::vector<char> data;
+  while (state->read(&byte, 1))
+    data.push_back(byte);
+  plugin_io io(&_engine.desc());
+  if (io.load(data, _engine.state()).ok()) return kResultOk;
+  return kResultFalse;
 }
 
 tresult PLUGIN_API
