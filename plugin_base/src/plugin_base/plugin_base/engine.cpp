@@ -18,10 +18,10 @@ _host_block(std::make_unique<host_block>())
   int note_limit_guess = _desc.plugin->polyphony * 64;
 
   // init everything that is not frame-count dependent
+  _state.resize(_dims.module_slot_param_slot);
   _desc.init_defaults(_state);
   _global_engines.resize(_dims.module_slot);
   _accurate_frames.resize(_desc.param_count);
-  _state.resize(_dims.module_slot_param_slot);
   _common_block.notes.reserve(note_limit_guess);
   _voice_engines.resize(_dims.voice_module_slot);
   _plugin_block.automation.block.resize(_dims.module_slot_param_slot);

@@ -70,7 +70,7 @@ validate_dims(plugin_topo const& plugin, plugin_dims const& dims)
     {
       assert(dims.module_slot_param_slot[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
-        assert(dims.module_slot_param_slot[m][mi][p] == module.params[m].slot_count);
+        assert(dims.module_slot_param_slot[m][mi][p] == module.params[p].slot_count);
     }
   }
 }
@@ -443,6 +443,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       bool is_voice = module.scope == module_scope::voice;
       int cv_frames = is_cv && is_voice ? frame_count : 0;
       int audio_frames = is_audio && is_voice ? frame_count : 0;
+      module_voice_audio[v].emplace_back();
       module_voice_cv[v].emplace_back(module.slot_count, cv_frames);
       for (int mi = 0; mi < module.slot_count; mi++)
         module_voice_audio[v][m].emplace_back(2, audio_frames);
