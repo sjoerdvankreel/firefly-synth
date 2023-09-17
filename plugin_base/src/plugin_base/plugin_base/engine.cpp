@@ -111,11 +111,12 @@ plugin_engine::process()
       0.0f);
 
   // take voices starting this block, grab oldest when out
+  // TODO monophonic portamento
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
+    int take_index = -1;
     auto const& event = _host_block->events.notes[e];
     if (event.type != note_event::type_t::on) continue;
-    int take_index = -1;
     std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
     for (int i = 0; i < _voices_states.size(); i++)
       if (!_voices_states[i].active)
@@ -282,7 +283,21 @@ plugin_engine::process()
   }
 
   // release voices ending this block
-
+  // TODO leave this to the plugs envelope
+  for (int e = 0; e < _host_block->events.notes.size(); e++)
+  {
+    int release_index = -1;
+    auto const& event = _host_block->events.notes[e];
+    if(event.type == note_event::type_t::on) continue;
+    for (int v = 0; v < _voices_states.size(); v++)
+      if ((event.id.id >= 0 && event.id.id == _voices_states[v].id) ||
+        (event.id.key == _voices_states[v].key && event.id.channel == _voices_states[v].channel)) {
+        release_index = v;
+        break;
+      }
+    assert(release_index >= 0);
+    _voices_states[release_index] = voice_state();
+  }
 
   // update output params 3 times a second
   _host_block->events.out.clear();

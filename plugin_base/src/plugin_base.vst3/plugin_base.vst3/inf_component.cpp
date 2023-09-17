@@ -90,7 +90,7 @@ inf_component::process(ProcessData& data)
   Event vst_event;
   if (data.inputEvents)
     for (int i = 0; i < data.inputEvents->getEventCount(); i++)
-      if (data.inputEvents->getEvent(i, vst_event))
+      if (data.inputEvents->getEvent(i, vst_event) == kResultOk)
       {
         if (vst_event.type == Event::kNoteOnEvent) 
         {
