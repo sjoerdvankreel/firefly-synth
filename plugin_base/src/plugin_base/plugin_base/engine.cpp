@@ -18,7 +18,8 @@ _desc(std::move(topo)), _dims(*_desc.plugin)
   // init everything that is not frame-count dependent
   _state.resize(_dims.params);
   _desc.init_defaults(_state);
-  _module_engines.resize(_dims.modules);
+  _voice_engines.resize(_dims.voices);
+  _global_engines.resize(_dims.modules);
   _accurate_frames.resize(_desc.param_count);
   _plugin_block.in.block.resize(_dims.params);
   _common_block.notes.reserve(note_limit_guess);
@@ -59,7 +60,11 @@ plugin_engine::deactivate()
   _plugin_block.out.global_audio = {};
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
     for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
-      _module_engines[m][mi].reset();
+    {
+      _global_engines[m][mi].reset();
+      for(int v = 0; v < _desc.plugin->polyphony; v++)
+        _voice_engines[v][m][mi].reset();
+    }
 }
 
 void
@@ -81,7 +86,11 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _plugin_block.in.accurate.resize(frame_dims.accurate);
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
-      _module_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
+    {
+      _global_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
+      for(int v = 0; v < _desc.plugin->polyphony; v++)
+        _voice_engines[v][m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
+    }
 }
 
 void 
@@ -223,7 +232,7 @@ plugin_engine::process()
       {
         block.out.cv_ = &_plugin_block.out.global_cv[m][mi];
         block.out.audio_ = &_plugin_block.out.global_audio[m][mi];
-        _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
+        _global_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
       }
       else for(int v = 0; v < voice_count; v++)
       {
@@ -232,7 +241,7 @@ plugin_engine::process()
         block.out.voice_ = &_plugin_block.out.voices[v];
         voice_in.cv_ = &_plugin_block.out.voice_cv[v];
         voice_in.audio_ = &_plugin_block.out.voice_audio[v];
-        _module_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
+        _voice_engines[v][m][mi]->process(*_desc.plugin, _plugin_block, block);
       }
     }
   }

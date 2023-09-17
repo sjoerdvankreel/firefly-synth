@@ -51,10 +51,18 @@ stable_hash(std::string const& text)
 static void
 validate_dims(plugin_topo const& plugin, plugin_dims const& dims)
 {
+  assert(dims.voices.size() == plugin.polyphony);
+  for(int v = 0; v < plugin.polyphony; v++)
+  {
+    assert(dims.voices[v].size() == plugin.modules.size());
+    for(int m = 0; m < plugin.modules.size(); m++)
+      assert(dims.voices[v][m] == plugin.modules[m].slot_count);
+  }
+
   assert(dims.params.size() == plugin.modules.size());
   assert(dims.modules.size() == plugin.modules.size());
   for (int m = 0; m < plugin.modules.size(); m++)
-  {
+  {    
     auto const& module = plugin.modules[m];
     assert(dims.modules[m] == module.slot_count);
     assert(dims.params[m].size() == module.slot_count);

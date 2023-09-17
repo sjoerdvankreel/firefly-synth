@@ -36,7 +36,7 @@ filter_topo()
     section_main, param_dir::input, param_label::both, false));
   result.params.emplace_back(param_log("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", 1, 
     section_main, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, 20, 20000, 1000, 1000, "Hz"));
-  result.params.emplace_back(param_pct("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", 2, 
+  result.params.emplace_back(param_pct("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", 2, // TODO osc slot count
     section_main, param_dir::input, param_edit::vslider, param_label::both, param_rate::accurate, true, 0, 1, 0.5));
   result.params.emplace_back(param_pct("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1, 
     section_main, param_dir::output, param_edit::text, param_label::both, param_rate::block, true, 0, 1, 0));

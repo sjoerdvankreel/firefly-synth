@@ -33,7 +33,8 @@ class plugin_engine final {
   jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
   std::chrono::milliseconds _activated_at_ms = {};
-  jarray<std::unique_ptr<module_engine>, 2> _module_engines = {};
+  jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
+  jarray<std::unique_ptr<module_engine>, 2> _global_engines = {};
 
 public:
   void process();
