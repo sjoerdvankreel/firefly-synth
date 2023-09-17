@@ -97,6 +97,11 @@ plugin_engine::process()
       _host_block.common->audio_out[c] + _common_block.frame_count,
       0.0f);
 
+  // clear per-voice audio out
+  for (int v = 0; v < voice_count; v++)
+    for(int c = 0; c < 2; c++)
+      std::fill(_plugin_block.out.voices[v][c].begin(), _plugin_block.out.voices[v][c].end(), 0.0f);
+
   // clear module cv/audio out
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
   {
@@ -113,8 +118,7 @@ plugin_engine::process()
           auto& curve = _plugin_block.out.voice_cv[v][m][mi];
           std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
         }
-      }
-      else if (module.output == module_output::audio)
+      } else if (module.output == module_output::audio)
       {
         if (module.scope == module_scope::global)
         {
