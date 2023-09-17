@@ -71,10 +71,14 @@ static void
 validate_frame_dims(
   plugin_topo const& plugin, plugin_frame_dims const& dims, int frame_count)
 {
+  assert(dims.voices.size() == plugin.polyphony);
   assert(dims.voice_cv.size() == plugin.polyphony);
   assert(dims.voice_audio.size() == plugin.polyphony);
   for (int v = 0; v < plugin.polyphony; v++)
   {
+    assert(dims.voices[v].size() == 2);
+    assert(dims.voices[v][0] == frame_count);
+    assert(dims.voices[v][1] == frame_count);
     assert(dims.voice_cv[v].size() == plugin.modules.size());
     assert(dims.voice_audio[v].size() == plugin.modules.size());
     for (int m = 0; m < plugin.modules.size(); m++)
@@ -412,6 +416,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
   {
     voice_cv.emplace_back();
     voice_audio.emplace_back();
+    voices.emplace_back(2, frame_count);
     for (int m = 0; m < plugin.modules.size(); m++)
     {
       auto const& module = plugin.modules[m];

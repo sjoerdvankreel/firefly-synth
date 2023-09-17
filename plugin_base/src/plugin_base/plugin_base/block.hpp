@@ -72,6 +72,7 @@ struct plugin_in final {
 
 // all modules cv/audio
 struct plugin_out final {
+  jarray<float, 3> voices = {};
   jarray<float, 4> voice_cv = {};
   jarray<float, 3> global_cv = {};
   jarray<float, 5> voice_audio = {};

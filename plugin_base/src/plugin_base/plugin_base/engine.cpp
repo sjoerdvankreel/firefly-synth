@@ -87,6 +87,9 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 void 
 plugin_engine::process()
 {
+  // TODO
+  int voice_count = 2;
+
   // clear host audio out
   for(int c = 0; c < 2; c++)
     std::fill(
@@ -101,14 +104,29 @@ plugin_engine::process()
     for (int mi = 0; mi < module.slot_count; mi++)
       if(module.output == module_output::cv)
       {
-        auto& curve = _plugin_block.out.cv[m][mi];
-        std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
+        if(module.scope == module_scope::global)
+        {
+          auto& curve = _plugin_block.out.global_cv[m][mi];
+          std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
+        } else for (int v = 0; v < voice_count; v++)
+        {
+          auto& curve = _plugin_block.out.voice_cv[v][m][mi];
+          std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
+        }
       }
       else if (module.output == module_output::audio)
       {
-        auto& audio = _plugin_block.out.audio[m][mi];
-        for(int c = 0; c < 2; c++)
-          std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
+        if (module.scope == module_scope::global)
+        {
+          auto& audio = _plugin_block.out.global_audio[m][mi];
+          for(int c = 0; c < 2; c++)
+            std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
+        } else for (int v = 0; v < voice_count; v++)
+        {
+          auto& audio = _plugin_block.out.voice_audio[v][m][mi];
+          for (int c = 0; c < 2; c++)
+            std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);;
+        }
       } else assert(module.output == module_output::none);
   }
 
