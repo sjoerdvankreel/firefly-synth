@@ -97,6 +97,8 @@ validate_frame_dims(
       bool is_audio = module.output == module_output::audio;
       int cv_frames = is_cv && is_voice ? frame_count : 0;
       int audio_frames = is_audio && is_voice ? frame_count : 0;
+      (void)cv_frames;
+      (void)audio_frames;
       assert(dims.module_voice_cv[v][m].size() == module.slot_count);
       assert(dims.module_voice_audio[v][m].size() == module.slot_count);
       for (int mi = 0; mi < module.slot_count; mi++)
@@ -136,6 +138,7 @@ validate_frame_dims(
       {
         auto const& param = module.params[p];
         int accurate_frames = param.rate == param_rate::accurate? frame_count: 0;
+        (void)accurate_frames;
         assert(dims.accurate_automation[m][mi][p].size() == param.slot_count);
         for(int pi = 0; pi < param.slot_count; pi++)
           assert(dims.accurate_automation[m][mi][p][pi] == accurate_frames);
