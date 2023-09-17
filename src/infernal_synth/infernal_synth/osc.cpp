@@ -76,9 +76,16 @@ osc_engine::process(
   {
     switch (type)
     {
-    case type_saw: sample = _phase * 2 - 1; break;
-    case type_sine: sample = std::sin(_phase * 2 * pi32); break;
-    default: assert(false); sample = 0; break;
+    case type_saw: 
+      sample = _phase * 2 - 1; 
+      break;
+    case type_sine: 
+      sample = std::sin(_phase * 2 * pi32); 
+      break;
+    default: 
+      assert(false); 
+      sample = 0; 
+      break;
     }
     module.out.audio()[0][f] = sample * gain[f] * balance(0, bal[f]);
     module.out.audio()[1][f] = sample * gain[f] * balance(1, bal[f]);
