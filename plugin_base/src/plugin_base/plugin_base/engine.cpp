@@ -82,12 +82,12 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(*_desc.plugin, max_frame_count);
-  // TODO _plugin_block.voices_audio_out.resize(frame_dims.)
-  _plugin_block.module_out.voice_cv.resize(frame_dims.voice_cv);
-  _plugin_block.module_out.voice_audio.resize(frame_dims.voice_audio);
-  _plugin_block.module_out.global_cv.resize(frame_dims.global_cv);
-  _plugin_block.module_out.global_audio.resize(frame_dims.global_audio);
-  _plugin_block.automation.accurate.resize(frame_dims.accurate);
+  _plugin_block.voices_audio_out.resize(frame_dims.voices_audio);
+  _plugin_block.module_out.voice_cv.resize(frame_dims.module_voice_cv);
+  _plugin_block.module_out.voice_audio.resize(frame_dims.module_voice_audio);
+  _plugin_block.module_out.global_cv.resize(frame_dims.module_global_cv);
+  _plugin_block.module_out.global_audio.resize(frame_dims.module_global_audio);
+  _plugin_block.automation.accurate.resize(frame_dims.accurate_automation);
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
