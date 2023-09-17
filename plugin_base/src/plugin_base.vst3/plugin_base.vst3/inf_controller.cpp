@@ -63,6 +63,28 @@ inf_controller::createView(char const* name)
   return _editor = new inf_editor(this);
 }
 
+void 
+inf_controller::ui_loaded(jarray<plain_value, 4> const& new_state)
+{
+  int param_global = 0;
+  for(int m = 0; m < _desc.plugin->modules.size(); m++)
+  {
+    auto const& module = _desc.plugin->modules[m];
+    for (int mi = 0; mi < module.params.size(); mi++)
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        for (int pi = 0; pi < param.slot_count; pi++)
+        {
+          int tag = _desc.param_index_to_tag[param_global++];
+          normalized_value normalized = param.plain_to_normalized(new_state[m][mi][p][pi]);
+          beginEdit(tag);
+
+        }
+      }
+  }
+}
+
 tresult PLUGIN_API 
 inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
@@ -73,7 +95,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   plain_value plain = _desc.normalized_to_plain_at(mapping, normalized_value(value));
   mapping.value_at(_ui_state) = plain;
   if (_editor == nullptr) return kResultTrue;
-  _editor->plugin_param_changed(index, plain);
+  _editor->plugin_changed(index, plain);
   return kResultTrue;
 }
 

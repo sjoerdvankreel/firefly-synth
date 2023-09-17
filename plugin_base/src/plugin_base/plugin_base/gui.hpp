@@ -21,7 +21,7 @@ public:
   virtual void ui_end_changes(int index) = 0;
   virtual void ui_begin_changes(int index) = 0;
   virtual void ui_changing(int index, plain_value plain) = 0;
-  virtual void ui_load(jarray<plain_value, 4> const& new_state) = 0;
+  virtual void ui_loaded(jarray<plain_value, 4> const& new_state) = 0;
 };
 
 class plugin_gui:

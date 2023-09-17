@@ -254,9 +254,9 @@ plugin(std::move(plugin_))
     module_id_to_index[module.id] = m;
     for(int p = 0; p < module.params.size(); p++)
       param_id_to_index[module.id][module.params[p].id] = p;
-    for(int i = 0; i < module.slot_count; i++)
+    for(int mi = 0; mi < module.slot_count; mi++)
     {
-      modules.emplace_back(module_desc(module, m, i, module_global++, param_global));
+      modules.emplace_back(module_desc(module, m, mi, module_global++, param_global));
       for(int p = 0; p < module.params.size(); p++)
         param_global += module.params[p].slot_count;
     }

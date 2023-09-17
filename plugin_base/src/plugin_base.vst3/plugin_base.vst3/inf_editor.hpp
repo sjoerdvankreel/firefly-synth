@@ -27,7 +27,8 @@ public:
   Steinberg::tresult PLUGIN_API isPlatformTypeSupported(Steinberg::FIDString type) override  { return Steinberg::kResultTrue; }
 
   void ui_changing(int index, plain_value plain) override;
-  void plugin_param_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
+  void plugin_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
+  void ui_loaded(jarray<plain_value, 4> const& new_state) override { _controller->ui_loaded(new_state); }
   void ui_end_changes(int index) override { _controller->endEdit(_controller->desc().param_index_to_tag[index]); }
   void ui_begin_changes(int index) override { _controller->beginEdit(_controller->desc().param_index_to_tag[index]); }
 };

@@ -323,8 +323,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
       for(int i = 0; i < res.warnings.size(); i++)
         stuff += "warn: " + res.warnings[i] + "\r\n";
       MessageBoxOptions options = MessageBoxOptions().withMessage(String(stuff)).withTitle("RESULT").withButton("OK");
-      AlertWindow::showAsync(options, [this, res = std::move(res)](int){
-        this->ui_loaded(res.state);
+      AlertWindow::showAsync(options, [](int){
       });
     });
   };
