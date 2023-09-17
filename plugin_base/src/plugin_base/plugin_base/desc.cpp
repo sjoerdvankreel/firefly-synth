@@ -122,6 +122,8 @@ validate_frame_dims(
     bool is_global = module.scope == module_scope::global;
     int cv_frames = is_cv && is_global ? frame_count : 0;
     int audio_frames = is_audio && is_global ? frame_count : 0;
+    (void)cv_frames;
+    (void)audio_frames;
     assert(dims.module_global_cv[m].size() == module.slot_count);
     assert(dims.module_global_audio[m].size() == module.slot_count);
     assert(dims.accurate_automation[m].size() == module.slot_count);
