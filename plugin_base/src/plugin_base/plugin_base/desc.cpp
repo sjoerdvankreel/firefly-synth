@@ -402,6 +402,16 @@ plugin_desc::init_defaults(jarray<plain_value, 4>& state) const
 plugin_dims::
 plugin_dims(plugin_topo const& plugin)
 {
+  for (int v = 0; v < plugin.polyphony; v++)
+  {
+    voice_module_slot.emplace_back();
+    for (int m = 0; m < plugin.modules.size(); m++)
+    {
+      auto const& module = plugin.modules[m];
+      voice_module_slot[v].push_back(module.slot_count);
+    }
+  }
+
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
