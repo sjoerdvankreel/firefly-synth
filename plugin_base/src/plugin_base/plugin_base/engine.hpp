@@ -26,6 +26,17 @@ public:
 
 // global plugin audio processor
 class plugin_engine final {
+
+  struct voice_state final {
+    // TODO start/end frames
+    int id = -1;
+    short key = -1;
+    short channel = -1;
+    bool active = false;
+    float velocity = 0.0f;
+    std::int64_t time = -1;
+  };
+
   plugin_desc const _desc;
   plugin_dims const _dims; 
   float _sample_rate = {};
@@ -34,6 +45,7 @@ class plugin_engine final {
   jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
   std::unique_ptr<host_block> _host_block = {};
+  std::vector<voice_state> _voices_states = {};
   std::chrono::milliseconds _activated_at_ms = {};
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _global_engines = {};
