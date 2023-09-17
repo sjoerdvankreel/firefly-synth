@@ -35,6 +35,8 @@ struct plugin_block final {
 
 // voice level input in case of per-voice module
 struct module_voice_in final {
+  int key;
+  float velocity;
   jarray<float, 3> const* cv_ = {};
   jarray<float, 4> const* audio_ = {};
   jarray<float, 3> const& cv() const { return *cv_; }

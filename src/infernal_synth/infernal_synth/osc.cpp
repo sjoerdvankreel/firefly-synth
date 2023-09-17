@@ -82,7 +82,7 @@ osc_engine::process(
     }
     module.out.audio()[0][f] = sample * gain[f] * balance(0, bal[f]);
     module.out.audio()[1][f] = sample * gain[f] * balance(1, bal[f]);
-    _phase += note_to_frequency(oct, note, cent[f]) / plugin.sample_rate;
+    _phase += note_to_frequency(oct, note, cent[f], module.in.voice->key) / plugin.sample_rate;
     _phase -= std::floor(_phase);
   }
 }

@@ -18,12 +18,13 @@ balance(int channel, float value)
 }
 
 inline float
-note_to_frequency(int oct, int note, float cent)
+note_to_frequency(int oct, int note, float cent, int key)
 {
+  int const middle_c = 60;
   assert(0 <= oct && oct <= 9);
   assert(0 <= note && note <= 11);
   assert(-1 <= cent && cent <= 1);
-  float pitch = 12 * oct + note + cent;
+  float pitch = (12 * oct + note) + cent + (key - middle_c);
   return 440.0f * std::pow(2.0f, (pitch - 69.0f) / 12.0f);
 }
 
