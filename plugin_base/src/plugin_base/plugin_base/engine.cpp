@@ -245,9 +245,11 @@ plugin_engine::process()
       {
         module_voice_in voice_in = {};
         block.in.voice = &voice_in;
-        block.out.voice_audio_ = &_plugin_block.voices_audio_out[v];
         voice_in.cv_ = &_plugin_block.module_out.voice_cv[v];
         voice_in.audio_ = &_plugin_block.module_out.voice_audio[v];
+        block.out.voice_audio_ = &_plugin_block.voices_audio_out[v];
+        block.out.cv_ = &_plugin_block.module_out.voice_cv[v][m][mi];
+        block.out.audio_ = &_plugin_block.module_out.voice_audio[v][m][mi];
         _voice_engines[v][m][mi]->process(*_desc.plugin, _plugin_block, block);
       }
     }

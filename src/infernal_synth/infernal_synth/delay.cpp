@@ -51,7 +51,7 @@ delay_engine::process(
       }
 
   if (module.in.block()[param_on][0].step() == 0) return;
-  auto const& param = topo.modules[module_filter].params[param_out_gain];
+  auto const& param = topo.modules[module_delay].params[param_out_gain];
   plain_value out_gain = param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f));
   module.out.host->params()[param_out_gain][0] = out_gain;
 }
