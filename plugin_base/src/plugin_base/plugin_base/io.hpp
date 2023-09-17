@@ -15,7 +15,7 @@ struct io_load
 {
   std::string error = {};
   std::vector<std::string> warnings = {};
-  bool ok() { return error.size() == 0; };
+  bool ok() const { return error.size() == 0; };
 
   io_load() = default;
   io_load(std::string const& error): error(error) {}

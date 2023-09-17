@@ -325,12 +325,14 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
       plugin_io io(_desc);
       std::string message;
       std::string path = chooser->getResult().getFullPathName().toStdString();
+      if(path.empty()) return;
       auto result = io.load_file(path, *_ui_state);
       message += "error: " + result.error + "\r\n";
       for(int i = 0; i < result.warnings.size(); i++)
         message += "warn: " + result.warnings[i] + "\r\n";
       MessageBoxOptions options = MessageBoxOptions().withMessage(String(message)).withTitle("RESULT").withButton("OK");
-      AlertWindow::showAsync(options, [](int){
+      AlertWindow::showAsync(options, [this, result](int){
+        if(result.ok()) state_loaded();
       });
     });
   };
@@ -342,7 +344,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
     chooser->launchAsync(FileBrowserComponent::saveMode, [this, chooser](FileChooser const&) {
       plugin_io io(_desc);
       std::string path = chooser->getResult().getFullPathName().toStdString();
-      io.save_file(path, *_ui_state);
+      if(!path.empty()) io.save_file(path, *_ui_state);
     });
   };
   resized();
