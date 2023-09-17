@@ -58,9 +58,13 @@ public:
   inf_plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo);
   
   bool implementsGui() const noexcept override { return true; }
+  bool implementsState() const noexcept override { return true; }
   bool implementsParams() const noexcept override { return true; }
   bool implementsNotePorts() const noexcept override { return true; }
   bool implementsAudioPorts() const noexcept override { return true; }
+
+  bool stateSave(clap_ostream const* stream) noexcept override;
+  bool stateLoad(clap_istream const* stream) noexcept override;
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;

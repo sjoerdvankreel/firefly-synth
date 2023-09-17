@@ -1,3 +1,4 @@
+#include <plugin_base/io.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 
@@ -65,6 +66,31 @@ inf_plugin::timerCallback()
     mapping.value_at(_ui_state) = e.plain;
     if(_gui) _gui->plugin_changed(e.index, e.plain);
   }
+}
+
+bool 
+inf_plugin::stateSave(clap_ostream const* stream) noexcept
+{
+  plugin_io io(&_engine.desc());
+  std::vector<char> data(io.save(_engine.state()));
+  return stream->write(stream, data.data(), data.size()) == data.size();
+}
+
+bool 
+inf_plugin::stateLoad(clap_istream const* stream) noexcept
+{
+  std::vector<char> data;
+  do {
+    char byte;
+    int read = stream->read(stream, &byte, 1);
+    if (read == 0) break;
+    if (read < 0 || read > 1) return false;
+    data.push_back(byte);
+  } while(true);
+
+  plugin_io io(&_engine.desc());
+  if (io.load(data, _engine.state()).ok()) return true;
+  return false;
 }
 
 bool

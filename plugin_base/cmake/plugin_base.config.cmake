@@ -1,7 +1,7 @@
 cmake_policy(SET CMP0091 NEW)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-add_compile_options(/W4;/WX;/external:W0;/wd4245;/wd4267;/wd4244;/wd4100;/wd26495;/fp:fast;/arch:AVX)
+add_compile_options(/W4;/WX;/external:W0;/wd4245;/wd4267;/wd4244;/wd4100;/wd26495;/wd4389;/fp:fast;/arch:AVX)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 add_compile_options(-Wall;-Wextra;-Werror;-Wno-cpp;-Wno-sign-compare;-Wno-unused-parameter;-Wfatal-errors;-ffast-math;-march=native)
 else()

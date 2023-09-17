@@ -1,7 +1,6 @@
 gui
 graphs
 antialias
-state save
 clap threadpool
 host context menu
 (polyphonic) modulation
