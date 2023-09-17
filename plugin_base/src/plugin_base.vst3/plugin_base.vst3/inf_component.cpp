@@ -1,7 +1,6 @@
 #include <plugin_base/io.hpp>
 #include <plugin_base.vst3/inf_component.hpp>
 
-#include <base/source/fstreamer.h>
 #include <pluginterfaces/base/ibstream.h>
 #include <pluginterfaces/vst/ivstevents.h>
 #include <pluginterfaces/vst/ivstprocesscontext.h>
@@ -48,8 +47,9 @@ tresult PLUGIN_API
 inf_component::setState(IBStream* state)
 {
   char byte;
+  int read = 1;
   std::vector<char> data;
-  while (state->read(&byte, 1))
+  while (state->read(&byte, 1, &read) == kResultTrue && read == 1)
     data.push_back(byte);
   plugin_io io(&_engine.desc());
   if (io.load(data, _engine.state()).ok()) return kResultOk;
