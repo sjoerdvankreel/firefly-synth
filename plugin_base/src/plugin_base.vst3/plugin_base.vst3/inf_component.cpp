@@ -101,7 +101,7 @@ inf_component::process(ProcessData& data)
           note.id.key = vst_event.noteOn.pitch;
           note.id.channel = vst_event.noteOn.channel;
           note.velocity = vst_event.noteOn.velocity;
-          block.common->notes.push_back(note);
+          block.events.notes.push_back(note);
         }
         else if (vst_event.type == Event::kNoteOffEvent)
         {
@@ -112,7 +112,7 @@ inf_component::process(ProcessData& data)
           note.id.key = vst_event.noteOff.pitch;
           note.id.channel = vst_event.noteOff.channel;
           note.velocity = vst_event.noteOff.velocity;
-          block.common->notes.push_back(note);
+          block.events.notes.push_back(note);
         }
       }
 

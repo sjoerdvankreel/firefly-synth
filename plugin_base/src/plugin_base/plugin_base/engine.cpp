@@ -22,8 +22,8 @@ _host_block(std::make_unique<host_block>())
   _desc.init_defaults(_state);
   _global_engines.resize(_dims.module_slot);
   _accurate_frames.resize(_desc.param_count);
-  _common_block.notes.reserve(note_limit_guess);
   _voice_engines.resize(_dims.voice_module_slot);
+  _host_block->events.notes.reserve(note_limit_guess);
   _plugin_block.automation.block.resize(_dims.module_slot_param_slot);
   _host_block->events.out.reserve(block_events_guess);
   _host_block->events.block.reserve(block_events_guess);
@@ -34,13 +34,13 @@ host_block&
 plugin_engine::prepare()
 {
   // host calls this and should provide the current block values
-  _common_block.notes.clear();
   _common_block.bpm = 0;
   _common_block.frame_count = 0;
   _common_block.stream_time = 0;
   _common_block.audio_in = nullptr;
   _host_block->audio_out = nullptr;
   _host_block->events.out.clear();
+  _host_block->events.notes.clear();
   _host_block->events.block.clear();
   _host_block->events.accurate.clear();
   return *_host_block;

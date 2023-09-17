@@ -8,6 +8,13 @@
 
 namespace plugin_base {
 
+// note id or PCK (port is 0)
+struct note_id final {
+  int id;
+  short key;
+  short channel;
+};
+  
 // once per block automation
 struct block_event final {
   int param;
@@ -21,9 +28,18 @@ struct accurate_event final {
   normalized_value normalized;
 };
 
+// keyboard event
+struct note_event final {
+  int frame;
+  note_id id;
+  float velocity;
+  enum class type_t { on, off, cut } type;
+};
+
 // these are translated to curves/values
 struct host_events final {
   std::vector<block_event> out;
+  std::vector<note_event> notes;
   std::vector<block_event> block;
   std::vector<accurate_event> accurate;
   INF_DECLARE_MOVE_ONLY(host_events);

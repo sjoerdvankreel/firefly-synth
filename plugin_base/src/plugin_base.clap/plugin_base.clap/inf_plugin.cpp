@@ -424,7 +424,7 @@ inf_plugin::process(clap_process const* process) noexcept
       note.velocity = event->velocity;
       note.frame = header->time;
       note.id.channel = event->channel;
-      block.common->notes.push_back(note);
+      block.events.notes.push_back(note);
       break;
     }
     case CLAP_EVENT_PARAM_VALUE:
