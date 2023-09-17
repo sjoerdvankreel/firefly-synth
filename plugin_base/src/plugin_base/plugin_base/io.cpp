@@ -13,20 +13,10 @@ namespace plugin_base {
 static int const version = 1;
 static std::string const magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
-bool
-plugin_io::save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const
+io_load
+plugin_io::load_file(std::filesystem::path const& path) const
 {
-  std::ofstream stream(path, std::ios::out | std::ios::binary);
-  if (stream.bad()) return false;
-  auto data(save(state));
-  stream.write(data.data(), data.size());
-  return !stream.bad();
-}
-
-io_result
-plugin_io::load_file(std::filesystem::path const& path, jarray<plain_value, 4>& state) const
-{
-  io_result failed("Could not read file.");
+  io_load failed("Could not read file.");
   std::ifstream stream(path, std::ios::binary | std::ios::ate);
   if(stream.bad()) return failed;
   std::streamsize size = stream.tellg();
@@ -35,7 +25,17 @@ plugin_io::load_file(std::filesystem::path const& path, jarray<plain_value, 4>& 
   std::vector<char> data(size, 0);
   stream.read(data.data(), size);
   if (stream.bad()) return failed;
-  return load(data, state);
+  return load(data);
+};
+
+bool
+plugin_io::save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const
+{
+  std::ofstream stream(path, std::ios::out | std::ios::binary);
+  if (stream.bad()) return false;
+  auto data(save(state));
+  stream.write(data.data(), data.size());
+  return !stream.bad();
 }
 
 std::vector<char>
@@ -117,38 +117,40 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
   return std::vector<char>(json.begin(), json.end());
 }
 
-io_result 
-plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) const
+io_load
+plugin_io::load(std::vector<char> const& data) const
 {
   var root;
   std::string json(data.size(), '\0');
   std::copy(data.begin(), data.end(), json.begin());
   auto parse_result = JSON::parse(String(json), root);
   if(!parse_result.wasOk()) 
-    return io_result("Invalid json.");
+    return io_load("Invalid json.");
   if(!root.hasProperty("plugin")) 
-    return io_result("Invalid plugin.");
+    return io_load("Invalid plugin.");
   if(!root.hasProperty("checksum")) 
-    return io_result("Invalid checksum.");
+    return io_load("Invalid checksum.");
   if(!root.hasProperty("magic") || root["magic"] != magic) 
-    return io_result("Invalid magic.");
+    return io_load("Invalid magic.");
   if(!root.hasProperty("version") || (int)root["version"] > version) 
-    return io_result("Invalid version.");  
+    return io_load("Invalid version.");
 
-  io_result result;
   var plugin = root["plugin"];
   if(plugin["id"] != _desc->plugin->id) 
-    return io_result("Invalid plugin id.");
+    return io_load("Invalid plugin id.");
   if((int)plugin["version_major"] > _desc->plugin->version_major) 
-    return io_result("Invalid plugin version.");
+    return io_load("Invalid plugin version.");
   if((int)plugin["version_major"] == _desc->plugin->version_major)
     if((int)plugin["version_minor"] > _desc->plugin->version_minor) 
-      return io_result("Invalid plugin version.");
+      return io_load("Invalid plugin version.");
   if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) 
-    return io_result("Invalid checksum.");
+    return io_load("Invalid checksum.");
 
   // good to go - only warnings from now on
-  _desc->init_defaults(state);
+  io_load result;
+  plugin_dims dims(*_desc->plugin);
+  result.state.resize(dims.params);
+  _desc->init_defaults(result.state);
   for(int m = 0; m < plugin["modules"].size(); m++)
   {
     // check for old module not found
@@ -210,7 +212,7 @@ plugin_io::load(std::vector<char> const& data, jarray<plain_value, 4>& state) co
           auto const& topo = _desc->plugin->modules[module_iter->second].params[param_iter->second];
           std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
           if(topo.text_to_plain(text, plain))
-            state[module_iter->second][mi][param_iter->second][pi] = plain;
+            result.state[module_iter->second][mi][param_iter->second][pi] = plain;
           else
             result.warnings.push_back("Param '" + new_module.name + " " + new_param.name + "': invalid value '" + text + "'.");
         }

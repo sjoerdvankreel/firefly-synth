@@ -251,7 +251,7 @@ plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
 // TODO ! un-uglify it from here
 
 plugin_gui::
-plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
+plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const* ui_state) :
 _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
   setOpaque(true);
@@ -310,7 +310,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
     juce::FileChooser* chooser = new juce::FileChooser("load");
     chooser->launchAsync(FileBrowserComponent::openMode, [this](const FileChooser & chsr) {
       plugin_io io(_desc);
-      auto res = io.load_file(chsr.getResult().getFullPathName().toStdString(), *_ui_state);
+      auto res = io.load_file(chsr.getResult().getFullPathName().toStdString());
       std::string stuff; 
       stuff += "error: " + res.error + "\r\n";
       for(int i = 0; i < res.warnings.size(); i++)
