@@ -306,21 +306,29 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Load");
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    plugin_io io(_desc);
-    auto res = io.load_file("c:\\temp\\plug.json", *_ui_state);
-    std::string stuff; 
-    stuff += "error: " + res.error + "\r\n";
-    for(int i = 0; i < res.warnings.size(); i++)
-      stuff += "warn: " + res.warnings[i] + "\r\n";
-    MessageBoxOptions options = MessageBoxOptions().withMessage(String(stuff)).withTitle("RESULT").withButton("OK");
-    AlertWindow::showAsync(options, [](int){});
+    // todo dont leak
+    juce::FileChooser* chooser = new juce::FileChooser("load");
+    chooser->launchAsync(FileBrowserComponent::openMode, [this](const FileChooser & chsr) {
+      plugin_io io(_desc);
+      auto res = io.load_file(chsr.getResult().getFullPathName().toStdString(), *_ui_state);
+      std::string stuff; 
+      stuff += "error: " + res.error + "\r\n";
+      for(int i = 0; i < res.warnings.size(); i++)
+        stuff += "warn: " + res.warnings[i] + "\r\n";
+      MessageBoxOptions options = MessageBoxOptions().withMessage(String(stuff)).withTitle("RESULT").withButton("OK");
+      AlertWindow::showAsync(options, [](int){});
+    });
   };
   _children.emplace_back(std::make_unique<TextButton>());
   addAndMakeVisible(_children[_children.size() - 1].get());
   ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Save");
   ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    plugin_io io(_desc);
-    io.save_file("c:\\temp\\plug.json", *_ui_state);
+    // todo dont leak
+    juce::FileChooser* chooser = new juce::FileChooser("save");
+    chooser->launchAsync(FileBrowserComponent::saveMode, [this](const FileChooser& chsr) {
+      plugin_io io(_desc);
+      io.save_file(chsr.getResult().getFullPathName().toStdString(), *_ui_state);
+    });
   };
   resized();
 }
