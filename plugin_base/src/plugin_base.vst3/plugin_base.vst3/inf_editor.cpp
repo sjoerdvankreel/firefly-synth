@@ -12,7 +12,7 @@ _gui(std::make_unique<plugin_gui>(&controller->desc(), &controller->ui_state()))
 tresult PLUGIN_API 
 inf_editor::removed()
 {
-  _gui->remove_ui_listener(this);
+  _gui->remove_ui_listener(_controller);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
   return EditorView::removed();
@@ -23,7 +23,7 @@ inf_editor::attached(void* parent, FIDString type)
 {
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
-  _gui->add_ui_listener(this);
+  _gui->add_ui_listener(_controller);
   return EditorView::attached(parent, type);
 }
 
@@ -50,16 +50,6 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
   int new_height = new_rect->getWidth() / _controller->desc().plugin->gui_aspect_ratio;
   new_rect->bottom = new_rect->top + new_height;
   return kResultTrue;
-}
-
-void 
-inf_editor::ui_changing(int index, plain_value plain)
-{
-  int tag = _controller->desc().param_index_to_tag[index];
-  param_mapping const& mapping = _controller->desc().mappings[index];
-  auto normalized = _controller->desc().plain_to_normalized_at(mapping, plain).value();
-  _controller->performEdit(tag, normalized);
-  _controller->setParamNormalized(tag, normalized);
 }
 
 }
