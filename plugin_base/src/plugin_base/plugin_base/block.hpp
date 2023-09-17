@@ -88,16 +88,21 @@ struct plugin_block final {
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
-// single module automation
+// voice level module state
+struct module_voice_in final {
+  jarray<float, 3> const* cv_ = {};
+  jarray<float, 4> const* audio_ = {};
+  jarray<float, 3> const& cv() const { return *cv_; }
+  jarray<float, 4> const& audio() const { return *audio_; }
+};
+
+// single module automation and state
 struct module_in final {
+  module_voice_in const* voice = {};
   jarray<float, 3> const* accurate_ = {};
-  jarray<float, 3> const* voice_cv_ = {};
-  jarray<float, 4> const* voice_audio_ = {};
   jarray<plain_value, 2> const* block_ = {};
-  jarray<float, 3> const& voice_cv() const { return *voice_cv_; }
   jarray<float, 3> const& accurate() const { return *accurate_; }
   jarray<plain_value, 2> const& block() const { return *block_; }
-  jarray<float, 4> const& voice_audio() const { return *voice_audio_; }
   INF_DECLARE_MOVE_ONLY(module_in);
 };
 

@@ -49,7 +49,7 @@ filter_engine::process(
 {
   float max_out = 0.0f;
   auto const& osc_gain = module.in.accurate()[param_osc_gain];
-  auto const& osc_audio = module.in.voice_audio()[module_osc];
+  auto const& osc_audio = module.in.voice->audio()[module_osc];
   for(int o = 0; o < topo.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
