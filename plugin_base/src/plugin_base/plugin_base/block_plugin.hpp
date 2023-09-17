@@ -33,7 +33,7 @@ struct plugin_block final {
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 
-// voice level module state
+// voice level input in case of per-voice module
 struct module_voice_in final {
   jarray<float, 3> const* cv_ = {};
   jarray<float, 4> const* audio_ = {};
@@ -51,16 +51,22 @@ struct module_in final {
   INF_DECLARE_MOVE_ONLY(module_in);
 };
 
+// host level output in case of global module
+struct module_host_out final {
+  float* const* audio = {};
+  jarray<plain_value, 2>* params_ = {};
+  jarray<plain_value, 2>& params() const { return *params_; }
+};
+
 // single module cv/audio/out params
 struct module_out final {
+  module_host_out* host = {};
   jarray<float, 1>* cv_ = {};
   jarray<float, 2>* audio_ = {};
-  jarray<float, 2>* voice_ = {};
-  jarray<plain_value, 2>* params_ = {};
+  jarray<float, 2>* voice_audio_ = {};
   jarray<float, 1>& cv() const { return *cv_; }
   jarray<float, 2>& audio() const { return *audio_; }
-  jarray<float, 2>& voice() const { return *voice_; }
-  jarray<plain_value, 2>& params() const { return *params_; }
+  jarray<float, 2>& voice_audio() const { return *voice_audio_; }
   INF_DECLARE_MOVE_ONLY(module_out);
 };
 

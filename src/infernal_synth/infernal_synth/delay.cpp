@@ -46,14 +46,14 @@ delay_engine::process(
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
       {
-        plugin.host->audio_out[c][f] += plugin.out.voices[v][c][f];
-        max_out = std::max(max_out, plugin.host->audio_out[c][f]);
+        module.out.host->audio[c][f] += plugin.voices_audio_out[v][c][f];
+        max_out = std::max(max_out, module.out.host->audio[c][f]);
       }
 
   if (module.in.block()[param_on][0].step() == 0) return;
   auto const& param = topo.modules[module_filter].params[param_out_gain];
   plain_value out_gain = param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f));
-  module.out.params()[param_out_gain][0] = out_gain;
+  module.out.host->params()[param_out_gain][0] = out_gain;
 }
 
 }

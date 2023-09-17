@@ -51,7 +51,7 @@ filter_engine::process(
   for(int o = 0; o < topo.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
-        module.out.voice()[c][f] += osc_audio[o][c][f] * osc_gain[o][f];
+        module.out.voice_audio()[c][f] += osc_audio[o][c][f] * osc_gain[o][f];
   if(module.in.block()[param_on][0].step() == 0) return;
 
   float w = 2 * plugin.sample_rate;
@@ -64,10 +64,10 @@ filter_engine::process(
     float b = (w - angle) * norm;
     for (int c = 0; c < 2; c++)
     {
-      float filtered = module.out.voice()[c][f] * a + _in[c] * a + _out[c] * b;
-      _in[c] = module.out.voice()[c][f];
+      float filtered = module.out.voice_audio()[c][f] * a + _in[c] * a + _out[c] * b;
+      _in[c] = module.out.voice_audio()[c][f];
       _out[c] = filtered;
-      module.out.voice()[c][f] = filtered;
+      module.out.voice_audio()[c][f] = filtered;
     }
   }
 }
