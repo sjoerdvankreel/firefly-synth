@@ -87,27 +87,6 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   return kResultTrue;
 }
 
-void
-inf_controller::ui_loaded(jarray<plain_value, 4> const& new_state)
-{
-  int param_global = 0;
-  for (int m = 0; m < _desc.plugin->modules.size(); m++)
-  {
-    auto const& module = _desc.plugin->modules[m];
-    for (int mi = 0; mi < module.params.size(); mi++)
-      for (int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        for (int pi = 0; pi < param.slot_count; pi++)
-        {
-          ui_begin_changes(param_global);
-          ui_changing(param_global, new_state[m][mi][p][pi]);
-          ui_begin_changes(param_global);
-        }
-      }
-  }
-}
-
 tresult PLUGIN_API 
 inf_controller::initialize(FUnknown* context)
 {

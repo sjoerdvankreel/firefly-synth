@@ -227,13 +227,6 @@ plugin_gui::ui_changing(int index, plain_value plain)
     _ui_listeners[i]->ui_changing(index, plain);
 }
 
-void 
-plugin_gui::ui_loaded(jarray<plain_value, 4> const& new_state)
-{
-  for (int i = 0; i < _ui_listeners.size(); i++)
-    _ui_listeners[i]->ui_loaded(new_state);
-}
-
 void
 plugin_gui::plugin_changed(int index, plain_value plain)
 {
@@ -255,10 +248,24 @@ plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
   if (iter != _plugin_listeners[index].end()) _plugin_listeners[index].erase(iter);
 }
 
+void
+plugin_gui::state_loaded()
+{
+  int param_global = 0;
+  for (int m = 0; m < _desc->plugin->modules.size(); m++)
+  {
+    auto const& module = _desc->plugin->modules[m];
+    for (int mi = 0; mi < module.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+        for (int pi = 0; pi < module.params[p].slot_count; pi++)
+          ui_changed(param_global++, (*_ui_state)[m][mi][p][pi]);
+  }
+}
+
 // TODO ! un-uglify it from here
 
 plugin_gui::
-plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const* ui_state) :
+plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
 _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
   setOpaque(true);
@@ -317,7 +324,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
     juce::FileChooser* chooser = new juce::FileChooser("load");
     chooser->launchAsync(FileBrowserComponent::openMode, [this](const FileChooser & chsr) {
       plugin_io io(_desc);
-      auto res = io.load_file(chsr.getResult().getFullPathName().toStdString());
+      auto res = io.load_file(chsr.getResult().getFullPathName().toStdString(), *_ui_state);
       std::string stuff; 
       stuff += "error: " + res.error + "\r\n";
       for(int i = 0; i < res.warnings.size(); i++)

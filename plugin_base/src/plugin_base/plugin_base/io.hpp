@@ -14,7 +14,6 @@ namespace plugin_base {
 struct io_load
 {
   std::string error = {};
-  jarray<plain_value, 4> state = {};
   std::vector<std::string> warnings = {};
   bool ok() { return error.size() == 0; };
 
@@ -29,9 +28,9 @@ public:
   INF_DECLARE_MOVE_ONLY(plugin_io);
   plugin_io(plugin_desc const* desc): _desc(desc) {}
 
-  io_load load(std::vector<char> const& data) const;
-  io_load load_file(std::filesystem::path const& path) const;
   std::vector<char> save(jarray<plain_value, 4> const& state) const;
+  io_load load(std::vector<char> const& data, jarray<plain_value, 4>& state) const;
+  io_load load_file(std::filesystem::path const& path, jarray<plain_value, 4>& state) const;
   bool save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const;
 };
 

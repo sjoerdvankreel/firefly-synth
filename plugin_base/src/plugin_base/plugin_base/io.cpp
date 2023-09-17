@@ -14,7 +14,8 @@ static int const version = 1;
 static std::string const magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
 io_load
-plugin_io::load_file(std::filesystem::path const& path) const
+plugin_io::load_file(
+  std::filesystem::path const& path, jarray<plain_value, 4>& state) const
 {
   io_load failed("Could not read file.");
   std::ifstream stream(path, std::ios::binary | std::ios::ate);
@@ -25,11 +26,12 @@ plugin_io::load_file(std::filesystem::path const& path) const
   std::vector<char> data(size, 0);
   stream.read(data.data(), size);
   if (stream.bad()) return failed;
-  return load(data);
+  return load(data, state);
 };
 
 bool
-plugin_io::save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const
+plugin_io::save_file(
+  std::filesystem::path const& path, jarray<plain_value, 4> const& state) const
 {
   std::ofstream stream(path, std::ios::out | std::ios::binary);
   if (stream.bad()) return false;
@@ -118,7 +120,8 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
 }
 
 io_load
-plugin_io::load(std::vector<char> const& data) const
+plugin_io::load(
+  std::vector<char> const& data, jarray<plain_value, 4>& state) const
 {
   var root;
   std::string json(data.size(), '\0');
@@ -149,8 +152,8 @@ plugin_io::load(std::vector<char> const& data) const
   // good to go - only warnings from now on
   io_load result;
   plugin_dims dims(*_desc->plugin);
-  result.state.resize(dims.params);
-  _desc->init_defaults(result.state);
+  state.resize(dims.params);
+  _desc->init_defaults(state);
   for(int m = 0; m < plugin["modules"].size(); m++)
   {
     // check for old module not found
@@ -212,7 +215,7 @@ plugin_io::load(std::vector<char> const& data) const
           auto const& topo = _desc->plugin->modules[module_iter->second].params[param_iter->second];
           std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
           if(topo.text_to_plain(text, plain))
-            result.state[module_iter->second][mi][param_iter->second][pi] = plain;
+            state[module_iter->second][mi][param_iter->second][pi] = plain;
           else
             result.warnings.push_back("Param '" + new_module.name + " " + new_param.name + "': invalid value '" + text + "'.");
         }

@@ -21,7 +21,6 @@ public:
   virtual void ui_end_changes(int index) = 0;
   virtual void ui_begin_changes(int index) = 0;
   virtual void ui_changing(int index, plain_value plain) = 0;
-  virtual void ui_loaded(jarray<plain_value, 4> const& new_state) = 0;
 };
 
 class plugin_gui:
@@ -29,13 +28,15 @@ public juce::Component
 {
   plugin_desc const* const _desc;
   std::vector<ui_listener*> _ui_listeners = {};
-  jarray<plain_value, 4> const* const _ui_state = {};
+  jarray<plain_value, 4>* const _ui_state = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   std::vector<std::unique_ptr<juce::Component>> _children = {}; // must be destructed first
 
+  void state_loaded();
+
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4> const* ui_state);
+  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state);
 
   void resized() override;
   void paint(juce::Graphics& g) override 
@@ -45,7 +46,6 @@ public:
   void ui_begin_changes(int index);
   void ui_changed(int index, plain_value plain);
   void ui_changing(int index, plain_value plain);
-  void ui_loaded(jarray<plain_value, 4> const& new_state);
   void plugin_changed(int index, plain_value plain);
 
   void remove_ui_listener(ui_listener* listener);

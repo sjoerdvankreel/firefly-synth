@@ -30,7 +30,6 @@ public:
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   void ui_changing(int index, plain_value plain) override;
-  void ui_loaded(jarray<plain_value, 4> const& new_state) override;
   void ui_end_changes(int index) override { endEdit(desc().param_index_to_tag[index]); }
   void ui_begin_changes(int index) override { beginEdit(desc().param_index_to_tag[index]); }
 
