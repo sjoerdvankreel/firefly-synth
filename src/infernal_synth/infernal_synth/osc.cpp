@@ -14,6 +14,7 @@ class osc_engine:
 public module_engine {
   float _phase = 0;
 public:
+  INF_DECLARE_MOVE_ONLY(osc_engine);
   void process(
     plugin_topo const& topo, 
     plugin_block const& plugin,

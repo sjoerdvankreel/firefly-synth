@@ -16,6 +16,7 @@ public module_engine {
   float _in[2] = { 0, 0 };
   float _out[2] = { 0, 0 };
 public:
+  INF_DECLARE_MOVE_ONLY(filter_engine);
   void process(
     plugin_topo const& topo, 
     plugin_block const& plugin, 
