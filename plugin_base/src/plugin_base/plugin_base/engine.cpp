@@ -149,11 +149,11 @@ plugin_engine::process()
           auto& curve = _plugin_block.module_out.global_cv[m][mi];
           std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
         } else for (int v = 0; v < _voices_states.size(); v++)
-          if(_voices_states[v].active)
-          {
-            auto& curve = _plugin_block.module_out.voice_cv[v][m][mi];
-            std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
-          }
+        {
+          // TODO only active voices
+          auto& curve = _plugin_block.module_out.voice_cv[v][m][mi];
+          std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
+        }
       } else if (module.output == module_output::audio)
       {
         if (module.scope == module_scope::global)
@@ -162,12 +162,12 @@ plugin_engine::process()
           for(int c = 0; c < 2; c++)
             std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
         } else for (int v = 0; v < _voices_states.size(); v++)
-          if (_voices_states[v].active) 
-          {
-            auto& audio = _plugin_block.module_out.voice_audio[v][m][mi];
-            for (int c = 0; c < 2; c++)
-              std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);;
-          }
+        {
+          // TODO only active voices
+          auto& audio = _plugin_block.module_out.voice_audio[v][m][mi];
+          for (int c = 0; c < 2; c++)
+            std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);;
+        }
       } else assert(module.output == module_output::none);
   }
 

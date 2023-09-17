@@ -41,8 +41,8 @@ delay_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
   float max_out = 0.0f;
-  int voice_count = 2; // TODO
-  for(int v = 0; v < voice_count; v++)
+  // TODO only active voices
+  for(int v = 0; v < topo.polyphony; v++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < plugin.host->frame_count; f++)
       {
