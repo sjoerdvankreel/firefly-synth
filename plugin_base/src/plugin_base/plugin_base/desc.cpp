@@ -156,8 +156,9 @@ validate_plugin_desc(plugin_desc const& desc)
 
   for(int m = 0; m < desc.plugin->modules.size(); m++)
   {
-    auto const& mod = desc.plugin->modules[m];
-    assert(desc.param_id_to_index.at(mod.id).size() == mod.params.size());
+    auto const& module = desc.plugin->modules[m];
+    (void)module;
+    assert(desc.param_id_to_index.at(module.id).size() == module.params.size());
   }
 
   for (int m = 0; m < desc.modules.size(); m++)
