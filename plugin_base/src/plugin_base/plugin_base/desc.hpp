@@ -108,9 +108,9 @@ struct plugin_desc final {
 
 // runtime plugin topo dimensions
 struct plugin_dims final {
-  jarray<int, 3> params;
-  jarray<int, 2> voices;
-  jarray<int, 1> modules;
+  jarray<int, 1> module_slot;
+  jarray<int, 2> voice_module_slot;
+  jarray<int, 3> module_slot_param_slot;
 
   INF_DECLARE_MOVE_ONLY(plugin_dims);
   plugin_dims(plugin_topo const& topo);

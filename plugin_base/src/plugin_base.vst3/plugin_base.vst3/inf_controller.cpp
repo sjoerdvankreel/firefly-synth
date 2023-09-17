@@ -51,7 +51,7 @@ inf_controller(std::unique_ptr<plugin_topo>&& topo) :
 _desc(std::move(topo)) 
 { 
   plugin_dims dims(*_desc.plugin);
-  _ui_state.resize(dims.params);
+  _ui_state.resize(dims.module_slot_param_slot);
   _desc.init_defaults(_ui_state); 
 }
 

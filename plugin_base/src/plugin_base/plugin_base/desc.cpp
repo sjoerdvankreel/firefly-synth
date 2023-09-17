@@ -51,26 +51,26 @@ stable_hash(std::string const& text)
 static void
 validate_dims(plugin_topo const& plugin, plugin_dims const& dims)
 {
-  assert(dims.voices.size() == plugin.polyphony);
+  assert(dims.voice_module_slot.size() == plugin.polyphony);
   for(int v = 0; v < plugin.polyphony; v++)
   {
-    assert(dims.voices[v].size() == plugin.modules.size());
+    assert(dims.voice_module_slot[v].size() == plugin.modules.size());
     for(int m = 0; m < plugin.modules.size(); m++)
-      assert(dims.voices[v][m] == plugin.modules[m].slot_count);
+      assert(dims.voice_module_slot[v][m] == plugin.modules[m].slot_count);
   }
 
-  assert(dims.params.size() == plugin.modules.size());
-  assert(dims.modules.size() == plugin.modules.size());
+  assert(dims.module_slot.size() == plugin.modules.size());
+  assert(dims.module_slot_param_slot.size() == plugin.modules.size());
   for (int m = 0; m < plugin.modules.size(); m++)
   {    
     auto const& module = plugin.modules[m];
-    assert(dims.modules[m] == module.slot_count);
-    assert(dims.params[m].size() == module.slot_count);
+    assert(dims.module_slot[m] == module.slot_count);
+    assert(dims.module_slot_param_slot[m].size() == module.slot_count);
     for (int mi = 0; mi < module.slot_count; mi++)
     {
-      assert(dims.params[m][mi].size() == module.params.size());
+      assert(dims.module_slot_param_slot[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
-        assert(dims.params[m][mi][p] == module.params[m].slot_count);
+        assert(dims.module_slot_param_slot[m][mi][p] == module.params[m].slot_count);
     }
   }
 }
@@ -405,13 +405,13 @@ plugin_dims(plugin_topo const& plugin)
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
-    modules.push_back(module.slot_count);
-    params.emplace_back();
+    module_slot.push_back(module.slot_count);
+    module_slot_param_slot.emplace_back();
     for(int mi = 0; mi < module.slot_count; mi++)
     {
-      params[m].emplace_back();
+      module_slot_param_slot[m].emplace_back();
       for (int p = 0; p < module.params.size(); p++)
-        params[m][mi].push_back(module.params[p].slot_count);
+        module_slot_param_slot[m][mi].push_back(module.params[p].slot_count);
     }
   }
   validate_dims(plugin, *this);

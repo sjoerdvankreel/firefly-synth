@@ -81,8 +81,8 @@ tresult PLUGIN_API
 inf_component::process(ProcessData& data)
 {
   host_block& block = _engine.prepare();
+  block.audio_out = data.outputs[0].channelBuffers32;
   block.common->frame_count = data.numSamples;
-  block.common->audio_out = data.outputs[0].channelBuffers32;
   block.common->bpm = data.processContext ? data.processContext->tempo : 0;
   block.common->stream_time = data.processContext ? data.processContext->projectTimeSamples : 0;
   block.common->audio_in = _engine.desc().plugin->type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;

@@ -33,6 +33,7 @@ struct host_events final {
 struct host_block final {
   host_events events;
   common_block* common;
+  float* const* audio_out;
   INF_DECLARE_MOVE_ONLY(host_block);
 };
 

@@ -152,7 +152,7 @@ plugin_io::load(
   // good to go - only warnings from now on
   io_load result;
   plugin_dims dims(*_desc->plugin);
-  state.resize(dims.params);
+  state.resize(dims.module_slot_param_slot);
   _desc->init_defaults(state);
   for(int m = 0; m < plugin["modules"].size(); m++)
   {

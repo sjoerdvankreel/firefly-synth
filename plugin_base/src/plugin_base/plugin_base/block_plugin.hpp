@@ -8,28 +8,28 @@
 namespace plugin_base {
 
 // all modules automation
-struct plugin_in final {
+struct plugin_automation final {
   jarray<float, 5> accurate = {};
   jarray<plain_value, 4> block = {};
-  INF_DECLARE_MOVE_ONLY(plugin_in);
+  INF_DECLARE_MOVE_ONLY(plugin_automation);
 };
 
 // all modules cv/audio
-struct plugin_out final {
-  jarray<float, 3> voices = {};
+struct plugin_module_out final {
   jarray<float, 4> voice_cv = {};
   jarray<float, 3> global_cv = {};
   jarray<float, 5> voice_audio = {};
   jarray<float, 4> global_audio = {};
-  INF_DECLARE_MOVE_ONLY(plugin_out);
+  INF_DECLARE_MOVE_ONLY(plugin_module_out);
 };
 
 // global process call in/out
 struct plugin_block final {
-  plugin_in in = {};
-  plugin_out out = {};
   float sample_rate = {};
   common_block const* host = {};
+  plugin_module_out module_out = {};
+  plugin_automation automation = {};
+  jarray<float, 3> voices_audio_out = {};
   INF_DECLARE_MOVE_ONLY(plugin_block);
 };
 

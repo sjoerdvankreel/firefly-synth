@@ -41,7 +41,7 @@ _to_ui_events(std::make_unique<event_queue>(default_q_size)),
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 {
   plugin_dims dims(*_engine.desc().plugin);
-  _ui_state.resize(dims.params);
+  _ui_state.resize(dims.module_slot_param_slot);
   _engine.desc().init_defaults(_ui_state);
   _block_automation_seen.resize(_engine.desc().param_count);
 }
@@ -393,9 +393,9 @@ clap_process_status
 inf_plugin::process(clap_process const* process) noexcept
 {
   host_block& block = _engine.prepare();
+  block.audio_out = process->audio_outputs[0].data32;
   block.common->stream_time = process->steady_time;
   block.common->frame_count = process->frames_count;
-  block.common->audio_out = process->audio_outputs[0].data32;
   block.common->bpm = process->transport? process->transport->tempo: 0;
   block.common->audio_in = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
 
