@@ -12,6 +12,8 @@
 
 namespace plugin_base {
 
+struct host_block;
+
 // single module audio processor
 class module_engine {
 public:
@@ -27,11 +29,11 @@ class plugin_engine final {
   plugin_desc const _desc;
   plugin_dims const _dims; 
   float _sample_rate = {};
-  host_block _host_block = {};
   plugin_block _plugin_block = {};
   common_block _common_block = {};
   jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
+  std::unique_ptr<host_block> _host_block = {};
   std::chrono::milliseconds _activated_at_ms = {};
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _global_engines = {};

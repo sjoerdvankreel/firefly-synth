@@ -1,13 +1,15 @@
 #include <plugin_base/engine.hpp>
+#include <plugin_base/block_host.hpp>
 
 namespace plugin_base {
 
 plugin_engine::
 plugin_engine(std::unique_ptr<plugin_topo>&& topo) :
-_desc(std::move(topo)), _dims(*_desc.plugin)
+_desc(std::move(topo)), _dims(*_desc.plugin), 
+_host_block(std::make_unique<host_block>())
 {
-  _host_block.common = &_common_block;
   _plugin_block.host = &_common_block;
+  _host_block->common = &_common_block;
 
   // reserve this much but allocate on the audio thread if necessary
   // still seems better than dropping events
@@ -23,25 +25,25 @@ _desc(std::move(topo)), _dims(*_desc.plugin)
   _accurate_frames.resize(_desc.param_count);
   _plugin_block.in.block.resize(_dims.params);
   _common_block.notes.reserve(note_limit_guess);
-  _host_block.events.out.reserve(block_events_guess);
-  _host_block.events.block.reserve(block_events_guess);
-  _host_block.events.accurate.reserve(accurate_events_guess);
+  _host_block->events.out.reserve(block_events_guess);
+  _host_block->events.block.reserve(block_events_guess);
+  _host_block->events.accurate.reserve(accurate_events_guess);
 }
 
 host_block&
 plugin_engine::prepare()
 {
   // host calls this and should provide the current block values
-  _host_block.events.out.clear();
-  _host_block.events.block.clear();
-  _host_block.events.accurate.clear();
-  _host_block.common->notes.clear();
-  _host_block.common->bpm = 0;
-  _host_block.common->frame_count = 0;
-  _host_block.common->stream_time = 0;
-  _host_block.common->audio_in = nullptr;
-  _host_block.common->audio_out = nullptr;
-  return _host_block;
+  _common_block.notes.clear();
+  _common_block.bpm = 0;
+  _common_block.frame_count = 0;
+  _common_block.stream_time = 0;
+  _common_block.audio_in = nullptr;
+  _common_block.audio_out = nullptr;
+  _host_block->events.out.clear();
+  _host_block->events.block.clear();
+  _host_block->events.accurate.clear();
+  return *_host_block;
 }
 
 void
@@ -50,9 +52,9 @@ plugin_engine::deactivate()
   // drop frame-count dependent memory
   _sample_rate = 0;
   _activated_at_ms = {};
-  _host_block.events.out.clear();
-  _host_block.events.block.clear();
-  _host_block.events.accurate.clear();
+  _host_block->events.out.clear();
+  _host_block->events.block.clear();
+  _host_block->events.accurate.clear();
   _plugin_block.in.accurate = {};
   _plugin_block.out.voice_cv = {};
   _plugin_block.out.voice_audio = {};
@@ -102,8 +104,8 @@ plugin_engine::process()
   // clear host audio out
   for(int c = 0; c < 2; c++)
     std::fill(
-      _host_block.common->audio_out[c], 
-      _host_block.common->audio_out[c] + _common_block.frame_count,
+      _common_block.audio_out[c], 
+      _common_block.audio_out[c] + _common_block.frame_count,
       0.0f);
 
   // clear per-voice audio out
@@ -168,9 +170,9 @@ plugin_engine::process()
   }
     
   // process per-block automation values
-  for (int e = 0; e < _host_block.events.block.size(); e++)
+  for (int e = 0; e < _host_block->events.block.size(); e++)
   {
-    auto const& event = _host_block.events.block[e];
+    auto const& event = _host_block->events.block[e];
     auto const& mapping = _desc.mappings[event.param];
     plain_value plain = _desc.normalized_to_plain_at(mapping, event.normalized);
     mapping.value_at(_state) = plain;
@@ -182,10 +184,10 @@ plugin_engine::process()
   // 2) interpolation needs to be done on normalized (linear) values and
   // 3) the host must provide a value at the end of the buffer if that event would have effect w.r.t. the next block
   std::fill(_accurate_frames.begin(), _accurate_frames.end(), 0);
-  for (int e = 0; e < _host_block.events.accurate.size(); e++)
+  for (int e = 0; e < _host_block->events.accurate.size(); e++)
   {
     // linear interpolate as normalized
-    auto const& event = _host_block.events.accurate[e];
+    auto const& event = _host_block->events.accurate[e];
     auto const& mapping = _desc.mappings[event.param];
     auto& curve = mapping.value_at(_plugin_block.in.accurate);
     int prev_frame = _accurate_frames[event.param];
@@ -247,7 +249,7 @@ plugin_engine::process()
   }
 
   // update output params 3 times a second
-  _host_block.events.out.clear();
+  _host_block->events.out.clear();
   auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
   auto now_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
   if((now_millis - _activated_at_ms).count() < 333) return;
@@ -267,7 +269,7 @@ plugin_engine::process()
             block_event out_event;
             out_event.param = param_global;
             out_event.normalized = module.params[p].plain_to_normalized(_state[m][mi][p][pi]);
-            _host_block.events.out.push_back(out_event);
+            _host_block->events.out.push_back(out_event);
           }
           param_global++;
         }

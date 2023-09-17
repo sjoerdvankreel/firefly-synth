@@ -3,65 +3,9 @@
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
-
-#include <vector>
-#include <cstdint>
+#include <plugin_base/block_common.hpp>
 
 namespace plugin_base {
-
-// note id or PCK (port is 0)
-struct note_id final {
-  int id;
-  short key;
-  short channel;
-};
-
-// keyboard event
-struct note_event final {
-  int frame;
-  note_id id;
-  float velocity;
-  enum class type_t { on, off, cut } type;
-};
-
-// once per block automation
-struct block_event final {
-  int param;
-  normalized_value normalized;
-};
-
-// sample accurate automation
-struct accurate_event final {
-  int frame;
-  int param;
-  normalized_value normalized;
-};
-
-// shared host/plug
-struct common_block final {
-  float bpm;
-  int frame_count;
-  float* const* audio_out;
-  float const* const* audio_in;
-  std::int64_t stream_time;
-  std::vector<note_event> notes;
-  INF_DECLARE_MOVE_ONLY(common_block);
-};
-
-// shared host/plug
-struct host_events final {
-  std::vector<block_event> out;
-  std::vector<block_event> block;
-  std::vector<accurate_event> accurate;
-  INF_DECLARE_MOVE_ONLY(host_events);
-};
-
-// shared block, automation events
-struct host_block final {
-  host_events events;
-  common_block* common;
-  INF_DECLARE_MOVE_ONLY(host_block);
-};
 
 // all modules automation
 struct plugin_in final {

@@ -40,8 +40,6 @@ void
 delay_engine::process(
   plugin_topo const& topo, plugin_block const& plugin, module_block& module)
 {
-  if (module.in.block()[param_on][0].step() == 0) return;
-
   float max_out = 0.0f;
   int voice_count = 2; // TODO
   for(int v = 0; v < voice_count; v++)
@@ -52,6 +50,7 @@ delay_engine::process(
         max_out = std::max(max_out, plugin.host->audio_out[c][f]);
       }
 
+  if (module.in.block()[param_on][0].step() == 0) return;
   auto const& param = topo.modules[module_filter].params[param_out_gain];
   plain_value out_gain = param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f));
   module.out.params()[param_out_gain][0] = out_gain;
