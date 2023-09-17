@@ -2,6 +2,7 @@
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
 
+#include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/inf_editor.hpp>
 #include <plugin_base.vst3/inf_controller.hpp>
 
@@ -85,6 +86,20 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);
   return kResultTrue;
+}
+
+tresult PLUGIN_API
+inf_controller::setComponentState(IBStream* state)
+{
+  if (!load_state(_desc, state, _ui_state))
+    return kResultFalse;
+  for (int p = 0; p < _desc.param_count; p++)
+  {
+    int tag = _desc.param_index_to_tag[p];
+    auto const& mapping = _desc.mappings[p];
+    setParamNormalized(tag, _desc.plain_to_normalized_at(mapping, mapping.value_at(_ui_state)).value());
+  }
+  return kResultOk;
 }
 
 tresult PLUGIN_API 

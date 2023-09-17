@@ -1,4 +1,5 @@
 #include <plugin_base/io.hpp>
+#include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/inf_component.hpp>
 
 #include <pluginterfaces/base/ibstream.h>
@@ -46,13 +47,8 @@ inf_component::getState(IBStream* state)
 tresult PLUGIN_API
 inf_component::setState(IBStream* state)
 {
-  char byte;
-  int read = 1;
-  std::vector<char> data;
-  while (state->read(&byte, 1, &read) == kResultTrue && read == 1)
-    data.push_back(byte);
-  plugin_io io(&_engine.desc());
-  if (io.load(data, _engine.state()).ok()) return kResultOk;
+  if(load_state(_engine.desc(), state, _engine.state())) 
+    return kResultOk;
   return kResultFalse;
 }
 

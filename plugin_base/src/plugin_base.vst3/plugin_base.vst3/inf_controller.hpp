@@ -35,6 +35,7 @@ public:
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;
+  Steinberg::tresult PLUGIN_API setComponentState(Steinberg::IBStream* state) override;
   Steinberg::tresult PLUGIN_API setParamNormalized(Steinberg::Vst::ParamID tag, Steinberg::Vst::ParamValue value) override;
 };
 
