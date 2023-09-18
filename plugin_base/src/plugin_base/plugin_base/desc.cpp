@@ -299,9 +299,13 @@ validate_plugin_topo(plugin_topo const& topo)
   assert(0 < topo.gui_default_width && topo.gui_default_width <= 3840);
   assert(0 < topo.gui_aspect_ratio && topo.gui_aspect_ratio <= 21.0 / 9.0);
 
+  int stage = 0;
   for (int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
+    assert((int)module.stage >= stage);
+    stage = (int)module.stage;
+
     validate_module_topo(module);
     INF_ASSERT_EXEC(module_ids.insert(module.id).second);
     for (int s = 0; s < module.sections.size(); s++)
@@ -433,6 +437,7 @@ plugin_dims(plugin_topo const& plugin)
         module_slot_param_slot[m][mi].push_back(module.params[p].slot_count);
     }
   }
+
   validate_dims(plugin, *this);
 }
 

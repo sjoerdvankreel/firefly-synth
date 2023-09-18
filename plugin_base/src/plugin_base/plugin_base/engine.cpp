@@ -262,15 +262,20 @@ plugin_engine::process()
   }
 
   // run all modules in order
-  _plugin_block.sample_rate = _sample_rate;
+  for (int m = 0; m < _desc.plugin->modules.size(); m++)
+  {
+    process_block block;
+    auto const& module = _desc.plugin->modules[m];
+    if(module.stage != module_stage::input) continue;
+  }
+
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
-    bool is_voice = module.scope == module_scope::voice;
     for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
       module_block block = {};
-      // TODO copy over the host common block
+      // TODO copy over the host common block and sample rate
       block.in.block_ = &_plugin_block.automation.block[m][mi];
       block.in.accurate_ = &_plugin_block.automation.accurate[m][mi];
       if (!is_voice)
@@ -310,8 +315,8 @@ plugin_engine::process()
     {
       auto& state = _voice_states[v];
       if (state.active && 
-        ((event.id.id >= 0 && event.id.id == state.id) ||
-        (event.id.key == state.key && event.id.channel == state.channel)))
+        ((event.id.id >= 0 && event.id.id == state.id.id) ||
+        (event.id.key == state.id.key && event.id.channel == state.id.channel)))
         state = voice_state();
     }
   }
