@@ -40,16 +40,12 @@ delay_engine::process(process_block& block)
   for(int c = 0; c < 2; c++)
     for(int f = 0; f < block.host.frame_count; f++)
     {
-      block.out->host_audio[c][f] += block.out->voices_mixdown[c][f];
+      block.out->host_audio[c][f] += block.out->mixdown[c][f];
       max_out = std::max(max_out, block.out->host_audio[c][f]);
     }
 
   if (block.block_automation[param_on][0].step() == 0) return;
-
-
-  auto const& param = topo.modules[module_delay].params[param_out_gain];
-  plain_value out_gain = param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f));
-  block.out->output_params[param_out_gain][0] = out_gain;
+  block.set_out_param(param_out_gain, 0, std::clamp(max_out, 0.0f, 1.0f));
 }
 
 }

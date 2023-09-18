@@ -13,17 +13,17 @@ struct plugin_topo;
 // single output module process call
 struct out_process_block final {
   float* const* host_audio;
-  jarray<plain_value, 2>& out_params;
-  jarray<float, 2> const& voices_mixdown;
+  jarray<plain_value, 2>& params;
+  jarray<float, 2> const& mixdown;
   INF_DECLARE_MOVE_ONLY(out_process_block);
 };
 
 // single per-voice module process call
 struct voice_process_block final {
+  jarray<float, 2>& result;
   voice_state const& state;
-  jarray<float, 2>& voice_result;
-  jarray<float, 3> const& voice_cv_in;
-  jarray<float, 4> const& voice_audio_in;
+  jarray<float, 3> const& cv_in;
+  jarray<float, 4> const& audio_in;
   INF_DECLARE_MOVE_ONLY(voice_process_block);
 };
 
@@ -43,7 +43,8 @@ struct process_block final {
   jarray<plain_value, 2> const& block_automation;
 
   INF_DECLARE_MOVE_ONLY(process_block);
-  void set_out_param(int param, int slot, double raw);
+  void set_out_param(int param, int slot, double raw)
+  { out->params[param][slot] = module.params[param].topo->raw_to_plain(raw); }
 };
 
 }

@@ -15,7 +15,7 @@ public module_engine {
   float _phase = 0;
 public:
   INF_DECLARE_MOVE_ONLY(osc_engine);
-  void process(plugin_topo const& topo, module_block& block) override;
+  void process(process_block& block) override;
 };
 
 static std::vector<item_topo>
@@ -57,7 +57,7 @@ osc_topo()
 }
 
 void
-osc_engine::process(plugin_topo const& topo, module_block& block)
+osc_engine::process(process_block& block)
 {
   if(block.block_automation[param_on][0].step() == 0) return;
   int oct = block.block_automation[param_oct][0].step();
@@ -76,9 +76,9 @@ osc_engine::process(plugin_topo const& topo, module_block& block)
     case type_sine: sample = std::sin(_phase * 2 * pi32); break;
     default: assert(false); sample = 0; break;
     }
-    module.audio_out[0][f] = sample * gain[f] * balance(0, bal[f]);
-    module.audio_out[1][f] = sample * gain[f] * balance(1, bal[f]);
-    _phase += note_to_frequency(oct, note, cent[f], module.voice->state.id.key) / module.sample_rate;
+    block.audio_out[0][f] = sample * gain[f] * balance(0, bal[f]);
+    block.audio_out[1][f] = sample * gain[f] * balance(1, bal[f]);
+    _phase += note_to_frequency(oct, note, cent[f], block.voice->state.id.key) / block.sample_rate;
     _phase -= std::floor(_phase);
   }
 }
