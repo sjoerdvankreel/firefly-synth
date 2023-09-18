@@ -7,13 +7,6 @@
 #include <vector>
 
 namespace plugin_base {
-
-// note id or PCK (port is 0)
-struct note_id final {
-  int id;
-  short key;
-  short channel;
-};
   
 // once per block automation
 struct block_event final {
@@ -45,10 +38,10 @@ struct host_events final {
   INF_DECLARE_MOVE_ONLY(host_events);
 };
 
-// shared block, automation events
+// shared block, note/automation events, host audio out
 struct host_block final {
   host_events events;
-  common_block* common;
+  common_block common;
   float* const* audio_out;
   INF_DECLARE_MOVE_ONLY(host_block);
 };

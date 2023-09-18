@@ -14,41 +14,36 @@ namespace plugin_base {
 
 struct host_block;
 
-// single module audio processor
-class module_engine {
-public:
-  virtual void 
-  process(
-    plugin_topo const& topo, 
-    plugin_block const& plugin, 
-    module_block& module) = 0;
-};
+// single module audio processors
+class module_engine { 
+public: virtual void process(plugin_topo const& topo, module_block& block) = 0; };
+class voice_module_engine {
+public: virtual void process(plugin_topo const& topo, voice_module_block& block) = 0; };
+class output_module_engine {
+public: virtual void process(plugin_topo const& topo, output_module_block& block) = 0; };
 
 // global plugin audio processor
 class plugin_engine final {
 
-  struct voice_state final {
-    // TODO start/end frames
-    int id = -1;
-    short key = -1;
-    short channel = -1;
-    bool active = false;
-    float velocity = 0.0f;
-    std::int64_t time = -1;
-  };
-
   plugin_desc const _desc;
   plugin_dims const _dims; 
   float _sample_rate = {};
-  plugin_block _plugin_block = {};
   common_block _common_block = {};
   jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
+  jarray<float, 3> _voices_results = {};
+  jarray<float, 4> _voice_cv_state = {};
+  jarray<float, 3> _global_cv_state = {};
+  jarray<float, 5> _voice_audio_state = {};
+  jarray<float, 4> _global_audio_state = {};
+  jarray<float, 5> _accurate_automation = {};
+  jarray<plain_value, 4> _block_automation = {};
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
   std::chrono::milliseconds _activated_at_ms = {};
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
-  jarray<std::unique_ptr<module_engine>, 2> _global_engines = {};
+  jarray<std::unique_ptr<module_engine>, 2> _module_engines = {};
+  jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
 public:
   void process();
