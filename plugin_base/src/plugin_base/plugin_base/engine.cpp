@@ -77,14 +77,14 @@ plugin_engine::deactivate()
   _host_block->events.accurate.clear();
 
   for(int m = 0; m < _desc.module_voice_start; m++)
-    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _input_engines[m][mi].reset();
   for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
-    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       for (int v = 0; v < _desc.plugin->polyphony; v++)
         _voice_engines[v][m][mi].reset();
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
-    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _output_engines[m][mi].reset();
 }
 
@@ -109,14 +109,14 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _accurate_automation.resize(frame_dims.accurate_automation);
 
   for (int m = 0; m < _desc.module_voice_start; m++)
-    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _input_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
   for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
-    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       for (int v = 0; v < _desc.plugin->polyphony; v++)
         _voice_engines[v][m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
-    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _output_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
 }
 
