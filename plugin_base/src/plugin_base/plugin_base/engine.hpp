@@ -16,11 +16,9 @@ struct host_block;
 
 // single module audio processors
 class module_engine { 
-public: virtual void process(plugin_topo const& topo, module_block& block) = 0; };
-class voice_module_engine {
-public: virtual void process(plugin_topo const& topo, voice_module_block& block) = 0; };
-class output_module_engine {
-public: virtual void process(plugin_topo const& topo, output_module_block& block) = 0; };
+public: 
+  virtual void process(plugin_topo const& topo, module_block& block) = 0;
+};
 
 // global plugin audio processor
 class plugin_engine final {
@@ -42,7 +40,7 @@ class plugin_engine final {
   std::unique_ptr<host_block> _host_block = {};
   std::chrono::milliseconds _activated_at_ms = {};
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
-  jarray<std::unique_ptr<module_engine>, 2> _module_engines = {};
+  jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
 public:

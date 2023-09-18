@@ -11,7 +11,7 @@ note_names();
 module_topo
 make_module(
   std::string const& id, std::string const& name,
-  int slot_count, module_scope scope, module_output output);
+  int slot_count, module_stage stage, module_output output);
 
 // block-rate
 param_topo

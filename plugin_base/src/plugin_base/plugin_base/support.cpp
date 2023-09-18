@@ -29,12 +29,12 @@ param_base(
 module_topo
 make_module(
   std::string const& id, std::string const& name,
-  int slot_count, module_scope scope, module_output output)
+  int slot_count, module_stage stage, module_output output)
 {
   module_topo result = {};
   result.id = id;
   result.name = name;
-  result.scope = scope;
+  result.stage = stage;
   result.output = output;
   result.slot_count = slot_count;
   return result;

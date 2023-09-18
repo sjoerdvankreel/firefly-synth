@@ -11,8 +11,8 @@
 namespace plugin_base {
 
 enum class plugin_type { synth, fx };
-enum class module_scope { voice, global };
 enum class module_output { none, cv, audio };
+enum class module_stage { input, voice, output };
 
 enum class param_dir { input, output };
 enum class param_rate { accurate, block };
@@ -93,7 +93,7 @@ struct module_topo final {
   int slot_count;
   std::string id;
   std::string name;
-  module_scope scope;
+  module_stage stage;
   module_output output;
   std::vector<param_topo> params;
   std::vector<section_topo> sections;
