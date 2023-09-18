@@ -198,12 +198,20 @@ param_base(gui, desc), Slider()
   plugin_changed(initial);
 }
 
+
 void 
-plugin_gui::ui_changed(int index, plain_value plain)
+ui_listener::ui_changed(int index, plain_value plain)
 {
   ui_begin_changes(index);
   ui_changing(index, plain);
   ui_end_changes(index);
+}
+
+void 
+plugin_gui::ui_changed(int index, plain_value plain)
+{
+  for (int i = 0; i < _ui_listeners.size(); i++)
+    _ui_listeners[i]->ui_changed(index, plain);
 }
 
 void 

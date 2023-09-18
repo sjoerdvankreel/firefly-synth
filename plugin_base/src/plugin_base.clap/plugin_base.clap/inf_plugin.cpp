@@ -72,7 +72,7 @@ bool
 inf_plugin::stateSave(clap_ostream const* stream) noexcept
 {
   plugin_io io(&_engine.desc());
-  std::vector<char> data(io.save(_engine.state()));
+  std::vector<char> data(io.save(_ui_state));
   return stream->write(stream, data.data(), data.size()) == data.size();
 }
 
@@ -89,8 +89,10 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
   } while(true);
 
   plugin_io io(&_engine.desc());
-  if (io.load(data, _engine.state()).ok()) return true;
-  return false;
+  if (!io.load(data, _ui_state).ok()) return false;
+  for (int p = 0; p < _engine.desc().param_count; p++)
+    ui_changed(p, _engine.desc().mappings[p].value_at(_ui_state));
+  return true;
 }
 
 bool

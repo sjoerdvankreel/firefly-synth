@@ -4,10 +4,12 @@ antialias
 clap threadpool
 host context menu
 (polyphonic) modulation
+split stages to pre-voice-post + adjust data structures
 try out some airwindows stuff
 voice manager including voice-level unison
 manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
 linux, renoise, bitwig, cbb
-renoise not call setcomponentstate?
+renoise initial gui size
+rename v2.0 to 2

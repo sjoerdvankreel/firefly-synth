@@ -24,8 +24,8 @@ _host_block(std::make_unique<host_block>())
   _desc.init_defaults(_state);
   _global_engines.resize(_dims.module_slot);
   _accurate_frames.resize(_desc.param_count);
+  _voice_states.resize(_desc.plugin->polyphony);
   _voice_engines.resize(_dims.voice_module_slot);
-  _voices_states.resize(_desc.plugin->polyphony);
   _host_block->events.notes.reserve(note_limit_guess);
   _plugin_block.automation.block.resize(_dims.module_slot_param_slot);
   _host_block->events.out.reserve(block_events_guess);
@@ -122,27 +122,28 @@ plugin_engine::process()
   // TODO monophonic portamento
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
-    int take_index = -1;
+    int slot = -1;
     auto const& event = _host_block->events.notes[e];
     if (event.type != note_event::type_t::on) continue;
     std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
-    for (int i = 0; i < _voices_states.size(); i++)
-      if (!_voices_states[i].active)
+    for (int i = 0; i < _voice_states.size(); i++)
+      if (!_voice_states[i].active)
       {
-        take_index = i;
+        slot = i;
         break;
-      } else if(_voices_states[i].time < min_time)
+      } else if(_voice_states[i].time < min_time)
       {
-        take_index = i;
-        min_time = _voices_states[i].time;
+        slot = i;
+        min_time = _voice_states[i].time;
       }
-    assert(take_index >= 0);
-    _voices_states[take_index].active = true;
-    _voices_states[take_index].id = event.id.id;
-    _voices_states[take_index].key = event.id.key;
-    _voices_states[take_index].velocity = event.velocity;
-    _voices_states[take_index].channel = event.id.channel;
-    _voices_states[take_index].time = _common_block.stream_time + event.frame;
+    assert(slot >= 0); 
+    auto& state = _voice_states[slot];
+    state.active = true;
+    state.id = event.id.id;
+    state.key = event.id.key;
+    state.velocity = event.velocity;
+    state.channel = event.id.channel;
+    state.time = _common_block.stream_time + event.frame;
   }
 
   // clear module cv/audio out
@@ -156,7 +157,7 @@ plugin_engine::process()
         {
           auto& curve = _plugin_block.module_out.global_cv[m][mi];
           std::fill(curve.begin(), curve.begin() + _common_block.frame_count, 0.0f);
-        } else for (int v = 0; v < _voices_states.size(); v++)
+        } else for (int v = 0; v < _voice_states.size(); v++)
         {
           // TODO only active voices
           auto& curve = _plugin_block.module_out.voice_cv[v][m][mi];
@@ -169,7 +170,7 @@ plugin_engine::process()
           auto& audio = _plugin_block.module_out.global_audio[m][mi];
           for(int c = 0; c < 2; c++)
             std::fill(audio[c].begin(), audio[c].begin() + _common_block.frame_count, 0.0f);
-        } else for (int v = 0; v < _voices_states.size(); v++)
+        } else for (int v = 0; v < _voice_states.size(); v++)
         {
           // TODO only active voices
           auto& audio = _plugin_block.module_out.voice_audio[v][m][mi];
@@ -273,13 +274,13 @@ plugin_engine::process()
         block.out.audio_ = &_plugin_block.module_out.global_audio[m][mi];
         _global_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
       }
-      else for(int v = 0; v < _voices_states.size(); v++)
-        if(_voices_states[v].active)
+      else for(int v = 0; v < _voice_states.size(); v++)
+        if(_voice_states[v].active)
         {
           module_voice_in voice_in = {};
           block.in.voice = &voice_in;
-          voice_in.key = _voices_states[v].key;
-          voice_in.velocity = _voices_states[v].velocity;
+          voice_in.key = _voice_states[v].key;
+          voice_in.velocity = _voice_states[v].velocity;
           voice_in.cv_ = &_plugin_block.module_out.voice_cv[v];
           voice_in.audio_ = &_plugin_block.module_out.voice_audio[v];
           block.out.voice_audio_ = &_plugin_block.voices_audio_out[v];
@@ -294,17 +295,16 @@ plugin_engine::process()
   // TODO leave this to the plugs envelope
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
-    int release_index = -1;
     auto const& event = _host_block->events.notes[e];
     if(event.type == note_event::type_t::on) continue;
-    for (int v = 0; v < _voices_states.size(); v++)
-      if ((event.id.id >= 0 && event.id.id == _voices_states[v].id) ||
-        (event.id.key == _voices_states[v].key && event.id.channel == _voices_states[v].channel)) {
-        release_index = v;
-        break;
-      }
-    assert(release_index >= 0);
-    _voices_states[release_index] = voice_state();
+    for (int v = 0; v < _voice_states.size(); v++)
+    {
+      auto& state = _voice_states[v];
+      if (state.active && 
+        ((event.id.id >= 0 && event.id.id == state.id) ||
+        (event.id.key == state.key && event.id.channel == state.channel)))
+        state = voice_state();
+    }
   }
 
   // update output params 3 times a second

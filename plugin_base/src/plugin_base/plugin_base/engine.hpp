@@ -44,8 +44,8 @@ class plugin_engine final {
   common_block _common_block = {};
   jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
+  std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
-  std::vector<voice_state> _voices_states = {};
   std::chrono::milliseconds _activated_at_ms = {};
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _global_engines = {};

@@ -18,6 +18,7 @@ public:
 class ui_listener
 {
 public:
+  void ui_changed(int index, plain_value plain);
   virtual void ui_end_changes(int index) = 0;
   virtual void ui_begin_changes(int index) = 0;
   virtual void ui_changing(int index, plain_value plain) = 0;

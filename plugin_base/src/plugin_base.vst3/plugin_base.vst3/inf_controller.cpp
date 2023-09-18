@@ -94,11 +94,7 @@ inf_controller::setComponentState(IBStream* state)
   if (!load_state(_desc, state, _ui_state))
     return kResultFalse;
   for (int p = 0; p < _desc.param_count; p++)
-  {
-    int tag = _desc.param_index_to_tag[p];
-    auto const& mapping = _desc.mappings[p];
-    setParamNormalized(tag, _desc.plain_to_normalized_at(mapping, mapping.value_at(_ui_state)).value());
-  }
+    ui_changed(p, _desc.mappings[p].value_at(_ui_state));
   return kResultOk;
 }
 
