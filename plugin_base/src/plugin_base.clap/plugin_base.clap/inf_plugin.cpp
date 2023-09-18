@@ -170,7 +170,7 @@ inf_plugin::ui_changing(int index, plain_value plain)
   push_to_audio(index, plain);
   param_mapping const& mapping = _engine.desc().mappings[index];
   mapping.value_at(_ui_state) = plain;
-  _gui->plugin_changed(index, plain);
+  if(_gui) _gui->plugin_changed(index, plain);
 }
 
 void 
