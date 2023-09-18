@@ -9,6 +9,7 @@ voice manager including voice-level unison
 manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
+adsr env
 linux, renoise, bitwig, cbb
 renoise initial gui size
 rename v2.0 to 2
