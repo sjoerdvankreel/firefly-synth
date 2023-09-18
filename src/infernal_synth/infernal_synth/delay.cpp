@@ -3,6 +3,7 @@
 #include <plugin_base/engine.hpp>
 #include <infernal_synth/synth.hpp>
 
+#include <array>
 #include <algorithm>
 
 using namespace plugin_base;
@@ -11,8 +12,12 @@ namespace infernal_synth {
 
 class delay_engine: 
 public module_engine {
+  int _pos = 0;
+  int const _length;
+  jarray<float, 2> _buffer = {};
 public:
   INF_DECLARE_MOVE_ONLY(delay_engine);
+  delay_engine(int sample_rate);
   void process(process_block& block) override;
 };
 
@@ -29,22 +34,30 @@ delay_topo()
     section_main, param_dir::input, param_label::both, false));
   result.params.emplace_back(param_pct("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1,
     section_main, param_dir::output, param_edit::text, param_label::both, param_rate::block, true, 0, 1, 0));
-  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(); };
+  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
   return result;
 }
+
+delay_engine::
+delay_engine(int sample_rate) : 
+_length(sample_rate / 2)
+{ _buffer.resize(jarray<int, 1>(2, _length)); }
 
 void
 delay_engine::process(process_block& block)
 {
   float max_out = 0.0f;
-  for(int c = 0; c < 2; c++)
+  for (int c = 0; c < 2; c++)  
     for(int f = 0; f < block.host.frame_count; f++)
     {
-      block.out->host_audio[c][f] += block.out->mixdown[c][f];
+      block.out->host_audio[c][f] = block.out->mixdown[c][f];
+      if (block.block_automation[param_on][0].step() != 0)
+        block.out->host_audio[c][f] += _buffer[c][(_pos + f) % _length];
+      _buffer[c][(_pos + f) % _length] = block.out->mixdown[c][f];
       max_out = std::max(max_out, block.out->host_audio[c][f]);
-    }
-
-  if (block.block_automation[param_on][0].step() == 0) return;
+    }  
+  _pos += block.host.frame_count;
+  _pos %= _length;
   block.set_out_param(param_out_gain, 0, std::clamp(max_out, 0.0f, 1.0f));
 }
 

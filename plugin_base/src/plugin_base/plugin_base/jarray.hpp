@@ -40,11 +40,13 @@ public:
   void resize(dims_type const& dims) 
   { jarray_traits<T, Dims>::resize(_data, dims); }
 
-  decltype(_data.end()) end() { return _data.end(); }
-  decltype(_data.begin()) begin() { return _data.begin(); }
-
   elem_type& operator[](int i) { return _data[i]; }
   elem_type const& operator[](int i) const { return _data[i]; }
+
+  decltype(_data.end()) end() { return _data.end(); }
+  decltype(_data.begin()) begin() { return _data.begin(); }
+  decltype(_data.end()) end() const { return _data.end(); }
+  decltype(_data.begin()) begin()const { return _data.begin(); }
 
   void clear() { _data.clear(); }
   std::size_t size() const { return _data.size(); }
