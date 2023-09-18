@@ -66,6 +66,8 @@ struct module_desc final {
 struct plugin_desc final {
   int param_count = {};
   int module_count = {};
+  int module_voice_start = {};
+  int module_output_start = {};
   std::vector<module_desc> modules = {};
   std::unique_ptr<plugin_topo> plugin = {};
   std::vector<param_mapping> mappings = {};

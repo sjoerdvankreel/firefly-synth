@@ -44,7 +44,7 @@ filter_engine::process(process_block& block)
 {
   auto const& osc_audio = block.voice->audio_in[module_osc];
   auto const& osc_gain = block.accurate_automation[param_osc_gain];
-  for(int o = 0; o < block.plugin.plugin->modules[module_osc].slot_count; o++)
+  for(int o = 0; o < block.plugin.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < block.host.frame_count; f++)
         block.voice->result[c][f] += osc_audio[o][c][f] * osc_gain[o][f];

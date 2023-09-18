@@ -31,6 +31,18 @@ _host_block(std::make_unique<host_block>())
   _host_block->events.accurate.reserve(accurate_events_guess);
 }
 
+process_block 
+plugin_engine::make_process_block(int module, int slot)
+{
+  return {
+    _sample_rate, nullptr, _host_block->common,
+    *_desc.plugin, _desc.plugin->modules[module], nullptr,
+    _global_cv_state[module][slot], _global_audio_state[module][slot],
+    _global_cv_state, _global_audio_state,
+    _accurate_automation[module][slot], _block_automation[module][slot]
+  };
+}
+
 host_block&
 plugin_engine::prepare()
 {
@@ -64,21 +76,16 @@ plugin_engine::deactivate()
   _host_block->events.block.clear();
   _host_block->events.accurate.clear();
 
-  for(int m = 0; m < _desc.plugin->modules.size(); m++)
-  {
-    auto const& module = _desc.plugin->modules[m];
-    for(int mi = 0; mi < module.slot_count; mi++)
-      switch(module.stage)
-      {
-      case module_stage::voice:
-        for (int v = 0; v < _desc.plugin->polyphony; v++)
-          _voice_engines[v][m][mi].reset();
-        break;
-      case module_stage::input: _input_engines[m][mi].reset(); break;
-      case module_stage::output: _output_engines[m][mi].reset(); break;
-      default: assert(false); break;
-      }
-  }
+  for(int m = 0; m < _desc.module_voice_start; m++)
+    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+      _input_engines[m][mi].reset();
+  for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
+    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+      for (int v = 0; v < _desc.plugin->polyphony; v++)
+        _voice_engines[v][m][mi].reset();
+  for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
+    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+      _output_engines[m][mi].reset();
 }
 
 void
@@ -101,25 +108,16 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _global_audio_state.resize(frame_dims.module_global_audio);
   _accurate_automation.resize(frame_dims.accurate_automation);
 
-  for (int m = 0; m < _desc.plugin->modules.size(); m++)
-  {
-    auto const& module = _desc.plugin->modules[m];
-    for (int mi = 0; mi < module.slot_count; mi++)
-      switch (module.stage)
-      {
-      case module_stage::input:
-        _input_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
-        break;
-      case module_stage::output: 
-        _output_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
-        break;
-      case module_stage::voice:
-        for (int v = 0; v < _desc.plugin->polyphony; v++)
-          _voice_engines[v][m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
-        break;
-      default: assert(false); break;
-      }
-  }
+  for (int m = 0; m < _desc.module_voice_start; m++)
+    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+      _input_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
+  for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
+    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+      for (int v = 0; v < _desc.plugin->polyphony; v++)
+        _voice_engines[v][m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
+  for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
+    for (int mi = 0; mi < _desc.modules[m].module->slot_count; mi++)
+      _output_engines[m][mi] = _desc.plugin->modules[m].engine_factory(sample_rate, max_frame_count);
 }
 
 void 
@@ -234,10 +232,10 @@ plugin_engine::process()
     auto const& mapping = _desc.mappings[event.param];
     auto& curve = mapping.value_at(_accurate_automation);
     int prev_frame = _accurate_frames[event.param];
-    float frame_count = event.frame - prev_frame + 1;
+    float range_frames = event.frame - prev_frame + 1;
     float range = event.normalized.value() - curve[prev_frame];
     for(int f = prev_frame; f <= event.frame; f++)
-      curve[f] = curve[prev_frame] + (f - prev_frame) / frame_count * range;
+      curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
     // denormalize
     mapping.value_at(_state).real_unchecked(_desc.normalized_to_plain_at(mapping, event.normalized).real());
@@ -262,48 +260,40 @@ plugin_engine::process()
   }
 
   // run all modules in order
-  for (int m = 0; m < _desc.plugin->modules.size(); m++)
-  {
-    process_block block;
-    auto const& module = _desc.plugin->modules[m];
-    if(module.stage != module_stage::input) continue;
-  }
-
-  for(int m = 0; m < _desc.plugin->modules.size(); m++)
-  {
-    auto const& module = _desc.plugin->modules[m];
-    for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+  // TODO threadpool
+  for (int m = 0; m < _desc.module_voice_start; m++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
-      module_block block = {};
-      // TODO copy over the host common block and sample rate
-      block.in.block_ = &_plugin_block.automation.block[m][mi];
-      block.in.accurate_ = &_plugin_block.automation.accurate[m][mi];
-      if (!is_voice)
-      {
-        module_host_out host_out = {};
-        host_out.params_ = &_state[m][mi];
-        host_out.audio = _host_block->audio_out;
-        block.out.host = &host_out;
-        block.out.cv_ = &_plugin_block.module_out.global_cv[m][mi];
-        block.out.audio_ = &_plugin_block.module_out.global_audio[m][mi];
-        _global_engines[m][mi]->process(*_desc.plugin, _plugin_block, block);
-      }
-      else for(int v = 0; v < _voice_states.size(); v++)
-        if(_voice_states[v].active)
-        {
-          module_voice_in voice_in = {};
-          block.in.voice = &voice_in;
-          voice_in.key = _voice_states[v].key;
-          voice_in.velocity = _voice_states[v].velocity;
-          voice_in.cv_ = &_plugin_block.module_out.voice_cv[v];
-          voice_in.audio_ = &_plugin_block.module_out.voice_audio[v];
-          block.out.voice_audio_ = &_plugin_block.voices_audio_out[v];
-          block.out.cv_ = &_plugin_block.module_out.voice_cv[v][m][mi];
-          block.out.audio_ = &_plugin_block.module_out.voice_audio[v][m][mi];
-          _voice_engines[v][m][mi]->process(*_desc.plugin, _plugin_block, block);
-        }
+      process_block block(make_process_block(m, mi));
+      _input_engines[m][mi]->process(block);
     }
-  }
+  for (int v = 0; v < _voice_states.size(); v++)
+    if (_voice_states[v].active)
+      for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
+        for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+        {
+          voice_process_block voice_block = {
+            _voice_results[v],
+            _voice_states[v],
+            _voice_cv_state[v],
+            _voice_audio_state[v]
+          };
+          process_block block(make_process_block(m, mi));
+          block.voice = &voice_block;
+          _input_engines[m][mi]->process(block);
+        }
+  for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    {
+      out_process_block out_block = {
+        _host_block->audio_out,
+        _state[m][mi],
+        _voices_mixdown
+      };
+      process_block block(make_process_block(m, mi));
+      block.out = &out_block;
+      _input_engines[m][mi]->process(block);
+    }
 
   // release voices ending this block
   // TODO leave this to the plugs envelope

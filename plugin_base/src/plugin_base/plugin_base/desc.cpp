@@ -250,6 +250,10 @@ validate_plugin_desc(plugin_desc const& desc)
   std::set<std::string> all_ids;
   (void)param_global;
 
+  assert(0 <= desc.module_voice_start);
+  assert(desc.module_voice_start <= desc.module_output_start);
+  assert(desc.module_output_start < desc.plugin->modules.size());
+
   assert(desc.param_count > 0);
   assert(desc.module_count > 0);
   assert(desc.modules.size() == desc.module_count);
@@ -358,9 +362,13 @@ plugin(std::move(plugin_))
 {
   int param_global = 0;
   int module_global = 0;
+
   for(int m = 0; m < plugin->modules.size(); m++)
   {
     auto const& module = plugin->modules[m];
+    if(module.stage == module_stage::input) module_voice_start++;
+    if(module.stage == module_stage::input) module_output_start++;
+    if(module.stage == module_stage::voice) module_output_start++;
     module_id_to_index[module.id] = m;
     for(int p = 0; p < module.params.size(); p++)
       param_id_to_index[module.id][module.params[p].id] = p;
