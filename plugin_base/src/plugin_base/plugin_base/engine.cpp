@@ -280,7 +280,7 @@ plugin_engine::process()
           };
           process_block block(make_process_block(m, mi));
           block.voice = &voice_block;
-          _input_engines[m][mi]->process(block);
+          _voice_engines[v][m][mi]->process(block);
         }
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
@@ -292,7 +292,7 @@ plugin_engine::process()
       };
       process_block block(make_process_block(m, mi));
       block.out = &out_block;
-      _input_engines[m][mi]->process(block);
+      _output_engines[m][mi]->process(block);
     }
 
   // release voices ending this block
