@@ -32,13 +32,14 @@ _host_block(std::make_unique<host_block>())
 }
 
 process_block 
-plugin_engine::make_process_block(int module, int slot)
+plugin_engine::make_process_block(int module, int slot, int voice)
 {
+  jarray<float, 1>& cv_out = voice < 0? _global_cv_state[module][slot]: _voice_cv_state[voice][module][slot];
+  jarray<float, 2>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
   return {
     _sample_rate, nullptr, _host_block->common,
     *_desc.plugin, _desc.plugin->modules[module], nullptr,
-    _global_cv_state[module][slot], _global_audio_state[module][slot],
-    _global_cv_state, _global_audio_state,
+    cv_out, audio_out, _global_cv_state, _global_audio_state,
     _accurate_automation[module][slot], _block_automation[module][slot]
   };
 }
@@ -264,7 +265,7 @@ plugin_engine::process()
   for (int m = 0; m < _desc.module_voice_start; m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
-      process_block block(make_process_block(m, mi));
+      process_block block(make_process_block(m, mi, -1));
       _input_engines[m][mi]->process(block);
     }
   for (int v = 0; v < _voice_states.size(); v++)
@@ -278,7 +279,7 @@ plugin_engine::process()
             _voice_cv_state[v],
             _voice_audio_state[v]
           };
-          process_block block(make_process_block(m, mi));
+          process_block block(make_process_block(m, mi, v));
           block.voice = &voice_block;
           _voice_engines[v][m][mi]->process(block);
         }
@@ -290,7 +291,7 @@ plugin_engine::process()
         _state[m][mi],
         _voices_mixdown
       };
-      process_block block(make_process_block(m, mi));
+      process_block block(make_process_block(m, mi, -1));
       block.out = &out_block;
       _output_engines[m][mi]->process(block);
     }

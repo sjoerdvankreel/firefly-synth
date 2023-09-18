@@ -43,7 +43,7 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
-  process_block make_process_block(int module, int slot);
+  process_block make_process_block(int module, int slot, int voice);
 
 public:
   void process();
