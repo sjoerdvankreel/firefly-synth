@@ -15,10 +15,7 @@ public module_engine {
   float _phase = 0;
 public:
   INF_DECLARE_MOVE_ONLY(osc_engine);
-  void process(
-    plugin_topo const& topo, 
-    plugin_block const& plugin,
-    module_block& module) override;
+  void process(plugin_topo const& topo, module_block& block) override;
 };
 
 static std::vector<item_topo>
@@ -38,7 +35,7 @@ module_topo
 osc_topo()
 {
   module_topo result(make_module("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, 
-    module_scope::voice, module_output::audio));
+    module_stage::voice, module_output::audio));
   result.sections.emplace_back(section_topo(section_main, "Main"));
   result.sections.emplace_back(section_topo(section_pitch, "Pitch"));
   result.params.emplace_back(param_toggle("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", 1, 
@@ -60,36 +57,28 @@ osc_topo()
 }
 
 void
-osc_engine::process(
-  plugin_topo const& topo, plugin_block const& plugin, module_block& module)
+osc_engine::process(plugin_topo const& topo, module_block& block)
 {
-  if(module.in.block()[param_on][0].step() == 0) return;
-  int oct = module.in.block()[param_oct][0].step();
-  int note = module.in.block()[param_note][0].step();
-  int type = module.in.block()[param_type][0].step();
-  auto const& bal = module.in.accurate()[param_bal][0];
-  auto const& cent = module.in.accurate()[param_cent][0];
-  auto const& gain = module.in.accurate()[param_gain][0];
+  if(block.block_automation[param_on][0].step() == 0) return;
+  int oct = block.block_automation[param_oct][0].step();
+  int note = block.block_automation[param_note][0].step();
+  int type = block.block_automation[param_type][0].step();
+  auto const& bal = block.accurate_automation[param_bal][0];
+  auto const& cent = block.accurate_automation[param_cent][0];
+  auto const& gain = block.accurate_automation[param_gain][0];
 
   float sample;
-  for (int f = 0; f < plugin.host->frame_count; f++)
+  for (int f = 0; f < block.host.frame_count; f++)
   {
     switch (type)
     {
-    case type_saw: 
-      sample = _phase * 2 - 1; 
-      break;
-    case type_sine: 
-      sample = std::sin(_phase * 2 * pi32); 
-      break;
-    default: 
-      assert(false); 
-      sample = 0; 
-      break;
+    case type_saw: sample = _phase * 2 - 1; break;
+    case type_sine: sample = std::sin(_phase * 2 * pi32); break;
+    default: assert(false); sample = 0; break;
     }
-    module.out.audio()[0][f] = sample * gain[f] * balance(0, bal[f]);
-    module.out.audio()[1][f] = sample * gain[f] * balance(1, bal[f]);
-    _phase += note_to_frequency(oct, note, cent[f], module.in.voice->key) / plugin.sample_rate;
+    module.audio_out[0][f] = sample * gain[f] * balance(0, bal[f]);
+    module.audio_out[1][f] = sample * gain[f] * balance(1, bal[f]);
+    _phase += note_to_frequency(oct, note, cent[f], module.voice->state.id.key) / module.sample_rate;
     _phase -= std::floor(_phase);
   }
 }

@@ -17,7 +17,7 @@ struct host_block;
 // single module audio processors
 class module_engine { 
 public: 
-  virtual void process(plugin_topo const& topo, module_block& block) = 0;
+  virtual void process(process_block& block) = 0;
 };
 
 // global plugin audio processor

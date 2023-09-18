@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
@@ -7,34 +8,42 @@
 
 namespace plugin_base {
 
+struct plugin_topo;
+
 // single output module process call
-struct output_module_block final {
+struct out_process_block final {
   float* const* host_audio;
-  jarray<plain_value, 2>& output_params;
+  jarray<plain_value, 2>& out_params;
   jarray<float, 2> const& voices_mixdown;
+  INF_DECLARE_MOVE_ONLY(out_process_block);
 };
 
 // single per-voice module process call
-struct voice_module_block final {
+struct voice_process_block final {
   voice_state const& state;
   jarray<float, 2>& voice_result;
   jarray<float, 3> const& voice_cv_in;
   jarray<float, 4> const& voice_audio_in;
+  INF_DECLARE_MOVE_ONLY(voice_process_block);
 };
 
 // single module process call
-struct module_block {
+struct process_block final {
   float sample_rate;
+  out_process_block* out;
   common_block const& host;
-  voice_module_block* voice;
-  output_module_block* output;
+  plugin_desc const& plugin;
+  module_desc const& module;
+  voice_process_block* voice;
   jarray<float, 1>& cv_out;
   jarray<float, 2>& audio_out;
   jarray<float, 3> const& global_cv_in;
   jarray<float, 4> const& global_audio_in;
   jarray<float, 3> const& accurate_automation;
   jarray<plain_value, 2> const& block_automation;
-};
 
+  INF_DECLARE_MOVE_ONLY(process_block);
+  void set_out_param(int param, int slot, double raw);
+};
 
 }

@@ -13,10 +13,7 @@ class delay_engine:
 public module_engine {
 public:
   INF_DECLARE_MOVE_ONLY(delay_engine);
-  void process(
-    plugin_topo const& topo, 
-    plugin_block const& plugin, 
-    module_block& module) override;
+  void process(process_block& block) override;
 };
 
 enum { section_main };
@@ -26,7 +23,7 @@ module_topo
 delay_topo()
 {
   module_topo result(make_module("{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Delay", 1, 
-    module_scope::global, module_output::none));
+    module_stage::output, module_output::none));
   result.sections.emplace_back(section_topo(section_main, "Main"));
   result.params.emplace_back(param_toggle("{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, 
     section_main, param_dir::input, param_label::both, false));
@@ -37,23 +34,22 @@ delay_topo()
 }
 
 void
-delay_engine::process(
-  plugin_topo const& topo, plugin_block const& plugin, module_block& module)
+delay_engine::process(process_block& block)
 {
   float max_out = 0.0f;
-  // TODO only active voices
-  for(int v = 0; v < topo.polyphony; v++)
-    for(int c = 0; c < 2; c++)
-      for(int f = 0; f < plugin.host->frame_count; f++)
-      {
-        module.out.host->audio[c][f] += plugin.voices_audio_out[v][c][f];
-        max_out = std::max(max_out, module.out.host->audio[c][f]);
-      }
+  for(int c = 0; c < 2; c++)
+    for(int f = 0; f < block.host.frame_count; f++)
+    {
+      block.out->host_audio[c][f] += block.out->voices_mixdown[c][f];
+      max_out = std::max(max_out, block.out->host_audio[c][f]);
+    }
 
-  if (module.in.block()[param_on][0].step() == 0) return;
+  if (block.block_automation[param_on][0].step() == 0) return;
+
+
   auto const& param = topo.modules[module_delay].params[param_out_gain];
   plain_value out_gain = param.raw_to_plain(std::clamp(std::abs(max_out), 0.0f, 1.0f));
-  module.out.host->params()[param_out_gain][0] = out_gain;
+  block.out->output_params[param_out_gain][0] = out_gain;
 }
 
 }
