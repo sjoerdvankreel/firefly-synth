@@ -4,7 +4,6 @@ antialias
 clap threadpool
 host context menu
 (polyphonic) modulation
-split stages to pre-voice-post + adjust data structures
 try out some airwindows stuff
 voice manager including voice-level unison
 manual automation interpolation/zipper noise
