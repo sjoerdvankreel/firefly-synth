@@ -45,7 +45,7 @@ delay_engine::process(process_block& block)
     }
 
   if (block.block_automation[param_on][0].step() == 0) return;
-  block.set_out_param(param_out_gain, 0, std::clamp(max_out, 0.0f, 1.0f));
+  block.set_out_param(param_on, 0, std::clamp(max_out, 0.0f, 1.0f));
 }
 
 }

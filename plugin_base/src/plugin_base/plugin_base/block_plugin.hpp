@@ -44,7 +44,7 @@ struct process_block final {
 
   INF_DECLARE_MOVE_ONLY(process_block);
   void set_out_param(int param, int slot, double raw)
-  { out->params[param][slot] = module.params[param].topo->raw_to_plain(raw); }
+  { out->params[param][slot] = module.params[param].param->raw_to_plain(raw); }
 };
 
 }

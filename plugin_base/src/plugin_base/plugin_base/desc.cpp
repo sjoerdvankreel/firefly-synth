@@ -93,7 +93,7 @@ validate_frame_dims(
     {
       auto const& module = plugin.modules[m];
       bool is_cv = module.output == module_output::cv;
-      bool is_voice = module.scope == module_scope::voice;
+      bool is_voice = module.stage == module_stage::voice;
       bool is_audio = module.output == module_output::audio;
       int cv_frames = is_cv && is_voice ? frame_count : 0;
       int audio_frames = is_audio && is_voice ? frame_count : 0;
@@ -118,8 +118,8 @@ validate_frame_dims(
   {
     auto const& module = plugin.modules[m];
     bool is_cv = module.output == module_output::cv;
+    bool is_global = module.stage != module_stage::voice;
     bool is_audio = module.output == module_output::audio;
-    bool is_global = module.scope == module_scope::global;
     int cv_frames = is_cv && is_global ? frame_count : 0;
     int audio_frames = is_audio && is_global ? frame_count : 0;
     (void)cv_frames;
@@ -444,8 +444,8 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     {
       auto const& module = plugin.modules[m];
       bool is_cv = module.output == module_output::cv;
+      bool is_voice = module.stage == module_stage::voice;
       bool is_audio = module.output == module_output::audio;
-      bool is_voice = module.scope == module_scope::voice;
       int cv_frames = is_cv && is_voice ? frame_count : 0;
       int audio_frames = is_audio && is_voice ? frame_count : 0;
       module_voice_audio[v].emplace_back();
@@ -459,8 +459,8 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
   {
     auto const& module = plugin.modules[m];
     bool is_cv = module.output == module_output::cv;
+    bool is_global = module.stage != module_stage::voice;
     bool is_audio = module.output == module_output::audio;
-    bool is_global = module.scope == module_scope::global;
     int cv_frames = is_cv && is_global ? frame_count : 0;
     int audio_frames = is_audio && is_global ? frame_count : 0;
     module_global_audio.emplace_back();
