@@ -18,7 +18,7 @@ synth_topo()
   result->gui_default_width = 800;
   result->gui_aspect_ratio = 4.0f / 3.0f;
   result->modules.emplace_back(osc_topo());
-  result->modules.emplace_back(filter_topo());
+  result->modules.emplace_back(filter_topo(result->modules[module_osc].slot_count));
   result->modules.emplace_back(delay_topo());
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
