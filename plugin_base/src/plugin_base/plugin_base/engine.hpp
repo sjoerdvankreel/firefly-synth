@@ -26,10 +26,10 @@ class plugin_engine final {
   plugin_desc const _desc;
   plugin_dims const _dims; 
   float _sample_rate = {};
-  common_block _common_block = {};
   jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
-  jarray<float, 3> _voices_results = {};
+  jarray<float, 2> _voices_mixdown = {};
+  jarray<float, 3> _voice_results = {};
   jarray<float, 4> _voice_cv_state = {};
   jarray<float, 3> _global_cv_state = {};
   jarray<float, 5> _voice_audio_state = {};
