@@ -153,39 +153,44 @@ plugin_engine::process()
   }
 
   // clear audio outputs
-  // TODO only active voices
   for (int c = 0; c < 2; c++)
   {
     std::fill(_host_block->audio_out[c], _host_block->audio_out[c] + frame_count, 0.0f);
     std::fill(_voices_mixdown[c].begin(), _voices_mixdown[c].begin() + frame_count, 0.0f);
     for (int v = 0; v < _voice_results.size(); v++)
-      std::fill(_voice_results[v][c].begin(), _voice_results[v][c].begin() + frame_count, 0.0f);
+      if(_voice_states[v].active)
+        std::fill(_voice_results[v][c].begin(), _voice_results[v][c].begin() + frame_count, 0.0f);
   }
 
   // clear module cv/audio out
-  // TODO only active voices
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
       if(module.output == module_output::cv)
         if(module.stage != module_stage::voice)
+        {
           std::fill(_global_cv_state[m][mi].begin(), 
                     _global_cv_state[m][mi].begin() + frame_count, 0.0f);
-        else
+        } else {
           for (int v = 0; v < _voice_states.size(); v++)
-            std::fill(_voice_cv_state[v][m][mi].begin(), 
-                      _voice_cv_state[v][m][mi].begin() + frame_count, 0.0f);
+            if(_voice_states[v].active)
+              std::fill(_voice_cv_state[v][m][mi].begin(), 
+                        _voice_cv_state[v][m][mi].begin() + frame_count, 0.0f);
+        }
       else if (module.output == module_output::audio)
         if (module.stage != module_stage::voice)
+        {
           for(int c = 0; c < 2; c++)
             std::fill(_global_audio_state[m][mi][c].begin(), 
                      _global_audio_state[m][mi][c].begin() + frame_count, 0.0f);
-          else 
-            for (int v = 0; v < _voice_states.size(); v++)
-              for (int c = 0; c < 2; c++)
-                std::fill(_voice_audio_state[v][m][mi][c].begin(), 
-                          _voice_audio_state[v][m][mi][c].begin() + frame_count, 0.0f);
+        } else {
+           for (int v = 0; v < _voice_states.size(); v++)
+             if (_voice_states[v].active)
+               for (int c = 0; c < 2; c++)
+                 std::fill(_voice_audio_state[v][m][mi][c].begin(), 
+                           _voice_audio_state[v][m][mi][c].begin() + frame_count, 0.0f);
+        }
       else
         assert(module.output == module_output::none);
   }
