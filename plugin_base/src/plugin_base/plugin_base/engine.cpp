@@ -126,16 +126,6 @@ plugin_engine::process()
 {
   int frame_count = _host_block->common.frame_count;
 
-  // clear host audio out
-  for(int c = 0; c < 2; c++)
-    std::fill(_host_block->audio_out[c], _host_block->audio_out[c] + frame_count, 0.0f);
-
-  // clear voices audio out 
-  // TODO only active voices
-  for(int v = 0; v < _voice_results.size(); v++)
-    for(int c = 0; c < 2; c++)
-      std::fill(_voice_results[v][c].begin(), _voice_results[v][c].begin() + frame_count, 0.0f);
-
   // take voices starting this block, grab oldest when out
   // TODO monophonic portamento
   for (int e = 0; e < _host_block->events.notes.size(); e++)
@@ -160,6 +150,16 @@ plugin_engine::process()
     state.active = true;
     state.velocity = event.velocity;
     state.time = _host_block->common.stream_time + event.frame;
+  }
+
+  // clear audio outputs
+  // TODO only active voices
+  for (int c = 0; c < 2; c++)
+  {
+    std::fill(_host_block->audio_out[c], _host_block->audio_out[c] + frame_count, 0.0f);
+    std::fill(_voices_mixdown[c].begin(), _voices_mixdown[c].begin() + frame_count, 0.0f);
+    for (int v = 0; v < _voice_results.size(); v++)
+      std::fill(_voice_results[v][c].begin(), _voice_results[v][c].begin() + frame_count, 0.0f);
   }
 
   // clear module cv/audio out
@@ -260,14 +260,16 @@ plugin_engine::process()
       }
   }
 
-  // run all modules in order
-  // TODO threadpool
+  // run input modules in order
   for (int m = 0; m < _desc.module_voice_start; m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
       process_block block(make_process_block(m, mi, -1));
       _input_engines[m][mi]->process(block);
     }
+
+  // run voice modules in order
+  // TODO threadpool
   for (int v = 0; v < _voice_states.size(); v++)
     if (_voice_states[v].active)
       for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
@@ -283,6 +285,15 @@ plugin_engine::process()
           block.voice = &voice_block;
           _voice_engines[v][m][mi]->process(block);
         }
+
+  // combine voices output
+  for (int v = 0; v < _voice_states.size(); v++)
+    if (_voice_states[v].active)
+      for(int c = 0; c < 2; c++)
+        for(int f = 0; f < frame_count; f++)
+          _voices_mixdown[c][f] += _voice_results[v][c][f];
+
+  // combine output modules in order
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
