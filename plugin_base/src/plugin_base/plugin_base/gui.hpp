@@ -39,8 +39,8 @@ public juce::Component
   void state_loaded();
   template <class T, class... U> T& make_component(U&&... args);
 
-  void add_sections(juce::GroupComponent& group, module_topo const& module);
   void add_module_slots(module_topo const& module, module_desc const* slots);
+  void add_sections(juce::GroupComponent& container, module_topo const& module);
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);

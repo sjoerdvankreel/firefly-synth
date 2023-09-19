@@ -345,9 +345,17 @@ plugin_gui::make_component(U&&... args)
 }
 
 void 
-plugin_gui::add_sections(GroupComponent& group, module_topo const& module)
+plugin_gui::add_sections(GroupComponent& container, module_topo const& module)
 {
-
+  auto& grid = make_component<grid_component>(module.dimension);
+  container.addAndMakeVisible(grid);
+  for (int s = 0; s < module.sections.size(); s++)
+  {
+    auto const& section = module.sections[s];
+    auto& group = make_component<GroupComponent>();
+    group.setText(section.name);
+    grid.add(group, section.position);
+  }
 }
 
 void 
