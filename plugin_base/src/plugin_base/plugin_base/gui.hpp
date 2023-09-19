@@ -29,8 +29,8 @@ public:
 class plugin_gui:
 public juce::Component
 {
+  grid_component* _grid = {};
   plugin_desc const* const _desc;
-  std::unique_ptr<grid_component> _grid = {};
   std::vector<ui_listener*> _ui_listeners = {};
   jarray<plain_value, 4>* const _ui_state = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};

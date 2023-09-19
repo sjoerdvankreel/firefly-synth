@@ -213,47 +213,40 @@ param_base(gui, desc), Slider()
 class grid_component:
 public Component
 {
-  struct dims { int x; int y; int w; int h; };
-  int const _rows;
-  int const _columns;
-  std::vector<dims> _dims = {};
+  gui_dimension const _dimension;
+  std::vector<gui_position> _positions = {};
 
 public:
-  grid_component(int rows, int columns): 
-  _rows(rows), _columns(columns) {}
-
   void resized() override;
-  void add(Component& child, int row, int column, int row_span, int column_span);
-  void add(Component& child, int row, int column) { add(child, row, column, 1, 1); }
+  void add(Component& child, gui_position const& position);
+  grid_component(gui_dimension const& dimension): _dimension(dimension) {}
 };
+
+void
+grid_component::add(Component& child, gui_position const& position)
+{
+  addAndMakeVisible(child);
+  _positions.push_back(position);
+}
 
 void 
 grid_component::resized()
 {
   Grid grid;
-  for(int i = 0; i < _rows; i++) 
+  for(int i = 0; i < _dimension.rows; i++)
     grid.templateRows.add(Grid::Fr(1));
-  for(int i = 0; i < _columns; i++) 
+  for(int i = 0; i < _dimension.columns; i++) 
     grid.templateColumns.add(Grid::Fr(1));
-  for (int i = 0; i < _dims.size(); i++)
+  for (int i = 0; i < _positions.size(); i++)
   {
     GridItem item(getChildComponent(i));
-    item.row.start = _dims[i].y + 1;
-    item.row.end = _dims[i].y + 1 + _dims[i].h;
-    item.column.start = _dims[i].x + 1;
-    item.column.end = _dims[i].x + 1 + _dims[i].w;
+    item.row.start = _positions[i].row + 1;
+    item.row.end = _positions[i].row + 1 + _positions[i].row_span;
+    item.column.start = _positions[i].column + 1;
+    item.column.end = _positions[i].column + 1 + _positions[i].column_span;
     grid.items.add(item);
   }
   grid.performLayout(getLocalBounds());
-}
-
-void 
-grid_component::add(Component& child, int row, int column, int row_span, int column_span)
-{
-  addAndMakeVisible(child);
-  assert(0 <= row && row + row_span <= _rows);
-  assert(0 <= column && column + column_span <= _columns);
-  _dims.push_back({ row, column, row_span, column_span });
 }
 
 // main plugin gui
@@ -323,14 +316,16 @@ plugin_gui::state_loaded()
 
 plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
-_desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count),
-_grid(std::make_unique<grid_component>(desc->plugin->gui_grid_rows, desc->plugin->gui_grid_columns))
+_desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
-  setOpaque(true);
   auto const& topo = *_desc->plugin;
+  setOpaque(true);
   setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
+  _grid = &make_component<grid_component>(topo.dimension.rows, topo.dimension.columns);
+  addAndMakeVisible(_grid);
   for (int m = 0; m < _desc->modules.size(); m++)
     add_module(_desc->modules[m]);
+  resized();
 }
 
 template <class T, class... U> T& 
@@ -347,7 +342,7 @@ plugin_gui::add_module(module_desc const& desc)
 {
   auto& group = make_component<GroupComponent>();
   group.setText(desc.name);
-  addAndMakeVisible(group);
+  _grid->add(group, desc.module->position);
 }
 
 }
