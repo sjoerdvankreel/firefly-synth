@@ -9,6 +9,8 @@
 
 namespace plugin_base {
 
+class grid_component;
+
 class plugin_listener
 {
 public:
@@ -28,18 +30,20 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const* const _desc;
+  std::unique_ptr<grid_component> _grid = {};
   std::vector<ui_listener*> _ui_listeners = {};
   jarray<plain_value, 4>* const _ui_state = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
-  std::vector<std::unique_ptr<juce::Component>> _children = {}; // must be destructed first
+  std::vector<std::unique_ptr<juce::Component>> _components = {}; // must be destructed first
 
   void state_loaded();
+  void add_module(module_desc const& module);
+  template <class T, class... U> T& make_component(U&&... args);
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
   plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state);
 
-  void resized() override;
   void paint(juce::Graphics& g) override 
   { g.fillAll(juce::Colours::black); }
 

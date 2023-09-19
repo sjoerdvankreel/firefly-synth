@@ -34,25 +34,47 @@ enum { param_on, param_type, param_gain, param_bal, param_oct, param_note, param
 module_topo
 osc_topo()
 {
-  module_topo result(make_module("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, 
-    module_stage::voice, module_output::audio));
-  result.sections.emplace_back(section_topo(section_main, "Main"));
-  result.sections.emplace_back(section_topo(section_pitch, "Pitch"));
-  result.params.emplace_back(param_toggle("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", 1, 
-    section_main, param_dir::input, param_label::both, false));
-  result.params.emplace_back(param_items("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", 1, 
-    section_main, param_dir::input, param_edit::list, param_label::both, type_items(), "Saw"));
-  result.params.emplace_back(param_pct("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", 1, 
-    section_main, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, true, 0, 1, 1));
-  result.params.emplace_back(param_pct("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", 1, 
-    section_pitch, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, true, -1, 1, 0));
-  result.params.emplace_back(param_steps("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", 1, 
-    section_pitch, param_dir::input, param_edit::list, param_label::both, 0, 9, 4));
-  result.params.emplace_back(param_names("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, 
-    section_pitch, param_dir::input, param_edit::text, param_label::both, note_names(), "C"));
-  result.params.emplace_back(param_pct("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", 1, 
-    section_pitch, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, false, -1, 1, 0));
-  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
+  module_topo result(make_module(
+    "{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, 
+    module_stage::voice, module_output::audio, 
+    gui_layout::vertical, gui_position { 0, 0 }, gui_dimension { 2, 1 }));
+  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
+    return std::make_unique<osc_engine>(); };
+
+  result.sections.emplace_back(make_section(
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 3 }));
+  result.params.emplace_back(param_toggle(
+    "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", 1, 
+    section_main, param_dir::input, param_label::both, false,
+    gui_layout::default_, gui_position { 0, 0 }));
+  result.params.emplace_back(param_items(
+    "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", 1, 
+    section_main, param_dir::input, param_edit::list, param_label::both, type_items(), "Saw",
+    gui_layout::default_, gui_position{ 0, 1 }));
+  result.params.emplace_back(param_pct(
+    "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", 1, 
+    section_main, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, true, 0, 1, 1,
+    gui_layout::default_, gui_position { 0, 2 }));
+
+  result.sections.emplace_back(make_section(
+    "Pitch", section_pitch, gui_position{ 1, 0 }, gui_dimension { 1, 4 }));
+  result.params.emplace_back(param_pct(
+    "{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", 1, 
+    section_pitch, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, true, -1, 1, 0,
+    gui_layout::default_, gui_position { 0, 0 }));
+  result.params.emplace_back(param_steps(
+    "{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", 1, 
+    section_pitch, param_dir::input, param_edit::list, param_label::both, 0, 9, 4,
+    gui_layout::default_, gui_position { 0, 1 }));
+  result.params.emplace_back(param_names(
+    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, 
+    section_pitch, param_dir::input, param_edit::text, param_label::both, note_names(), "C",
+    gui_layout::default_, gui_position { 0, 2 }));
+  result.params.emplace_back(param_pct(
+    "{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", 1, 
+    section_pitch, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, false, -1, 1, 0,
+    gui_layout::default_, gui_position { 0, 3 }));
+
   return result;
 }
 

@@ -10,9 +10,11 @@
 
 namespace plugin_base {
 
-enum class plugin_type { synth, fx };
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
+
+enum class plugin_type { synth, fx };
+enum class gui_layout { default_, horizontal, vertical, tabbed };
 
 enum class param_dir { input, output };
 enum class param_rate { accurate, block };
@@ -25,6 +27,20 @@ class module_engine;
 typedef std::unique_ptr<module_engine>(*
 module_engine_factory)(int sample_rate, int max_frame_count);
 
+// dimensions of own grid
+struct gui_dimension final {
+  int rows;
+  int columns;
+};
+
+// position in parent grid
+struct gui_position final {
+  int row;
+  int row_span; 
+  int column;
+  int column_span;
+};
+
 // item in list
 struct item_topo final {
   std::string id;
@@ -33,6 +49,16 @@ struct item_topo final {
   INF_DECLARE_MOVE_ONLY(item_topo);
   item_topo(std::string const& id, std::string const& name): 
   id(id), name(name) {}
+};
+
+// param gui section
+struct section_topo final {
+  int section;
+  std::string name;
+  gui_position position;
+  gui_dimension dimension;
+
+  INF_DECLARE_MOVE_ONLY(section_topo);
 };
 
 // param group in module
@@ -46,12 +72,16 @@ struct param_topo final {
   std::string name;
   std::string unit;
   std::string default_;
+
   param_dir dir;
   param_type type;
   param_rate rate;
   param_edit edit;
   param_label label;
   param_display display;
+
+  gui_layout layout;
+  gui_position position;
   std::vector<item_topo> items;
   std::vector<std::string> names;
 
@@ -78,16 +108,6 @@ struct param_topo final {
   normalized_value default_normalized() const { return plain_to_normalized(default_plain()); }
 };
 
-// gui section
-struct section_topo final {
-  int section;
-  std::string name;
-
-  INF_DECLARE_MOVE_ONLY(section_topo);
-  section_topo(int section, std::string const& name):
-  section(section), name(name) {}
-};
-
 // module group in plugin
 struct module_topo final {
   int slot_count;
@@ -95,10 +115,14 @@ struct module_topo final {
   std::string name;
   module_stage stage;
   module_output output;
+
+  gui_layout layout;
+  gui_position position;
+  gui_dimension dimension;
   std::vector<param_topo> params;
   std::vector<section_topo> sections;
-  module_engine_factory engine_factory;
 
+  module_engine_factory engine_factory;
   INF_DECLARE_MOVE_ONLY(module_topo);
 };
 
@@ -110,9 +134,11 @@ struct plugin_topo final {
   plugin_type type;
   int version_major;
   int version_minor;
+
   int gui_min_width;
   int gui_default_width;
   float gui_aspect_ratio;
+  gui_dimension dimension;
   std::vector<module_topo> modules;
 
   INF_DECLARE_MOVE_ONLY(plugin_topo);

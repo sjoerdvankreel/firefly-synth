@@ -13,3 +13,5 @@ adsr env
 linux, renoise, bitwig, cbb
 rename v2.0 to 2
 preset extension
+validate gui slot not taken
+tryout varying osc slot count

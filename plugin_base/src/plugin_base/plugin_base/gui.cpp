@@ -8,6 +8,16 @@ using namespace juce;
 
 namespace plugin_base {
 
+void 
+ui_listener::ui_changed(int index, plain_value plain)
+{
+  ui_begin_changes(index);
+  ui_changing(index, plain);
+  ui_end_changes(index);
+}
+
+// control types bound to a parameter topo & plugin value
+
 class param_base:
 public plugin_listener
 {
@@ -198,14 +208,55 @@ param_base(gui, desc), Slider()
   plugin_changed(initial);
 }
 
+// grid component as opposed to grid layout
+
+class grid_component:
+public Component
+{
+  struct dims { int x; int y; int w; int h; };
+  int const _rows;
+  int const _columns;
+  std::vector<dims> _dims = {};
+
+public:
+  grid_component(int rows, int columns): 
+  _rows(rows), _columns(columns) {}
+
+  void resized() override;
+  void add(Component& child, int row, int column, int row_span, int column_span);
+  void add(Component& child, int row, int column) { add(child, row, column, 1, 1); }
+};
 
 void 
-ui_listener::ui_changed(int index, plain_value plain)
+grid_component::resized()
 {
-  ui_begin_changes(index);
-  ui_changing(index, plain);
-  ui_end_changes(index);
+  Grid grid;
+  for(int i = 0; i < _rows; i++) 
+    grid.templateRows.add(Grid::Fr(1));
+  for(int i = 0; i < _columns; i++) 
+    grid.templateColumns.add(Grid::Fr(1));
+  for (int i = 0; i < _dims.size(); i++)
+  {
+    GridItem item(getChildComponent(i));
+    item.row.start = _dims[i].y + 1;
+    item.row.end = _dims[i].y + 1 + _dims[i].h;
+    item.column.start = _dims[i].x + 1;
+    item.column.end = _dims[i].x + 1 + _dims[i].w;
+    grid.items.add(item);
+  }
+  grid.performLayout(getLocalBounds());
 }
+
+void 
+grid_component::add(Component& child, int row, int column, int row_span, int column_span)
+{
+  addAndMakeVisible(child);
+  assert(0 <= row && row + row_span <= _rows);
+  assert(0 <= column && column + column_span <= _columns);
+  _dims.push_back({ row, column, row_span, column_span });
+}
+
+// main plugin gui
 
 void 
 plugin_gui::ui_changed(int index, plain_value plain)
@@ -270,137 +321,33 @@ plugin_gui::state_loaded()
   }
 }
 
-// TODO ! un-uglify it from here
-
 plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
-_desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
+_desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count),
+_grid(std::make_unique<grid_component>(desc->plugin->gui_grid_rows, desc->plugin->gui_grid_columns))
 {
   setOpaque(true);
-  setSize(_desc->plugin->gui_default_width, _desc->plugin->gui_default_width / _desc->plugin->gui_aspect_ratio);
+  auto const& topo = *_desc->plugin;
+  setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
   for (int m = 0; m < _desc->modules.size(); m++)
-  {
-    auto const& module = _desc->modules[m];
-    for (int p = 0; p < module.params.size(); p++)
-    {
-      auto const& param = module.params[p];
-      plain_value initial_value = (*_ui_state)[module.topo][module.slot][param.topo][param.slot];
-      if(param.param->edit == param_edit::toggle)
-      {
-        _children.emplace_back(std::make_unique<param_toggle_button>(this, &param, initial_value));
-        addAndMakeVisible(_children[_children.size() - 1].get());
-      }
-      else if (param.param->edit == param_edit::list)
-      {
-        _children.emplace_back(std::make_unique<param_combobox>(this, &param, initial_value));
-        addAndMakeVisible(_children[_children.size() - 1].get());
-      }
-      else if (param.param->edit == param_edit::text)
-      {
-        _children.emplace_back(std::make_unique<param_textbox>(this, &param, initial_value));
-        addAndMakeVisible(_children[_children.size() - 1].get());
-      }
-      else
-      {
-        _children.emplace_back(std::make_unique<param_slider>(this, &param, initial_value));
-        addAndMakeVisible(_children[_children.size() - 1].get());
-      }
-      _children[_children.size()-1]->setEnabled(param.param->dir == param_dir::input);
+    add_module(_desc->modules[m]);
+}
 
-      if(param.param->label == param_label::none)
-      {
-        _children.emplace_back(std::make_unique<Label>());
-        addAndMakeVisible(_children[_children.size() - 1].get());
-      }
-      else if (param.param->label == param_label::name)
-      {
-        _children.emplace_back(std::make_unique<param_name_label>(&param));
-        addAndMakeVisible(_children[_children.size() - 1].get());
-      }
-      else
-      {
-        _children.emplace_back(std::make_unique<param_value_label>(this, &param, initial_value));
-        addAndMakeVisible(_children[_children.size() - 1].get());
-      }
-    }
-  }
-  _children.emplace_back(std::make_unique<TextButton>());
-  addAndMakeVisible(_children[_children.size() - 1].get());
-  ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Load");
-  ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    auto chooser = std::make_shared<FileChooser>("Save");
-    chooser->launchAsync(FileBrowserComponent::openMode, [this, chooser](FileChooser const&) {
-      plugin_io io(_desc);
-      std::string message;
-      std::string path = chooser->getResult().getFullPathName().toStdString();
-      if(path.empty()) return;
-      auto result = io.load_file(path, *_ui_state);
-      message += "error: " + result.error + "\r\n";
-      for(int i = 0; i < result.warnings.size(); i++)
-        message += "warn: " + result.warnings[i] + "\r\n";
-      MessageBoxOptions options = MessageBoxOptions().withMessage(String(message)).withTitle("RESULT").withButton("OK");
-      AlertWindow::showAsync(options, [this, result](int){
-        if(result.ok()) state_loaded();
-      });
-    });
-  };
-  _children.emplace_back(std::make_unique<TextButton>());
-  addAndMakeVisible(_children[_children.size() - 1].get());
-  ((TextButton*)_children[_children.size() - 1].get())->setButtonText("Save");
-  ((TextButton*)_children[_children.size() - 1].get())->onClick = [this]() {
-    auto chooser = std::make_shared<FileChooser>("Save");
-    chooser->launchAsync(FileBrowserComponent::saveMode, [this, chooser](FileChooser const&) {
-      plugin_io io(_desc);
-      std::string path = chooser->getResult().getFullPathName().toStdString();
-      if(!path.empty()) io.save_file(path, *_ui_state);
-    });
-  };
-  resized();
+template <class T, class... U> T& 
+plugin_gui::make_component(U&&... args) 
+{
+  auto component = std::make_unique<T>(std::forward<U>(args)...);
+  T* result = component.get();
+  _components.emplace_back(std::move(component));
+  return *result;
 }
 
 void 
-plugin_gui::resized()
+plugin_gui::add_module(module_desc const& desc)
 {
-  Grid grid;
-  int c = 0;
-  grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
-  grid.templateRows.add(Grid::TrackInfo(Grid::Fr(1)));
-  for (int m = 0; m < _desc->modules.size(); m++)
-  {
-    auto const& module = _desc->modules[m];
-    for (int p = 0; p < module.params.size(); p++)
-    {
-      grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
-      GridItem edit_item(getChildComponent(c * 2));
-      edit_item.row.end = 2;
-      edit_item.row.start = 1;
-      edit_item.column.start = c + 1;
-      edit_item.column.end = c + 2;
-      grid.items.add(edit_item);
-      GridItem label_item(getChildComponent(c * 2 + 1));
-      label_item.row.end = 3;
-      label_item.row.start = 2;
-      label_item.column.start = c + 1;
-      label_item.column.end = c + 2;
-      grid.items.add(label_item);
-      c++;
-    }
-  } 
-  grid.templateColumns.add(Grid::TrackInfo(Grid::Fr(1)));
-  GridItem load_item(getChildComponent(getChildren().size() - 2));
-  load_item.row.end = 2;
-  load_item.row.start = 1;
-  load_item.column.start = c + 1;
-  load_item.column.end = c + 2;
-  grid.items.add(load_item);
-  GridItem save_item(getChildComponent(getChildren().size() - 1));
-  save_item.row.end = 3;
-  save_item.row.start = 2;
-  save_item.column.start = c + 1;
-  save_item.column.end = c + 2;
-  grid.items.add(save_item);
-  c++;
-  grid.performLayout(getLocalBounds());
+  auto& group = make_component<GroupComponent>();
+  group.setText(desc.name);
+  addAndMakeVisible(group);
 }
 
 }
