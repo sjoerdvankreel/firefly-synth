@@ -29,7 +29,7 @@ filter_topo(int osc_slot_count)
   module_topo result(make_module(
     "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, 
     module_stage::voice, module_output::none,
-    gui_layout::default_, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
+    gui_layout::default_, gui_position { 2, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
     return std::make_unique<filter_engine>(); };
 
@@ -46,7 +46,7 @@ filter_topo(int osc_slot_count)
   result.params.emplace_back(param_pct(
     "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", osc_slot_count,
     section_main, param_dir::input, param_edit::vslider, param_label::both, param_rate::accurate, true, 0, 1, 0.5,
-    gui_layout::horizontal, gui_position { 0, 2 }));
+    gui_layout::horizontal, gui_position { 0, 2, 1, osc_slot_count }));
 
   return result;
 }
