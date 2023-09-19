@@ -162,8 +162,8 @@ static void validate_gui_constraints(
     if(include(children[k]))
     {
       auto const& pos = children[k].position;
-      for (int r = pos.row; r < pos.row + pos.row_span; r++)
-        for (int c = pos.column; c < pos.column + pos.column_span; c++)
+      for (int r = pos.row; r < pos.row + pos.dimension.rows; r++)
+        for (int c = pos.column; c < pos.column + pos.dimension.columns; c++)
         {
           assert(gui_taken(r, c) == 0);
           gui_taken(r, c) = 1;
@@ -181,10 +181,10 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   assert(0 <= section.section && section.section < module.sections.size());
   assert(0 < section.dimension.rows && section.dimension.rows <= 1024);
   assert(0 < section.dimension.columns && section.dimension.columns <= 1024);
-  assert(0 < section.position.row_span && section.position.row_span <= 1024);
-  assert(0 < section.position.column_span && section.position.column_span <= 1024);
-  assert(0 <= section.position.row && section.position.row + section.position.row_span <= module.dimension.rows);
-  assert(0 <= section.position.column && section.position.column + section.position.column_span <= module.dimension.columns);
+  assert(0 < section.position.dimension.rows && section.position.dimension.rows <= 1024);
+  assert(0 < section.position.dimension.columns && section.position.dimension.columns <= 1024);
+  assert(0 <= section.position.row && section.position.row + section.position.dimension.rows <= module.dimension.rows);
+  assert(0 <= section.position.column && section.position.column + section.position.dimension.columns <= module.dimension.columns);
   validate_gui_constraints(section, module.params, [&section](param_topo const& p) { return p.section == section.section; });
 }
 
@@ -200,10 +200,10 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert((module.slot_count == 1) == (module.layout == gui_layout::default_));
   assert(0 < module.dimension.rows && module.dimension.rows <= 1024);
   assert(0 < module.dimension.columns && module.dimension.columns <= 1024);
-  assert(0 < module.position.row_span && module.position.row_span <= 1024);
-  assert(0 < module.position.column_span && module.position.column_span <= 1024);
-  assert(0 <= module.position.row && module.position.row + module.position.row_span <= plugin.dimension.rows);
-  assert(0 <= module.position.column && module.position.column + module.position.column_span <= plugin.dimension.columns);
+  assert(0 < module.position.dimension.rows && module.position.dimension.rows <= 1024);
+  assert(0 < module.position.dimension.columns && module.position.dimension.columns <= 1024);
+  assert(0 <= module.position.row && module.position.row + module.position.dimension.rows <= plugin.dimension.rows);
+  assert(0 <= module.position.column && module.position.column + module.position.dimension.columns <= plugin.dimension.columns);
   validate_gui_constraints(module, module.sections, [](auto const&) { return true; });
 }
 
@@ -253,10 +253,10 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(!param.is_real() || param.display == param_display::pct_no_unit || param.unit.size() > 0);
 
   assert((param.slot_count == 1) == (param.layout == gui_layout::default_));
-  assert(0 < param.position.row_span && param.position.row_span <= 1024);
-  assert(0 < param.position.column_span && param.position.column_span <= 1024);
-  assert(0 <= param.position.row && param.position.row + param.position.row_span <= module.sections[param.section].dimension.rows);
-  assert(0 <= param.position.column && param.position.column + param.position.column_span <= module.sections[param.section].dimension.columns);
+  assert(0 < param.position.dimension.rows && param.position.dimension.rows <= 1024);
+  assert(0 < param.position.dimension.columns && param.position.dimension.columns <= 1024);
+  assert(0 <= param.position.row && param.position.row + param.position.dimension.rows <= module.sections[param.section].dimension.rows);
+  assert(0 <= param.position.column && param.position.column + param.position.dimension.columns <= module.sections[param.section].dimension.columns);
 }
 
 static void

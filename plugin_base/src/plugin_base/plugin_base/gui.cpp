@@ -241,9 +241,9 @@ grid_component::resized()
   {
     GridItem item(getChildComponent(i));
     item.row.start = _positions[i].row + 1;
-    item.row.end = _positions[i].row + 1 + _positions[i].row_span;
     item.column.start = _positions[i].column + 1;
-    item.column.end = _positions[i].column + 1 + _positions[i].column_span;
+    item.row.end = _positions[i].row + 1 + _positions[i].dimension.rows;
+    item.column.end = _positions[i].column + 1 + _positions[i].dimension.columns;
     grid.items.add(item);
   }
   grid.performLayout(getLocalBounds());
@@ -366,16 +366,23 @@ plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots
   {
   case gui_layout::vertical:
   case gui_layout::horizontal:
+  {
+    bool is_vertical = module.layout == gui_layout::vertical;
+    int slow_rows = is_vertical ? module.slot_count : 1;
+    int slow_columns = is_vertical? 1: module.slot_count;
+    auto& slot_grid = make_component<grid_component>(gui_dimension { slow_rows, slow_columns });
     for (int i = 0; i < module.slot_count; i++)
     {
       auto& group = make_component<GroupComponent>();
       group.setText(slots[i].name);
       add_sections(group, *slots[i].module);
-      int row = module.position.row + (module.layout == gui_layout::vertical? i: 0);
-      int column = module.position.column + (module.layout == gui_layout::vertical ? 0: i);
-      _grid->add(group, { row, column, 1, 1 });
+      int row = (is_vertical? i: 0);
+      int column = (is_vertical ? 0: i);
+      slot_grid.add(group, { row, column, 1, 1 });
     }
+    _grid->add(slot_grid, module.position);
     break;
+  }
   default:
     assert(false);
     break;

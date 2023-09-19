@@ -29,16 +29,15 @@ module_engine_factory)(int sample_rate, int max_frame_count);
 
 // dimensions of own grid
 struct gui_dimension final {
-  int rows = -1;
-  int columns = -1;
+  int rows = 1;
+  int columns = 1;
 };
 
 // position in parent grid
 struct gui_position final {
   int row = -1;
   int column = -1;
-  int row_span = 1;
-  int column_span = 1;
+  gui_dimension dimension;
 };
 
 // item in list
