@@ -44,14 +44,14 @@ public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
   plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state);
 
-  void paint(juce::Graphics& g) override 
-  { g.fillAll(juce::Colours::black); }
-
   void ui_end_changes(int index);
   void ui_begin_changes(int index);
   void ui_changed(int index, plain_value plain);
   void ui_changing(int index, plain_value plain);
   void plugin_changed(int index, plain_value plain);
+
+  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
+  void resized() override { reinterpret_cast<juce::Component*>(_grid)->resized(); }
 
   void remove_ui_listener(ui_listener* listener);
   void remove_plugin_listener(int index, plugin_listener* listener);

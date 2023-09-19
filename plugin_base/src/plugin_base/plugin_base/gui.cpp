@@ -247,6 +247,8 @@ grid_component::resized()
     grid.items.add(item);
   }
   grid.performLayout(getLocalBounds());
+  for(int i = 0; i < _positions.size(); i++)
+    getChildComponent(i)->resized();
 }
 
 // main plugin gui
@@ -319,13 +321,13 @@ plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
 _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
   auto const& topo = *_desc->plugin;
-  setOpaque(true);
-  setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
   _grid = &make_component<grid_component>(topo.dimension);
+  setOpaque(true);
   addAndMakeVisible(_grid);
   for (int m = 0; m < _desc->modules.size(); m++)
     add_module(_desc->modules[m]);
-  resized();
+  setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
+  _grid->setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
 }
 
 template <class T, class... U> T& 
