@@ -37,8 +37,8 @@ public juce::Component
   std::vector<std::unique_ptr<juce::Component>> _components = {}; // must be destructed first
 
   void state_loaded();
-  void add_module(module_desc const& module);
   template <class T, class... U> T& make_component(U&&... args);
+  void add_module_slots(module_topo const& module, module_desc const* slots);
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);

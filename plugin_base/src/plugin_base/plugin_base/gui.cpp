@@ -320,12 +320,17 @@ plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
 _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
+  int mi = 0;
   auto const& topo = *_desc->plugin;
   _grid = &make_component<grid_component>(topo.dimension);
   setOpaque(true);
   addAndMakeVisible(_grid);
-  for (int m = 0; m < _desc->modules.size(); m++)
-    add_module(_desc->modules[m]);
+  for(int m = 0; m < _desc->plugin->modules.size(); m++)
+  {
+    auto const& module = _desc->plugin->modules[m];
+    add_module_slots(module, &_desc->modules[mi]);
+    mi += module.slot_count;
+  }
   setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
   _grid->setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
 }
@@ -340,11 +345,33 @@ plugin_gui::make_component(U&&... args)
 }
 
 void 
-plugin_gui::add_module(module_desc const& desc)
-{
-  auto& group = make_component<GroupComponent>();
-  group.setText(desc.name);
-  _grid->add(group, desc.module->position);
+plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots)
+{  
+  if (module.slot_count == 1)
+  {
+    auto& group = make_component<GroupComponent>();
+    group.setText(slots[0].name);
+    _grid->add(group, module.position);
+    return;
+  }
+
+  switch (module.layout)
+  {
+  case gui_layout::vertical:
+  case gui_layout::horizontal:
+    for (int s = 0; s < module.slot_count; s++)
+    {
+      auto& group = make_component<GroupComponent>();
+      group.setText(slots[s].name);
+      int row = module.position.row + (module.layout == gui_layout::vertical? s: 0);
+      int column = module.position.column + (module.layout == gui_layout::vertical ? 0: s);
+      _grid->add(group, { row, column, 1, 1 });
+    }
+    break;
+  default:
+    assert(false);
+    break;
+  }
 }
 
 }
