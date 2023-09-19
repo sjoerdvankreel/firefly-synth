@@ -154,6 +154,127 @@ validate_frame_dims(
 }
 
 static void
+validate_section_topo(module_topo const& module, section_topo const& section)
+{
+  assert(section.name.size());
+  assert(0 <= section.section && section.section < module.sections.size());
+  assert(0 < section.dimension.rows && section.dimension.rows <= 1024);
+  assert(0 < section.dimension.columns && section.dimension.columns <= 1024);
+  assert(0 < section.position.row_span && section.position.row_span <= 1024);
+  assert(0 < section.position.column_span && section.position.column_span <= 1024);
+  assert(0 <= section.position.row && section.position.row + section.position.row_span <= module.dimension.rows);
+  assert(0 <= section.position.column && section.position.column + section.position.column_span <= module.dimension.columns);
+}
+
+static void
+validate_module_topo(plugin_topo const& plugin, module_topo const& module)
+{
+  assert(module.id.size());
+  assert(module.name.size());
+  assert(module.params.size());
+  assert(module.slot_count > 0);
+  assert(module.engine_factory);
+  assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
+  assert((module.slot_count == 1) == (module.layout == gui_layout::default_));
+  assert(0 < module.dimension.rows && module.dimension.rows <= 1024);
+  assert(0 < module.dimension.columns && module.dimension.columns <= 1024);
+  assert(0 < module.position.row_span && module.position.row_span <= 1024);
+  assert(0 < module.position.column_span && module.position.column_span <= 1024);
+  assert(0 <= module.position.row && module.position.row + module.position.row_span <= plugin.dimension.rows);
+  assert(0 <= module.position.column && module.position.column + module.position.column_span <= plugin.dimension.columns);
+}
+
+static void
+validate_param_topo(module_topo const& module, param_topo const& param)
+{
+  assert(param.id.size());
+  assert(param.name.size());
+  assert(param.section >= 0);
+  assert(param.max > param.min);
+  assert(param.default_.size());
+  assert(param.section < module.sections.size());
+  assert(0 < param.slot_count && param.slot_count <= 1024);
+  assert(0 <= param.section && param.section < module.sections.size());
+
+  assert(param.type != param_type::log || param.exp != 0);
+  assert(param.type == param_type::log || param.exp == 0);
+  assert(param.dir != param_dir::output || param.rate == param_rate::block);
+  
+  assert(param.edit != param_edit::toggle || param.min == 0);
+  assert(param.edit != param_edit::toggle || param.max == 1);
+  assert(param.edit != param_edit::toggle || param.type == param_type::step);
+
+  assert(param.type == param_type::name || param.names.size() == 0);
+  assert(param.type != param_type::name || param.min == 0);
+  assert(param.type != param_type::name || param.names.size() > 0);
+  assert(param.type != param_type::name || param.unit.size() == 0);
+  assert(param.type != param_type::name || param.max == param.names.size() - 1);
+
+  assert(param.type == param_type::item || param.items.size() == 0);
+  assert(param.type != param_type::item || param.items.size() > 0);
+  assert(param.type != param_type::item || param.unit.size() == 0);
+  assert(param.type != param_type::item || param.min == 0);
+  assert(param.type != param_type::item || param.max == param.items.size() - 1);
+
+  assert(param.display != param_display::pct || param.unit == "%");
+  assert(param.display == param_display::normal || param.type == param_type::linear);
+
+  assert(param.is_real() || (int)param.min == param.min);
+  assert(param.is_real() || (int)param.max == param.max);
+  assert(param.is_real() || param.rate == param_rate::block);
+  assert(param.is_real() || param.display == param_display::normal);
+  assert(param.is_real() || param.min <= param.default_plain().step());
+  assert(param.is_real() || param.max >= param.default_plain().step());
+  assert(!param.is_real() || param.min <= param.default_plain().real());
+  assert(!param.is_real() || param.max >= param.default_plain().real());
+  assert(!param.is_real() || param.display == param_display::pct_no_unit || param.unit.size() > 0);
+
+  assert((param.slot_count == 1) == (param.layout == gui_layout::default_));
+  assert(0 < param.position.row_span && param.position.row_span <= 1024);
+  assert(0 < param.position.column_span && param.position.column_span <= 1024);
+  assert(0 <= param.position.row && param.position.row + param.position.row_span <= module.sections[param.section].dimension.rows);
+  assert(0 <= param.position.column && param.position.column + param.position.column_span <= module.sections[param.section].dimension.columns);
+}
+
+static void
+validate_plugin_topo(plugin_topo const& topo)
+{
+  std::set<std::string> param_ids;
+  std::set<std::string> module_ids;
+
+  assert(topo.id.size());
+  assert(topo.name.size());
+  assert(topo.modules.size());
+  assert(topo.version_major >= 0);
+  assert(topo.version_minor >= 0);
+  assert(topo.gui_default_width <= 3840);
+  assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
+
+  assert(0 < topo.dimension.rows && topo.dimension.rows <= 1024);
+  assert(0 < topo.dimension.columns && topo.dimension.columns <= 1024);
+  assert(0 < topo.gui_aspect_ratio && topo.gui_aspect_ratio <= 21.0 / 9.0);
+  assert(0 < topo.gui_min_width && topo.gui_min_width <= topo.gui_default_width);
+
+  int stage = 0;
+  for (int m = 0; m < topo.modules.size(); m++)
+  {
+    auto const& module = topo.modules[m];
+    assert((int)module.stage >= stage);
+    stage = (int)module.stage;
+
+    validate_module_topo(topo, module);
+    INF_ASSERT_EXEC(module_ids.insert(module.id).second);
+    for (int s = 0; s < module.sections.size(); s++)
+      validate_section_topo(module, module.sections[s]);
+    for (int p = 0; p < module.params.size(); p++)
+    {
+      validate_param_topo(module, module.params[p]);
+      INF_ASSERT_EXEC(param_ids.insert(module.params[p].id).second);
+    }
+  }
+}
+
+static void
 validate_module_desc(plugin_desc const& plugin_desc, module_desc const& desc)
 {
   assert(desc.module);
@@ -166,7 +287,7 @@ validate_module_desc(plugin_desc const& plugin_desc, module_desc const& desc)
   assert(0 <= desc.topo && desc.topo < plugin_desc.plugin->modules.size());
 }
 
-static void 
+static void
 validate_param_desc(module_desc const& module_desc, param_desc const& desc)
 {
   assert(desc.param);
@@ -176,70 +297,6 @@ validate_param_desc(module_desc const& module_desc, param_desc const& desc)
   assert(0 <= desc.slot && desc.slot < desc.param->slot_count);
   assert(0 <= desc.local && desc.local < module_desc.params.size());
   assert(0 <= desc.topo && desc.topo < module_desc.module->params.size());
-}
-
-static void
-validate_section_topo(module_topo const& module_topo, section_topo const& topo)
-{
-  assert(topo.name.size());
-  assert(0 <= topo.section && topo.section < module_topo.sections.size());
-}
-
-static void
-validate_module_topo(module_topo const& topo)
-{
-  assert(topo.id.size());
-  assert(topo.name.size());
-  assert(topo.params.size());
-  assert(topo.slot_count > 0);
-  assert(topo.engine_factory);
-  assert(0 < topo.sections.size() && topo.sections.size() <= topo.params.size());
-}
-
-static void
-validate_param_topo(module_topo const& module_topo, param_topo const& topo)
-{
-  assert(topo.id.size());
-  assert(topo.name.size());
-  assert(topo.section >= 0);
-  assert(topo.max > topo.min);
-  assert(topo.default_.size());
-  assert(topo.section < module_topo.sections.size());
-  assert(0 < topo.slot_count && topo.slot_count <= 1024);
-  assert(0 <= topo.section && topo.section < module_topo.sections.size());
-
-  assert(topo.type != param_type::log || topo.exp != 0);
-  assert(topo.type == param_type::log || topo.exp == 0);
-  assert(topo.dir != param_dir::output || topo.rate == param_rate::block);
-  
-  assert(topo.edit != param_edit::toggle || topo.min == 0);
-  assert(topo.edit != param_edit::toggle || topo.max == 1);
-  assert(topo.edit != param_edit::toggle || topo.type == param_type::step);
-
-  assert(topo.type == param_type::name || topo.names.size() == 0);
-  assert(topo.type != param_type::name || topo.min == 0);
-  assert(topo.type != param_type::name || topo.names.size() > 0);
-  assert(topo.type != param_type::name || topo.unit.size() == 0);
-  assert(topo.type != param_type::name || topo.max == topo.names.size() - 1);
-
-  assert(topo.type == param_type::item || topo.items.size() == 0);
-  assert(topo.type != param_type::item || topo.items.size() > 0);
-  assert(topo.type != param_type::item || topo.unit.size() == 0);
-  assert(topo.type != param_type::item || topo.min == 0);
-  assert(topo.type != param_type::item || topo.max == topo.items.size() - 1);
-
-  assert(topo.display != param_display::pct || topo.unit == "%");
-  assert(topo.display == param_display::normal || topo.type == param_type::linear);
-
-  assert(topo.is_real() || (int)topo.min == topo.min);
-  assert(topo.is_real() || (int)topo.max == topo.max);
-  assert(topo.is_real() || topo.rate == param_rate::block);
-  assert(topo.is_real() || topo.display == param_display::normal);
-  assert(topo.is_real() || topo.min <= topo.default_plain().step());
-  assert(topo.is_real() || topo.max >= topo.default_plain().step());
-  assert(!topo.is_real() || topo.min <= topo.default_plain().real());
-  assert(!topo.is_real() || topo.max >= topo.default_plain().real());
-  assert(!topo.is_real() || topo.display == param_display::pct_no_unit || topo.unit.size() > 0);
 }
 
 static void
@@ -284,44 +341,6 @@ validate_plugin_desc(plugin_desc const& desc)
       assert(param.global == param_global++);
       INF_ASSERT_EXEC(all_ids.insert(param.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.id_hash).second);
-    }
-  }
-}
-
-static void
-validate_plugin_topo(plugin_topo const& topo)
-{
-  std::set<std::string> param_ids;
-  std::set<std::string> module_ids;
-
-  assert(topo.id.size());
-  assert(topo.name.size());
-  assert(topo.modules.size());
-  assert(topo.version_major >= 0);
-  assert(topo.version_minor >= 0);
-  assert(topo.gui_default_width <= 3840);
-  assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
-
-  assert(0 < topo.gui_grid_rows && topo.gui_grid_rows <= 1024);
-  assert(0 < topo.gui_grid_columns && topo.gui_grid_columns <= 1024);
-  assert(0 < topo.gui_aspect_ratio && topo.gui_aspect_ratio <= 21.0 / 9.0);
-  assert(0 < topo.gui_min_width && topo.gui_min_width <= topo.gui_default_width);
-
-  int stage = 0;
-  for (int m = 0; m < topo.modules.size(); m++)
-  {
-    auto const& module = topo.modules[m];
-    assert((int)module.stage >= stage);
-    stage = (int)module.stage;
-
-    validate_module_topo(module);
-    INF_ASSERT_EXEC(module_ids.insert(module.id).second);
-    for (int s = 0; s < module.sections.size(); s++)
-      validate_section_topo(module, module.sections[s]);
-    for (int p = 0; p < module.params.size(); p++)
-    {
-      validate_param_topo(module, module.params[p]);
-      INF_ASSERT_EXEC(param_ids.insert(module.params[p].id).second);
     }
   }
 }
