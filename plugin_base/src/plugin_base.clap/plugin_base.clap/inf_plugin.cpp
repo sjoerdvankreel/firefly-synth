@@ -7,6 +7,7 @@
 
 #include <vector>
 #include <utility>
+#include <algorithm>
 
 using namespace juce;
 using namespace moodycamel;
@@ -134,6 +135,7 @@ inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 bool
 inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 {
+  guiAdjustSize(&width, &height);
   _gui->setSize(width, height);
   return true;
 }
@@ -143,13 +145,16 @@ inf_plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 {
   *width = _gui->getWidth();
   *height = _gui->getHeight();
+  guiAdjustSize(width, height);
   return true;
 }
 
 bool
 inf_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
-  *height = *width / _engine.desc().plugin->gui_aspect_ratio;
+  auto const& topo = *_engine.desc().plugin;
+  *width = std::max((int)*width, topo.gui_min_width);
+  *height = *width / topo.gui_aspect_ratio;
   return true;
 }
 

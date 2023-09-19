@@ -110,6 +110,7 @@ struct plugin_topo final {
   plugin_type type;
   int version_major;
   int version_minor;
+  int gui_min_width;
   int gui_default_width;
   float gui_aspect_ratio;
   std::vector<module_topo> modules;

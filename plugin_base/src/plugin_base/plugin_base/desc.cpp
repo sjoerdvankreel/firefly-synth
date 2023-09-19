@@ -300,8 +300,9 @@ validate_plugin_topo(plugin_topo const& topo)
   assert(topo.version_major >= 0);
   assert(topo.version_minor >= 0);
   assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
-  assert(0 < topo.gui_default_width && topo.gui_default_width <= 3840);
+  assert(topo.gui_default_width <= 3840);
   assert(0 < topo.gui_aspect_ratio && topo.gui_aspect_ratio <= 21.0 / 9.0);
+  assert(0 < topo.gui_min_width && topo.gui_min_width <= topo.gui_default_width);
 
   int stage = 0;
   for (int m = 0; m < topo.modules.size(); m++)
