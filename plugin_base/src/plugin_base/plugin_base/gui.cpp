@@ -345,12 +345,19 @@ plugin_gui::make_component(U&&... args)
 }
 
 void 
+plugin_gui::add_sections(GroupComponent& group, module_topo const& module)
+{
+
+}
+
+void 
 plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots)
 {  
   if (module.slot_count == 1)
   {
     auto& group = make_component<GroupComponent>();
     group.setText(slots[0].name);
+    add_sections(group, *slots[0].module);
     _grid->add(group, module.position);
     return;
   }
@@ -359,12 +366,13 @@ plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots
   {
   case gui_layout::vertical:
   case gui_layout::horizontal:
-    for (int s = 0; s < module.slot_count; s++)
+    for (int i = 0; i < module.slot_count; i++)
     {
       auto& group = make_component<GroupComponent>();
-      group.setText(slots[s].name);
-      int row = module.position.row + (module.layout == gui_layout::vertical? s: 0);
-      int column = module.position.column + (module.layout == gui_layout::vertical ? 0: s);
+      group.setText(slots[i].name);
+      add_sections(group, *slots[i].module);
+      int row = module.position.row + (module.layout == gui_layout::vertical? i: 0);
+      int column = module.position.column + (module.layout == gui_layout::vertical ? 0: i);
       _grid->add(group, { row, column, 1, 1 });
     }
     break;

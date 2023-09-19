@@ -16,3 +16,4 @@ preset extension
 validate gui slot not taken
 tryout varying osc slot count
 apply marray whereever possible
+test out layouts
