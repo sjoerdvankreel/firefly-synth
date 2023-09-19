@@ -153,6 +153,27 @@ validate_frame_dims(
   }
 }
 
+template <class Parent, class Child, class Include>
+static void validate_gui_constraints(
+  Parent const& parent, std::vector<Child> const& children, Include include)
+{
+  marray<int, 2> gui_taken(parent.dimension.rows, parent.dimension.columns);
+  for (int k = 0; k < children.size(); k++)
+    if(include(children[k]))
+    {
+      auto const& pos = children[k].position;
+      for (int r = pos.row; r < pos.row + pos.row_span; r++)
+        for (int c = pos.column; c < pos.column + pos.column_span; c++)
+        {
+          assert(gui_taken(r, c) == 0);
+          gui_taken(r, c) = 1;
+        }
+    }
+  for (int r = 0; r < parent.dimension.rows; r++)
+    for (int c = 0; c < parent.dimension.columns; c++)
+      assert(gui_taken(r, c) == 1);
+}
+
 static void
 validate_section_topo(module_topo const& module, section_topo const& section)
 {
@@ -164,6 +185,7 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   assert(0 < section.position.column_span && section.position.column_span <= 1024);
   assert(0 <= section.position.row && section.position.row + section.position.row_span <= module.dimension.rows);
   assert(0 <= section.position.column && section.position.column + section.position.column_span <= module.dimension.columns);
+  validate_gui_constraints(section, module.params, [&section](param_topo const& p) { return p.section == section.section; });
 }
 
 static void
@@ -182,6 +204,7 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(0 < module.position.column_span && module.position.column_span <= 1024);
   assert(0 <= module.position.row && module.position.row + module.position.row_span <= plugin.dimension.rows);
   assert(0 <= module.position.column && module.position.column + module.position.column_span <= plugin.dimension.columns);
+  validate_gui_constraints(module, module.sections, [](auto const&) { return true; });
 }
 
 static void
@@ -241,6 +264,7 @@ validate_plugin_topo(plugin_topo const& topo)
 {
   std::set<std::string> param_ids;
   std::set<std::string> module_ids;
+  validate_gui_constraints(topo, topo.modules, [](auto const&) { return true; });
 
   assert(topo.id.size());
   assert(topo.name.size());
