@@ -321,7 +321,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   auto const& topo = *_desc->plugin;
   setOpaque(true);
   setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
-  _grid = &make_component<grid_component>(topo.dimension.rows, topo.dimension.columns);
+  _grid = &make_component<grid_component>(topo.dimension);
   addAndMakeVisible(_grid);
   for (int m = 0; m < _desc->modules.size(); m++)
     add_module(_desc->modules[m]);
