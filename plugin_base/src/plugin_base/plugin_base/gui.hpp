@@ -41,9 +41,14 @@ public juce::Component
 
   Component& make_sections(module_topo const& module);
   Component& make_section(module_topo const& module, section_topo const& section);
+  
+  Component& make_params(param_topo const& param, param_desc const* slots);
+  Component& make_single_param(param_topo const& param, param_desc const& slot);
+  Component& make_multi_param(param_topo const& param, param_desc const* slots);
+
+  Component& make_modules(module_topo const& module, module_desc const* slots);
   Component& make_single_module(module_topo const& module, module_desc const& slot);
   Component& make_multi_module(module_topo const& module, module_desc const* slots);
-  Component& make_module_slots(module_topo const& module, module_desc const* slots);
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
