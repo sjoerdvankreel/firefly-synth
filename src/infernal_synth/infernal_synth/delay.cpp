@@ -37,12 +37,14 @@ delay_topo()
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 2 }));
   result.params.emplace_back(param_toggle(
-    "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, 
-    section_main, param_dir::input, param_label_contents::default_, false,
+    "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, section_main, false,
+    param_dir::input,
+    param_label_contents::default_, param_label_align::left, param_label_justify::far,
     gui_layout::single, gui_position { 0, 0 } ));
   result.params.emplace_back(param_pct(
-    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1,
-    section_main, param_dir::output, param_edit::text, param_label_contents::default_, param_rate::block, true, 0, 1, 0,
+    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1, section_main, 0, 1, 0,
+    param_dir::output, param_rate::block, true, param_edit::text,
+    param_label_contents::default_, param_label_align::left, param_label_justify::far,
     gui_layout::single, gui_position { 0, 1 }));
 
   return result;
