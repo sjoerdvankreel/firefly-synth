@@ -16,3 +16,4 @@ preset extension
 tryout varying osc slot count
 apply marray whereever possible
 scaling
+not scale font/auto ellips

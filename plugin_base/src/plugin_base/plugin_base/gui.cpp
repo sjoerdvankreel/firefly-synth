@@ -8,6 +8,10 @@ using namespace juce;
 
 namespace plugin_base {
 
+static inline int constexpr label_height = 15;
+static inline int constexpr groupbox_padding = 6;
+static inline int constexpr groupbox_padding_top = 16;
+
 void 
 ui_listener::ui_changed(int index, plain_value plain)
 {
@@ -219,9 +223,15 @@ public:
 void
 group_component::resized()
 {
+  Rectangle<int> bounds(getLocalBounds());
+  Rectangle<int> child_bounds(
+    bounds.getX() + groupbox_padding, 
+    bounds.getY() + groupbox_padding_top, 
+    bounds.getWidth() - 2 * groupbox_padding, 
+    bounds.getHeight() - groupbox_padding - groupbox_padding_top);
   assert(getNumChildComponents() < 2);
   if (getNumChildComponents() == 1)
-    getChildComponent(0)->setBounds(getLocalBounds().reduced(15));
+    getChildComponent(0)->setBounds(child_bounds);
 }
 
 // grid component as opposed to grid layout
@@ -450,7 +460,7 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
 {
   if(param.param->label == param_label::none)
     return make_param_edit(module, param);
-  auto& result = make_component<grid_component>(gui_dimension({ 1, -15 }, { 1 }));
+  auto& result = make_component<grid_component>(gui_dimension({ 1, -label_height }, { 1 }));
   result.add(make_param_edit(module, param), { 0, 0 });
   result.add(make_param_label(module, param), { 1, 0 });
   return result;
