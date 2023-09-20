@@ -208,7 +208,24 @@ param_base(gui, desc), Slider()
   plugin_changed(initial);
 }
 
+// resizes single child on resize
+
+class group_component :
+  public GroupComponent {
+public:
+  void resized() override;
+};
+
+void
+group_component::resized()
+{
+  assert(getNumChildComponents() < 2);
+  if (getNumChildComponents() == 1)
+    getChildComponent(0)->setBounds(getLocalBounds().reduced(15));
+}
+
 // grid component as opposed to grid layout
+// resizes children on resize
 
 class grid_component:
 public Component
@@ -330,7 +347,6 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
     mi += module.slot_count;
   }
   setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
-  _grid->setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
 }
 
 template <class T, class... U> T& 
@@ -350,7 +366,7 @@ plugin_gui::add_sections(GroupComponent& container, module_topo const& module)
   for (int s = 0; s < module.sections.size(); s++)
   {
     auto const& section = module.sections[s];
-    auto& group = make_component<GroupComponent>();
+    auto& group = make_component<group_component>();
     group.setText(section.name);
     grid.add(group, section.position);
   }
@@ -361,7 +377,7 @@ plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots
 {  
   if (module.slot_count == 1)
   {
-    auto& group = make_component<GroupComponent>();
+    auto& group = make_component<group_component>();
     group.setText(slots[0].name);
     add_sections(group, *slots[0].module);
     _grid->add(group, module.position);
@@ -379,7 +395,7 @@ plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots
     auto& slot_grid = make_component<grid_component>(gui_dimension { slow_rows, slow_columns });
     for (int i = 0; i < module.slot_count; i++)
     {
-      auto& group = make_component<GroupComponent>();
+      auto& group = make_component<group_component>();
       group.setText(slots[i].name);
       add_sections(group, *slots[i].module);
       int row = (is_vertical? i: 0);
