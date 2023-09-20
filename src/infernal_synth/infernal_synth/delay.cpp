@@ -22,7 +22,7 @@ public:
 };
 
 enum { section_main };
-enum { param_on, param_out_gain };
+enum { param_on, param_out };
 
 module_topo
 delay_topo()
@@ -35,14 +35,14 @@ delay_topo()
     return std::make_unique<delay_engine>(sample_rate); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 2 }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1 }, { 1, 6 } }));
   result.params.emplace_back(param_toggle(
     "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, section_main, false,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 0 } ));
   result.params.emplace_back(param_pct(
-    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1, section_main, 0, 1, 0,
+    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out", 1, section_main, 0, 1, 0,
     param_dir::output, param_rate::block, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
@@ -70,7 +70,7 @@ delay_engine::process(process_block& block)
     }  
   _pos += block.host.frame_count;
   _pos %= _length;
-  block.set_out_param(param_out_gain, 0, std::clamp(max_out, 0.0f, 1.0f));
+  block.set_out_param(param_out, 0, std::clamp(max_out, 0.0f, 1.0f));
 }
 
 }

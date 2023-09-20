@@ -36,16 +36,16 @@ justification_type(param_label_align align, param_label_justify justify)
     break;
   case param_label_align::left:
     switch (justify) {
-    case param_label_justify::near: return Justification::topRight;
-    case param_label_justify::far: return Justification::bottomRight;
-    case param_label_justify::center: return Justification::centredRight;
+    case param_label_justify::near: return Justification::topLeft;
+    case param_label_justify::far: return Justification::bottomLeft;
+    case param_label_justify::center: return Justification::centredLeft;
     default: break; }
     break;
   case param_label_align::right:
     switch (justify) {
-    case param_label_justify::near: return Justification::topLeft;
-    case param_label_justify::far: return Justification::bottomLeft;
-    case param_label_justify::center: return Justification::centredLeft;
+    case param_label_justify::near: return Justification::topRight;
+    case param_label_justify::far: return Justification::bottomRight;
+    case param_label_justify::center: return Justification::centredRight;
     default: break; }
     break;
   default:
