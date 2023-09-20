@@ -37,7 +37,7 @@ osc_topo()
   module_topo result(make_module(
     "{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, 
     module_stage::voice, module_output::audio, 
-    gui_layout::horizontal, gui_position { 0, 0, 2, 1 }, gui_dimension { 2, 1 }));
+    gui_layout::horizontal, gui_position { 0, 0 }, gui_dimension { 2, 1 }));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
     return std::make_unique<osc_engine>(); };
 
@@ -50,7 +50,7 @@ osc_topo()
   result.params.emplace_back(param_items(
     "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", 1, 
     section_main, param_dir::input, param_edit::list, param_label::both, type_items(), "Saw",
-    gui_layout::default_, gui_position{ 0, 1 }));
+    gui_layout::default_, gui_position { 0, 1 }));
   result.params.emplace_back(param_pct(
     "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", 1, 
     section_main, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, true, 0, 1, 1,
