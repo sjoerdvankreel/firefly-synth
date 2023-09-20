@@ -20,8 +20,10 @@ enum class param_dir { input, output };
 enum class param_rate { accurate, block };
 enum class param_display { normal, pct, pct_no_unit };
 enum class param_type { step, name, item, linear, log };
-enum class param_label { none, name, value, both, default_ };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
+enum class param_label_justify { near, center, far };
+enum class param_label_align { top, bottom, left, right };
+enum class param_label_contents { none, name, value, both, default_ };
 
 class module_engine;
 typedef std::unique_ptr<module_engine>(*
@@ -84,8 +86,10 @@ struct param_topo final {
   param_type type;
   param_rate rate;
   param_edit edit;
-  param_label label;
   param_display display;
+  param_label_align label_align;
+  param_label_justify label_justify;
+  param_label_contents label_contents;
 
   gui_layout layout;
   gui_position position;

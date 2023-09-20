@@ -458,7 +458,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 Component&
 plugin_gui::make_single_param(module_desc const& module, param_desc const& param, bool tabbed)
 {
-  if(param.param->label == param_label::none)
+  if(param.param->label_contents == param_label_contents::none)
     return make_param_edit(module, param);
   auto& result = make_component<grid_component>(gui_dimension({ 1, -label_height }, { 1 }));
   result.add(make_param_edit(module, param), { 0, 0 });
@@ -491,19 +491,19 @@ plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
 Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
 {
-  param_label label = param.param->label;
-  if(label == param_label::default_)
+  param_label_contents contents = param.param->label_contents;
+  if(contents == param_label_contents::default_)
     switch (param.param->edit)
     {
     case param_edit::list: 
     case param_edit::text:
     case param_edit::toggle:
-      label = param_label::name;
+      contents = param_label_contents::name;
       break;
     case param_edit::knob:
     case param_edit::hslider:
     case param_edit::vslider:
-      label = param_label::both;
+      contents = param_label_contents::both;
       break;
     default:
       assert(false);
@@ -511,13 +511,13 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
     }
 
   plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
-  switch (label)
+  switch (contents)
   {
-  case param_label::name:
+  case param_label_contents::name:
     return make_component<param_name_label>(&param);
-  case param_label::both:
-  case param_label::value:
-    return make_component<param_value_label>(this, &param, label == param_label::both, initial);
+  case param_label_contents::both:
+  case param_label_contents::value:
+    return make_component<param_value_label>(this, &param, contents == param_label_contents::both, initial);
   default:
     assert(false);
     return *((Component*)nullptr);
