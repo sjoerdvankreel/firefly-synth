@@ -37,7 +37,8 @@ struct gui_dimension final {
 struct gui_position final {
   int row = -1;
   int column = -1;
-  gui_dimension dimension;
+  int row_span = 1;
+  int column_span = 1;
 };
 
 // item in list

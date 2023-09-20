@@ -259,8 +259,8 @@ grid_component::resized()
     GridItem item(getChildComponent(i));
     item.row.start = _positions[i].row + 1;
     item.column.start = _positions[i].column + 1;
-    item.row.end = _positions[i].row + 1 + _positions[i].dimension.rows;
-    item.column.end = _positions[i].column + 1 + _positions[i].dimension.columns;
+    item.row.end = _positions[i].row + 1 + _positions[i].row_span;
+    item.column.end = _positions[i].column + 1 + _positions[i].column_span;
     grid.items.add(item);
   }
   grid.performLayout(getLocalBounds());
