@@ -9,7 +9,21 @@ inf_editor(inf_controller* controller) :
 EditorView(controller), _controller(controller),
 _gui(std::make_unique<plugin_gui>(&controller->desc(), &controller->ui_state())) {}
 
-tresult PLUGIN_API 
+tresult PLUGIN_API
+inf_editor::setContentScaleFactor(float factor)
+{
+  _gui->content_scale(factor);
+  return kResultOk;
+}
+
+tresult PLUGIN_API
+inf_editor::queryInterface(TUID const iid, void** obj)
+{
+  QUERY_INTERFACE(iid, obj, IPlugViewContentScaleSupport::iid, IPlugViewContentScaleSupport)
+  return EditorView::queryInterface(iid, obj);
+}
+
+tresult PLUGIN_API
 inf_editor::removed()
 {
   _gui->remove_ui_listener(_controller);
