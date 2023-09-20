@@ -341,18 +341,13 @@ plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
 _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
+  _grid = &make_component<grid_component>(_desc->plugin->dimension);
+  for(auto iter = _desc->modules.begin(); iter != _desc->modules.end(); iter += iter->module->slot_count)
+    _grid->add(make_modules(&(*iter)), iter->module->position);
+
   auto const& topo = *_desc->plugin;
-  _grid = &make_component<grid_component>(topo.dimension);
   setOpaque(true);
   addAndMakeVisible(_grid);
-
-  int mi = 0;
-  module_desc const* modules = _desc->modules.data();
-  for(int m = 0; m < _desc->plugin->modules.size(); m++)
-  {
-    _grid->add(make_modules(modules + mi), modules[mi].module->position);
-    mi += modules[mi].module->slot_count;
-  }
   setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
 }
 
