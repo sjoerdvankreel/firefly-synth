@@ -418,7 +418,9 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
     if(iter->param->section == section.section)
       grid.add(make_params(module, &(*iter)), iter->param->position);
-
+  
+  if(module.module->sections.size() == 1)
+    return grid;
   auto& result = make_component<group_component>();
   result.setText(section.name);
   result.addAndMakeVisible(grid);
