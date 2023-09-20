@@ -378,14 +378,15 @@ Component&
 plugin_gui::make_modules(module_desc const* slots)
 {  
   if (slots[0].module->slot_count == 1)
-    return make_single_module(slots[0]);
+    return make_single_module(slots[0], false);
   else
     return make_multi_module(slots);  
 }
 
 Component&
-plugin_gui::make_single_module(module_desc const& slot)
+plugin_gui::make_single_module(module_desc const& slot, bool tabbed)
 {
+  if(tabbed) return make_sections(slot);
   auto& result = make_component<group_component>();
   result.setText(slot.name);
   result.addAndMakeVisible(make_sections(slot));
@@ -395,8 +396,8 @@ plugin_gui::make_single_module(module_desc const& slot)
 Component&
 plugin_gui::make_multi_module(module_desc const* slots)
 {
-  auto make_single = [this](module_desc const& m) -> Component& {
-    return make_single_module(m); };
+  auto make_single = [this](module_desc const& m, bool tabbed) -> Component& {
+    return make_single_module(m, tabbed); };
   return make_multi_slot(*slots[0].module, slots, make_single);
 }
 
@@ -431,7 +432,7 @@ Component&
 plugin_gui::make_params(module_desc const& module, param_desc const* params)
 {
   if (params[0].param->slot_count == 1)
-    return make_single_param(module, params[0]);
+    return make_single_param(module, params[0], false);
   else
     return make_multi_param(module, params);
 }
@@ -439,13 +440,13 @@ plugin_gui::make_params(module_desc const& module, param_desc const* params)
 Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
-  auto make_single = [this, &module](param_desc const& p) -> Component& {
-    return make_single_param(module, p); };
+  auto make_single = [this, &module](param_desc const& p, bool tabbed) -> Component& {
+    return make_single_param(module, p, tabbed); };
   return make_multi_slot(*slots[0].param, slots, make_single);
 }
 
 Component&
-plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
+plugin_gui::make_single_param(module_desc const& module, param_desc const& param, bool tabbed)
 {
   if(param.param->label == param_label::none)
     return make_param_edit(module, param);
@@ -525,14 +526,14 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
     bool vertical = topo.layout == gui_layout::vertical;
     auto& result = make_component<grid_component>(vertical, topo.slot_count);
     for (int i = 0; i < topo.slot_count; i++)
-      result.add(make_single(slots[i]), vertical, i);
+      result.add(make_single(slots[i], false), vertical, i);
     return result;
   }
   case gui_layout::tabbed:
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
     for (int i = 0; i < topo.slot_count; i++)
-      result.addTab(slots[i].name, Colours::black, &make_single(slots[i]), false);
+      result.addTab(slots[i].name, Colours::black, &make_single(slots[i], true), false);
     return result;
   }
   default:
