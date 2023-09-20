@@ -13,12 +13,65 @@ static inline int constexpr label_height = 15;
 static inline int constexpr groupbox_padding = 6;
 static inline int constexpr groupbox_padding_top = 16;
 
-void 
+void
 ui_listener::ui_changed(int index, plain_value plain)
 {
   ui_begin_changes(index);
   ui_changing(index, plain);
   ui_end_changes(index);
+}
+
+static param_label_contents
+label_contents(param_label_contents contents, param_edit edit)
+{
+  if (contents != param_label_contents::default_) return contents;
+  switch (edit)
+  {
+  case param_edit::list:
+  case param_edit::text:
+  case param_edit::toggle:
+    return param_label_contents::name;
+  case param_edit::knob:
+  case param_edit::hslider:
+  case param_edit::vslider:
+    return param_label_contents::both;
+  default:
+    assert(false);
+    return (param_label_contents)0;
+  }
+}
+
+static Justification 
+justification_type(param_label_align align, param_label_justify justify)
+{
+  switch (align)
+  {
+  case param_label_align::top:
+  case param_label_align::bottom:
+    switch (justify) {
+    case param_label_justify::center: return Justification::centred;
+    case param_label_justify::near: return Justification::centredLeft;
+    case param_label_justify::far: return Justification::centredRight;
+    default: break; }
+    break;
+  case param_label_align::left:
+    switch (justify) {
+    case param_label_justify::near: return Justification::topRight;
+    case param_label_justify::far: return Justification::bottomRight;
+    case param_label_justify::center: return Justification::centredRight;
+    default: break; }
+    break;
+  case param_label_align::right:
+    switch (justify) {
+    case param_label_justify::near: return Justification::topLeft;
+    case param_label_justify::far: return Justification::bottomLeft;
+    case param_label_justify::center: return Justification::centredLeft;
+    default: break; }
+    break;
+  default:
+    assert(false);
+    return Justification::centred;
+  }
 }
 
 // control types bound to a parameter topo & plugin value
@@ -190,18 +243,10 @@ param_base(gui, desc), Slider()
 {
   switch (desc->param->edit)
   {
-  case param_edit::vslider:
-    setSliderStyle(Slider::LinearVertical);
-    break;
-  case param_edit::hslider:
-    setSliderStyle(Slider::LinearHorizontal);
-    break;
-  case param_edit::knob:
-    setSliderStyle(Slider::RotaryVerticalDrag);
-    break;
-  default:
-    assert(false);
-    break;
+  case param_edit::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
+  case param_edit::vslider: setSliderStyle(Slider::LinearVertical); break;
+  case param_edit::hslider: setSliderStyle(Slider::LinearHorizontal); break;
+  default: assert(false); break;
   }
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
   if (!desc->param->is_real()) setRange(desc->param->min, desc->param->max, 1);
@@ -514,37 +559,24 @@ plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
 Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
 {
-  param_label_contents contents = param.param->label_contents;
-  if(contents == param_label_contents::default_)
-    switch (param.param->edit)
-    {
-    case param_edit::list: 
-    case param_edit::text:
-    case param_edit::toggle:
-      contents = param_label_contents::name;
-      break;
-    case param_edit::knob:
-    case param_edit::hslider:
-    case param_edit::vslider:
-      contents = param_label_contents::both;
-      break;
-    default:
-      assert(false);
-      break;
-    }
-
+  Label* result = {};
   plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
+  param_label_contents contents = label_contents(param.param->label_contents, param.param->edit);
   switch (contents)
   {
   case param_label_contents::name:
-    return make_component<param_name_label>(&param);
+    result = &make_component<param_name_label>(&param);
+    break;
   case param_label_contents::both:
   case param_label_contents::value:
-    return make_component<param_value_label>(this, &param, contents == param_label_contents::both, initial);
+    result = &make_component<param_value_label>(this, &param, contents == param_label_contents::both, initial);
+    break;
   default:
     assert(false);
-    return *((Component*)nullptr);
+    break;
   }
+  result->setJustificationType(justification_type(param.param->label_align, param.param->label_justify);
+  return *result;
 }
 
 template <class Topo, class Slot, class MakeSingle>
