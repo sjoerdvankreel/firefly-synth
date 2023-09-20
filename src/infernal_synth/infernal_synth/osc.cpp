@@ -28,7 +28,7 @@ type_items()
 }
 
 enum { type_saw, type_sine };
-enum { section_main, section_pitch };
+enum { section_pitch, section_main };
 enum { param_on, param_type, param_gain, param_bal, param_note, param_oct, param_cent };
 
 module_topo
@@ -42,7 +42,25 @@ osc_topo()
     return std::make_unique<osc_engine>(); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1 }, { 1, 2, 2, 2 } }));
+    "Pitch", section_pitch, gui_position{ 0, 0 }, gui_dimension{ 1, 3 }));
+  result.params.emplace_back(param_names(
+    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, section_pitch, note_names(), "C",
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::single, gui_position{ 0, 0 }));
+  result.params.emplace_back(param_steps(
+    "{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", 1, section_pitch, 0, 9, 4,
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::single, gui_position{ 0, 1 }));
+  result.params.emplace_back(param_pct(
+    "{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", 1, section_pitch, -1, 1, 0,
+    param_dir::input, param_rate::accurate, false, param_edit::hslider,
+    param_label_contents::value, param_label_align::right, param_label_justify::center,
+    gui_layout::single, gui_position{ 0, 2 }));
+
+  result.sections.emplace_back(make_section(
+    "Main", section_main, gui_position { 1, 0 }, gui_dimension { { 1 }, { 1, 2, 2, 2 } }));
   result.params.emplace_back(param_toggle(
     "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", 1, section_main, false, 
     param_dir::input, 
@@ -63,24 +81,6 @@ osc_topo()
     param_dir::input, param_rate::accurate, true, param_edit::hslider,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 3 }));
-
-  result.sections.emplace_back(make_section(
-    "Pitch", section_pitch, gui_position{ 1, 0 }, gui_dimension { 1, 3 }));
-  result.params.emplace_back(param_names(
-    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, section_pitch, note_names(), "C",
-    param_dir::input, param_edit::list,
-    param_label_contents::none, param_label_align::left, param_label_justify::center,
-    gui_layout::single, gui_position{ 0, 0 }));
-  result.params.emplace_back(param_steps(
-    "{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", 1, section_pitch, 0, 9, 4,
-    param_dir::input, param_edit::list, 
-    param_label_contents::none, param_label_align::left, param_label_justify::center,
-    gui_layout::single, gui_position { 0, 1 }));
-  result.params.emplace_back(param_pct(
-    "{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", 1, section_pitch, -1, 1, 0,
-    param_dir::input, param_rate::accurate, false, param_edit::hslider, 
-    param_label_contents::value, param_label_align::right, param_label_justify::center,
-    gui_layout::single, gui_position { 0, 2 }));
 
   return result;
 }
