@@ -23,7 +23,7 @@ enum class param_type { step, name, item, linear, log };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
 enum class param_label_justify { near, center, far };
 enum class param_label_align { top, bottom, left, right };
-enum class param_label_contents { none, name, value, both, default_ };
+enum class param_label_contents { none, name, value, both };
 
 class module_engine;
 typedef std::unique_ptr<module_engine>(*

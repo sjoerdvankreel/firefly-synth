@@ -21,26 +21,6 @@ ui_listener::ui_changed(int index, plain_value plain)
   ui_end_changes(index);
 }
 
-static param_label_contents
-label_contents(param_label_contents contents, param_edit edit)
-{
-  if (contents != param_label_contents::default_) return contents;
-  switch (edit)
-  {
-  case param_edit::list:
-  case param_edit::text:
-  case param_edit::toggle:
-    return param_label_contents::name;
-  case param_edit::knob:
-  case param_edit::hslider:
-  case param_edit::vslider:
-    return param_label_contents::both;
-  default:
-    assert(false);
-    return (param_label_contents)0;
-  }
-}
-
 static Justification 
 justification_type(param_label_align align, param_label_justify justify)
 {
@@ -561,8 +541,8 @@ Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
 {
   Label* result = {};
+  auto contents = param.param->label_contents;
   plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
-  param_label_contents contents = label_contents(param.param->label_contents, param.param->edit);
   switch (contents)
   {
   case param_label_contents::name:
