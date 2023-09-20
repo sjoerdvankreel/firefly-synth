@@ -365,6 +365,23 @@ plugin_gui::make_component(U&&... args)
 }
 
 Component&
+plugin_gui::make_section(module_topo const& module, section_topo const& section)
+{
+  auto& result = make_component<group_component>();
+  result.setText(section.name);
+  return result;
+}
+
+Component&
+plugin_gui::make_sections(module_topo const& module)
+{
+  auto& result = make_component<grid_component>(module.dimension);
+  for (int s = 0; s < module.sections.size(); s++)
+    result.add(make_section(module, module.sections[s]), module.sections[s].position);
+  return result;
+}
+
+Component&
 plugin_gui::make_module_slots(module_topo const& module, module_desc const* slots)
 {  
   if (module.slot_count == 1)
@@ -407,20 +424,6 @@ plugin_gui::make_multi_module(module_topo const& module, module_desc const* slot
     assert(false);
     return *((Component*)nullptr);
   }
-}
-
-Component&
-plugin_gui::make_sections(module_topo const& module)
-{
-  auto& result = make_component<grid_component>(module.dimension);
-  for (int s = 0; s < module.sections.size(); s++)
-  {
-    auto const& section = module.sections[s];
-    auto& group = make_component<group_component>();
-    group.setText(section.name);
-    result.add(group, section.position);
-  }
-  return result;
 }
 
 }
