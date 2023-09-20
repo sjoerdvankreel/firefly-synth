@@ -478,7 +478,7 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
   case param_label_align::top:
     return make_param_label_edit(module, param, gui_dimension({ -label_height, 1 }, { 1 }), { 0, 0 }, { 1, 0 });
   case param_label_align::bottom:
-    return make_param_label_edit(module, param, gui_dimension({ 1 - label_height, }, { 1 }), { 1, 0 }, { 0, 0 });
+    return make_param_label_edit(module, param, gui_dimension({ 1, -label_height, }, { 1 }), { 1, 0 }, { 0, 0 });
   case param_label_align::left:
     return make_param_label_edit(module, param, gui_dimension({ 1 }, { -label_width, 1 }), { 0, 0 }, { 0, 1 });
   case param_label_align::right:
