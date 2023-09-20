@@ -250,10 +250,10 @@ void
 grid_component::resized()
 {
   Grid grid;
-  for(int i = 0; i < _dimension.rows; i++)
-    grid.templateRows.add(Grid::Fr(1));
-  for(int i = 0; i < _dimension.columns; i++) 
-    grid.templateColumns.add(Grid::Fr(1));
+  for(int i = 0; i < _dimension.row_sizes.size(); i++)
+    grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
+  for(int i = 0; i < _dimension.column_sizes.size(); i++) 
+    grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
   for (int i = 0; i < _positions.size(); i++)
   {
     GridItem item(getChildComponent(i));

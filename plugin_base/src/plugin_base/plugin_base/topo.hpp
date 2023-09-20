@@ -27,18 +27,25 @@ class module_engine;
 typedef std::unique_ptr<module_engine>(*
 module_engine_factory)(int sample_rate, int max_frame_count);
 
-// dimensions of own grid
-struct gui_dimension final {
-  int rows = 1;
-  int columns = 1;
-};
-
 // position in parent grid
 struct gui_position final {
   int row = -1;
   int column = -1;
   int row_span = 1;
   int column_span = 1;
+};
+
+// dimensions of own grid (relative distribution)
+struct gui_dimension final {
+  std::vector<int> row_sizes = { 1 };
+  std::vector<int> column_sizes = { 1 };
+
+  gui_dimension() = default;
+  gui_dimension(gui_dimension const&) = default;
+  gui_dimension(int row_count, int column_count):
+  row_sizes(row_count, 1), column_sizes(column_count, 1) {}
+  gui_dimension(std::vector<int> const& row_sizes, std::vector<int> const& column_sizes):
+  row_sizes(row_sizes), column_sizes(column_sizes) {}
 };
 
 // item in list

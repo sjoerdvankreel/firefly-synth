@@ -15,8 +15,8 @@ synth_topo()
   result->id = INF_SYNTH_ID;
   result->name = INF_SYNTH_NAME;
   result->type = plugin_type::synth;
-  result->dimension.rows = 3;
-  result->dimension.columns = 1;
+  result->dimension.row_sizes = { 2, 1, 1 };
+  result->dimension.column_sizes = { 1 };
   result->gui_min_width = 400;
   result->gui_default_width = 800;
   result->gui_aspect_ratio = 4.0f / 3.0f;
