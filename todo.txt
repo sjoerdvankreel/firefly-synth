@@ -5,7 +5,8 @@ clap threadpool
 host context menu
 (polyphonic) modulation
 try out some airwindows stuff
-voice manager including voice-level unison
+voice manager
+voice level unison
 manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
@@ -14,6 +15,5 @@ linux, renoise, bitwig, cbb
 rename v2.0 to 2
 preset extension
 apply marray whereever possible
-scaling
 not scale font/auto ellips
 get the lnf in there

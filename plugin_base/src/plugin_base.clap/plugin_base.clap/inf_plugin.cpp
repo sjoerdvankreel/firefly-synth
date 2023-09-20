@@ -110,6 +110,13 @@ inf_plugin::guiHide() noexcept
   return true;
 }
 
+bool 
+inf_plugin::guiSetScale(double scale) noexcept
+{
+  _gui->content_scale(scale);
+  return true;
+}
+
 bool
 inf_plugin::guiSetParent(clap_window const* window) noexcept
 {
