@@ -39,16 +39,16 @@ public juce::Component
   void state_loaded();
   template <class T, class... U> T& make_component(U&&... args);
 
+  Component& make_params(param_desc const* slots);
+  Component& make_single_param(param_desc const& slot);
+  Component& make_multi_param(param_desc const* slots);
+
   Component& make_modules(module_desc const* slots);
   Component& make_single_module(module_desc const& slot);
   Component& make_multi_module(module_desc const* slots);
 
   Component& make_sections(module_desc const& module);
   Component& make_section(module_desc const& module, section_topo const& section);
-  
-  Component& make_params(param_topo const& param, param_desc const* slots);
-  Component& make_single_param(param_topo const& param, param_desc const& slot);
-  Component& make_multi_param(param_topo const& param, param_desc const* slots);
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
