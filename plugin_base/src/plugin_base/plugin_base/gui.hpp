@@ -53,7 +53,9 @@ public juce::Component
   Component& make_param_edit(module_desc const& module, param_desc const& param);
   Component& make_param_label(module_desc const& module, param_desc const& param);
   Component& make_multi_param(module_desc const& module, param_desc const* params);
-  Component& make_single_param(module_desc const& module, param_desc const& param, bool tabbed);
+  Component& make_single_param(module_desc const& module, param_desc const& param);
+  Component& make_param_label_edit(module_desc const& module, param_desc const& param,
+      gui_dimension const& dimension, gui_position const& label_position, gui_position const& edit_position);
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);

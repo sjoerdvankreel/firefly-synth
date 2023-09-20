@@ -8,6 +8,7 @@ using namespace juce;
 
 namespace plugin_base {
 
+static inline int constexpr label_width = 40;
 static inline int constexpr label_height = 15;
 static inline int constexpr groupbox_padding = 6;
 static inline int constexpr groupbox_padding_top = 16;
@@ -442,7 +443,7 @@ Component&
 plugin_gui::make_params(module_desc const& module, param_desc const* params)
 {
   if (params[0].param->slot_count == 1)
-    return make_single_param(module, params[0], false);
+    return make_single_param(module, params[0]);
   else
     return make_multi_param(module, params);
 }
@@ -451,19 +452,41 @@ Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
   auto make_single = [this, &module](param_desc const& p, bool tabbed) -> Component& {
-    return make_single_param(module, p, tabbed); };
+    return make_single_param(module, p); };
   return make_multi_slot(*slots[0].param, slots, make_single);
 }
 
+Component& 
+plugin_gui::make_param_label_edit(
+  module_desc const& module, param_desc const& param, 
+  gui_dimension const& dimension, gui_position const& label_position, gui_position const& edit_position)
+{
+  auto& result = make_component<grid_component>(dimension);
+  result.add(make_param_label(module, param), label_position);
+  result.add(make_param_edit(module, param), edit_position);
+  return result;
+}
+
 Component&
-plugin_gui::make_single_param(module_desc const& module, param_desc const& param, bool tabbed)
+plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
 {
   if(param.param->label_contents == param_label_contents::none)
     return make_param_edit(module, param);
-  auto& result = make_component<grid_component>(gui_dimension({ 1, -label_height }, { 1 }));
-  result.add(make_param_edit(module, param), { 0, 0 });
-  result.add(make_param_label(module, param), { 1, 0 });
-  return result;
+
+  switch(param.param->label_align)
+  {
+  case param_label_align::top:
+    return make_param_label_edit(module, param, gui_dimension({ -label_height, 1 }, { 1 }), { 0, 0 }, { 1, 0 });
+  case param_label_align::bottom:
+    return make_param_label_edit(module, param, gui_dimension({ 1 - label_height, }, { 1 }), { 1, 0 }, { 0, 0 });
+  case param_label_align::left:
+    return make_param_label_edit(module, param, gui_dimension({ 1 }, { -label_width, 1 }), { 0, 0 }, { 0, 1 });
+  case param_label_align::right:
+    return make_param_label_edit(module, param, gui_dimension({ 1 }, { 1, -label_width }), { 0, 1 }, { 0, 0 });
+  default:
+    assert(false);
+    return *((Component*)nullptr);
+  }
 }
 
 Component&
