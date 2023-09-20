@@ -43,10 +43,11 @@ public:
 class param_value_label:
 public param_base, public Label
 {
+  bool const _both;
 public:
   void plugin_changed(plain_value plain) override final;
-  param_value_label(plugin_gui* gui, param_desc const* desc, plain_value initial):
-  param_base(gui, desc), Label() { plugin_changed(initial); }
+  param_value_label(plugin_gui* gui, param_desc const* desc, bool both, plain_value initial):
+  param_base(gui, desc), Label(), _both(both) { plugin_changed(initial); }
 };
 
 class param_slider:
@@ -120,8 +121,7 @@ void
 param_value_label::plugin_changed(plain_value plain)
 { 
   std::string text = _desc->param->plain_to_text(plain);
-  if(_desc->param->label == param_label::both)
-    text = _desc->name + " " + text;
+  if(_both) text = _desc->name + " " + text;
   setText(text, dontSendNotification); 
 }
 
@@ -507,7 +507,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
     return make_component<param_name_label>(&param);
   case param_label::both:
   case param_label::value:
-    return make_component<param_value_label>(this, &param, initial);
+    return make_component<param_value_label>(this, &param, label == param_label::both, initial);
   default:
     assert(false);
     return *((Component*)nullptr);
