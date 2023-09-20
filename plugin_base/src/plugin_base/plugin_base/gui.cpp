@@ -396,6 +396,13 @@ plugin_gui::make_multi_module(module_topo const& module, module_desc const* slot
       result.add(make_single_module(module, slots[i]), vertical, i);
     return result;
   }
+  case gui_layout::tabbed:
+  {
+    auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+    for (int i = 0; i < module.slot_count; i++)
+      result.addTab(slots[i].name, Colours::black, &make_single_module(module, slots[i]), false);
+    return result;
+  }
   default:
     assert(false);
     return *((Component*)nullptr);
