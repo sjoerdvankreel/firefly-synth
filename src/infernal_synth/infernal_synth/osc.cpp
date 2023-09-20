@@ -55,12 +55,12 @@ osc_topo()
     gui_layout::single, gui_position { 0, 1 }));
   result.params.emplace_back(param_pct(
     "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", 1, section_main, 0, 1, 1, 
-    param_dir::input, param_rate::accurate, true, param_edit::knob, 
+    param_dir::input, param_rate::accurate, true, param_edit::hslider,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 2 }));
   result.params.emplace_back(param_pct(
     "{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", 1, section_main, -1, 1, 0, 
-    param_dir::input, param_rate::accurate, true, param_edit::knob,
+    param_dir::input, param_rate::accurate, true, param_edit::hslider,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 3 }));
 
