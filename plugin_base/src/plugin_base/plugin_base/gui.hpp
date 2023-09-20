@@ -40,6 +40,8 @@ public juce::Component
   template <class T, class... U> T& make_component(U&&... args);
 
   Component& make_sections(module_topo const& module);
+  Component& make_single_module(module_topo const& module, module_desc const& slot);
+  Component& make_multi_module(module_topo const& module, module_desc const* slots);
   Component& make_module_slots(module_topo const& module, module_desc const* slots);
 
 public:

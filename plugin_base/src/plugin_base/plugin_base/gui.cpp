@@ -236,7 +236,13 @@ public Component
 public:
   void resized() override;
   void add(Component& child, gui_position const& position);
-  grid_component(gui_dimension const& dimension): _dimension(dimension) {}
+
+  grid_component(gui_dimension const& dimension) :
+  _dimension(dimension) {}
+  grid_component(bool vertical, int count) : 
+  _dimension(vertical ? count : 1, vertical ? 1 : count) {}
+  void add(Component& child, bool vertical, int position) 
+  { add(child, gui_position { vertical? position: 0, vertical? 0: position }); }
 };
 
 void
@@ -358,7 +364,45 @@ plugin_gui::make_component(U&&... args)
   return *result;
 }
 
-Component& 
+Component&
+plugin_gui::make_module_slots(module_topo const& module, module_desc const* slots)
+{  
+  if (module.slot_count == 1)
+    return make_single_module(module, slots[0]);
+  else
+    return make_multi_module(module, slots);  
+}
+
+Component&
+plugin_gui::make_single_module(module_topo const& module, module_desc const& slot)
+{
+  auto& result = make_component<group_component>();
+  result.setText(slot.name);
+  result.addAndMakeVisible(make_sections(module));
+  return result;
+}
+
+Component&
+plugin_gui::make_multi_module(module_topo const& module, module_desc const* slots)
+{
+  switch (module.layout)
+  {
+  case gui_layout::vertical:
+  case gui_layout::horizontal:
+  {
+    bool vertical = module.layout == gui_layout::vertical;
+    auto& result = make_component<grid_component>(vertical, module.slot_count);
+    for (int i = 0; i < module.slot_count; i++)
+      result.add(make_single_module(module, slots[i]), vertical, i);
+    return result;
+  }
+  default:
+    assert(false);
+    return *((Component*)nullptr);
+  }
+}
+
+Component&
 plugin_gui::make_sections(module_topo const& module)
 {
   auto& result = make_component<grid_component>(module.dimension);
@@ -370,43 +414,6 @@ plugin_gui::make_sections(module_topo const& module)
     result.add(group, section.position);
   }
   return result;
-}
-
-Component&
-plugin_gui::make_module_slots(module_topo const& module, module_desc const* slots)
-{  
-  if (module.slot_count == 1)
-  {
-    auto& result = make_component<group_component>();
-    result.setText(slots[0].name);
-    result.addAndMakeVisible(make_sections(module));
-    return result;
-  }
-
-  switch (module.layout)
-  {
-  case gui_layout::vertical:
-  case gui_layout::horizontal:
-  {
-    bool is_vertical = module.layout == gui_layout::vertical;
-    int slow_rows = is_vertical ? module.slot_count : 1;
-    int slow_columns = is_vertical? 1: module.slot_count;
-    auto& result = make_component<grid_component>(gui_dimension { slow_rows, slow_columns });
-    for (int i = 0; i < module.slot_count; i++)
-    {
-      auto& group = make_component<group_component>();
-      group.setText(slots[i].name);
-      group.addAndMakeVisible(make_sections(module));
-      int row = (is_vertical? i: 0);
-      int column = (is_vertical ? 0: i);
-      result.add(group, { row, column, 1, 1 });
-    }
-    return result;
-  }
-  default:
-    assert(false);
-    return *((Component*)nullptr);
-  }
 }
 
 }
