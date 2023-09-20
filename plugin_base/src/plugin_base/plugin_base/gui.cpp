@@ -69,9 +69,10 @@ justification_type(param_label_align align, param_label_justify justify)
     default: break; }
     break;
   default:
-    assert(false);
-    return Justification::centred;
+    break;
   }
+  assert(false);
+  return Justification::centred;
 }
 
 // control types bound to a parameter topo & plugin value
