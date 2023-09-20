@@ -197,7 +197,7 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(module.slot_count > 0);
   assert(module.engine_factory);
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
-  assert((module.slot_count == 1) == (module.layout == gui_layout::default_));
+  assert((module.slot_count == 1) == (module.layout == gui_layout::single));
   assert(0 < module.position.row_span && module.position.row_span <= 1024);
   assert(0 < module.position.column_span && module.position.column_span <= 1024);
   assert(0 < module.dimension.row_sizes.size() && module.dimension.row_sizes.size() <= 1024);
@@ -252,7 +252,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(!param.is_real() || param.max >= param.default_plain().real());
   assert(!param.is_real() || param.display == param_display::pct_no_unit || param.unit.size() > 0);
 
-  assert((param.slot_count == 1) == (param.layout == gui_layout::default_));
+  assert((param.slot_count == 1) == (param.layout == gui_layout::single));
   assert(0 < param.position.row_span && param.position.row_span <= 1024);
   assert(0 < param.position.column_span && param.position.column_span <= 1024);
   assert(0 <= param.position.row && param.position.row + param.position.row_span <= module.sections[param.section].dimension.row_sizes.size());

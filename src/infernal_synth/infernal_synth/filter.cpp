@@ -29,7 +29,7 @@ filter_topo(int osc_slot_count)
   module_topo result(make_module(
     "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, 
     module_stage::voice, module_output::none,
-    gui_layout::default_, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
+    gui_layout::single, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
     return std::make_unique<filter_engine>(); };
 
@@ -37,15 +37,15 @@ filter_topo(int osc_slot_count)
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 2 + osc_slot_count }));
   result.params.emplace_back(param_toggle(
     "{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", 1, 
-    section_main, param_dir::input, param_label::both, false,
-    gui_layout::default_, gui_position { 0, 0 }));
+    section_main, param_dir::input, param_label::default_, false,
+    gui_layout::single, gui_position { 0, 0 }));
   result.params.emplace_back(param_log(
     "{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", 1, 
-    section_main, param_dir::input, param_edit::knob, param_label::both, param_rate::accurate, 20, 20000, 1000, 1000, "Hz",
-    gui_layout::default_, gui_position { 0, 1 }));
+    section_main, param_dir::input, param_edit::knob, param_label::default_, param_rate::accurate, 20, 20000, 1000, 1000, "Hz",
+    gui_layout::single, gui_position { 0, 1 }));
   result.params.emplace_back(param_pct(
     "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", osc_slot_count,
-    section_main, param_dir::input, param_edit::vslider, param_label::both, param_rate::accurate, true, 0, 1, 0.5,
+    section_main, param_dir::input, param_edit::vslider, param_label::default_, param_rate::accurate, true, 0, 1, 0.5,
     gui_layout::horizontal, gui_position { 0, 2, 1, osc_slot_count }));
 
   return result;

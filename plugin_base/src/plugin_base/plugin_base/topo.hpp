@@ -14,13 +14,13 @@ enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
 enum class plugin_type { synth, fx };
-enum class gui_layout { default_, horizontal, vertical, tabbed };
+enum class gui_layout { single, horizontal, vertical, tabbed };
 
 enum class param_dir { input, output };
 enum class param_rate { accurate, block };
-enum class param_label { none, name, value, both };
 enum class param_display { normal, pct, pct_no_unit };
 enum class param_type { step, name, item, linear, log };
+enum class param_label { none, name, value, both, default_ };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
 
 class module_engine;

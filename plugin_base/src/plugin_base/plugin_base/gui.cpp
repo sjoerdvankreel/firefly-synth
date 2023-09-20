@@ -454,23 +454,6 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
 }
 
 Component&
-plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
-{
-  plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
-  switch (param.param->label)
-  {
-  case param_label::name:
-    return make_component<param_name_label>(&param);
-  case param_label::both:
-  case param_label::value:
-    return make_component<param_value_label>(this, &param, initial);
-  default:
-    assert(false);
-    return *((Component*)nullptr);
-  }
-}
-
-Component&
 plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
 {
   plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
@@ -486,6 +469,42 @@ plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
     return make_component<param_combobox>(this, &param, initial);
   case param_edit::toggle:
     return make_component<param_toggle_button>(this, &param, initial);
+  default:
+    assert(false);
+    return *((Component*)nullptr);
+  }
+}
+
+Component&
+plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
+{
+  param_label label = param.param->label;
+  if(label == param_label::default_)
+    switch (param.param->edit)
+    {
+    case param_edit::list: 
+    case param_edit::text:
+    case param_edit::toggle:
+      label = param_label::name;
+      break;
+    case param_edit::knob:
+    case param_edit::hslider:
+    case param_edit::vslider:
+      label = param_label::both;
+      break;
+    default:
+      assert(false);
+      break;
+    }
+
+  plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
+  switch (label)
+  {
+  case param_label::name:
+    return make_component<param_name_label>(&param);
+  case param_label::both:
+  case param_label::value:
+    return make_component<param_value_label>(this, &param, initial);
   default:
     assert(false);
     return *((Component*)nullptr);

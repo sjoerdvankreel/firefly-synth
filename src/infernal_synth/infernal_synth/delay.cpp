@@ -30,7 +30,7 @@ delay_topo()
   module_topo result(make_module(
     "{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Delay", 1, 
     module_stage::output, module_output::none,
-    gui_layout::default_, gui_position { 2, 0 }, gui_dimension { 1, 1 }));
+    gui_layout::single, gui_position { 2, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
     return std::make_unique<delay_engine>(sample_rate); };
 
@@ -38,12 +38,12 @@ delay_topo()
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 2 }));
   result.params.emplace_back(param_toggle(
     "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, 
-    section_main, param_dir::input, param_label::both, false,
-    gui_layout::default_, gui_position { 0, 0 } ));
+    section_main, param_dir::input, param_label::default_, false,
+    gui_layout::single, gui_position { 0, 0 } ));
   result.params.emplace_back(param_pct(
     "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out Gain", 1,
-    section_main, param_dir::output, param_edit::text, param_label::both, param_rate::block, true, 0, 1, 0,
-    gui_layout::default_, gui_position { 0, 1 }));
+    section_main, param_dir::output, param_edit::text, param_label::default_, param_rate::block, true, 0, 1, 0,
+    gui_layout::single, gui_position { 0, 1 }));
 
   return result;
 }
