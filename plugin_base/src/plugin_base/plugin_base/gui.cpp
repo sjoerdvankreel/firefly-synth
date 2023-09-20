@@ -247,8 +247,6 @@ grid_component::resized()
     grid.items.add(item);
   }
   grid.performLayout(getLocalBounds());
-  for(int i = 0; i < _positions.size(); i++)
-    getChildComponent(i)->resized();
 }
 
 // main plugin gui

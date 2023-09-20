@@ -53,7 +53,7 @@ public:
   void plugin_changed(int index, plain_value plain);
 
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
-  void resized() override { reinterpret_cast<juce::Component*>(_grid)->resized(); }
+  void resized() override { reinterpret_cast<juce::Component*>(_grid)->setBounds(getLocalBounds()); }
 
   void remove_ui_listener(ui_listener* listener);
   void remove_plugin_listener(int index, plugin_listener* listener);
