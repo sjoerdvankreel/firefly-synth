@@ -33,13 +33,19 @@ param_topo::text_to_normalized(
 std::string
 param_topo::plain_to_text(plain_value plain) const
 {
+  std::string prefix = "";
+  if(min < 0 && 
+    ((is_real() && plain.real() > 0) || 
+    (!is_real() && plain.step() > 0))) 
+    prefix = "+";
+
   if (edit == param_edit::toggle)
     return plain.step() == 0 ? "Off" : "On";
   switch (type)
   {
   case param_type::name: return names[plain.step()];
   case param_type::item: return items[plain.step()].name;
-  case param_type::step: return std::to_string(plain.step());
+  case param_type::step: return prefix + std::to_string(plain.step());
   default: break;
   }
 
@@ -48,7 +54,7 @@ param_topo::plain_to_text(plain_value plain) const
   int mult = display != param_display::normal ? 100 : 1;
   stream << std::setprecision(prec) << plain.real() * (mult);
   if (unit.size()) stream << " " << unit;
-  return stream.str();
+  return prefix + stream.str();
 }
 
 bool 
