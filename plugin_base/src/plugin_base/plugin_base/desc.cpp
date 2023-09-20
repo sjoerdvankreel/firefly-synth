@@ -317,10 +317,10 @@ validate_param_desc(module_desc const& module_desc, param_desc const& desc)
   assert(desc.param);
   assert(desc.id_hash >= 0);
   assert(desc.id.size() > 0);
-  assert(0 < desc.short_name.size() && desc.short_name.size() < desc.full_name.size());
   assert(0 <= desc.slot && desc.slot < desc.param->slot_count);
   assert(0 <= desc.local && desc.local < module_desc.params.size());
   assert(0 <= desc.topo && desc.topo < module_desc.module->params.size());
+  assert(0 < desc.name.size() && desc.name.size() < desc.full_name.size());
 }
 
 static void
@@ -379,8 +379,8 @@ param_desc(
   this->slot = slot;
   this->local = local;
   this->global = global;
-  short_name = param_name(param_, slot);
-  full_name = module_name(module_, module_slot) + " " + short_name;
+  name = param_name(param_, slot);
+  full_name = module_name(module_, module_slot) + " " + name;
   id = module_id(module_, module_slot) + "-" + param_id(param_, slot);
   id_hash = stable_hash(id.c_str());
 }

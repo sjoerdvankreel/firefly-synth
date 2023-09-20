@@ -36,9 +36,6 @@ public juce::Component
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   std::vector<std::unique_ptr<juce::Component>> _components = {}; // must be destructed first
 
-  void state_loaded();
-  template <class T, class... U> T& make_component(U&&... args);
-
   Component& make_params(param_desc const* slots);
   Component& make_single_param(param_desc const& slot);
   Component& make_multi_param(param_desc const* slots);
@@ -49,6 +46,12 @@ public juce::Component
 
   Component& make_sections(module_desc const& module);
   Component& make_section(module_desc const& module, section_topo const& section);
+
+  void state_loaded();
+  template <class T, class... U>
+  T& make_component(U&&... args);
+  template <class Topo, class Slot, class MakeSingle>
+  Component& make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single);
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);

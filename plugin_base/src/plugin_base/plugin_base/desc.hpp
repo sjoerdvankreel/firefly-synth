@@ -36,8 +36,8 @@ struct param_desc final {
   int global = {};
   int id_hash = {};
   std::string id = {};
+  std::string name = {};
   std::string full_name = {};
-  std::string short_name = {};
   param_topo const* param = {};
 
   INF_DECLARE_MOVE_ONLY(param_desc);

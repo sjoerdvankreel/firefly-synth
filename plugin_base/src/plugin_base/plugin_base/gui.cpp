@@ -37,7 +37,7 @@ public Label
 {
 public:
   param_name_label(param_desc const* desc) 
-  { setText(desc->short_name, dontSendNotification);  }
+  { setText(desc->name, dontSendNotification);  }
 };
 
 class param_value_label:
@@ -121,7 +121,7 @@ param_value_label::plugin_changed(plain_value plain)
 { 
   std::string text = _desc->param->plain_to_text(plain);
   if(_desc->param->label == param_label::both)
-    text = _desc->short_name + " " + text;
+    text = _desc->name + " " + text;
   setText(text, dontSendNotification); 
 }
 
@@ -396,6 +396,16 @@ plugin_gui::make_single_module(module_desc const& slot)
 }
 
 Component&
+plugin_gui::make_sections(module_desc const& module)
+{
+  auto const& topo = *module.module;
+  auto& result = make_component<grid_component>(topo.dimension);
+  for (int s = 0; s < topo.sections.size(); s++)
+    result.add(make_section(module, topo.sections[s]), topo.sections[s].position);
+  return result;
+}
+
+Component&
 plugin_gui::make_section(module_desc const& module, section_topo const& section)
 {
   auto const& params = module.params;
@@ -410,48 +420,18 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   return result;
 }
 
-Component&
-plugin_gui::make_sections(module_desc const& module)
-{
-  auto const& topo = *module.module;
-  auto& result = make_component<grid_component>(topo.dimension);
-  for (int s = 0; s < topo.sections.size(); s++)
-    result.add(make_section(module, topo.sections[s]), topo.sections[s].position);
-  return result;
-}
+Component& 
+plugin_gui::make_multi_param(param_desc const* slots)
+{ return make_multi_slot(*slots[0].param, slots, &plugin_gui::make_single_param); }
 
 Component&
 plugin_gui::make_multi_module(module_desc const* slots)
-{
-  auto const& topo = *slots[0].module;
-  switch (topo.layout)
-  {
-  case gui_layout::vertical:
-  case gui_layout::horizontal:
-  {
-    bool vertical = topo.layout == gui_layout::vertical;
-    auto& result = make_component<grid_component>(vertical, topo.slot_count);
-    for (int i = 0; i < topo.slot_count; i++)
-      result.add(make_single_module(slots[i]), vertical, i);
-    return result;
-  }
-  case gui_layout::tabbed:
-  {
-    auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
-    for (int i = 0; i < topo.slot_count; i++)
-      result.addTab(slots[i].name, Colours::black, &make_single_module(slots[i]), false);
-    return result;
-  }
-  default:
-    assert(false);
-    return *((Component*)nullptr);
-  }
-}
+{ return make_multi_slot(*slots[0].module, slots, &plugin_gui::make_single_module); }
 
-Component& 
-plugin_gui::make_multi_param(param_desc const* slots)
+template <class Topo, class Slot, class MakeSingle>
+Component&
+plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single)
 {
-  auto const& topo = *slots[0].param;
   switch (topo.layout)
   {
   case gui_layout::vertical:
@@ -460,14 +440,14 @@ plugin_gui::make_multi_param(param_desc const* slots)
     bool vertical = topo.layout == gui_layout::vertical;
     auto& result = make_component<grid_component>(vertical, topo.slot_count);
     for (int i = 0; i < topo.slot_count; i++)
-      result.add(make_single_param(slots[i]), vertical, i);
+      result.add((this->*make_single)(slots[i]), vertical, i);
     return result;
   }
   case gui_layout::tabbed:
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
     for (int i = 0; i < topo.slot_count; i++)
-      result.addTab(slots[i].full_name, Colours::black, &make_single_param(slots[i]), false);
+      result.addTab(slots[i].name, Colours::black, &(this->*make_single)(slots[i]), false);
     return result;
   }
   default:
