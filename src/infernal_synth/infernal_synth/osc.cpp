@@ -42,7 +42,7 @@ osc_topo()
     return std::make_unique<osc_engine>(); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 4 }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1 }, { 1, 2, 2, 2 } }));
   result.params.emplace_back(param_toggle(
     "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", 1, section_main, false, 
     param_dir::input, 
