@@ -236,13 +236,13 @@ public Component
 public:
   void resized() override;
   void add(Component& child, gui_position const& position);
-
-  grid_component(gui_dimension const& dimension) :
-  _dimension(dimension) {}
-  grid_component(bool vertical, int count) : 
-  _dimension(vertical ? count : 1, vertical ? 1 : count) {}
   void add(Component& child, bool vertical, int position) 
   { add(child, gui_position { vertical? position: 0, vertical? 0: position }); }
+
+  grid_component(gui_dimension const& dimension) :
+  _dimension(dimension) { }
+  grid_component(bool vertical, int count) :
+  _dimension(vertical ? count : 1, vertical ? 1 : count) {}
 };
 
 void
@@ -256,10 +256,23 @@ void
 grid_component::resized()
 {
   Grid grid;
+
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
-    grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
-  for(int i = 0; i < _dimension.column_sizes.size(); i++) 
-    grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
+    if(_dimension.row_sizes[i] > 0)
+      grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
+    else if (_dimension.row_sizes[i] < 0)
+      grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
+    else
+      assert(false);
+
+  for(int i = 0; i < _dimension.column_sizes.size(); i++)
+    if(_dimension.column_sizes[i] > 0)
+      grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
+    else if(_dimension.column_sizes[i] < 0)
+      grid.templateColumns.add(Grid::Px(-_dimension.column_sizes[i]));
+    else
+      assert(false);
+
   for (int i = 0; i < _positions.size(); i++)
   {
     GridItem item(getChildComponent(i));
@@ -269,6 +282,7 @@ grid_component::resized()
     item.column.end = _positions[i].column + 1 + _positions[i].column_span;
     grid.items.add(item);
   }
+
   grid.performLayout(getLocalBounds());
 }
 
@@ -361,23 +375,6 @@ plugin_gui::make_component(U&&... args)
 }
 
 Component&
-plugin_gui::make_params(param_desc const* slots)
-{
-  if (slots[0].param->slot_count == 1)
-    return make_single_param(slots[0]);
-  else
-    return make_multi_param(slots);
-}
-
-Component&
-plugin_gui::make_single_param(param_desc const& slot)
-{
-  auto& result = make_component<Label>();
-  result.setText(slot.name, dontSendNotification);
-  return result;
-}
-
-Component&
 plugin_gui::make_modules(module_desc const* slots)
 {  
   if (slots[0].module->slot_count == 1)
@@ -393,6 +390,14 @@ plugin_gui::make_single_module(module_desc const& slot)
   result.setText(slot.name);
   result.addAndMakeVisible(make_sections(slot));
   return result;
+}
+
+Component&
+plugin_gui::make_multi_module(module_desc const* slots)
+{
+  auto make_single = [this](module_desc const& m) -> Component& {
+    return make_single_module(m); };
+  return make_multi_slot(*slots[0].module, slots, make_single);
 }
 
 Component&
@@ -412,7 +417,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   auto& grid = make_component<grid_component>(section.dimension);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
     if(iter->param->section == section.section)
-      grid.add(make_params(&(*iter)), iter->param->position);
+      grid.add(make_params(module, &(*iter)), iter->param->position);
 
   auto& result = make_component<group_component>();
   result.setText(section.name);
@@ -420,13 +425,72 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   return result;
 }
 
-Component& 
-plugin_gui::make_multi_param(param_desc const* slots)
-{ return make_multi_slot(*slots[0].param, slots, &plugin_gui::make_single_param); }
+Component&
+plugin_gui::make_params(module_desc const& module, param_desc const* params)
+{
+  if (params[0].param->slot_count == 1)
+    return make_single_param(module, params[0]);
+  else
+    return make_multi_param(module, params);
+}
 
 Component&
-plugin_gui::make_multi_module(module_desc const* slots)
-{ return make_multi_slot(*slots[0].module, slots, &plugin_gui::make_single_module); }
+plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
+{
+  auto make_single = [this, &module](param_desc const& p) -> Component& {
+    return make_single_param(module, p); };
+  return make_multi_slot(*slots[0].param, slots, make_single);
+}
+
+Component&
+plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
+{
+  if(param.param->label == param_label::none)
+    return make_param_edit(module, param);
+  auto& result = make_component<grid_component>(gui_dimension({ 1, -15 }, { 1 }));
+  result.add(make_param_edit(module, param), { 0, 0 });
+  result.add(make_param_label(module, param), { 1, 0 });
+  return result;
+}
+
+Component&
+plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
+{
+  plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
+  switch (param.param->label)
+  {
+  case param_label::name:
+    return make_component<param_name_label>(&param);
+  case param_label::both:
+  case param_label::value:
+    return make_component<param_value_label>(this, &param, initial);
+  default:
+    assert(false);
+    return *((Component*)nullptr);
+  }
+}
+
+Component&
+plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
+{
+  plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
+  switch (param.param->edit)
+  {
+  case param_edit::knob:
+  case param_edit::hslider:
+  case param_edit::vslider:
+    return make_component<param_slider>(this, &param, initial);
+  case param_edit::text:
+    return make_component<param_textbox>(this, &param, initial);
+  case param_edit::list:
+    return make_component<param_combobox>(this, &param, initial);
+  case param_edit::toggle:
+    return make_component<param_toggle_button>(this, &param, initial);
+  default:
+    assert(false);
+    return *((Component*)nullptr);
+  }
+}
 
 template <class Topo, class Slot, class MakeSingle>
 Component&
@@ -440,14 +504,14 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
     bool vertical = topo.layout == gui_layout::vertical;
     auto& result = make_component<grid_component>(vertical, topo.slot_count);
     for (int i = 0; i < topo.slot_count; i++)
-      result.add((this->*make_single)(slots[i]), vertical, i);
+      result.add(make_single(slots[i]), vertical, i);
     return result;
   }
   case gui_layout::tabbed:
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
     for (int i = 0; i < topo.slot_count; i++)
-      result.addTab(slots[i].name, Colours::black, &(this->*make_single)(slots[i]), false);
+      result.addTab(slots[i].name, Colours::black, &make_single(slots[i]), false);
     return result;
   }
   default:
