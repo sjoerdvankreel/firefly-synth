@@ -373,7 +373,7 @@ Component&
 plugin_gui::make_single_param(param_desc const& slot)
 {
   auto& result = make_component<Label>();
-  result.setText(slot.full_name, dontSendNotification);
+  result.setText(slot.name, dontSendNotification);
   return result;
 }
 
