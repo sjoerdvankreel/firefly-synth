@@ -13,8 +13,8 @@ adsr env
 linux, renoise, bitwig, cbb
 rename v2.0 to 2
 preset extension
-tryout varying osc slot count
 apply marray whereever possible
 scaling
 not scale font/auto ellips
 display cent/bal as +100
+get the lnf in there
