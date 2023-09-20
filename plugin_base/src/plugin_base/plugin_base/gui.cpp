@@ -575,7 +575,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
     assert(false);
     break;
   }
-  result->setJustificationType(justification_type(param.param->label_align, param.param->label_justify);
+  result->setJustificationType(justification_type(param.param->label_align, param.param->label_justify));
   return *result;
 }
 
