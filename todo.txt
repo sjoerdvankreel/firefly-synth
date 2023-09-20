@@ -17,3 +17,4 @@ tryout varying osc slot count
 apply marray whereever possible
 scaling
 not scale font/auto ellips
+display cent/bal as +100
