@@ -343,7 +343,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   for(int m = 0; m < _desc->plugin->modules.size(); m++)
   {
     auto const& module = _desc->plugin->modules[m];
-    add_module_slots(module, &_desc->modules[mi]);
+    _grid->add(make_module_slots(module, &_desc->modules[mi]), module.position);
     mi += module.slot_count;
   }
   setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
@@ -358,30 +358,29 @@ plugin_gui::make_component(U&&... args)
   return *result;
 }
 
-void 
-plugin_gui::add_sections(GroupComponent& container, module_topo const& module)
+Component& 
+plugin_gui::make_sections(module_topo const& module)
 {
-  auto& grid = make_component<grid_component>(module.dimension);
-  container.addAndMakeVisible(grid);
+  auto& result = make_component<grid_component>(module.dimension);
   for (int s = 0; s < module.sections.size(); s++)
   {
     auto const& section = module.sections[s];
     auto& group = make_component<group_component>();
     group.setText(section.name);
-    grid.add(group, section.position);
+    result.add(group, section.position);
   }
+  return result;
 }
 
-void 
-plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots)
+Component&
+plugin_gui::make_module_slots(module_topo const& module, module_desc const* slots)
 {  
   if (module.slot_count == 1)
   {
-    auto& group = make_component<group_component>();
-    group.setText(slots[0].name);
-    add_sections(group, *slots[0].module);
-    _grid->add(group, module.position);
-    return;
+    auto& result = make_component<group_component>();
+    result.setText(slots[0].name);
+    result.addAndMakeVisible(make_sections(module));
+    return result;
   }
 
   switch (module.layout)
@@ -392,22 +391,21 @@ plugin_gui::add_module_slots(module_topo const& module, module_desc const* slots
     bool is_vertical = module.layout == gui_layout::vertical;
     int slow_rows = is_vertical ? module.slot_count : 1;
     int slow_columns = is_vertical? 1: module.slot_count;
-    auto& slot_grid = make_component<grid_component>(gui_dimension { slow_rows, slow_columns });
+    auto& result = make_component<grid_component>(gui_dimension { slow_rows, slow_columns });
     for (int i = 0; i < module.slot_count; i++)
     {
       auto& group = make_component<group_component>();
       group.setText(slots[i].name);
-      add_sections(group, *slots[i].module);
+      group.addAndMakeVisible(make_sections(module));
       int row = (is_vertical? i: 0);
       int column = (is_vertical ? 0: i);
-      slot_grid.add(group, { row, column, 1, 1 });
+      result.add(group, { row, column, 1, 1 });
     }
-    _grid->add(slot_grid, module.position);
-    break;
+    return result;
   }
   default:
     assert(false);
-    break;
+    return *((Component*)nullptr);
   }
 }
 
