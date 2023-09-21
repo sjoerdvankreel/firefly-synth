@@ -12,7 +12,6 @@ am/fm/lfos/modmatrix
 am/fm->select relevant sources
 adsr env
 linux, renoise, bitwig, cbb
-rename v2.0 to 2
 preset extension
 not scale font/auto ellips
 get the lnf in there
