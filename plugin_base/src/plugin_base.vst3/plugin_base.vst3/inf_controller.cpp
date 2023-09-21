@@ -5,6 +5,8 @@
 #include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/inf_editor.hpp>
 #include <plugin_base.vst3/inf_controller.hpp>
+#include <plugin_base.vst3/inf_editor_linux.hpp>
+#include <plugin_base.vst3/inf_editor_generic.hpp>
 
 #include <base/source/fstring.h>
 #include <juce_events/juce_events.h>
@@ -61,7 +63,11 @@ inf_controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
   MessageManager::getInstance();
-  return _editor = new inf_editor(this);
+#if JUCE_LINUX || JUCE_BSD
+  return _editor = new inf_editor_linux(this);
+#else
+  return _editor = new inf_editor_generic(this);
+#endif
 }
 
 void
