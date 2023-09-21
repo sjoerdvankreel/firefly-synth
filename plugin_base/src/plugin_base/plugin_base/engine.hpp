@@ -4,6 +4,7 @@
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/block_host.hpp>
 #include <plugin_base/block_plugin.hpp>
 
 #include <memory>
@@ -11,8 +12,6 @@
 #include <utility>
 
 namespace plugin_base {
-
-struct host_block;
 
 // single module audio processors
 class module_engine { 

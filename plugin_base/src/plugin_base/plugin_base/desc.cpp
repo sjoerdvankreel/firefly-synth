@@ -277,6 +277,7 @@ validate_plugin_topo(plugin_topo const& topo)
   assert(0 < topo.dimension.column_sizes.size() && topo.dimension.column_sizes.size() <= 1024);
 
   int stage = 0;
+  (void)stage;
   for (int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
