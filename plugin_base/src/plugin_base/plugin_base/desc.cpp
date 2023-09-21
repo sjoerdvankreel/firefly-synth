@@ -157,21 +157,18 @@ template <class Parent, class Child, class Include>
 static void validate_gui_constraints(
   Parent const& parent, std::vector<Child> const& children, Include include)
 {
-  marray<int, 2> gui_taken((int)parent.dimension.row_sizes.size(), (int)parent.dimension.column_sizes.size());
+  std::set<std::pair<int, int>> gui_taken;
   for (int k = 0; k < children.size(); k++)
     if(include(children[k]))
     {
       auto const& pos = children[k].position;
       for (int r = pos.row; r < pos.row + pos.row_span; r++)
         for (int c = pos.column; c < pos.column + pos.column_span; c++)
-        {
-          assert(gui_taken(r, c) == 0);
-          gui_taken(r, c) = 1;
-        }
+          INF_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second);
     }
   for (int r = 0; r < parent.dimension.row_sizes.size(); r++)
     for (int c = 0; c < parent.dimension.column_sizes.size(); c++)
-      assert(gui_taken(r, c) == 1);
+      assert(gui_taken.find(std::make_pair(r, c)) != gui_taken.end());
 }
 
 static void
