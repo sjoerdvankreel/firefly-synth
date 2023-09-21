@@ -29,7 +29,7 @@ type_items()
 
 enum { type_saw, type_sine };
 enum { section_pitch, section_main };
-enum { param_on, param_type, param_gain, param_bal, param_note, param_oct, param_cent };
+enum { param_note, param_oct, param_cent, param_on, param_type, param_gain, param_bal };
 
 module_topo
 osc_topo()
