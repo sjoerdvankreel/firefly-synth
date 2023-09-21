@@ -221,7 +221,7 @@ plugin_engine::process()
   {
     auto const& event = _host_block->events.block[e];
     auto const& mapping = _desc.mappings[event.param];
-    plain_value plain = _desc.normalized_to_plain_at(mapping, event.normalized);
+    plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(event.normalized);
     mapping.value_at(_state) = plain;
     mapping.value_at(_block_automation) = plain;
   }
@@ -244,7 +244,7 @@ plugin_engine::process()
       curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
     // denormalize
-    mapping.value_at(_state).real_unchecked(_desc.normalized_to_plain_at(mapping, event.normalized).real());
+    mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).param->normalized_to_plain(event.normalized).real());
     _accurate_frames[event.param] = event.frame;
   }
 

@@ -69,7 +69,7 @@ inf_controller::ui_changing(int index, plain_value plain)
 {
   int tag = desc().param_index_to_tag[index];
   param_mapping const& mapping = desc().mappings[index];
-  auto normalized = desc().plain_to_normalized_at(mapping, plain).value();
+  auto normalized = desc().param_at(mapping).param->plain_to_normalized(plain).value();
   performEdit(tag, normalized);
   setParamNormalized(tag, normalized);
 }
@@ -81,7 +81,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
     return kResultFalse;
   int index = _desc.param_tag_to_index.at(tag);
   param_mapping const& mapping = _desc.mappings[index];
-  plain_value plain = _desc.normalized_to_plain_at(mapping, normalized_value(value));
+  plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(normalized_value(value));
   mapping.value_at(_ui_state) = plain;
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);

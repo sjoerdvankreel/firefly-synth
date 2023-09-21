@@ -83,29 +83,7 @@ struct plugin_desc final {
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; }
 
-  // utility forwarding to topo
-  plain_value raw_to_plain_at(param_mapping const& mapping, double raw) const 
-  { return param_at(mapping).param->raw_to_plain(raw); }
-  double plain_to_raw_at(param_mapping const& mapping, plain_value plain) const 
-  { return param_at(mapping).param->plain_to_raw(plain); }
-  normalized_value raw_to_normalized_at(param_mapping const& mapping, double raw) const 
-  { return param_at(mapping).param->raw_to_normalized(raw); }
-  double normalized_to_raw_at(param_mapping const& mapping, normalized_value normalized) const 
-  { return param_at(mapping).param->normalized_to_raw(normalized); }
-  normalized_value plain_to_normalized_at(param_mapping const& mapping, plain_value plain) const 
-  { return param_at(mapping).param->plain_to_normalized(plain); }
-  plain_value normalized_to_plain_at(param_mapping const& mapping, normalized_value normalized) const 
-  { return param_at(mapping).param->normalized_to_plain(normalized); }
-  
-  // utility forwarding to topo
-  std::string plain_to_text_at(param_mapping const& mapping, plain_value plain) const
-  { return param_at(mapping).param->plain_to_text(plain); }
-  std::string normalized_to_text_at(param_mapping const& mapping, normalized_value normalized) const
-  { return param_at(mapping).param->normalized_to_text(normalized); }
-  bool text_to_plain_at(param_mapping const& mapping, std::string const& textual, plain_value& plain) const
-  { return param_at(mapping).param->text_to_plain(textual, plain); }
-  bool text_to_normalized_at(param_mapping const& mapping, std::string const& textual, normalized_value& normalized) const
-  { return param_at(mapping).param->text_to_normalized(textual, normalized); }
+ 
 };
 
 // runtime plugin topo dimensions
