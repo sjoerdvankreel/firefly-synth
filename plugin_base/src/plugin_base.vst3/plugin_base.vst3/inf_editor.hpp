@@ -24,7 +24,7 @@ public:
   inf_editor(inf_controller* controller);
 
 #ifdef __linux__
-  void onFDIsSet(Steinberg::Linux::FileDescriptor fd) override;
+  void PLUGIN_API onFDIsSet(Steinberg::Linux::FileDescriptor fd) override;
 #endif
 
   void plugin_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }

@@ -56,10 +56,12 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
 }
 
 #ifdef __linux__
-void 
+void PLUGIN_API
 inf_editor::onFDIsSet(Steinberg::Linux::FileDescriptor fd)
 {
   std::cout << "POSIX ME HARDER! " << fd << "\n";
+  // TODO switch the msg thread
+  LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
 }
 #endif
 
