@@ -1,5 +1,7 @@
 #if JUCE_LINUX || JUCE_BSD
 
+#include <iostream>
+
 namespace juce {
 
 struct MessageManagerLockedDeleter
@@ -7,8 +9,11 @@ struct MessageManagerLockedDeleter
   template <typename ObjectType>
   void operator() (ObjectType* object) const noexcept
   {
+    std::cout << "D1\n";
     const MessageManagerLock mmLock;
+    std::cout << "D2\n";
     delete object;
+    std::cout << "D3\n";
   }
 };
 

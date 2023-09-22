@@ -13,6 +13,7 @@ protected:
   plugin_gui* gui() const override;
 
 public: 
+  ~inf_editor_linux();
   INF_DECLARE_MOVE_ONLY(inf_editor_linux);
   inf_editor_linux(inf_controller* controller);
 
