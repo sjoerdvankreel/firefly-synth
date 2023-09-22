@@ -12,6 +12,9 @@ namespace plugin_base::vst3 {
 class inf_editor final:
 public Steinberg::Vst::EditorView,
 public Steinberg::IPlugViewContentScaleSupport
+#ifdef __linux__
+, public Steinberg::Linux::IEventHandler
+#endif
 {
   inf_controller* const _controller = {};
   std::unique_ptr<plugin_gui> _gui = {};
@@ -19,6 +22,10 @@ public Steinberg::IPlugViewContentScaleSupport
 public: 
   INF_DECLARE_MOVE_ONLY(inf_editor);
   inf_editor(inf_controller* controller);
+
+#ifdef __linux__
+  void onFDIsSet(Steinberg::Linux::FileDescriptor fd) override;
+#endif
 
   void plugin_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
 
