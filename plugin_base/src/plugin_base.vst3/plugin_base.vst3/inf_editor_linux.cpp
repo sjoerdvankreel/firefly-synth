@@ -17,27 +17,25 @@ namespace plugin_base::vst3 {
 
 struct inf_editor_linux::impl
 {
-  std::unique_ptr<plugin_gui> gui;
   SharedResourcePointer<EventHandler> event_handler;
   SharedResourcePointer<detail::MessageThread> message_thread;
-
-  ~impl() { std::cout << "Do i even destruct?\n"; }
+  std::unique_ptr<plugin_gui, MessageManagerLockedDeleter> gui;
 };
 
 inf_editor_linux::
 ~inf_editor_linux()
 {
-  std::cout << "D1\n";
+  std::cout << "REALDTOR\n";
+
 }
 
 inf_editor_linux::
 inf_editor_linux(inf_controller* controller):
-inf_editor(controller), _impl()
+inf_editor(controller), _impl(std::make_unique<impl>()) 
 {
   std::cout << "C1\n";
   MessageManagerLock const mm_lock;
   std::cout << "C2\n";
-  _impl.reset(new impl());
   _impl->gui.reset(new plugin_gui(&controller->desc(), &controller->ui_state()));
   std::cout << "C3\n";
 }
@@ -57,7 +55,7 @@ inf_editor_linux::removed()
   std::cout << "R2\n";
   _impl->gui->setVisible(false);
   std::cout << "R3\n";
-  _impl->gui->removeFromDesktop();
+  _impl->gui.reset();
   std::cout << "R4\n";
   _impl->event_handler->unregisterHandlerForFrame(plugFrame);
   std::cout << "R5\n";
@@ -68,14 +66,26 @@ tresult PLUGIN_API
 inf_editor_linux::attached(void* parent, FIDString type)
 {
   std::cout << "A1\n";
-  _impl->event_handler->registerHandlerForFrame(plugFrame);
+  if (parent == nullptr) return kResultFalse;
   std::cout << "A2\n";
-  _impl->gui->addToDesktop(0, parent);
+  _impl->event_handler->registerHandlerForFrame(plugFrame);
+  systemWindow = parent;
   std::cout << "A3\n";
+  if(!_impl->gui)
+  {
+    std::cout << "A4\n";
+    MessageManagerLock const mm_lock;
+    std::cout << "A5\n";
+    _impl->gui.reset(new plugin_gui(&_controller->desc(), &_controller->ui_state()));
+    std::cout << "A6\n";
+  }
+  std::cout << "A7\n";
+  _impl->gui->addToDesktop(0, parent);
+  std::cout << "A8\n";
   _impl->gui->setVisible(true);
-  std::cout << "A4\n";
+  std::cout << "A9\n";
   _impl->gui->add_ui_listener(_controller);
-  std::cout << "A5\n";
+  std::cout << "A10\n";
   return kResultTrue;
 }
 
