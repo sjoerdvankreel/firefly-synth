@@ -24,7 +24,7 @@ inf_editor_linux::
 inf_editor_linux(inf_controller* controller):
 inf_editor(controller), _impl(std::make_unique<impl>()) 
 {
-  const MessageManagerLock mm_lock;
+  MessageManagerLock const mm_lock;
   _impl->gui.reset(new plugin_gui(&controller->desc(), &controller->ui_state()));
 }
 
