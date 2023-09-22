@@ -35,14 +35,11 @@ inf_editor_linux(inf_controller* controller):
 inf_editor(controller), _impl()
 {
   std::cout << "C1\n";
-  MessageManager::getInstance();
   MessageManagerLock const mm_lock;
-  std::cout << "i really have the lock ctor and the msgmgr\n";
   std::cout << "C2\n";
   _impl.reset(new impl());
   _impl->gui.reset(new plugin_gui(&controller->desc(), &controller->ui_state()));
   std::cout << "C3\n";
-  std::cout << "i dont really have the lock ctor but still the mgr\n";
 }
 
 plugin_gui* 
