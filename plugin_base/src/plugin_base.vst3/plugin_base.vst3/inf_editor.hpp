@@ -18,10 +18,10 @@ public Steinberg::IPlugViewContentScaleSupport
 , public Steinberg::Linux::IEventHandler
 #endif
 {
-  inf_controller* const _controller = {};
   std::unique_ptr<plugin_gui> _gui = {};
+  inf_controller* const _controller = {};
 #ifdef __linux__
-  juce::SharedResourcePointer<juce::detail::MessageThread> messageThread;
+  juce::SharedResourcePointer<juce::detail::MessageThread> message_thread;
 #endif
 
 public: 
