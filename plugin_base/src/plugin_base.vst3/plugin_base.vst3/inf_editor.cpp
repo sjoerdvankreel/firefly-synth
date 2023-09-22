@@ -3,6 +3,8 @@
 #include <juce_events/native/juce_EventLoopInternal_linux.h>
 #endif
 
+#include <iostream>
+
 using namespace juce;
 using namespace Steinberg;
 
@@ -57,6 +59,7 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
 void 
 inf_editor::onFDIsSet(Steinberg::Linux::FileDescriptor fd)
 {
+  std::cout << "POSIX ME HARDER! " << fd << "\n";
 }
 #endif
 
@@ -69,6 +72,7 @@ inf_editor::removed()
 #ifdef __linux__
   Steinberg::Linux::IRunLoop* loop = {};
   INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
+  std::cout << "Unregistering\n";
   loop->unregisterEventHandler(this);
 #endif
   return EditorView::removed();
@@ -81,7 +85,10 @@ inf_editor::attached(void* parent, FIDString type)
   Steinberg::Linux::IRunLoop* loop = {};
   INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
   for (int fd: LinuxEventLoopInternal::getRegisteredFds())
+  {
+    std::cout << "Registering fd " << fd << "\n";
     loop->registerEventHandler(this, fd);
+  }
 #endif
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
@@ -94,7 +101,7 @@ inf_editor::queryInterface(TUID const iid, void** obj)
 {
   QUERY_INTERFACE(iid, obj, IPlugViewContentScaleSupport::iid, IPlugViewContentScaleSupport)
 #ifdef __linux__
-    QUERY_INTERFACE(iid, obj, Steinberg::Linux::IEventHandler::iid, Steinberg::Linux::IEventHandler)
+  QUERY_INTERFACE(iid, obj, Steinberg::Linux::IEventHandler::iid, Steinberg::Linux::IEventHandler)
 #endif
     return EditorView::queryInterface(iid, obj);
 }
