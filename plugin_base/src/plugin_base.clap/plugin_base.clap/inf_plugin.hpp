@@ -6,6 +6,7 @@
 
 #include <clap/helpers/plugin.hh>
 #include <readerwriterqueue.h>
+
 #include <memory>
 #include <cstdint>
 
@@ -66,6 +67,11 @@ public:
 
   bool stateSave(clap_ostream const* stream) noexcept override;
   bool stateLoad(clap_istream const* stream) noexcept override;
+
+#if (defined __linux__) || (defined  __FreeBSD__)
+  void onPosixFd(int fd, int flags) noexcept override;
+  bool implementsPosixFdSupport() const noexcept override { return true; }
+#endif
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;

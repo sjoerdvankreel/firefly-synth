@@ -1,6 +1,10 @@
 #include <plugin_base/io.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
+#if (defined __linux__) || (defined  __FreeBSD__)
+#include <plugin_base.clap/linux_display_fd.hpp>
+#include <juce_events/native/juce_EventLoopInternal_linux.h>
+#endif
 
 #include <clap/helpers/plugin.hxx>
 #include <clap/helpers/host-proxy.hxx>
@@ -8,6 +12,8 @@
 #include <vector>
 #include <utility>
 #include <algorithm>
+
+#include <iostream>
 
 using namespace juce;
 using namespace moodycamel;
@@ -124,16 +130,33 @@ inf_plugin::guiSetParent(clap_window const* window) noexcept
   return true;
 }
 
+#if (defined __linux__) || (defined  __FreeBSD__)
+void
+inf_plugin::onPosixFd(int fd, int flags) noexcept
+{
+  std::cout << "fd = " << fd << " flags = " << flags << "\n";
+  LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
+}
+#endif
+
 void 
 inf_plugin::guiDestroy() noexcept
 {
   _gui->remove_ui_listener(this);
   _gui.reset();
+#if (defined __linux__) || (defined  __FreeBSD__)
+  std::cout << "unregister\n";
+  _host.posixFdSupportUnregister(current_display_fd());
+#endif
 }
 
 bool
 inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
+#if (defined __linux__) || (defined  __FreeBSD__)
+  std::cout << "register\n";
+  _host.posixFdSupportRegister(current_display_fd(), CLAP_POSIX_FD_READ);
+#endif
   _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_ui_state);
   _gui->add_ui_listener(this);
   return true;
