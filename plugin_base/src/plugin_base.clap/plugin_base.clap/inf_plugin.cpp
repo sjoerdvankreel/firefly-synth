@@ -13,8 +13,6 @@
 #include <utility>
 #include <algorithm>
 
-#include <iostream>
-
 using namespace juce;
 using namespace moodycamel;
 using namespace plugin_base;
@@ -105,9 +103,7 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
 bool
 inf_plugin::guiShow() noexcept
 {
-  std::cout << "show, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   _gui->setVisible(true);
-  std::cout << "show, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   return true;
 }
 
@@ -128,28 +124,27 @@ inf_plugin::guiSetScale(double scale) noexcept
 bool
 inf_plugin::guiSetParent(clap_window const* window) noexcept
 {
-  std::cout << "parent, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   _gui->addToDesktop(0, window->ptr);
-  std::cout << "parent, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
+  _gui->setVisible(true);
+  _gui->add_ui_listener(this);
+  _gui->resized();
   return true;
 }
 
 #if (defined __linux__) || (defined  __FreeBSD__)
 void
 inf_plugin::onPosixFd(int fd, int flags) noexcept
-{
-  //std::cout << "clap fd = " << fd << " flags = " << flags << "\n";
-  LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
-}
+{ LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd); }
 #endif
 
 void 
 inf_plugin::guiDestroy() noexcept
 {
   _gui->remove_ui_listener(this);
+  _gui->setVisible(false);
+  _gui->removeFromDesktop();
   _gui.reset();
 #if (defined __linux__) || (defined  __FreeBSD__)
-  std::cout << "unregister\n";
   for (int fd : LinuxEventLoopInternal::getRegisteredFds())
     _host.posixFdSupportUnregister(fd);
 #endif
@@ -159,13 +154,10 @@ bool
 inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
 #if (defined __linux__) || (defined  __FreeBSD__)
-  std::cout << "register\n";
   for (int fd : LinuxEventLoopInternal::getRegisteredFds())
     _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
 #endif
   _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_ui_state);
-  _gui->add_ui_listener(this);
-  std::cout << "create, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   return true;
 }
 
@@ -174,7 +166,6 @@ inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 {
   guiAdjustSize(&width, &height);
   _gui->setSize(width, height);
-  std::cout << "setsize, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   return true;
 }
 
