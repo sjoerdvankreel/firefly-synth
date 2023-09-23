@@ -138,7 +138,7 @@ inf_plugin::guiSetParent(clap_window const* window) noexcept
 void
 inf_plugin::onPosixFd(int fd, int flags) noexcept
 {
-  std::cout << "clap fd = " << fd << " flags = " << flags << "\n";
+  //std::cout << "clap fd = " << fd << " flags = " << flags << "\n";
   LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
 }
 #endif
