@@ -105,7 +105,9 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
 bool
 inf_plugin::guiShow() noexcept
 {
+  std::cout << "show, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   _gui->setVisible(true);
+  std::cout << "show, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   return true;
 }
 
@@ -126,7 +128,9 @@ inf_plugin::guiSetScale(double scale) noexcept
 bool
 inf_plugin::guiSetParent(clap_window const* window) noexcept
 {
+  std::cout << "parent, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   _gui->addToDesktop(0, window->ptr);
+  std::cout << "parent, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   return true;
 }
 
@@ -161,6 +165,7 @@ inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 #endif
   _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_ui_state);
   _gui->add_ui_listener(this);
+  std::cout << "create, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   return true;
 }
 
@@ -169,6 +174,7 @@ inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 {
   guiAdjustSize(&width, &height);
   _gui->setSize(width, height);
+  std::cout << "setsize, size = " << _gui->getWidth() << " " << _gui->getHeight() << "\n";
   return true;
 }
 
