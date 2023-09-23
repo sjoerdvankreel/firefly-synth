@@ -3,6 +3,8 @@
 #include <juce_events/native/juce_EventLoopInternal_linux.h>
 #endif
 
+#include <iostream>
+
 using namespace juce;
 using namespace Steinberg;
 
@@ -56,7 +58,18 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
 #ifdef __linux__
 void PLUGIN_API
 inf_editor::onFDIsSet(Steinberg::Linux::FileDescriptor fd)
-{ LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd); }
+{
+  std::cout << "POSIX ME HARDER! " << fd << "\n";
+  /*
+  if (!MessageManager::getInstance()->isThisTheMessageThread())
+  {
+    if (messageThread->isRunning())
+      messageThread->stop();
+    MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+  }
+  */
+  LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
+}
 #endif
 
 tresult PLUGIN_API
@@ -68,6 +81,7 @@ inf_editor::removed()
 #ifdef __linux__
   Steinberg::Linux::IRunLoop* loop = {};
   INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
+  std::cout << "Unregistering\n";
   loop->unregisterEventHandler(this);
 #endif
   return EditorView::removed();
@@ -80,7 +94,10 @@ inf_editor::attached(void* parent, FIDString type)
   Steinberg::Linux::IRunLoop* loop = {};
   INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
   for (int fd: LinuxEventLoopInternal::getRegisteredFds())
+  {
+    std::cout << "Registering fd " << fd << "\n";
     loop->registerEventHandler(this, fd);
+  }
 #endif
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
