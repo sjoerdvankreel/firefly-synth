@@ -5,8 +5,6 @@
 
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
-#include <juce_audio_plugin_client/detail/juce_LinuxMessageThread.h>
-
 #include <utility>
 
 namespace plugin_base::vst3 {
@@ -20,9 +18,6 @@ public Steinberg::IPlugViewContentScaleSupport
 {
   inf_controller* const _controller = {};
   std::unique_ptr<plugin_gui> _gui = {};
-#ifdef __linux__
-  juce::SharedResourcePointer<juce::detail::MessageThread> messageThread;
-#endif
 
 public: 
   INF_DECLARE_MOVE_ONLY(inf_editor);

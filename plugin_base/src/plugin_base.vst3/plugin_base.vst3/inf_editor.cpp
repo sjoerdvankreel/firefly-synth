@@ -60,14 +60,7 @@ void PLUGIN_API
 inf_editor::onFDIsSet(Steinberg::Linux::FileDescriptor fd)
 {
   std::cout << "POSIX ME HARDER! " << fd << "\n";
-  /*
-  if (!MessageManager::getInstance()->isThisTheMessageThread())
-  {
-    if (messageThread->isRunning())
-      messageThread->stop();
-    MessageManager::getInstance()->setCurrentThreadAsMessageThread();
-  }
-  */
+  // TODO switch the msg thread
   LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
 }
 #endif
