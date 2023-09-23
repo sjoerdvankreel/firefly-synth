@@ -5,6 +5,7 @@
 
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
+
 #include <utility>
 
 namespace plugin_base::vst3 {
@@ -12,22 +13,20 @@ namespace plugin_base::vst3 {
 class inf_editor final:
 public Steinberg::Vst::EditorView,
 public Steinberg::IPlugViewContentScaleSupport
-#ifdef __linux__
+#if (defined __linux__) || (defined  __FreeBSD__)
 , public Steinberg::Linux::IEventHandler
 #endif
 {
-  inf_controller* const _controller = {};
   std::unique_ptr<plugin_gui> _gui = {};
-
+  inf_controller* const _controller = {};
 public: 
   INF_DECLARE_MOVE_ONLY(inf_editor);
   inf_editor(inf_controller* controller);
+  void plugin_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
 
-#ifdef __linux__
+#if (defined __linux__) || (defined  __FreeBSD__)
   void PLUGIN_API onFDIsSet(Steinberg::Linux::FileDescriptor fd) override;
 #endif
-
-  void plugin_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
 
   Steinberg::uint32 PLUGIN_API addRef() override { return EditorView::addRef(); }
   Steinberg::uint32 PLUGIN_API release() override { return EditorView::release(); } 

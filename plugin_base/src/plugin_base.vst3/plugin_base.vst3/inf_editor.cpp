@@ -1,9 +1,7 @@
 #include <plugin_base.vst3/inf_editor.hpp>
-#if __linux__
+#if (defined __linux__) || (defined  __FreeBSD__)
 #include <juce_events/native/juce_EventLoopInternal_linux.h>
 #endif
-
-#include <iostream>
 
 using namespace juce;
 using namespace Steinberg;
@@ -55,14 +53,10 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
   return kResultTrue;
 }
 
-#ifdef __linux__
+#if (defined __linux__) || (defined  __FreeBSD__)
 void PLUGIN_API
 inf_editor::onFDIsSet(Steinberg::Linux::FileDescriptor fd)
-{
-  std::cout << "POSIX ME HARDER! " << fd << "\n";
-  // TODO switch the msg thread
-  LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
-}
+{ LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd); }
 #endif
 
 tresult PLUGIN_API
@@ -71,10 +65,9 @@ inf_editor::removed()
   _gui->remove_ui_listener(_controller);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
-#ifdef __linux__
+#if (defined __linux__) || (defined  __FreeBSD__)
   Steinberg::Linux::IRunLoop* loop = {};
   INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
-  std::cout << "Unregistering\n";
   loop->unregisterEventHandler(this);
 #endif
   return EditorView::removed();
@@ -83,14 +76,11 @@ inf_editor::removed()
 tresult PLUGIN_API
 inf_editor::attached(void* parent, FIDString type)
 {
-#ifdef __linux__
+#if (defined __linux__) || (defined  __FreeBSD__)
   Steinberg::Linux::IRunLoop* loop = {};
   INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
   for (int fd: LinuxEventLoopInternal::getRegisteredFds())
-  {
-    std::cout << "Registering fd " << fd << "\n";
     loop->registerEventHandler(this, fd);
-  }
 #endif
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
@@ -102,10 +92,10 @@ tresult PLUGIN_API
 inf_editor::queryInterface(TUID const iid, void** obj)
 {
   QUERY_INTERFACE(iid, obj, IPlugViewContentScaleSupport::iid, IPlugViewContentScaleSupport)
-#ifdef __linux__
+#if (defined __linux__) || (defined  __FreeBSD__)
   QUERY_INTERFACE(iid, obj, Steinberg::Linux::IEventHandler::iid, Steinberg::Linux::IEventHandler)
 #endif
-    return EditorView::queryInterface(iid, obj);
+  return EditorView::queryInterface(iid, obj);
 }
 
 }
