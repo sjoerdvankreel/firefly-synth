@@ -134,7 +134,7 @@ inf_plugin::guiSetParent(clap_window const* window) noexcept
 void
 inf_plugin::onPosixFd(int fd, int flags) noexcept
 {
-  std::cout << "fd = " << fd << " flags = " << flags << "\n";
+  std::cout << "clap fd = " << fd << " flags = " << flags << "\n";
   LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
 }
 #endif
@@ -146,7 +146,8 @@ inf_plugin::guiDestroy() noexcept
   _gui.reset();
 #if (defined __linux__) || (defined  __FreeBSD__)
   std::cout << "unregister\n";
-  _host.posixFdSupportUnregister(current_display_fd());
+  for (int fd : LinuxEventLoopInternal::getRegisteredFds())
+    _host.posixFdSupportUnregister(fd);
 #endif
 }
 
@@ -155,7 +156,8 @@ inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
 #if (defined __linux__) || (defined  __FreeBSD__)
   std::cout << "register\n";
-  _host.posixFdSupportRegister(current_display_fd(), CLAP_POSIX_FD_READ);
+  for (int fd : LinuxEventLoopInternal::getRegisteredFds())
+    _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
 #endif
   _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_ui_state);
   _gui->add_ui_listener(this);
