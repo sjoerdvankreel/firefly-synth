@@ -56,7 +56,15 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
 #ifdef __linux__
 void PLUGIN_API
 inf_editor::onFDIsSet(Steinberg::Linux::FileDescriptor fd)
-{ LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd); }
+{ 
+  if (!MessageManager::getInstance()->isThisTheMessageThread())
+  {
+  if (message_thread->isRunning())
+    message_thread->stop();
+    MessageManager::getInstance()->setCurrentThreadAsMessageThread();
+  }
+  LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd);
+}
 #endif
 
 tresult PLUGIN_API
