@@ -15,3 +15,4 @@ linux, renoise, bitwig, cbb
 preset extension
 not scale font/auto ellips
 get the lnf in there
+bitwig linux not good aspect ratio
