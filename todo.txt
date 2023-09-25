@@ -16,15 +16,28 @@ not scale font/auto ellips
 get the lnf in there
 bitwig linux not good aspect ratio
 
-test: reaper vst3 win
-test: reaper vst3 lin
-test: reaper clap win
-test: reaper clap lin
-test: bitwig vst3 win
-test: bitwig vst3 lin
-test: bitwig clap win
-test: bitwig clap lin
-test: renoise vst3 win
-test: renoise vst3 lin
-test: waveform vst3 win
+testing:
+v test: reaper vst3 win
+v test: reaper vst3 lin
+v test: reaper clap win
+v test: reaper clap lin
+
+v test: bitwig vst3 win
+v test: bitwig vst3 lin
+v test: bitwig clap win
+v test: bitwig clap lin
+
+v test: renoise vst3 win
+v test: renoise vst3 lin
+
+v test: waveform vst3 win
+
+todo test:
+
 test: waveform vst3 lin
+test: fl studio vst3 win
+test: cbb vst3 win
+
+
+
+
