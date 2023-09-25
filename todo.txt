@@ -15,5 +15,16 @@ preset extension
 not scale font/auto ellips
 get the lnf in there
 bitwig linux not good aspect ratio
-testing: win/lin
-testing: reaper/renoise/bitwig/fruity/cbb/waveform
+
+test: reaper vst3 win
+test: reaper vst3 lin
+test: reaper clap win
+test: reaper clap lin
+test: bitwig vst3 win
+test: bitwig vst3 lin
+test: bitwig clap win
+test: bitwig clap lin
+test: renoise vst3 win
+test: renoise vst3 lin
+test: waveform vst3 win
+test: waveform vst3 lin
