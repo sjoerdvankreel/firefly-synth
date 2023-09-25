@@ -11,8 +11,9 @@ manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
 adsr env
-linux, renoise, bitwig, cbb
 preset extension
 not scale font/auto ellips
 get the lnf in there
 bitwig linux not good aspect ratio
+testing: win/lin
+testing: reaper/renoise/bitwig/fruity/cbb/waveform
