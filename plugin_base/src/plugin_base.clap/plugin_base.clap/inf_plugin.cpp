@@ -125,6 +125,10 @@ bool
 inf_plugin::guiSetParent(clap_window const* window) noexcept
 {
   _gui->addToDesktop(0, window->ptr);
+#if (defined __linux__) || (defined  __FreeBSD__)
+  for (int fd : LinuxEventLoopInternal::getRegisteredFds())
+    _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
+#endif
   _gui->setVisible(true);
   _gui->add_ui_listener(this);
   _gui->resized();
@@ -153,10 +157,6 @@ inf_plugin::guiDestroy() noexcept
 bool
 inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
-#if (defined __linux__) || (defined  __FreeBSD__)
-  for (int fd : LinuxEventLoopInternal::getRegisteredFds())
-    _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
-#endif
   _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_ui_state);
   return true;
 }
