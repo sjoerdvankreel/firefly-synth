@@ -16,29 +16,20 @@ not scale font/auto ellips
 get the lnf in there
 bitwig linux not good aspect ratio
 drop display_fd
-fix the toggle button event drama
 
 testing:
 v test: reaper vst3 win
 v test: reaper vst3 lin
 v test: reaper clap win
 v test: reaper clap lin
-
 v test: bitwig vst3 win
 v test: bitwig vst3 lin
 v test: bitwig clap win
 v test: bitwig clap lin
-
 v test: renoise vst3 win
 v test: renoise vst3 lin
-
 v test: waveform vst3 win
 v test: waveform vst3 lin
-
-v test: cbb vst3 win
-
-todo test:
-
-test: fl studio vst3 win
-
+v test: cakewalk vst3 win
+v test: flstudio vst3 win
 
