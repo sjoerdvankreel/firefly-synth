@@ -34,11 +34,10 @@ v test: renoise vst3 lin
 v test: waveform vst3 win
 v test: waveform vst3 lin
 
+v test: cbb vst3 win
+
 todo test:
 
 test: fl studio vst3 win
-test: cbb vst3 win
-
-
 
 
