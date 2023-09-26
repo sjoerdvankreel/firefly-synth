@@ -23,12 +23,10 @@ inf_editor::setContentScaleFactor(float factor)
 tresult PLUGIN_API
 inf_editor::getSize(ViewRect* new_size)
 {
-  new_size->top = 0;
-  new_size->left = 0;
-  new_size->right = _gui->getWidth();
-  new_size->bottom = _gui->getHeight();
+  new_size->right = new_size->left + _gui->getWidth();
+  new_size->bottom = new_size->top + _gui->getHeight();
   checkSizeConstraint(new_size);
-  return EditorView::getSize(new_size);
+  return kResultTrue;
 }
 
 tresult PLUGIN_API
@@ -36,7 +34,7 @@ inf_editor::onSize(ViewRect* new_size)
 {
   checkSizeConstraint(new_size);
   _gui->setSize(new_size->getWidth(), new_size->getHeight());
-  return EditorView::onSize(new_size);
+  return kResultTrue;
 }
 
 tresult PLUGIN_API
@@ -44,12 +42,8 @@ inf_editor::checkSizeConstraint(ViewRect* new_rect)
 {
   auto const& topo = *_controller->desc().plugin;
   int new_width = std::max(new_rect->getWidth(), topo.gui_min_width);
-  new_rect->top = 0;
-  new_rect->left = 0;
-  new_rect->right = new_width;
-  new_rect->bottom = new_rect->getWidth() / topo.gui_aspect_ratio;
-  rect.right = new_rect->right;
-  rect.bottom = new_rect->bottom;
+  new_rect->right = new_rect->left + new_width;
+  new_rect->bottom = new_rect->top + (new_width / topo.gui_aspect_ratio);
   return kResultTrue;
 }
 
