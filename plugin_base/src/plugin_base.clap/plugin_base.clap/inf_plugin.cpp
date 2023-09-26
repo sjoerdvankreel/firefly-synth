@@ -2,7 +2,6 @@
 #include <plugin_base/value.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 #if (defined __linux__) || (defined  __FreeBSD__)
-#include <plugin_base.clap/linux_display_fd.hpp>
 #include <juce_events/native/juce_EventLoopInternal_linux.h>
 #endif
 
