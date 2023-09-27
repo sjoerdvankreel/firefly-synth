@@ -15,10 +15,11 @@ class filter_engine:
 public module_engine {  
   float _in[2];
   float _out[2];
+
 public:
-  filter_engine() { reset(); }
+  filter_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(filter_engine);
-  void reset() override { _in[0] = _in[1] = _out[0] = _out[1] = 0; }
+  void initialize() override { _in[0] = _in[1] = _out[0] = _out[1] = 0; }
   void process(process_block& block, int start_frame, int end_frame) override;
 };
 

@@ -15,10 +15,11 @@ public module_engine {
   int _pos;
   int const _length;
   jarray<float, 2> _buffer = {};
+
 public:
   delay_engine(int sample_rate);
   INF_DECLARE_MOVE_ONLY(delay_engine);
-  void reset() override;
+  void initialize() override;
   void process(process_block& block, int start_frame, int end_frame) override;
 };
 
@@ -56,11 +57,11 @@ delay_engine(int sample_rate) :
 _length(sample_rate / 2)
 { 
   _buffer.resize(jarray<int, 1>(2, _length)); 
-  reset();
+  initialize();
 }
 
 void
-delay_engine::reset()
+delay_engine::initialize()
 {
   _pos = 0;
   _buffer.fill(0);

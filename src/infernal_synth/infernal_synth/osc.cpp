@@ -13,10 +13,11 @@ namespace infernal_synth {
 class osc_engine: 
 public module_engine {
   float _phase;
+
 public:
-  osc_engine() { reset(); }
+  osc_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(osc_engine);
-  void reset() override { _phase = 0; }
+  void initialize() override { _phase = 0; }
   void process(process_block& block, int start_frame, int end_frame) override;
 };
 
