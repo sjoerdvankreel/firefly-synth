@@ -130,11 +130,6 @@ plugin_engine::process()
 
   // TODO monophonic portamento
 
-  auto voice_states_start = _voice_states;
-  
-  for (int i = 0; i < _voice_states.size(); i++)
-    assert(_voice_states[i].time <= _stream_time);
-
   // assume all active voices play the entire block
   // and return voices completed the previous block
   for(int i = 0; i < _voice_states.size(); i++)
@@ -145,18 +140,12 @@ plugin_engine::process()
     } else if(_voice_states[i].stage == voice_stage::release)
       _voice_states[i] = voice_state();
 
-  for (int i = 0; i < _voice_states.size(); i++)
-    assert(_voice_states[i].time <= _stream_time);
-
   // steal voices for incoming notes by age
-  int max_on_frame = 0;
-  (void)max_on_frame;
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
     int slot = -1;
     auto const& event = _host_block->events.notes[e];
     if (event.type != note_event::type_t::on) continue;
-    max_on_frame = std::max(max_on_frame, event.frame);
     std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
     for (int i = 0; i < _voice_states.size(); i++)
       if (_voice_states[i].stage == voice_stage::inactive)
@@ -176,16 +165,12 @@ plugin_engine::process()
     state.velocity = event.velocity;
     state.stage = voice_stage::active;
     state.time = _stream_time + event.frame;
-    assert(state.time < _stream_time + frame_count);
     assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
     for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
       for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
         _voice_engines[slot][m][mi]->initialize();
   }
-
-  for(int i = 0; i < _voice_states.size(); i++)
-    assert(_voice_states[i].time <= _stream_time + max_on_frame);
   
   // mark voices for completion the next block
   // be sure to check the note was on (in time) before we turn it off
@@ -193,7 +178,6 @@ plugin_engine::process()
   {
     auto const& event = _host_block->events.notes[e];
     if (event.type == note_event::type_t::on) continue;
-    int release_count = 0;
     for (int v = 0; v < _voice_states.size(); v++)
     {
       auto& state = _voice_states[v];
@@ -203,26 +187,12 @@ plugin_engine::process()
         state.id.channel == event.id.channel &&
         state.time < _stream_time + event.frame)
       {
-        release_count++;
         state.end_frame = event.frame;
         state.stage = voice_stage::release;
         assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
       }
     }
-    assert(release_count == 1);
   }
-
-  std::vector<int> active(frame_count, 0);
-  for(int f = 0; f < frame_count; f++)
-    for(int v = 0; v < _voice_states.size(); v++)
-      if(_voice_states[v].stage != voice_stage::inactive)
-        if (_voice_states[v].start_frame <= f && f < _voice_states[v].end_frame)
-        {
-          assert(!active[f]);
-          active[f] = true;
-        }
-
-#if 0
 
   // clear audio outputs
   for (int c = 0; c < 2; c++)
@@ -411,13 +381,8 @@ plugin_engine::process()
         }
   }
 
-#endif
-
   // keep track of running time in frames
   _stream_time += frame_count;
-
-  for (int i = 0; i < _voice_states.size(); i++)
-    assert(_voice_states[i].time < _stream_time);
 }
 
 }
