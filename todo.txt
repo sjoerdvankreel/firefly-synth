@@ -14,8 +14,6 @@ adsr env
 preset extension
 not scale font/auto ellips
 get the lnf in there
-bitwig linux not good aspect ratio
-drop display_fd
 
 testing:
 v test: reaper vst3 win
