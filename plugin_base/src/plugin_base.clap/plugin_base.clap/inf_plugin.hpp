@@ -83,8 +83,8 @@ public:
   bool guiGetSize(uint32_t* width, uint32_t* height) noexcept override;
   bool guiAdjustSize(uint32_t* width, uint32_t* height) noexcept override;
   bool guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept override;
+  bool guiIsApiSupported(char const* api, bool is_floating) noexcept override;
   bool guiCanResize() const noexcept override { return true; }
-  bool guiIsApiSupported(char const* api, bool is_floating) noexcept override { return !is_floating; }
 
   std::int32_t getParamIndexForParamId(clap_id param_id) const noexcept override;
   bool getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept override;

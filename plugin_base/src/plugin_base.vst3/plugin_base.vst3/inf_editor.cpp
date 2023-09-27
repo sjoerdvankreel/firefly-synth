@@ -53,6 +53,18 @@ inf_editor::onFDIsSet(Steinberg::Linux::FileDescriptor fd)
 { LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd); }
 #endif
 
+tresult PLUGIN_API 
+inf_editor::isPlatformTypeSupported(FIDString type)
+{
+#if WIN32
+  return strcmp(type, kPlatformTypeHWND) == 0? kResultTrue: kResultFalse;
+#elif (defined __linux__) || (defined  __FreeBSD__)
+  return strcmp(type, kPlatformTypeX11EmbedWindowID) == 0 ? kResultTrue : kResultFalse;
+#else
+#error
+#endif
+}
+
 tresult PLUGIN_API
 inf_editor::removed()
 {

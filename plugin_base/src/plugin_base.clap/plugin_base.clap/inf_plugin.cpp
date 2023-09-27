@@ -9,6 +9,7 @@
 #include <clap/helpers/host-proxy.hxx>
 
 #include <vector>
+#include <cstring>
 #include <utility>
 #include <algorithm>
 
@@ -118,6 +119,19 @@ inf_plugin::guiSetScale(double scale) noexcept
 {
   _gui->content_scale(scale);
   return true;
+}
+
+bool 
+inf_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
+{
+  if(is_floating) return false;
+#if(WIN32)
+  return !strcmp(api, CLAP_WINDOW_API_WIN32);
+#elif (defined __linux__) || (defined  __FreeBSD__)
+  return _host.canUsePosixFdSupport() && !strcmp(api, CLAP_WINDOW_API_X11);
+#else
+#error
+#endif
 }
 
 bool
