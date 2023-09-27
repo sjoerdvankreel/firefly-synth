@@ -196,7 +196,7 @@ inf_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
   auto const& topo = *_engine.desc().plugin;
   *width = std::clamp((int)*width, topo.gui_min_width, topo.gui_max_width);
-  *height = *width / topo.gui_aspect_ratio;
+  *height = *width * topo.gui_aspect_ratio_height / topo.gui_aspect_ratio_width;
   return true;
 }
 
@@ -206,8 +206,8 @@ inf_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
   hints->preserve_aspect_ratio = true;
   hints->can_resize_vertically = true;
   hints->can_resize_horizontally = true;
-  hints->aspect_ratio_height = 1.0;
-  hints->aspect_ratio_width = _engine.desc().plugin->gui_aspect_ratio;
+  hints->aspect_ratio_width = _engine.desc().plugin->gui_aspect_ratio_width;
+  hints->aspect_ratio_height = _engine.desc().plugin->gui_aspect_ratio_height;
   return true;
 }
 

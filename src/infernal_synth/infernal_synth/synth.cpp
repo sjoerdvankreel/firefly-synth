@@ -20,7 +20,8 @@ synth_topo()
   result->gui_min_width = 400;
   result->gui_max_width = 1200;
   result->gui_default_width = 800;
-  result->gui_aspect_ratio = 16.0f / 9.0f;
+  result->gui_aspect_ratio_width = 16;
+  result->gui_aspect_ratio_height = 9;
   result->modules.emplace_back(osc_topo());
   result->modules.emplace_back(filter_topo(result->modules[module_osc].slot_count));
   result->modules.emplace_back(delay_topo());

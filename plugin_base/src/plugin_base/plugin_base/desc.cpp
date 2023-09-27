@@ -271,7 +271,8 @@ validate_plugin_topo(plugin_topo const& topo)
   assert(topo.gui_default_width <= 3840);
   assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
 
-  assert(0 < topo.gui_aspect_ratio && topo.gui_aspect_ratio <= 21.0 / 9.0);
+  assert(0 < topo.gui_aspect_ratio_width && topo.gui_aspect_ratio_width <= 100);
+  assert(0 < topo.gui_aspect_ratio_height && topo.gui_aspect_ratio_height <= 100);
   assert(0 < topo.dimension.row_sizes.size() && topo.dimension.row_sizes.size() <= 1024);
   assert(0 < topo.dimension.column_sizes.size() && topo.dimension.column_sizes.size() <= 1024);
   assert(0 < topo.gui_min_width && topo.gui_min_width <= topo.gui_default_width && topo.gui_default_width <= topo.gui_max_width);

@@ -399,7 +399,7 @@ _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
   auto const& topo = *_desc->plugin;
   setOpaque(true);
   addAndMakeVisible(_grid);
-  setSize(topo.gui_default_width, topo.gui_default_width / topo.gui_aspect_ratio);
+  setSize(topo.gui_default_width, topo.gui_default_width * topo.gui_aspect_ratio_height / topo.gui_aspect_ratio_width);
 }
 
 template <class T, class... U> T& 

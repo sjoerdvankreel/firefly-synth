@@ -149,7 +149,8 @@ struct plugin_topo final {
   int gui_min_width;
   int gui_max_width;
   int gui_default_width;
-  float gui_aspect_ratio;
+  int gui_aspect_ratio_width;
+  int gui_aspect_ratio_height;
   gui_dimension dimension;
   std::vector<module_topo> modules;
 
