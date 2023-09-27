@@ -26,6 +26,7 @@ class plugin_engine final {
   plugin_desc const _desc;
   plugin_dims const _dims; 
   float _sample_rate = {};
+  std::int64_t _stream_time = {};
   jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};

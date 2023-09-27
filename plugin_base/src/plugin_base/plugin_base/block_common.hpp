@@ -11,6 +11,12 @@ struct note_id final {
   short channel;
 };
 
+// shared host/plug
+struct common_block final {
+  float bpm;
+  float const* const* audio_in;
+};
+
 // for polyphonic stuff
 enum class voice_stage { inactive, active, release };
 struct voice_state final {
@@ -20,14 +26,6 @@ struct voice_state final {
   float velocity = 0.0f;
   std::int64_t time = -1;
   voice_stage stage = {};
-};
-
-// shared host/plug
-struct common_block final {
-  float bpm;
-  int frame_count;
-  std::int64_t stream_time;
-  float const* const* audio_in;
 };
 
 }

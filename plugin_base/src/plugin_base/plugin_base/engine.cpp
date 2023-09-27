@@ -53,9 +53,8 @@ plugin_engine::prepare()
   _host_block->events.notes.clear();
   _host_block->events.block.clear();
   _host_block->events.accurate.clear();
+  _host_block->frame_count = 0;
   _host_block->common.bpm = 0;
-  _host_block->common.frame_count = 0;
-  _host_block->common.stream_time = 0;
   _host_block->common.audio_in = nullptr;
   return *_host_block;
 }
@@ -63,9 +62,11 @@ plugin_engine::prepare()
 void
 plugin_engine::deactivate()
 {
-  // drop frame-count dependent memory
   _sample_rate = 0;
+  _stream_time = 0;
   _activated_at_ms = {};
+
+  // drop frame-count dependent memory
   _voice_results = {};
   _voices_mixdown = {};
   _voice_cv_state = {};
@@ -93,6 +94,7 @@ void
 plugin_engine::activate(int sample_rate, int max_frame_count)
 {  
   deactivate();
+  _stream_time = 0;
   _sample_rate = sample_rate;
 
   // set activation time
@@ -124,7 +126,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 void 
 plugin_engine::process()
 {
-  int frame_count = _host_block->common.frame_count;
+  int frame_count = _host_block->frame_count;
 
   // TODO monophonic portamento
 
@@ -162,7 +164,7 @@ plugin_engine::process()
     state.start_frame = event.frame;
     state.velocity = event.velocity;
     state.stage = voice_stage::active;
-    state.time = _host_block->common.stream_time + event.frame;
+    state.time = _stream_time + event.frame;
     assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
     for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
@@ -183,7 +185,7 @@ plugin_engine::process()
         state.id.id == event.id.id &&
         state.id.key == event.id.key &&
         state.id.channel == event.id.channel &&
-        state.time < _host_block->common.stream_time + event.frame)
+        state.time < _stream_time + event.frame)
       {
         state.end_frame = event.frame;
         state.stage = voice_stage::release;
@@ -377,6 +379,9 @@ plugin_engine::process()
           }
           param_global++;
         }
+
+    // keep track of running time in frames
+    _stream_time += frame_count;
   }
 }
 

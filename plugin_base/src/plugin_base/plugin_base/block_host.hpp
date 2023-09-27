@@ -40,6 +40,7 @@ struct host_events final {
 
 // shared block, note/automation events, host audio out
 struct host_block final {
+  int frame_count;
   host_events events;
   common_block common;
   float* const* audio_out;

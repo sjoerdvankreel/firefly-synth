@@ -441,9 +441,8 @@ clap_process_status
 inf_plugin::process(clap_process const* process) noexcept
 {
   host_block& block = _engine.prepare();
+  block.frame_count = process->frames_count;
   block.audio_out = process->audio_outputs[0].data32;
-  block.common.stream_time = process->steady_time;
-  block.common.frame_count = process->frames_count;
   block.common.bpm = process->transport? process->transport->tempo: 0;
   block.common.audio_in = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
 
