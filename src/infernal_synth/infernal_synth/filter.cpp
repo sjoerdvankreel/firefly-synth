@@ -18,8 +18,8 @@ public module_engine {
 public:
   filter_engine() { reset(); }
   INF_DECLARE_MOVE_ONLY(filter_engine);
-  void process(process_block& block) override;
   void reset() override { _in[0] = _in[1] = _out[0] = _out[1] = 0; }
+  void process(process_block& block, int start_frame, int end_frame) override;
 };
 
 enum { section_main };
@@ -62,7 +62,7 @@ filter_topo(int osc_slot_count)
 }
 
 void
-filter_engine::process(process_block& block)
+filter_engine::process(process_block& block, int start_frame, int end_frame)
 {
   auto const& osc_audio = block.voice->audio_in[module_osc];
   auto const& osc_gain = block.accurate_automation[param_osc_gain];

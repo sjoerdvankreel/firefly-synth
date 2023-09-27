@@ -17,7 +17,7 @@ namespace plugin_base {
 class module_engine { 
 public: 
   virtual void reset() = 0;
-  virtual void process(process_block& block) = 0;
+  virtual void process(process_block& block, int start_frame, int end_frame) = 0;
 };
 
 // global plugin audio processor

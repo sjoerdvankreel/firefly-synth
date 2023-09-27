@@ -126,8 +126,19 @@ plugin_engine::process()
 {
   int frame_count = _host_block->common.frame_count;
 
-  // take voices starting this block, grab oldest when out
   // TODO monophonic portamento
+
+  // assume all active voices play the entire block
+  // and return voices completed the previous block
+  for(int i = 0; i < _voice_states.size(); i++)
+    if (_voice_states[i].stage == voice_stage::active)
+    {
+      _voice_states[i].start_frame = 0;
+      _voice_states[i].end_frame = frame_count;
+    } else if(_voice_states[i].stage == voice_stage::release)
+      _voice_states[i] = voice_state();
+
+  // steal voices for incoming notes by age
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
     int slot = -1;
@@ -135,7 +146,7 @@ plugin_engine::process()
     if (event.type != note_event::type_t::on) continue;
     std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
     for (int i = 0; i < _voice_states.size(); i++)
-      if (!_voice_states[i].active)
+      if (_voice_states[i].stage == voice_stage::inactive)
       {
         slot = i;
         break;
@@ -147,9 +158,33 @@ plugin_engine::process()
     assert(slot >= 0); 
     auto& state = _voice_states[slot];
     state.id = event.id;
-    state.active = true;
     state.velocity = event.velocity;
+    state.start_frame = event.frame;
+    state.stage = voice_stage::active;
+    state.end_frame = frame_count - event.frame;
     state.time = _host_block->common.stream_time + event.frame;
+    assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
+  }
+  
+  // mark voices for completion the next block
+  // be sure to check the note was on (in time) before we turn it off
+  for (int e = 0; e < _host_block->events.notes.size(); e++)
+  {
+    auto const& event = _host_block->events.notes[e];
+    if (event.type == note_event::type_t::on) continue;
+    for (int v = 0; v < _voice_states.size(); v++)
+    {
+      auto& state = _voice_states[v];
+      if (state.stage == voice_stage::active &&
+        state.time <= _host_block->common.stream_time + event.frame &&
+        ((event.id.id >= 0 && event.id.id == state.id.id) ||
+          (event.id.key == state.id.key && event.id.channel == state.id.channel)))
+      {
+        _voice_states[v].end_frame = event.frame;
+        _voice_states[v].stage = voice_stage::release;
+      }
+      assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
+    }
   }
 
   // clear audio outputs
@@ -158,7 +193,7 @@ plugin_engine::process()
     std::fill(_host_block->audio_out[c], _host_block->audio_out[c] + frame_count, 0.0f);
     std::fill(_voices_mixdown[c].begin(), _voices_mixdown[c].begin() + frame_count, 0.0f);
     for (int v = 0; v < _voice_results.size(); v++)
-      if(_voice_states[v].active)
+      if(_voice_states[v].stage != voice_stage::inactive)
         std::fill(_voice_results[v][c].begin(), _voice_results[v][c].begin() + frame_count, 0.0f);
   }
 
@@ -174,7 +209,7 @@ plugin_engine::process()
                     _global_cv_state[m][mi].begin() + frame_count, 0.0f);
         } else {
           for (int v = 0; v < _voice_states.size(); v++)
-            if(_voice_states[v].active)
+            if(_voice_states[v].stage != voice_stage::inactive)
               std::fill(_voice_cv_state[v][m][mi].begin(), 
                         _voice_cv_state[v][m][mi].begin() + frame_count, 0.0f);
         }
@@ -186,7 +221,7 @@ plugin_engine::process()
                      _global_audio_state[m][mi][c].begin() + frame_count, 0.0f);
         } else {
            for (int v = 0; v < _voice_states.size(); v++)
-             if (_voice_states[v].active)
+             if (_voice_states[v].stage != voice_stage::inactive)
                for (int c = 0; c < 2; c++)
                  std::fill(_voice_audio_state[v][m][mi][c].begin(), 
                            _voice_audio_state[v][m][mi][c].begin() + frame_count, 0.0f);
@@ -270,13 +305,13 @@ plugin_engine::process()
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
       process_block block(make_process_block(m, mi, -1));
-      _input_engines[m][mi]->process(block);
+      _input_engines[m][mi]->process(block, 0, frame_count);
     }
 
   // run voice modules in order
   // TODO threadpool
   for (int v = 0; v < _voice_states.size(); v++)
-    if (_voice_states[v].active)
+    if (_voice_states[v].stage != voice_stage::inactive)
       for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
         for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
         {
@@ -288,12 +323,12 @@ plugin_engine::process()
           };
           process_block block(make_process_block(m, mi, v));
           block.voice = &voice_block;
-          _voice_engines[v][m][mi]->process(block);
+          _voice_engines[v][m][mi]->process(block, _voice_states[v].start_frame, _voice_states[v].end_frame);
         }
 
   // combine voices output
   for (int v = 0; v < _voice_states.size(); v++)
-    if (_voice_states[v].active)
+    if (_voice_states[v].stage != voice_stage::inactive)
       for(int c = 0; c < 2; c++)
         for(int f = 0; f < frame_count; f++)
           _voices_mixdown[c][f] += _voice_results[v][c][f];
@@ -309,24 +344,8 @@ plugin_engine::process()
       };
       process_block block(make_process_block(m, mi, -1));
       block.out = &out_block;
-      _output_engines[m][mi]->process(block);
+      _output_engines[m][mi]->process(block, 0, frame_count);
     }
-
-  // release voices ending this block
-  // TODO leave this to the plugs envelope
-  for (int e = 0; e < _host_block->events.notes.size(); e++)
-  {
-    auto const& event = _host_block->events.notes[e];
-    if(event.type == note_event::type_t::on) continue;
-    for (int v = 0; v < _voice_states.size(); v++)
-    {
-      auto& state = _voice_states[v];
-      if (state.active && 
-        ((event.id.id >= 0 && event.id.id == state.id.id) ||
-        (event.id.key == state.id.key && event.id.channel == state.id.channel)))
-        state = voice_state();
-    }
-  }
 
   // update output params 3 times a second
   _host_block->events.out.clear();

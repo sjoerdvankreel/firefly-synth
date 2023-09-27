@@ -17,7 +17,7 @@ public:
   osc_engine() { reset(); }
   INF_DECLARE_MOVE_ONLY(osc_engine);
   void reset() override { _phase = 0; }
-  void process(process_block& block) override;
+  void process(process_block& block, int start_frame, int end_frame) override;
 };
 
 static std::vector<item_topo>
@@ -88,7 +88,7 @@ osc_topo()
 }
 
 void
-osc_engine::process(process_block& block)
+osc_engine::process(process_block& block, int start_frame, int end_frame)
 {
   if(block.block_automation[param_on][0].step() == 0) return;
   int oct = block.block_automation[param_oct][0].step();

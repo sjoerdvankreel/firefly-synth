@@ -12,12 +12,14 @@ struct note_id final {
 };
 
 // for polyphonic stuff
-// TODO start/end frames
+enum class voice_stage { inactive, active, release };
 struct voice_state final {
   note_id id = {};
-  bool active = false;
+  int end_frame = -1;
+  int start_frame = -1;
   float velocity = 0.0f;
   std::int64_t time = -1;
+  voice_stage stage = {};
 };
 
 // shared host/plug
