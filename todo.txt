@@ -12,7 +12,6 @@ am/fm/lfos/modmatrix
 am/fm->select relevant sources
 adsr env
 preset extension
-not scale font/auto ellips
 get the lnf in there
 fix 2 notes in a row voice problem
 
