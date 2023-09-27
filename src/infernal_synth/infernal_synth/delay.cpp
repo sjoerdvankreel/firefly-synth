@@ -71,7 +71,7 @@ delay_engine::process(process_block& block, int start_frame, int end_frame)
 {
   float max_out = 0.0f;
   for (int c = 0; c < 2; c++)  
-    for(int f = 0; f < block.host.frame_count; f++)
+    for(int f = start_frame; f < end_frame; f++)
     {
       block.out->host_audio[c][f] = block.out->mixdown[c][f];
       if (block.block_automation[param_on][0].step() != 0)
@@ -79,7 +79,7 @@ delay_engine::process(process_block& block, int start_frame, int end_frame)
       _buffer[c][(_pos + f) % _length] = block.out->mixdown[c][f];
       max_out = std::max(max_out, block.out->host_audio[c][f]);
     }  
-  _pos += block.host.frame_count;
+  _pos += end_frame - start_frame;
   _pos %= _length;
   block.set_out_param(param_out, 0, std::clamp(max_out, 0.0f, 1.0f));
 }

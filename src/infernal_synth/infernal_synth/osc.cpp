@@ -99,7 +99,7 @@ osc_engine::process(process_block& block, int start_frame, int end_frame)
   auto const& gain = block.accurate_automation[param_gain][0];
 
   float sample;
-  for (int f = 0; f < block.host.frame_count; f++)
+  for (int f = start_frame; f < end_frame; f++)
   {
     switch (type)
     {

@@ -68,13 +68,13 @@ filter_engine::process(process_block& block, int start_frame, int end_frame)
   auto const& osc_gain = block.accurate_automation[param_osc_gain];
   for(int o = 0; o < block.plugin.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
-      for(int f = 0; f < block.host.frame_count; f++)
+      for(int f = start_frame; f < end_frame; f++)
         block.voice->result[c][f] += osc_audio[o][c][f] * osc_gain[o][f];
   if(block.block_automation[param_on][0].step() == 0) return;
 
   float w = 2 * block.sample_rate;
   auto const& freq = block.accurate_automation[param_freq][0];
-  for (int f = 0; f < block.host.frame_count; f++)
+  for (int f = start_frame; f < end_frame; f++)
   {
     float angle = freq[f] * 2 * pi32;
     float norm = 1 / (angle + w);

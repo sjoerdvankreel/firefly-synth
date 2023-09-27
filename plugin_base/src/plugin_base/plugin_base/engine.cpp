@@ -176,9 +176,10 @@ plugin_engine::process()
     {
       auto& state = _voice_states[v];
       if (state.stage == voice_stage::active &&
-        state.time <= _host_block->common.stream_time + event.frame &&
-        ((event.id.id >= 0 && event.id.id == state.id.id) ||
-          (event.id.key == state.id.key && event.id.channel == state.id.channel)))
+        state.id.id == event.id.id &&
+        state.id.key == event.id.key &&
+        state.id.channel == event.id.channel &&
+        state.time <= _host_block->common.stream_time + event.frame)
       {
         _voice_states[v].end_frame = event.frame;
         _voice_states[v].stage = voice_stage::release;
