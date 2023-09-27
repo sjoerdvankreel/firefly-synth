@@ -147,6 +147,7 @@ struct plugin_topo final {
   int version_minor;
 
   int gui_min_width;
+  int gui_max_width;
   int gui_default_width;
   float gui_aspect_ratio;
   gui_dimension dimension;

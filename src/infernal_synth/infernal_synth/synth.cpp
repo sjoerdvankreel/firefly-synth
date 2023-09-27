@@ -18,6 +18,7 @@ synth_topo()
   result->dimension.row_sizes = { 2, 1, 1 };
   result->dimension.column_sizes = { 1 };
   result->gui_min_width = 400;
+  result->gui_max_width = 1200;
   result->gui_default_width = 800;
   result->gui_aspect_ratio = 16.0f / 9.0f;
   result->modules.emplace_back(osc_topo());
