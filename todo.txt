@@ -15,7 +15,6 @@ preset extension
 not scale font/auto ellips
 get the lnf in there
 fix 2 notes in a row voice problem
-fix juce leaks
 
 testing:
 v test: reaper vst3 win
