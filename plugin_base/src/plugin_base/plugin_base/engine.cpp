@@ -158,12 +158,12 @@ plugin_engine::process()
     assert(slot >= 0); 
     auto& state = _voice_states[slot];
     state.id = event.id;
-    state.velocity = event.velocity;
+    state.end_frame = frame_count;
     state.start_frame = event.frame;
+    state.velocity = event.velocity;
     state.stage = voice_stage::active;
-    state.end_frame = frame_count - event.frame;
     state.time = _host_block->common.stream_time + event.frame;
-    assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
+    assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
     for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
       for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
@@ -183,12 +183,12 @@ plugin_engine::process()
         state.id.id == event.id.id &&
         state.id.key == event.id.key &&
         state.id.channel == event.id.channel &&
-        state.time <= _host_block->common.stream_time + event.frame)
+        state.time < _host_block->common.stream_time + event.frame)
       {
         state.end_frame = event.frame;
         state.stage = voice_stage::release;
+        assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
       }
-      assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
     }
   }
 
