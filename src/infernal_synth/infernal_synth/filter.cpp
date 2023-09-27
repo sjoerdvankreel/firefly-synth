@@ -13,11 +13,13 @@ namespace infernal_synth {
 
 class filter_engine: 
 public module_engine {  
-  float _in[2] = { 0, 0 };
-  float _out[2] = { 0, 0 };
+  float _in[2];
+  float _out[2];
 public:
+  filter_engine() { reset(); }
   INF_DECLARE_MOVE_ONLY(filter_engine);
   void process(process_block& block) override;
+  void reset() override { _in[0] = _in[1] = _out[0] = _out[1] = 0; }
 };
 
 enum { section_main };

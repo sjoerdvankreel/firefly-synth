@@ -5,11 +5,13 @@
 #include <cassert>
 
 #define INF_DECLARE_MOVE_ONLY(x) \
-  x() = default;                 \
   x(x&&) = default;              \
   x(x const&) = delete;          \
   x& operator = (x&&) = default; \
   x& operator = (x const&) = delete
+#define INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(x) \
+  INF_DECLARE_MOVE_ONLY(x); \
+  x() = default
 
 #define INF_STR_(x) #x
 #define INF_STR(x) INF_STR_(x)

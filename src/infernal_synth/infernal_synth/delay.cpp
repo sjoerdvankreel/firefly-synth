@@ -12,12 +12,13 @@ namespace infernal_synth {
 
 class delay_engine: 
 public module_engine {
-  int _pos = 0;
+  int _pos;
   int const _length;
   jarray<float, 2> _buffer = {};
 public:
-  INF_DECLARE_MOVE_ONLY(delay_engine);
   delay_engine(int sample_rate);
+  INF_DECLARE_MOVE_ONLY(delay_engine);
+  void reset() override;
   void process(process_block& block) override;
 };
 
@@ -53,7 +54,17 @@ delay_topo()
 delay_engine::
 delay_engine(int sample_rate) : 
 _length(sample_rate / 2)
-{ _buffer.resize(jarray<int, 1>(2, _length)); }
+{ 
+  _buffer.resize(jarray<int, 1>(2, _length)); 
+  reset();
+}
+
+void
+delay_engine::reset()
+{
+  _pos = 0;
+  _buffer.fill(0);
+}
 
 void
 delay_engine::process(process_block& block)

@@ -35,7 +35,7 @@ struct host_events final {
   std::vector<note_event> notes;
   std::vector<block_event> block;
   std::vector<accurate_event> accurate;
-  INF_DECLARE_MOVE_ONLY(host_events);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(host_events);
 };
 
 // shared block, note/automation events, host audio out
@@ -43,7 +43,7 @@ struct host_block final {
   host_events events;
   common_block common;
   float* const* audio_out;
-  INF_DECLARE_MOVE_ONLY(host_block);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(host_block);
 };
 
 }

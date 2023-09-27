@@ -55,7 +55,7 @@ struct item_topo final {
   std::string id;
   std::string name;
   
-  INF_DECLARE_MOVE_ONLY(item_topo);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(item_topo);
   item_topo(std::string const& id, std::string const& name): 
   id(id), name(name) {}
 };
@@ -67,7 +67,7 @@ struct section_topo final {
   gui_position position;
   gui_dimension dimension;
 
-  INF_DECLARE_MOVE_ONLY(section_topo);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
 };
 
 // param group in module
@@ -96,7 +96,7 @@ struct param_topo final {
   std::vector<item_topo> items;
   std::vector<std::string> names;
 
-  INF_DECLARE_MOVE_ONLY(param_topo);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
   bool is_real() const { return type == param_type::log || type == param_type::linear; }
 
   // representation conversion
@@ -134,7 +134,7 @@ struct module_topo final {
   std::vector<section_topo> sections;
 
   module_engine_factory engine_factory;
-  INF_DECLARE_MOVE_ONLY(module_topo);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo);
 };
 
 // plugin definition
@@ -154,7 +154,7 @@ struct plugin_topo final {
   gui_dimension dimension;
   std::vector<module_topo> modules;
 
-  INF_DECLARE_MOVE_ONLY(plugin_topo);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo);
 };
 
 inline normalized_value

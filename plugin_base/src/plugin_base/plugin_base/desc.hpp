@@ -20,7 +20,7 @@ struct param_mapping final {
   int module_topo = {};
   int module_slot = {};
   int module_global = {};
-  INF_DECLARE_MOVE_ONLY(param_mapping);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_mapping);
 
   template <class T> auto& value_at(T& container) const 
   { return container[module_topo][module_slot][param_topo][param_slot]; }
@@ -40,7 +40,7 @@ struct param_desc final {
   std::string full_name = {};
   param_topo const* param = {};
 
-  INF_DECLARE_MOVE_ONLY(param_desc);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_desc);
   param_desc(
     module_topo const& module_, int module_slot,
     param_topo const& param_, int topo, int slot, int local, int global);
@@ -57,7 +57,7 @@ struct module_desc final {
   module_topo const* module = {};
   std::vector<param_desc> params = {};
 
-  INF_DECLARE_MOVE_ONLY(module_desc);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_desc);
   module_desc(
     module_topo const& module_, int topo, int slot, int global, int param_global_start);
 };
@@ -76,7 +76,7 @@ struct plugin_desc final {
   std::map<std::string, int> module_id_to_index = {};
   std::map<std::string, std::map<std::string, int>> param_id_to_index = {};
 
-  INF_DECLARE_MOVE_ONLY(plugin_desc);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_desc);
   plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);
 
   void init_defaults(jarray<plain_value, 4>& state) const;
@@ -92,7 +92,7 @@ struct plugin_dims final {
   jarray<int, 2> voice_module_slot;
   jarray<int, 3> module_slot_param_slot;
 
-  INF_DECLARE_MOVE_ONLY(plugin_dims);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_dims);
   plugin_dims(plugin_topo const& topo);
 };
 
@@ -106,7 +106,7 @@ struct plugin_frame_dims final {
   jarray<int, 3> module_global_audio;
   jarray<int, 4> accurate_automation;
 
-  INF_DECLARE_MOVE_ONLY(plugin_frame_dims);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& topo, int frame_count);
 };
 
