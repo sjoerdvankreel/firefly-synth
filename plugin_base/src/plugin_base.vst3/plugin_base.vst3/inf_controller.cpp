@@ -60,7 +60,6 @@ IPlugView* PLUGIN_API
 inf_controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
-  MessageManager::getInstance();
   return _editor = new inf_editor(this);
 }
 

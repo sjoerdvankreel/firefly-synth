@@ -13,6 +13,14 @@ static inline int constexpr label_height = 15;
 static inline int constexpr groupbox_padding = 6;
 static inline int constexpr groupbox_padding_top = 16;
 
+void 
+gui_terminate()
+{ juce::shutdownJuce_GUI(); }
+
+void 
+gui_init()
+{ juce::initialiseJuce_GUI(); }
+
 void
 ui_listener::ui_changed(int index, plain_value plain)
 {

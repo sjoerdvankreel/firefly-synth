@@ -11,6 +11,7 @@
 
 using namespace Steinberg;
 using namespace Steinberg::Vst;
+using namespace plugin_base;
 using namespace infernal_synth;
 using namespace plugin_base::vst3;
 
@@ -36,6 +37,9 @@ component_factory(void*)
   auto result = new inf_component(synth_topo(), controller_id);
   return static_cast<IAudioProcessor*>(result);
 }
+
+bool InitModule() { gui_init(); return true; }
+bool DeinitModule() { gui_terminate(); return true; }
 
 BEGIN_FACTORY_DEF(INF_SYNTH_VENDOR_NAME, INF_SYNTH_VENDOR_URL, INF_SYNTH_VENDOR_MAIL)
   DEF_CLASS2(

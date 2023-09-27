@@ -11,6 +11,9 @@ namespace plugin_base {
 
 class grid_component;
 
+void gui_init();
+void gui_terminate();
+
 class plugin_listener
 {
 public:

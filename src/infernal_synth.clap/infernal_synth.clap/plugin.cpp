@@ -1,12 +1,14 @@
 #include <infernal_synth/synth.hpp>
 #include <infernal_synth/plugin.hpp>
 
+#include <plugin_base/gui.hpp>
 #include <plugin_base.clap/support.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 
 #include <clap/clap.h>
 #include <cstring>
 
+using namespace plugin_base;
 using namespace infernal_synth;
 using namespace plugin_base::clap;
 
@@ -37,7 +39,7 @@ extern "C" CLAP_EXPORT
 clap_plugin_entry_t const clap_entry =
 {
   .clap_version = CLAP_VERSION_INIT,
-  .init = [](char const*) { return true; },
-  .deinit = [](){},
+  .init = [](char const*) { gui_init(); return true; },
+  .deinit = [](){ gui_terminate(); },
   .get_factory = get_plugin_factory<&descriptor, synth_topo>
 };
