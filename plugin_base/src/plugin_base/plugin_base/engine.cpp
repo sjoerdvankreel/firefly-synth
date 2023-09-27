@@ -130,7 +130,8 @@ plugin_engine::process()
 
   // TODO monophonic portamento
 
-  // assume all active voices play the entire block
+  // always take a voice for an entire block,
+  // module processor is handed appropriate start/end_frame.
   // and return voices completed the previous block
   for(int i = 0; i < _voice_states.size(); i++)
     if (_voice_states[i].stage == voice_stage::active)
