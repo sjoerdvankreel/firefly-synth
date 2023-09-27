@@ -173,7 +173,11 @@ plugin_engine::process()
   }
   
   // mark voices for completion the next block
-  // be sure to check the note was on (in time) before we turn it off
+  // be sure to check the note was on (earlier in time than the event) before we turn it off
+  // note sure how to handle note id vs pck: 
+  // clap on bitwig hands us note-on events with note id and note-off events without them
+  // so i choose to allow note-off with note-id to only kill the same note-id
+  // but allow note-off without note-id to kill any matching pck regardless of note-id
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
     auto const& event = _host_block->events.notes[e];
@@ -184,10 +188,9 @@ plugin_engine::process()
     {
       auto& state = _voice_states[v];
       if (state.stage == voice_stage::active &&
-        state.id.id == event.id.id &&
-        state.id.key == event.id.key &&
-        state.id.channel == event.id.channel &&
-        state.time < _stream_time + event.frame)
+        state.time < _stream_time + event.frame &&
+        ((event.id.id != -1 && state.id.id == event.id.id) ||
+        (event.id.id == -1 && (state.id.key == event.id.key && state.id.channel == event.id.channel))))
       {
         release_count++;
         state.end_frame = event.frame;
