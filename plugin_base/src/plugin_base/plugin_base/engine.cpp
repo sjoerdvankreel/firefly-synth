@@ -379,10 +379,10 @@ plugin_engine::process()
           }
           param_global++;
         }
-
-    // keep track of running time in frames
-    _stream_time += frame_count;
   }
+
+  // keep track of running time in frames
+  _stream_time += frame_count;
 }
 
 }
