@@ -39,7 +39,7 @@ class plugin_engine final {
   jarray<plain_value, 4> _block_automation = {};
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
-  std::chrono::milliseconds _activated_at_ms = {};
+  std::chrono::milliseconds _output_updated_ms = {};
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};

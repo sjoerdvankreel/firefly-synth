@@ -64,7 +64,7 @@ plugin_engine::deactivate()
 {
   _sample_rate = 0;
   _stream_time = 0;
-  _activated_at_ms = {};
+  _output_updated_ms = {};
 
   // drop frame-count dependent memory
   _voice_results = {};
@@ -99,7 +99,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // set activation time
   auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
-  _activated_at_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
+  _output_updated_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(*_desc.plugin, max_frame_count);
@@ -178,6 +178,8 @@ plugin_engine::process()
   {
     auto const& event = _host_block->events.notes[e];
     if (event.type == note_event::type_t::on) continue;
+    int release_count = 0;
+    (void)release_count;
     for (int v = 0; v < _voice_states.size(); v++)
     {
       auto& state = _voice_states[v];
@@ -187,11 +189,13 @@ plugin_engine::process()
         state.id.channel == event.id.channel &&
         state.time < _stream_time + event.frame)
       {
+        release_count++;
         state.end_frame = event.frame;
         state.stage = voice_stage::release;
         assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
       }
     }
+    assert(release_count > 0);
   }
 
   // clear audio outputs
@@ -354,35 +358,36 @@ plugin_engine::process()
       _output_engines[m][mi]->process(block, 0, frame_count);
     }
 
+  // keep track of running time in frames
+  _stream_time += frame_count;
+
   // update output params 3 times a second
+  // push all out params - we don't check for changes
   _host_block->events.out.clear();
   auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
   auto now_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
-  if((now_millis - _activated_at_ms).count() < 333) return;
-
-  // push all out params - we don't check for changes
-  int param_global = 0;
-  _activated_at_ms = now_millis;
-  for (int m = 0; m < _desc.plugin->modules.size(); m++)
+  if((now_millis - _output_updated_ms).count() >= 333)
   {
-    auto const& module = _desc.plugin->modules[m];
-    for (int mi = 0; mi < module.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-        for(int pi = 0; pi < module.params[p].slot_count; pi++)
-        {
-          if (module.params[p].dir == param_dir::output)
+    int param_global = 0;
+    _output_updated_ms = now_millis;
+    for (int m = 0; m < _desc.plugin->modules.size(); m++)
+    {
+      auto const& module = _desc.plugin->modules[m];
+      for (int mi = 0; mi < module.slot_count; mi++)
+        for (int p = 0; p < module.params.size(); p++)
+          for(int pi = 0; pi < module.params[p].slot_count; pi++)
           {
-            block_event out_event;
-            out_event.param = param_global;
-            out_event.normalized = module.params[p].plain_to_normalized(_state[m][mi][p][pi]);
-            _host_block->events.out.push_back(out_event);
+            if (module.params[p].dir == param_dir::output)
+            {
+              block_event out_event;
+              out_event.param = param_global;
+              out_event.normalized = module.params[p].plain_to_normalized(_state[m][mi][p][pi]);
+              _host_block->events.out.push_back(out_event);
+            }
+            param_global++;
           }
-          param_global++;
-        }
+    }
   }
-
-  // keep track of running time in frames
-  _stream_time += frame_count;
 }
 
 }
