@@ -88,23 +88,35 @@ env_engine::process(process_block& block)
     double stage_seconds;
     switch (_stage)
     {
-    case env_stage::a: 
-      stage_seconds = a[f]; 
-      block.cv_out[f] = _release_level = _stage_pos / stage_seconds;
-      break;
-    case env_stage::d: 
-      stage_seconds = d[f]; 
-      block.cv_out[f] = _release_level = s[f] + (1.0 - _stage_pos / stage_seconds * (1.0 - s[f]));
-      break;
-    case env_stage::r: 
-      stage_seconds = r[f]; 
-      block.cv_out[f] = 1.0 - _stage_pos / stage_seconds * _release_level;
-      break;
-    default: 
-      assert(false); 
-      stage_seconds = 0; 
-      break;
+    case env_stage::a: stage_seconds = a[f]; break;
+    case env_stage::d: stage_seconds = d[f]; break;
+    case env_stage::r: stage_seconds = r[f]; break;
+    default: assert(false); stage_seconds = 0; break;
     }
+
+    if(_stage_pos > stage_seconds) _stage_pos = stage_seconds;
+    if (stage_seconds == 0)
+      block.cv_out[f] = _release_level;
+    else 
+      switch (_stage)
+      {
+      case env_stage::a:
+        block.cv_out[f] = _release_level = _stage_pos / stage_seconds;
+        assert(-1.0 <= _release_level && _release_level <= 1.0f);
+        break;
+      case env_stage::d:
+        block.cv_out[f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s[f]);
+        // TODO checks to base
+        assert(-1.0 <= _release_level && _release_level <= 1.0f);
+        break;
+      case env_stage::r:
+        //block.cv_out[f] = 1.0 - _stage_pos / stage_seconds * _release_level;
+        break;
+      default:
+        assert(false);
+        stage_seconds = 0;
+        break;
+      }
 
     _stage_pos += 1.0 / block.sample_rate;
     if (_stage_pos >= stage_seconds)
