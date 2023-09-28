@@ -10,14 +10,18 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+enum class env_stage { a, d, s, r, end };
+
 class env_engine: 
 public module_engine {
-  int _position;
+  double _level = 0;
+  double _stage_pos = 0;
+  env_stage _stage = {};
 public:
   env_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(env_engine);
   void process(process_block& block) override;
-  void initialize() override { _position = 0; }
+  void initialize() override { _level = 0; _stage_pos = 0; _stage = env_stage::a; }
 };
 
 enum { section_main };
@@ -29,7 +33,7 @@ env_topo()
   module_topo result(make_module(
     "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", 1, 
     module_stage::voice, module_output::cv, 
-    gui_layout::single, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
+    gui_layout::single, gui_position { 0, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
     return std::make_unique<env_engine>(); };
 
@@ -62,6 +66,47 @@ env_topo()
 void
 env_engine::process(process_block& block)
 {
+  auto const& a = block.accurate_automation[param_a][0];
+  auto const& d = block.accurate_automation[param_d][0];
+  auto const& s = block.accurate_automation[param_s][0];
+  auto const& r = block.accurate_automation[param_r][0];
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    if (_stage == env_stage::end)
+    {
+      block.cv_out[f] = 0;
+      continue;
+    }
+
+    if (_stage == env_stage::s)
+    {
+      block.cv_out[f] = s[f];
+      continue;
+    }
+
+    double stage_seconds;
+    block.cv_out[f] = _level;
+    switch (_stage)
+    {
+    case env_stage::a: stage_seconds = a[f]; break;
+    case env_stage::d: stage_seconds = d[f]; break;
+    case env_stage::r: stage_seconds = r[f]; break;
+    default: assert(false); stage_seconds = 0; break;
+    }
+
+    _stage_pos += 1.0 / block.sample_rate;
+    if (_stage_pos >= stage_seconds)
+    {
+      _stage_pos = 0;
+      switch (_stage)
+      {
+      case env_stage::a: _stage = env_stage::d; break;
+      case env_stage::d: _stage = env_stage::s; break;
+      case env_stage::r: _stage = env_stage::end; break;
+      default: assert(false); break;
+      }
+    }
+  }
 }
 
 }

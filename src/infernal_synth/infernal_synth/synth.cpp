@@ -23,8 +23,8 @@ synth_topo()
   result->preset_extension = "infpreset";
   result->dimension.column_sizes = { 1 };
   result->dimension.row_sizes = { 2, 1, 1, 1 };
-  result->modules.emplace_back(osc_topo());
   result->modules.emplace_back(env_topo());
+  result->modules.emplace_back(osc_topo());
   result->modules.emplace_back(filter_topo(result->modules[module_osc].slot_count));
   result->modules.emplace_back(delay_topo());
   result->version_minor = INF_SYNTH_VERSION_MINOR;
