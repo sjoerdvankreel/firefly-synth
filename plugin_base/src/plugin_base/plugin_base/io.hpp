@@ -11,14 +11,14 @@
 
 namespace plugin_base {
 
-struct io_load
+struct load_result
 {
   std::string error = {};
   std::vector<std::string> warnings = {};
   bool ok() const { return error.size() == 0; };
 
-  io_load() = default;
-  io_load(std::string const& error): error(error) {}
+  load_result() = default;
+  load_result(std::string const& error): error(error) {}
 };
 
 class plugin_io final
@@ -29,9 +29,9 @@ public:
   plugin_io(plugin_desc const* desc): _desc(desc) {}
 
   std::vector<char> save(jarray<plain_value, 4> const& state) const;
-  io_load load(std::vector<char> const& data, jarray<plain_value, 4>& state) const;
-  io_load load_file(std::filesystem::path const& path, jarray<plain_value, 4>& state) const;
+  load_result load(std::vector<char> const& data, jarray<plain_value, 4>& state) const;
   bool save_file(std::filesystem::path const& path, jarray<plain_value, 4> const& state) const;
+  load_result load_file(std::filesystem::path const& path, jarray<plain_value, 4>& state) const;
 };
 
 }

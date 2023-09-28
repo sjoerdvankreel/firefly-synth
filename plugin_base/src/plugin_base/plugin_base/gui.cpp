@@ -441,12 +441,6 @@ Component&
 plugin_gui::make_top_bar()
 {
   auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }));
-  
-  auto& load = make_component<TextButton>();
-  load.setButtonText("Load");
-  result.add(load, { 0, 0 });
-  load.onClick = [this]() {    
-  };
 
   auto& save = make_component<TextButton>();
   save.setButtonText("Save");
@@ -456,11 +450,43 @@ plugin_gui::make_top_bar()
     FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _desc->plugin->preset_extension, true, false, this);
     chooser->launchAsync(flags, [this](FileChooser const& chooser) {
       auto path = chooser.getResult().getFullPathName();
+      delete& chooser;
+      if (path.length() == 0) return;
+      plugin_io(_desc).save_file(path.toStdString(), *_ui_state);
+    });};
+
+  auto& load = make_component<TextButton>();
+  load.setButtonText("Load");
+  result.add(load, { 0, 0 });
+  load.onClick = [this]() {
+    int flags = FileBrowserComponent::openMode;
+    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _desc->plugin->preset_extension, true, false, this);
+    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
+      auto path = chooser.getResult().getFullPathName();
       delete &chooser;
-      if(path.length() > 0) 
-        plugin_io(_desc).save_file(path.toStdString(), *_ui_state);
-    });
-  };
+      if(path.length() == 0) return;
+
+      auto icon = MessageBoxIconType::WarningIcon;
+      auto result = plugin_io(_desc).load_file(path.toStdString(), *_ui_state);
+      if(result.error.size())
+      {
+        auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
+        AlertWindow::showAsync(options, nullptr);
+        return;
+      }
+
+      state_loaded();
+      if (result.warnings.size())
+      {
+        String warnings;
+        for(int i = 0; i < result.warnings.size() && i < 5; i++)
+          warnings += String(result.warnings[i]) + "\n";
+        if(result.warnings.size() > 5)
+          warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
+        auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
+        AlertWindow::showAsync(options, nullptr);
+      }
+    });};
 
   return result;
 }

@@ -13,11 +13,11 @@ namespace plugin_base {
 static int const version = 1;
 static std::string const magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
-io_load
+load_result
 plugin_io::load_file(
   std::filesystem::path const& path, jarray<plain_value, 4>& state) const
 {
-  io_load failed("Could not read file.");
+  load_result failed("Could not read file.");
   std::ifstream stream(path, std::ios::binary | std::ios::ate);
   if(stream.bad()) return failed;
   std::streamsize size = stream.tellg();
@@ -119,7 +119,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
   return std::vector<char>(json.begin(), json.end());
 }
 
-io_load
+load_result
 plugin_io::load(
   std::vector<char> const& data, jarray<plain_value, 4>& state) const
 {
@@ -128,29 +128,29 @@ plugin_io::load(
   std::copy(data.begin(), data.end(), json.begin());
   auto parse_result = JSON::parse(String(json), root);
   if(!parse_result.wasOk()) 
-    return io_load("Invalid json.");
+    return load_result("Invalid json.");
   if(!root.hasProperty("plugin")) 
-    return io_load("Invalid plugin.");
+    return load_result("Invalid plugin.");
   if(!root.hasProperty("checksum")) 
-    return io_load("Invalid checksum.");
+    return load_result("Invalid checksum.");
   if(!root.hasProperty("magic") || root["magic"] != magic) 
-    return io_load("Invalid magic.");
+    return load_result("Invalid magic.");
   if(!root.hasProperty("version") || (int)root["version"] > version) 
-    return io_load("Invalid version.");
+    return load_result("Invalid version.");
 
   var plugin = root["plugin"];
   if(plugin["id"] != _desc->plugin->id) 
-    return io_load("Invalid plugin id.");
+    return load_result("Invalid plugin id.");
   if((int)plugin["version_major"] > _desc->plugin->version_major) 
-    return io_load("Invalid plugin version.");
+    return load_result("Invalid plugin version.");
   if((int)plugin["version_major"] == _desc->plugin->version_major)
     if((int)plugin["version_minor"] > _desc->plugin->version_minor) 
-      return io_load("Invalid plugin version.");
+      return load_result("Invalid plugin version.");
   if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) 
-    return io_load("Invalid checksum.");
+    return load_result("Invalid checksum.");
 
   // good to go - only warnings from now on
-  io_load result;
+  load_result result;
   plugin_dims dims(*_desc->plugin);
   state.resize(dims.module_slot_param_slot);
   _desc->init_defaults(state);
