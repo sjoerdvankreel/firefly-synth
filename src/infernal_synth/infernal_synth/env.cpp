@@ -14,14 +14,14 @@ enum class env_stage { a, d, s, r, end };
 
 class env_engine: 
 public module_engine {
-  double _level = 0;
   double _stage_pos = 0;
   env_stage _stage = {};
+  double _release_level = 0;
 public:
   env_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(env_engine);
   void process(process_block& block) override;
-  void initialize() override { _level = 0; _stage_pos = 0; _stage = env_stage::a; }
+  void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
 };
 
 enum { section_main };
@@ -70,28 +70,40 @@ env_engine::process(process_block& block)
   auto const& d = block.accurate_automation[param_d][0];
   auto const& s = block.accurate_automation[param_s][0];
   auto const& r = block.accurate_automation[param_r][0];
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if (_stage == env_stage::end)
     {
-      block.cv_out[f] = 0;
+      block.cv_out[f] = _release_level = 0;
       continue;
     }
 
     if (_stage == env_stage::s)
     {
-      block.cv_out[f] = s[f];
+      block.cv_out[f] = _release_level = s[f];
       continue;
     }
 
     double stage_seconds;
-    block.cv_out[f] = _level;
     switch (_stage)
     {
-    case env_stage::a: stage_seconds = a[f]; break;
-    case env_stage::d: stage_seconds = d[f]; break;
-    case env_stage::r: stage_seconds = r[f]; break;
-    default: assert(false); stage_seconds = 0; break;
+    case env_stage::a: 
+      stage_seconds = a[f]; 
+      block.cv_out[f] = _release_level = _stage_pos / stage_seconds;
+      break;
+    case env_stage::d: 
+      stage_seconds = d[f]; 
+      block.cv_out[f] = _release_level = s[f] + (1.0 - _stage_pos / stage_seconds * (1.0 - s[f]));
+      break;
+    case env_stage::r: 
+      stage_seconds = r[f]; 
+      block.cv_out[f] = 1.0 - _stage_pos / stage_seconds * _release_level;
+      break;
+    default: 
+      assert(false); 
+      stage_seconds = 0; 
+      break;
     }
 
     _stage_pos += 1.0 / block.sample_rate;

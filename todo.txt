@@ -16,6 +16,8 @@ get the lnf in there
 handle clap midi notes
 handle clap is_modulatable
 think some more on note_id
+too many decimals for adsr
+get the graphs in there, see what adsr does
 
 testing:
 v test: reaper vst3 win
