@@ -411,13 +411,9 @@ plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
 _desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
 {
-  _grid = &make_component<grid_component>(_desc->plugin->dimension);
-  for(auto iter = _desc->modules.begin(); iter != _desc->modules.end(); iter += iter->module->slot_count)
-    _grid->add(make_modules(&(*iter)), iter->module->position);
-
-  auto const& topo = *_desc->plugin;
   setOpaque(true);
-  addAndMakeVisible(_grid);
+  auto const& topo = *_desc->plugin;
+  addAndMakeVisible(&make_container());
   setSize(topo.gui_default_width, topo.gui_default_width * topo.gui_aspect_ratio_height / topo.gui_aspect_ratio_width);
 }
 
@@ -428,6 +424,39 @@ plugin_gui::make_component(U&&... args)
   T* result = component.get();
   _components.emplace_back(std::move(component));
   return *result;
+}
+
+Component& 
+plugin_gui::make_container()
+{
+  auto& result = make_component<grid_component>(gui_dimension({ -20, 1 }, { 1 }));
+  result.add(make_top_bar(), { 0, 0 });
+  result.add(make_content(), { 1, 0 });
+  return result;
+}
+
+// TODO just for now.
+// Give plugin more control over this.
+Component&
+plugin_gui::make_top_bar()
+{
+  auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }));
+  auto& load = make_component<TextButton>();
+  load.setButtonText("Load");
+  result.add(load, { 0, 0 });
+  auto& save = make_component<TextButton>();
+  save.setButtonText("Save");
+  result.add(save, { 0, 1 });
+  return result;
+}
+
+Component&
+plugin_gui::make_content()
+{
+  auto& result = make_component<grid_component>(_desc->plugin->dimension);
+  for (auto iter = _desc->modules.begin(); iter != _desc->modules.end(); iter += iter->module->slot_count)
+    result.add(make_modules(&(*iter)), iter->module->position);
+  return result;
 }
 
 Component&

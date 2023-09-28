@@ -32,7 +32,6 @@ public:
 class plugin_gui:
 public juce::Component
 {
-  grid_component* _grid = {};
   plugin_desc const* const _desc;
   std::vector<ui_listener*> _ui_listeners = {};
   jarray<plain_value, 4>* const _ui_state = {};
@@ -45,13 +44,15 @@ public juce::Component
   template <class Topo, class Slot, class MakeSingle>
   Component& make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single);
 
+  Component& make_top_bar();
+  Component& make_content();
+  Component& make_container();
+
   Component& make_modules(module_desc const* slots);
   Component& make_multi_module(module_desc const* slots);
   Component& make_single_module(module_desc const& slot, bool tabbed);
-
   Component& make_sections(module_desc const& module);
   Component& make_section(module_desc const& module, section_topo const& section);
-
   Component& make_params(module_desc const& module, param_desc const* params);
   Component& make_param_edit(module_desc const& module, param_desc const& param);
   Component& make_param_label(module_desc const& module, param_desc const& param);
@@ -71,8 +72,8 @@ public:
   void plugin_changed(int index, plain_value plain);
 
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
+  void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
   void content_scale(float factor) { setTransform(juce::AffineTransform::scale(factor)); }
-  void resized() override { reinterpret_cast<juce::Component*>(_grid)->setBounds(getLocalBounds()); }
 
   void remove_ui_listener(ui_listener* listener);
   void remove_plugin_listener(int index, plugin_listener* listener);
