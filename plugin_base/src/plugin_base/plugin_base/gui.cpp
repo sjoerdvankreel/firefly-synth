@@ -441,12 +441,27 @@ Component&
 plugin_gui::make_top_bar()
 {
   auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }));
+  
   auto& load = make_component<TextButton>();
   load.setButtonText("Load");
   result.add(load, { 0, 0 });
+  load.onClick = [this]() {    
+  };
+
   auto& save = make_component<TextButton>();
   save.setButtonText("Save");
   result.add(save, { 0, 1 });
+  save.onClick = [this]() {
+    int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
+    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _desc->plugin->preset_extension, true, false, this);
+    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
+      auto path = chooser.getResult().getFullPathName();
+      delete &chooser;
+      if(path.length() > 0) 
+        plugin_io(_desc).save_file(path.toStdString(), *_ui_state);
+    });
+  };
+
   return result;
 }
 

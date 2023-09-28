@@ -15,13 +15,14 @@ synth_topo()
   result->id = INF_SYNTH_ID;
   result->name = INF_SYNTH_NAME;
   result->type = plugin_type::synth;
-  result->dimension.row_sizes = { 2, 1, 1 };
-  result->dimension.column_sizes = { 1 };
   result->gui_min_width = 400;
   result->gui_max_width = 1200;
   result->gui_default_width = 800;
   result->gui_aspect_ratio_width = 16;
   result->gui_aspect_ratio_height = 9;
+  result->preset_extension = "infpreset";
+  result->dimension.column_sizes = { 1 };
+  result->dimension.row_sizes = { 2, 1, 1 };
   result->modules.emplace_back(osc_topo());
   result->modules.emplace_back(filter_topo(result->modules[module_osc].slot_count));
   result->modules.emplace_back(delay_topo());

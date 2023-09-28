@@ -145,6 +145,7 @@ struct plugin_topo final {
   plugin_type type;
   int version_major;
   int version_minor;
+  std::string preset_extension;
 
   int gui_min_width;
   int gui_max_width;

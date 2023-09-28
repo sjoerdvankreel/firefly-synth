@@ -268,6 +268,7 @@ validate_plugin_topo(plugin_topo const& topo)
   assert(topo.modules.size());
   assert(topo.version_major >= 0);
   assert(topo.version_minor >= 0);
+  assert(topo.preset_extension.size());
   assert(topo.gui_default_width <= 3840);
   assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
 
