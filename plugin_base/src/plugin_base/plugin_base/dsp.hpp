@@ -8,6 +8,13 @@ namespace plugin_base {
 inline float constexpr pi32 = 3.14159265358979323846264338327950288f;
 inline double constexpr pi64 = 3.14159265358979323846264338327950288;
 
+template <class T>
+inline void check_unipolar(T val)
+{ assert((T)0 <= val && val <= (T)1); }
+template <class T>
+inline void check_bipolar(T val)
+{ assert((T)-1 <= val && val <= (T)1); }
+
 inline float
 balance(int channel, float value)
 {

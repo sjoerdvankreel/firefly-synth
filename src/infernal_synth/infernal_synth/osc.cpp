@@ -109,6 +109,7 @@ osc_engine::process(process_block& block)
     case type_sine: sample = std::sin(_phase * 2 * pi32); break;
     default: assert(false); sample = 0; break;
     }
+    check_bipolar(sample);
     block.audio_out[0][f] = sample * gain[f] * env[f] * balance(0, bal[f]);
     block.audio_out[1][f] = sample * gain[f] * env[f] * balance(1, bal[f]);
     _phase += note_to_frequency(oct, note, cent[f], block.voice->state.id.key) / block.sample_rate;
