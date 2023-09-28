@@ -32,11 +32,12 @@ _host_block(std::make_unique<host_block>())
 }
 
 process_block 
-plugin_engine::make_process_block(int module, int slot, int voice)
+plugin_engine::make_process_block(int voice, int module, int slot, int start_frame, int end_frame)
 {
   jarray<float, 1>& cv_out = voice < 0? _global_cv_state[module][slot]: _voice_cv_state[voice][module][slot];
   jarray<float, 2>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
   return {
+    start_frame, end_frame,
     _sample_rate, nullptr, _host_block->common,
     *_desc.plugin, _desc.plugin->modules[module], nullptr,
     cv_out, audio_out, _global_cv_state, _global_audio_state,
@@ -319,8 +320,8 @@ plugin_engine::process()
   for (int m = 0; m < _desc.module_voice_start; m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
-      process_block block(make_process_block(m, mi, -1));
-      _input_engines[m][mi]->process(block, 0, frame_count);
+      process_block block(make_process_block(-1, m, mi, 0, frame_count));
+      _input_engines[m][mi]->process(block);
     }
 
   // run voice modules in order
@@ -330,15 +331,16 @@ plugin_engine::process()
       for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
         for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
         {
+          auto const& state = _voice_states[v];
           voice_process_block voice_block = {
             _voice_results[v],
-            _voice_states[v],
+            state,
             _voice_cv_state[v],
             _voice_audio_state[v]
           };
-          process_block block(make_process_block(m, mi, v));
+          process_block block(make_process_block(v, m, mi, state.start_frame, state.end_frame));
           block.voice = &voice_block;
-          _voice_engines[v][m][mi]->process(block, _voice_states[v].start_frame, _voice_states[v].end_frame);
+          _voice_engines[v][m][mi]->process(block);
         }
 
   // combine voices output
@@ -357,9 +359,9 @@ plugin_engine::process()
         _state[m][mi],
         _voices_mixdown
       };
-      process_block block(make_process_block(m, mi, -1));
+      process_block block(make_process_block(-1, m, mi, 0, frame_count));
       block.out = &out_block;
-      _output_engines[m][mi]->process(block, 0, frame_count);
+      _output_engines[m][mi]->process(block);
     }
 
   // keep track of running time in frames

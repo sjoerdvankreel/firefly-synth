@@ -16,8 +16,8 @@ public module_engine {
 public:
   env_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(env_engine);
+  void process(process_block& block) override;
   void initialize() override { _position = 0; }
-  void process(process_block& block, int start_frame, int end_frame) override;
 };
 
 enum { section_main };
@@ -60,7 +60,7 @@ env_topo()
 }
 
 void
-env_engine::process(process_block& block, int start_frame, int end_frame)
+env_engine::process(process_block& block)
 {
 }
 

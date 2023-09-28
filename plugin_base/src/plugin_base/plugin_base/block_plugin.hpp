@@ -28,6 +28,8 @@ struct voice_process_block final {
 
 // single module process call
 struct process_block final {
+  int start_frame;
+  int end_frame;
   float sample_rate;
   out_process_block* out;
   common_block const& host;
@@ -40,7 +42,6 @@ struct process_block final {
   jarray<float, 4> const& global_audio_in;
   jarray<float, 3> const& accurate_automation;
   jarray<plain_value, 2> const& block_automation;
-
   void set_out_param(int param, int slot, double raw);
 };
 

@@ -17,7 +17,7 @@ namespace plugin_base {
 class module_engine { 
 public: 
   virtual void initialize() = 0;
-  virtual void process(process_block& block, int start_frame, int end_frame) = 0;
+  virtual void process(process_block& block) = 0;
 };
 
 // global plugin audio processor
@@ -43,8 +43,7 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
-
-  process_block make_process_block(int module, int slot, int voice);
+  process_block make_process_block(int voice, int module, int slot, int start_frame, int end_frame);
 
 public:
   void process();
