@@ -5,21 +5,16 @@ clap threadpool
 host context menu
 (polyphonic) modulation
 try out some airwindows stuff
-voice manager
-voice level unison
+voice level unison ?
 manual automation interpolation/zipper noise
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
-adsr env
-preset extension
 get the lnf in there
 handle clap midi notes
 handle clap is_modulatable
-think some more on note_id
 too many decimals for adsr
 get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
-test clap note cut/choke vs off
 
 testing:
 v test: reaper vst3 win
