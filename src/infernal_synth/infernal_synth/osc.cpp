@@ -41,8 +41,8 @@ osc_topo()
     "{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", 2, 
     module_stage::voice, module_output::audio, 
     gui_layout::tabbed, gui_position { 1, 0 }, gui_dimension { 2, 1 }));
-  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
-    return std::make_unique<osc_engine>(); };
+  result.engine_factory = [](int, int, int) -> 
+    std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
 
   result.sections.emplace_back(make_section(
     "Pitch", section_pitch, gui_position{ 0, 0 }, gui_dimension{ 1, 3 }));

@@ -14,12 +14,14 @@ enum class env_stage { a, d, s, r, end };
 
 class env_engine: 
 public module_engine {
+  int const _slot;
   double _stage_pos = 0;
   env_stage _stage = {};
   double _release_level = 0;
+
 public:
-  env_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(env_engine);
+  env_engine(int slot) : _slot(slot) { initialize(); }
   void process(process_block& block) override;
   void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
 };
@@ -31,11 +33,11 @@ module_topo
 env_topo()
 {
   module_topo result(make_module(
-    "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", 1, 
+    "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", 2, 
     module_stage::voice, module_output::cv, 
-    gui_layout::single, gui_position { 0, 0 }, gui_dimension { 1, 1 }));
-  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
-    return std::make_unique<env_engine>(); };
+    gui_layout::tabbed, gui_position { 0, 0 }, gui_dimension { 1, 1 }));
+  result.engine_factory = [](int slot, int, int) -> 
+    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(slot); };
 
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 4 }));
@@ -127,7 +129,8 @@ env_engine::process(process_block& block)
         break;
       case env_stage::r: 
         _stage = env_stage::end; 
-        block.voice->finished = true; 
+        if(_slot == 0)
+          block.voice->finished = true; 
         break;
       default: assert(false); break;
       }

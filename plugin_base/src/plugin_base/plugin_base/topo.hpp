@@ -27,7 +27,7 @@ enum class param_label_contents { none, name, value, both };
 
 class module_engine;
 typedef std::unique_ptr<module_engine>(*
-module_engine_factory)(int sample_rate, int max_frame_count);
+module_engine_factory)(int slot, int sample_rate, int max_frame_count);
 
 // position in parent grid
 struct gui_position final {

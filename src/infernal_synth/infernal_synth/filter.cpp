@@ -33,8 +33,8 @@ filter_topo(int osc_slot_count)
     "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, 
     module_stage::voice, module_output::none,
     gui_layout::single, gui_position { 2, 0 }, gui_dimension { 1, 1 }));
-  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
-    return std::make_unique<filter_engine>(); };
+  result.engine_factory = [](int, int, int) -> 
+    std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
 
   std::vector<int> column_sizes;
   column_sizes.push_back(1);
@@ -74,10 +74,13 @@ filter_engine::process(process_block& block)
   if(block.block_automation[param_on][0].step() == 0) return;
 
   float w = 2 * block.sample_rate;
+  auto const& env = block.voice->cv_in[module_env][1];
+  // TODO - env is now in 0-1, but freq is already in linear domain.
+  // We'd better multiple env*freq with freq also in 0-1 (log domain).
   auto const& freq = block.accurate_automation[param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float angle = freq[f] * 2 * pi32;
+    float angle = freq[f] * env[f] * 2 * pi32;
     float norm = 1 / (angle + w);
     float a = angle * norm;
     float b = (w - angle) * norm;

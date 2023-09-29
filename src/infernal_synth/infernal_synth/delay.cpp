@@ -33,8 +33,8 @@ delay_topo()
     "{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Delay", 1, 
     module_stage::output, module_output::none,
     gui_layout::single, gui_position { 3, 0 }, gui_dimension { 1, 1 }));
-  result.engine_factory = [](int sample_rate, int max_frame_count) -> std::unique_ptr<module_engine> {
-    return std::make_unique<delay_engine>(sample_rate); };
+  result.engine_factory = [](int, int sample_rate, int) -> 
+    std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1 }, { 1, 6 } }));
