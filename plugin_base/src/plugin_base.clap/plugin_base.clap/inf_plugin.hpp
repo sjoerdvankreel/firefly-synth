@@ -64,12 +64,9 @@ public:
   bool implementsParams() const noexcept override { return true; }
   bool implementsNotePorts() const noexcept override { return true; }
   bool implementsAudioPorts() const noexcept override { return true; }
-  bool implementsThreadPool() const noexcept override { return true; }
 
   bool stateSave(clap_ostream const* stream) noexcept override;
   bool stateLoad(clap_istream const* stream) noexcept override;
-  void threadPoolExec(uint32_t task_index) noexcept override 
-  { _engine.process_voice(task_index); }
 
 #if (defined __linux__) || (defined  __FreeBSD__)
   void onPosixFd(int fd, int flags) noexcept override;

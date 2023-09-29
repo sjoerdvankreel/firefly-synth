@@ -14,7 +14,7 @@ namespace plugin_base::vst3 {
 
 inf_component::
 inf_component(std::unique_ptr<plugin_topo>&& topo, FUID const& controller_id) :
-_engine(std::move(topo), nullptr, nullptr)
+_engine(std::move(topo))
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
