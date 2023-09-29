@@ -6,8 +6,13 @@
 namespace plugin_base {
 
 plugin_engine::
-plugin_engine(std::unique_ptr<plugin_topo>&& topo) :
+plugin_engine(
+  std::unique_ptr<plugin_topo>&& topo, 
+  thread_pool_voice_processor voice_processor,
+  void* voice_processor_context):
 _desc(std::move(topo)), _dims(*_desc.plugin), 
+_voice_processor(voice_processor),
+_voice_processor_context(voice_processor_context),
 _host_block(std::make_unique<host_block>())
 {
   // reserve this much but allocate on the audio thread if necessary
@@ -122,6 +127,32 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
       _output_engines[m][mi] = _desc.plugin->modules[m].engine_factory(mi, sample_rate, max_frame_count);
+}
+
+void
+plugin_engine::process_voice(int v)
+{
+  if (_voice_states[v].stage != voice_stage::unused)
+    for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
+      for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+      {
+        auto& state = _voice_states[v];
+        voice_process_block voice_block = {
+          false,
+          _voice_results[v],
+          state,
+          _voice_cv_state[v],
+          _voice_audio_state[v]
+        };
+        process_block block(make_process_block(v, m, mi, state.start_frame, state.end_frame));
+        block.voice = &voice_block;
+        _voice_engines[v][m][mi]->process(block);
+        state.release_frame = -1;
+
+        // plugin completed its envelope
+        if (block.voice->finished)
+          _voice_states[v].stage = voice_stage::finishing;
+      }
 }
 
 void 
@@ -335,27 +366,7 @@ plugin_engine::process()
   // run voice modules in order
   // TODO threadpool
   for (int v = 0; v < _voice_states.size(); v++)
-    if (_voice_states[v].stage != voice_stage::unused)
-      for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
-        for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
-        {
-          auto& state = _voice_states[v];
-          voice_process_block voice_block = {
-            false,
-            _voice_results[v],
-            state,
-            _voice_cv_state[v],
-            _voice_audio_state[v]
-          };
-          process_block block(make_process_block(v, m, mi, state.start_frame, state.end_frame));
-          block.voice = &voice_block;
-          _voice_engines[v][m][mi]->process(block);
-          state.release_frame = -1;
-
-          // plugin completed its envelope
-          if(block.voice->finished) 
-            _voice_states[v].stage = voice_stage::finishing;
-        }
+    process_voice(v);
 
   // combine voices output
   for (int v = 0; v < _voice_states.size(); v++)
@@ -364,7 +375,7 @@ plugin_engine::process()
         for(int f = 0; f < frame_count; f++)
           _voices_mixdown[c][f] += _voice_results[v][c][f];
 
-  // combine output modules in order
+  // run output modules in order
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {

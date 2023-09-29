@@ -13,6 +13,8 @@
 
 namespace plugin_base {
 
+class plugin_engine;
+
 // single module audio processors
 class module_engine { 
 public: 
@@ -20,11 +22,20 @@ public:
   virtual void process(process_block& block) = 0;
 };
 
+// catering to clap
+// but also a great way to see if voices are really independent
+typedef bool (*
+thread_pool_voice_processor)(plugin_engine& engine, void* context);
+
 // global plugin audio processor
 class plugin_engine final {
 
   plugin_desc const _desc;
   plugin_dims const _dims; 
+
+  void* _voice_processor_context = nullptr;
+  thread_pool_voice_processor _voice_processor = {};
+
   float _sample_rate = {};
   std::int64_t _stream_time = {};
   jarray<plain_value, 4> _state = {};
@@ -49,10 +60,14 @@ public:
   void process();
   void deactivate();
   host_block& prepare();
+  void process_voice(int v); // public for threadpool
   void activate(int sample_rate, int max_frame_count);
 
   INF_DECLARE_MOVE_ONLY(plugin_engine);
-  explicit plugin_engine(std::unique_ptr<plugin_topo>&& topo);
+  explicit plugin_engine(
+    std::unique_ptr<plugin_topo>&& topo, 
+    thread_pool_voice_processor voice_processor, 
+    void* voice_processor_context);
 
   plugin_desc const& desc() const { return _desc; }
   jarray<plain_value, 4>& state() { return _state; }

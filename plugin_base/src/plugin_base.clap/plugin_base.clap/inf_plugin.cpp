@@ -37,11 +37,17 @@ normalized_to_clap(param_topo const& topo, normalized_value normalized)
     return clap_value(topo.normalized_to_raw(normalized));
 }
 
+static bool 
+thread_pool_voice_processor(plugin_engine& engine, void* context)
+{
+  return false;
+}
+
 inf_plugin::
 inf_plugin(
   clap_plugin_descriptor const* desc, 
   clap_host const* host, std::unique_ptr<plugin_topo>&& topo):
-Plugin(desc, host), _engine(std::move(topo)),
+Plugin(desc, host), _engine(std::move(topo), thread_pool_voice_processor, this),
 _to_ui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 {
