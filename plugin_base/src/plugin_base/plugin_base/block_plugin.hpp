@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/dsp.hpp>
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
@@ -58,6 +59,7 @@ process_block::set_out_param(int param, int slot, double raw) const
 inline float
 process_block::normalized_to_raw(int module_, int param_, float normalized) const
 {
+  check_unipolar(normalized);
   auto const& param_topo = plugin.modules[module_].params[param_];
   return param_topo.normalized_to_raw(normalized_value(normalized));
 }
