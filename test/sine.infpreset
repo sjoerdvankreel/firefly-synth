@@ -1,0 +1,289 @@
+{
+  "magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
+  "version": 1,
+  "checksum": "daf806af405541814291e9a58df3b2aa",
+  "plugin": {
+    "id": "56AFFFF7565F48348C4359D5E6C856A4",
+    "name": "Infernal Synth",
+    "version_major": 2,
+    "version_minor": 0,
+    "modules": [
+      {
+        "id": "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}",
+        "name": "Env",
+        "slot_count": 2,
+        "params": [
+          {
+            "id": "{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}",
+            "name": "A",
+            "slot_count": 1
+          },
+          {
+            "id": "{45E37229-839F-4735-A31D-07DE9873DF04}",
+            "name": "D",
+            "slot_count": 1
+          },
+          {
+            "id": "{E5AB2431-1953-40E4-AFD3-735DB31A4A06}",
+            "name": "S",
+            "slot_count": 1
+          },
+          {
+            "id": "{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}",
+            "name": "R",
+            "slot_count": 1
+          }
+        ]
+      },
+      {
+        "id": "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+        "name": "Osc",
+        "slot_count": 2,
+        "params": [
+          {
+            "id": "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}",
+            "name": "Note",
+            "slot_count": 1
+          },
+          {
+            "id": "{38C78D40-840A-4EBE-A336-2C81D23B426D}",
+            "name": "Oct",
+            "slot_count": 1
+          },
+          {
+            "id": "{691F82E5-00C8-4962-89FE-9862092131CB}",
+            "name": "Cent",
+            "slot_count": 1
+          },
+          {
+            "id": "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}",
+            "name": "On",
+            "slot_count": 1
+          },
+          {
+            "id": "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}",
+            "name": "Type",
+            "slot_count": 1
+          },
+          {
+            "id": "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+            "name": "Gain",
+            "slot_count": 1
+          },
+          {
+            "id": "{23C6BC03-0978-4582-981B-092D68338ADA}",
+            "name": "Bal",
+            "slot_count": 1
+          }
+        ]
+      },
+      {
+        "id": "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}",
+        "name": "Filter",
+        "slot_count": 1,
+        "params": [
+          {
+            "id": "{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}",
+            "name": "On",
+            "slot_count": 1
+          },
+          {
+            "id": "{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}",
+            "name": "Freq",
+            "slot_count": 1
+          },
+          {
+            "id": "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}",
+            "name": "Osc Gain",
+            "slot_count": 2
+          }
+        ]
+      },
+      {
+        "id": "{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}",
+        "name": "Delay",
+        "slot_count": 1,
+        "params": [
+          {
+            "id": "{A8638DE3-B574-4584-99A2-EC6AEE725839}",
+            "name": "On",
+            "slot_count": 1
+          }
+        ]
+      }
+    ],
+    "state": [
+      {
+        "slots": [
+          {
+            "params": [
+              {
+                "slots": [
+                  "0.03 Sec"
+                ]
+              },
+              {
+                "slots": [
+                  "0.19571 Sec"
+                ]
+              },
+              {
+                "slots": [
+                  "53.6 %"
+                ]
+              },
+              {
+                "slots": [
+                  "0.2 Sec"
+                ]
+              }
+            ]
+          },
+          {
+            "params": [
+              {
+                "slots": [
+                  "0.03 Sec"
+                ]
+              },
+              {
+                "slots": [
+                  "0.1 Sec"
+                ]
+              },
+              {
+                "slots": [
+                  "50 %"
+                ]
+              },
+              {
+                "slots": [
+                  "0.2 Sec"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "params": [
+              {
+                "slots": [
+                  "C"
+                ]
+              },
+              {
+                "slots": [
+                  "4"
+                ]
+              },
+              {
+                "slots": [
+                  "0"
+                ]
+              },
+              {
+                "slots": [
+                  "On"
+                ]
+              },
+              {
+                "slots": [
+                  "Sine"
+                ]
+              },
+              {
+                "slots": [
+                  "100 %"
+                ]
+              },
+              {
+                "slots": [
+                  "0 %"
+                ]
+              }
+            ]
+          },
+          {
+            "params": [
+              {
+                "slots": [
+                  "C"
+                ]
+              },
+              {
+                "slots": [
+                  "4"
+                ]
+              },
+              {
+                "slots": [
+                  "0"
+                ]
+              },
+              {
+                "slots": [
+                  "Off"
+                ]
+              },
+              {
+                "slots": [
+                  "Saw"
+                ]
+              },
+              {
+                "slots": [
+                  "100 %"
+                ]
+              },
+              {
+                "slots": [
+                  "0 %"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "params": [
+              {
+                "slots": [
+                  "Off"
+                ]
+              },
+              {
+                "slots": [
+                  "1000 Hz"
+                ]
+              },
+              {
+                "slots": [
+                  "50 %",
+                  "50 %"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "params": [
+              {
+                "slots": [
+                  "Off"
+                ]
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}
