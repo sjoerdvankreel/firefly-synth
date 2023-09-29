@@ -338,7 +338,7 @@ plugin_engine::process()
       for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
         for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
         {
-          auto const& state = _voice_states[v];
+          auto& state = _voice_states[v];
           voice_process_block voice_block = {
             false,
             _voice_results[v],
@@ -349,6 +349,7 @@ plugin_engine::process()
           process_block block(make_process_block(v, m, mi, state.start_frame, state.end_frame));
           block.voice = &voice_block;
           _voice_engines[v][m][mi]->process(block);
+          state.release_frame = -1;
 
           // plugin completed its envelope
           if(block.voice->finished) 

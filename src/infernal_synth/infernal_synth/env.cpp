@@ -108,7 +108,7 @@ env_engine::process(process_block& block)
       {
       case env_stage::a: block.cv_out[f] = _release_level = _stage_pos / stage_seconds; break;
       case env_stage::d: block.cv_out[f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s[f]); break;
-      case env_stage::r: block.cv_out[f] = 1.0 - _stage_pos / stage_seconds * _release_level; break;
+      case env_stage::r: block.cv_out[f] = (1.0 - _stage_pos / stage_seconds) * _release_level; break;
       default: assert(false); stage_seconds = 0; break;
       }
 
@@ -119,9 +119,16 @@ env_engine::process(process_block& block)
       _stage_pos = 0;
       switch (_stage)
       {
-      case env_stage::a: _stage = env_stage::d; break;
-      case env_stage::d: _stage = env_stage::s; break;
-      case env_stage::r: _stage = env_stage::end; break;
+      case env_stage::a: 
+        _stage = env_stage::d; 
+        break;
+      case env_stage::d: 
+        _stage = env_stage::s; 
+        break;
+      case env_stage::r: 
+        _stage = env_stage::end; 
+        block.voice->finished = true; 
+        break;
       default: assert(false); break;
       }
     }
