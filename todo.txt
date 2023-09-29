@@ -16,6 +16,7 @@ too many decimals for adsr
 get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
 ui set exact values
+load preset while playing behaves weird
 
 testing:
 v test: reaper vst3 win
