@@ -18,6 +18,7 @@ handle automation changes at voice vs block start
 ui set exact values
 load preset while playing behaves weird
 fix the other hosts adsr
+fix the bug in the checkbox, dont come through
 
 testing:
 v test: reaper vst3 win
