@@ -139,7 +139,7 @@ plugin_engine::process()
     {
       _voice_states[i].start_frame = 0;
       _voice_states[i].end_frame = frame_count;
-    } else if(_voice_states[i].stage == voice_stage::release)
+    } else if(_voice_states[i].stage == voice_stage::finishing)
       _voice_states[i] = voice_state();
 
   // steal voices for incoming notes by age
@@ -150,7 +150,7 @@ plugin_engine::process()
     if (event.type != note_event::type_t::on) continue;
     std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
     for (int i = 0; i < _voice_states.size(); i++)
-      if (_voice_states[i].stage == voice_stage::inactive)
+      if (_voice_states[i].stage == voice_stage::unused)
       {
         slot = i;
         break;
@@ -195,9 +195,16 @@ plugin_engine::process()
         (event.id.id == -1 && (state.id.key == event.id.key && state.id.channel == event.id.channel))))
       {
         release_count++;
-        state.end_frame = event.frame;
-        state.stage = voice_stage::release;
-        assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
+        if(event.type == note_event::type_t::cut)
+        {
+          state.end_frame = event.frame;
+          state.stage = voice_stage::finishing;
+          assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
+        } else {
+          state.release_frame = event.frame;
+          state.stage = voice_stage::releasing;
+          assert(0 <= state.start_frame && state.start_frame <= state.release_frame && state.release_frame < frame_count);
+        }
       }
     }
     assert(release_count > 0);
@@ -209,7 +216,7 @@ plugin_engine::process()
     std::fill(_host_block->audio_out[c], _host_block->audio_out[c] + frame_count, 0.0f);
     std::fill(_voices_mixdown[c].begin(), _voices_mixdown[c].begin() + frame_count, 0.0f);
     for (int v = 0; v < _voice_results.size(); v++)
-      if(_voice_states[v].stage != voice_stage::inactive)
+      if(_voice_states[v].stage != voice_stage::unused)
         std::fill(_voice_results[v][c].begin(), _voice_results[v][c].begin() + frame_count, 0.0f);
   }
 
@@ -225,7 +232,7 @@ plugin_engine::process()
                     _global_cv_state[m][mi].begin() + frame_count, 0.0f);
         } else {
           for (int v = 0; v < _voice_states.size(); v++)
-            if(_voice_states[v].stage != voice_stage::inactive)
+            if(_voice_states[v].stage != voice_stage::unused)
               std::fill(_voice_cv_state[v][m][mi].begin(), 
                         _voice_cv_state[v][m][mi].begin() + frame_count, 0.0f);
         }
@@ -237,7 +244,7 @@ plugin_engine::process()
                      _global_audio_state[m][mi][c].begin() + frame_count, 0.0f);
         } else {
            for (int v = 0; v < _voice_states.size(); v++)
-             if (_voice_states[v].stage != voice_stage::inactive)
+             if (_voice_states[v].stage != voice_stage::unused)
                for (int c = 0; c < 2; c++)
                  std::fill(_voice_audio_state[v][m][mi][c].begin(), 
                            _voice_audio_state[v][m][mi][c].begin() + frame_count, 0.0f);
@@ -327,12 +334,13 @@ plugin_engine::process()
   // run voice modules in order
   // TODO threadpool
   for (int v = 0; v < _voice_states.size(); v++)
-    if (_voice_states[v].stage != voice_stage::inactive)
+    if (_voice_states[v].stage != voice_stage::unused)
       for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
         for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
         {
           auto const& state = _voice_states[v];
           voice_process_block voice_block = {
+            false,
             _voice_results[v],
             state,
             _voice_cv_state[v],
@@ -341,11 +349,15 @@ plugin_engine::process()
           process_block block(make_process_block(v, m, mi, state.start_frame, state.end_frame));
           block.voice = &voice_block;
           _voice_engines[v][m][mi]->process(block);
+
+          // plugin completed its envelope
+          if(block.voice->finished) 
+            _voice_states[v].stage = voice_stage::finishing;
         }
 
   // combine voices output
   for (int v = 0; v < _voice_states.size(); v++)
-    if (_voice_states[v].stage != voice_stage::inactive)
+    if (_voice_states[v].stage != voice_stage::unused)
       for(int c = 0; c < 2; c++)
         for(int f = 0; f < frame_count; f++)
           _voices_mixdown[c][f] += _voice_results[v][c][f];

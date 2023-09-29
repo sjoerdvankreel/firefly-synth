@@ -79,6 +79,12 @@ env_engine::process(process_block& block)
       continue;
     }
 
+    if (block.voice->state.release_frame == f)
+    {
+      _stage_pos = 0;
+      _stage = env_stage::r;
+    }
+
     if (_stage == env_stage::s)
     {
       block.cv_out[f] = _release_level = s[f];

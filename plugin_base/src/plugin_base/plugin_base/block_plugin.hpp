@@ -20,6 +20,7 @@ struct out_process_block final {
 
 // single per-voice module process call
 struct voice_process_block final {
+  bool finished;
   jarray<float, 2>& result;
   voice_state const& state;
   jarray<float, 3> const& cv_in;

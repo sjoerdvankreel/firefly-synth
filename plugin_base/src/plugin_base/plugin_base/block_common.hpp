@@ -18,11 +18,12 @@ struct common_block final {
 };
 
 // for polyphonic stuff
-enum class voice_stage { inactive, active, release };
+enum class voice_stage { unused, active, releasing, finishing };
 struct voice_state final {
-  note_id id = {};
   int end_frame = -1;
   int start_frame = -1;
+  int release_frame = -1;
+  note_id id = {};
   float velocity = 0.0f;
   std::int64_t time = -1;
   voice_stage stage = {};
