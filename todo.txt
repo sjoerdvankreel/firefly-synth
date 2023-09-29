@@ -15,6 +15,7 @@ handle clap is_modulatable
 too many decimals for adsr
 get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
+ui set exact values
 
 testing:
 v test: reaper vst3 win
