@@ -301,13 +301,14 @@ plugin_engine::process()
     for(int f = prev_frame; f <= event.frame; f++)
       curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
-    // denormalize
+    // denormalize current state values
     mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).param->normalized_to_plain(event.normalized).real());
     _accurate_frames[event.param] = event.frame;
   }
 
-  // denormalize all interpolated curves even if they where not changed
-  // this might be costly for log-scaled parameters
+  // denormalize interpolated curves even if they where not changed
+  // for all parameters specified as param_format::plain
+  // param_format::normalized will show up as such in module_engine::process
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
@@ -315,8 +316,8 @@ plugin_engine::process()
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        for(int pi = 0; pi < param.slot_count; pi++)
-          if(param.rate == param_rate::accurate)
+        if (param.rate == param_rate::accurate && param.format == param_format::plain)
+          for(int pi = 0; pi < param.slot_count; pi++)
             for(int f = 0; f < frame_count; f++)
               _accurate_automation[m][mi][p][pi][f] = param.normalized_to_plain(
                 normalized_value(_accurate_automation[m][mi][p][pi][f])).real();

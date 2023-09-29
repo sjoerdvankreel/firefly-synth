@@ -18,6 +18,7 @@ enum class gui_layout { single, horizontal, vertical, tabbed };
 
 enum class param_dir { input, output };
 enum class param_rate { accurate, block };
+enum class param_format { plain, normalized };
 enum class param_display { normal, pct, pct_no_unit };
 enum class param_type { step, name, item, linear, log };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
@@ -86,6 +87,7 @@ struct param_topo final {
   param_type type;
   param_rate rate;
   param_edit edit;
+  param_format format;
   param_display display;
   param_label_align label_align;
   param_label_justify label_justify;

@@ -11,7 +11,7 @@ note_names()
 static param_topo
 param_base(
   std::string const& id, std::string const& name, int slot_count, int section, std::string const& default_,
-  param_dir dir, param_rate rate, param_edit edit,
+  param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
@@ -21,6 +21,7 @@ param_base(
   result.edit = edit;
   result.name = name;
   result.rate = rate;
+  result.format = format;
   result.layout = layout;
   result.section = section;
   result.position = position;
@@ -73,7 +74,7 @@ param_toggle(
 {
   param_topo result(param_base(
     id, name, slot_count, section, default_? "On": "Off", 
-    dir, param_rate::block, param_edit::toggle, 
+    dir, param_rate::block, param_format::plain, param_edit::toggle, 
     label_contents, label_align, label_justify, layout, position));
   result.min = 0;
   result.max = 1;
@@ -91,7 +92,7 @@ param_steps(
 {
   param_topo result(param_base(
     id, name, slot_count, section, std::to_string(default_), 
-    dir, param_rate::block, edit, 
+    dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
   result.min = min;
   result.max = max;
@@ -109,7 +110,7 @@ param_items(
 {
   param_topo result(param_base(
     id, name, slot_count, section, default_, 
-    dir, param_rate::block, edit, 
+    dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
   result.items = std::move(items);
   result.min = 0;
@@ -128,7 +129,7 @@ param_names(
 {
   param_topo result(param_base(
     id, name, slot_count, section, default_,
-    dir, param_rate::block, edit, 
+    dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
   result.min = 0;
   result.max = names.size() - 1;
@@ -141,13 +142,13 @@ param_topo
 param_pct(
   std::string const& id, std::string const& name, int slot_count, int section,
   double min, double max, double default_,
-  param_dir dir, param_rate rate, bool unit, param_edit edit,
+  param_dir dir, param_rate rate, param_format format, bool unit, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, slot_count, section, std::to_string(default_ * 100), 
-    dir, rate, edit, 
+    dir, rate, format, edit, 
     label_contents, label_align, label_justify, layout, position));
   result.min = min;
   result.max = max;
@@ -161,13 +162,13 @@ param_topo
 param_linear(
   std::string const& id, std::string const& name, int slot_count, int section,
   double min, double max, double default_, std::string const& unit,
-  param_dir dir, param_rate rate, param_edit edit,
+  param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, slot_count, section, std::to_string(default_), 
-    dir, rate, edit, 
+    dir, rate, format, edit,
     label_contents, label_align, label_justify, layout, position));
   result.min = min;
   result.max = max;
@@ -180,13 +181,13 @@ param_topo
 param_log(
   std::string const& id, std::string const& name, int slot_count, int section,
   double min, double max, double default_, double midpoint, std::string const& unit,
-  param_dir dir, param_rate rate, param_edit edit,
+  param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, slot_count, section, std::to_string(default_), 
-    dir, rate, edit, 
+    dir, rate, format, edit,
     label_contents, label_align, label_justify, layout, position));
   result.min = min;
   result.max = max;

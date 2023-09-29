@@ -218,6 +218,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
 
   assert(param.type != param_type::log || param.exp != 0);
   assert(param.type == param_type::log || param.exp == 0);
+  assert(param.format == param_format::plain || param.is_real());
   assert(param.dir != param_dir::output || param.rate == param_rate::block);
   
   assert(param.edit != param_edit::toggle || param.min == 0);

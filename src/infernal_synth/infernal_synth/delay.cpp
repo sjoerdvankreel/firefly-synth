@@ -45,7 +45,7 @@ delay_topo()
     gui_layout::single, gui_position { 0, 0 } ));
   result.params.emplace_back(param_pct(
     "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out", 1, section_main, 0, 1, 0,
-    param_dir::output, param_rate::block, true, param_edit::text,
+    param_dir::output, param_rate::block, param_format::plain, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
 

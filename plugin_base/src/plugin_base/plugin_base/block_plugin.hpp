@@ -43,14 +43,23 @@ struct process_block final {
   jarray<float, 4> const& global_audio_in;
   jarray<float, 3> const& accurate_automation;
   jarray<plain_value, 2> const& block_automation;
-  void set_out_param(int param, int slot, double raw);
+
+  void set_out_param(int param, int slot, double raw) const;
+  float normalized_to_raw(int module_, int param_, float normalized) const;
 };
 
 inline void 
-process_block::set_out_param(int param, int slot, double raw)
+process_block::set_out_param(int param, int slot, double raw) const
 {
   assert(module.params[param].dir == param_dir::output);
   out->params[param][slot] = module.params[param].raw_to_plain(raw);
+}
+
+inline float
+process_block::normalized_to_raw(int module_, int param_, float normalized) const
+{
+  auto const& param_topo = plugin.modules[module_].params[param_];
+  return param_topo.normalized_to_raw(normalized_value(normalized));
 }
 
 }

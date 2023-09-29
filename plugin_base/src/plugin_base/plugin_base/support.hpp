@@ -54,21 +54,21 @@ param_topo
 param_pct(
   std::string const& id, std::string const& name, int slot_count, int section, 
   double min, double max, double default_,
-  param_dir dir, param_rate rate, bool unit, param_edit edit, 
+  param_dir dir, param_rate rate, param_format format, bool unit, param_edit edit, 
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify, 
   gui_layout layout, gui_position const& position);
 param_topo
 param_linear(
   std::string const& id, std::string const& name, int slot_count, int section, 
   double min, double max, double default_, std::string const& unit,
-  param_dir dir, param_rate rate, param_edit edit, 
+  param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 param_topo
 param_log(
   std::string const& id, std::string const& name, int slot_count, int section, 
   double min, double max, double default_, double midpoint, std::string const& unit,
-  param_dir dir, param_rate rate, param_edit edit,
+  param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 }

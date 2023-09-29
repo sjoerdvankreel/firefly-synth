@@ -50,12 +50,12 @@ filter_topo(int osc_slot_count)
     gui_layout::single, gui_position { 0, 0 }));
   result.params.emplace_back(param_log(
     "{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", 1, section_main, 20, 20000, 1000, 1000, "Hz",
-    param_dir::input, param_rate::accurate, param_edit::hslider,
+    param_dir::input, param_rate::accurate, param_format::normalized, param_edit::hslider,
     param_label_contents::name, param_label_align::bottom, param_label_justify::near,
     gui_layout::single, gui_position { 0, 1 }));
   result.params.emplace_back(param_pct(
     "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", osc_slot_count, section_main, 0, 1, 0.5,
-    param_dir::input, param_rate::accurate, true, param_edit::hslider,
+    param_dir::input, param_rate::accurate, param_format::plain, true, param_edit::hslider,
     param_label_contents::name, param_label_align::bottom, param_label_justify::near,
     gui_layout::horizontal, gui_position { 0, 2, 1, osc_slot_count }));
 
@@ -75,12 +75,10 @@ filter_engine::process(process_block& block)
 
   float w = 2 * block.sample_rate;
   auto const& env = block.voice->cv_in[module_env][1];
-  // TODO - env is now in 0-1, but freq is already in linear domain.
-  // We'd better multiple env*freq with freq also in 0-1 (log domain).
   auto const& freq = block.accurate_automation[param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float angle = freq[f] * env[f] * 2 * pi32;
+    float angle = block.normalized_to_raw(module_filter, param_freq, freq[f] * env[f]) * 2 * pi32;
     float norm = 1 / (angle + w);
     float a = angle * norm;
     float b = (w - angle) * norm;
