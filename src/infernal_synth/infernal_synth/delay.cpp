@@ -76,7 +76,7 @@ delay_engine::process(process_block& block)
     {
       block.out->host_audio[c][f] = block.out->mixdown[c][f];
       if (block.block_automation[param_on][0].step() != 0)
-        block.out->host_audio[c][f] += _buffer[c][(_pos + f) % _length];
+        block.out->host_audio[c][f] += _buffer[c][(_pos + f) % _length] * 0.5f;
       _buffer[c][(_pos + f) % _length] = block.out->mixdown[c][f];
       max_out = std::max(max_out, block.out->host_audio[c][f]);
     }  
