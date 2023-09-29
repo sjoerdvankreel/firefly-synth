@@ -37,17 +37,18 @@ normalized_to_clap(param_topo const& topo, normalized_value normalized)
     return clap_value(topo.normalized_to_raw(normalized));
 }
 
-static bool 
-thread_pool_voice_processor(plugin_engine& engine, void* context)
+static bool
+forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
 {
-  return false;
+  auto plugin = static_cast<inf_plugin*>(context);
+  return plugin->thread_pool_voice_processor(engine);
 }
 
 inf_plugin::
 inf_plugin(
   clap_plugin_descriptor const* desc, 
   clap_host const* host, std::unique_ptr<plugin_topo>&& topo):
-Plugin(desc, host), _engine(std::move(topo), thread_pool_voice_processor, this),
+Plugin(desc, host), _engine(std::move(topo), forward_thread_pool_voice_processor, this),
 _to_ui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 {
@@ -463,6 +464,7 @@ inf_plugin::process(clap_process const* process) noexcept
     if(header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     switch (header->type)
     {
+    // TODO handle midi note events
     case CLAP_EVENT_NOTE_ON:
     case CLAP_EVENT_NOTE_OFF:
     case CLAP_EVENT_NOTE_CHOKE:

@@ -363,10 +363,11 @@ plugin_engine::process()
       _input_engines[m][mi]->process(block);
     }
 
-  // run voice modules in order
-  // TODO threadpool
-  for (int v = 0; v < _voice_states.size(); v++)
-    process_voice(v);
+  // run voice modules in order taking advantage of host threadpool if possible
+  // note: multithreading over voices, not anything within a single voice
+  if(!(_voice_processor && _voice_processor(*this, _voice_processor_context)))
+    for (int v = 0; v < _voice_states.size(); v++)
+      process_voice(v);
 
   // combine voices output
   for (int v = 0; v < _voice_states.size(); v++)

@@ -68,8 +68,11 @@ public:
 
   bool stateSave(clap_ostream const* stream) noexcept override;
   bool stateLoad(clap_istream const* stream) noexcept override;
-  void threadPoolExec(uint32_t task_index) noexcept override 
+  
+  void threadPoolExec(uint32_t task_index) noexcept override
   { _engine.process_voice(task_index); }
+  bool thread_pool_voice_processor(plugin_engine& engine)
+  { return _host.threadPoolRequestExec(engine.desc().plugin->polyphony); }
 
 #if (defined __linux__) || (defined  __FreeBSD__)
   void onPosixFd(int fd, int flags) noexcept override;
