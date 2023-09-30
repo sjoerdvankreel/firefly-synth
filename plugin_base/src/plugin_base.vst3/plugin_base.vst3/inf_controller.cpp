@@ -63,11 +63,6 @@ inf_controller::createView(char const* name)
   return _editor = new inf_editor(this);
 }
 
-void 
-inf_controller::ui_state_check()
-{
-}
-
 void
 inf_controller::ui_changing(int index, plain_value plain)
 {

@@ -112,7 +112,6 @@ public:
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
-  void ui_state_check() override;
   void ui_changing(int index, plain_value plain) override;
   void ui_end_changes(int index) override { push_to_audio(index, sync_event::type_t::end_edit); }
   void ui_begin_changes(int index) override { push_to_audio(index, sync_event::type_t::begin_edit); }
