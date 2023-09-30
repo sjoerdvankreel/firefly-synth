@@ -8,6 +8,8 @@
 #include <plugin_base/block_plugin.hpp>
 
 #include <memory>
+#include <vector>
+#include <thread>
 #include <utility>
 
 namespace plugin_base {
@@ -53,6 +55,7 @@ class plugin_engine final {
   std::unique_ptr<host_block> _host_block = {};
   
   void* _voice_processor_context = nullptr;
+  std::vector<std::thread::id> _voice_thread_ids;
   thread_pool_voice_processor _voice_processor = {};
 
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
@@ -62,6 +65,7 @@ class plugin_engine final {
   process_block make_process_block(
     int voice, int module, int slot, 
     int start_frame, int end_frame);
+  int process_voices_single_threaded();
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_engine);
@@ -72,7 +76,7 @@ public:
 
   // per-voice public for threadpool
   void process();
-  void process_voice(int v); 
+  void process_voice(int v, bool threaded); 
 
   void deactivate();
   void release_block();

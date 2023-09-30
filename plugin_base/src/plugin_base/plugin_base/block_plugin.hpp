@@ -15,6 +15,7 @@ struct plugin_topo;
 // single output module process call
 struct out_process_block final {
   int voice_count;
+  int thread_count;
   double cpu_usage;
   float* const* host_audio;
   jarray<plain_value, 2>& params;

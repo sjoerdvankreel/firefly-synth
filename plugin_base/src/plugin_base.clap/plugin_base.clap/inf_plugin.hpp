@@ -70,7 +70,7 @@ public:
   bool stateLoad(clap_istream const* stream) noexcept override;
   
   void threadPoolExec(uint32_t task_index) noexcept override 
-  { _engine.process_voice(task_index); }  
+  { _engine.process_voice(task_index, true); }  
   bool thread_pool_voice_processor(plugin_engine& engine)
   { return _host.threadPoolRequestExec(engine.desc().plugin->polyphony); }
 

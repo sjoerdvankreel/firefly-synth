@@ -24,7 +24,7 @@ public:
 };
 
 enum { section_main };
-enum { param_on, param_out, param_voices, param_cpu };
+enum { param_on, param_out, param_voices, param_cpu, param_threads };
 
 module_topo
 delay_topo(int polyphony)
@@ -37,7 +37,7 @@ delay_topo(int polyphony)
     std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1 }, { 1, 2, 2, 2 } }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 5 }));
   result.params.emplace_back(param_toggle(
     "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, section_main, false,
     param_dir::input,
@@ -58,6 +58,11 @@ delay_topo(int polyphony)
     param_dir::output, param_rate::block, param_format::plain, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 3 }));
+  result.params.emplace_back(param_steps(
+    "{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", 1, section_main, 0, polyphony, 0,
+    param_dir::output, param_edit::list,
+    param_label_contents::name, param_label_align::left, param_label_justify::center,
+    gui_layout::single, gui_position{ 0, 4 }));
 
   return result;
 }
@@ -93,6 +98,7 @@ delay_engine::process(process_block& block)
   _pos += block.end_frame - block.start_frame;
   _pos %= _length;
   block.set_out_param(param_voices, 0, block.out->voice_count);
+  block.set_out_param(param_threads, 0, block.out->thread_count);
   block.set_out_param(param_out, 0, std::clamp(max_out, 0.0f, 1.0f));
   block.set_out_param(param_cpu, 0, std::clamp(block.out->cpu_usage, 0.0, 1.0));
 }
