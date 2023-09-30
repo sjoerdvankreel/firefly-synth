@@ -69,6 +69,7 @@ struct plugin_desc final {
   int module_voice_start = {};
   int module_output_start = {};
   std::vector<module_desc> modules = {};
+  std::vector<param_desc const*> params = {};
   std::unique_ptr<plugin_topo> plugin = {};
   std::vector<param_mapping> mappings = {};
   std::vector<int> param_index_to_tag = {};
@@ -81,9 +82,7 @@ struct plugin_desc final {
 
   void init_defaults(jarray<plain_value, 4>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
-  { return modules[mapping.module_global].params[mapping.param_local]; }
-
- 
+  { return modules[mapping.module_global].params[mapping.param_local]; } 
 };
 
 // runtime plugin topo dimensions

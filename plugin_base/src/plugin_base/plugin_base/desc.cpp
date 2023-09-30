@@ -338,6 +338,7 @@ validate_plugin_desc(plugin_desc const& desc)
 
   assert(desc.param_count > 0);
   assert(desc.module_count > 0);
+  assert(desc.params.size() == desc.param_count);
   assert(desc.modules.size() == desc.module_count);
   assert(desc.mappings.size() == desc.param_count);
   assert(desc.param_tag_to_index.size() == desc.param_count);
@@ -446,6 +447,7 @@ plugin(std::move(plugin_))
       param_index_to_tag.push_back(param.id_hash);
       param_tag_to_index[param.id_hash] = mappings.size();
       mappings.push_back(std::move(mapping));
+      params.push_back(&module.params[p]);
     }
   }
 

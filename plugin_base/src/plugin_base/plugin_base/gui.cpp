@@ -347,29 +347,33 @@ grid_component::resized()
 void 
 plugin_gui::ui_changed(int index, plain_value plain)
 {
-  for (int i = 0; i < _ui_listeners.size(); i++)
-    _ui_listeners[i]->ui_changed(index, plain);
+  if(_desc->params[index]->param->dir == param_dir::input)
+    for (int i = 0; i < _ui_listeners.size(); i++)
+      _ui_listeners[i]->ui_changed(index, plain);
 }
 
 void 
 plugin_gui::ui_begin_changes(int index)
 {
-  for(int i = 0; i < _ui_listeners.size(); i++)
-    _ui_listeners[i]->ui_begin_changes(index);
+  if (_desc->params[index]->param->dir == param_dir::input)
+    for(int i = 0; i < _ui_listeners.size(); i++)
+      _ui_listeners[i]->ui_begin_changes(index);
 }
 
 void
 plugin_gui::ui_end_changes(int index)
 {
-  for (int i = 0; i < _ui_listeners.size(); i++)
-    _ui_listeners[i]->ui_end_changes(index);
+  if (_desc->params[index]->param->dir == param_dir::input)
+    for (int i = 0; i < _ui_listeners.size(); i++)
+      _ui_listeners[i]->ui_end_changes(index);
 }
 
 void
 plugin_gui::ui_changing(int index, plain_value plain)
 {
-  for (int i = 0; i < _ui_listeners.size(); i++)
-    _ui_listeners[i]->ui_changing(index, plain);
+  if (_desc->params[index]->param->dir == param_dir::input)
+    for (int i = 0; i < _ui_listeners.size(); i++)
+      _ui_listeners[i]->ui_changing(index, plain);
 }
 
 void
