@@ -70,6 +70,7 @@ inf_controller::ui_changing(int index, plain_value plain)
   param_mapping const& mapping = desc().mappings[index];
   auto normalized = desc().param_at(mapping).param->plain_to_normalized(plain).value();
   performEdit(tag, normalized);
+  setParamNormalized(tag, normalized);
 }
 
 tresult PLUGIN_API 
