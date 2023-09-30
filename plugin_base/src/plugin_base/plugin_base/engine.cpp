@@ -134,13 +134,18 @@ plugin_engine::process()
   // always take a voice for an entire block,
   // module processor is handed appropriate start/end_frame.
   // and return voices completed the previous block
-  for(int i = 0; i < _voice_states.size(); i++)
-    if (_voice_states[i].stage == voice_stage::active)
+  for (int i = 0; i < _voice_states.size(); i++)
+  {
+    auto& state = _voice_states[i];
+    if (state.stage == voice_stage::active || state.stage == voice_stage::releasing)
     {
-      _voice_states[i].start_frame = 0;
-      _voice_states[i].end_frame = frame_count;
-    } else if(_voice_states[i].stage == voice_stage::finishing)
-      _voice_states[i] = voice_state();
+      state.start_frame = 0;
+      state.end_frame = frame_count;
+      state.release_frame = frame_count;
+    }
+    else if (state.stage == voice_stage::finishing)
+      state = voice_state();
+  }
 
   // steal voices for incoming notes by age
   for (int e = 0; e < _host_block->events.notes.size(); e++)

@@ -19,6 +19,9 @@ ui set exact values
 load preset while playing behaves weird
 fix the other hosts adsr
 fix the bug in the checkbox, dont come through
+fix param not flush
+fix all the tests
+display voice count
 
 testing:
 v test: reaper vst3 win
