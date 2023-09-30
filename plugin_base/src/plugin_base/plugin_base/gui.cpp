@@ -144,8 +144,7 @@ public:
   
   void buttonClicked(Button*) override {}
   void buttonStateChanged(Button*) override;
-  void plugin_changed(plain_value plain) override final 
-  { setToggleState(plain.step() != 0, dontSendNotification); }
+  void plugin_changed(plain_value plain) override final;
 };
 
 class param_textbox :
@@ -181,6 +180,13 @@ param_value_label::plugin_changed(plain_value plain)
   std::string text = _desc->param->plain_to_text(plain);
   if(_both) text = _desc->name + " " + text;
   setText(text, dontSendNotification); 
+}
+
+void 
+param_toggle_button::plugin_changed(plain_value plain)
+{
+  _checked = plain.step() != 0;
+  setToggleState(plain.step() != 0, dontSendNotification);
 }
 
 void 
