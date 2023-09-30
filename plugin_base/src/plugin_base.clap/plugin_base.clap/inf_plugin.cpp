@@ -69,6 +69,12 @@ inf_plugin::init() noexcept
 }
 
 void 
+inf_plugin::ui_state_check()
+{
+
+}
+
+void 
 inf_plugin::timerCallback()
 {
   sync_event e;

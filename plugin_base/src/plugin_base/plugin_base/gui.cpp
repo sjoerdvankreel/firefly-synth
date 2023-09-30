@@ -409,6 +409,8 @@ plugin_gui::state_loaded()
         for (int pi = 0; pi < module.params[p].slot_count; pi++)
           ui_changed(param_global++, (*_ui_state)[m][mi][p][pi]);
   }
+  for (int i = 0; i < _ui_listeners.size(); i++)
+    _ui_listeners[i]->ui_state_check();
 }
 
 plugin_gui::

@@ -7,6 +7,12 @@
 #include <vector>
 
 namespace plugin_base {
+
+// special purpose messages send as block events to the engine
+enum class engine_messages {
+  first = std::numeric_limits<int>::max() - 100,
+  ui_state_check = first
+};
   
 // once per block automation
 struct block_event final {
