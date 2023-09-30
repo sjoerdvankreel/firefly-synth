@@ -127,6 +127,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 void 
 plugin_engine::process()
 {
+  int voice_count = 0;
   int frame_count = _host_block->frame_count;
 
   // TODO monophonic portamento
@@ -139,6 +140,7 @@ plugin_engine::process()
     auto& state = _voice_states[i];
     if (state.stage == voice_stage::active || state.stage == voice_stage::releasing)
     {
+      voice_count++;
       state.start_frame = 0;
       state.end_frame = frame_count;
       state.release_frame = frame_count;
@@ -374,6 +376,7 @@ plugin_engine::process()
     for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
     {
       out_process_block out_block = {
+        voice_count,
         _host_block->audio_out,
         _state[m][mi],
         _voices_mixdown

@@ -24,10 +24,10 @@ public:
 };
 
 enum { section_main };
-enum { param_on, param_out };
+enum { param_on, param_out, param_voices };
 
 module_topo
-delay_topo()
+delay_topo(int polyphony)
 {
   module_topo result(make_module(
     "{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Delay", 1, 
@@ -37,7 +37,7 @@ delay_topo()
     std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1 }, { 1, 6 } }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1 }, { 1, 3, 3 } }));
   result.params.emplace_back(param_toggle(
     "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, section_main, false,
     param_dir::input,
@@ -48,6 +48,11 @@ delay_topo()
     param_dir::output, param_rate::block, param_format::plain, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
+  result.params.emplace_back(param_steps(
+    "{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", 1, section_main, 0, polyphony, 0,
+    param_dir::output, param_edit::list,
+    param_label_contents::name, param_label_align::left, param_label_justify::center,
+    gui_layout::single, gui_position{ 0, 2 }));
 
   return result;
 }
@@ -82,6 +87,7 @@ delay_engine::process(process_block& block)
     }  
   _pos += block.end_frame - block.start_frame;
   _pos %= _length;
+  block.set_out_param(param_voices, 0, block.out->voice_count);
   block.set_out_param(param_out, 0, std::clamp(max_out, 0.0f, 1.0f));
 }
 
