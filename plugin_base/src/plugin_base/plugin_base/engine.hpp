@@ -12,12 +12,20 @@
 
 namespace plugin_base {
 
+class plugin_engine;
+
 // single module audio processors
 class module_engine { 
 public: 
   virtual void initialize() = 0;
   virtual void process(process_block& block) = 0;
 };
+
+// catering to clap
+// but also a great way to see if voices are really independent
+typedef bool (*
+thread_pool_voice_processor)(
+  plugin_engine& engine, void* context);
 
 // global plugin audio processor
 class plugin_engine final {
@@ -44,21 +52,32 @@ class plugin_engine final {
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
   
+  void* _voice_processor_context = nullptr;
+  thread_pool_voice_processor _voice_processor = {};
+
   jarray<std::unique_ptr<module_engine>, 3> _voice_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
-  process_block make_process_block(int voice, int module, int slot, int start_frame, int end_frame);
+  process_block make_process_block(
+    int voice, int module, int slot, 
+    int start_frame, int end_frame);
 
 public:
+  INF_DECLARE_MOVE_ONLY(plugin_engine);
+  plugin_engine(
+    std::unique_ptr<plugin_topo>&& topo,
+    thread_pool_voice_processor voice_processor,
+    void* voice_processor_context);
+
+  // per-voice public for threadpool
   void process();
+  void process_voice(int v); 
+
   void deactivate();
   void release_block();
   host_block& prepare_block();
   void activate(int sample_rate, int max_frame_count);
-
-  INF_DECLARE_MOVE_ONLY(plugin_engine);
-  explicit plugin_engine(std::unique_ptr<plugin_topo>&& topo);
 
   plugin_desc const& desc() const { return _desc; }
   jarray<plain_value, 4>& state() { return _state; }
