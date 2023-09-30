@@ -76,7 +76,7 @@ inf_component::setBusArrangements(
 tresult PLUGIN_API
 inf_component::process(ProcessData& data)
 {
-  host_block& block = _engine.prepare();
+  host_block& block = _engine.prepare_block();
   block.frame_count = data.numSamples;
   block.audio_out = data.outputs[0].channelBuffers32;
   block.common.bpm = data.processContext ? data.processContext->tempo : 0;
@@ -149,6 +149,8 @@ inf_component::process(ProcessData& data)
     queue = data.outputParameterChanges->addParameterData(tag, unused_index);
     queue->addPoint(0, event.normalized.value(), unused_index);
   }
+
+  _engine.release_block();
   return kResultOk;
 }
 

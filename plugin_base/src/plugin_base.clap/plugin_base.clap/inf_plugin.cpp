@@ -440,7 +440,7 @@ inf_plugin::process_ui_to_audio_events(const clap_output_events_t* out)
 clap_process_status
 inf_plugin::process(clap_process const* process) noexcept
 {
-  host_block& block = _engine.prepare();
+  host_block& block = _engine.prepare_block();
   block.frame_count = process->frames_count;
   block.audio_out = process->audio_outputs[0].data32;
   block.common.bpm = process->transport? process->transport->tempo: 0;
@@ -514,6 +514,7 @@ inf_plugin::process(clap_process const* process) noexcept
     to_ui_event.plain = _engine.desc().param_at(mapping).param->normalized_to_plain(out_event.normalized);
     _to_ui_events->enqueue(to_ui_event);
   }
+  _engine.release_block();
   return CLAP_PROCESS_CONTINUE;
 }
 

@@ -45,10 +45,20 @@ plugin_engine::make_process_block(int voice, int module, int slot, int start_fra
   };
 }
 
+void
+plugin_engine::release_block()
+{
+  double now = seconds_since_epoch();
+  double process_time_sec = now - _block_start_time_sec;
+  double block_time_sec = _host_block->frame_count / _sample_rate;
+  _cpu_usage = process_time_sec / block_time_sec;
+}
+
 host_block&
-plugin_engine::prepare()
+plugin_engine::prepare_block()
 {
   // host calls this and should provide the current block values
+  _block_start_time_sec = seconds_since_epoch();
   _host_block->audio_out = nullptr;
   _host_block->events.out.clear();
   _host_block->events.notes.clear();
@@ -63,9 +73,11 @@ plugin_engine::prepare()
 void
 plugin_engine::deactivate()
 {
+  _cpu_usage = 0;
   _sample_rate = 0;
   _stream_time = 0;
-  _output_updated_ms = {};
+  _output_updated_sec = 0;
+  _block_start_time_sec = 0;
 
   // drop frame-count dependent memory
   _voice_results = {};
@@ -97,10 +109,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   deactivate();
   _stream_time = 0;
   _sample_rate = sample_rate;
-
-  // set activation time
-  auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
-  _output_updated_ms = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
+  _output_updated_sec = seconds_since_epoch();
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(*_desc.plugin, max_frame_count);
@@ -377,6 +386,7 @@ plugin_engine::process()
     {
       out_process_block out_block = {
         voice_count,
+        _cpu_usage,
         _host_block->audio_out,
         _state[m][mi],
         _voices_mixdown
@@ -392,12 +402,11 @@ plugin_engine::process()
   // update output params 3 times a second
   // push all out params - we don't check for changes
   _host_block->events.out.clear();
-  auto now_ticks = std::chrono::system_clock::now().time_since_epoch();
-  auto now_millis = std::chrono::duration_cast<std::chrono::milliseconds>(now_ticks);
-  if((now_millis - _output_updated_ms).count() >= 333)
+  auto now_sec = seconds_since_epoch();
+  if(now_sec - _output_updated_sec > 0.33)
   {
     int param_global = 0;
-    _output_updated_ms = now_millis;
+    _output_updated_sec = now_sec;
     for (int m = 0; m < _desc.plugin->modules.size(); m++)
     {
       auto const& module = _desc.plugin->modules[m];

@@ -20,6 +20,9 @@
 
 namespace plugin_base {
 
+double
+seconds_since_epoch();
+
 template <class T> std::string 
 to_8bit_string(T const* source)
 {
