@@ -19,6 +19,7 @@ load preset while playing behaves weird
 fix the bug in the checkbox, dont come through
 fix param not flush
 cakewalk not flush on load
+-- cbb, renoise is fucked
 
 testing:
 v test: reaper vst3 win
