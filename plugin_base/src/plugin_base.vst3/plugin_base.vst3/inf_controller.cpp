@@ -60,21 +60,7 @@ IPlugView* PLUGIN_API
 inf_controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
-
-  // get everything in there as ui listeners were not active before
-  int global_param_index = 0;
-  _editor = new inf_editor(this);
-  for(int m = 0; m < _desc.plugin->modules.size(); m++)
-    for(int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
-      for(int p = 0; p < _desc.plugin->modules[m].params.size(); p++)
-        for(int pi = 0; pi < _desc.plugin->modules[m].params[p].slot_count; pi++)
-        {
-          _editor->plugin_changed(global_param_index, 
-            _desc.plugin->modules[m].params[p].normalized_to_plain(
-              normalized_value(getParamNormalized(_desc.param_index_to_tag[global_param_index]))));
-          global_param_index++;
-        }
-  return _editor;
+  return _editor = new inf_editor(this);
 }
 
 void
