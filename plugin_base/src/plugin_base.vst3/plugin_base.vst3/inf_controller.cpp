@@ -69,6 +69,8 @@ inf_controller::ui_changing(int index, plain_value plain)
   int tag = desc().param_index_to_tag[index];
   param_mapping const& mapping = desc().mappings[index];
   auto normalized = desc().param_at(mapping).param->plain_to_normalized(plain).value();
+
+  // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree...
   performEdit(tag, normalized);
   setParamNormalized(tag, normalized);
 }
