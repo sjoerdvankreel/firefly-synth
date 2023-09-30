@@ -607,23 +607,26 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
 Component&
 plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
 {
+  Component* result = nullptr;
   plain_value initial((*_ui_state)[module.topo][module.slot][param.topo][param.slot]);
   switch (param.param->edit)
   {
   case param_edit::knob:
   case param_edit::hslider:
   case param_edit::vslider:
-    return make_component<param_slider>(this, &param, initial);
+    result = &make_component<param_slider>(this, &param, initial); break;
   case param_edit::text:
-    return make_component<param_textbox>(this, &param, initial);
+    result = &make_component<param_textbox>(this, &param, initial); break;
   case param_edit::list:
-    return make_component<param_combobox>(this, &param, initial);
+    result = &make_component<param_combobox>(this, &param, initial); break;
   case param_edit::toggle:
-    return make_component<param_toggle_button>(this, &param, initial);
+    result = &make_component<param_toggle_button>(this, &param, initial); break;
   default:
     assert(false);
     return *((Component*)nullptr);
   }
+  result->setEnabled(param.param->dir == param_dir::input);
+  return *result;
 }
 
 Component&

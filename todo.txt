@@ -14,7 +14,6 @@ too many decimals for adsr
 get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
 ui set exact values
-make output params not editable
 
 load preset while playing behaves weird
 fix the bug in the checkbox, dont come through
