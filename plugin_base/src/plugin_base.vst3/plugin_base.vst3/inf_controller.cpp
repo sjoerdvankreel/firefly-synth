@@ -80,10 +80,15 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
     return kResultFalse;
   int index = _desc.param_tag_to_index.at(tag);
   param_mapping const& mapping = _desc.mappings[index];
-  plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(normalized_value(value));
+  auto const& param = _desc.param_at(mapping).param;
+  plain_value plain = param->normalized_to_plain(normalized_value(value));
   mapping.value_at(_ui_state) = plain;
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);
+#ifndef NDEBUG
+  if(param->dir == param_dir::input)
+    debug_breakable();
+#endif
   return kResultTrue;
 }
 
