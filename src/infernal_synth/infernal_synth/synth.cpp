@@ -18,11 +18,11 @@ synth_topo()
   result->gui_min_width = 400;
   result->gui_max_width = 1200;
   result->gui_default_width = 800;
-  result->gui_aspect_ratio_width = 16;
-  result->gui_aspect_ratio_height = 9;
+  result->gui_aspect_ratio_width = 4;
+  result->gui_aspect_ratio_height = 3;
   result->preset_extension = "infpreset";
   result->dimension.column_sizes = { 1 };
-  result->dimension.row_sizes = { 1, 2, 1, 1 };
+  result->dimension.row_sizes = { 1, 1, 2, 1, 1 };
   result->modules.emplace_back(lfo_topo());
   result->modules.emplace_back(env_topo());
   result->modules.emplace_back(osc_topo());
