@@ -38,7 +38,7 @@ osc_topo()
 {
   module_topo result(make_module(
     "{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Voice Osc", 2, 
-    module_stage::voice, module_output::audio, 
+    module_stage::voice, module_output::audio, 1,
     gui_layout::tabbed, gui_position { 2, 0 }, gui_dimension { 2, 1 }));
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };

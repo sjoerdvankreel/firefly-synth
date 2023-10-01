@@ -15,8 +15,8 @@ make_section(
 
 module_topo
 make_module(
-  std::string const& id, std::string const& name,
-  int slot_count, module_stage stage, module_output output,
+  std::string const& id, std::string const& name, int slot_count, 
+  module_stage stage, module_output output, int output_count,
   gui_layout layout, gui_position const& position, gui_dimension const& dimension);
 
 // block-rate

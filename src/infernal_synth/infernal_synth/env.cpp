@@ -32,7 +32,7 @@ env_topo()
 {
   module_topo result(make_module(
     "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Voice Env", 2, 
-    module_stage::voice, module_output::cv, 
+    module_stage::voice, module_output::cv, 1,
     gui_layout::tabbed, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int slot, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<env_engine>(slot); };

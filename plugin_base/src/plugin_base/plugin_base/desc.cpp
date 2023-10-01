@@ -193,6 +193,8 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(module.params.size());
   assert(module.slot_count > 0);
   assert(module.engine_factory);
+  assert(module.output == module_output::none || module.output_count > 0);
+  assert(module.output != module_output::none || module.output_count == 0);
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
   assert((module.slot_count == 1) == (module.layout == gui_layout::single));
   assert(0 < module.position.row_span && module.position.row_span <= 1024);

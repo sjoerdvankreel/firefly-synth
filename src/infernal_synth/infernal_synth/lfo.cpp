@@ -28,7 +28,7 @@ lfo_topo()
 {
   module_topo result(make_module(
     "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", 3, 
-    module_stage::input, module_output::cv, 
+    module_stage::input, module_output::cv, 1,
     gui_layout::tabbed, gui_position { 0, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(); };

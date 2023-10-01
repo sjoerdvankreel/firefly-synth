@@ -125,6 +125,7 @@ struct param_topo final {
 // module group in plugin
 struct module_topo final {
   int slot_count;
+  int output_count;
   std::string id;
   std::string name;
   module_stage stage;
