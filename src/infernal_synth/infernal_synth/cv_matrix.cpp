@@ -14,6 +14,15 @@ namespace infernal_synth {
 enum { section_main };
 static int constexpr route_count = 8;
 
+static std::vector<item_topo>
+source_items(module_topo const& lfo_topo, module_topo const& env_topo)
+{
+  std::vector<item_topo> result;
+  result.emplace_back(lfo_topo.id, lfo_topo.name);
+  result.emplace_back(env_topo.id, env_topo.name);
+  return result;
+}
+
 class cv_matrix_engine: 
 public module_engine { 
 public:
@@ -37,12 +46,17 @@ cv_matrix_topo(
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 1 }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 2 }));
   result.params.emplace_back(param_toggle(
     "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", route_count, section_main, false,
     param_dir::input,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position { 0, 0 }));
+  result.params.emplace_back(param_items(
+    "{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", route_count, section_main, source_items(lfo_topo, env_topo), "",
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::vertical, gui_position{ 0, 1 }));
 
   return result;
 }

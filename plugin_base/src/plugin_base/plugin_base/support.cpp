@@ -110,7 +110,7 @@ param_items(
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
-    id, name, slot_count, section, default_, 
+    id, name, slot_count, section, default_.size()? default_: items[0].name,
     dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
   result.items = std::move(items);
@@ -129,7 +129,7 @@ param_names(
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
-    id, name, slot_count, section, default_,
+    id, name, slot_count, section, default_.size()? default_: names[0],
     dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
   result.min = 0;

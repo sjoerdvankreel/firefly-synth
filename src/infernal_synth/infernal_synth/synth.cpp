@@ -22,7 +22,7 @@ synth_topo()
   result->gui_aspect_ratio_height = 3;
   result->preset_extension = "infpreset";
   result->dimension.column_sizes = { 1 };
-  result->dimension.row_sizes = { 1, 1, 2, 1, 2, 1 };
+  result->dimension.row_sizes = { 1, 1, 2, 1, 3, 1 };
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 

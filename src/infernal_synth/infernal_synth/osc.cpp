@@ -46,7 +46,7 @@ osc_topo()
   result.sections.emplace_back(make_section(
     "Pitch", section_pitch, gui_position{ 0, 0 }, gui_dimension{ 1, 3 }));
   result.params.emplace_back(param_names(
-    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, section_pitch, note_names(), "C",
+    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, section_pitch, note_names(), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 0 }));
@@ -69,7 +69,7 @@ osc_topo()
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 0 }));
   result.params.emplace_back(param_items(
-    "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", 1, section_main, type_items(), "Saw",
+    "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", 1, section_main, type_items(), "",
     param_dir::input, param_edit::list, 
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
