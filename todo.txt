@@ -16,6 +16,7 @@ ui set exact values
 handle generic midi in
 dependent visibility/enabled
 start documenting stuff
+on-note/hold-type cv
 
 host bugs:
 - cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)

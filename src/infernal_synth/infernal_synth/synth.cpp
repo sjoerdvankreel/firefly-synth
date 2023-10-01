@@ -22,14 +22,20 @@ synth_topo()
   result->gui_aspect_ratio_height = 3;
   result->preset_extension = "infpreset";
   result->dimension.column_sizes = { 1 };
-  result->dimension.row_sizes = { 1, 1, 2, 1, 1 };
-  result->modules.emplace_back(lfo_topo());
-  result->modules.emplace_back(env_topo());
-  result->modules.emplace_back(osc_topo());
-  result->modules.emplace_back(filter_topo(result->modules[module_osc].slot_count));
-  result->modules.emplace_back(delay_topo(result->polyphony));
+  result->dimension.row_sizes = { 1, 1, 2, 1, 2, 1 };
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
+
+  result->modules.resize(module_count);
+  result->modules[module_lfo] = lfo_topo();
+  result->modules[module_env] = env_topo();
+  result->modules[module_osc] = osc_topo();
+  result->modules[module_filter] = filter_topo(
+    result->modules[module_osc].slot_count);
+  result->modules[module_cv_matrix] = cv_matrix_topo(
+    result->modules[module_lfo], result->modules[module_env], 
+    result->modules[module_osc], result->modules[module_filter]);
+  result->modules[module_delay] = delay_topo(result->polyphony);
   return result;
 }
 
