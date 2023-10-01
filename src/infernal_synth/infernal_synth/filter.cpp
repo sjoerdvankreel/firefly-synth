@@ -30,9 +30,9 @@ module_topo
 filter_topo(int osc_slot_count)
 {
   module_topo result(make_module(
-    "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", 1, 
+    "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice Filter", 1, 
     module_stage::voice, module_output::none,
-    gui_layout::single, gui_position { 2, 0 }, gui_dimension { 1, 1 }));
+    gui_layout::single, gui_position { 3, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
 
