@@ -10,16 +10,8 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-class osc_engine: 
-public module_engine {
-  float _phase;
-
-public:
-  osc_engine() { initialize(); }
-  INF_DECLARE_MOVE_ONLY(osc_engine);
-  void initialize() override { _phase = 0; }
-  void process(process_block& block) override;
-};
+enum { type_saw, type_sine };
+enum { section_pitch, section_main };
 
 static std::vector<item_topo>
 type_items()
@@ -30,9 +22,16 @@ type_items()
   return result;
 }
 
-enum { type_saw, type_sine };
-enum { section_pitch, section_main };
-enum { param_note, param_oct, param_cent, param_on, param_type, param_gain, param_bal };
+class osc_engine:
+public module_engine {
+  float _phase;
+
+public:
+  osc_engine() { initialize(); }
+  INF_DECLARE_MOVE_ONLY(osc_engine);
+  void initialize() override { _phase = 0; }
+  void process(process_block& block) override;
+};
 
 module_topo
 osc_topo()
@@ -91,14 +90,14 @@ osc_topo()
 void
 osc_engine::process(process_block& block)
 {
-  if(block.block_automation[param_on][0].step() == 0) return;
-  int oct = block.block_automation[param_oct][0].step();
-  int note = block.block_automation[param_note][0].step();
-  int type = block.block_automation[param_type][0].step();
+  if(block.block_automation[osc_param_on][0].step() == 0) return;
+  int oct = block.block_automation[osc_param_oct][0].step();
+  int note = block.block_automation[osc_param_note][0].step();
+  int type = block.block_automation[osc_param_type][0].step();
   auto const& env = block.voice->cv_in[module_env][0];
-  auto const& bal = block.accurate_automation[param_bal][0];
-  auto const& cent = block.accurate_automation[param_cent][0];
-  auto const& gain = block.accurate_automation[param_gain][0];
+  auto const& bal = block.accurate_automation[osc_param_bal][0];
+  auto const& cent = block.accurate_automation[osc_param_cent][0];
+  auto const& gain = block.accurate_automation[osc_param_gain][0];
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)

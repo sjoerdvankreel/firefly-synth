@@ -10,6 +10,8 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+enum { section_main };
+
 class lfo_engine: 
 public module_engine {
   float _phase;
@@ -20,9 +22,6 @@ public:
   void process(process_block& block) override;
   void initialize() override { _phase = 0; }
 };
-
-enum { section_main };
-enum { param_sync, param_rate, param_num, param_denom };
 
 module_topo
 lfo_topo()

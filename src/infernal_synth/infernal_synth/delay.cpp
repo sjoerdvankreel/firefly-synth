@@ -10,6 +10,8 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+enum { section_main };
+
 class delay_engine: 
 public module_engine {
   int _pos;
@@ -22,9 +24,6 @@ public:
   void initialize() override;
   void process(process_block& block) override;
 };
-
-enum { section_main };
-enum { param_on, param_out, param_voices, param_cpu, param_threads };
 
 module_topo
 delay_topo(int polyphony)
@@ -90,17 +89,17 @@ delay_engine::process(process_block& block)
     for(int f = block.start_frame; f < block.end_frame; f++)
     {
       block.out->host_audio[c][f] = block.out->mixdown[c][f];
-      if (block.block_automation[param_on][0].step() != 0)
+      if (block.block_automation[delay_param_on][0].step() != 0)
         block.out->host_audio[c][f] += _buffer[c][(_pos + f) % _length] * 0.5f;
       _buffer[c][(_pos + f) % _length] = block.out->mixdown[c][f];
       max_out = std::max(max_out, block.out->host_audio[c][f]);
     }  
   _pos += block.end_frame - block.start_frame;
   _pos %= _length;
-  block.set_out_param(param_voices, 0, block.out->voice_count);
-  block.set_out_param(param_threads, 0, block.out->thread_count);
-  block.set_out_param(param_out, 0, std::clamp(max_out, 0.0f, 1.0f));
-  block.set_out_param(param_cpu, 0, std::clamp(block.out->cpu_usage, 0.0, 1.0));
+  block.set_out_param(delay_param_voices, 0, block.out->voice_count);
+  block.set_out_param(delay_param_threads, 0, block.out->thread_count);
+  block.set_out_param(delay_param_out, 0, std::clamp(max_out, 0.0f, 1.0f));
+  block.set_out_param(delay_param_cpu, 0, std::clamp(block.out->cpu_usage, 0.0, 1.0));
 }
 
 }

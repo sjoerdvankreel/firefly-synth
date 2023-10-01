@@ -11,6 +11,8 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+enum { section_main };
+
 class filter_engine: 
 public module_engine {  
   float _in[2];
@@ -22,9 +24,6 @@ public:
   void process(process_block& block) override;
   void initialize() override { _in[0] = _in[1] = _out[0] = _out[1] = 0; }
 };
-
-enum { section_main };
-enum { param_on, param_freq, param_osc_gain };
 
 module_topo
 filter_topo(int osc_slot_count)
@@ -66,19 +65,19 @@ void
 filter_engine::process(process_block& block)
 {
   auto const& osc_audio = block.voice->audio_in[module_osc];
-  auto const& osc_gain = block.accurate_automation[param_osc_gain];
+  auto const& osc_gain = block.accurate_automation[filter_param_osc_gain];
   for(int o = 0; o < block.plugin.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
         block.voice->result[c][f] += osc_audio[o][c][f] * osc_gain[o][f];
-  if(block.block_automation[param_on][0].step() == 0) return;
+  if(block.block_automation[filter_param_on][0].step() == 0) return;
 
   float w = 2 * block.sample_rate;
   auto const& env = block.voice->cv_in[module_env][1];
-  auto const& freq = block.accurate_automation[param_freq][0];
+  auto const& freq = block.accurate_automation[filter_param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float angle = block.normalized_to_raw(module_filter, param_freq, freq[f] * env[f]) * 2 * pi32;
+    float angle = block.normalized_to_raw(module_filter, filter_param_freq, freq[f] * env[f]) * 2 * pi32;
     float norm = 1 / (angle + w);
     float a = angle * norm;
     float b = (w - angle) * norm;

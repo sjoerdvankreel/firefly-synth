@@ -10,6 +10,7 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+enum { section_main };
 enum class env_stage { a, d, s, r, end };
 
 class env_engine: 
@@ -25,9 +26,6 @@ public:
   void process(process_block& block) override;
   void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
 };
-
-enum { section_main };
-enum { param_a, param_d, param_s, param_r };
 
 module_topo
 env_topo()
@@ -68,10 +66,10 @@ env_topo()
 void
 env_engine::process(process_block& block)
 {
-  auto const& a = block.accurate_automation[param_a][0];
-  auto const& d = block.accurate_automation[param_d][0];
-  auto const& s = block.accurate_automation[param_s][0];
-  auto const& r = block.accurate_automation[param_r][0];
+  auto const& a = block.accurate_automation[env_param_a][0];
+  auto const& d = block.accurate_automation[env_param_d][0];
+  auto const& s = block.accurate_automation[env_param_s][0];
+  auto const& r = block.accurate_automation[env_param_r][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
