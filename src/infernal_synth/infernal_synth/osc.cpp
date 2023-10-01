@@ -94,7 +94,7 @@ osc_engine::process(process_block& block)
   int oct = block.block_automation[osc_param_oct][0].step();
   int note = block.block_automation[osc_param_note][0].step();
   int type = block.block_automation[osc_param_type][0].step();
-  auto const& env = block.voice->cv_in[module_env][0];
+  auto const& env = block.voice->cv_in[module_env][0][0];
   auto const& bal = block.accurate_automation[osc_param_bal][0];
   auto const& cent = block.accurate_automation[osc_param_cent][0];
   auto const& gain = block.accurate_automation[osc_param_gain][0];
@@ -109,8 +109,8 @@ osc_engine::process(process_block& block)
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    block.audio_out[0][f] = sample * gain[f] * env[f] * balance(0, bal[f]);
-    block.audio_out[1][f] = sample * gain[f] * env[f] * balance(1, bal[f]);
+    block.audio_out[0][0][f] = sample * gain[f] * env[f] * balance(0, bal[f]);
+    block.audio_out[0][1][f] = sample * gain[f] * env[f] * balance(1, bal[f]);
     _phase += note_to_frequency(oct, note, cent[f], block.voice->state.id.key) / block.sample_rate;
     _phase -= std::floor(_phase);
   }

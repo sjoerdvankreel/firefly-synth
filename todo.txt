@@ -15,6 +15,7 @@ handle automation changes at voice vs block start
 ui set exact values
 handle generic midi in
 dependent visibility/enabled
+start documenting stuff
 
 host bugs:
 - cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)

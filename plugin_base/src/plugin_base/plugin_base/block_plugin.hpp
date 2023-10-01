@@ -27,8 +27,8 @@ struct voice_process_block final {
   bool finished;
   jarray<float, 2>& result;
   voice_state const& state;
-  jarray<float, 3> const& cv_in;
-  jarray<float, 4> const& audio_in;
+  jarray<float, 4> const& cv_in;
+  jarray<float, 5> const& audio_in;
 };
 
 // single module process call
@@ -41,10 +41,10 @@ struct process_block final {
   plugin_topo const& plugin;
   module_topo const& module;
   voice_process_block* voice;
-  jarray<float, 1>& cv_out;
-  jarray<float, 2>& audio_out;
-  jarray<float, 3> const& global_cv_in;
-  jarray<float, 4> const& global_audio_in;
+  jarray<float, 2>& cv_out;
+  jarray<float, 3>& audio_out;
+  jarray<float, 4> const& global_cv_in;
+  jarray<float, 5> const& global_audio_in;
   jarray<float, 3> const& accurate_automation;
   jarray<plain_value, 2> const& block_automation;
 

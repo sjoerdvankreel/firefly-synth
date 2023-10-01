@@ -41,8 +41,8 @@ _voice_processor_context(voice_processor_context)
 process_block 
 plugin_engine::make_process_block(int voice, int module, int slot, int start_frame, int end_frame)
 {
-  jarray<float, 1>& cv_out = voice < 0? _global_cv_state[module][slot]: _voice_cv_state[voice][module][slot];
-  jarray<float, 2>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
+  jarray<float, 2>& cv_out = voice < 0? _global_cv_state[module][slot]: _voice_cv_state[voice][module][slot];
+  jarray<float, 3>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
   return {
     start_frame, end_frame,
     _sample_rate, nullptr, _host_block->common,
@@ -300,26 +300,30 @@ plugin_engine::process()
       if(module.output == module_output::cv)
         if(module.stage != module_stage::voice)
         {
-          std::fill(_global_cv_state[m][mi].begin(), 
-                    _global_cv_state[m][mi].begin() + frame_count, 0.0f);
+          for(int oi = 0; oi < module.output_count; oi++)
+            std::fill(_global_cv_state[m][mi][oi].begin(),
+                      _global_cv_state[m][mi][oi].begin() + frame_count, 0.0f);
         } else {
           for (int v = 0; v < _voice_states.size(); v++)
             if(_voice_states[v].stage != voice_stage::unused)
-              std::fill(_voice_cv_state[v][m][mi].begin(), 
-                        _voice_cv_state[v][m][mi].begin() + frame_count, 0.0f);
+              for (int oi = 0; oi < module.output_count; oi++)
+                std::fill(_voice_cv_state[v][m][mi][oi].begin(),
+                          _voice_cv_state[v][m][mi][oi].begin() + frame_count, 0.0f);
         }
       else if (module.output == module_output::audio)
         if (module.stage != module_stage::voice)
         {
-          for(int c = 0; c < 2; c++)
-            std::fill(_global_audio_state[m][mi][c].begin(), 
-                     _global_audio_state[m][mi][c].begin() + frame_count, 0.0f);
+          for (int oi = 0; oi < module.output_count; oi++)
+            for(int c = 0; c < 2; c++)
+              std::fill(_global_audio_state[m][mi][oi][c].begin(), 
+                       _global_audio_state[m][mi][oi][c].begin() + frame_count, 0.0f);
         } else {
            for (int v = 0; v < _voice_states.size(); v++)
              if (_voice_states[v].stage != voice_stage::unused)
-               for (int c = 0; c < 2; c++)
-                 std::fill(_voice_audio_state[v][m][mi][c].begin(), 
-                           _voice_audio_state[v][m][mi][c].begin() + frame_count, 0.0f);
+               for (int oi = 0; oi < module.output_count; oi++)
+                 for (int c = 0; c < 2; c++)
+                   std::fill(_voice_audio_state[v][m][mi][oi][c].begin(), 
+                             _voice_audio_state[v][m][mi][oi][c].begin() + frame_count, 0.0f);
         }
       else
         assert(module.output == module_output::none);

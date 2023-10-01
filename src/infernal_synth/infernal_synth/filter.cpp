@@ -64,7 +64,7 @@ filter_topo(int osc_slot_count)
 void
 filter_engine::process(process_block& block)
 {
-  auto const& osc_audio = block.voice->audio_in[module_osc];
+  auto const& osc_audio = block.voice->audio_in[module_osc][0];
   auto const& osc_gain = block.accurate_automation[filter_param_osc_gain];
   for(int o = 0; o < block.plugin.modules[module_osc].slot_count; o++)
     for(int c = 0; c < 2; c++)
@@ -73,7 +73,7 @@ filter_engine::process(process_block& block)
   if(block.block_automation[filter_param_on][0].step() == 0) return;
 
   float w = 2 * block.sample_rate;
-  auto const& env = block.voice->cv_in[module_env][1];
+  auto const& env = block.voice->cv_in[module_env][1][0];
   auto const& freq = block.accurate_automation[filter_param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {

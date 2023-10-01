@@ -107,10 +107,16 @@ validate_frame_dims(
       assert(dims.module_voice_audio[v][m].size() == module.slot_count);
       for (int mi = 0; mi < module.slot_count; mi++)
       {
-        assert(dims.module_voice_cv[v][m][mi] == cv_frames);
-        assert(dims.module_voice_audio[v][m][mi].size() == 2);
-        for(int c = 0; c < 2; c++)
-          assert(dims.module_voice_audio[v][m][mi][c] == audio_frames);
+        assert(dims.module_voice_cv[v][m][mi].size() == module.output_count);
+        assert(dims.module_voice_audio[v][m][mi].size() == module.output_count);
+
+        for(int oi = 0; oi < module.output_count; oi++)
+        {
+          assert(dims.module_voice_cv[v][m][mi][oi] == cv_frames);
+          assert(dims.module_voice_audio[v][m][mi][oi].size() == 2);
+          for(int c = 0; c < 2; c++)
+            assert(dims.module_voice_audio[v][m][mi][oi][c] == audio_frames);
+        }
       }
     }
   }
@@ -134,10 +140,16 @@ validate_frame_dims(
 
     for (int mi = 0; mi < module.slot_count; mi++)
     {
-      assert(dims.module_global_cv[m][mi] == cv_frames);
-      assert(dims.module_global_audio[m][mi].size() == 2);
-      for(int c = 0; c < 2; c++)
-        assert(dims.module_global_audio[m][mi][c] == audio_frames);
+      assert(dims.module_global_cv[m][mi].size() == module.output_count);
+      assert(dims.module_global_audio[m][mi].size() == module.output_count);
+
+      for(int oi = 0; oi < module.output_count; oi++)
+      {
+        assert(dims.module_global_cv[m][mi][oi] == cv_frames);
+        assert(dims.module_global_audio[m][mi][oi].size() == 2);
+        for(int c = 0; c < 2; c++)
+          assert(dims.module_global_audio[m][mi][oi][c] == audio_frames);
+      }
 
       assert(dims.accurate_automation[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
@@ -517,10 +529,15 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       bool is_audio = module.output == module_output::audio;
       int cv_frames = is_cv && is_voice ? frame_count : 0;
       int audio_frames = is_audio && is_voice ? frame_count : 0;
+      module_voice_cv[v].emplace_back();
       module_voice_audio[v].emplace_back();
-      module_voice_cv[v].emplace_back(module.slot_count, cv_frames);
       for (int mi = 0; mi < module.slot_count; mi++)
-        module_voice_audio[v][m].emplace_back(2, audio_frames);
+      {
+        module_voice_audio[v][m].emplace_back();
+        module_voice_cv[v][m].emplace_back(module.output_count, cv_frames);
+        for(int oi = 0; oi < module.output_count; oi++)
+          module_voice_audio[v][m][mi].emplace_back(2, audio_frames);
+      }
     }
   }
 
@@ -532,13 +549,16 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     bool is_audio = module.output == module_output::audio;
     int cv_frames = is_cv && is_global ? frame_count : 0;
     int audio_frames = is_audio && is_global ? frame_count : 0;
+    module_global_cv.emplace_back();
     module_global_audio.emplace_back();
     accurate_automation.emplace_back();
-    module_global_cv.emplace_back(module.slot_count, cv_frames);
     for (int mi = 0; mi < module.slot_count; mi++)
     {
       accurate_automation[m].emplace_back();
-      module_global_audio[m].emplace_back(2, audio_frames);
+      module_global_audio[m].emplace_back();
+      module_global_cv[m].emplace_back(module.output_count, cv_frames);
+      for(int oi = 0; oi < module.output_count; oi++)
+        module_global_audio[m][mi].emplace_back(2, audio_frames);
       for (int p = 0; p < module.params.size(); p++)
       {
         int param_frames = module.params[p].rate == param_rate::accurate ? frame_count : 0;
