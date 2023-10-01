@@ -68,7 +68,6 @@ cv_matrix_topo(
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 0, 3 }));
 
-
   return result;
 }
 
