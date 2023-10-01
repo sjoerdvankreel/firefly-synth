@@ -10,10 +10,11 @@
 
 namespace plugin_base {
 
+enum class plugin_type { synth, fx };
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
-enum class plugin_type { synth, fx };
+enum class relevance { normal, hide, disable };
 enum class gui_layout { single, horizontal, vertical, tabbed };
 
 enum class param_dir { input, output };
@@ -27,6 +28,8 @@ enum class param_label_align { top, bottom, left, right };
 enum class param_label_contents { none, name, value, both };
 
 class module_engine;
+typedef relevance(*
+param_relevance)(plain_value plain);
 typedef std::unique_ptr<module_engine>(*
 module_engine_factory)(int slot, int sample_rate, int max_frame_count);
 
@@ -98,6 +101,8 @@ struct param_topo final {
   gui_position position;
   std::vector<item_topo> items;
   std::vector<std::string> names;
+  int relevance_index = -1;
+  param_relevance relevance = {};
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
   bool is_real() const { return type == param_type::log || type == param_type::linear; }

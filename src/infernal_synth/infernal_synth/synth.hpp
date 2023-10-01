@@ -6,11 +6,11 @@ namespace infernal_synth {
 
 enum { module_lfo, module_env, module_cv_matrix, module_osc, module_filter, module_delay, module_count };
 
-enum { cv_matrix_param_on };
 enum { env_param_a, env_param_d, env_param_s, env_param_r };
 enum { filter_param_on, filter_param_freq, filter_param_osc_gain };
 enum { lfo_param_sync, lfo_param_rate, lfo_param_num, lfo_param_denom };
 enum { delay_param_on, delay_param_out, delay_param_voices, delay_param_cpu, delay_param_threads };
+enum { cv_matrix_param_active, cv_matrix_param_source, cv_matrix_param_lfo_index, cv_matrix_param_env_index };
 enum { osc_param_note, osc_param_oct, osc_param_cent, osc_param_on, osc_param_type, osc_param_gain, osc_param_bal };
 
 plugin_base::module_topo lfo_topo();

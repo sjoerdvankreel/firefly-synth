@@ -57,16 +57,20 @@ cv_matrix_topo(
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 0, 1 }));
-  result.params.emplace_back(param_steps(
+  auto& lfo_index = result.params.emplace_back(param_steps(
     "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 0, 2 }));
-  result.params.emplace_back(param_steps(
+  lfo_index.relevance_index = cv_matrix_param_source;
+  lfo_index.relevance = [](plain_value plain) { return plain.step() == 0 ? relevance::normal: relevance::disable; };
+  auto& env_index = result.params.emplace_back(param_steps(
     "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 0, 3 }));
+  env_index.relevance_index = cv_matrix_param_source;
+  env_index.relevance = [](plain_value plain) { return plain.step() == 1 ? relevance::normal : relevance::disable; };
 
   return result;
 }
