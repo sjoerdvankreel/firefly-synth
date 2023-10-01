@@ -17,6 +17,7 @@ handle generic midi in
 dependent visibility/enabled
 start documenting stuff
 on-note/hold-type cv
+provide to/fromstring for steps
 
 host bugs:
 - cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)

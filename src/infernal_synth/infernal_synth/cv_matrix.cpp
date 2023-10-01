@@ -46,7 +46,7 @@ cv_matrix_topo(
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 2 }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 4 }));
   result.params.emplace_back(param_toggle(
     "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", route_count, section_main, false,
     param_dir::input,
@@ -57,6 +57,17 @@ cv_matrix_topo(
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 0, 1 }));
+  result.params.emplace_back(param_steps(
+    "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::vertical, gui_position{ 0, 2 }));
+  result.params.emplace_back(param_steps(
+    "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::vertical, gui_position{ 0, 3 }));
+
 
   return result;
 }
