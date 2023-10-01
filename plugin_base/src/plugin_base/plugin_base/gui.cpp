@@ -9,7 +9,7 @@ using namespace juce;
 
 namespace plugin_base {
 
-static inline int constexpr label_width = 40;
+static inline int constexpr label_width = 80;
 static inline int constexpr label_height = 15;
 static inline int constexpr groupbox_padding = 6;
 static inline int constexpr groupbox_padding_top = 16;
