@@ -236,8 +236,6 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.type != param_type::item || param.unit.size() == 0);
   assert(param.type != param_type::item || param.min == 0);
   assert(param.type != param_type::item || param.max == param.items.size() - 1);
-
-  assert(param.display != param_display::pct || param.unit == "%");
   assert(param.display == param_display::normal || param.type == param_type::linear);
 
   assert(param.is_real() || (int)param.min == param.min);
@@ -246,9 +244,10 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.is_real() || param.display == param_display::normal);
   assert(param.is_real() || param.min <= param.default_plain().step());
   assert(param.is_real() || param.max >= param.default_plain().step());
+  assert(param.is_real() || param.precision == 0);
   assert(!param.is_real() || param.min <= param.default_plain().real());
   assert(!param.is_real() || param.max >= param.default_plain().real());
-  assert(!param.is_real() || param.display == param_display::pct_no_unit || param.unit.size() > 0);
+  assert(!param.is_real() || (0 <= param.precision && param.precision <= 10));
 
   assert((param.slot_count == 1) == (param.layout == gui_layout::single));
   assert(0 < param.position.row_span && param.position.row_span <= 1024);

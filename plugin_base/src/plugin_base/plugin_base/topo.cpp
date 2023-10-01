@@ -50,10 +50,8 @@ param_topo::plain_to_text(plain_value plain) const
   }
 
   std::ostringstream stream;
-  int prec = display != param_display::normal ? 3 : 5;
-  int mult = display != param_display::normal ? 100 : 1;
-  stream << std::setprecision(prec) << plain.real() * (mult);
-  if (unit.size()) stream << " " << unit;
+  int mul = display == param_display::pct ? 100 : 1;
+  stream << std::fixed << std::setprecision(precision) << (plain.real() * mul);
   return prefix + stream.str();
 }
 

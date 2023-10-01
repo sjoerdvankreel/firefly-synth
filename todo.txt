@@ -10,17 +10,12 @@ am/fm->select relevant sources
 get the lnf in there
 handle clap midi notes
 handle clap is_modulatable
-too many decimals for adsr
 get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
 ui set exact values
 
-load preset while playing behaves weird
-fix param not flush
-cakewalk not flush on load
-
 host bugs:
-- cbb, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)
+- cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)
 
 testing:
 v test: reaper vst3 win

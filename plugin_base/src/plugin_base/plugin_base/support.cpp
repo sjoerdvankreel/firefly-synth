@@ -10,7 +10,7 @@ note_names()
 
 static param_topo
 param_base(
-  std::string const& id, std::string const& name, int slot_count, int section, std::string const& default_,
+  std::string const& id, std::string const& name, int slot_count, int section, std::string const& default_, 
   param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
@@ -141,7 +141,7 @@ param_names(
 param_topo
 param_pct(
   std::string const& id, std::string const& name, int slot_count, int section,
-  double min, double max, double default_,
+  double min, double max, double default_, int precision,
   param_dir dir, param_rate rate, param_format format, bool unit, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
@@ -153,15 +153,16 @@ param_pct(
   result.min = min;
   result.max = max;
   result.unit = unit? "%": "";
+  result.precision = precision;
   result.type = param_type::linear;
-  result.display = unit ? param_display::pct : param_display::pct_no_unit;
+  result.display = param_display::pct;
   return result;
 }
 
 param_topo
 param_linear(
   std::string const& id, std::string const& name, int slot_count, int section,
-  double min, double max, double default_, std::string const& unit,
+  double min, double max, double default_, int precision, std::string const& unit,
   param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
@@ -173,6 +174,7 @@ param_linear(
   result.min = min;
   result.max = max;
   result.unit = unit;
+  result.precision = precision;
   result.type = param_type::linear;
   return result;
 }
@@ -180,7 +182,7 @@ param_linear(
 param_topo
 param_log(
   std::string const& id, std::string const& name, int slot_count, int section,
-  double min, double max, double default_, double midpoint, std::string const& unit,
+  double min, double max, double default_, double midpoint, int precision, std::string const& unit,
   param_dir dir, param_rate rate, param_format format, param_edit edit,
   param_label_contents label_contents, param_label_align label_align, param_label_justify label_justify,
   gui_layout layout, gui_position const& position)
@@ -192,6 +194,7 @@ param_log(
   result.min = min;
   result.max = max;
   result.unit = unit;
+  result.precision = precision;
   result.type = param_type::log;
   result.exp = std::log((midpoint - min) / (max - min)) / std::log(0.5);
   return result;

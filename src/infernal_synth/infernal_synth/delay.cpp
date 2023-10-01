@@ -44,7 +44,7 @@ delay_topo(int polyphony)
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 0 } ));
   result.params.emplace_back(param_pct(
-    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out", 1, section_main, 0, 1, 0,
+    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out", 1, section_main, 0, 1, 0, 0,
     param_dir::output, param_rate::block, param_format::plain, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
@@ -54,7 +54,7 @@ delay_topo(int polyphony)
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 2 }));
   result.params.emplace_back(param_pct(
-    "{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", 1, section_main, 0, 1, 0,
+    "{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", 1, section_main, 0, 1, 0, 0,
     param_dir::output, param_rate::block, param_format::plain, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 3 }));

@@ -17,9 +17,9 @@ enum class plugin_type { synth, fx };
 enum class gui_layout { single, horizontal, vertical, tabbed };
 
 enum class param_dir { input, output };
+enum class param_display { normal, pct };
 enum class param_rate { accurate, block };
 enum class param_format { plain, normalized };
-enum class param_display { normal, pct, pct_no_unit };
 enum class param_type { step, name, item, linear, log };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
 enum class param_label_justify { near, center, far };
@@ -77,6 +77,7 @@ struct param_topo final {
   double max;
   double exp;
   int section;
+  int precision;
   int slot_count;
   std::string id;
   std::string name;
