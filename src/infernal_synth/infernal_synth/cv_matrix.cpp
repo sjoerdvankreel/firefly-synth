@@ -44,42 +44,53 @@ cv_matrix_topo(
     gui_layout::single, gui_position { 4, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
-
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1 } }));
+  
+  std::vector<int> enabled_indices = { cv_matrix_param_on, cv_matrix_param_active };
+  param_ui_state_selector enabled_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+
   result.params.emplace_back(param_toggle(
     "{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", 1, section_main, true,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 0, 1, 4 }));
+
   auto& active = result.params.emplace_back(param_toggle(
     "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", route_count, section_main, false,
     param_dir::input,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position { 1, 0 }));
-  active.visibility_indices = { cv_matrix_param_on };
-  active.visibility_selector = [](auto const& values) { return values[0] != 0; };
+  active.enabled_indices = { cv_matrix_param_on };
+  active.enabled_selector = [](auto const& values) { return values[0] != 0; };
+
   auto& source = result.params.emplace_back(param_items(
     "{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", route_count, section_main, source_items(lfo_topo, env_topo), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 1 }));
-  source.visibility_indices = { cv_matrix_param_on, cv_matrix_param_active };
-  source.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  source.enabled_indices = enabled_indices;
+  source.enabled_selector = enabled_selector;
+
   auto& lfo_index = result.params.emplace_back(param_steps(
     "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
-  lfo_index.visibility_indices = { cv_matrix_param_on, cv_matrix_param_active };
-  lfo_index.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  lfo_index.enabled_indices = enabled_indices;
+  lfo_index.enabled_selector = enabled_selector;
+  lfo_index.visibility_indices = { cv_matrix_param_source };
+  lfo_index.visibility_selector = [](auto const& values) { return values[0] == 0; };
+
   auto& env_index = result.params.emplace_back(param_steps(
     "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 3 }));
-  env_index.visibility_indices = { cv_matrix_param_on, cv_matrix_param_active };
-  env_index.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  env_index.enabled_indices = enabled_indices;
+  env_index.enabled_selector = enabled_selector;
+  env_index.visibility_indices = { cv_matrix_param_source };
+  env_index.visibility_selector = [](auto const& values) { return values[0] == 1; };
 
   return result;
 }
