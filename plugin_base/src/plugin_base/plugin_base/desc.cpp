@@ -165,9 +165,9 @@ validate_frame_dims(
   }
 }
 
-template <class Parent, class Child, class Include>
+template <class Parent, class Child, class VisibilitySelector, class Include>
 static void validate_gui_constraints(
-  Parent const& parent, std::vector<Child> const& children, Include include)
+  Parent const& parent, std::vector<Child> const& children, VisibilitySelector selector, Include include)
 {
   std::set<std::pair<int, int>> gui_taken;
   for (int k = 0; k < children.size(); k++)
@@ -176,7 +176,7 @@ static void validate_gui_constraints(
       auto const& pos = children[k].position;
       for (int r = pos.row; r < pos.row + pos.row_span; r++)
         for (int c = pos.column; c < pos.column + pos.column_span; c++)
-          INF_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second);
+          INF_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second || selector(children[k]) != nullptr);
     }
   for (int r = 0; r < parent.dimension.row_sizes.size(); r++)
     for (int c = 0; c < parent.dimension.column_sizes.size(); c++)
@@ -194,7 +194,9 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   assert(0 < section.dimension.column_sizes.size() && section.dimension.column_sizes.size() <= 1024);
   assert(0 <= section.position.row && section.position.row + section.position.row_span <= module.dimension.row_sizes.size());
   assert(0 <= section.position.column && section.position.column + section.position.column_span <= module.dimension.column_sizes.size());
-  validate_gui_constraints(section, module.params, [&section](param_topo const& p) { return p.section == section.section; });
+  validate_gui_constraints(section, module.params, 
+    [](param_topo const& p) { return p.visibility_selector; }, 
+    [&section](param_topo const& p) { return p.section == section.section; });
 }
 
 static void
@@ -215,7 +217,7 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(0 < module.dimension.column_sizes.size() && module.dimension.column_sizes.size() <= 1024);
   assert(0 <= module.position.row && module.position.row + module.position.row_span <= plugin.dimension.row_sizes.size());
   assert(0 <= module.position.column && module.position.column + module.position.column_span <= plugin.dimension.column_sizes.size());
-  validate_gui_constraints(module, module.sections, [](auto const&) { return true; });
+  validate_gui_constraints(module, module.sections, [](auto const&) { return nullptr; }, [](auto const&) { return true; });
 }
 
 static void
@@ -289,7 +291,7 @@ validate_plugin_topo(plugin_topo const& topo)
 {
   std::set<std::string> param_ids;
   std::set<std::string> module_ids;
-  validate_gui_constraints(topo, topo.modules, [](auto const&) { return true; });
+  validate_gui_constraints(topo, topo.modules, [](auto const&) { return nullptr; }, [](auto const&) { return true; });
 
   assert(topo.id.size());
   assert(topo.name.size());

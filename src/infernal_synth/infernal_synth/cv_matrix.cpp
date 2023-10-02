@@ -45,7 +45,7 @@ cv_matrix_topo(
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1 } }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1 } }));
   
   std::vector<int> enabled_indices = { cv_matrix_param_on, cv_matrix_param_active };
   param_ui_state_selector enabled_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
@@ -54,7 +54,7 @@ cv_matrix_topo(
     "{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", 1, section_main, true,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
-    gui_layout::single, gui_position{ 0, 0, 1, 4 }));
+    gui_layout::single, gui_position { 0, 0, 1, 3 }));
 
   auto& active = result.params.emplace_back(param_toggle(
     "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", route_count, section_main, false,
@@ -86,7 +86,7 @@ cv_matrix_topo(
     "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
-    gui_layout::vertical, gui_position{ 1, 3 }));
+    gui_layout::vertical, gui_position{ 1, 2 }));
   env_index.enabled_indices = enabled_indices;
   env_index.enabled_selector = enabled_selector;
   env_index.visibility_indices = { cv_matrix_param_source };
