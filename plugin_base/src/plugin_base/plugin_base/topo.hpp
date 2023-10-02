@@ -27,7 +27,7 @@ enum class param_label_align { top, bottom, left, right };
 enum class param_label_contents { none, name, value, both };
 
 typedef bool(*
-ui_state_selector)(std::vector<int>const& values);
+param_ui_state_selector)(std::vector<int>const& values);
 
 class module_engine;
 typedef std::unique_ptr<module_engine>(*
@@ -104,8 +104,8 @@ struct param_topo final {
 
   std::vector<int> enabled_indices;
   std::vector<int> visibility_indices;
-  ui_state_selector enabled_selector;
-  ui_state_selector visible_selector;
+  param_ui_state_selector enabled_selector;
+  param_ui_state_selector visibility_selector;
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
   bool is_real() const { return type == param_type::log || type == param_type::linear; }

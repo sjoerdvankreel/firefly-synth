@@ -58,28 +58,28 @@ cv_matrix_topo(
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position { 1, 0 }));
   active.visibility_indices = { cv_matrix_param_on };
-  active.visible_selector = [](auto const& values) { return values[0] != 0; };
+  active.visibility_selector = [](auto const& values) { return values[0] != 0; };
   auto& source = result.params.emplace_back(param_items(
     "{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", route_count, section_main, source_items(lfo_topo, env_topo), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 1 }));
   source.visibility_indices = { cv_matrix_param_on, cv_matrix_param_active };
-  source.visible_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  source.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
   auto& lfo_index = result.params.emplace_back(param_steps(
     "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
   lfo_index.visibility_indices = { cv_matrix_param_on, cv_matrix_param_active };
-  lfo_index.visible_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  lfo_index.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
   auto& env_index = result.params.emplace_back(param_steps(
     "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 3 }));
   env_index.visibility_indices = { cv_matrix_param_on, cv_matrix_param_active };
-  env_index.visible_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  env_index.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
 
   return result;
 }

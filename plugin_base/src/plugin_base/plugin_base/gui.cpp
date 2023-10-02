@@ -4,6 +4,7 @@
 #include <plugin_base/gui_lnf.hpp>
 
 #include <vector>
+#include <algorithm>
 
 using namespace juce;
 
@@ -80,7 +81,8 @@ class param_base:
 public plugin_listener
 {
 private:
-  int relevance_index() const;
+  std::vector<int> _visibility_values = {};
+  std::vector<int> _visibility_indices = {};
 
 public:
   virtual ~param_base();
@@ -182,16 +184,33 @@ param_base(plugin_gui* gui, module_desc const* module, param_desc const* param):
 _gui(gui), _module(module), _param(param)
 { 
   _gui->add_plugin_listener(_param->global, this);
-  if(relevance_index() != -1)
-    _gui->add_plugin_listener(relevance_index(), this);
+  for (int i = 0; i < _param->param->visibility_indices.size(); i++)
+  {
+    int base_index = _param->param->visibility_indices[i];
+    auto const& slots = _gui->desc()->param_topo_to_index[_module->topo][_module->slot][base_index];
+    int index = _module->module->params[base_index].slot_count == 1? slots[0]: slots[_param->slot];
+    _visibility_indices.push_back(index);
+    _gui->add_plugin_listener(index, this);
+  }
 }
 
 param_base::
 ~param_base()
 {
-  if (relevance_index() != -1)
-    _gui->remove_plugin_listener(relevance_index(), this);
+  for(int i = 0; i < _visibility_indices.size(); i++)
+    _gui->remove_plugin_listener(_visibility_indices[i], this);
   _gui->remove_plugin_listener(_param->global, this);
+}
+
+void
+param_base::init()
+{
+  // Must be called by subclass constructor as we dynamic_cast to Component inside.
+  auto const& own_mapping = _gui->desc()->mappings[_param->global];
+  plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
+  if (_visibility_indices.size() == 0) return;
+  auto const& visibility_mapping = _gui->desc()->mappings[_visibility_indices[0]];
+  plugin_changed(_visibility_indices[0], visibility_mapping.value_at(_gui->ui_state()));
 }
 
 void
@@ -202,32 +221,16 @@ param_base::plugin_changed(int index, plain_value plain)
     own_param_changed(plain);
     return;
   }
-  assert(index == relevance_index());
-  auto& self = dynamic_cast<Component&>(*this);
-  auto relevance = _param->param->relevance(plain);
-  self.setVisible(relevance != relevance::hide);
-  self.setEnabled(relevance != relevance::disable);
-}
-
-void
-param_base::init()
-{
-  // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  auto const& own_mapping = _gui->desc()->mappings[_param->global];
-  plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
-  if(relevance_index() == -1) return;
-  auto const& relevance_mapping = _gui->desc()->mappings[relevance_index()];
-  plugin_changed(relevance_index(), relevance_mapping.value_at(_gui->ui_state()));
-}
-
-int
-param_base::relevance_index() const
-{
-  int index = _param->param->relevance_index;
-  if (index == -1) return index;
-  if (_module->module->params[index].slot_count == 1)
-    return _gui->desc()->param_topo_to_index[_module->topo][_module->slot][index][0];
-  return _gui->desc()->param_topo_to_index[_module->topo][_module->slot][index][_param->slot];
+  if (std::find(_visibility_indices.begin(), _visibility_indices.end(), index) != _visibility_indices.end())
+  {
+    _visibility_values.clear();
+    for (int i = 0; i < _visibility_indices.size(); i++)
+    {
+      auto const& mapping = _gui->desc()->mappings[_visibility_indices[i]];
+      _visibility_values.push_back(mapping.value_at(_gui->ui_state()).step());
+    }
+    dynamic_cast<Component&>(*this).setVisible(_param->param->visibility_selector(_visibility_values));
+  }
 }
 
 void
