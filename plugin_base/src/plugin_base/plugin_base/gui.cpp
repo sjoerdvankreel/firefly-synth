@@ -79,111 +79,167 @@ justification_type(param_label_align align, param_label_justify justify)
 class param_base:
 public plugin_listener
 {
+private:
+  int relevance_index() const;
+
+public:
+  virtual ~param_base();
+  void plugin_changed(int index, plain_value plain) override final;
+
 protected:
   plugin_gui* const _gui;
-  param_desc const* const _desc;
-  param_base(plugin_gui* gui, param_desc const* desc): 
-  _gui(gui), _desc(desc) 
-  { _gui->add_plugin_listener(_desc->global, this); }
-public:
-  virtual ~param_base() 
-  { _gui->remove_plugin_listener(_desc->global, this); }
+  param_desc const* const _param;  
+  module_desc const* const _module;
+  virtual void own_param_changed(plain_value plain) = 0;
+  param_base(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
 class param_name_label:
-public Label
+public param_base, public Label
 {
+protected:
+  void own_param_changed(plain_value plain) override {}
 public:
-  param_name_label(param_desc const* desc) 
-  { setText(desc->name, dontSendNotification);  }
+  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param):
+  param_base(gui, module, param), Label() { setText(param->name, dontSendNotification);  }
 };
 
 class param_value_label:
 public param_base, public Label
 {
   bool const _both;
+protected:
+  void own_param_changed(plain_value plain) override final;
 public:
-  void plugin_changed(plain_value plain) override final;
-  param_value_label(plugin_gui* gui, param_desc const* desc, bool both, plain_value initial):
-  param_base(gui, desc), Label(), _both(both) { plugin_changed(initial); }
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, plain_value initial):
+  param_base(gui, module, param), Label(), _both(both) { own_param_changed(initial); }
 };
 
 class param_slider:
 public param_base, public Slider
 {
+protected:
+  void own_param_changed(plain_value plain) override final
+  { setValue(_param->param->plain_to_raw(plain), dontSendNotification); }
+
 public: 
-  param_slider(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void valueChanged() override
-  { _gui->ui_changing(_desc->global, _desc->param->raw_to_plain(getValue())); }
-  void plugin_changed(plain_value plain) override final 
-  { setValue(_desc->param->plain_to_raw(plain), dontSendNotification); }
-  void stoppedDragging() override { _gui->ui_end_changes(_desc->global); }
-  void startedDragging() override { _gui->ui_begin_changes(_desc->global); }
+  param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial);
+  void stoppedDragging() override { _gui->ui_end_changes(_param->global); }
+  void startedDragging() override { _gui->ui_begin_changes(_param->global); }
+  void valueChanged() override { _gui->ui_changing(_param->global, _param->param->raw_to_plain(getValue())); }
 };
 
 class param_combobox :
 public param_base, public ComboBox, public ComboBox::Listener
 {
+protected:
+  void own_param_changed(plain_value plain) override final
+  { setSelectedItemIndex(plain.step() - _param->param->min); }
+
 public:
   ~param_combobox() { removeListener(this); }
-  param_combobox(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  void plugin_changed(plain_value plain) override final
-  { setSelectedItemIndex(plain.step() - _desc->param->min); }
+  param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial);
   void comboBoxChanged(ComboBox*) override final
-  { _gui->ui_changed(_desc->global, 
-    _desc->param->raw_to_plain(getSelectedItemIndex() + _desc->param->min)); }
+  { _gui->ui_changed(_param->global, _param->param->raw_to_plain(getSelectedItemIndex() + _param->param->min)); }
 };
 
 class param_toggle_button :
 public param_base, public ToggleButton, public Button::Listener
 {
   bool _checked = false;
+protected:
+  void own_param_changed(plain_value plain) override final;
+
 public:
-  ~param_toggle_button() { removeListener(this); }
-  param_toggle_button(plugin_gui* gui, param_desc const* desc, plain_value initial);
-  
   void buttonClicked(Button*) override {}
   void buttonStateChanged(Button*) override;
-  void plugin_changed(plain_value plain) override final;
+  ~param_toggle_button() { removeListener(this); }
+  param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial);
 };
 
 class param_textbox :
 public param_base, public TextEditor, public TextEditor::Listener
 {
   std::string _last_parsed;
+protected:
+  void own_param_changed(plain_value plain) override final
+  { setText(_last_parsed = _param->param->plain_to_text(plain), false); }
+
 public:
-  ~param_textbox() { removeListener(this); }
-  param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial);
-
   void textEditorTextChanged(TextEditor&) override;
-  void plugin_changed(plain_value plain) override final
-  { setText(_last_parsed = _desc->param->plain_to_text(plain), false); }
-
   void textEditorFocusLost(TextEditor&) override { setText(_last_parsed, false); }
   void textEditorReturnKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
   void textEditorEscapeKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
+
+  ~param_textbox() { removeListener(this); }
+  param_textbox(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial);
 };
+
+param_base::
+param_base(plugin_gui* gui, module_desc const* module, param_desc const* param): 
+_gui(gui), _module(module), _param(param)
+{ 
+  _gui->add_plugin_listener(_param->global, this);
+  if(relevance_index() != -1)
+  {
+    _gui->add_plugin_listener(relevance_index(), this);
+    auto const& mapping = _gui->desc()->mappings[relevance_index()];
+    plugin_changed(relevance_index(), mapping.value_at(_gui->ui_state()));
+  }
+}
+
+param_base::
+~param_base()
+{
+  if (relevance_index() != -1)
+    _gui->remove_plugin_listener(relevance_index(), this);
+  _gui->remove_plugin_listener(_param->global, this);
+}
+
+int 
+param_base::relevance_index() const
+{
+  int index = _param->param->relevance_index;
+  if(index == -1) return index;
+  auto const& mapping = _gui->desc()->module_param_to_index;
+  return mapping[_module->global][index];
+}
+
+void
+param_base::plugin_changed(int index, plain_value plain)
+{
+  if (index == _param->global)
+  {
+    own_param_changed(plain);
+    return;
+  }
+  assert(index == relevance_index());
+  auto& self = dynamic_cast<Component&>(*this);
+  auto relevance = _param->param->relevance(plain);
+  self.setVisible(relevance != relevance::hide);
+  self.setEnabled(relevance != relevance::disable);
+}
 
 void
 param_textbox::textEditorTextChanged(TextEditor&)
 {
   plain_value plain;
   std::string text(getText().toStdString());
-  if (!_desc->param->text_to_plain(text, plain)) return;
+  if (!_param->param->text_to_plain(text, plain)) return;
   _last_parsed = text;
-  _gui->ui_changed(_desc->global, plain);
+  _gui->ui_changed(_param->global, plain);
 }
 
 void
-param_value_label::plugin_changed(plain_value plain)
+param_value_label::own_param_changed(plain_value plain)
 { 
-  std::string text = _desc->param->plain_to_text(plain);
-  if(_both) text = _desc->name + " " + text;
+  std::string text = _param->param->plain_to_text(plain);
+  if(_both) text = _param->name + " " + text;
   setText(text, dontSendNotification); 
 }
 
 void 
-param_toggle_button::plugin_changed(plain_value plain)
+param_toggle_button::own_param_changed(plain_value plain)
 {
   _checked = plain.step() != 0;
   setToggleState(plain.step() != 0, dontSendNotification);
@@ -193,46 +249,46 @@ void
 param_toggle_button::buttonStateChanged(Button*)
 { 
   if(_checked == getToggleState()) return;
-  plain_value plain = _desc->param->raw_to_plain(getToggleState() ? 1 : 0);
+  plain_value plain = _param->param->raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
-  _gui->ui_changed(_desc->global, plain);
+  _gui->ui_changed(_param->global, plain);
 }
 
 param_textbox::
-param_textbox(plugin_gui* gui, param_desc const* desc, plain_value initial) :
-param_base(gui, desc), TextEditor()
+param_textbox(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial) :
+param_base(gui, module, param), TextEditor()
 {
   addListener(this);
-  plugin_changed(initial);
+  own_param_changed(initial);
 }
 
 param_toggle_button::
-param_toggle_button(plugin_gui* gui, param_desc const* desc, plain_value initial):
-param_base(gui, desc), ToggleButton()
+param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial):
+param_base(gui, module, param), ToggleButton()
 { 
-  auto value = desc->param->default_plain();
+  auto value = param->param->default_plain();
   _checked = value.step() != 0;
   addListener(this);
-  plugin_changed(initial);
+  own_param_changed(initial);
 }
 
 param_combobox::
-param_combobox(plugin_gui* gui, param_desc const* desc, plain_value initial) :
-param_base(gui, desc), ComboBox()
+param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial) :
+param_base(gui, module, param), ComboBox()
 {
-  switch (desc->param->type)
+  switch (param->param->type)
   {
   case param_type::name:
-    for (int i = 0; i < desc->param->names.size(); i++)
-      addItem(desc->param->names[i], i + 1);
+    for (int i = 0; i < param->param->names.size(); i++)
+      addItem(param->param->names[i], i + 1);
     break;
   case param_type::item:
-    for (int i = 0; i < desc->param->items.size(); i++)
-      addItem(desc->param->items[i].name, i + 1);
+    for (int i = 0; i < param->param->items.size(); i++)
+      addItem(param->param->items[i].name, i + 1);
     break;
   case param_type::step:
-    for (int i = desc->param->min; i <= desc->param->max; i++)
-      addItem(std::to_string(i), desc->param->min + i + 1);
+    for (int i = param->param->min; i <= param->param->max; i++)
+      addItem(std::to_string(i), param->param->min + i + 1);
     break;
   default:
     assert(false);
@@ -240,14 +296,14 @@ param_base(gui, desc), ComboBox()
   }
   addListener(this);
   setEditableText(false);
-  plugin_changed(initial);
+  own_param_changed(initial);
 }
 
 param_slider::
-param_slider(plugin_gui* gui, param_desc const* desc, plain_value initial) :
-param_base(gui, desc), Slider()
+param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param, plain_value initial) :
+param_base(gui, module, param), Slider()
 {
-  switch (desc->param->edit)
+  switch (param->param->edit)
   {
   case param_edit::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
   case param_edit::vslider: setSliderStyle(Slider::LinearVertical); break;
@@ -255,13 +311,13 @@ param_base(gui, desc), Slider()
   default: assert(false); break;
   }
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-  if (!desc->param->is_real()) setRange(desc->param->min, desc->param->max, 1);
+  if (!param->param->is_real()) setRange(param->param->min, param->param->max, 1);
   else setNormalisableRange(
-    NormalisableRange<double>(desc->param->min, desc->param->max,
-    [this](double s, double e, double v) { return _desc->param->normalized_to_raw(normalized_value(v)); },
-    [this](double s, double e, double v) { return _desc->param->raw_to_normalized(v).value(); }));
-  setDoubleClickReturnValue(true, _desc->param->default_raw(), ModifierKeys::noModifiers);
-  plugin_changed(initial);
+    NormalisableRange<double>(param->param->min, param->param->max,
+    [this](double s, double e, double v) { return _param->param->normalized_to_raw(normalized_value(v)); },
+    [this](double s, double e, double v) { return _param->param->raw_to_normalized(v).value(); }));
+  setDoubleClickReturnValue(true, param->param->default_raw(), ModifierKeys::noModifiers);
+  own_param_changed(initial);
 }
 
 // resizes single child on resize
@@ -386,7 +442,7 @@ void
 plugin_gui::plugin_changed(int index, plain_value plain)
 {
   for(int i = 0; i < _plugin_listeners[index].size(); i++)
-    _plugin_listeners[index][i]->plugin_changed(plain);
+    _plugin_listeners[index][i]->plugin_changed(index, plain);
 }
 
 void 
@@ -624,13 +680,13 @@ plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
   case param_edit::knob:
   case param_edit::hslider:
   case param_edit::vslider:
-    result = &make_component<param_slider>(this, &param, initial); break;
+    result = &make_component<param_slider>(this, &module, &param, initial); break;
   case param_edit::text:
-    result = &make_component<param_textbox>(this, &param, initial); break;
+    result = &make_component<param_textbox>(this, &module, &param, initial); break;
   case param_edit::list:
-    result = &make_component<param_combobox>(this, &param, initial); break;
+    result = &make_component<param_combobox>(this, &module, &param, initial); break;
   case param_edit::toggle:
-    result = &make_component<param_toggle_button>(this, &param, initial); break;
+    result = &make_component<param_toggle_button>(this, &module, &param, initial); break;
   default:
     assert(false);
     return *((Component*)nullptr);
@@ -648,11 +704,11 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
   switch (contents)
   {
   case param_label_contents::name:
-    result = &make_component<param_name_label>(&param);
+    result = &make_component<param_name_label>(this, &module, &param);
     break;
   case param_label_contents::both:
   case param_label_contents::value:
-    result = &make_component<param_value_label>(this, &param, contents == param_label_contents::both, initial);
+    result = &make_component<param_value_label>(this, &module, &param, contents == param_label_contents::both, initial);
     break;
   default:
     assert(false);

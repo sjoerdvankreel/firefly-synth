@@ -14,12 +14,6 @@ class grid_component;
 void gui_init();
 void gui_terminate();
 
-class plugin_listener
-{
-public:
-  virtual void plugin_changed(plain_value plain) = 0;
-};
-
 class ui_listener
 {
 public:
@@ -27,6 +21,12 @@ public:
   virtual void ui_end_changes(int index) = 0;
   virtual void ui_begin_changes(int index) = 0;
   virtual void ui_changing(int index, plain_value plain) = 0;
+};
+
+class plugin_listener
+{
+public:
+  virtual void plugin_changed(int index, plain_value plain) = 0;
 };
 
 class plugin_gui:
@@ -70,6 +70,9 @@ public:
   void ui_changed(int index, plain_value plain);
   void ui_changing(int index, plain_value plain);
   void plugin_changed(int index, plain_value plain);
+
+  plugin_desc const* desc() const { return _desc; }
+  jarray<plain_value, 4> const& ui_state() const { return *_ui_state; }
 
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
