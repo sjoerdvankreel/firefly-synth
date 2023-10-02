@@ -81,8 +81,16 @@ class param_base:
 public plugin_listener
 {
 private:
+  std::vector<int> _enabled_values = {};
+  std::vector<int> _enabled_indices = {};
   std::vector<int> _visibility_values = {};
   std::vector<int> _visibility_indices = {};
+
+  bool select_ui_state(
+    std::vector<int> const& indices, 
+    std::vector<int>& values, param_ui_state_selector selector);
+  void setup_ui_state_indices(
+    std::vector<int> const& topo_indices, std::vector<int>& indices);
 
 public:
   virtual ~param_base();
@@ -184,14 +192,8 @@ param_base(plugin_gui* gui, module_desc const* module, param_desc const* param):
 _gui(gui), _module(module), _param(param)
 { 
   _gui->add_plugin_listener(_param->global, this);
-  for (int i = 0; i < _param->param->visibility_indices.size(); i++)
-  {
-    int base_index = _param->param->visibility_indices[i];
-    auto const& slots = _gui->desc()->param_topo_to_index[_module->topo][_module->slot][base_index];
-    int index = _module->module->params[base_index].slot_count == 1? slots[0]: slots[_param->slot];
-    _visibility_indices.push_back(index);
-    _gui->add_plugin_listener(index, this);
-  }
+  setup_ui_state_indices(_param->param->enabled_indices, _enabled_indices);
+  setup_ui_state_indices(_param->param->visibility_indices, _visibility_indices);
 }
 
 param_base::
@@ -199,7 +201,23 @@ param_base::
 {
   for(int i = 0; i < _visibility_indices.size(); i++)
     _gui->remove_plugin_listener(_visibility_indices[i], this);
+  for (int i = 0; i < _enabled_indices.size(); i++)
+    _gui->remove_plugin_listener(_enabled_indices[i], this);
   _gui->remove_plugin_listener(_param->global, this);
+}
+
+bool 
+param_base::select_ui_state(
+  std::vector<int> const& indices, 
+  std::vector<int>& values, param_ui_state_selector selector)
+{
+  values.clear();
+  for (int i = 0; i < indices.size(); i++)
+  {
+    auto const& mapping = _gui->desc()->mappings[indices[i]];
+    values.push_back(mapping.value_at(_gui->ui_state()).step());
+  }
+  return selector(values);
 }
 
 void
@@ -208,9 +226,31 @@ param_base::init()
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   auto const& own_mapping = _gui->desc()->mappings[_param->global];
   plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
-  if (_visibility_indices.size() == 0) return;
-  auto const& visibility_mapping = _gui->desc()->mappings[_visibility_indices[0]];
-  plugin_changed(_visibility_indices[0], visibility_mapping.value_at(_gui->ui_state()));
+  if (_enabled_indices.size() != 0)
+  {
+    auto const& enabled_mapping = _gui->desc()->mappings[_enabled_indices[0]];
+    plugin_changed(_enabled_indices[0], enabled_mapping.value_at(_gui->ui_state()));
+  }
+  if (_visibility_indices.size() != 0)
+  {
+    auto const& visibility_mapping = _gui->desc()->mappings[_visibility_indices[0]];
+    plugin_changed(_visibility_indices[0], visibility_mapping.value_at(_gui->ui_state()));
+  }
+}
+
+void 
+param_base::setup_ui_state_indices(
+  std::vector<int> const& topo_indices, std::vector<int>& indices)
+{
+  for (int i = 0; i < topo_indices.size(); i++)
+  {
+    auto const& param_topo_to_index = _gui->desc()->param_topo_to_index;
+    auto const& slots = param_topo_to_index[_module->topo][_module->slot][topo_indices[i]];
+    bool single_slot = _module->module->params[topo_indices[i]].slot_count == 1;
+    int state_index = single_slot ? slots[0] : slots[_param->slot];
+    indices.push_back(state_index);
+    _gui->add_plugin_listener(state_index, this);
+  }
 }
 
 void
@@ -221,16 +261,16 @@ param_base::plugin_changed(int index, plain_value plain)
     own_param_changed(plain);
     return;
   }
-  if (std::find(_visibility_indices.begin(), _visibility_indices.end(), index) != _visibility_indices.end())
-  {
-    _visibility_values.clear();
-    for (int i = 0; i < _visibility_indices.size(); i++)
-    {
-      auto const& mapping = _gui->desc()->mappings[_visibility_indices[i]];
-      _visibility_values.push_back(mapping.value_at(_gui->ui_state()).step());
-    }
-    dynamic_cast<Component&>(*this).setVisible(_param->param->visibility_selector(_visibility_values));
-  }
+  
+  auto enabled_iter = std::find(_enabled_indices.begin(), _enabled_indices.end(), index);
+  if (enabled_iter != _enabled_indices.end())
+    dynamic_cast<Component&>(*this).setEnabled(select_ui_state(
+      _enabled_indices, _enabled_values, _param->param->enabled_selector));
+
+  auto visibility_iter = std::find(_visibility_indices.begin(), _visibility_indices.end(), index);
+  if (visibility_iter != _visibility_indices.end())
+    dynamic_cast<Component&>(*this).setVisible(select_ui_state(
+      _visibility_indices, _visibility_values, _param->param->visibility_selector));
 }
 
 void

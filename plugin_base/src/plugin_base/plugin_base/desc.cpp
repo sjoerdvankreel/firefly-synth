@@ -269,6 +269,13 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(0 <= param.position.row && param.position.row + param.position.row_span <= module.sections[param.section].dimension.row_sizes.size());
   assert(0 <= param.position.column && param.position.column + param.position.column_span <= module.sections[param.section].dimension.column_sizes.size());
 
+  assert((param.enabled_indices.size() == 0) == (param.enabled_selector == nullptr));
+  for (int i = 0; i < param.enabled_indices.size(); i++)
+  {
+    assert(!module.params[param.enabled_indices[i]].is_real());
+    assert(module.params[param.enabled_indices[i]].slot_count == 1 || module.params[param.enabled_indices[i]].slot_count == param.slot_count);
+  }
+
   assert((param.visibility_indices.size() == 0) == (param.visibility_selector == nullptr));
   for (int i = 0; i < param.visibility_indices.size(); i++)
   {
