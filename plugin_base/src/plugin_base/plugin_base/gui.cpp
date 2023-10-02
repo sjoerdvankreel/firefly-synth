@@ -194,15 +194,6 @@ param_base::
   _gui->remove_plugin_listener(_param->global, this);
 }
 
-int 
-param_base::relevance_index() const
-{
-  int index = _param->param->relevance_index;
-  if(index == -1) return index;
-  auto const& mapping = _gui->desc()->module_param_to_index;
-  return mapping[_module->global][index];
-}
-
 void
 param_base::plugin_changed(int index, plain_value plain)
 {
@@ -227,6 +218,16 @@ param_base::init()
   if(relevance_index() == -1) return;
   auto const& relevance_mapping = _gui->desc()->mappings[relevance_index()];
   plugin_changed(relevance_index(), relevance_mapping.value_at(_gui->ui_state()));
+}
+
+int
+param_base::relevance_index() const
+{
+  int index = _param->param->relevance_index;
+  if (index == -1) return index;
+  if (_module->module->params[index].slot_count == 1)
+    return _gui->desc()->param_topo_to_index[_module->topo][_module->slot][index][0];
+  return _gui->desc()->param_topo_to_index[_module->topo][_module->slot][index][_param->slot];
 }
 
 void

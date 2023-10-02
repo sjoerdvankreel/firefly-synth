@@ -263,14 +263,15 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(!param.is_real() || param.max >= param.default_plain().real());
   assert(!param.is_real() || (0 <= param.precision && param.precision <= 10));
 
-  assert((param.relevance_index == -1) == (param.relevance == nullptr));
-  assert(param.relevance_index == -1 || !module.params[param.relevance_index].is_real());
-
   assert((param.slot_count == 1) == (param.layout == gui_layout::single));
   assert(0 < param.position.row_span && param.position.row_span <= 1024);
   assert(0 < param.position.column_span && param.position.column_span <= 1024);
   assert(0 <= param.position.row && param.position.row + param.position.row_span <= module.sections[param.section].dimension.row_sizes.size());
   assert(0 <= param.position.column && param.position.column + param.position.column_span <= module.sections[param.section].dimension.column_sizes.size());
+
+  assert((param.relevance_index == -1) == (param.relevance == nullptr));
+  assert(param.relevance_index == -1 || !module.params[param.relevance_index].is_real());
+  assert(param.relevance_index == -1 || module.params[param.relevance_index].slot_count == 1 || module.params[param.relevance_index].slot_count == param.slot_count);
 }
 
 static void
@@ -359,17 +360,31 @@ validate_plugin_desc(plugin_desc const& desc)
   assert(desc.mappings.size() == desc.param_count);
   assert(desc.param_tag_to_index.size() == desc.param_count);
   assert(desc.param_index_to_tag.size() == desc.param_count);
-  assert(desc.module_param_to_index.size() == desc.modules.size());
   assert(desc.param_id_to_index.size() == desc.plugin->modules.size());
   assert(desc.module_id_to_index.size() == desc.plugin->modules.size());
+  assert(desc.param_topo_to_index.size() == desc.plugin->modules.size());
 
+  param_global = 0;
   for(int m = 0; m < desc.plugin->modules.size(); m++)
   {
     auto const& module = desc.plugin->modules[m];
     (void)module;
+    assert(desc.param_topo_to_index[m].size() == module.slot_count);
     assert(desc.param_id_to_index.at(module.id).size() == module.params.size());
+    for(int mi = 0; mi < module.slot_count; mi++)
+    {
+      assert(desc.param_topo_to_index[m][mi].size() == module.params.size());
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        assert(desc.param_topo_to_index[m][mi][p].size() == param.slot_count);
+        for(int pi = 0; pi < param.slot_count; pi++)
+          assert(desc.param_topo_to_index[m][mi][p][pi] == param_global++);
+      }
+    }
   }
 
+  param_global = 0;
   for (int m = 0; m < desc.modules.size(); m++)
   {
     auto const& module = desc.modules[m];
@@ -377,7 +392,6 @@ validate_plugin_desc(plugin_desc const& desc)
     validate_module_desc(desc, module);
     INF_ASSERT_EXEC(all_ids.insert(module.id).second);
     INF_ASSERT_EXEC(all_hashes.insert(module.id_hash).second);
-    assert(desc.module_param_to_index[m].size() == module.params.size());
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
@@ -433,6 +447,7 @@ plugin(std::move(plugin_))
   for(int m = 0; m < plugin->modules.size(); m++)
   {
     auto const& module = plugin->modules[m];
+    param_topo_to_index.emplace_back();
     if(module.stage == module_stage::input) module_voice_start++;
     if(module.stage == module_stage::input) module_output_start++;
     if(module.stage == module_stage::voice) module_output_start++;
@@ -441,9 +456,15 @@ plugin(std::move(plugin_))
       param_id_to_index[module.id][module.params[p].id] = p;
     for(int mi = 0; mi < module.slot_count; mi++)
     {
+      param_topo_to_index[m].emplace_back();
       modules.emplace_back(module_desc(module, m, mi, module_global++, param_global));
       for(int p = 0; p < module.params.size(); p++)
-        param_global += module.params[p].slot_count;
+      {
+        auto const& param = module.params[p];
+        param_topo_to_index[m][mi].emplace_back();
+        for(int pi = 0; pi < param.slot_count; pi++)
+          param_topo_to_index[m][mi][p].push_back(param_global++);
+      }
     }
   }
 
@@ -451,7 +472,6 @@ plugin(std::move(plugin_))
   for(int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
-    module_param_to_index.emplace_back();
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
@@ -467,7 +487,6 @@ plugin(std::move(plugin_))
       param_tag_to_index[param.id_hash] = mappings.size();
       mappings.push_back(std::move(mapping));
       params.push_back(&module.params[p]);
-      module_param_to_index[m].push_back(param.global);
     }
   }
 
