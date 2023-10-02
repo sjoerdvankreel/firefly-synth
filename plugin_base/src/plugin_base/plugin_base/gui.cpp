@@ -262,15 +262,20 @@ param_base::plugin_changed(int index, plain_value plain)
     return;
   }
   
+  auto& self = dynamic_cast<Component&>(*this);
   auto enabled_iter = std::find(_enabled_indices.begin(), _enabled_indices.end(), index);
   if (enabled_iter != _enabled_indices.end())
-    dynamic_cast<Component&>(*this).setEnabled(select_ui_state(
+    self.setEnabled(select_ui_state(
       _enabled_indices, _enabled_values, _param->param->enabled_selector));
 
   auto visibility_iter = std::find(_visibility_indices.begin(), _visibility_indices.end(), index);
   if (visibility_iter != _visibility_indices.end())
-    dynamic_cast<Component&>(*this).setVisible(select_ui_state(
-      _visibility_indices, _visibility_values, _param->param->visibility_selector));
+  {
+    bool visible = select_ui_state(
+      _visibility_indices, _visibility_values, _param->param->visibility_selector);
+    self.setVisible(visible);
+    self.setInterceptsMouseClicks(visible, visible);
+  }
 }
 
 void
