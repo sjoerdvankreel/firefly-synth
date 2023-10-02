@@ -224,6 +224,7 @@ param_base::init()
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   auto const& own_mapping = _gui->desc()->mappings[_param->global];
   plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
+  if(relevance_index() == -1) return;
   auto const& relevance_mapping = _gui->desc()->mappings[relevance_index()];
   plugin_changed(relevance_index(), relevance_mapping.value_at(_gui->ui_state()));
 }
