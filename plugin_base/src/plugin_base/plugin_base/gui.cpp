@@ -107,7 +107,8 @@ protected:
 };
 
 class param_name_label:
-public param_base, public Label
+public param_base, 
+public Label
 {
 protected:
   void own_param_changed(plain_value plain) override {}
@@ -117,7 +118,8 @@ public:
 };
 
 class param_value_label:
-public param_base, public Label
+public param_base, 
+public Label
 {
   bool const _both;
 protected:
@@ -128,7 +130,8 @@ public:
 };
 
 class param_slider:
-public param_base, public Slider
+public param_base,
+public Slider
 {
 protected:
   void own_param_changed(plain_value plain) override final
@@ -142,7 +145,9 @@ public:
 };
 
 class param_combobox :
-public param_base, public ComboBox, public ComboBox::Listener
+public param_base, 
+public ComboBox, 
+public ComboBox::Listener
 {
 protected:
   void own_param_changed(plain_value plain) override final
@@ -156,7 +161,9 @@ public:
 };
 
 class param_toggle_button :
-public param_base, public ToggleButton, public Button::Listener
+public param_base, 
+public ToggleButton, 
+public Button::Listener
 {
   bool _checked = false;
 protected:
@@ -170,7 +177,9 @@ public:
 };
 
 class param_textbox :
-public param_base, public TextEditor, public TextEditor::Listener
+public param_base, 
+public TextEditor, 
+public TextEditor::Listener
 {
   std::string _last_parsed;
 protected:
