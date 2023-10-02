@@ -57,25 +57,27 @@ cv_matrix_topo(
     param_dir::input,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position { 1, 0 }));
-  result.params.emplace_back(param_items(
+  auto& source = result.params.emplace_back(param_items(
     "{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", route_count, section_main, source_items(lfo_topo, env_topo), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 1 }));
+  source.relevance_index = cv_matrix_param_on;
+  source.relevance = [](plain_value plain) { return plain.step() != 0 ? relevance::normal : relevance::disable; };
   auto& lfo_index = result.params.emplace_back(param_steps(
     "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
-  lfo_index.relevance_index = cv_matrix_param_source;
-  lfo_index.relevance = [](plain_value plain) { return plain.step() == 0 ? relevance::normal : relevance::disable; };
+  lfo_index.relevance_index = cv_matrix_param_on;
+  lfo_index.relevance = [](plain_value plain) { return plain.step() != 0 ? relevance::normal : relevance::disable; };
   auto& env_index = result.params.emplace_back(param_steps(
     "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 3 }));
-  env_index.relevance_index = cv_matrix_param_source;
-  env_index.relevance = [](plain_value plain) { return plain.step() == 1 ? relevance::normal : relevance::disable; };
+  env_index.relevance_index = cv_matrix_param_on;
+  env_index.relevance = [](plain_value plain) { return plain.step() != 0 ? relevance::normal : relevance::disable; };
 
   return result;
 }
