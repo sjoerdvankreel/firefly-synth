@@ -75,50 +75,64 @@ justification_type(param_label_align align, param_label_justify justify)
   return Justification::centred;
 }
 
-// control types bound to a parameter topo & plugin value
-
-class param_base:
+// base class for anything that should react to ui_state
+// i.e. has it's enabled/visible bound to a set of plugin parameters
+class ui_state_component:
 public plugin_listener
 {
+public:
+  virtual ~ui_state_component();
+  void plugin_changed(int index, plain_value plain) override;
+
+protected:
+  plugin_gui* const _gui;
+  int const _own_slot_index;
+  ui_state const* const _state;
+  module_desc const* const _module;
+
+  virtual void init();
+  ui_state_component(plugin_gui* gui, module_desc const* module, ui_state const* state, int own_slot_index);
+
 private:
   std::vector<int> _enabled_values = {};
   std::vector<int> _enabled_params = {};
   std::vector<int> _visibility_values = {};
   std::vector<int> _visibility_params = {};
 
-  bool select_ui_state(
-    std::vector<int> const& params,
-    std::vector<int>& values, ui_state_selector selector);
-  void setup_ui_state_params(
-    std::vector<int> const& topo_params, std::vector<int>& params);
+  void setup_ui_state_params(std::vector<int> const& topo_params, std::vector<int>& params);
+  bool select_ui_state(std::vector<int> const& params, std::vector<int>& values, ui_state_selector selector);
+};
+
+// ui_state_component that is additionally bound to a single parameter value
+// i.e., edit control or a label that displays a plugin parameter value
+class param_component:
+public ui_state_component
+{
+protected:
+  param_desc const* const _param;
 
 public:
-  virtual ~param_base();
   void plugin_changed(int index, plain_value plain) override final;
+  virtual ~param_component() { _gui->remove_plugin_listener(_param->global, this); }
 
 protected:
-  plugin_gui* const _gui;
-  param_desc const* const _param;  
-  module_desc const* const _module;
-
-  void init();
+  void init() override final;
   virtual void own_param_changed(plain_value plain) = 0;
-  param_base(plugin_gui* gui, module_desc const* module, param_desc const* param);
+  param_component(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
 class param_name_label:
-public param_base, 
+public ui_state_component,
 public Label
 {
-protected:
-  void own_param_changed(plain_value plain) override {}
 public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param):
-  param_base(gui, module, param), Label() { setText(param->name, dontSendNotification);  }
+  ui_state_component(gui, module, &param->param->ui_state, param->slot), Label() 
+  { setText(param->name, dontSendNotification);  }
 };
 
 class param_value_label:
-public param_base, 
+public param_component, 
 public Label
 {
   bool const _both;
@@ -126,11 +140,11 @@ protected:
   void own_param_changed(plain_value plain) override final;
 public:
   param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both):
-  param_base(gui, module, param), Label(), _both(both) { init(); }
+  param_component(gui, module, param), Label(), _both(both) { init(); }
 };
 
 class param_slider:
-public param_base,
+public param_component,
 public Slider
 {
 protected:
@@ -145,7 +159,7 @@ public:
 };
 
 class param_combobox :
-public param_base, 
+public param_component,
 public ComboBox, 
 public ComboBox::Listener
 {
@@ -161,7 +175,7 @@ public:
 };
 
 class param_toggle_button :
-public param_base, 
+public param_component,
 public ToggleButton, 
 public Button::Listener
 {
@@ -177,7 +191,7 @@ public:
 };
 
 class param_textbox :
-public param_base, 
+public param_component,
 public TextEditor, 
 public TextEditor::Listener
 {
@@ -196,27 +210,25 @@ public:
   param_textbox(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
-param_base::
-param_base(plugin_gui* gui, module_desc const* module, param_desc const* param): 
-_gui(gui), _module(module), _param(param)
-{ 
-  _gui->add_plugin_listener(_param->global, this);
-  setup_ui_state_params(_param->param->ui_state.enabled_params, _enabled_params);
-  setup_ui_state_params(_param->param->ui_state.visibility_params, _visibility_params);
+ui_state_component::
+ui_state_component(plugin_gui* gui, module_desc const* module, ui_state const* state, int own_slot_index):
+_gui(gui), _own_slot_index(own_slot_index), _state(state), _module(module)
+{
+  setup_ui_state_params(state->enabled_params, _enabled_params);
+  setup_ui_state_params(state->visibility_params, _visibility_params);
 }
 
-param_base::
-~param_base()
+ui_state_component::
+~ui_state_component()
 {
   for(int i = 0; i < _visibility_params.size(); i++)
     _gui->remove_plugin_listener(_visibility_params[i], this);
   for (int i = 0; i < _enabled_params.size(); i++)
     _gui->remove_plugin_listener(_enabled_params[i], this);
-  _gui->remove_plugin_listener(_param->global, this);
 }
 
 bool 
-param_base::select_ui_state(
+ui_state_component::select_ui_state(
   std::vector<int> const& indices, 
   std::vector<int>& values, ui_state_selector selector)
 {
@@ -230,11 +242,9 @@ param_base::select_ui_state(
 }
 
 void
-param_base::init()
+ui_state_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  auto const& own_mapping = _gui->desc()->mappings[_param->global];
-  plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
   if (_enabled_params.size() != 0)
   {
     auto const& enabled_mapping = _gui->desc()->mappings[_enabled_params[0]];
@@ -248,7 +258,7 @@ param_base::init()
 }
 
 void 
-param_base::setup_ui_state_params(
+ui_state_component::setup_ui_state_params(
   std::vector<int> const& topo_params, std::vector<int>& params)
 {
   for (int i = 0; i < topo_params.size(); i++)
@@ -256,35 +266,52 @@ param_base::setup_ui_state_params(
     auto const& param_topo_to_index = _gui->desc()->param_topo_to_index;
     auto const& slots = param_topo_to_index[_module->topo][_module->slot][topo_params[i]];
     bool single_slot = _module->module->params[topo_params[i]].slot_count == 1;
-    int state_index = single_slot ? slots[0] : slots[_param->slot];
+    int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);
     _gui->add_plugin_listener(state_index, this);
   }
 }
 
 void
-param_base::plugin_changed(int index, plain_value plain)
-{
-  if (index == _param->global)
-  {
-    own_param_changed(plain);
-    return;
-  }
-  
+ui_state_component::plugin_changed(int index, plain_value plain)
+{  
   auto& self = dynamic_cast<Component&>(*this);
   auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
   if (enabled_iter != _enabled_params.end())
     self.setEnabled(select_ui_state(
-      _enabled_params, _enabled_values, _param->param->ui_state.enabled_selector));
+      _enabled_params, _enabled_values, _state->enabled_selector));
 
   auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
   if (visibility_iter != _visibility_params.end())
   {
     bool visible = select_ui_state(
-      _visibility_params, _visibility_values, _param->param->ui_state.visibility_selector);
+      _visibility_params, _visibility_values, _state->visibility_selector);
     self.setVisible(visible);
     self.setInterceptsMouseClicks(visible, visible);
   }
+}
+
+param_component::
+param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
+ui_state_component(gui, module, &param->param->ui_state, param->slot), _param(param)
+{ _gui->add_plugin_listener(_param->global, this); }
+
+void
+param_component::plugin_changed(int index, plain_value plain)
+{
+  if (index == _param->global)
+    own_param_changed(plain);
+  else
+    ui_state_component::plugin_changed(index, plain);
+}
+
+void
+param_component::init()
+{
+  // Must be called by subclass constructor as we dynamic_cast to Component inside.
+  auto const& own_mapping = _gui->desc()->mappings[_param->global];
+  plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
+  ui_state_component::init();
 }
 
 void
@@ -323,7 +350,7 @@ param_toggle_button::buttonStateChanged(Button*)
 
 param_textbox::
 param_textbox(plugin_gui* gui, module_desc const* module, param_desc const* param) :
-param_base(gui, module, param), TextEditor()
+param_component(gui, module, param), TextEditor()
 {
   addListener(this);
   init();
@@ -331,7 +358,7 @@ param_base(gui, module, param), TextEditor()
 
 param_toggle_button::
 param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param):
-param_base(gui, module, param), ToggleButton()
+param_component(gui, module, param), ToggleButton()
 { 
   auto value = param->param->default_plain();
   _checked = value.step() != 0;
@@ -341,7 +368,7 @@ param_base(gui, module, param), ToggleButton()
 
 param_combobox::
 param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param) :
-param_base(gui, module, param), ComboBox()
+param_component(gui, module, param), ComboBox()
 {
   switch (param->param->type)
   {
@@ -368,7 +395,7 @@ param_base(gui, module, param), ComboBox()
 
 param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
-param_base(gui, module, param), Slider()
+param_component(gui, module, param), Slider()
 {
   switch (param->param->edit)
   {
@@ -384,13 +411,13 @@ param_base(gui, module, param), Slider()
     [this](double s, double e, double v) { return _param->param->normalized_to_raw(normalized_value(v)); },
     [this](double s, double e, double v) { return _param->param->raw_to_normalized(v).value(); }));
   setDoubleClickReturnValue(true, param->param->default_raw(), ModifierKeys::noModifiers);
-  param_base::init();
+  param_component::init();
 }
 
 // resizes single child on resize
 
 class group_component :
-  public GroupComponent {
+public GroupComponent {
 public:
   void resized() override;
 };
