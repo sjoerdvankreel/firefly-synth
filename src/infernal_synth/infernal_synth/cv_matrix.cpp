@@ -47,6 +47,7 @@ target_filter_items(module_topo const& filter_topo)
 {
   std::vector<item_topo> result;
   result.emplace_back(filter_topo.params[filter_param_freq]);
+  result.emplace_back(filter_topo.params[filter_param_temp]);
   // TODO osc gain counted parameter
   return result;
 }
@@ -157,11 +158,11 @@ cv_matrix_topo(
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 5 }));
-  osc_target.ui_state.enabled_params = enabled_params;
-  osc_target.ui_state.enabled_selector = enabled_selector;
-  osc_target.ui_state.visibility_params = { cv_matrix_param_filter_target };
-  osc_target.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_filter) };
-  osc_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+  filter_target.ui_state.enabled_params = enabled_params;
+  filter_target.ui_state.enabled_selector = enabled_selector;
+  filter_target.ui_state.visibility_params = { cv_matrix_param_filter_target };
+  filter_target.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_filter) };
+  filter_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   return result;
 }
