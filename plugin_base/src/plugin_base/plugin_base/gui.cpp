@@ -810,7 +810,11 @@ plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
     assert(false);
     return *((Component*)nullptr);
   }
-  result->setEnabled(param.param->dir == param_dir::input);
+
+  // don't touch state for input in case it is a ui-state-bound parameter
+  if(param.param->dir == param_dir::output)
+    result->setEnabled(false);
+
   return *result;
 }
 

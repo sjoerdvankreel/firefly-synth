@@ -288,6 +288,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(!param.is_real() || (0 <= param.precision && param.precision <= 10));
 
   validate_ui_state(module, param.ui_state, param.slot_count);
+  assert(param.dir == param_dir::input || param.ui_state.enabled_selector == nullptr);
   assert((param.slot_count == 1) == (param.layout == gui_layout::single));
   assert(0 < param.position.row_span && param.position.row_span <= 1024);
   assert(0 < param.position.column_span && param.position.column_span <= 1024);
