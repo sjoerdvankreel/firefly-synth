@@ -127,14 +127,16 @@ osc_engine::process(process_block& block)
   auto const& bal = block.accurate_automation[osc_param_bal][0];
   auto const& cent = block.accurate_automation[osc_param_cent][0];
   auto const& gain = block.accurate_automation[osc_param_gain][0];
+  auto const& saw_gain = block.accurate_automation[osc_param_saw_gain][0];
+  auto const& sine_gain = block.accurate_automation[osc_param_sine_gain][0];
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     switch (type)
     {
-    case type_saw: sample = _phase * 2 - 1; break;
-    case type_sine: sample = std::sin(_phase * 2 * pi32); break;
+    case type_saw: sample = saw_gain[f] * (_phase * 2 - 1); break;
+    case type_sine: sample = sine_gain[f] * std::sin(_phase * 2 * pi32); break;
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);

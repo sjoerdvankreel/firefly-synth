@@ -18,8 +18,12 @@ start documenting stuff
 on-note/hold-type cv
 provide to/fromstring for steps
 dependent visibility/enabled -- param + section level
+disable denormals
 
-host bugs:
+* continuing
+- keep updating the demo apps
+
+* host bugs:
 - cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)
 
 testing:
