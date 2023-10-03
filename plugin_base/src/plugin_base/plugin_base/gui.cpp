@@ -722,9 +722,9 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
 {
   grid_component* grid = nullptr;
   if (module.module->sections.size() == 1)
-    grid = &make_component<grid_component>(section.dimension);
-  else
     grid = &make_component<section_grid_component>(this, &module, &section);
+  else
+    grid = &make_component<grid_component>(section.dimension);
 
   auto const& params = module.params;
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
@@ -734,7 +734,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   if(module.module->sections.size() == 1)
     return *grid;
 
-  auto& result = make_component<group_component>();
+  auto& result = make_component<section_group_component>(this, &module, &section);
   result.setText(section.name);
   result.addAndMakeVisible(grid);
   return result;
