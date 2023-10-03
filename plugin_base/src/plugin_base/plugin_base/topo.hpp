@@ -27,10 +27,10 @@ enum class param_label_align { top, bottom, left, right };
 enum class param_label_contents { none, name, value, both };
 
 class module_engine;
-typedef bool(*
-ui_state_selector)(std::vector<int>const& values);
 typedef std::unique_ptr<module_engine>(*
 module_engine_factory)(int slot, int sample_rate, int max_frame_count);
+typedef bool(*
+ui_state_selector)(std::vector<int> const& values, std::vector<int> const& context);
 
 // position in parent grid
 struct gui_position final {
@@ -55,21 +55,23 @@ struct gui_dimension final {
 
 // item in list
 struct item_topo final {
-  std::string id;
-  std::string name;
+  int tag = -1;
+  std::string id = {};
+  std::string name = {};
   
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(item_topo);
-  item_topo(std::string const& id, std::string const& name): 
-  id(id), name(name) {}
+  item_topo(std::string const& id, std::string const& name, int tag): 
+  tag(tag), id(id), name(name) {}
 };
 
 // binding ui state
 struct ui_state final {
-  std::vector<int> enabled_params;
-  std::vector<int> visibility_params;
-  ui_state_selector enabled_selector;
-  ui_state_selector visibility_selector;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(ui_state);
+  std::vector<int> enabled_params = {};
+  std::vector<int> enabled_context = {};
+  ui_state_selector enabled_selector = {};
+  std::vector<int> visibility_params = {};
+  std::vector<int> visibility_context = {};
+  ui_state_selector visibility_selector = {};
 };
 
 // param gui section

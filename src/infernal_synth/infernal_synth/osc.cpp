@@ -17,8 +17,8 @@ static std::vector<item_topo>
 type_items()
 {
   std::vector<item_topo> result;
-  result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw");
-  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sine");
+  result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw", type_saw);
+  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sine", type_sine);
   return result;
 }
 
@@ -46,7 +46,7 @@ osc_topo()
   auto& pitch = result.sections.emplace_back(make_section(
     "Pitch", section_pitch, gui_position{ 0, 0, 1, 4 }, gui_dimension{ 1, 3 }));
   pitch.ui_state.enabled_params = { osc_param_on };
-  pitch.ui_state.enabled_selector = [](auto const& values) { return values[0] != 0; };
+  pitch.ui_state.enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0; };
   
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position{ 1, 0, 1, 3 }, gui_dimension{ { 1 }, { 1, 2, 2, 2 } }));
@@ -54,12 +54,12 @@ osc_topo()
   auto& sine_gain = result.sections.emplace_back(make_section(
     "Sine gain", section_sine_gain, gui_position{ 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
   sine_gain.ui_state.visibility_params = { osc_param_on, osc_param_type };
-  sine_gain.ui_state.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] == type_sine; };
+  sine_gain.ui_state.visibility_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_sine; };
   
   auto& saw_gain = result.sections.emplace_back(make_section(
     "Saw gain", section_saw_gain, gui_position { 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
   saw_gain.ui_state.visibility_params = { osc_param_on, osc_param_type };
-  saw_gain.ui_state.visibility_selector = [](auto const& values) { return values[0] != 0 && values[1] == type_saw; };
+  saw_gain.ui_state.visibility_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_saw; };
 
   result.params.emplace_back(param_names(
     "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, section_pitch, note_names(), "",

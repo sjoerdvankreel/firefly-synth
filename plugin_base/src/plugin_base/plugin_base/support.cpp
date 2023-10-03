@@ -33,6 +33,15 @@ param_base(
   return result;
 }
 
+int
+index_of_item_tag(std::vector<item_topo> const& items, int tag)
+{
+  for(int i = 0; i < items.size(); i++)
+    if(items[i].tag == tag)
+      return i;
+  return -1;
+}
+
 section_topo
 make_section(
   std::string const& name, int section,

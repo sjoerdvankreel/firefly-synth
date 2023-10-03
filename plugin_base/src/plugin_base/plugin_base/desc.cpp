@@ -187,7 +187,10 @@ static void
 validate_ui_state(module_topo const& module, ui_state const& state, int slot_count)
 {
   auto const& enabled_params = state.enabled_params;
+  auto const& enabled_context = state.enabled_context;
+  (void)enabled_context;
   assert((enabled_params.size() == 0) == (state.enabled_selector == nullptr));
+  assert((enabled_context.size() == 0) || (enabled_context.size() == enabled_params.size()));
   for (int i = 0; i < enabled_params.size(); i++)
   {
     assert(!module.params[enabled_params[i]].is_real());
@@ -195,7 +198,10 @@ validate_ui_state(module_topo const& module, ui_state const& state, int slot_cou
   }
 
   auto const& visibility_params = state.visibility_params;
+  auto const& visibility_context = state.visibility_context;
+  (void)visibility_context;
   assert((visibility_params.size() == 0) == (state.visibility_selector == nullptr));
+  assert((visibility_context.size() == 0) || (visibility_context.size() == visibility_params.size()));
   for (int i = 0; i < visibility_params.size(); i++)
   {
     assert(!module.params[visibility_params[i]].is_real());

@@ -18,8 +18,8 @@ static std::vector<item_topo>
 source_items(module_topo const& lfo_topo, module_topo const& env_topo)
 {
   std::vector<item_topo> result;
-  result.emplace_back(lfo_topo.id, lfo_topo.name);
-  result.emplace_back(env_topo.id, env_topo.name);
+  result.emplace_back(lfo_topo.id, lfo_topo.name, module_lfo);
+  result.emplace_back(env_topo.id, env_topo.name, module_env);
   return result;
 }
 
@@ -48,7 +48,7 @@ cv_matrix_topo(
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1 } }));
   
   std::vector<int> enabled_params = { cv_matrix_param_on, cv_matrix_param_active };
-  ui_state_selector enabled_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  ui_state_selector enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] != 0; };
 
   result.params.emplace_back(param_toggle(
     "{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", 1, section_main, true,
@@ -62,7 +62,7 @@ cv_matrix_topo(
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position { 1, 0 }));
   active.ui_state.enabled_params = { cv_matrix_param_on };
-  active.ui_state.enabled_selector = [](auto const& values) { return values[0] != 0; };
+  active.ui_state.enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0; };
 
   auto& source = result.params.emplace_back(param_items(
     "{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", route_count, section_main, source_items(lfo_topo, env_topo), "",
@@ -80,7 +80,8 @@ cv_matrix_topo(
   lfo_index.ui_state.enabled_params = enabled_params;
   lfo_index.ui_state.enabled_selector = enabled_selector;
   lfo_index.ui_state.visibility_params = { cv_matrix_param_source };
-  lfo_index.ui_state.visibility_selector = [](auto const& values) { return values[0] == 0; };
+  lfo_index.ui_state.visibility_context = { index_of_item_tag(source.items, module_lfo) };
+  lfo_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& env_index = result.params.emplace_back(param_steps(
     "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
@@ -90,7 +91,10 @@ cv_matrix_topo(
   env_index.ui_state.enabled_params = enabled_params;
   env_index.ui_state.enabled_selector = enabled_selector;
   env_index.ui_state.visibility_params = { cv_matrix_param_source };
-  env_index.ui_state.visibility_selector = [](auto const& values) { return values[0] == 1; };
+  env_index.ui_state.visibility_context = { index_of_item_tag(source.items, module_env) };
+  env_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { 
+    return vs[0] == ctx[0]; 
+  };
 
   return result;
 }

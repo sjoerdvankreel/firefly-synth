@@ -99,8 +99,11 @@ private:
   std::vector<int> _visibility_values = {};
   std::vector<int> _visibility_params = {};
 
-  void setup_ui_state_params(std::vector<int> const& topo_params, std::vector<int>& params);
-  bool select_ui_state(std::vector<int> const& params, std::vector<int>& values, ui_state_selector selector);
+  bool select_ui_state(
+    std::vector<int> const& params, std::vector<int>& values,
+    std::vector<int> const& context, ui_state_selector selector);
+  void setup_ui_state_params(
+    std::vector<int> const& topo_params, std::vector<int>& params);
 };
 
 // ui_state_component that is additionally bound to a single parameter value
@@ -229,16 +232,16 @@ ui_state_component::
 
 bool 
 ui_state_component::select_ui_state(
-  std::vector<int> const& indices, 
-  std::vector<int>& values, ui_state_selector selector)
+  std::vector<int> const& params, std::vector<int>& values, 
+  std::vector<int> const& context, ui_state_selector selector)
 {
   values.clear();
-  for (int i = 0; i < indices.size(); i++)
+  for (int i = 0; i < params.size(); i++)
   {
-    auto const& mapping = _gui->desc()->mappings[indices[i]];
+    auto const& mapping = _gui->desc()->mappings[params[i]];
     values.push_back(mapping.value_at(_gui->ui_state()).step());
   }
-  return selector(values);
+  return selector(values, context);
 }
 
 void
@@ -279,13 +282,13 @@ ui_state_component::plugin_changed(int index, plain_value plain)
   auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
   if (enabled_iter != _enabled_params.end())
     self.setEnabled(select_ui_state(
-      _enabled_params, _enabled_values, _state->enabled_selector));
+      _enabled_params, _enabled_values, _state->enabled_context, _state->enabled_selector));
 
   auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
   if (visibility_iter != _visibility_params.end())
   {
     bool visible = select_ui_state(
-      _visibility_params, _visibility_values, _state->visibility_selector);
+      _visibility_params, _visibility_values, _state->visibility_context, _state->visibility_selector);
     self.setVisible(visible);
     self.setInterceptsMouseClicks(visible, visible);
   }
