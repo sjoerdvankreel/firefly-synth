@@ -18,8 +18,8 @@ static std::vector<item_topo>
 source_items(module_topo const& lfo_topo, module_topo const& env_topo)
 {
   std::vector<item_topo> result;
-  result.emplace_back(lfo_topo.id, lfo_topo.name, module_lfo);
-  result.emplace_back(env_topo.id, env_topo.name, module_env);
+  result.emplace_back(lfo_topo);
+  result.emplace_back(env_topo);
   return result;
 }
 

@@ -60,8 +60,9 @@ struct item_topo final {
   std::string name = {};
   
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(item_topo);
-  item_topo(std::string const& id, std::string const& name, int tag): 
-  tag(tag), id(id), name(name) {}
+  // copy from param or module
+  template <class T> item_topo(T const& item) : tag(item.index), id(item.id), name(item.name) {}
+  item_topo(std::string const& id, std::string const& name, int tag): tag(tag), id(id), name(name) {}
 };
 
 // binding ui state
