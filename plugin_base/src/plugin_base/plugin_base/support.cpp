@@ -40,6 +40,7 @@ index_of_item_tag(std::vector<item_topo> const& items, int tag)
   for(int i = 0; i < items.size(); i++)
     if(items[i].tag == tag)
       return i;
+  assert(false);
   return -1;
 }
 

@@ -80,7 +80,7 @@ cv_matrix_topo(
   lfo_index.ui_state.enabled_params = enabled_params;
   lfo_index.ui_state.enabled_selector = enabled_selector;
   lfo_index.ui_state.visibility_params = { cv_matrix_param_source };
-  lfo_index.ui_state.visibility_context = { index_of_item_tag(source.items, module_lfo) };
+  lfo_index.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_source].items, module_lfo)};
   lfo_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& env_index = result.params.emplace_back(param_steps(
@@ -91,10 +91,8 @@ cv_matrix_topo(
   env_index.ui_state.enabled_params = enabled_params;
   env_index.ui_state.enabled_selector = enabled_selector;
   env_index.ui_state.visibility_params = { cv_matrix_param_source };
-  env_index.ui_state.visibility_context = { index_of_item_tag(source.items, module_env) };
-  env_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { 
-    return vs[0] == ctx[0]; 
-  };
+  env_index.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_source].items, module_env) };
+  env_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   return result;
 }
