@@ -415,7 +415,6 @@ param_component(gui, module, param), Slider()
 }
 
 // resizes single child on resize
-
 class group_component :
 public GroupComponent {
 public:
@@ -438,7 +437,6 @@ group_component::resized()
 
 // grid component as opposed to grid layout
 // resizes children on resize
-
 class grid_component:
 public Component
 {
@@ -499,6 +497,16 @@ grid_component::resized()
 
   grid.performLayout(getLocalBounds());
 }
+
+// ui_state_component that hosts a number of plugin parameters
+class section_component :
+public ui_state_component,
+public grid_component
+{
+public:
+  section_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
+  ui_state_component(gui, module, &section->ui_state, 0), grid_component(section->dimension) {}
+};
 
 // main plugin gui
 
@@ -703,16 +711,16 @@ Component&
 plugin_gui::make_section(module_desc const& module, section_topo const& section)
 {
   auto const& params = module.params;
-  auto& grid = make_component<grid_component>(section.dimension);
+  auto& component = make_component<section_component>(this, &module, &section);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
     if(iter->param->section == section.section)
-      grid.add(make_params(module, &(*iter)), iter->param->position);
+      component.add(make_params(module, &(*iter)), iter->param->position);
   
   if(module.module->sections.size() == 1)
-    return grid;
+    return component;
   auto& result = make_component<group_component>();
   result.setText(section.name);
-  result.addAndMakeVisible(grid);
+  result.addAndMakeVisible(component);
   return result;
 }
 
