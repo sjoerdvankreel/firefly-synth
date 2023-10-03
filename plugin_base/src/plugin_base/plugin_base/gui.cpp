@@ -424,10 +424,12 @@ public:
   void add(Component& child, bool vertical, int position) 
   { add(child, gui_position { vertical? position: 0, vertical? 0: position }); }
 
+  // Can't intercept mouse as we may be invisible on top of 
+  // another grid in case of param or section dependent visibility.
   grid_component(gui_dimension const& dimension) :
-  _dimension(dimension) { }
+  _dimension(dimension) { setInterceptsMouseClicks(false, true); }
   grid_component(bool vertical, int count) :
-  _dimension(vertical ? count : 1, vertical ? 1 : count) {}
+  grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }) {}
 };
 
 void
