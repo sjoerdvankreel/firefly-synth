@@ -76,6 +76,7 @@ struct ui_state final {
 struct section_topo final {
   int section;
   std::string name;
+  ui_state ui_state;
   gui_position position;
   gui_dimension dimension;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);

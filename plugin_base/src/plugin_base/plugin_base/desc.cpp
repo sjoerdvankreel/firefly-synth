@@ -184,6 +184,26 @@ static void validate_gui_constraints(
 }
 
 static void
+validate_ui_state(module_topo const& module, ui_state const& state, int slot_count)
+{
+  auto const& enabled_params = state.enabled_params;
+  assert((enabled_params.size() == 0) == (state.enabled_selector == nullptr));
+  for (int i = 0; i < enabled_params.size(); i++)
+  {
+    assert(!module.params[enabled_params[i]].is_real());
+    assert(module.params[enabled_params[i]].slot_count == 1 || slot_count);
+  }
+
+  auto const& visibility_params = state.visibility_params;
+  assert((visibility_params.size() == 0) == (state.visibility_selector == nullptr));
+  for (int i = 0; i < visibility_params.size(); i++)
+  {
+    assert(!module.params[visibility_params[i]].is_real());
+    assert(module.params[visibility_params[i]].slot_count == 1 || slot_count);
+  }
+}
+
+static void
 validate_section_topo(module_topo const& module, section_topo const& section)
 {
   assert(section.name.size());
@@ -194,6 +214,8 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   assert(0 < section.dimension.column_sizes.size() && section.dimension.column_sizes.size() <= 1024);
   assert(0 <= section.position.row && section.position.row + section.position.row_span <= module.dimension.row_sizes.size());
   assert(0 <= section.position.column && section.position.column + section.position.column_span <= module.dimension.column_sizes.size());
+
+  validate_ui_state(module, section.ui_state, 1);
   validate_gui_constraints(section, module.params, 
     [](param_topo const& p) { return p.ui_state.visibility_selector; }, 
     [&section](param_topo const& p) { return p.section == section.section; });
@@ -265,27 +287,12 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(!param.is_real() || param.max >= param.default_plain().real());
   assert(!param.is_real() || (0 <= param.precision && param.precision <= 10));
 
+  validate_ui_state(module, param.ui_state, param.slot_count);
   assert((param.slot_count == 1) == (param.layout == gui_layout::single));
   assert(0 < param.position.row_span && param.position.row_span <= 1024);
   assert(0 < param.position.column_span && param.position.column_span <= 1024);
   assert(0 <= param.position.row && param.position.row + param.position.row_span <= module.sections[param.section].dimension.row_sizes.size());
   assert(0 <= param.position.column && param.position.column + param.position.column_span <= module.sections[param.section].dimension.column_sizes.size());
-
-  auto const& enabled_params = param.ui_state.enabled_params;
-  assert((enabled_params.size() == 0) == (param.ui_state.enabled_selector == nullptr));
-  for (int i = 0; i < enabled_params.size(); i++)
-  {
-    assert(!module.params[enabled_params[i]].is_real());
-    assert(module.params[enabled_params[i]].slot_count == 1 || module.params[enabled_params[i]].slot_count == param.slot_count);
-  }
-
-  auto const& visibility_params = param.ui_state.visibility_params;
-  assert((visibility_params.size() == 0) == (param.ui_state.visibility_selector == nullptr));
-  for (int i = 0; i < visibility_params.size(); i++)
-  {
-    assert(!module.params[visibility_params[i]].is_real());
-    assert(module.params[visibility_params[i]].slot_count == 1 || module.params[visibility_params[i]].slot_count == param.slot_count);
-  }
 }
 
 static void
