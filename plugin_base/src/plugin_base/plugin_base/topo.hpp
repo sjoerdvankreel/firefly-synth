@@ -72,11 +72,12 @@ struct ui_state final {
   std::vector<int> visibility_params = {};
   std::vector<int> visibility_context = {};
   ui_state_selector visibility_selector = {};
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(ui_state);
 };
 
 // param gui section
 struct section_topo final {
-  int section;
+  int index;
   std::string name;
   ui_state ui_state;
   gui_position position;
@@ -89,6 +90,7 @@ struct param_topo final {
   double min;
   double max;
   double exp;
+  int index;
   int section;
   int precision;
   int slot_count;
@@ -138,6 +140,7 @@ struct param_topo final {
 
 // module group in plugin
 struct module_topo final {
+  int index;
   int slot_count;
   int output_count;
   std::string id;

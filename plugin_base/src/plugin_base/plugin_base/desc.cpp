@@ -213,7 +213,7 @@ static void
 validate_section_topo(module_topo const& module, section_topo const& section)
 {
   assert(section.name.size());
-  assert(0 <= section.section && section.section < module.sections.size());
+  assert(0 <= section.index && section.index < module.sections.size());
   assert(0 < section.position.row_span && section.position.row_span <= 1024);
   assert(0 < section.position.column_span && section.position.column_span <= 1024);
   assert(0 < section.dimension.row_sizes.size() && section.dimension.row_sizes.size() <= 1024);
@@ -224,7 +224,7 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   validate_ui_state(module, section.ui_state, 1);
   validate_gui_constraints(section, module.params, 
     [](param_topo const& p) { return p.ui_state.visibility_selector; }, 
-    [&section](param_topo const& p) { return p.section == section.section; });
+    [&section](param_topo const& p) { return p.section == section.index; });
 }
 
 static void
@@ -397,14 +397,18 @@ validate_plugin_desc(plugin_desc const& desc)
   {
     auto const& module = desc.plugin->modules[m];
     (void)module;
+    assert(desc.plugin->modules[m].index == m);
     assert(desc.param_topo_to_index[m].size() == module.slot_count);
     assert(desc.param_id_to_index.at(module.id).size() == module.params.size());
+    for(int s = 0; s < module.sections.size(); s++)
+      assert(module.sections[s].index == s);
     for(int mi = 0; mi < module.slot_count; mi++)
     {
       assert(desc.param_topo_to_index[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
+        assert(param.index == p);
         assert(desc.param_topo_to_index[m][mi][p].size() == param.slot_count);
         for(int pi = 0; pi < param.slot_count; pi++)
           assert(desc.param_topo_to_index[m][mi][p][pi] == param_global++);

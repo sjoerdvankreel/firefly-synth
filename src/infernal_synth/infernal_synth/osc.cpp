@@ -37,7 +37,7 @@ module_topo
 osc_topo()
 {
   module_topo result(make_module(
-    "{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Voice Osc", 2, 
+    "{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Voice Osc", module_osc, 2, 
     module_stage::voice, module_output::audio, 1,
     gui_layout::tabbed, gui_position { 2, 0 }, gui_dimension { 2, 4 }));
   result.engine_factory = [](int, int, int) ->
@@ -62,55 +62,55 @@ osc_topo()
   saw_gain.ui_state.visibility_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_saw; };
 
   result.params.emplace_back(param_names(
-    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", 1, section_pitch, note_names(), "",
+    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", osc_param_note, 1, section_pitch, note_names(), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 0 }));
   
   result.params.emplace_back(param_steps(
-    "{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", 1, section_pitch, 0, 9, 4,
+    "{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", osc_param_oct, 1, section_pitch, 0, 9, 4,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 1 }));
   
   result.params.emplace_back(param_pct(
-    "{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", 1, section_pitch, -1, 1, 0, 0,
+    "{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", osc_param_cent, 1, section_pitch, -1, 1, 0, 0,
     param_dir::input, param_rate::accurate, param_format::plain, false, param_edit::hslider,
     param_label_contents::value, param_label_align::right, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 2 }));
 
   result.params.emplace_back(param_toggle(
-    "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", 1, section_main, false, 
+    "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", osc_param_on, 1, section_main, false,
     param_dir::input, 
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 0 }));
   
   result.params.emplace_back(param_items(
-    "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", 1, section_main, type_items(), "",
+    "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", osc_param_type, 1, section_main, type_items(), "",
     param_dir::input, param_edit::list, 
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
   
   result.params.emplace_back(param_pct(
-    "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", 1, section_main, 0, 1, 1, 0,
+    "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", osc_param_gain, 1, section_main, 0, 1, 1, 0,
     param_dir::input, param_rate::accurate, param_format::plain, true, param_edit::hslider,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 2 }));
   
   result.params.emplace_back(param_pct(
-    "{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", 1, section_main, -1, 1, 0, 0,
+    "{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", osc_param_bal, 1, section_main, -1, 1, 0, 0,
     param_dir::input, param_rate::accurate, param_format::plain, true, param_edit::hslider,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 3 }));
 
   result.params.emplace_back(param_pct(
-    "{42E7A672-699C-4955-B45B-BBB8190A50E7}", "Sine Gain", 1, section_sine_gain, 0, 1, 1, 0,
+    "{42E7A672-699C-4955-B45B-BBB8190A50E7}", "Sine Gain", osc_param_sine_gain, 1, section_sine_gain, 0, 1, 1, 0,
     param_dir::input, param_rate::accurate, param_format::plain, true, param_edit::knob,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 0 }));
 
   result.params.emplace_back(param_pct(
-    "{725B22B5-FAE9-4C4E-9B69-CAE46E4DCC6D}", "Saw Gain", 1, section_saw_gain, 0, 1, 1, 0,
+    "{725B22B5-FAE9-4C4E-9B69-CAE46E4DCC6D}", "Saw Gain", osc_param_saw_gain, 1, section_saw_gain, 0, 1, 1, 0,
     param_dir::input, param_rate::accurate, param_format::plain, true, param_edit::knob,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 0 }));

@@ -731,7 +731,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
 
   auto const& params = module.params;
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
-    if(iter->param->section == section.section)
+    if(iter->param->section == section.index)
       grid->add(make_params(module, &(*iter)), iter->param->position);
   
   if(module.module->sections.size() == 1)

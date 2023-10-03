@@ -29,7 +29,7 @@ module_topo
 delay_topo(int polyphony)
 {
   module_topo result(make_module(
-    "{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Global Delay", 1, 
+    "{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Global Delay", module_delay, 1, 
     module_stage::output, module_output::none, 0,
     gui_layout::single, gui_position { 5, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int, int sample_rate, int) -> 
@@ -39,31 +39,31 @@ delay_topo(int polyphony)
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 5 }));
 
   result.params.emplace_back(param_toggle(
-    "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", 1, section_main, false,
+    "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", delay_param_on, 1, section_main, false,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 0 } ));
   
   result.params.emplace_back(param_pct(
-    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out", 1, section_main, 0, 1, 0, 0,
+    "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out", delay_param_out, 1, section_main, 0, 1, 0, 0,
     param_dir::output, param_rate::block, param_format::plain, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
   
   result.params.emplace_back(param_steps(
-    "{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", 1, section_main, 0, polyphony, 0,
+    "{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", delay_param_voices, 1, section_main, 0, polyphony, 0,
     param_dir::output, param_edit::list,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 2 }));
   
   result.params.emplace_back(param_pct(
-    "{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", 1, section_main, 0, 1, 0, 0,
+    "{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", delay_param_cpu, 1, section_main, 0, 1, 0, 0,
     param_dir::output, param_rate::block, param_format::plain, true, param_edit::text,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 3 }));
   
   result.params.emplace_back(param_steps(
-    "{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", 1, section_main, 0, polyphony, 0,
+    "{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", delay_param_threads, 1, section_main, 0, polyphony, 0,
     param_dir::output, param_edit::list,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 4 }));
