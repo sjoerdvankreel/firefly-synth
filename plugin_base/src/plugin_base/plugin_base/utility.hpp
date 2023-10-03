@@ -3,6 +3,8 @@
 #include <string>
 #include <cstring>
 #include <cassert>
+#include <utility>
+#include <cstdint>
 
 #define INF_DECLARE_MOVE_ONLY(x) \
   x(x&&) = default;              \
@@ -20,8 +22,25 @@
 
 namespace plugin_base {
 
+template <class Exit>
+class scope_guard {
+  Exit _exit;
+
+public:
+  ~scope_guard() { _exit(); }
+  scope_guard(Exit exit) : _exit(exit) {}
+
+  scope_guard(scope_guard&) = delete;
+  scope_guard(scope_guard const&) = delete;          
+  scope_guard& operator = (scope_guard&&) = delete;
+  scope_guard& operator = (scope_guard const&) = delete;
+};
+
 double seconds_since_epoch();
 inline void debug_breakable() {};
+
+std::pair<uint32_t, uint32_t> disable_denormals();
+void restore_denormals(std::pair<uint32_t, uint32_t> state);
 
 template <class T> std::string 
 to_8bit_string(T const* source)

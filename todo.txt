@@ -17,8 +17,6 @@ handle generic midi in
 start documenting stuff
 on-note/hold-type cv
 provide to/fromstring for steps
-dependent visibility/enabled -- param + section level
-disable denormals
 
 * continuing
 - keep updating the demo apps
