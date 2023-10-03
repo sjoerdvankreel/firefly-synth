@@ -63,13 +63,21 @@ struct item_topo final {
   id(id), name(name) {}
 };
 
+// binding ui state
+struct ui_state final {
+  std::vector<int> enabled_params;
+  std::vector<int> visibility_params;
+  ui_state_selector enabled_selector;
+  ui_state_selector visibility_selector;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(ui_state);
+};
+
 // param gui section
 struct section_topo final {
   int section;
   std::string name;
   gui_position position;
   gui_dimension dimension;
-
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
 };
 
@@ -96,15 +104,11 @@ struct param_topo final {
   param_label_justify label_justify;
   param_label_contents label_contents;
 
+  ui_state ui_state;
   gui_layout layout;
   gui_position position;
   std::vector<item_topo> items;
   std::vector<std::string> names;
-
-  std::vector<int> enabled_params;
-  std::vector<int> visibility_params;
-  ui_state_selector enabled_selector;
-  ui_state_selector visibility_selector;
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
   bool is_real() const { return type == param_type::log || type == param_type::linear; }

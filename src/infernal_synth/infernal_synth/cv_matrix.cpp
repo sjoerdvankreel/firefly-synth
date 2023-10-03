@@ -61,36 +61,36 @@ cv_matrix_topo(
     param_dir::input,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position { 1, 0 }));
-  active.enabled_params = { cv_matrix_param_on };
-  active.enabled_selector = [](auto const& values) { return values[0] != 0; };
+  active.ui_state.enabled_params = { cv_matrix_param_on };
+  active.ui_state.enabled_selector = [](auto const& values) { return values[0] != 0; };
 
   auto& source = result.params.emplace_back(param_items(
     "{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", route_count, section_main, source_items(lfo_topo, env_topo), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 1 }));
-  source.enabled_params = enabled_params;
-  source.enabled_selector = enabled_selector;
+  source.ui_state.enabled_params = enabled_params;
+  source.ui_state.enabled_selector = enabled_selector;
 
   auto& lfo_index = result.params.emplace_back(param_steps(
     "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
-  lfo_index.enabled_params = enabled_params;
-  lfo_index.enabled_selector = enabled_selector;
-  lfo_index.visibility_params = { cv_matrix_param_source };
-  lfo_index.visibility_selector = [](auto const& values) { return values[0] == 0; };
+  lfo_index.ui_state.enabled_params = enabled_params;
+  lfo_index.ui_state.enabled_selector = enabled_selector;
+  lfo_index.ui_state.visibility_params = { cv_matrix_param_source };
+  lfo_index.ui_state.visibility_selector = [](auto const& values) { return values[0] == 0; };
 
   auto& env_index = result.params.emplace_back(param_steps(
     "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", route_count, section_main, 0, env_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
-  env_index.enabled_params = enabled_params;
-  env_index.enabled_selector = enabled_selector;
-  env_index.visibility_params = { cv_matrix_param_source };
-  env_index.visibility_selector = [](auto const& values) { return values[0] == 1; };
+  env_index.ui_state.enabled_params = enabled_params;
+  env_index.ui_state.enabled_selector = enabled_selector;
+  env_index.ui_state.visibility_params = { cv_matrix_param_source };
+  env_index.ui_state.visibility_selector = [](auto const& values) { return values[0] == 1; };
 
   return result;
 }

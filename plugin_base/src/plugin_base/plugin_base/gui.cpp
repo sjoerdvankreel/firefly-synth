@@ -201,8 +201,8 @@ param_base(plugin_gui* gui, module_desc const* module, param_desc const* param):
 _gui(gui), _module(module), _param(param)
 { 
   _gui->add_plugin_listener(_param->global, this);
-  setup_ui_state_params(_param->param->enabled_params, _enabled_params);
-  setup_ui_state_params(_param->param->visibility_params, _visibility_params);
+  setup_ui_state_params(_param->param->ui_state.enabled_params, _enabled_params);
+  setup_ui_state_params(_param->param->ui_state.visibility_params, _visibility_params);
 }
 
 param_base::
@@ -275,13 +275,13 @@ param_base::plugin_changed(int index, plain_value plain)
   auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
   if (enabled_iter != _enabled_params.end())
     self.setEnabled(select_ui_state(
-      _enabled_params, _enabled_values, _param->param->enabled_selector));
+      _enabled_params, _enabled_values, _param->param->ui_state.enabled_selector));
 
   auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
   if (visibility_iter != _visibility_params.end())
   {
     bool visible = select_ui_state(
-      _visibility_params, _visibility_values, _param->param->visibility_selector);
+      _visibility_params, _visibility_values, _param->param->ui_state.visibility_selector);
     self.setVisible(visible);
     self.setInterceptsMouseClicks(visible, visible);
   }
