@@ -43,8 +43,10 @@ osc_topo()
   result.engine_factory = [](int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
 
-  result.sections.emplace_back(make_section(
+  auto& pitch = result.sections.emplace_back(make_section(
     "Pitch", section_pitch, gui_position{ 0, 0, 1, 4 }, gui_dimension{ 1, 3 }));
+  pitch.ui_state.enabled_params = { osc_param_on };
+  pitch.ui_state.enabled_selector = [](auto const& values) { return values[0] != 0; };
   
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position{ 1, 0, 1, 3 }, gui_dimension{ { 1 }, { 1, 2, 2, 2 } }));
