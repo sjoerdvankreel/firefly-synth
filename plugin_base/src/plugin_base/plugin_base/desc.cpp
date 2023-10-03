@@ -191,7 +191,7 @@ validate_ui_state(module_topo const& module, ui_state const& state, int slot_cou
   for (int i = 0; i < enabled_params.size(); i++)
   {
     assert(!module.params[enabled_params[i]].is_real());
-    assert(module.params[enabled_params[i]].slot_count == 1 || slot_count);
+    assert(module.params[enabled_params[i]].slot_count == 1 || module.params[enabled_params[i]].slot_count == slot_count);
   }
 
   auto const& visibility_params = state.visibility_params;
@@ -199,7 +199,7 @@ validate_ui_state(module_topo const& module, ui_state const& state, int slot_cou
   for (int i = 0; i < visibility_params.size(); i++)
   {
     assert(!module.params[visibility_params[i]].is_real());
-    assert(module.params[visibility_params[i]].slot_count == 1 || slot_count);
+    assert(module.params[visibility_params[i]].slot_count == 1 || module.params[visibility_params[i]].slot_count == slot_count);
   }
 }
 
@@ -239,7 +239,7 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(0 < module.dimension.column_sizes.size() && module.dimension.column_sizes.size() <= 1024);
   assert(0 <= module.position.row && module.position.row + module.position.row_span <= plugin.dimension.row_sizes.size());
   assert(0 <= module.position.column && module.position.column + module.position.column_span <= plugin.dimension.column_sizes.size());
-  validate_gui_constraints(module, module.sections, [](auto const&) { return nullptr; }, [](auto const&) { return true; });
+  validate_gui_constraints(module, module.sections, [](auto const& section) { return section.ui_state.visibility_selector; }, [](auto const&) { return true; });
 }
 
 static void
