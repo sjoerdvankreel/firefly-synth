@@ -499,13 +499,23 @@ grid_component::resized()
 }
 
 // ui_state_component that hosts a number of plugin parameters
-class section_component :
+class section_grid_component :
 public ui_state_component,
 public grid_component
 {
 public:
-  section_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
+  section_grid_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
   ui_state_component(gui, module, &section->ui_state, 0), grid_component(section->dimension) {}
+};
+
+// ui_state_component that hosts a single section_grid_component
+class section_group_component :
+public ui_state_component,
+public group_component
+{
+public:
+  section_group_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
+  ui_state_component(gui, module, &section->ui_state, 0), group_component() {}
 };
 
 // main plugin gui
@@ -710,17 +720,23 @@ plugin_gui::make_sections(module_desc const& module)
 Component&
 plugin_gui::make_section(module_desc const& module, section_topo const& section)
 {
+  grid_component* grid = nullptr;
+  if (module.module->sections.size() == 1)
+    grid = &make_component<grid_component>(section.dimension);
+  else
+    grid = &make_component<section_grid_component>(this, &module, &section);
+
   auto const& params = module.params;
-  auto& component = make_component<section_component>(this, &module, &section);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
     if(iter->param->section == section.section)
-      component.add(make_params(module, &(*iter)), iter->param->position);
+      grid->add(make_params(module, &(*iter)), iter->param->position);
   
   if(module.module->sections.size() == 1)
-    return component;
+    return *grid;
+
   auto& result = make_component<group_component>();
   result.setText(section.name);
-  result.addAndMakeVisible(component);
+  result.addAndMakeVisible(grid);
   return result;
 }
 
