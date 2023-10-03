@@ -17,6 +17,7 @@ handle generic midi in
 start documenting stuff
 on-note/hold-type cv
 provide to/fromstring for steps
+make nice assert messages
 
 * continuing
 - keep updating the demo apps

@@ -149,7 +149,7 @@ cv_matrix_topo(
     gui_layout::vertical, gui_position{ 1, 5 }));
   osc_target.ui_state.enabled_params = enabled_params;
   osc_target.ui_state.enabled_selector = enabled_selector;
-  osc_target.ui_state.visibility_params = { cv_matrix_param_osc_target };
+  osc_target.ui_state.visibility_params = { cv_matrix_param_target };
   osc_target.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_osc) };
   osc_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
@@ -160,7 +160,7 @@ cv_matrix_topo(
     gui_layout::vertical, gui_position{ 1, 5 }));
   filter_target.ui_state.enabled_params = enabled_params;
   filter_target.ui_state.enabled_selector = enabled_selector;
-  filter_target.ui_state.visibility_params = { cv_matrix_param_filter_target };
+  filter_target.ui_state.visibility_params = { cv_matrix_param_target };
   filter_target.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_filter) };
   filter_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 

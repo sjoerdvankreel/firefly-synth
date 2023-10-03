@@ -246,6 +246,15 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(0 <= module.position.row && module.position.row + module.position.row_span <= plugin.dimension.row_sizes.size());
   assert(0 <= module.position.column && module.position.column + module.position.column_span <= plugin.dimension.column_sizes.size());
   validate_gui_constraints(module, module.sections, [](auto const& section) { return section.ui_state.visibility_selector; }, [](auto const&) { return true; });
+
+  for(int p = 0; p < module.params.size(); p++)
+  {
+    auto const& param = module.params[p];
+    for (int e = 0; e < param.ui_state.enabled_params.size(); e++)
+      assert(param.index != param.ui_state.enabled_params[e]);
+    for(int v = 0; v < param.ui_state.visibility_params.size(); v++)
+      assert(param.index != param.ui_state.visibility_params[v]);
+  }
 }
 
 static void
