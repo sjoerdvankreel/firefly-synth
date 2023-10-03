@@ -17,7 +17,6 @@ handle generic midi in
 start documenting stuff
 on-note/hold-type cv
 provide to/fromstring for steps
-assert enum order is list order
 
 * continuing
 - keep updating the demo apps
