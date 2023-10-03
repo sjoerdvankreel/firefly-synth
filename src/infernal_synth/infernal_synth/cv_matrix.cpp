@@ -32,7 +32,26 @@ target_items(module_topo const& osc_topo, module_topo const& filter_topo)
   return result;
 }
 
-class cv_matrix_engine: 
+static std::vector<item_topo>
+target_osc_items(module_topo const& osc_topo)
+{
+  std::vector<item_topo> result;
+  result.emplace_back(osc_topo.params[osc_param_bal]);
+  result.emplace_back(osc_topo.params[osc_param_gain]);
+  result.emplace_back(osc_topo.params[osc_param_cent]);
+  return result;
+}
+
+static std::vector<item_topo>
+target_filter_items(module_topo const& filter_topo)
+{
+  std::vector<item_topo> result;
+  result.emplace_back(filter_topo.params[filter_param_freq]);
+  // TODO osc gain counted parameter
+  return result;
+}
+
+class cv_matrix_engine:
 public module_engine { 
 public:
   void initialize() override {}
@@ -54,7 +73,7 @@ cv_matrix_topo(
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1, 1 } }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1, 1, 1 } }));
   
   std::vector<int> enabled_params = { cv_matrix_param_on, cv_matrix_param_active };
   ui_state_selector enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] != 0; };
@@ -63,7 +82,7 @@ cv_matrix_topo(
     "{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", cv_matrix_param_on, 1, section_main, true,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
-    gui_layout::single, gui_position { 0, 0, 1, 5 }));
+    gui_layout::single, gui_position { 0, 0, 1, 6 }));
 
   auto& active = result.params.emplace_back(param_toggle(
     "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", cv_matrix_param_active, route_count, section_main, false,
@@ -121,6 +140,28 @@ cv_matrix_topo(
   osc_index.ui_state.visibility_params = { cv_matrix_param_target };
   osc_index.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_osc) };
   osc_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+
+  auto& osc_target = result.params.emplace_back(param_items(
+    "{28286D1C-6A9D-4CD4-AB70-4A3AFDF7302B}", "Osc Target", cv_matrix_param_osc_target, route_count, section_main, target_osc_items(osc_topo), "",
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::vertical, gui_position{ 1, 5 }));
+  osc_target.ui_state.enabled_params = enabled_params;
+  osc_target.ui_state.enabled_selector = enabled_selector;
+  osc_target.ui_state.visibility_params = { cv_matrix_param_osc_target };
+  osc_target.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_osc) };
+  osc_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+
+  auto& filter_target = result.params.emplace_back(param_items(
+    "{B8098815-BBD5-4171-9AAF-CE4B6645AEE2}", "Filter Target", cv_matrix_param_filter_target, route_count, section_main, target_filter_items(filter_topo), "",
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::vertical, gui_position{ 1, 5 }));
+  osc_target.ui_state.enabled_params = enabled_params;
+  osc_target.ui_state.enabled_selector = enabled_selector;
+  osc_target.ui_state.visibility_params = { cv_matrix_param_filter_target };
+  osc_target.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_filter) };
+  osc_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   return result;
 }
