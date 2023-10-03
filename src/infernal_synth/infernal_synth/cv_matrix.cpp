@@ -54,7 +54,7 @@ cv_matrix_topo(
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1 } }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1, 1 } }));
   
   std::vector<int> enabled_params = { cv_matrix_param_on, cv_matrix_param_active };
   ui_state_selector enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] != 0; };
@@ -63,7 +63,7 @@ cv_matrix_topo(
     "{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", cv_matrix_param_on, 1, section_main, true,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
-    gui_layout::single, gui_position { 0, 0, 1, 4 }));
+    gui_layout::single, gui_position { 0, 0, 1, 5 }));
 
   auto& active = result.params.emplace_back(param_toggle(
     "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", cv_matrix_param_active, route_count, section_main, false,
@@ -110,6 +110,17 @@ cv_matrix_topo(
     gui_layout::vertical, gui_position{ 1, 3 }));
   target.ui_state.enabled_params = enabled_params;
   target.ui_state.enabled_selector = enabled_selector;
+
+  auto& osc_index = result.params.emplace_back(param_steps(
+    "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", cv_matrix_param_osc_index, route_count, section_main, 0, osc_topo.slot_count - 1, 0,
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::vertical, gui_position{ 1, 4 }));
+  osc_index.ui_state.enabled_params = enabled_params;
+  osc_index.ui_state.enabled_selector = enabled_selector;
+  osc_index.ui_state.visibility_params = { cv_matrix_param_target };
+  osc_index.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_osc) };
+  osc_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   return result;
 }
