@@ -47,8 +47,8 @@ cv_matrix_topo(
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1 } }));
   
-  std::vector<int> enabled_indices = { cv_matrix_param_on, cv_matrix_param_active };
-  param_ui_state_selector enabled_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
+  std::vector<int> enabled_params = { cv_matrix_param_on, cv_matrix_param_active };
+  ui_state_selector enabled_selector = [](auto const& values) { return values[0] != 0 && values[1] != 0; };
 
   result.params.emplace_back(param_toggle(
     "{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", 1, section_main, true,
@@ -61,7 +61,7 @@ cv_matrix_topo(
     param_dir::input,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position { 1, 0 }));
-  active.enabled_indices = { cv_matrix_param_on };
+  active.enabled_params = { cv_matrix_param_on };
   active.enabled_selector = [](auto const& values) { return values[0] != 0; };
 
   auto& source = result.params.emplace_back(param_items(
@@ -69,7 +69,7 @@ cv_matrix_topo(
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 1 }));
-  source.enabled_indices = enabled_indices;
+  source.enabled_params = enabled_params;
   source.enabled_selector = enabled_selector;
 
   auto& lfo_index = result.params.emplace_back(param_steps(
@@ -77,9 +77,9 @@ cv_matrix_topo(
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
-  lfo_index.enabled_indices = enabled_indices;
+  lfo_index.enabled_params = enabled_params;
   lfo_index.enabled_selector = enabled_selector;
-  lfo_index.visibility_indices = { cv_matrix_param_source };
+  lfo_index.visibility_params = { cv_matrix_param_source };
   lfo_index.visibility_selector = [](auto const& values) { return values[0] == 0; };
 
   auto& env_index = result.params.emplace_back(param_steps(
@@ -87,9 +87,9 @@ cv_matrix_topo(
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
-  env_index.enabled_indices = enabled_indices;
+  env_index.enabled_params = enabled_params;
   env_index.enabled_selector = enabled_selector;
-  env_index.visibility_indices = { cv_matrix_param_source };
+  env_index.visibility_params = { cv_matrix_param_source };
   env_index.visibility_selector = [](auto const& values) { return values[0] == 1; };
 
   return result;

@@ -82,15 +82,15 @@ public plugin_listener
 {
 private:
   std::vector<int> _enabled_values = {};
-  std::vector<int> _enabled_indices = {};
+  std::vector<int> _enabled_params = {};
   std::vector<int> _visibility_values = {};
-  std::vector<int> _visibility_indices = {};
+  std::vector<int> _visibility_params = {};
 
   bool select_ui_state(
-    std::vector<int> const& indices, 
-    std::vector<int>& values, param_ui_state_selector selector);
-  void setup_ui_state_indices(
-    std::vector<int> const& topo_indices, std::vector<int>& indices);
+    std::vector<int> const& params,
+    std::vector<int>& values, ui_state_selector selector);
+  void setup_ui_state_params(
+    std::vector<int> const& topo_params, std::vector<int>& params);
 
 public:
   virtual ~param_base();
@@ -201,24 +201,24 @@ param_base(plugin_gui* gui, module_desc const* module, param_desc const* param):
 _gui(gui), _module(module), _param(param)
 { 
   _gui->add_plugin_listener(_param->global, this);
-  setup_ui_state_indices(_param->param->enabled_indices, _enabled_indices);
-  setup_ui_state_indices(_param->param->visibility_indices, _visibility_indices);
+  setup_ui_state_params(_param->param->enabled_params, _enabled_params);
+  setup_ui_state_params(_param->param->visibility_params, _visibility_params);
 }
 
 param_base::
 ~param_base()
 {
-  for(int i = 0; i < _visibility_indices.size(); i++)
-    _gui->remove_plugin_listener(_visibility_indices[i], this);
-  for (int i = 0; i < _enabled_indices.size(); i++)
-    _gui->remove_plugin_listener(_enabled_indices[i], this);
+  for(int i = 0; i < _visibility_params.size(); i++)
+    _gui->remove_plugin_listener(_visibility_params[i], this);
+  for (int i = 0; i < _enabled_params.size(); i++)
+    _gui->remove_plugin_listener(_enabled_params[i], this);
   _gui->remove_plugin_listener(_param->global, this);
 }
 
 bool 
 param_base::select_ui_state(
   std::vector<int> const& indices, 
-  std::vector<int>& values, param_ui_state_selector selector)
+  std::vector<int>& values, ui_state_selector selector)
 {
   values.clear();
   for (int i = 0; i < indices.size(); i++)
@@ -235,29 +235,29 @@ param_base::init()
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   auto const& own_mapping = _gui->desc()->mappings[_param->global];
   plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
-  if (_enabled_indices.size() != 0)
+  if (_enabled_params.size() != 0)
   {
-    auto const& enabled_mapping = _gui->desc()->mappings[_enabled_indices[0]];
-    plugin_changed(_enabled_indices[0], enabled_mapping.value_at(_gui->ui_state()));
+    auto const& enabled_mapping = _gui->desc()->mappings[_enabled_params[0]];
+    plugin_changed(_enabled_params[0], enabled_mapping.value_at(_gui->ui_state()));
   }
-  if (_visibility_indices.size() != 0)
+  if (_visibility_params.size() != 0)
   {
-    auto const& visibility_mapping = _gui->desc()->mappings[_visibility_indices[0]];
-    plugin_changed(_visibility_indices[0], visibility_mapping.value_at(_gui->ui_state()));
+    auto const& visibility_mapping = _gui->desc()->mappings[_visibility_params[0]];
+    plugin_changed(_visibility_params[0], visibility_mapping.value_at(_gui->ui_state()));
   }
 }
 
 void 
-param_base::setup_ui_state_indices(
-  std::vector<int> const& topo_indices, std::vector<int>& indices)
+param_base::setup_ui_state_params(
+  std::vector<int> const& topo_params, std::vector<int>& params)
 {
-  for (int i = 0; i < topo_indices.size(); i++)
+  for (int i = 0; i < topo_params.size(); i++)
   {
     auto const& param_topo_to_index = _gui->desc()->param_topo_to_index;
-    auto const& slots = param_topo_to_index[_module->topo][_module->slot][topo_indices[i]];
-    bool single_slot = _module->module->params[topo_indices[i]].slot_count == 1;
+    auto const& slots = param_topo_to_index[_module->topo][_module->slot][topo_params[i]];
+    bool single_slot = _module->module->params[topo_params[i]].slot_count == 1;
     int state_index = single_slot ? slots[0] : slots[_param->slot];
-    indices.push_back(state_index);
+    params.push_back(state_index);
     _gui->add_plugin_listener(state_index, this);
   }
 }
@@ -272,16 +272,16 @@ param_base::plugin_changed(int index, plain_value plain)
   }
   
   auto& self = dynamic_cast<Component&>(*this);
-  auto enabled_iter = std::find(_enabled_indices.begin(), _enabled_indices.end(), index);
-  if (enabled_iter != _enabled_indices.end())
+  auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
+  if (enabled_iter != _enabled_params.end())
     self.setEnabled(select_ui_state(
-      _enabled_indices, _enabled_values, _param->param->enabled_selector));
+      _enabled_params, _enabled_values, _param->param->enabled_selector));
 
-  auto visibility_iter = std::find(_visibility_indices.begin(), _visibility_indices.end(), index);
-  if (visibility_iter != _visibility_indices.end())
+  auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
+  if (visibility_iter != _visibility_params.end())
   {
     bool visible = select_ui_state(
-      _visibility_indices, _visibility_values, _param->param->visibility_selector);
+      _visibility_params, _visibility_values, _param->param->visibility_selector);
     self.setVisible(visible);
     self.setInterceptsMouseClicks(visible, visible);
   }

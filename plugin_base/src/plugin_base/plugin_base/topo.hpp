@@ -26,10 +26,9 @@ enum class param_label_justify { near, center, far };
 enum class param_label_align { top, bottom, left, right };
 enum class param_label_contents { none, name, value, both };
 
-typedef bool(*
-param_ui_state_selector)(std::vector<int>const& values);
-
 class module_engine;
+typedef bool(*
+ui_state_selector)(std::vector<int>const& values);
 typedef std::unique_ptr<module_engine>(*
 module_engine_factory)(int slot, int sample_rate, int max_frame_count);
 
@@ -102,10 +101,10 @@ struct param_topo final {
   std::vector<item_topo> items;
   std::vector<std::string> names;
 
-  std::vector<int> enabled_indices;
-  std::vector<int> visibility_indices;
-  param_ui_state_selector enabled_selector;
-  param_ui_state_selector visibility_selector;
+  std::vector<int> enabled_params;
+  std::vector<int> visibility_params;
+  ui_state_selector enabled_selector;
+  ui_state_selector visibility_selector;
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
   bool is_real() const { return type == param_type::log || type == param_type::linear; }
