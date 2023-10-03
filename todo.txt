@@ -18,6 +18,7 @@ start documenting stuff
 on-note/hold-type cv
 provide to/fromstring for steps
 make nice assert messages
+drop format::plain in favor of modulation
 
 * continuing
 - keep updating the demo apps

@@ -47,8 +47,7 @@ target_filter_items(module_topo const& filter_topo)
 {
   std::vector<item_topo> result;
   result.emplace_back(filter_topo.params[filter_param_freq]);
-  result.emplace_back(filter_topo.params[filter_param_temp]);
-  // TODO osc gain counted parameter
+  result.emplace_back(filter_topo.params[filter_param_osc_gain]);
   return result;
 }
 
@@ -74,7 +73,7 @@ cv_matrix_topo(
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1, 1, 1 } }));
+    "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1, 1, 1, 1 } }));
   
   std::vector<int> enabled_params = { cv_matrix_param_on, cv_matrix_param_active };
   ui_state_selector enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] != 0; };
@@ -83,7 +82,7 @@ cv_matrix_topo(
     "{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", cv_matrix_param_on, 1, section_main, true,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
-    gui_layout::single, gui_position { 0, 0, 1, 6 }));
+    gui_layout::single, gui_position { 0, 0, 1, 7 }));
 
   auto& active = result.params.emplace_back(param_toggle(
     "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", cv_matrix_param_active, route_count, section_main, false,
@@ -102,7 +101,7 @@ cv_matrix_topo(
   source.ui_state.enabled_selector = enabled_selector;
 
   auto& lfo_index = result.params.emplace_back(param_steps(
-    "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", cv_matrix_param_lfo_index, route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
+    "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", cv_matrix_param_source_lfo_index, route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
@@ -113,7 +112,7 @@ cv_matrix_topo(
   lfo_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& env_index = result.params.emplace_back(param_steps(
-    "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", cv_matrix_param_env_index, route_count, section_main, 0, env_topo.slot_count - 1, 0,
+    "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", cv_matrix_param_source_env_index, route_count, section_main, 0, env_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
@@ -132,7 +131,7 @@ cv_matrix_topo(
   target.ui_state.enabled_selector = enabled_selector;
 
   auto& osc_index = result.params.emplace_back(param_steps(
-    "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", cv_matrix_param_osc_index, route_count, section_main, 0, osc_topo.slot_count - 1, 0,
+    "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", cv_matrix_param_target_osc_index, route_count, section_main, 0, osc_topo.slot_count - 1, 0,
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 4 }));
@@ -143,7 +142,7 @@ cv_matrix_topo(
   osc_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& osc_target = result.params.emplace_back(param_items(
-    "{28286D1C-6A9D-4CD4-AB70-4A3AFDF7302B}", "Osc Target", cv_matrix_param_osc_target, route_count, section_main, target_osc_items(osc_topo), "",
+    "{28286D1C-6A9D-4CD4-AB70-4A3AFDF7302B}", "Osc Param", cv_matrix_param_target_osc_param, route_count, section_main, target_osc_items(osc_topo), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 5 }));
@@ -154,7 +153,7 @@ cv_matrix_topo(
   osc_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& filter_target = result.params.emplace_back(param_items(
-    "{B8098815-BBD5-4171-9AAF-CE4B6645AEE2}", "Filter Target", cv_matrix_param_filter_target, route_count, section_main, target_filter_items(filter_topo), "",
+    "{B8098815-BBD5-4171-9AAF-CE4B6645AEE2}", "Filter Param", cv_matrix_param_target_filter_param, route_count, section_main, target_filter_items(filter_topo), "",
     param_dir::input, param_edit::list,
     param_label_contents::none, param_label_align::left, param_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 5 }));
@@ -163,6 +162,20 @@ cv_matrix_topo(
   filter_target.ui_state.visibility_params = { cv_matrix_param_target };
   filter_target.ui_state.visibility_context = { index_of_item_tag(result.params[cv_matrix_param_target].items, module_filter) };
   filter_target.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+
+  auto& osc_gain_index = result.params.emplace_back(param_steps(
+    "{FB4EB870-48DD-40D5-9D0E-2E9F0C4E3C48}", "Filter Osc Gain", cv_matrix_target_filter_param_osc_gain_index, route_count, section_main, 
+    0, filter_topo.params[filter_param_osc_gain].slot_count - 1, 0,
+    param_dir::input, param_edit::list,
+    param_label_contents::none, param_label_align::left, param_label_justify::center,
+    gui_layout::vertical, gui_position{ 1, 6 }));
+  osc_gain_index.ui_state.enabled_params = enabled_params;
+  osc_gain_index.ui_state.enabled_selector = enabled_selector;
+  osc_gain_index.ui_state.visibility_params = { cv_matrix_param_target, cv_matrix_param_target_filter_param };
+  osc_gain_index.ui_state.visibility_context = { 
+    index_of_item_tag(result.params[cv_matrix_param_target].items, module_filter), 
+    index_of_item_tag(result.params[cv_matrix_param_target_filter_param].items, filter_param_osc_gain)};
+  osc_gain_index.ui_state.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0] && vs[1] == ctx[1]; };
 
   return result;
 }
