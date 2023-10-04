@@ -2,7 +2,7 @@
 
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base/block/common.hpp>
+#include <plugin_base/block/shared.hpp>
 
 #include <vector>
 
@@ -44,7 +44,7 @@ struct host_events final {
 struct host_block final {
   int frame_count;
   host_events events;
-  common_block common;
+  shared_block shared;
   float* const* audio_out;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(host_block);
 };

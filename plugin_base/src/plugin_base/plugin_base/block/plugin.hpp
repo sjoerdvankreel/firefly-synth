@@ -4,7 +4,7 @@
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
-#include <plugin_base/block/common.hpp>
+#include <plugin_base/block/shared.hpp>
 
 #include <cassert>
 
@@ -62,7 +62,7 @@ struct plugin_block final {
 
   plugin_output_block* out;
   plugin_voice_block* voice;
-  common_block const& host;
+  shared_block const& host;
   plugin_topo const& plugin;
   module_topo const& module;
 

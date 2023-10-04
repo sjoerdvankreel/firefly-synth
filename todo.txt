@@ -20,11 +20,10 @@ provide to/fromstring for steps
 drop format::plain in favor of modulation
 param value dependent on other param
 mark param as modulatable or not
-clean up the topo
 move note_names to plug
 cleanup the validation
-process_block->plugin_block
 gui + desc to folders + split
+cleanup all the headers + folder structure
 
 * continuing
 - keep updating the demo apps

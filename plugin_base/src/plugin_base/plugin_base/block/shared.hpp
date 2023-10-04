@@ -12,7 +12,7 @@ struct note_id final {
 };
 
 // shared host/plug
-struct common_block final {
+struct shared_block final {
   float bpm;
   float const* const* audio_in;
 };

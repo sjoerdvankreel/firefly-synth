@@ -48,7 +48,7 @@ plugin_engine::make_plugin_block(int voice, int module, int slot, int start_fram
     _accurate_automation[module][slot], _block_automation[module][slot] };
   return {
     start_frame, end_frame, _sample_rate, state, nullptr, nullptr, 
-    _host_block->common, *_desc.plugin, _desc.plugin->modules[module] };
+    _host_block->shared, *_desc.plugin, _desc.plugin->modules[module] };
 }
 
 void
@@ -71,8 +71,8 @@ plugin_engine::prepare_block()
   _host_block->events.block.clear();
   _host_block->events.accurate.clear();
   _host_block->frame_count = 0;
-  _host_block->common.bpm = 0;
-  _host_block->common.audio_in = nullptr;
+  _host_block->shared.bpm = 0;
+  _host_block->shared.audio_in = nullptr;
   return *_host_block;
 }
 
