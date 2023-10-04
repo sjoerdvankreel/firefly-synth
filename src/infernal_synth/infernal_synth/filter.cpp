@@ -54,12 +54,6 @@ filter_topo(int osc_slot_count)
     param_dir::input, param_rate::accurate, param_format::normalized, param_edit::hslider,
     param_label_contents::name, param_label_align::bottom, param_label_justify::near,
     gui_layout::single, gui_position { 0, 1 }));
-  
-  result.params.emplace_back(param_pct(
-    "{86D56949-A257-4510-8965-92D64C23BD80}", "Temp", filter_param_temp, 1, section_main, 0, 1, 0.5, 0,
-    param_dir::input, param_rate::accurate, param_format::plain, true, param_edit::hslider,
-    param_label_contents::name, param_label_align::bottom, param_label_justify::near,
-    gui_layout::single, gui_position{ 0, 2 }));
 
   result.params.emplace_back(param_pct(
     "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", filter_param_osc_gain, osc_slot_count, section_main, 0, 1, 0.5, 0,

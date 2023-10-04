@@ -8,7 +8,7 @@ enum { module_lfo, module_env, module_cv_matrix, module_osc, module_filter, modu
 
 enum { env_param_a, env_param_d, env_param_s, env_param_r };
 enum { lfo_param_sync, lfo_param_rate, lfo_param_num, lfo_param_denom };
-enum { filter_param_on, filter_param_freq, filter_param_temp /* TODO */, filter_param_osc_gain };
+enum { filter_param_on, filter_param_freq, filter_param_osc_gain };
 enum { delay_param_on, delay_param_out, delay_param_voices, delay_param_cpu, delay_param_threads };
 enum { osc_param_note, osc_param_oct, osc_param_cent, osc_param_on, osc_param_type, osc_param_gain, osc_param_bal, osc_param_sine_gain, osc_param_saw_gain };
 
