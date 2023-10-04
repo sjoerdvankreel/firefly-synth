@@ -30,7 +30,7 @@ class module_engine;
 typedef std::unique_ptr<module_engine>(*
 module_engine_factory)(int slot, int sample_rate, int max_frame_count);
 typedef bool(*
-ui_state_selector)(std::vector<int> const& values, std::vector<int> const& context);
+gui_binding_selector)(std::vector<int> const& values, std::vector<int> const& context);
 
 // position in parent grid
 struct gui_position final {
@@ -66,22 +66,22 @@ struct item_topo final {
 };
 
 // binding ui state
-struct ui_state final {
+struct gui_bindings final {
   std::vector<int> enabled_params = {};
   std::vector<int> enabled_context = {};
-  ui_state_selector enabled_selector = {};
+  gui_binding_selector enabled_selector = {};
   std::vector<int> visibility_params = {};
   std::vector<int> visibility_context = {};
-  ui_state_selector visibility_selector = {};
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(ui_state);
+  gui_binding_selector visibility_selector = {};
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
 };
 
 // param gui section
 struct section_topo final {
   int index;
   std::string name;
-  ui_state ui_state;
   gui_position position;
+  gui_bindings bindings;
   gui_dimension dimension;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
 };
@@ -110,9 +110,9 @@ struct param_topo final {
   param_label_justify label_justify;
   param_label_contents label_contents;
 
-  ui_state ui_state;
   gui_layout layout;
   gui_position position;
+  gui_bindings bindings;
   std::vector<item_topo> items;
   std::vector<std::string> names;
 

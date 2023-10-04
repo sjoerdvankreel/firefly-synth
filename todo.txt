@@ -20,6 +20,9 @@ provide to/fromstring for steps
 make nice assert messages
 drop format::plain in favor of modulation
 param value dependent on other param
+mark param as modulatable or not
+clean up the topo
+all ui to gui
 
 * continuing
 - keep updating the demo apps
