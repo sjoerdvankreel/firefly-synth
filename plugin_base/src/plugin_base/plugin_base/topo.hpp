@@ -42,6 +42,21 @@ struct gui_position final {
   int column_span = 1;
 };
 
+// binding to enabled/visible
+struct gui_binding final {
+  std::vector<int> params = {};
+  std::vector<int> context = {};
+  gui_binding_selector selector = {};
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_binding);
+};
+
+// binding to enabled/visible
+struct gui_bindings final {
+  gui_binding enabled;
+  gui_binding visible;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
+};
+
 // dimensions of own grid (relative distribution)
 struct gui_dimension final {
   std::vector<int> row_sizes = { 1 };
@@ -55,17 +70,6 @@ struct gui_dimension final {
   row_sizes(row_sizes), column_sizes(column_sizes) {}
 };
 
-// binding to ui enabled/visible
-struct gui_bindings final {
-  std::vector<int> enabled_params = {};
-  std::vector<int> enabled_context = {};
-  gui_binding_selector enabled_selector = {};
-  std::vector<int> visibility_params = {};
-  std::vector<int> visibility_context = {};
-  gui_binding_selector visibility_selector = {};
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
-};
-
 // item in list
 struct item_topo final {
   int tag = -1;
@@ -74,8 +78,10 @@ struct item_topo final {
   
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(item_topo);
   // copy from param or module
-  template <class T> item_topo(T const& item) : tag(item.index), id(item.id), name(item.name) {}
-  item_topo(std::string const& id, std::string const& name, int tag): tag(tag), id(id), name(name) {}
+  template <class T> item_topo(T const& item) : 
+  tag(item.index), id(item.id), name(item.name) {}
+  item_topo(std::string const& id, std::string const& name, int tag): 
+  tag(tag), id(id), name(name) {}
 };
 
 // param section ui

@@ -165,26 +165,6 @@ validate_frame_dims(
   }
 }
 
-template <class Parent, class Child, class VisibilitySelector, class Include>
-static void validate_gui_layout(
-  Parent const& parent, std::vector<Child> const& children, 
-  VisibilitySelector selector, Include include)
-{
-  std::set<std::pair<int, int>> gui_taken;
-  for (int k = 0; k < children.size(); k++)
-    if(include(children[k]))
-    {
-      auto const& pos = children[k].gui.position;
-      for (int r = pos.row; r < pos.row + pos.row_span; r++)
-        for (int c = pos.column; c < pos.column + pos.column_span; c++)
-          INF_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second 
-            || selector(children[k]) != nullptr);
-    }
-  for (int r = 0; r < parent.gui.dimension.row_sizes.size(); r++)
-    for (int c = 0; c < parent.gui.dimension.column_sizes.size(); c++)
-      assert(gui_taken.find(std::make_pair(r, c)) != gui_taken.end());
-}
-
 template <class Gui> static void
 validate_gui_dimensions(Gui const& gui)
 {
@@ -202,29 +182,42 @@ validate_gui_positions(ParentGui const& parent, ChildGui const& child)
 }
 
 static void
+validate_gui_binding(module_topo const& module, gui_binding const& binding, int slot_count)
+{
+  assert((binding.params.size() == 0) == (binding.selector == nullptr));
+  assert((binding.context.size() == 0) || (binding.context.size() == binding.params.size()));
+  for (int i = 0; i < binding.params.size(); i++)
+  {
+    assert(!module.params[binding.params[i]].domain.is_real());
+    assert(module.params[binding.params[i]].slot_count == 1 || module.params[binding.params[i]].slot_count == slot_count);
+  }
+}
+
+static void
 validate_gui_bindings(module_topo const& module, gui_bindings const& bindings, int slot_count)
 {
-  auto const& enabled_params = bindings.enabled_params;
-  auto const& enabled_context = bindings.enabled_context;
-  (void)enabled_context;
-  assert((enabled_params.size() == 0) == (bindings.enabled_selector == nullptr));
-  assert((enabled_context.size() == 0) || (enabled_context.size() == enabled_params.size()));
-  for (int i = 0; i < enabled_params.size(); i++)
-  {
-    assert(!module.params[enabled_params[i]].domain.is_real());
-    assert(module.params[enabled_params[i]].slot_count == 1 || module.params[enabled_params[i]].slot_count == slot_count);
-  }
+  validate_gui_binding(module, bindings.enabled, slot_count);
+  validate_gui_binding(module, bindings.visible, slot_count);
+}
 
-  auto const& visibility_params = bindings.visibility_params;
-  auto const& visibility_context = bindings.visibility_context;
-  (void)visibility_context;
-  assert((visibility_params.size() == 0) == (bindings.visibility_selector == nullptr));
-  assert((visibility_context.size() == 0) || (visibility_context.size() == visibility_params.size()));
-  for (int i = 0; i < visibility_params.size(); i++)
-  {
-    assert(!module.params[visibility_params[i]].domain.is_real());
-    assert(module.params[visibility_params[i]].slot_count == 1 || module.params[visibility_params[i]].slot_count == slot_count);
-  }
+template <class Parent, class Child, class VisibilitySelector, class Include>
+static void validate_gui_layout(
+  Parent const& parent, std::vector<Child> const& children,
+  VisibilitySelector selector, Include include)
+{
+  std::set<std::pair<int, int>> gui_taken;
+  for (int k = 0; k < children.size(); k++)
+    if (include(children[k]))
+    {
+      auto const& pos = children[k].gui.position;
+      for (int r = pos.row; r < pos.row + pos.row_span; r++)
+        for (int c = pos.column; c < pos.column + pos.column_span; c++)
+          INF_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second
+            || selector(children[k]) != nullptr);
+    }
+  for (int r = 0; r < parent.gui.dimension.row_sizes.size(); r++)
+    for (int c = 0; c < parent.gui.dimension.column_sizes.size(); c++)
+      assert(gui_taken.find(std::make_pair(r, c)) != gui_taken.end());
 }
 
 static void
@@ -236,7 +229,7 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   validate_gui_positions(module.gui, section.gui);
   validate_gui_bindings(module, section.gui.bindings, 1);
   validate_gui_layout(section, module.params,
-    [](param_topo const& p) { return p.gui.bindings.visibility_selector; },
+    [](param_topo const& p) { return p.gui.bindings.visible.selector; },
     [&section](param_topo const& p) { return p.section == section.index; });
 }
 
@@ -254,15 +247,15 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert((module.slot_count == 1) == (module.gui.layout == gui_layout::single));
   validate_gui_dimensions(module.gui);
   validate_gui_positions(plugin.gui, module.gui);
-  validate_gui_layout(module, module.sections, [](auto const& section) { return section.gui.bindings.visibility_selector; }, [](auto const&) { return true; });
+  validate_gui_layout(module, module.sections, [](auto const& section) { return section.gui.bindings.visible.selector; }, [](auto const&) { return true; });
 
   for(int p = 0; p < module.params.size(); p++)
   {
     auto const& param = module.params[p];
-    for (int e = 0; e < param.gui.bindings.enabled_params.size(); e++)
-      assert(param.index != param.gui.bindings.enabled_params[e]);
-    for(int v = 0; v < param.gui.bindings.visibility_params.size(); v++)
-      assert(param.index != param.gui.bindings.visibility_params[v]);
+    for (int e = 0; e < param.gui.bindings.enabled.params.size(); e++)
+      assert(param.index != param.gui.bindings.enabled.params[e]);
+    for(int v = 0; v < param.gui.bindings.visible.params.size(); v++)
+      assert(param.index != param.gui.bindings.visible.params[v]);
   }
 }
 
@@ -332,7 +325,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
 
   validate_param_domain(param.domain, param.default_plain());
   validate_gui_bindings(module, param.gui.bindings, param.slot_count);
-  assert(param.dir == param_dir::input || param.gui.bindings.enabled_selector == nullptr);
+  assert(param.dir == param_dir::input || param.gui.bindings.enabled.selector == nullptr);
   assert((param.slot_count == 1) == (param.gui.layout == gui_layout::single));
   validate_gui_positions(module.sections[param.section].gui, param.gui);
 }

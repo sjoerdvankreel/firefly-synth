@@ -102,10 +102,12 @@ private:
   std::vector<int> _visibility_params = {};
 
   bool bind(
-    std::vector<int> const& params, std::vector<int>& values,
-    std::vector<int> const& context, gui_binding_selector selector);
+    gui_binding const& binding,
+    std::vector<int> const& params, 
+    std::vector<int>& values);
   void setup_bindings(
-    std::vector<int> const& topo_params, std::vector<int>& params);
+    std::vector<int> const& topo_params, 
+    std::vector<int>& params);
 };
 
 // binding_component that is additionally bound to a single parameter value
@@ -221,8 +223,8 @@ binding_component(
   gui_bindings const* bindings, int own_slot_index):
 _gui(gui), _own_slot_index(own_slot_index), _bindings(bindings), _module(module)
 {
-  setup_bindings(bindings->enabled_params, _enabled_params);
-  setup_bindings(bindings->visibility_params, _visibility_params);
+  setup_bindings(bindings->enabled.params, _enabled_params);
+  setup_bindings(bindings->visible.params, _visibility_params);
 }
 
 binding_component::
@@ -236,8 +238,8 @@ binding_component::
 
 bool 
 binding_component::bind(
-  std::vector<int> const& params, std::vector<int>& values, 
-  std::vector<int> const& context, gui_binding_selector selector)
+  gui_binding const& binding, 
+  std::vector<int> const& params, std::vector<int>& values)
 {
   values.clear();
   for (int i = 0; i < params.size(); i++)
@@ -245,7 +247,7 @@ binding_component::bind(
     auto const& mapping = _gui->desc()->mappings[params[i]];
     values.push_back(mapping.value_at(_gui->gui_state()).step());
   }
-  return selector(values, context);
+  return binding.selector(values, binding.context);
 }
 
 void
@@ -285,14 +287,12 @@ binding_component::plugin_changed(int index, plain_value plain)
   auto& self = dynamic_cast<Component&>(*this);
   auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
   if (enabled_iter != _enabled_params.end())
-    self.setEnabled(bind(_enabled_params, _enabled_values, 
-      _bindings->enabled_context, _bindings->enabled_selector));
+    self.setEnabled(bind(_bindings->enabled, _enabled_params, _enabled_values));
 
   auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
   if (visibility_iter != _visibility_params.end())
   {
-    bool visible = bind(_visibility_params, _visibility_values, 
-      _bindings->visibility_context, _bindings->visibility_selector);
+    bool visible = bind(_bindings->visible, _visibility_params, _visibility_values);
     self.setVisible(visible);
     self.setInterceptsMouseClicks(visible, visible);
   }
