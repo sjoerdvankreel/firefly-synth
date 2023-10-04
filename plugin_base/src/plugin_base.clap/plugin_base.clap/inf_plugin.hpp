@@ -2,7 +2,7 @@
 
 #include <plugin_base/gui.hpp>
 #include <plugin_base/engine.hpp>
-#include <plugin_base/block_host.hpp>
+#include <plugin_base/block/host.hpp>
 
 #include <clap/helpers/plugin.hh>
 #include <readerwriterqueue.h>
@@ -13,6 +13,7 @@
 namespace plugin_base::clap {
 
 inline int constexpr default_q_size = 4096;
+enum class sync_event_type { end_edit, begin_edit, value_changing };
 
 // linear and log map to normalized, step maps to plain
 class clap_value {
@@ -28,8 +29,8 @@ public:
 struct sync_event
 {
   int index = {};
+  sync_event_type type;
   plain_value plain = {};
-  enum class type_t { end_edit, begin_edit, value_changing } type;
 };
 
 class inf_plugin:
@@ -51,7 +52,7 @@ public gui_listener, public juce::Timer
   void timerCallback() override;
   void push_to_gui(int index, clap_value clap);
   void push_to_audio(int index, plain_value plain);
-  void push_to_audio(int index, sync_event::type_t type);
+  void push_to_audio(int index, sync_event_type type);
   void process_gui_to_audio_events(clap_output_events_t const* out);
 
 public:
@@ -113,8 +114,8 @@ public:
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
   void gui_changing(int index, plain_value plain) override;
-  void gui_end_changes(int index) override { push_to_audio(index, sync_event::type_t::end_edit); }
-  void gui_begin_changes(int index) override { push_to_audio(index, sync_event::type_t::begin_edit); }
+  void gui_end_changes(int index) override { push_to_audio(index, sync_event_type::end_edit); }
+  void gui_begin_changes(int index) override { push_to_audio(index, sync_event_type::begin_edit); }
 };
 
 }

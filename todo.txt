@@ -23,8 +23,8 @@ mark param as modulatable or not
 clean up the topo
 move note_names to plug
 cleanup the validation
-move param functions to domain
 process_block->plugin_block
+gui + desc to folders + split
 
 * continuing
 - keep updating the demo apps

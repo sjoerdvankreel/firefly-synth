@@ -90,7 +90,7 @@ inf_component::process(ProcessData& data)
         if (vst_event.type == Event::kNoteOnEvent) 
         {
           note_event note;
-          note.type = note_event::type_t::on;
+          note.type = note_event_type::on;
           note.frame = vst_event.sampleOffset;
           note.id.id = vst_event.noteOn.noteId;
           note.id.key = vst_event.noteOn.pitch;
@@ -101,7 +101,7 @@ inf_component::process(ProcessData& data)
         else if (vst_event.type == Event::kNoteOffEvent)
         {
           note_event note;
-          note.type = note_event::type_t::off;
+          note.type = note_event_type::off;
           note.frame = vst_event.sampleOffset;
           note.id.id = vst_event.noteOff.noteId;
           note.id.key = vst_event.noteOff.pitch;

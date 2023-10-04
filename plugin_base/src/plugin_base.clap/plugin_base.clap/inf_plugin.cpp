@@ -233,12 +233,12 @@ inf_plugin::push_to_audio(int index, plain_value plain)
   sync_event e;
   e.plain = plain;
   e.index = index;
-  e.type = sync_event::type_t::value_changing;
+  e.type = sync_event_type::value_changing;
   _to_audio_events->enqueue(e);
 }
 
 void 
-inf_plugin::push_to_audio(int index, sync_event::type_t type)
+inf_plugin::push_to_audio(int index, sync_event_type type)
 {
   sync_event e;
   e.type = type;
@@ -253,7 +253,7 @@ inf_plugin::push_to_gui(int index, clap_value clap)
   param_mapping const& mapping = _engine.desc().mappings[index];
   auto const& topo = *_engine.desc().param_at(mapping).param;
   e.index = index;
-  e.type = sync_event::type_t::value_changing;
+  e.type = sync_event_type::value_changing;
   e.plain = topo.domain.normalized_to_plain(clap_to_normalized(topo, clap));
   _to_gui_events->enqueue(e);
 }
@@ -411,7 +411,7 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
     int tag = _engine.desc().param_index_to_tag[e.index];
     switch(e.type) 
     {
-    case sync_event::type_t::value_changing:
+    case sync_event_type::value_changing:
     {
       param_mapping const& mapping = _engine.desc().mappings[e.index];
       auto const& topo = *_engine.desc().param_at(mapping).param;
@@ -427,8 +427,8 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
       out->try_push(out, &(event.header));
       break;
     }
-    case sync_event::type_t::end_edit:
-    case sync_event::type_t::begin_edit:
+    case sync_event_type::end_edit:
+    case sync_event_type::begin_edit:
     {
       auto event = clap_event_param_gesture();
       event.param_id = tag;
@@ -436,7 +436,7 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
       event.header.flags = 0;
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_gesture);
-      event.header.type = (e.type == sync_event::type_t::begin_edit ? CLAP_EVENT_PARAM_GESTURE_BEGIN : CLAP_EVENT_PARAM_GESTURE_END);
+      event.header.type = (e.type == sync_event_type::begin_edit ? CLAP_EVENT_PARAM_GESTURE_BEGIN : CLAP_EVENT_PARAM_GESTURE_END);
       out->try_push(out, &event.header);
       break;
     }
@@ -472,9 +472,9 @@ inf_plugin::process(clap_process const* process) noexcept
     {
       note_event note = {};
       auto event = reinterpret_cast<clap_event_note_t const*>(header);
-      if (header->type == CLAP_EVENT_NOTE_ON) note.type = note_event::type_t::on;
-      else if (header->type == CLAP_EVENT_NOTE_OFF) note.type = note_event::type_t::off;
-      else if (header->type == CLAP_EVENT_NOTE_CHOKE) note.type = note_event::type_t::cut;
+      if (header->type == CLAP_EVENT_NOTE_ON) note.type = note_event_type::on;
+      else if (header->type == CLAP_EVENT_NOTE_OFF) note.type = note_event_type::off;
+      else if (header->type == CLAP_EVENT_NOTE_CHOKE) note.type = note_event_type::cut;
       note.id.key = event->key;
       note.id.id = event->note_id;
       note.velocity = event->velocity;

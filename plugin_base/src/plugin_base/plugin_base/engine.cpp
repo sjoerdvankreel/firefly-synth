@@ -1,5 +1,5 @@
 #include <plugin_base/engine.hpp>
-#include <plugin_base/block_host.hpp>
+#include <plugin_base/block/host.hpp>
 
 #include <limits>
 #include <algorithm>
@@ -224,7 +224,7 @@ plugin_engine::process()
   {
     int slot = -1;
     auto const& event = _host_block->events.notes[e];
-    if (event.type != note_event::type_t::on) continue;
+    if (event.type != note_event_type::on) continue;
     std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
     for (int i = 0; i < _voice_states.size(); i++)
       if (_voice_states[i].stage == voice_stage::unused)
@@ -260,7 +260,7 @@ plugin_engine::process()
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
     auto const& event = _host_block->events.notes[e];
-    if (event.type == note_event::type_t::on) continue;
+    if (event.type == note_event_type::on) continue;
     int release_count = 0;
     (void)release_count;
     for (int v = 0; v < _voice_states.size(); v++)
@@ -272,7 +272,7 @@ plugin_engine::process()
         (event.id.id == -1 && (state.id.key == event.id.key && state.id.channel == event.id.channel))))
       {
         release_count++;
-        if(event.type == note_event::type_t::cut)
+        if(event.type == note_event_type::cut)
         {
           state.end_frame = event.frame;
           state.stage = voice_stage::finishing;

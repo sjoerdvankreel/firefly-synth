@@ -4,13 +4,25 @@
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
-#include <plugin_base/block_common.hpp>
+#include <plugin_base/block/common.hpp>
 
 #include <cassert>
 
 namespace plugin_base {
 
 struct plugin_topo;
+enum class voice_stage { unused, active, releasing, finishing };
+
+// for polyphonic synth
+struct voice_state final {
+  note_id id = {};
+  int end_frame = -1;
+  int start_frame = -1;
+  int release_frame = -1;
+  float velocity = 0.0f;
+  std::int64_t time = -1;
+  voice_stage stage = {};
+};
 
 // single output module process call
 struct out_process_block final {
@@ -36,11 +48,13 @@ struct process_block final {
   int start_frame;
   int end_frame;
   float sample_rate;
+
   out_process_block* out;
   common_block const& host;
   plugin_topo const& plugin;
   module_topo const& module;
   voice_process_block* voice;
+
   jarray<float, 2>& cv_out;
   jarray<float, 3>& audio_out;
   jarray<float, 4> const& global_cv_in;

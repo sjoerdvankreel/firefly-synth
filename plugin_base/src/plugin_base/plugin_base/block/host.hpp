@@ -2,11 +2,13 @@
 
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base/block_common.hpp>
+#include <plugin_base/block/common.hpp>
 
 #include <vector>
 
 namespace plugin_base {
+
+enum class note_event_type { on, off, cut };
   
 // once per block automation
 struct block_event final {
@@ -26,7 +28,7 @@ struct note_event final {
   int frame;
   note_id id;
   float velocity;
-  enum class type_t { on, off, cut } type;
+  note_event_type type;
 };
 
 // these are translated to curves/values

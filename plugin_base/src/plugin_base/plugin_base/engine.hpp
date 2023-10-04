@@ -4,8 +4,8 @@
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base/block_host.hpp>
-#include <plugin_base/block_plugin.hpp>
+#include <plugin_base/block/host.hpp>
+#include <plugin_base/block/plugin.hpp>
 
 #include <memory>
 #include <vector>
