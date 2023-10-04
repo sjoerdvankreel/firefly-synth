@@ -14,20 +14,20 @@ enum { type_saw, type_sine };
 enum { section_pitch, section_main, section_sine_gain, section_saw_gain };
 enum { param_note, param_oct, param_cent, param_on, param_type, param_gain, param_bal, param_sine_gain, param_saw_gain };
 
-std::vector<item_topo>
+std::vector<list_item>
 cv_matrix_target_osc_params(module_topo const& osc_topo)
 {
-  std::vector<item_topo> result;
+  std::vector<list_item> result;
   result.emplace_back(osc_topo.params[param_bal]);
   result.emplace_back(osc_topo.params[param_gain]);
   result.emplace_back(osc_topo.params[param_cent]);
   return result;
 }
 
-static std::vector<item_topo>
+static std::vector<list_item>
 type_items()
 {
-  std::vector<item_topo> result;
+  std::vector<list_item> result;
   result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw", type_saw);
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sine", type_sine);
   return result;

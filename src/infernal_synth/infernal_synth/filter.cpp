@@ -14,10 +14,10 @@ namespace infernal_synth {
 enum { section_main };
 enum { param_on, param_freq, param_osc_gain };
 
-std::vector<item_topo>
+std::vector<list_item>
 cv_matrix_target_filter_params(module_topo const& filter_topo)
 {
-  std::vector<item_topo> result;
+  std::vector<list_item> result;
   result.emplace_back(filter_topo.params[param_freq]);
   result.emplace_back(filter_topo.params[param_osc_gain]);
   return result;

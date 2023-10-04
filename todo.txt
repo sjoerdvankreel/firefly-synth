@@ -23,7 +23,6 @@ mark param as modulatable or not
 clean up the topo
 move note_names to plug
 cleanup the validation
-rename item_topo
 
 * continuing
 - keep updating the demo apps

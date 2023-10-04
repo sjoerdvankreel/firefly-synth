@@ -21,19 +21,19 @@ enum {
   param_target_filter_param, param_target_filter_param_osc_gain_index
 };
 
-static std::vector<item_topo>
+static std::vector<list_item>
 source_modules(module_topo const& lfo_topo, module_topo const& env_topo)
 {
-  std::vector<item_topo> result;
+  std::vector<list_item> result;
   result.emplace_back(lfo_topo);
   result.emplace_back(env_topo);
   return result;
 }
 
-static std::vector<item_topo>
+static std::vector<list_item>
 target_modules(module_topo const& osc_topo, module_topo const& filter_topo)
 {
-  std::vector<item_topo> result;
+  std::vector<list_item> result;
   result.emplace_back(osc_topo);
   result.emplace_back(filter_topo);
   return result;

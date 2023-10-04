@@ -71,16 +71,16 @@ struct gui_dimension final {
 };
 
 // item in list
-struct item_topo final {
+struct list_item final {
   int tag = -1;
   std::string id = {};
   std::string name = {};
-  
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(item_topo);
-  template <class T> item_topo(T const& item) :
-  tag(item.index), id(item.id), name(item.name) {}
-  item_topo(std::string const& id, std::string const& name, int tag): 
-  tag(tag), id(id), name(name) {}
+
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(list_item);
+  template <class T> list_item(T const& item) :
+    tag(item.index), id(item.id), name(item.name) {}
+  list_item(std::string const& id, std::string const& name, int tag) :
+    tag(tag), id(id), name(name) {}
 };
 
 // param section ui
@@ -109,7 +109,7 @@ struct param_domain final {
   std::string default_;
   domain_type type;
   domain_display display;
-  std::vector<item_topo> items;
+  std::vector<list_item> items;
   std::vector<std::string> names;
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_domain);

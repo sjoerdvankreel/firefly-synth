@@ -6,10 +6,10 @@ namespace infernal_synth {
 
 enum { module_lfo, module_env, module_cv_matrix, module_osc, module_filter, module_delay, module_count };
 
-std::vector<plugin_base::item_topo>
+std::vector<plugin_base::list_item>
 cv_matrix_target_osc_params(
   plugin_base::module_topo const& osc_topo);
-std::vector<plugin_base::item_topo>
+std::vector<plugin_base::list_item>
 cv_matrix_target_filter_params(
   plugin_base::module_topo const& filter_topo);
 
