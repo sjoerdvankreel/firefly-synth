@@ -3,7 +3,7 @@ function(declare_local_target LIBRARY_TYPE PROJECT_NAME SOURCE_DIR)
   file(GLOB_RECURSE "${PROJECT_NAME}_SRC" "${${PROJECT_NAME}_SRC_DIR}/*.*")
   add_library(${PROJECT_NAME} ${LIBRARY_TYPE} "${${PROJECT_NAME}_SRC}")
   target_include_directories(${PROJECT_NAME} PRIVATE "${${PROJECT_NAME}_SRC_DIR}")
-  source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/${${PROJECT_NAME}_SRC_DIR}" FILES "${${PROJECT_NAME}_SRC}")
+# source_group(TREE "${CMAKE_CURRENT_SOURCE_DIR}/${${PROJECT_NAME}_SRC_DIR}" FILES "${${PROJECT_NAME}_SRC}")
 endfunction()
 
 function(declare_vst3_target WRAPPER_NAME WRAPPER_SRC PLUGIN_NAME IS_FX)
