@@ -24,13 +24,12 @@ struct plugin_topo_gui final {
 
 // plugin definition
 struct plugin_topo final {
-  std::string id;
-  std::string name;
+  int polyphony;
   int version_major;
   int version_minor;
 
-  int polyphony;
   plugin_type type;
+  component_tag tag;
   plugin_topo_gui gui;
   std::string extension;
   std::vector<module_topo> modules;

@@ -743,7 +743,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
     return *grid;
 
   auto& result = make_component<section_group_component>(this, &module, &section);
-  result.setText(section.name);
+  result.setText(section.tag.name);
   result.addAndMakeVisible(grid);
   return result;
 }

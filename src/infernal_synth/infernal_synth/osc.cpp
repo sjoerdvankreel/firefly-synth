@@ -55,20 +55,20 @@ osc_topo()
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
 
   auto& pitch = result.sections.emplace_back(make_section(
-    "Pitch", section_pitch, gui_position{ 0, 0, 1, 4 }, gui_dimension{ 1, 3 }));
+    "{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch", section_pitch, gui_position{ 0, 0, 1, 4 }, gui_dimension{ 1, 3 }));
   pitch.gui.bindings.enabled.params = { param_on };
   pitch.gui.bindings.enabled.selector = [](auto const& vs, auto const&) { return vs[0] != 0; };
   
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position{ 1, 0, 1, 3 }, gui_dimension{ { 1 }, { 1, 2, 2, 2 } }));
+    "{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main", section_main, gui_position{ 1, 0, 1, 3 }, gui_dimension{ { 1 }, { 1, 2, 2, 2 } }));
   
   auto& sine_gain = result.sections.emplace_back(make_section(
-    "Sine gain", section_sine_gain, gui_position{ 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
+    "{A3D3BDF9-5CD0-47D2-BBDD-1BAD1274CDC4}", "Sine gain", section_sine_gain, gui_position{ 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
   sine_gain.gui.bindings.visible.params = { param_on, param_type };
   sine_gain.gui.bindings.visible.selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_sine; };
   
   auto& saw_gain = result.sections.emplace_back(make_section(
-    "Saw gain", section_saw_gain, gui_position { 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
+    "{8CACFECE-A9D1-4B49-AEE6-015EAF5CA682}", "Saw gain", section_saw_gain, gui_position { 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
   saw_gain.gui.bindings.visible.params = { param_on, param_type };
   saw_gain.gui.bindings.visible.selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_saw; };
 

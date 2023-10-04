@@ -36,7 +36,7 @@ env_topo()
     module_stage::voice, module_output::cv, 1,
     gui_layout::tabbed, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ 1, 4 }));
+    "{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ 1, 4 }));
   result.engine_factory = [](int slot, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<env_engine>(slot); };
   

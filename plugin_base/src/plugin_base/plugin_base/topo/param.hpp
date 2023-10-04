@@ -25,7 +25,7 @@ struct list_item final {
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(list_item);
   template <class T> list_item(T const& item) : 
-  tag(item.info.index), id(item.info.id), name(item.info.name) {}
+  tag(item.info.index), id(item.info.tag.id), name(item.info.tag.name) {}
   list_item(std::string const& id, std::string const& name, int tag) :
   tag(tag), id(id), name(name) {}
 };

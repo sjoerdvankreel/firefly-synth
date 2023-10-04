@@ -48,8 +48,8 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
   root->setProperty("version", var(version));
 
   auto plugin = std::make_unique<DynamicObject>();
-  plugin->setProperty("id", String(_desc->plugin->id));
-  plugin->setProperty("name", String(_desc->plugin->name));
+  plugin->setProperty("id", String(_desc->plugin->tag.id));
+  plugin->setProperty("name", String(_desc->plugin->tag.name));
   plugin->setProperty("version_major", _desc->plugin->version_major);
   plugin->setProperty("version_minor", _desc->plugin->version_minor);
   
@@ -60,16 +60,16 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     var params;
     auto const& module_topo = _desc->plugin->modules[m];
     auto module = std::make_unique<DynamicObject>();
-    module->setProperty("id", String(module_topo.info.id));
-    module->setProperty("name", String(module_topo.info.name));
+    module->setProperty("id", String(module_topo.info.tag.id));
+    module->setProperty("name", String(module_topo.info.tag.name));
     module->setProperty("slot_count", module_topo.info.slot_count);
     for (int p = 0; p < module_topo.params.size(); p++)
     {
       auto const& param_topo = module_topo.params[p];
       if(param_topo.dsp.direction == param_direction::output) continue;
       auto param = std::make_unique<DynamicObject>();
-      param->setProperty("id", String(param_topo.info.id));
-      param->setProperty("name", String(param_topo.info.name));
+      param->setProperty("id", String(param_topo.info.tag.id));
+      param->setProperty("name", String(param_topo.info.tag.name));
       param->setProperty("slot_count", param_topo.info.slot_count);
       params.append(var(param.release()));
     }
@@ -139,7 +139,7 @@ plugin_io::load(
     return load_result("Invalid version.");
 
   var plugin = root["plugin"];
-  if(plugin["id"] != _desc->plugin->id) 
+  if(plugin["id"] != _desc->plugin->tag.id)
     return load_result("Invalid plugin id.");
   if((int)plugin["version_major"] > _desc->plugin->version_major) 
     return load_result("Invalid plugin version.");
@@ -170,7 +170,7 @@ plugin_io::load(
     var module_slot_count = plugin["modules"][m]["slot_count"];
     auto const& new_module = _desc->plugin->modules[module_iter->second];
     if ((int)module_slot_count != new_module.info.slot_count)
-      result.warnings.push_back("Module '" + new_module.info.name + "' changed slot count.");
+      result.warnings.push_back("Module '" + new_module.info.tag.name + "' changed slot count.");
 
     for (int p = 0; p < plugin["modules"][m]["params"].size(); p++)
     {
@@ -188,7 +188,7 @@ plugin_io::load(
       var param_slot_count = plugin["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
       if ((int)param_slot_count != new_param.info.slot_count)
-        result.warnings.push_back("Param '" + new_module.info.name + " " + new_param.info.name + "' slot count changed.");
+        result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "' slot count changed.");
     }
   }
 
@@ -217,7 +217,7 @@ plugin_io::load(
           if(topo.text_to_plain(text, plain))
             state[module_iter->second][mi][param_iter->second][pi] = plain;
           else
-            result.warnings.push_back("Param '" + new_module.info.name + " " + new_param.info.name + "': invalid value '" + text + "'.");
+            result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
         }
       }
   }

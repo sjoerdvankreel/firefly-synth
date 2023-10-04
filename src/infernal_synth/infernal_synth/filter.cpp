@@ -46,7 +46,7 @@ filter_topo(int osc_slot_count)
   result.engine_factory = [](int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ { 1 }, { 1, 1, 2} }));
+    "{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ { 1 }, { 1, 1, 2} }));
 
   result.params.emplace_back(param_toggle(
     "{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1, section_main, false,

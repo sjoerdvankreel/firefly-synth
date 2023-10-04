@@ -32,7 +32,7 @@ lfo_topo()
     module_stage::input, module_output::cv, 1,
     gui_layout::tabbed, gui_position { 0, 0 }, gui_dimension { 1, 1 }));
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ 1, 4 }));
+    "{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ 1, 4 }));
   result.engine_factory = [](int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(); };
 

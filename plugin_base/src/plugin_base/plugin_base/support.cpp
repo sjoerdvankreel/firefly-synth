@@ -16,9 +16,9 @@ param_base(
   gui_layout layout, gui_position const& position)
 {
   param_topo result = {};
-  result.info.id = id;
+  result.info.tag.id = id;
   result.dsp.direction = direction;
-  result.info.name = name;
+  result.info.tag.name = name;
   result.dsp.rate = rate;
   result.info.index = index;
   result.dsp.format = format;
@@ -46,11 +46,12 @@ index_of_item_tag(std::vector<list_item> const& items, int tag)
 
 section_topo
 make_section(
-  std::string const& name, int index,
+  std::string const& id, std::string const& name, int index,
   gui_position const& position, gui_dimension const& dimension)
 {
   section_topo result = {};
-  result.name = name;
+  result.tag.name = name;
+  result.tag.id = id;
   result.index = index;
   result.gui.position = position;
   result.gui.dimension = dimension;
@@ -64,8 +65,8 @@ make_module(
   gui_layout layout, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo result = {};
-  result.info.id = id;
-  result.info.name = name;
+  result.info.tag.id = id;
+  result.info.tag.name = name;
   result.info.index = index;
   result.dsp.stage = stage;
   result.dsp.output = output;

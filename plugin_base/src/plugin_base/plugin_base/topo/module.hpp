@@ -40,6 +40,7 @@ struct module_topo final {
   module_dsp dsp;
   module_topo_gui gui;
   component_info info;
+
   std::vector<param_topo> params;
   std::vector<section_topo> sections;
   module_engine_factory engine_factory;

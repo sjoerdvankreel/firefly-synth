@@ -8,7 +8,7 @@ namespace plugin_base {
 static std::string
 param_id(param_topo const& param, int slot)
 {
-  std::string result = param.info.id;
+  std::string result = param.info.tag.id;
   result += "-" + std::to_string(slot);
   return result;
 }
@@ -16,7 +16,7 @@ param_id(param_topo const& param, int slot)
 static std::string
 module_id(module_topo const& module, int slot)
 {
-  std::string result = module.info.id;
+  std::string result = module.info.tag.id;
   result += "-" + std::to_string(slot);
   return result;
 }
@@ -24,7 +24,7 @@ module_id(module_topo const& module, int slot)
 static std::string
 param_name(param_topo const& param, int slot)
 {
-  std::string result = param.info.name;
+  std::string result = param.info.tag.name;
   if (param.info.slot_count > 1) result += " " + std::to_string(slot + 1);
   return result;
 }
@@ -32,7 +32,7 @@ param_name(param_topo const& param, int slot)
 static std::string
 module_name(module_topo const& module, int slot)
 {
-  std::string result = module.info.name;
+  std::string result = module.info.tag.name;
   if (module.info.slot_count > 1) result += " " + std::to_string(slot + 1);
   return result;
 }
@@ -223,7 +223,8 @@ static void validate_gui_layout(
 static void
 validate_section_topo(module_topo const& module, section_topo const& section)
 {
-  assert(section.name.size());
+  assert(section.tag.id.size());
+  assert(section.tag.name.size());
   assert(0 <= section.index && section.index < module.sections.size());
   validate_gui_dimensions(section.gui);
   validate_gui_positions(module.gui, section.gui);
@@ -236,8 +237,8 @@ validate_section_topo(module_topo const& module, section_topo const& section)
 static void
 validate_module_topo(plugin_topo const& plugin, module_topo const& module)
 {
-  assert(module.info.id.size());
-  assert(module.info.name.size());
+  assert(module.info.tag.id.size());
+  assert(module.info.tag.name.size());
   assert(module.params.size());
   assert(module.info.slot_count > 0);
   assert(module.engine_factory);
@@ -310,8 +311,8 @@ validate_param_domain(param_domain const& domain, plain_value default_plain)
 static void
 validate_param_topo(module_topo const& module, param_topo const& param)
 {
-  assert(param.info.id.size());
-  assert(param.info.name.size());
+  assert(param.info.tag.id.size());
+  assert(param.info.tag.name.size());
   assert(param.section >= 0);
   assert(param.section < module.sections.size());
   assert(0 < param.info.slot_count && param.info.slot_count <= 1024);
@@ -337,8 +338,8 @@ validate_plugin_topo(plugin_topo const& topo)
   std::set<std::string> module_ids;
   validate_gui_layout(topo, topo.modules, [](auto const&) { return nullptr; }, [](auto const&) { return true; });
 
-  assert(topo.id.size());
-  assert(topo.name.size());
+  assert(topo.tag.id.size());
+  assert(topo.tag.name.size());
   assert(topo.modules.size());
   assert(topo.version_major >= 0);
   assert(topo.version_minor >= 0);
@@ -362,13 +363,13 @@ validate_plugin_topo(plugin_topo const& topo)
     stage = (int)module.dsp.stage;
 
     validate_module_topo(topo, module);
-    INF_ASSERT_EXEC(module_ids.insert(module.info.id).second);
+    INF_ASSERT_EXEC(module_ids.insert(module.info.tag.id).second);
     for (int s = 0; s < module.sections.size(); s++)
       validate_section_topo(module, module.sections[s]);
     for (int p = 0; p < module.params.size(); p++)
     {
       validate_param_topo(module, module.params[p]);
-      INF_ASSERT_EXEC(param_ids.insert(module.params[p].info.id).second);
+      INF_ASSERT_EXEC(param_ids.insert(module.params[p].info.tag.id).second);
     }
   }
 }
@@ -428,7 +429,7 @@ validate_plugin_desc(plugin_desc const& desc)
     (void)module;
     assert(desc.plugin->modules[m].info.index == m);
     assert(desc.param_topo_to_index[m].size() == module.info.slot_count);
-    assert(desc.param_id_to_index.at(module.info.id).size() == module.params.size());
+    assert(desc.param_id_to_index.at(module.info.tag.id).size() == module.params.size());
     for(int s = 0; s < module.sections.size(); s++)
       assert(module.sections[s].index == s);
     for(int mi = 0; mi < module.info.slot_count; mi++)
@@ -512,9 +513,9 @@ plugin(std::move(plugin_))
     if(module.dsp.stage == module_stage::input) module_voice_start++;
     if(module.dsp.stage == module_stage::input) module_output_start++;
     if(module.dsp.stage == module_stage::voice) module_output_start++;
-    module_id_to_index[module.info.id] = m;
+    module_id_to_index[module.info.tag.id] = m;
     for(int p = 0; p < module.params.size(); p++)
-      param_id_to_index[module.info.id][module.params[p].info.id] = p;
+      param_id_to_index[module.info.tag.id][module.params[p].info.tag.id] = p;
     for(int mi = 0; mi < module.info.slot_count; mi++)
     {
       param_topo_to_index[m].emplace_back();

@@ -13,7 +13,7 @@ index_of_item_tag(std::vector<list_item> const& items, int tag);
 
 section_topo
 make_section(
-  std::string const& name, int index,
+  std::string const& id, std::string const& name, int index,
   gui_position const& position, gui_dimension const& dimension);
 
 module_topo

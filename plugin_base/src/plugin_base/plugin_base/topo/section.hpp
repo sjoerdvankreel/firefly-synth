@@ -18,7 +18,7 @@ struct section_topo_gui final {
 // param ui section
 struct section_topo final {
   int index;
-  std::string name;
+  component_tag tag;
   section_topo_gui gui;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
 };

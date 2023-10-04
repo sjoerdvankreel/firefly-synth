@@ -37,7 +37,7 @@ delay_topo(int polyphony)
     std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
   result.sections.emplace_back(make_section(
-    "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 5 }));
+    "{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 5 }));
 
   result.params.emplace_back(param_toggle(
     "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", param_on, 1, section_main, false,
