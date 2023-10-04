@@ -25,6 +25,8 @@ clean up the topo
 all ui to gui
 move note_names to plug
 rename plugin_gui to editor
+cleanup the validation
+split out the bindings
 
 * continuing
 - keep updating the demo apps
