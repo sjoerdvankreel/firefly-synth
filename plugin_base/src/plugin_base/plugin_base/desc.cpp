@@ -269,7 +269,6 @@ validate_param_domain(param_domain const& domain, plain_value default_plain)
   {
     assert(domain.min == 0);
     assert(domain.max == 1);
-    assert(domain.type == domain_type::toggle);
   }
 
   if(domain.type == domain_type::name)
@@ -320,6 +319,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.dir != param_dir::output || param.rate == param_rate::block);
 
   assert(param.domain.is_real() || param.rate == param_rate::block);
+  assert(param.edit != param_edit::toggle || param.domain.type == domain_type::toggle);
 
   validate_param_domain(param.domain, param.default_plain());
   validate_gui_bindings(module, param.bindings, param.slot_count);
