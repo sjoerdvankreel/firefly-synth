@@ -14,13 +14,13 @@ class grid_component;
 void gui_init();
 void gui_terminate();
 
-class ui_listener
+class gui_listener
 {
 public:
-  void ui_changed(int index, plain_value plain);
-  virtual void ui_end_changes(int index) = 0;
-  virtual void ui_begin_changes(int index) = 0;
-  virtual void ui_changing(int index, plain_value plain) = 0;
+  void gui_changed(int index, plain_value plain);
+  virtual void gui_end_changes(int index) = 0;
+  virtual void gui_begin_changes(int index) = 0;
+  virtual void gui_changing(int index, plain_value plain) = 0;
 };
 
 class plugin_listener
@@ -33,10 +33,11 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const* const _desc;
-  std::vector<ui_listener*> _ui_listeners = {};
   jarray<plain_value, 4>* const _ui_state = {};
+  std::vector<gui_listener*> _gui_listeners = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
-  std::vector<std::unique_ptr<juce::Component>> _components = {}; // must be destructed first
+  // must be destructed first, will unregister listeners
+  std::vector<std::unique_ptr<juce::Component>> _components = {};
 
   void state_loaded();
   template <class T, class... U>
@@ -65,10 +66,10 @@ public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
   plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state);
 
-  void ui_end_changes(int index);
-  void ui_begin_changes(int index);
-  void ui_changed(int index, plain_value plain);
-  void ui_changing(int index, plain_value plain);
+  void gui_end_changes(int index);
+  void gui_begin_changes(int index);
+  void gui_changed(int index, plain_value plain);
+  void gui_changing(int index, plain_value plain);
   void plugin_changed(int index, plain_value plain);
 
   plugin_desc const* desc() const { return _desc; }
@@ -78,9 +79,9 @@ public:
   void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
   void content_scale(float factor) { setTransform(juce::AffineTransform::scale(factor)); }
 
-  void remove_ui_listener(ui_listener* listener);
+  void remove_gui_listener(gui_listener* listener);
   void remove_plugin_listener(int index, plugin_listener* listener);
-  void add_ui_listener(ui_listener* listener) { _ui_listeners.push_back(listener); }
+  void add_gui_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
   void add_plugin_listener(int index, plugin_listener* listener) { _plugin_listeners[index].push_back(listener); }
 };
 

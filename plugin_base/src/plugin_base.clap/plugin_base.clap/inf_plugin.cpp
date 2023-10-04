@@ -103,7 +103,7 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
   plugin_io io(&_engine.desc());
   if (!io.load(data, _ui_state).ok()) return false;
   for (int p = 0; p < _engine.desc().param_count; p++)
-    ui_changed(p, _engine.desc().mappings[p].value_at(_ui_state));
+    gui_changed(p, _engine.desc().mappings[p].value_at(_ui_state));
   return true;
 }
 
@@ -150,7 +150,7 @@ inf_plugin::guiSetParent(clap_window const* window) noexcept
     _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
 #endif
   _gui->setVisible(true);
-  _gui->add_ui_listener(this);
+  _gui->add_gui_listener(this);
   _gui->resized();
   return true;
 }
@@ -164,7 +164,7 @@ inf_plugin::onPosixFd(int fd, int flags) noexcept
 void 
 inf_plugin::guiDestroy() noexcept
 {
-  _gui->remove_ui_listener(this);
+  _gui->remove_gui_listener(this);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
   _gui.reset();
@@ -219,7 +219,7 @@ inf_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 }
 
 void 
-inf_plugin::ui_changing(int index, plain_value plain)
+inf_plugin::gui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
   param_mapping const& mapping = _engine.desc().mappings[index];

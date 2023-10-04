@@ -14,7 +14,7 @@ class inf_editor;
 
 class inf_controller final:
 public Steinberg::Vst::EditControllerEx1,
-public ui_listener
+public gui_listener
 {
   plugin_desc const _desc;
   inf_editor* _editor = {};
@@ -29,9 +29,9 @@ public:
   jarray<plain_value, 4> const& ui_state() const { return _ui_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
-  void ui_changing(int index, plain_value plain) override;
-  void ui_end_changes(int index) override { endEdit(desc().param_index_to_tag[index]); }
-  void ui_begin_changes(int index) override { beginEdit(desc().param_index_to_tag[index]); }
+  void gui_changing(int index, plain_value plain) override;
+  void gui_end_changes(int index) override { endEdit(desc().param_index_to_tag[index]); }
+  void gui_begin_changes(int index) override { beginEdit(desc().param_index_to_tag[index]); }
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;

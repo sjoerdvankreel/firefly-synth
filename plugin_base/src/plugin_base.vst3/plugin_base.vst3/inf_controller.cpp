@@ -64,7 +64,7 @@ inf_controller::createView(char const* name)
 }
 
 void
-inf_controller::ui_changing(int index, plain_value plain)
+inf_controller::gui_changing(int index, plain_value plain)
 {
   int tag = desc().param_index_to_tag[index];
   param_mapping const& mapping = desc().mappings[index];
@@ -100,7 +100,7 @@ inf_controller::setComponentState(IBStream* state)
   if (!load_state(_desc, state, _ui_state))
     return kResultFalse;
   for (int p = 0; p < _desc.param_count; p++)
-    ui_changed(p, _desc.mappings[p].value_at(_ui_state));
+    gui_changed(p, _desc.mappings[p].value_at(_ui_state));
   return kResultOk;
 }
 

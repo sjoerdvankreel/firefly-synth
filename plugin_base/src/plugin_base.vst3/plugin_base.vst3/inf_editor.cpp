@@ -68,7 +68,7 @@ inf_editor::isPlatformTypeSupported(FIDString type)
 tresult PLUGIN_API
 inf_editor::removed()
 {
-  _gui->remove_ui_listener(_controller);
+  _gui->remove_gui_listener(_controller);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
 #if (defined __linux__) || (defined  __FreeBSD__)
@@ -90,7 +90,7 @@ inf_editor::attached(void* parent, FIDString type)
 #endif
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
-  _gui->add_ui_listener(_controller);
+  _gui->add_gui_listener(_controller);
   _gui->resized();
   return EditorView::attached(parent, type);
 }

@@ -34,11 +34,11 @@ gui_init()
 }
 
 void
-ui_listener::ui_changed(int index, plain_value plain)
+gui_listener::gui_changed(int index, plain_value plain)
 {
-  ui_begin_changes(index);
-  ui_changing(index, plain);
-  ui_end_changes(index);
+  gui_begin_changes(index);
+  gui_changing(index, plain);
+  gui_end_changes(index);
 }
 
 static Justification 
@@ -158,9 +158,9 @@ protected:
 
 public: 
   param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param);
-  void stoppedDragging() override { _gui->ui_end_changes(_param->global); }
-  void startedDragging() override { _gui->ui_begin_changes(_param->global); }
-  void valueChanged() override { _gui->ui_changing(_param->global, _param->param->raw_to_plain(getValue())); }
+  void stoppedDragging() override { _gui->gui_end_changes(_param->global); }
+  void startedDragging() override { _gui->gui_begin_changes(_param->global); }
+  void valueChanged() override { _gui->gui_changing(_param->global, _param->param->raw_to_plain(getValue())); }
 };
 
 class param_combobox :
@@ -176,7 +176,7 @@ public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param);
   void comboBoxChanged(ComboBox*) override final
-  { _gui->ui_changed(_param->global, _param->param->raw_to_plain(getSelectedItemIndex() + _param->param->min)); }
+  { _gui->gui_changed(_param->global, _param->param->raw_to_plain(getSelectedItemIndex() + _param->param->min)); }
 };
 
 class param_toggle_button :
@@ -328,7 +328,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
   std::string text(getText().toStdString());
   if (!_param->param->text_to_plain(text, plain)) return;
   _last_parsed = text;
-  _gui->ui_changed(_param->global, plain);
+  _gui->gui_changed(_param->global, plain);
 }
 
 void
@@ -352,7 +352,7 @@ param_toggle_button::buttonStateChanged(Button*)
   if(_checked == getToggleState()) return;
   plain_value plain = _param->param->raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
-  _gui->ui_changed(_param->global, plain);
+  _gui->gui_changed(_param->global, plain);
 }
 
 param_textbox::
@@ -528,35 +528,35 @@ public:
 // main plugin gui
 
 void 
-plugin_gui::ui_changed(int index, plain_value plain)
+plugin_gui::gui_changed(int index, plain_value plain)
 {
   if(_desc->params[index]->param->dir == param_dir::input)
-    for (int i = 0; i < _ui_listeners.size(); i++)
-      _ui_listeners[i]->ui_changed(index, plain);
+    for (int i = 0; i < _gui_listeners.size(); i++)
+      _gui_listeners[i]->gui_changed(index, plain);
 }
 
 void 
-plugin_gui::ui_begin_changes(int index)
+plugin_gui::gui_begin_changes(int index)
 {
   if (_desc->params[index]->param->dir == param_dir::input)
-    for(int i = 0; i < _ui_listeners.size(); i++)
-      _ui_listeners[i]->ui_begin_changes(index);
+    for(int i = 0; i < _gui_listeners.size(); i++)
+      _gui_listeners[i]->gui_begin_changes(index);
 }
 
 void
-plugin_gui::ui_end_changes(int index)
+plugin_gui::gui_end_changes(int index)
 {
   if (_desc->params[index]->param->dir == param_dir::input)
-    for (int i = 0; i < _ui_listeners.size(); i++)
-      _ui_listeners[i]->ui_end_changes(index);
+    for (int i = 0; i < _gui_listeners.size(); i++)
+      _gui_listeners[i]->gui_end_changes(index);
 }
 
 void
-plugin_gui::ui_changing(int index, plain_value plain)
+plugin_gui::gui_changing(int index, plain_value plain)
 {
   if (_desc->params[index]->param->dir == param_dir::input)
-    for (int i = 0; i < _ui_listeners.size(); i++)
-      _ui_listeners[i]->ui_changing(index, plain);
+    for (int i = 0; i < _gui_listeners.size(); i++)
+      _gui_listeners[i]->gui_changing(index, plain);
 }
 
 void
@@ -567,10 +567,10 @@ plugin_gui::plugin_changed(int index, plain_value plain)
 }
 
 void 
-plugin_gui::remove_ui_listener(ui_listener* listener)
+plugin_gui::remove_gui_listener(gui_listener* listener)
 {
-  auto iter = std::find(_ui_listeners.begin(), _ui_listeners.end(), listener);
-  if(iter != _ui_listeners.end()) _ui_listeners.erase(iter);
+  auto iter = std::find(_gui_listeners.begin(), _gui_listeners.end(), listener);
+  if(iter != _gui_listeners.end()) _gui_listeners.erase(iter);
 }
 
 void 
@@ -590,7 +590,7 @@ plugin_gui::state_loaded()
     for (int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
         for (int pi = 0; pi < module.params[p].slot_count; pi++)
-          ui_changed(param_global++, (*_ui_state)[m][mi][p][pi]);
+          gui_changed(param_global++, (*_ui_state)[m][mi][p][pi]);
   }
 }
 
