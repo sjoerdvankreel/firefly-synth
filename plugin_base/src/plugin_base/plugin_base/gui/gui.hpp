@@ -3,6 +3,7 @@
 #include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/gui/listeners.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <vector>
@@ -13,21 +14,6 @@ class grid_component;
 
 void gui_init();
 void gui_terminate();
-
-class gui_listener
-{
-public:
-  void gui_changed(int index, plain_value plain);
-  virtual void gui_end_changes(int index) = 0;
-  virtual void gui_begin_changes(int index) = 0;
-  virtual void gui_changing(int index, plain_value plain) = 0;
-};
-
-class plugin_listener
-{
-public:
-  virtual void plugin_changed(int index, plain_value plain) = 0;
-};
 
 class plugin_gui:
 public juce::Component
