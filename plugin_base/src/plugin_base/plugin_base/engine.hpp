@@ -20,7 +20,7 @@ class plugin_engine;
 class module_engine { 
 public: 
   virtual void initialize() = 0;
-  virtual void process(process_block& block) = 0;
+  virtual void process(plugin_block& block) = 0;
 };
 
 // catering to clap
@@ -62,7 +62,7 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
-  process_block make_process_block(
+  plugin_block make_plugin_block(
     int voice, int module, int slot, 
     int start_frame, int end_frame);
   int process_voices_single_threaded();

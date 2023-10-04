@@ -25,7 +25,7 @@ struct voice_state final {
 };
 
 // single output module process call
-struct out_process_block final {
+struct plugin_output_block final {
   int voice_count;
   int thread_count;
   double cpu_usage;
@@ -35,7 +35,7 @@ struct out_process_block final {
 };
 
 // single per-voice module process call
-struct voice_process_block final {
+struct plugin_voice_block final {
   bool finished;
   jarray<float, 2>& result;
   voice_state const& state;
@@ -44,16 +44,16 @@ struct voice_process_block final {
 };
 
 // single module process call
-struct process_block final {
+struct plugin_block final {
   int start_frame;
   int end_frame;
   float sample_rate;
 
-  out_process_block* out;
+  plugin_output_block* out;
   common_block const& host;
   plugin_topo const& plugin;
   module_topo const& module;
-  voice_process_block* voice;
+  plugin_voice_block* voice;
 
   jarray<float, 2>& cv_out;
   jarray<float, 3>& audio_out;
@@ -67,14 +67,14 @@ struct process_block final {
 };
 
 inline void 
-process_block::set_out_param(int param, int slot, double raw) const
+plugin_block::set_out_param(int param, int slot, double raw) const
 {
   assert(module.params[param].dsp.direction == param_direction::output);
   out->params[param][slot] = module.params[param].domain.raw_to_plain(raw);
 }
 
 inline float
-process_block::normalized_to_raw(int module_, int param_, float normalized) const
+plugin_block::normalized_to_raw(int module_, int param_, float normalized) const
 {
   check_unipolar(normalized);
   auto const& param_topo = plugin.modules[module_].params[param_];

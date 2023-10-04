@@ -20,7 +20,7 @@ public module_engine {
 public:
   lfo_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(lfo_engine);
-  void process(process_block& block) override;
+  void process(plugin_block& block) override;
   void initialize() override { _phase = 0; }
 };
 
@@ -64,7 +64,7 @@ lfo_topo()
 }
 
 void
-lfo_engine::process(process_block& block)
+lfo_engine::process(plugin_block& block)
 {
 }
 

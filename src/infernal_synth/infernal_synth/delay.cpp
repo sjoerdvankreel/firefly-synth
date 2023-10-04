@@ -23,7 +23,7 @@ public:
   delay_engine(int sample_rate);
   INF_DECLARE_MOVE_ONLY(delay_engine);
   void initialize() override;
-  void process(process_block& block) override;
+  void process(plugin_block& block) override;
 };
 
 module_topo
@@ -88,7 +88,7 @@ delay_engine::initialize()
 }
 
 void
-delay_engine::process(process_block& block)
+delay_engine::process(plugin_block& block)
 {
   float max_out = 0.0f;
   for (int c = 0; c < 2; c++)  

@@ -38,8 +38,8 @@ _voice_processor_context(voice_processor_context)
   _host_block->events.accurate.reserve(accurate_events_guess);
 }
 
-process_block 
-plugin_engine::make_process_block(int voice, int module, int slot, int start_frame, int end_frame)
+plugin_block
+plugin_engine::make_plugin_block(int voice, int module, int slot, int start_frame, int end_frame)
 {
   jarray<float, 2>& cv_out = voice < 0? _global_cv_state[module][slot]: _voice_cv_state[voice][module][slot];
   jarray<float, 3>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
@@ -167,14 +167,14 @@ plugin_engine::process_voice(int v, bool threaded)
     for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
     {
       auto& state = _voice_states[v];
-      voice_process_block voice_block = {
+      plugin_voice_block voice_block = {
         false,
         _voice_results[v],
         state,
         _voice_cv_state[v],
         _voice_audio_state[v]
       };
-      process_block block(make_process_block(v, m, mi, state.start_frame, state.end_frame));
+      plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
       _voice_engines[v][m][mi]->process(block);
       state.release_frame = -1;
@@ -409,7 +409,7 @@ plugin_engine::process()
   for (int m = 0; m < _desc.module_voice_start; m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
     {
-      process_block block(make_process_block(-1, m, mi, 0, frame_count));
+      plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
       _input_engines[m][mi]->process(block);
     }
 
@@ -450,7 +450,7 @@ plugin_engine::process()
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
     for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
     {
-      out_process_block out_block = {
+      plugin_output_block out_block = {
         voice_count,
         thread_count,
         _cpu_usage,
@@ -458,7 +458,7 @@ plugin_engine::process()
         _plugin_state[m][mi],
         _voices_mixdown
       };
-      process_block block(make_process_block(-1, m, mi, 0, frame_count));
+      plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
       block.out = &out_block;
       _output_engines[m][mi]->process(block);
     }

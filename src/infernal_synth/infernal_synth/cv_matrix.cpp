@@ -43,7 +43,7 @@ class cv_matrix_engine:
 public module_engine { 
 public:
   void initialize() override {}
-  void process(process_block& block) override;
+  void process(plugin_block& block) override;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
@@ -170,7 +170,7 @@ cv_matrix_topo(
 }
 
 void
-cv_matrix_engine::process(process_block& block)
+cv_matrix_engine::process(plugin_block& block)
 {
 }
 

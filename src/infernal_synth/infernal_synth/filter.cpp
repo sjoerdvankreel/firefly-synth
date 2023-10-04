@@ -32,7 +32,7 @@ public module_engine {
 public:
   filter_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(filter_engine);
-  void process(process_block& block) override;
+  void process(plugin_block& block) override;
   void initialize() override { _in[0] = _in[1] = _out[0] = _out[1] = 0; }
 };
 
@@ -70,7 +70,7 @@ filter_topo(int osc_slot_count)
 }
 
 void
-filter_engine::process(process_block& block)
+filter_engine::process(plugin_block& block)
 {
   auto const& osc_audio = block.voice->audio_in[module_osc];
   auto const& osc_gain = block.accurate_automation[param_osc_gain];

@@ -41,7 +41,7 @@ public:
   osc_engine() { initialize(); }
   INF_DECLARE_MOVE_ONLY(osc_engine);
   void initialize() override { _phase = 0; }
-  void process(process_block& block) override;
+  void process(plugin_block& block) override;
 };
 
 module_topo
@@ -130,7 +130,7 @@ osc_topo()
 }
 
 void
-osc_engine::process(process_block& block)
+osc_engine::process(plugin_block& block)
 {
   if(block.block_automation[param_on][0].step() == 0) return;
   int oct = block.block_automation[param_oct][0].step();

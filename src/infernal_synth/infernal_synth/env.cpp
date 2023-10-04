@@ -24,7 +24,7 @@ public module_engine {
 public:
   INF_DECLARE_MOVE_ONLY(env_engine);
   env_engine(int slot) : _slot(slot) { initialize(); }
-  void process(process_block& block) override;
+  void process(plugin_block& block) override;
   void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
 };
 
@@ -68,7 +68,7 @@ env_topo()
 }
 
 void
-env_engine::process(process_block& block)
+env_engine::process(plugin_block& block)
 {
   auto const& a = block.accurate_automation[param_a][0];
   auto const& d = block.accurate_automation[param_d][0];
