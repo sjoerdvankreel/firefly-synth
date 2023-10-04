@@ -96,7 +96,7 @@ cv_matrix_topo(
   lfo_index.bindings.enabled_params = enabled_params;
   lfo_index.bindings.enabled_selector = enabled_selector;
   lfo_index.bindings.visibility_params = { param_source };
-  lfo_index.bindings.visibility_context = { index_of_item_tag(result.params[param_source].items, module_lfo)};
+  lfo_index.bindings.visibility_context = { index_of_item_tag(result.params[param_source].domain.items, module_lfo)};
   lfo_index.bindings.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& env_index = result.params.emplace_back(param_steps(
@@ -107,7 +107,7 @@ cv_matrix_topo(
   env_index.bindings.enabled_params = enabled_params;
   env_index.bindings.enabled_selector = enabled_selector;
   env_index.bindings.visibility_params = { param_source };
-  env_index.bindings.visibility_context = { index_of_item_tag(result.params[param_source].items, module_env) };
+  env_index.bindings.visibility_context = { index_of_item_tag(result.params[param_source].domain.items, module_env) };
   env_index.bindings.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& target = result.params.emplace_back(param_items(
@@ -126,7 +126,7 @@ cv_matrix_topo(
   osc_index.bindings.enabled_params = enabled_params;
   osc_index.bindings.enabled_selector = enabled_selector;
   osc_index.bindings.visibility_params = { param_target };
-  osc_index.bindings.visibility_context = { index_of_item_tag(result.params[param_target].items, module_osc) };
+  osc_index.bindings.visibility_context = { index_of_item_tag(result.params[param_target].domain.items, module_osc) };
   osc_index.bindings.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& osc_target = result.params.emplace_back(param_items(
@@ -137,7 +137,7 @@ cv_matrix_topo(
   osc_target.bindings.enabled_params = enabled_params;
   osc_target.bindings.enabled_selector = enabled_selector;
   osc_target.bindings.visibility_params = { param_target };
-  osc_target.bindings.visibility_context = { index_of_item_tag(result.params[param_target].items, module_osc) };
+  osc_target.bindings.visibility_context = { index_of_item_tag(result.params[param_target].domain.items, module_osc) };
   osc_target.bindings.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& filter_target = result.params.emplace_back(param_items(
@@ -148,7 +148,7 @@ cv_matrix_topo(
   filter_target.bindings.enabled_params = enabled_params;
   filter_target.bindings.enabled_selector = enabled_selector;
   filter_target.bindings.visibility_params = { param_target };
-  filter_target.bindings.visibility_context = { index_of_item_tag(result.params[param_target].items, module_filter) };
+  filter_target.bindings.visibility_context = { index_of_item_tag(result.params[param_target].domain.items, module_filter) };
   filter_target.bindings.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   int FILTER_PARAM_OSC_GAIN = 2; // TODO
@@ -162,8 +162,8 @@ cv_matrix_topo(
   osc_gain_index.bindings.enabled_selector = enabled_selector;
   osc_gain_index.bindings.visibility_params = { param_target, param_target_filter_param };
   osc_gain_index.bindings.visibility_context = {
-    index_of_item_tag(result.params[param_target].items, module_filter), 
-    index_of_item_tag(result.params[param_target_filter_param].items, FILTER_PARAM_OSC_GAIN )};
+    index_of_item_tag(result.params[param_target].domain.items, module_filter),
+    index_of_item_tag(result.params[param_target_filter_param].domain.items, FILTER_PARAM_OSC_GAIN )};
   osc_gain_index.bindings.visibility_selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0] && vs[1] == ctx[1]; };
 
   return result;

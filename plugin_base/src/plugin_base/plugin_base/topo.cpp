@@ -41,17 +41,17 @@ param_topo::plain_to_text(plain_value plain) const
 
   if (edit == param_edit::toggle)
     return plain.step() == 0 ? "Off" : "On";
-  switch (type)
+  switch (domain.type)
   {
-  case param_type::name: return names[plain.step()];
-  case param_type::item: return items[plain.step()].name;
-  case param_type::step: return prefix + std::to_string(plain.step());
+  case domain_type::name: return domain.names[plain.step()];
+  case domain_type::item: return domain.items[plain.step()].name;
+  case domain_type::step: return prefix + std::to_string(plain.step());
   default: break;
   }
 
   std::ostringstream stream;
-  int mul = display == param_display::pct ? 100 : 1;
-  stream << std::fixed << std::setprecision(precision) << (plain.real() * mul);
+  int mul = domain.display == domain_display::percentage ? 100 : 1;
+  stream << std::fixed << std::setprecision(domain.precision) << (plain.real() * mul);
   return prefix + stream.str();
 }
 
@@ -67,10 +67,10 @@ param_topo::text_to_plain(
     return true;
   }
 
-  if (type == param_type::name)
+  if (domain.type == domain_type::name)
   {
-    for (int i = 0; i < names.size(); i++)
-      if (names[i] == textual)
+    for (int i = 0; i < domain.names.size(); i++)
+      if (domain.names[i] == textual)
       {
         plain = plain_value::from_step(i);
         return true;
@@ -78,10 +78,10 @@ param_topo::text_to_plain(
     return false;
   }
 
-  if (type == param_type::item)
+  if (domain.type == domain_type::item)
   {
-    for (int i = 0; i < items.size(); i++)
-      if (items[i].name == textual)
+    for (int i = 0; i < domain.items.size(); i++)
+      if (domain.items[i].name == textual)
       {
         plain = plain_value::from_step(i);
         return true;
@@ -90,7 +90,7 @@ param_topo::text_to_plain(
   }
 
   std::istringstream stream(textual);
-  if (type == param_type::step)
+  if (domain.type == domain_type::step)
   {
     int step = std::numeric_limits<int>::max();
     stream >> step;
@@ -100,7 +100,7 @@ param_topo::text_to_plain(
 
   float real = std::numeric_limits<float>::max();
   stream >> real;
-  real /= (display == param_display::normal) ? 1 : 100;
+  real /= (domain.display == domain_display::normal) ? 1 : 100;
   plain = plain_value::from_real(real);
   return domain.min <= real && real <= domain.max;
 }

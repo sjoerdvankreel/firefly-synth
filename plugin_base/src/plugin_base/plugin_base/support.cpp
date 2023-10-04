@@ -91,7 +91,7 @@ param_toggle(
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = 0;
   result.domain.max = 1;
-  result.type = param_type::step;
+  result.domain.type = domain_type::step;
   return result;
 }
 
@@ -109,7 +109,7 @@ param_steps(
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = min;
   result.domain.max = max;
-  result.type = param_type::step;
+  result.domain.type = domain_type::step;
   return result;
 }
 
@@ -125,10 +125,10 @@ param_items(
     id, name, index, slot_count, section, default_.size()? default_: items[0].name,
     dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
-  result.items = std::move(items);
+  result.domain.items = std::move(items);
   result.domain.min = 0;
-  result.domain.max = result.items.size() - 1;
-  result.type = param_type::item;
+  result.domain.max = result.domain.items.size() - 1;
+  result.domain.type = domain_type::item;
   return result;
 }
 
@@ -146,8 +146,8 @@ param_names(
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = 0;
   result.domain.max = names.size() - 1;
-  result.names = names;
-  result.type = param_type::name;
+  result.domain.names = names;
+  result.domain.type = domain_type::name;
   return result;
 }
 
@@ -166,9 +166,9 @@ param_pct(
   result.domain.min = min;
   result.domain.max = max;
   result.domain.unit = unit? "%": "";
-  result.precision = precision;
-  result.type = param_type::linear;
-  result.display = param_display::pct;
+  result.domain.precision = precision;
+  result.domain.type = domain_type::linear;
+  result.domain.display = domain_display::percentage;
   return result;
 }
 
@@ -187,8 +187,8 @@ param_linear(
   result.domain.min = min;
   result.domain.max = max;
   result.domain.unit = unit;
-  result.precision = precision;
-  result.type = param_type::linear;
+  result.domain.precision = precision;
+  result.domain.type = domain_type::linear;
   return result;
 }
 
@@ -204,8 +204,8 @@ param_log(
     id, name, index, slot_count, section, std::to_string(default_), 
     dir, rate, format, edit,
     label_contents, label_align, label_justify, layout, position));
-  result.precision = precision;
-  result.type = param_type::log;
+  result.domain.precision = precision;
+  result.domain.type = domain_type::log;
   result.domain.min = min;
   result.domain.max = max;
   result.domain.unit = unit;

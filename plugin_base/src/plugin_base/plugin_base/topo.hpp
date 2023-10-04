@@ -11,15 +11,17 @@
 namespace plugin_base {
 
 enum class plugin_type { synth, fx };
-enum class module_output { none, cv, audio };
-enum class module_stage { input, voice, output };
 enum class gui_layout { single, horizontal, vertical, tabbed };
 
+enum class module_output { none, cv, audio };
+enum class module_stage { input, voice, output };
+
+enum class domain_display { normal, percentage };
+enum class domain_type { step, name, item, linear, log };
+
 enum class param_dir { input, output };
-enum class param_display { normal, pct };
 enum class param_rate { accurate, block };
 enum class param_format { plain, normalized };
-enum class param_type { step, name, item, linear, log };
 enum class param_edit { toggle, list, text, knob, hslider, vslider };
 enum class param_label_justify { near, center, far };
 enum class param_label_align { top, bottom, left, right };
@@ -90,8 +92,13 @@ struct param_domain final {
   double min;
   double max;
   double exp;
+  int precision;
   std::string unit;
   std::string default_;
+  domain_type type;
+  domain_display display;
+  std::vector<item_topo> items;
+  std::vector<std::string> names;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_domain);
 };
 
@@ -99,18 +106,15 @@ struct param_domain final {
 struct param_topo final {
   int index;
   int section;
-  int precision;
   int slot_count;
   std::string id;
   std::string name;
   param_domain domain;
 
   param_dir dir;
-  param_type type;
   param_rate rate;
   param_edit edit;
   param_format format;
-  param_display display;
   param_label_align label_align;
   param_label_justify label_justify;
   param_label_contents label_contents;
@@ -118,11 +122,6 @@ struct param_topo final {
   gui_layout layout;
   gui_position position;
   gui_bindings bindings;
-  std::vector<item_topo> items;
-  std::vector<std::string> names;
-
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
-  bool is_real() const { return type == param_type::log || type == param_type::linear; }
 
   // representation conversion
   plain_value raw_to_plain(double raw) const;
@@ -142,6 +141,9 @@ struct param_topo final {
   plain_value default_plain() const;
   double default_raw() const { return plain_to_raw(default_plain()); }
   normalized_value default_normalized() const { return plain_to_normalized(default_plain()); }
+
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
+  bool is_real() const { return domain.type == domain_type::log || domain.type == domain_type::linear; }
 };
 
 // module group in plugin
@@ -224,7 +226,7 @@ param_topo::plain_to_normalized(plain_value plain) const
   double range = domain.max - domain.min;
   if (!is_real())
     return normalized_value((plain.step() - domain.min) / range);
-  if (type == param_type::linear)
+  if (domain.type == domain_type::linear)
     return normalized_value((plain.real() - domain.min) / range);
   return normalized_value(std::pow((plain.real() - domain.min) * (1 / range), 1 / domain.exp));
 }
@@ -235,7 +237,7 @@ param_topo::normalized_to_plain(normalized_value normalized) const
   double range = domain.max - domain.min;
   if (!is_real())
     return plain_value::from_step(domain.min + std::floor(std::min(range, normalized.value() * (range + 1))));
-  if (type == param_type::linear)
+  if (domain.type == domain_type::linear)
     return plain_value::from_real(domain.min + normalized.value() * range);
   return plain_value::from_real(std::pow(normalized.value(), domain.exp) * range + domain.min);
 }

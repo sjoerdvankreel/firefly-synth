@@ -377,17 +377,17 @@ param_combobox::
 param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), ComboBox()
 {
-  switch (param->param->type)
+  switch (param->param->domain.type)
   {
-  case param_type::name:
-    for (int i = 0; i < param->param->names.size(); i++)
-      addItem(param->param->names[i], i + 1);
+  case domain_type::name:
+    for (int i = 0; i < param->param->domain.names.size(); i++)
+      addItem(param->param->domain.names[i], i + 1);
     break;
-  case param_type::item:
-    for (int i = 0; i < param->param->items.size(); i++)
-      addItem(param->param->items[i].name, i + 1);
+  case domain_type::item:
+    for (int i = 0; i < param->param->domain.items.size(); i++)
+      addItem(param->param->domain.items[i].name, i + 1);
     break;
-  case param_type::step:
+  case domain_type::step:
     for (int i = param->param->domain.min; i <= param->param->domain.max; i++)
       addItem(std::to_string(i), param->param->domain.min + i + 1);
     break;
