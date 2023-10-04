@@ -70,19 +70,6 @@ struct gui_dimension final {
   row_sizes(row_sizes), column_sizes(column_sizes) {}
 };
 
-// item in list
-struct list_item final {
-  int tag = -1;
-  std::string id = {};
-  std::string name = {};
-
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(list_item);
-  template <class T> list_item(T const& item) :
-    tag(item.index), id(item.id), name(item.name) {}
-  list_item(std::string const& id, std::string const& name, int tag) :
-    tag(tag), id(id), name(name) {}
-};
-
 // param section ui
 struct section_topo_gui final {
   gui_bindings bindings;
@@ -97,6 +84,19 @@ struct section_topo final {
   std::string name;
   section_topo_gui gui;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
+};
+
+// item in list
+struct list_item final {
+  int tag = -1;
+  std::string id = {};
+  std::string name = {};
+
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(list_item);
+  template <class T> list_item(T const& item) :
+    tag(item.index), id(item.id), name(item.name) {}
+  list_item(std::string const& id, std::string const& name, int tag) :
+    tag(tag), id(id), name(name) {}
 };
 
 // parameter bounds
@@ -199,12 +199,13 @@ struct plugin_topo_gui final {
 
 // plugin definition
 struct plugin_topo final {
-  int polyphony;
   std::string id;
   std::string name;
-  plugin_type type;
   int version_major;
   int version_minor;
+
+  int polyphony;
+  plugin_type type;
   plugin_topo_gui gui;
   std::string preset_extension;
   std::vector<module_topo> modules;
