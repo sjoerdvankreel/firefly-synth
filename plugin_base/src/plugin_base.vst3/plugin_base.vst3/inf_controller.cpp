@@ -140,7 +140,7 @@ inf_controller::initialize(FUnknown* context)
       if(param.param->edit == param_edit::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
-      if (!param.param->is_real())
+      if (!param.param->domain.is_real())
         param_info.stepCount = param.param->domain.max - param.param->domain.min;
       parameters.addParameter(new param_wrapper(module.params[p].param, param_info));
     }

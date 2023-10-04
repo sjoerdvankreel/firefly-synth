@@ -91,7 +91,7 @@ param_toggle(
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = 0;
   result.domain.max = 1;
-  result.domain.type = domain_type::step;
+  result.domain.type = domain_type::toggle;
   return result;
 }
 

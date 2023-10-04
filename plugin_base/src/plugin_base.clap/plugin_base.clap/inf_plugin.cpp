@@ -22,7 +22,7 @@ namespace plugin_base::clap {
 static inline normalized_value
 clap_to_normalized(param_topo const& topo, clap_value clap)
 {
-  if(topo.is_real())
+  if(topo.domain.is_real())
     return normalized_value(clap.value());
   else
     return normalized_value(topo.raw_to_normalized(clap.value()));
@@ -31,7 +31,7 @@ clap_to_normalized(param_topo const& topo, clap_value clap)
 static inline clap_value
 normalized_to_clap(param_topo const& topo, normalized_value normalized)
 {
-  if(topo.is_real())
+  if(topo.domain.is_real())
     return clap_value(normalized.value());
   else
     return clap_value(topo.normalized_to_raw(normalized));
@@ -333,7 +333,7 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
 
   // this is what the clap_value is all about
   info->default_value = normalized_to_clap(*param.param, param.param->default_normalized()).value();
-  if (param.param->is_real())
+  if (param.param->domain.is_real())
   {
     info->min_value = 0;
     info->max_value = 1;

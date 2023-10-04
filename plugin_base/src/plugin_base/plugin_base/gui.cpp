@@ -388,6 +388,7 @@ param_component(gui, module, param), ComboBox()
       addItem(param->param->domain.items[i].name, i + 1);
     break;
   case domain_type::step:
+  case domain_type::toggle:
     for (int i = param->param->domain.min; i <= param->param->domain.max; i++)
       addItem(std::to_string(i), param->param->domain.min + i + 1);
     break;
@@ -412,7 +413,7 @@ param_component(gui, module, param), Slider()
   default: assert(false); break;
   }
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-  if (!param->param->is_real()) setRange(param->param->domain.min, param->param->domain.max, 1);
+  if (!param->param->domain.is_real()) setRange(param->param->domain.min, param->param->domain.max, 1);
   else setNormalisableRange(
     NormalisableRange<double>(param->param->domain.min, param->param->domain.max,
     [this](double s, double e, double v) { return _param->param->normalized_to_raw(normalized_value(v)); },

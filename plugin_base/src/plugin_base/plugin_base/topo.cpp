@@ -35,17 +35,19 @@ param_topo::plain_to_text(plain_value plain) const
 {
   std::string prefix = "";
   if(domain.min < 0 && 
-    ((is_real() && plain.real() > 0) || 
-    (!is_real() && plain.step() > 0))) 
+    ((domain.is_real() && plain.real() > 0) ||
+    (!domain.is_real() && plain.step() > 0)))
     prefix = "+";
 
   if (edit == param_edit::toggle)
     return plain.step() == 0 ? "Off" : "On";
   switch (domain.type)
   {
+  case domain_type::step:
+  case domain_type::toggle:
+    return prefix + std::to_string(plain.step());
   case domain_type::name: return domain.names[plain.step()];
   case domain_type::item: return domain.items[plain.step()].name;
-  case domain_type::step: return prefix + std::to_string(plain.step());
   default: break;
   }
 
@@ -59,7 +61,7 @@ bool
 param_topo::text_to_plain(
   std::string const& textual, plain_value& plain) const
 {
-  if (edit == param_edit::toggle)
+  if (domain.type == domain_type::toggle)
   {
     if (textual == "Off") plain = plain_value::from_step(0);
     else if (textual == "On") plain = plain_value::from_step(1);

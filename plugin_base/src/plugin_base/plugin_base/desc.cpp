@@ -193,7 +193,7 @@ validate_gui_bindings(module_topo const& module, gui_bindings const& bindings, i
   assert((enabled_context.size() == 0) || (enabled_context.size() == enabled_params.size()));
   for (int i = 0; i < enabled_params.size(); i++)
   {
-    assert(!module.params[enabled_params[i]].is_real());
+    assert(!module.params[enabled_params[i]].domain.is_real());
     assert(module.params[enabled_params[i]].slot_count == 1 || module.params[enabled_params[i]].slot_count == slot_count);
   }
 
@@ -204,7 +204,7 @@ validate_gui_bindings(module_topo const& module, gui_bindings const& bindings, i
   assert((visibility_context.size() == 0) || (visibility_context.size() == visibility_params.size()));
   for (int i = 0; i < visibility_params.size(); i++)
   {
-    assert(!module.params[visibility_params[i]].is_real());
+    assert(!module.params[visibility_params[i]].domain.is_real());
     assert(module.params[visibility_params[i]].slot_count == 1 || module.params[visibility_params[i]].slot_count == slot_count);
   }
 }
@@ -258,50 +258,70 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
 }
 
 static void
+validate_param_domain(param_domain const& domain, plain_value default_plain)
+{
+  assert(domain.default_.size());
+  assert(domain.max > domain.min);
+  assert((domain.type == domain_type::log) == (domain.exp != 0));
+  assert(domain.display == domain_display::normal || domain.type == domain_type::linear);
+
+  if (domain.type == domain_type::toggle)
+  {
+    assert(domain.min == 0);
+    assert(domain.max == 1);
+    assert(domain.type == domain_type::toggle);
+  }
+
+  if(domain.type == domain_type::name)
+  {
+    assert(domain.min == 0);
+    assert(domain.unit.size() == 0);
+    assert(domain.names.size() > 0);
+    assert(domain.max == domain.names.size() - 1);
+  }
+
+  if (domain.type == domain_type::item)
+  {
+    assert(domain.min == 0);
+    assert(domain.unit.size() == 0);
+    assert(domain.items.size() > 0);
+    assert(domain.max == domain.items.size() - 1);
+  }
+
+  if (!domain.is_real())
+  {
+    assert(domain.precision == 0);
+    assert((int)domain.min == domain.min);
+    assert((int)domain.max == domain.max);
+    assert(domain.min <= default_plain.step());
+    assert(domain.max >= default_plain.step());
+    assert(domain.display == domain_display::normal);
+  }
+
+  if (domain.is_real())
+  {
+    assert(domain.min <= default_plain.real());
+    assert(domain.max >= default_plain.real());
+    assert(0 <= domain.precision && domain.precision <= 10);
+  }
+}
+
+static void
 validate_param_topo(module_topo const& module, param_topo const& param)
 {
   assert(param.id.size());
   assert(param.name.size());
   assert(param.section >= 0);
-  assert(param.domain.default_.size());
-  assert(param.domain.max > param.domain.min);
   assert(param.section < module.sections.size());
   assert(0 < param.slot_count && param.slot_count <= 1024);
   assert(0 <= param.section && param.section < module.sections.size());
 
-  assert(param.domain.type != domain_type::log || param.domain.exp != 0);
-  assert(param.domain.type == domain_type::log || param.domain.exp == 0);
-  assert(param.format == param_format::plain || param.is_real());
+  assert(param.format == param_format::plain || param.domain.is_real());
   assert(param.dir != param_dir::output || param.rate == param_rate::block);
-  
-  assert(param.edit != param_edit::toggle || param.domain.min == 0);
-  assert(param.edit != param_edit::toggle || param.domain.max == 1);
-  assert(param.edit != param_edit::toggle || param.domain.type == domain_type::step);
 
-  assert(param.domain.type != domain_type::name || param.domain.names.size() > 0);
-  assert(param.domain.type == domain_type::name || param.domain.names.size() == 0);
-  assert(param.domain.type != domain_type::name || param.domain.min == 0);
-  assert(param.domain.type != domain_type::name || param.domain.unit.size() == 0);
-  assert(param.domain.type != domain_type::name || param.domain.max == param.domain.names.size() - 1);
+  assert(param.domain.is_real() || param.rate == param_rate::block);
 
-  assert(param.domain.type == domain_type::item || param.domain.items.size() == 0);
-  assert(param.domain.type != domain_type::item || param.domain.items.size() > 0);
-  assert(param.domain.type != domain_type::item || param.domain.unit.size() == 0);
-  assert(param.domain.type != domain_type::item || param.domain.min == 0);
-  assert(param.domain.type != domain_type::item || param.domain.max == param.domain.items.size() - 1);
-  assert(param.domain.display == domain_display::normal || param.domain.type == domain_type::linear);
-
-  assert(param.is_real() || param.domain.precision == 0);
-  assert(param.is_real() || param.rate == param_rate::block);
-  assert(param.is_real() || param.domain.display == domain_display::normal);
-  assert(param.is_real() || (int)param.domain.min == param.domain.min);
-  assert(param.is_real() || (int)param.domain.max == param.domain.max);
-  assert(param.is_real() || param.domain.min <= param.default_plain().step());
-  assert(param.is_real() || param.domain.max >= param.default_plain().step());
-  assert(!param.is_real() || param.domain.min <= param.default_plain().real());
-  assert(!param.is_real() || param.domain.max >= param.default_plain().real());
-  assert(!param.is_real() || (0 <= param.domain.precision && param.domain.precision <= 10));
-
+  validate_param_domain(param.domain, param.default_plain());
   validate_gui_bindings(module, param.bindings, param.slot_count);
   assert(param.dir == param_dir::input || param.bindings.enabled_selector == nullptr);
   assert((param.slot_count == 1) == (param.layout == gui_layout::single));

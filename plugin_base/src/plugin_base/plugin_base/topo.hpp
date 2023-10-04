@@ -17,7 +17,7 @@ enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
 enum class domain_display { normal, percentage };
-enum class domain_type { step, name, item, linear, log };
+enum class domain_type { toggle, step, name, item, linear, log };
 
 enum class param_dir { input, output };
 enum class param_rate { accurate, block };
@@ -84,7 +84,7 @@ struct section_topo final {
   gui_position position;
   gui_bindings bindings;
   gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);    
 };
 
 // parameter bounds
@@ -99,7 +99,9 @@ struct param_domain final {
   domain_display display;
   std::vector<item_topo> items;
   std::vector<std::string> names;
+
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_domain);
+  bool is_real() const { return type == domain_type::log || type == domain_type::linear; }
 };
 
 // param group in module
@@ -123,6 +125,8 @@ struct param_topo final {
   gui_position position;
   gui_bindings bindings;
 
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
+
   // representation conversion
   plain_value raw_to_plain(double raw) const;
   double plain_to_raw(plain_value plain) const;
@@ -141,9 +145,6 @@ struct param_topo final {
   plain_value default_plain() const;
   double default_raw() const { return plain_to_raw(default_plain()); }
   normalized_value default_normalized() const { return plain_to_normalized(default_plain()); }
-
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
-  bool is_real() const { return domain.type == domain_type::log || domain.type == domain_type::linear; }
 };
 
 // module group in plugin
@@ -204,7 +205,7 @@ param_topo::normalized_to_raw(normalized_value normalized) const
 inline double
 param_topo::plain_to_raw(plain_value plain) const
 {
-  if (is_real())
+  if (domain.is_real())
     return plain.real();
   else
     return plain.step();
@@ -214,7 +215,7 @@ inline plain_value
 param_topo::raw_to_plain(double raw) const
 {
   assert(domain.min <= raw && raw <= domain.max);
-  if(is_real())
+  if(domain.is_real())
     return plain_value::from_real(raw);
   else
     return plain_value::from_step(raw);
@@ -224,7 +225,7 @@ inline normalized_value
 param_topo::plain_to_normalized(plain_value plain) const
 {
   double range = domain.max - domain.min;
-  if (!is_real())
+  if (!domain.is_real())
     return normalized_value((plain.step() - domain.min) / range);
   if (domain.type == domain_type::linear)
     return normalized_value((plain.real() - domain.min) / range);
@@ -235,7 +236,7 @@ inline plain_value
 param_topo::normalized_to_plain(normalized_value normalized) const
 {
   double range = domain.max - domain.min;
-  if (!is_real())
+  if (!domain.is_real())
     return plain_value::from_step(domain.min + std::floor(std::min(range, normalized.value() * (range + 1))));
   if (domain.type == domain_type::linear)
     return plain_value::from_real(domain.min + normalized.value() * range);
