@@ -11,13 +11,13 @@ note_names()
 static param_topo
 param_base(
   std::string const& id, std::string const& name, int index, int slot_count, int section, std::string const& default_,
-  param_dir dir, param_rate rate, param_format format, gui_edit_type edit_type,
+  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result = {};
   result.id = id;
-  result.dir = dir;
+  result.direction = direction;
   result.name = name;
   result.rate = rate;
   result.index = index;
@@ -81,13 +81,13 @@ param_topo
 param_toggle(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   bool default_,
-  param_dir dir,
+  param_direction direction,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, index, slot_count, section, default_? "On": "Off", 
-    dir, param_rate::block, param_format::plain, gui_edit_type::toggle, 
+    direction, param_rate::block, param_format::plain, gui_edit_type::toggle, 
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = 0;
   result.domain.max = 1;
@@ -99,13 +99,13 @@ param_topo
 param_steps(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   int min, int max, int default_,
-  param_dir dir, gui_edit_type edit_type,
+  param_direction direction, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, index, slot_count, section, std::to_string(default_), 
-    dir, param_rate::block, param_format::plain, edit_type,
+    direction, param_rate::block, param_format::plain, edit_type,
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = min;
   result.domain.max = max;
@@ -117,13 +117,13 @@ param_topo
 param_items(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   std::vector<list_item>&& items, std::string const& default_,
-  param_dir dir, gui_edit_type edit_type,
+  param_direction direction, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, index, slot_count, section, default_.size()? default_: items[0].name,
-    dir, param_rate::block, param_format::plain, edit_type,
+    direction, param_rate::block, param_format::plain, edit_type,
     label_contents, label_align, label_justify, layout, position));
   result.domain.items = std::move(items);
   result.domain.min = 0;
@@ -136,13 +136,13 @@ param_topo
 param_names(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   std::vector<std::string> const& names, std::string const& default_,
-  param_dir dir, gui_edit_type edit_type,
+  param_direction direction, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, index, slot_count, section, default_.size()? default_: names[0],
-    dir, param_rate::block, param_format::plain, edit_type,
+    direction, param_rate::block, param_format::plain, edit_type,
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = 0;
   result.domain.max = names.size() - 1;
@@ -155,13 +155,13 @@ param_topo
 param_pct(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   double min, double max, double default_, int precision,
-  param_dir dir, param_rate rate, param_format format, bool unit, gui_edit_type edit_type,
+  param_direction direction, param_rate rate, param_format format, bool unit, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, index, slot_count, section, std::to_string(default_ * 100), 
-    dir, rate, format, edit_type,
+    direction, rate, format, edit_type,
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = min;
   result.domain.max = max;
@@ -176,13 +176,13 @@ param_topo
 param_linear(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   double min, double max, double default_, int precision, std::string const& unit,
-  param_dir dir, param_rate rate, param_format format, gui_edit_type edit_type,
+  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, index, slot_count, section, std::to_string(default_), 
-    dir, rate, format, edit_type,
+    direction, rate, format, edit_type,
     label_contents, label_align, label_justify, layout, position));
   result.domain.min = min;
   result.domain.max = max;
@@ -196,13 +196,13 @@ param_topo
 param_log(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   double min, double max, double default_, double midpoint, int precision, std::string const& unit,
-  param_dir dir, param_rate rate, param_format format, gui_edit_type edit_type,
+  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position)
 {
   param_topo result(param_base(
     id, name, index, slot_count, section, std::to_string(default_), 
-    dir, rate, format, edit_type,
+    direction, rate, format, edit_type,
     label_contents, label_align, label_justify, layout, position));
   result.domain.precision = precision;
   result.domain.type = domain_type::log;

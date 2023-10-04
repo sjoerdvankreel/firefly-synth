@@ -1,6 +1,6 @@
 #pragma once
 
-#include <plugin_base/topo.hpp>
+#include <plugin_base/topo/plugin.hpp>
 #include <string>
 
 namespace plugin_base {
@@ -27,28 +27,28 @@ param_topo
 param_toggle(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   bool default_, 
-  param_dir dir,
+  param_direction direction,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 param_topo
 param_steps(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   int min, int max, int default_,
-  param_dir dir, gui_edit_type edit_type,
+  param_direction direction, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 param_topo
 param_items(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   std::vector<list_item>&& items, std::string const& default_,
-  param_dir dir, gui_edit_type edit_type,
+  param_direction direction, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 param_topo
 param_names(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   std::vector<std::string> const& names, std::string const& default_,
-  param_dir dir, gui_edit_type edit_type,
+  param_direction direction, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 
@@ -57,21 +57,21 @@ param_topo
 param_pct(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   double min, double max, double default_, int precision,
-  param_dir dir, param_rate rate, param_format format, bool unit, gui_edit_type edit_type,
+  param_direction direction, param_rate rate, param_format format, bool unit, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 param_topo
 param_linear(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   double min, double max, double default_, int precision, std::string const& unit,
-  param_dir dir, param_rate rate, param_format format, gui_edit_type edit_type,
+  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 param_topo
 param_log(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   double min, double max, double default_, double midpoint, int precision, std::string const& unit,
-  param_dir dir, param_rate rate, param_format format, gui_edit_type edit_type,
+  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
 }

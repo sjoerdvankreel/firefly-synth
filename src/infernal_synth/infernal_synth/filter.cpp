@@ -1,7 +1,8 @@
 #include <plugin_base/dsp.hpp>
-#include <plugin_base/topo.hpp>
 #include <plugin_base/support.hpp>
 #include <plugin_base/engine.hpp>
+#include <plugin_base/topo/plugin.hpp>
+
 #include <infernal_synth/synth.hpp>
 
 #include <cmath>
@@ -49,19 +50,19 @@ filter_topo(int osc_slot_count)
 
   result.params.emplace_back(param_toggle(
     "{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1, section_main, false,
-    param_dir::input,
+    param_direction::input,
     gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position { 0, 0 }));
   
   result.params.emplace_back(param_log(
     "{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_freq, 1, section_main, 20, 20000, 1000, 1000, 0, "Hz",
-    param_dir::input, param_rate::accurate, param_format::normalized, gui_edit_type::hslider,
+    param_direction::input, param_rate::accurate, param_format::normalized, gui_edit_type::hslider,
     gui_label_contents::name, gui_label_align::bottom, gui_label_justify::near,
     gui_layout::single, gui_position { 0, 1 }));
 
   result.params.emplace_back(param_pct(
     "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", param_osc_gain, osc_slot_count, section_main, 0, 1, 0.5, 0,
-    param_dir::input, param_rate::accurate, param_format::plain, true, gui_edit_type::hslider,
+    param_direction::input, param_rate::accurate, param_format::plain, true, gui_edit_type::hslider,
     gui_label_contents::name, gui_label_align::bottom, gui_label_justify::near,
     gui_layout::horizontal, gui_position { 0, 2 }));
 

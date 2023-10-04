@@ -1,9 +1,9 @@
 #pragma once
 
-#include <plugin_base/topo.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/topo/plugin.hpp>
 
 #include <map>
 #include <vector>

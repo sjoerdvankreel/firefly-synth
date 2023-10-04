@@ -1,7 +1,7 @@
 #include <plugin_base/io.hpp>
-#include <plugin_base/topo.hpp>
 #include <plugin_base/gui.hpp>
 #include <plugin_base/gui_lnf.hpp>
+#include <plugin_base/topo/plugin.hpp>
 
 #include <vector>
 #include <algorithm>
@@ -531,7 +531,7 @@ public:
 void 
 plugin_gui::gui_changed(int index, plain_value plain)
 {
-  if(_desc->params[index]->param->dir == param_dir::input)
+  if(_desc->params[index]->param->direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_changed(index, plain);
 }
@@ -539,7 +539,7 @@ plugin_gui::gui_changed(int index, plain_value plain)
 void 
 plugin_gui::gui_begin_changes(int index)
 {
-  if (_desc->params[index]->param->dir == param_dir::input)
+  if (_desc->params[index]->param->direction == param_direction::input)
     for(int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_begin_changes(index);
 }
@@ -547,7 +547,7 @@ plugin_gui::gui_begin_changes(int index)
 void
 plugin_gui::gui_end_changes(int index)
 {
-  if (_desc->params[index]->param->dir == param_dir::input)
+  if (_desc->params[index]->param->direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_end_changes(index);
 }
@@ -555,7 +555,7 @@ plugin_gui::gui_end_changes(int index)
 void
 plugin_gui::gui_changing(int index, plain_value plain)
 {
-  if (_desc->params[index]->param->dir == param_dir::input)
+  if (_desc->params[index]->param->direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_changing(index, plain);
 }
@@ -635,7 +635,7 @@ plugin_gui::make_top_bar()
   result.add(save, { 0, 1 });
   save.onClick = [this]() {
     int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
-    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _desc->plugin->preset_extension, true, false, this);
+    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _desc->plugin->extension, true, false, this);
     chooser->launchAsync(flags, [this](FileChooser const& chooser) {
       auto path = chooser.getResult().getFullPathName();
       delete& chooser;
@@ -648,7 +648,7 @@ plugin_gui::make_top_bar()
   result.add(load, { 0, 0 });
   load.onClick = [this]() {
     int flags = FileBrowserComponent::openMode;
-    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _desc->plugin->preset_extension, true, false, this);
+    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _desc->plugin->extension, true, false, this);
     chooser->launchAsync(flags, [this](FileChooser const& chooser) {
       auto path = chooser.getResult().getFullPathName();
       delete &chooser;
@@ -820,7 +820,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   }
 
   // don't touch state for input in case it is a ui-state-bound parameter
-  if(param.param->dir == param_dir::output)
+  if(param.param->direction == param_direction::output)
     result->setEnabled(false);
 
   return *result;

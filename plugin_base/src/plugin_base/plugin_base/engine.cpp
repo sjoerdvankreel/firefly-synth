@@ -481,7 +481,7 @@ plugin_engine::process()
         for (int p = 0; p < module.params.size(); p++)
           for(int pi = 0; pi < module.params[p].slot_count; pi++)
           {
-            if (module.params[p].dir == param_dir::output)
+            if (module.params[p].direction == param_direction::output)
             {
               block_event out_event;
               out_event.param = param_global;

@@ -323,7 +323,7 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
   from_8bit_string(info->module, _engine.desc().modules[mapping.module_global].name.c_str());
 
   info->flags = 0;
-  if(param.param->dir != param_dir::input)
+  if(param.param->direction != param_direction::input)
     info->flags |= CLAP_PARAM_IS_READONLY;
   else
   {

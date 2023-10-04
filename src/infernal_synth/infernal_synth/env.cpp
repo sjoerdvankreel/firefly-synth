@@ -1,7 +1,7 @@
 #include <plugin_base/dsp.hpp>
-#include <plugin_base/topo.hpp>
 #include <plugin_base/engine.hpp>
 #include <plugin_base/support.hpp>
+#include <plugin_base/topo/plugin.hpp>
 
 #include <infernal_synth/synth.hpp>
 #include <cmath>
@@ -42,25 +42,25 @@ env_topo()
   
   result.params.emplace_back(param_log(
     "{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1, section_main, 0, 10, 0.03, 1, 3, "Sec",
-    param_dir::input, param_rate::accurate, param_format::plain, gui_edit_type::knob,
+    param_direction::input, param_rate::accurate, param_format::plain, gui_edit_type::knob,
     gui_label_contents::both, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position { 0, 0 }));
   
   result.params.emplace_back(param_log(
     "{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_d, 1, section_main, 0, 10, 0.1, 1, 3, "Sec",
-    param_dir::input, param_rate::accurate, param_format::plain, gui_edit_type::knob,
+    param_direction::input, param_rate::accurate, param_format::plain, gui_edit_type::knob,
     gui_label_contents::both, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
   
   result.params.emplace_back(param_pct(
     "{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1, section_main, 0, 1, 0.5, 0,
-    param_dir::input, param_rate::accurate, param_format::plain, true, gui_edit_type::knob,
+    param_direction::input, param_rate::accurate, param_format::plain, true, gui_edit_type::knob,
     gui_label_contents::both, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position{ 0, 2 }));
   
   result.params.emplace_back(param_log(
     "{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1, section_main, 0, 10, 0.2, 1, 3, "Sec",
-    param_dir::input, param_rate::accurate, param_format::plain, gui_edit_type::knob,
+    param_direction::input, param_rate::accurate, param_format::plain, gui_edit_type::knob,
     gui_label_contents::both, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position { 0, 3 }));
 

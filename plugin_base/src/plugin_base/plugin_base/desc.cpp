@@ -318,14 +318,14 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(0 <= param.section && param.section < module.sections.size());
 
   assert(param.format == param_format::plain || param.domain.is_real());
-  assert(param.dir != param_dir::output || param.rate == param_rate::block);
+  assert(param.direction != param_direction::output || param.rate == param_rate::block);
 
   assert(param.domain.is_real() || param.rate == param_rate::block);
   assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
 
   validate_param_domain(param.domain, param.default_plain());
   validate_gui_bindings(module, param.gui.bindings, param.slot_count);
-  assert(param.dir == param_dir::input || param.gui.bindings.enabled.selector == nullptr);
+  assert(param.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
   assert((param.slot_count == 1) == (param.gui.layout == gui_layout::single));
   validate_gui_positions(module.sections[param.section].gui, param.gui);
 }
@@ -342,7 +342,7 @@ validate_plugin_topo(plugin_topo const& topo)
   assert(topo.modules.size());
   assert(topo.version_major >= 0);
   assert(topo.version_minor >= 0);
-  assert(topo.preset_extension.size());
+  assert(topo.extension.size());
   assert(topo.gui.default_width <= 3840);
   assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
   validate_gui_dimensions(topo.gui);

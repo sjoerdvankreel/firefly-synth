@@ -1,6 +1,6 @@
 #pragma once
 
-#include <plugin_base/topo.hpp>
+#include <plugin_base/topo/plugin.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 
 #include <cstring>
