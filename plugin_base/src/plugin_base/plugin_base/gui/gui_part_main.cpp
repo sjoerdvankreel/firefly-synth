@@ -48,73 +48,6 @@ justification_type(gui_label_align align, gui_label_justify justify)
   return Justification::centred;
 }
 
-void 
-plugin_gui::gui_changed(int index, plain_value plain)
-{
-  if(_desc->params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_changed(index, plain);
-}
-
-void 
-plugin_gui::gui_begin_changes(int index)
-{
-  if (_desc->params[index]->param->dsp.direction == param_direction::input)
-    for(int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_begin_changes(index);
-}
-
-void
-plugin_gui::gui_end_changes(int index)
-{
-  if (_desc->params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_end_changes(index);
-}
-
-void
-plugin_gui::gui_changing(int index, plain_value plain)
-{
-  if (_desc->params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_changing(index, plain);
-}
-
-void
-plugin_gui::plugin_changed(int index, plain_value plain)
-{
-  for(int i = 0; i < _plugin_listeners[index].size(); i++)
-    _plugin_listeners[index][i]->plugin_changed(index, plain);
-}
-
-void 
-plugin_gui::remove_gui_listener(gui_listener* listener)
-{
-  auto iter = std::find(_gui_listeners.begin(), _gui_listeners.end(), listener);
-  if(iter != _gui_listeners.end()) _gui_listeners.erase(iter);
-}
-
-void 
-plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
-{
-  auto iter = std::find(_plugin_listeners[index].begin(), _plugin_listeners[index].end(), listener);
-  if (iter != _plugin_listeners[index].end()) _plugin_listeners[index].erase(iter);
-}
-
-void
-plugin_gui::state_loaded()
-{
-  int param_global = 0;
-  for (int m = 0; m < _desc->plugin->modules.size(); m++)
-  {
-    auto const& module = _desc->plugin->modules[m];
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          gui_changed(param_global++, (*_gui_state)[m][mi][p][pi]);
-  }
-}
-
 plugin_gui::
 plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* gui_state) :
 _desc(desc), _gui_state(gui_state), _plugin_listeners(desc->param_count)
@@ -140,62 +73,6 @@ plugin_gui::make_container()
   auto& result = make_component<grid_component>(gui_dimension({ -20, 1 }, { 1 }));
   result.add(make_top_bar(), { 0, 0 });
   result.add(make_content(), { 1, 0 });
-  return result;
-}
-
-// TODO just for now.
-// Give plugin more control over this.
-Component&
-plugin_gui::make_top_bar()
-{
-  auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }));
-
-  auto& save = make_component<TextButton>();
-  save.setButtonText("Save");
-  result.add(save, { 0, 1 });
-  save.onClick = [this]() {
-    int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
-    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _desc->plugin->extension, true, false, this);
-    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
-      auto path = chooser.getResult().getFullPathName();
-      delete& chooser;
-      if (path.length() == 0) return;
-      plugin_io(_desc).save_file(path.toStdString(), *_gui_state);
-    });};
-
-  auto& load = make_component<TextButton>();
-  load.setButtonText("Load");
-  result.add(load, { 0, 0 });
-  load.onClick = [this]() {
-    int flags = FileBrowserComponent::openMode;
-    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _desc->plugin->extension, true, false, this);
-    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
-      auto path = chooser.getResult().getFullPathName();
-      delete &chooser;
-      if(path.length() == 0) return;
-
-      auto icon = MessageBoxIconType::WarningIcon;
-      auto result = plugin_io(_desc).load_file(path.toStdString(), *_gui_state);
-      if(result.error.size())
-      {
-        auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
-        AlertWindow::showAsync(options, nullptr);
-        return;
-      }
-
-      state_loaded();
-      if (result.warnings.size())
-      {
-        String warnings;
-        for(int i = 0; i < result.warnings.size() && i < 5; i++)
-          warnings += String(result.warnings[i]) + "\n";
-        if(result.warnings.size() > 5)
-          warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
-        auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
-        AlertWindow::showAsync(options, nullptr);
-      }
-    });};
-
   return result;
 }
 
@@ -394,6 +271,62 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
     assert(false);
     return *((Component*)nullptr);
   }
+}
+
+// TODO just for now.
+// Give plugin more control over this.
+Component&
+plugin_gui::make_top_bar()
+{
+  auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }));
+
+  auto& save = make_component<TextButton>();
+  save.setButtonText("Save");
+  result.add(save, { 0, 1 });
+  save.onClick = [this]() {
+    int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
+    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _desc->plugin->extension, true, false, this);
+    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
+      auto path = chooser.getResult().getFullPathName();
+      delete& chooser;
+      if (path.length() == 0) return;
+      plugin_io(_desc).save_file(path.toStdString(), *_gui_state);
+    });};
+
+  auto& load = make_component<TextButton>();
+  load.setButtonText("Load");
+  result.add(load, { 0, 0 });
+  load.onClick = [this]() {
+    int flags = FileBrowserComponent::openMode;
+    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _desc->plugin->extension, true, false, this);
+    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
+      auto path = chooser.getResult().getFullPathName();
+      delete &chooser;
+      if(path.length() == 0) return;
+
+      auto icon = MessageBoxIconType::WarningIcon;
+      auto result = plugin_io(_desc).load_file(path.toStdString(), *_gui_state);
+      if(result.error.size())
+      {
+        auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
+        AlertWindow::showAsync(options, nullptr);
+        return;
+      }
+
+      fire_state_loaded();
+      if (result.warnings.size())
+      {
+        String warnings;
+        for(int i = 0; i < result.warnings.size() && i < 5; i++)
+          warnings += String(result.warnings[i]) + "\n";
+        if(result.warnings.size() > 5)
+          warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
+        auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
+        AlertWindow::showAsync(options, nullptr);
+      }
+    });};
+
+  return result;
 }
 
 }

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <plugin_base/gui.hpp>
+#include <plugin_base/gui/gui.hpp>
 #include <plugin_base.vst3/inf_controller.hpp>
 
 #include <public.sdk/source/vst/vsteditcontroller.h>
