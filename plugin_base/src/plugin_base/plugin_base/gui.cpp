@@ -42,30 +42,30 @@ gui_listener::gui_changed(int index, plain_value plain)
 }
 
 static Justification 
-justification_type(param_label_align align, param_label_justify justify)
+justification_type(gui_label_align align, gui_label_justify justify)
 {
   switch (align)
   {
-  case param_label_align::top:
-  case param_label_align::bottom:
+  case gui_label_align::top:
+  case gui_label_align::bottom:
     switch (justify) {
-    case param_label_justify::center: return Justification::centred;
-    case param_label_justify::near: return Justification::centredLeft;
-    case param_label_justify::far: return Justification::centredRight;
+    case gui_label_justify::center: return Justification::centred;
+    case gui_label_justify::near: return Justification::centredLeft;
+    case gui_label_justify::far: return Justification::centredRight;
     default: break; }
     break;
-  case param_label_align::left:
+  case gui_label_align::left:
     switch (justify) {
-    case param_label_justify::near: return Justification::topLeft;
-    case param_label_justify::far: return Justification::bottomLeft;
-    case param_label_justify::center: return Justification::centredLeft;
+    case gui_label_justify::near: return Justification::topLeft;
+    case gui_label_justify::far: return Justification::bottomLeft;
+    case gui_label_justify::center: return Justification::centredLeft;
     default: break; }
     break;
-  case param_label_align::right:
+  case gui_label_align::right:
     switch (justify) {
-    case param_label_justify::near: return Justification::topRight;
-    case param_label_justify::far: return Justification::bottomRight;
-    case param_label_justify::center: return Justification::centredRight;
+    case gui_label_justify::near: return Justification::topRight;
+    case gui_label_justify::far: return Justification::bottomRight;
+    case gui_label_justify::center: return Justification::centredRight;
     default: break; }
     break;
   default:
@@ -132,7 +132,7 @@ public Label
 {
 public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param):
-  binding_component(gui, module, &param->param->bindings, param->slot), Label()
+  binding_component(gui, module, &param->param->gui.bindings, param->slot), Label()
   { setText(param->name, dontSendNotification);  }
 };
 
@@ -300,7 +300,7 @@ binding_component::plugin_changed(int index, plain_value plain)
 
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
-binding_component(gui, module, &param->param->bindings, param->slot), _param(param)
+binding_component(gui, module, &param->param->gui.bindings, param->slot), _param(param)
 { _gui->add_plugin_listener(_param->global, this); }
 
 void
@@ -405,11 +405,11 @@ param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
 {
-  switch (param->param->edit)
+  switch (param->param->gui.edit_type)
   {
-  case param_edit::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
-  case param_edit::vslider: setSliderStyle(Slider::LinearVertical); break;
-  case param_edit::hslider: setSliderStyle(Slider::LinearHorizontal); break;
+  case gui_edit_type::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
+  case gui_edit_type::vslider: setSliderStyle(Slider::LinearVertical); break;
+  case gui_edit_type::hslider: setSliderStyle(Slider::LinearHorizontal); break;
   default: assert(false); break;
   }
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
@@ -737,7 +737,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   auto const& params = module.params;
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
     if(iter->param->section == section.index)
-      grid->add(make_params(module, &(*iter)), iter->param->position);
+      grid->add(make_params(module, &(*iter)), iter->param->gui.position);
   
   if(module.module->sections.size() == 1)
     return *grid;
@@ -772,25 +772,25 @@ plugin_gui::make_param_label_edit(
 {
   auto& result = make_component<grid_component>(dimension);
   result.add(make_param_label(module, param), label_position);
-  result.add(make_param_edit(module, param), edit_position);
+  result.add(make_param_editor(module, param), edit_position);
   return result;
 }
 
 Component&
 plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
 {
-  if(param.param->label_contents == param_label_contents::none)
-    return make_param_edit(module, param);
+  if(param.param->gui.label_contents == gui_label_contents::none)
+    return make_param_editor(module, param);
 
-  switch(param.param->label_align)
+  switch(param.param->gui.label_align)
   {
-  case param_label_align::top:
+  case gui_label_align::top:
     return make_param_label_edit(module, param, gui_dimension({ -label_height, 1 }, { 1 }), { 0, 0 }, { 1, 0 });
-  case param_label_align::bottom:
+  case gui_label_align::bottom:
     return make_param_label_edit(module, param, gui_dimension({ 1, -label_height, }, { 1 }), { 1, 0 }, { 0, 0 });
-  case param_label_align::left:
+  case gui_label_align::left:
     return make_param_label_edit(module, param, gui_dimension({ 1 }, { -label_width, 1 }), { 0, 0 }, { 0, 1 });
-  case param_label_align::right:
+  case gui_label_align::right:
     return make_param_label_edit(module, param, gui_dimension({ 1 }, { 1, -label_width }), { 0, 1 }, { 0, 0 });
   default:
     assert(false);
@@ -799,20 +799,20 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
 }
 
 Component&
-plugin_gui::make_param_edit(module_desc const& module, param_desc const& param)
+plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
   Component* result = nullptr;
-  switch (param.param->edit)
+  switch (param.param->gui.edit_type)
   {
-  case param_edit::knob:
-  case param_edit::hslider:
-  case param_edit::vslider:
+  case gui_edit_type::knob:
+  case gui_edit_type::hslider:
+  case gui_edit_type::vslider:
     result = &make_component<param_slider>(this, &module, &param); break;
-  case param_edit::text:
+  case gui_edit_type::text:
     result = &make_component<param_textbox>(this, &module, &param); break;
-  case param_edit::list:
+  case gui_edit_type::list:
     result = &make_component<param_combobox>(this, &module, &param); break;
-  case param_edit::toggle:
+  case gui_edit_type::toggle:
     result = &make_component<param_toggle_button>(this, &module, &param); break;
   default:
     assert(false);
@@ -830,21 +830,21 @@ Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
 {
   Label* result = {};
-  auto contents = param.param->label_contents;
+  auto contents = param.param->gui.label_contents;
   switch (contents)
   {
-  case param_label_contents::name:
+  case gui_label_contents::name:
     result = &make_component<param_name_label>(this, &module, &param);
     break;
-  case param_label_contents::both:
-  case param_label_contents::value:
-    result = &make_component<param_value_label>(this, &module, &param, contents == param_label_contents::both);
+  case gui_label_contents::both:
+  case gui_label_contents::value:
+    result = &make_component<param_value_label>(this, &module, &param, contents == gui_label_contents::both);
     break;
   default:
     assert(false);
     break;
   }
-  result->setJustificationType(justification_type(param.param->label_align, param.param->label_justify));
+  result->setJustificationType(justification_type(param.param->gui.label_align, param.param->gui.label_justify));
   return *result;
 }
 

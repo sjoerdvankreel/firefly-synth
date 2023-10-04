@@ -50,19 +50,19 @@ filter_topo(int osc_slot_count)
   result.params.emplace_back(param_toggle(
     "{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1, section_main, false,
     param_dir::input,
-    param_label_contents::name, param_label_align::left, param_label_justify::center,
+    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position { 0, 0 }));
   
   result.params.emplace_back(param_log(
     "{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_freq, 1, section_main, 20, 20000, 1000, 1000, 0, "Hz",
-    param_dir::input, param_rate::accurate, param_format::normalized, param_edit::hslider,
-    param_label_contents::name, param_label_align::bottom, param_label_justify::near,
+    param_dir::input, param_rate::accurate, param_format::normalized, gui_edit_type::hslider,
+    gui_label_contents::name, gui_label_align::bottom, gui_label_justify::near,
     gui_layout::single, gui_position { 0, 1 }));
 
   result.params.emplace_back(param_pct(
     "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", param_osc_gain, osc_slot_count, section_main, 0, 1, 0.5, 0,
-    param_dir::input, param_rate::accurate, param_format::plain, true, param_edit::hslider,
-    param_label_contents::name, param_label_align::bottom, param_label_justify::near,
+    param_dir::input, param_rate::accurate, param_format::plain, true, gui_edit_type::hslider,
+    gui_label_contents::name, gui_label_align::bottom, gui_label_justify::near,
     gui_layout::horizontal, gui_position { 0, 2 }));
 
   return result;

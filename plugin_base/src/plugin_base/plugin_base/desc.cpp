@@ -223,7 +223,7 @@ validate_section_topo(module_topo const& module, section_topo const& section)
 
   validate_gui_bindings(module, section.bindings, 1);
   validate_gui_constraints(section, module.params, 
-    [](param_topo const& p) { return p.bindings.visibility_selector; },
+    [](param_topo const& p) { return p.gui.bindings.visibility_selector; },
     [&section](param_topo const& p) { return p.section == section.index; });
 }
 
@@ -250,10 +250,10 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   for(int p = 0; p < module.params.size(); p++)
   {
     auto const& param = module.params[p];
-    for (int e = 0; e < param.bindings.enabled_params.size(); e++)
-      assert(param.index != param.bindings.enabled_params[e]);
-    for(int v = 0; v < param.bindings.visibility_params.size(); v++)
-      assert(param.index != param.bindings.visibility_params[v]);
+    for (int e = 0; e < param.gui.bindings.enabled_params.size(); e++)
+      assert(param.index != param.gui.bindings.enabled_params[e]);
+    for(int v = 0; v < param.gui.bindings.visibility_params.size(); v++)
+      assert(param.index != param.gui.bindings.visibility_params[v]);
   }
 }
 
@@ -319,16 +319,16 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.dir != param_dir::output || param.rate == param_rate::block);
 
   assert(param.domain.is_real() || param.rate == param_rate::block);
-  assert(param.edit != param_edit::toggle || param.domain.type == domain_type::toggle);
+  assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
 
   validate_param_domain(param.domain, param.default_plain());
-  validate_gui_bindings(module, param.bindings, param.slot_count);
-  assert(param.dir == param_dir::input || param.bindings.enabled_selector == nullptr);
-  assert((param.slot_count == 1) == (param.layout == gui_layout::single));
-  assert(0 < param.position.row_span && param.position.row_span <= 1024);
-  assert(0 < param.position.column_span && param.position.column_span <= 1024);
-  assert(0 <= param.position.row && param.position.row + param.position.row_span <= module.sections[param.section].dimension.row_sizes.size());
-  assert(0 <= param.position.column && param.position.column + param.position.column_span <= module.sections[param.section].dimension.column_sizes.size());
+  validate_gui_bindings(module, param.gui.bindings, param.slot_count);
+  assert(param.dir == param_dir::input || param.gui.bindings.enabled_selector == nullptr);
+  assert((param.slot_count == 1) == (param.gui.layout == gui_layout::single));
+  assert(0 < param.gui.position.row_span && param.gui.position.row_span <= 1024);
+  assert(0 < param.gui.position.column_span && param.gui.position.column_span <= 1024);
+  assert(0 <= param.gui.position.row && param.gui.position.row + param.gui.position.row_span <= module.sections[param.section].dimension.row_sizes.size());
+  assert(0 <= param.gui.position.column && param.gui.position.column + param.gui.position.column_span <= module.sections[param.section].dimension.column_sizes.size());
 }
 
 static void

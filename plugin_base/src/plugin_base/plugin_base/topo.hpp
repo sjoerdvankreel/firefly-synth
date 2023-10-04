@@ -11,21 +11,22 @@
 namespace plugin_base {
 
 enum class plugin_type { synth, fx };
-enum class gui_layout { single, horizontal, vertical, tabbed };
 
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
-enum class domain_display { normal, percentage };
-enum class domain_type { toggle, step, name, item, linear, log };
-
 enum class param_dir { input, output };
 enum class param_rate { accurate, block };
 enum class param_format { plain, normalized };
-enum class param_edit { toggle, list, text, knob, hslider, vslider };
-enum class param_label_justify { near, center, far };
-enum class param_label_align { top, bottom, left, right };
-enum class param_label_contents { none, name, value, both };
+
+enum class domain_display { normal, percentage };
+enum class domain_type { toggle, step, name, item, linear, log };
+
+enum class gui_label_justify { near, center, far };
+enum class gui_label_align { top, bottom, left, right };
+enum class gui_label_contents { none, name, value, both };
+enum class gui_layout { single, horizontal, vertical, tabbed };
+enum class gui_edit_type { toggle, list, text, knob, hslider, vslider };
 
 class module_engine;
 typedef std::unique_ptr<module_engine>(*
@@ -104,6 +105,18 @@ struct param_domain final {
   bool is_real() const { return type == domain_type::log || type == domain_type::linear; }
 };
 
+// parameter ui
+struct param_gui final {
+  gui_layout layout;
+  gui_position position;
+  gui_bindings bindings;
+  gui_edit_type edit_type;
+  gui_label_align label_align;
+  gui_label_justify label_justify;
+  gui_label_contents label_contents;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_gui);
+};
+
 // param group in module
 struct param_topo final {
   int index;
@@ -111,20 +124,11 @@ struct param_topo final {
   int slot_count;
   std::string id;
   std::string name;
-  param_domain domain;
-
+  param_gui gui;
   param_dir dir;
   param_rate rate;
-  param_edit edit;
+  param_domain domain;
   param_format format;
-  param_label_align label_align;
-  param_label_justify label_justify;
-  param_label_contents label_contents;
-
-  gui_layout layout;
-  gui_position position;
-  gui_bindings bindings;
-
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
 
   // representation conversion

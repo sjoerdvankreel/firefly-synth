@@ -39,7 +39,7 @@ param_topo::plain_to_text(plain_value plain) const
     (!domain.is_real() && plain.step() > 0)))
     prefix = "+";
 
-  if (edit == param_edit::toggle)
+  if (domain.type == domain_type::toggle)
     return plain.step() == 0 ? "Off" : "On";
   switch (domain.type)
   {

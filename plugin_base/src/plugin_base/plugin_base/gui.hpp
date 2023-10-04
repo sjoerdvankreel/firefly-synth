@@ -55,8 +55,8 @@ public juce::Component
   Component& make_sections(module_desc const& module);
   Component& make_section(module_desc const& module, section_topo const& section);
   Component& make_params(module_desc const& module, param_desc const* params);
-  Component& make_param_edit(module_desc const& module, param_desc const& param);
   Component& make_param_label(module_desc const& module, param_desc const& param);
+  Component& make_param_editor(module_desc const& module, param_desc const& param);
   Component& make_multi_param(module_desc const& module, param_desc const* params);
   Component& make_single_param(module_desc const& module, param_desc const& param);
   Component& make_param_label_edit(module_desc const& module, param_desc const& param,

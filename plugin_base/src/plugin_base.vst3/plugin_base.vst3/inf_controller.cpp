@@ -137,7 +137,7 @@ inf_controller::initialize(FUnknown* context)
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;
-      if(param.param->edit == param_edit::list)
+      if(param.param->gui.edit_type == gui_edit_type::list)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
       if (!param.param->domain.is_real())
