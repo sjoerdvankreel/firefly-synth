@@ -11,6 +11,7 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 enum { section_main };
+enum { param_sync, param_rate, param_num, param_denom };
 
 class lfo_engine: 
 public module_engine {
@@ -36,25 +37,25 @@ lfo_topo()
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(); };
 
   result.params.emplace_back(param_toggle(
-    "{2A9CAE77-13B0-406F-BA57-1A30ED2F5D80}", "Sync", lfo_param_sync, 1, section_main, false,
+    "{2A9CAE77-13B0-406F-BA57-1A30ED2F5D80}", "Sync", param_sync, 1, section_main, false,
     param_dir::input,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 0 }));
 
   result.params.emplace_back(param_linear(
-    "{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", lfo_param_rate, 1, section_main, 0.1, 20, 1, 2, "Hz",
+    "{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1, section_main, 0.1, 20, 1, 2, "Hz",
     param_dir::input, param_rate::accurate, param_format::plain, param_edit::knob,
     param_label_contents::both, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
 
   result.params.emplace_back(param_steps(
-    "{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", lfo_param_num, 1, section_main, 1, 16, 1,
+    "{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1, section_main, 1, 16, 1,
     param_dir::input, param_edit::list,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 2 }));
 
   result.params.emplace_back(param_steps(
-    "{84B58AC9-C401-4580-978C-60591AFB757B}", "Denom", lfo_param_denom, 1, section_main, 1, 16, 4,
+    "{84B58AC9-C401-4580-978C-60591AFB757B}", "Denom", param_denom, 1, section_main, 1, 16, 4,
     param_dir::input, param_edit::list,
     param_label_contents::name, param_label_align::left, param_label_justify::center,
     gui_layout::single, gui_position{ 0, 3 }));

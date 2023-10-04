@@ -19,6 +19,7 @@ on-note/hold-type cv
 provide to/fromstring for steps
 make nice assert messages
 drop format::plain in favor of modulation
+param value dependent on other param
 
 * continuing
 - keep updating the demo apps
