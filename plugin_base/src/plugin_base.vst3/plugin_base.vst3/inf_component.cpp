@@ -120,7 +120,7 @@ inf_component::process(ProcessData& data)
       {
         int param_index = _engine.desc().param_tag_to_index.at(queue->getParameterId());
         auto const& mapping = _engine.desc().mappings[param_index];
-        auto rate = _engine.desc().param_at(mapping).param->rate;
+        auto rate = _engine.desc().param_at(mapping).param->dsp.rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
           block_event event;

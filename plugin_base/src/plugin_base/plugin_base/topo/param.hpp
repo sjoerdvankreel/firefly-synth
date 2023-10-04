@@ -30,6 +30,26 @@ struct list_item final {
   tag(tag), id(id), name(name) {}
 };
 
+// parameter dsp
+struct param_dsp final {
+  param_rate rate;
+  param_format format;
+  param_direction direction;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_dsp);
+};
+
+// parameter ui
+struct param_topo_gui final {
+  gui_layout layout;
+  gui_position position;
+  gui_bindings bindings;
+  gui_edit_type edit_type;
+  gui_label_align label_align;
+  gui_label_justify label_justify;
+  gui_label_contents label_contents;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo_gui);
+};
+
 // parameter bounds
 struct param_domain final {
   double min;
@@ -47,19 +67,7 @@ struct param_domain final {
   bool is_real() const { return type == domain_type::log || type == domain_type::linear; }
 };
 
-// parameter ui
-struct param_topo_gui final {
-  gui_layout layout;
-  gui_position position;
-  gui_bindings bindings;
-  gui_edit_type edit_type;
-  gui_label_align label_align;
-  gui_label_justify label_justify;
-  gui_label_contents label_contents;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo_gui);
-};
-
-// param group in module
+// parameter in module
 struct param_topo final {
   int index;
   int section;
@@ -67,11 +75,9 @@ struct param_topo final {
   std::string id;
   std::string name;
 
-  param_rate rate;
+  param_dsp dsp;
   param_topo_gui gui;
   param_domain domain;
-  param_format format;
-  param_direction direction;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
 
   // representation conversion

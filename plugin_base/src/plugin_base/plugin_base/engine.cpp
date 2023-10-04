@@ -343,7 +343,7 @@ plugin_engine::process()
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        if(param.rate == param_rate::block)
+        if(param.dsp.rate == param_rate::block)
           for(int pi = 0; pi < param.slot_count; pi++)
             _block_automation[m][mi][p][pi] = _plugin_state[m][mi][p][pi];
         else
@@ -397,7 +397,7 @@ plugin_engine::process()
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        if (param.rate == param_rate::accurate && param.format == param_format::plain)
+        if (param.dsp.rate == param_rate::accurate && param.dsp.format == param_format::plain)
           for(int pi = 0; pi < param.slot_count; pi++)
             for(int f = 0; f < frame_count; f++)
               _accurate_automation[m][mi][p][pi][f] = param.normalized_to_plain(
@@ -481,7 +481,7 @@ plugin_engine::process()
         for (int p = 0; p < module.params.size(); p++)
           for(int pi = 0; pi < module.params[p].slot_count; pi++)
           {
-            if (module.params[p].direction == param_direction::output)
+            if (module.params[p].dsp.direction == param_direction::output)
             {
               block_event out_event;
               out_event.param = param_global;

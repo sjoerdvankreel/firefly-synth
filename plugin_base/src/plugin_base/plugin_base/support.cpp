@@ -17,11 +17,11 @@ param_base(
 {
   param_topo result = {};
   result.id = id;
-  result.direction = direction;
+  result.dsp.direction = direction;
   result.name = name;
-  result.rate = rate;
+  result.dsp.rate = rate;
   result.index = index;
-  result.format = format;
+  result.dsp.format = format;
   result.section = section;
   result.slot_count = slot_count;
   result.domain.default_ = default_;

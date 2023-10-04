@@ -55,7 +55,7 @@ struct process_block final {
 inline void 
 process_block::set_out_param(int param, int slot, double raw) const
 {
-  assert(module.params[param].direction == param_direction::output);
+  assert(module.params[param].dsp.direction == param_direction::output);
   out->params[param][slot] = module.params[param].raw_to_plain(raw);
 }
 

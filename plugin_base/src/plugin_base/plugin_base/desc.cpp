@@ -155,7 +155,7 @@ validate_frame_dims(
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        int accurate_frames = param.rate == param_rate::accurate? frame_count: 0;
+        int accurate_frames = param.dsp.rate == param_rate::accurate? frame_count: 0;
         (void)accurate_frames;
         assert(dims.accurate_automation[m][mi][p].size() == param.slot_count);
         for(int pi = 0; pi < param.slot_count; pi++)
@@ -317,15 +317,15 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(0 < param.slot_count && param.slot_count <= 1024);
   assert(0 <= param.section && param.section < module.sections.size());
 
-  assert(param.format == param_format::plain || param.domain.is_real());
-  assert(param.direction != param_direction::output || param.rate == param_rate::block);
+  assert(param.dsp.format == param_format::plain || param.domain.is_real());
+  assert(param.dsp.direction != param_direction::output || param.dsp.rate == param_rate::block);
 
-  assert(param.domain.is_real() || param.rate == param_rate::block);
+  assert(param.domain.is_real() || param.dsp.rate == param_rate::block);
   assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
 
   validate_param_domain(param.domain, param.default_plain());
   validate_gui_bindings(module, param.gui.bindings, param.slot_count);
-  assert(param.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
+  assert(param.dsp.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
   assert((param.slot_count == 1) == (param.gui.layout == gui_layout::single));
   validate_gui_positions(module.sections[param.section].gui, param.gui);
 }
@@ -648,7 +648,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
         module_global_audio[m][mi].emplace_back(2, audio_frames);
       for (int p = 0; p < module.params.size(); p++)
       {
-        int param_frames = module.params[p].rate == param_rate::accurate ? frame_count : 0;
+        int param_frames = module.params[p].dsp.rate == param_rate::accurate ? frame_count : 0;
         accurate_automation[m][mi].emplace_back(module.params[p].slot_count, param_frames);
       }
     }

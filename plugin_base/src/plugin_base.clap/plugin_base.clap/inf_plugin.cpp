@@ -323,7 +323,7 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
   from_8bit_string(info->module, _engine.desc().modules[mapping.module_global].name.c_str());
 
   info->flags = 0;
-  if(param.param->direction != param_direction::input)
+  if(param.param->dsp.direction != param_direction::input)
     info->flags |= CLAP_PARAM_IS_READONLY;
   else
   {
@@ -490,7 +490,7 @@ inf_plugin::process(clap_process const* process) noexcept
       auto const& mapping = _engine.desc().mappings[index];
       auto const& param = _engine.desc().param_at(mapping);
       push_to_gui(index, clap_value(event->value));
-      if (param.param->rate == param_rate::block)
+      if (param.param->dsp.rate == param_rate::block)
       {
         if (_block_automation_seen[index] == 0)
         {

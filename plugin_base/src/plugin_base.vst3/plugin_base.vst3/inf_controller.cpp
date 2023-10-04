@@ -88,7 +88,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);
 #ifndef NDEBUG
-  if(param->direction == param_direction::input)
+  if(param->dsp.direction == param_direction::input)
     debug_breakable();
 #endif
   return kResultTrue;
@@ -133,7 +133,7 @@ inf_controller::initialize(FUnknown* context)
       param_info.defaultNormalizedValue = param.param->default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;
-      if(param.param->direction == param_direction::input)
+      if(param.param->dsp.direction == param_direction::input)
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;

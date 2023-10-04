@@ -531,7 +531,7 @@ public:
 void 
 plugin_gui::gui_changed(int index, plain_value plain)
 {
-  if(_desc->params[index]->param->direction == param_direction::input)
+  if(_desc->params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_changed(index, plain);
 }
@@ -539,7 +539,7 @@ plugin_gui::gui_changed(int index, plain_value plain)
 void 
 plugin_gui::gui_begin_changes(int index)
 {
-  if (_desc->params[index]->param->direction == param_direction::input)
+  if (_desc->params[index]->param->dsp.direction == param_direction::input)
     for(int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_begin_changes(index);
 }
@@ -547,7 +547,7 @@ plugin_gui::gui_begin_changes(int index)
 void
 plugin_gui::gui_end_changes(int index)
 {
-  if (_desc->params[index]->param->direction == param_direction::input)
+  if (_desc->params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_end_changes(index);
 }
@@ -555,7 +555,7 @@ plugin_gui::gui_end_changes(int index)
 void
 plugin_gui::gui_changing(int index, plain_value plain)
 {
-  if (_desc->params[index]->param->direction == param_direction::input)
+  if (_desc->params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_changing(index, plain);
 }
@@ -820,7 +820,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   }
 
   // don't touch state for input in case it is a ui-state-bound parameter
-  if(param.param->direction == param_direction::output)
+  if(param.param->dsp.direction == param_direction::output)
     result->setEnabled(false);
 
   return *result;
