@@ -1,7 +1,7 @@
 #pragma once
 
-#include <plugin_base/gui.hpp>
 #include <plugin_base/desc.hpp>
+#include <plugin_base/gui/gui.hpp>
 #include <plugin_base/utility.hpp>
 
 #include <pluginterfaces/gui/iplugview.h>

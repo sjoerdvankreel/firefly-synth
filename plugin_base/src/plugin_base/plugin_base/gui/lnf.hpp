@@ -4,7 +4,7 @@
 
 namespace plugin_base {
 
-class gui_lnf:
+class lnf:
 public juce::LookAndFeel_V4 {
 public:
   void drawLabel(juce::Graphics& g, juce::Label& label) override;

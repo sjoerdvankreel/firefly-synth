@@ -1,11 +1,11 @@
-#include <plugin_base/gui_lnf.hpp>
+#include <plugin_base/gui/lnf.hpp>
 
 using namespace juce;
 
 namespace plugin_base {
 
 void 
-gui_lnf::drawLabel(Graphics& g, Label& label)
+lnf::drawLabel(Graphics& g, Label& label)
 {
   g.fillAll(label.findColour(Label::backgroundColourId));
   if (!label.isBeingEdited())
@@ -16,8 +16,7 @@ gui_lnf::drawLabel(Graphics& g, Label& label)
     g.setColour(label.findColour(Label::textColourId).withMultipliedAlpha(alpha));
     g.drawText(label.getText(), area, label.getJustificationType(), false);
     g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
-  }
-  else if (label.isEnabled())
+  } else if (label.isEnabled())
     g.setColour(label.findColour(Label::outlineColourId));
   g.drawRect(label.getLocalBounds());
 }

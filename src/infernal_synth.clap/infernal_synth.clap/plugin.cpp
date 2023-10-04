@@ -1,7 +1,7 @@
 #include <infernal_synth/synth.hpp>
 #include <infernal_synth/plugin.hpp>
 
-#include <plugin_base/gui.hpp>
+#include <plugin_base/gui/gui.hpp>
 #include <plugin_base.clap/support.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 

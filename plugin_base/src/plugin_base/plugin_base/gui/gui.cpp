@@ -1,6 +1,6 @@
 #include <plugin_base/io.hpp>
-#include <plugin_base/gui.hpp>
-#include <plugin_base/gui_lnf.hpp>
+#include <plugin_base/gui/gui.hpp>
+#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/topo/plugin.hpp>
 
 #include <vector>
@@ -15,7 +15,7 @@ static inline int constexpr label_height = 15;
 static inline int constexpr groupbox_padding = 6;
 static inline int constexpr groupbox_padding_top = 16;
 
-static std::unique_ptr<gui_lnf> _lnf = {};
+static std::unique_ptr<lnf> _lnf = {};
 
 void 
 gui_terminate()
@@ -29,7 +29,7 @@ void
 gui_init()
 { 
   initialiseJuce_GUI(); 
-  _lnf = std::make_unique<gui_lnf>();
+  _lnf = std::make_unique<lnf>();
   LookAndFeel::setDefaultLookAndFeel(_lnf.get());
 }
 

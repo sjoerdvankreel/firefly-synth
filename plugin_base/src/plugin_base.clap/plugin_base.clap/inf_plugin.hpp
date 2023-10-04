@@ -1,7 +1,7 @@
 #pragma once
 
-#include <plugin_base/gui.hpp>
 #include <plugin_base/engine.hpp>
+#include <plugin_base/gui/gui.hpp>
 #include <plugin_base/block/host.hpp>
 
 #include <clap/helpers/plugin.hh>
