@@ -17,14 +17,11 @@ handle generic midi in
 start documenting stuff
 on-note/hold-type cv
 provide to/fromstring for steps
-make nice assert messages
 drop format::plain in favor of modulation
 param value dependent on other param
 mark param as modulatable or not
 clean up the topo
-all ui to gui
 move note_names to plug
-rename plugin_gui to editor
 cleanup the validation
 rename item_topo
 

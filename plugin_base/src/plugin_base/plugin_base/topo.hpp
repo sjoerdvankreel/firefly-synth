@@ -84,19 +84,19 @@ struct item_topo final {
 };
 
 // param section ui
-struct section_gui final {
+struct section_topo_gui final {
   gui_bindings bindings;
   gui_position position;
   gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_gui);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo_gui);
 };
 
 // param ui section
 struct section_topo final {
   int index;
-  section_gui gui;
   std::string name;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);    
+  section_topo_gui gui;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
 };
 
 // parameter bounds
@@ -117,7 +117,7 @@ struct param_domain final {
 };
 
 // parameter ui
-struct param_gui final {
+struct param_topo_gui final {
   gui_layout layout;
   gui_position position;
   gui_bindings bindings;
@@ -125,7 +125,7 @@ struct param_gui final {
   gui_label_align label_align;
   gui_label_justify label_justify;
   gui_label_contents label_contents;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_gui);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo_gui);
 };
 
 // param group in module
@@ -135,7 +135,7 @@ struct param_topo final {
   int slot_count;
   std::string id;
   std::string name;
-  param_gui gui;
+  param_topo_gui gui;
   param_dir dir;
   param_rate rate;
   param_domain domain;
@@ -163,11 +163,11 @@ struct param_topo final {
 };
 
 // module ui
-struct module_gui final {
+struct module_topo_gui final {
   gui_layout layout;
   gui_position position;
   gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_gui);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo_gui);
 };
 
 // module group in plugin
@@ -177,7 +177,7 @@ struct module_topo final {
   int output_count;
   std::string id;
   std::string name;
-  module_gui gui;
+  module_topo_gui gui;
   module_stage stage;
   module_output output;  
   std::vector<param_topo> params;
@@ -187,15 +187,14 @@ struct module_topo final {
 };
 
 // plugin ui
-// TODO drop _t
-struct plugin_gui_t final {
+struct plugin_topo_gui final {
   int min_width;
   int max_width;
   int default_width;
   int aspect_ratio_width;
   int aspect_ratio_height;
   gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_gui_t);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo_gui);
 };
 
 // plugin definition
@@ -203,11 +202,11 @@ struct plugin_topo final {
   int polyphony;
   std::string id;
   std::string name;
-  plugin_gui_t gui;
   plugin_type type;
   int version_major;
   int version_minor;
-  std::string preset_extension;  
+  plugin_topo_gui gui;
+  std::string preset_extension;
   std::vector<module_topo> modules;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo);
 };
