@@ -27,16 +27,22 @@ struct module_topo_gui final {
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo_gui);
 };
 
-// module group in plugin
+// module dsp
+struct module_topo_dsp final {
+  int output_count;
+  module_stage stage;
+  module_output output;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo_dsp);
+};
+
+// module in plugin
 struct module_topo final {
   int index;
   int slot_count;
-  int output_count;
   std::string id;
   std::string name;
   module_topo_gui gui;
-  module_stage stage;
-  module_output output;  
+  module_topo_dsp dsp;
   std::vector<param_topo> params;
   std::vector<section_topo> sections;
   module_engine_factory engine_factory;

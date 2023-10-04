@@ -302,36 +302,36 @@ plugin_engine::process()
   {
     auto const& module = _desc.plugin->modules[m];
     for (int mi = 0; mi < module.slot_count; mi++)
-      if(module.output == module_output::cv)
-        if(module.stage != module_stage::voice)
+      if(module.dsp.output == module_output::cv)
+        if(module.dsp.stage != module_stage::voice)
         {
-          for(int oi = 0; oi < module.output_count; oi++)
+          for(int oi = 0; oi < module.dsp.output_count; oi++)
             std::fill(_global_cv_state[m][mi][oi].begin(),
                       _global_cv_state[m][mi][oi].begin() + frame_count, 0.0f);
         } else {
           for (int v = 0; v < _voice_states.size(); v++)
             if(_voice_states[v].stage != voice_stage::unused)
-              for (int oi = 0; oi < module.output_count; oi++)
+              for (int oi = 0; oi < module.dsp.output_count; oi++)
                 std::fill(_voice_cv_state[v][m][mi][oi].begin(),
                           _voice_cv_state[v][m][mi][oi].begin() + frame_count, 0.0f);
         }
-      else if (module.output == module_output::audio)
-        if (module.stage != module_stage::voice)
+      else if (module.dsp.output == module_output::audio)
+        if (module.dsp.stage != module_stage::voice)
         {
-          for (int oi = 0; oi < module.output_count; oi++)
+          for (int oi = 0; oi < module.dsp.output_count; oi++)
             for(int c = 0; c < 2; c++)
               std::fill(_global_audio_state[m][mi][oi][c].begin(), 
                        _global_audio_state[m][mi][oi][c].begin() + frame_count, 0.0f);
         } else {
            for (int v = 0; v < _voice_states.size(); v++)
              if (_voice_states[v].stage != voice_stage::unused)
-               for (int oi = 0; oi < module.output_count; oi++)
+               for (int oi = 0; oi < module.dsp.output_count; oi++)
                  for (int c = 0; c < 2; c++)
                    std::fill(_voice_audio_state[v][m][mi][oi][c].begin(), 
                              _voice_audio_state[v][m][mi][oi][c].begin() + frame_count, 0.0f);
         }
       else
-        assert(module.output == module_output::none);
+        assert(module.dsp.output == module_output::none);
   }
 
   // set automation values to state, automation may overwrite

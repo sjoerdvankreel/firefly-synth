@@ -67,10 +67,10 @@ make_module(
   result.id = id;
   result.name = name;
   result.index = index;
-  result.stage = stage;
-  result.output = output;
+  result.dsp.stage = stage;
+  result.dsp.output = output;
   result.slot_count = slot_count;
-  result.output_count = output_count;
+  result.dsp.output_count = output_count;
   result.gui.layout = layout;
   result.gui.position = position;
   result.gui.dimension = dimension;

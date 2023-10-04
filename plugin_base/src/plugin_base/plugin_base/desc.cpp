@@ -96,9 +96,9 @@ validate_frame_dims(
     for (int m = 0; m < plugin.modules.size(); m++)
     {
       auto const& module = plugin.modules[m];
-      bool is_cv = module.output == module_output::cv;
-      bool is_voice = module.stage == module_stage::voice;
-      bool is_audio = module.output == module_output::audio;
+      bool is_cv = module.dsp.output == module_output::cv;
+      bool is_voice = module.dsp.stage == module_stage::voice;
+      bool is_audio = module.dsp.output == module_output::audio;
       int cv_frames = is_cv && is_voice ? frame_count : 0;
       int audio_frames = is_audio && is_voice ? frame_count : 0;
       (void)cv_frames;
@@ -107,10 +107,10 @@ validate_frame_dims(
       assert(dims.module_voice_audio[v][m].size() == module.slot_count);
       for (int mi = 0; mi < module.slot_count; mi++)
       {
-        assert(dims.module_voice_cv[v][m][mi].size() == module.output_count);
-        assert(dims.module_voice_audio[v][m][mi].size() == module.output_count);
+        assert(dims.module_voice_cv[v][m][mi].size() == module.dsp.output_count);
+        assert(dims.module_voice_audio[v][m][mi].size() == module.dsp.output_count);
 
-        for(int oi = 0; oi < module.output_count; oi++)
+        for(int oi = 0; oi < module.dsp.output_count; oi++)
         {
           assert(dims.module_voice_cv[v][m][mi][oi] == cv_frames);
           assert(dims.module_voice_audio[v][m][mi][oi].size() == 2);
@@ -127,9 +127,9 @@ validate_frame_dims(
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
-    bool is_cv = module.output == module_output::cv;
-    bool is_global = module.stage != module_stage::voice;
-    bool is_audio = module.output == module_output::audio;
+    bool is_cv = module.dsp.output == module_output::cv;
+    bool is_global = module.dsp.stage != module_stage::voice;
+    bool is_audio = module.dsp.output == module_output::audio;
     int cv_frames = is_cv && is_global ? frame_count : 0;
     int audio_frames = is_audio && is_global ? frame_count : 0;
     (void)cv_frames;
@@ -140,10 +140,10 @@ validate_frame_dims(
 
     for (int mi = 0; mi < module.slot_count; mi++)
     {
-      assert(dims.module_global_cv[m][mi].size() == module.output_count);
-      assert(dims.module_global_audio[m][mi].size() == module.output_count);
+      assert(dims.module_global_cv[m][mi].size() == module.dsp.output_count);
+      assert(dims.module_global_audio[m][mi].size() == module.dsp.output_count);
 
-      for(int oi = 0; oi < module.output_count; oi++)
+      for(int oi = 0; oi < module.dsp.output_count; oi++)
       {
         assert(dims.module_global_cv[m][mi][oi] == cv_frames);
         assert(dims.module_global_audio[m][mi][oi].size() == 2);
@@ -241,8 +241,8 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(module.params.size());
   assert(module.slot_count > 0);
   assert(module.engine_factory);
-  assert(module.output == module_output::none || module.output_count > 0);
-  assert(module.output != module_output::none || module.output_count == 0);
+  assert(module.dsp.output == module_output::none || module.dsp.output_count > 0);
+  assert(module.dsp.output != module_output::none || module.dsp.output_count == 0);
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
   assert((module.slot_count == 1) == (module.gui.layout == gui_layout::single));
   validate_gui_dimensions(module.gui);
@@ -358,8 +358,8 @@ validate_plugin_topo(plugin_topo const& topo)
   for (int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
-    assert((int)module.stage >= stage);
-    stage = (int)module.stage;
+    assert((int)module.dsp.stage >= stage);
+    stage = (int)module.dsp.stage;
 
     validate_module_topo(topo, module);
     INF_ASSERT_EXEC(module_ids.insert(module.id).second);
@@ -509,9 +509,9 @@ plugin(std::move(plugin_))
   {
     auto const& module = plugin->modules[m];
     param_topo_to_index.emplace_back();
-    if(module.stage == module_stage::input) module_voice_start++;
-    if(module.stage == module_stage::input) module_output_start++;
-    if(module.stage == module_stage::voice) module_output_start++;
+    if(module.dsp.stage == module_stage::input) module_voice_start++;
+    if(module.dsp.stage == module_stage::input) module_output_start++;
+    if(module.dsp.stage == module_stage::voice) module_output_start++;
     module_id_to_index[module.id] = m;
     for(int p = 0; p < module.params.size(); p++)
       param_id_to_index[module.id][module.params[p].id] = p;
@@ -611,9 +611,9 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     for (int m = 0; m < plugin.modules.size(); m++)
     {
       auto const& module = plugin.modules[m];
-      bool is_cv = module.output == module_output::cv;
-      bool is_voice = module.stage == module_stage::voice;
-      bool is_audio = module.output == module_output::audio;
+      bool is_cv = module.dsp.output == module_output::cv;
+      bool is_voice = module.dsp.stage == module_stage::voice;
+      bool is_audio = module.dsp.output == module_output::audio;
       int cv_frames = is_cv && is_voice ? frame_count : 0;
       int audio_frames = is_audio && is_voice ? frame_count : 0;
       module_voice_cv[v].emplace_back();
@@ -621,8 +621,8 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       for (int mi = 0; mi < module.slot_count; mi++)
       {
         module_voice_audio[v][m].emplace_back();
-        module_voice_cv[v][m].emplace_back(module.output_count, cv_frames);
-        for(int oi = 0; oi < module.output_count; oi++)
+        module_voice_cv[v][m].emplace_back(module.dsp.output_count, cv_frames);
+        for(int oi = 0; oi < module.dsp.output_count; oi++)
           module_voice_audio[v][m][mi].emplace_back(2, audio_frames);
       }
     }
@@ -631,9 +631,9 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
-    bool is_cv = module.output == module_output::cv;
-    bool is_global = module.stage != module_stage::voice;
-    bool is_audio = module.output == module_output::audio;
+    bool is_cv = module.dsp.output == module_output::cv;
+    bool is_global = module.dsp.stage != module_stage::voice;
+    bool is_audio = module.dsp.output == module_output::audio;
     int cv_frames = is_cv && is_global ? frame_count : 0;
     int audio_frames = is_audio && is_global ? frame_count : 0;
     module_global_cv.emplace_back();
@@ -643,8 +643,8 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     {
       accurate_automation[m].emplace_back();
       module_global_audio[m].emplace_back();
-      module_global_cv[m].emplace_back(module.output_count, cv_frames);
-      for(int oi = 0; oi < module.output_count; oi++)
+      module_global_cv[m].emplace_back(module.dsp.output_count, cv_frames);
+      for(int oi = 0; oi < module.dsp.output_count; oi++)
         module_global_audio[m][mi].emplace_back(2, audio_frames);
       for (int p = 0; p < module.params.size(); p++)
       {

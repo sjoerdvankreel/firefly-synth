@@ -43,7 +43,7 @@ filter_topo(int osc_slot_count)
     "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice Filter", module_filter, 1, 
     module_stage::voice, module_output::none, 0,
     gui_layout::single, gui_position { 3, 0 }, gui_dimension { 1, 1 }));
-  result.engine_factory = [](int, int, int) -> 
+  result.engine_factory = [](int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
   result.sections.emplace_back(make_section(
     "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ { 1 }, { 1, 1, 2} }));
