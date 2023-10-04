@@ -50,12 +50,12 @@ inf_plugin(
   clap_host const* host, std::unique_ptr<plugin_topo>&& topo):
 Plugin(desc, host), 
 _engine(std::move(topo), forward_thread_pool_voice_processor, this),
-_to_ui_events(std::make_unique<event_queue>(default_q_size)), 
+_to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 {
   plugin_dims dims(*_engine.desc().plugin);
-  _ui_state.resize(dims.module_slot_param_slot);
-  _engine.desc().init_defaults(_ui_state);
+  _gui_state.resize(dims.module_slot_param_slot);
+  _engine.desc().init_defaults(_gui_state);
   _block_automation_seen.resize(_engine.desc().param_count);
 }
 
@@ -72,10 +72,10 @@ void
 inf_plugin::timerCallback()
 {
   sync_event e;
-  while (_to_ui_events->try_dequeue(e))
+  while (_to_gui_events->try_dequeue(e))
   {
     param_mapping const& mapping = _engine.desc().mappings[e.index];
-    mapping.value_at(_ui_state) = e.plain;
+    mapping.value_at(_gui_state) = e.plain;
     if(_gui) _gui->plugin_changed(e.index, e.plain);
   }
 }
@@ -84,7 +84,7 @@ bool
 inf_plugin::stateSave(clap_ostream const* stream) noexcept
 {
   plugin_io io(&_engine.desc());
-  std::vector<char> data(io.save(_ui_state));
+  std::vector<char> data(io.save(_gui_state));
   return stream->write(stream, data.data(), data.size()) == data.size();
 }
 
@@ -101,9 +101,9 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
   } while(true);
 
   plugin_io io(&_engine.desc());
-  if (!io.load(data, _ui_state).ok()) return false;
+  if (!io.load(data, _gui_state).ok()) return false;
   for (int p = 0; p < _engine.desc().param_count; p++)
-    gui_changed(p, _engine.desc().mappings[p].value_at(_ui_state));
+    gui_changed(p, _engine.desc().mappings[p].value_at(_gui_state));
   return true;
 }
 
@@ -177,7 +177,7 @@ inf_plugin::guiDestroy() noexcept
 bool
 inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
-  _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_ui_state);
+  _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_gui_state);
   return true;
 }
 
@@ -223,7 +223,7 @@ inf_plugin::gui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
   param_mapping const& mapping = _engine.desc().mappings[index];
-  mapping.value_at(_ui_state) = plain;
+  mapping.value_at(_gui_state) = plain;
   if(_gui) _gui->plugin_changed(index, plain);
 }
 
@@ -247,7 +247,7 @@ inf_plugin::push_to_audio(int index, sync_event::type_t type)
 }
 
 void
-inf_plugin::push_to_ui(int index, clap_value clap)
+inf_plugin::push_to_gui(int index, clap_value clap)
 {
   sync_event e;
   param_mapping const& mapping = _engine.desc().mappings[index];
@@ -255,7 +255,7 @@ inf_plugin::push_to_ui(int index, clap_value clap)
   e.index = index;
   e.type = sync_event::type_t::value_changing;
   e.plain = topo.normalized_to_plain(clap_to_normalized(topo, clap));
-  _to_ui_events->enqueue(e);
+  _to_gui_events->enqueue(e);
 }
 
 std::int32_t
@@ -284,7 +284,7 @@ inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
   int index = getParamIndexForParamId(param_id);
   param_mapping const& mapping(_engine.desc().mappings[index]);
   auto const& topo = *_engine.desc().param_at(mapping).param;
-  *value = normalized_to_clap(topo, topo.plain_to_normalized(mapping.value_at(_ui_state))).value();
+  *value = normalized_to_clap(topo, topo.plain_to_normalized(mapping.value_at(_gui_state))).value();
   return true;
 }
 
@@ -360,9 +360,9 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
     auto const& mapping = _engine.desc().mappings[index];
     auto const& topo = *_engine.desc().param_at(mapping).param;
     mapping.value_at(_engine.state()) = topo.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
-    push_to_ui(index, clap_value(event->value));
+    push_to_gui(index, clap_value(event->value));
   }
-  process_ui_to_audio_events(out);
+  process_gui_to_audio_events(out);
 }
 
 bool
@@ -403,7 +403,7 @@ inf_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uin
 }
 
 void 
-inf_plugin::process_ui_to_audio_events(const clap_output_events_t* out)
+inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
 {
   sync_event e;
   while (_to_audio_events->try_dequeue(e))
@@ -454,7 +454,7 @@ inf_plugin::process(clap_process const* process) noexcept
   block.common.bpm = process->transport? process->transport->tempo: 0;
   block.common.audio_in = process->audio_inputs? process->audio_inputs[0].data32: nullptr;
 
-  process_ui_to_audio_events(process->out_events);
+  process_gui_to_audio_events(process->out_events);
 
   // make sure we only push per-block events at most 1 time
   std::fill(_block_automation_seen.begin(), _block_automation_seen.end(), 0);
@@ -489,7 +489,7 @@ inf_plugin::process(clap_process const* process) noexcept
       int index = getParamIndexForParamId(event->param_id);
       auto const& mapping = _engine.desc().mappings[index];
       auto const& param = _engine.desc().param_at(mapping);
-      push_to_ui(index, clap_value(event->value));
+      push_to_gui(index, clap_value(event->value));
       if (param.param->rate == param_rate::block)
       {
         if (_block_automation_seen[index] == 0)
@@ -516,12 +516,12 @@ inf_plugin::process(clap_process const* process) noexcept
   _engine.process();
   for (int e = 0; e < block.events.out.size(); e++)
   {
-    sync_event to_ui_event = {};
+    sync_event to_gui_event = {};
     auto const& out_event = block.events.out[e];
     auto const& mapping = _engine.desc().mappings[out_event.param];
-    to_ui_event.index = out_event.param;
-    to_ui_event.plain = _engine.desc().param_at(mapping).param->normalized_to_plain(out_event.normalized);
-    _to_ui_events->enqueue(to_ui_event);
+    to_gui_event.index = out_event.param;
+    to_gui_event.plain = _engine.desc().param_at(mapping).param->normalized_to_plain(out_event.normalized);
+    _to_gui_events->enqueue(to_gui_event);
   }
   _engine.release_block();
   return CLAP_PROCESS_CONTINUE;

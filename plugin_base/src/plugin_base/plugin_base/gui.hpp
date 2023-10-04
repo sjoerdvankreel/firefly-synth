@@ -33,7 +33,7 @@ class plugin_gui:
 public juce::Component
 {
   plugin_desc const* const _desc;
-  jarray<plain_value, 4>* const _ui_state = {};
+  jarray<plain_value, 4>* const _gui_state = {};
   std::vector<gui_listener*> _gui_listeners = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   // must be destructed first, will unregister listeners
@@ -64,7 +64,7 @@ public juce::Component
 
 public:
   INF_DECLARE_MOVE_ONLY(plugin_gui);
-  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state);
+  plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* gui_state);
 
   void gui_end_changes(int index);
   void gui_begin_changes(int index);
@@ -73,7 +73,7 @@ public:
   void plugin_changed(int index, plain_value plain);
 
   plugin_desc const* desc() const { return _desc; }
-  jarray<plain_value, 4> const& ui_state() const { return *_ui_state; }
+  jarray<plain_value, 4> const& gui_state() const { return *_gui_state; }
 
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }

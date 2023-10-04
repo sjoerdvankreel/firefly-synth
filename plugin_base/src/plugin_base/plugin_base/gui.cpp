@@ -108,7 +108,7 @@ private:
     std::vector<int> const& topo_params, std::vector<int>& params);
 };
 
-// ui_state_component that is additionally bound to a single parameter value
+// binding_component that is additionally bound to a single parameter value
 // i.e., edit control or a label that displays a plugin parameter value
 class param_component:
 public binding_component
@@ -243,7 +243,7 @@ binding_component::bind(
   for (int i = 0; i < params.size(); i++)
   {
     auto const& mapping = _gui->desc()->mappings[params[i]];
-    values.push_back(mapping.value_at(_gui->ui_state()).step());
+    values.push_back(mapping.value_at(_gui->gui_state()).step());
   }
   return selector(values, context);
 }
@@ -255,12 +255,12 @@ binding_component::init()
   if (_enabled_params.size() != 0)
   {
     auto const& enabled_mapping = _gui->desc()->mappings[_enabled_params[0]];
-    plugin_changed(_enabled_params[0], enabled_mapping.value_at(_gui->ui_state()));
+    plugin_changed(_enabled_params[0], enabled_mapping.value_at(_gui->gui_state()));
   }
   if (_visibility_params.size() != 0)
   {
     auto const& visibility_mapping = _gui->desc()->mappings[_visibility_params[0]];
-    plugin_changed(_visibility_params[0], visibility_mapping.value_at(_gui->ui_state()));
+    plugin_changed(_visibility_params[0], visibility_mapping.value_at(_gui->gui_state()));
   }
 }
 
@@ -317,7 +317,7 @@ param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   auto const& own_mapping = _gui->desc()->mappings[_param->global];
-  plugin_changed(_param->global, own_mapping.value_at(_gui->ui_state()));
+  plugin_changed(_param->global, own_mapping.value_at(_gui->gui_state()));
   binding_component::init();
 }
 
@@ -505,7 +505,7 @@ grid_component::resized()
   grid.performLayout(getLocalBounds());
 }
 
-// ui_state_component that hosts a number of plugin parameters
+// binding_component that hosts a number of plugin parameters
 class section_grid_component :
 public binding_component,
 public grid_component
@@ -515,7 +515,7 @@ public:
   binding_component(gui, module, &section->bindings, 0), grid_component(section->dimension) { init(); }
 };
 
-// ui_state_component that hosts a single section_grid_component
+// binding_component that hosts a single section_grid_component
 class section_group_component :
 public binding_component,
 public group_component
@@ -590,13 +590,13 @@ plugin_gui::state_loaded()
     for (int mi = 0; mi < module.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
         for (int pi = 0; pi < module.params[p].slot_count; pi++)
-          gui_changed(param_global++, (*_ui_state)[m][mi][p][pi]);
+          gui_changed(param_global++, (*_gui_state)[m][mi][p][pi]);
   }
 }
 
 plugin_gui::
-plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* ui_state) :
-_desc(desc), _ui_state(ui_state), _plugin_listeners(desc->param_count)
+plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* gui_state) :
+_desc(desc), _gui_state(gui_state), _plugin_listeners(desc->param_count)
 {
   setOpaque(true);
   auto const& topo = *_desc->plugin;
@@ -639,7 +639,7 @@ plugin_gui::make_top_bar()
       auto path = chooser.getResult().getFullPathName();
       delete& chooser;
       if (path.length() == 0) return;
-      plugin_io(_desc).save_file(path.toStdString(), *_ui_state);
+      plugin_io(_desc).save_file(path.toStdString(), *_gui_state);
     });};
 
   auto& load = make_component<TextButton>();
@@ -654,7 +654,7 @@ plugin_gui::make_top_bar()
       if(path.length() == 0) return;
 
       auto icon = MessageBoxIconType::WarningIcon;
-      auto result = plugin_io(_desc).load_file(path.toStdString(), *_ui_state);
+      auto result = plugin_io(_desc).load_file(path.toStdString(), *_gui_state);
       if(result.error.size())
       {
         auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);

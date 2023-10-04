@@ -18,15 +18,15 @@ public gui_listener
 {
   plugin_desc const _desc;
   inf_editor* _editor = {};
-  jarray<plain_value, 4> _ui_state = {};
+  jarray<plain_value, 4> _gui_state = {};
 
 public: 
   INF_DECLARE_MOVE_ONLY(inf_controller);
   inf_controller(std::unique_ptr<plugin_topo>&& topo);
 
   plugin_desc const& desc() const { return _desc; }
-  jarray<plain_value, 4>& ui_state() { return _ui_state; }
-  jarray<plain_value, 4> const& ui_state() const { return _ui_state; }
+  jarray<plain_value, 4>& gui_state() { return _gui_state; }
+  jarray<plain_value, 4> const& gui_state() const { return _gui_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   void gui_changing(int index, plain_value plain) override;

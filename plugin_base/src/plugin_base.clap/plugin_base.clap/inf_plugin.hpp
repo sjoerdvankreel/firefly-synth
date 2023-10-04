@@ -42,17 +42,17 @@ public gui_listener, public juce::Timer
 
   plugin_engine _engine;
   std::unique_ptr<plugin_gui> _gui = {};
-  jarray<plain_value, 4> _ui_state = {};
+  jarray<plain_value, 4> _gui_state = {};
   std::vector<int> _block_automation_seen = {};
-  std::unique_ptr<event_queue> _to_ui_events = {};
+  std::unique_ptr<event_queue> _to_gui_events = {};
   std::unique_ptr<event_queue> _to_audio_events = {};
 
   // Pull in values from audio->main regardless of whether ui is present.
   void timerCallback() override;
-  void push_to_ui(int index, clap_value clap);
+  void push_to_gui(int index, clap_value clap);
   void push_to_audio(int index, plain_value plain);
   void push_to_audio(int index, sync_event::type_t type);
-  void process_ui_to_audio_events(clap_output_events_t const* out);
+  void process_gui_to_audio_events(clap_output_events_t const* out);
 
 public:
   ~inf_plugin() { stopTimer(); }

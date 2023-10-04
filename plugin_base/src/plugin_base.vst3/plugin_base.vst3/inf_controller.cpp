@@ -52,8 +52,8 @@ inf_controller(std::unique_ptr<plugin_topo>&& topo) :
 _desc(std::move(topo)) 
 { 
   plugin_dims dims(*_desc.plugin);
-  _ui_state.resize(dims.module_slot_param_slot);
-  _desc.init_defaults(_ui_state); 
+  _gui_state.resize(dims.module_slot_param_slot);
+  _desc.init_defaults(_gui_state);
 }
 
 IPlugView* PLUGIN_API 
@@ -84,7 +84,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   param_mapping const& mapping = _desc.mappings[index];
   auto const& param = _desc.param_at(mapping).param;
   plain_value plain = param->normalized_to_plain(normalized_value(value));
-  mapping.value_at(_ui_state) = plain;
+  mapping.value_at(_gui_state) = plain;
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);
 #ifndef NDEBUG
@@ -97,10 +97,10 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 tresult PLUGIN_API
 inf_controller::setComponentState(IBStream* state)
 {
-  if (!load_state(_desc, state, _ui_state))
+  if (!load_state(_desc, state, _gui_state))
     return kResultFalse;
   for (int p = 0; p < _desc.param_count; p++)
-    gui_changed(p, _desc.mappings[p].value_at(_ui_state));
+    gui_changed(p, _desc.mappings[p].value_at(_gui_state));
   return kResultOk;
 }
 
