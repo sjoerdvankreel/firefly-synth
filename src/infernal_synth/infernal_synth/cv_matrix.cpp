@@ -89,7 +89,7 @@ cv_matrix_topo(
   source.gui.bindings.enabled.selector = enabled_selector;
 
   auto& lfo_index = result.params.emplace_back(param_steps(
-    "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", param_source_lfo_index, route_count, section_main, 0, lfo_topo.slot_count - 1, 0,
+    "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", param_source_lfo_index, route_count, section_main, 0, lfo_topo.info.slot_count - 1, 0,
     param_direction::input, gui_edit_type::list,
     gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
@@ -100,7 +100,7 @@ cv_matrix_topo(
   lfo_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   auto& env_index = result.params.emplace_back(param_steps(
-    "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", param_source_env_index, route_count, section_main, 0, env_topo.slot_count - 1, 0,
+    "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", param_source_env_index, route_count, section_main, 0, env_topo.info.slot_count - 1, 0,
     param_direction::input, gui_edit_type::list,
     gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 2 }));
@@ -119,7 +119,7 @@ cv_matrix_topo(
   target.gui.bindings.enabled.selector = enabled_selector;
 
   auto& osc_index = result.params.emplace_back(param_steps(
-    "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", param_target_osc_index, route_count, section_main, 0, osc_topo.slot_count - 1, 0,
+    "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", param_target_osc_index, route_count, section_main, 0, osc_topo.info.slot_count - 1, 0,
     param_direction::input, gui_edit_type::list,
     gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 4 }));
@@ -154,7 +154,7 @@ cv_matrix_topo(
   int FILTER_PARAM_OSC_GAIN = 2; // TODO
   auto& osc_gain_index = result.params.emplace_back(param_steps(
     "{FB4EB870-48DD-40D5-9D0E-2E9F0C4E3C48}", "Filter Osc Gain", param_target_filter_param_osc_gain_index, route_count, section_main, 
-    0, filter_topo.params[FILTER_PARAM_OSC_GAIN].slot_count - 1, 0,
+    0, filter_topo.params[FILTER_PARAM_OSC_GAIN].info.slot_count - 1, 0,
     param_direction::input, gui_edit_type::list,
     gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
     gui_layout::vertical, gui_position{ 1, 6 }));

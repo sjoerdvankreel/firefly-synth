@@ -1,6 +1,7 @@
 #pragma once
 
 #include <vector>
+#include <string>
 
 namespace plugin_base {
 
@@ -15,6 +16,15 @@ typedef bool(*
 gui_binding_selector)(
   std::vector<int> const& values, 
   std::vector<int> const& context);
+
+// module and parameter metadata
+struct component_info final {
+  int index;
+  int slot_count;
+  std::string id;
+  std::string name;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(component_info);
+};
 
 // position in parent grid
 struct gui_position final {

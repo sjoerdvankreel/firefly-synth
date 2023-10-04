@@ -60,17 +60,17 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     var params;
     auto const& module_topo = _desc->plugin->modules[m];
     auto module = std::make_unique<DynamicObject>();
-    module->setProperty("id", String(module_topo.id));
-    module->setProperty("name", String(module_topo.name));
-    module->setProperty("slot_count", module_topo.slot_count);
+    module->setProperty("id", String(module_topo.info.id));
+    module->setProperty("name", String(module_topo.info.name));
+    module->setProperty("slot_count", module_topo.info.slot_count);
     for (int p = 0; p < module_topo.params.size(); p++)
     {
       auto const& param_topo = module_topo.params[p];
       if(param_topo.dsp.direction == param_direction::output) continue;
       auto param = std::make_unique<DynamicObject>();
-      param->setProperty("id", String(param_topo.id));
-      param->setProperty("name", String(param_topo.name));
-      param->setProperty("slot_count", param_topo.slot_count);
+      param->setProperty("id", String(param_topo.info.id));
+      param->setProperty("name", String(param_topo.info.name));
+      param->setProperty("slot_count", param_topo.info.slot_count);
       params.append(var(param.release()));
     }
     module->setProperty("params", params);
@@ -85,7 +85,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
     var module_slot_states;
     auto const& module_topo = _desc->plugin->modules[m];
     auto module_state = std::make_unique<DynamicObject>();
-    for (int mi = 0; mi < module_topo.slot_count; mi++)
+    for (int mi = 0; mi < module_topo.info.slot_count; mi++)
     {
       var param_states;
       auto module_slot_state = std::make_unique<DynamicObject>();
@@ -95,7 +95,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
         auto const& param_topo = module_topo.params[p];
         if(param_topo.dsp.direction == param_direction::output) continue;
         auto param_state = std::make_unique<DynamicObject>();
-        for (int pi = 0; pi < param_topo.slot_count; pi++)
+        for (int pi = 0; pi < param_topo.info.slot_count; pi++)
           param_slot_states.append(var(String(param_topo.plain_to_text(state[m][mi][p][pi]))));
         param_state->setProperty("slots", param_slot_states);
         param_states.append(var(param_state.release()));
@@ -169,8 +169,8 @@ plugin_io::load(
     // check for changed module slot count
     var module_slot_count = plugin["modules"][m]["slot_count"];
     auto const& new_module = _desc->plugin->modules[module_iter->second];
-    if ((int)module_slot_count != new_module.slot_count)
-      result.warnings.push_back("Module '" + new_module.name + "' changed slot count.");
+    if ((int)module_slot_count != new_module.info.slot_count)
+      result.warnings.push_back("Module '" + new_module.info.name + "' changed slot count.");
 
     for (int p = 0; p < plugin["modules"][m]["params"].size(); p++)
     {
@@ -187,8 +187,8 @@ plugin_io::load(
       // check for changed param slot count
       var param_slot_count = plugin["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
-      if ((int)param_slot_count != new_param.slot_count)
-        result.warnings.push_back("Param '" + new_module.name + " " + new_param.name + "' slot count changed.");
+      if ((int)param_slot_count != new_param.info.slot_count)
+        result.warnings.push_back("Param '" + new_module.info.name + " " + new_param.info.name + "' slot count changed.");
     }
   }
 
@@ -201,7 +201,7 @@ plugin_io::load(
     var module_slots = plugin["state"][m]["slots"];
     auto const& new_module = _desc->plugin->modules[module_iter->second];
 
-    for(int mi = 0; mi < module_slots.size() && mi < new_module.slot_count; mi++)
+    for(int mi = 0; mi < module_slots.size() && mi < new_module.info.slot_count; mi++)
       for (int p = 0; p < module_slots[mi]["params"].size(); p++)
       {
         auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
@@ -209,7 +209,7 @@ plugin_io::load(
         if (param_iter == _desc->param_id_to_index.at(module_id).end()) continue;
         var param_slots = plugin["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
-        for (int pi = 0; pi < param_slots.size() && pi < new_param.slot_count; pi++)
+        for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)
         {
           plain_value plain;
           auto const& topo = _desc->plugin->modules[module_iter->second].params[param_iter->second];
@@ -217,7 +217,7 @@ plugin_io::load(
           if(topo.text_to_plain(text, plain))
             state[module_iter->second][mi][param_iter->second][pi] = plain;
           else
-            result.warnings.push_back("Param '" + new_module.name + " " + new_param.name + "': invalid value '" + text + "'.");
+            result.warnings.push_back("Param '" + new_module.info.name + " " + new_param.info.name + "': invalid value '" + text + "'.");
         }
       }
   }

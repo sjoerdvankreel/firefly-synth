@@ -1,8 +1,8 @@
 #pragma once
 
 #include <plugin_base/utility.hpp>
-#include <plugin_base/topo/gui.hpp>
 #include <plugin_base/topo/param.hpp>
+#include <plugin_base/topo/shared.hpp>
 #include <plugin_base/topo/section.hpp>
 
 #include <memory>
@@ -37,12 +37,9 @@ struct module_dsp final {
 
 // module in plugin
 struct module_topo final {
-  int index;
-  int slot_count;
-  std::string id;
-  std::string name;
   module_dsp dsp;
   module_topo_gui gui;
+  component_info info;
   std::vector<param_topo> params;
   std::vector<section_topo> sections;
   module_engine_factory engine_factory;

@@ -274,7 +274,7 @@ binding_component::setup_bindings(
   {
     auto const& param_topo_to_index = _gui->desc()->param_topo_to_index;
     auto const& slots = param_topo_to_index[_module->topo][_module->slot][topo_params[i]];
-    bool single_slot = _module->module->params[topo_params[i]].slot_count == 1;
+    bool single_slot = _module->module->params[topo_params[i]].info.slot_count == 1;
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);
     _gui->add_plugin_listener(state_index, this);
@@ -588,9 +588,9 @@ plugin_gui::state_loaded()
   for (int m = 0; m < _desc->plugin->modules.size(); m++)
   {
     auto const& module = _desc->plugin->modules[m];
-    for (int mi = 0; mi < module.slot_count; mi++)
+    for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
-        for (int pi = 0; pi < module.params[p].slot_count; pi++)
+        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
           gui_changed(param_global++, (*_gui_state)[m][mi][p][pi]);
   }
 }
@@ -683,7 +683,7 @@ Component&
 plugin_gui::make_content()
 {
   auto& result = make_component<grid_component>(_desc->plugin->gui.dimension);
-  for (auto iter = _desc->modules.begin(); iter != _desc->modules.end(); iter += iter->module->slot_count)
+  for (auto iter = _desc->modules.begin(); iter != _desc->modules.end(); iter += iter->module->info.slot_count)
     result.add(make_modules(&(*iter)), iter->module->gui.position);
   return result;
 }
@@ -691,7 +691,7 @@ plugin_gui::make_content()
 Component&
 plugin_gui::make_modules(module_desc const* slots)
 {  
-  if (slots[0].module->slot_count == 1)
+  if (slots[0].module->info.slot_count == 1)
     return make_single_module(slots[0], false);
   else
     return make_multi_module(slots);  
@@ -735,7 +735,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
     grid = &make_component<grid_component>(section.gui.dimension);
 
   auto const& params = module.params;
-  for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
+  for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->section == section.index)
       grid->add(make_params(module, &(*iter)), iter->param->gui.position);
   
@@ -751,7 +751,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
 Component&
 plugin_gui::make_params(module_desc const& module, param_desc const* params)
 {
-  if (params[0].param->slot_count == 1)
+  if (params[0].param->info.slot_count == 1)
     return make_single_param(module, params[0]);
   else
     return make_multi_param(module, params);
@@ -858,15 +858,15 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
   case gui_layout::horizontal:
   {
     bool vertical = topo.gui.layout == gui_layout::vertical;
-    auto& result = make_component<grid_component>(vertical, topo.slot_count);
-    for (int i = 0; i < topo.slot_count; i++)
+    auto& result = make_component<grid_component>(vertical, topo.info.slot_count);
+    for (int i = 0; i < topo.info.slot_count; i++)
       result.add(make_single(slots[i], false), vertical, i);
     return result;
   }
   case gui_layout::tabbed:
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
-    for (int i = 0; i < topo.slot_count; i++)
+    for (int i = 0; i < topo.info.slot_count; i++)
       result.addTab(slots[i].name, Colours::black, &make_single(slots[i], true), false);
     return result;
   }

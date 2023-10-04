@@ -2,7 +2,7 @@
 
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base/topo/gui.hpp>
+#include <plugin_base/topo/shared.hpp>
 
 #include <cmath>
 #include <vector>
@@ -25,7 +25,7 @@ struct list_item final {
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(list_item);
   template <class T> list_item(T const& item) : 
-  tag(item.index), id(item.id), name(item.name) {}
+  tag(item.info.index), id(item.info.id), name(item.info.name) {}
   list_item(std::string const& id, std::string const& name, int tag) :
   tag(tag), id(id), name(name) {}
 };
@@ -69,15 +69,11 @@ struct param_domain final {
 
 // parameter in module
 struct param_topo final {
-  int index;
   int section;
-  int slot_count;
-  std::string id;
-  std::string name;
-
   param_dsp dsp;
   param_topo_gui gui;
   param_domain domain;
+  component_info info;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
 
   // representation conversion

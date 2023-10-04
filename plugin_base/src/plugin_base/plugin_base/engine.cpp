@@ -99,14 +99,14 @@ plugin_engine::deactivate()
   _host_block->events.accurate.clear();
 
   for(int m = 0; m < _desc.module_voice_start; m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
       _input_engines[m][mi].reset();
   for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
       for (int v = 0; v < _desc.plugin->polyphony; v++)
         _voice_engines[v][m][mi].reset();
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
       _output_engines[m][mi].reset();
 }
 
@@ -129,14 +129,14 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _accurate_automation.resize(frame_dims.accurate_automation);
 
   for (int m = 0; m < _desc.module_voice_start; m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
       _input_engines[m][mi] = _desc.plugin->modules[m].engine_factory(mi, sample_rate, max_frame_count);
   for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
       for (int v = 0; v < _desc.plugin->polyphony; v++)
         _voice_engines[v][m][mi] = _desc.plugin->modules[m].engine_factory(mi, sample_rate, max_frame_count);
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
       _output_engines[m][mi] = _desc.plugin->modules[m].engine_factory(mi, sample_rate, max_frame_count);
 }
 
@@ -164,7 +164,7 @@ plugin_engine::process_voice(int v, bool threaded)
   std::pair<uint32_t, uint32_t> denormal_state;
   if(threaded) denormal_state = disable_denormals();
   for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
     {
       auto& state = _voice_states[v];
       voice_process_block voice_block = {
@@ -247,7 +247,7 @@ plugin_engine::process()
     assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
     for (int m = _desc.module_voice_start; m < _desc.module_output_start; m++)
-      for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+      for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
         _voice_engines[slot][m][mi]->initialize();
   }
   
@@ -301,7 +301,7 @@ plugin_engine::process()
   for(int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
-    for (int mi = 0; mi < module.slot_count; mi++)
+    for (int mi = 0; mi < module.info.slot_count; mi++)
       if(module.dsp.output == module_output::cv)
         if(module.dsp.stage != module_stage::voice)
         {
@@ -339,15 +339,15 @@ plugin_engine::process()
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
-    for(int mi = 0; mi < module.slot_count; mi++)
+    for(int mi = 0; mi < module.info.slot_count; mi++)
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         if(param.dsp.rate == param_rate::block)
-          for(int pi = 0; pi < param.slot_count; pi++)
+          for(int pi = 0; pi < param.info.slot_count; pi++)
             _block_automation[m][mi][p][pi] = _plugin_state[m][mi][p][pi];
         else
-          for (int pi = 0; pi < param.slot_count; pi++)
+          for (int pi = 0; pi < param.info.slot_count; pi++)
             std::fill(
               _accurate_automation[m][mi][p][pi].begin(),
               _accurate_automation[m][mi][p][pi].begin() + frame_count,
@@ -393,12 +393,12 @@ plugin_engine::process()
   for (int m = 0; m < _desc.plugin->modules.size(); m++)
   {
     auto const& module = _desc.plugin->modules[m];
-    for (int mi = 0; mi < module.slot_count; mi++)
+    for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         if (param.dsp.rate == param_rate::accurate && param.dsp.format == param_format::plain)
-          for(int pi = 0; pi < param.slot_count; pi++)
+          for(int pi = 0; pi < param.info.slot_count; pi++)
             for(int f = 0; f < frame_count; f++)
               _accurate_automation[m][mi][p][pi][f] = param.normalized_to_plain(
                 normalized_value(_accurate_automation[m][mi][p][pi][f])).real();
@@ -407,7 +407,7 @@ plugin_engine::process()
 
   // run input modules in order
   for (int m = 0; m < _desc.module_voice_start; m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
     {
       process_block block(make_process_block(-1, m, mi, 0, frame_count));
       _input_engines[m][mi]->process(block);
@@ -448,7 +448,7 @@ plugin_engine::process()
 
   // run output modules in order
   for (int m = _desc.module_output_start; m < _desc.plugin->modules.size(); m++)
-    for (int mi = 0; mi < _desc.plugin->modules[m].slot_count; mi++)
+    for (int mi = 0; mi < _desc.plugin->modules[m].info.slot_count; mi++)
     {
       out_process_block out_block = {
         voice_count,
@@ -477,9 +477,9 @@ plugin_engine::process()
     for (int m = 0; m < _desc.plugin->modules.size(); m++)
     {
       auto const& module = _desc.plugin->modules[m];
-      for (int mi = 0; mi < module.slot_count; mi++)
+      for (int mi = 0; mi < module.info.slot_count; mi++)
         for (int p = 0; p < module.params.size(); p++)
-          for(int pi = 0; pi < module.params[p].slot_count; pi++)
+          for(int pi = 0; pi < module.params[p].info.slot_count; pi++)
           {
             if (module.params[p].dsp.direction == param_direction::output)
             {

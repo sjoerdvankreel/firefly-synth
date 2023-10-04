@@ -16,14 +16,14 @@ param_base(
   gui_layout layout, gui_position const& position)
 {
   param_topo result = {};
-  result.id = id;
+  result.info.id = id;
   result.dsp.direction = direction;
-  result.name = name;
+  result.info.name = name;
   result.dsp.rate = rate;
-  result.index = index;
+  result.info.index = index;
   result.dsp.format = format;
   result.section = section;
-  result.slot_count = slot_count;
+  result.info.slot_count = slot_count;
   result.domain.default_ = default_;
   result.gui.layout = layout;
   result.gui.position = position;
@@ -64,12 +64,12 @@ make_module(
   gui_layout layout, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo result = {};
-  result.id = id;
-  result.name = name;
-  result.index = index;
+  result.info.id = id;
+  result.info.name = name;
+  result.info.index = index;
   result.dsp.stage = stage;
   result.dsp.output = output;
-  result.slot_count = slot_count;
+  result.info.slot_count = slot_count;
   result.dsp.output_count = output_count;
   result.gui.layout = layout;
   result.gui.position = position;

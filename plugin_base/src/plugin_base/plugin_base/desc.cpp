@@ -8,7 +8,7 @@ namespace plugin_base {
 static std::string
 param_id(param_topo const& param, int slot)
 {
-  std::string result = param.id;
+  std::string result = param.info.id;
   result += "-" + std::to_string(slot);
   return result;
 }
@@ -16,7 +16,7 @@ param_id(param_topo const& param, int slot)
 static std::string
 module_id(module_topo const& module, int slot)
 {
-  std::string result = module.id;
+  std::string result = module.info.id;
   result += "-" + std::to_string(slot);
   return result;
 }
@@ -24,16 +24,16 @@ module_id(module_topo const& module, int slot)
 static std::string
 param_name(param_topo const& param, int slot)
 {
-  std::string result = param.name;
-  if (param.slot_count > 1) result += " " + std::to_string(slot + 1);
+  std::string result = param.info.name;
+  if (param.info.slot_count > 1) result += " " + std::to_string(slot + 1);
   return result;
 }
 
 static std::string
 module_name(module_topo const& module, int slot)
 {
-  std::string result = module.name;
-  if (module.slot_count > 1) result += " " + std::to_string(slot + 1);
+  std::string result = module.info.name;
+  if (module.info.slot_count > 1) result += " " + std::to_string(slot + 1);
   return result;
 }
 
@@ -56,7 +56,7 @@ validate_dims(plugin_topo const& plugin, plugin_dims const& dims)
   {
     assert(dims.voice_module_slot[v].size() == plugin.modules.size());
     for(int m = 0; m < plugin.modules.size(); m++)
-      assert(dims.voice_module_slot[v][m] == plugin.modules[m].slot_count);
+      assert(dims.voice_module_slot[v][m] == plugin.modules[m].info.slot_count);
   }
 
   assert(dims.module_slot.size() == plugin.modules.size());
@@ -64,13 +64,13 @@ validate_dims(plugin_topo const& plugin, plugin_dims const& dims)
   for (int m = 0; m < plugin.modules.size(); m++)
   {    
     auto const& module = plugin.modules[m];
-    assert(dims.module_slot[m] == module.slot_count);
-    assert(dims.module_slot_param_slot[m].size() == module.slot_count);
-    for (int mi = 0; mi < module.slot_count; mi++)
+    assert(dims.module_slot[m] == module.info.slot_count);
+    assert(dims.module_slot_param_slot[m].size() == module.info.slot_count);
+    for (int mi = 0; mi < module.info.slot_count; mi++)
     {
       assert(dims.module_slot_param_slot[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
-        assert(dims.module_slot_param_slot[m][mi][p] == module.params[p].slot_count);
+        assert(dims.module_slot_param_slot[m][mi][p] == module.params[p].info.slot_count);
     }
   }
 }
@@ -103,9 +103,9 @@ validate_frame_dims(
       int audio_frames = is_audio && is_voice ? frame_count : 0;
       (void)cv_frames;
       (void)audio_frames;
-      assert(dims.module_voice_cv[v][m].size() == module.slot_count);
-      assert(dims.module_voice_audio[v][m].size() == module.slot_count);
-      for (int mi = 0; mi < module.slot_count; mi++)
+      assert(dims.module_voice_cv[v][m].size() == module.info.slot_count);
+      assert(dims.module_voice_audio[v][m].size() == module.info.slot_count);
+      for (int mi = 0; mi < module.info.slot_count; mi++)
       {
         assert(dims.module_voice_cv[v][m][mi].size() == module.dsp.output_count);
         assert(dims.module_voice_audio[v][m][mi].size() == module.dsp.output_count);
@@ -134,11 +134,11 @@ validate_frame_dims(
     int audio_frames = is_audio && is_global ? frame_count : 0;
     (void)cv_frames;
     (void)audio_frames;
-    assert(dims.module_global_cv[m].size() == module.slot_count);
-    assert(dims.module_global_audio[m].size() == module.slot_count);
-    assert(dims.accurate_automation[m].size() == module.slot_count);
+    assert(dims.module_global_cv[m].size() == module.info.slot_count);
+    assert(dims.module_global_audio[m].size() == module.info.slot_count);
+    assert(dims.accurate_automation[m].size() == module.info.slot_count);
 
-    for (int mi = 0; mi < module.slot_count; mi++)
+    for (int mi = 0; mi < module.info.slot_count; mi++)
     {
       assert(dims.module_global_cv[m][mi].size() == module.dsp.output_count);
       assert(dims.module_global_audio[m][mi].size() == module.dsp.output_count);
@@ -157,8 +157,8 @@ validate_frame_dims(
         auto const& param = module.params[p];
         int accurate_frames = param.dsp.rate == param_rate::accurate? frame_count: 0;
         (void)accurate_frames;
-        assert(dims.accurate_automation[m][mi][p].size() == param.slot_count);
-        for(int pi = 0; pi < param.slot_count; pi++)
+        assert(dims.accurate_automation[m][mi][p].size() == param.info.slot_count);
+        for(int pi = 0; pi < param.info.slot_count; pi++)
           assert(dims.accurate_automation[m][mi][p][pi] == accurate_frames);
       }
     }
@@ -189,7 +189,7 @@ validate_gui_binding(module_topo const& module, gui_binding const& binding, int 
   for (int i = 0; i < binding.params.size(); i++)
   {
     assert(!module.params[binding.params[i]].domain.is_real());
-    assert(module.params[binding.params[i]].slot_count == 1 || module.params[binding.params[i]].slot_count == slot_count);
+    assert(module.params[binding.params[i]].info.slot_count == 1 || module.params[binding.params[i]].info.slot_count == slot_count);
   }
 }
 
@@ -236,15 +236,15 @@ validate_section_topo(module_topo const& module, section_topo const& section)
 static void
 validate_module_topo(plugin_topo const& plugin, module_topo const& module)
 {
-  assert(module.id.size());
-  assert(module.name.size());
+  assert(module.info.id.size());
+  assert(module.info.name.size());
   assert(module.params.size());
-  assert(module.slot_count > 0);
+  assert(module.info.slot_count > 0);
   assert(module.engine_factory);
   assert(module.dsp.output == module_output::none || module.dsp.output_count > 0);
   assert(module.dsp.output != module_output::none || module.dsp.output_count == 0);
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
-  assert((module.slot_count == 1) == (module.gui.layout == gui_layout::single));
+  assert((module.info.slot_count == 1) == (module.gui.layout == gui_layout::single));
   validate_gui_dimensions(module.gui);
   validate_gui_positions(plugin.gui, module.gui);
   validate_gui_layout(module, module.sections, [](auto const& section) { return section.gui.bindings.visible.selector; }, [](auto const&) { return true; });
@@ -253,9 +253,9 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   {
     auto const& param = module.params[p];
     for (int e = 0; e < param.gui.bindings.enabled.params.size(); e++)
-      assert(param.index != param.gui.bindings.enabled.params[e]);
+      assert(param.info.index != param.gui.bindings.enabled.params[e]);
     for(int v = 0; v < param.gui.bindings.visible.params.size(); v++)
-      assert(param.index != param.gui.bindings.visible.params[v]);
+      assert(param.info.index != param.gui.bindings.visible.params[v]);
   }
 }
 
@@ -310,11 +310,11 @@ validate_param_domain(param_domain const& domain, plain_value default_plain)
 static void
 validate_param_topo(module_topo const& module, param_topo const& param)
 {
-  assert(param.id.size());
-  assert(param.name.size());
+  assert(param.info.id.size());
+  assert(param.info.name.size());
   assert(param.section >= 0);
   assert(param.section < module.sections.size());
-  assert(0 < param.slot_count && param.slot_count <= 1024);
+  assert(0 < param.info.slot_count && param.info.slot_count <= 1024);
   assert(0 <= param.section && param.section < module.sections.size());
 
   assert(param.dsp.format == param_format::plain || param.domain.is_real());
@@ -324,9 +324,9 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
 
   validate_param_domain(param.domain, param.default_plain());
-  validate_gui_bindings(module, param.gui.bindings, param.slot_count);
+  validate_gui_bindings(module, param.gui.bindings, param.info.slot_count);
   assert(param.dsp.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
-  assert((param.slot_count == 1) == (param.gui.layout == gui_layout::single));
+  assert((param.info.slot_count == 1) == (param.gui.layout == gui_layout::single));
   validate_gui_positions(module.sections[param.section].gui, param.gui);
 }
 
@@ -362,13 +362,13 @@ validate_plugin_topo(plugin_topo const& topo)
     stage = (int)module.dsp.stage;
 
     validate_module_topo(topo, module);
-    INF_ASSERT_EXEC(module_ids.insert(module.id).second);
+    INF_ASSERT_EXEC(module_ids.insert(module.info.id).second);
     for (int s = 0; s < module.sections.size(); s++)
       validate_section_topo(module, module.sections[s]);
     for (int p = 0; p < module.params.size(); p++)
     {
       validate_param_topo(module, module.params[p]);
-      INF_ASSERT_EXEC(param_ids.insert(module.params[p].id).second);
+      INF_ASSERT_EXEC(param_ids.insert(module.params[p].info.id).second);
     }
   }
 }
@@ -381,7 +381,7 @@ validate_module_desc(plugin_desc const& plugin_desc, module_desc const& desc)
   assert(desc.name.size());
   assert(desc.params.size());
   assert(desc.id_hash >= 0);
-  assert(0 <= desc.slot && desc.slot < desc.module->slot_count);
+  assert(0 <= desc.slot && desc.slot < desc.module->info.slot_count);
   assert(0 <= desc.global && desc.global < plugin_desc.modules.size());
   assert(0 <= desc.topo && desc.topo < plugin_desc.plugin->modules.size());
 }
@@ -392,7 +392,7 @@ validate_param_desc(module_desc const& module_desc, param_desc const& desc)
   assert(desc.param);
   assert(desc.id_hash >= 0);
   assert(desc.id.size() > 0);
-  assert(0 <= desc.slot && desc.slot < desc.param->slot_count);
+  assert(0 <= desc.slot && desc.slot < desc.param->info.slot_count);
   assert(0 <= desc.local && desc.local < module_desc.params.size());
   assert(0 <= desc.topo && desc.topo < module_desc.module->params.size());
   assert(0 < desc.name.size() && desc.name.size() < desc.full_name.size());
@@ -426,20 +426,20 @@ validate_plugin_desc(plugin_desc const& desc)
   {
     auto const& module = desc.plugin->modules[m];
     (void)module;
-    assert(desc.plugin->modules[m].index == m);
-    assert(desc.param_topo_to_index[m].size() == module.slot_count);
-    assert(desc.param_id_to_index.at(module.id).size() == module.params.size());
+    assert(desc.plugin->modules[m].info.index == m);
+    assert(desc.param_topo_to_index[m].size() == module.info.slot_count);
+    assert(desc.param_id_to_index.at(module.info.id).size() == module.params.size());
     for(int s = 0; s < module.sections.size(); s++)
       assert(module.sections[s].index == s);
-    for(int mi = 0; mi < module.slot_count; mi++)
+    for(int mi = 0; mi < module.info.slot_count; mi++)
     {
       assert(desc.param_topo_to_index[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        assert(param.index == p);
-        assert(desc.param_topo_to_index[m][mi][p].size() == param.slot_count);
-        for(int pi = 0; pi < param.slot_count; pi++)
+        assert(param.info.index == p);
+        assert(desc.param_topo_to_index[m][mi][p].size() == param.info.slot_count);
+        for(int pi = 0; pi < param.info.slot_count; pi++)
           assert(desc.param_topo_to_index[m][mi][p][pi] == param_global++);
       }
     }
@@ -494,7 +494,7 @@ module_desc(
 
   int param_local = 0;
   for(int p = 0; p < module_.params.size(); p++)
-    for(int i = 0; i < module_.params[p].slot_count; i++)
+    for(int i = 0; i < module_.params[p].info.slot_count; i++)
       params.emplace_back(param_desc(module_, slot, module_.params[p], p, i, param_local++, param_global_start++));
 }
 
@@ -512,10 +512,10 @@ plugin(std::move(plugin_))
     if(module.dsp.stage == module_stage::input) module_voice_start++;
     if(module.dsp.stage == module_stage::input) module_output_start++;
     if(module.dsp.stage == module_stage::voice) module_output_start++;
-    module_id_to_index[module.id] = m;
+    module_id_to_index[module.info.id] = m;
     for(int p = 0; p < module.params.size(); p++)
-      param_id_to_index[module.id][module.params[p].id] = p;
-    for(int mi = 0; mi < module.slot_count; mi++)
+      param_id_to_index[module.info.id][module.params[p].info.id] = p;
+    for(int mi = 0; mi < module.info.slot_count; mi++)
     {
       param_topo_to_index[m].emplace_back();
       modules.emplace_back(module_desc(module, m, mi, module_global++, param_global));
@@ -523,7 +523,7 @@ plugin(std::move(plugin_))
       {
         auto const& param = module.params[p];
         param_topo_to_index[m][mi].emplace_back();
-        for(int pi = 0; pi < param.slot_count; pi++)
+        for(int pi = 0; pi < param.info.slot_count; pi++)
           param_topo_to_index[m][mi][p].push_back(param_global++);
       }
     }
@@ -563,9 +563,9 @@ plugin_desc::init_defaults(jarray<plain_value, 4>& state) const
   for (int m = 0; m < plugin->modules.size(); m++)
   {
     auto const& module = plugin->modules[m];
-    for(int mi = 0; mi < module.slot_count; mi++)
+    for(int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
-        for(int pi = 0; pi < module.params[p].slot_count; pi++)
+        for(int pi = 0; pi < module.params[p].info.slot_count; pi++)
           state[m][mi][p][pi] = module.params[p].default_plain();
   }
 }
@@ -579,20 +579,20 @@ plugin_dims(plugin_topo const& plugin)
     for (int m = 0; m < plugin.modules.size(); m++)
     {
       auto const& module = plugin.modules[m];
-      voice_module_slot[v].push_back(module.slot_count);
+      voice_module_slot[v].push_back(module.info.slot_count);
     }
   }
 
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
-    module_slot.push_back(module.slot_count);
+    module_slot.push_back(module.info.slot_count);
     module_slot_param_slot.emplace_back();
-    for(int mi = 0; mi < module.slot_count; mi++)
+    for(int mi = 0; mi < module.info.slot_count; mi++)
     {
       module_slot_param_slot[m].emplace_back();
       for (int p = 0; p < module.params.size(); p++)
-        module_slot_param_slot[m][mi].push_back(module.params[p].slot_count);
+        module_slot_param_slot[m][mi].push_back(module.params[p].info.slot_count);
     }
   }
 
@@ -618,7 +618,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       int audio_frames = is_audio && is_voice ? frame_count : 0;
       module_voice_cv[v].emplace_back();
       module_voice_audio[v].emplace_back();
-      for (int mi = 0; mi < module.slot_count; mi++)
+      for (int mi = 0; mi < module.info.slot_count; mi++)
       {
         module_voice_audio[v][m].emplace_back();
         module_voice_cv[v][m].emplace_back(module.dsp.output_count, cv_frames);
@@ -639,7 +639,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     module_global_cv.emplace_back();
     module_global_audio.emplace_back();
     accurate_automation.emplace_back();
-    for (int mi = 0; mi < module.slot_count; mi++)
+    for (int mi = 0; mi < module.info.slot_count; mi++)
     {
       accurate_automation[m].emplace_back();
       module_global_audio[m].emplace_back();
@@ -649,7 +649,7 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       for (int p = 0; p < module.params.size(); p++)
       {
         int param_frames = module.params[p].dsp.rate == param_rate::accurate ? frame_count : 0;
-        accurate_automation[m][mi].emplace_back(module.params[p].slot_count, param_frames);
+        accurate_automation[m][mi].emplace_back(module.params[p].info.slot_count, param_frames);
       }
     }
   }
