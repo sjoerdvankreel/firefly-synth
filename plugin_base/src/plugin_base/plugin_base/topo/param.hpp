@@ -2,7 +2,7 @@
 
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
-#include <plugin_base/topo_gui.hpp>
+#include <plugin_base/topo/gui.hpp>
 
 #include <cmath>
 #include <vector>

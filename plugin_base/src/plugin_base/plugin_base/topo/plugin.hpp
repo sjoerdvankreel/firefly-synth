@@ -1,8 +1,8 @@
 #pragma once
 
 #include <plugin_base/utility.hpp>
-#include <plugin_base/topo_gui.hpp>
-#include <plugin_base/topo_module.hpp>
+#include <plugin_base/topo/gui.hpp>
+#include <plugin_base/topo/module.hpp>
 
 #include <vector>
 #include <string>

@@ -1,9 +1,9 @@
 #pragma once
 
 #include <plugin_base/utility.hpp>
-#include <plugin_base/topo_gui.hpp>
-#include <plugin_base/topo_param.hpp>
-#include <plugin_base/topo_section.hpp>
+#include <plugin_base/topo/gui.hpp>
+#include <plugin_base/topo/param.hpp>
+#include <plugin_base/topo/section.hpp>
 
 #include <memory>
 #include <vector>
