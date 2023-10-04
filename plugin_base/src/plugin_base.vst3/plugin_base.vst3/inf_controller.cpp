@@ -21,9 +21,9 @@ public Parameter
   param_topo const* const _topo;
 public:
   ParamValue toNormalized(ParamValue plain) const override 
-  { return _topo->raw_to_normalized(plain).value(); }
+  { return _topo->domain.raw_to_normalized(plain).value(); }
   ParamValue toPlain(ParamValue normalized) const override 
-  { return _topo->normalized_to_raw(normalized_value(normalized)); }
+  { return _topo->domain.normalized_to_raw(normalized_value(normalized)); }
 
   void toString(ParamValue normalized, String128 string) const override;
   bool fromString(TChar const* string, ParamValue& normalized) const override;
@@ -33,7 +33,7 @@ public:
 void 
 param_wrapper::toString(ParamValue normalized, String128 string) const
 {
-  auto text = _topo->normalized_to_text(normalized_value(normalized));
+  auto text = _topo->domain.normalized_to_text(normalized_value(normalized));
   from_8bit_string(string, sizeof(String128) / sizeof(string[0]), text.c_str());
 }
 
@@ -42,7 +42,7 @@ param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
 {
   normalized_value base_normalized;
   std::string text(to_8bit_string(string));
-  if(!_topo->text_to_normalized(text, base_normalized)) return false;
+  if(!_topo->domain.text_to_normalized(text, base_normalized)) return false;
   normalized = base_normalized.value();
   return true;
 }
@@ -68,7 +68,7 @@ inf_controller::gui_changing(int index, plain_value plain)
 {
   int tag = desc().param_index_to_tag[index];
   param_mapping const& mapping = desc().mappings[index];
-  auto normalized = desc().param_at(mapping).param->plain_to_normalized(plain).value();
+  auto normalized = desc().param_at(mapping).param->domain.plain_to_normalized(plain).value();
 
   // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
   performEdit(tag, normalized);
@@ -83,7 +83,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   int index = _desc.param_tag_to_index.at(tag);
   param_mapping const& mapping = _desc.mappings[index];
   auto const& param = _desc.param_at(mapping).param;
-  plain_value plain = param->normalized_to_plain(normalized_value(value));
+  plain_value plain = param->domain.normalized_to_plain(normalized_value(value));
   mapping.value_at(_gui_state) = plain;
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);
@@ -130,7 +130,7 @@ inf_controller::initialize(FUnknown* context)
       from_8bit_string(param_info.title, param.full_name.c_str());
       from_8bit_string(param_info.shortTitle, param.full_name.c_str());
       from_8bit_string(param_info.units, param.param->domain.unit.c_str());
-      param_info.defaultNormalizedValue = param.param->default_normalized().value();
+      param_info.defaultNormalizedValue = param.param->domain.default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;
       if(param.param->dsp.direction == param_direction::input)

@@ -25,7 +25,7 @@ clap_to_normalized(param_topo const& topo, clap_value clap)
   if(topo.domain.is_real())
     return normalized_value(clap.value());
   else
-    return normalized_value(topo.raw_to_normalized(clap.value()));
+    return normalized_value(topo.domain.raw_to_normalized(clap.value()));
 }
 
 static inline clap_value
@@ -34,7 +34,7 @@ normalized_to_clap(param_topo const& topo, normalized_value normalized)
   if(topo.domain.is_real())
     return clap_value(normalized.value());
   else
-    return clap_value(topo.normalized_to_raw(normalized));
+    return clap_value(topo.domain.normalized_to_raw(normalized));
 }
 
 static bool
@@ -254,7 +254,7 @@ inf_plugin::push_to_gui(int index, clap_value clap)
   auto const& topo = *_engine.desc().param_at(mapping).param;
   e.index = index;
   e.type = sync_event::type_t::value_changing;
-  e.plain = topo.normalized_to_plain(clap_to_normalized(topo, clap));
+  e.plain = topo.domain.normalized_to_plain(clap_to_normalized(topo, clap));
   _to_gui_events->enqueue(e);
 }
 
@@ -284,7 +284,7 @@ inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
   int index = getParamIndexForParamId(param_id);
   param_mapping const& mapping(_engine.desc().mappings[index]);
   auto const& topo = *_engine.desc().param_at(mapping).param;
-  *value = normalized_to_clap(topo, topo.plain_to_normalized(mapping.value_at(_gui_state))).value();
+  *value = normalized_to_clap(topo, topo.domain.plain_to_normalized(mapping.value_at(_gui_state))).value();
   return true;
 }
 
@@ -295,7 +295,7 @@ inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* val
   int index = getParamIndexForParamId(param_id);
   param_mapping const& mapping(_engine.desc().mappings[index]);
   auto const& param = *_engine.desc().param_at(mapping).param;
-  if (!param.text_to_normalized(display, normalized)) return false;
+  if (!param.domain.text_to_normalized(display, normalized)) return false;
   *value = normalized_to_clap(param, normalized).value();
   return true;
 }
@@ -307,7 +307,7 @@ inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std
   param_mapping const& mapping(_engine.desc().mappings[index]);
   auto const& param = *_engine.desc().param_at(mapping).param;
   normalized_value normalized = clap_to_normalized(param, clap_value(value));
-  std::string text = param.normalized_to_text(normalized);
+  std::string text = param.domain.normalized_to_text(normalized);
   from_8bit_string(display, size, text.c_str());
   return true;
 }
@@ -332,7 +332,7 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
   }
 
   // this is what the clap_value is all about
-  info->default_value = normalized_to_clap(*param.param, param.param->default_normalized()).value();
+  info->default_value = normalized_to_clap(*param.param, param.param->domain.default_normalized()).value();
   if (param.param->domain.is_real())
   {
     info->min_value = 0;
@@ -359,7 +359,7 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
     int index = getParamIndexForParamId(event->param_id);
     auto const& mapping = _engine.desc().mappings[index];
     auto const& topo = *_engine.desc().param_at(mapping).param;
-    mapping.value_at(_engine.plugin_state()) = topo.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
+    mapping.value_at(_engine.plugin_state()) = topo.domain.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
     push_to_gui(index, clap_value(event->value));
   }
   process_gui_to_audio_events(out);
@@ -423,7 +423,7 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_value);
       event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
-      event.value = normalized_to_clap(topo, topo.plain_to_normalized(e.plain)).value();
+      event.value = normalized_to_clap(topo, topo.domain.plain_to_normalized(e.plain)).value();
       out->try_push(out, &(event.header));
       break;
     }
@@ -520,7 +520,7 @@ inf_plugin::process(clap_process const* process) noexcept
     auto const& out_event = block.events.out[e];
     auto const& mapping = _engine.desc().mappings[out_event.param];
     to_gui_event.index = out_event.param;
-    to_gui_event.plain = _engine.desc().param_at(mapping).param->normalized_to_plain(out_event.normalized);
+    to_gui_event.plain = _engine.desc().param_at(mapping).param->domain.normalized_to_plain(out_event.normalized);
     _to_gui_events->enqueue(to_gui_event);
   }
   _engine.release_block();

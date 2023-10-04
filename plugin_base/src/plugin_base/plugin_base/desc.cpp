@@ -324,7 +324,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.domain.is_real() || param.dsp.rate == param_rate::block);
   assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
 
-  validate_param_domain(param.domain, param.default_plain());
+  validate_param_domain(param.domain, param.domain.default_plain());
   validate_gui_bindings(module, param.gui.bindings, param.info.slot_count);
   assert(param.dsp.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
   assert((param.info.slot_count == 1) == (param.gui.layout == gui_layout::single));
@@ -567,7 +567,7 @@ plugin_desc::init_defaults(jarray<plain_value, 4>& state) const
     for(int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
         for(int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          state[m][mi][p][pi] = module.params[p].default_plain();
+          state[m][mi][p][pi] = module.params[p].domain.default_plain();
   }
 }
 

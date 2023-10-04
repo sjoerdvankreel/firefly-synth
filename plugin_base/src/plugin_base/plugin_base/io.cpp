@@ -96,7 +96,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
         if(param_topo.dsp.direction == param_direction::output) continue;
         auto param_state = std::make_unique<DynamicObject>();
         for (int pi = 0; pi < param_topo.info.slot_count; pi++)
-          param_slot_states.append(var(String(param_topo.plain_to_text(state[m][mi][p][pi]))));
+          param_slot_states.append(var(String(param_topo.domain.plain_to_text(state[m][mi][p][pi]))));
         param_state->setProperty("slots", param_slot_states);
         param_states.append(var(param_state.release()));
       }
@@ -214,7 +214,7 @@ plugin_io::load(
           plain_value plain;
           auto const& topo = _desc->plugin->modules[module_iter->second].params[param_iter->second];
           std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
-          if(topo.text_to_plain(text, plain))
+          if(topo.domain.text_to_plain(text, plain))
             state[module_iter->second][mi][param_iter->second][pi] = plain;
           else
             result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");

@@ -351,7 +351,7 @@ plugin_engine::process()
             std::fill(
               _accurate_automation[m][mi][p][pi].begin(),
               _accurate_automation[m][mi][p][pi].begin() + frame_count,
-              (float)param.raw_to_normalized(_plugin_state[m][mi][p][pi].real()).value());
+              (float)param.domain.raw_to_normalized(_plugin_state[m][mi][p][pi].real()).value());
       }
   }
     
@@ -360,7 +360,7 @@ plugin_engine::process()
   {
     auto const& event = _host_block->events.block[e];
     auto const& mapping = _desc.mappings[event.param];
-    plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(event.normalized);
+    plain_value plain = _desc.param_at(mapping).param->domain.normalized_to_plain(event.normalized);
     mapping.value_at(_plugin_state) = plain;
     mapping.value_at(_block_automation) = plain;
   }
@@ -383,7 +383,7 @@ plugin_engine::process()
       curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
     // denormalize current state values
-    mapping.value_at(_plugin_state).real_unchecked(_desc.param_at(mapping).param->normalized_to_plain(event.normalized).real());
+    mapping.value_at(_plugin_state).real_unchecked(_desc.param_at(mapping).param->domain.normalized_to_plain(event.normalized).real());
     _accurate_frames[event.param] = event.frame;
   }
 
@@ -400,7 +400,7 @@ plugin_engine::process()
         if (param.dsp.rate == param_rate::accurate && param.dsp.format == param_format::plain)
           for(int pi = 0; pi < param.info.slot_count; pi++)
             for(int f = 0; f < frame_count; f++)
-              _accurate_automation[m][mi][p][pi][f] = param.normalized_to_plain(
+              _accurate_automation[m][mi][p][pi][f] = param.domain.normalized_to_plain(
                 normalized_value(_accurate_automation[m][mi][p][pi][f])).real();
       }
   }
@@ -485,7 +485,7 @@ plugin_engine::process()
             {
               block_event out_event;
               out_event.param = param_global;
-              out_event.normalized = module.params[p].plain_to_normalized(_plugin_state[m][mi][p][pi]);
+              out_event.normalized = module.params[p].domain.plain_to_normalized(_plugin_state[m][mi][p][pi]);
               _host_block->events.out.push_back(out_event);
             }
             param_global++;

@@ -19,7 +19,7 @@ public:
 
 // linear with min/max
 class plain_value final {
-  friend struct param_topo;
+  friend struct param_domain;
   union { float _real; int _step; };
 
   static plain_value from_real(float real);

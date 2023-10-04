@@ -56,7 +56,7 @@ inline void
 process_block::set_out_param(int param, int slot, double raw) const
 {
   assert(module.params[param].dsp.direction == param_direction::output);
-  out->params[param][slot] = module.params[param].raw_to_plain(raw);
+  out->params[param][slot] = module.params[param].domain.raw_to_plain(raw);
 }
 
 inline float
@@ -64,7 +64,7 @@ process_block::normalized_to_raw(int module_, int param_, float normalized) cons
 {
   check_unipolar(normalized);
   auto const& param_topo = plugin.modules[module_].params[param_];
-  return param_topo.normalized_to_raw(normalized_value(normalized));
+  return param_topo.domain.normalized_to_raw(normalized_value(normalized));
 }
 
 }

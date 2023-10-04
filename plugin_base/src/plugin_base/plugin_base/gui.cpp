@@ -156,13 +156,13 @@ public Slider
 {
 protected:
   void own_param_changed(plain_value plain) override final
-  { setValue(_param->param->plain_to_raw(plain), dontSendNotification); }
+  { setValue(_param->param->domain.plain_to_raw(plain), dontSendNotification); }
 
 public: 
   param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param);
   void stoppedDragging() override { _gui->gui_end_changes(_param->global); }
   void startedDragging() override { _gui->gui_begin_changes(_param->global); }
-  void valueChanged() override { _gui->gui_changing(_param->global, _param->param->raw_to_plain(getValue())); }
+  void valueChanged() override { _gui->gui_changing(_param->global, _param->param->domain.raw_to_plain(getValue())); }
 };
 
 class param_combobox :
@@ -178,7 +178,7 @@ public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param);
   void comboBoxChanged(ComboBox*) override final
-  { _gui->gui_changed(_param->global, _param->param->raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
+  { _gui->gui_changed(_param->global, _param->param->domain.raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
 };
 
 class param_toggle_button :
@@ -205,7 +205,7 @@ public TextEditor::Listener
   std::string _last_parsed;
 protected:
   void own_param_changed(plain_value plain) override final
-  { setText(_last_parsed = _param->param->plain_to_text(plain), false); }
+  { setText(_last_parsed = _param->param->domain.plain_to_text(plain), false); }
 
 public:
   void textEditorTextChanged(TextEditor&) override;
@@ -326,7 +326,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
 {
   plain_value plain;
   std::string text(getText().toStdString());
-  if (!_param->param->text_to_plain(text, plain)) return;
+  if (!_param->param->domain.text_to_plain(text, plain)) return;
   _last_parsed = text;
   _gui->gui_changed(_param->global, plain);
 }
@@ -334,7 +334,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
-  std::string text = _param->param->plain_to_text(plain);
+  std::string text = _param->param->domain.plain_to_text(plain);
   if(_both) text = _param->name + " " + text;
   setText(text, dontSendNotification); 
 }
@@ -350,7 +350,7 @@ void
 param_toggle_button::buttonStateChanged(Button*)
 { 
   if(_checked == getToggleState()) return;
-  plain_value plain = _param->param->raw_to_plain(getToggleState() ? 1 : 0);
+  plain_value plain = _param->param->domain.raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
   _gui->gui_changed(_param->global, plain);
 }
@@ -367,7 +367,7 @@ param_toggle_button::
 param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param):
 param_component(gui, module, param), ToggleButton()
 { 
-  auto value = param->param->default_plain();
+  auto value = param->param->domain.default_plain();
   _checked = value.step() != 0;
   addListener(this);
   init();
@@ -416,9 +416,9 @@ param_component(gui, module, param), Slider()
   if (!param->param->domain.is_real()) setRange(param->param->domain.min, param->param->domain.max, 1);
   else setNormalisableRange(
     NormalisableRange<double>(param->param->domain.min, param->param->domain.max,
-    [this](double s, double e, double v) { return _param->param->normalized_to_raw(normalized_value(v)); },
-    [this](double s, double e, double v) { return _param->param->raw_to_normalized(v).value(); }));
-  setDoubleClickReturnValue(true, param->param->default_raw(), ModifierKeys::noModifiers);
+    [this](double s, double e, double v) { return _param->param->domain.normalized_to_raw(normalized_value(v)); },
+    [this](double s, double e, double v) { return _param->param->domain.raw_to_normalized(v).value(); }));
+  setDoubleClickReturnValue(true, param->param->domain.default_raw(), ModifierKeys::noModifiers);
   param_component::init();
 }
 
