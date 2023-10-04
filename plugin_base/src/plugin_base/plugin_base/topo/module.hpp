@@ -1,0 +1,46 @@
+#pragma once
+
+#include <plugin_base/utility.hpp>
+#include <plugin_base/topo_gui.hpp>
+#include <plugin_base/topo_param.hpp>
+#include <plugin_base/topo_section.hpp>
+
+#include <memory>
+#include <vector>
+#include <string>
+
+namespace plugin_base {
+
+enum class module_output { none, cv, audio };
+enum class module_stage { input, voice, output };
+
+class module_engine;
+typedef std::unique_ptr<module_engine>(*
+module_engine_factory)(
+  int slot, int sample_rate, int max_frame_count);
+
+// module ui
+struct module_topo_gui final {
+  gui_layout layout;
+  gui_position position;
+  gui_dimension dimension;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo_gui);
+};
+
+// module group in plugin
+struct module_topo final {
+  int index;
+  int slot_count;
+  int output_count;
+  std::string id;
+  std::string name;
+  module_topo_gui gui;
+  module_stage stage;
+  module_output output;  
+  std::vector<param_topo> params;
+  std::vector<section_topo> sections;
+  module_engine_factory engine_factory;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo);
+};
+
+}

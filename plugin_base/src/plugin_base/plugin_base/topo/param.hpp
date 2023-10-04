@@ -2,89 +2,20 @@
 
 #include <plugin_base/value.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/topo_gui.hpp>
 
 #include <cmath>
 #include <vector>
 #include <string>
-#include <memory>
 
 namespace plugin_base {
 
-enum class plugin_type { synth, fx };
-
-enum class module_output { none, cv, audio };
-enum class module_stage { input, voice, output };
-
-enum class param_dir { input, output };
 enum class param_rate { accurate, block };
+enum class param_direction { input, output };
 enum class param_format { plain, normalized };
 
 enum class domain_display { normal, percentage };
 enum class domain_type { toggle, step, name, item, linear, log };
-
-enum class gui_label_justify { near, center, far };
-enum class gui_label_align { top, bottom, left, right };
-enum class gui_label_contents { none, name, value, both };
-enum class gui_layout { single, horizontal, vertical, tabbed };
-enum class gui_edit_type { toggle, list, text, knob, hslider, vslider };
-
-class module_engine;
-typedef std::unique_ptr<module_engine>(*
-module_engine_factory)(int slot, int sample_rate, int max_frame_count);
-typedef bool(*
-gui_binding_selector)(std::vector<int> const& values, std::vector<int> const& context);
-
-// position in parent grid
-struct gui_position final {
-  int row = -1;
-  int column = -1;
-  int row_span = 1;
-  int column_span = 1;
-};
-
-// binding to enabled/visible
-struct gui_binding final {
-  std::vector<int> params = {};
-  std::vector<int> context = {};
-  gui_binding_selector selector = {};
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_binding);
-};
-
-// binding to enabled/visible
-struct gui_bindings final {
-  gui_binding enabled;
-  gui_binding visible;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
-};
-
-// dimensions of own grid (relative distribution)
-struct gui_dimension final {
-  std::vector<int> row_sizes = { 1 };
-  std::vector<int> column_sizes = { 1 };
-
-  gui_dimension() = default;
-  gui_dimension(gui_dimension const&) = default;
-  gui_dimension(int row_count, int column_count):
-  row_sizes(row_count, 1), column_sizes(column_count, 1) {}
-  gui_dimension(std::vector<int> const& row_sizes, std::vector<int> const& column_sizes):
-  row_sizes(row_sizes), column_sizes(column_sizes) {}
-};
-
-// param section ui
-struct section_topo_gui final {
-  gui_bindings bindings;
-  gui_position position;
-  gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo_gui);
-};
-
-// param ui section
-struct section_topo final {
-  int index;
-  std::string name;
-  section_topo_gui gui;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
-};
 
 // item in list
 struct list_item final {
@@ -93,10 +24,10 @@ struct list_item final {
   std::string name = {};
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(list_item);
-  template <class T> list_item(T const& item) :
-    tag(item.index), id(item.id), name(item.name) {}
+  template <class T> list_item(T const& item) : 
+  tag(item.index), id(item.id), name(item.name) {}
   list_item(std::string const& id, std::string const& name, int tag) :
-    tag(tag), id(id), name(name) {}
+  tag(tag), id(id), name(name) {}
 };
 
 // parameter bounds
@@ -107,11 +38,11 @@ struct param_domain final {
   int precision;
   std::string unit;
   std::string default_;
+
   domain_type type;
   domain_display display;
   std::vector<list_item> items;
   std::vector<std::string> names;
-
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_domain);
   bool is_real() const { return type == domain_type::log || type == domain_type::linear; }
 };
@@ -135,11 +66,12 @@ struct param_topo final {
   int slot_count;
   std::string id;
   std::string name;
-  param_topo_gui gui;
-  param_dir dir;
+
   param_rate rate;
+  param_topo_gui gui;
   param_domain domain;
   param_format format;
+  param_direction direction;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
 
   // representation conversion
@@ -162,61 +94,11 @@ struct param_topo final {
   normalized_value default_normalized() const { return plain_to_normalized(default_plain()); }
 };
 
-// module ui
-struct module_topo_gui final {
-  gui_layout layout;
-  gui_position position;
-  gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo_gui);
-};
-
-// module group in plugin
-struct module_topo final {
-  int index;
-  int slot_count;
-  int output_count;
-  std::string id;
-  std::string name;
-  module_topo_gui gui;
-  module_stage stage;
-  module_output output;  
-  std::vector<param_topo> params;
-  std::vector<section_topo> sections;
-  module_engine_factory engine_factory;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo);
-};
-
-// plugin ui
-struct plugin_topo_gui final {
-  int min_width;
-  int max_width;
-  int default_width;
-  int aspect_ratio_width;
-  int aspect_ratio_height;
-  gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo_gui);
-};
-
-// plugin definition
-struct plugin_topo final {
-  std::string id;
-  std::string name;
-  int version_major;
-  int version_minor;
-
-  int polyphony;
-  plugin_type type;
-  plugin_topo_gui gui;
-  std::string preset_extension;
-  std::vector<module_topo> modules;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo);
-};
-
 inline normalized_value
 param_topo::raw_to_normalized(double raw) const
 {
   plain_value plain = raw_to_plain(raw);
-  return plain_to_normalized(plain);
+  return plain_to_normalized(raw_to_plain(raw));
 }
 
 inline double
