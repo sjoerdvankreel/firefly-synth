@@ -52,8 +52,8 @@ make_section(
   section_topo result = {};
   result.name = name;
   result.index = index;
-  result.position = position;
-  result.dimension = dimension;
+  result.gui.position = position;
+  result.gui.dimension = dimension;
   return result;
 }
 
@@ -69,11 +69,11 @@ make_module(
   result.index = index;
   result.stage = stage;
   result.output = output;
-  result.layout = layout;
-  result.position = position;
-  result.dimension = dimension;
   result.slot_count = slot_count;
   result.output_count = output_count;
+  result.gui.layout = layout;
+  result.gui.position = position;
+  result.gui.dimension = dimension;
   return result;
 }
 

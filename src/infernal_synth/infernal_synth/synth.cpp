@@ -15,16 +15,17 @@ synth_topo()
   result->id = INF_SYNTH_ID;
   result->name = INF_SYNTH_NAME;
   result->type = plugin_type::synth;
-  result->gui_min_width = 400;
-  result->gui_max_width = 1200;
-  result->gui_default_width = 800;
-  result->gui_aspect_ratio_width = 4;
-  result->gui_aspect_ratio_height = 3;
   result->preset_extension = "infpreset";
-  result->dimension.column_sizes = { 1 };
-  result->dimension.row_sizes = { 1, 1, 2, 1, 3, 1 };
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
+
+  result->gui.min_width = 400;
+  result->gui.max_width = 1200;
+  result->gui.default_width = 800;
+  result->gui.aspect_ratio_width = 4;
+  result->gui.aspect_ratio_height = 3;
+  result->gui.dimension.column_sizes = { 1 };
+  result->gui.dimension.row_sizes = { 1, 1, 2, 1, 3, 1 };
 
   result->modules.resize(module_count);
   result->modules[module_lfo] = lfo_topo();

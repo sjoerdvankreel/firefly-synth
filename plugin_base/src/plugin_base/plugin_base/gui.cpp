@@ -513,7 +513,7 @@ public grid_component
 {
 public:
   section_grid_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
-  binding_component(gui, module, &section->bindings, 0), grid_component(section->dimension) { init(); }
+  binding_component(gui, module, &section->gui.bindings, 0), grid_component(section->gui.dimension) { init(); }
 };
 
 // binding_component that hosts a single section_grid_component
@@ -523,7 +523,7 @@ public group_component
 {
 public:
   section_group_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
-  binding_component(gui, module, &section->bindings, 0), group_component() { init(); }
+  binding_component(gui, module, &section->gui.bindings, 0), group_component() { init(); }
 };
 
 // main plugin gui
@@ -602,7 +602,7 @@ _desc(desc), _gui_state(gui_state), _plugin_listeners(desc->param_count)
   setOpaque(true);
   auto const& topo = *_desc->plugin;
   addAndMakeVisible(&make_container());
-  setSize(topo.gui_default_width, topo.gui_default_width * topo.gui_aspect_ratio_height / topo.gui_aspect_ratio_width);
+  setSize(topo.gui.default_width, topo.gui.default_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
 }
 
 template <class T, class... U> T& 
@@ -682,9 +682,9 @@ plugin_gui::make_top_bar()
 Component&
 plugin_gui::make_content()
 {
-  auto& result = make_component<grid_component>(_desc->plugin->dimension);
+  auto& result = make_component<grid_component>(_desc->plugin->gui.dimension);
   for (auto iter = _desc->modules.begin(); iter != _desc->modules.end(); iter += iter->module->slot_count)
-    result.add(make_modules(&(*iter)), iter->module->position);
+    result.add(make_modules(&(*iter)), iter->module->gui.position);
   return result;
 }
 
@@ -719,9 +719,9 @@ Component&
 plugin_gui::make_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  auto& result = make_component<grid_component>(topo.dimension);
+  auto& result = make_component<grid_component>(topo.gui.dimension);
   for (int s = 0; s < topo.sections.size(); s++)
-    result.add(make_section(module, topo.sections[s]), topo.sections[s].position);
+    result.add(make_section(module, topo.sections[s]), topo.sections[s].gui.position);
   return result;
 }
 
@@ -732,7 +732,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   if (module.module->sections.size() == 1)
     grid = &make_component<section_grid_component>(this, &module, &section);
   else
-    grid = &make_component<grid_component>(section.dimension);
+    grid = &make_component<grid_component>(section.gui.dimension);
 
   auto const& params = module.params;
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->slot_count)
@@ -852,12 +852,12 @@ template <class Topo, class Slot, class MakeSingle>
 Component&
 plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single)
 {
-  switch (topo.layout)
+  switch (topo.gui.layout)
   {
   case gui_layout::vertical:
   case gui_layout::horizontal:
   {
-    bool vertical = topo.layout == gui_layout::vertical;
+    bool vertical = topo.gui.layout == gui_layout::vertical;
     auto& result = make_component<grid_component>(vertical, topo.slot_count);
     for (int i = 0; i < topo.slot_count; i++)
       result.add(make_single(slots[i], false), vertical, i);

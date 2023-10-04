@@ -173,13 +173,13 @@ static void validate_gui_constraints(
   for (int k = 0; k < children.size(); k++)
     if(include(children[k]))
     {
-      auto const& pos = children[k].position;
+      auto const& pos = children[k].gui.position;
       for (int r = pos.row; r < pos.row + pos.row_span; r++)
         for (int c = pos.column; c < pos.column + pos.column_span; c++)
           INF_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second || selector(children[k]) != nullptr);
     }
-  for (int r = 0; r < parent.dimension.row_sizes.size(); r++)
-    for (int c = 0; c < parent.dimension.column_sizes.size(); c++)
+  for (int r = 0; r < parent.gui.dimension.row_sizes.size(); r++)
+    for (int c = 0; c < parent.gui.dimension.column_sizes.size(); c++)
       assert(gui_taken.find(std::make_pair(r, c)) != gui_taken.end());
 }
 
@@ -214,14 +214,14 @@ validate_section_topo(module_topo const& module, section_topo const& section)
 {
   assert(section.name.size());
   assert(0 <= section.index && section.index < module.sections.size());
-  assert(0 < section.position.row_span && section.position.row_span <= 1024);
-  assert(0 < section.position.column_span && section.position.column_span <= 1024);
-  assert(0 < section.dimension.row_sizes.size() && section.dimension.row_sizes.size() <= 1024);
-  assert(0 < section.dimension.column_sizes.size() && section.dimension.column_sizes.size() <= 1024);
-  assert(0 <= section.position.row && section.position.row + section.position.row_span <= module.dimension.row_sizes.size());
-  assert(0 <= section.position.column && section.position.column + section.position.column_span <= module.dimension.column_sizes.size());
+  assert(0 < section.gui.position.row_span && section.gui.position.row_span <= 1024);
+  assert(0 < section.gui.position.column_span && section.gui.position.column_span <= 1024);
+  assert(0 < section.gui.dimension.row_sizes.size() && section.gui.dimension.row_sizes.size() <= 1024);
+  assert(0 < section.gui.dimension.column_sizes.size() && section.gui.dimension.column_sizes.size() <= 1024);
+  assert(0 <= section.gui.position.row && section.gui.position.row + section.gui.position.row_span <= module.gui.dimension.row_sizes.size());
+  assert(0 <= section.gui.position.column && section.gui.position.column + section.gui.position.column_span <= module.gui.dimension.column_sizes.size());
 
-  validate_gui_bindings(module, section.bindings, 1);
+  validate_gui_bindings(module, section.gui.bindings, 1);
   validate_gui_constraints(section, module.params, 
     [](param_topo const& p) { return p.gui.bindings.visibility_selector; },
     [&section](param_topo const& p) { return p.section == section.index; });
@@ -238,14 +238,14 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(module.output == module_output::none || module.output_count > 0);
   assert(module.output != module_output::none || module.output_count == 0);
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
-  assert((module.slot_count == 1) == (module.layout == gui_layout::single));
-  assert(0 < module.position.row_span && module.position.row_span <= 1024);
-  assert(0 < module.position.column_span && module.position.column_span <= 1024);
-  assert(0 < module.dimension.row_sizes.size() && module.dimension.row_sizes.size() <= 1024);
-  assert(0 < module.dimension.column_sizes.size() && module.dimension.column_sizes.size() <= 1024);
-  assert(0 <= module.position.row && module.position.row + module.position.row_span <= plugin.dimension.row_sizes.size());
-  assert(0 <= module.position.column && module.position.column + module.position.column_span <= plugin.dimension.column_sizes.size());
-  validate_gui_constraints(module, module.sections, [](auto const& section) { return section.bindings.visibility_selector; }, [](auto const&) { return true; });
+  assert((module.slot_count == 1) == (module.gui.layout == gui_layout::single));
+  assert(0 < module.gui.position.row_span && module.gui.position.row_span <= 1024);
+  assert(0 < module.gui.position.column_span && module.gui.position.column_span <= 1024);
+  assert(0 < module.gui.dimension.row_sizes.size() && module.gui.dimension.row_sizes.size() <= 1024);
+  assert(0 < module.gui.dimension.column_sizes.size() && module.gui.dimension.column_sizes.size() <= 1024);
+  assert(0 <= module.gui.position.row && module.gui.position.row + module.gui.position.row_span <= plugin.gui.dimension.row_sizes.size());
+  assert(0 <= module.gui.position.column && module.gui.position.column + module.gui.position.column_span <= plugin.gui.dimension.column_sizes.size());
+  validate_gui_constraints(module, module.sections, [](auto const& section) { return section.gui.bindings.visibility_selector; }, [](auto const&) { return true; });
 
   for(int p = 0; p < module.params.size(); p++)
   {
@@ -327,8 +327,8 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert((param.slot_count == 1) == (param.gui.layout == gui_layout::single));
   assert(0 < param.gui.position.row_span && param.gui.position.row_span <= 1024);
   assert(0 < param.gui.position.column_span && param.gui.position.column_span <= 1024);
-  assert(0 <= param.gui.position.row && param.gui.position.row + param.gui.position.row_span <= module.sections[param.section].dimension.row_sizes.size());
-  assert(0 <= param.gui.position.column && param.gui.position.column + param.gui.position.column_span <= module.sections[param.section].dimension.column_sizes.size());
+  assert(0 <= param.gui.position.row && param.gui.position.row + param.gui.position.row_span <= module.sections[param.section].gui.dimension.row_sizes.size());
+  assert(0 <= param.gui.position.column && param.gui.position.column + param.gui.position.column_span <= module.sections[param.section].gui.dimension.column_sizes.size());
 }
 
 static void
@@ -344,14 +344,14 @@ validate_plugin_topo(plugin_topo const& topo)
   assert(topo.version_major >= 0);
   assert(topo.version_minor >= 0);
   assert(topo.preset_extension.size());
-  assert(topo.gui_default_width <= 3840);
+  assert(topo.gui.default_width <= 3840);
   assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
 
-  assert(0 < topo.gui_aspect_ratio_width && topo.gui_aspect_ratio_width <= 100);
-  assert(0 < topo.gui_aspect_ratio_height && topo.gui_aspect_ratio_height <= 100);
-  assert(0 < topo.dimension.row_sizes.size() && topo.dimension.row_sizes.size() <= 1024);
-  assert(0 < topo.dimension.column_sizes.size() && topo.dimension.column_sizes.size() <= 1024);
-  assert(0 < topo.gui_min_width && topo.gui_min_width <= topo.gui_default_width && topo.gui_default_width <= topo.gui_max_width);
+  assert(0 < topo.gui.aspect_ratio_width && topo.gui.aspect_ratio_width <= 100);
+  assert(0 < topo.gui.aspect_ratio_height && topo.gui.aspect_ratio_height <= 100);
+  assert(0 < topo.gui.dimension.row_sizes.size() && topo.gui.dimension.row_sizes.size() <= 1024);
+  assert(0 < topo.gui.dimension.column_sizes.size() && topo.gui.dimension.column_sizes.size() <= 1024);
+  assert(0 < topo.gui.min_width && topo.gui.min_width <= topo.gui.default_width && topo.gui.default_width <= topo.gui.max_width);
 
   int stage = 0;
   (void)stage;
