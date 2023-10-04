@@ -1,5 +1,5 @@
 function(declare_local_target LIBRARY_TYPE PROJECT_NAME SOURCE_DIR)
-  set("${PROJECT_NAME}_SRC_DIR" "src/${SOURCE_DIR}")
+  set("${PROJECT_NAME}_SRC_DIR" "${CMAKE_CURRENT_SOURCE_DIR}/src/${SOURCE_DIR}")
   file(GLOB_RECURSE "${PROJECT_NAME}_SRC" "${${PROJECT_NAME}_SRC_DIR}/*.*")
   add_library(${PROJECT_NAME} ${LIBRARY_TYPE} "${${PROJECT_NAME}_SRC}")
   target_include_directories(${PROJECT_NAME} PRIVATE "${${PROJECT_NAME}_SRC_DIR}")
