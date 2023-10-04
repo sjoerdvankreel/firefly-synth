@@ -43,13 +43,12 @@ plugin_engine::make_plugin_block(int voice, int module, int slot, int start_fram
 {
   jarray<float, 2>& cv_out = voice < 0? _global_cv_state[module][slot]: _voice_cv_state[voice][module][slot];
   jarray<float, 3>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
-  return {
-    start_frame, end_frame,
-    _sample_rate, nullptr, _host_block->common,
-    *_desc.plugin, _desc.plugin->modules[module], nullptr,
+  plugin_block_state state = {
     cv_out, audio_out, _global_cv_state, _global_audio_state,
-    _accurate_automation[module][slot], _block_automation[module][slot]
-  };
+    _accurate_automation[module][slot], _block_automation[module][slot] };
+  return {
+    start_frame, end_frame, _sample_rate, state, nullptr, nullptr, 
+    _host_block->common, *_desc.plugin, _desc.plugin->modules[module] };
 }
 
 void

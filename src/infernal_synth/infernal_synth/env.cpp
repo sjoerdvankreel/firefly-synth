@@ -70,16 +70,16 @@ env_topo()
 void
 env_engine::process(plugin_block& block)
 {
-  auto const& a = block.accurate_automation[param_a][0];
-  auto const& d = block.accurate_automation[param_d][0];
-  auto const& s = block.accurate_automation[param_s][0];
-  auto const& r = block.accurate_automation[param_r][0];
+  auto const& a = block.state.accurate_automation[param_a][0];
+  auto const& d = block.state.accurate_automation[param_d][0];
+  auto const& s = block.state.accurate_automation[param_s][0];
+  auto const& r = block.state.accurate_automation[param_r][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if (_stage == env_stage::end)
     {
-      block.cv_out[0][f] = _release_level = 0;
+      block.state.own_cv_out[0][f] = _release_level = 0;
       continue;
     }
 
@@ -91,7 +91,7 @@ env_engine::process(plugin_block& block)
 
     if (_stage == env_stage::s)
     {
-      block.cv_out[0][f] = _release_level = s[f];
+      block.state.own_cv_out[0][f] = _release_level = s[f];
       continue;
     }
 
@@ -106,13 +106,13 @@ env_engine::process(plugin_block& block)
 
     if(_stage_pos > stage_seconds) _stage_pos = stage_seconds;
     if (stage_seconds == 0)
-      block.cv_out[0][f] = _release_level;
+      block.state.own_cv_out[0][f] = _release_level;
     else 
       switch (_stage)
       {
-      case env_stage::a: block.cv_out[0][f] = _release_level = _stage_pos / stage_seconds; break;
-      case env_stage::d: block.cv_out[0][f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s[f]); break;
-      case env_stage::r: block.cv_out[0][f] = (1.0 - _stage_pos / stage_seconds) * _release_level; break;
+      case env_stage::a: block.state.own_cv_out[0][f] = _release_level = _stage_pos / stage_seconds; break;
+      case env_stage::d: block.state.own_cv_out[0][f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s[f]); break;
+      case env_stage::r: block.state.own_cv_out[0][f] = (1.0 - _stage_pos / stage_seconds) * _release_level; break;
       default: assert(false); stage_seconds = 0; break;
       }
 

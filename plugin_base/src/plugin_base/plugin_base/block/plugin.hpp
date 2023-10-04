@@ -43,24 +43,28 @@ struct plugin_voice_block final {
   jarray<float, 5> const& audio_in;
 };
 
+// state and automation
+struct plugin_block_state final {
+  jarray<float, 2>& own_cv_out;
+  jarray<float, 3>& own_audio_out;
+  jarray<float, 4> const& global_cv_in;
+  jarray<float, 5> const& global_audio_in;
+  jarray<float, 3> const& accurate_automation;
+  jarray<plain_value, 2> const& block_automation;
+};
+
 // single module process call
 struct plugin_block final {
   int start_frame;
   int end_frame;
   float sample_rate;
+  plugin_block_state state;
 
   plugin_output_block* out;
+  plugin_voice_block* voice;
   common_block const& host;
   plugin_topo const& plugin;
   module_topo const& module;
-  plugin_voice_block* voice;
-
-  jarray<float, 2>& cv_out;
-  jarray<float, 3>& audio_out;
-  jarray<float, 4> const& global_cv_in;
-  jarray<float, 5> const& global_audio_in;
-  jarray<float, 3> const& accurate_automation;
-  jarray<plain_value, 2> const& block_automation;
 
   void set_out_param(int param, int slot, double raw) const;
   float normalized_to_raw(int module_, int param_, float normalized) const;

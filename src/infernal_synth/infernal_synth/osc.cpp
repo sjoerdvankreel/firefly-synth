@@ -132,16 +132,16 @@ osc_topo()
 void
 osc_engine::process(plugin_block& block)
 {
-  if(block.block_automation[param_on][0].step() == 0) return;
-  int oct = block.block_automation[param_oct][0].step();
-  int note = block.block_automation[param_note][0].step();
-  int type = block.block_automation[param_type][0].step();
+  if(block.state.block_automation[param_on][0].step() == 0) return;
+  int oct = block.state.block_automation[param_oct][0].step();
+  int note = block.state.block_automation[param_note][0].step();
+  int type = block.state.block_automation[param_type][0].step();
   auto const& env = block.voice->cv_in[module_env][0][0];
-  auto const& bal = block.accurate_automation[param_bal][0];
-  auto const& cent = block.accurate_automation[param_cent][0];
-  auto const& gain = block.accurate_automation[param_gain][0];
-  auto const& saw_gain = block.accurate_automation[param_saw_gain][0];
-  auto const& sine_gain = block.accurate_automation[param_sine_gain][0];
+  auto const& bal = block.state.accurate_automation[param_bal][0];
+  auto const& cent = block.state.accurate_automation[param_cent][0];
+  auto const& gain = block.state.accurate_automation[param_gain][0];
+  auto const& saw_gain = block.state.accurate_automation[param_saw_gain][0];
+  auto const& sine_gain = block.state.accurate_automation[param_sine_gain][0];
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -153,8 +153,8 @@ osc_engine::process(plugin_block& block)
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    block.audio_out[0][0][f] = sample * gain[f] * env[f] * balance(0, bal[f]);
-    block.audio_out[0][1][f] = sample * gain[f] * env[f] * balance(1, bal[f]);
+    block.state.own_audio_out[0][0][f] = sample * gain[f] * env[f] * balance(0, bal[f]);
+    block.state.own_audio_out[0][1][f] = sample * gain[f] * env[f] * balance(1, bal[f]);
     _phase += note_to_frequency(oct, note, cent[f], block.voice->state.id.key) / block.sample_rate;
     _phase -= std::floor(_phase);
   }
