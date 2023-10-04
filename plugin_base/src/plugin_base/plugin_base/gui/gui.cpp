@@ -14,24 +14,6 @@ namespace plugin_base {
 static inline int constexpr label_width = 80;
 static inline int constexpr label_height = 15;
 
-static std::unique_ptr<lnf> _lnf = {};
-
-void 
-gui_terminate()
-{ 
-  LookAndFeel::setDefaultLookAndFeel(nullptr);
-  _lnf.reset();
-  shutdownJuce_GUI(); 
-}
-
-void 
-gui_init()
-{ 
-  initialiseJuce_GUI(); 
-  _lnf = std::make_unique<lnf>();
-  LookAndFeel::setDefaultLookAndFeel(_lnf.get());
-}
-
 static Justification 
 justification_type(gui_label_align align, gui_label_justify justify)
 {
@@ -65,8 +47,6 @@ justification_type(gui_label_align align, gui_label_justify justify)
   assert(false);
   return Justification::centred;
 }
-
-// main plugin gui
 
 void 
 plugin_gui::gui_changed(int index, plain_value plain)
