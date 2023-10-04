@@ -359,7 +359,7 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
     int index = getParamIndexForParamId(event->param_id);
     auto const& mapping = _engine.desc().mappings[index];
     auto const& topo = *_engine.desc().param_at(mapping).param;
-    mapping.value_at(_engine.state()) = topo.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
+    mapping.value_at(_engine.plugin_state()) = topo.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
     push_to_gui(index, clap_value(event->value));
   }
   process_gui_to_audio_events(out);
@@ -415,7 +415,7 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
     {
       param_mapping const& mapping = _engine.desc().mappings[e.index];
       auto const& topo = *_engine.desc().param_at(mapping).param;
-      mapping.value_at(_engine.state()) = e.plain;
+      mapping.value_at(_engine.plugin_state()) = e.plain;
       auto event = clap_event_param_value();
       event.param_id = tag;
       event.header.time = 0;

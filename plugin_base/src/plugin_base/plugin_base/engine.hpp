@@ -41,7 +41,6 @@ class plugin_engine final {
   double _block_start_time_sec = {};
   std::int64_t _stream_time = {};
 
-  jarray<plain_value, 4> _state = {};
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};
@@ -50,6 +49,7 @@ class plugin_engine final {
   jarray<float, 6> _voice_audio_state = {};
   jarray<float, 5> _global_audio_state = {};
   jarray<float, 5> _accurate_automation = {};
+  jarray<plain_value, 4> _plugin_state = {};
   jarray<plain_value, 4> _block_automation = {};
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
@@ -84,8 +84,8 @@ public:
   void activate(int sample_rate, int max_frame_count);
 
   plugin_desc const& desc() const { return _desc; }
-  jarray<plain_value, 4>& state() { return _state; }
-  jarray<plain_value, 4> const& state() const { return _state; }
+  jarray<plain_value, 4>& plugin_state() { return _plugin_state; }
+  jarray<plain_value, 4> const& plugin_state() const { return _plugin_state; }
 };
 
 }

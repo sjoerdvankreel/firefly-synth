@@ -24,8 +24,8 @@ _voice_processor_context(voice_processor_context)
   int note_limit_guess = _desc.plugin->polyphony * 64;
 
   // init everything that is not frame-count dependent
-  _state.resize(_dims.module_slot_param_slot);
-  _desc.init_defaults(_state);
+  _plugin_state.resize(_dims.module_slot_param_slot);
+  _desc.init_defaults(_plugin_state);
   _input_engines.resize(_dims.module_slot);
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
@@ -345,13 +345,13 @@ plugin_engine::process()
         auto const& param = module.params[p];
         if(param.rate == param_rate::block)
           for(int pi = 0; pi < param.slot_count; pi++)
-            _block_automation[m][mi][p][pi] = _state[m][mi][p][pi];
+            _block_automation[m][mi][p][pi] = _plugin_state[m][mi][p][pi];
         else
           for (int pi = 0; pi < param.slot_count; pi++)
             std::fill(
               _accurate_automation[m][mi][p][pi].begin(),
               _accurate_automation[m][mi][p][pi].begin() + frame_count,
-              (float)param.raw_to_normalized(_state[m][mi][p][pi].real()).value());
+              (float)param.raw_to_normalized(_plugin_state[m][mi][p][pi].real()).value());
       }
   }
     
@@ -361,7 +361,7 @@ plugin_engine::process()
     auto const& event = _host_block->events.block[e];
     auto const& mapping = _desc.mappings[event.param];
     plain_value plain = _desc.param_at(mapping).param->normalized_to_plain(event.normalized);
-    mapping.value_at(_state) = plain;
+    mapping.value_at(_plugin_state) = plain;
     mapping.value_at(_block_automation) = plain;
   }
 
@@ -383,7 +383,7 @@ plugin_engine::process()
       curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
     // denormalize current state values
-    mapping.value_at(_state).real_unchecked(_desc.param_at(mapping).param->normalized_to_plain(event.normalized).real());
+    mapping.value_at(_plugin_state).real_unchecked(_desc.param_at(mapping).param->normalized_to_plain(event.normalized).real());
     _accurate_frames[event.param] = event.frame;
   }
 
@@ -455,7 +455,7 @@ plugin_engine::process()
         thread_count,
         _cpu_usage,
         _host_block->audio_out,
-        _state[m][mi],
+        _plugin_state[m][mi],
         _voices_mixdown
       };
       process_block block(make_process_block(-1, m, mi, 0, frame_count));
@@ -485,7 +485,7 @@ plugin_engine::process()
             {
               block_event out_event;
               out_event.param = param_global;
-              out_event.normalized = module.params[p].plain_to_normalized(_state[m][mi][p][pi]);
+              out_event.normalized = module.params[p].plain_to_normalized(_plugin_state[m][mi][p][pi]);
               _host_block->events.out.push_back(out_event);
             }
             param_global++;
