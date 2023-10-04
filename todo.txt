@@ -26,7 +26,6 @@ all ui to gui
 move note_names to plug
 rename plugin_gui to editor
 cleanup the validation
-split out the bindings
 rename item_topo
 
 * continuing
