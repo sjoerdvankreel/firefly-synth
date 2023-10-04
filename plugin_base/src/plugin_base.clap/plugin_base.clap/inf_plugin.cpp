@@ -340,8 +340,8 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
   }
   else
   {
-    info->min_value = param.param->min;
-    info->max_value = param.param->max;
+    info->min_value = param.param->domain.min;
+    info->max_value = param.param->domain.max;
     info->flags |= CLAP_PARAM_IS_STEPPED;
   }
   return true;

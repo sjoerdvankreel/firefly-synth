@@ -10,10 +10,9 @@
 
 namespace plugin_base {
 
+enum class plugin_type { synth, fx };
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
-
-enum class plugin_type { synth, fx };
 enum class gui_layout { single, horizontal, vertical, tabbed };
 
 enum class param_dir { input, output };
@@ -53,6 +52,17 @@ struct gui_dimension final {
   row_sizes(row_sizes), column_sizes(column_sizes) {}
 };
 
+// binding to ui enabled/visible
+struct gui_bindings final {
+  std::vector<int> enabled_params = {};
+  std::vector<int> enabled_context = {};
+  gui_binding_selector enabled_selector = {};
+  std::vector<int> visibility_params = {};
+  std::vector<int> visibility_context = {};
+  gui_binding_selector visibility_selector = {};
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
+};
+
 // item in list
 struct item_topo final {
   int tag = -1;
@@ -65,17 +75,6 @@ struct item_topo final {
   item_topo(std::string const& id, std::string const& name, int tag): tag(tag), id(id), name(name) {}
 };
 
-// binding ui state
-struct gui_bindings final {
-  std::vector<int> enabled_params = {};
-  std::vector<int> enabled_context = {};
-  gui_binding_selector enabled_selector = {};
-  std::vector<int> visibility_params = {};
-  std::vector<int> visibility_context = {};
-  gui_binding_selector visibility_selector = {};
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
-};
-
 // param gui section
 struct section_topo final {
   int index;
@@ -86,19 +85,25 @@ struct section_topo final {
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
 };
 
-// param group in module
-struct param_topo final {
+// parameter bounds
+struct param_domain final {
   double min;
   double max;
   double exp;
+  std::string unit;
+  std::string default_;
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_domain);
+};
+
+// param group in module
+struct param_topo final {
   int index;
   int section;
   int precision;
   int slot_count;
   std::string id;
   std::string name;
-  std::string unit;
-  std::string default_;
+  param_domain domain;
 
   param_dir dir;
   param_type type;
@@ -206,7 +211,7 @@ param_topo::plain_to_raw(plain_value plain) const
 inline plain_value 
 param_topo::raw_to_plain(double raw) const
 {
-  assert(min <= raw && raw <= max);
+  assert(domain.min <= raw && raw <= domain.max);
   if(is_real())
     return plain_value::from_real(raw);
   else
@@ -216,23 +221,23 @@ param_topo::raw_to_plain(double raw) const
 inline normalized_value 
 param_topo::plain_to_normalized(plain_value plain) const
 {
-  double range = max - min;
+  double range = domain.max - domain.min;
   if (!is_real())
-    return normalized_value((plain.step() - min) / range);
+    return normalized_value((plain.step() - domain.min) / range);
   if (type == param_type::linear)
-    return normalized_value((plain.real() - min) / range);
-  return normalized_value(std::pow((plain.real() - min) * (1 / range), 1 / exp));
+    return normalized_value((plain.real() - domain.min) / range);
+  return normalized_value(std::pow((plain.real() - domain.min) * (1 / range), 1 / domain.exp));
 }
 
 inline plain_value 
 param_topo::normalized_to_plain(normalized_value normalized) const
 {
-  double range = max - min;
+  double range = domain.max - domain.min;
   if (!is_real())
-    return plain_value::from_step(min + std::floor(std::min(range, normalized.value() * (range + 1))));
+    return plain_value::from_step(domain.min + std::floor(std::min(range, normalized.value() * (range + 1))));
   if (type == param_type::linear)
-    return plain_value::from_real(min + normalized.value() * range);
-  return plain_value::from_real(std::pow(normalized.value(), exp) * range + min);
+    return plain_value::from_real(domain.min + normalized.value() * range);
+  return plain_value::from_real(std::pow(normalized.value(), domain.exp) * range + domain.min);
 }
 
 }

@@ -128,8 +128,8 @@ inf_controller::initialize(FUnknown* context)
       param_info.id = param.id_hash;
       param_info.unitId = unit_info.id;
       from_8bit_string(param_info.title, param.full_name.c_str());
-      from_8bit_string(param_info.units, param.param->unit.c_str());
       from_8bit_string(param_info.shortTitle, param.full_name.c_str());
+      from_8bit_string(param_info.units, param.param->domain.unit.c_str());
       param_info.defaultNormalizedValue = param.param->default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;
@@ -141,7 +141,7 @@ inf_controller::initialize(FUnknown* context)
         param_info.flags |= ParameterInfo::kIsList;
       param_info.stepCount = 0;
       if (!param.param->is_real())
-        param_info.stepCount = param.param->max - param.param->min;
+        param_info.stepCount = param.param->domain.max - param.param->domain.min;
       parameters.addParameter(new param_wrapper(module.params[p].param, param_info));
     }
   }

@@ -170,13 +170,13 @@ public ComboBox::Listener
 {
 protected:
   void own_param_changed(plain_value plain) override final
-  { setSelectedItemIndex(plain.step() - _param->param->min); }
+  { setSelectedItemIndex(plain.step() - _param->param->domain.min); }
 
 public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param);
   void comboBoxChanged(ComboBox*) override final
-  { _gui->gui_changed(_param->global, _param->param->raw_to_plain(getSelectedItemIndex() + _param->param->min)); }
+  { _gui->gui_changed(_param->global, _param->param->raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
 };
 
 class param_toggle_button :
@@ -388,8 +388,8 @@ param_component(gui, module, param), ComboBox()
       addItem(param->param->items[i].name, i + 1);
     break;
   case param_type::step:
-    for (int i = param->param->min; i <= param->param->max; i++)
-      addItem(std::to_string(i), param->param->min + i + 1);
+    for (int i = param->param->domain.min; i <= param->param->domain.max; i++)
+      addItem(std::to_string(i), param->param->domain.min + i + 1);
     break;
   default:
     assert(false);
@@ -412,9 +412,9 @@ param_component(gui, module, param), Slider()
   default: assert(false); break;
   }
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
-  if (!param->param->is_real()) setRange(param->param->min, param->param->max, 1);
+  if (!param->param->is_real()) setRange(param->param->domain.min, param->param->domain.max, 1);
   else setNormalisableRange(
-    NormalisableRange<double>(param->param->min, param->param->max,
+    NormalisableRange<double>(param->param->domain.min, param->param->domain.max,
     [this](double s, double e, double v) { return _param->param->normalized_to_raw(normalized_value(v)); },
     [this](double s, double e, double v) { return _param->param->raw_to_normalized(v).value(); }));
   setDoubleClickReturnValue(true, param->param->default_raw(), ModifierKeys::noModifiers);

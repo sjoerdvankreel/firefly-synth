@@ -26,8 +26,8 @@ param_base(
   result.layout = layout;
   result.section = section;
   result.position = position;
-  result.default_ = default_;
   result.slot_count = slot_count;
+  result.domain.default_ = default_;
   result.label_align = label_align;
   result.label_justify = label_justify;
   result.label_contents = label_contents;
@@ -89,8 +89,8 @@ param_toggle(
     id, name, index, slot_count, section, default_? "On": "Off", 
     dir, param_rate::block, param_format::plain, param_edit::toggle, 
     label_contents, label_align, label_justify, layout, position));
-  result.min = 0;
-  result.max = 1;
+  result.domain.min = 0;
+  result.domain.max = 1;
   result.type = param_type::step;
   return result;
 }
@@ -107,8 +107,8 @@ param_steps(
     id, name, index, slot_count, section, std::to_string(default_), 
     dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
-  result.min = min;
-  result.max = max;
+  result.domain.min = min;
+  result.domain.max = max;
   result.type = param_type::step;
   return result;
 }
@@ -126,8 +126,8 @@ param_items(
     dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
   result.items = std::move(items);
-  result.min = 0;
-  result.max = result.items.size() - 1;
+  result.domain.min = 0;
+  result.domain.max = result.items.size() - 1;
   result.type = param_type::item;
   return result;
 }
@@ -144,8 +144,8 @@ param_names(
     id, name, index, slot_count, section, default_.size()? default_: names[0],
     dir, param_rate::block, param_format::plain, edit,
     label_contents, label_align, label_justify, layout, position));
-  result.min = 0;
-  result.max = names.size() - 1;
+  result.domain.min = 0;
+  result.domain.max = names.size() - 1;
   result.names = names;
   result.type = param_type::name;
   return result;
@@ -163,9 +163,9 @@ param_pct(
     id, name, index, slot_count, section, std::to_string(default_ * 100), 
     dir, rate, format, edit, 
     label_contents, label_align, label_justify, layout, position));
-  result.min = min;
-  result.max = max;
-  result.unit = unit? "%": "";
+  result.domain.min = min;
+  result.domain.max = max;
+  result.domain.unit = unit? "%": "";
   result.precision = precision;
   result.type = param_type::linear;
   result.display = param_display::pct;
@@ -184,9 +184,9 @@ param_linear(
     id, name, index, slot_count, section, std::to_string(default_), 
     dir, rate, format, edit,
     label_contents, label_align, label_justify, layout, position));
-  result.min = min;
-  result.max = max;
-  result.unit = unit;
+  result.domain.min = min;
+  result.domain.max = max;
+  result.domain.unit = unit;
   result.precision = precision;
   result.type = param_type::linear;
   return result;
@@ -204,12 +204,12 @@ param_log(
     id, name, index, slot_count, section, std::to_string(default_), 
     dir, rate, format, edit,
     label_contents, label_align, label_justify, layout, position));
-  result.min = min;
-  result.max = max;
-  result.unit = unit;
   result.precision = precision;
   result.type = param_type::log;
-  result.exp = std::log((midpoint - min) / (max - min)) / std::log(0.5);
+  result.domain.min = min;
+  result.domain.max = max;
+  result.domain.unit = unit;
+  result.domain.exp = std::log((midpoint - min) / (max - min)) / std::log(0.5);
   return result;
 }
 

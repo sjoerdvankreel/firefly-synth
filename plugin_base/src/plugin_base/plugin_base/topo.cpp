@@ -9,7 +9,7 @@ plain_value
 param_topo::default_plain() const
 {
   plain_value result;
-  INF_ASSERT_EXEC(text_to_plain(default_, result));
+  INF_ASSERT_EXEC(text_to_plain(domain.default_, result));
   return result;
 }
 
@@ -34,7 +34,7 @@ std::string
 param_topo::plain_to_text(plain_value plain) const
 {
   std::string prefix = "";
-  if(min < 0 && 
+  if(domain.min < 0 && 
     ((is_real() && plain.real() > 0) || 
     (!is_real() && plain.step() > 0))) 
     prefix = "+";
@@ -95,14 +95,14 @@ param_topo::text_to_plain(
     int step = std::numeric_limits<int>::max();
     stream >> step;
     plain = plain_value::from_step(step);
-    return min <= step && step <= max;
+    return domain.min <= step && step <= domain.max;
   }
 
   float real = std::numeric_limits<float>::max();
   stream >> real;
   real /= (display == param_display::normal) ? 1 : 100;
   plain = plain_value::from_real(real);
-  return min <= real && real <= max;
+  return domain.min <= real && real <= domain.max;
 }
 
 }
