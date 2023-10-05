@@ -165,39 +165,12 @@ validate_frame_dims(
   }
 }
 
-template <class Gui> static void
-validate_gui_dimensions(Gui const& gui)
-{
-  assert(0 < gui.dimension.row_sizes.size() && gui.dimension.row_sizes.size() <= 1024);
-  assert(0 < gui.dimension.column_sizes.size() && gui.dimension.column_sizes.size() <= 1024);
-}
-
 template <class ParentGui, class ChildGui> static void
 validate_gui_positions(ParentGui const& parent, ChildGui const& child)
 {
-  assert(0 < child.position.row_span && child.position.row_span <= 1024);
-  assert(0 < child.position.column_span && child.position.column_span <= 1024);
+  child.position.validate();
   assert(0 <= child.position.row && child.position.row + child.position.row_span <= parent.dimension.row_sizes.size());
   assert(0 <= child.position.column && child.position.column + child.position.column_span <= parent.dimension.column_sizes.size());
-}
-
-static void
-validate_gui_binding(module_topo const& module, gui_binding const& binding, int slot_count)
-{
-  assert((binding.params.size() == 0) == (binding.selector == nullptr));
-  assert((binding.context.size() == 0) || (binding.context.size() == binding.params.size()));
-  for (int i = 0; i < binding.params.size(); i++)
-  {
-    assert(!module.params[binding.params[i]].domain.is_real());
-    assert(module.params[binding.params[i]].info.slot_count == 1 || module.params[binding.params[i]].info.slot_count == slot_count);
-  }
-}
-
-static void
-validate_gui_bindings(module_topo const& module, gui_bindings const& bindings, int slot_count)
-{
-  validate_gui_binding(module, bindings.enabled, slot_count);
-  validate_gui_binding(module, bindings.visible, slot_count);
 }
 
 template <class Parent, class Child, class VisibilitySelector, class Include>
@@ -223,12 +196,11 @@ static void validate_gui_layout(
 static void
 validate_section_topo(module_topo const& module, section_topo const& section)
 {
-  assert(section.tag.id.size());
-  assert(section.tag.name.size());
+  section.tag.validate();
   assert(0 <= section.index && section.index < module.sections.size());
-  validate_gui_dimensions(section.gui);
+  section.gui.dimension.validate();
   validate_gui_positions(module.gui, section.gui);
-  validate_gui_bindings(module, section.gui.bindings, 1);
+  section.gui.bindings.validate(module, 1);
   validate_gui_layout(section, module.params,
     [](param_topo const& p) { return p.gui.bindings.visible.selector; },
     [&section](param_topo const& p) { return p.section == section.index; });
@@ -237,16 +209,14 @@ validate_section_topo(module_topo const& module, section_topo const& section)
 static void
 validate_module_topo(plugin_topo const& plugin, module_topo const& module)
 {
-  assert(module.info.tag.id.size());
-  assert(module.info.tag.name.size());
+  module.info.validate();
   assert(module.params.size());
-  assert(module.info.slot_count > 0);
   assert(module.engine_factory);
   assert(module.dsp.output == module_output::none || module.dsp.output_count > 0);
   assert(module.dsp.output != module_output::none || module.dsp.output_count == 0);
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
   assert((module.info.slot_count == 1) == (module.gui.layout == gui_layout::single));
-  validate_gui_dimensions(module.gui);
+  module.gui.dimension.validate();
   validate_gui_positions(plugin.gui, module.gui);
   validate_gui_layout(module, module.sections, [](auto const& section) { return section.gui.bindings.visible.selector; }, [](auto const&) { return true; });
 
@@ -311,11 +281,9 @@ validate_param_domain(param_domain const& domain, plain_value default_plain)
 static void
 validate_param_topo(module_topo const& module, param_topo const& param)
 {
-  assert(param.info.tag.id.size());
-  assert(param.info.tag.name.size());
+  param.info.validate();
   assert(param.section >= 0);
   assert(param.section < module.sections.size());
-  assert(0 < param.info.slot_count && param.info.slot_count <= 1024);
   assert(0 <= param.section && param.section < module.sections.size());
 
   assert(param.dsp.format == param_format::plain || param.domain.is_real());
@@ -325,7 +293,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
 
   validate_param_domain(param.domain, param.domain.default_plain());
-  validate_gui_bindings(module, param.gui.bindings, param.info.slot_count);
+  param.gui.bindings.validate(module, param.info.slot_count);
   assert(param.dsp.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
   assert((param.info.slot_count == 1) == (param.gui.layout == gui_layout::single));
   validate_gui_positions(module.sections[param.section].gui, param.gui);
@@ -338,15 +306,14 @@ validate_plugin_topo(plugin_topo const& topo)
   std::set<std::string> module_ids;
   validate_gui_layout(topo, topo.modules, [](auto const&) { return nullptr; }, [](auto const&) { return true; });
 
-  assert(topo.tag.id.size());
-  assert(topo.tag.name.size());
+  topo.tag.validate();
   assert(topo.modules.size());
   assert(topo.version_major >= 0);
   assert(topo.version_minor >= 0);
   assert(topo.extension.size());
   assert(topo.gui.default_width <= 3840);
   assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
-  validate_gui_dimensions(topo.gui);
+  topo.gui.dimension.validate();
 
   assert(0 < topo.gui.aspect_ratio_width && topo.gui.aspect_ratio_width <= 100);
   assert(0 < topo.gui.aspect_ratio_height && topo.gui.aspect_ratio_height <= 100);
@@ -378,6 +345,7 @@ static void
 validate_module_desc(plugin_desc const& plugin_desc, module_desc const& desc)
 {
   assert(desc.module);
+  // TODO move to tag
   assert(desc.id.size());
   assert(desc.name.size());
   assert(desc.params.size());

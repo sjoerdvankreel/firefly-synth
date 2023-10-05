@@ -1,9 +1,16 @@
 #pragma once
 
+#include <plugin_base/utility.hpp>
+
 #include <vector>
 #include <string>
 
 namespace plugin_base {
+
+struct module_topo;
+
+// just a guess for validation, increase if needed
+inline int constexpr topo_max = 1024;
 
 enum class gui_label_justify { near, center, far };
 enum class gui_label_align { top, bottom, left, right };
@@ -20,6 +27,8 @@ gui_binding_selector)(
 struct component_tag final {
   std::string id;
   std::string name;
+
+  void validate() const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(component_tag);
 };
 
@@ -28,6 +37,8 @@ struct component_info final {
   int index;
   int slot_count;
   component_tag tag;
+
+  void validate() const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(component_info);
 };
 
@@ -37,6 +48,8 @@ struct gui_position final {
   int column = -1;
   int row_span = 1;
   int column_span = 1;
+
+  void validate() const;
 };
 
 // binding to enabled/visible
@@ -44,14 +57,18 @@ struct gui_binding final {
   std::vector<int> params = {};
   std::vector<int> context = {};
   gui_binding_selector selector = {};
+
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_binding);
+  void validate(module_topo const& module, int slot_count) const;
 };
 
 // binding to enabled/visible
 struct gui_bindings final {
   gui_binding enabled;
   gui_binding visible;
+
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
+  void validate(module_topo const& module, int slot_count) const;
 };
 
 // dimensions of own grid (relative distribution)
@@ -59,6 +76,7 @@ struct gui_dimension final {
   std::vector<int> row_sizes = { 1 };
   std::vector<int> column_sizes = { 1 };
 
+  void validate() const;
   gui_dimension() = default;
   gui_dimension(gui_dimension const&) = default;
   gui_dimension(int row_count, int column_count);
