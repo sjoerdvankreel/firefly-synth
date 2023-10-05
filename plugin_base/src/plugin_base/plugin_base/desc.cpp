@@ -2,6 +2,7 @@
 #include <plugin_base/value.hpp>
 
 #include <set>
+#include <algorithm>
 #include <functional>
 
 namespace plugin_base {
@@ -166,22 +167,21 @@ validate_frame_dims(
   }
 }
 
-template <class Child>
 static void validate_gui_layout(
-  gui_dimension const& parent_dimension, std::vector<Child> const& children,
+  gui_dimension const& parent, std::vector<gui_position> const& children,
   std::function<bool(int)> conditionally_visible, std::function<bool(int)> include)
 {
   std::set<std::pair<int, int>> gui_taken;
   for (int k = 0; k < children.size(); k++)
     if (include(k))
     {
-      auto const& pos = children[k].gui.position;
+      auto const& pos = children[k];
       for (int r = pos.row; r < pos.row + pos.row_span; r++)
         for (int c = pos.column; c < pos.column + pos.column_span; c++)
           INF_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second || conditionally_visible(k));
     }
-  for (int r = 0; r < parent_dimension.row_sizes.size(); r++)
-    for (int c = 0; c < parent_dimension.column_sizes.size(); c++)
+  for (int r = 0; r < parent.row_sizes.size(); r++)
+    for (int c = 0; c < parent.column_sizes.size(); c++)
       assert(gui_taken.find(std::make_pair(r, c)) != gui_taken.end());
 }
 
@@ -193,7 +193,9 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   section.gui.dimension.validate();
   section.gui.position.validate(module.gui.dimension);
   section.gui.bindings.validate(module, 1);
-  validate_gui_layout(section.gui.dimension, module.params,
+  std::vector<gui_position> param_positions;
+  std::transform(module.params.begin(), module.params.end(), param_positions.begin(), [](auto const& p) { return p.gui.position; });
+  validate_gui_layout(section.gui.dimension, param_positions,
     [&module](int p) { return module.params[p].gui.bindings.visible.selector != nullptr; },
     [&module, &section](int p) { return module.params[p].section == section.index; });
 }
@@ -210,7 +212,9 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert((module.info.slot_count == 1) == (module.gui.layout == gui_layout::single));
   module.gui.dimension.validate();
   module.gui.position.validate(plugin.gui.dimension);
-  validate_gui_layout(module.gui.dimension, module.sections, [&module](int s) { return module.sections[s].gui.bindings.visible.selector != nullptr; }, [](int) { return true; });
+  std::vector<gui_position> section_positions;
+  std::transform(module.sections.begin(), module.sections.end(), section_positions.begin(), [](auto const& s) { return s.gui.position; });
+  validate_gui_layout(module.gui.dimension, section_positions, [&module](int s) { return module.sections[s].gui.bindings.visible.selector != nullptr; }, [](int) { return true; });
 
   for(int p = 0; p < module.params.size(); p++)
   {
@@ -248,7 +252,9 @@ validate_plugin_topo(plugin_topo const& topo)
 {
   std::set<std::string> param_ids;
   std::set<std::string> module_ids;
-  validate_gui_layout(topo.gui.dimension, topo.modules, [](int) { return false; }, [](int) { return true; });
+  std::vector<gui_position> module_positions;
+  std::transform(topo.modules.begin(), topo.modules.end(), module_positions.begin(), [](auto const& m) { return m.gui.position; });
+  validate_gui_layout(topo.gui.dimension, module_positions, [](int) { return false; }, [](int) { return true; });
 
   topo.tag.validate();
   assert(topo.modules.size());
