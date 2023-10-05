@@ -168,29 +168,6 @@ validate_frame_dims(
 }
 
 static void
-validate_module_topo(plugin_topo const& plugin, module_topo const& module)
-{
-  module.info.validate();
-  assert(module.params.size());
-  assert(module.engine_factory);
-  assert(module.dsp.output == module_output::none || module.dsp.output_count > 0);
-  assert(module.dsp.output != module_output::none || module.dsp.output_count == 0);
-  assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
-  assert((module.info.slot_count == 1) == (module.gui.layout == gui_layout::single));
-  module.gui.position.validate(plugin.gui.dimension);
-  module.gui.dimension.validate(module.sections, [](int) { return true; }, [&module](int s) { return module.sections[s].gui.bindings.visible.selector == nullptr; });
-
-  for(int p = 0; p < module.params.size(); p++)
-  {
-    auto const& param = module.params[p];
-    for (int e = 0; e < param.gui.bindings.enabled.params.size(); e++)
-      assert(param.info.index != param.gui.bindings.enabled.params[e]);
-    for(int v = 0; v < param.gui.bindings.visible.params.size(); v++)
-      assert(param.info.index != param.gui.bindings.visible.params[v]);
-  }
-}
-
-static void
 validate_param_topo(module_topo const& module, param_topo const& param)
 {
   param.info.validate();
@@ -240,7 +217,7 @@ validate_plugin_topo(plugin_topo const& topo)
     assert((int)module.dsp.stage >= stage);
     stage = (int)module.dsp.stage;
 
-    validate_module_topo(topo, module);
+    module.validate(topo);
     INF_ASSERT_EXEC(module_ids.insert(module.info.tag.id).second);
     for (int s = 0; s < module.sections.size(); s++)
       module.sections[s].validate(module);

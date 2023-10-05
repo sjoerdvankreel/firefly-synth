@@ -11,6 +11,7 @@
 
 namespace plugin_base {
 
+struct plugin_topo;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
@@ -44,6 +45,8 @@ struct module_topo final {
   std::vector<param_topo> params;
   std::vector<section_topo> sections;
   module_engine_factory engine_factory;
+
+  void validate(plugin_topo const& plugin) const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo);
 };
 
