@@ -33,6 +33,8 @@ struct plugin_topo final {
   plugin_topo_gui gui;
   std::string extension;
   std::vector<module_topo> modules;
+
+  void validate() const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo);
 };
 

@@ -168,42 +168,6 @@ validate_frame_dims(
 }
 
 static void
-validate_plugin_topo(plugin_topo const& topo)
-{
-  std::set<std::string> param_ids;
-  std::set<std::string> module_ids;
-  topo.gui.dimension.validate(topo.modules, [](int) { return true; }, [](int) { return true; });
-
-  topo.tag.validate();
-  assert(topo.modules.size());
-  assert(topo.version_major >= 0);
-  assert(topo.version_minor >= 0);
-  assert(topo.extension.size());
-  assert(topo.gui.default_width <= 3840);
-  assert(topo.polyphony >= 0 && topo.polyphony <= 1024);
-
-  assert(0 < topo.gui.aspect_ratio_width && topo.gui.aspect_ratio_width <= 100);
-  assert(0 < topo.gui.aspect_ratio_height && topo.gui.aspect_ratio_height <= 100);
-  assert(0 < topo.gui.min_width && topo.gui.min_width <= topo.gui.default_width && topo.gui.default_width <= topo.gui.max_width);
-
-  int stage = 0;
-  (void)stage;
-  for (int m = 0; m < topo.modules.size(); m++)
-  {
-    auto const& module = topo.modules[m];
-    assert((int)module.dsp.stage >= stage);
-    stage = (int)module.dsp.stage;
-
-    module.validate(topo);
-    INF_ASSERT_EXEC(module_ids.insert(module.info.tag.id).second);
-    for (int p = 0; p < module.params.size(); p++)
-    {
-      INF_ASSERT_EXEC(param_ids.insert(module.params[p].info.tag.id).second);
-    }
-  }
-}
-
-static void
 validate_module_desc(plugin_desc const& plugin_desc, module_desc const& desc)
 {
   assert(desc.module);
@@ -335,6 +299,7 @@ plugin(std::move(plugin_))
 {
   int param_global = 0;
   int module_global = 0;
+  plugin->validate();
 
   for(int m = 0; m < plugin->modules.size(); m++)
   {
@@ -385,7 +350,6 @@ plugin(std::move(plugin_))
   param_count = param_global;
   module_count = modules.size();
   validate_plugin_desc(*this);
-  validate_plugin_topo(*plugin);
 }
 
 void
