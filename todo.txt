@@ -24,6 +24,7 @@ move note_names to plug
 cleanup the validation
 gui + desc to folders + split
 cleanup all the headers + folder structure
+split gui/components and gui/gui
 
 * continuing
 - keep updating the demo apps
