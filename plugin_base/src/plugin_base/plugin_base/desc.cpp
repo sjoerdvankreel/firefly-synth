@@ -198,11 +198,8 @@ validate_plugin_topo(plugin_topo const& topo)
 
     module.validate(topo);
     INF_ASSERT_EXEC(module_ids.insert(module.info.tag.id).second);
-    for (int s = 0; s < module.sections.size(); s++)
-      module.sections[s].validate(module);
     for (int p = 0; p < module.params.size(); p++)
     {
-      module.params[p].validate(module);
       INF_ASSERT_EXEC(param_ids.insert(module.params[p].info.tag.id).second);
     }
   }
