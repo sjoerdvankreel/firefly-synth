@@ -7,6 +7,8 @@
 
 namespace plugin_base {
 
+struct module_topo;
+
 // param section ui
 struct section_topo_gui final {
   gui_bindings bindings;
@@ -20,6 +22,8 @@ struct section_topo final {
   int index;
   component_tag tag;
   section_topo_gui gui;
+
+  void validate(module_topo const& module) const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
 };
 

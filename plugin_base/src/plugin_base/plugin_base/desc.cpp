@@ -168,19 +168,6 @@ validate_frame_dims(
 }
 
 static void
-validate_section_topo(module_topo const& module, section_topo const& section)
-{
-  section.tag.validate();
-  assert(0 <= section.index && section.index < module.sections.size());
-  section.gui.position.validate(module.gui.dimension);
-  section.gui.bindings.validate(module, 1);
-  section.gui.dimension.validate(
-    module.params,
-    [&module, &section](int p) { return module.params[p].section == section.index; },
-    [&module](int p) { return module.params[p].gui.bindings.visible.selector == nullptr; });
-}
-
-static void
 validate_module_topo(plugin_topo const& plugin, module_topo const& module)
 {
   module.info.validate();
@@ -256,7 +243,7 @@ validate_plugin_topo(plugin_topo const& topo)
     validate_module_topo(topo, module);
     INF_ASSERT_EXEC(module_ids.insert(module.info.tag.id).second);
     for (int s = 0; s < module.sections.size(); s++)
-      validate_section_topo(module, module.sections[s]);
+      module.sections[s].validate(module);
     for (int p = 0; p < module.params.size(); p++)
     {
       validate_param_topo(module, module.params[p]);
