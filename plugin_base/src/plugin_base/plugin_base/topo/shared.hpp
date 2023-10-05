@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace plugin_base {
 
@@ -77,7 +78,11 @@ struct gui_dimension final {
   std::vector<int> row_sizes = { 1 };
   std::vector<int> column_sizes = { 1 };
 
-  void validate() const;
+  void validate(
+    std::vector<gui_position> const& children, 
+    std::function<bool(int)> include, 
+    std::function<bool(int)> always_visible) const;
+
   gui_dimension() = default;
   gui_dimension(gui_dimension const&) = default;
   gui_dimension(int row_count, int column_count);

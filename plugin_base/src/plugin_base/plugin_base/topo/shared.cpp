@@ -1,5 +1,8 @@
 #include <plugin_base/topo/shared.hpp>
 #include <plugin_base/topo/module.hpp>
+
+#include <set>
+#include <utility>
 #include <cassert>
 
 namespace plugin_base {
@@ -17,13 +20,6 @@ component_info::validate() const
   assert(0 <= index && index < topo_max);
   assert(0 < slot_count && slot_count < topo_max);
   tag.validate();
-}
-
-void
-gui_dimension::validate() const
-{
-  assert(0 < row_sizes.size() && row_sizes.size() < topo_max);
-  assert(0 < column_sizes.size() && column_sizes.size() < topo_max);
 }
 
 void
@@ -55,6 +51,29 @@ gui_binding::validate(module_topo const& module, int slot_count) const
     assert(!bound.domain.is_real());
     assert(bound.info.slot_count == 1 || bound.info.slot_count == slot_count);
   }
+}
+
+void
+gui_dimension::validate(
+  std::vector<gui_position> const& children,
+  std::function<bool(int)> include,
+  std::function<bool(int)> always_visible) const
+{
+  std::set<std::pair<int, int>> taken;
+  assert(0 < row_sizes.size() && row_sizes.size() < topo_max);
+  assert(0 < column_sizes.size() && column_sizes.size() < topo_max);
+
+  for (int k = 0; k < children.size(); k++)
+  {
+    if (!include(k)) continue;
+    auto const& pos = children[k];
+    for (int r = pos.row; r < pos.row + pos.row_span; r++)
+      for (int c = pos.column; c < pos.column + pos.column_span; c++)
+        INF_ASSERT_EXEC(taken.insert(std::make_pair(r, c)).second || !always_visible(k));
+  }
+  for (int r = 0; r < row_sizes.size(); r++)
+    for (int c = 0; c < column_sizes.size(); c++)
+      assert(taken.find(std::make_pair(r, c)) != taken.end());
 }
 
 }
