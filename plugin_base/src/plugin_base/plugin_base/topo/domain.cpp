@@ -97,4 +97,52 @@ param_domain::text_to_plain(
   return min <= real && real <= max;
 }
 
+void
+param_domain::validate() const
+{
+  assert(max > min);
+  assert(default_.size());
+  assert((type == domain_type::log) == (exp != 0));
+  assert(display == domain_display::normal || type == domain_type::linear);
+
+  if (type == domain_type::toggle)
+  {
+    assert(min == 0);
+    assert(max == 1);
+  }
+
+  if (type == domain_type::name)
+  {
+    assert(min == 0);
+    assert(unit.size() == 0);
+    assert(names.size() > 0);
+    assert(max == names.size() - 1);
+  }
+
+  if (type == domain_type::item)
+  {
+    assert(min == 0);
+    assert(unit.size() == 0);
+    assert(items.size() > 0);
+    assert(max == items.size() - 1);
+  }
+
+  if (!is_real())
+  {
+    assert(precision == 0);
+    assert((int)min == min);
+    assert((int)max == max);
+    assert(min <= default_plain().step());
+    assert(max >= default_plain().step());
+    assert(display == domain_display::normal);
+  }
+
+  if (is_real())
+  {
+    assert(min <= default_plain().real());
+    assert(max >= default_plain().real());
+    assert(0 <= precision && precision <= 10);
+  }
+}
+
 }

@@ -231,54 +231,6 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
 }
 
 static void
-validate_param_domain(param_domain const& domain, plain_value default_plain)
-{
-  assert(domain.default_.size());
-  assert(domain.max > domain.min);
-  assert((domain.type == domain_type::log) == (domain.exp != 0));
-  assert(domain.display == domain_display::normal || domain.type == domain_type::linear);
-
-  if (domain.type == domain_type::toggle)
-  {
-    assert(domain.min == 0);
-    assert(domain.max == 1);
-  }
-
-  if(domain.type == domain_type::name)
-  {
-    assert(domain.min == 0);
-    assert(domain.unit.size() == 0);
-    assert(domain.names.size() > 0);
-    assert(domain.max == domain.names.size() - 1);
-  }
-
-  if (domain.type == domain_type::item)
-  {
-    assert(domain.min == 0);
-    assert(domain.unit.size() == 0);
-    assert(domain.items.size() > 0);
-    assert(domain.max == domain.items.size() - 1);
-  }
-
-  if (!domain.is_real())
-  {
-    assert(domain.precision == 0);
-    assert((int)domain.min == domain.min);
-    assert((int)domain.max == domain.max);
-    assert(domain.min <= default_plain.step());
-    assert(domain.max >= default_plain.step());
-    assert(domain.display == domain_display::normal);
-  }
-
-  if (domain.is_real())
-  {
-    assert(domain.min <= default_plain.real());
-    assert(domain.max >= default_plain.real());
-    assert(0 <= domain.precision && domain.precision <= 10);
-  }
-}
-
-static void
 validate_param_topo(module_topo const& module, param_topo const& param)
 {
   param.info.validate();
@@ -292,7 +244,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   assert(param.domain.is_real() || param.dsp.rate == param_rate::block);
   assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
 
-  validate_param_domain(param.domain, param.domain.default_plain());
+  param.domain.validate();
   param.gui.bindings.validate(module, param.info.slot_count);
   assert(param.dsp.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
   assert((param.info.slot_count == 1) == (param.gui.layout == gui_layout::single));

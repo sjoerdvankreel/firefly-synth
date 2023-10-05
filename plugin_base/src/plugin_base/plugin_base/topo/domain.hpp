@@ -40,6 +40,7 @@ struct param_domain final {
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const;
+  void validate() const;
 
   // parse default text - slow!
   double default_raw() const;
