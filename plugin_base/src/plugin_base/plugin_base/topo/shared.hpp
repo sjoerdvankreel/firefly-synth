@@ -4,6 +4,7 @@
 
 #include <vector>
 #include <string>
+#include <algorithm>
 #include <functional>
 
 namespace plugin_base {
@@ -82,6 +83,11 @@ struct gui_dimension final {
     std::vector<gui_position> const& children, 
     std::function<bool(int)> include, 
     std::function<bool(int)> always_visible) const;
+  template <class Child> 
+  void validate(
+    std::vector<Child> const& children,
+    std::function<bool(int)> include,
+    std::function<bool(int)> always_visible) const;
 
   gui_dimension() = default;
   gui_dimension(gui_dimension const&) = default;
@@ -96,5 +102,16 @@ row_sizes(row_count, 1), column_sizes(column_count, 1) {}
 inline gui_dimension::
 gui_dimension(std::vector<int> const& row_sizes, std::vector<int> const& column_sizes) : 
 row_sizes(row_sizes), column_sizes(column_sizes) {}
+
+template <class Child> void 
+gui_dimension::validate(
+  std::vector<Child> const& children,
+  std::function<bool(int)> include,
+  std::function<bool(int)> always_visible) const
+{
+  std::vector<gui_position> positions(children.size(), gui_position { });
+  std::transform(children.begin(), children.end(), positions.begin(), [](auto const& c) { return c.gui.position; });
+  return validate(positions, include, always_visible);
+}
 
 }

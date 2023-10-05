@@ -174,10 +174,8 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   assert(0 <= section.index && section.index < module.sections.size());
   section.gui.position.validate(module.gui.dimension);
   section.gui.bindings.validate(module, 1);
-  std::vector<gui_position> param_positions(module.params.size(), gui_position {});
-  std::transform(module.params.begin(), module.params.end(), param_positions.begin(), [](auto const& p) { return p.gui.position; });
   section.gui.dimension.validate(
-    param_positions, 
+    module.params,
     [&module, &section](int p) { return module.params[p].section == section.index; },
     [&module](int p) { return module.params[p].gui.bindings.visible.selector == nullptr; });
 }
@@ -193,9 +191,7 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
   assert((module.info.slot_count == 1) == (module.gui.layout == gui_layout::single));
   module.gui.position.validate(plugin.gui.dimension);
-  std::vector<gui_position> section_positions(module.sections.size(), gui_position{});
-  std::transform(module.sections.begin(), module.sections.end(), section_positions.begin(), [](auto const& s) { return s.gui.position; });
-  module.gui.dimension.validate(section_positions, [](int) { return true; }, [&module](int s) { return module.sections[s].gui.bindings.visible.selector == nullptr; });
+  module.gui.dimension.validate(module.sections, [](int) { return true; }, [&module](int s) { return module.sections[s].gui.bindings.visible.selector == nullptr; });
 
   for(int p = 0; p < module.params.size(); p++)
   {
@@ -233,9 +229,7 @@ validate_plugin_topo(plugin_topo const& topo)
 {
   std::set<std::string> param_ids;
   std::set<std::string> module_ids;
-  std::vector<gui_position> module_positions(topo.modules.size(), gui_position{});
-  std::transform(topo.modules.begin(), topo.modules.end(), module_positions.begin(), [](auto const& m) { return m.gui.position; });
-  topo.gui.dimension.validate(module_positions, [](int) { return true; }, [](int) { return true; });
+  topo.gui.dimension.validate(topo.modules, [](int) { return true; }, [](int) { return true; });
 
   topo.tag.validate();
   assert(topo.modules.size());
