@@ -184,8 +184,6 @@ validate_plugin_topo(plugin_topo const& topo)
 
   assert(0 < topo.gui.aspect_ratio_width && topo.gui.aspect_ratio_width <= 100);
   assert(0 < topo.gui.aspect_ratio_height && topo.gui.aspect_ratio_height <= 100);
-  assert(0 < topo.gui.dimension.row_sizes.size() && topo.gui.dimension.row_sizes.size() <= 1024);
-  assert(0 < topo.gui.dimension.column_sizes.size() && topo.gui.dimension.column_sizes.size() <= 1024);
   assert(0 < topo.gui.min_width && topo.gui.min_width <= topo.gui.default_width && topo.gui.default_width <= topo.gui.max_width);
 
   int stage = 0;
