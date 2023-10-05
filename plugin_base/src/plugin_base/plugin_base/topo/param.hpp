@@ -10,6 +10,8 @@
 
 namespace plugin_base {
 
+struct module_topo;
+
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_format { plain, normalized };
@@ -41,7 +43,9 @@ struct param_topo final {
   param_topo_gui gui;
   param_domain domain;
   component_info info;
+
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
+  void validate(module_topo const& module) const;
 };
 
 }

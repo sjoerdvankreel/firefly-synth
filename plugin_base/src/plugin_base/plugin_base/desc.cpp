@@ -168,27 +168,6 @@ validate_frame_dims(
 }
 
 static void
-validate_param_topo(module_topo const& module, param_topo const& param)
-{
-  param.info.validate();
-  assert(param.section >= 0);
-  assert(param.section < module.sections.size());
-  assert(0 <= param.section && param.section < module.sections.size());
-
-  assert(param.dsp.format == param_format::plain || param.domain.is_real());
-  assert(param.dsp.direction != param_direction::output || param.dsp.rate == param_rate::block);
-
-  assert(param.domain.is_real() || param.dsp.rate == param_rate::block);
-  assert(param.gui.edit_type != gui_edit_type::toggle || param.domain.type == domain_type::toggle);
-
-  param.domain.validate();
-  param.gui.bindings.validate(module, param.info.slot_count);
-  assert(param.dsp.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
-  assert((param.info.slot_count == 1) == (param.gui.layout == gui_layout::single));
-  param.gui.position.validate(module.sections[param.section].gui.dimension);
-}
-
-static void
 validate_plugin_topo(plugin_topo const& topo)
 {
   std::set<std::string> param_ids;
@@ -223,7 +202,7 @@ validate_plugin_topo(plugin_topo const& topo)
       module.sections[s].validate(module);
     for (int p = 0; p < module.params.size(); p++)
     {
-      validate_param_topo(module, module.params[p]);
+      module.params[p].validate(module);
       INF_ASSERT_EXEC(param_ids.insert(module.params[p].info.tag.id).second);
     }
   }
