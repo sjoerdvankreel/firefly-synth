@@ -165,14 +165,6 @@ validate_frame_dims(
   }
 }
 
-template <class ParentGui, class ChildGui> static void
-validate_gui_positions(ParentGui const& parent, ChildGui const& child)
-{
-  child.position.validate();
-  assert(0 <= child.position.row && child.position.row + child.position.row_span <= parent.dimension.row_sizes.size());
-  assert(0 <= child.position.column && child.position.column + child.position.column_span <= parent.dimension.column_sizes.size());
-}
-
 template <class Parent, class Child, class VisibilitySelector, class Include>
 static void validate_gui_layout(
   Parent const& parent, std::vector<Child> const& children,
@@ -199,7 +191,7 @@ validate_section_topo(module_topo const& module, section_topo const& section)
   section.tag.validate();
   assert(0 <= section.index && section.index < module.sections.size());
   section.gui.dimension.validate();
-  validate_gui_positions(module.gui, section.gui);
+  section.gui.position.validate(module.gui.dimension);
   section.gui.bindings.validate(module, 1);
   validate_gui_layout(section, module.params,
     [](param_topo const& p) { return p.gui.bindings.visible.selector; },
@@ -217,7 +209,7 @@ validate_module_topo(plugin_topo const& plugin, module_topo const& module)
   assert(0 < module.sections.size() && module.sections.size() <= module.params.size());
   assert((module.info.slot_count == 1) == (module.gui.layout == gui_layout::single));
   module.gui.dimension.validate();
-  validate_gui_positions(plugin.gui, module.gui);
+  module.gui.position.validate(plugin.gui.dimension);
   validate_gui_layout(module, module.sections, [](auto const& section) { return section.gui.bindings.visible.selector; }, [](auto const&) { return true; });
 
   for(int p = 0; p < module.params.size(); p++)
@@ -248,7 +240,7 @@ validate_param_topo(module_topo const& module, param_topo const& param)
   param.gui.bindings.validate(module, param.info.slot_count);
   assert(param.dsp.direction == param_direction::input || param.gui.bindings.enabled.selector == nullptr);
   assert((param.info.slot_count == 1) == (param.gui.layout == gui_layout::single));
-  validate_gui_positions(module.sections[param.section].gui, param.gui);
+  param.gui.position.validate(module.sections[param.section].gui.dimension);
 }
 
 static void

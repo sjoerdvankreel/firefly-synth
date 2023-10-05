@@ -8,6 +8,7 @@
 namespace plugin_base {
 
 struct module_topo;
+struct gui_dimension;
 
 // just a guess for validation, increase if needed
 inline int constexpr topo_max = 1024;
@@ -49,7 +50,7 @@ struct gui_position final {
   int row_span = 1;
   int column_span = 1;
 
-  void validate() const;
+  void validate(gui_dimension const& parent_dimension) const;
 };
 
 // binding to enabled/visible

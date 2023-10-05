@@ -20,15 +20,6 @@ component_info::validate() const
 }
 
 void
-gui_position::validate() const
-{
-  assert(0 <= row && row < topo_max);
-  assert(0 <= column && column < topo_max);
-  assert(0 < row_span && row_span < topo_max);
-  assert(0 < column_span && column_span < topo_max);
-}
-
-void
 gui_dimension::validate() const
 {
   assert(0 < row_sizes.size() && row_sizes.size() < topo_max);
@@ -40,6 +31,17 @@ gui_bindings::validate(module_topo const& module, int slot_count) const
 {
   enabled.validate(module, slot_count);
   visible.validate(module, slot_count);
+}
+
+void
+gui_position::validate(gui_dimension const& parent_dimension) const
+{
+  assert(0 <= row && row < topo_max);
+  assert(0 <= column && column < topo_max);
+  assert(0 < row_span && row_span < topo_max);
+  assert(0 < column_span && column_span < topo_max);
+  assert(row + row_span <= parent_dimension.row_sizes.size());
+  assert(column + column_span <= parent_dimension.column_sizes.size());
 }
 
 void
