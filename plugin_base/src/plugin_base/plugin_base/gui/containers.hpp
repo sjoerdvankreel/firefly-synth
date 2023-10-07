@@ -1,6 +1,6 @@
 #pragma once
 
-#include <plugin_base/desc/desc.hpp>
+#include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/gui/components.hpp>
