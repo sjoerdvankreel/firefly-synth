@@ -69,13 +69,6 @@ make_param_gui_single(int section, gui_edit_type edit_type, gui_position positio
 { return make_param_gui(section, edit_type, gui_layout::single, position, gui_label(label)); }
 
 param_topo
-param_steps(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  int min, int max, int default_,
-  param_direction direction, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position);
-param_topo
 param_names(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   std::vector<std::string> const& names, std::string const& default_,

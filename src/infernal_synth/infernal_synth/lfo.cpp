@@ -48,17 +48,15 @@ lfo_topo()
     gui_label_contents::both, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
 
-  result.params.emplace_back(param_steps(
-    "{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1, section_main, 1, 16, 1,
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 2 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
+    make_param_dsp_block(), make_domain_step(1, 16, 1),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, make_label_default(gui_label_contents::name))));
 
-  result.params.emplace_back(param_steps(
-    "{84B58AC9-C401-4580-978C-60591AFB757B}", "Denom", param_denom, 1, section_main, 1, 16, 4,
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 3 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Denom", param_denom, 1),
+    make_param_dsp_block(), make_domain_step(1, 16, 4),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, make_label_default(gui_label_contents::name))));
 
   return result;
 }

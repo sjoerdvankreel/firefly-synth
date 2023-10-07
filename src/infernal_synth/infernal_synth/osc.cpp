@@ -86,11 +86,10 @@ osc_topo()
     gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position{ 0, 0 }));
   
-  result.params.emplace_back(param_steps(
-    "{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", param_oct, 1, section_pitch, 0, 9, 4,
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 1 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", param_oct, 1),
+    make_param_dsp_block(), make_domain_step(0, 9, 4),
+    make_param_gui_single(section_pitch, gui_edit_type::list, { 0, 1 }, make_label_none())));
   
   result.params.emplace_back(param_pct(
     "{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1, section_pitch, -1, 1, 0, 0,
