@@ -40,9 +40,9 @@ struct param_topo_gui final {
 struct param_topo final {
   int section;
   param_dsp dsp;
+  topo_info info;
   param_topo_gui gui;
   param_domain domain;
-  component_info info;
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module) const;

@@ -39,8 +39,8 @@ struct module_dsp final {
 // module in plugin
 struct module_topo final {
   module_dsp dsp;
+  topo_info info;
   module_topo_gui gui;
-  component_info info;
 
   std::vector<param_topo> params;
   std::vector<section_topo> sections;

@@ -8,14 +8,14 @@
 namespace plugin_base {
 
 void
-component_tag::validate() const
+topo_tag::validate() const
 {
   assert(id.size());
   assert(name.size());
 }
 
 void
-component_info::validate() const
+topo_info::validate() const
 {
   assert(0 <= index && index < topo_max);
   assert(0 < slot_count && slot_count < topo_max);

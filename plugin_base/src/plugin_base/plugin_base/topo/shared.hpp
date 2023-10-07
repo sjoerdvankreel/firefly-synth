@@ -27,22 +27,22 @@ gui_binding_selector)(
   std::vector<int> const& context);
 
 // plugin and section metadata
-struct component_tag final {
+struct topo_tag final {
   std::string id;
   std::string name;
 
   void validate() const;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(component_tag);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(topo_tag);
 };
 
 // module and parameter metadata
-struct component_info final {
+struct topo_info final {
   int index;
   int slot_count;
-  component_tag tag;
+  topo_tag tag;
 
   void validate() const;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(component_info);
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(topo_info);
 };
 
 // position in parent grid

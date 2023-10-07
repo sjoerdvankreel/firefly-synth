@@ -20,7 +20,7 @@ struct section_topo_gui final {
 // param ui section
 struct section_topo final {
   int index;
-  component_tag tag;
+  topo_tag tag;
   section_topo_gui gui;
 
   void validate(module_topo const& module) const;

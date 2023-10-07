@@ -28,8 +28,8 @@ struct plugin_topo final {
   int version_major;
   int version_minor;
 
+  topo_tag tag;
   plugin_type type;
-  component_tag tag;
   plugin_topo_gui gui;
   std::string extension;
   std::vector<module_topo> modules;
