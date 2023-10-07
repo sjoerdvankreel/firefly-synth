@@ -24,10 +24,9 @@ move note_names to plug
 cleanup the validation
 gui + desc to folders + split
 cleanup all the headers + folder structure
-split gui/components and gui/gui
 
 * continuing
-- keep updating the demo apps
+- keep updating the demo tracks
 
 * host bugs:
 - cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)

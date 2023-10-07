@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/desc.hpp>
 #include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
+#include <plugin_base/desc/desc.hpp>
 
 #include <pluginterfaces/base/ibstream.h>
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/desc.hpp>
-#include <plugin_base/gui/gui.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/gui/gui.hpp>
+#include <plugin_base/desc/desc.hpp>
 
 #include <pluginterfaces/gui/iplugview.h>
 #include <public.sdk/source/vst/vsteditcontroller.h>
