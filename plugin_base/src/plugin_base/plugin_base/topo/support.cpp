@@ -279,25 +279,4 @@ param_linear(
   return result;
 }
 
-param_topo
-param_log(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  double min, double max, double default_, double midpoint, int precision, std::string const& unit,
-  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position)
-{
-  param_topo result(param_base(
-    id, name, index, slot_count, section, std::to_string(default_), 
-    direction, rate, format, edit_type,
-    label_contents, label_align, label_justify, layout, position));
-  result.domain.precision = precision;
-  result.domain.type = domain_type::log;
-  result.domain.min = min;
-  result.domain.max = max;
-  result.domain.unit = unit;
-  result.domain.exp = std::log((midpoint - min) / (max - min)) / std::log(0.5);
-  return result;
-}
-
 }

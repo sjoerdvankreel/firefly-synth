@@ -54,11 +54,10 @@ filter_topo(int osc_slot_count)
     make_param_dsp_block(), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, make_label_default(gui_label_contents::name))));
   
-  result.params.emplace_back(param_log(
-    "{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_freq, 1, section_main, 20, 20000, 1000, 1000, 0, "Hz",
-    param_direction::input, param_rate::accurate, param_format::normalized, gui_edit_type::hslider,
-    gui_label_contents::name, gui_label_align::bottom, gui_label_justify::near,
-    gui_layout::single, gui_position { 0, 1 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_freq, 1),
+    make_param_dsp_accurate(param_format::normalized), make_domain_log(20, 20000, 1000, 1000, 0, "Hz"),
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, make_label(gui_label_contents::name, gui_label_align::bottom, gui_label_justify::near))));
 
   result.params.emplace_back(param_pct(
     "{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc Gain", param_osc_gain, osc_slot_count, section_main, 0, 1, 0.5, 0,

@@ -8,11 +8,6 @@ namespace plugin_base {
 int
 index_of_item_tag(std::vector<list_item> const& items, int tag);
 
-topo_tag
-make_topo_tag(std::string const& id, std::string const& name);
-topo_info
-make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
-
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
 inline gui_label 
@@ -21,6 +16,11 @@ make_label_default(gui_label_contents contents)
 inline gui_label 
 make_label_none()
 { return make_label_default(gui_label_contents::none); }
+
+topo_tag
+make_topo_tag(std::string const& id, std::string const& name);
+topo_info
+make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
 
 section_topo
 make_section(int index, topo_tag const& tag, section_topo_gui const& gui);
@@ -84,11 +84,5 @@ param_linear(
   param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
-param_topo
-param_log(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  double min, double max, double default_, double midpoint, int precision, std::string const& unit,
-  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position);
+
 }
