@@ -51,11 +51,10 @@ delay_topo(int polyphony)
     gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position { 0, 1 }));
   
-  result.params.emplace_back(param_steps(
-    "{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", param_voices, 1, section_main, 0, polyphony, 0,
-    param_direction::output, gui_edit_type::list,
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 2 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", param_voices, 1),
+    make_param_dsp_output(), make_domain_step(0, polyphony, 0),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, make_label_default(gui_label_contents::name))));
   
   result.params.emplace_back(param_pct(
     "{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", param_cpu, 1, section_main, 0, 1, 0, 0,
@@ -63,11 +62,10 @@ delay_topo(int polyphony)
     gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
     gui_layout::single, gui_position{ 0, 3 }));
   
-  result.params.emplace_back(param_steps(
-    "{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", param_threads, 1, section_main, 0, polyphony, 0,
-    param_direction::output, gui_edit_type::list,
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 4 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", param_threads, 1),
+    make_param_dsp_output(), make_domain_step(0, polyphony, 0),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 4 }, make_label_default(gui_label_contents::name))));
 
   return result;
 }

@@ -84,22 +84,21 @@ cv_matrix_topo(
   source.gui.bindings.enabled.params = enabled_params;
   source.gui.bindings.enabled.selector = enabled_selector;
 
-  auto& lfo_index = result.params.emplace_back(param_steps(
-    "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", param_source_lfo_index, route_count, section_main, 0, lfo.info.slot_count - 1, 0,
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
-    gui_layout::vertical, gui_position{ 1, 2 }));
+  auto& lfo_index = result.params.emplace_back(make_param(
+    make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", param_source_lfo_index, route_count),
+    make_param_dsp_block(), make_domain_step(0, lfo.info.slot_count - 1, 0),
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 2 }, make_label_none())));
   lfo_index.gui.bindings.enabled.params = enabled_params;
   lfo_index.gui.bindings.enabled.selector = enabled_selector;
   lfo_index.gui.bindings.visible.params = { param_source };
   lfo_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_source].domain.items, module_lfo)};
   lfo_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
-  auto& env_index = result.params.emplace_back(param_steps(
-    "{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", param_source_env_index, route_count, section_main, 0, env.info.slot_count - 1, 0,
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
-    gui_layout::vertical, gui_position{ 1, 2 }));
+  auto& env_index = result.params.emplace_back(make_param(
+    make_topo_info("{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", param_source_env_index, route_count),
+    make_param_dsp_block(), make_domain_step(0, env.info.slot_count - 1, 0),
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 2 }, make_label_none())));
+
   env_index.gui.bindings.enabled.params = enabled_params;
   env_index.gui.bindings.enabled.selector = enabled_selector;
   env_index.gui.bindings.visible.params = { param_source };
@@ -114,11 +113,11 @@ cv_matrix_topo(
   target.gui.bindings.enabled.params = enabled_params;
   target.gui.bindings.enabled.selector = enabled_selector;
 
-  auto& osc_index = result.params.emplace_back(param_steps(
-    "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", param_target_osc_index, route_count, section_main, 0, osc.info.slot_count - 1, 0,
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
-    gui_layout::vertical, gui_position{ 1, 4 }));
+  auto& osc_index = result.params.emplace_back(make_param(
+    make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", param_target_osc_index, route_count),
+    make_param_dsp_block(), make_domain_step(0, osc.info.slot_count - 1, 0),
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 4 }, make_label_none())));
+
   osc_index.gui.bindings.enabled.params = enabled_params;
   osc_index.gui.bindings.enabled.selector = enabled_selector;
   osc_index.gui.bindings.visible.params = { param_target };
@@ -147,12 +146,10 @@ cv_matrix_topo(
   filter_target.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
 
   int FILTER_PARAM_OSC_GAIN = 2; // TODO
-  auto& osc_gain_index = result.params.emplace_back(param_steps(
-    "{FB4EB870-48DD-40D5-9D0E-2E9F0C4E3C48}", "Filter Osc Gain", param_target_filter_param_osc_gain_index, route_count, section_main, 
-    0, filter.params[FILTER_PARAM_OSC_GAIN].info.slot_count - 1, 0,
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
-    gui_layout::vertical, gui_position{ 1, 6 }));
+  auto& osc_gain_index = result.params.emplace_back(make_param(
+    make_topo_info("{FB4EB870-48DD-40D5-9D0E-2E9F0C4E3C48}", "Filter Osc Gain", param_target_filter_param_osc_gain_index, route_count),
+    make_param_dsp_block(), make_domain_step(0, filter.params[FILTER_PARAM_OSC_GAIN].info.slot_count - 1, 0),
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 6 }, make_label_none())));
   osc_gain_index.gui.bindings.enabled.params = enabled_params;
   osc_gain_index.gui.bindings.enabled.selector = enabled_selector;
   osc_gain_index.gui.bindings.visible.params = { param_target, param_target_filter_param };
