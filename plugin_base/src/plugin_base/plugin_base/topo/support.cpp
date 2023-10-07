@@ -17,7 +17,7 @@ param_base(
   result.dsp.rate = rate;
   result.info.index = index;
   result.dsp.format = format;
-  result.section = section;
+  result.gui.section = section;
   result.info.slot_count = slot_count;
   result.domain.default_ = default_;
   result.gui.layout = layout;

@@ -26,6 +26,7 @@ struct param_dsp final {
 
 // parameter ui
 struct param_topo_gui final {
+  int section;
   gui_layout layout;
   gui_position position;
   gui_bindings bindings;
@@ -39,7 +40,6 @@ struct param_topo_gui final {
 
 // parameter in module
 struct param_topo final {
-  int section;
   param_dsp dsp;
   topo_info info;
   param_topo_gui gui;
