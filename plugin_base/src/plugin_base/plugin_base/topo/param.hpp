@@ -28,15 +28,11 @@ struct param_dsp final {
 // parameter ui
 struct param_topo_gui final {
   int section;
-  
+  gui_label label;
   gui_layout layout;
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
-
-  gui_label_align label_align;
-  gui_label_justify label_justify;
-  gui_label_contents label_contents;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
 };

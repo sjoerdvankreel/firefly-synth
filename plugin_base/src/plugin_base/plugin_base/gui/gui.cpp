@@ -256,10 +256,10 @@ plugin_gui::make_param_label_edit(
 Component&
 plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
 {
-  if(param.param->gui.label_contents == gui_label_contents::none)
+  if(param.param->gui.label.contents == gui_label_contents::none)
     return make_param_editor(module, param);
 
-  switch(param.param->gui.label_align)
+  switch(param.param->gui.label.align)
   {
   case gui_label_align::top:
     return make_param_label_edit(module, param, gui_dimension({ -label_height, 1 }, { 1 }), { 0, 0 }, { 1, 0 });
@@ -307,7 +307,7 @@ Component&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
 {
   Label* result = {};
-  auto contents = param.param->gui.label_contents;
+  auto contents = param.param->gui.label.contents;
   switch (contents)
   {
   case gui_label_contents::name:
@@ -321,7 +321,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
     assert(false);
     break;
   }
-  result->setJustificationType(justification_type(param.param->gui.label_align, param.param->gui.label_justify));
+  result->setJustificationType(justification_type(param.param->gui.label.align, param.param->gui.label.justify));
   return *result;
 }
 

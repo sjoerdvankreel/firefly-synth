@@ -45,6 +45,15 @@ struct topo_info final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_info);
 };
 
+// label positioning
+struct gui_label final {
+  gui_label_align align;
+  gui_label_justify justify;
+  gui_label_contents contents;
+
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_label);
+};
+
 // position in parent grid
 struct gui_position final {
   int row = -1;

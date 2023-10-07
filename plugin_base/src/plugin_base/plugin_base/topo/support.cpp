@@ -23,9 +23,9 @@ param_base(
   result.gui.layout = layout;
   result.gui.position = position;
   result.gui.edit_type = edit_type;
-  result.gui.label_align = label_align;
-  result.gui.label_justify = label_justify;
-  result.gui.label_contents = label_contents;
+  result.gui.label.align = label_align;
+  result.gui.label.justify = label_justify;
+  result.gui.label.contents = label_contents;
   return result;
 }
 
