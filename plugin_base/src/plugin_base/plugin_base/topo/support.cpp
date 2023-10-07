@@ -257,25 +257,6 @@ param_steps(
 }
 
 param_topo
-param_items(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  std::vector<list_item>&& items, std::string const& default_,
-  param_direction direction, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position)
-{
-  param_topo result(param_base(
-    id, name, index, slot_count, section, default_.size()? default_: items[0].name,
-    direction, param_rate::block, param_format::plain, edit_type,
-    label_contents, label_align, label_justify, layout, position));
-  result.domain.items = std::move(items);
-  result.domain.min = 0;
-  result.domain.max = result.domain.items.size() - 1;
-  result.domain.type = domain_type::item;
-  return result;
-}
-
-param_topo
 param_names(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   std::vector<std::string> const& names, std::string const& default_,
