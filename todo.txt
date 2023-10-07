@@ -14,19 +14,15 @@ get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
 ui set exact values
 handle generic midi in
-start documenting stuff
 on-note/hold-type cv
 provide to/fromstring for steps
 drop format::plain in favor of modulation
 param value dependent on other param
 mark param as modulatable or not
-cleanup the validation
-gui + desc to folders + split
 cleanup all the headers + folder structure
 check the todos
 cleanup the rest (vst/clap/plugin)
 do cakewalk bug report
-prevent acc. copy on position/dimension
 test all host+linux
 
 * continuing
