@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/desc.hpp>
-#include <plugin_base/gui/gui.hpp>
+#include <plugin_base/desc/desc.hpp>
 #include <plugin_base/topo/plugin.hpp>
+#include <plugin_base/gui/gui.hpp>
 #include <plugin_base/gui/components.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
