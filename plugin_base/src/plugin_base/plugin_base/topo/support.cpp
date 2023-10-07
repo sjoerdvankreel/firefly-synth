@@ -59,6 +59,16 @@ make_topo_info(std::string const& id, std::string const& name, int index, int sl
   return result;
 }
 
+gui_label
+make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify)
+{
+  gui_label result = {};
+  result.align = align;
+  result.justify = justify;
+  result.contents = contents;
+  return result;
+}
+
 section_topo
 make_section(int index, topo_tag const& tag, section_topo_gui const& gui)
 {
@@ -105,6 +115,18 @@ make_module_gui(gui_layout layout, gui_position const& position, gui_dimension c
   result.layout = layout;
   result.position = position;
   result.dimension = dimension;
+  return result;
+}
+
+param_topo_gui
+make_param_gui(int section, gui_layout layout, gui_position position, gui_edit_type edit_type, gui_label label)
+{
+  param_topo_gui result = {};
+  result.layout = layout;
+  result.section = section;
+  result.position = position;
+  result.edit_type = edit_type;
+  result.label = gui_label(label);
   return result;
 }
 

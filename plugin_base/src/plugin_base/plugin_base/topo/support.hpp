@@ -12,6 +12,8 @@ topo_tag
 make_topo_tag(std::string const& id, std::string const& name);
 topo_info
 make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
+gui_label 
+make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
 
 section_topo
 make_section(int index, topo_tag const& tag, section_topo_gui const& gui);
@@ -24,6 +26,9 @@ module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
 module_topo_gui
 make_module_gui(gui_layout layout, gui_position const& position, gui_dimension const& dimension);
+
+param_topo_gui
+make_param_gui(int section, gui_layout layout, gui_position position, gui_edit_type edit_type, gui_label label);
 
 // block-rate
 param_topo
