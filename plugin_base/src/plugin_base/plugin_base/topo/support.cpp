@@ -3,10 +3,6 @@
 
 namespace plugin_base {
 
-std::vector<std::string>
-note_names() 
-{ return { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }; }
-
 static param_topo
 param_base(
   std::string const& id, std::string const& name, int index, int slot_count, int section, std::string const& default_,

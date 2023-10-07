@@ -5,9 +5,6 @@
 
 namespace plugin_base {
 
-std::vector<std::string>
-note_names();
-
 int
 index_of_item_tag(std::vector<list_item> const& items, int tag);
 

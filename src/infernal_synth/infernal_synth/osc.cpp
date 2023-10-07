@@ -1,7 +1,7 @@
-#include <plugin_base/support.hpp>
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/topo/plugin.hpp>
+#include <plugin_base/topo/support.hpp>
 
 #include <infernal_synth/synth.hpp>
 #include <cmath>
@@ -13,6 +13,10 @@ namespace infernal_synth {
 enum { type_saw, type_sine };
 enum { section_pitch, section_main, section_sine_gain, section_saw_gain };
 enum { param_note, param_oct, param_cent, param_on, param_type, param_gain, param_bal, param_sine_gain, param_saw_gain };
+
+static std::vector<std::string>
+note_names()
+{ return { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }; }
 
 std::vector<list_item>
 cv_matrix_target_osc_params(module_topo const& osc_topo)

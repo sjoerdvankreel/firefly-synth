@@ -20,7 +20,6 @@ provide to/fromstring for steps
 drop format::plain in favor of modulation
 param value dependent on other param
 mark param as modulatable or not
-move note_names to plug
 cleanup the validation
 gui + desc to folders + split
 cleanup all the headers + folder structure
