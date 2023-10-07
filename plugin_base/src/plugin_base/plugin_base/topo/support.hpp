@@ -12,6 +12,7 @@ topo_tag
 make_topo_tag(std::string const& id, std::string const& name);
 topo_info
 make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
+
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
 inline gui_label 
@@ -67,14 +68,6 @@ make_param_gui(int section, gui_edit_type edit_type, gui_layout layout, gui_posi
 inline param_topo_gui
 make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label label)
 { return make_param_gui(section, edit_type, gui_layout::single, position, gui_label(label)); }
-
-param_topo
-param_names(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  std::vector<std::string> const& names, std::string const& default_,
-  param_direction direction, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position);
 
 // either block or accurate rate
 param_topo

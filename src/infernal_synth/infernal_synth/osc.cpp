@@ -80,11 +80,10 @@ osc_topo()
   saw_gain.gui.bindings.visible.params = { param_on, param_type };
   saw_gain.gui.bindings.visible.selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_saw; };
 
-  result.params.emplace_back(param_names(
-    "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1, section_pitch, note_names(), "",
-    param_direction::input, gui_edit_type::list,
-    gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 0 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
+    make_param_dsp_block(), make_domain_name(note_names(), ""),
+    make_param_gui_single(section_pitch, gui_edit_type::list, { 0, 0 }, make_label_none())));
   
   result.params.emplace_back(make_param(
     make_topo_info("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", param_oct, 1),

@@ -239,25 +239,6 @@ make_param(topo_info const& info, param_dsp const& dsp, param_domain const& doma
 }
 
 param_topo
-param_names(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  std::vector<std::string> const& names, std::string const& default_,
-  param_direction direction, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position)
-{
-  param_topo result(param_base(
-    id, name, index, slot_count, section, default_.size()? default_: names[0],
-    direction, param_rate::block, param_format::plain, edit_type,
-    label_contents, label_align, label_justify, layout, position));
-  result.domain.min = 0;
-  result.domain.max = names.size() - 1;
-  result.domain.names = names;
-  result.domain.type = domain_type::name;
-  return result;
-}
-
-param_topo
 param_pct(
   std::string const& id, std::string const& name, int index, int slot_count, int section,
   double min, double max, double default_, int precision,
