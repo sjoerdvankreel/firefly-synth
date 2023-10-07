@@ -25,6 +25,7 @@ gui + desc to folders + split
 cleanup all the headers + folder structure
 check the todos
 cleanup the rest (vst/clap/plugin)
+do cakewalk bug report
 
 * continuing
 - keep updating the demo tracks
