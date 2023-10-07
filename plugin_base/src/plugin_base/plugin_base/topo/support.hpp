@@ -77,12 +77,5 @@ param_pct(
   param_direction direction, param_rate rate, param_format format, bool unit, gui_edit_type edit_type,
   gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
   gui_layout layout, gui_position const& position);
-param_topo
-param_linear(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  double min, double max, double default_, int precision, std::string const& unit,
-  param_direction direction, param_rate rate, param_format format, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position);
 
 }

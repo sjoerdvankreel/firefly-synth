@@ -42,11 +42,10 @@ lfo_topo()
     make_param_dsp_block(), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, make_label_default(gui_label_contents::name))));
 
-  result.params.emplace_back(param_linear(
-    "{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1, section_main, 0.1, 20, 1, 2, "Hz",
-    param_direction::input, param_rate::accurate, param_format::plain, gui_edit_type::knob,
-    gui_label_contents::both, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position { 0, 1 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
+    make_param_dsp_accurate(param_format::plain), make_domain_linear(0.1, 20, 1, 2, "Hz"),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, make_label_default(gui_label_contents::both))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
