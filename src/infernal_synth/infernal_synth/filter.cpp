@@ -43,11 +43,12 @@ filter_topo(int osc_slot_count)
     make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice Filter", module_filter, 1), 
     make_module_dsp(module_stage::voice, module_output::none, 0),
     make_module_gui(gui_layout::single, { 3, 0 }, { 1, 1 })));
-  result.engine_factory = [](int, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
     make_section_gui({ 0, 0 }, { { 1 }, { 1, 1, 2} })));
+  result.engine_factory = [](int, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
+
   result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1),
     make_param_dsp_block(), make_domain_toggle(false),

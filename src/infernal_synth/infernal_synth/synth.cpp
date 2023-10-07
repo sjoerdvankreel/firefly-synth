@@ -12,10 +12,10 @@ synth_topo()
 {
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
-  result->tag.id = INF_SYNTH_ID;
-  result->tag.name = INF_SYNTH_NAME;
   result->extension = "infpreset";
   result->type = plugin_type::synth;
+  result->tag.id = INF_SYNTH_ID;
+  result->tag.name = INF_SYNTH_NAME;
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 

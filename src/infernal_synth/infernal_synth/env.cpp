@@ -44,23 +44,23 @@ env_topo()
   result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
     make_param_dsp_accurate(param_format::plain), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 0 }, make_label_default(gui_label_contents::both))));
-  
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 0 }, 
+      make_label_default(gui_label_contents::both))));  
   result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_d, 1),
     make_param_dsp_accurate(param_format::plain), make_domain_log(0, 10, 0.1, 1, 3, "Sec"), 
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, make_label_default(gui_label_contents::both))));
-  
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
+      make_label_default(gui_label_contents::both))));  
   result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1),
     make_param_dsp_accurate(param_format::plain), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, make_label_default(gui_label_contents::both))));
-  
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
+      make_label_default(gui_label_contents::both))));  
   result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1),
     make_param_dsp_accurate(param_format::plain), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, make_label_default(gui_label_contents::both))));
-
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
+      make_label_default(gui_label_contents::both))));
   return result;
 }
 
