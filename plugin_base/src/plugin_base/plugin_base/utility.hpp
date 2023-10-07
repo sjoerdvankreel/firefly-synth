@@ -39,9 +39,6 @@ public:
 double seconds_since_epoch();
 inline void debug_breakable() {};
 
-std::pair<uint32_t, uint32_t> disable_denormals();
-void restore_denormals(std::pair<uint32_t, uint32_t> state);
-
 template <class T> std::string 
 to_8bit_string(T const* source)
 {
@@ -65,8 +62,6 @@ void from_8bit_string(T* dest, int count, char const* source)
 
 template <class T, int N>
 void from_8bit_string(T(&dest)[N], char const* source)
-{
-  from_8bit_string(dest, N, source);
-}
+{ from_8bit_string(dest, N, source); }
 
 }

@@ -1,5 +1,5 @@
 #include <plugin_base/support.hpp>
-#include <plugin_base/engine.hpp>
+#include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/topo/plugin.hpp>
 
 #include <infernal_synth/synth.hpp>

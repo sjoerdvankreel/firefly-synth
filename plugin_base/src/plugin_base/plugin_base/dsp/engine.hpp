@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/value.hpp>
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
+#include <plugin_base/dsp/value.hpp>
 #include <plugin_base/desc/dims.hpp>
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/block/host.hpp>

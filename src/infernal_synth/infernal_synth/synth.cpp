@@ -1,7 +1,7 @@
 #include <infernal_synth/synth.hpp>
 #include <infernal_synth/plugin.hpp>
 
-#include <plugin_base/engine.hpp>
+#include <plugin_base/dsp/engine.hpp>
 
 using namespace plugin_base;
 
