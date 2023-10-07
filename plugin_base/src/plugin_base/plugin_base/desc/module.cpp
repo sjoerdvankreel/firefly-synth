@@ -25,12 +25,14 @@ module_desc(
 }
 
 void
-module_desc::validate(plugin_desc const& plugin) const
+module_desc::validate(plugin_desc const& plugin, int index) const
 {
   assert(module);
   assert(params.size());
-  assert(0 <= info.global && info.global < plugin.modules.size());
+  assert(info.global == index);
   info.validate(plugin.plugin->modules.size(), module->info.slot_count);
+  for(int p = 0; p < params.size(); p++)
+    params[p].validate(*this, p);
 }
 
 }

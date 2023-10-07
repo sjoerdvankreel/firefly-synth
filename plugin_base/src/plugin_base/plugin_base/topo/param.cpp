@@ -4,7 +4,7 @@
 namespace plugin_base {
 
 void
-param_topo::validate(module_topo const& module) const
+param_topo::validate(module_topo const& module, int index) const
 {
   info.validate();
   domain.validate();
@@ -16,6 +16,7 @@ param_topo::validate(module_topo const& module) const
   for (int v = 0; v < gui.bindings.visible.params.size(); v++)
     assert(info.index != gui.bindings.visible.params[v]);
 
+  assert(info.index == index);
   assert(0 <= section && section < module.sections.size());
   assert(domain.is_real() || dsp.rate == param_rate::block);
   assert(dsp.format == param_format::plain || domain.is_real());

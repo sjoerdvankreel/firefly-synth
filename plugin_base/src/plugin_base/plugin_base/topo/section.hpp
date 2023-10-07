@@ -23,8 +23,8 @@ struct section_topo final {
   topo_tag tag;
   section_topo_gui gui;
 
-  void validate(module_topo const& module) const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
+  void validate(module_topo const& module, int index_) const;
 };
 
 }

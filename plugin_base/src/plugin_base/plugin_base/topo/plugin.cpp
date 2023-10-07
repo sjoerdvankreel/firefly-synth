@@ -24,7 +24,7 @@ plugin_topo::validate() const
   std::set<std::string> all_ids;
   for (int m = 0; m < modules.size(); m++)
   {
-    modules[m].validate(*this);
+    modules[m].validate(*this, m);
     assert((int)modules[m].dsp.stage >= stage);
     stage = (int)modules[m].dsp.stage;
     INF_ASSERT_EXEC(all_ids.insert(modules[m].info.tag.id).second);

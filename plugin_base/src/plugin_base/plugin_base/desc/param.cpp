@@ -21,11 +21,11 @@ param_desc(
 }
 
 void
-param_desc::validate(module_desc const& module) const
+param_desc::validate(module_desc const& module, int index) const
 {
   assert(param);
+  assert(local == index);
   assert(info.name.size() < full_name.size());
-  assert(0 <= local && local < module.params.size());
   info.validate(module.params.size(), param->info.slot_count);
 }
 

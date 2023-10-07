@@ -1,5 +1,4 @@
 #include <plugin_base/desc/plugin.hpp>
-
 #include <set>
 
 namespace plugin_base {
@@ -80,65 +79,62 @@ void
 plugin_desc::validate() const
 {
   int param_global = 0;
+  (void)param_global;
   std::set<int> all_hashes;
   std::set<std::string> all_ids;
-  (void)param_global;
-
-  assert(0 <= module_voice_start);
-  assert(module_voice_start <= module_output_start);
-  assert(module_output_start < plugin->modules.size());
 
   assert(param_count > 0);
   assert(module_count > 0);
+  assert(module_voice_start >= 0);
   assert(params.size() == param_count);
   assert(modules.size() == module_count);
-  assert(mappings.params.size() == param_count);
-  assert(mappings.tag_to_index.size() == param_count);
-  assert(mappings.index_to_tag.size() == param_count);
-  assert(mappings.id_to_index.size() == plugin->modules.size());
-  assert(mappings.id_to_index.size() == plugin->modules.size());
-  assert(mappings.topo_to_index.size() == plugin->modules.size());
+  assert(module_voice_start <= module_output_start);
+  assert(module_output_start < plugin->modules.size());
 
-  param_global = 0;
-  for (int m = 0; m < plugin->modules.size(); m++)
-  {
-    auto const& module = plugin->modules[m];
-    (void)module;
-    assert(plugin->modules[m].info.index == m);
-    assert(mappings.topo_to_index[m].size() == module.info.slot_count);
-    assert(mappings.id_to_index.at(module.info.tag.id).size() == module.params.size());
-    for (int s = 0; s < module.sections.size(); s++)
-      assert(module.sections[s].index == s);
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-    {
-      assert(mappings.topo_to_index[m][mi].size() == module.params.size());
-      for (int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        assert(param.info.index == p);
-        assert(mappings.topo_to_index[m][mi][p].size() == param.info.slot_count);
-        for (int pi = 0; pi < param.info.slot_count; pi++)
-          assert(mappings.topo_to_index[m][mi][p][pi] == param_global++);
-      }
-    }
-  }
-
-  param_global = 0;
   for (int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
-    assert(module.info.global == m);
-    module.validate(*this);
+    module.validate(*this, m);
     INF_ASSERT_EXEC(all_ids.insert(module.info.id).second);
     INF_ASSERT_EXEC(all_hashes.insert(module.info.id_hash).second);
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
-      // todo move to module
-      param.validate(module);
       assert(param.info.global == param_global++);
       INF_ASSERT_EXEC(all_ids.insert(param.info.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
+    }
+  }
+}
+
+void
+plugin_param_mappings::validate(plugin_desc const& plugin) const
+{
+  assert(params.size() == plugin.param_count);
+  assert(tag_to_index.size() == plugin.param_count);
+  assert(index_to_tag.size() == plugin.param_count);
+  assert(id_to_index.size() == plugin.plugin->modules.size());
+  assert(id_to_index.size() == plugin.plugin->modules.size());
+  assert(topo_to_index.size() == plugin.plugin->modules.size());
+
+  int param_global = 0;
+  (void)param_global;
+  for (int m = 0; m < plugin.plugin->modules.size(); m++)
+  {
+    auto const& module = plugin.plugin->modules[m];
+    (void)module;
+    assert(topo_to_index[m].size() == module.info.slot_count);
+    assert(id_to_index.at(module.info.tag.id).size() == module.params.size());
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+    {
+      assert(topo_to_index[m][mi].size() == module.params.size());
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        assert(topo_to_index[m][mi][p].size() == param.info.slot_count);
+        for (int pi = 0; pi < param.info.slot_count; pi++)
+          assert(topo_to_index[m][mi][p][pi] == param_global++);
+      }
     }
   }
 }

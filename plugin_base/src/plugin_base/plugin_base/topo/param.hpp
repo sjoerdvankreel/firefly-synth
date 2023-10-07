@@ -45,7 +45,7 @@ struct param_topo final {
   param_domain domain;
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
-  void validate(module_topo const& module) const;
+  void validate(module_topo const& module, int index) const;
 };
 
 }

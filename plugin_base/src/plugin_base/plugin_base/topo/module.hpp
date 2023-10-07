@@ -46,8 +46,8 @@ struct module_topo final {
   std::vector<section_topo> sections;
   module_engine_factory engine_factory;
 
-  void validate(plugin_topo const& plugin) const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo);
+  void validate(plugin_topo const& plugin, int index) const;
 };
 
 }

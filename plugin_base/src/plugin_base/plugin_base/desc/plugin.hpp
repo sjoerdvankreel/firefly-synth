@@ -13,6 +13,8 @@
 
 namespace plugin_base {
 
+struct plugin_desc;
+
 // mapping plugin level parameter index
 struct param_mapping final {
   int param_topo = {};
@@ -39,6 +41,8 @@ struct plugin_param_mappings final {
 
   std::map<std::string, std::map<std::string, int>> id_to_index = {};
   std::vector<std::vector<std::vector<std::vector<int>>>> topo_to_index = {};
+
+  void validate(plugin_desc const& plugin) const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_param_mappings);
 };
 

@@ -4,14 +4,14 @@
 namespace plugin_base {
 
 void 
-section_topo::validate(module_topo const& module) const
+section_topo::validate(module_topo const& module, int index_) const
 {
   tag.validate();
   gui.bindings.validate(module, 1);
   gui.position.validate(module.gui.dimension);
 
-  assert(0 <= index && index < module.sections.size());
-  auto include = [this, &module](int p) { return module.params[p].section == index; };
+  assert(this->index == index_);
+  auto include = [this, &module](int p) { return module.params[p].section == this->index; };
   auto always_visible = [&module](int p) { return module.params[p].gui.bindings.visible.selector == nullptr; };
   gui.dimension.validate(module.params, include, always_visible);
 }
