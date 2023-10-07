@@ -15,23 +15,23 @@ plugin(std::move(plugin_))
   for(int m = 0; m < plugin->modules.size(); m++)
   {
     auto const& module = plugin->modules[m];
-    param_topo_to_index.emplace_back();
+    mappings.topo_to_index.emplace_back();
     if(module.dsp.stage == module_stage::input) module_voice_start++;
     if(module.dsp.stage == module_stage::input) module_output_start++;
     if(module.dsp.stage == module_stage::voice) module_output_start++;
     module_id_to_index[module.info.tag.id] = m;
     for(int p = 0; p < module.params.size(); p++)
-      param_id_to_index[module.info.tag.id][module.params[p].info.tag.id] = p;
+      mappings.id_to_index[module.info.tag.id][module.params[p].info.tag.id] = p;
     for(int mi = 0; mi < module.info.slot_count; mi++)
     {
-      param_topo_to_index[m].emplace_back();
+      mappings.topo_to_index[m].emplace_back();
       modules.emplace_back(module_desc(module, m, mi, module_global++, param_global));
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        param_topo_to_index[m][mi].emplace_back();
+        mappings.topo_to_index[m][mi].emplace_back();
         for(int pi = 0; pi < param.info.slot_count; pi++)
-          param_topo_to_index[m][mi][p].push_back(param_global++);
+          mappings.topo_to_index[m][mi][p].push_back(param_global++);
       }
     }
   }
@@ -51,9 +51,9 @@ plugin(std::move(plugin_))
       mapping.param_slot = param.info.slot;
       mapping.param_topo = param.info.topo;
       mapping.param_global = param_global++;
-      param_index_to_tag.push_back(param.info.id_hash);
-      param_tag_to_index[param.info.id_hash] = mappings.size();
-      mappings.push_back(std::move(mapping));
+      mappings.index_to_tag.push_back(param.info.id_hash);
+      mappings.tag_to_index[param.info.id_hash] = mappings.params.size();
+      mappings.params.push_back(std::move(mapping));
       params.push_back(&module.params[p]);
     }
   }
@@ -92,12 +92,12 @@ plugin_desc::validate() const
   assert(module_count > 0);
   assert(params.size() == param_count);
   assert(modules.size() == module_count);
-  assert(mappings.size() == param_count);
-  assert(param_tag_to_index.size() == param_count);
-  assert(param_index_to_tag.size() == param_count);
-  assert(param_id_to_index.size() == plugin->modules.size());
-  assert(module_id_to_index.size() == plugin->modules.size());
-  assert(param_topo_to_index.size() == plugin->modules.size());
+  assert(mappings.params.size() == param_count);
+  assert(mappings.tag_to_index.size() == param_count);
+  assert(mappings.index_to_tag.size() == param_count);
+  assert(mappings.id_to_index.size() == plugin->modules.size());
+  assert(mappings.id_to_index.size() == plugin->modules.size());
+  assert(mappings.topo_to_index.size() == plugin->modules.size());
 
   param_global = 0;
   for (int m = 0; m < plugin->modules.size(); m++)
@@ -105,20 +105,20 @@ plugin_desc::validate() const
     auto const& module = plugin->modules[m];
     (void)module;
     assert(plugin->modules[m].info.index == m);
-    assert(param_topo_to_index[m].size() == module.info.slot_count);
-    assert(param_id_to_index.at(module.info.tag.id).size() == module.params.size());
+    assert(mappings.topo_to_index[m].size() == module.info.slot_count);
+    assert(mappings.id_to_index.at(module.info.tag.id).size() == module.params.size());
     for (int s = 0; s < module.sections.size(); s++)
       assert(module.sections[s].index == s);
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
-      assert(param_topo_to_index[m][mi].size() == module.params.size());
+      assert(mappings.topo_to_index[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         assert(param.info.index == p);
-        assert(param_topo_to_index[m][mi][p].size() == param.info.slot_count);
+        assert(mappings.topo_to_index[m][mi][p].size() == param.info.slot_count);
         for (int pi = 0; pi < param.info.slot_count; pi++)
-          assert(param_topo_to_index[m][mi][p][pi] == param_global++);
+          assert(mappings.topo_to_index[m][mi][p][pi] == param_global++);
       }
     }
   }

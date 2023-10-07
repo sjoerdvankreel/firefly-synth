@@ -31,7 +31,7 @@ binding_component::bind(
   values.clear();
   for (int i = 0; i < params.size(); i++)
   {
-    auto const& mapping = _gui->desc()->mappings[params[i]];
+    auto const& mapping = _gui->desc()->mappings.params[params[i]];
     values.push_back(mapping.value_at(_gui->gui_state()).step());
   }
   return binding.selector(values, binding.context);
@@ -43,12 +43,12 @@ binding_component::init()
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   if (_enabled_params.size() != 0)
   {
-    auto const& enabled_mapping = _gui->desc()->mappings[_enabled_params[0]];
+    auto const& enabled_mapping = _gui->desc()->mappings.params[_enabled_params[0]];
     plugin_changed(_enabled_params[0], enabled_mapping.value_at(_gui->gui_state()));
   }
   if (_visibility_params.size() != 0)
   {
-    auto const& visibility_mapping = _gui->desc()->mappings[_visibility_params[0]];
+    auto const& visibility_mapping = _gui->desc()->mappings.params[_visibility_params[0]];
     plugin_changed(_visibility_params[0], visibility_mapping.value_at(_gui->gui_state()));
   }
 }
@@ -59,7 +59,7 @@ binding_component::setup_bindings(
 {
   for (int i = 0; i < topo_params.size(); i++)
   {
-    auto const& param_topo_to_index = _gui->desc()->param_topo_to_index;
+    auto const& param_topo_to_index = _gui->desc()->mappings.topo_to_index;
     auto const& slots = param_topo_to_index[_module->info.topo][_module->info.slot][topo_params[i]];
     bool single_slot = _module->module->params[topo_params[i]].info.slot_count == 1;
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];

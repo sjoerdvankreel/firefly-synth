@@ -179,8 +179,8 @@ plugin_io::load(
       // check for old param not found
       auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
       auto param_name = plugin["modules"][m]["params"][p]["name"].toString().toStdString();
-      auto param_iter = _desc->param_id_to_index.at(module_id).find(param_id);
-      if (param_iter == _desc->param_id_to_index.at(module_id).end())
+      auto param_iter = _desc->mappings.id_to_index.at(module_id).find(param_id);
+      if (param_iter == _desc->mappings.id_to_index.at(module_id).end())
       {
         result.warnings.push_back("Param '" + module_name + " " + param_name + "' was deleted.");
         continue;
@@ -207,8 +207,8 @@ plugin_io::load(
       for (int p = 0; p < module_slots[mi]["params"].size(); p++)
       {
         auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
-        auto param_iter = _desc->param_id_to_index.at(module_id).find(param_id);
-        if (param_iter == _desc->param_id_to_index.at(module_id).end()) continue;
+        auto param_iter = _desc->mappings.id_to_index.at(module_id).find(param_id);
+        if (param_iter == _desc->mappings.id_to_index.at(module_id).end()) continue;
         var param_slots = plugin["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
         for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)

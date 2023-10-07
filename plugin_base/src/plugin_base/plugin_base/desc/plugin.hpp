@@ -15,7 +15,6 @@ namespace plugin_base {
 
 // mapping plugin level parameter index
 struct param_mapping final {
-
   int param_topo = {};
   int param_slot = {};
   int param_local = {};
@@ -32,24 +31,29 @@ struct param_mapping final {
   { return container[module_topo][module_slot][param_topo][param_slot]; }
 };
 
+// mapping to/from global parameter info
+struct plugin_param_mappings final {
+  std::vector<int> index_to_tag = {};
+  std::map<int, int> tag_to_index = {};
+  std::vector<param_mapping> params = {};
+
+  std::map<std::string, std::map<std::string, int>> id_to_index = {};
+  std::vector<std::vector<std::vector<std::vector<int>>>> topo_to_index = {};
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_param_mappings);
+};
+
 // runtime plugin descriptor
 struct plugin_desc final {
-
   int param_count = {};
   int module_count = {};
   int module_voice_start = {};
   int module_output_start = {};
 
+  plugin_param_mappings mappings = {};
   std::vector<module_desc> modules = {};
   std::unique_ptr<plugin_topo> plugin = {};
   std::vector<param_desc const*> params = {};
-
-  std::vector<param_mapping> mappings = {};
-  std::vector<int> param_index_to_tag = {};
-  std::map<int, int> param_tag_to_index = {};
   std::map<std::string, int> module_id_to_index = {};
-  std::map<std::string, std::map<std::string, int>> param_id_to_index = {};
-  std::vector<std::vector<std::vector<std::vector<int>>>> param_topo_to_index = {};
 
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_desc);
   plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);

@@ -358,7 +358,7 @@ plugin_engine::process()
   for (int e = 0; e < _host_block->events.block.size(); e++)
   {
     auto const& event = _host_block->events.block[e];
-    auto const& mapping = _desc.mappings[event.param];
+    auto const& mapping = _desc.mappings.params[event.param];
     plain_value plain = _desc.param_at(mapping).param->domain.normalized_to_plain(event.normalized);
     mapping.value_at(_plugin_state) = plain;
     mapping.value_at(_block_automation) = plain;
@@ -373,7 +373,7 @@ plugin_engine::process()
   {
     // linear interpolate as normalized
     auto const& event = _host_block->events.accurate[e];
-    auto const& mapping = _desc.mappings[event.param];
+    auto const& mapping = _desc.mappings.params[event.param];
     auto& curve = mapping.value_at(_accurate_automation);
     int prev_frame = _accurate_frames[event.param];
     float range_frames = event.frame - prev_frame + 1;

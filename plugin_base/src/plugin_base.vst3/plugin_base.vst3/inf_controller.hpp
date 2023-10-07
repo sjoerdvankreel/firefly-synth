@@ -30,8 +30,8 @@ public:
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   void gui_changing(int index, plain_value plain) override;
-  void gui_end_changes(int index) override { endEdit(desc().param_index_to_tag[index]); }
-  void gui_begin_changes(int index) override { beginEdit(desc().param_index_to_tag[index]); }
+  void gui_end_changes(int index) override { endEdit(desc().mappings.index_to_tag[index]); }
+  void gui_begin_changes(int index) override { beginEdit(desc().mappings.index_to_tag[index]); }
 
   Steinberg::IPlugView* PLUGIN_API createView(char const* name) override;
   Steinberg::tresult PLUGIN_API initialize(Steinberg::FUnknown* context) override;

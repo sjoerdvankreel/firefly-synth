@@ -66,8 +66,8 @@ inf_controller::createView(char const* name)
 void
 inf_controller::gui_changing(int index, plain_value plain)
 {
-  int tag = desc().param_index_to_tag[index];
-  param_mapping const& mapping = desc().mappings[index];
+  int tag = desc().mappings.index_to_tag[index];
+  param_mapping const& mapping = desc().mappings.params[index];
   auto normalized = desc().param_at(mapping).param->domain.plain_to_normalized(plain).value();
 
   // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
@@ -80,8 +80,8 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
-  int index = _desc.param_tag_to_index.at(tag);
-  param_mapping const& mapping = _desc.mappings[index];
+  int index = _desc.mappings.tag_to_index.at(tag);
+  param_mapping const& mapping = _desc.mappings.params[index];
   auto const& param = _desc.param_at(mapping).param;
   plain_value plain = param->domain.normalized_to_plain(normalized_value(value));
   mapping.value_at(_gui_state) = plain;
@@ -100,7 +100,7 @@ inf_controller::setComponentState(IBStream* state)
   if (!load_state(_desc, state, _gui_state))
     return kResultFalse;
   for (int p = 0; p < _desc.param_count; p++)
-    gui_changed(p, _desc.mappings[p].value_at(_gui_state));
+    gui_changed(p, _desc.mappings.params[p].value_at(_gui_state));
   return kResultOk;
 }
 

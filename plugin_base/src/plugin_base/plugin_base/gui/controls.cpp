@@ -22,7 +22,7 @@ void
 param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  auto const& own_mapping = _gui->desc()->mappings[_param->info.global];
+  auto const& own_mapping = _gui->desc()->mappings.params[_param->info.global];
   plugin_changed(_param->info.global, own_mapping.value_at(_gui->gui_state()));
   binding_component::init();
 }

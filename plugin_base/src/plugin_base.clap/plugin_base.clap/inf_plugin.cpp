@@ -74,7 +74,7 @@ inf_plugin::timerCallback()
   sync_event e;
   while (_to_gui_events->try_dequeue(e))
   {
-    param_mapping const& mapping = _engine.desc().mappings[e.index];
+    param_mapping const& mapping = _engine.desc().mappings.params[e.index];
     mapping.value_at(_gui_state) = e.plain;
     if(_gui) _gui->plugin_changed(e.index, e.plain);
   }
@@ -103,7 +103,7 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
   plugin_io io(&_engine.desc());
   if (!io.load(data, _gui_state).ok()) return false;
   for (int p = 0; p < _engine.desc().param_count; p++)
-    gui_changed(p, _engine.desc().mappings[p].value_at(_gui_state));
+    gui_changed(p, _engine.desc().mappings.params[p].value_at(_gui_state));
   return true;
 }
 
@@ -222,7 +222,7 @@ void
 inf_plugin::gui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
-  param_mapping const& mapping = _engine.desc().mappings[index];
+  param_mapping const& mapping = _engine.desc().mappings.params[index];
   mapping.value_at(_gui_state) = plain;
   if(_gui) _gui->plugin_changed(index, plain);
 }
@@ -250,7 +250,7 @@ void
 inf_plugin::push_to_gui(int index, clap_value clap)
 {
   sync_event e;
-  param_mapping const& mapping = _engine.desc().mappings[index];
+  param_mapping const& mapping = _engine.desc().mappings.params[index];
   auto const& topo = *_engine.desc().param_at(mapping).param;
   e.index = index;
   e.type = sync_event_type::value_changing;
@@ -261,8 +261,8 @@ inf_plugin::push_to_gui(int index, clap_value clap)
 std::int32_t
 inf_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
-  auto iter = _engine.desc().param_tag_to_index.find(param_id);
-  if (iter == _engine.desc().param_tag_to_index.end())
+  auto iter = _engine.desc().mappings.tag_to_index.find(param_id);
+  if (iter == _engine.desc().mappings.tag_to_index.end())
   {
     assert(false);
     return -1;
@@ -282,7 +282,7 @@ bool
 inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
   int index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[index]);
+  param_mapping const& mapping(_engine.desc().mappings.params[index]);
   auto const& topo = *_engine.desc().param_at(mapping).param;
   *value = normalized_to_clap(topo, topo.domain.plain_to_normalized(mapping.value_at(_gui_state))).value();
   return true;
@@ -293,7 +293,7 @@ inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* val
 {
   normalized_value normalized;
   int index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[index]);
+  param_mapping const& mapping(_engine.desc().mappings.params[index]);
   auto const& param = *_engine.desc().param_at(mapping).param;
   if (!param.domain.text_to_normalized(display, normalized)) return false;
   *value = normalized_to_clap(param, normalized).value();
@@ -304,7 +304,7 @@ bool
 inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
 {
   int index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.desc().mappings[index]);
+  param_mapping const& mapping(_engine.desc().mappings.params[index]);
   auto const& param = *_engine.desc().param_at(mapping).param;
   normalized_value normalized = clap_to_normalized(param, clap_value(value));
   std::string text = param.domain.normalized_to_text(normalized);
@@ -315,7 +315,7 @@ inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std
 bool
 inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 {
-  param_mapping const& mapping(_engine.desc().mappings[index]);
+  param_mapping const& mapping(_engine.desc().mappings.params[index]);
   param_desc const& param = _engine.desc().param_at(mapping);
   info->cookie = nullptr;
   info->id = param.info.id_hash;
@@ -357,7 +357,7 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
     if (header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     auto event = reinterpret_cast<clap_event_param_value const*>(header);
     int index = getParamIndexForParamId(event->param_id);
-    auto const& mapping = _engine.desc().mappings[index];
+    auto const& mapping = _engine.desc().mappings.params[index];
     auto const& topo = *_engine.desc().param_at(mapping).param;
     mapping.value_at(_engine.plugin_state()) = topo.domain.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
     push_to_gui(index, clap_value(event->value));
@@ -408,12 +408,12 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
   sync_event e;
   while (_to_audio_events->try_dequeue(e))
   {
-    int tag = _engine.desc().param_index_to_tag[e.index];
+    int tag = _engine.desc().mappings.index_to_tag[e.index];
     switch(e.type) 
     {
     case sync_event_type::value_changing:
     {
-      param_mapping const& mapping = _engine.desc().mappings[e.index];
+      param_mapping const& mapping = _engine.desc().mappings.params[e.index];
       auto const& topo = *_engine.desc().param_at(mapping).param;
       mapping.value_at(_engine.plugin_state()) = e.plain;
       auto event = clap_event_param_value();
@@ -487,7 +487,7 @@ inf_plugin::process(clap_process const* process) noexcept
     {
       auto event = reinterpret_cast<clap_event_param_value const*>(header);
       int index = getParamIndexForParamId(event->param_id);
-      auto const& mapping = _engine.desc().mappings[index];
+      auto const& mapping = _engine.desc().mappings.params[index];
       auto const& param = _engine.desc().param_at(mapping);
       push_to_gui(index, clap_value(event->value));
       if (param.param->dsp.rate == param_rate::block)
@@ -518,7 +518,7 @@ inf_plugin::process(clap_process const* process) noexcept
   {
     sync_event to_gui_event = {};
     auto const& out_event = block.events.out[e];
-    auto const& mapping = _engine.desc().mappings[out_event.param];
+    auto const& mapping = _engine.desc().mappings.params[out_event.param];
     to_gui_event.index = out_event.param;
     to_gui_event.plain = _engine.desc().param_at(mapping).param->domain.normalized_to_plain(out_event.normalized);
     _to_gui_events->enqueue(to_gui_event);
