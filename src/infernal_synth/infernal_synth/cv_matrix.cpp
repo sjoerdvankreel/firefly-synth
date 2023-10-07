@@ -72,11 +72,10 @@ cv_matrix_topo(
     make_param_dsp_block(), make_domain_toggle(true),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 7 }, make_label_default(gui_label_contents::name))));
 
-  auto& active = result.params.emplace_back(param_toggle(
-    "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count, section_main, false,
-    param_direction::input,
-    gui_label_contents::none, gui_label_align::left, gui_label_justify::center,
-    gui_layout::vertical, gui_position { 1, 0 }));
+  auto& active = result.params.emplace_back(make_param(
+    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count),
+    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_gui(section_main, gui_edit_type::toggle, gui_layout::vertical, { 1, 0 }, make_label_none())));
   active.gui.bindings.enabled.params = { param_on };
   active.gui.bindings.enabled.selector = [](auto const& vs, auto const&) { return vs[0] != 0; };
 

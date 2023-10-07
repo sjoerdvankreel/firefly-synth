@@ -49,11 +49,10 @@ filter_topo(int osc_slot_count)
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
     make_section_gui({ 0, 0 }, { { 1 }, { 1, 1, 2} })));
 
-  result.params.emplace_back(param_toggle(
-    "{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1, section_main, false,
-    param_direction::input,
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position { 0, 0 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1),
+    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, make_label_default(gui_label_contents::name))));
   
   result.params.emplace_back(param_log(
     "{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_freq, 1, section_main, 20, 20000, 1000, 1000, 0, "Hz",

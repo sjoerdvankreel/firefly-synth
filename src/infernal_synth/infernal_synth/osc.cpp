@@ -98,11 +98,10 @@ osc_topo()
     gui_label_contents::value, gui_label_align::right, gui_label_justify::center,
     gui_layout::single, gui_position{ 0, 2 }));
 
-  result.params.emplace_back(param_toggle(
-    "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", param_on, 1, section_main, false,
-    param_direction::input, 
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position { 0, 0 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", param_on, 1),
+    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, make_label_default(gui_label_contents::name))));
   
   result.params.emplace_back(param_items(
     "{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1, section_main, type_items(), "",

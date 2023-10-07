@@ -14,9 +14,12 @@ topo_info
 make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
-inline gui_label
+inline gui_label 
 make_label_default(gui_label_contents contents)
 { return make_label(contents, gui_label_align::left, gui_label_justify::center); }
+inline gui_label 
+make_label_none()
+{ return make_label_default(gui_label_contents::none); }
 
 section_topo
 make_section(int index, topo_tag const& tag, section_topo_gui const& gui);
@@ -42,6 +45,14 @@ inline param_dsp
 make_param_dsp_output()
 { return make_param_dsp(param_direction::output, param_rate::block, param_format::plain); }
 
+param_topo
+make_param(topo_info const& info, param_dsp const& dsp, param_domain const& domain, param_topo_gui const& gui);
+param_topo_gui
+make_param_gui(int section, gui_edit_type edit_type, gui_layout layout, gui_position position, gui_label label);
+inline param_topo_gui
+make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label label)
+{ return make_param_gui(section, edit_type, gui_layout::single, position, gui_label(label)); }
+
 param_domain
 make_domain_toggle(bool default_);
 param_domain
@@ -57,22 +68,6 @@ make_domain_linear(double min, double max, double default_, int precision, std::
 param_domain
 make_domain_log(double min, double max, double default_, double midpoint, int precision, std::string const& unit);
 
-param_topo
-make_param(topo_info const& info, param_dsp const& dsp, param_domain const& domain, param_topo_gui const& gui);
-param_topo_gui
-make_param_gui(int section, gui_edit_type edit_type, gui_layout layout, gui_position position, gui_label label);
-inline param_topo_gui
-make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label label)
-{ return make_param_gui(section, edit_type, gui_layout::single, position, gui_label(label)); }
-
-// block-rate
-param_topo
-param_toggle(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  bool default_, 
-  param_direction direction,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position);
 param_topo
 param_steps(
   std::string const& id, std::string const& name, int index, int slot_count, int section,

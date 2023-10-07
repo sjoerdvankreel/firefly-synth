@@ -238,25 +238,6 @@ make_param(topo_info const& info, param_dsp const& dsp, param_domain const& doma
   return result;
 }
 
-
-param_topo
-param_toggle(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  bool default_,
-  param_direction direction,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position)
-{
-  param_topo result(param_base(
-    id, name, index, slot_count, section, default_? "On": "Off", 
-    direction, param_rate::block, param_format::plain, gui_edit_type::toggle, 
-    label_contents, label_align, label_justify, layout, position));
-  result.domain.min = 0;
-  result.domain.max = 1;
-  result.domain.type = domain_type::toggle;
-  return result;
-}
-
 param_topo
 param_steps(
   std::string const& id, std::string const& name, int index, int slot_count, int section,

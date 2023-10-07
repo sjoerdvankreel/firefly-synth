@@ -40,11 +40,10 @@ delay_topo(int polyphony)
     make_topo_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"),
     make_section_gui({ 0, 0 }, { 1, 5 })));
 
-  result.params.emplace_back(param_toggle(
-    "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", param_on, 1, section_main, false,
-    param_direction::input,
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position { 0, 0 } ));
+  result.params.emplace_back(make_param(
+    make_topo_info("{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", param_on, 1),
+    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, make_label_default(gui_label_contents::name))));
   
   result.params.emplace_back(param_pct(
     "{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Out", param_out, 1, section_main, 0, 1, 0, 0,

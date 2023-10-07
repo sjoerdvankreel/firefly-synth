@@ -37,11 +37,10 @@ lfo_topo()
   result.engine_factory = [](int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(); };
 
-  result.params.emplace_back(param_toggle(
-    "{2A9CAE77-13B0-406F-BA57-1A30ED2F5D80}", "Sync", param_sync, 1, section_main, false,
-    param_direction::input,
-    gui_label_contents::name, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 0 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{2A9CAE77-13B0-406F-BA57-1A30ED2F5D80}", "Sync", param_sync, 1),
+    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, make_label_default(gui_label_contents::name))));
 
   result.params.emplace_back(param_linear(
     "{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1, section_main, 0.1, 20, 1, 2, "Hz",
