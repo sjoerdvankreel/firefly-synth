@@ -27,6 +27,7 @@ check the todos
 cleanup the rest (vst/clap/plugin)
 do cakewalk bug report
 prevent acc. copy on position/dimension
+test all host+linux
 
 * continuing
 - keep updating the demo tracks
