@@ -1,5 +1,6 @@
 #include <plugin_base/engine.hpp>
 #include <plugin_base/block/host.hpp>
+#include <plugin_base/desc/frame_dims.hpp>
 
 #include <limits>
 #include <algorithm>
