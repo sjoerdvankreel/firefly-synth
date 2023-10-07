@@ -4,6 +4,7 @@
 #include <plugin_base/jarray.hpp>
 #include <plugin_base/utility.hpp>
 #include <plugin_base/desc/desc.hpp>
+#include <plugin_base/desc/dims.hpp>
 #include <plugin_base/block/host.hpp>
 #include <plugin_base/block/plugin.hpp>
 

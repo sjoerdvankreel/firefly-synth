@@ -11,6 +11,8 @@
 
 namespace plugin_base {
 
+struct plugin_desc;
+
 // mapping plugin level parameter index
 struct param_mapping final {
   int param_topo = {};
@@ -20,8 +22,8 @@ struct param_mapping final {
   int module_topo = {};
   int module_slot = {};
   int module_global = {};
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_mapping);
 
+  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_mapping);
   template <class T> auto& value_at(T& container) const 
   { return container[module_topo][module_slot][param_topo][param_slot]; }
   template <class T> auto const& value_at(T const& container) const 
@@ -57,9 +59,12 @@ struct module_desc final {
   module_topo const* module = {};
   std::vector<param_desc> params = {};
 
+  void validate(plugin_desc const& plugin) const;
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_desc);
+
   module_desc(
-    module_topo const& module_, int topo, int slot, int global, int param_global_start);
+    module_topo const& module_, int topo, 
+    int slot, int global, int param_global_start);
 };
 
 // runtime plugin descriptor
@@ -84,30 +89,6 @@ struct plugin_desc final {
   void init_defaults(jarray<plain_value, 4>& state) const;
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; } 
-};
-
-// runtime plugin topo dimensions
-struct plugin_dims final {
-  jarray<int, 1> module_slot;
-  jarray<int, 2> voice_module_slot;
-  jarray<int, 3> module_slot_param_slot;
-
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_dims);
-  plugin_dims(plugin_topo const& topo);
-};
-
-// runtime plugin buffer dimensions
-struct plugin_frame_dims final {
-  jarray<int, 1> audio;
-  jarray<int, 2> voices_audio;
-  jarray<int, 4> module_voice_cv;
-  jarray<int, 3> module_global_cv;
-  jarray<int, 5> module_voice_audio;
-  jarray<int, 4> module_global_audio;
-  jarray<int, 4> accurate_automation;
-
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_frame_dims);
-  plugin_frame_dims(plugin_topo const& topo, int frame_count);
 };
 
 }

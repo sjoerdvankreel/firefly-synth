@@ -1,4 +1,6 @@
 #include <plugin_base/io.hpp>
+#include <plugin_base/desc/dims.hpp>
+
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
 
