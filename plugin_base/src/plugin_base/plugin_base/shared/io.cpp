@@ -1,4 +1,4 @@
-#include <plugin_base/io.hpp>
+#include <plugin_base/shared/io.hpp>
 #include <plugin_base/desc/dims.hpp>
 
 #include <juce_core/juce_core.h>

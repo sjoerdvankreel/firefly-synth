@@ -1,9 +1,9 @@
 #pragma once
 
-#include <plugin_base/utility.hpp>
 #include <plugin_base/dsp/value.hpp>
 #include <plugin_base/topo/domain.hpp>
 #include <plugin_base/topo/shared.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 #include <vector>
 #include <string>
@@ -33,6 +33,7 @@ struct param_topo_gui final {
   gui_label_align label_align;
   gui_label_justify label_justify;
   gui_label_contents label_contents;
+
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo_gui);
 };
 

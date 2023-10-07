@@ -1,9 +1,9 @@
 #pragma once
 
-#include <plugin_base/utility.hpp>
 #include <plugin_base/desc/param.hpp>
 #include <plugin_base/desc/shared.hpp>
 #include <plugin_base/topo/module.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 #include <vector>
 #include <string>

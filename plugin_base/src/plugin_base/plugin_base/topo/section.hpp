@@ -1,7 +1,7 @@
 #pragma once
 
-#include <plugin_base/utility.hpp>
 #include <plugin_base/topo/shared.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 #include <string>
 
@@ -14,6 +14,7 @@ struct section_topo_gui final {
   gui_bindings bindings;
   gui_position position;
   gui_dimension dimension;
+
   INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo_gui);
 };
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/utility.hpp>
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/block/host.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 #include <public.sdk/source/vst/vstaudioeffect.h>
 

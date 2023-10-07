@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/utility.hpp>
 #include <plugin_base/topo/shared.hpp>
 #include <plugin_base/topo/module.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 #include <vector>
 #include <string>
