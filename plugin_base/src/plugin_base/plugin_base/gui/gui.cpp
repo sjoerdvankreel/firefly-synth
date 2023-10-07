@@ -16,27 +16,27 @@ static inline int constexpr label_width = 80;
 static inline int constexpr label_height = 15;
 
 static Justification 
-justification_type(gui_label_align align, gui_label_justify justify)
+justification_type(gui_label const& label)
 {
-  switch (align)
+  switch (label.align)
   {
   case gui_label_align::top:
   case gui_label_align::bottom:
-    switch (justify) {
+    switch (label.justify) {
     case gui_label_justify::center: return Justification::centred;
     case gui_label_justify::near: return Justification::centredLeft;
     case gui_label_justify::far: return Justification::centredRight;
     default: break; }
     break;
   case gui_label_align::left:
-    switch (justify) {
+    switch (label.justify) {
     case gui_label_justify::near: return Justification::topLeft;
     case gui_label_justify::far: return Justification::bottomLeft;
     case gui_label_justify::center: return Justification::centredLeft;
     default: break; }
     break;
   case gui_label_align::right:
-    switch (justify) {
+    switch (label.justify) {
     case gui_label_justify::near: return Justification::topRight;
     case gui_label_justify::far: return Justification::bottomRight;
     case gui_label_justify::center: return Justification::centredRight;
@@ -321,7 +321,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
     assert(false);
     break;
   }
-  result->setJustificationType(justification_type(param.param->gui.label.align, param.param->gui.label.justify));
+  result->setJustificationType(justification_type(param.param->gui.label));
   return *result;
 }
 
