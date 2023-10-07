@@ -1,4 +1,4 @@
-#include <plugin_base/io.hpp>
+#include <plugin_base/shared/io.hpp>
 #include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/inf_component.hpp>
 

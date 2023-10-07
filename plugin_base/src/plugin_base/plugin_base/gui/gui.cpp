@@ -1,4 +1,4 @@
-#include <plugin_base/io.hpp>
+#include <plugin_base/shared/io.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/gui/lnf.hpp>
@@ -213,7 +213,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
 
   auto const& params = module.params;
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
-    if(iter->param->section == section.index)
+    if(iter->param->gui.section == section.index)
       grid->add(make_params(module, &(*iter)), iter->param->gui.position);
   
   if(module.module->sections.size() == 1)
