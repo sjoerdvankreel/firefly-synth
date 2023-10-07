@@ -10,8 +10,8 @@ int
 desc_id_hash(std::string const& text);
 
 std::string 
-module_desc_id(module_topo const& module, int slot);
+desc_id(topo_info const& info, int slot);
 std::string 
-module_desc_name(module_topo const& module, int slot);
+desc_name(topo_info const& info, int slot);
 
 }

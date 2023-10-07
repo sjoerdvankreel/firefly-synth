@@ -3,18 +3,18 @@
 namespace plugin_base {
 
 std::string
-module_desc_id(module_topo const& module, int slot)
+desc_id(topo_info const& info, int slot)
 {
-  std::string result = module.info.tag.id;
+  std::string result = info.tag.id;
   result += "-" + std::to_string(slot);
   return result;
 }
 
 std::string
-module_desc_name(module_topo const& module, int slot)
+desc_name(topo_info const& info, int slot)
 {
-  std::string result = module.info.tag.name;
-  if (module.info.slot_count > 1) result += " " + std::to_string(slot + 1);
+  std::string result = info.tag.name;
+  if (info.slot_count > 1) result += " " + std::to_string(slot + 1);
   return result;
 }
 

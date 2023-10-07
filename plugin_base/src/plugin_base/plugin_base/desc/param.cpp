@@ -4,23 +4,6 @@
 
 namespace plugin_base {
 
-// todo shared with module
-static std::string
-param_id(param_topo const& param, int slot)
-{
-  std::string result = param.info.tag.id;
-  result += "-" + std::to_string(slot);
-  return result;
-}
-
-static std::string
-param_name(param_topo const& param, int slot)
-{
-  std::string result = param.info.tag.name;
-  if (param.info.slot_count > 1) result += " " + std::to_string(slot + 1);
-  return result;
-}
-
 param_desc::
 param_desc(
   module_topo const& module_, int module_slot,
@@ -31,9 +14,9 @@ param_desc(
   this->slot = slot;
   this->local = local;
   this->global = global;
-  name = param_name(param_, slot);
-  full_name = module_desc_name(module_, module_slot) + " " + name;
-  id = module_desc_id(module_, module_slot) + "-" + param_id(param_, slot);
+  name = desc_name(param_.info, slot);
+  full_name = desc_name(module_.info, module_slot) + " " + name;
+  id = desc_id(module_.info, module_slot) + "-" + desc_id(param_.info, slot);
   id_hash = desc_id_hash(id.c_str());
 }
 

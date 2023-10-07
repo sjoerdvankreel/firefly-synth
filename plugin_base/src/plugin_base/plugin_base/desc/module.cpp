@@ -13,8 +13,8 @@ module_desc(
   this->topo = topo;
   this->slot = slot;
   this->global = global;
-  id = module_desc_id(module_, slot);
-  name = module_desc_name(module_, slot);
+  id = desc_id(module_.info, slot);
+  name = desc_name(module_.info, slot);
   id_hash = desc_id_hash(id);
 
   int param_local = 0;
