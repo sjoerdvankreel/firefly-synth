@@ -40,11 +40,22 @@ index_of_item_tag(std::vector<list_item> const& items, int tag)
 }
 
 topo_tag
-make_tag(std::string const& id, std::string const& name)
+make_topo_tag(std::string const& id, std::string const& name)
 {
   topo_tag result = {};
   result.id = id;
   result.name = name;
+  return result;
+}
+
+topo_info
+make_topo_info(std::string const& id, std::string const& name, int index, int slot_count)
+{
+  topo_info result = {};
+  result.tag.id = id;
+  result.tag.name = name;
+  result.index = index;
+  result.slot_count = slot_count;
   return result;
 }
 
@@ -67,23 +78,33 @@ make_section_gui(gui_position const& position, gui_dimension const& dimension)
   return result;
 }
 
+module_dsp
+make_module_dsp(module_stage stage, module_output output, int output_count)
+{
+  module_dsp result = {};
+  result.stage = stage;
+  result.output = output;
+  result.output_count = output_count;
+  return result;
+}
+
 module_topo
-make_module(
-  std::string const& id, std::string const& name, int index, int slot_count, 
-  module_stage stage, module_output output, int output_count,
-  gui_layout layout, gui_position const& position, gui_dimension const& dimension)
+make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui)
 {
   module_topo result = {};
-  result.info.tag.id = id;
-  result.info.tag.name = name;
-  result.info.index = index;
-  result.dsp.stage = stage;
-  result.dsp.output = output;
-  result.info.slot_count = slot_count;
-  result.dsp.output_count = output_count;
-  result.gui.layout = layout;
-  result.gui.position = position;
-  result.gui.dimension = dimension;
+  result.dsp = module_dsp(dsp);
+  result.info = topo_info(info);
+  result.gui = module_topo_gui(gui);
+  return result;
+}
+
+module_topo_gui
+make_module_gui(gui_layout layout, gui_position const& position, gui_dimension const& dimension)
+{
+  module_topo_gui result = {};
+  result.layout = layout;
+  result.position = position;
+  result.dimension = dimension;
   return result;
 }
 

@@ -32,12 +32,12 @@ module_topo
 env_topo()
 {
   module_topo result(make_module(
-    "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Voice Env", module_env, 2, 
-    module_stage::voice, module_output::cv, 1,
-    gui_layout::tabbed, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
+    make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Voice Env", module_env, 2), 
+    make_module_dsp(module_stage::voice, module_output::cv, 1),
+    make_module_gui(gui_layout::tabbed, { 1, 0 }, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
-    make_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"), 
-    make_section_gui(gui_position{ 0, 0 }, gui_dimension{ 1, 4 })));
+    make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
+    make_section_gui({ 0, 0 }, { 1, 4 })));
   result.engine_factory = [](int slot, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<env_engine>(slot); };
   

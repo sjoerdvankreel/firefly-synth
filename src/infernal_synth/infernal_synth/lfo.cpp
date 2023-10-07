@@ -28,12 +28,12 @@ module_topo
 lfo_topo()
 {
   module_topo result(make_module(
-    "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", module_lfo, 3, 
-    module_stage::input, module_output::cv, 1,
-    gui_layout::tabbed, gui_position { 0, 0 }, gui_dimension { 1, 1 }));
+    make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", module_lfo, 3), 
+    make_module_dsp(module_stage::input, module_output::cv, 1),
+    make_module_gui(gui_layout::tabbed, { 0, 0 }, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
-    make_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"), 
-    make_section_gui(gui_position{ 0, 0 }, gui_dimension{ 1, 4 })));
+    make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
+    make_section_gui({ 0, 0 }, { 1, 4 })));
   result.engine_factory = [](int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(); };
 

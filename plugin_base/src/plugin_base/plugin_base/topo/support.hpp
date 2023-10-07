@@ -9,18 +9,21 @@ int
 index_of_item_tag(std::vector<list_item> const& items, int tag);
 
 topo_tag
-make_tag(std::string const& id, std::string const& name);
+make_topo_tag(std::string const& id, std::string const& name);
+topo_info
+make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
 
 section_topo
 make_section(int index, topo_tag const& tag, section_topo_gui const& gui);
 section_topo_gui
 make_section_gui(gui_position const& position, gui_dimension const& dimension);
 
+module_dsp 
+make_module_dsp(module_stage stage, module_output output, int output_count);
 module_topo
-make_module(
-  std::string const& id, std::string const& name, int index, int slot_count, 
-  module_stage stage, module_output output, int output_count,
-  gui_layout layout, gui_position const& position, gui_dimension const& dimension);
+make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
+module_topo_gui
+make_module_gui(gui_layout layout, gui_position const& position, gui_dimension const& dimension);
 
 // block-rate
 param_topo
