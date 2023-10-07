@@ -118,15 +118,15 @@ inf_controller::initialize(FUnknown* context)
     unit_info.id = unit_id++;
     unit_info.parentUnitId = kRootUnitId;
     unit_info.programListId = kNoProgramListId;
-    from_8bit_string(unit_info.name, module.name.c_str());
+    from_8bit_string(unit_info.name, module.info.name.c_str());
     addUnit(new Unit(unit_info));
 
     for (int p = 0; p < module.params.size(); p++)
     {
       ParameterInfo param_info = {};
       auto const& param = module.params[p];
-      param_info.id = param.id_hash;
       param_info.unitId = unit_info.id;
+      param_info.id = param.info.id_hash;
       from_8bit_string(param_info.title, param.full_name.c_str());
       from_8bit_string(param_info.shortTitle, param.full_name.c_str());
       from_8bit_string(param_info.units, param.param->domain.unit.c_str());

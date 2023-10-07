@@ -18,9 +18,21 @@ desc_name(topo_info const& info, int slot)
   return result;
 }
 
+void
+desc_info::validate(int topo_count, int slot_count) const
+{
+  assert(id.size());
+  assert(name.size());
+  assert(global >= 0);
+  assert(id_hash >= 0);
+  assert(0 <= slot && slot < slot_count);
+  assert(0 <= topo && topo < topo_count);
+}
+
 int
 desc_id_hash(std::string const& text)
 {
+  // stable hash, nonnegative required for vst3 param tags
   std::uint32_t h = 0;
   int const multiplier = 33;
   auto utext = reinterpret_cast<std::uint8_t const*>(text.c_str());

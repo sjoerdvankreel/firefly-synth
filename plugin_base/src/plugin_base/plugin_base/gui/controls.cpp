@@ -6,13 +6,13 @@ namespace plugin_base {
 
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
-binding_component(gui, module, &param->param->gui.bindings, param->slot), _param(param)
-{ _gui->add_plugin_listener(_param->global, this); }
+binding_component(gui, module, &param->param->gui.bindings, param->info.slot), _param(param)
+{ _gui->add_plugin_listener(_param->info.global, this); }
 
 void
 param_component::plugin_changed(int index, plain_value plain)
 {
-  if (index == _param->global)
+  if (index == _param->info.global)
     own_param_changed(plain);
   else
     binding_component::plugin_changed(index, plain);
@@ -22,8 +22,8 @@ void
 param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  auto const& own_mapping = _gui->desc()->mappings[_param->global];
-  plugin_changed(_param->global, own_mapping.value_at(_gui->gui_state()));
+  auto const& own_mapping = _gui->desc()->mappings[_param->info.global];
+  plugin_changed(_param->info.global, own_mapping.value_at(_gui->gui_state()));
   binding_component::init();
 }
 
@@ -34,14 +34,14 @@ param_textbox::textEditorTextChanged(TextEditor&)
   std::string text(getText().toStdString());
   if (!_param->param->domain.text_to_plain(text, plain)) return;
   _last_parsed = text;
-  _gui->gui_changed(_param->global, plain);
+  _gui->gui_changed(_param->info.global, plain);
 }
 
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _param->param->domain.plain_to_text(plain);
-  if(_both) text = _param->name + " " + text;
+  if(_both) text = _param->info.name + " " + text;
   setText(text, dontSendNotification); 
 }
 
@@ -58,7 +58,7 @@ param_toggle_button::buttonStateChanged(Button*)
   if(_checked == getToggleState()) return;
   plain_value plain = _param->param->domain.raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
-  _gui->gui_changed(_param->global, plain);
+  _gui->gui_changed(_param->info.global, plain);
 }
 
 param_textbox::

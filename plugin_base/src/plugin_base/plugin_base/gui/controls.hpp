@@ -20,7 +20,7 @@ protected:
 
 public:
   void plugin_changed(int index, plain_value plain) override final;
-  virtual ~param_component() { _gui->remove_plugin_listener(_param->global, this); }
+  virtual ~param_component() { _gui->remove_plugin_listener(_param->info.global, this); }
 
 protected:
   void init() override final;
@@ -35,8 +35,8 @@ public juce::Label
 {
 public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param):
-  binding_component(gui, module, &param->param->gui.bindings, param->slot), Label()
-  { setText(param->name, juce::dontSendNotification);  }
+  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), Label()
+  { setText(param->info.name, juce::dontSendNotification);  }
 };
 
 // parameter value or name+value display
@@ -101,9 +101,9 @@ protected:
 
 public: 
   param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param);
-  void stoppedDragging() override { _gui->gui_end_changes(_param->global); }
-  void startedDragging() override { _gui->gui_begin_changes(_param->global); }
-  void valueChanged() override { _gui->gui_changing(_param->global, _param->param->domain.raw_to_plain(getValue())); }
+  void stoppedDragging() override { _gui->gui_end_changes(_param->info.global); }
+  void startedDragging() override { _gui->gui_begin_changes(_param->info.global); }
+  void valueChanged() override { _gui->gui_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); }
 };
 
 // dropdown bound to single parameter
@@ -120,7 +120,7 @@ public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param);
   void comboBoxChanged(ComboBox*) override final
-  { _gui->gui_changed(_param->global, _param->param->domain.raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
+  { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
 };
 
 }

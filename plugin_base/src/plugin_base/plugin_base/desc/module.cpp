@@ -10,12 +10,12 @@ module_desc(
   int slot, int global, int param_global_start)
 {
   module = &module_;
-  this->topo = topo;
-  this->slot = slot;
-  this->global = global;
-  id = desc_id(module_.info, slot);
-  name = desc_name(module_.info, slot);
-  id_hash = desc_id_hash(id);
+  info.topo = topo;
+  info.slot = slot;
+  info.global = global;
+  info.id = desc_id(module_.info, slot);
+  info.name = desc_name(module_.info, slot);
+  info.id_hash = desc_id_hash(info.id);
 
   int param_local = 0;
   for(int p = 0; p < module_.params.size(); p++)
@@ -28,14 +28,9 @@ void
 module_desc::validate(plugin_desc const& plugin) const
 {
   assert(module);
-  // TODO move to tag
-  assert(id.size());
-  assert(name.size());
   assert(params.size());
-  assert(id_hash >= 0);
-  assert(0 <= slot && slot < module->info.slot_count);
-  assert(0 <= global && global < plugin.modules.size());
-  assert(0 <= topo && topo < plugin.plugin->modules.size());
+  assert(0 <= info.global && info.global < plugin.modules.size());
+  info.validate(plugin.plugin->modules.size(), module->info.slot_count);
 }
 
 }

@@ -318,9 +318,9 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
   param_mapping const& mapping(_engine.desc().mappings[index]);
   param_desc const& param = _engine.desc().param_at(mapping);
   info->cookie = nullptr;
-  info->id = param.id_hash;
+  info->id = param.info.id_hash;
   from_8bit_string(info->name, _engine.desc().param_at(mapping).full_name.c_str());
-  from_8bit_string(info->module, _engine.desc().modules[mapping.module_global].name.c_str());
+  from_8bit_string(info->module, _engine.desc().modules[mapping.module_global].info.name.c_str());
 
   info->flags = 0;
   if(param.param->dsp.direction != param_direction::input)

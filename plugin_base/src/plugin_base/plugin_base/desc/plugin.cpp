@@ -45,14 +45,14 @@ plugin(std::move(plugin_))
       auto const& param = module.params[p];
       param_mapping mapping;
       mapping.module_global = m;
-      mapping.module_slot = module.slot;
-      mapping.module_topo = module.topo;
+      mapping.module_slot = module.info.slot;
+      mapping.module_topo = module.info.topo;
       mapping.param_local = p;
-      mapping.param_slot = param.slot;
-      mapping.param_topo = param.topo;
+      mapping.param_slot = param.info.slot;
+      mapping.param_topo = param.info.topo;
       mapping.param_global = param_global++;
-      param_index_to_tag.push_back(param.id_hash);
-      param_tag_to_index[param.id_hash] = mappings.size();
+      param_index_to_tag.push_back(param.info.id_hash);
+      param_tag_to_index[param.info.id_hash] = mappings.size();
       mappings.push_back(std::move(mapping));
       params.push_back(&module.params[p]);
     }
@@ -127,18 +127,18 @@ plugin_desc::validate() const
   for (int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
-    assert(module.global == m);
+    assert(module.info.global == m);
     module.validate(*this);
-    INF_ASSERT_EXEC(all_ids.insert(module.id).second);
-    INF_ASSERT_EXEC(all_hashes.insert(module.id_hash).second);
+    INF_ASSERT_EXEC(all_ids.insert(module.info.id).second);
+    INF_ASSERT_EXEC(all_hashes.insert(module.info.id_hash).second);
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
       // todo move to module
       param.validate(module);
-      assert(param.global == param_global++);
-      INF_ASSERT_EXEC(all_ids.insert(param.id).second);
-      INF_ASSERT_EXEC(all_hashes.insert(param.id_hash).second);
+      assert(param.info.global == param_global++);
+      INF_ASSERT_EXEC(all_ids.insert(param.info.id).second);
+      INF_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
     }
   }
 }

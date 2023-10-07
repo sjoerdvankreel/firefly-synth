@@ -60,7 +60,7 @@ binding_component::setup_bindings(
   for (int i = 0; i < topo_params.size(); i++)
   {
     auto const& param_topo_to_index = _gui->desc()->param_topo_to_index;
-    auto const& slots = param_topo_to_index[_module->topo][_module->slot][topo_params[i]];
+    auto const& slots = param_topo_to_index[_module->info.topo][_module->info.slot][topo_params[i]];
     bool single_slot = _module->module->params[topo_params[i]].info.slot_count == 1;
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);

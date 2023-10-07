@@ -15,10 +15,12 @@ namespace plugin_base {
 
 // mapping plugin level parameter index
 struct param_mapping final {
+
   int param_topo = {};
   int param_slot = {};
   int param_local = {};
   int param_global = {};
+
   int module_topo = {};
   int module_slot = {};
   int module_global = {};

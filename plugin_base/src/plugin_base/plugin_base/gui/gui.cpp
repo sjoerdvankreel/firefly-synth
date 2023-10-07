@@ -179,7 +179,7 @@ plugin_gui::make_single_module(module_desc const& slot, bool tabbed)
 {
   if(tabbed) return make_sections(slot);
   auto& result = make_component<group_component>();
-  result.setText(slot.name);
+  result.setText(slot.info.name);
   result.addAndMakeVisible(make_sections(slot));
   return result;
 }
@@ -344,7 +344,7 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
     for (int i = 0; i < topo.info.slot_count; i++)
-      result.addTab(slots[i].name, Colours::black, &make_single(slots[i], true), false);
+      result.addTab(slots[i].info.name, Colours::black, &make_single(slots[i], true), false);
     return result;
   }
   default:
