@@ -21,7 +21,7 @@ public gui_listener
   jarray<plain_value, 4> _gui_state = {};
 
 public: 
-  INF_DECLARE_MOVE_ONLY(inf_controller);
+  INF_PREVENT_ACCIDENTAL_COPY(inf_controller);
   inf_controller(std::unique_ptr<plugin_topo>&& topo);
 
   plugin_desc const& desc() const { return _desc; }

@@ -16,7 +16,7 @@ class plugin_gui:
 public juce::Component
 {
 public:
-  INF_DECLARE_MOVE_ONLY(plugin_gui);
+  INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   plugin_gui(
     plugin_desc const* desc, 
     jarray<plain_value, 4>* gui_state);

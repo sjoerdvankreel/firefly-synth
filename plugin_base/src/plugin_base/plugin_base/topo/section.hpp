@@ -15,7 +15,7 @@ struct section_topo_gui final {
   gui_position position;
   gui_dimension dimension;
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo_gui);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(section_topo_gui);
 };
 
 // param ui section
@@ -24,7 +24,7 @@ struct section_topo final {
   topo_tag tag;
   section_topo_gui gui;
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(section_topo);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(section_topo);
   void validate(module_topo const& module, int index_) const;
 };
 

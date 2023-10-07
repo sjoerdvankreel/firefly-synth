@@ -25,7 +25,7 @@ struct module_topo_gui final {
   gui_layout layout;
   gui_position position;
   gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo_gui);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 
 // module dsp
@@ -33,7 +33,7 @@ struct module_dsp final {
   int output_count;
   module_stage stage;
   module_output output;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_dsp);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);
 };
 
 // module in plugin
@@ -46,7 +46,7 @@ struct module_topo final {
   std::vector<section_topo> sections;
   module_engine_factory engine_factory;
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_topo);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;
 };
 

@@ -37,7 +37,7 @@ class jarray final {
   std::vector<elem_type> _data;
 
 public:
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(jarray);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(jarray);
   explicit jarray(std::size_t size, elem_type const& val) :
   _data(size, val) {}
   

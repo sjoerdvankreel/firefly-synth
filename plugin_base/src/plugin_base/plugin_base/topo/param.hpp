@@ -21,21 +21,24 @@ struct param_dsp final {
   param_rate rate;
   param_format format;
   param_direction direction;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_dsp);
+
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
 };
 
 // parameter ui
 struct param_topo_gui final {
   int section;
+  
   gui_layout layout;
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
+
   gui_label_align label_align;
   gui_label_justify label_justify;
   gui_label_contents label_contents;
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo_gui);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
 };
 
 // parameter in module
@@ -45,7 +48,7 @@ struct param_topo final {
   param_topo_gui gui;
   param_domain domain;
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_topo);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module, int index) const;
 };
 

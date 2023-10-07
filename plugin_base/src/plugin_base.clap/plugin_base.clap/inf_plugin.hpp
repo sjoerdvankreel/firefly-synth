@@ -57,7 +57,7 @@ public gui_listener, public juce::Timer
 
 public:
   ~inf_plugin() { stopTimer(); }
-  INF_DECLARE_MOVE_ONLY(inf_plugin);
+  INF_PREVENT_ACCIDENTAL_COPY(inf_plugin);
   inf_plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo);
   
   bool implementsGui() const noexcept override { return true; }

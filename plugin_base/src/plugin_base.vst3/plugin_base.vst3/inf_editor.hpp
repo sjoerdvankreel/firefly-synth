@@ -20,7 +20,7 @@ public Steinberg::IPlugViewContentScaleSupport
   std::unique_ptr<plugin_gui> _gui = {};
   inf_controller* const _controller = {};
 public: 
-  INF_DECLARE_MOVE_ONLY(inf_editor);
+  INF_PREVENT_ACCIDENTAL_COPY(inf_editor);
   inf_editor(inf_controller* controller);
   void plugin_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
 

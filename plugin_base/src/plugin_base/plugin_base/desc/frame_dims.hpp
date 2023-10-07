@@ -16,7 +16,7 @@ struct plugin_frame_dims final {
   jarray<int, 4> module_global_audio;
   jarray<int, 4> accurate_automation;
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_frame_dims);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& plugin, int frame_count);
   void validate(plugin_topo const& plugin, int frame_count) const;
 };

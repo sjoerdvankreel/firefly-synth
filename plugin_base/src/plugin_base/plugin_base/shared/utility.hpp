@@ -6,13 +6,13 @@
 #include <utility>
 #include <cstdint>
 
-#define INF_DECLARE_MOVE_ONLY(x) \
-  x(x&&) = default;              \
-  x(x const&) = delete;          \
-  x& operator = (x&&) = default; \
+#define INF_PREVENT_ACCIDENTAL_COPY(x)  \
+  x(x&&) = default;               \
+  x& operator = (x&&) = default;  \
+  explicit x(x const&) = default; \
   x& operator = (x const&) = delete
-#define INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(x) \
-  INF_DECLARE_MOVE_ONLY(x); \
+#define INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(x) \
+  INF_PREVENT_ACCIDENTAL_COPY(x); \
   x() = default
 
 #define INF_STR_(x) #x

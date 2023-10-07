@@ -25,7 +25,7 @@ class plugin_io final
 {
   plugin_desc const* const _desc;
 public:
-  INF_DECLARE_MOVE_ONLY(plugin_io);
+  INF_PREVENT_ACCIDENTAL_COPY(plugin_io);
   plugin_io(plugin_desc const* desc): _desc(desc) {}
 
   std::vector<char> save(jarray<plain_value, 4> const& state) const;

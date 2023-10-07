@@ -32,7 +32,7 @@ struct topo_tag final {
   std::string name;
 
   void validate() const;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(topo_tag);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_tag);
 };
 
 // module and parameter metadata
@@ -42,7 +42,7 @@ struct topo_info final {
   topo_tag tag;
 
   void validate() const;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(topo_info);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_info);
 };
 
 // position in parent grid
@@ -61,7 +61,7 @@ struct gui_binding final {
   std::vector<int> context = {};
   gui_binding_selector selector = {};
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_binding);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_binding);
   void validate(module_topo const& module, int slot_count) const;
 };
 
@@ -70,7 +70,7 @@ struct gui_bindings final {
   gui_binding enabled;
   gui_binding visible;
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(gui_bindings);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_bindings);
   void validate(module_topo const& module, int slot_count) const;
 };
 

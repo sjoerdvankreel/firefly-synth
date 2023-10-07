@@ -39,17 +39,31 @@ index_of_item_tag(std::vector<list_item> const& items, int tag)
   return -1;
 }
 
+topo_tag
+make_tag(std::string const& id, std::string const& name)
+{
+  topo_tag result = {};
+  result.id = id;
+  result.name = name;
+  return result;
+}
+
 section_topo
-make_section(
-  std::string const& id, std::string const& name, int index,
-  gui_position const& position, gui_dimension const& dimension)
+make_section(int index, topo_tag const& tag, section_topo_gui const& gui)
 {
   section_topo result = {};
-  result.tag.name = name;
-  result.tag.id = id;
   result.index = index;
-  result.gui.position = position;
-  result.gui.dimension = dimension;
+  result.tag = topo_tag(tag);
+  result.gui = section_topo_gui(gui);
+  return result;
+}
+
+section_topo_gui
+make_section_gui(gui_position const& position, gui_dimension const& dimension)
+{
+  section_topo_gui result = {};
+  result.position = position;
+  result.dimension = dimension;
   return result;
 }
 

@@ -21,7 +21,7 @@ struct desc_info final {
   std::string id = {};
   std::string name = {};
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(desc_info);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(desc_info);
   void validate(int topo_count, int slot_count) const;
 };
 

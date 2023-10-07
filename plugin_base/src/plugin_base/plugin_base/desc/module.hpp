@@ -22,7 +22,7 @@ struct module_desc final {
     module_topo const& module_, int topo,
     int slot, int global, int param_global_start);
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(module_desc);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_desc);
   void validate(plugin_desc const& plugin, int index) const;
 };
 

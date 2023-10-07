@@ -19,7 +19,7 @@ struct list_item final {
   std::string id = {};
   std::string name = {};
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(list_item);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   template <class T> list_item(T const& item);
   list_item(std::string const& id, std::string const& name, int tag);
 };
@@ -37,7 +37,7 @@ struct param_domain final {
   domain_display display;
   std::vector<list_item> items;
   std::vector<std::string> names;  
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_domain);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const;
   void validate() const;

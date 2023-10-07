@@ -69,7 +69,7 @@ class plugin_engine final {
   int process_voices_single_threaded();
 
 public:
-  INF_DECLARE_MOVE_ONLY(plugin_engine);
+  INF_PREVENT_ACCIDENTAL_COPY(plugin_engine);
   plugin_engine(
     std::unique_ptr<plugin_topo>&& topo,
     thread_pool_voice_processor voice_processor,

@@ -22,7 +22,7 @@ public module_engine {
   double _release_level = 0;
 
 public:
-  INF_DECLARE_MOVE_ONLY(env_engine);
+  INF_PREVENT_ACCIDENTAL_COPY(env_engine);
   env_engine(int slot) : _slot(slot) { initialize(); }
   void process(plugin_block& block) override;
   void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
@@ -35,8 +35,9 @@ env_topo()
     "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Voice Env", module_env, 2, 
     module_stage::voice, module_output::cv, 1,
     gui_layout::tabbed, gui_position { 1, 0 }, gui_dimension { 1, 1 }));
-  result.sections.emplace_back(make_section(
-    "{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main", section_main, gui_position{ 0, 0 }, gui_dimension{ 1, 4 }));
+  result.sections.emplace_back(make_section(section_main,
+    make_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"), 
+    make_section_gui(gui_position{ 0, 0 }, gui_dimension{ 1, 4 })));
   result.engine_factory = [](int slot, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<env_engine>(slot); };
   

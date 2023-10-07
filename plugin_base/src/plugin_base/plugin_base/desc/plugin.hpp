@@ -26,7 +26,7 @@ struct param_mapping final {
   int module_slot = {};
   int module_global = {};
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(param_mapping);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_mapping);
   template <class T> auto& value_at(T& container) const 
   { return container[module_topo][module_slot][param_topo][param_slot]; }
   template <class T> auto const& value_at(T const& container) const 
@@ -43,7 +43,7 @@ struct plugin_param_mappings final {
   std::vector<std::vector<std::vector<std::vector<int>>>> topo_to_index = {};
 
   void validate(plugin_desc const& plugin) const;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_param_mappings);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_param_mappings);
 };
 
 // runtime plugin descriptor
@@ -59,8 +59,8 @@ struct plugin_desc final {
   std::vector<param_desc const*> params = {};
   std::map<std::string, int> module_id_to_index = {};
 
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_desc);
   plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
 
   void validate() const;
   void init_defaults(jarray<plain_value, 4>& state) const;

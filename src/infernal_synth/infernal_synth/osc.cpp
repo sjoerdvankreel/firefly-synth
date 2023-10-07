@@ -43,7 +43,7 @@ public module_engine {
 
 public:
   osc_engine() { initialize(); }
-  INF_DECLARE_MOVE_ONLY(osc_engine);
+  INF_PREVENT_ACCIDENTAL_COPY(osc_engine);
   void initialize() override { _phase = 0; }
   void process(plugin_block& block) override;
 };
@@ -58,21 +58,25 @@ osc_topo()
   result.engine_factory = [](int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
 
-  auto& pitch = result.sections.emplace_back(make_section(
-    "{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch", section_pitch, gui_position{ 0, 0, 1, 4 }, gui_dimension{ 1, 3 }));
+  auto& pitch = result.sections.emplace_back(make_section(section_pitch,
+    make_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"), 
+    make_section_gui(gui_position{ 0, 0, 1, 4 }, gui_dimension{ 1, 3 })));
   pitch.gui.bindings.enabled.params = { param_on };
   pitch.gui.bindings.enabled.selector = [](auto const& vs, auto const&) { return vs[0] != 0; };
   
-  result.sections.emplace_back(make_section(
-    "{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main", section_main, gui_position{ 1, 0, 1, 3 }, gui_dimension{ { 1 }, { 1, 2, 2, 2 } }));
+  result.sections.emplace_back(make_section(section_main,
+    make_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"), 
+    make_section_gui(gui_position{ 1, 0, 1, 3 }, gui_dimension{ { 1 }, { 1, 2, 2, 2 } })));
   
-  auto& sine_gain = result.sections.emplace_back(make_section(
-    "{A3D3BDF9-5CD0-47D2-BBDD-1BAD1274CDC4}", "Sine gain", section_sine_gain, gui_position{ 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
+  auto& sine_gain = result.sections.emplace_back(make_section(section_sine_gain,
+    make_tag("{A3D3BDF9-5CD0-47D2-BBDD-1BAD1274CDC4}", "Sine gain"), 
+    make_section_gui(gui_position{ 1, 3, 1, 1 }, gui_dimension{ 1, 1 })));
   sine_gain.gui.bindings.visible.params = { param_on, param_type };
   sine_gain.gui.bindings.visible.selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_sine; };
   
-  auto& saw_gain = result.sections.emplace_back(make_section(
-    "{8CACFECE-A9D1-4B49-AEE6-015EAF5CA682}", "Saw gain", section_saw_gain, gui_position { 1, 3, 1, 1 }, gui_dimension{ 1, 1 }));
+  auto& saw_gain = result.sections.emplace_back(make_section(section_saw_gain,
+    make_tag("{8CACFECE-A9D1-4B49-AEE6-015EAF5CA682}", "Saw gain"), 
+    make_section_gui(gui_position { 1, 3, 1, 1 }, gui_dimension{ 1, 1 })));
   saw_gain.gui.bindings.visible.params = { param_on, param_type };
   saw_gain.gui.bindings.visible.selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_saw; };
 

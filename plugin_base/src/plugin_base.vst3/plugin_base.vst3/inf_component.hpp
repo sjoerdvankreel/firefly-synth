@@ -13,7 +13,7 @@ public Steinberg::Vst::AudioEffect {
   plugin_engine _engine;
 
 public:
-  INF_DECLARE_MOVE_ONLY(inf_component);
+  INF_PREVENT_ACCIDENTAL_COPY(inf_component);
   inf_component(std::unique_ptr<plugin_topo>&& topo, Steinberg::FUID const& controller_id);
 
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;

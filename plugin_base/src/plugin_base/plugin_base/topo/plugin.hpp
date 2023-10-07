@@ -16,10 +16,12 @@ struct plugin_topo_gui final {
   int min_width;
   int max_width;
   int default_width;
+
   int aspect_ratio_width;
   int aspect_ratio_height;
   gui_dimension dimension;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo_gui);
+
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };
 
 // plugin definition
@@ -35,7 +37,7 @@ struct plugin_topo final {
   std::vector<module_topo> modules;
 
   void validate() const;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(plugin_topo);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
 
 }

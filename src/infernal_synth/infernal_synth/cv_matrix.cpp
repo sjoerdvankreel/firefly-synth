@@ -44,7 +44,7 @@ public module_engine {
 public:
   void initialize() override {}
   void process(plugin_block& block) override;
-  INF_DECLARE_MOVE_ONLY_DEFAULT_CTOR(cv_matrix_engine);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
 module_topo 
@@ -60,8 +60,9 @@ cv_matrix_topo(
     gui_layout::single, gui_position { 4, 0 }, gui_dimension { 1, 1 }));
   result.engine_factory = [](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
-  result.sections.emplace_back(make_section(
-    "{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main", section_main, gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1, 1, 1, 1 } }));
+  result.sections.emplace_back(make_section(section_main,
+    make_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
+    make_section_gui(gui_position { 0, 0 }, gui_dimension { { 1, 5 }, { 1, 1, 1, 1, 1, 1, 1 } })));
   
   std::vector<int> enabled_params = { param_on, param_active };
   gui_binding_selector enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] != 0; };

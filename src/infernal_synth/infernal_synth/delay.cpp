@@ -21,7 +21,7 @@ public module_engine {
 
 public:
   delay_engine(int sample_rate);
-  INF_DECLARE_MOVE_ONLY(delay_engine);
+  INF_PREVENT_ACCIDENTAL_COPY(delay_engine);
   void initialize() override;
   void process(plugin_block& block) override;
 };
@@ -36,8 +36,9 @@ delay_topo(int polyphony)
   result.engine_factory = [](int, int sample_rate, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
-  result.sections.emplace_back(make_section(
-    "{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main", section_main, gui_position { 0, 0 }, gui_dimension { 1, 5 }));
+  result.sections.emplace_back(make_section(section_main,
+    make_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"), 
+    make_section_gui(gui_position { 0, 0 }, gui_dimension { 1, 5 })));
 
   result.params.emplace_back(param_toggle(
     "{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", param_on, 1, section_main, false,
