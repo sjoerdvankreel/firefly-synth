@@ -51,11 +51,10 @@ env_topo()
     make_param_dsp_accurate(param_format::plain), make_domain_log(0, 10, 0.1, 1, 3, "Sec"), 
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, make_label_default(gui_label_contents::both))));
   
-  result.params.emplace_back(param_pct(
-    "{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1, section_main, 0, 1, 0.5, 0,
-    param_direction::input, param_rate::accurate, param_format::plain, true, gui_edit_type::knob,
-    gui_label_contents::both, gui_label_align::left, gui_label_justify::center,
-    gui_layout::single, gui_position{ 0, 2 }));
+  result.params.emplace_back(make_param(
+    make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1),
+    make_param_dsp_accurate(param_format::plain), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, make_label_default(gui_label_contents::both))));
   
   result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1),

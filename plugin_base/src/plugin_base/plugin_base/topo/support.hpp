@@ -69,13 +69,4 @@ inline param_topo_gui
 make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label label)
 { return make_param_gui(section, edit_type, gui_layout::single, position, gui_label(label)); }
 
-// either block or accurate rate
-param_topo
-param_pct(
-  std::string const& id, std::string const& name, int index, int slot_count, int section,
-  double min, double max, double default_, int precision,
-  param_direction direction, param_rate rate, param_format format, bool unit, gui_edit_type edit_type,
-  gui_label_contents label_contents, gui_label_align label_align, gui_label_justify label_justify,
-  gui_layout layout, gui_position const& position);
-
 }
