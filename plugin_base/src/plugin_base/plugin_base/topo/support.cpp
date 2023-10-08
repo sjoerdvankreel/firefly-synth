@@ -26,9 +26,10 @@ topo_info
 make_topo_info(std::string const& id, std::string const& name, int index, int slot_count)
 {
   topo_info result = {};
+  result.tag.id = id;
+  result.tag.name = name;
   result.index = index;
   result.slot_count = slot_count;
-  result.tag = make_topo_tag(id, name);
   return result;
 }
 

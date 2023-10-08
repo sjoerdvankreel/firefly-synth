@@ -20,7 +20,7 @@ struct list_item final {
   std::string name = {};
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
-  list_item(topo_info const& info);
+  template <class T> list_item(T const& item);
   list_item(std::string const& id, std::string const& name, int tag);
 };
 
@@ -63,11 +63,12 @@ struct param_domain final {
 };
 
 inline list_item::
-list_item(topo_info const& info):
-tag(info.index), id(info.tag.id), name(info.tag.name) {}
-inline list_item::
 list_item(std::string const& id, std::string const& name, int tag) :
 tag(tag), id(id), name(name) {}
+
+template <class T> list_item::
+list_item(T const& item):
+tag(item.info.index), id(item.info.tag.id), name(item.info.tag.name) {}
 
 inline double 
 param_domain::default_raw() const 
