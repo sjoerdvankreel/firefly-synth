@@ -43,22 +43,22 @@ env_topo()
   
   result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
+    make_param_dsp_accurate(), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 0 }, 
       make_label_default(gui_label_contents::both))));  
   result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_d, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_log(0, 10, 0.1, 1, 3, "Sec"), 
+    make_param_dsp_accurate(), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
       make_label_default(gui_label_contents::both))));  
   result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_dsp_accurate(), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
       make_label_default(gui_label_contents::both))));  
   result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
+    make_param_dsp_accurate(), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
       make_label_default(gui_label_contents::both))));
   return result;
@@ -67,10 +67,10 @@ env_topo()
 void
 env_engine::process(plugin_block& block)
 {
-  auto const& a = block.state.accurate_automation[param_a][0];
-  auto const& d = block.state.accurate_automation[param_d][0];
-  auto const& s = block.state.accurate_automation[param_s][0];
-  auto const& r = block.state.accurate_automation[param_r][0];
+  auto const& a_curve = block.state.accurate_automation[param_a][0];
+  auto const& d_curve = block.state.accurate_automation[param_d][0];
+  auto const& s_curve = block.state.accurate_automation[param_s][0];
+  auto const& r_curve = block.state.accurate_automation[param_r][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -88,16 +88,16 @@ env_engine::process(plugin_block& block)
 
     if (_stage == env_stage::s)
     {
-      block.state.own_cv_out[0][f] = _release_level = s[f];
+      block.state.own_cv_out[0][f] = _release_level = s_curve[f];
       continue;
     }
 
     double stage_seconds;
     switch (_stage)
     {
-    case env_stage::a: stage_seconds = a[f]; break;
-    case env_stage::d: stage_seconds = d[f]; break;
-    case env_stage::r: stage_seconds = r[f]; break;
+    case env_stage::a: stage_seconds = block.normalized_to_raw(module_env, param_a, a_curve[f]); break;
+    case env_stage::d: stage_seconds = block.normalized_to_raw(module_env, param_d, d_curve[f]); break;
+    case env_stage::r: stage_seconds = block.normalized_to_raw(module_env, param_r, r_curve[f]); break;
     default: assert(false); stage_seconds = 0; break;
     }
 
@@ -108,7 +108,7 @@ env_engine::process(plugin_block& block)
       switch (_stage)
       {
       case env_stage::a: block.state.own_cv_out[0][f] = _release_level = _stage_pos / stage_seconds; break;
-      case env_stage::d: block.state.own_cv_out[0][f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s[f]); break;
+      case env_stage::d: block.state.own_cv_out[0][f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s_curve[f]); break;
       case env_stage::r: block.state.own_cv_out[0][f] = (1.0 - _stage_pos / stage_seconds) * _release_level; break;
       default: assert(false); stage_seconds = 0; break;
       }

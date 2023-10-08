@@ -14,12 +14,10 @@ struct module_topo;
 
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
-enum class param_format { plain, normalized };
 
 // parameter dsp
 struct param_dsp final {
   param_rate rate;
-  param_format format;
   param_direction direction;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);

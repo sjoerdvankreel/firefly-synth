@@ -180,11 +180,10 @@ make_domain_log(double min, double max, double default_, double midpoint, int pr
 }
 
 param_dsp
-make_param_dsp(param_direction direction, param_rate rate, param_format format)
+make_param_dsp(param_direction direction, param_rate rate)
 {
   param_dsp result = {};
   result.rate = rate;
-  result.format = format;
   result.direction = direction;
   return result;
 }

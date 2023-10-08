@@ -35,16 +35,16 @@ module_topo_gui
 make_module_gui(gui_layout layout, gui_position const& position, gui_dimension const& dimension);
 
 param_dsp
-make_param_dsp(param_direction direction, param_rate rate, param_format format);
+make_param_dsp(param_direction direction, param_rate rate);
 inline param_dsp
-make_param_dsp_accurate(param_format format)
-{ return make_param_dsp(param_direction::input, param_rate::accurate, format); }
+make_param_dsp_accurate()
+{ return make_param_dsp(param_direction::input, param_rate::accurate); }
 inline param_dsp
 make_param_dsp_block()
-{ return make_param_dsp(param_direction::input, param_rate::block, param_format::plain); }
+{ return make_param_dsp(param_direction::input, param_rate::block); }
 inline param_dsp
 make_param_dsp_output()
-{ return make_param_dsp(param_direction::output, param_rate::block, param_format::plain); }
+{ return make_param_dsp(param_direction::output, param_rate::block); }
 
 param_domain
 make_domain_toggle(bool default_);

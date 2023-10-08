@@ -368,7 +368,7 @@ plugin_engine::process()
 
   // process accurate automation values, this is a bit tricky as 
   // 1) events can come in at any frame position and
-  // 2) interpolation needs to be done on normalized (linear) values and
+  // 2) interpolation needs to be done on normalized (linear) values (plugin needs to scale to plain) and
   // 3) the host must provide a value at the end of the buffer if that event would have effect w.r.t. the next block
   std::fill(_accurate_frames.begin(), _accurate_frames.end(), 0);
   for (int e = 0; e < _host_block->events.accurate.size(); e++)
@@ -386,24 +386,6 @@ plugin_engine::process()
     // denormalize current state values
     mapping.value_at(_plugin_state).real_unchecked(_desc.param_at(mapping).param->domain.normalized_to_plain(event.normalized).real());
     _accurate_frames[event.param] = event.frame;
-  }
-
-  // denormalize interpolated curves even if they where not changed
-  // for all parameters specified as param_format::plain
-  // param_format::normalized will show up as such in module_engine::process
-  for (int m = 0; m < _desc.plugin->modules.size(); m++)
-  {
-    auto const& module = _desc.plugin->modules[m];
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        if (param.dsp.rate == param_rate::accurate && param.dsp.format == param_format::plain)
-          for(int pi = 0; pi < param.info.slot_count; pi++)
-            for(int f = 0; f < frame_count; f++)
-              _accurate_automation[m][mi][p][pi][f] = param.domain.normalized_to_plain(
-                normalized_value(_accurate_automation[m][mi][p][pi][f])).real();
-      }
   }
 
   // run input modules in order

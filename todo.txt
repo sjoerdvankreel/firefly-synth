@@ -16,7 +16,6 @@ ui set exact values
 handle generic midi in
 on-note/hold-type cv
 provide to/fromstring for steps
-drop format::plain in favor of modulation
 param value dependent on other param
 mark param as modulatable or not
 check the todos

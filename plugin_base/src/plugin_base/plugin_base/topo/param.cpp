@@ -18,7 +18,6 @@ param_topo::validate(module_topo const& module, int index) const
 
   assert(info.index == index);
   assert(domain.is_real() || dsp.rate == param_rate::block);
-  assert(dsp.format == param_format::plain || domain.is_real());
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == gui_layout::single));
   assert(dsp.direction != param_direction::output || dsp.rate == param_rate::block);

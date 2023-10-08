@@ -88,12 +88,12 @@ osc_topo()
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(
     make_topo_info("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 }, 
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, 
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(
@@ -108,17 +108,17 @@ osc_topo()
       make_label_none())));  
   result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_percentage(-1, 1, 0, 0, false),
+    make_param_dsp_accurate(), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 }, 
       make_label(gui_label_contents::value, gui_label_align::right, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{42E7A672-699C-4955-B45B-BBB8190A50E7}", "Sine Gain", param_sine_gain, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_sine_gain, gui_edit_type::knob, { 0, 0 }, 
       make_label_none())));
   result.params.emplace_back(make_param(
     make_topo_info("{725B22B5-FAE9-4C4E-9B69-CAE46E4DCC6D}", "Saw Gain", param_saw_gain, 1),
-    make_param_dsp_accurate(param_format::plain), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_saw_gain, gui_edit_type::knob, { 0, 0 }, 
       make_label_none())));
   return result;
@@ -131,26 +131,28 @@ osc_engine::process(plugin_block& block)
   int oct = block.state.block_automation[param_oct][0].step();
   int note = block.state.block_automation[param_note][0].step();
   int type = block.state.block_automation[param_type][0].step();
-  auto const& env = block.voice->cv_in[module_env][0][0];
-  auto const& bal = block.state.accurate_automation[param_bal][0];
-  auto const& cent = block.state.accurate_automation[param_cent][0];
-  auto const& gain = block.state.accurate_automation[param_gain][0];
-  auto const& saw_gain = block.state.accurate_automation[param_saw_gain][0];
-  auto const& sine_gain = block.state.accurate_automation[param_sine_gain][0];
+  auto const& env_curve = block.voice->cv_in[module_env][0][0];
+  auto const& bal_curve = block.state.accurate_automation[param_bal][0];
+  auto const& cent_curve = block.state.accurate_automation[param_cent][0];
+  auto const& gain_curve = block.state.accurate_automation[param_gain][0];
+  auto const& saw_gain_curve = block.state.accurate_automation[param_saw_gain][0];
+  auto const& sine_gain_curve = block.state.accurate_automation[param_sine_gain][0];
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     switch (type)
     {
-    case type_saw: sample = saw_gain[f] * (_phase * 2 - 1); break;
-    case type_sine: sample = sine_gain[f] * std::sin(_phase * 2 * pi32); break;
+    case type_saw: sample = saw_gain_curve[f] * (_phase * 2 - 1); break;
+    case type_sine: sample = sine_gain_curve[f] * std::sin(_phase * 2 * pi32); break;
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    block.state.own_audio_out[0][0][f] = sample * gain[f] * env[f] * balance(0, bal[f]);
-    block.state.own_audio_out[0][1][f] = sample * gain[f] * env[f] * balance(1, bal[f]);
-    _phase += note_to_frequency(oct, note, cent[f], block.voice->state.id.key) / block.sample_rate;
+    float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
+    float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
+    block.state.own_audio_out[0][0][f] = sample * gain_curve[f] * env_curve[f] * balance(0, bal);
+    block.state.own_audio_out[0][1][f] = sample * gain_curve[f] * env_curve[f] * balance(1, bal);
+    _phase += note_to_frequency(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
     _phase -= std::floor(_phase);
   }
 }
