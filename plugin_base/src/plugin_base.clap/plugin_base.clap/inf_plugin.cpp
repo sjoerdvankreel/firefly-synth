@@ -331,7 +331,7 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
     info->flags |= CLAP_PARAM_REQUIRES_PROCESS;
   }
 
-  // this is what the clap_value is all about
+  // this is what clap_value is for
   info->default_value = normalized_to_clap(*param.param, param.param->domain.default_normalized()).value();
   if (param.param->domain.is_real())
   {
