@@ -18,16 +18,6 @@ static std::vector<std::string>
 note_names()
 { return { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }; }
 
-std::vector<list_item>
-cv_matrix_target_osc_params(module_topo const& osc_topo)
-{
-  std::vector<list_item> result;
-  result.emplace_back(osc_topo.params[param_bal]);
-  result.emplace_back(osc_topo.params[param_gain]);
-  result.emplace_back(osc_topo.params[param_cent]);
-  return result;
-}
-
 static std::vector<list_item>
 type_items()
 {

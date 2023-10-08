@@ -39,6 +39,16 @@ target_modules(module_topo const& osc, module_topo const& filter)
   return result;
 }
 
+static std::vector<list_item>
+target_params(module_topo const& module)
+{
+  std::vector<list_item> result;
+  for(int i = 0; i < module.params.size(); i++)
+    if(module.params[i].domain.is_real())
+      result.emplace_back(module.params[i]);
+  return result;
+}
+
 class cv_matrix_engine:
 public module_engine { 
 public:
@@ -132,7 +142,7 @@ cv_matrix_topo(
  
   auto& osc_target = result.params.emplace_back(make_param(
     make_topo_info("{28286D1C-6A9D-4CD4-AB70-4A3AFDF7302B}", "Osc Param", param_target_osc_param, route_count),
-    make_param_dsp_block(), make_domain_item(cv_matrix_target_osc_params(osc), ""),
+    make_param_dsp_block(), make_domain_item(target_params(osc), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 5 }, 
       make_label_none())));
     osc_target.gui.bindings.enabled.params = enabled_params;
@@ -143,7 +153,7 @@ cv_matrix_topo(
   
   auto& filter_target = result.params.emplace_back(make_param(
     make_topo_info("{B8098815-BBD5-4171-9AAF-CE4B6645AEE2}", "Filter Param", param_target_filter_param, route_count),
-    make_param_dsp_block(), make_domain_item(cv_matrix_target_filter_params(filter), ""),
+    make_param_dsp_block(), make_domain_item(target_params(filter), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 5 }, 
       make_label_none())));
   filter_target.gui.bindings.enabled.params = enabled_params;
