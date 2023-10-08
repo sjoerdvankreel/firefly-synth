@@ -19,9 +19,7 @@ provide to/fromstring for steps
 drop format::plain in favor of modulation
 param value dependent on other param
 mark param as modulatable or not
-cleanup all the headers + folder structure
 check the todos
-cleanup the rest (vst/clap/plugin)
 do cakewalk bug report
 test all host+linux
 
