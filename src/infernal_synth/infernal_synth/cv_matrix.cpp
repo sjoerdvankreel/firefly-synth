@@ -75,16 +75,16 @@ cv_matrix_topo(
   source.gui.bindings.enabled.selector = enabled_selector;
   param_current++;
 
-  for(int i = 0; i < sources.size(); i++)
+  for(int s = 0; s < sources.size(); s++)
   {
     auto& source_index = result.params.emplace_back(make_param(
-      make_topo_info({ "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", sources[i]->info.tag.id }, "Source Index", param_current, route_count),
-      make_param_dsp_block(), make_domain_step(0, sources[i]->info.slot_count - 1, 0),
+      make_topo_info({ "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", sources[s]->info.tag.id }, "Source Index", param_current, route_count),
+      make_param_dsp_block(), make_domain_step(0, sources[s]->info.slot_count - 1, 0),
       make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 2 }, 
         make_label_none())));
     source_index.gui.bindings.enabled.params = enabled_params;
     source_index.gui.bindings.enabled.selector = enabled_selector;
-    source_index.gui.bindings.visible.context = { i };
+    source_index.gui.bindings.visible.context = { s };
     source_index.gui.bindings.visible.params = { param_source };
     source_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
     param_current++;
@@ -100,18 +100,37 @@ cv_matrix_topo(
   target.gui.bindings.enabled.selector = enabled_selector;
   param_current++;
   
-  for(int i = 0; i < targets.size(); i++)
+  for(int t = 0; t < targets.size(); t++)
   {
+    if(targets[t]->info.slot_count == 1) continue;
     auto& target_index = result.params.emplace_back(make_param(
-      make_topo_info({ "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", targets[i]->info.tag.id }, "Target Index", param_current, route_count),
-      make_param_dsp_block(), make_domain_step(0, targets[i]->info.slot_count - 1, 0),
+      make_topo_info({ "{79366858-994F-485F-BA1F-34AE3DFD2CEE}", targets[t]->info.tag.id }, "Target Index", param_current, route_count),
+      make_param_dsp_block(), make_domain_step(0, targets[t]->info.slot_count - 1, 0),
       make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 4 }, 
         make_label_none())));
     target_index.gui.bindings.enabled.params = enabled_params;
     target_index.gui.bindings.enabled.selector = enabled_selector;
-    target_index.gui.bindings.visible.context = { i };
+    target_index.gui.bindings.visible.context = { t };
     target_index.gui.bindings.visible.params = { param_target };
     target_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+
+    int modulatable_param = 0;
+    for (int p = 0; p < targets[t]->params.size(); p++)
+    {
+      auto const& param = targets[t]->params[p];
+      if(!param.domain.is_real()) continue;
+      auto& target_param = result.params.emplace_back(make_param(
+        make_topo_info({ "{28286D1C-6A9D-4CD4-AB70-4A3AFDF7302B}", "Osc Param", param++, route_count),
+        make_param_dsp_block(), make_domain_item(target_params(osc), ""),
+        make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 5 },
+          make_label_none())));
+      osc_target.gui.bindings.enabled.params = enabled_params;
+      osc_target.gui.bindings.enabled.selector = enabled_selector;
+      osc_target.gui.bindings.visible.params = { param_target };
+      osc_target.gui.bindings.visible.context = { index_of_item_tag(result.params[param_target].domain.items, module_osc) };
+      osc_target.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+    }
+
     param_current++;
   }
 
