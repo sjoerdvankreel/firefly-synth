@@ -87,10 +87,6 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   mapping.value_at(_gui_state) = plain;
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);
-#ifndef NDEBUG
-  if(param->dsp.direction == param_direction::input)
-    debug_breakable();
-#endif
   return kResultTrue;
 }
 

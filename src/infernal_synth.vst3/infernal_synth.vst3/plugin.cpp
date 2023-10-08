@@ -2,7 +2,7 @@
 #include <infernal_synth/plugin.hpp>
 
 #include <plugin_base/gui/init.hpp>
-#include <plugin_base.vst3/support.hpp>
+#include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/inf_component.hpp>
 #include <plugin_base.vst3/inf_controller.hpp>
 
