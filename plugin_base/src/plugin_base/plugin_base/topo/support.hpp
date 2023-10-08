@@ -1,6 +1,8 @@
 #pragma once
 
 #include <plugin_base/topo/plugin.hpp>
+
+#include <vector>
 #include <string>
 
 namespace plugin_base {
@@ -21,6 +23,12 @@ topo_tag
 make_topo_tag(std::string const& id, std::string const& name);
 topo_info
 make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
+inline topo_tag
+make_topo_tag(std::vector<std::string> const& ids, std::string const& name)
+{ return make_topo_tag(join_string(ids, "-"), name); }
+inline topo_info
+make_topo_info(std::vector<std::string> const& ids, std::string const& name, int index, int slot_count)
+{ return make_topo_info(join_string(ids, "-"), name, index, slot_count); }
 
 section_topo
 make_section(int index, topo_tag const& tag, section_topo_gui const& gui);

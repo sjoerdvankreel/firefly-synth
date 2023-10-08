@@ -3,6 +3,16 @@
 
 namespace plugin_base {
 
+std::string 
+join_string(std::vector<std::string> const& strings, std::string const& delim)
+{
+  if(strings.empty()) return std::string();
+  std::string result = strings[0];
+  for(int i = 1; i < strings.size(); i++)
+    result += delim + strings[i];
+  return result;
+}
+
 double
 seconds_since_epoch()
 {

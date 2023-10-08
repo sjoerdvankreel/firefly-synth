@@ -34,8 +34,8 @@ synth_topo()
   result->modules[module_filter] = filter_topo(
     result->modules[module_osc].info.slot_count);
   result->modules[module_cv_matrix] = cv_matrix_topo(
-    result->modules[module_lfo], result->modules[module_env], 
-    result->modules[module_osc], result->modules[module_filter]);
+    { &result->modules[module_lfo], &result->modules[module_env] }, 
+    { &result->modules[module_osc], &result->modules[module_filter] });
   result->modules[module_delay] = delay_topo(result->polyphony);
   return result;
 }

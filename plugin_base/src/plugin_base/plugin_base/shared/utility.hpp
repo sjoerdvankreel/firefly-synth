@@ -1,6 +1,7 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <cstring>
 #include <cassert>
 #include <utility>
@@ -38,6 +39,11 @@ public:
 
 double seconds_since_epoch();
 inline void debug_breakable() {};
+
+std::string 
+join_string(
+  std::vector<std::string> const& strings, 
+  std::string const& delim);
 
 template <class T> std::string 
 to_8bit_string(T const* source)
