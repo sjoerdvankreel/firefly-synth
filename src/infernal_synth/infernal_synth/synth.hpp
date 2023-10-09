@@ -1,6 +1,7 @@
 #pragma once
 
 #include <plugin_base/topo/plugin.hpp>
+#include <vector>
 
 namespace infernal_synth {
 
@@ -12,10 +13,8 @@ plugin_base::module_topo osc_topo();
 plugin_base::module_topo delay_topo(int polyphony);
 plugin_base::module_topo filter_topo(int osc_slot_count);
 plugin_base::module_topo cv_matrix_topo(
-  plugin_base::module_topo const& lfo,
-  plugin_base::module_topo const& env,
-  plugin_base::module_topo const& osc,
-  plugin_base::module_topo const& filter);
+  std::vector<plugin_base::module_topo const*> const& sources, 
+  std::vector<plugin_base::module_topo const*> const& targets);
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 
 }

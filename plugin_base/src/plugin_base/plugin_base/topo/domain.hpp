@@ -7,6 +7,7 @@
 #include <cmath>
 #include <vector>
 #include <string>
+#include <algorithm>
 
 namespace plugin_base {
 
@@ -20,7 +21,7 @@ struct list_item final {
   std::string name = {};
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
-  template <class T> list_item(T const& item);
+  list_item(topo_info const& info);
   list_item(std::string const& id, std::string const& name, int tag);
 };
 
@@ -63,12 +64,11 @@ struct param_domain final {
 };
 
 inline list_item::
+list_item(topo_info const& info):
+tag(info.index), id(info.tag.id), name(info.tag.name) {}
+inline list_item::
 list_item(std::string const& id, std::string const& name, int tag) :
 tag(tag), id(id), name(name) {}
-
-template <class T> list_item::
-list_item(T const& item):
-tag(item.info.index), id(item.info.tag.id), name(item.info.tag.name) {}
 
 inline double 
 param_domain::default_raw() const 
@@ -118,6 +118,15 @@ param_domain::normalized_to_plain(normalized_value normalized) const
   if (type == domain_type::linear)
     return plain_value::from_real(min + normalized.value() * range);
   return plain_value::from_real(std::pow(normalized.value(), exp) * range + min);
+}
+
+template <class T>
+std::vector<list_item> 
+to_list_items(std::vector<T const*> const& topos)
+{
+  std::vector<list_item> items(topos.size(), list_item {});
+  std::transform(topos.begin(), topos.end(), items.begin(), [](T const* t) { return list_item(t->info); });
+  return items;
 }
 
 }

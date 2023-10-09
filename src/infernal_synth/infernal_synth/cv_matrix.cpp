@@ -14,40 +14,7 @@ namespace infernal_synth {
 static int constexpr route_count = 8;
 
 enum { section_main };
-enum {
-  param_on, param_active,
-  param_source, param_source_lfo_index, param_source_env_index,
-  param_target, param_target_osc_index, param_target_osc_param,
-  param_target_filter_param, param_target_filter_param_osc_gain_index
-};
-
-static std::vector<list_item>
-source_modules(module_topo const& lfo, module_topo const& env)
-{
-  std::vector<list_item> result;
-  result.emplace_back(lfo);
-  result.emplace_back(env);
-  return result;
-}
-
-static std::vector<list_item>
-target_modules(module_topo const& osc, module_topo const& filter)
-{
-  std::vector<list_item> result;
-  result.emplace_back(osc);
-  result.emplace_back(filter);
-  return result;
-}
-
-static std::vector<list_item>
-target_params(module_topo const& module)
-{
-  std::vector<list_item> result;
-  for(int i = 0; i < module.params.size(); i++)
-    if(module.params[i].domain.is_real())
-      result.emplace_back(module.params[i]);
-  return result;
-}
+enum { param_on, param_active, param_source, param_source_index, param_target, param_target_index };
 
 class cv_matrix_engine:
 public module_engine { 
@@ -59,10 +26,8 @@ public:
 
 module_topo 
 cv_matrix_topo(
-  module_topo const& lfo,
-  module_topo const& env,
-  module_topo const& osc,
-  module_topo const& filter)
+  std::vector<module_topo const*> const& sources,
+  std::vector<module_topo const*> const& targets)
 {
   std::vector<int> enabled_params = { param_on, param_active };
   gui_binding_selector enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] != 0; };
@@ -75,12 +40,12 @@ cv_matrix_topo(
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1, 1, 1 } })));
+    make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1 } })));
   
   result.params.emplace_back(make_param(
     make_topo_info("{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", param_on, 1),
     make_param_dsp_block(), make_domain_toggle(true),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 7 }, 
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 5 }, 
       make_label_default(gui_label_contents::name))));
   
   auto& active = result.params.emplace_back(make_param(
@@ -93,53 +58,43 @@ cv_matrix_topo(
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
-    make_param_dsp_block(), make_domain_item(source_modules(lfo, env), ""),
+    make_param_dsp_block(), make_domain_item(to_list_items(sources), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 1 }, 
       make_label_none())));
   source.gui.bindings.enabled.params = enabled_params;
   source.gui.bindings.enabled.selector = enabled_selector;
   
-  auto& lfo_index = result.params.emplace_back(make_param(
-    make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "LFO Index", param_source_lfo_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, lfo.info.slot_count - 1, 0),
+  auto& source_index = result.params.emplace_back(make_param(
+    make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
+    make_param_dsp_block(), make_domain_step(0, 2 /* TODO */, 0),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 2 }, 
       make_label_none())));
-  lfo_index.gui.bindings.enabled.params = enabled_params;
-  lfo_index.gui.bindings.enabled.selector = enabled_selector;
-  lfo_index.gui.bindings.visible.params = { param_source };
-  lfo_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_source].domain.items, module_lfo)};
-  lfo_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
-  
-  auto& env_index = result.params.emplace_back(make_param(
-    make_topo_info("{BA2FB14A-5484-4721-B640-DA26306194A4}", "Env Index", param_source_env_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, env.info.slot_count - 1, 0),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 2 }, 
-      make_label_none())));
-  env_index.gui.bindings.enabled.params = enabled_params;
-  env_index.gui.bindings.enabled.selector = enabled_selector;
-  env_index.gui.bindings.visible.params = { param_source };
-  env_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_source].domain.items, module_env) };
-  env_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+  source_index.gui.bindings.enabled.params = enabled_params;
+  source_index.gui.bindings.enabled.selector = enabled_selector;
+  source_index.gui.bindings.visible.params = { param_source };
+  source_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_source].domain.items, module_lfo)};
+  source_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
   
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
-    make_param_dsp_block(), make_domain_item(target_modules(osc, filter), ""),
+    make_param_dsp_block(), make_domain_item(to_list_items(targets), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 3 }, 
       make_label_none())));
   target.gui.bindings.enabled.params = enabled_params;
   target.gui.bindings.enabled.selector = enabled_selector;
   
-  auto& osc_index = result.params.emplace_back(make_param(
-    make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Osc Index", param_target_osc_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, osc.info.slot_count - 1, 0),
+  auto& target_index = result.params.emplace_back(make_param(
+    make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
+    make_param_dsp_block(), make_domain_step(0, 1 /* TODO */, 0),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 4 }, 
       make_label_none())));
-  osc_index.gui.bindings.enabled.params = enabled_params;
-  osc_index.gui.bindings.enabled.selector = enabled_selector;
-  osc_index.gui.bindings.visible.params = { param_target };
-  osc_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_target].domain.items, module_osc) };
-  osc_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
+  target_index.gui.bindings.enabled.params = enabled_params;
+  target_index.gui.bindings.enabled.selector = enabled_selector;
+  target_index.gui.bindings.visible.params = { param_target };
+  target_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_target].domain.items, module_osc) };
+  target_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
  
+#if 0
   auto& osc_target = result.params.emplace_back(make_param(
     make_topo_info("{28286D1C-6A9D-4CD4-AB70-4A3AFDF7302B}", "Osc Param", param_target_osc_param, route_count),
     make_param_dsp_block(), make_domain_item(target_params(osc), ""),
@@ -175,6 +130,8 @@ cv_matrix_topo(
     index_of_item_tag(result.params[param_target].domain.items, module_filter),
     index_of_item_tag(result.params[param_target_filter_param].domain.items, FILTER_PARAM_OSC_GAIN )};
   osc_gain_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0] && vs[1] == ctx[1]; };
+
+#endif
   return result;
 }
 
