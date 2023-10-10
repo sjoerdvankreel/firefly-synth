@@ -21,7 +21,7 @@ module_topo::validate(plugin_topo const& plugin, int index) const
 
   auto include = [](int) { return true; };
   auto always_visible = [this](int s) { return sections[s].gui.bindings.visible.selector == nullptr; };
-  gui.dimension.validate(sections, include, always_visible);
+  gui.dimension.validate(map_vector(sections, [](auto const& s) { return s.gui.position; }), include, always_visible);
   gui.position.validate(plugin.gui.dimension);
   info.validate();
 }

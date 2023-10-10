@@ -1,10 +1,12 @@
 #pragma once
 
 #include <string>
+#include <vector>
 #include <cstring>
 #include <cassert>
 #include <utility>
 #include <cstdint>
+#include <algorithm>
 
 #define INF_PREVENT_ACCIDENTAL_COPY(x)  \
   x(x&&) = default;               \
@@ -63,5 +65,14 @@ void from_8bit_string(T* dest, int count, char const* source)
 template <class T, int N>
 void from_8bit_string(T(&dest)[N], char const* source)
 { from_8bit_string(dest, N, source); }
+
+template <class T, class Unary>
+auto map_vector(std::vector<T> const& in, Unary op) ->
+std::vector<decltype(op(in[0]))>
+{
+  std::vector<decltype(op(in[0]))> result(in.size(), decltype(op(in[0])) {});
+  std::transform(in.begin(), in.end(), result.begin(), op);
+  return result;
+}
 
 }

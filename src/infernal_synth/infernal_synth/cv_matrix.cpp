@@ -71,9 +71,6 @@ cv_matrix_topo(
       make_label_none())));
   source_index.gui.bindings.enabled.params = enabled_params;
   source_index.gui.bindings.enabled.selector = enabled_selector;
-  source_index.gui.bindings.visible.params = { param_source };
-  source_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_source].domain.items, module_lfo)};
-  source_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
   
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
@@ -90,9 +87,6 @@ cv_matrix_topo(
       make_label_none())));
   target_index.gui.bindings.enabled.params = enabled_params;
   target_index.gui.bindings.enabled.selector = enabled_selector;
-  target_index.gui.bindings.visible.params = { param_target };
-  target_index.gui.bindings.visible.context = { index_of_item_tag(result.params[param_target].domain.items, module_osc) };
-  target_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
  
 #if 0
   auto& osc_target = result.params.emplace_back(make_param(
