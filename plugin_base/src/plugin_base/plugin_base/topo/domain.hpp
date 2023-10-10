@@ -20,6 +20,9 @@ struct list_item final {
   std::string id = {};
   std::string name = {};
 
+  template <class T> static list_item 
+  from_topo(T const* topo) { return list_item(topo->info); }
+
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   list_item(topo_info const& info);
   list_item(std::string const& id, std::string const& name, int tag);
@@ -118,15 +121,6 @@ param_domain::normalized_to_plain(normalized_value normalized) const
   if (type == domain_type::linear)
     return plain_value::from_real(min + normalized.value() * range);
   return plain_value::from_real(std::pow(normalized.value(), exp) * range + min);
-}
-
-template <class T>
-std::vector<list_item> 
-to_list_items(std::vector<T const*> const& topos)
-{
-  std::vector<list_item> items(topos.size(), list_item {});
-  std::transform(topos.begin(), topos.end(), items.begin(), [](T const* t) { return list_item(t->info); });
-  return items;
 }
 
 }

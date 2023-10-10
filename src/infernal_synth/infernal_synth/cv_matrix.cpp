@@ -2,6 +2,7 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 #include <infernal_synth/synth.hpp>
 #include <cmath>
@@ -58,7 +59,7 @@ cv_matrix_topo(
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
-    make_param_dsp_block(), make_domain_item(to_list_items(sources), ""),
+    make_param_dsp_block(), make_domain_item(map_vector(sources, list_item::from_topo<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 1 }, 
       make_label_none())));
   source.gui.bindings.enabled.params = enabled_params;
@@ -74,7 +75,7 @@ cv_matrix_topo(
   
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
-    make_param_dsp_block(), make_domain_item(to_list_items(targets), ""),
+    make_param_dsp_block(), make_domain_item(map_vector(targets, list_item::from_topo<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 3 }, 
       make_label_none())));
   target.gui.bindings.enabled.params = enabled_params;
