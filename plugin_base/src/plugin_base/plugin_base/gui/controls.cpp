@@ -119,17 +119,28 @@ param_component(gui, module, param), Component()
   auto const& topo_to_index = _gui->desc()->mappings.topo_to_index;
   auto const& param_indices = topo_to_index[_module->info.topo][_module->info.slot];
   _dependent_global_index = param_indices[param->param->dependent_index][param->info.slot];
+  _own_value = _param->param->dependents[0].min;
   for (int i = 0; i < param->param->dependents.size(); i++)
   {
     auto const& domain = param->param->dependents[i];
     auto& dependent = _dependents.emplace_back(std::make_unique<ComboBox>());
     for (int j = domain.min; j <= domain.max; j++)
       dependent->addItem(domain.raw_to_text(j), j - domain.min + 1);
+    dependent->setSelectedItemIndex(0);
     addChildComponent(dependent.get());
+    dependent->addListener(this);
   }
   init();
   update_dependents();
   gui->add_plugin_listener(_dependent_global_index, this);
+}
+
+param_dependent::
+~param_dependent() 
+{ 
+  _gui->remove_plugin_listener(_dependent_global_index, this); 
+  for(int i = 0; i < _dependents.size(); i++)
+    _dependents[i]->removeListener(this);
 }
 
 void
@@ -146,6 +157,32 @@ param_dependent::plugin_changed(int index, plain_value plain)
     update_dependents();
   else
     param_component::plugin_changed(index, plain);
+}
+
+void
+param_dependent::own_param_changed(plain_value plain)
+{
+  if(_dependent_value == -1) return;
+  int min = _param->param->dependents[_dependent_value].min;
+  _dependents[_dependent_value]->setSelectedItemIndex(plain.step() - min);
+}
+
+void
+param_dependent::comboBoxChanged(ComboBox* box)
+{
+  for(int i = 0; i < _dependents.size(); i++)
+  {
+    if(_dependents[i].get() != box) continue;
+    int value = _param->param->dependents[i].min + box->getSelectedItemIndex();
+    if (_own_value != value)
+    {
+      _own_value = value;
+      plain_value plain = _param->param->domain.raw_to_plain(value);
+      _gui->gui_changed(_param->info.global, plain);
+    }
+    return;
+  }
+  assert(false);
 }
 
 void

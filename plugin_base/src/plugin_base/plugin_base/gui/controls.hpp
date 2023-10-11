@@ -126,12 +126,14 @@ public:
 // dropdown bound to single parameter with multiple domains
 class param_dependent:
 public param_component,
-public juce::Component
+public juce::Component,
+public juce::ComboBox::Listener
 {
 protected:
-  void own_param_changed(plain_value plain) override final {}
+  void own_param_changed(plain_value plain) override final;
 
 private:
+  int _own_value = -1;
   int _dependent_value = -1;
   int _dependent_global_index = -1;
 
@@ -140,9 +142,11 @@ private:
 
 public:
   void resized() override;
+  void comboBoxChanged(juce::ComboBox* box) override;
   void plugin_changed(int index, plain_value plain) override;
+
+  ~param_dependent() override;
   param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param);
-  ~param_dependent() override { _gui->remove_plugin_listener(_dependent_global_index, this); }
 };
 
 }
