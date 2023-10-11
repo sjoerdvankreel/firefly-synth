@@ -3,16 +3,6 @@
 
 namespace plugin_base {
 
-int
-index_of_item_tag(std::vector<list_item> const& items, int tag)
-{
-  for(int i = 0; i < items.size(); i++)
-    if(items[i].tag == tag)
-      return i;
-  assert(false);
-  return -1;
-}
-
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name)
 {

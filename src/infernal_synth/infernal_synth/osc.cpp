@@ -22,8 +22,8 @@ static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw", type_saw);
-  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sine", type_sine);
+  result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw");
+  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sine");
   return result;
 }
 

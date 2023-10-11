@@ -16,16 +16,15 @@ enum class domain_type { toggle, step, name, item, linear, log };
 
 // item in list
 struct list_item final {
-  int tag = -1;
   std::string id = {};
   std::string name = {};
 
   template <class T> static list_item 
-  from_topo(T const* topo) { return list_item(topo->info); }
+  from_topo(T const* topo) { return list_item(topo->info.tag); }
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
-  list_item(topo_info const& info);
-  list_item(std::string const& id, std::string const& name, int tag);
+  list_item(topo_tag const& tag);
+  list_item(std::string const& id, std::string const& name);
 };
 
 // parameter bounds
@@ -69,11 +68,11 @@ struct param_domain final {
 };
 
 inline list_item::
-list_item(topo_info const& info):
-tag(info.index), id(info.tag.id), name(info.tag.name) {}
+list_item(topo_tag const& tag):
+id(tag.id), name(tag.name) {}
 inline list_item::
-list_item(std::string const& id, std::string const& name, int tag) :
-tag(tag), id(id), name(name) {}
+list_item(std::string const& id, std::string const& name) :
+id(id), name(name) {}
 
 inline double 
 param_domain::default_raw() const 

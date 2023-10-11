@@ -5,9 +5,6 @@
 
 namespace plugin_base {
 
-int
-index_of_item_tag(std::vector<list_item> const& items, int tag);
-
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
 inline gui_label 
