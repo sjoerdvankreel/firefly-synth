@@ -21,6 +21,7 @@ check the todos
 do cakewalk bug report
 test all host+linux
 drop module_desc/param_desc topo?
+allow automation dependent/depending through param handler
 
 * continuing
 - keep updating the demo tracks
