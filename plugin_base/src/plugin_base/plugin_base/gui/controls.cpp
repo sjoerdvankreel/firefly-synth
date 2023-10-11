@@ -163,7 +163,7 @@ void
 param_dependent::own_param_changed(plain_value plain)
 {
   if(_dependent_value == -1) return;
-  int index = std::clamp(plain.step(), 0, (int)_param->param->dependents[_dependent_value].max);
+  int index = _param->param->clamp_dependent(_dependent_value, plain).step();
   _dependents[_dependent_value]->setSelectedItemIndex(index, juce::dontSendNotification);
 }
 
