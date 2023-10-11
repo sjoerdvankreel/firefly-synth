@@ -49,7 +49,7 @@ make_param_dsp_output()
 param_domain
 make_domain_toggle(bool default_);
 param_domain
-make_domain_step(int min, int max, int default_);
+make_domain_step(int min, int max, int default_, int display_offset);
 param_domain
 make_domain_item(std::vector<list_item> const& items, std::string const& default_);
 param_domain

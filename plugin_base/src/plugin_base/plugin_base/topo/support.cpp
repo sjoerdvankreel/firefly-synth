@@ -104,12 +104,13 @@ make_domain_toggle(bool default_)
 }
 
 param_domain
-make_domain_step(int min, int max, int default_)
+make_domain_step(int min, int max, int default_, int display_offset)
 {
   param_domain result = {};
   result.min = min;
   result.max = max;
   result.type = domain_type::step;
+  result.display_offset = display_offset;
   result.default_ = std::to_string(default_);
   return result;
 }

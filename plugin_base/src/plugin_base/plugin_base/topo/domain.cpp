@@ -13,6 +13,14 @@ param_domain::default_plain() const
   return result;
 }
 
+std::string
+param_domain::raw_to_text(
+  double raw) const
+{
+  plain_value plain(raw_to_plain(raw));
+  return plain_to_text(plain);
+}
+
 std::string 
 param_domain::normalized_to_text(
   normalized_value normalized) const
@@ -44,7 +52,7 @@ param_domain::plain_to_text(plain_value plain) const
   case domain_type::name: return names[plain.step()];
   case domain_type::item: return items[plain.step()].name;
   case domain_type::toggle: return plain.step() == 0 ? "Off" : "On";
-  case domain_type::step: return prefix + std::to_string(plain.step());
+  case domain_type::step: return prefix + std::to_string(plain.step() + display_offset);
   default: break;
   }
 
@@ -86,7 +94,7 @@ param_domain::text_to_plain(
   {
     int step = std::numeric_limits<int>::max();
     stream >> step;
-    plain = plain_value::from_step(step);
+    plain = plain_value::from_step(step - display_offset);
     return min <= step && step <= max;
   }
 
@@ -103,6 +111,7 @@ param_domain::validate() const
   assert(max > min);
   assert(default_.size());
   assert((type == domain_type::log) == (exp != 0));
+  assert((type == domain_type::step) || (display_offset == 0));
   assert(display == domain_display::normal || type == domain_type::linear);
 
   if (type == domain_type::toggle)

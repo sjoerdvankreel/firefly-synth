@@ -93,7 +93,7 @@ osc_topo()
       make_label_none())));  
   result.params.emplace_back(make_param(
     make_topo_info("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", param_oct, 1),
-    make_param_dsp_block(), make_domain_step(0, 9, 4),
+    make_param_dsp_block(), make_domain_step(0, 9, 4, 0),
     make_param_gui_single(section_pitch, gui_edit_type::list, { 0, 1 }, 
       make_label_none())));  
   result.params.emplace_back(make_param(

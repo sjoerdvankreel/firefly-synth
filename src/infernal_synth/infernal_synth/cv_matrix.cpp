@@ -67,7 +67,7 @@ cv_matrix_topo(
   
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, 2 /* TODO */, 0),
+    make_param_dsp_block(), make_domain_step(0, 2 /* TODO */, 1, 1),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 2 }, 
       make_label_none())));
   source_index.gui.bindings.enabled.params = enabled_params;
@@ -83,7 +83,7 @@ cv_matrix_topo(
   
   auto& target_index = result.params.emplace_back(make_param(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, 1 /* TODO */, 0),
+    make_param_dsp_block(), make_domain_step(0, 1 /* TODO */, 1, 1),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 4 }, 
       make_label_none())));
   target_index.gui.bindings.enabled.params = enabled_params;
@@ -115,7 +115,7 @@ cv_matrix_topo(
   int FILTER_PARAM_OSC_GAIN = 2; // TODO
   auto& osc_gain_index = result.params.emplace_back(make_param(
     make_topo_info("{FB4EB870-48DD-40D5-9D0E-2E9F0C4E3C48}", "Filter Osc Gain", param_target_filter_param_osc_gain_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, filter.params[FILTER_PARAM_OSC_GAIN].info.slot_count - 1, 0),
+    make_param_dsp_block(), make_domain_step(0, filter.params[FILTER_PARAM_OSC_GAIN].info.slot_count - 1, 0, 1),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 6 }, 
       make_label_none())));
   osc_gain_index.gui.bindings.enabled.params = enabled_params;

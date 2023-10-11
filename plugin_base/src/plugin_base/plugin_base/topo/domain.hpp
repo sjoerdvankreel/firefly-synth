@@ -34,6 +34,7 @@ struct param_domain final {
   double max;
   double exp;
   int precision;
+  int display_offset;
   std::string unit;
   std::string default_;
 
@@ -60,6 +61,7 @@ struct param_domain final {
   plain_value normalized_to_plain(normalized_value normalized) const;
 
   // parse and format
+  std::string raw_to_text(double raw) const;
   std::string plain_to_text(plain_value plain) const;
   std::string normalized_to_text(normalized_value normalized) const;
   bool text_to_plain(std::string const& textual, plain_value& plain) const;

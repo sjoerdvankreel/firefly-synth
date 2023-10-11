@@ -83,25 +83,9 @@ param_combobox::
 param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), ComboBox()
 {
-  switch (param->param->domain.type)
-  {
-  case domain_type::name:
-    for (int i = 0; i < param->param->domain.names.size(); i++)
-      addItem(param->param->domain.names[i], i + 1);
-    break;
-  case domain_type::item:
-    for (int i = 0; i < param->param->domain.items.size(); i++)
-      addItem(param->param->domain.items[i].name, i + 1);
-    break;
-  case domain_type::step:
-  case domain_type::toggle:
-    for (int i = param->param->domain.min; i <= param->param->domain.max; i++)
-      addItem(std::to_string(i), param->param->domain.min + i + 1);
-    break;
-  default:
-    assert(false);
-    break;
-  }
+  auto const& domain = param->param->domain;
+  for(int i = domain.min; i <= domain.max; i++)
+    addItem(domain.raw_to_text(i), i + 1);
   addListener(this);
   setEditableText(false);
   init();

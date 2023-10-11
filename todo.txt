@@ -15,7 +15,6 @@ handle automation changes at voice vs block start
 ui set exact values
 handle generic midi in
 on-note/hold-type cv
-provide to/fromstring for steps
 param value dependent on other param
 mark param as modulatable or not
 check the todos
