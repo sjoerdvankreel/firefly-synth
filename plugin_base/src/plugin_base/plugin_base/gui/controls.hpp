@@ -19,11 +19,11 @@ protected:
   param_desc const* const _param;
 
 public:
-  void plugin_changed(int index, plain_value plain) override final;
+  void plugin_changed(int index, plain_value plain) override;
   virtual ~param_component() { _gui->remove_plugin_listener(_param->info.global, this); }
 
 protected:
-  void init() override final;
+  void init() override;
   virtual void own_param_changed(plain_value plain) = 0;
   param_component(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
@@ -121,6 +121,26 @@ public:
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param);
   void comboBoxChanged(ComboBox*) override final
   { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
+};
+
+// dropdown bound to single parameter with multiple domains
+class param_dependent:
+public param_component,
+public juce::Component
+{
+protected:
+  void own_param_changed(plain_value plain) override final {}
+
+private:
+  void update_dependents();
+  int _dependent_global_index = -1;
+  std::vector<std::unique_ptr<juce::ComboBox>> _dependents = {};
+
+public:
+  void resized() override;
+  void plugin_changed(int index, plain_value plain) override;
+  param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param);
+  ~param_dependent() override { _gui->remove_plugin_listener(_dependent_global_index, this); }
 };
 
 }

@@ -85,7 +85,7 @@ param_component(gui, module, param), ComboBox()
 {
   auto const& domain = param->param->domain;
   for(int i = domain.min; i <= domain.max; i++)
-    addItem(domain.raw_to_text(i), i + 1);
+    addItem(domain.raw_to_text(i), i - domain.min + 1);
   addListener(this);
   setEditableText(false);
   init();
@@ -110,6 +110,52 @@ param_component(gui, module, param), Slider()
     [this](double s, double e, double v) { return _param->param->domain.raw_to_normalized(v).value(); }));
   setDoubleClickReturnValue(true, param->param->domain.default_raw(), ModifierKeys::noModifiers);
   param_component::init();
+}
+
+param_dependent::
+param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param):
+param_component(gui, module, param), Component()
+{
+  auto const& topo_to_index = _gui->desc()->mappings.topo_to_index;
+  auto const& param_indices = topo_to_index[_module->info.topo][_module->info.slot];
+  _dependent_global_index = param_indices[param->param->dependent_index][param->info.slot];
+  for (int i = 0; i < param->param->dependents.size(); i++)
+  {
+    auto const& domain = param->param->dependents[i];
+    auto& dependent = _dependents.emplace_back(std::make_unique<ComboBox>());
+    for (int j = domain.min; j <= domain.max; j++)
+      dependent->addItem(domain.raw_to_text(j), i - domain.min + 1);
+    addChildComponent(dependent.get());
+  }
+  init();
+  update_dependents();
+  gui->add_plugin_listener(_dependent_global_index, this);
+}
+
+void
+param_dependent::resized()
+{
+  for(int i = 0; i < _dependents.size(); i++)
+    _dependents[i]->setBounds(getLocalBounds());
+}
+
+void 
+param_dependent::plugin_changed(int index, plain_value plain)
+{
+  if(index == _dependent_global_index)
+    update_dependents();
+  else
+    param_component::plugin_changed(index, plain);
+}
+
+void
+param_dependent::update_dependents()
+{
+  // TODO take domain min into account
+  auto const& param_state = _gui->gui_state()[_module->info.topo][_module->info.slot];
+  int dependent_value = param_state[_param->param->dependent_index][_param->info.slot].step();
+  for(int i = 0; i < _dependents.size(); i++)
+    _dependents[i]->setVisible(i == dependent_value);
 }
 
 }

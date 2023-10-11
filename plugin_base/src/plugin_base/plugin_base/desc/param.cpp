@@ -25,6 +25,7 @@ param_desc::validate(module_desc const& module, int index) const
 {
   assert(param);
   assert(local == index);
+  assert(info.topo == param->info.index);
   assert(info.name.size() < full_name.size());
   info.validate(module.params.size(), param->info.slot_count);
 }
