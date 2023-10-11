@@ -52,6 +52,8 @@ make_domain_item(std::vector<list_item> const& items, std::string const& default
 param_domain
 make_domain_name(std::vector<std::string> const& names, std::string const& default_);
 param_domain
+make_domain_dependent(int dependent_index, std::vector<param_domain const*> const& dependents);
+param_domain
 make_domain_percentage(double min, double max, double default_, int precision, bool unit);
 param_domain
 make_domain_linear(double min, double max, double default_, int precision, std::string const& unit);

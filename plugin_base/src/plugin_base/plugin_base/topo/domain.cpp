@@ -82,6 +82,18 @@ param_domain::text_to_plain(
     return false;
   }
 
+  if (type == domain_type::dependent)
+  {
+    assert(dependents.size() > 1);
+    assert(min == 0 && max == 999);
+    assert(0 <= dependent_index && dependent_index < topo_max);
+    assert(dependents[0]->type == domain_type::item ||
+      dependents[0]->type == domain_type::name ||
+      dependents[0]->type == domain_type::step);
+    for (int i = 1; i < dependents.size(); i++)
+      assert(dependents[i]->type == dependents[0]->type);
+  }
+
   if (type == domain_type::toggle)
   {
     if (textual == "On") return plain = plain_value::from_step(1), true;
