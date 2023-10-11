@@ -96,14 +96,14 @@ param_domain::text_to_plain(
     int step = std::numeric_limits<int>::max();
     stream >> step;
     plain = plain_value::from_step(step - display_offset);
-    return min <= step && step <= max;
+    return min <= plain.step() && plain.step() <= max;
   }
 
   float real = std::numeric_limits<float>::max();
   stream >> real;
   real /= (display == domain_display::normal) ? 1 : 100;
   plain = plain_value::from_real(real);
-  return min <= real && real <= max;
+  return min <= plain.real() && plain.real() <= max;
 }
 
 void
