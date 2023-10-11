@@ -22,7 +22,6 @@ param_topo::validate(module_topo const& module, int index) const
   assert((info.slot_count == 1) == (gui.layout == gui_layout::single));
   assert(dsp.direction != param_direction::output || dsp.rate == param_rate::block);
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
-  assert(domain.type != domain_type::dependent || gui.edit_type == gui_edit_type::list);
   assert(dsp.direction == param_direction::input || gui.bindings.enabled.selector == nullptr);
 }
 

@@ -130,19 +130,6 @@ make_domain_name(std::vector<std::string> const& names, std::string const& defau
 }
 
 param_domain
-make_domain_dependent(int dependent_index, std::vector<param_domain const*> const& dependents)
-{
-  param_domain result = {};
-  result.min = 0;
-  result.max = 999;
-  result.dependents = dependents;
-  result.default_ = std::to_string(0);
-  result.type = domain_type::dependent;
-  result.dependent_index = dependent_index;
-  return result;
-}
-
-param_domain
 make_domain_percentage(double min, double max, double default_, int precision, bool unit)
 {
   param_domain result = {};

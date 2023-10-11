@@ -12,7 +12,7 @@
 namespace plugin_base {
 
 enum class domain_display { normal, percentage };
-enum class domain_type { toggle, step, name, item, dependent, linear, log };
+enum class domain_type { toggle, step, name, item, linear, log };
 
 // item in list
 struct list_item final {
@@ -34,15 +34,13 @@ struct param_domain final {
   double exp;
   int precision;
   int display_offset;
-  int dependent_index;
   std::string unit;
   std::string default_;
 
   domain_type type;
   domain_display display;
   std::vector<list_item> items;
-  std::vector<std::string> names;
-  std::vector<param_domain const*> dependents;
+  std::vector<std::string> names;  
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const;
