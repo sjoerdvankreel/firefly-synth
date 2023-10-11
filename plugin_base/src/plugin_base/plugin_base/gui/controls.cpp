@@ -165,6 +165,7 @@ param_dependent::own_param_changed(plain_value plain)
   if(_dependent_value == -1) return;
   int index = _param->param->clamp_dependent(_dependent_value, plain).step();
   _dependents[_dependent_value]->setSelectedItemIndex(index, juce::dontSendNotification);
+  _own_value = index;
 }
 
 void
@@ -193,8 +194,9 @@ param_dependent::update_dependents()
   if(_dependent_value == dependent_value) return;
 
   _dependent_value = dependent_value;
-  plain_value own_plain = _param->param->domain.raw_to_plain(_own_value);
-  int new_own_value = _param->param->clamp_dependent(_dependent_value, own_plain).step();
+  int other_index = _dependents[_dependent_value]->getSelectedItemIndex();
+  plain_value new_own_plain = _param->param->domain.raw_to_plain(other_index);
+  int new_own_value = _param->param->clamp_dependent(_dependent_value, new_own_plain).step();
   if(new_own_value != _own_value)
   {
     own_param_changed(_param->param->domain.raw_to_plain(new_own_value));
