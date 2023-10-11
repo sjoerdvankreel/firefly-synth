@@ -64,6 +64,8 @@ struct plugin_desc final {
 
   void validate() const;
   void init_defaults(jarray<plain_value, 4>& state) const;
+  void sync_dependent_params(jarray<plain_value, 4>& state) const;
+
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; } 
 };

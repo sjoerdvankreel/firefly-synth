@@ -47,13 +47,13 @@ struct param_topo final {
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module, int index) const;
-  plain_value clamp_dependent(int dependent_index_, plain_value plain) const;
+  plain_value clamp_dependent(int dependent_value, plain_value plain) const;
 };
 
 inline plain_value 
-param_topo::clamp_dependent(int dependent_index_, plain_value plain) const
+param_topo::clamp_dependent(int dependent_value, plain_value plain) const
 {
-  auto const& dependent_domain = dependents[dependent_index_];
+  auto const& dependent_domain = dependents[dependent_value];
   return dependent_domain.raw_to_plain(std::clamp(plain.step(), 0, (int)dependent_domain.max));
 }
 

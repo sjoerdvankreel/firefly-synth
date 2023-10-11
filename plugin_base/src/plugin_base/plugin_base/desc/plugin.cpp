@@ -73,6 +73,27 @@ plugin_desc::init_defaults(jarray<plain_value, 4>& state) const
         for(int pi = 0; pi < module.params[p].info.slot_count; pi++)
           state[m][mi][p][pi] = module.params[p].domain.default_plain();
   }
+  sync_dependent_params(state);
+}
+
+void 
+plugin_desc::sync_dependent_params(jarray<plain_value, 4>& state) const
+{
+  for (int m = 0; m < plugin->modules.size(); m++)
+  {
+    auto const& module = plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        if(param.domain.type != domain_type::dependent) continue;
+        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
+        {
+          int dependent_value = state[m][mi][param.dependent_index][pi].step();
+          state[m][mi][p][pi] = module.params[p].clamp_dependent(dependent_value, state[m][mi][p][pi]);
+        }
+      }
+  }
 }
 
 void
