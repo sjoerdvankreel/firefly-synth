@@ -193,7 +193,13 @@ param_dependent::update_dependents()
   if(_dependent_value == dependent_value) return;
 
   _dependent_value = dependent_value;
-  own_param_changed(_param->param->domain.raw_to_plain(_own_value));
+  plain_value own_plain = _param->param->domain.raw_to_plain(_own_value);
+  int new_own_value = _param->param->clamp_dependent(_dependent_value, own_plain).step();
+  if(new_own_value != _own_value)
+  {
+    own_param_changed(_param->param->domain.raw_to_plain(_own_value));
+    _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(new_own_value));
+  }
   for(int i = 0; i < _dependents.size(); i++)
   {
     _dependents[i]->setVisible(i == dependent_value);
