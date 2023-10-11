@@ -160,7 +160,6 @@ param_dependent::update_dependents()
   for(int i = 0; i < _dependents.size(); i++)
   {
     auto const& domain = _param->param->dependents[i];
-    _dependents[i]->setSelectedItemIndex(0);
     _dependents[i]->setEnabled(domain.max - domain.min > 0);
     _dependents[i]->setVisible(i == dependent_value - dependent_min);
   }
