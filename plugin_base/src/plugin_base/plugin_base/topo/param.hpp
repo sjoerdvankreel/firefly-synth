@@ -41,6 +41,8 @@ struct param_topo final {
   topo_info info;
   param_topo_gui gui;
   param_domain domain;
+  int dependent_index;
+  std::vector<param_domain> dependents;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module, int index) const;

@@ -16,6 +16,23 @@ param_topo::validate(module_topo const& module, int index) const
   for (int v = 0; v < gui.bindings.visible.params.size(); v++)
     assert(info.index != gui.bindings.visible.params[v]);
 
+  if (domain.type != domain_type::dependent)
+  {
+    assert(dependent_index == 0);
+    assert(dependents.size() == 0);
+    assert(gui.edit_type != gui_edit_type::dependent);
+  }
+  else
+  {
+    assert(dependent_index >= 0);
+    assert(dependents.size() > 1);
+    assert(gui.edit_type == gui_edit_type::dependent);
+    for(int i = 0; i < dependents.size(); i++)
+      assert(dependents[i].type == domain_type::item 
+          || dependents[i].type == domain_type::name 
+          || dependents[i].type == domain_type::step);
+  }
+
   assert(info.index == index);
   assert(domain.is_real() || dsp.rate == param_rate::block);
   assert(0 <= gui.section && gui.section < module.sections.size());

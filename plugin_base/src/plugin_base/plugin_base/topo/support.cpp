@@ -83,6 +83,17 @@ make_module_gui(gui_layout layout, gui_position const& position, gui_dimension c
 }
 
 param_domain
+make_domain_dependent()
+{
+  param_domain result = {};
+  result.min = 0;
+  result.max = 999;
+  result.default_ = std::to_string(0);
+  result.type = domain_type::dependent;
+  return result;
+}
+
+param_domain
 make_domain_toggle(bool default_)
 {
   param_domain result = {};

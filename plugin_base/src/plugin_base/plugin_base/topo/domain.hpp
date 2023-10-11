@@ -12,7 +12,7 @@
 namespace plugin_base {
 
 enum class domain_display { normal, percentage };
-enum class domain_type { toggle, step, name, item, linear, log };
+enum class domain_type { toggle, step, name, item, dependent, linear, log };
 
 // item in list
 struct list_item final {

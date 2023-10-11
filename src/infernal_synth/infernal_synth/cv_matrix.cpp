@@ -67,12 +67,15 @@ cv_matrix_topo(
   
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, 2 /* TODO */, 1, 1),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 2 }, 
+    make_param_dsp_block(), make_domain_dependent(),
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 2 }, 
       make_label_none())));
   source_index.gui.bindings.enabled.params = enabled_params;
   source_index.gui.bindings.enabled.selector = enabled_selector;
-  
+  source_index.dependent_index = param_source;
+  for (int i = 0; i < sources.size(); i++)
+    source_index.dependents.push_back(make_domain_step(0, sources[i]->info.slot_count, 0, 0));
+
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(), make_domain_item(map_vector(targets, list_item::from_topo<module_topo>), ""),
