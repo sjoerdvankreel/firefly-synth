@@ -99,11 +99,13 @@ cv_matrix_topo(
 
   std::vector<param_domain> target_param_domains;
   auto is_modulatable = [](auto const& p) { return p.dsp.rate == param_rate::accurate; };
+  auto filter_modulatable = [is_modulatable](auto const& ps) { return vector_filter(ps, is_modulatable); };
+  auto map_params_to_items = [](auto const& ps) { return vector_map(ps, list_item::from_topo<param_topo>); };
+  auto map_items_to_domains = [](auto const& is) { return make_domain_item(is, ""); };
   auto target_params = vector_map(targets, [](auto const& m) { return m->params; });
-  auto modulatable_target_params = vector_map(target_params, [is_modulatable](auto const& ps) { return vector_filter(ps, is_modulatable); });
-  auto modulatable_target_items = vector_map(modulatable_target_params, [](auto const& ps) { return vector_map(ps, list_item::from_topo<param_topo>); });
-  auto modulatable_target_domains = vector_map(modulatable_target_items, [](auto const& is) { return make_domain_item(is, ""); });
-
+  auto modulatable_target_params = vector_map(target_params, filter_modulatable);
+  auto modulatable_target_items = vector_map(modulatable_target_params, map_params_to_items);
+  auto modulatable_target_domains = vector_map(modulatable_target_items, map_items_to_domains);
   auto& target_param = result.params.emplace_back(make_param(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
     make_param_dsp_block(), make_domain_dependent(modulatable_target_domains),
