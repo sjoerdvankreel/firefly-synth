@@ -109,7 +109,7 @@ param_domain::text_to_plain(
 void
 param_domain::validate() const
 {
-  assert(max > min);
+  assert(max >= min);
   assert(default_.size());
   assert((type == domain_type::log) == (exp != 0));
   assert((type == domain_type::step) || (display_offset == 0));
