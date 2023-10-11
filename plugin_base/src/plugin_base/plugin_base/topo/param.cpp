@@ -27,6 +27,7 @@ param_topo::validate(module_topo const& module, int index) const
     assert(dependent_index >= 0);
     assert(dependents.size() > 1);
     assert(gui.edit_type == gui_edit_type::dependent);
+    assert(info.slot_count == module.params[dependent_index].info.slot_count);
     for(int i = 0; i < dependents.size(); i++)
       assert(dependents[i].type == domain_type::item 
           || dependents[i].type == domain_type::name 
