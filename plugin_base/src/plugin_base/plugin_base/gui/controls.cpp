@@ -151,15 +151,18 @@ param_dependent::plugin_changed(int index, plain_value plain)
 void
 param_dependent::update_dependents()
 {
-  // TODO take domain min into account
   auto const& param_state = _gui->gui_state()[_module->info.topo][_module->info.slot];
   int dependent_value = param_state[_param->param->dependent_index][_param->info.slot].step();
   if(_dependent_value == dependent_value) return;
 
+  _dependent_value = dependent_value;
+  int dependent_min = _module->module->params[_param->param->dependent_index].domain.min;
   for(int i = 0; i < _dependents.size(); i++)
   {
+    auto const& domain = _param->param->dependents[i];
     _dependents[i]->setSelectedItemIndex(0);
-    _dependents[i]->setVisible(i == dependent_value);
+    _dependents[i]->setEnabled(domain.max - domain.min > 0);
+    _dependents[i]->setVisible(i == dependent_value - dependent_min);
   }
 }
 
