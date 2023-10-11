@@ -124,7 +124,7 @@ param_component(gui, module, param), Component()
     auto const& domain = param->param->dependents[i];
     auto& dependent = _dependents.emplace_back(std::make_unique<ComboBox>());
     for (int j = domain.min; j <= domain.max; j++)
-      dependent->addItem(domain.raw_to_text(j), i - domain.min + 1);
+      dependent->addItem(domain.raw_to_text(j), j - domain.min + 1);
     addChildComponent(dependent.get());
   }
   init();
@@ -154,8 +154,13 @@ param_dependent::update_dependents()
   // TODO take domain min into account
   auto const& param_state = _gui->gui_state()[_module->info.topo][_module->info.slot];
   int dependent_value = param_state[_param->param->dependent_index][_param->info.slot].step();
+  if(_dependent_value == dependent_value) return;
+
   for(int i = 0; i < _dependents.size(); i++)
+  {
+    _dependents[i]->setSelectedItemIndex(0);
     _dependents[i]->setVisible(i == dependent_value);
+  }
 }
 
 }

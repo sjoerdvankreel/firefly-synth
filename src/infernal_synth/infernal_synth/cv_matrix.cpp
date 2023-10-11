@@ -74,7 +74,7 @@ cv_matrix_topo(
   source_index.gui.bindings.enabled.selector = enabled_selector;
   source_index.dependent_index = param_source;
   for (int i = 0; i < sources.size(); i++)
-    source_index.dependents.push_back(make_domain_step(0, sources[i]->info.slot_count, 0, 0));
+    source_index.dependents.push_back(make_domain_step(0, sources[i]->info.slot_count - 1, 0, 0));
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
