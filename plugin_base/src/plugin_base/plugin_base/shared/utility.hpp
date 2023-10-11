@@ -6,6 +6,7 @@
 #include <cassert>
 #include <utility>
 #include <cstdint>
+#include <iterator>
 #include <algorithm>
 
 #define INF_PREVENT_ACCIDENTAL_COPY(x)  \
@@ -65,6 +66,14 @@ void from_8bit_string(T* dest, int count, char const* source)
 template <class T, int N>
 void from_8bit_string(T(&dest)[N], char const* source)
 { from_8bit_string(dest, N, source); }
+
+template <class T, class Pred>
+std::vector<T> filter_vector(std::vector<T> const& in, Pred pred)
+{
+  std::vector<T> result;
+  std::copy_if(in.begin(), in.end(), std::back_inserter(result), pred);
+  return result;
+}
 
 template <class T, class Unary>
 auto map_vector(std::vector<T> const& in, Unary op) ->

@@ -5,6 +5,7 @@
 #include <plugin_base/shared/utility.hpp>
 
 #include <infernal_synth/synth.hpp>
+
 #include <cmath>
 #include <algorithm>
 
@@ -100,47 +101,14 @@ cv_matrix_topo(
   target_param.gui.bindings.enabled.params = enabled_params;
   target_param.gui.bindings.enabled.selector = enabled_selector;
   target_param.dependent_index = param_target;
+  auto is_modulatable = [](auto const& p) { return p.dsp.rate == param_rate::accurate; };
   for (int i = 0; i < targets.size(); i++)
-    target_param.dependents.push_back(make_domain_item(map_vector(targets[i]->params, list_item::from_topo<param_topo>), ""));
- 
-#if 0
-  auto& osc_target = result.params.emplace_back(make_param(
-    make_topo_info("{28286D1C-6A9D-4CD4-AB70-4A3AFDF7302B}", "Osc Param", param_target_osc_param, route_count),
-    make_param_dsp_block(), make_domain_item(target_params(osc), ""),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 5 }, 
-      make_label_none())));
-    osc_target.gui.bindings.enabled.params = enabled_params;
-  osc_target.gui.bindings.enabled.selector = enabled_selector;
-  osc_target.gui.bindings.visible.params = { param_target };
-  osc_target.gui.bindings.visible.context = { index_of_item_tag(result.params[param_target].domain.items, module_osc) };
-  osc_target.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
-  
-  auto& filter_target = result.params.emplace_back(make_param(
-    make_topo_info("{B8098815-BBD5-4171-9AAF-CE4B6645AEE2}", "Filter Param", param_target_filter_param, route_count),
-    make_param_dsp_block(), make_domain_item(target_params(filter), ""),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 5 }, 
-      make_label_none())));
-  filter_target.gui.bindings.enabled.params = enabled_params;
-  filter_target.gui.bindings.enabled.selector = enabled_selector;
-  filter_target.gui.bindings.visible.params = { param_target };
-  filter_target.gui.bindings.visible.context = { index_of_item_tag(result.params[param_target].domain.items, module_filter) };
-  filter_target.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0]; };
-  
-  int FILTER_PARAM_OSC_GAIN = 2; // TODO
-  auto& osc_gain_index = result.params.emplace_back(make_param(
-    make_topo_info("{FB4EB870-48DD-40D5-9D0E-2E9F0C4E3C48}", "Filter Osc Gain", param_target_filter_param_osc_gain_index, route_count),
-    make_param_dsp_block(), make_domain_step(0, filter.params[FILTER_PARAM_OSC_GAIN].info.slot_count - 1, 0, 1),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 6 }, 
-      make_label_none())));
-  osc_gain_index.gui.bindings.enabled.params = enabled_params;
-  osc_gain_index.gui.bindings.enabled.selector = enabled_selector;
-  osc_gain_index.gui.bindings.visible.params = { param_target, param_target_filter_param };
-  osc_gain_index.gui.bindings.visible.context = {
-    index_of_item_tag(result.params[param_target].domain.items, module_filter),
-    index_of_item_tag(result.params[param_target_filter_param].domain.items, FILTER_PARAM_OSC_GAIN )};
-  osc_gain_index.gui.bindings.visible.selector = [](auto const& vs, auto const& ctx) { return vs[0] == ctx[0] && vs[1] == ctx[1]; };
+  { 
+    auto modulatable_params = filter_vector(targets[i]->params, is_modulatable);
+    auto modulatable_items = map_vector(modulatable_params, list_item::from_topo<param_topo>);
+    target_param.dependents.push_back(make_domain_item(modulatable_items, ""));
+  }
 
-#endif
   return result;
 }
 
