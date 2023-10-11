@@ -20,6 +20,7 @@ param_topo::validate(module_topo const& module, int index) const
   {
     assert(dependent_index == 0);
     assert(dependents.size() == 0);
+    assert(domain.max > domain.min);
     assert(gui.edit_type != gui_edit_type::dependent);
   }
   else
@@ -29,9 +30,12 @@ param_topo::validate(module_topo const& module, int index) const
     assert(gui.edit_type == gui_edit_type::dependent);
     assert(info.slot_count == module.params[dependent_index].info.slot_count);
     for(int i = 0; i < dependents.size(); i++)
+    {
+      dependents[i].validate();
       assert(dependents[i].type == domain_type::item 
           || dependents[i].type == domain_type::name 
           || dependents[i].type == domain_type::step);
+    }
   }
 
   assert(info.index == index);
