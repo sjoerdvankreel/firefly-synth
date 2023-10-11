@@ -25,18 +25,21 @@ param_topo::validate(module_topo const& module, int index) const
   }
   else
   {
+    int max = -1;
     assert(dependent_index >= 0);
     assert(dependents.size() > 1);
     assert(gui.edit_type == gui_edit_type::dependent);
     assert(info.slot_count == module.params[dependent_index].info.slot_count);
     for(int i = 0; i < dependents.size(); i++)
     {
+      max = std::max(max, (int)dependents[i].max);
       dependents[i].validate();
       assert(dependents[i].min == 0);
       assert(dependents[i].type == domain_type::item 
           || dependents[i].type == domain_type::name 
           || dependents[i].type == domain_type::step);
     }
+    assert(max == domain.max);
   }
 
   assert(info.index == index);

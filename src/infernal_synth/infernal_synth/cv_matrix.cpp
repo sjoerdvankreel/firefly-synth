@@ -66,16 +66,17 @@ cv_matrix_topo(
   source.gui.bindings.enabled.params = enabled_params;
   source.gui.bindings.enabled.selector = enabled_selector;
   
+  auto map_to_slot_domain = [](auto const& m) { return make_domain_step(0, m->info.slot_count - 1, 1, 1); };
+  auto source_slot_domains = map_vector(sources, map_to_slot_domain);
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
-    make_param_dsp_block(), make_domain_dependent(),
+    make_param_dsp_block(), make_domain_dependent(source_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 2 }, 
       make_label_none())));
+  source_index.dependent_index = param_source;
+  //source_index.dependents = source_slot_domains;
   source_index.gui.bindings.enabled.params = enabled_params;
   source_index.gui.bindings.enabled.selector = enabled_selector;
-  source_index.dependent_index = param_source;
-  for (int i = 0; i < sources.size(); i++)
-    source_index.dependents.push_back(make_domain_step(0, sources[i]->info.slot_count - 1, 1, 1));
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
@@ -85,32 +86,33 @@ cv_matrix_topo(
   target.gui.bindings.enabled.params = enabled_params;
   target.gui.bindings.enabled.selector = enabled_selector;
   
+  auto target_slot_domains = map_vector(targets, map_to_slot_domain);
   auto& target_index = result.params.emplace_back(make_param(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
-    make_param_dsp_block(), make_domain_dependent(),
+    make_param_dsp_block(), make_domain_dependent(target_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 4 },
       make_label_none())));
+  target_index.dependent_index = param_target;
+  //target_index.dependents = target_slot_domains;
   target_index.gui.bindings.enabled.params = enabled_params;
   target_index.gui.bindings.enabled.selector = enabled_selector;
-  target_index.dependent_index = param_target;
-  for (int i = 0; i < targets.size(); i++)
-    target_index.dependents.push_back(make_domain_step(0, targets[i]->info.slot_count - 1, 1, 1));
+
+  std::vector<param_domain> target_param_domains;
+  auto is_modulatable = [](auto const& p) { return p.dsp.rate == param_rate::accurate; };
+  std::vector<std::vector<param_topo>> target_params = map_vector(targets, [](auto const& m) { return m->params; });
+  std::vector<std::vector<param_topo>> modulatable_target_params = map_vector(target_params, [is_modulatable](auto const& ps) { return filter_vector(ps, is_modulatable); });
+  std::vector<std::vector<list_item>> modulatable_target_items = map_vector(modulatable_target_params, [](auto const& ps) { return map_vector(ps, list_item::from_topo<param_topo>); });
+  std::vector<param_domain> modulatable_target_domains = map_vector(modulatable_target_items, [](auto const& is) { return make_domain_item(is, ""); });
 
   auto& target_param = result.params.emplace_back(make_param(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
-    make_param_dsp_block(), make_domain_dependent(),
+    make_param_dsp_block(), make_domain_dependent(modulatable_target_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 5 },
       make_label_none())));
+  target_param.dependent_index = param_target;
+  //target_param.dependents = modulatable_target_domains;
   target_param.gui.bindings.enabled.params = enabled_params;
   target_param.gui.bindings.enabled.selector = enabled_selector;
-  target_param.dependent_index = param_target;
-  auto is_modulatable = [](auto const& p) { return p.dsp.rate == param_rate::accurate; };
-  for (int i = 0; i < targets.size(); i++)
-  { 
-    auto modulatable_params = filter_vector(targets[i]->params, is_modulatable);
-    auto modulatable_items = map_vector(modulatable_params, list_item::from_topo<param_topo>);
-    target_param.dependents.push_back(make_domain_item(modulatable_items, ""));
-  }
 
   return result;
 }

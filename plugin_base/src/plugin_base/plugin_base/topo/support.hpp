@@ -44,9 +44,9 @@ make_param_dsp_output()
 { return make_param_dsp(param_direction::output, param_rate::block); }
 
 param_domain
-make_domain_dependent();
-param_domain
 make_domain_toggle(bool default_);
+param_domain
+make_domain_dependent(std::vector<param_domain> const& dependents);
 param_domain
 make_domain_step(int min, int max, int default_, int display_offset);
 param_domain

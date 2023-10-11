@@ -140,7 +140,6 @@ param_domain::validate() const
   if (type == domain_type::dependent)
   {
     assert(min == 0);
-    assert(max == 999);
     assert(display_offset == 0);
   }
 

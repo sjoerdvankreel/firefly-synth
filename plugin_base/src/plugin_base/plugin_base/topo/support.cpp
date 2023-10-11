@@ -83,13 +83,15 @@ make_module_gui(gui_layout layout, gui_position const& position, gui_dimension c
 }
 
 param_domain
-make_domain_dependent()
+make_domain_dependent(std::vector<param_domain> const& dependents)
 {
   param_domain result = {};
+  auto selector = [](auto const& d) { return d.max; };
+  auto domain_limits = map_vector(dependents, selector);
   result.min = 0;
-  result.max = 999;
   result.default_ = std::to_string(0);
   result.type = domain_type::dependent;
+  result.max = *std::max_element(domain_limits.begin(), domain_limits.end());
   return result;
 }
 

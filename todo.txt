@@ -27,6 +27,7 @@ dependent:
 - storage/io
 - display values
 - max of max
+- do clamp_to_dependent
 
 * continuing
 - keep updating the demo tracks
