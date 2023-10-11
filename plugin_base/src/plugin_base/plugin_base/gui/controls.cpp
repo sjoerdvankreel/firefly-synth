@@ -163,8 +163,7 @@ void
 param_dependent::own_param_changed(plain_value plain)
 {
   if(_dependent_value == -1) return;
-  int min = _param->param->dependents[_dependent_value].min;
-  _dependents[_dependent_value]->setSelectedItemIndex(plain.step() - min);
+  _dependents[_dependent_value]->setSelectedItemIndex(plain.step());
 }
 
 void
@@ -173,8 +172,8 @@ param_dependent::comboBoxChanged(ComboBox* box)
   for(int i = 0; i < _dependents.size(); i++)
   {
     if(_dependents[i].get() != box) continue;
-    int value = _param->param->dependents[i].min + box->getSelectedItemIndex();
-    if (_own_value != value)
+    int value = box->getSelectedItemIndex();
+    if (_own_value != value && value != -1)
     {
       _own_value = value;
       plain_value plain = _param->param->domain.raw_to_plain(value);
@@ -193,12 +192,10 @@ param_dependent::update_dependents()
   if(_dependent_value == dependent_value) return;
 
   _dependent_value = dependent_value;
-  int dependent_min = _module->module->params[_param->param->dependent_index].domain.min;
   for(int i = 0; i < _dependents.size(); i++)
   {
-    auto const& domain = _param->param->dependents[i];
-    _dependents[i]->setEnabled(domain.max - domain.min > 0);
-    _dependents[i]->setVisible(i == dependent_value - dependent_min);
+    _dependents[i]->setVisible(i == dependent_value);
+    _dependents[i]->setEnabled(_param->param->dependents[i].max > 0);
   }
 }
 

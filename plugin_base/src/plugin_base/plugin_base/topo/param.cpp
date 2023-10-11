@@ -32,6 +32,7 @@ param_topo::validate(module_topo const& module, int index) const
     for(int i = 0; i < dependents.size(); i++)
     {
       dependents[i].validate();
+      assert(dependents[i].min == 0);
       assert(dependents[i].type == domain_type::item 
           || dependents[i].type == domain_type::name 
           || dependents[i].type == domain_type::step);
