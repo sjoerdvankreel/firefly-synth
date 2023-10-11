@@ -163,7 +163,8 @@ void
 param_dependent::own_param_changed(plain_value plain)
 {
   if(_dependent_value == -1) return;
-  _dependents[_dependent_value]->setSelectedItemIndex(plain.step());
+  int index = std::clamp(plain.step(), 0, (int)_param->param->dependents[_dependent_value].max);
+  _dependents[_dependent_value]->setSelectedItemIndex(index, juce::dontSendNotification);
 }
 
 void
@@ -192,6 +193,7 @@ param_dependent::update_dependents()
   if(_dependent_value == dependent_value) return;
 
   _dependent_value = dependent_value;
+  own_param_changed(_param->param->domain.raw_to_plain(_own_value));
   for(int i = 0; i < _dependents.size(); i++)
   {
     _dependents[i]->setVisible(i == dependent_value);

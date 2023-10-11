@@ -22,6 +22,11 @@ do cakewalk bug report
 test all host+linux
 drop module_desc/param_desc topo?
 allow automation dependent/depending through param handler
+dependent:
+- automation
+- storage/io
+- display values
+- max of max
 
 * continuing
 - keep updating the demo tracks
