@@ -87,7 +87,7 @@ make_domain_dependent(std::vector<param_domain> const& dependents)
 {
   param_domain result = {};
   auto selector = [](auto const& d) { return d.max; };
-  auto domain_limits = map_vector(dependents, selector);
+  auto domain_limits = vector_map(dependents, selector);
   result.min = 0;
   result.default_ = std::to_string(0);
   result.type = domain_type::dependent;

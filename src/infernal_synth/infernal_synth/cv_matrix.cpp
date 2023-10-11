@@ -60,59 +60,59 @@ cv_matrix_topo(
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
-    make_param_dsp_block(), make_domain_item(map_vector(sources, list_item::from_topo_ptr<module_topo>), ""),
+    make_param_dsp_block(), make_domain_item(vector_map(sources, list_item::from_topo_ptr<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 1 }, 
       make_label_none())));
   source.gui.bindings.enabled.params = enabled_params;
   source.gui.bindings.enabled.selector = enabled_selector;
   
   auto map_to_slot_domain = [](auto const& m) { return make_domain_step(0, m->info.slot_count - 1, 1, 1); };
-  auto source_slot_domains = map_vector(sources, map_to_slot_domain);
+  auto source_slot_domains = vector_map(sources, map_to_slot_domain);
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
     make_param_dsp_block(), make_domain_dependent(source_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 2 }, 
       make_label_none())));
-  source_index.dependent_index = param_source;
-  //source_index.dependents = source_slot_domains;
   source_index.gui.bindings.enabled.params = enabled_params;
   source_index.gui.bindings.enabled.selector = enabled_selector;
+  source_index.dependent_index = param_source;
+  source_index.dependents = vector_explicit_copy(source_slot_domains);
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
-    make_param_dsp_block(), make_domain_item(map_vector(targets, list_item::from_topo_ptr<module_topo>), ""),
+    make_param_dsp_block(), make_domain_item(vector_map(targets, list_item::from_topo_ptr<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 3 }, 
       make_label_none())));
   target.gui.bindings.enabled.params = enabled_params;
   target.gui.bindings.enabled.selector = enabled_selector;
   
-  auto target_slot_domains = map_vector(targets, map_to_slot_domain);
+  auto target_slot_domains = vector_map(targets, map_to_slot_domain);
   auto& target_index = result.params.emplace_back(make_param(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
     make_param_dsp_block(), make_domain_dependent(target_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 4 },
       make_label_none())));
-  target_index.dependent_index = param_target;
-  //target_index.dependents = target_slot_domains;
   target_index.gui.bindings.enabled.params = enabled_params;
   target_index.gui.bindings.enabled.selector = enabled_selector;
+  target_index.dependent_index = param_target;
+  target_index.dependents = vector_explicit_copy(target_slot_domains);
 
   std::vector<param_domain> target_param_domains;
   auto is_modulatable = [](auto const& p) { return p.dsp.rate == param_rate::accurate; };
-  std::vector<std::vector<param_topo>> target_params = map_vector(targets, [](auto const& m) { return m->params; });
-  std::vector<std::vector<param_topo>> modulatable_target_params = map_vector(target_params, [is_modulatable](auto const& ps) { return filter_vector(ps, is_modulatable); });
-  std::vector<std::vector<list_item>> modulatable_target_items = map_vector(modulatable_target_params, [](auto const& ps) { return map_vector(ps, list_item::from_topo<param_topo>); });
-  std::vector<param_domain> modulatable_target_domains = map_vector(modulatable_target_items, [](auto const& is) { return make_domain_item(is, ""); });
+  auto target_params = vector_map(targets, [](auto const& m) { return m->params; });
+  auto modulatable_target_params = vector_map(target_params, [is_modulatable](auto const& ps) { return vector_filter(ps, is_modulatable); });
+  auto modulatable_target_items = vector_map(modulatable_target_params, [](auto const& ps) { return vector_map(ps, list_item::from_topo<param_topo>); });
+  auto modulatable_target_domains = vector_map(modulatable_target_items, [](auto const& is) { return make_domain_item(is, ""); });
 
   auto& target_param = result.params.emplace_back(make_param(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
     make_param_dsp_block(), make_domain_dependent(modulatable_target_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 5 },
       make_label_none())));
-  target_param.dependent_index = param_target;
-  //target_param.dependents = modulatable_target_domains;
   target_param.gui.bindings.enabled.params = enabled_params;
   target_param.gui.bindings.enabled.selector = enabled_selector;
+  target_param.dependent_index = param_target;
+  target_param.dependents = vector_explicit_copy(modulatable_target_domains);
 
   return result;
 }

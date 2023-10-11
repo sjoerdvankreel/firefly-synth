@@ -67,17 +67,25 @@ template <class T, int N>
 void from_8bit_string(T(&dest)[N], char const* source)
 { from_8bit_string(dest, N, source); }
 
-template <class T, class Pred>
-std::vector<T> filter_vector(std::vector<T> const& in, Pred pred)
+template <class T> std::vector<T> 
+vector_explicit_copy(std::vector<T> const& in)
+{
+  std::vector<T> result;
+  for (int i = 0; i < in.size(); i++)
+    result.push_back(T(in[i]));
+  return result;
+}
+
+template <class T, class Pred> std::vector<T> 
+vector_filter(std::vector<T> const& in, Pred pred)
 {
   std::vector<T> result;
   std::copy_if(in.begin(), in.end(), std::back_inserter(result), pred);
   return result;
 }
 
-template <class T, class Unary>
-auto map_vector(std::vector<T> const& in, Unary op) ->
-std::vector<decltype(op(in[0]))>
+template <class T, class Unary> auto 
+vector_map(std::vector<T> const& in, Unary op) -> std::vector<decltype(op(in[0]))>
 {
   std::vector<decltype(op(in[0]))> result(in.size(), decltype(op(in[0])) {});
   std::transform(in.begin(), in.end(), result.begin(), op);

@@ -14,7 +14,7 @@ section_topo::validate(module_topo const& module, int index_) const
   assert(this->index == index_);
   auto include = [this, &module](int p) { return module.params[p].gui.section == this->index; };
   auto always_visible = [&module](int p) { return module.params[p].gui.bindings.visible.selector == nullptr; };
-  gui.dimension.validate(map_vector(module.params, [](auto const& p){ return p.gui.position; }), include, always_visible);
+  gui.dimension.validate(vector_map(module.params, [](auto const& p){ return p.gui.position; }), include, always_visible);
 }
 
 }

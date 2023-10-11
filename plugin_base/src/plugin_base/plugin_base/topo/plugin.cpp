@@ -18,7 +18,7 @@ plugin_topo::validate() const
 
   tag.validate();
   auto return_true = [](int) { return true; };
-  gui.dimension.validate(map_vector(modules, [](auto const& m) { return m.gui.position; }), return_true, return_true);
+  gui.dimension.validate(vector_map(modules, [](auto const& m) { return m.gui.position; }), return_true, return_true);
 
   int stage = 0;
   std::set<std::string> all_ids;
