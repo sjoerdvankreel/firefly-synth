@@ -19,12 +19,14 @@ struct list_item final {
   std::string id = {};
   std::string name = {};
 
-  template <class T> static list_item 
-  from_topo(T const* topo) { return list_item(topo->info.tag); }
-
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   list_item(topo_tag const& tag);
   list_item(std::string const& id, std::string const& name);
+
+  template <class T> static list_item 
+  from_topo(T const& topo) { return list_item(topo.info.tag); }
+  template <class T> static list_item 
+  from_topo_ptr(T const* topo) { return list_item(topo->info.tag); }
 };
 
 // parameter bounds

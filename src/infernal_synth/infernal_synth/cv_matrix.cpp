@@ -15,7 +15,7 @@ namespace infernal_synth {
 static int constexpr route_count = 8;
 
 enum { section_main };
-enum { param_on, param_active, param_source, param_source_index, param_target, param_target_index };
+enum { param_on, param_active, param_source, param_source_index, param_target, param_target_index, param_target_param };
 
 class cv_matrix_engine:
 public module_engine { 
@@ -41,12 +41,12 @@ cv_matrix_topo(
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1 } })));
+    make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1, 1 } })));
   
   result.params.emplace_back(make_param(
     make_topo_info("{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", param_on, 1),
     make_param_dsp_block(), make_domain_toggle(true),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 5 }, 
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 6 }, 
       make_label_default(gui_label_contents::name))));
   
   auto& active = result.params.emplace_back(make_param(
@@ -59,7 +59,7 @@ cv_matrix_topo(
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
-    make_param_dsp_block(), make_domain_item(map_vector(sources, list_item::from_topo<module_topo>), ""),
+    make_param_dsp_block(), make_domain_item(map_vector(sources, list_item::from_topo_ptr<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 1 }, 
       make_label_none())));
   source.gui.bindings.enabled.params = enabled_params;
@@ -78,7 +78,7 @@ cv_matrix_topo(
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
-    make_param_dsp_block(), make_domain_item(map_vector(targets, list_item::from_topo<module_topo>), ""),
+    make_param_dsp_block(), make_domain_item(map_vector(targets, list_item::from_topo_ptr<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 3 }, 
       make_label_none())));
   target.gui.bindings.enabled.params = enabled_params;
@@ -91,6 +91,17 @@ cv_matrix_topo(
       make_label_none())));
   target_index.gui.bindings.enabled.params = enabled_params;
   target_index.gui.bindings.enabled.selector = enabled_selector;
+
+  auto& target_param = result.params.emplace_back(make_param(
+    make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
+    make_param_dsp_block(), make_domain_dependent(),
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 5 },
+      make_label_none())));
+  target_param.gui.bindings.enabled.params = enabled_params;
+  target_param.gui.bindings.enabled.selector = enabled_selector;
+  target_param.dependent_index = param_target;
+  for (int i = 0; i < targets.size(); i++)
+    target_param.dependents.push_back(make_domain_item(map_vector(targets[i]->params, list_item::from_topo<param_topo>), ""));
  
 #if 0
   auto& osc_target = result.params.emplace_back(make_param(
