@@ -31,7 +31,7 @@ cv_matrix_topo(
   std::vector<module_topo const*> const& targets)
 {
   std::vector<int> enabled_params = { param_on, param_active };
-  gui_binding_selector enabled_selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] != 0; };
+  gui_binding_selector enabled_selector = [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; };
 
   module_topo result(make_module(
     make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1), 
@@ -55,7 +55,7 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::toggle, gui_layout::vertical, { 1, 0 }, 
       make_label_none())));
   active.gui.bindings.enabled.params = { param_on };
-  active.gui.bindings.enabled.selector = [](auto const& vs, auto const&) { return vs[0] != 0; };
+  active.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] != 0; };
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),

@@ -23,8 +23,7 @@ enum class gui_edit_type { toggle, list, text, knob, hslider, vslider };
 
 typedef bool(*
 gui_binding_selector)(
-  std::vector<int> const& values, 
-  std::vector<int> const& context);
+  std::vector<int> const& values);
 
 // plugin and section metadata
 struct topo_tag final {
@@ -67,7 +66,6 @@ struct gui_position final {
 // binding to enabled/visible
 struct gui_binding final {
   std::vector<int> params = {};
-  std::vector<int> context = {};
   gui_binding_selector selector = {};
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_binding);

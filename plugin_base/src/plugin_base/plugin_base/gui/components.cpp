@@ -34,7 +34,7 @@ binding_component::bind(
     auto const& mapping = _gui->desc()->mappings.params[params[i]];
     values.push_back(mapping.value_at(_gui->gui_state()).step());
   }
-  return binding.selector(values, binding.context);
+  return binding.selector(values);
 }
 
 void

@@ -44,7 +44,6 @@ void
 gui_binding::validate(module_topo const& module, int slot_count) const
 {
   assert((params.size() == 0) == (selector == nullptr));
-  assert((context.size() == 0) || (context.size() == params.size()));
   for (int i = 0; i < params.size(); i++)
   {
     auto const& bound = module.params[params[i]];

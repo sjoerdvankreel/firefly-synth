@@ -54,17 +54,17 @@ osc_topo()
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
     make_section_gui({ 0, 0, 1, 4 }, { 1, 3 })));
   pitch.gui.bindings.enabled.params = { param_on };
-  pitch.gui.bindings.enabled.selector = [](auto const& vs, auto const&) { return vs[0] != 0; };
+  pitch.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] != 0; };
   auto& sine_gain = result.sections.emplace_back(make_section(section_sine_gain,
     make_topo_tag("{A3D3BDF9-5CD0-47D2-BBDD-1BAD1274CDC4}", "Sine gain"),
     make_section_gui({ 1, 3, 1, 1 }, { 1, 1 })));
   sine_gain.gui.bindings.visible.params = { param_on, param_type };
-  sine_gain.gui.bindings.visible.selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_sine; };
+  sine_gain.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0 && vs[1] == type_sine; };
   auto& saw_gain = result.sections.emplace_back(make_section(section_saw_gain,
     make_topo_tag("{8CACFECE-A9D1-4B49-AEE6-015EAF5CA682}", "Saw gain"),
     make_section_gui( { 1, 3, 1, 1 }, { 1, 1 })));
   saw_gain.gui.bindings.visible.params = { param_on, param_type };
-  saw_gain.gui.bindings.visible.selector = [](auto const& vs, auto const&) { return vs[0] != 0 && vs[1] == type_saw; };
+  saw_gain.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0 && vs[1] == type_saw; };
 
   result.params.emplace_back(make_param(
     make_topo_info("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", param_on, 1),
