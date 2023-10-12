@@ -3,6 +3,7 @@
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/block/host.hpp>
+#include <plugin_base/shared/state.hpp>
 
 #include <clap/helpers/plugin.hh>
 #include <readerwriterqueue.h>
@@ -13,6 +14,8 @@
 namespace plugin_base::clap {
 
 inline int constexpr default_q_size = 4096;
+typedef std::unique_ptr<plugin_topo>(*topo_factory)();
+
 enum class sync_event_type { end_edit, begin_edit, value_changing };
 
 // linear and log map to normalized, step maps to plain
@@ -42,8 +45,8 @@ public gui_listener, public juce::Timer
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
 
   plugin_engine _engine;
+  plugin_state _gui_state = {};
   std::unique_ptr<plugin_gui> _gui = {};
-  jarray<plain_value, 4> _gui_state = {};
   std::vector<int> _block_automation_seen = {};
   std::unique_ptr<event_queue> _to_gui_events = {};
   std::unique_ptr<event_queue> _to_audio_events = {};
@@ -58,7 +61,9 @@ public gui_listener, public juce::Timer
 public:
   ~inf_plugin() { stopTimer(); }
   INF_PREVENT_ACCIDENTAL_COPY(inf_plugin);
-  inf_plugin(clap_plugin_descriptor const* desc, clap_host const* host, std::unique_ptr<plugin_topo>&& topo);
+  inf_plugin(
+    clap_plugin_descriptor const* desc, 
+    clap_host const* host, topo_factory factory);
   
   bool implementsGui() const noexcept override { return true; }
   bool implementsState() const noexcept override { return true; }

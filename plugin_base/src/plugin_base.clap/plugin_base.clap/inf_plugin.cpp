@@ -47,17 +47,12 @@ forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
 inf_plugin::
 inf_plugin(
   clap_plugin_descriptor const* desc, 
-  clap_host const* host, std::unique_ptr<plugin_topo>&& topo):
+  clap_host const* host, topo_factory factory):
 Plugin(desc, host), 
-_engine(std::move(topo), forward_thread_pool_voice_processor, this),
+_engine(factory(), forward_thread_pool_voice_processor, this), _gui_state(factory()),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
-{
-  plugin_dims dims(*_engine.desc().plugin);
-  _gui_state.resize(dims.module_slot_param_slot);
-  _engine.desc().init_defaults(_gui_state);
-  _block_automation_seen.resize(_engine.desc().param_count);
-}
+{ _block_automation_seen.resize(_engine.desc().param_count); }
 
 bool
 inf_plugin::init() noexcept
@@ -75,7 +70,7 @@ inf_plugin::timerCallback()
   while (_to_gui_events->try_dequeue(e))
   {
     param_mapping const& mapping = _engine.desc().mappings.params[e.index];
-    mapping.value_at(_gui_state) = e.plain;
+    mapping.value_at(_gui_state.state()) = e.plain;
     if(_gui) _gui->plugin_changed(e.index, e.plain);
   }
 }
@@ -84,7 +79,7 @@ bool
 inf_plugin::stateSave(clap_ostream const* stream) noexcept
 {
   plugin_io io(&_engine.desc());
-  std::vector<char> data(io.save(_gui_state));
+  std::vector<char> data(io.save(_gui_state.state()));
   return stream->write(stream, data.data(), data.size()) == data.size();
 }
 
@@ -101,9 +96,9 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
   } while(true);
 
   plugin_io io(&_engine.desc());
-  if (!io.load(data, _gui_state).ok()) return false;
+  if (!io.load(data, _gui_state.state()).ok()) return false;
   for (int p = 0; p < _engine.desc().param_count; p++)
-    gui_changed(p, _engine.desc().mappings.params[p].value_at(_gui_state));
+    gui_changed(p, _engine.desc().mappings.params[p].value_at(_gui_state.state()));
   return true;
 }
 
@@ -177,7 +172,7 @@ inf_plugin::guiDestroy() noexcept
 bool
 inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
-  _gui = std::make_unique<plugin_gui>(&_engine.desc(), &_gui_state);
+  _gui = std::make_unique<plugin_gui>(&_gui_state);
   return true;
 }
 
@@ -223,7 +218,7 @@ inf_plugin::gui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
   param_mapping const& mapping = _engine.desc().mappings.params[index];
-  mapping.value_at(_gui_state) = plain;
+  mapping.value_at(_gui_state.state()) = plain;
   if(_gui) _gui->plugin_changed(index, plain);
 }
 
@@ -284,7 +279,7 @@ inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
   int index = getParamIndexForParamId(param_id);
   param_mapping const& mapping(_engine.desc().mappings.params[index]);
   auto const& topo = *_engine.desc().param_at(mapping).param;
-  *value = normalized_to_clap(topo, topo.domain.plain_to_normalized(mapping.value_at(_gui_state))).value();
+  *value = normalized_to_clap(topo, topo.domain.plain_to_normalized(mapping.value_at(_gui_state.state()))).value();
   return true;
 }
 
