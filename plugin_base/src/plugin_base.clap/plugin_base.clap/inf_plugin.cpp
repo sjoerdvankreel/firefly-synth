@@ -78,8 +78,7 @@ inf_plugin::timerCallback()
 bool 
 inf_plugin::stateSave(clap_ostream const* stream) noexcept
 {
-  plugin_io io(&_engine.state().desc());
-  std::vector<char> data(io.save(_gui_state.state()));
+  std::vector<char> data(plugin_io_save(_gui_state));
   return stream->write(stream, data.data(), data.size()) == data.size();
 }
 
@@ -95,8 +94,7 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
     data.push_back(byte);
   } while(true);
 
-  plugin_io io(&_engine.state().desc());
-  if (!io.load(data, _gui_state.state()).ok()) return false;
+  if (!plugin_io_load(data, _gui_state).ok()) return false;
   for (int p = 0; p < _engine.state().desc().param_count; p++)
     gui_changed(p, _engine.state().desc().mappings.params[p].value_at(_gui_state.state()));
   return true;

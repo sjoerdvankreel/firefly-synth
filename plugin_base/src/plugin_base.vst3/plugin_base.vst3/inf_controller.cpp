@@ -84,7 +84,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 tresult PLUGIN_API
 inf_controller::setComponentState(IBStream* state)
 {
-  if (!load_state(gui_state().desc(), state, gui_state().state()))
+  if (!load_state(state, gui_state()))
     return kResultFalse;
   for (int p = 0; p < gui_state().desc().param_count; p++)
     gui_changed(p, gui_state().desc().mappings.params[p].value_at(gui_state().state()));

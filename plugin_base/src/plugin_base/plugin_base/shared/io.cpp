@@ -16,8 +16,8 @@ static int const version = 1;
 static std::string const magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
 load_result
-plugin_io::load_file(
-  std::filesystem::path const& path, jarray<plain_value, 4>& state) const
+plugin_io_load_file(
+  std::filesystem::path const& path, plugin_state& state)
 {
   load_result failed("Could not read file.");
   std::ifstream stream(path, std::ios::binary | std::ios::ate);
@@ -28,39 +28,39 @@ plugin_io::load_file(
   std::vector<char> data(size, 0);
   stream.read(data.data(), size);
   if (stream.bad()) return failed;
-  return load(data, state);
+  return plugin_io_load(data, state);
 };
 
 bool
-plugin_io::save_file(
-  std::filesystem::path const& path, jarray<plain_value, 4> const& state) const
+plugin_io_save_file(
+  std::filesystem::path const& path, plugin_state const& state)
 {
   std::ofstream stream(path, std::ios::out | std::ios::binary);
   if (stream.bad()) return false;
-  auto data(save(state));
+  auto data(plugin_io_save(state));
   stream.write(data.data(), data.size());
   return !stream.bad();
 }
 
 std::vector<char>
-plugin_io::save(jarray<plain_value, 4> const& state) const
+plugin_io_save(plugin_state const& state)
 {
   auto root = std::make_unique<DynamicObject>();
   root->setProperty("magic", var(magic));
   root->setProperty("version", var(version));
 
   auto plugin = std::make_unique<DynamicObject>();
-  plugin->setProperty("id", String(_desc->plugin->tag.id));
-  plugin->setProperty("name", String(_desc->plugin->tag.name));
-  plugin->setProperty("version_major", _desc->plugin->version_major);
-  plugin->setProperty("version_minor", _desc->plugin->version_minor);
+  plugin->setProperty("id", String(state.desc().plugin->tag.id));
+  plugin->setProperty("name", String(state.desc().plugin->tag.name));
+  plugin->setProperty("version_major", state.desc().plugin->version_major);
+  plugin->setProperty("version_minor", state.desc().plugin->version_minor);
   
   // store some topo info so we can provide meaningful warnings
   var modules;
-  for (int m = 0; m < _desc->plugin->modules.size(); m++)
+  for (int m = 0; m < state.desc().plugin->modules.size(); m++)
   {
     var params;
-    auto const& module_topo = _desc->plugin->modules[m];
+    auto const& module_topo = state.desc().plugin->modules[m];
     auto module = std::make_unique<DynamicObject>();
     module->setProperty("id", String(module_topo.info.tag.id));
     module->setProperty("name", String(module_topo.info.tag.name));
@@ -82,10 +82,10 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
 
   // dump the textual values in 4d format
   var module_states;
-  for (int m = 0; m < _desc->plugin->modules.size(); m++)
+  for (int m = 0; m < state.desc().plugin->modules.size(); m++)
   {
     var module_slot_states;
-    auto const& module_topo = _desc->plugin->modules[m];
+    auto const& module_topo = state.desc().plugin->modules[m];
     auto module_state = std::make_unique<DynamicObject>();
     for (int mi = 0; mi < module_topo.info.slot_count; mi++)
     {
@@ -98,7 +98,7 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
         if(param_topo.dsp.direction == param_direction::output) continue;
         auto param_state = std::make_unique<DynamicObject>();
         for (int pi = 0; pi < param_topo.info.slot_count; pi++)
-          param_slot_states.append(var(String(param_topo.domain.plain_to_text(state[m][mi][p][pi]))));
+          param_slot_states.append(var(String(param_topo.domain.plain_to_text(state.state()[m][mi][p][pi]))));
         param_state->setProperty("slots", param_slot_states);
         param_states.append(var(param_state.release()));
       }
@@ -122,8 +122,8 @@ plugin_io::save(jarray<plain_value, 4> const& state) const
 }
 
 load_result
-plugin_io::load(
-  std::vector<char> const& data, jarray<plain_value, 4>& state) const
+plugin_io_load(
+  std::vector<char> const& data, plugin_state& state)
 {
   var root;
   std::string json(data.size(), '\0');
@@ -141,28 +141,28 @@ plugin_io::load(
     return load_result("Invalid version.");
 
   var plugin = root["plugin"];
-  if(plugin["id"] != _desc->plugin->tag.id)
+  if(plugin["id"] != state.desc().plugin->tag.id)
     return load_result("Invalid plugin id.");
-  if((int)plugin["version_major"] > _desc->plugin->version_major) 
+  if((int)plugin["version_major"] > state.desc().plugin->version_major)
     return load_result("Invalid plugin version.");
-  if((int)plugin["version_major"] == _desc->plugin->version_major)
-    if((int)plugin["version_minor"] > _desc->plugin->version_minor) 
+  if((int)plugin["version_major"] == state.desc().plugin->version_major)
+    if((int)plugin["version_minor"] > state.desc().plugin->version_minor)
       return load_result("Invalid plugin version.");
   if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) 
     return load_result("Invalid checksum.");
 
   // good to go - only warnings from now on
   load_result result;
-  plugin_dims dims(*_desc->plugin);
-  state.resize(dims.module_slot_param_slot);
-  _desc->init_defaults(state);
+  plugin_dims dims(*state.desc().plugin);
+  state.state().resize(dims.module_slot_param_slot);
+  state.desc().init_defaults(state.state());
   for(int m = 0; m < plugin["modules"].size(); m++)
   {
     // check for old module not found
     auto module_id = plugin["modules"][m]["id"].toString().toStdString();
     auto module_name = plugin["modules"][m]["name"].toString().toStdString();
-    auto module_iter = _desc->module_id_to_index.find(module_id);
-    if (module_iter == _desc->module_id_to_index.end())
+    auto module_iter = state.desc().module_id_to_index.find(module_id);
+    if (module_iter == state.desc().module_id_to_index.end())
     {
       result.warnings.push_back("Module '" + module_name + "' was deleted.");
       continue;
@@ -170,7 +170,7 @@ plugin_io::load(
 
     // check for changed module slot count
     var module_slot_count = plugin["modules"][m]["slot_count"];
-    auto const& new_module = _desc->plugin->modules[module_iter->second];
+    auto const& new_module = state.desc().plugin->modules[module_iter->second];
     if ((int)module_slot_count != new_module.info.slot_count)
       result.warnings.push_back("Module '" + new_module.info.tag.name + "' changed slot count.");
 
@@ -179,8 +179,8 @@ plugin_io::load(
       // check for old param not found
       auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
       auto param_name = plugin["modules"][m]["params"][p]["name"].toString().toStdString();
-      auto param_iter = _desc->mappings.id_to_index.at(module_id).find(param_id);
-      if (param_iter == _desc->mappings.id_to_index.at(module_id).end())
+      auto param_iter = state.desc().mappings.id_to_index.at(module_id).find(param_id);
+      if (param_iter == state.desc().mappings.id_to_index.at(module_id).end())
       {
         result.warnings.push_back("Param '" + module_name + " " + param_name + "' was deleted.");
         continue;
@@ -188,7 +188,7 @@ plugin_io::load(
 
       // check for changed param slot count
       var param_slot_count = plugin["modules"][m]["params"][p]["slot_count"];
-      auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
+      auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
       if ((int)param_slot_count != new_param.info.slot_count)
         result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "' slot count changed.");
     }
@@ -198,26 +198,26 @@ plugin_io::load(
   for (int m = 0; m < plugin["state"].size(); m++)
   {
     auto module_id = plugin["modules"][m]["id"].toString().toStdString();
-    auto module_iter = _desc->module_id_to_index.find(module_id);
-    if(module_iter == _desc->module_id_to_index.end()) continue;
+    auto module_iter = state.desc().module_id_to_index.find(module_id);
+    if(module_iter == state.desc().module_id_to_index.end()) continue;
     var module_slots = plugin["state"][m]["slots"];
-    auto const& new_module = _desc->plugin->modules[module_iter->second];
+    auto const& new_module = state.desc().plugin->modules[module_iter->second];
 
     for(int mi = 0; mi < module_slots.size() && mi < new_module.info.slot_count; mi++)
       for (int p = 0; p < module_slots[mi]["params"].size(); p++)
       {
         auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
-        auto param_iter = _desc->mappings.id_to_index.at(module_id).find(param_id);
-        if (param_iter == _desc->mappings.id_to_index.at(module_id).end()) continue;
+        auto param_iter = state.desc().mappings.id_to_index.at(module_id).find(param_id);
+        if (param_iter == state.desc().mappings.id_to_index.at(module_id).end()) continue;
         var param_slots = plugin["state"][m]["slots"][mi]["params"][p]["slots"];
-        auto const& new_param = _desc->plugin->modules[module_iter->second].params[param_iter->second];
+        auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
         for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)
         {
           plain_value plain;
-          auto const& topo = _desc->plugin->modules[module_iter->second].params[param_iter->second];
+          auto const& topo = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
           std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
           if(topo.domain.text_to_plain(text, plain))
-            state[module_iter->second][mi][param_iter->second][pi] = plain;
+            state.state()[module_iter->second][mi][param_iter->second][pi] = plain;
           else
             result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
         }

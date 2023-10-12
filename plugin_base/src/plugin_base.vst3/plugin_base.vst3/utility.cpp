@@ -14,15 +14,14 @@ fuid_from_text(char const* text)
 }
 
 bool 
-load_state(plugin_desc const& desc, IBStream* stream, jarray<plain_value, 4>& state)
+load_state(IBStream* stream, plugin_state& state)
 {
   char byte;
   int read = 1;
   std::vector<char> data;
   while (stream->read(&byte, 1, &read) == kResultTrue && read == 1)
     data.push_back(byte);
-  plugin_io io(&desc);
-  return io.load(data, state).ok();
+  return plugin_io_load(data, state).ok();
 }
 
 }

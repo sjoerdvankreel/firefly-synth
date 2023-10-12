@@ -360,7 +360,7 @@ plugin_gui::make_top_bar()
       auto path = chooser.getResult().getFullPathName();
       delete& chooser;
       if (path.length() == 0) return;
-      plugin_io(&_gui_state->desc()).save_file(path.toStdString(), _gui_state->state());
+      plugin_io_save_file(path.toStdString(), *_gui_state);
     });};
 
   auto& load = make_component<TextButton>();
@@ -375,7 +375,7 @@ plugin_gui::make_top_bar()
       if(path.length() == 0) return;
 
       auto icon = MessageBoxIconType::WarningIcon;
-      auto result = plugin_io(&_gui_state->desc()).load_file(path.toStdString(), _gui_state->state());
+      auto result = plugin_io_load_file(path.toStdString(), *_gui_state);
       if(result.error.size())
       {
         auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
