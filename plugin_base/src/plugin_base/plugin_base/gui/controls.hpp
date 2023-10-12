@@ -133,8 +133,6 @@ protected:
   void own_param_changed(plain_value plain) override final;
 
 private:
-  int _own_value = -1;
-  int _dependent_value = -1;
   int _dependent_global_index = -1;
 
   void update_dependents();

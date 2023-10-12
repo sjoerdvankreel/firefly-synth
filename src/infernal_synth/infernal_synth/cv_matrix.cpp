@@ -110,7 +110,7 @@ cv_matrix_topo(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
     make_param_dsp_block(), make_domain_dependent(modulatable_target_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 5 },
-      make_label_none())));
+      make_label_default(gui_label_contents::value))));
   target_param.gui.bindings.enabled.params = enabled_params;
   target_param.gui.bindings.enabled.selector = enabled_selector;
   target_param.dependent_index = param_target;

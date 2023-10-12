@@ -224,7 +224,6 @@ plugin_io::load(
       }
   }
 
-  _desc->sync_dependent_params(state);
   return result;
 }
 
