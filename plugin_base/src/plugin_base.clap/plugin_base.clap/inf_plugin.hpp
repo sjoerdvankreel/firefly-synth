@@ -78,7 +78,7 @@ public:
   void threadPoolExec(uint32_t task_index) noexcept override 
   { _engine.process_voice(task_index, true); }  
   bool thread_pool_voice_processor(plugin_engine& engine)
-  { return _host.threadPoolRequestExec(engine.desc().plugin->polyphony); }
+  { return _host.threadPoolRequestExec(engine.state().desc().plugin->polyphony); }
 
 #if (defined __linux__) || (defined  __FreeBSD__)
   void onPosixFd(int fd, int flags) noexcept override;
@@ -106,7 +106,7 @@ public:
   bool paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept override;
   void paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept override;
   bool paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept override;
-  std::uint32_t paramsCount() const noexcept override { return _engine.desc().param_count; }
+  std::uint32_t paramsCount() const noexcept override { return _engine.state().desc().param_count; }
 
   std::uint32_t notePortsCount(bool is_input) const noexcept override { return is_input? 1: 0;}
   bool notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept override;

@@ -5,6 +5,7 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/block/host.hpp>
 #include <plugin_base/block/plugin.hpp>
+#include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
 
@@ -33,7 +34,7 @@ thread_pool_voice_processor)(
 // global plugin audio processor
 class plugin_engine final {
 
-  plugin_desc const _desc;
+  plugin_state _state = {};
   plugin_dims const _dims;
 
   float _sample_rate = {};
@@ -50,7 +51,6 @@ class plugin_engine final {
   jarray<float, 6> _voice_audio_state = {};
   jarray<float, 5> _global_audio_state = {};
   jarray<float, 5> _accurate_automation = {};
-  jarray<plain_value, 4> _plugin_state = {};
   jarray<plain_value, 4> _block_automation = {};
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
@@ -84,9 +84,8 @@ public:
   host_block& prepare_block();
   void activate(int sample_rate, int max_frame_count);
 
-  plugin_desc const& desc() const { return _desc; }
-  jarray<plain_value, 4>& plugin_state() { return _plugin_state; }
-  jarray<plain_value, 4> const& plugin_state() const { return _plugin_state; }
+  plugin_state& state() { return _state; } 
+  plugin_state const& state() const { return _state; }
 };
 
 }

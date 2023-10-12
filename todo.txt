@@ -22,7 +22,12 @@ do cakewalk bug report
 test all host+linux
 drop module_desc/param_desc topo?
 allow automation dependent/depending through param handler
+
 move value.hpp to shared
+move init_defaults to state
+rewrite plugin_io for state
+handle all value_at & friends
+
 dependent:
 - automation
 - storage/io

@@ -39,15 +39,15 @@ inf_component::setupProcessing(ProcessSetup& setup)
 tresult PLUGIN_API
 inf_component::getState(IBStream* state)
 {
-  plugin_io io(&_engine.desc());
-  std::vector<char> data(io.save(_engine.plugin_state()));
+  plugin_io io(&_engine.state().desc());
+  std::vector<char> data(io.save(_engine.state().state()));
   return state->write(data.data(), data.size());
 }
 
 tresult PLUGIN_API
 inf_component::setState(IBStream* state)
 {
-  if(load_state(_engine.desc(), state, _engine.plugin_state()))
+  if(load_state(_engine.state().desc(), state, _engine.state().state()))
     return kResultOk;
   return kResultFalse;
 }
@@ -58,7 +58,7 @@ inf_component::initialize(FUnknown* context)
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
   addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
-  if(_engine.desc().plugin->type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
+  if(_engine.state().desc().plugin->type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
   return kResultTrue;
 }
 
@@ -67,9 +67,9 @@ inf_component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
-  if (_engine.desc().plugin->type != plugin_type::fx && input_count != 0) return kResultFalse;
+  if (_engine.state().desc().plugin->type != plugin_type::fx && input_count != 0) return kResultFalse;
   if (output_count != 1 || outputs[0] != SpeakerArr::kStereo) return kResultFalse;
-  if((_engine.desc().plugin->type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
+  if((_engine.state().desc().plugin->type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
   return AudioEffect::setBusArrangements(inputs, input_count, outputs, output_count);
 }
 
@@ -80,7 +80,7 @@ inf_component::process(ProcessData& data)
   block.frame_count = data.numSamples;
   block.audio_out = data.outputs[0].channelBuffers32;
   block.shared.bpm = data.processContext ? data.processContext->tempo : 0;
-  block.shared.audio_in = _engine.desc().plugin->type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
+  block.shared.audio_in = _engine.state().desc().plugin->type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
 
   Event vst_event;
   if (data.inputEvents)
@@ -118,9 +118,9 @@ inf_component::process(ProcessData& data)
     for(int i = 0; i < data.inputParameterChanges->getParameterCount(); i++)
       if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
-        int param_index = _engine.desc().mappings.tag_to_index.at(queue->getParameterId());
-        auto const& mapping = _engine.desc().mappings.params[param_index];
-        auto rate = _engine.desc().param_at(mapping).param->dsp.rate;
+        int param_index = _engine.state().desc().mappings.tag_to_index.at(queue->getParameterId());
+        auto const& mapping = _engine.state().desc().mappings.params[param_index];
+        auto rate = _engine.state().desc().param_at(mapping).param->dsp.rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
           block_event event;
@@ -145,7 +145,7 @@ inf_component::process(ProcessData& data)
   for (int e = 0; e < block.events.out.size(); e++)
   {
     auto const& event = block.events.out[e];
-    int tag = _engine.desc().mappings.index_to_tag[event.param];
+    int tag = _engine.state().desc().mappings.index_to_tag[event.param];
     queue = data.outputParameterChanges->addParameterData(tag, unused_index);
     queue->addPoint(0, event.normalized.value(), unused_index);
   }
