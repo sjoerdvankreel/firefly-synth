@@ -22,8 +22,8 @@ void
 param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  auto const& own_mapping = _gui->desc()->mappings.params[_param->info.global];
-  plugin_changed(_param->info.global, own_mapping.value_at(_gui->gui_state()));
+  auto const& own_mapping = _gui->gui_state()->desc().mappings.params[_param->info.global];
+  plugin_changed(_param->info.global, own_mapping.value_at(_gui->gui_state()->state()));
   binding_component::init();
 }
 
@@ -116,7 +116,7 @@ param_dependent::
 param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param):
 param_component(gui, module, param), Component()
 {
-  auto const& topo_to_index = _gui->desc()->mappings.topo_to_index;
+  auto const& topo_to_index = _gui->gui_state()->desc().mappings.topo_to_index;
   auto const& param_indices = topo_to_index[_module->info.topo][_module->info.slot];
   _dependent_global_index = param_indices[param->param->dependent_index][param->info.slot];
   for (int i = 0; i < param->param->dependents.size(); i++)
@@ -175,8 +175,8 @@ param_dependent::comboBoxChanged(ComboBox* box)
 void
 param_dependent::update_dependents()
 {
-  auto const& mapping = _gui->desc()->mappings.params[_dependent_global_index];
-  int dependent_value = mapping.value_at(_gui->gui_state()).step();
+  auto const& mapping = _gui->gui_state()->desc().mappings.params[_dependent_global_index];
+  int dependent_value = mapping.value_at(_gui->gui_state()->state()).step();
   for (int i = 0; i < _dependents.size(); i++)
   {
     _dependents[i]->setVisible(i == dependent_value);
@@ -187,8 +187,8 @@ param_dependent::update_dependents()
 void
 param_dependent::own_param_changed(plain_value plain)
 {
-  auto const& mapping = _gui->desc()->mappings.params[_dependent_global_index];
-  int dependent_value = mapping.value_at(_gui->gui_state()).step();
+  auto const& mapping = _gui->gui_state()->desc().mappings.params[_dependent_global_index];
+  int dependent_value = mapping.value_at(_gui->gui_state()->state()).step();
   int index = _param->param->clamp_dependent(dependent_value, plain).step();
   _dependents[dependent_value]->setSelectedItemIndex(index, juce::dontSendNotification);
 }

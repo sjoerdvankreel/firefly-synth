@@ -1,8 +1,8 @@
 #pragma once
 
 #include <plugin_base/dsp/value.hpp>
-#include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/shared/state.hpp>
 #include <plugin_base/gui/listeners.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -17,9 +17,7 @@ public juce::Component
 {
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
-  plugin_gui(
-    plugin_desc const* desc, 
-    jarray<plain_value, 4>* gui_state);
+  plugin_gui(plugin_state* gui_state);
 
   void gui_end_changes(int index);
   void gui_begin_changes(int index);
@@ -28,21 +26,18 @@ public:
   void plugin_changed(int index, plain_value plain);
 
   void fire_state_loaded();
-  void add_gui_listener(gui_listener* listener);
   void remove_gui_listener(gui_listener* listener);
-  void add_plugin_listener(int index, plugin_listener* listener);
   void remove_plugin_listener(int index, plugin_listener* listener);
-
-  plugin_desc const* desc() const { return _desc; }
-  jarray<plain_value, 4> const& gui_state() const { return *_gui_state; }
+  plugin_state const* gui_state() const { return _gui_state; }
+  void add_gui_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
+  void add_plugin_listener(int index, plugin_listener* listener) { _plugin_listeners[index].push_back(listener); }
 
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
   void content_scale(float factor) { setTransform(juce::AffineTransform::scale(factor)); }
   
 private:
-  plugin_desc const* const _desc;
-  jarray<plain_value, 4>* const _gui_state = {};
+  plugin_state* const _gui_state;
   std::vector<gui_listener*> _gui_listeners = {};
   std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   // must be destructed first, will unregister listeners

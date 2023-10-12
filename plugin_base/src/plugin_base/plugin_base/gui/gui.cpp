@@ -50,31 +50,19 @@ justification_type(gui_label const& label)
 }
 
 plugin_gui::
-plugin_gui(plugin_desc const* desc, jarray<plain_value, 4>* gui_state) :
-_desc(desc), _gui_state(gui_state), _plugin_listeners(desc->param_count)
+plugin_gui(plugin_state* gui_state) :
+_gui_state(gui_state), _plugin_listeners(gui_state->desc().param_count)
 {
   setOpaque(true);
-  auto const& topo = *_desc->plugin;
+  auto const& topo = *gui_state->desc().plugin;
   addAndMakeVisible(&make_container());
   setSize(topo.gui.default_width, topo.gui.default_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
 }
 
 void
-plugin_gui::add_gui_listener(gui_listener* listener)
-{
-  _gui_listeners.push_back(listener);
-}
-
-void
-plugin_gui::add_plugin_listener(int index, plugin_listener* listener)
-{
-  _plugin_listeners[index].push_back(listener);
-}
-
-void
 plugin_gui::gui_changed(int index, plain_value plain)
 {
-  if (_desc->params[index]->param->dsp.direction == param_direction::input)
+  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_changed(index, plain);
 }
@@ -82,7 +70,7 @@ plugin_gui::gui_changed(int index, plain_value plain)
 void
 plugin_gui::gui_begin_changes(int index)
 {
-  if (_desc->params[index]->param->dsp.direction == param_direction::input)
+  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_begin_changes(index);
 }
@@ -90,7 +78,7 @@ plugin_gui::gui_begin_changes(int index)
 void
 plugin_gui::gui_end_changes(int index)
 {
-  if (_desc->params[index]->param->dsp.direction == param_direction::input)
+  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_end_changes(index);
 }
@@ -98,7 +86,7 @@ plugin_gui::gui_end_changes(int index)
 void
 plugin_gui::gui_changing(int index, plain_value plain)
 {
-  if (_desc->params[index]->param->dsp.direction == param_direction::input)
+  if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
     for (int i = 0; i < _gui_listeners.size(); i++)
       _gui_listeners[i]->gui_changing(index, plain);
 }
@@ -128,13 +116,13 @@ void
 plugin_gui::fire_state_loaded()
 {
   int param_global = 0;
-  for (int m = 0; m < _desc->plugin->modules.size(); m++)
+  for (int m = 0; m < _gui_state->desc().plugin->modules.size(); m++)
   {
-    auto const& module = _desc->plugin->modules[m];
+    auto const& module = _gui_state->desc().plugin->modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
         for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          gui_changed(param_global++, (*_gui_state)[m][mi][p][pi]);
+          gui_changed(param_global++, _gui_state->state()[m][mi][p][pi]);
   }
 }
 
@@ -159,8 +147,8 @@ plugin_gui::make_container()
 Component&
 plugin_gui::make_content()
 {
-  auto& result = make_component<grid_component>(_desc->plugin->gui.dimension);
-  for (auto iter = _desc->modules.begin(); iter != _desc->modules.end(); iter += iter->module->info.slot_count)
+  auto& result = make_component<grid_component>(_gui_state->desc().plugin->gui.dimension);
+  for (auto iter = _gui_state->desc().modules.begin(); iter != _gui_state->desc().modules.end(); iter += iter->module->info.slot_count)
     result.add(make_modules(&(*iter)), iter->module->gui.position);
   return result;
 }
@@ -367,12 +355,12 @@ plugin_gui::make_top_bar()
   result.add(save, { 0, 1 });
   save.onClick = [this]() {
     int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
-    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _desc->plugin->extension, true, false, this);
+    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
     chooser->launchAsync(flags, [this](FileChooser const& chooser) {
       auto path = chooser.getResult().getFullPathName();
       delete& chooser;
       if (path.length() == 0) return;
-      plugin_io(_desc).save_file(path.toStdString(), *_gui_state);
+      plugin_io(&_gui_state->desc()).save_file(path.toStdString(), _gui_state->state());
     });};
 
   auto& load = make_component<TextButton>();
@@ -380,14 +368,14 @@ plugin_gui::make_top_bar()
   result.add(load, { 0, 0 });
   load.onClick = [this]() {
     int flags = FileBrowserComponent::openMode;
-    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _desc->plugin->extension, true, false, this);
+    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
     chooser->launchAsync(flags, [this](FileChooser const& chooser) {
       auto path = chooser.getResult().getFullPathName();
       delete &chooser;
       if(path.length() == 0) return;
 
       auto icon = MessageBoxIconType::WarningIcon;
-      auto result = plugin_io(_desc).load_file(path.toStdString(), *_gui_state);
+      auto result = plugin_io(&_gui_state->desc()).load_file(path.toStdString(), _gui_state->state());
       if(result.error.size())
       {
         auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);

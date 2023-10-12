@@ -47,15 +47,6 @@ param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
   return true;
 }
 
-inf_controller::
-inf_controller(std::unique_ptr<plugin_topo>&& topo) : 
-_desc(std::move(topo)) 
-{ 
-  plugin_dims dims(*_desc.plugin);
-  _gui_state.resize(dims.module_slot_param_slot);
-  _desc.init_defaults(_gui_state);
-}
-
 IPlugView* PLUGIN_API 
 inf_controller::createView(char const* name)
 {
@@ -66,9 +57,9 @@ inf_controller::createView(char const* name)
 void
 inf_controller::gui_changing(int index, plain_value plain)
 {
-  int tag = desc().mappings.index_to_tag[index];
-  param_mapping const& mapping = desc().mappings.params[index];
-  auto normalized = desc().param_at(mapping).param->domain.plain_to_normalized(plain).value();
+  int tag = gui_state().desc().mappings.index_to_tag[index];
+  param_mapping const& mapping = gui_state().desc().mappings.params[index];
+  auto normalized = gui_state().desc().param_at(mapping).param->domain.plain_to_normalized(plain).value();
 
   // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
   performEdit(tag, normalized);
@@ -80,11 +71,11 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
-  int index = _desc.mappings.tag_to_index.at(tag);
-  param_mapping const& mapping = _desc.mappings.params[index];
-  auto const& param = _desc.param_at(mapping).param;
+  int index = gui_state().desc().mappings.tag_to_index.at(tag);
+  param_mapping const& mapping = gui_state().desc().mappings.params[index];
+  auto const& param = gui_state().desc().param_at(mapping).param;
   plain_value plain = param->domain.normalized_to_plain(normalized_value(value));
-  mapping.value_at(_gui_state) = plain;
+  mapping.value_at(_gui_state.state()) = plain;
   if (_editor == nullptr) return kResultTrue;
   _editor->plugin_changed(index, plain);
   return kResultTrue;
@@ -93,10 +84,10 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 tresult PLUGIN_API
 inf_controller::setComponentState(IBStream* state)
 {
-  if (!load_state(_desc, state, _gui_state))
+  if (!load_state(gui_state().desc(), state, gui_state().state()))
     return kResultFalse;
-  for (int p = 0; p < _desc.param_count; p++)
-    gui_changed(p, _desc.mappings.params[p].value_at(_gui_state));
+  for (int p = 0; p < gui_state().desc().param_count; p++)
+    gui_changed(p, gui_state().desc().mappings.params[p].value_at(gui_state().state()));
   return kResultOk;
 }
 
@@ -107,9 +98,9 @@ inf_controller::initialize(FUnknown* context)
   if(EditController::initialize(context) != kResultTrue) 
     return kResultFalse;
 
-  for(int m = 0; m < _desc.modules.size(); m++)
+  for(int m = 0; m < gui_state().desc().modules.size(); m++)
   {
-    auto const& module = _desc.modules[m];
+    auto const& module = gui_state().desc().modules[m];
     UnitInfo unit_info;
     unit_info.id = unit_id++;
     unit_info.parentUnitId = kRootUnitId;

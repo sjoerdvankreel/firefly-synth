@@ -11,7 +11,7 @@ namespace plugin_base::vst3 {
 inf_editor::
 inf_editor(inf_controller* controller) :
 EditorView(controller), _controller(controller),
-_gui(std::make_unique<plugin_gui>(&controller->desc(), &controller->gui_state())) {}
+_gui(std::make_unique<plugin_gui>(&controller->gui_state())) {}
 
 tresult PLUGIN_API
 inf_editor::setContentScaleFactor(float factor)
@@ -40,7 +40,7 @@ inf_editor::onSize(ViewRect* new_size)
 tresult PLUGIN_API
 inf_editor::checkSizeConstraint(ViewRect* new_size)
 {
-  auto const& topo = *_controller->desc().plugin;
+  auto const& topo = *_controller->gui_state().desc().plugin;
   int new_width = std::clamp(new_size->getWidth(), topo.gui.min_width, topo.gui.max_width);
   new_size->right = new_size->left + new_width;
   new_size->bottom = new_size->top + (new_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
