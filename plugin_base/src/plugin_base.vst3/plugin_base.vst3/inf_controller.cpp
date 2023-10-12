@@ -72,12 +72,9 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
   int index = gui_state().desc().mappings.tag_to_index.at(tag);
-  param_mapping const& mapping = gui_state().desc().mappings.params[index];
-  auto const& param = gui_state().desc().param_at(mapping).param;
-  plain_value plain = param->domain.normalized_to_plain(normalized_value(value));
-  mapping.value_at(_gui_state.state()) = plain;
+  _gui_state.set_normalized_at_index(index, normalized_value(value));
   if (_editor == nullptr) return kResultTrue;
-  _editor->plugin_changed(index, plain);
+  _editor->plugin_changed(index, _gui_state.get_plain_at_index(index));
   return kResultTrue;
 }
 
