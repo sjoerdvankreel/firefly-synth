@@ -69,8 +69,7 @@ inf_plugin::timerCallback()
   sync_event e;
   while (_to_gui_events->try_dequeue(e))
   {
-    param_mapping const& mapping = _engine.state().desc().mappings.params[e.index];
-    mapping.value_at(_gui_state.state()) = e.plain;
+    _gui_state.set(e.index, e.plain);
     if(_gui) _gui->plugin_changed(e.index, e.plain);
   }
 }
@@ -96,7 +95,7 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
 
   if (!plugin_io_load(data, _gui_state).ok()) return false;
   for (int p = 0; p < _engine.state().desc().param_count; p++)
-    gui_changed(p, _engine.state().desc().mappings.params[p].value_at(_gui_state.state()));
+    gui_changed(p, _gui_state.get(p));
   return true;
 }
 
@@ -215,8 +214,7 @@ void
 inf_plugin::gui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
-  param_mapping const& mapping = _engine.state().desc().mappings.params[index];
-  mapping.value_at(_gui_state.state()) = plain;
+  _gui_state.set(index, plain);
   if(_gui) _gui->plugin_changed(index, plain);
 }
 
@@ -275,9 +273,8 @@ bool
 inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
   int index = getParamIndexForParamId(param_id);
-  param_mapping const& mapping(_engine.state().desc().mappings.params[index]);
-  auto const& topo = *_engine.state().desc().param_at(mapping).param;
-  *value = normalized_to_clap(topo, topo.domain.plain_to_normalized(mapping.value_at(_gui_state.state()))).value();
+  auto const& param = *_gui_state.param(index).param;
+  *value = normalized_to_clap(param, param.domain.plain_to_normalized(_gui_state.get(index))).value();
   return true;
 }
 
@@ -350,9 +347,9 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
     if (header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     auto event = reinterpret_cast<clap_event_param_value const*>(header);
     int index = getParamIndexForParamId(event->param_id);
-    auto const& mapping = _engine.state().desc().mappings.params[index];
-    auto const& topo = *_engine.state().desc().param_at(mapping).param;
-    mapping.value_at(_engine.state().state()) = topo.domain.normalized_to_plain(clap_to_normalized(topo, clap_value(event->value)));
+    auto const& param = *_engine.state().param(index).param;
+    auto normalized = clap_to_normalized(param, clap_value(event->value));
+    _engine.state().set(index, param.domain.normalized_to_plain(normalized));
     push_to_gui(index, clap_value(event->value));
   }
   process_gui_to_audio_events(out);
