@@ -69,7 +69,7 @@ inf_plugin::timerCallback()
   sync_event e;
   while (_to_gui_events->try_dequeue(e))
   {
-    _gui_state.set(e.index, e.plain);
+    _gui_state.set_plain_at_index(e.index, e.plain);
     if(_gui) _gui->plugin_changed(e.index, e.plain);
   }
 }
@@ -95,7 +95,7 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
 
   if (!plugin_io_load(data, _gui_state).ok()) return false;
   for (int p = 0; p < _engine.state().desc().param_count; p++)
-    gui_changed(p, _gui_state.get(p));
+    gui_changed(p, _gui_state.get_plain_at_index(p));
   return true;
 }
 
@@ -214,7 +214,7 @@ void
 inf_plugin::gui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
-  _gui_state.set(index, plain);
+  _gui_state.set_plain_at_index(index, plain);
   if(_gui) _gui->plugin_changed(index, plain);
 }
 
@@ -272,9 +272,9 @@ inf_plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) cons
 bool
 inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
-  int index = getParamIndexForParamId(param_id);
-  auto const& param = *_gui_state.param(index).param;
-  *value = normalized_to_clap(param, param.domain.plain_to_normalized(_gui_state.get(index))).value();
+  auto const& topo = *_gui_state.param_at_tag(param_id).param;
+  auto normalized = _gui_state.get_normalized_at_tag(param_id);
+  *value = normalized_to_clap(topo, normalized).value();
   return true;
 }
 
@@ -347,9 +347,9 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
     if (header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     auto event = reinterpret_cast<clap_event_param_value const*>(header);
     int index = getParamIndexForParamId(event->param_id);
-    auto const& param = *_engine.state().param(index).param;
+    auto const& param = *_engine.state().param_at_index(index).param;
     auto normalized = clap_to_normalized(param, clap_value(event->value));
-    _engine.state().set(index, param.domain.normalized_to_plain(normalized));
+    _engine.state().set_normalized_at_index(index, normalized);
     push_to_gui(index, clap_value(event->value));
   }
   process_gui_to_audio_events(out);

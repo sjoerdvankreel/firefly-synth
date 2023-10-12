@@ -21,6 +21,7 @@ check the todos
 do cakewalk bug report
 test all host+linux
 
+disallow all access to mapping
 do value_at_tag/value_at_index
 drop value_at/param_at/etc
 drop module_desc/param_desc topo?
