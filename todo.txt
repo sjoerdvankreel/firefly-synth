@@ -20,8 +20,10 @@ mark param as modulatable or not
 check the todos
 do cakewalk bug report
 test all host+linux
+
 drop module_desc/param_desc topo?
 allow automation dependent/depending through param handler
+clean everything
 
 move value.hpp to shared
 move init_defaults to state

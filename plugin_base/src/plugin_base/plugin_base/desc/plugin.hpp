@@ -59,11 +59,9 @@ struct plugin_desc final {
   std::vector<param_desc const*> params = {};
   std::map<std::string, int> module_id_to_index = {};
 
+  void validate() const;
   plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
-
-  void validate() const;
-  void init_defaults(jarray<plain_value, 4>& state) const;
 
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; } 

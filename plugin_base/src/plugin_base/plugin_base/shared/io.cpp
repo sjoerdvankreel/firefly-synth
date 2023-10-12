@@ -1,5 +1,4 @@
 #include <plugin_base/shared/io.hpp>
-#include <plugin_base/desc/dims.hpp>
 
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>
@@ -153,9 +152,7 @@ plugin_io_load(
 
   // good to go - only warnings from now on
   load_result result;
-  plugin_dims dims(*state.desc().plugin);
-  state.state().resize(dims.module_slot_param_slot);
-  state.desc().init_defaults(state.state());
+  state.init_defaults();
   for(int m = 0; m < plugin["modules"].size(); m++)
   {
     // check for old module not found

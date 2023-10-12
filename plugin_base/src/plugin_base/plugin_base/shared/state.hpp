@@ -12,6 +12,7 @@ class plugin_state final {
   plugin_desc const _desc;
   jarray<plain_value, 4> _state = {};  
 public:
+  void init_defaults();
   plugin_state(std::unique_ptr<plugin_topo>&& topo);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);  
 

@@ -63,19 +63,6 @@ plugin(std::move(plugin_))
 }
 
 void
-plugin_desc::init_defaults(jarray<plain_value, 4>& state) const
-{
-  for (int m = 0; m < plugin->modules.size(); m++)
-  {
-    auto const& module = plugin->modules[m];
-    for(int mi = 0; mi < module.info.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-        for(int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          state[m][mi][p][pi] = module.params[p].domain.default_plain();
-  }
-}
-
-void
 plugin_desc::validate() const
 {
   int param_global = 0;
