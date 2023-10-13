@@ -1,6 +1,6 @@
 #include <plugin_base/desc/dims.hpp>
-#include <plugin_base/dsp/value.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/shared/value.hpp>
 
 #include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/inf_editor.hpp>

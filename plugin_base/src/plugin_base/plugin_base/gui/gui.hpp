@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/dsp/value.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/shared/state.hpp>
+#include <plugin_base/shared/value.hpp>
 #include <plugin_base/gui/listeners.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>

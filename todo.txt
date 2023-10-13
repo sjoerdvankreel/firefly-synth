@@ -28,12 +28,8 @@ drop value_at/param_at/etc
 drop module_desc/param_desc topo?
 separate can_modulate from is_accurate
 allow automation dependent/depending through param handler
-clean everything
-
-move value.hpp to shared
-move init_defaults to state
-rewrite plugin_io for state
 handle all value_at & friends
+clean everything
 
 dependent:
 - automation

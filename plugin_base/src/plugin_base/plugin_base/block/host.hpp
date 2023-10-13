@@ -1,7 +1,7 @@
 #pragma once
 
-#include <plugin_base/dsp/value.hpp>
 #include <plugin_base/block/shared.hpp>
+#include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/utility.hpp>
 
 #include <vector>

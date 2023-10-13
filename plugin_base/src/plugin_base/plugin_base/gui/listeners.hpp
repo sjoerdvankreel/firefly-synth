@@ -1,6 +1,6 @@
 #pragma once
 
-#include <plugin_base/dsp/value.hpp>
+#include <plugin_base/shared/value.hpp>
 
 namespace plugin_base {
 

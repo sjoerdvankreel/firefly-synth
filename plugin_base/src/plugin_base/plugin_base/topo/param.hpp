@@ -1,8 +1,8 @@
 #pragma once
 
-#include <plugin_base/dsp/value.hpp>
 #include <plugin_base/topo/domain.hpp>
 #include <plugin_base/topo/shared.hpp>
+#include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/utility.hpp>
 
 #include <vector>
@@ -20,7 +20,6 @@ enum class param_direction { input, output };
 struct param_dsp final {
   param_rate rate;
   param_direction direction;
-
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
 };
 
@@ -32,7 +31,6 @@ struct param_topo_gui final {
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
-
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
 };
 
