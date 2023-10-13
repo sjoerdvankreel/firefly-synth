@@ -17,9 +17,6 @@ public:
   plugin_state(std::unique_ptr<plugin_topo>&& topo);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);  
 
-  param_desc const& param_at_tag(int tag) const;
-  param_desc const& param_at_index(int index) const;
-
   double get_raw_at_tag(int tag) const;
   void set_raw_at_tag(int tag, double value);
   double get_raw_at_index(int index) const;
@@ -39,20 +36,6 @@ public:
   jarray<plain_value, 4>& state() { return _state; }
   jarray<plain_value, 4> const& state() const { return _state; }
 };
-
-inline param_desc const&
-plugin_state::param_at_index(int index) const
-{
-  auto const& mapping = desc().mappings.params[index];
-  return desc().param_at(mapping);
-}
-
-inline param_desc const&
-plugin_state::param_at_tag(int tag) const
-{
-  int index = desc().mappings.tag_to_index.at(tag);
-  return param_at_index(index);
-}
 
 inline plain_value 
 plugin_state::get_plain_at_index(int index) const

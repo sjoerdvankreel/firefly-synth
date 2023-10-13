@@ -272,7 +272,7 @@ inf_plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) cons
 bool
 inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
-  auto const& topo = *_gui_state.param_at_tag(param_id).param;
+  auto const& topo = *_gui_state.desc().param_at_tag(param_id).param;
   auto normalized = _gui_state.get_normalized_at_tag(param_id);
   *value = normalized_to_clap(topo, normalized).value();
   return true;
@@ -347,7 +347,7 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
     if (header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     auto event = reinterpret_cast<clap_event_param_value const*>(header);
     int index = getParamIndexForParamId(event->param_id);
-    auto const& param = *_engine.state().param_at_index(index).param;
+    auto const& param = *_engine.state().desc().param_at_index(index).param;
     auto normalized = clap_to_normalized(param, clap_value(event->value));
     _engine.state().set_normalized_at_index(index, normalized);
     push_to_gui(index, clap_value(event->value));

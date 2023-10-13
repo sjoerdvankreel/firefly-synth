@@ -65,6 +65,8 @@ struct plugin_desc final {
 
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; } 
+  param_desc const& param_at_index(int index) const { return param_at(mappings.params[index]); }
+  param_desc const& param_at_tag(int tag) const { return param_at_index(mappings.tag_to_index.at(tag)); }
 };
 
 }
