@@ -120,33 +120,6 @@ inf_plugin::guiSetScale(double scale) noexcept
   return true;
 }
 
-bool 
-inf_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
-{
-  if(is_floating) return false;
-#if(WIN32)
-  return !strcmp(api, CLAP_WINDOW_API_WIN32);
-#elif (defined __linux__) || (defined  __FreeBSD__)
-  return _host.canUsePosixFdSupport() && !strcmp(api, CLAP_WINDOW_API_X11);
-#else
-#error
-#endif
-}
-
-bool
-inf_plugin::guiSetParent(clap_window const* window) noexcept
-{
-  _gui->addToDesktop(0, window->ptr);
-#if (defined __linux__) || (defined  __FreeBSD__)
-  for (int fd : LinuxEventLoopInternal::getRegisteredFds())
-    _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
-#endif
-  _gui->setVisible(true);
-  _gui->add_gui_listener(this);
-  _gui->resized();
-  return true;
-}
-
 #if (defined __linux__) || (defined  __FreeBSD__)
 void
 inf_plugin::onPosixFd(int fd, int flags) noexcept
@@ -167,10 +140,30 @@ inf_plugin::guiDestroy() noexcept
 }
 
 bool
-inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
+inf_plugin::guiSetParent(clap_window const* window) noexcept
 {
-  _gui = std::make_unique<plugin_gui>(&_gui_state);
+  _gui->addToDesktop(0, window->ptr);
+#if (defined __linux__) || (defined  __FreeBSD__)
+  for (int fd : LinuxEventLoopInternal::getRegisteredFds())
+    _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
+#endif
+  _gui->setVisible(true);
+  _gui->add_gui_listener(this);
+  _gui->resized();
   return true;
+}
+
+bool
+inf_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
+{
+  if (is_floating) return false;
+#if(WIN32)
+  return !strcmp(api, CLAP_WINDOW_API_WIN32);
+#elif (defined __linux__) || (defined  __FreeBSD__)
+  return _host.canUsePosixFdSupport() && !strcmp(api, CLAP_WINDOW_API_X11);
+#else
+#error
+#endif
 }
 
 bool
@@ -178,6 +171,13 @@ inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 {
   guiAdjustSize(&width, &height);
   _gui->setSize(width, height);
+  return true;
+}
+
+bool
+inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
+{
+  _gui = std::make_unique<plugin_gui>(&_gui_state);
   return true;
 }
 

@@ -75,15 +75,15 @@ public:
   bool stateSave(clap_ostream const* stream) noexcept override;
   bool stateLoad(clap_istream const* stream) noexcept override;
   
-  void threadPoolExec(uint32_t task_index) noexcept override 
-  { _engine.process_voice(task_index, true); }  
-  bool thread_pool_voice_processor(plugin_engine& engine)
-  { return _host.threadPoolRequestExec(engine.state().desc().plugin->polyphony); }
-
 #if (defined __linux__) || (defined  __FreeBSD__)
   void onPosixFd(int fd, int flags) noexcept override;
   bool implementsPosixFdSupport() const noexcept override { return true; }
 #endif
+
+  void threadPoolExec(uint32_t task_index) noexcept override 
+  { _engine.process_voice(task_index, true); }  
+  bool thread_pool_voice_processor(plugin_engine& engine)
+  { return _host.threadPoolRequestExec(engine.state().desc().plugin->polyphony); }
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;
