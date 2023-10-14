@@ -21,7 +21,7 @@ public gui_listener
 
 public: 
   INF_PREVENT_ACCIDENTAL_COPY(inf_controller);
-  inf_controller(std::unique_ptr<plugin_topo>&& topo): _gui_state(std::move(topo)) {}
+  inf_controller(plugin_desc const* desc): _gui_state(desc) {}
 
   plugin_state& gui_state() { return _gui_state; }
   plugin_state const& gui_state() const { return _gui_state; };

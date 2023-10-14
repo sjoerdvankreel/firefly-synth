@@ -4,8 +4,8 @@
 namespace plugin_base {
 
 plugin_desc::
-plugin_desc(std::unique_ptr<plugin_topo>&& plugin_):
-plugin(std::move(plugin_))
+plugin_desc(plugin_topo const* plugin):
+plugin(plugin)
 {
   int param_global = 0;
   int module_global = 0;

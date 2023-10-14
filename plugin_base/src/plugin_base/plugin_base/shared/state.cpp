@@ -4,10 +4,10 @@
 namespace plugin_base {
 
 plugin_state::
-plugin_state(std::unique_ptr<plugin_topo>&& topo):
-_desc(std::move(topo))
+plugin_state(plugin_desc const* desc):
+_desc(desc)
 {
-  plugin_dims dims(*_desc.plugin);
+  plugin_dims dims(*_desc->plugin);
   _state.resize(dims.module_slot_param_slot);
   init_defaults();
 }

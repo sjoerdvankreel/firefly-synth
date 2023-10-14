@@ -62,8 +62,8 @@ public:
   ~inf_plugin() { stopTimer(); }
   INF_PREVENT_ACCIDENTAL_COPY(inf_plugin);
   inf_plugin(
-    clap_plugin_descriptor const* desc, 
-    clap_host const* host, topo_factory factory);
+    clap_plugin_descriptor const* clap_desc, 
+    clap_host const* host, plugin_desc const* desc);
   
   bool implementsGui() const noexcept override { return true; }
   bool implementsState() const noexcept override { return true; }

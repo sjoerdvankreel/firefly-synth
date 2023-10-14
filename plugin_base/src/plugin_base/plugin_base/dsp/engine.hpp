@@ -71,7 +71,7 @@ class plugin_engine final {
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_engine);
   plugin_engine(
-    std::unique_ptr<plugin_topo>&& topo,
+    plugin_desc const* desc,
     thread_pool_voice_processor voice_processor,
     void* voice_processor_context);
 

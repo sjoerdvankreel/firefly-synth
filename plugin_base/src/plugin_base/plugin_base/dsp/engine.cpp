@@ -10,10 +10,10 @@ namespace plugin_base {
 
 plugin_engine::
 plugin_engine(
-  std::unique_ptr<plugin_topo>&& topo,
+  plugin_desc const* desc,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
-_state(std::move(topo)), _dims(*_state.desc().plugin), 
+_state(desc), _dims(*_state.desc().plugin),
 _host_block(std::make_unique<host_block>()),
 _voice_processor(voice_processor),
 _voice_thread_ids(_state.desc().plugin->polyphony, std::thread::id()),

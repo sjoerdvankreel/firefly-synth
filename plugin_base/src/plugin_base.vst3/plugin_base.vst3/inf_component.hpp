@@ -14,7 +14,7 @@ public Steinberg::Vst::AudioEffect {
 
 public:
   INF_PREVENT_ACCIDENTAL_COPY(inf_component);
-  inf_component(std::unique_ptr<plugin_topo>&& topo, Steinberg::FUID const& controller_id);
+  inf_component(plugin_desc const* desc, Steinberg::FUID const& controller_id);
 
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;
   Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* state) override;

@@ -24,23 +24,41 @@ using namespace plugin_base::vst3;
 #define INF_SYNTH_CONTROLLER_ID "E5EC671A225942D5B03FE8131DB8CD46"
 #endif
 
+static std::unique_ptr<plugin_topo> _topo = {};
+static std::unique_ptr<plugin_desc> _desc = {};
+
+bool
+DeinitModule()
+{
+  gui_terminate();
+  _desc.reset();
+  _topo.reset();
+  return true;
+}
+
+bool 
+InitModule() 
+{ 
+  _topo = synth_topo();
+  _desc = std::make_unique<plugin_desc>(_topo.get());
+  gui_init(); 
+  return true; 
+}
+
 static FUnknown*
 controller_factory(void*)
 {
-  auto result = new inf_controller(synth_topo());
+  auto result = new inf_controller(_desc.get());
   return static_cast<IEditController*>(result);
 }
 
 static FUnknown*
 component_factory(void*)
-{ 
+{
   FUID controller_id(fuid_from_text(INF_SYNTH_CONTROLLER_ID));
-  auto result = new inf_component(synth_topo(), controller_id);
+  auto result = new inf_component(_desc.get(), controller_id);
   return static_cast<IAudioProcessor*>(result);
 }
-
-bool InitModule() { gui_init(); return true; }
-bool DeinitModule() { gui_terminate(); return true; }
 
 BEGIN_FACTORY_DEF(INF_SYNTH_VENDOR_NAME, INF_SYNTH_VENDOR_URL, INF_SYNTH_VENDOR_MAIL)
   DEF_CLASS2(

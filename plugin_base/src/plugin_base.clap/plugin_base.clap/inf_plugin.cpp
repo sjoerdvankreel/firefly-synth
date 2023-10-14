@@ -46,10 +46,10 @@ forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
 
 inf_plugin::
 inf_plugin(
-  clap_plugin_descriptor const* desc, 
-  clap_host const* host, topo_factory factory):
-Plugin(desc, host), 
-_engine(factory(), forward_thread_pool_voice_processor, this), _gui_state(factory()),
+  clap_plugin_descriptor const* clap_desc, 
+  clap_host const* host, plugin_desc const* desc):
+Plugin(clap_desc, host), 
+_engine(desc, forward_thread_pool_voice_processor, this), _gui_state(desc),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 { _block_automation_seen.resize(_engine.state().desc().param_count); }
@@ -403,9 +403,6 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
     {
     case sync_event_type::value_changing:
     {
-      param_mapping const& mapping = _engine.state().desc().mappings.params[e.index];
-      auto const& topo = *_engine.state().desc().param_at(mapping).param;
-      mapping.value_at(_engine.state().state()) = e.plain;
       auto event = clap_event_param_value();
       event.param_id = tag;
       event.header.time = 0;
@@ -413,7 +410,9 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_value);
       event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
+      auto const& topo = *_engine.state().desc().param_at_index(e.index).param;
       event.value = normalized_to_clap(topo, topo.domain.plain_to_normalized(e.plain)).value();
+      _engine.state().set_plain_at_index(e.index, e.plain);
       out->try_push(out, &(event.header));
       break;
     }

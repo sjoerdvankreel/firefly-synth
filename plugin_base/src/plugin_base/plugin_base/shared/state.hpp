@@ -9,120 +9,45 @@
 namespace plugin_base {
 
 class plugin_state final {
-  plugin_desc const _desc;
   jarray<plain_value, 4> _state = {};  
+  plugin_desc const* const _desc = {};
 
 public:
   void init_defaults();
-  plugin_state(std::unique_ptr<plugin_topo>&& topo);
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);  
+  plugin_state(plugin_desc const* desc);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
-  double get_raw_at_tag(int tag) const;
-  void set_raw_at_tag(int tag, double value);
-  double get_raw_at_index(int index) const;
-  void set_raw_at_index(int index, double value);
-
-  plain_value get_plain_at_tag(int tag) const;
-  void set_plain_at_tag(int tag, plain_value value);
-  plain_value get_plain_at_index(int index) const;
-  void set_plain_at_index(int index, plain_value value);
-
-  normalized_value get_normalized_at_tag(int tag) const;
-  void set_normalized_at_tag(int tag, normalized_value value);
-  normalized_value get_normalized_at_index(int index) const;
-  void set_normalized_at_index(int index, normalized_value value);
-
-  plugin_desc const& desc() const { return _desc; }
+  // TODO drop all of these
+  plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 4>& state() { return _state; }
   jarray<plain_value, 4> const& state() const { return _state; }
+
+  plain_value get_plain_at_index(int index) const 
+  { return desc().mappings.params[index].value_at(_state); }
+  void set_plain_at_index(int index, plain_value value) 
+  { desc().mappings.params[index].value_at(_state) = value; }
+  plain_value get_plain_at_tag(int tag) const 
+  { return get_plain_at_index(desc().mappings.tag_to_index.at(tag)); }
+  void set_plain_at_tag(int tag, plain_value value) 
+  { set_plain_at_index(desc().mappings.tag_to_index.at(tag), value); }
+
+  double get_raw_at_tag(int tag) const 
+  { return get_raw_at_index(desc().mappings.tag_to_index.at(tag)); }
+  void set_raw_at_tag(int tag, double value) 
+  { set_raw_at_index(desc().mappings.tag_to_index.at(tag), value); }
+  double get_raw_at_index(int index) const 
+  { return desc().plain_to_raw_at_index(index, desc().mappings.params[index].value_at(_state)); }
+  void set_raw_at_index(int index, double value) 
+  { desc().mappings.params[index].value_at(_state) = desc().raw_to_plain_at_index(index, value); }
+
+  normalized_value get_normalized_at_tag(int tag) const 
+  { return get_normalized_at_index(desc().mappings.tag_to_index.at(tag)); }
+  void set_normalized_at_tag(int tag, normalized_value value) 
+  { set_normalized_at_index(desc().mappings.tag_to_index.at(tag), value); }
+  normalized_value get_normalized_at_index(int index) const 
+  { return desc().plain_to_normalized_at_index(index, desc().mappings.params[index].value_at(_state)); }
+  void set_normalized_at_index(int index, normalized_value value) 
+  { desc().mappings.params[index].value_at(_state) = desc().normalized_to_plain_at_index(index, value); }
 };
-
-inline plain_value 
-plugin_state::get_plain_at_index(int index) const
-{
-  auto const& mapping = desc().mappings.params[index];
-  return mapping.value_at(_state);
-}
-
-inline void 
-plugin_state::set_plain_at_index(int index, plain_value value)
-{
-  auto const& mapping = desc().mappings.params[index];
-  mapping.value_at(_state) = value;
-}
-
-inline plain_value
-plugin_state::get_plain_at_tag(int tag) const
-{
-  int index = desc().mappings.tag_to_index.at(tag);
-  return get_plain_at_index(index);
-}
-
-inline void
-plugin_state::set_plain_at_tag(int tag, plain_value value)
-{
-  int index = desc().mappings.tag_to_index.at(tag);
-  set_plain_at_index(index, value);
-}
-
-inline double
-plugin_state::get_raw_at_index(int index) const
-{
-  auto const& mapping = desc().mappings.params[index];
-  auto const& domain = desc().param_at(mapping).param->domain;
-  return domain.plain_to_raw(mapping.value_at(_state));
-}
-
-inline void
-plugin_state::set_raw_at_index(int index, double value)
-{
-  auto const& mapping = desc().mappings.params[index];
-  auto const& domain = desc().param_at(mapping).param->domain;
-  mapping.value_at(_state) = domain.raw_to_plain(value);
-}
-
-inline double
-plugin_state::get_raw_at_tag(int tag) const
-{
-  int index = desc().mappings.tag_to_index.at(tag);
-  return get_raw_at_index(index);
-}
-
-inline void
-plugin_state::set_raw_at_tag(int tag, double value)
-{
-  int index = desc().mappings.tag_to_index.at(tag);
-  set_raw_at_index(index, value);
-}
-
-inline normalized_value
-plugin_state::get_normalized_at_index(int index) const
-{
-  auto const& mapping = desc().mappings.params[index];
-  auto const& domain = desc().param_at(mapping).param->domain;
-  return domain.plain_to_normalized(mapping.value_at(_state));
-}
-
-inline void
-plugin_state::set_normalized_at_index(int index, normalized_value value)
-{
-  auto const& mapping = desc().mappings.params[index];
-  auto const& domain = desc().param_at(mapping).param->domain;
-  mapping.value_at(_state) = domain.normalized_to_plain(value);
-}
-
-inline normalized_value
-plugin_state::get_normalized_at_tag(int tag) const
-{
-  int index = desc().mappings.tag_to_index.at(tag);
-  return get_normalized_at_index(index);
-}
-
-inline void
-plugin_state::set_normalized_at_tag(int tag, normalized_value value)
-{
-  int index = desc().mappings.tag_to_index.at(tag);
-  set_normalized_at_index(index, value);
-}
 
 }

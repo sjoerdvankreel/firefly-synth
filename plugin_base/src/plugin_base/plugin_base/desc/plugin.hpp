@@ -53,20 +53,52 @@ struct plugin_desc final {
   int module_voice_start = {};
   int module_output_start = {};
 
+  plugin_topo const* plugin = {};
   plugin_param_mappings mappings = {};
   std::vector<module_desc> modules = {};
-  std::unique_ptr<plugin_topo> plugin = {};
   std::vector<param_desc const*> params = {};
   std::map<std::string, int> module_id_to_index = {};
 
   void validate() const;
-  plugin_desc(std::unique_ptr<plugin_topo>&& plugin_);
+  plugin_desc(plugin_topo const* plugin);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
 
+  // TODO drop this
   param_desc const& param_at(param_mapping const& mapping) const
   { return modules[mapping.module_global].params[mapping.param_local]; } 
-  param_desc const& param_at_index(int index) const { return param_at(mappings.params[index]); }
-  param_desc const& param_at_tag(int tag) const { return param_at_index(mappings.tag_to_index.at(tag)); }
+
+  // TODO and maybe this
+  param_desc const& param_at_index(int index) const 
+  { return param_at(mappings.params[index]); }
+  param_desc const& param_at_tag(int tag) const 
+  { return param_at_index(mappings.tag_to_index.at(tag)); }
+
+  plain_value raw_to_plain_at_tag(int tag, double raw) const
+  { return raw_to_plain_at_index(mappings.tag_to_index.at(tag), raw); }
+  double plain_to_raw_at_tag(int tag, plain_value plain) const
+  { return plain_to_raw_at_index(mappings.tag_to_index.at(tag), plain); }
+  plain_value raw_to_plain_at_index(int index, double raw) const
+  { return param_at(mappings.params[index]).param->domain.raw_to_plain(raw); }
+  double plain_to_raw_at_index(int index, plain_value plain) const
+  { return param_at(mappings.params[index]).param->domain.plain_to_raw(plain); }
+
+  double normalized_to_raw_at_tag(int tag, normalized_value normalized) const
+  { return normalized_to_raw_at_index(mappings.tag_to_index.at(tag), normalized); }
+  normalized_value raw_to_normalized_at_tag(int tag, double raw) const
+  { return raw_to_normalized_at_index(mappings.tag_to_index.at(tag), raw); }
+  double normalized_to_raw_at_index(int index, normalized_value normalized) const
+  { return param_at(mappings.params[index]).param->domain.normalized_to_raw(normalized); }
+  normalized_value raw_to_normalized_at_index(int index, double raw) const
+  { return param_at(mappings.params[index]).param->domain.raw_to_normalized(raw); }
+
+  plain_value normalized_to_plain_at_tag(int tag, normalized_value normalized) const
+  { return normalized_to_plain_at_index(mappings.tag_to_index.at(tag), normalized); }
+  normalized_value plain_to_normalized_at_tag(int tag, plain_value plain) const
+  { return plain_to_normalized_at_index(mappings.tag_to_index.at(tag), plain); }
+  plain_value normalized_to_plain_at_index(int index, normalized_value normalized) const
+  { return param_at(mappings.params[index]).param->domain.normalized_to_plain(normalized); }
+  normalized_value plain_to_normalized_at_index(int index, plain_value plain) const
+  { return param_at(mappings.params[index]).param->domain.plain_to_normalized(plain); }
 };
 
 }

@@ -84,7 +84,7 @@ inf_controller::setComponentState(IBStream* state)
   if (!load_state(state, gui_state()))
     return kResultFalse;
   for (int p = 0; p < gui_state().desc().param_count; p++)
-    gui_changed(p, gui_state().desc().mappings.params[p].value_at(gui_state().state()));
+    gui_changed(p, gui_state().get_plain_at_index(p));
   return kResultOk;
 }
 

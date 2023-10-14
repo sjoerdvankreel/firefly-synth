@@ -3,7 +3,6 @@
 
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/gui/init.hpp>
-#include <plugin_base.clap/utility.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 
 #include <clap/clap.h>
@@ -19,8 +18,28 @@ using namespace plugin_base::clap;
 #define PLUG_FEATURE CLAP_PLUGIN_FEATURE_INSTRUMENT
 #endif
 
+static std::unique_ptr<plugin_topo> _topo = {};
+static std::unique_ptr<plugin_desc> _desc = {};
+
 static char const*
 features[] = { PLUG_FEATURE, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
+
+static void CLAP_ABI
+deinit()
+{
+  gui_terminate();
+  _desc.reset();
+  _topo.reset();
+}
+
+static bool CLAP_ABI
+init(char const*)
+{
+  _topo = synth_topo();
+  _desc = std::make_unique<plugin_desc>(_topo.get());
+  gui_init();
+  return true;
+}
 
 static clap_plugin_descriptor_t const descriptor =
 {
@@ -36,11 +55,23 @@ static clap_plugin_descriptor_t const descriptor =
   .features = features
 };
 
+static void const* 
+get_plugin_factory(char const* factory_id)
+{
+  static clap_plugin_factory result;
+  if (strcmp(factory_id, CLAP_PLUGIN_FACTORY_ID)) return nullptr;
+  result.get_plugin_count = [](clap_plugin_factory const*) { return 1u; };
+  result.get_plugin_descriptor = [](clap_plugin_factory const*, std::uint32_t) { return &descriptor; };
+  result.create_plugin = [](clap_plugin_factory const*, clap_host const* host, char const*)
+  { return (new inf_plugin(&descriptor, host, _desc.get()))->clapPlugin(); };
+  return &result;
+}
+
 extern "C" CLAP_EXPORT 
 clap_plugin_entry_t const clap_entry =
 {
   .clap_version = CLAP_VERSION_INIT,
-  .init = [](char const*) { gui_init(); return true; },
-  .deinit = [](){ gui_terminate(); },
-  .get_factory = get_plugin_factory<&descriptor, synth_topo>
+  .init = init,
+  .deinit = deinit,
+  .get_factory = get_plugin_factory
 };
