@@ -3,6 +3,7 @@
 #include <plugin_base/shared/value.hpp>
 
 #include <plugin_base.vst3/utility.hpp>
+#include <plugin_base.vst3/inf_param.hpp>
 #include <plugin_base.vst3/inf_editor.hpp>
 #include <plugin_base.vst3/inf_controller.hpp>
 
@@ -15,38 +16,6 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
-class param_wrapper:
-public Parameter
-{
-  param_topo const* const _topo;
-public:
-  ParamValue toNormalized(ParamValue plain) const override 
-  { return _topo->domain.raw_to_normalized(plain).value(); }
-  ParamValue toPlain(ParamValue normalized) const override 
-  { return _topo->domain.normalized_to_raw(normalized_value(normalized)); }
-
-  void toString(ParamValue normalized, String128 string) const override;
-  bool fromString(TChar const* string, ParamValue& normalized) const override;
-  param_wrapper(param_topo const* topo, ParameterInfo const& info) : Parameter(info), _topo(topo) {}
-};
-
-void 
-param_wrapper::toString(ParamValue normalized, String128 string) const
-{
-  auto text = _topo->domain.normalized_to_text(normalized_value(normalized));
-  from_8bit_string(string, sizeof(String128) / sizeof(string[0]), text.c_str());
-}
-
-bool 
-param_wrapper::fromString(TChar const* string, ParamValue& normalized) const
-{
-  normalized_value base_normalized;
-  std::string text(to_8bit_string(string));
-  if(!_topo->domain.text_to_normalized(text, base_normalized)) return false;
-  normalized = base_normalized.value();
-  return true;
-}
-
 IPlugView* PLUGIN_API 
 inf_controller::createView(char const* name)
 {
@@ -54,15 +23,14 @@ inf_controller::createView(char const* name)
   return _editor = new inf_editor(this);
 }
 
-void
-inf_controller::gui_changing(int index, plain_value plain)
+tresult PLUGIN_API
+inf_controller::setComponentState(IBStream* state)
 {
-  int tag = gui_state().desc().mappings.index_to_tag[index];
-  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
-
-  // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
-  performEdit(tag, normalized);
-  setParamNormalized(tag, normalized);
+  if (!load_state(state, gui_state()))
+    return kResultFalse;
+  for (int p = 0; p < gui_state().desc().param_count; p++)
+    gui_changed(p, gui_state().get_plain_at_index(p));
+  return kResultOk;
 }
 
 tresult PLUGIN_API 
@@ -77,14 +45,15 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   return kResultTrue;
 }
 
-tresult PLUGIN_API
-inf_controller::setComponentState(IBStream* state)
+void
+inf_controller::gui_changing(int index, plain_value plain)
 {
-  if (!load_state(state, gui_state()))
-    return kResultFalse;
-  for (int p = 0; p < gui_state().desc().param_count; p++)
-    gui_changed(p, gui_state().get_plain_at_index(p));
-  return kResultOk;
+  int tag = gui_state().desc().mappings.index_to_tag[index];
+  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
+
+  // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
+  performEdit(tag, normalized);
+  setParamNormalized(tag, normalized);
 }
 
 tresult PLUGIN_API 
@@ -125,7 +94,7 @@ inf_controller::initialize(FUnknown* context)
       param_info.stepCount = 0;
       if (!param.param->domain.is_real())
         param_info.stepCount = param.param->domain.max - param.param->domain.min;
-      parameters.addParameter(new param_wrapper(module.params[p].param, param_info));
+      parameters.addParameter(new inf_param(module.params[p].param, param_info));
     }
   }
 
