@@ -39,9 +39,11 @@ binding_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   if (_enabled_params.size() != 0)
-    plugin_changed(_enabled_params[0], _gui->gui_state()->get_plain_at_index(_enabled_params[0]));
+    plugin_changed(_enabled_params[0], 
+      _gui->gui_state()->get_plain_at_index(_enabled_params[0]));
   if (_visibility_params.size() != 0)
-    plugin_changed(_visibility_params[0], _gui->gui_state()->get_plain_at_index(_visibility_params[0]));
+    plugin_changed(_visibility_params[0], 
+      _gui->gui_state()->get_plain_at_index(_visibility_params[0]));
 }
 
 void 
