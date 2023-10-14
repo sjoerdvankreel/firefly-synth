@@ -22,8 +22,7 @@ void
 param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  auto const& own_mapping = _gui->gui_state()->desc().mappings.params[_param->info.global];
-  plugin_changed(_param->info.global, own_mapping.value_at(_gui->gui_state()->state()));
+  plugin_changed(_param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global));
   binding_component::init();
 }
 
@@ -175,8 +174,7 @@ param_dependent::comboBoxChanged(ComboBox* box)
 void
 param_dependent::update_dependents()
 {
-  auto const& mapping = _gui->gui_state()->desc().mappings.params[_dependent_global_index];
-  int dependent_value = mapping.value_at(_gui->gui_state()->state()).step();
+  int dependent_value = _gui->gui_state()->get_plain_at_index(_dependent_global_index).step();
   for (int i = 0; i < _dependents.size(); i++)
   {
     _dependents[i]->setVisible(i == dependent_value);

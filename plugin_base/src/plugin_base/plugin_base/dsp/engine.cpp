@@ -13,7 +13,8 @@ plugin_engine(
   plugin_desc const* desc,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
-_state(desc), _dims(*_state.desc().plugin),
+_state(desc), _block_automation(desc),
+_dims(*_state.desc().plugin),
 _host_block(std::make_unique<host_block>()),
 _voice_processor(voice_processor),
 _voice_thread_ids(_state.desc().plugin->polyphony, std::thread::id()),
@@ -31,7 +32,6 @@ _voice_processor_context(voice_processor_context)
   _voice_engines.resize(_dims.voice_module_slot);
   _accurate_frames.resize(_state.desc().param_count);
   _voice_states.resize(_state.desc().plugin->polyphony);
-  _block_automation.resize(_dims.module_slot_param_slot);
   _host_block->events.notes.reserve(note_limit_guess);
   _host_block->events.out.reserve(block_events_guess);
   _host_block->events.block.reserve(block_events_guess);
@@ -45,7 +45,7 @@ plugin_engine::make_plugin_block(int voice, int module, int slot, int start_fram
   jarray<float, 3>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
   plugin_block_state state = {
     cv_out, audio_out, _global_cv_state, _global_audio_state,
-    _accurate_automation[module][slot], _block_automation[module][slot] };
+    _accurate_automation[module][slot], _block_automation.state()[module][slot] };
   return {
     start_frame, end_frame, _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, _state.desc().plugin->modules[module]};
@@ -344,7 +344,7 @@ plugin_engine::process()
         auto const& param = module.params[p];
         if(param.dsp.rate == param_rate::block)
           for(int pi = 0; pi < param.info.slot_count; pi++)
-            _block_automation[m][mi][p][pi] = _state.state()[m][mi][p][pi];
+            _block_automation.state()[m][mi][p][pi] = _state.state()[m][mi][p][pi];
         else
           for (int pi = 0; pi < param.info.slot_count; pi++)
             std::fill(
@@ -358,10 +358,8 @@ plugin_engine::process()
   for (int e = 0; e < _host_block->events.block.size(); e++)
   {
     auto const& event = _host_block->events.block[e];
-    auto const& mapping = _state.desc().mappings.params[event.param];
-    plain_value plain = _state.desc().param_at(mapping).param->domain.normalized_to_plain(event.normalized);
-    mapping.value_at(_state.state()) = plain;
-    mapping.value_at(_block_automation) = plain;
+    _state.set_normalized_at_index(event.param, event.normalized);
+    _block_automation.set_normalized_at_index(event.param, event.normalized);
   }
 
   // process accurate automation values, this is a bit tricky as 

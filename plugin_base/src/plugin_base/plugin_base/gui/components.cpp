@@ -30,10 +30,7 @@ binding_component::bind(
 {
   values.clear();
   for (int i = 0; i < params.size(); i++)
-  {
-    auto const& mapping = _gui->gui_state()->desc().mappings.params[params[i]];
-    values.push_back(mapping.value_at(_gui->gui_state()->state()).step());
-  }
+    values.push_back(_gui->gui_state()->get_plain_at_index(params[i]).step());
   return binding.selector(values);
 }
 
@@ -42,15 +39,9 @@ binding_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   if (_enabled_params.size() != 0)
-  {
-    auto const& enabled_mapping = _gui->gui_state()->desc().mappings.params[_enabled_params[0]];
-    plugin_changed(_enabled_params[0], enabled_mapping.value_at(_gui->gui_state()->state()));
-  }
+    plugin_changed(_enabled_params[0], _gui->gui_state()->get_plain_at_index(_enabled_params[0]));
   if (_visibility_params.size() != 0)
-  {
-    auto const& visibility_mapping = _gui->gui_state()->desc().mappings.params[_visibility_params[0]];
-    plugin_changed(_visibility_params[0], visibility_mapping.value_at(_gui->gui_state()->state()));
-  }
+    plugin_changed(_visibility_params[0], _gui->gui_state()->get_plain_at_index(_visibility_params[0]));
 }
 
 void 

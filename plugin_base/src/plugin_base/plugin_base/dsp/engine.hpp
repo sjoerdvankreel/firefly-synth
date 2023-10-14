@@ -34,8 +34,9 @@ thread_pool_voice_processor)(
 // global plugin audio processor
 class plugin_engine final {
 
-  plugin_state _state = {};
   plugin_dims const _dims;
+  plugin_state _state = {};
+  plugin_state _block_automation = {};
 
   float _sample_rate = {};
   double _cpu_usage = {};
@@ -51,7 +52,6 @@ class plugin_engine final {
   jarray<float, 6> _voice_audio_state = {};
   jarray<float, 5> _global_audio_state = {};
   jarray<float, 5> _accurate_automation = {};
-  jarray<plain_value, 4> _block_automation = {};
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
   
