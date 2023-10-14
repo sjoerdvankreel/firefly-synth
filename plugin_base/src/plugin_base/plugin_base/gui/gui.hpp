@@ -25,16 +25,16 @@ public:
   void gui_changing(int index, plain_value plain);
   void plugin_changed(int index, plain_value plain);
 
+  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
+  void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
+  void content_scale(float factor) { setTransform(juce::AffineTransform::scale(factor)); }
+
   void fire_state_loaded();
   void remove_gui_listener(gui_listener* listener);
   void remove_plugin_listener(int index, plugin_listener* listener);
   plugin_state const* gui_state() const { return _gui_state; }
   void add_gui_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
   void add_plugin_listener(int index, plugin_listener* listener) { _plugin_listeners[index].push_back(listener); }
-
-  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
-  void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
-  void content_scale(float factor) { setTransform(juce::AffineTransform::scale(factor)); }
   
 private:
   plugin_state* const _gui_state;

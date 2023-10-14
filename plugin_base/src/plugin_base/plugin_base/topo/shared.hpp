@@ -49,7 +49,6 @@ struct gui_label final {
   gui_label_align align;
   gui_label_justify justify;
   gui_label_contents contents;
-
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_label);
 };
 
