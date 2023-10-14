@@ -58,8 +58,7 @@ void
 inf_controller::gui_changing(int index, plain_value plain)
 {
   int tag = gui_state().desc().mappings.index_to_tag[index];
-  param_mapping const& mapping = gui_state().desc().mappings.params[index];
-  auto normalized = gui_state().desc().param_at(mapping).param->domain.plain_to_normalized(plain).value();
+  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
 
   // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
   performEdit(tag, normalized);

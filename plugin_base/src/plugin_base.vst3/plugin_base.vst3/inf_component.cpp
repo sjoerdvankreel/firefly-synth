@@ -118,8 +118,7 @@ inf_component::process(ProcessData& data)
       if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
         int param_index = _engine.state().desc().mappings.tag_to_index.at(queue->getParameterId());
-        auto const& mapping = _engine.state().desc().mappings.params[param_index];
-        auto rate = _engine.state().desc().param_at(mapping).param->dsp.rate;
+        auto rate = _engine.state().desc().param_at_index(param_index).param->dsp.rate;
         if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
         {
           block_event event;

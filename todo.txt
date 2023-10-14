@@ -26,7 +26,7 @@ disallow all access to mapping
 do value_at_tag/value_at_index
 drop value_at/param_at/etc
 drop module_desc/param_desc topo?
-separate can_modulate from is_accurate
+separate can_modulate from is_accurate + do can_automate for all params
 allow automation dependent/depending through param handler
 handle all value_at & friends
 clean everything
