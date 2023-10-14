@@ -45,7 +45,7 @@ plugin_engine::make_plugin_block(int voice, int module, int slot, int start_fram
   jarray<float, 3>& audio_out = voice < 0 ? _global_audio_state[module][slot] : _voice_audio_state[voice][module][slot];
   plugin_block_state state = {
     cv_out, audio_out, _global_cv_state, _global_audio_state,
-    _accurate_automation[module][slot], _block_automation.state()[module][slot] };
+    _accurate_automation[module][slot], _block_automation.module_state_at(module, slot) };
   return {
     start_frame, end_frame, _sample_rate, state, nullptr, nullptr, 
     _host_block->shared, *_state.desc().plugin, _state.desc().plugin->modules[module]};
@@ -344,13 +344,13 @@ plugin_engine::process()
         auto const& param = module.params[p];
         if(param.dsp.rate == param_rate::block)
           for(int pi = 0; pi < param.info.slot_count; pi++)
-            _block_automation.state()[m][mi][p][pi] = _state.state()[m][mi][p][pi];
+            _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
         else
           for (int pi = 0; pi < param.info.slot_count; pi++)
             std::fill(
               _accurate_automation[m][mi][p][pi].begin(),
               _accurate_automation[m][mi][p][pi].begin() + frame_count,
-              (float)param.domain.raw_to_normalized(_state.state()[m][mi][p][pi].real()).value());
+              (float)_state.get_normalized_at(m, mi, p, pi).value());
       }
   }
     
@@ -434,7 +434,7 @@ plugin_engine::process()
         thread_count,
         _cpu_usage,
         _host_block->audio_out,
-        _state.state()[m][mi],
+        _state.module_state_at(m, mi),
         _voices_mixdown
       };
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
@@ -464,7 +464,7 @@ plugin_engine::process()
             {
               block_event out_event;
               out_event.param = param_global;
-              out_event.normalized = module.params[p].domain.plain_to_normalized(_state.state()[m][mi][p][pi]);
+              out_event.normalized = _state.get_normalized_at(m, mi, p, pi);
               _host_block->events.out.push_back(out_event);
             }
             param_global++;

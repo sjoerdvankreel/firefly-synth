@@ -115,15 +115,8 @@ plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
 void
 plugin_gui::fire_state_loaded()
 {
-  int param_global = 0;
-  for (int m = 0; m < _gui_state->desc().plugin->modules.size(); m++)
-  {
-    auto const& module = _gui_state->desc().plugin->modules[m];
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          gui_changed(param_global++, _gui_state->state()[m][mi][p][pi]);
-  }
+  for(int i = 0; i < _gui_state->desc().param_count; i++)
+    gui_changed(i, _gui_state->get_plain_at_index(i));
 }
 
 template <class T, class... U> T&

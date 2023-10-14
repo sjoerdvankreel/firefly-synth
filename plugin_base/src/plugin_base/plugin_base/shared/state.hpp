@@ -17,24 +17,16 @@ public:
   plugin_state(plugin_desc const* desc);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
-  // TODO drop all of these
   plugin_desc const& desc() const { return *_desc; }
-  //jarray<plain_value, 4>& state() { return _state; }
-  //jarray<plain_value, 4> const& state() const { return _state; }
+  jarray<plain_value, 2>& module_state_at(int module, int slot)
+  { return _state[module][slot]; }
+  jarray<plain_value, 2> const& module_state_at(int module, int slot) const
+  { return _state[module][slot]; }
 
   plain_value get_plain_at(int m, int mi, int p, int pi) const 
   { return _state[m][mi][p][pi]; }
   void set_plain_at(int m, int mi, int p, int pi, plain_value value)
   { _state[m][mi][p][pi] = value; }
-  double get_raw_at(int m, int mi, int p, int pi) const 
-  { return _desc->plain_to_raw_at(m, p, _state[m][mi][p][pi]); }
-  void set_raw_at(int m, int mi, int p, int pi, double value)
-  { _state[m][mi][p][pi] = _desc->raw_to_plain_at(m, p, value); }
-  normalized_value get_normalized_at(int m, int mi, int p, int pi) const 
-  { return _desc->plain_to_normalized_at(m, p, _state[m][mi][p][pi]); }
-  void set_normalized_at(int m, int mi, int p, int pi, normalized_value value)
-  { _state[m][mi][p][pi] = _desc->normalized_to_plain_at(m, p, value); }
-
   plain_value get_plain_at_index(int index) const 
   { return desc().mappings.params[index].value_at(_state); }
   void set_plain_at_index(int index, plain_value value) 
@@ -44,6 +36,10 @@ public:
   void set_plain_at_tag(int tag, plain_value value) 
   { set_plain_at_index(desc().mappings.tag_to_index.at(tag), value); }
 
+  double get_raw_at(int m, int mi, int p, int pi) const 
+  { return _desc->plain_to_raw_at(m, p, _state[m][mi][p][pi]); }
+  void set_raw_at(int m, int mi, int p, int pi, double value)
+  { _state[m][mi][p][pi] = _desc->raw_to_plain_at(m, p, value); }
   double get_raw_at_tag(int tag) const 
   { return get_raw_at_index(desc().mappings.tag_to_index.at(tag)); }
   void set_raw_at_tag(int tag, double value) 
@@ -53,6 +49,10 @@ public:
   void set_raw_at_index(int index, double value) 
   { desc().mappings.params[index].value_at(_state) = desc().raw_to_plain_at_index(index, value); }
 
+  normalized_value get_normalized_at(int m, int mi, int p, int pi) const 
+  { return _desc->plain_to_normalized_at(m, p, _state[m][mi][p][pi]); }
+  void set_normalized_at(int m, int mi, int p, int pi, normalized_value value)
+  { _state[m][mi][p][pi] = _desc->normalized_to_plain_at(m, p, value); }
   normalized_value get_normalized_at_tag(int tag) const 
   { return get_normalized_at_index(desc().mappings.tag_to_index.at(tag)); }
   void set_normalized_at_tag(int tag, normalized_value value) 
