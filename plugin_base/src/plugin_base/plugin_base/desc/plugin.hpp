@@ -38,7 +38,6 @@ struct plugin_param_mappings final {
   std::vector<int> index_to_tag = {};
   std::map<int, int> tag_to_index = {};
   std::vector<param_mapping> params = {};
-
   std::map<std::string, std::map<std::string, int>> id_to_index = {};
   std::vector<std::vector<std::vector<std::vector<int>>>> topo_to_index = {};
 

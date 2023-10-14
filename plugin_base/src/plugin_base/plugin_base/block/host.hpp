@@ -37,7 +37,6 @@ struct host_events final {
   std::vector<note_event> notes;
   std::vector<block_event> block;
   std::vector<accurate_event> accurate;
-
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_events);
 };
 
@@ -47,7 +46,6 @@ struct host_block final {
   host_events events;
   shared_block shared;
   float* const* audio_out;
-
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_block);
 };
 
