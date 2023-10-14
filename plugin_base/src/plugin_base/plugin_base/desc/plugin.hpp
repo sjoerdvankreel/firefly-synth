@@ -69,9 +69,15 @@ public:
 
   param_desc const& param_at_index(int index) const 
   { return param_at_mapping(mappings.params[index]); }
-  param_desc const& param_at_tag(int tag) const 
+  param_desc const& param_at_tag(int tag) const
   { return param_at_index(mappings.tag_to_index.at(tag)); }
+  param_topo const& param_topo_at(int module, int param) const
+  { return plugin->modules[module].params[param]; }
 
+  plain_value raw_to_plain_at(int module, int param, double raw) const
+  { return param_topo_at(module, param).domain.raw_to_plain(raw); }
+  double plain_to_raw_at(int module, int param, plain_value plain) const
+  { return param_topo_at(module, param).domain.plain_to_raw(plain); }
   plain_value raw_to_plain_at_tag(int tag, double raw) const
   { return raw_to_plain_at_index(mappings.tag_to_index.at(tag), raw); }
   double plain_to_raw_at_tag(int tag, plain_value plain) const
@@ -81,6 +87,10 @@ public:
   double plain_to_raw_at_index(int index, plain_value plain) const
   { return param_at_mapping(mappings.params[index]).param->domain.plain_to_raw(plain); }
 
+  double normalized_to_raw_at(int module, int param, normalized_value normalized) const
+  { return param_topo_at(module, param).domain.normalized_to_raw(normalized); }
+  normalized_value raw_to_normalized_at(int module, int param, double raw) const
+  { return param_topo_at(module, param).domain.raw_to_normalized(raw); }
   double normalized_to_raw_at_tag(int tag, normalized_value normalized) const
   { return normalized_to_raw_at_index(mappings.tag_to_index.at(tag), normalized); }
   normalized_value raw_to_normalized_at_tag(int tag, double raw) const
@@ -90,6 +100,10 @@ public:
   normalized_value raw_to_normalized_at_index(int index, double raw) const
   { return param_at_mapping(mappings.params[index]).param->domain.raw_to_normalized(raw); }
 
+  plain_value normalized_to_plain_at(int module, int param, normalized_value normalized) const
+  { return param_topo_at(module, param).domain.normalized_to_plain(normalized); }
+  normalized_value plain_to_normalized_at(int module, int param, plain_value plain) const
+  { return param_topo_at(module, param).domain.plain_to_normalized(plain); }
   plain_value normalized_to_plain_at_tag(int tag, normalized_value normalized) const
   { return normalized_to_plain_at_index(mappings.tag_to_index.at(tag), normalized); }
   normalized_value plain_to_normalized_at_tag(int tag, plain_value plain) const

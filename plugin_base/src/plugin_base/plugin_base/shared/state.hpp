@@ -19,8 +19,21 @@ public:
 
   // TODO drop all of these
   plugin_desc const& desc() const { return *_desc; }
-  jarray<plain_value, 4>& state() { return _state; }
-  jarray<plain_value, 4> const& state() const { return _state; }
+  //jarray<plain_value, 4>& state() { return _state; }
+  //jarray<plain_value, 4> const& state() const { return _state; }
+
+  plain_value get_plain_at(int m, int mi, int p, int pi) const 
+  { return _state[m][mi][p][pi]; }
+  void set_plain_at(int m, int mi, int p, int pi, plain_value value)
+  { _state[m][mi][p][pi] = value; }
+  double get_raw_at(int m, int mi, int p, int pi) const 
+  { return _desc->plain_to_raw_at(m, p, _state[m][mi][p][pi]); }
+  void set_raw_at(int m, int mi, int p, int pi, double value)
+  { _state[m][mi][p][pi] = _desc->raw_to_plain_at(m, p, value); }
+  normalized_value get_normalized_at(int m, int mi, int p, int pi) const 
+  { return _desc->plain_to_normalized_at(m, p, _state[m][mi][p][pi]); }
+  void set_normalized_at(int m, int mi, int p, int pi, normalized_value value)
+  { _state[m][mi][p][pi] = _desc->normalized_to_plain_at(m, p, value); }
 
   plain_value get_plain_at_index(int index) const 
   { return desc().mappings.params[index].value_at(_state); }
