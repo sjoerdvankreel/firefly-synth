@@ -14,7 +14,7 @@ plugin_engine(
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
 _state(desc), _block_automation(desc),
-_dims(*_state.desc().plugin),
+_dims(*desc->plugin),
 _host_block(std::make_unique<host_block>()),
 _voice_processor(voice_processor),
 _voice_thread_ids(_state.desc().plugin->polyphony, std::thread::id()),
