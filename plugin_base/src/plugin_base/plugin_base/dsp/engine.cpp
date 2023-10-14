@@ -379,9 +379,9 @@ plugin_engine::process()
     for(int f = prev_frame; f <= event.frame; f++)
       curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
-    // denormalize current state values
-    mapping.value_at(_state.state()).real_unchecked(_state.desc().param_at(mapping).param->domain.normalized_to_plain(event.normalized).real());
+    // denormalize current state value
     _accurate_frames[event.param] = event.frame;
+    _state.set_normalized_at_index(event.param, event.normalized);
   }
 
   // run input modules in order

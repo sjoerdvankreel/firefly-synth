@@ -29,7 +29,6 @@ class plain_value final {
 public:
   int step() const { return _step; }
   float real() const { return _real; }
-  void real_unchecked(float raw) { _real = raw; }
 
   plain_value() : _real(0.0f) {}
   plain_value(plain_value const&) = default;
