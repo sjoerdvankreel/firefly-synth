@@ -185,8 +185,7 @@ param_dependent::update_dependents()
 void
 param_dependent::own_param_changed(plain_value plain)
 {
-  auto const& mapping = _gui->gui_state()->desc().mappings.params[_dependent_global_index];
-  int dependent_value = mapping.value_at(_gui->gui_state()->state()).step();
+  int dependent_value = _gui->gui_state()->get_plain_at_index(_dependent_global_index).step();
   int index = _param->param->clamp_dependent(dependent_value, plain).step();
   _dependents[dependent_value]->setSelectedItemIndex(index, juce::dontSendNotification);
 }
