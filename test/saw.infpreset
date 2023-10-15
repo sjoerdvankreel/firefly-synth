@@ -1,7 +1,7 @@
 {
   "magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
   "version": 1,
-  "checksum": "5274b4ab678333fc8c570214b18e9fd1",
+  "checksum": "38f346b0df660507ab43977ea154ac8a",
   "plugin": {
     "id": "56AFFFF7565F48348C4359D5E6C856A4",
     "name": "Infernal Synth",
@@ -9,8 +9,35 @@
     "version_minor": 0,
     "modules": [
       {
+        "id": "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+        "name": "Global LFO",
+        "slot_count": 3,
+        "params": [
+          {
+            "id": "{2A9CAE77-13B0-406F-BA57-1A30ED2F5D80}",
+            "name": "Sync",
+            "slot_count": 1
+          },
+          {
+            "id": "{EE68B03D-62F0-4457-9918-E3086B4BCA1C}",
+            "name": "Rate",
+            "slot_count": 1
+          },
+          {
+            "id": "{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}",
+            "name": "Num",
+            "slot_count": 1
+          },
+          {
+            "id": "{84B58AC9-C401-4580-978C-60591AFB757B}",
+            "name": "Denom",
+            "slot_count": 1
+          }
+        ]
+      },
+      {
         "id": "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}",
-        "name": "Env",
+        "name": "Voice Env",
         "slot_count": 2,
         "params": [
           {
@@ -36,25 +63,52 @@
         ]
       },
       {
-        "id": "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
-        "name": "Osc",
-        "slot_count": 2,
+        "id": "{1762278E-5B1E-4495-B499-060EE997A8FD}",
+        "name": "Voice CV Matrix",
+        "slot_count": 1,
         "params": [
           {
-            "id": "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}",
-            "name": "Note",
+            "id": "{06512F9B-2B49-4C2E-BF1F-40070065CABB}",
+            "name": "On",
             "slot_count": 1
           },
           {
-            "id": "{38C78D40-840A-4EBE-A336-2C81D23B426D}",
-            "name": "Oct",
-            "slot_count": 1
+            "id": "{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}",
+            "name": "Active",
+            "slot_count": 8
           },
           {
-            "id": "{691F82E5-00C8-4962-89FE-9862092131CB}",
-            "name": "Cent",
-            "slot_count": 1
+            "id": "{E6D638C0-2337-426D-8C8C-71E9E1595ED3}",
+            "name": "Source",
+            "slot_count": 8
           },
+          {
+            "id": "{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}",
+            "name": "Source Index",
+            "slot_count": 8
+          },
+          {
+            "id": "{94A037CE-F410-4463-8679-5660AFD1582E}",
+            "name": "Target",
+            "slot_count": 8
+          },
+          {
+            "id": "{79366858-994F-485F-BA1F-34AE3DFD2CEE}",
+            "name": "Target Index",
+            "slot_count": 8
+          },
+          {
+            "id": "{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}",
+            "name": "Target Param",
+            "slot_count": 8
+          }
+        ]
+      },
+      {
+        "id": "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+        "name": "Voice Osc",
+        "slot_count": 2,
+        "params": [
           {
             "id": "{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}",
             "name": "On",
@@ -74,12 +128,37 @@
             "id": "{23C6BC03-0978-4582-981B-092D68338ADA}",
             "name": "Bal",
             "slot_count": 1
+          },
+          {
+            "id": "{78856BE3-31E2-4E06-A6DF-2C9BB534789F}",
+            "name": "Note",
+            "slot_count": 1
+          },
+          {
+            "id": "{38C78D40-840A-4EBE-A336-2C81D23B426D}",
+            "name": "Oct",
+            "slot_count": 1
+          },
+          {
+            "id": "{691F82E5-00C8-4962-89FE-9862092131CB}",
+            "name": "Cent",
+            "slot_count": 1
+          },
+          {
+            "id": "{42E7A672-699C-4955-B45B-BBB8190A50E7}",
+            "name": "Sine Gain",
+            "slot_count": 1
+          },
+          {
+            "id": "{725B22B5-FAE9-4C4E-9B69-CAE46E4DCC6D}",
+            "name": "Saw Gain",
+            "slot_count": 1
           }
         ]
       },
       {
         "id": "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}",
-        "name": "Filter",
+        "name": "Voice Filter",
         "slot_count": 1,
         "params": [
           {
@@ -101,7 +180,7 @@
       },
       {
         "id": "{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}",
-        "name": "Delay",
+        "name": "Global Delay",
         "slot_count": 1,
         "params": [
           {
@@ -119,22 +198,22 @@
             "params": [
               {
                 "slots": [
-                  "0.03 Sec"
+                  "Off"
                 ]
               },
               {
                 "slots": [
-                  "0.32963 Sec"
+                  "1.00"
                 ]
               },
               {
                 "slots": [
-                  "27.2 %"
+                  "1"
                 ]
               },
               {
                 "slots": [
-                  "0.11392 Sec"
+                  "4"
                 ]
               }
             ]
@@ -143,22 +222,46 @@
             "params": [
               {
                 "slots": [
-                  "0 Sec"
+                  "Off"
                 ]
               },
               {
                 "slots": [
-                  "0.36779 Sec"
+                  "1.00"
                 ]
               },
               {
                 "slots": [
-                  "44 %"
+                  "1"
                 ]
               },
               {
                 "slots": [
-                  "2.2239 Sec"
+                  "4"
+                ]
+              }
+            ]
+          },
+          {
+            "params": [
+              {
+                "slots": [
+                  "Off"
+                ]
+              },
+              {
+                "slots": [
+                  "1.00"
+                ]
+              },
+              {
+                "slots": [
+                  "1"
+                ]
+              },
+              {
+                "slots": [
+                  "4"
                 ]
               }
             ]
@@ -171,37 +274,22 @@
             "params": [
               {
                 "slots": [
-                  "C"
+                  "0.020"
                 ]
               },
               {
                 "slots": [
-                  "4"
+                  "0.381"
                 ]
               },
               {
                 "slots": [
-                  "-9.09"
+                  "39"
                 ]
               },
               {
                 "slots": [
-                  "On"
-                ]
-              },
-              {
-                "slots": [
-                  "Saw"
-                ]
-              },
-              {
-                "slots": [
-                  "100 %"
-                ]
-              },
-              {
-                "slots": [
-                  "-39.1 %"
+                  "0.114"
                 ]
               }
             ]
@@ -210,37 +298,22 @@
             "params": [
               {
                 "slots": [
-                  "C"
+                  "0.000"
                 ]
               },
               {
                 "slots": [
-                  "4"
+                  "0.368"
                 ]
               },
               {
                 "slots": [
-                  "+9.09"
+                  "44"
                 ]
               },
               {
                 "slots": [
-                  "On"
-                ]
-              },
-              {
-                "slots": [
-                  "Saw"
-                ]
-              },
-              {
-                "slots": [
-                  "100 %"
-                ]
-              },
-              {
-                "slots": [
-                  "+36.6 %"
+                  "2.224"
                 ]
               }
             ]
@@ -258,13 +331,200 @@
               },
               {
                 "slots": [
-                  "20.088 Hz"
+                  "Off",
+                  "Off",
+                  "Off",
+                  "Off",
+                  "Off",
+                  "Off",
+                  "Off",
+                  "Off"
                 ]
               },
               {
                 "slots": [
-                  "7.46 %",
-                  "6.47 %"
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}",
+                  "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}"
+                ]
+              },
+              {
+                "slots": [
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1"
+                ]
+              },
+              {
+                "slots": [
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}",
+                  "{45C2CCFE-48D9-4231-A327-319DAE5C9366}"
+                ]
+              },
+              {
+                "slots": [
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1"
+                ]
+              },
+              {
+                "slots": [
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
+                  "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "params": [
+              {
+                "slots": [
+                  "On"
+                ]
+              },
+              {
+                "slots": [
+                  "{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}"
+                ]
+              },
+              {
+                "slots": [
+                  "100"
+                ]
+              },
+              {
+                "slots": [
+                  "-39"
+                ]
+              },
+              {
+                "slots": [
+                  "C"
+                ]
+              },
+              {
+                "slots": [
+                  "4"
+                ]
+              },
+              {
+                "slots": [
+                  "-9"
+                ]
+              },
+              {
+                "slots": [
+                  "100"
+                ]
+              },
+              {
+                "slots": [
+                  "100"
+                ]
+              }
+            ]
+          },
+          {
+            "params": [
+              {
+                "slots": [
+                  "On"
+                ]
+              },
+              {
+                "slots": [
+                  "{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}"
+                ]
+              },
+              {
+                "slots": [
+                  "100"
+                ]
+              },
+              {
+                "slots": [
+                  "+37"
+                ]
+              },
+              {
+                "slots": [
+                  "C"
+                ]
+              },
+              {
+                "slots": [
+                  "4"
+                ]
+              },
+              {
+                "slots": [
+                  "+9"
+                ]
+              },
+              {
+                "slots": [
+                  "100"
+                ]
+              },
+              {
+                "slots": [
+                  "100"
+                ]
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "slots": [
+          {
+            "params": [
+              {
+                "slots": [
+                  "On"
+                ]
+              },
+              {
+                "slots": [
+                  "112"
+                ]
+              },
+              {
+                "slots": [
+                  "7",
+                  "6"
                 ]
               }
             ]
