@@ -98,7 +98,7 @@ cv_matrix_topo(
   target_index.dependent_domains = vector_explicit_copy(target_slot_domains);
 
   std::vector<param_domain> target_param_domains;
-  auto is_modulatable = [](auto const& p) { return p.dsp.rate == param_rate::accurate; };
+  auto is_modulatable = [](auto const& p) { return p.dsp.automate == param_automate::modulate; };
   auto filter_modulatable = [is_modulatable](auto const& ps) { return vector_filter(ps, is_modulatable); };
   auto map_params_to_items = [](auto const& ps) { return vector_map(ps, list_item::from_topo<param_topo>); };
   auto map_items_to_domains = [](auto const& is) { return make_domain_item(is, ""); };

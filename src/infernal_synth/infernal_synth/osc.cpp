@@ -108,7 +108,7 @@ osc_topo()
       make_label_none())));
   result.params.emplace_back(make_param(
     make_topo_info("{725B22B5-FAE9-4C4E-9B69-CAE46E4DCC6D}", "Saw Gain", param_saw_gain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_saw_gain, gui_edit_type::knob, { 0, 0 }, 
       make_label_none())));
   return result;
