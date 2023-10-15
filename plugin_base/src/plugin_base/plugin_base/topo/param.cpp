@@ -3,9 +3,31 @@
 
 namespace plugin_base {
 
+void 
+param_dsp::validate() const
+{
+  if (rate == param_rate::accurate)
+    assert(direction == param_direction::input);
+  if (automate == param_automate::automate)
+    assert(direction == param_direction::input);
+
+  if (direction == param_direction::output)
+  {
+    assert(rate == param_rate::block);
+    assert(automate == param_automate::none);
+  }
+
+  if (automate == param_automate::modulate)
+  {
+    assert(rate == param_rate::accurate);
+    assert(direction == param_direction::input);
+  }
+}
+
 void
 param_topo::validate(module_topo const& module, int index) const
 {
+  dsp.validate();
   info.validate();
   domain.validate();
   gui.bindings.validate(module, info.slot_count);
@@ -46,7 +68,6 @@ param_topo::validate(module_topo const& module, int index) const
   assert(domain.is_real() || dsp.rate == param_rate::block);
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == gui_layout::single));
-  assert(dsp.direction != param_direction::output || dsp.rate == param_rate::block);
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
   assert(dsp.direction == param_direction::input || gui.bindings.enabled.selector == nullptr);
 }

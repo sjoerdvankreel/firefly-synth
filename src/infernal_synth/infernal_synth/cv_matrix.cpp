@@ -46,13 +46,13 @@ cv_matrix_topo(
   
   result.params.emplace_back(make_param(
     make_topo_info("{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", param_on, 1),
-    make_param_dsp_block(), make_domain_toggle(true),
+    make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 6 }, 
       make_label_default(gui_label_contents::name))));
   
   auto& active = result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count),
-    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, gui_layout::vertical, { 1, 0 }, 
       make_label_none())));
   active.gui.bindings.enabled.params = { param_on };
@@ -60,7 +60,7 @@ cv_matrix_topo(
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
-    make_param_dsp_block(), make_domain_item(vector_map(sources, list_item::from_topo_ptr<module_topo>), ""),
+    make_param_dsp_block(param_automate::none), make_domain_item(vector_map(sources, list_item::from_topo_ptr<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 1 }, 
       make_label_none())));
   source.gui.bindings.enabled.params = enabled_params;
@@ -70,7 +70,7 @@ cv_matrix_topo(
   auto source_slot_domains = vector_map(sources, map_to_slot_domain);
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
-    make_param_dsp_block(), make_domain_dependent(source_slot_domains),
+    make_param_dsp_block(param_automate::none), make_domain_dependent(source_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 2 }, 
       make_label_none())));
   source_index.gui.bindings.enabled.params = enabled_params;
@@ -80,7 +80,7 @@ cv_matrix_topo(
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
-    make_param_dsp_block(), make_domain_item(vector_map(targets, list_item::from_topo_ptr<module_topo>), ""),
+    make_param_dsp_block(param_automate::none), make_domain_item(vector_map(targets, list_item::from_topo_ptr<module_topo>), ""),
     make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 3 }, 
       make_label_none())));
   target.gui.bindings.enabled.params = enabled_params;
@@ -89,7 +89,7 @@ cv_matrix_topo(
   auto target_slot_domains = vector_map(targets, map_to_slot_domain);
   auto& target_index = result.params.emplace_back(make_param(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
-    make_param_dsp_block(), make_domain_dependent(target_slot_domains),
+    make_param_dsp_block(param_automate::none), make_domain_dependent(target_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 4 },
       make_label_none())));
   target_index.gui.bindings.enabled.params = enabled_params;
@@ -108,7 +108,7 @@ cv_matrix_topo(
   auto modulatable_target_domains = vector_map(modulatable_target_items, map_items_to_domains);
   auto& target_param = result.params.emplace_back(make_param(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
-    make_param_dsp_block(), make_domain_dependent(modulatable_target_domains),
+    make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 5 },
       make_label_default(gui_label_contents::value))));
   target_param.gui.bindings.enabled.params = enabled_params;

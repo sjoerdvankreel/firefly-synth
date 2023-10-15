@@ -41,7 +41,7 @@ delay_topo(int polyphony)
 
   result.params.emplace_back(make_param(
     make_topo_info("{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", param_on, 1),
-    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, 
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(

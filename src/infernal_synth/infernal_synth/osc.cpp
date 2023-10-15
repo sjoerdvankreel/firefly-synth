@@ -68,47 +68,47 @@ osc_topo()
 
   result.params.emplace_back(make_param(
     make_topo_info("{AA9D7DA6-A719-4FDA-9F2E-E00ABB784845}", "On", param_on, 1),
-    make_param_dsp_block(), make_domain_toggle(false),
+    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, 
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
-    make_param_dsp_block(), make_domain_item(type_items(), ""),
+    make_param_dsp_block(param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, 
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(
     make_topo_info("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 }, 
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
-    make_param_dsp_accurate(), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, 
       make_label_default(gui_label_contents::name))));
   result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
-    make_param_dsp_block(), make_domain_name(note_names(), ""),
+    make_param_dsp_block(param_automate::none), make_domain_name(note_names(), ""),
     make_param_gui_single(section_pitch, gui_edit_type::list, { 0, 0 }, 
       make_label_none())));  
   result.params.emplace_back(make_param(
     make_topo_info("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", param_oct, 1),
-    make_param_dsp_block(), make_domain_step(0, 9, 4, 0),
+    make_param_dsp_block(param_automate::none), make_domain_step(0, 9, 4, 0),
     make_param_gui_single(section_pitch, gui_edit_type::list, { 0, 1 }, 
       make_label_none())));  
   result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
-    make_param_dsp_accurate(), make_domain_percentage(-1, 1, 0, 0, false),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 }, 
       make_label(gui_label_contents::value, gui_label_align::right, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{42E7A672-699C-4955-B45B-BBB8190A50E7}", "Sine Gain", param_sine_gain, 1),
-    make_param_dsp_accurate(), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_sine_gain, gui_edit_type::knob, { 0, 0 }, 
       make_label_none())));
   result.params.emplace_back(make_param(
     make_topo_info("{725B22B5-FAE9-4C4E-9B69-CAE46E4DCC6D}", "Saw Gain", param_saw_gain, 1),
-    make_param_dsp_accurate(), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_saw_gain, gui_edit_type::knob, { 0, 0 }, 
       make_label_none())));
   return result;
