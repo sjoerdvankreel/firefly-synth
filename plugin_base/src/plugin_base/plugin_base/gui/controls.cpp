@@ -121,15 +121,15 @@ param_component(gui, module, param), Component()
   for (int i = 0; i < param->param->dependent_domains.size(); i++)
   {
     auto const& domain = param->param->dependent_domains[i];
-    auto& dependent = _dependents.emplace_back(std::make_unique<ComboBox>());
+    auto& editor = _editors.emplace_back(std::make_unique<ComboBox>());
     for (int j = domain.min; j <= domain.max; j++)
-      dependent->addItem(domain.raw_to_text(j), j - domain.min + 1);
-    dependent->setSelectedItemIndex(0, dontSendNotification);
-    addChildComponent(dependent.get());
-    dependent->addListener(this);
+      editor->addItem(domain.raw_to_text(j), j - domain.min + 1);
+    editor->setSelectedItemIndex(0, dontSendNotification);
+    addChildComponent(editor.get());
+    editor->addListener(this);
   }
   init();
-  update_dependents();
+  update_editors();
   gui->gui_state()->add_listener(_global_dependency_index, this);
 }
 
@@ -137,22 +137,22 @@ param_dependent::
 ~param_dependent() 
 { 
   _gui->gui_state()->remove_listener(_global_dependency_index, this);
-  for(int i = 0; i < _dependents.size(); i++)
-    _dependents[i]->removeListener(this);
+  for(int i = 0; i < _editors.size(); i++)
+    _editors[i]->removeListener(this);
 }
 
 void
 param_dependent::resized()
 {
-  for(int i = 0; i < _dependents.size(); i++)
-    _dependents[i]->setBounds(getLocalBounds());
+  for(int i = 0; i < _editors.size(); i++)
+    _editors[i]->setBounds(getLocalBounds());
 }
 
 void 
 param_dependent::state_changed(int index, plain_value plain)
 {
   if(index == _global_dependency_index)
-    update_dependents();
+    update_editors();
   else
     param_component::state_changed(index, plain);
 }
@@ -160,9 +160,9 @@ param_dependent::state_changed(int index, plain_value plain)
 void
 param_dependent::comboBoxChanged(ComboBox* box)
 {
-  for(int i = 0; i < _dependents.size(); i++)
+  for(int i = 0; i < _editors.size(); i++)
   {
-    if(_dependents[i].get() != box) continue;
+    if(_editors[i].get() != box) continue;
     int value = box->getSelectedItemIndex();
     plain_value plain = _param->param->domain.raw_to_plain(value);
     _gui->gui_changed(_param->info.global, plain);
@@ -172,22 +172,22 @@ param_dependent::comboBoxChanged(ComboBox* box)
 }
 
 void
-param_dependent::update_dependents()
+param_dependent::update_editors()
 {
-  int dependent_value = _gui->gui_state()->get_plain_at_index(_global_dependency_index).step();
-  for (int i = 0; i < _dependents.size(); i++)
+  int dependency_value = _gui->gui_state()->get_plain_at_index(_global_dependency_index).step();
+  for (int i = 0; i < _editors.size(); i++)
   {
-    _dependents[i]->setVisible(i == dependent_value);
-    _dependents[i]->setEnabled(_param->param->dependent_domains[i].max > 0);
+    _editors[i]->setVisible(i == dependency_value);
+    _editors[i]->setEnabled(_param->param->dependent_domains[i].max > 0);
   }
 }
 
 void
 param_dependent::own_param_changed(plain_value plain)
 {
-  int dependent_value = _gui->gui_state()->get_plain_at_index(_global_dependency_index).step();
-  int index = _param->param->clamp_dependent(dependent_value, plain).step();
-  _dependents[dependent_value]->setSelectedItemIndex(index, juce::dontSendNotification);
+  int dependency_value = _gui->gui_state()->get_plain_at_index(_global_dependency_index).step();
+  int index = _param->param->clamp_dependent(dependency_value, plain).step();
+  _editors[dependency_value]->setSelectedItemIndex(index, juce::dontSendNotification);
 }
 
 }

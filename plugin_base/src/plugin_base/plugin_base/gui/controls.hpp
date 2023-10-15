@@ -134,8 +134,8 @@ protected:
 private:
   int _global_dependency_index = -1;
 
-  void update_dependents();
-  std::vector<std::unique_ptr<juce::ComboBox>> _dependents = {};
+  void update_editors();
+  std::vector<std::unique_ptr<juce::ComboBox>> _editors = {};
 
 public:
   void resized() override;
