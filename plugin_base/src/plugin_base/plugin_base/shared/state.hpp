@@ -43,7 +43,6 @@ public:
   jarray<plain_value, 2> const& module_state_at(int module, int slot) const
   { return _state[module][slot]; }
 
-  void set_plain_at(int m, int mi, int p, int pi, plain_value value);
   plain_value get_plain_at(int m, int mi, int p, int pi) const 
   { return _state[m][mi][p][pi]; }
   plain_value get_plain_at_index(int index) const 
@@ -54,6 +53,7 @@ public:
   { return get_plain_at_index(desc().mappings.tag_to_index.at(tag)); }
   void set_plain_at_tag(int tag, plain_value value) 
   { set_plain_at_index(desc().mappings.tag_to_index.at(tag), value); }
+  void set_plain_at(int m, int mi, int p, int pi, plain_value value, bool force_notify = false);
 
   double get_raw_at(int m, int mi, int p, int pi) const 
   { return _desc->plain_to_raw_at(m, p, get_plain_at(m, mi, p, pi)); }
