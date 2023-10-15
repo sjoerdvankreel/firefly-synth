@@ -19,7 +19,7 @@ mark param as modulatable or not
 do cakewalk bug report
 test all host+linux
 param value dependent on other param
-move listener to gui
+drop listeners.cpp/hpp
 separate can_modulate from is_accurate + do can_automate for all params
 allow automation dependent/depending through param handler
 
