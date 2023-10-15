@@ -115,9 +115,8 @@ param_dependent::
 param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param):
 param_component(gui, module, param), Component()
 {
-  auto const& topo_to_index = _gui->gui_state()->desc().mappings.topo_to_index;
-  auto const& param_indices = topo_to_index[_module->info.topo][_module->info.slot];
-  _global_dependency_index = param_indices[param->param->dependency_index][param->info.slot];
+  _global_dependency_index = gui->gui_state()->desc().dependency_index(param->info.global);
+  assert(_global_dependency_index != -1);
   for (int i = 0; i < param->param->dependent_domains.size(); i++)
   {
     auto const& domain = param->param->dependent_domains[i];

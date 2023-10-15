@@ -92,7 +92,7 @@ inf_controller::initialize(FUnknown* context)
       param_info.stepCount = 0;
       if (!param.param->domain.is_real())
         param_info.stepCount = param.param->domain.max - param.param->domain.min;
-      parameters.addParameter(new inf_param(module.params[p].param, param_info));
+      parameters.addParameter(new inf_param(&_gui_state, module.params[p].param, module.params[p].info.global, param_info));
     }
   }
 

@@ -61,7 +61,7 @@ struct param_domain final {
   normalized_value plain_to_normalized(plain_value plain) const;
   plain_value normalized_to_plain(normalized_value normalized) const;
 
-  // parse and format
+  // parse and format of independent values
   std::string raw_to_text(double raw) const;
   std::string plain_to_text(plain_value plain) const;
   std::string normalized_to_text(normalized_value normalized) const;

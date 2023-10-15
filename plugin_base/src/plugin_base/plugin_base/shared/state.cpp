@@ -53,4 +53,13 @@ plugin_state::remove_listener(int index, state_listener* listener) const
   map_iter->second.erase(vector_iter);
 }
 
+param_domain const& 
+plugin_state::select_dependency_domain(int index) const
+{
+  int dependency_index = desc().dependency_index(index);
+  if (dependency_index == -1) return desc().param_at_index(index).param->domain;
+  int dependency_value = get_plain_at_index(dependency_index).step();
+  return desc().param_at_index(index).param->dependent_domains[dependency_value];
+}
+
 }

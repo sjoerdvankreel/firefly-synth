@@ -68,6 +68,7 @@ public:
   plugin_desc(plugin_topo const* plugin);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
 
+  int dependency_index(int index) const;
   param_desc const& param_at_index(int index) const 
   { return param_at_mapping(mappings.params[index]); }
   param_desc const& param_at_tag(int tag) const

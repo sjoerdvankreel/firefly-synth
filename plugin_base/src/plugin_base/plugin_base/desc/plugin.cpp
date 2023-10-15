@@ -72,6 +72,15 @@ plugin(plugin)
   }
 }
 
+int
+plugin_desc::dependency_index(int index) const
+{
+  auto const& m = mappings.params[index];
+  int di = param_at_index(index).param->dependency_index;
+  if(di == -1) return -1;
+  return mappings.topo_to_index[m.module_topo][m.module_slot][di][m.param_slot];
+}
+
 void
 plugin_desc::validate() const
 {

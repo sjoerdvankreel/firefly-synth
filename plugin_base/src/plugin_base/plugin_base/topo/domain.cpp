@@ -42,6 +42,12 @@ param_domain::text_to_normalized(
 std::string
 param_domain::plain_to_text(plain_value plain) const
 {
+  // TODO assert(type != domain_type::dependent);
+  if (type == domain_type::dependent)
+  {
+    return "";
+  }
+
   std::string prefix = "";
   if(min < 0 &&  ((is_real() && plain.real() > 0) 
     || (!is_real() && plain.step() > 0)))
@@ -51,7 +57,6 @@ param_domain::plain_to_text(plain_value plain) const
   {
   case domain_type::name: return names[plain.step()];
   case domain_type::item: return items[plain.step()].name;
-  case domain_type::dependent: return std::to_string(plain.step());
   case domain_type::toggle: return plain.step() == 0 ? "Off" : "On";
   case domain_type::step: return prefix + std::to_string(plain.step() + display_offset);
   default: break;
@@ -67,6 +72,14 @@ bool
 param_domain::text_to_plain(
   std::string const& textual, plain_value& plain) const
 {
+  // TODO
+  // assert(type != domain_type::dependent);
+  if(type == domain_type::dependent)
+  {
+    plain = plain_value::from_step(0);
+    return true;
+  }
+
   if (type == domain_type::name)
   {
     for (int i = 0; i < names.size(); i++)
@@ -91,7 +104,7 @@ param_domain::text_to_plain(
   }
 
   std::istringstream stream(textual);
-  if (type == domain_type::step || type == domain_type::dependent)
+  if (type == domain_type::step)
   {
     int step = std::numeric_limits<int>::max();
     stream >> step;
