@@ -118,6 +118,7 @@ plugin_desc::validate() const
     auto const& this_param = param_at_mapping(m);
     if(this_param.param->dependency_index == -1) continue;
     auto const& that_index = mappings.topo_to_index[m.module_topo][m.module_slot][this_param.param->dependency_index][m.param_slot];
+    assert(that_index < p);
     auto const& dependents = param_dependents[that_index];
     assert(std::find(dependents.begin(), dependents.end(), p) != dependents.end());
   }
