@@ -107,6 +107,7 @@ param_domain::raw_to_plain(double raw) const
 inline normalized_value 
 param_domain::plain_to_normalized(plain_value plain) const
 {
+  assert(type != domain_type::dependent);
   double range = max - min;
   if (!is_real())
     return normalized_value((plain.step() - min) / range);
@@ -118,6 +119,7 @@ param_domain::plain_to_normalized(plain_value plain) const
 inline plain_value 
 param_domain::normalized_to_plain(normalized_value normalized) const
 {
+  assert(type != domain_type::dependent);
   double range = max - min;
   if (!is_real())
     return plain_value::from_step(min + std::floor(std::min(range, normalized.value() * (range + 1))));
