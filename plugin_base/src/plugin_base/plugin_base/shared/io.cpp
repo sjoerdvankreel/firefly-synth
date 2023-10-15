@@ -215,7 +215,6 @@ plugin_io_load(
         {
           plain_value plain;
           int index = state.desc().mappings.topo_to_index[m][mi][p][pi];
-          auto const& topo = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
           std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
           if(state.text_to_plain_at_index(true, index, text, plain))
             state.set_plain_at(module_iter->second, mi, param_iter->second, pi, plain);
