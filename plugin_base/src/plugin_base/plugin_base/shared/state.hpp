@@ -96,19 +96,4 @@ public:
   { return select_dependency_domain(index).text_to_normalized(textual, normalized); }
 };
 
-inline void 
-plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
-{
-  _state[m][mi][p][pi] = value;
-  int index = desc().mappings.topo_to_index[m][mi][p][pi];
-  if(_notify) state_changed(index, value);
-  for (int d = 0; d < desc().param_dependents[index].size(); d++)
-  {
-    int dependent_index = desc().param_dependents[index][d];
-    auto dependent_value = get_plain_at_index(dependent_index);
-    auto clamped = desc().param_at_index(dependent_index).param->clamp_dependent(value.step(), dependent_value);
-    set_plain_at_index(dependent_index, clamped);
-  }  
-}
-
 }
