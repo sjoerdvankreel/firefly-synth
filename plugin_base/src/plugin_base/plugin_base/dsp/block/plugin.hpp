@@ -1,10 +1,10 @@
 #pragma once
 
-#include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/desc/plugin.hpp>
-#include <plugin_base/block/shared.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/jarray.hpp>
+#include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/dsp/block/shared.hpp>
 
 #include <cassert>
 

@@ -2,12 +2,12 @@
 
 #include <plugin_base/desc/dims.hpp>
 #include <plugin_base/desc/plugin.hpp>
-#include <plugin_base/block/host.hpp>
-#include <plugin_base/block/plugin.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/dsp/block/host.hpp>
+#include <plugin_base/dsp/block/plugin.hpp>
 
 #include <memory>
 #include <vector>

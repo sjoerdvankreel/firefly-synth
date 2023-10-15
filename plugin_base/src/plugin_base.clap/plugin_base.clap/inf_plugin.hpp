@@ -2,7 +2,7 @@
 
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/dsp/engine.hpp>
-#include <plugin_base/block/host.hpp>
+#include <plugin_base/dsp/block/host.hpp>
 #include <plugin_base/shared/state.hpp>
 
 #include <clap/helpers/plugin.hh>

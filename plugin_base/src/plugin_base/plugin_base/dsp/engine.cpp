@@ -1,6 +1,6 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
-#include <plugin_base/block/host.hpp>
+#include <plugin_base/dsp/block/host.hpp>
 #include <plugin_base/desc/frame_dims.hpp>
 
 #include <limits>
