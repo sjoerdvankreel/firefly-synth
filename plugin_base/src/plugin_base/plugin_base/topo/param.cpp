@@ -18,26 +18,26 @@ param_topo::validate(module_topo const& module, int index) const
 
   if (domain.type != domain_type::dependent)
   {
-    assert(dependent_index == 0);
-    assert(dependents.size() == 0);
     assert(domain.max > domain.min);
+    assert(dependency_index == 0);
+    assert(dependency_domains.size() == 0);
     assert(gui.edit_type != gui_edit_type::dependent);
   }
   else
   {
     int max = -1;
-    assert(dependent_index >= 0);
-    assert(dependents.size() > 1);
+    assert(dependency_index >= 0);
+    assert(dependency_domains.size() > 1);
     assert(gui.edit_type == gui_edit_type::dependent);
-    assert(info.slot_count == module.params[dependent_index].info.slot_count);
-    for(int i = 0; i < dependents.size(); i++)
+    assert(info.slot_count == module.params[dependency_index].info.slot_count);
+    for(int i = 0; i < dependency_domains.size(); i++)
     {
-      max = std::max(max, (int)dependents[i].max);
-      dependents[i].validate();
-      assert(dependents[i].min == 0);
-      assert(dependents[i].type == domain_type::item 
-          || dependents[i].type == domain_type::name 
-          || dependents[i].type == domain_type::step);
+      max = std::max(max, (int)dependency_domains[i].max);
+      dependency_domains[i].validate();
+      assert(dependency_domains[i].min == 0);
+      assert(dependency_domains[i].type == domain_type::item
+          || dependency_domains[i].type == domain_type::name
+          || dependency_domains[i].type == domain_type::step);
     }
     assert(max == domain.max);
   }
