@@ -9,7 +9,6 @@ plugin(plugin)
 {
   int param_global = 0;
   int module_global = 0;
-  plugin->validate();
 
   for(int m = 0; m < plugin->modules.size(); m++)
   {
@@ -88,6 +87,7 @@ plugin_desc::validate() const
   (void)param_global;
   std::set<int> all_hashes;
   std::set<std::string> all_ids;
+  plugin->validate();
 
   assert(param_count > 0);
   assert(module_count > 0);
