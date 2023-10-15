@@ -19,7 +19,7 @@ param_topo::validate(module_topo const& module, int index) const
   if (domain.type != domain_type::dependent)
   {
     assert(domain.max > domain.min);
-    assert(dependency_index == 0);
+    assert(dependency_index == -1);
     assert(dependent_domains.size() == 0);
     assert(gui.edit_type != gui_edit_type::dependent);
   }

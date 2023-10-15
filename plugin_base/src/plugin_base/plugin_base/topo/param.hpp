@@ -40,7 +40,7 @@ struct param_topo final {
   topo_info info;
   param_topo_gui gui;
   param_domain domain;
-  int dependency_index;
+  int dependency_index = -1;
   std::vector<param_domain> dependent_domains;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);

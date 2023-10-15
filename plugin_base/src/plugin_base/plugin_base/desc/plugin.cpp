@@ -70,8 +70,6 @@ plugin(plugin)
     int dependency_index = mappings.topo_to_index[m.module_topo][m.module_slot][param.dependency_index][m.param_slot];
     param_dependents[dependency_index].push_back(p);
   }
-
-  validate();
 }
 
 void

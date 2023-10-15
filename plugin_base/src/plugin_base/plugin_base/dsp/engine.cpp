@@ -20,6 +20,10 @@ _voice_processor(voice_processor),
 _voice_thread_ids(_state.desc().plugin->polyphony, std::thread::id()),
 _voice_processor_context(voice_processor_context)
 {
+  // validate here instead of plugin_desc ctor 
+  // since that runs on module init so is hard to debug
+  desc->validate();
+
   // reserve this much but allocate on the audio thread if necessary
   // still seems better than dropping events
   int block_events_guess = _state.desc().param_count;
