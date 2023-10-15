@@ -82,13 +82,13 @@ public:
   { set_plain_at_index(index, desc().normalized_to_plain_at_index(index, value)); }
 
   // parse and format of possibly dependent values
-  std::string raw_to_text_at_index(int index, double raw) const
-  { return plain_to_text_at_index(index, desc().raw_to_plain_at_index(index, raw)); }
-  std::string normalized_to_text_at_index(int index, normalized_value normalized) const
-  { return plain_to_text_at_index(index, desc().normalized_to_plain_at_index(index, normalized)); }
-  std::string plain_to_text_at_index(int index, plain_value plain) const;
-  bool text_to_plain_at_index(int index, std::string const& textual, plain_value& plain) const;
-  bool text_to_normalized_at_index(int index, std::string const& textual, normalized_value& normalized) const;
+  std::string raw_to_text_at_index(bool io, int index, double raw) const
+  { return plain_to_text_at_index(io, index, desc().raw_to_plain_at_index(index, raw)); }
+  std::string normalized_to_text_at_index(bool io, int index, normalized_value normalized) const
+  { return plain_to_text_at_index(io, index, desc().normalized_to_plain_at_index(index, normalized)); }
+  std::string plain_to_text_at_index(bool io, int index, plain_value plain) const;
+  bool text_to_plain_at_index(bool io, int index, std::string const& textual, plain_value& plain) const;
+  bool text_to_normalized_at_index(bool io, int index, std::string const& textual, normalized_value& normalized) const;
 };
 
 }

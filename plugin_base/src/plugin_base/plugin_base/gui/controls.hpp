@@ -60,7 +60,7 @@ public juce::TextEditor::Listener
   std::string _last_parsed;
 protected:
   void own_param_changed(plain_value plain) override final
-  { setText(_last_parsed = _param->param->domain.plain_to_text(plain), false); }
+  { setText(_last_parsed = _param->param->domain.plain_to_text(false, plain), false); }
 
 public:
   void textEditorTextChanged(TextEditor&) override;

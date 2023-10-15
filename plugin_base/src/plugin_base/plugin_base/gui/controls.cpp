@@ -31,7 +31,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
 {
   plain_value plain;
   std::string text(getText().toStdString());
-  if (!_param->param->domain.text_to_plain(text, plain)) return;
+  if (!_param->param->domain.text_to_plain(false, text, plain)) return;
   _last_parsed = text;
   _gui->gui_changed(_param->info.global, plain);
 }
@@ -39,7 +39,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
-  std::string text = _param->param->domain.plain_to_text(plain);
+  std::string text = _param->param->domain.plain_to_text(false, plain);
   if(_both) text = _param->info.name + " " + text;
   setText(text, dontSendNotification); 
 }
@@ -84,7 +84,7 @@ param_component(gui, module, param), ComboBox()
 {
   auto const& domain = param->param->domain;
   for(int i = domain.min; i <= domain.max; i++)
-    addItem(domain.raw_to_text(i), i - domain.min + 1);
+    addItem(domain.raw_to_text(false, i), i - domain.min + 1);
   addListener(this);
   setEditableText(false);
   init();
@@ -122,7 +122,7 @@ param_component(gui, module, param), Component()
     auto const& domain = param->param->dependent_domains[i];
     auto& editor = _editors.emplace_back(std::make_unique<ComboBox>());
     for (int j = domain.min; j <= domain.max; j++)
-      editor->addItem(domain.raw_to_text(j), j - domain.min + 1);
+      editor->addItem(domain.raw_to_text(false, j), j - domain.min + 1);
     editor->setSelectedItemIndex(0, dontSendNotification);
     addChildComponent(editor.get());
     editor->addListener(this);

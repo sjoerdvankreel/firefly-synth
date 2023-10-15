@@ -278,7 +278,7 @@ inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* val
 {
   normalized_value normalized;
   auto const& param = *_engine.state().desc().param_at_tag(param_id).param;
-  if (!param.domain.text_to_normalized(display, normalized)) return false;
+  if (!param.domain.text_to_normalized(false, display, normalized)) return false;
   *value = normalized_to_clap(param, normalized).value();
   return true;
 }
@@ -288,7 +288,7 @@ inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std
 {
   auto const& param = *_engine.state().desc().param_at_tag(param_id).param;
   normalized_value normalized = clap_to_normalized(param, clap_value(value));
-  std::string text = param.domain.normalized_to_text(normalized);
+  std::string text = param.domain.normalized_to_text(false, normalized);
   from_8bit_string(display, size, text.c_str());
   return true;
 }

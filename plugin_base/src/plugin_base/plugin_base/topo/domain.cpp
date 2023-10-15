@@ -9,38 +9,38 @@ plain_value
 param_domain::default_plain() const
 {
   plain_value result;
-  INF_ASSERT_EXEC(text_to_plain(default_, result));
+  INF_ASSERT_EXEC(text_to_plain(false, default_, result));
   return result;
 }
 
 std::string
 param_domain::raw_to_text(
-  double raw) const
+  bool io, double raw) const
 {
   plain_value plain(raw_to_plain(raw));
-  return plain_to_text(plain);
+  return plain_to_text(io, plain);
 }
 
 std::string 
 param_domain::normalized_to_text(
-  normalized_value normalized) const
+  bool io, normalized_value normalized) const
 {
   plain_value plain(normalized_to_plain(normalized));
-  return plain_to_text(plain);
+  return plain_to_text(io, plain);
 }
 
 bool 
 param_domain::text_to_normalized(
-  std::string const& textual, normalized_value& normalized) const
+  bool io, std::string const& textual, normalized_value& normalized) const
 {
   plain_value plain;
-  if(!text_to_plain(textual, plain)) return false;
+  if(!text_to_plain(io, textual, plain)) return false;
   normalized = plain_to_normalized(plain);
   return true;
 }
 
 std::string
-param_domain::plain_to_text(plain_value plain) const
+param_domain::plain_to_text(bool io, plain_value plain) const
 {
   // TODO assert(type != domain_type::dependent);
   if (type == domain_type::dependent)
@@ -70,7 +70,7 @@ param_domain::plain_to_text(plain_value plain) const
 
 bool 
 param_domain::text_to_plain(
-  std::string const& textual, plain_value& plain) const
+  bool io, std::string const& textual, plain_value& plain) const
 {
   // TODO
   // assert(type != domain_type::dependent);

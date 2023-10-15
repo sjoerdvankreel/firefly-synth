@@ -62,11 +62,11 @@ struct param_domain final {
   plain_value normalized_to_plain(normalized_value normalized) const;
 
   // parse and format of independent values
-  std::string raw_to_text(double raw) const;
-  std::string plain_to_text(plain_value plain) const;
-  std::string normalized_to_text(normalized_value normalized) const;
-  bool text_to_plain(std::string const& textual, plain_value& plain) const;
-  bool text_to_normalized(std::string const& textual, normalized_value& normalized) const;
+  std::string raw_to_text(bool io, double raw) const;
+  std::string plain_to_text(bool io, plain_value plain) const;
+  std::string normalized_to_text(bool io, normalized_value normalized) const;
+  bool text_to_plain(bool io, std::string const& textual, plain_value& plain) const;
+  bool text_to_normalized(bool io, std::string const& textual, normalized_value& normalized) const;
 };
 
 inline list_item::

@@ -55,32 +55,32 @@ plugin_state::remove_listener(int index, state_listener* listener) const
 
 bool 
 plugin_state::text_to_normalized_at_index(
- int index, std::string const& textual, normalized_value& normalized) const
+  bool io, int index, std::string const& textual, normalized_value& normalized) const
 {
   plain_value plain;
-  if(!text_to_plain_at_index(index, textual, plain)) return false;
+  if(!text_to_plain_at_index(io, index, textual, plain)) return false;
   normalized = desc().plain_to_normalized_at_index(index, plain);
   return true;
 }
 
 std::string 
-plugin_state::plain_to_text_at_index(int index, plain_value plain) const
+plugin_state::plain_to_text_at_index(bool io, int index, plain_value plain) const
 {
   int dependency_index = desc().dependency_index(index);
-  if (dependency_index == -1) return desc().param_at_index(index).param->domain.plain_to_text(plain);
+  if (dependency_index == -1) return desc().param_at_index(index).param->domain.plain_to_text(io, plain);
   int dependency_value = get_plain_at_index(dependency_index).step();
   auto clamped = desc().param_at_index(index).param->clamp_dependent(dependency_value, plain);
-  return desc().param_at_index(index).param->dependent_domains[dependency_value].plain_to_text(clamped);
+  return desc().param_at_index(index).param->dependent_domains[dependency_value].plain_to_text(io, clamped);
 }
 
 bool 
 plugin_state::text_to_plain_at_index(
-  int index, std::string const& textual, plain_value& plain) const
+  bool io, int index, std::string const& textual, plain_value& plain) const
 {
   int dependency_index = desc().dependency_index(index);
-  if (dependency_index == -1) return desc().param_at_index(index).param->domain.text_to_plain(textual, plain);
+  if (dependency_index == -1) return desc().param_at_index(index).param->domain.text_to_plain(io, textual, plain);
   int dependency_value = get_plain_at_index(dependency_index).step();
-  return desc().param_at_index(index).param->dependent_domains[dependency_value].text_to_plain(textual, plain);
+  return desc().param_at_index(index).param->dependent_domains[dependency_value].text_to_plain(io, textual, plain);
 }
 
 void
