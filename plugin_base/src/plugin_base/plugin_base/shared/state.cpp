@@ -100,12 +100,12 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value, bool
   for (int d = 0; d < desc().param_dependents[index].size(); d++)
   {
     int dependent_index = desc().param_dependents[index][d];
-    auto const& m = desc().mappings.params[dependent_index];
+    auto const& map = desc().mappings.params[dependent_index];
     auto dependent_value = get_plain_at_index(dependent_index);
     auto clamped = desc().param_at_index(dependent_index).param->clamp_dependent(value.step(), dependent_value);
 
     // force notification since value-to-text conversion has changed
-    set_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot, clamped, true);
+    set_plain_at(map.module_topo, map.module_slot, map.param_topo, map.param_slot, clamped, true);
   }
   
   // notify later
