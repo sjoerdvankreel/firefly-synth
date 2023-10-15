@@ -36,12 +36,29 @@ param_textbox::textEditorTextChanged(TextEditor&)
   _gui->gui_changed(_param->info.global, plain);
 }
 
+param_value_label::
+param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both) :
+param_component(gui, module, param), Label(), _both(both) 
+{
+  _global_dependency_index = gui->gui_state()->desc().dependency_index(param->info.global);
+  init();
+}
+
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
   if(_both) text = _param->info.name + " " + text;
   setText(text, dontSendNotification); 
+}
+
+void
+param_value_label::state_changed(int index, plain_value plain)
+{
+  if (index == _global_dependency_index)
+    own_param_changed(_gui->gui_state()->get_plain_at_index(_param->info.global));
+  else
+    param_component::state_changed(index, plain);
 }
 
 void 

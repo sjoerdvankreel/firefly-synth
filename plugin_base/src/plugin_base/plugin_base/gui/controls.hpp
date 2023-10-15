@@ -44,11 +44,12 @@ public param_component,
 public juce::Label
 {
   bool const _both;
+  int _global_dependency_index = -1;
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
-  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both):
-  param_component(gui, module, param), Label(), _both(both) { init(); }
+  void state_changed(int index, plain_value plain) override;
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both);
 };
 
 // textbox bound to single parameter
