@@ -39,7 +39,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
-  std::string text = _param->param->domain.plain_to_text(false, plain);
+  std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
   if(_both) text = _param->info.name + " " + text;
   setText(text, dontSendNotification); 
 }
