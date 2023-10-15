@@ -19,8 +19,8 @@ mark param as modulatable or not
 do cakewalk bug report
 test all host+linux
 param value dependent on other param
+move block to dsp
 
-drop module_desc/param_desc topo?
 separate can_modulate from is_accurate + do can_automate for all params
 allow automation dependent/depending through param handler
 
@@ -28,7 +28,6 @@ dependent:
 - automation
 - storage/io
 - display values
-- max of max
 
 * continuing
 - keep updating the demo tracks

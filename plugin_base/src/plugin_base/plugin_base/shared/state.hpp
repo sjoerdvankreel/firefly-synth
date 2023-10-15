@@ -12,6 +12,11 @@ class plugin_state final {
   jarray<plain_value, 4> _state = {};  
   plugin_desc const* const _desc = {};
 
+  plain_value get_plain_at_mapping(param_mapping const& m) const 
+  { return get_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot); }
+  void set_plain_at_mapping(param_mapping const& m, plain_value value)
+  { set_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot, value); }
+
 public:
   void init_defaults();
   plugin_state(plugin_desc const* desc);
@@ -28,39 +33,39 @@ public:
   void set_plain_at(int m, int mi, int p, int pi, plain_value value)
   { _state[m][mi][p][pi] = value; }
   plain_value get_plain_at_index(int index) const 
-  { return desc().mappings.params[index].value_at(_state); }
+  { return get_plain_at_mapping(desc().mappings.params[index]); }
   void set_plain_at_index(int index, plain_value value) 
-  { desc().mappings.params[index].value_at(_state) = value; }
+  { set_plain_at_mapping(desc().mappings.params[index], value); }
   plain_value get_plain_at_tag(int tag) const 
   { return get_plain_at_index(desc().mappings.tag_to_index.at(tag)); }
   void set_plain_at_tag(int tag, plain_value value) 
   { set_plain_at_index(desc().mappings.tag_to_index.at(tag), value); }
 
   double get_raw_at(int m, int mi, int p, int pi) const 
-  { return _desc->plain_to_raw_at(m, p, _state[m][mi][p][pi]); }
+  { return _desc->plain_to_raw_at(m, p, get_plain_at(m, mi, p, pi)); }
   void set_raw_at(int m, int mi, int p, int pi, double value)
-  { _state[m][mi][p][pi] = _desc->raw_to_plain_at(m, p, value); }
+  { set_plain_at(m, mi, p, pi, _desc->raw_to_plain_at(m, p, value)); }
   double get_raw_at_tag(int tag) const 
   { return get_raw_at_index(desc().mappings.tag_to_index.at(tag)); }
   void set_raw_at_tag(int tag, double value) 
   { set_raw_at_index(desc().mappings.tag_to_index.at(tag), value); }
   double get_raw_at_index(int index) const 
-  { return desc().plain_to_raw_at_index(index, desc().mappings.params[index].value_at(_state)); }
+  { return desc().plain_to_raw_at_index(index, get_plain_at_index(index)); }
   void set_raw_at_index(int index, double value) 
-  { desc().mappings.params[index].value_at(_state) = desc().raw_to_plain_at_index(index, value); }
+  { set_plain_at_index(index, desc().raw_to_plain_at_index(index, value)); }
 
   normalized_value get_normalized_at(int m, int mi, int p, int pi) const 
-  { return _desc->plain_to_normalized_at(m, p, _state[m][mi][p][pi]); }
+  { return _desc->plain_to_normalized_at(m, p, get_plain_at(m, mi, p, pi)); }
   void set_normalized_at(int m, int mi, int p, int pi, normalized_value value)
-  { _state[m][mi][p][pi] = _desc->normalized_to_plain_at(m, p, value); }
+  { set_plain_at(m, mi, p, pi,_desc->normalized_to_plain_at(m, p, value)); }
   normalized_value get_normalized_at_tag(int tag) const 
   { return get_normalized_at_index(desc().mappings.tag_to_index.at(tag)); }
   void set_normalized_at_tag(int tag, normalized_value value) 
   { set_normalized_at_index(desc().mappings.tag_to_index.at(tag), value); }
   normalized_value get_normalized_at_index(int index) const 
-  { return desc().plain_to_normalized_at_index(index, desc().mappings.params[index].value_at(_state)); }
+  { return desc().plain_to_normalized_at_index(index, get_plain_at_index(index)); }
   void set_normalized_at_index(int index, normalized_value value) 
-  { desc().mappings.params[index].value_at(_state) = desc().normalized_to_plain_at_index(index, value); }
+  { set_plain_at_index(index, desc().normalized_to_plain_at_index(index, value)); }
 };
 
 }
