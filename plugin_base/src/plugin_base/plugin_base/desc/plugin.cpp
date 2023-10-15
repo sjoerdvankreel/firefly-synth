@@ -59,6 +59,18 @@ plugin(plugin)
 
   param_count = param_global;
   module_count = modules.size();
+
+  for(int p = 0; p < param_count; p++)
+  {
+    param_dependents.emplace_back();
+    auto const& m = mappings.params[p];
+    auto const& module = plugin->modules[m.module_topo];
+    auto const& param = module.params[m.param_topo];
+    if(param.domain.type != domain_type::dependent) continue;
+    int dependency_index = mappings.topo_to_index[m.module_topo][m.module_slot][param.dependency_index][m.param_slot];
+    param_dependents[dependency_index].push_back(p);
+  }
+
   validate();
 }
 
@@ -91,6 +103,16 @@ plugin_desc::validate() const
       INF_ASSERT_EXEC(all_ids.insert(param.info.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
     }
+  }
+
+  for (int p = 0; p < param_count; p++)
+  {
+    auto const& m = mappings.params[p];
+    auto const& this_param = param_at_mapping(m);
+    if(this_param.param->dependency_index == -1) continue;
+    auto const& that_index = mappings.topo_to_index[m.module_topo][m.module_slot][this_param.param->dependency_index][m.param_slot];
+    auto const& dependents = param_dependents[that_index];
+    assert(std::find(dependents.begin(), dependents.end(), p) != dependents.end());
   }
 }
 

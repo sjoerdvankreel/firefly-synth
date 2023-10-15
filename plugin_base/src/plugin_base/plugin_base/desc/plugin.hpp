@@ -62,6 +62,7 @@ public:
   std::vector<module_desc> modules = {};
   std::vector<param_desc const*> params = {};
   std::map<std::string, int> module_id_to_index = {};
+  std::vector<std::vector<int>> param_dependents = {};
 
   void validate() const;
   plugin_desc(plugin_topo const* plugin);
