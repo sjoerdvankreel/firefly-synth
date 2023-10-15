@@ -117,10 +117,10 @@ param_component(gui, module, param), Component()
 {
   auto const& topo_to_index = _gui->gui_state()->desc().mappings.topo_to_index;
   auto const& param_indices = topo_to_index[_module->info.topo][_module->info.slot];
-  _dependent_global_index = param_indices[param->param->dependent_index][param->info.slot];
-  for (int i = 0; i < param->param->dependents.size(); i++)
+  _global_dependency_index = param_indices[param->param->dependency_index][param->info.slot];
+  for (int i = 0; i < param->param->dependency_domains.size(); i++)
   {
-    auto const& domain = param->param->dependents[i];
+    auto const& domain = param->param->dependency_domains[i];
     auto& dependent = _dependents.emplace_back(std::make_unique<ComboBox>());
     for (int j = domain.min; j <= domain.max; j++)
       dependent->addItem(domain.raw_to_text(j), j - domain.min + 1);
@@ -130,13 +130,13 @@ param_component(gui, module, param), Component()
   }
   init();
   update_dependents();
-  gui->gui_state()->add_listener(_dependent_global_index, this);
+  gui->gui_state()->add_listener(_global_dependency_index, this);
 }
 
 param_dependent::
 ~param_dependent() 
 { 
-  _gui->gui_state()->remove_listener(_dependent_global_index, this);
+  _gui->gui_state()->remove_listener(_global_dependency_index, this);
   for(int i = 0; i < _dependents.size(); i++)
     _dependents[i]->removeListener(this);
 }
@@ -151,7 +151,7 @@ param_dependent::resized()
 void 
 param_dependent::state_changed(int index, plain_value plain)
 {
-  if(index == _dependent_global_index)
+  if(index == _global_dependency_index)
     update_dependents();
   else
     param_component::state_changed(index, plain);
@@ -174,18 +174,18 @@ param_dependent::comboBoxChanged(ComboBox* box)
 void
 param_dependent::update_dependents()
 {
-  int dependent_value = _gui->gui_state()->get_plain_at_index(_dependent_global_index).step();
+  int dependent_value = _gui->gui_state()->get_plain_at_index(_global_dependency_index).step();
   for (int i = 0; i < _dependents.size(); i++)
   {
     _dependents[i]->setVisible(i == dependent_value);
-    _dependents[i]->setEnabled(_param->param->dependents[i].max > 0);
+    _dependents[i]->setEnabled(_param->param->dependency_domains[i].max > 0);
   }
 }
 
 void
 param_dependent::own_param_changed(plain_value plain)
 {
-  int dependent_value = _gui->gui_state()->get_plain_at_index(_dependent_global_index).step();
+  int dependent_value = _gui->gui_state()->get_plain_at_index(_global_dependency_index).step();
   int index = _param->param->clamp_dependent(dependent_value, plain).step();
   _dependents[dependent_value]->setSelectedItemIndex(index, juce::dontSendNotification);
 }

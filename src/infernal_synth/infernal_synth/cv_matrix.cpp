@@ -75,8 +75,8 @@ cv_matrix_topo(
       make_label_none())));
   source_index.gui.bindings.enabled.params = enabled_params;
   source_index.gui.bindings.enabled.selector = enabled_selector;
-  source_index.dependent_index = param_source;
-  source_index.dependents = vector_explicit_copy(source_slot_domains);
+  source_index.dependency_index = param_source;
+  source_index.dependency_domains = vector_explicit_copy(source_slot_domains);
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
@@ -94,8 +94,8 @@ cv_matrix_topo(
       make_label_none())));
   target_index.gui.bindings.enabled.params = enabled_params;
   target_index.gui.bindings.enabled.selector = enabled_selector;
-  target_index.dependent_index = param_target;
-  target_index.dependents = vector_explicit_copy(target_slot_domains);
+  target_index.dependency_index = param_target;
+  target_index.dependency_domains = vector_explicit_copy(target_slot_domains);
 
   std::vector<param_domain> target_param_domains;
   auto is_modulatable = [](auto const& p) { return p.dsp.rate == param_rate::accurate; };
@@ -113,8 +113,8 @@ cv_matrix_topo(
       make_label_default(gui_label_contents::value))));
   target_param.gui.bindings.enabled.params = enabled_params;
   target_param.gui.bindings.enabled.selector = enabled_selector;
-  target_param.dependent_index = param_target;
-  target_param.dependents = vector_explicit_copy(modulatable_target_domains);
+  target_param.dependency_index = param_target;
+  target_param.dependency_domains = vector_explicit_copy(modulatable_target_domains);
 
   return result;
 }

@@ -132,7 +132,7 @@ protected:
   void own_param_changed(plain_value plain) override final;
 
 private:
-  int _dependent_global_index = -1;
+  int _global_dependency_index = -1;
 
   void update_dependents();
   std::vector<std::unique_ptr<juce::ComboBox>> _dependents = {};
