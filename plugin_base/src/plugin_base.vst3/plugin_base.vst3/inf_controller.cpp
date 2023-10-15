@@ -40,8 +40,6 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
     return kResultFalse;
   int index = gui_state().desc().mappings.tag_to_index.at(tag);
   _gui_state.set_normalized_at_index(index, normalized_value(value));
-  if (_editor == nullptr) return kResultTrue;
-  _editor->plugin_changed(index, _gui_state.get_plain_at_index(index));
   return kResultTrue;
 }
 

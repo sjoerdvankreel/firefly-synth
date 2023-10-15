@@ -3,7 +3,6 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/gui/gui.hpp>
-#include <plugin_base/gui/listeners.hpp>
 #include <plugin_base/gui/components.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -20,7 +19,7 @@ protected:
 
 public:
   void plugin_changed(int index, plain_value plain) override;
-  virtual ~param_component() { _gui->remove_plugin_listener(_param->info.global, this); }
+  virtual ~param_component() { _gui->gui_state()->remove_listener(_param->info.global, this); }
 
 protected:
   void init() override;

@@ -20,9 +20,8 @@ public Steinberg::IPlugViewContentScaleSupport
   std::unique_ptr<plugin_gui> _gui = {};
   inf_controller* const _controller = {};
 public: 
-  INF_PREVENT_ACCIDENTAL_COPY(inf_editor);
   inf_editor(inf_controller* controller);
-  void plugin_changed(int index, plain_value plain) { _gui->plugin_changed(index, plain); }
+  INF_PREVENT_ACCIDENTAL_COPY(inf_editor);
 
 #if (defined __linux__) || (defined  __FreeBSD__)
   void PLUGIN_API onFDIsSet(Steinberg::Linux::FileDescriptor fd) override;

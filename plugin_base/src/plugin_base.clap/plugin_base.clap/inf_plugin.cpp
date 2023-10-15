@@ -68,10 +68,7 @@ inf_plugin::timerCallback()
 {
   sync_event e;
   while (_to_gui_events->try_dequeue(e))
-  {
     _gui_state.set_plain_at_index(e.index, e.plain);
-    if(_gui) _gui->plugin_changed(e.index, e.plain);
-  }
 }
 
 bool 
@@ -215,7 +212,6 @@ inf_plugin::gui_changing(int index, plain_value plain)
 { 
   push_to_audio(index, plain);
   _gui_state.set_plain_at_index(index, plain);
-  if(_gui) _gui->plugin_changed(index, plain);
 }
 
 void 

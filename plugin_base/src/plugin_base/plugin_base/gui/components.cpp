@@ -18,9 +18,9 @@ binding_component::
 ~binding_component()
 {
   for(int i = 0; i < _visibility_params.size(); i++)
-    _gui->remove_plugin_listener(_visibility_params[i], this);
+    _gui->gui_state()->remove_listener(_visibility_params[i], this);
   for (int i = 0; i < _enabled_params.size(); i++)
-    _gui->remove_plugin_listener(_enabled_params[i], this);
+    _gui->gui_state()->remove_listener(_enabled_params[i], this);
 }
 
 bool 
@@ -57,7 +57,7 @@ binding_component::setup_bindings(
     bool single_slot = _module->module->params[topo_params[i]].info.slot_count == 1;
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);
-    _gui->add_plugin_listener(state_index, this);
+    _gui->gui_state()->add_listener(state_index, this);
   }
 }
 

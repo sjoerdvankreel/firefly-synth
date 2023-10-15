@@ -3,7 +3,6 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/value.hpp>
-#include <plugin_base/gui/listeners.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <vector>
@@ -32,7 +31,6 @@ public:
   void gui_begin_changes(int index);
   void gui_changed(int index, plain_value plain);
   void gui_changing(int index, plain_value plain);
-  void plugin_changed(int index, plain_value plain);
 
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
@@ -40,15 +38,12 @@ public:
 
   void fire_state_loaded();
   void remove_gui_listener(gui_listener* listener);
-  void remove_plugin_listener(int index, plugin_listener* listener);
   plugin_state const* gui_state() const { return _gui_state; }
   void add_gui_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
-  void add_plugin_listener(int index, plugin_listener* listener) { _plugin_listeners[index].push_back(listener); }
   
 private:
   plugin_state* const _gui_state;
   std::vector<gui_listener*> _gui_listeners = {};
-  std::vector<std::vector<plugin_listener*>> _plugin_listeners = {};
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 

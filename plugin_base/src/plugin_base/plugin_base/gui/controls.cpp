@@ -7,7 +7,7 @@ namespace plugin_base {
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot), _param(param)
-{ _gui->add_plugin_listener(_param->info.global, this); }
+{ _gui->gui_state()->add_listener(_param->info.global, this); }
 
 void
 param_component::plugin_changed(int index, plain_value plain)
@@ -130,13 +130,13 @@ param_component(gui, module, param), Component()
   }
   init();
   update_dependents();
-  gui->add_plugin_listener(_dependent_global_index, this);
+  gui->gui_state()->add_listener(_dependent_global_index, this);
 }
 
 param_dependent::
 ~param_dependent() 
 { 
-  _gui->remove_plugin_listener(_dependent_global_index, this); 
+  _gui->gui_state()->remove_listener(_dependent_global_index, this);
   for(int i = 0; i < _dependents.size(); i++)
     _dependents[i]->removeListener(this);
 }

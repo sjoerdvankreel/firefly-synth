@@ -59,7 +59,7 @@ gui_listener::gui_changed(int index, plain_value plain)
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state) :
-_gui_state(gui_state), _plugin_listeners(gui_state->desc().param_count)
+_gui_state(gui_state)
 {
   setOpaque(true);
   auto const& topo = *gui_state->desc().plugin;
@@ -100,24 +100,10 @@ plugin_gui::gui_changing(int index, plain_value plain)
 }
 
 void
-plugin_gui::plugin_changed(int index, plain_value plain)
-{
-  for (int i = 0; i < _plugin_listeners[index].size(); i++)
-    _plugin_listeners[index][i]->plugin_changed(index, plain);
-}
-
-void
 plugin_gui::remove_gui_listener(gui_listener* listener)
 {
   auto iter = std::find(_gui_listeners.begin(), _gui_listeners.end(), listener);
   if (iter != _gui_listeners.end()) _gui_listeners.erase(iter);
-}
-
-void
-plugin_gui::remove_plugin_listener(int index, plugin_listener* listener)
-{
-  auto iter = std::find(_plugin_listeners[index].begin(), _plugin_listeners[index].end(), listener);
-  if (iter != _plugin_listeners[index].end()) _plugin_listeners[index].erase(iter);
 }
 
 void

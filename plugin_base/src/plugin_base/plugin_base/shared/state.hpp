@@ -6,11 +6,40 @@
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
 
+#include <map>
+#include <vector>
+
 namespace plugin_base {
 
+class plugin_listener
+{
+public:
+  virtual void plugin_changed(int index, plain_value plain) = 0;
+};
+
+class no_notifier final {
+public:
+  void plugin_changed(int index, plain_value plain) {}
+  void add_listener(int index, plugin_listener* listener) {}
+  void remove_listener(int index, plugin_listener* listener) {}
+};
+
+class plugin_notifier final {
+  std::map<int, std::vector<plugin_listener*>> _listeners = {};
+public:
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_notifier);
+  void plugin_changed(int index, plain_value plain);
+
+  void remove_listener(int index, plugin_listener* listener);
+  void add_listener(int index, plugin_listener* listener)
+  { _listeners[index].push_back(listener); }
+};
+
+// TODO template notifier
 class plugin_state final {
-  jarray<plain_value, 4> _state = {};  
+  jarray<plain_value, 4> _state = {};
   plugin_desc const* const _desc = {};
+  mutable plugin_notifier _notifier = {};
 
   plain_value get_plain_at_mapping(param_mapping const& m) const 
   { return get_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot); }
@@ -22,16 +51,20 @@ public:
   plugin_state(plugin_desc const* desc);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
+  void add_listener(int index, plugin_listener* listener) const
+  { _notifier.add_listener(index, listener); }
+  void remove_listener(int index, plugin_listener* listener) const
+  { _notifier.remove_listener(index, listener); }
+
   plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 2>& module_state_at(int module, int slot)
   { return _state[module][slot]; }
   jarray<plain_value, 2> const& module_state_at(int module, int slot) const
   { return _state[module][slot]; }
 
+  void set_plain_at(int m, int mi, int p, int pi, plain_value value);
   plain_value get_plain_at(int m, int mi, int p, int pi) const 
   { return _state[m][mi][p][pi]; }
-  void set_plain_at(int m, int mi, int p, int pi, plain_value value)
-  { _state[m][mi][p][pi] = value; }
   plain_value get_plain_at_index(int index) const 
   { return get_plain_at_mapping(desc().mappings.params[index]); }
   void set_plain_at_index(int index, plain_value value) 
@@ -67,5 +100,13 @@ public:
   void set_normalized_at_index(int index, normalized_value value) 
   { set_plain_at_index(index, desc().normalized_to_plain_at_index(index, value)); }
 };
+
+inline void 
+plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
+{
+  _state[m][mi][p][pi] = value;
+  _notifier.plugin_changed(desc().mappings.topo_to_index[m][mi][p][pi], value);
+  // TODO find my dependents
+}
 
 }
