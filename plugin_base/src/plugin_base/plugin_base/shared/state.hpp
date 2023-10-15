@@ -24,8 +24,6 @@ class plugin_state final {
   std::map<int, std::vector<state_listener*>> mutable _listeners = {};
 
   void state_changed(int index, plain_value plain) const;
-  param_domain const& select_dependency_domain(int index) const;
-
   plain_value get_plain_at_mapping(param_mapping const& m) const 
   { return get_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot); }
   void set_plain_at_mapping(param_mapping const& m, plain_value value)
@@ -85,15 +83,12 @@ public:
 
   // parse and format of possibly dependent values
   std::string raw_to_text_at_index(int index, double raw) const
-  { return select_dependency_domain(index).raw_to_text(raw); }
-  std::string plain_to_text_at_index(int index, plain_value plain) const
-  { return select_dependency_domain(index).plain_to_text(plain); }
+  { return plain_to_text_at_index(index, desc().raw_to_plain_at_index(index, raw)); }
   std::string normalized_to_text_at_index(int index, normalized_value normalized) const
-  { return select_dependency_domain(index).normalized_to_text(normalized); }
-  bool text_to_plain_at_index(int index, std::string const& textual, plain_value& plain) const
-  { return select_dependency_domain(index).text_to_plain(textual, plain); }
-  bool text_to_normalized_at_index(int index, std::string const& textual, normalized_value& normalized) const
-  { return select_dependency_domain(index).text_to_normalized(textual, normalized); }
+  { return plain_to_text_at_index(index, desc().normalized_to_plain_at_index(index, normalized)); }
+  std::string plain_to_text_at_index(int index, plain_value plain) const;
+  bool text_to_plain_at_index(int index, std::string const& textual, plain_value& plain) const;
+  bool text_to_normalized_at_index(int index, std::string const& textual, normalized_value& normalized) const;
 };
 
 }

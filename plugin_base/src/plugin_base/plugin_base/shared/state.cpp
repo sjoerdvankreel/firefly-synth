@@ -53,13 +53,34 @@ plugin_state::remove_listener(int index, state_listener* listener) const
   map_iter->second.erase(vector_iter);
 }
 
-param_domain const& 
-plugin_state::select_dependency_domain(int index) const
+bool 
+plugin_state::text_to_normalized_at_index(
+ int index, std::string const& textual, normalized_value& normalized) const
+{
+  plain_value plain;
+  if(!text_to_plain_at_index(index, textual, plain)) return false;
+  normalized = desc().plain_to_normalized_at_index(index, plain);
+  return true;
+}
+
+std::string 
+plugin_state::plain_to_text_at_index(int index, plain_value plain) const
 {
   int dependency_index = desc().dependency_index(index);
-  if (dependency_index == -1) return desc().param_at_index(index).param->domain;
+  if (dependency_index == -1) return desc().param_at_index(index).param->domain.plain_to_text(plain);
   int dependency_value = get_plain_at_index(dependency_index).step();
-  return desc().param_at_index(index).param->dependent_domains[dependency_value];
+  auto clamped = desc().param_at_index(index).param->clamp_dependent(dependency_value, plain);
+  return desc().param_at_index(index).param->dependent_domains[dependency_value].plain_to_text(clamped);
+}
+
+bool 
+plugin_state::text_to_plain_at_index(
+  int index, std::string const& textual, plain_value& plain) const
+{
+  int dependency_index = desc().dependency_index(index);
+  if (dependency_index == -1) return desc().param_at_index(index).param->domain.text_to_plain(textual, plain);
+  int dependency_value = get_plain_at_index(dependency_index).step();
+  return desc().param_at_index(index).param->dependent_domains[dependency_value].text_to_plain(textual, plain);
 }
 
 void
