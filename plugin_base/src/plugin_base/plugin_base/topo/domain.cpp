@@ -8,6 +8,11 @@ namespace plugin_base {
 plain_value
 param_domain::default_plain() const
 {
+  // don't rely on text conversion as this is dependent on 
+  // the rest of the state and the default should be 0 anyway
+  if (type == domain_type::dependent)
+    return plain_value::from_step(0);
+
   plain_value result;
   INF_ASSERT_EXEC(text_to_plain(false, default_, result));
   return result;
@@ -42,11 +47,7 @@ param_domain::text_to_normalized(
 std::string
 param_domain::plain_to_text(bool io, plain_value plain) const
 {
-  // TODO assert(type != domain_type::dependent);
-  if (type == domain_type::dependent)
-  {
-    return "";
-  }
+  assert(type != domain_type::dependent);
 
   std::string prefix = "";
   if(min < 0 &&  ((is_real() && plain.real() > 0) 
@@ -72,13 +73,7 @@ bool
 param_domain::text_to_plain(
   bool io, std::string const& textual, plain_value& plain) const
 {
-  // TODO
-  // assert(type != domain_type::dependent);
-  if(type == domain_type::dependent)
-  {
-    plain = plain_value::from_step(0);
-    return true;
-  }
+  assert(type != domain_type::dependent);
 
   if (type == domain_type::name)
   {
