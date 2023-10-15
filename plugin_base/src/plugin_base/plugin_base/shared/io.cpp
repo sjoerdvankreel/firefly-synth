@@ -214,10 +214,10 @@ plugin_io_load(
         for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)
         {
           plain_value plain;
-          int index = state.desc().mappings.topo_to_index[m][mi][p][pi];
+          int index = state.desc().mappings.topo_to_index[new_module.info.index][mi][new_param.info.index][pi];
           std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
           if(state.text_to_plain_at_index(true, index, text, plain))
-            state.set_plain_at(module_iter->second, mi, param_iter->second, pi, plain);
+            state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, plain);
           else
             result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
         }
