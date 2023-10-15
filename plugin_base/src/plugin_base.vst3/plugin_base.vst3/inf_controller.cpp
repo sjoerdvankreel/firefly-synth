@@ -91,7 +91,7 @@ inf_controller::initialize(FUnknown* context)
       param_info.defaultNormalizedValue = param.param->domain.default_normalized().value();
 
       param_info.flags = ParameterInfo::kNoFlags;
-      if(param.param->dsp.direction == param_direction::input)
+      if(param.param->dsp.automate != param_automate::none)
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;

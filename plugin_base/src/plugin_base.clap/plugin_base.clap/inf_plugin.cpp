@@ -326,7 +326,7 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
   from_8bit_string(info->module, module.info.name.c_str());
 
   info->flags = 0;
-  if(param.param->dsp.direction != param_direction::input)
+  if(param.param->dsp.automate == param_automate::none)
     info->flags |= CLAP_PARAM_IS_READONLY;
   else
   {
