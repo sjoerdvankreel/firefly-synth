@@ -56,8 +56,8 @@ param_domain::plain_to_text(bool io, plain_value plain) const
   switch (type)
   {
   case domain_type::name: return names[plain.step()];
-  case domain_type::item: return items[plain.step()].name;
   case domain_type::toggle: return plain.step() == 0 ? "Off" : "On";
+  case domain_type::item: return io? items[plain.step()].id: items[plain.step()].name;
   case domain_type::step: return prefix + std::to_string(plain.step() + display_offset);
   default: break;
   }
@@ -91,7 +91,7 @@ param_domain::text_to_plain(
   if (type == domain_type::item)
   {
     for (int i = 0; i < items.size(); i++)
-      if (items[i].name == textual)
+      if ((io && items[i].id == textual) || (!io && items[i].name == textual))
         return plain = plain_value::from_step(i), true;
     return false;
   }
