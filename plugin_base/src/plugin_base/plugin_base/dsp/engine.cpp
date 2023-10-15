@@ -175,7 +175,7 @@ plugin_engine::process_voice(int v, bool threaded)
   // so we can just push (polyphony) tasks each time
   if (_voice_states[v].stage == voice_stage::unused) return;
 
-  std::pair<uint32_t, uint32_t> denormal_state;
+  std::pair<std::uint32_t, std::uint32_t> denormal_state;
   if(threaded) denormal_state = disable_denormals();
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -211,7 +211,7 @@ plugin_engine::process()
 {
   int voice_count = 0;
   int frame_count = _host_block->frame_count;
-  std::pair<uint32_t, uint32_t> denormal_state = disable_denormals();
+  std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();
   scope_guard denormals([denormal_state]() { restore_denormals(denormal_state); });
 
   // TODO monophonic portamento

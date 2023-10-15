@@ -3,7 +3,7 @@
 
 namespace plugin_base {
 
-std::pair<uint32_t, uint32_t> 
+std::pair<std::uint32_t, std::uint32_t>
 disable_denormals()
 {
   uint32_t ftz = _MM_GET_FLUSH_ZERO_MODE();
@@ -14,7 +14,7 @@ disable_denormals()
 }
 
 void
-restore_denormals(std::pair<uint32_t, uint32_t> state)
+restore_denormals(std::pair<std::uint32_t, std::uint32_t> state)
 {
   _MM_SET_FLUSH_ZERO_MODE(state.first);
   _MM_SET_DENORMALS_ZERO_MODE(state.second);

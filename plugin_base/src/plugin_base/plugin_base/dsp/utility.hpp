@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <cstdint>
 
 namespace plugin_base {
 
@@ -16,8 +17,8 @@ template <class T>
 inline void check_bipolar(T val)
 { assert((T)-1 <= val && val <= (T)1); }
 
-std::pair<uint32_t, uint32_t> disable_denormals();
-void restore_denormals(std::pair<uint32_t, uint32_t> state);
+std::pair<std::uint32_t, std::uint32_t> disable_denormals();
+void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 
 inline float
 balance(int channel, float value)
