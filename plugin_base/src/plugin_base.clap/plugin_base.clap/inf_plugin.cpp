@@ -126,7 +126,7 @@ inf_plugin::onPosixFd(int fd, int flags) noexcept
 void 
 inf_plugin::guiDestroy() noexcept
 {
-  _gui->remove_gui_listener(this);
+  _gui->remove_listener(this);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
   _gui.reset();
@@ -145,7 +145,7 @@ inf_plugin::guiSetParent(clap_window const* window) noexcept
     _host.posixFdSupportRegister(fd, CLAP_POSIX_FD_READ);
 #endif
   _gui->setVisible(true);
-  _gui->add_gui_listener(this);
+  _gui->add_listener(this);
   _gui->resized();
   return true;
 }

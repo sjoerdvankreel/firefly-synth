@@ -100,7 +100,7 @@ plugin_gui::gui_changing(int index, plain_value plain)
 }
 
 void
-plugin_gui::remove_gui_listener(gui_listener* listener)
+plugin_gui::remove_listener(gui_listener* listener)
 {
   auto iter = std::find(_gui_listeners.begin(), _gui_listeners.end(), listener);
   if (iter != _gui_listeners.end()) _gui_listeners.erase(iter);

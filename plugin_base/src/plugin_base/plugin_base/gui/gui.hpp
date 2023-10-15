@@ -37,9 +37,9 @@ public:
   void content_scale(float factor) { setTransform(juce::AffineTransform::scale(factor)); }
 
   void fire_state_loaded();
-  void remove_gui_listener(gui_listener* listener);
+  void remove_listener(gui_listener* listener);
   plugin_state const* gui_state() const { return _gui_state; }
-  void add_gui_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
+  void add_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
   
 private:
   plugin_state* const _gui_state;

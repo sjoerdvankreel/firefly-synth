@@ -22,8 +22,6 @@ param value dependent on other param
 drop listeners.cpp/hpp
 separate can_modulate from is_accurate + do can_automate for all params
 allow automation dependent/depending through param handler
-add_gui_listener->add_listener
-add_plugin_listener->add_listener
 
 dependent:
 - automation
