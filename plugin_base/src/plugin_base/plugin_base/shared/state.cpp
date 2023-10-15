@@ -84,19 +84,12 @@ plugin_state::text_to_plain_at_index(
 }
 
 void
-plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value, bool force_notify)
+plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 {
-  bool value_changed = false;
-  int index = desc().mappings.topo_to_index[m][mi][p][pi];
-  auto const& param = desc().param_at_index(index).param;
-
-  if(param->domain.is_real())
-    value_changed = _state[m][mi][p][pi].real() != value.real();
-  else
-    value_changed = _state[m][mi][p][pi].step() != value.step();
-
   // get in sync first
   _state[m][mi][p][pi] = value;
+  int index = desc().mappings.topo_to_index[m][mi][p][pi];
+
   for (int d = 0; d < desc().param_dependents[index].size(); d++)
   {
     int dependent_index = desc().param_dependents[index][d];
@@ -105,11 +98,12 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value, bool
     auto clamped = desc().param_at_index(dependent_index).param->clamp_dependent(value.step(), dependent_value);
 
     // force notification since value-to-text conversion has changed
-    set_plain_at(map.module_topo, map.module_slot, map.param_topo, map.param_slot, clamped, true);
+    set_plain_at(map.module_topo, map.module_slot, map.param_topo, map.param_slot, clamped);
   }
   
-  // notify later
-  if (_notify && (value_changed || force_notify)) state_changed(index, value);
+  // notify later, even notify if state did not change because of
+  // possible multiple bindings and/or changed value-to-text behaviour
+  if (_notify) state_changed(index, value);
 }
 
 }

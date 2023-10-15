@@ -20,13 +20,7 @@ do cakewalk bug report
 test all host+linux
 param value dependent on other param
 separate can_modulate from is_accurate + do can_automate for all params
-allow automation dependent/depending through param handler
 linux build
-
-dependent:
-- automation
-- storage/io
-- display values
 
 * continuing
 - keep updating the demo tracks
