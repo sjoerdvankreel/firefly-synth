@@ -11,11 +11,11 @@ namespace plugin_base {
 // base class for anything that should react to gui_bindings
 // i.e. has it's enabled/visible bound to a set of plugin parameters
 class binding_component:
-public plugin_listener
+public state_listener
 {
 public:
   virtual ~binding_component();
-  void plugin_changed(int index, plain_value plain) override;
+  void state_changed(int index, plain_value plain) override;
 
 protected:
   plugin_gui* const _gui;

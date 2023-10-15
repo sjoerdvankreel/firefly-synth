@@ -49,7 +49,7 @@ inf_plugin(
   clap_plugin_descriptor const* clap_desc, 
   clap_host const* host, plugin_desc const* desc):
 Plugin(clap_desc, host), 
-_engine(desc, forward_thread_pool_voice_processor, this), _gui_state(desc),
+_engine(desc, forward_thread_pool_voice_processor, this), _gui_state(desc, true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 { _block_automation_seen.resize(_engine.state().desc().param_count); }

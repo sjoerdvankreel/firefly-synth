@@ -18,7 +18,7 @@ protected:
   param_desc const* const _param;
 
 public:
-  void plugin_changed(int index, plain_value plain) override;
+  void state_changed(int index, plain_value plain) override;
   virtual ~param_component() { _gui->gui_state()->remove_listener(_param->info.global, this); }
 
 protected:
@@ -140,7 +140,7 @@ private:
 public:
   void resized() override;
   void comboBoxChanged(juce::ComboBox* box) override;
-  void plugin_changed(int index, plain_value plain) override;
+  void state_changed(int index, plain_value plain) override;
 
   ~param_dependent() override;
   param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param);

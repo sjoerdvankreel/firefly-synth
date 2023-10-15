@@ -10,19 +10,19 @@ binding_component(gui, module, &param->param->gui.bindings, param->info.slot), _
 { _gui->gui_state()->add_listener(_param->info.global, this); }
 
 void
-param_component::plugin_changed(int index, plain_value plain)
+param_component::state_changed(int index, plain_value plain)
 {
   if (index == _param->info.global)
     own_param_changed(plain);
   else
-    binding_component::plugin_changed(index, plain);
+    binding_component::state_changed(index, plain);
 }
 
 void
 param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
-  plugin_changed(_param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global));
+  state_changed(_param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global));
   binding_component::init();
 }
 
@@ -149,12 +149,12 @@ param_dependent::resized()
 }
 
 void 
-param_dependent::plugin_changed(int index, plain_value plain)
+param_dependent::state_changed(int index, plain_value plain)
 {
   if(index == _dependent_global_index)
     update_dependents();
   else
-    param_component::plugin_changed(index, plain);
+    param_component::state_changed(index, plain);
 }
 
 void

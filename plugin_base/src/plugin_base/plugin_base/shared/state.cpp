@@ -4,8 +4,8 @@
 namespace plugin_base {
 
 plugin_state::
-plugin_state(plugin_desc const* desc):
-_desc(desc)
+plugin_state(plugin_desc const* desc, bool notify):
+_desc(desc), _notify(notify)
 {
   plugin_dims dims(*_desc->plugin);
   _state.resize(dims.module_slot_param_slot);
@@ -23,6 +23,34 @@ plugin_state::init_defaults()
         for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
           _state[m][mi][p][pi] = module.params[p].domain.default_plain();
   }
+}
+
+void
+plugin_state::state_changed(int index, plain_value plain) const
+{
+  assert(_notify);
+  auto iter = _listeners.find(index);
+  if (iter == _listeners.end()) return;
+  for (int i = 0; i < iter->second.size(); i++)
+    iter->second[i]->state_changed(index, plain);
+}
+
+void 
+plugin_state::add_listener(int index, state_listener* listener) const
+{
+  assert(_notify);
+  _listeners[index].push_back(listener);
+}
+
+void
+plugin_state::remove_listener(int index, state_listener* listener) const
+{
+  assert(_notify);
+  auto map_iter = _listeners.find(index);
+  assert(map_iter != _listeners.end());
+  auto vector_iter = std::find(map_iter->second.begin(), map_iter->second.end(), listener);
+  assert(vector_iter != map_iter->second.end());
+  map_iter->second.erase(vector_iter);
 }
 
 }

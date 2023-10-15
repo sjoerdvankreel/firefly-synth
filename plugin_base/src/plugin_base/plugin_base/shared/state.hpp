@@ -5,33 +5,37 @@
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
-#include <plugin_base/shared/notifier.hpp>
 
 #include <map>
 #include <vector>
 
 namespace plugin_base {
 
-// TODO template notifier
+class state_listener
+{
+public:
+  virtual void state_changed(int index, plain_value plain) = 0;
+};
+
 class plugin_state final {
+  bool const _notify = {};
   jarray<plain_value, 4> _state = {};
   plugin_desc const* const _desc = {};
-  mutable plugin_notifier _notifier = {};
+  std::map<int, std::vector<state_listener*>> mutable _listeners = {};
 
+  void state_changed(int index, plain_value plain) const;
   plain_value get_plain_at_mapping(param_mapping const& m) const 
   { return get_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot); }
   void set_plain_at_mapping(param_mapping const& m, plain_value value)
   { set_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot, value); }
 
 public:
-  void init_defaults();
-  plugin_state(plugin_desc const* desc);
+  plugin_state(plugin_desc const* desc, bool notify);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
-  void add_listener(int index, plugin_listener* listener) const
-  { _notifier.add_listener(index, listener); }
-  void remove_listener(int index, plugin_listener* listener) const
-  { _notifier.remove_listener(index, listener); }
+  void init_defaults();
+  void add_listener(int index, state_listener* listener) const;
+  void remove_listener(int index, state_listener* listener) const;
 
   plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 2>& module_state_at(int module, int slot)
@@ -82,7 +86,7 @@ inline void
 plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 {
   _state[m][mi][p][pi] = value;
-  _notifier.plugin_changed(desc().mappings.topo_to_index[m][mi][p][pi], value);
+  if(_notify) state_changed(desc().mappings.topo_to_index[m][mi][p][pi], value);
   // TODO find my dependents
 }
 

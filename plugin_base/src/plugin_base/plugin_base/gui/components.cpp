@@ -39,10 +39,10 @@ binding_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   if (_enabled_params.size() != 0)
-    plugin_changed(_enabled_params[0], 
+    state_changed(_enabled_params[0], 
       _gui->gui_state()->get_plain_at_index(_enabled_params[0]));
   if (_visibility_params.size() != 0)
-    plugin_changed(_visibility_params[0], 
+    state_changed(_visibility_params[0],
       _gui->gui_state()->get_plain_at_index(_visibility_params[0]));
 }
 
@@ -62,7 +62,7 @@ binding_component::setup_bindings(
 }
 
 void
-binding_component::plugin_changed(int index, plain_value plain)
+binding_component::state_changed(int index, plain_value plain)
 {  
   auto& self = dynamic_cast<Component&>(*this);
   auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);

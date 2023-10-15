@@ -13,7 +13,7 @@ plugin_engine(
   plugin_desc const* desc,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
-_state(desc), _block_automation(desc),
+_state(desc, false), _block_automation(desc, false),
 _dims(*desc->plugin),
 _host_block(std::make_unique<host_block>()),
 _voice_processor(voice_processor),
