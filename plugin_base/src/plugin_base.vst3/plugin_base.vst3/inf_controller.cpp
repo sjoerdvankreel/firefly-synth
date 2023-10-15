@@ -16,6 +16,25 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
+void 
+inf_controller::any_state_changed(int index, plain_value plain)
+{
+  // if some other parameter depends on this one, we need to re-render value-to-text
+  if (_gui_state.desc().param_dependents[index].size())
+    componentHandler->restartComponent(kParamTitlesChanged);
+}
+
+void
+inf_controller::gui_changing(int index, plain_value plain)
+{
+  int tag = gui_state().desc().mappings.index_to_tag[index];
+  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
+
+  // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
+  performEdit(tag, normalized);
+  setParamNormalized(tag, normalized);
+}
+
 IPlugView* PLUGIN_API 
 inf_controller::createView(char const* name)
 {
@@ -41,17 +60,6 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
   int index = gui_state().desc().mappings.tag_to_index.at(tag);
   _gui_state.set_normalized_at_index(index, normalized_value(value));
   return kResultTrue;
-}
-
-void
-inf_controller::gui_changing(int index, plain_value plain)
-{
-  int tag = gui_state().desc().mappings.index_to_tag[index];
-  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
-
-  // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
-  performEdit(tag, normalized);
-  setParamNormalized(tag, normalized);
 }
 
 tresult PLUGIN_API 
