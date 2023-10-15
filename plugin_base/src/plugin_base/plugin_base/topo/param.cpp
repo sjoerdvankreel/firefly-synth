@@ -6,8 +6,6 @@ namespace plugin_base {
 void 
 param_dsp::validate() const
 {
-  if (rate == param_rate::accurate)
-    assert(direction == param_direction::input);
   if (automate == param_automate::automate)
     assert(direction == param_direction::input);
 
@@ -15,6 +13,12 @@ param_dsp::validate() const
   {
     assert(rate == param_rate::block);
     assert(automate == param_automate::none);
+  }
+
+  if (rate == param_rate::accurate)
+  {
+    assert(automate != param_automate::none);
+    assert(direction == param_direction::input);
   }
 
   if (automate == param_automate::modulate)
