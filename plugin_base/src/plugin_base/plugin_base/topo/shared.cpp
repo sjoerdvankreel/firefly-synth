@@ -47,6 +47,7 @@ gui_binding::validate(module_topo const& module, int slot_count) const
   for (int i = 0; i < params.size(); i++)
   {
     auto const& bound = module.params[params[i]];
+    (void)bound;
     assert(!bound.domain.is_real());
     assert(bound.info.slot_count == 1 || bound.info.slot_count == slot_count);
   }
