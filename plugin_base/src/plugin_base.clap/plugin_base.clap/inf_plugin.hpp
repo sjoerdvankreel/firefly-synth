@@ -40,7 +40,9 @@ class inf_plugin:
 public ::clap::helpers::Plugin<
   ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>,
-public gui_listener, public juce::Timer
+public gui_listener,
+public any_state_listener,
+public juce::Timer
 {
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
 
@@ -59,7 +61,7 @@ public gui_listener, public juce::Timer
   void process_gui_to_audio_events(clap_output_events_t const* out);
 
 public:
-  ~inf_plugin() { stopTimer(); }
+  ~inf_plugin();
   INF_PREVENT_ACCIDENTAL_COPY(inf_plugin);
   inf_plugin(
     clap_plugin_descriptor const* clap_desc, 
@@ -119,6 +121,7 @@ public:
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
   void gui_changing(int index, plain_value plain) override;
+  void any_state_changed(int index, plain_value plain) override;
   void gui_end_changes(int index) override { push_to_audio(index, sync_event_type::end_edit); }
   void gui_begin_changes(int index) override { push_to_audio(index, sync_event_type::begin_edit); }
 };
