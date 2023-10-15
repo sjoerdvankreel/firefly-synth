@@ -118,9 +118,9 @@ param_component(gui, module, param), Component()
   auto const& topo_to_index = _gui->gui_state()->desc().mappings.topo_to_index;
   auto const& param_indices = topo_to_index[_module->info.topo][_module->info.slot];
   _global_dependency_index = param_indices[param->param->dependency_index][param->info.slot];
-  for (int i = 0; i < param->param->dependency_domains.size(); i++)
+  for (int i = 0; i < param->param->dependent_domains.size(); i++)
   {
-    auto const& domain = param->param->dependency_domains[i];
+    auto const& domain = param->param->dependent_domains[i];
     auto& dependent = _dependents.emplace_back(std::make_unique<ComboBox>());
     for (int j = domain.min; j <= domain.max; j++)
       dependent->addItem(domain.raw_to_text(j), j - domain.min + 1);
@@ -178,7 +178,7 @@ param_dependent::update_dependents()
   for (int i = 0; i < _dependents.size(); i++)
   {
     _dependents[i]->setVisible(i == dependent_value);
-    _dependents[i]->setEnabled(_param->param->dependency_domains[i].max > 0);
+    _dependents[i]->setEnabled(_param->param->dependent_domains[i].max > 0);
   }
 }
 
