@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <functional>
 
 namespace plugin_base {
 
@@ -16,9 +17,9 @@ enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
 class module_engine;
-typedef std::unique_ptr<module_engine>(*
-module_engine_factory)(
-  int slot, int sample_rate, int max_frame_count);
+typedef std::function<std::unique_ptr<module_engine>(
+  int slot, int sample_rate, int max_frame_count)> 
+module_engine_factory;
 
 // module ui
 struct module_topo_gui final {

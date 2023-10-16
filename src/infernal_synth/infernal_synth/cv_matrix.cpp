@@ -20,9 +20,16 @@ enum { param_on, param_active, param_source, param_source_index, param_target, p
 
 class cv_matrix_engine:
 public module_engine { 
+  std::vector<module_topo const*> const _sources;
+  std::vector<module_topo const*> const _targets;
 public:
   void initialize() override {}
   void process(plugin_block& block) override;
+
+  cv_matrix_engine(
+    std::vector<module_topo const*> const& sources,
+    std::vector<module_topo const*> const& targets): 
+  _sources(sources), _targets(targets) {}
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
@@ -35,11 +42,11 @@ cv_matrix_topo(
   gui_binding_selector enabled_selector = [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; };
 
   module_topo result(make_module(
-    make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1), 
+    make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, route_count),
     make_module_dsp(module_stage::voice, module_output::cv, 1),
     make_module_gui(gui_layout::single, { 2, 0 }, { 1, 1 })));
-  result.engine_factory = [](int, int, int) -> 
-    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(); };
+  result.engine_factory = [sources, targets](int, int, int) -> 
+    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(sources, targets); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
     make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1, 1 } })));
