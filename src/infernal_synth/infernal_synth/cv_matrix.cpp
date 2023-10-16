@@ -42,8 +42,8 @@ cv_matrix_topo(
   gui_binding_selector enabled_selector = [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; };
 
   module_topo result(make_module(
-    make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, route_count),
-    make_module_dsp(module_stage::voice, module_output::cv, 1),
+    make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1),
+    make_module_dsp(module_stage::voice, module_output::cv, route_count),
     make_module_gui(gui_layout::single, { 2, 0 }, { 1, 1 })));
   result.engine_factory = [sources, targets](int, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(sources, targets); };
