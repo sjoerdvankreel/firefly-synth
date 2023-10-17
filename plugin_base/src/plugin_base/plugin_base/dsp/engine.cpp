@@ -458,9 +458,9 @@ plugin_engine::process()
       _output_engines[m][mi]->process(block);
 
       // copy back output parameter values
-      for(int p = 0; p < _state.desc().modules[m].params.size(); p++)
-        if(_state.desc().modules[m].params[p].param->dsp.direction == param_direction::output)
-          for(int pi = 0; pi < _state.desc().modules[m].params[p].param->info.slot_count; pi++)
+      for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+        if(_state.desc().plugin->modules[m].params[p].dsp.direction == param_direction::output)
+          for(int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
             _state.set_plain_at(m, mi, p, pi, _output_values[m][mi][p][pi]);
     }
 
