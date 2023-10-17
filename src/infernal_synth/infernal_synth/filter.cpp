@@ -61,6 +61,9 @@ filter_topo(int osc_slot_count)
 void
 filter_engine::process(plugin_block& block)
 {
+  void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
+  auto const& modulation = static_cast<cv_matrix_output const*>(cv_matrix_context)->modulation;
+
   auto const& osc_audio = block.voice->all_audio[module_osc];
   auto const& osc_gain = block.state.own_accurate_automation[param_osc_gain];
   for(int o = 0; o < block.plugin.modules[module_osc].info.slot_count; o++)
@@ -71,7 +74,7 @@ filter_engine::process(plugin_block& block)
 
   float w = 2 * block.sample_rate;
   auto const& env = block.voice->all_cv[module_env][1][0];
-  auto const& freq = block.state.own_accurate_automation[param_freq][0];
+  auto const& freq = *modulation[module_filter][0][param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float angle = block.normalized_to_raw(module_filter, param_freq, freq[f] * env[f]) * 2 * pi32;
