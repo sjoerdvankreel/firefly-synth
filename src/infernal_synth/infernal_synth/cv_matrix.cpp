@@ -148,6 +148,7 @@ cv_matrix_engine::process(plugin_block& block)
         for (int mi = 0; mi < _targets[m]->info.slot_count; mi++)
           for(int pi = 0; pi < _targets[m]->params[p].info.slot_count; pi++)
             _output.modulation[m][mi][p][pi] = &block.state.all_accurate_automation[m][mi][p][pi];
+  *block.state.own_context = &_output;
 }
 
 }
