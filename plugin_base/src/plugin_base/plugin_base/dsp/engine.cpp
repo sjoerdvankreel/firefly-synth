@@ -31,6 +31,9 @@ _voice_processor_context(voice_processor_context)
   int note_limit_guess = _state.desc().plugin->polyphony * 64;
 
   // init everything that is not frame-count dependent
+  _global_context.resize(_dims.module_slot);
+  _voice_context.resize(_dims.voice_module_slot);
+  _output_values.resize(_dims.module_slot_param_slot);
   _input_engines.resize(_dims.module_slot);
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
@@ -444,14 +447,21 @@ plugin_engine::process()
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
+      // output params are written to intermediate buffer first
       plugin_output_block out_block = {
         voice_count, thread_count,
         _cpu_usage, _host_block->audio_out,
-        _state.state()[m][mi], _voices_mixdown
+        _output_values[m][mi], _voices_mixdown
       };
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
       block.out = &out_block;
       _output_engines[m][mi]->process(block);
+
+      // copy back output parameter values
+      for(int p = 0; p < _state.desc().modules[m].params.size(); p++)
+        if(_state.desc().modules[m].params[p].param->dsp.direction == param_direction::output)
+          for(int pi = 0; pi < _state.desc().modules[m].params[p].param->info.slot_count; pi++)
+            _state.set_plain_at(m, mi, p, pi, _output_values[m][mi][p][pi]);
     }
 
   // keep track of running time in frames

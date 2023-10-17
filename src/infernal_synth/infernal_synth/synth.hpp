@@ -9,7 +9,7 @@ namespace infernal_synth {
 
 struct cv_matrix_output
 {
-  plugin_base::jarray<std::vector<float> const*, 4> modulation;
+  plugin_base::jarray<plugin_base::jarray<float, 1> const*, 4> modulation;
 };
 
 enum { module_lfo, module_env, module_cv_matrix, module_osc, module_filter, module_delay, module_count };

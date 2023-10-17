@@ -37,6 +37,9 @@ class plugin_engine final {
   plugin_dims const _dims;
   plugin_state _state = {};
   plugin_state _block_automation = {};
+  jarray<void*, 3> _voice_context = {};
+  jarray<void*, 2> _global_context = {};
+  jarray<plain_value, 4> _output_values = {};
 
   float _sample_rate = {};
   double _cpu_usage = {};
@@ -47,8 +50,6 @@ class plugin_engine final {
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};
-  jarray<void*, 3> _voice_context = {};
-  jarray<void*, 2> _global_context = {};
   jarray<float, 5> _voice_cv_state = {};
   jarray<float, 4> _global_cv_state = {};
   jarray<float, 6> _voice_audio_state = {};
