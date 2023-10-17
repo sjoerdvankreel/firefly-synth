@@ -37,7 +37,7 @@ filter_topo(int osc_slot_count)
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
     make_section_gui({ 0, 0 }, { { 1 }, { 1, 1, 2} })));
-  result.engine_factory = [](int, int, int) ->
+  result.engine_factory = [](auto const&, int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<filter_engine>(); };
 
   result.params.emplace_back(make_param(
@@ -61,17 +61,17 @@ filter_topo(int osc_slot_count)
 void
 filter_engine::process(plugin_block& block)
 {
-  auto const& osc_audio = block.voice->audio_in[module_osc];
-  auto const& osc_gain = block.state.accurate_automation[param_osc_gain];
+  auto const& osc_audio = block.voice->all_audio[module_osc];
+  auto const& osc_gain = block.state.own_accurate_automation[param_osc_gain];
   for(int o = 0; o < block.plugin.modules[module_osc].info.slot_count; o++)
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
         block.voice->result[c][f] += osc_audio[o][0][c][f] * osc_gain[o][f];
-  if(block.state.block_automation[param_on][0].step() == 0) return;
+  if(block.state.own_block_automation[param_on][0].step() == 0) return;
 
   float w = 2 * block.sample_rate;
-  auto const& env = block.voice->cv_in[module_env][1][0];
-  auto const& freq = block.state.accurate_automation[param_freq][0];
+  auto const& env = block.voice->all_cv[module_env][1][0];
+  auto const& freq = block.state.own_accurate_automation[param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float angle = block.normalized_to_raw(module_filter, param_freq, freq[f] * env[f]) * 2 * pi32;

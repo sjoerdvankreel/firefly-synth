@@ -39,18 +39,23 @@ struct plugin_voice_block final {
   bool finished;
   jarray<float, 2>& result;
   voice_state const& state;
-  jarray<float, 4> const& cv_in;
-  jarray<float, 5> const& audio_in;
+  jarray<float, 4> const& all_cv;
+  jarray<float, 5> const& all_audio;
+  jarray<void*, 2> const& all_context;
 };
 
 // state and automation
 struct plugin_block_state final {
-  jarray<float, 2>& own_cv_out;
-  jarray<float, 3>& own_audio_out;
-  jarray<float, 4> const& global_cv_in;
-  jarray<float, 5> const& global_audio_in;
-  jarray<float, 3> const& accurate_automation;
-  jarray<plain_value, 2> const& block_automation;
+  void** own_context = {};
+  jarray<float, 2>& own_cv;
+  jarray<float, 3>& own_audio;
+  jarray<float, 4> const& all_global_cv;
+  jarray<float, 5> const& all_global_audio;
+  jarray<void*, 2> const& all_global_context;
+  jarray<float, 3> const& own_accurate_automation;
+  jarray<float, 5> const& all_accurate_automation;
+  jarray<plain_value, 2> const& own_block_automation;
+  jarray<plain_value, 4> const& all_block_automation;
 };
 
 // single module process call

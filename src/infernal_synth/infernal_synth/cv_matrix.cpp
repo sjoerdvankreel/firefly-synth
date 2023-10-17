@@ -1,3 +1,4 @@
+#include <plugin_base/desc/dims.hpp>
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/topo/plugin.hpp>
@@ -20,6 +21,7 @@ enum { param_on, param_active, param_source, param_source_index, param_target, p
 
 class cv_matrix_engine:
 public module_engine { 
+  cv_matrix_output _output = {};
   std::vector<module_topo const*> const _sources;
   std::vector<module_topo const*> const _targets;
 public:
@@ -27,9 +29,9 @@ public:
   void process(plugin_block& block) override;
 
   cv_matrix_engine(
+    plugin_topo const& topo,
     std::vector<module_topo const*> const& sources,
-    std::vector<module_topo const*> const& targets): 
-  _sources(sources), _targets(targets) {}
+    std::vector<module_topo const*> const& targets);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
@@ -45,8 +47,8 @@ cv_matrix_topo(
     make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::cv, route_count),
     make_module_gui(gui_layout::single, { 2, 0 }, { 1, 1 })));
-  result.engine_factory = [sources, targets](int, int, int) -> 
-    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(sources, targets); };
+  result.engine_factory = [sources, targets](auto const& topo, int, int, int) -> 
+    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, sources, targets); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
     make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1, 1 } })));
@@ -126,9 +128,26 @@ cv_matrix_topo(
   return result;
 }
 
+cv_matrix_engine::
+cv_matrix_engine(
+  plugin_topo const& topo,
+  std::vector<module_topo const*> const& sources,
+  std::vector<module_topo const*> const& targets) :
+  _sources(sources), _targets(targets)
+{
+  plugin_dims dims(topo);
+  _output.modulation.resize(dims.module_slot_param_slot);
+}
+
 void
 cv_matrix_engine::process(plugin_block& block)
 {
+  for(int m = 0; m < _targets.size(); m++)
+    for(int p = 0; p < _targets[m]->params.size(); p++)
+      if(_targets[m]->params[p].dsp.automate == param_automate::modulate)
+        for (int mi = 0; mi < _targets[m]->info.slot_count; mi++)
+          for(int pi = 0; pi < _targets[m]->params[p].info.slot_count; pi++)
+            ;//_output.modulation[m][mi][p][pi] = &block.state.accurate_automation[m][mi][p][pi];
 }
 
 }

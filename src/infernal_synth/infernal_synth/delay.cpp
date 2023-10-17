@@ -36,7 +36,7 @@ delay_topo(int polyphony)
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"),
     make_section_gui({ 0, 0 }, { 1, 5 })));
-  result.engine_factory = [](int, int sample_rate, int) ->
+  result.engine_factory = [](auto const&, int, int sample_rate, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
   result.params.emplace_back(make_param(
@@ -90,7 +90,7 @@ delay_engine::process(plugin_block& block)
     for(int f = block.start_frame; f < block.end_frame; f++)
     {
       block.out->host_audio[c][f] = block.out->mixdown[c][f];
-      if (block.state.block_automation[param_on][0].step() != 0)
+      if (block.state.own_block_automation[param_on][0].step() != 0)
         block.out->host_audio[c][f] += _buffer[c][(_pos + f) % _length] * 0.5f;
       _buffer[c][(_pos + f) % _length] = block.out->mixdown[c][f];
       max_out = std::max(max_out, block.out->host_audio[c][f]);

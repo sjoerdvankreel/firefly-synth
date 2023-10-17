@@ -45,7 +45,7 @@ osc_topo()
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Voice Osc", module_osc, 2), 
     make_module_dsp(module_stage::voice, module_output::audio, 1),
     make_module_gui(gui_layout::tabbed, { 3, 0 }, { 2, 4 })));
-  result.engine_factory = [](int, int, int) ->
+  result.engine_factory = [](auto const&, int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
@@ -117,16 +117,16 @@ osc_topo()
 void
 osc_engine::process(plugin_block& block)
 {
-  if(block.state.block_automation[param_on][0].step() == 0) return;
-  int oct = block.state.block_automation[param_oct][0].step();
-  int note = block.state.block_automation[param_note][0].step();
-  int type = block.state.block_automation[param_type][0].step();
-  auto const& env_curve = block.voice->cv_in[module_env][0][0];
-  auto const& bal_curve = block.state.accurate_automation[param_bal][0];
-  auto const& cent_curve = block.state.accurate_automation[param_cent][0];
-  auto const& gain_curve = block.state.accurate_automation[param_gain][0];
-  auto const& saw_gain_curve = block.state.accurate_automation[param_saw_gain][0];
-  auto const& sine_gain_curve = block.state.accurate_automation[param_sine_gain][0];
+  if(block.state.own_block_automation[param_on][0].step() == 0) return;
+  int oct = block.state.own_block_automation[param_oct][0].step();
+  int note = block.state.own_block_automation[param_note][0].step();
+  int type = block.state.own_block_automation[param_type][0].step();
+  auto const& env_curve = block.voice->all_cv[module_env][0][0];
+  auto const& bal_curve = block.state.own_accurate_automation[param_bal][0];
+  auto const& cent_curve = block.state.own_accurate_automation[param_cent][0];
+  auto const& gain_curve = block.state.own_accurate_automation[param_gain][0];
+  auto const& saw_gain_curve = block.state.own_accurate_automation[param_saw_gain][0];
+  auto const& sine_gain_curve = block.state.own_accurate_automation[param_sine_gain][0];
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -140,8 +140,8 @@ osc_engine::process(plugin_block& block)
     check_bipolar(sample);
     float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
-    block.state.own_audio_out[0][0][f] = sample * gain_curve[f] * env_curve[f] * balance(0, bal);
-    block.state.own_audio_out[0][1][f] = sample * gain_curve[f] * env_curve[f] * balance(1, bal);
+    block.state.own_audio[0][0][f] = sample * gain_curve[f] * env_curve[f] * balance(0, bal);
+    block.state.own_audio[0][1][f] = sample * gain_curve[f] * env_curve[f] * balance(1, bal);
     _phase += note_to_frequency(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
     _phase -= std::floor(_phase);
   }

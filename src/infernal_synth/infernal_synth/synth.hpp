@@ -1,9 +1,16 @@
 #pragma once
 
 #include <plugin_base/topo/plugin.hpp>
+#include <plugin_base/shared/jarray.hpp>
+
 #include <vector>
 
 namespace infernal_synth {
+
+struct cv_matrix_output
+{
+  plugin_base::jarray<std::vector<float> const*, 4> modulation;
+};
 
 enum { module_lfo, module_env, module_cv_matrix, module_osc, module_filter, module_delay, module_count };
 

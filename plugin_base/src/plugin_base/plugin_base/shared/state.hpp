@@ -47,10 +47,7 @@ public:
   void remove_listener(int index, state_listener* listener) const;
 
   plugin_desc const& desc() const { return *_desc; }
-  jarray<plain_value, 2>& module_state_at(int module, int slot)
-  { return _state[module][slot]; }
-  jarray<plain_value, 2> const& module_state_at(int module, int slot) const
-  { return _state[module][slot]; }
+  jarray<plain_value, 4> const& state() const { return _state; }
 
   void set_plain_at(int m, int mi, int p, int pi, plain_value value);
   plain_value get_plain_at(int m, int mi, int p, int pi) const

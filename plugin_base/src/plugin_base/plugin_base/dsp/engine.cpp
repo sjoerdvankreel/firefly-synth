@@ -47,6 +47,9 @@ plugin_engine::make_plugin_block(
   int voice, int module, int slot, 
   int start_frame, int end_frame)
 {
+  void** context_out = voice < 0
+    ? &_global_context[module][slot]
+    : &_voice_context[voice][module][slot];
   jarray<float, 2>& cv_out = voice < 0
     ? _global_cv_state[module][slot]
     : _voice_cv_state[voice][module][slot];
@@ -54,10 +57,10 @@ plugin_engine::make_plugin_block(
     ? _global_audio_state[module][slot] 
     : _voice_audio_state[voice][module][slot];
   plugin_block_state state = {
-    cv_out, audio_out, 
-    _global_cv_state, _global_audio_state,
-    _accurate_automation[module][slot], 
-    _block_automation.module_state_at(module, slot) 
+    context_out, cv_out, audio_out,
+    _global_cv_state, _global_audio_state, _global_context,
+    _accurate_automation[module][slot], _accurate_automation,
+    _block_automation.state()[module][slot], _block_automation.state()
   };
   return {
     start_frame, end_frame, 
@@ -145,14 +148,14 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(mi, sample_rate, max_frame_count);
+      _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, mi, sample_rate, max_frame_count);
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for (int v = 0; v < _state.desc().plugin->polyphony; v++)
-        _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(mi, sample_rate, max_frame_count);
+        _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, mi, sample_rate, max_frame_count);
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(mi, sample_rate, max_frame_count);
+      _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, mi, sample_rate, max_frame_count);
 }
 
 int 
@@ -182,11 +185,8 @@ plugin_engine::process_voice(int v, bool threaded)
     {
       auto& state = _voice_states[v];
       plugin_voice_block voice_block = {
-        false,
-        _voice_results[v],
-        state,
-        _voice_cv_state[v],
-        _voice_audio_state[v]
+        false, _voice_results[v], state,
+        _voice_cv_state[v], _voice_audio_state[v], _voice_context[v]
       };
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
@@ -445,12 +445,9 @@ plugin_engine::process()
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
       plugin_output_block out_block = {
-        voice_count,
-        thread_count,
-        _cpu_usage,
-        _host_block->audio_out,
-        _state.module_state_at(m, mi),
-        _voices_mixdown
+        voice_count, thread_count,
+        _cpu_usage, _host_block->audio_out,
+        _state.state()[m][mi], _voices_mixdown
       };
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
       block.out = &out_block;

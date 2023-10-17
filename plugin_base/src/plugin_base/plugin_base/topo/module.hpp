@@ -18,7 +18,8 @@ enum class module_stage { input, voice, output };
 
 class module_engine;
 typedef std::function<std::unique_ptr<module_engine>(
-  int slot, int sample_rate, int max_frame_count)> 
+  plugin_topo const& topo, int slot, 
+  int sample_rate, int max_frame_count)> 
 module_engine_factory;
 
 // module ui

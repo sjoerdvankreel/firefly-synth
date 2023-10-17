@@ -34,7 +34,7 @@ lfo_topo()
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
     make_section_gui({ 0, 0 }, { 1, 4 })));
-  result.engine_factory = [](int, int, int) ->
+  result.engine_factory = [](auto const&, int, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(); };
 
   result.params.emplace_back(make_param(

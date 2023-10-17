@@ -38,7 +38,7 @@ env_topo()
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
     make_section_gui({ 0, 0 }, { 1, 4 })));
-  result.engine_factory = [](int slot, int, int) ->
+  result.engine_factory = [](auto const&, int slot, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<env_engine>(slot); };
   
   result.params.emplace_back(make_param(
@@ -67,16 +67,16 @@ env_topo()
 void
 env_engine::process(plugin_block& block)
 {
-  auto const& a_curve = block.state.accurate_automation[param_a][0];
-  auto const& d_curve = block.state.accurate_automation[param_d][0];
-  auto const& s_curve = block.state.accurate_automation[param_s][0];
-  auto const& r_curve = block.state.accurate_automation[param_r][0];
+  auto const& a_curve = block.state.own_accurate_automation[param_a][0];
+  auto const& d_curve = block.state.own_accurate_automation[param_d][0];
+  auto const& s_curve = block.state.own_accurate_automation[param_s][0];
+  auto const& r_curve = block.state.own_accurate_automation[param_r][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if (_stage == env_stage::end)
     {
-      block.state.own_cv_out[0][f] = _release_level = 0;
+      block.state.own_cv[0][f] = _release_level = 0;
       continue;
     }
 
@@ -88,7 +88,7 @@ env_engine::process(plugin_block& block)
 
     if (_stage == env_stage::s)
     {
-      block.state.own_cv_out[0][f] = _release_level = s_curve[f];
+      block.state.own_cv[0][f] = _release_level = s_curve[f];
       continue;
     }
 
@@ -103,13 +103,13 @@ env_engine::process(plugin_block& block)
 
     if(_stage_pos > stage_seconds) _stage_pos = stage_seconds;
     if (stage_seconds == 0)
-      block.state.own_cv_out[0][f] = _release_level;
+      block.state.own_cv[0][f] = _release_level;
     else 
       switch (_stage)
       {
-      case env_stage::a: block.state.own_cv_out[0][f] = _release_level = _stage_pos / stage_seconds; break;
-      case env_stage::d: block.state.own_cv_out[0][f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s_curve[f]); break;
-      case env_stage::r: block.state.own_cv_out[0][f] = (1.0 - _stage_pos / stage_seconds) * _release_level; break;
+      case env_stage::a: block.state.own_cv[0][f] = _release_level = _stage_pos / stage_seconds; break;
+      case env_stage::d: block.state.own_cv[0][f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s_curve[f]); break;
+      case env_stage::r: block.state.own_cv[0][f] = (1.0 - _stage_pos / stage_seconds) * _release_level; break;
       default: assert(false); stage_seconds = 0; break;
       }
 
