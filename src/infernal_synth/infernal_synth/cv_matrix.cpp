@@ -175,10 +175,20 @@ cv_matrix_engine(
 void
 cv_matrix_engine::process(plugin_block& block)
 {
-  for(int tm = 0; tm < _targets.size(); tm++)
+#if 0
+  for (int m = 0; m < _targets.size(); m++)
+    for (int p = 0; p < _modulatable_params[m].size(); p++)
+      for (int mi = 0; mi < _targets[m]->info.slot_count; mi++)
+        for (int pi = 0; pi < _modulatable_params[m][p].info.slot_count; pi++)
+          _output.modulation[_targets[m]->info.index][mi][_modulatable_params[m][p].info.index][pi] =
+            &block.state.all_accurate_automation[_targets[m]->info.index][mi][_modulatable_params[m][p].info.index][pi];
+  *block.state.own_context = &_output;
+#endif
+
+  for (int tm = 0; tm < _targets.size(); tm++)
     for (int tmi = 0; tmi < _targets[tm]->info.slot_count; tmi++)
-      for(int tp = 0; tp < _modulatable_params[tm].size(); tp++)
-        for(int tpi = 0; tpi < _targets[tm]->params[tp].info.slot_count; tpi++)
+      for (int tp = 0; tp < _modulatable_params[tm].size(); tp++)
+        for (int tpi = 0; tpi < _modulatable_params[tm][tp].info.slot_count; tpi++)
         {
           int real_tm = _targets[tm]->info.index;
           int real_tp = _modulatable_params[tm][tp].info.index;
