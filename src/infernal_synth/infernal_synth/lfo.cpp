@@ -80,7 +80,7 @@ lfo_engine::process(plugin_block& block)
   if (sync)
   {
     // TODO 4: project time signature
-    float rate = (float)num / denom * 4 / (block.host.bpm / 60);
+    float rate = block.host.bpm / (60.0f * 4.0f * (float)num / denom);
     std::fill(block.state.own_scratch[0].begin(), block.state.own_scratch[0].end(), rate);
   }
   else
