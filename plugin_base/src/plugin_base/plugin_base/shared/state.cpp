@@ -88,19 +88,6 @@ plugin_state::dependent_domain_at_index(int index) const
   return &param.dependent_domains[domain_index];
 }
 
-int
-plugin_state::dependent_domain_index_at_index(int index) const
-{
-  auto const& param = *desc().param_at_index(index).param;
-  if(param.dependency_indices.size() == 0) return -1;
-  int dependency_values[max_param_dependencies_count];
-  for(int d = 0; d < param.dependency_indices.size(); d++)
-    dependency_values[d] = get_plain_at_index(param.dependency_indices[d]).step();
-  int dependent_index = param.dependent_selector(dependency_values);
-  assert(0 <= dependent_index && dependent_index < param.dependent_domains.size());
-  return dependent_index;
-}
-
 bool 
 plugin_state::text_to_normalized_at_index(
   bool io, int index, std::string const& textual, normalized_value& normalized) const
@@ -137,6 +124,20 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
   // notify later, even notify if state did not change because of
   // possible multiple bindings and/or changed value-to-text behaviour
   if (_notify) state_changed(index, value);
+}
+
+int
+plugin_state::dependent_domain_index_at_index(int index) const
+{
+  auto const& param = desc().param_at_index(index);
+  if (param.param->dependency_indices.size() == 0) return -1;
+  auto const& map = desc().mappings.params[index];
+  int dependency_values[max_param_dependencies_count];
+  for (int d = 0; d < param.param->dependency_indices.size(); d++)
+    dependency_values[d] = get_plain_at(map.module_topo, map.module_slot, param.param->dependency_indices[d], map.param_slot).step();
+  int dependent_index = param.param->dependent_selector(dependency_values);
+  assert(0 <= dependent_index && dependent_index < param.param->dependent_domains.size());
+  return dependent_index;
 }
 
 }
