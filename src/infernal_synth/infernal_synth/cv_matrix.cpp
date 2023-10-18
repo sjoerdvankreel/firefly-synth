@@ -181,7 +181,7 @@ cv_matrix_engine::process(plugin_block& block)
         for(int tpi = 0; tpi < _targets[tm]->params[tp].info.slot_count; tpi++)
         {
           int real_tm = _targets[tm]->info.index;
-          int real_tp = _targets[tp]->info.index;
+          int real_tp = _modulatable_params[tm][tp].info.index;
           _output.modulated[real_tm][tmi][real_tp][tpi] = 0;
           _output.modulation[real_tm][tmi][real_tp][tpi] = &block.state.all_accurate_automation[real_tm][tmi][real_tp][tpi];
         }
