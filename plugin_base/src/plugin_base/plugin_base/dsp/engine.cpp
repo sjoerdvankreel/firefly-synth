@@ -56,11 +56,14 @@ plugin_engine::make_plugin_block(
   jarray<float, 2>& cv_out = voice < 0
     ? _global_cv_state[module][slot]
     : _voice_cv_state[voice][module][slot];
-  jarray<float, 3>& audio_out = voice < 0 
+  jarray<float, 2>& scratch = voice < 0
+    ? _global_scratch_state[module][slot]
+    : _voice_scratch_state[voice][module][slot];
+  jarray<float, 3>& audio_out = voice < 0
     ? _global_audio_state[module][slot] 
     : _voice_audio_state[voice][module][slot];
   plugin_block_state state = {
-    context_out, cv_out, audio_out,
+    context_out, cv_out, audio_out, scratch,
     _global_cv_state, _global_audio_state, _global_context,
     _accurate_automation[module][slot], _accurate_automation,
     _block_automation.state()[module][slot], _block_automation.state()
@@ -115,6 +118,8 @@ plugin_engine::deactivate()
   _global_cv_state = {};
   _global_audio_state = {};
   _accurate_automation = {};
+  _voice_scratch_state = {};
+  _global_scratch_state = {};
   _host_block->events.out.clear();
   _host_block->events.block.clear();
   _host_block->events.accurate.clear();
@@ -144,8 +149,10 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _voices_mixdown.resize(frame_dims.audio);
   _voice_results.resize(frame_dims.voices_audio);
   _voice_cv_state.resize(frame_dims.module_voice_cv);
+  _voice_scratch_state.resize(frame_dims.module_voice_scratch);
   _voice_audio_state.resize(frame_dims.module_voice_audio);
   _global_cv_state.resize(frame_dims.module_global_cv);
+  _global_scratch_state.resize(frame_dims.module_global_scratch);
   _global_audio_state.resize(frame_dims.module_global_audio);
   _accurate_automation.resize(frame_dims.accurate_automation);
 

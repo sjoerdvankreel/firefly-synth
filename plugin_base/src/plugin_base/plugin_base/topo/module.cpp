@@ -9,10 +9,11 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   assert(params.size());
   assert(engine_factory);
   assert(info.index == index);
+  assert(0 <= dsp.scratch_count && dsp.scratch_count < topo_max);
   assert(0 < sections.size() && sections.size() <= params.size());
-  assert(dsp.output == module_output::none || dsp.output_count > 0);
   assert(dsp.output != module_output::none || dsp.output_count == 0);
   assert((info.slot_count == 1) == (gui.layout == gui_layout::single));
+  assert(dsp.output == module_output::none || dsp.output_count > 0 && dsp.output_count < topo_max);
 
   for (int p = 0; p < params.size(); p++)
     params[p].validate(*this, p);

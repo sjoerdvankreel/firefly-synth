@@ -55,6 +55,8 @@ class plugin_engine final {
   jarray<float, 6> _voice_audio_state = {};
   jarray<float, 5> _global_audio_state = {};
   jarray<float, 5> _accurate_automation = {};
+  jarray<float, 5> _voice_scratch_state = {};
+  jarray<float, 4> _global_scratch_state = {};
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
   

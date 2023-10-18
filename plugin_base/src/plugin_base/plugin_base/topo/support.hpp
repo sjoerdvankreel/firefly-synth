@@ -24,10 +24,10 @@ make_section(int index, topo_tag const& tag, section_topo_gui const& gui);
 section_topo_gui
 make_section_gui(gui_position const& position, gui_dimension const& dimension);
 
-module_dsp 
-make_module_dsp(module_stage stage, module_output output, int output_count);
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
+module_dsp
+make_module_dsp(module_stage stage, module_output output, int output_count, int scratch_count);
 module_topo_gui
 make_module_gui(gui_layout layout, gui_position const& position, gui_dimension const& dimension);
 

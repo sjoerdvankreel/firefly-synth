@@ -52,16 +52,6 @@ make_section_gui(gui_position const& position, gui_dimension const& dimension)
   return result;
 }
 
-module_dsp
-make_module_dsp(module_stage stage, module_output output, int output_count)
-{
-  module_dsp result = {};
-  result.stage = stage;
-  result.output = output;
-  result.output_count = output_count;
-  return result;
-}
-
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui)
 {
@@ -69,6 +59,17 @@ make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const&
   result.dsp = module_dsp(dsp);
   result.info = topo_info(info);
   result.gui = module_topo_gui(gui);
+  return result;
+}
+
+module_dsp
+make_module_dsp(module_stage stage, module_output output, int output_count, int scratch_count)
+{
+  module_dsp result = {};
+  result.stage = stage;
+  result.output = output;
+  result.output_count = output_count;
+  result.scratch_count = scratch_count;
   return result;
 }
 

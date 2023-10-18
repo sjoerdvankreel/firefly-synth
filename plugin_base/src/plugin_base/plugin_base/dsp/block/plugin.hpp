@@ -49,6 +49,7 @@ struct plugin_block_state final {
   void** own_context = {};
   jarray<float, 2>& own_cv;
   jarray<float, 3>& own_audio;
+  jarray<float, 2>& own_scratch;
   jarray<float, 4> const& all_global_cv;
   jarray<float, 5> const& all_global_audio;
   jarray<void*, 2> const& all_global_context;
