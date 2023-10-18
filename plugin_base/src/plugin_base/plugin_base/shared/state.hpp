@@ -87,6 +87,9 @@ public:
   void set_normalized_at_index(int index, normalized_value value) 
   { set_plain_at_index(index, desc().normalized_to_plain_at_index(index, value)); }
 
+  // adjust bounds for all dependencies
+  plain_value clamp_dependent_at_index(int index, plain_value value) const;
+
   // parse and format of possibly dependent values
   std::string raw_to_text_at_index(bool io, int index, double raw) const
   { return plain_to_text_at_index(io, index, desc().raw_to_plain_at_index(index, raw)); }
