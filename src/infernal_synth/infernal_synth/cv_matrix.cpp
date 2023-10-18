@@ -220,7 +220,10 @@ cv_matrix_engine::process(plugin_block& block)
       ? block.voice->all_cv[source_module][source_module_index][0]
       : block.state.all_global_cv[source_module][source_module_index][0];
     for(int f = block.start_frame; f < block.end_frame; f++)
+    {
       modulated_curve[f] *= source_curve[f];
+      check_unipolar(modulated_curve[f]);
+    }
   }
   
   *block.state.own_context = &_output;
