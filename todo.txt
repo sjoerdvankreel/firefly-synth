@@ -24,6 +24,7 @@ linux build
 - keep updating the demo tracks
 
 * host bugs:
+- waveform: lots, not supported
 - cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)
 
 testing:
