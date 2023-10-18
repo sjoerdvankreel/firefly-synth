@@ -20,8 +20,8 @@ public module_engine {
 public:
   lfo_engine() { initialize(); }
   INF_PREVENT_ACCIDENTAL_COPY(lfo_engine);
-  void process(plugin_block& block) override;
   void initialize() override { _phase = 0; }
+  void process(plugin_block& block) override;
 };
 
 module_topo
@@ -63,6 +63,14 @@ lfo_topo()
 void
 lfo_engine::process(plugin_block& block)
 {
+  // TODO make per-voice lfo
+  // TODO rate/sync
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    block.state.own_cv[0][f] = std::sin(2.0f * pi32 * _phase);
+    _phase += 1.0f / block.sample_rate;
+    if(_phase >= 1.0f) _phase = 1.0f;
+  }
 }
 
 }
