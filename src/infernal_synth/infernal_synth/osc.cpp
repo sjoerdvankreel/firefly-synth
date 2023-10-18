@@ -118,17 +118,18 @@ void
 osc_engine::process(plugin_block& block)
 {
   if(block.state.own_block_automation[param_on][0].step() == 0) return;
-  auto const& env_curve = block.voice->all_cv[module_env][0][0];
   int oct = block.state.own_block_automation[param_oct][0].step();
   int note = block.state.own_block_automation[param_note][0].step();
   int type = block.state.own_block_automation[param_type][0].step();
+
+  auto const& env_curve = block.voice->all_cv[module_env][0][0];
+  auto const& saw_gain_curve = block.state.own_accurate_automation[param_saw_gain][0];
 
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
   auto const& modulation = static_cast<cv_matrix_output const*>(cv_matrix_context)->modulation;
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
-  auto const& saw_gain_curve = *modulation[module_osc][block.module_slot][param_saw_gain][0];
   auto const& sine_gain_curve = *modulation[module_osc][block.module_slot][param_sine_gain][0];
 
   float sample;
