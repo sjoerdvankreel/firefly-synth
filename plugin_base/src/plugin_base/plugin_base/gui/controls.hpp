@@ -44,12 +44,11 @@ public param_component,
 public juce::Label
 {
   bool const _both;
-  std::vector<int> _global_dependency_indices = {};
+  int _global_dependency_index = -1;
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
   void state_changed(int index, plain_value plain) override;
-  ~param_value_label();
   param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both);
 };
 
@@ -130,20 +129,19 @@ public param_component,
 public juce::Component,
 public juce::ComboBox::Listener
 {
-private:
-  void update_editor();
-  void update_editor_value();
-  juce::ComboBox _editor;
-  std::vector<int> _global_dependency_indices = {};
-
 protected:
-  void own_param_changed(plain_value plain) override final
-  { update_editor_value(); }
+  void own_param_changed(plain_value plain) override final;
+
+private:
+  int _global_dependency_index = -1;
+
+  void update_editors();
+  std::vector<std::unique_ptr<juce::ComboBox>> _editors = {};
 
 public:
+  void resized() override;
   void comboBoxChanged(juce::ComboBox* box) override;
   void state_changed(int index, plain_value plain) override;
-  void resized() override { _editor.setBounds(getLocalBounds()); }
 
   ~param_dependent() override;
   param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param);

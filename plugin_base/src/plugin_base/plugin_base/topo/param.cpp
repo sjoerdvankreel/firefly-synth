@@ -45,36 +45,38 @@ param_topo::validate(module_topo const& module, int index) const
   if (domain.type != domain_type::dependent)
   {
     assert(domain.max > domain.min);
-    assert(dependent_selector == nullptr);
-    assert(dependency_indices.size() == 0);
+    assert(dependency_index == -1);
+    assert(dependent_domains.size() == 0);
     assert(gui.edit_type != gui_edit_type::dependent);
   }
   else
   {
-    assert(dependency_indices.size() > 0);
-    assert(dependent_selector != nullptr);
+    int max = -1;
+    assert(dependency_index >= 0);
+    assert(dependent_domains.size() > 1);
     assert(gui.edit_type == gui_edit_type::dependent);
-    assert(dependency_indices.size() <= max_param_dependencies_count);
-    assert(domain.max == max_domain_dependent_value(module, dependency_indices, dependent_selector));
-    for (int d = 0; d < dependency_indices.size(); d++)
+    assert(info.slot_count == module.params[dependency_index].info.slot_count);
+    for(int i = 0; i < dependent_domains.size(); i++)
     {
-      assert(dependency_indices[d] < index);
-      auto const& other = module.params[dependency_indices[d]];
-      assert(other.domain.min == 0);
-      assert(!other.domain.is_real());
-      assert(info.slot_count == other.info.slot_count);
-      assert(other.dsp.direction != param_direction::output);
+      max = std::max(max, (int)dependent_domains[i].max);
+      dependent_domains[i].validate();
+      assert(dependent_domains[i].min == 0);
+      assert(dependent_domains[i].type == domain_type::item
+          || dependent_domains[i].type == domain_type::name
+          || dependent_domains[i].type == domain_type::step);
     }
+    assert(max == domain.max);
   }
 
   assert(info.index == index);
   assert(domain.is_real() || dsp.rate == param_rate::block);
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == gui_layout::single));
-  assert(dsp.direction != param_direction::output || dependent_selector == nullptr);
+  assert(dsp.direction != param_direction::output || dependency_index == -1);
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
   assert(dsp.direction == param_direction::input || gui.bindings.enabled.selector == nullptr);
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
+  assert(dependency_index == -1 || module.params[dependency_index].dsp.direction != param_direction::output);
 }
 
 }

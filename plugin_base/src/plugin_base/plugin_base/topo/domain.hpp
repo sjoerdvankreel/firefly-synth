@@ -14,18 +14,6 @@ namespace plugin_base {
 enum class domain_display { normal, percentage };
 enum class domain_type { toggle, step, name, item, dependent, linear, log };
 
-struct module_topo;
-struct param_domain;
-inline int const max_param_dependencies_count = 4;
-typedef param_domain const* (*
-dependent_domain_selector)(int const* values);
-
-int 
-max_domain_dependent_value(
-  module_topo const& module,
-  std::vector<int> dependency_indices,
-  dependent_domain_selector selector);
-
 // item in list
 struct list_item final {
   std::string id = {};

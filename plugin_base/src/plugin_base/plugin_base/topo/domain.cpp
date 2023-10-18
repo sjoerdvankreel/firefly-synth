@@ -1,5 +1,4 @@
 #include <plugin_base/topo/domain.hpp>
-#include <plugin_base/topo/module.hpp>
 
 #include <sstream>
 #include <iomanip>
@@ -169,48 +168,5 @@ param_domain::validate() const
     assert(0 <= precision && precision <= 10);
   }
 }
-
-// check cartesian product of all posible values to 
-// determine the maximum value from any domain returned by the selector
-int
-max_domain_dependent_value(
-  module_topo const& module,
-  std::vector<int> dependency_indices, 
-  dependent_domain_selector selector)
-{
-  int max = -1;
-  int dependency_values[max_param_dependencies_count];
-  for (int d1 = 0; d1 < dependency_indices.size(); d1++)
-  {
-    auto const& other1 = module.params[dependency_indices[d1]];
-    for (int v1 = other1.domain.min; v1 <= other1.domain.max; v1++)
-    {
-      dependency_values[d1] = v1;
-      for (int d2 = 0; d2 < dependency_indices.size(); d2++)
-      {
-        auto const& other2 = module.params[dependency_indices[d2]];
-        for (int v2 = other2.domain.min; v2 <= other2.domain.max; v2++)
-        {
-          dependency_values[d2] = v2;
-          for (int d3 = 0; d3 < dependency_indices.size(); d3++)
-          {
-            auto const& other3 = module.params[dependency_indices[d3]];
-            assert(other3.domain.min <= dependency_values[d3]);
-            assert(other3.domain.max >= dependency_values[d3]);
-          }
-          auto const& selected = *selector(dependency_values);
-          assert(selected.min == 0);
-          assert(selected.min == 0);
-          assert(selected.type == domain_type::item
-            || selected.type == domain_type::name
-            || selected.type == domain_type::step);
-          max = std::max(max, (int)selected.max);
-        }
-      }
-    }
-  }
-  return max;
-}
-
 
 }

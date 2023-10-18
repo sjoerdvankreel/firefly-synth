@@ -48,8 +48,6 @@ public:
 
   plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 4> const& state() const { return _state; }
-  param_domain const* dependent_domain_at_index(int index) const;
-  plain_value clamp_dependent_at_index(int index, plain_value value) const;
 
   void set_plain_at(int m, int mi, int p, int pi, plain_value value);
   plain_value get_plain_at(int m, int mi, int p, int pi) const
@@ -94,9 +92,8 @@ public:
   { return plain_to_text_at_index(io, index, desc().raw_to_plain_at_index(index, raw)); }
   std::string normalized_to_text_at_index(bool io, int index, normalized_value normalized) const
   { return plain_to_text_at_index(io, index, desc().normalized_to_plain_at_index(index, normalized)); }
-  bool text_to_plain_at_index(bool io, int index, std::string const& textual, plain_value& plain) const
-  { return dependent_domain_at_index(index)->text_to_plain(io, textual, plain); }
   std::string plain_to_text_at_index(bool io, int index, plain_value plain) const;
+  bool text_to_plain_at_index(bool io, int index, std::string const& textual, plain_value& plain) const;
   bool text_to_normalized_at_index(bool io, int index, std::string const& textual, normalized_value& normalized) const;
 };
 
