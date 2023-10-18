@@ -184,8 +184,8 @@ cv_matrix_engine::process(plugin_block& block)
           int real_tm = _targets[tm]->info.index;
           int real_tp = _modulatable_params[tm][tp].info.index;
           _output.modulation_index[real_tm][tmi][real_tp][tpi] = -1;
-          _output.modulation[real_tm][tmi][real_tp][tpi] = 
-            &block.state.all_accurate_automation[real_tm][tmi][real_tp][tpi];
+          auto const& curve = block.state.all_accurate_automation[real_tm][tmi][real_tp][tpi];
+          _output.modulation[real_tm][tmi][real_tp][tpi] = &curve;
         }
 
   // apply modulation routing, replacing original automation curve by our own buffer on write
@@ -205,7 +205,7 @@ cv_matrix_engine::process(plugin_block& block)
     {
       modulated_curve_ptr = &block.state.own_cv[modulation_index];
       auto const& target_automation = block.state.all_accurate_automation[target_module][target_module_index][target_param][target_param_index];
-      std::copy(target_automation.begin(), target_automation.end(), modulated_curve_ptr->begin());
+      std::copy(target_automation.cbegin(), target_automation.cend(), modulated_curve_ptr->begin());
       _output.modulation[target_module][target_module_index][target_param][target_param_index] = modulated_curve_ptr;
       _output.modulation_index[target_module][target_module_index][target_param][target_param_index] = modulation_index++;
     }

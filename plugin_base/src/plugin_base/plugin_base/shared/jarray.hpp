@@ -52,7 +52,9 @@ public:
   decltype(_data.end()) end() { return _data.end(); }
   decltype(_data.begin()) begin() { return _data.begin(); }
   decltype(_data.end()) end() const { return _data.end(); }
-  decltype(_data.begin()) begin()const { return _data.begin(); }
+  decltype(_data.begin()) begin() const { return _data.begin(); }
+  decltype(_data.cend()) cend() const { return _data.cend(); }
+  decltype(_data.cbegin()) cbegin() const { return _data.cbegin(); }
 
   void clear() { _data.clear(); }
   std::size_t size() const { return _data.size(); }
