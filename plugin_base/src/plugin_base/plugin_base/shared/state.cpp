@@ -75,6 +75,7 @@ plain_value
 plugin_state::clamp_dependent_at_index(int index, plain_value value) const
 {
   auto domain = dependent_domain_at_index(index);
+  if (domain->is_real()) return value;
   int result = std::clamp(value.step(), 0, (int)domain->max);
   return domain->raw_to_plain(result);
 }
