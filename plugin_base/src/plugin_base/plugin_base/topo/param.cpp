@@ -63,6 +63,7 @@ param_topo::validate(module_topo const& module, int index) const
     {
       assert(dependency_indices[d] < index);
       auto const& other = module.params[dependency_indices[d]];
+      (void)other;
       assert(other.domain.min == 0);
       assert(!other.domain.is_real());
       assert(info.slot_count == other.info.slot_count);
