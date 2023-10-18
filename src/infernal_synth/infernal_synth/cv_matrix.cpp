@@ -130,10 +130,18 @@ cv_matrix_topo(
   target_param.dependent_selector = [](int const* vs) { return vs[0]; };
   target_param.dependent_domains = vector_explicit_copy(modulatable_target_domains);
 
+  int mapping = 0;
   std::vector<param_domain> modulatable_target_param_index_domains;
+  std::vector<std::vector<int>> modulatable_target_param_index_domain_mappings;
   for(int m = 0; m < modulatable_target_params.size(); m++)
+  {
+    modulatable_target_param_index_domain_mappings.emplace_back();
     for(int p = 0; p < modulatable_target_params[m].size(); p++)
+    {
+      modulatable_target_param_index_domain_mappings[m].push_back(mapping++);
       modulatable_target_param_index_domains.push_back(map_to_slot_domain(&modulatable_target_params[m][p]));
+    }
+  }
   auto& target_param_index = result.params.emplace_back(make_param(
     make_topo_info("{05E7FB15-58AD-40EA-BA7F-FDAB255879ED}", "Target Param Index", param_target_param_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_param_index_domains),
@@ -141,9 +149,9 @@ cv_matrix_topo(
       make_label_default(gui_label_contents::value))));
   target_param_index.gui.bindings.enabled.params = enabled_params;
   target_param_index.gui.bindings.enabled.selector = enabled_selector;
-  target_param_index.dependent_selector = [](int const* vs) { return 0; };
   target_param_index.dependency_indices = { param_target, param_target_param };
   target_param_index.dependent_domains = vector_explicit_copy(modulatable_target_param_index_domains);
+  target_param_index.dependent_selector = [mappings = modulatable_target_param_index_domain_mappings](int const* vs) { return mappings[vs[0]][vs[1]]; };
 
   return result;
 }

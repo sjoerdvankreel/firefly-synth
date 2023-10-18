@@ -17,8 +17,8 @@ enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_automate { none, automate, modulate };
 
-typedef int (*
-dependent_domain_selector)(int const* values);
+typedef std::function<int(int const* values)>
+dependent_domain_selector;
 inline int const max_param_dependencies_count = 4;
 
 // parameter dsp
