@@ -62,6 +62,7 @@ struct plugin_block_state final {
 struct plugin_block final {
   int start_frame;
   int end_frame;
+  int module_slot;
   float sample_rate;
   plugin_block_state state;
 

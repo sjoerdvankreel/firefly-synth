@@ -45,7 +45,7 @@ osc_topo()
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Voice Osc", module_osc, 2), 
     make_module_dsp(module_stage::voice, module_output::audio, 1),
     make_module_gui(gui_layout::tabbed, { 3, 0 }, { 2, 4 })));
-  result.engine_factory = [](auto const&, int, int, int) ->
+  result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
@@ -118,15 +118,18 @@ void
 osc_engine::process(plugin_block& block)
 {
   if(block.state.own_block_automation[param_on][0].step() == 0) return;
+  auto const& env_curve = block.voice->all_cv[module_env][0][0];
   int oct = block.state.own_block_automation[param_oct][0].step();
   int note = block.state.own_block_automation[param_note][0].step();
   int type = block.state.own_block_automation[param_type][0].step();
-  auto const& env_curve = block.voice->all_cv[module_env][0][0];
-  auto const& bal_curve = block.state.own_accurate_automation[param_bal][0];
-  auto const& cent_curve = block.state.own_accurate_automation[param_cent][0];
-  auto const& gain_curve = block.state.own_accurate_automation[param_gain][0];
-  auto const& saw_gain_curve = block.state.own_accurate_automation[param_saw_gain][0];
-  auto const& sine_gain_curve = block.state.own_accurate_automation[param_sine_gain][0];
+
+  void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
+  auto const& modulation = static_cast<cv_matrix_output const*>(cv_matrix_context)->modulation;
+  auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
+  auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
+  auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
+  auto const& saw_gain_curve = *modulation[module_osc][block.module_slot][param_saw_gain][0];
+  auto const& sine_gain_curve = *modulation[module_osc][block.module_slot][param_sine_gain][0];
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)

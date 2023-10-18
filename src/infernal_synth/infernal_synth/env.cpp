@@ -16,14 +16,13 @@ enum { param_a, param_d, param_s, param_r };
 
 class env_engine: 
 public module_engine {
-  int const _slot;
   double _stage_pos = 0;
   env_stage _stage = {};
   double _release_level = 0;
 
 public:
+  env_engine() { initialize(); }
   INF_PREVENT_ACCIDENTAL_COPY(env_engine);
-  env_engine(int slot) : _slot(slot) { initialize(); }
   void process(plugin_block& block) override;
   void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
 };
@@ -38,8 +37,8 @@ env_topo()
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
     make_section_gui({ 0, 0 }, { 1, 4 })));
-  result.engine_factory = [](auto const&, int slot, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(slot); };
+  result.engine_factory = [](auto const&, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };
   
   result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
@@ -128,7 +127,7 @@ env_engine::process(plugin_block& block)
         break;
       case env_stage::r: 
         _stage = env_stage::end; 
-        if(_slot == 0)
+        if(block.module_slot == 0)
           block.voice->finished = true; 
         break;
       default: assert(false); break;

@@ -49,7 +49,7 @@ cv_matrix_topo(
     make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::cv, route_count),
     make_module_gui(gui_layout::single, { 2, 0 }, { 1, 1 })));
-  result.engine_factory = [sources, targets](auto const& topo, int, int, int) -> 
+  result.engine_factory = [sources, targets](auto const& topo, int, int) -> 
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, sources, targets); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 

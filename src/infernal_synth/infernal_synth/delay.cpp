@@ -36,7 +36,7 @@ delay_topo(int polyphony)
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"),
     make_section_gui({ 0, 0 }, { 1, 5 })));
-  result.engine_factory = [](auto const&, int, int sample_rate, int) ->
+  result.engine_factory = [](auto const&, int sample_rate, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
   result.params.emplace_back(make_param(
