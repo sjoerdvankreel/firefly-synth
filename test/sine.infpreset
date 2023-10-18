@@ -1,7 +1,7 @@
 {
   "magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
   "version": 1,
-  "checksum": "4d6ac4fdf6d936b64a7751b8871dc14e",
+  "checksum": "f25bdbdcefd2b43c5df914c167939dda",
   "plugin": {
     "id": "56AFFFF7565F48348C4359D5E6C856A4",
     "name": "Infernal Synth",
@@ -100,6 +100,11 @@
           {
             "id": "{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}",
             "name": "Target Param",
+            "slot_count": 8
+          },
+          {
+            "id": "{05E7FB15-58AD-40EA-BA7F-FDAB255879ED}",
+            "name": "Target Param Index",
             "slot_count": 8
           }
         ]
@@ -399,6 +404,18 @@
                   "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
                   "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}",
                   "{75E49B1F-0601-4E62-81FD-D01D778EDCB5}"
+                ]
+              },
+              {
+                "slots": [
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1",
+                  "1"
                 ]
               }
             ]
