@@ -84,7 +84,8 @@ cv_matrix_topo(
       make_label_none())));
   source_index.gui.bindings.enabled.params = enabled_params;
   source_index.gui.bindings.enabled.selector = enabled_selector;
-  source_index.dependency_index = param_source;
+  source_index.dependency_indices = { param_source };
+  source_index.dependent_selector = [](int const* vs) { return vs[0]; };
   source_index.dependent_domains = vector_explicit_copy(source_slot_domains);
 
   auto& target = result.params.emplace_back(make_param(
@@ -103,7 +104,8 @@ cv_matrix_topo(
       make_label_none())));
   target_index.gui.bindings.enabled.params = enabled_params;
   target_index.gui.bindings.enabled.selector = enabled_selector;
-  target_index.dependency_index = param_target;
+  target_index.dependency_indices = { param_target };
+  target_index.dependent_selector = [](int const* vs) { return vs[0]; };
   target_index.dependent_domains = vector_explicit_copy(target_slot_domains);
 
   std::vector<param_domain> target_param_domains;
@@ -122,7 +124,8 @@ cv_matrix_topo(
       make_label_default(gui_label_contents::value))));
   target_param.gui.bindings.enabled.params = enabled_params;
   target_param.gui.bindings.enabled.selector = enabled_selector;
-  target_param.dependency_index = param_target;
+  target_param.dependency_indices = { param_target };
+  target_param.dependent_selector = [](int const* vs) { return vs[0]; };
   target_param.dependent_domains = vector_explicit_copy(modulatable_target_domains);
 
   return result;
