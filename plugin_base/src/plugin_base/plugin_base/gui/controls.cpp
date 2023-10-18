@@ -202,7 +202,7 @@ void
 param_dependent::own_param_changed(plain_value plain)
 {
   int dependency_value = _gui->gui_state()->get_plain_at_index(_global_dependency_index).step();
-  int index = _gui->gui_state()->clamp_dependent_at_index(_param->info.global, plain).step();
+  int index = _param->param->clamp_dependent(dependency_value, plain).step();
   _editors[dependency_value]->setSelectedItemIndex(index, juce::dontSendNotification);
 }
 

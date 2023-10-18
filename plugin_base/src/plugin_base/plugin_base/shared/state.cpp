@@ -81,24 +81,13 @@ plugin_state::text_to_normalized_at_index(
   return true;
 }
 
-plain_value
-plugin_state::clamp_dependent_at_index(int index, plain_value value) const
-{
-  auto const& param = *desc().param_at_index(index).param;
-  if (param.dependency_index == -1) return value;
-  int dependency_value = get_plain_at_index(param.dependency_index).step();
-  auto const& dependent_domain = param.dependent_domains[dependency_value];
-  int clamped = std::clamp(value.step(), 0, (int)dependent_domain.max);
-  return dependent_domain.raw_to_plain(clamped);
-}
-
 std::string 
 plugin_state::plain_to_text_at_index(bool io, int index, plain_value plain) const
 {
   int dependency_index = desc().dependency_index(index);
   if (dependency_index == -1) return desc().param_at_index(index).param->domain.plain_to_text(io, plain);
-  auto clamped = clamp_dependent_at_index(index, plain);
   int dependency_value = get_plain_at_index(dependency_index).step();
+  auto clamped = desc().param_at_index(index).param->clamp_dependent(dependency_value, plain);
   return desc().param_at_index(index).param->dependent_domains[dependency_value].plain_to_text(io, clamped);
 }
 
@@ -115,7 +104,7 @@ plugin_state::text_to_plain_at_index(
 void
 plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 {
-  // get in sync first so dependency clamping works out ok
+  // get in sync first
   _state[m][mi][p][pi] = value;
   int index = desc().mappings.topo_to_index[m][mi][p][pi];
 
@@ -124,7 +113,9 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
     int dependent_index = desc().param_dependents[index][d];
     auto const& map = desc().mappings.params[dependent_index];
     auto dependent_value = get_plain_at_index(dependent_index);
-    auto clamped = clamp_dependent_at_index(dependent_index, dependent_value);
+    auto clamped = desc().param_at_index(dependent_index).param->clamp_dependent(value.step(), dependent_value);
+
+    // force notification since value-to-text conversion has changed
     set_plain_at(map.module_topo, map.module_slot, map.param_topo, map.param_slot, clamped);
   }
   
