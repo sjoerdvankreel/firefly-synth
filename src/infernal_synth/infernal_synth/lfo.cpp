@@ -65,10 +65,11 @@ lfo_engine::process(plugin_block& block)
 {
   // TODO make per-voice lfo
   // TODO rate/sync
+  auto const& rate_curve = block.state.own_accurate_automation[param_rate][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;
-    _phase += 1.0f / block.sample_rate;
+    _phase += block.normalized_to_raw(module_lfo, param_rate, rate_curve[f]) / block.sample_rate;
     if(_phase >= 1.0f) _phase = 0.0f;
   }
 }
