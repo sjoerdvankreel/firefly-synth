@@ -168,23 +168,14 @@ cv_matrix_engine(
   _sources(sources), _targets(targets), _modulatable_params(modulatable_params)
 {
   plugin_dims dims(topo);
-  _output.modulated.resize(dims.module_slot_param_slot);
   _output.modulation.resize(dims.module_slot_param_slot);
+  _output.modulation_index.resize(dims.module_slot_param_slot);
 }
 
 void
 cv_matrix_engine::process(plugin_block& block)
 {
-#if 0
-  for (int m = 0; m < _targets.size(); m++)
-    for (int p = 0; p < _modulatable_params[m].size(); p++)
-      for (int mi = 0; mi < _targets[m]->info.slot_count; mi++)
-        for (int pi = 0; pi < _modulatable_params[m][p].info.slot_count; pi++)
-          _output.modulation[_targets[m]->info.index][mi][_modulatable_params[m][p].info.index][pi] =
-            &block.state.all_accurate_automation[_targets[m]->info.index][mi][_modulatable_params[m][p].info.index][pi];
-  *block.state.own_context = &_output;
-#endif
-
+  // set every modulatable parameter to its corresponding automation curve
   for (int tm = 0; tm < _targets.size(); tm++)
     for (int tmi = 0; tmi < _targets[tm]->info.slot_count; tmi++)
       for (int tp = 0; tp < _modulatable_params[tm].size(); tp++)
@@ -192,9 +183,46 @@ cv_matrix_engine::process(plugin_block& block)
         {
           int real_tm = _targets[tm]->info.index;
           int real_tp = _modulatable_params[tm][tp].info.index;
-          _output.modulated[real_tm][tmi][real_tp][tpi] = 0;
-          _output.modulation[real_tm][tmi][real_tp][tpi] = &block.state.all_accurate_automation[real_tm][tmi][real_tp][tpi];
+          _output.modulation_index[real_tm][tmi][real_tp][tpi] = -1;
+          _output.modulation[real_tm][tmi][real_tp][tpi] = 
+            &block.state.all_accurate_automation[real_tm][tmi][real_tp][tpi];
         }
+
+  // apply modulation routing, replacing original automation curve by our own buffer on write
+  int modulation_index = 0;
+  auto const& own_automation = block.state.own_block_automation;
+  if(own_automation[param_on][0].step() == 0) return;
+  for (int r = 0; r < route_count; r++)
+  {
+    jarray<float, 1>* modulated_curve_ptr = nullptr;
+    if(own_automation[param_active][r].step() == 0) continue;
+    int selected_target = own_automation[param_target][r].step();
+    int target_module = _targets[selected_target]->info.index;
+    int target_module_index = own_automation[param_target_index][r].step();
+    int target_param_index = own_automation[param_target_param_index][r].step();
+    int target_param = _modulatable_params[selected_target][own_automation[param_target_param][r].step()].info.index;
+    if (_output.modulation_index[target_module][target_module_index][target_param][target_param_index] == -1)
+    {
+      modulated_curve_ptr = &block.state.own_cv[modulation_index];
+      auto const& target_automation = block.state.all_accurate_automation[target_module][target_module_index][target_param][target_param_index];
+      std::copy(target_automation.begin(), target_automation.end(), modulated_curve_ptr->begin());
+      _output.modulation[target_module][target_module_index][target_param][target_param_index] = modulated_curve_ptr;
+      _output.modulation_index[target_module][target_module_index][target_param][target_param_index] = modulation_index++;
+    }
+
+    // TODO just multiply by source for now
+    assert(modulated_curve_ptr != nullptr);
+    jarray<float, 1>& modulated_curve = *modulated_curve_ptr;
+    int selected_source = own_automation[param_source][r].step();
+    int source_module = _sources[selected_source]->info.index;
+    int source_module_index = own_automation[param_source_index][r].step();
+    auto const& source_curve = _sources[selected_source]->dsp.stage == module_stage::voice
+      ? block.voice->all_cv[source_module][source_module_index][0]
+      : block.state.all_global_cv[source_module][source_module_index][0];
+    for(int f = block.start_frame; f < block.end_frame; f++)
+      modulated_curve[f] *= source_curve[f];
+  }
+  
   *block.state.own_context = &_output;
 }
 

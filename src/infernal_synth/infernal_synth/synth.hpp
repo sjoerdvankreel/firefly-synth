@@ -9,8 +9,7 @@ namespace infernal_synth {
 
 struct cv_matrix_output
 {
-  // should be bool, but, vector<bool> strikes again
-  plugin_base::jarray<int, 4> modulated = {};
+  plugin_base::jarray<int, 4> modulation_index = {};
   plugin_base::jarray<plugin_base::jarray<float, 1> const*, 4> modulation = {};
 };
 
