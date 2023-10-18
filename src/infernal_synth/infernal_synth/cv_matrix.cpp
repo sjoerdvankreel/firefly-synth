@@ -26,6 +26,7 @@ public module_engine {
   cv_matrix_output _output = {};
   std::vector<module_topo const*> const _sources;
   std::vector<module_topo const*> const _targets;
+  std::vector<std::vector<param_topo>> _modulatable_params;
 public:
   void initialize() override {}
   void process(plugin_block& block) override;
@@ -33,7 +34,8 @@ public:
   cv_matrix_engine(
     plugin_topo const& topo,
     std::vector<module_topo const*> const& sources,
-    std::vector<module_topo const*> const& targets);
+    std::vector<module_topo const*> const& targets,
+    std::vector<std::vector<param_topo>> const& modulatable_params);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
@@ -49,8 +51,6 @@ cv_matrix_topo(
     make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::cv, route_count),
     make_module_gui(gui_layout::single, { 2, 0 }, { 1, 1 })));
-  result.engine_factory = [sources, targets](auto const& topo, int, int) -> 
-    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, sources, targets); };
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
     make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1, 1, 1 } })));
@@ -153,6 +153,9 @@ cv_matrix_topo(
   target_param_index.dependent_domains = vector_explicit_copy(modulatable_target_param_index_domains);
   target_param_index.dependent_selector = [mappings = modulatable_target_param_index_domain_mappings](int const* vs) { return mappings[vs[0]][vs[1]]; };
 
+  result.engine_factory = [sources, targets, modulatable_target_params](auto const& topo, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, sources, targets, modulatable_target_params); };
+
   return result;
 }
 
@@ -160,23 +163,28 @@ cv_matrix_engine::
 cv_matrix_engine(
   plugin_topo const& topo,
   std::vector<module_topo const*> const& sources,
-  std::vector<module_topo const*> const& targets) :
-  _sources(sources), _targets(targets)
+  std::vector<module_topo const*> const& targets,
+  std::vector<std::vector<param_topo>> const& modulatable_params) :
+  _sources(sources), _targets(targets), _modulatable_params(modulatable_params)
 {
   plugin_dims dims(topo);
+  _output.modulated.resize(dims.module_slot_param_slot);
   _output.modulation.resize(dims.module_slot_param_slot);
 }
 
 void
 cv_matrix_engine::process(plugin_block& block)
 {
-  for(int m = 0; m < _targets.size(); m++)
-    for(int p = 0; p < _targets[m]->params.size(); p++)
-      if(_targets[m]->params[p].dsp.automate == param_automate::modulate)
-        for (int mi = 0; mi < _targets[m]->info.slot_count; mi++)
-          for(int pi = 0; pi < _targets[m]->params[p].info.slot_count; pi++)
-            _output.modulation[_targets[m]->info.index][mi][p][pi] = 
-              &block.state.all_accurate_automation[_targets[m]->info.index][mi][p][pi];
+  for(int tm = 0; tm < _targets.size(); tm++)
+    for (int tmi = 0; tmi < _targets[tm]->info.slot_count; tmi++)
+      for(int tp = 0; tp < _modulatable_params[tm].size(); tp++)
+        for(int tpi = 0; tpi < _targets[tm]->params[tp].info.slot_count; tpi++)
+        {
+          int real_tm = _targets[tm]->info.index;
+          int real_tp = _targets[tp]->info.index;
+          _output.modulated[real_tm][tmi][real_tp][tpi] = 0;
+          _output.modulation[real_tm][tmi][real_tp][tpi] = &block.state.all_accurate_automation[real_tm][tmi][real_tp][tpi];
+        }
   *block.state.own_context = &_output;
 }
 
