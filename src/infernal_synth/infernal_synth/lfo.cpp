@@ -69,7 +69,7 @@ lfo_engine::process(plugin_block& block)
   {
     block.state.own_cv[0][f] = std::sin(2.0f * pi32 * _phase);
     _phase += 1.0f / block.sample_rate;
-    if(_phase >= 1.0f) _phase = 1.0f;
+    if(_phase >= 1.0f) _phase = 0.0f;
   }
 }
 
