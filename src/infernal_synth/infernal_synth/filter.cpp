@@ -75,11 +75,10 @@ filter_engine::process(plugin_block& block)
   if(block.state.own_block_automation[param_on][0].step() == 0) return;
 
   float w = 2 * block.sample_rate;
-  auto const& env = block.voice->all_cv[module_env][1][0];
   auto const& freq = *modulation[module_filter][0][param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float angle = block.normalized_to_raw(module_filter, param_freq, freq[f] * env[f]) * 2 * pi32;
+    float angle = block.normalized_to_raw(module_filter, param_freq, freq[f]) * 2 * pi32;
     float norm = 1 / (angle + w);
     float a = angle * norm;
     float b = (w - angle) * norm;
