@@ -29,7 +29,7 @@ lfo_topo()
 {
   module_topo result(make_module(
     make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", module_lfo, 3), 
-    make_module_dsp(module_stage::input, module_output::cv, 1, 0),
+    make_module_dsp(module_stage::input, module_output::cv, 1, 1),
     make_module_gui(gui_layout::tabbed, { 0, 0 }, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
@@ -73,13 +73,32 @@ lfo_topo()
 void
 lfo_engine::process(plugin_block& block)
 {
+  int num = block.state.own_block_automation[param_num][0].step();
+  int denom = block.state.own_block_automation[param_denom][0].step();
+  bool sync = block.state.own_block_automation[param_sync][0].step() != 0;
+  
+  if (sync)
+  {
+    // TODO 4: project time signature
+    float rate = (float)num / denom * 4 / (block.host.bpm / 60);
+    std::fill(block.state.own_scratch[0].begin(), block.state.own_scratch[0].end(), rate);
+  }
+  else
+  {
+    auto const& automation_rate_curve = block.state.own_accurate_automation[param_rate][0];
+    std::transform(
+      automation_rate_curve.cbegin(), 
+      automation_rate_curve.cend(), 
+      block.state.own_scratch[0].begin(), [&block](float v) { 
+        return block.normalized_to_raw(module_lfo, param_rate, v); });
+  }
+
   // TODO make per-voice lfo
-  // TODO rate/sync
-  auto const& rate_curve = block.state.own_accurate_automation[param_rate][0];
+  auto const& rate_curve = block.state.own_scratch[0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;
-    _phase += block.normalized_to_raw(module_lfo, param_rate, rate_curve[f]) / block.sample_rate;
+    _phase += rate_curve[f] / block.sample_rate;
     if(_phase >= 1.0f) _phase = 0.0f;
   }
 }
