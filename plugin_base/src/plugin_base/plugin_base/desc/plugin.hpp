@@ -8,6 +8,7 @@
 #include <plugin_base/shared/utility.hpp>
 
 #include <map>
+#include <set>
 #include <vector>
 #include <string>
 
@@ -61,14 +62,13 @@ public:
   plugin_param_mappings mappings = {};
   std::vector<module_desc> modules = {};
   std::vector<param_desc const*> params = {};
+  std::vector<std::set<int>> param_dependents = {};
   std::map<std::string, int> module_id_to_index = {};
-  std::vector<std::vector<int>> param_dependents = {};
 
   void validate() const;
   plugin_desc(plugin_topo const* plugin);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
 
-  int dependency_index(int index) const;
   param_desc const& param_at_index(int index) const 
   { return param_at_mapping(mappings.params[index]); }
   param_desc const& param_at_tag(int tag) const

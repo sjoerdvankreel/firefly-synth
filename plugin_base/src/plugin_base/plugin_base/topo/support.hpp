@@ -46,13 +46,13 @@ make_param_dsp_output()
 param_domain
 make_domain_toggle(bool default_);
 param_domain
-make_domain_dependent(std::vector<param_domain> const& dependents);
-param_domain
 make_domain_step(int min, int max, int default_, int display_offset);
 param_domain
 make_domain_item(std::vector<list_item> const& items, std::string const& default_);
 param_domain
 make_domain_name(std::vector<std::string> const& names, std::string const& default_);
+param_domain
+make_domain_dependent(module_topo const& module, std::vector<int> const& dependency_indices, dependent_domain_selector selector);
 param_domain
 make_domain_percentage(double min, double max, double default_, int precision, bool unit);
 param_domain

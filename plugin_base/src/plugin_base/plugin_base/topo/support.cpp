@@ -83,19 +83,6 @@ make_module_gui(gui_layout layout, gui_position const& position, gui_dimension c
 }
 
 param_domain
-make_domain_dependent(std::vector<param_domain> const& dependents)
-{
-  param_domain result = {};
-  auto selector = [](auto const& d) { return d.max; };
-  auto domain_limits = vector_map(dependents, selector);
-  result.min = 0;
-  result.default_ = std::to_string(0);
-  result.type = domain_type::dependent;
-  result.max = *std::max_element(domain_limits.begin(), domain_limits.end());
-  return result;
-}
-
-param_domain
 make_domain_toggle(bool default_)
 {
   param_domain result = {};
@@ -139,6 +126,17 @@ make_domain_name(std::vector<std::string> const& names, std::string const& defau
   result.max = names.size() - 1;
   result.type = domain_type::name;
   result.default_ = default_.size() ? default_ : result.names[0];
+  return result;
+}
+
+param_domain
+make_domain_dependent(module_topo const& module, std::vector<int> const& dependency_indices, dependent_domain_selector selector)
+{
+  param_domain result = {};
+  result.min = 0;
+  result.default_ = std::to_string(0);
+  result.type = domain_type::dependent;
+  result.max = max_domain_dependent_value(module, dependency_indices, selector);
   return result;
 }
 

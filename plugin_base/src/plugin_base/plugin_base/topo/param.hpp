@@ -44,20 +44,12 @@ struct param_topo final {
   topo_info info;
   param_topo_gui gui;
   param_domain domain;
-  int dependency_index = -1;
-  std::vector<param_domain> dependent_domains;
+
+  std::vector<int> dependency_indices = {};
+  dependent_domain_selector dependent_selector = {};
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module, int index) const;
-  plain_value clamp_dependent(int dependency_value, plain_value dependent_value) const;
 };
-
-inline plain_value 
-param_topo::clamp_dependent(int dependency_value, plain_value dependent_value) const
-{
-  auto const& dependent_domain = dependent_domains[dependency_value];
-  int clamped = std::clamp(dependent_value.step(), 0, (int)dependent_domain.max);
-  return dependent_domain.raw_to_plain(clamped);
-}
 
 }
