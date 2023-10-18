@@ -31,7 +31,7 @@ delay_topo(int polyphony)
 {
   module_topo result(make_module(
     make_topo_info("{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Global Delay", module_delay, 1), 
-    make_module_dsp(module_stage::output, module_output::none, 0),
+    make_module_dsp(module_stage::output, module_output::none, 0, 0),
     make_module_gui(gui_layout::single, { 5, 0 }, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"),
