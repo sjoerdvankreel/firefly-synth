@@ -27,12 +27,20 @@ public:
 };
 
 module_topo
-lfo_topo(plugin_base::gui_position const& pos, int module, std::string const& name)
+lfo_topo(plugin_base::gui_position const& pos, bool global)
 {
+  std::string const glfo_id = "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}";
+  std::string const vlfo_id = "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}";
+
+  std::string const id = global ? glfo_id : vlfo_id;
+  int const module = global ? module_glfo : module_vlfo;
+  std::string const name = global ? "Global LFO" : "Voice LFO";
+  module_stage const stage = global ? module_stage::input : module_stage::voice;
+
   // TODO! input->voice
   module_topo result(make_module(
-    make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", name, module, 3),
-    make_module_dsp(module_stage::input, module_output::cv, 1, 1),
+    make_topo_info(id, name, module, 3),
+    make_module_dsp(stage, module_output::cv, 1, 1),
     make_module_gui(gui_layout::tabbed, pos, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),

@@ -30,8 +30,8 @@ synth_topo()
   result->modules.resize(module_count);
   result->modules[module_env] = env_topo({ 1, 0, 1, 2 });
   result->modules[module_osc] = osc_topo({ 3, 0, 1, 2 });
-  result->modules[module_glfo] = lfo_topo({ 0, 0, 1, 1 }, module_glfo, "Global LFO");
-  result->modules[module_vlfo] = lfo_topo({ 0, 1, 1, 1 }, module_vlfo, "Voice LFO");
+  result->modules[module_glfo] = lfo_topo({ 0, 0, 1, 1 }, true);
+  result->modules[module_vlfo] = lfo_topo({ 0, 1, 1, 1 }, false);
   result->modules[module_filter] = filter_topo({ 4, 0, 1, 2 }, result->modules[module_osc].info.slot_count);
   result->modules[module_cv_matrix] = cv_matrix_topo({ 2, 0, 1, 2 },
     { &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
