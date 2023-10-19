@@ -20,7 +20,7 @@ inline void check_bipolar(T val)
 { assert((T)-1 <= val && val <= (T)1); }
 
 inline float
-timesig_to_frequency(float bpm, float num, float denom)
+timesig_to_freq(float bpm, float num, float denom)
 { return bpm / (60.0f * 4.0f * num / denom); }
 
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
@@ -36,7 +36,7 @@ balance(int channel, float value)
 }
 
 inline float
-note_to_frequency(int oct, int note, float cent, int key)
+note_to_freq(int oct, int note, float cent, int key)
 {
   int const middle_c = 60;
   assert(0 <= oct && oct <= 9);

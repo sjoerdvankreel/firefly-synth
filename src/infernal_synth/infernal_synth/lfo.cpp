@@ -1,5 +1,6 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/dsp/support.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 
@@ -73,27 +74,8 @@ lfo_topo()
 void
 lfo_engine::process(plugin_block& block)
 {
-  int num = block.state.own_block_automation[param_num][0].step();
-  int denom = block.state.own_block_automation[param_denom][0].step();
-  bool sync = block.state.own_block_automation[param_sync][0].step() != 0;
-  
-  if (sync)
-  {
-    float rate = timesig_to_frequency(block.host.bpm, num, denom);
-    std::fill(block.state.own_scratch[0].begin(), block.state.own_scratch[0].end(), rate);
-  }
-  else
-  {
-    auto const& automation_rate_curve = block.state.own_accurate_automation[param_rate][0];
-    std::transform(
-      automation_rate_curve.cbegin(), 
-      automation_rate_curve.cend(), 
-      block.state.own_scratch[0].begin(), [&block](float v) { 
-        return block.normalized_to_raw(module_lfo, param_rate, v); });
-  }
-
   // TODO make per-voice lfo
-  auto const& rate_curve = block.state.own_scratch[0];
+  auto const& rate_curve = sync_or_freq_into_scratch(block, module_lfo, param_sync, param_rate, param_num, param_denom, 0);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;

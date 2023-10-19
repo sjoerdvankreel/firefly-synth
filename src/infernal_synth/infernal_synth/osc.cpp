@@ -146,7 +146,7 @@ osc_engine::process(plugin_block& block)
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     block.state.own_audio[0][0][f] = sample * gain_curve[f] * env_curve[f] * balance(0, bal);
     block.state.own_audio[0][1][f] = sample * gain_curve[f] * env_curve[f] * balance(1, bal);
-    _phase += note_to_frequency(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
+    _phase += note_to_freq(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
     _phase -= std::floor(_phase);
   }
 }
