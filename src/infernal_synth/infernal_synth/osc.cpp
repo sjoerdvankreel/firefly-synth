@@ -39,12 +39,12 @@ public:
 };
 
 module_topo
-osc_topo()
+osc_topo(plugin_base::gui_position const& pos)
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Voice Osc", module_osc, 2), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
-    make_module_gui(gui_layout::tabbed, { 3, 0 }, { 2, 4 })));
+    make_module_gui(gui_layout::tabbed, pos, { 2, 4 })));
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
   result.sections.emplace_back(make_section(section_main,

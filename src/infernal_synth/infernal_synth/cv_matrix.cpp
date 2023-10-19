@@ -41,6 +41,7 @@ public:
 
 module_topo 
 cv_matrix_topo(
+  plugin_base::gui_position const& pos,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
@@ -50,7 +51,7 @@ cv_matrix_topo(
   module_topo result(make_module(
     make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::cv, route_count, 0),
-    make_module_gui(gui_layout::single, { 2, 0 }, { 1, 1 })));
+    make_module_gui(gui_layout::single, pos, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
     make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1, 1, 1 } })));
