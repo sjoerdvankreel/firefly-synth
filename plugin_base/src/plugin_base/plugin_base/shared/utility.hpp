@@ -76,6 +76,17 @@ vector_explicit_copy(std::vector<T> const& in)
   return result;
 }
 
+template <class T> std::vector<std::vector<int>>
+vector_index_count(std::vector<std::vector<T>> const& vs)
+{
+  int count = 0;
+  std::vector<std::vector<int>> result(vs.size(), std::vector<int>());
+  for (int i = 0; i < vs.size(); i++)
+    for (int j = 0; j < vs[i].size(); j++)
+      result[i].push_back(count++);
+  return result;
+}
+
 template <class T, class Pred> std::vector<T> 
 vector_filter(std::vector<T> const& in, Pred pred)
 {

@@ -132,18 +132,8 @@ cv_matrix_topo(
 
   auto map_to_slot_domain = [](auto const& t) { return make_domain_step(0, t.info.slot_count - 1, 1, 1); };
   auto modulatable_target_params_joined = vector_join(modulatable_target_params);
-  auto modulatable_target_param_index_domains = vector_map(modulatable_target_params_joined, map_to_slot_domain); 
-  
-  int mapping = 0;
-  std::vector<std::vector<int>> modulatable_target_param_index_domain_mappings;
-  for(int m = 0; m < modulatable_target_params.size(); m++)
-  {
-    modulatable_target_param_index_domain_mappings.emplace_back();
-    for(int p = 0; p < modulatable_target_params[m].size(); p++)
-    {
-      modulatable_target_param_index_domain_mappings[m].push_back(mapping++);
-    }
-  }
+  auto modulatable_target_param_index_domain_mappings = vector_index_count(modulatable_target_params);
+  auto modulatable_target_param_index_domains = vector_map(modulatable_target_params_joined, map_to_slot_domain);
   auto& target_param_index = result.params.emplace_back(make_param(
     make_topo_info("{05E7FB15-58AD-40EA-BA7F-FDAB255879ED}", "Target Param Index", param_target_param_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_param_index_domains),
@@ -157,7 +147,6 @@ cv_matrix_topo(
 
   result.engine_factory = [sources, targets, modulatable_target_params](auto const& topo, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, sources, targets, modulatable_target_params); };
-
   return result;
 }
 
