@@ -24,19 +24,19 @@ synth_topo()
   result->gui.default_width = 800;
   result->gui.aspect_ratio_width = 4;
   result->gui.aspect_ratio_height = 3;
-  result->gui.dimension.column_sizes = { 1 };
+  result->gui.dimension.column_sizes = { 1, 1 };
   result->gui.dimension.row_sizes = { 1, 1, 3, 2, 1, 1 };
 
   result->modules.resize(module_count);
-  result->modules[module_lfo] = lfo_topo({ 0, 0 });
-  result->modules[module_env] = env_topo({ 1, 0 });
-  result->modules[module_osc] = osc_topo({ 3, 0 });
-  result->modules[module_filter] = filter_topo({ 4, 0 }, 
+  result->modules[module_lfo] = lfo_topo({ 0, 0, 1, 2 });
+  result->modules[module_env] = env_topo({ 1, 0, 1, 2 });
+  result->modules[module_osc] = osc_topo({ 3, 0, 1, 2 });
+  result->modules[module_filter] = filter_topo({ 4, 0, 1, 2 },
     result->modules[module_osc].info.slot_count);
-  result->modules[module_cv_matrix] = cv_matrix_topo({ 2, 0 },
+  result->modules[module_cv_matrix] = cv_matrix_topo({ 2, 0, 1, 2 },
     { &result->modules[module_lfo], &result->modules[module_env] },
     { &result->modules[module_osc], &result->modules[module_filter] });
-  result->modules[module_delay] = delay_topo({ 5, 0 }, result->polyphony);
+  result->modules[module_delay] = delay_topo({ 5, 0, 1, 2 }, result->polyphony);
   return result;
 }
 
