@@ -17,26 +17,28 @@ enum { param_sync, param_rate, param_num, param_denom };
 class lfo_engine: 
 public module_engine {
   float _phase;
+  int const _module;
 
 public:
-  lfo_engine() { initialize(); }
   INF_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void initialize() override { _phase = 0; }
   void process(plugin_block& block) override;
+  lfo_engine(int module) : _module(module) { initialize(); }
 };
 
 module_topo
-lfo_topo(plugin_base::gui_position const& pos)
+lfo_topo(plugin_base::gui_position const& pos, int module, std::string const& name)
 {
+  // TODO! input->voice
   module_topo result(make_module(
-    make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", module_lfo, 3), 
+    make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", name, module, 3),
     make_module_dsp(module_stage::input, module_output::cv, 1, 1),
     make_module_gui(gui_layout::tabbed, pos, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
     make_section_gui({ 0, 0 }, { 1, 4 })));
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(); };
+  result.engine_factory = [module](auto const&, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
 
   result.params.emplace_back(make_param(
     make_topo_info("{2A9CAE77-13B0-406F-BA57-1A30ED2F5D80}", "Sync", param_sync, 1),
@@ -75,7 +77,8 @@ void
 lfo_engine::process(plugin_block& block)
 {
   // TODO make per-voice lfo
-  auto const& rate_curve = sync_or_freq_into_scratch(block, module_lfo, param_sync, param_rate, param_num, param_denom, 0);
+  auto const& rate_curve = sync_or_freq_into_scratch(
+    block, _module, param_sync, param_rate, param_num, param_denom, 0);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;
