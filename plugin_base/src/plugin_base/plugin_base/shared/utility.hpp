@@ -84,6 +84,15 @@ vector_filter(std::vector<T> const& in, Pred pred)
   return result;
 }
 
+template <class T> std::vector<T>
+vector_join(std::vector<std::vector<T>> const& vs)
+{
+  std::vector<T> result;
+  for (int i = 0; i < vs.size(); i++)
+    std::copy(vs[i].begin(), vs[i].end(), std::back_inserter(result));
+  return result;
+}
+
 template <class T, class Unary> auto 
 vector_map(std::vector<T> const& in, Unary op) -> std::vector<decltype(op(in[0]))>
 {

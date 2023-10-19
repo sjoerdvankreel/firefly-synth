@@ -77,8 +77,8 @@ cv_matrix_topo(
   source.gui.bindings.enabled.params = enabled_params;
   source.gui.bindings.enabled.selector = enabled_selector;
   
-  auto map_to_slot_domain = [](auto const& t) { return make_domain_step(0, t->info.slot_count - 1, 1, 1); };
-  auto source_slot_domains = vector_map(sources, map_to_slot_domain);
+  auto map_to_slot_domain_ptr = [](auto const& t) { return make_domain_step(0, t->info.slot_count - 1, 1, 1); };
+  auto source_slot_domains = vector_map(sources, map_to_slot_domain_ptr);
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(source_slot_domains),
@@ -98,7 +98,7 @@ cv_matrix_topo(
   target.gui.bindings.enabled.params = enabled_params;
   target.gui.bindings.enabled.selector = enabled_selector;
   
-  auto target_slot_domains = vector_map(targets, map_to_slot_domain);
+  auto target_slot_domains = vector_map(targets, map_to_slot_domain_ptr);
   auto& target_index = result.params.emplace_back(make_param(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(target_slot_domains),
@@ -130,8 +130,11 @@ cv_matrix_topo(
   target_param.dependent_selector = [](int const* vs) { return vs[0]; };
   target_param.dependent_domains = vector_explicit_copy(modulatable_target_domains);
 
+  auto map_to_slot_domain = [](auto const& t) { return make_domain_step(0, t.info.slot_count - 1, 1, 1); };
+  auto modulatable_target_params_joined = vector_join(modulatable_target_params);
+  auto modulatable_target_param_index_domains = vector_map(modulatable_target_params_joined, map_to_slot_domain); 
+  
   int mapping = 0;
-  std::vector<param_domain> modulatable_target_param_index_domains;
   std::vector<std::vector<int>> modulatable_target_param_index_domain_mappings;
   for(int m = 0; m < modulatable_target_params.size(); m++)
   {
@@ -139,7 +142,6 @@ cv_matrix_topo(
     for(int p = 0; p < modulatable_target_params[m].size(); p++)
     {
       modulatable_target_param_index_domain_mappings[m].push_back(mapping++);
-      modulatable_target_param_index_domains.push_back(map_to_slot_domain(&modulatable_target_params[m][p]));
     }
   }
   auto& target_param_index = result.params.emplace_back(make_param(
