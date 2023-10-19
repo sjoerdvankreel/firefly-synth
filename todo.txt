@@ -19,7 +19,6 @@ do cakewalk bug report
 test all host+linux
 param value dependent on other param
 linux build
-do timesig in the base
 
 * get some linux folks to comment (ycollete?)
 * continuing
