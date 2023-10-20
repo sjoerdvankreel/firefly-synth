@@ -188,12 +188,12 @@ plugin_engine::process_voice(int v, bool threaded)
   // so we can just push (polyphony) tasks each time
   if (_voice_states[v].stage == voice_stage::unused) return;
 
+  auto& state = _voice_states[v];
   std::pair<std::uint32_t, std::uint32_t> denormal_state;
   if(threaded) denormal_state = disable_denormals();
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      auto& state = _voice_states[v];
       plugin_voice_block voice_block = {
         false, _voice_results[v], state,
         _voice_cv_state[v], _voice_audio_state[v], _voice_context[v]
@@ -201,13 +201,16 @@ plugin_engine::process_voice(int v, bool threaded)
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
       _voice_engines[v][m][mi]->process(block);
-      state.release_frame = -1;
 
       // plugin completed its envelope
       if (block.voice->finished)
         _voice_states[v].stage = voice_stage::finishing;
     }
 
+  // plugin should have initiated release state
+  state.release_frame = -1;
+
+  // process() call will acquire
   if (threaded)
   {
     _voice_thread_ids[v] = std::this_thread::get_id();
