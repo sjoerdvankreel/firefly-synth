@@ -12,7 +12,7 @@ namespace infernal_synth {
 
 enum { section_main };
 enum class env_stage { a, d, s, r, end };
-enum { param_a, param_d, param_s, param_r };
+enum { param_on, param_a, param_d, param_s, param_r };
 
 class env_engine: 
 public module_engine {
@@ -31,41 +31,55 @@ module_topo
 env_topo(plugin_base::gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Voice Env", module_env, 3), 
+    make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", module_env, 3), 
     make_module_dsp(module_stage::voice, module_output::cv, 1, 0),
     make_module_gui(gui_layout::tabbed, pos, { 1, 1 })));
+
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
-    make_section_gui({ 0, 0 }, { 1, 4 })));
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };
+    make_section_gui({ 0, 0 }, { 1, 5 })));
   
+  result.params.emplace_back(make_param(
+    make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
+      make_label_default(gui_label_contents::name))));
+      
   result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 0 }, 
-      make_label_default(gui_label_contents::both))));  
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
+      make_label(gui_label_contents::both, gui_label_align::bottom, gui_label_justify::center))));
+
   result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_d, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
-      make_label_default(gui_label_contents::both))));  
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
+      make_label(gui_label_contents::both, gui_label_align::bottom, gui_label_justify::center))));
+
   result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
-      make_label_default(gui_label_contents::both))));  
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, 
+      make_label(gui_label_contents::both, gui_label_align::bottom, gui_label_justify::center))));
+
   result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
-      make_label_default(gui_label_contents::both))));
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 },
+      make_label(gui_label_contents::both, gui_label_align::bottom, gui_label_justify::center))));
+
+  result.engine_factory = [](auto const&, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };
+
   return result;
 }
 
 void
 env_engine::process(plugin_block& block)
 {
+  if (block.state.own_block_automation[param_on][0].step() == 0 && block.module_slot != 0) return;
+
   auto const& a_curve = block.state.own_accurate_automation[param_a][0];
   auto const& d_curve = block.state.own_accurate_automation[param_d][0];
   auto const& s_curve = block.state.own_accurate_automation[param_s][0];

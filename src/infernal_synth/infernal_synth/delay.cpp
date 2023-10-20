@@ -30,7 +30,7 @@ module_topo
 delay_topo(plugin_base::gui_position const& pos, int polyphony)
 {
   module_topo result(make_module(
-    make_topo_info("{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Global Delay", module_delay, 1), 
+    make_topo_info("{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Delay", module_delay, 1), 
     make_module_dsp(module_stage::output, module_output::none, 0, 0),
     make_module_gui(gui_layout::single, pos, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,

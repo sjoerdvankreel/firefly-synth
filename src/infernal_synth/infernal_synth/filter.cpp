@@ -31,7 +31,7 @@ module_topo
 filter_topo(plugin_base::gui_position const& pos, int osc_slot_count)
 {
   module_topo result(make_module(
-    make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice Filter", module_filter, 1), 
+    make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", module_filter, 1), 
     make_module_dsp(module_stage::voice, module_output::none, 0, 0),
     make_module_gui(gui_layout::single, pos, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,

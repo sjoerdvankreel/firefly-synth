@@ -49,7 +49,7 @@ cv_matrix_topo(
   gui_binding_selector enabled_selector = [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; };
 
   module_topo result(make_module(
-    make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "Voice CV Matrix", module_cv_matrix, 1),
+    make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "CV", module_cv_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::cv, route_count, 0),
     make_module_gui(gui_layout::single, pos, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
@@ -124,7 +124,7 @@ cv_matrix_topo(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 5 },
-      make_label_default(gui_label_contents::value))));
+      make_label_none())));
   target_param.gui.bindings.enabled.params = enabled_params;
   target_param.gui.bindings.enabled.selector = enabled_selector;
   target_param.dependency_indices = { param_target };
@@ -139,7 +139,7 @@ cv_matrix_topo(
     make_topo_info("{05E7FB15-58AD-40EA-BA7F-FDAB255879ED}", "Target Param Index", param_target_param_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_param_index_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 6 },
-      make_label_default(gui_label_contents::value))));
+      make_label_none())));
   target_param_index.gui.bindings.enabled.params = enabled_params;
   target_param_index.gui.bindings.enabled.selector = enabled_selector;
   target_param_index.dependency_indices = { param_target, param_target_param };

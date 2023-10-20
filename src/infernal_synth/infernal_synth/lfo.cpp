@@ -34,7 +34,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
 
   std::string const id = global ? glfo_id : vlfo_id;
   int const module = global ? module_glfo : module_vlfo;
-  std::string const name = global ? "Global LFO" : "Voice LFO";
+  std::string const name = global ? "GLFO" : "VLFO";
   module_stage const stage = global ? module_stage::input : module_stage::voice;
 
   module_topo result(make_module(
@@ -44,7 +44,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
 
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
-    make_section_gui({ 0, 0 }, { 1, 5 })));
+    make_section_gui({ 0, 0 }, { 1, 4 })));
 
   result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "On", param_on, 1),
@@ -63,27 +63,28 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
       make_label_default(gui_label_contents::both))));
-  rate.gui.bindings.enabled.params = { param_sync };
-  rate.gui.bindings.enabled.selector = [] (auto const& vs) { return vs[0] == 0; };
+  rate.gui.bindings.visible.params = { param_sync };
+  rate.gui.bindings.visible.selector = [] (auto const& vs) { return vs[0] == 0; };
 
   auto& num = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
     make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, 
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, 
       make_label_default(gui_label_contents::name))));
-  num.gui.bindings.enabled.params = { param_sync };
-  num.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] != 0; };
+  num.gui.bindings.visible.params = { param_sync };
+  num.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0; };
 
   auto& denom = result.params.emplace_back(make_param(
     make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Denom", param_denom, 1),
     make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 4, 0),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 4 }, 
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, 
       make_label_default(gui_label_contents::name))));
-  denom.gui.bindings.enabled.params = { param_sync };
-  denom.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] != 0; };
+  denom.gui.bindings.visible.params = { param_sync };
+  denom.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0; };
 
   result.engine_factory = [module](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
+
   return result;
 }
 
