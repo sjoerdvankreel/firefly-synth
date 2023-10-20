@@ -21,17 +21,20 @@ plugin_topo::validate() const
   gui.dimension.validate(vector_map(modules, [](auto const& m) { return m.gui.position; }), return_true, return_true);
 
   int stage = 0;
-  std::set<std::string> all_ids;
+  std::set<std::string> module_ids;
   for (int m = 0; m < modules.size(); m++)
   {
     modules[m].validate(*this, m);
     assert((int)modules[m].dsp.stage >= stage);
     stage = (int)modules[m].dsp.stage;
-    INF_ASSERT_EXEC(all_ids.insert(modules[m].info.tag.id).second);
+    
+    std::set<std::string> param_ids;
+    std::set<std::string> section_ids;
+    INF_ASSERT_EXEC(module_ids.insert(modules[m].info.tag.id).second);
     for (int s = 0; s < modules[m].sections.size(); s++)
-      INF_ASSERT_EXEC(all_ids.insert(modules[m].sections[s].tag.id).second);
+      INF_ASSERT_EXEC(section_ids.insert(modules[m].sections[s].tag.id).second);
     for (int p = 0; p < modules[m].params.size(); p++)
-      INF_ASSERT_EXEC(all_ids.insert(modules[m].params[p].info.tag.id).second);
+      INF_ASSERT_EXEC(param_ids.insert(modules[m].params[p].info.tag.id).second);
   }
 }
 

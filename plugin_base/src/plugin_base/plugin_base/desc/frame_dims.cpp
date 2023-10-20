@@ -142,7 +142,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int frame_count) const
       assert(module_global_audio[m][mi].size() == module.dsp.output_count);
       assert(module_global_scratch[m][mi].size() == module.dsp.scratch_count);
       for (int si = 0; si < module.dsp.scratch_count; si++)
-        assert(module_global_scratch[m][mi][si] == cv_frames);
+        assert(module_global_scratch[m][mi][si] == frame_count);
       for(int oi = 0; oi < module.dsp.output_count; oi++)
       {
         assert(module_global_cv[m][mi][oi] == cv_frames);
