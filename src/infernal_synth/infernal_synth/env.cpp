@@ -31,7 +31,7 @@ module_topo
 env_topo(plugin_base::gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Voice Env", module_env, 2), 
+    make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Voice Env", module_env, 3), 
     make_module_dsp(module_stage::voice, module_output::cv, 1, 0),
     make_module_gui(gui_layout::tabbed, pos, { 1, 1 })));
   result.sections.emplace_back(make_section(section_main,
