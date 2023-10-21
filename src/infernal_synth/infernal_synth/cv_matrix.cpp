@@ -60,7 +60,7 @@ cv_matrix_topo(
     make_topo_info("{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", param_on, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 7 }, 
-      make_label_default(gui_label_contents::name))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   
   auto& active = result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count),

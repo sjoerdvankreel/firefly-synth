@@ -41,8 +41,8 @@ delay_topo(plugin_base::gui_position const& pos)
   result.params.emplace_back(make_param(
     make_topo_info("{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", param_on, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, 
-      make_label(gui_label_contents::name, gui_label_align::bottom, gui_label_justify::center))));
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.engine_factory = [](auto const&, int sample_rate, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };

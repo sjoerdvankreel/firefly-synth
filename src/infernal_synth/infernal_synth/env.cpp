@@ -43,31 +43,31 @@ env_topo(plugin_base::gui_position const& pos)
     make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
       
   result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_d, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, 
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };

@@ -8,11 +8,8 @@ namespace plugin_base {
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
 inline gui_label 
-make_label_default(gui_label_contents contents)
-{ return make_label(contents, gui_label_align::left, gui_label_justify::center); }
-inline gui_label 
 make_label_none()
-{ return make_label_default(gui_label_contents::none); }
+{ return make_label(gui_label_contents::none, gui_label_align::left, gui_label_justify::center); }
 
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name);
