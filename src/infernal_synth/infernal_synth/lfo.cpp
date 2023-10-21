@@ -62,7 +62,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
-      make_label_default(gui_label_contents::both))));
+      make_label(gui_label_contents::both, gui_label_align::bottom, gui_label_justify::center))));
   rate.gui.bindings.visible.params = { param_sync };
   rate.gui.bindings.visible.selector = [] (auto const& vs) { return vs[0] == 0; };
 
