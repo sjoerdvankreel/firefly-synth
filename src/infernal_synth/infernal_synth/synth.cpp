@@ -19,11 +19,11 @@ synth_topo()
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
-  result->gui.min_width = 400;
-  result->gui.max_width = 1200;
-  result->gui.default_width = 800;
-  result->gui.aspect_ratio_width = 4;
-  result->gui.aspect_ratio_height = 3;
+  result->gui.min_width = 1200;
+  result->gui.max_width = 2000;
+  result->gui.default_width = 1200;
+  result->gui.aspect_ratio_width = 3;
+  result->gui.aspect_ratio_height = 1;
   result->gui.dimension.row_sizes = std::vector<int>(5, 1);
   result->gui.dimension.column_sizes = std::vector<int>(8, 1);
 

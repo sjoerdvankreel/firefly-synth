@@ -61,13 +61,13 @@ osc_topo(plugin_base::gui_position const& pos)
     make_topo_info("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", param_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::bottom, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
-      make_label(gui_label_contents::name, gui_label_align::bottom, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
 
   result.sections.emplace_back(make_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
@@ -89,7 +89,7 @@ osc_topo(plugin_base::gui_position const& pos)
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 }, 
-      make_label(gui_label_contents::value, gui_label_align::bottom, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
