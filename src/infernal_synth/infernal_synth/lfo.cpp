@@ -12,7 +12,7 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 enum { section_main };
-enum { param_on, param_sync, param_rate, param_num, param_denom };
+enum { param_on, param_sync, param_rate, param_num, param_den };
 
 class lfo_engine: 
 public module_engine {
@@ -70,17 +70,17 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
     make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 1, 0),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, 
-      make_label_default(gui_label_contents::name))));
+      make_label_none())));
   num.gui.bindings.visible.params = { param_sync };
   num.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0; };
 
-  auto& denom = result.params.emplace_back(make_param(
-    make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Denom", param_denom, 1),
+  auto& den = result.params.emplace_back(make_param(
+    make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Den", param_den, 1),
     make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 4, 0),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, 
-      make_label_default(gui_label_contents::name))));
-  denom.gui.bindings.visible.params = { param_sync };
-  denom.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0; };
+      make_label_none())));
+  den.gui.bindings.visible.params = { param_sync };
+  den.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0; };
 
   result.engine_factory = [module](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
@@ -93,7 +93,7 @@ lfo_engine::process(plugin_block& block)
 {
   if(block.state.own_block_automation[param_on][0].step() == 0) return; 
   auto const& rate_curve = sync_or_freq_into_scratch(block, 
-    _module, param_sync, param_rate, param_num, param_denom, 0);
+    _module, param_sync, param_rate, param_num, param_den, 0);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;

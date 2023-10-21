@@ -16,13 +16,13 @@ normalized_to_raw_into(
 jarray<float, 1> const&
 sync_or_freq_into_scratch(
   plugin_block const& block, int module, int sync_p, 
-  int freq_p, int num_p, int denom_p, int scratch)
+  int freq_p, int num_p, int den_p, int scratch)
 {
   auto& result = block.state.own_scratch[scratch];
   int num = block.state.own_block_automation[num_p][0].step();
-  int denom = block.state.own_block_automation[denom_p][0].step();
+  int den = block.state.own_block_automation[den_p][0].step();
   bool sync = block.state.own_block_automation[sync_p][0].step() != 0;
-  if (sync) std::fill(result.begin(), result.end(), timesig_to_freq(block.host.bpm, num, denom));
+  if (sync) std::fill(result.begin(), result.end(), timesig_to_freq(block.host.bpm, num, den));
   else normalized_to_raw_into(block, module, freq_p, block.state.own_accurate_automation[freq_p][0], result);
   return result;
 }

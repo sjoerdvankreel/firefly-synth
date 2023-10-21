@@ -15,6 +15,6 @@ normalized_to_raw_into(
 jarray<float, 1> const&
 sync_or_freq_into_scratch(
   plugin_block const& block, int module, int sync_p, 
-  int freq_p, int num_p, int denom_p, int scratch);
+  int freq_p, int num_p, int den_p, int scratch);
 
 }

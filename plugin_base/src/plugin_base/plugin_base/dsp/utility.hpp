@@ -20,8 +20,8 @@ inline void check_bipolar(T val)
 { assert((T)-1 <= val && val <= (T)1); }
 
 inline float
-timesig_to_freq(float bpm, float num, float denom)
-{ return bpm / (60.0f * 4.0f * num / denom); }
+timesig_to_freq(float bpm, float num, float den)
+{ return bpm / (60.0f * 4.0f * num / den); }
 
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
