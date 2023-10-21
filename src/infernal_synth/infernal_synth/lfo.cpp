@@ -12,7 +12,18 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 enum { section_main };
-enum { param_on, param_sync, param_rate, param_num, param_den };
+enum { type_off, type_rate, type_sync };
+enum { param_type, param_rate, param_num, param_den };
+
+static std::vector<list_item>
+type_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{6940ADC8-DF91-468A-8FA1-25843B1A5707}", "Off");
+  result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate");
+  result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
+  return result;
+}
 
 class lfo_engine: 
 public module_engine {
@@ -44,43 +55,39 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
 
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
-    make_section_gui({ 0, 0 }, { 1, 4 })));
+    make_section_gui({ 0, 0 }, { 1, 3 })));
 
   result.params.emplace_back(make_param(
-    make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "On", param_on, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
-      make_label_default(gui_label_contents::name))));
-
-  result.params.emplace_back(make_param(
-    make_topo_info("{2A9CAE77-13B0-406F-BA57-1A30ED2F5D80}", "Sync", param_sync, 1),
-    make_param_dsp_block(param_automate::none), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 1 }, 
-      make_label_default(gui_label_contents::name))));
+    make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
+    make_param_dsp_block(param_automate::none), make_domain_item(type_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 0 },
+      make_label_none())));
   
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 2 }, 
       make_label(gui_label_contents::both, gui_label_align::bottom, gui_label_justify::center))));
-  rate.gui.bindings.visible.params = { param_sync };
-  rate.gui.bindings.visible.selector = [] (auto const& vs) { return vs[0] == 0; };
+  rate.gui.bindings.enabled.params = { param_type };
+  rate.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_rate; };
+  rate.gui.bindings.visible.params = { param_type };
+  rate.gui.bindings.visible.selector = [] (auto const& vs) { return vs[0] != type_sync; };
 
   auto& num = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
     make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 1, 0),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, 
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, 
       make_label_none())));
-  num.gui.bindings.visible.params = { param_sync };
-  num.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0; };
+  num.gui.bindings.visible.params = { param_type };
+  num.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
 
   auto& den = result.params.emplace_back(make_param(
     make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Den", param_den, 1),
     make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 4, 0),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, 
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, 
       make_label_none())));
-  den.gui.bindings.visible.params = { param_sync };
-  den.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != 0; };
+  den.gui.bindings.visible.params = { param_type };
+  den.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
 
   result.engine_factory = [module](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
@@ -91,9 +98,10 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
 void
 lfo_engine::process(plugin_block& block)
 {
-  if(block.state.own_block_automation[param_on][0].step() == 0) return; 
+  int type = block.state.own_block_automation[param_type][0].step();
+  if(type == type_off) return; 
   auto const& rate_curve = sync_or_freq_into_scratch(block, 
-    _module, param_sync, param_rate, param_num, param_den, 0);
+    type == type_sync, _module, param_rate, param_num, param_den, 0);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;
