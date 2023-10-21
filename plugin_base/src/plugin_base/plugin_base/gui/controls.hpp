@@ -35,7 +35,7 @@ public juce::Label
 public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param):
   binding_component(gui, module, &param->param->gui.bindings, param->info.slot), Label()
-  { setText(param->info.name, juce::dontSendNotification);  }
+  { setText(param->info.name, juce::dontSendNotification); init(); }
 };
 
 // parameter value or name+value display
