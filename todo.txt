@@ -21,6 +21,7 @@ param value dependent on other param
 linux build
 use flow layout for the static labels
 resizing by content scaling
+autofit label
 
 * get some linux folks to comment (ycollete?)
 * continuing
