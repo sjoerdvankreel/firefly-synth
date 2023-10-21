@@ -25,7 +25,7 @@ synth_topo()
   result->gui.aspect_ratio_width = 4;
   result->gui.aspect_ratio_height = 3;
   result->gui.dimension.column_sizes = { 1, 1 };
-  result->gui.dimension.row_sizes = { 1, 1, 1, 2, 1, 1 };
+  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1 };
 
   result->modules.resize(module_count);
   result->modules[module_glfo] = lfo_topo({ 0, 0, 1, 1 }, true);
