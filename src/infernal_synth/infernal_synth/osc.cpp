@@ -69,7 +69,7 @@ osc_topo(plugin_base::gui_position const& pos)
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
       make_label_default(gui_label_contents::name))));
 
-  auto& pitch = result.sections.emplace_back(make_section(section_pitch,
+  result.sections.emplace_back(make_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
     make_section_gui({ 0, 1 }, { 1, 3 })));
 
@@ -104,7 +104,6 @@ osc_engine::process(plugin_block& block)
   if(type == type_off) return;
   int oct = block.state.own_block_automation[param_oct][0].step();
   int note = block.state.own_block_automation[param_note][0].step();
-  int type = block.state.own_block_automation[param_type][0].step();
 
   auto const& env_curve = block.voice->all_cv[module_env][0][0];
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
