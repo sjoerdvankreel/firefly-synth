@@ -43,7 +43,7 @@ env_topo(plugin_base::gui_position const& pos)
     make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
-      make_label_default(gui_label_contents::name))));
+      make_label(gui_label_contents::name, gui_label_align::bottom, gui_label_justify::center))));
       
   result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
