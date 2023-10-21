@@ -24,7 +24,7 @@ group_component::resized()
 void
 grid_component::add(Component& child, gui_position const& position)
 {
-  addAndMakeVisible(child);
+  add_and_make_visible(*this, child);
   _positions.push_back(position);
 }
 

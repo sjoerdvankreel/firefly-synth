@@ -55,7 +55,7 @@ _gui_state(gui_state)
 {
   setOpaque(true);
   auto const& topo = *gui_state->desc().plugin;
-  addAndMakeVisible(&make_container());
+  add_and_make_visible(*this, make_container());
   setSize(topo.gui.default_width, topo.gui.default_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
 }
 
@@ -147,7 +147,7 @@ plugin_gui::make_single_module(module_desc const& slot, bool tabbed)
   if(tabbed) return make_sections(slot);
   auto& result = make_component<group_component>();
   result.setText(slot.info.name);
-  result.addAndMakeVisible(make_sections(slot));
+  add_and_make_visible(result, make_sections(slot));
   return result;
 }
 
@@ -188,7 +188,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
 
   auto& result = make_component<section_group_component>(this, &module, &section);
   result.setText(section.tag.name);
-  result.addAndMakeVisible(grid);
+  add_and_make_visible(result, *grid);
   return result;
 }
 

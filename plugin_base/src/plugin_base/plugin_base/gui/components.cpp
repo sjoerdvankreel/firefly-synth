@@ -37,7 +37,10 @@ binding_component::bind(
 void
 binding_component::init()
 {
-  // Must be called by subclass constructor as we dynamic_cast to Component inside.
+  // Must be called by subclass constructor as we dynamic_cast to Component.
+  auto& self = dynamic_cast<Component&>(*this);
+  self.setVisible(true);
+  self.setEnabled(true);
   if (_enabled_params.size() != 0)
     state_changed(_enabled_params[0], 
       _gui->gui_state()->get_plain_at_index(_enabled_params[0]));

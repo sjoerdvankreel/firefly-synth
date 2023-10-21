@@ -1,8 +1,16 @@
 #pragma once
 
 #include <plugin_base/shared/value.hpp>
+#include <juce_gui_basics/juce_gui_basics.h>
 
 namespace plugin_base {
+
+void gui_init();
+void gui_terminate();
+
+void add_and_make_visible(
+  juce::Component& parent, 
+  juce::Component& child);
 
 class gui_listener
 {
