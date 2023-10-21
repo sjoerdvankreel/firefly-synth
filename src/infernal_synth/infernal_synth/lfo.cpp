@@ -59,7 +59,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
 
   result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
-    make_param_dsp_block(param_automate::none), make_domain_item(type_items(), ""),
+    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 0 },
       make_label_none())));
   
@@ -75,7 +75,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
 
   auto& num = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
-    make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 1, 0),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 1, 0),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, 
       make_label_none())));
   num.gui.bindings.visible.params = { param_type };
@@ -83,7 +83,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
 
   auto& den = result.params.emplace_back(make_param(
     make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Den", param_den, 1),
-    make_param_dsp_block(param_automate::none), make_domain_step(1, 16, 4, 0),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 4, 0),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, 
       make_label_none())));
   den.gui.bindings.visible.params = { param_type };
