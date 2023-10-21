@@ -12,15 +12,15 @@ namespace infernal_synth {
 
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
-enum { param_on, param_type, param_gain, param_bal, param_note, param_oct, param_cent };
+enum { param_type, param_gain, param_bal, param_note, param_oct, param_cent };
 
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
-  result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw");
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sine");
+  result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw");
   return result;
 }
 
