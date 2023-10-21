@@ -43,7 +43,7 @@ filter_topo(plugin_base::gui_position const& pos, int osc_slot_count)
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, 
-      make_label(gui_label_contents::name, gui_label_align::bottom, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::bottom, gui_label_justify::near))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_freq, 1),
