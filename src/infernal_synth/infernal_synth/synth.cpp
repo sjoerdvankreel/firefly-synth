@@ -30,15 +30,15 @@ synth_topo()
   result->gui.aspect_ratio_width = 12;
   result->gui.aspect_ratio_height = 5;
   result->gui.dimension.row_sizes = std::vector<int>(4, 1);
-  result->gui.dimension.column_sizes = std::vector<int>(8, 1);
+  result->gui.dimension.column_sizes = std::vector<int>(2, 1);
 
   result->gui.sections.resize(section_count);
-  result->gui.sections[section_env] = make_module_section_gui(section_env, { 1, 0, 1, 4 }, { 1, 1 });
-  result->gui.sections[section_osc] = make_module_section_gui(section_osc, { 2, 0, 1, 4 }, { 1, 1 });
-  result->gui.sections[section_lfos] = make_module_section_gui(section_lfos, { 0, 0, 1, 4 }, { 1, 2 });
-  result->gui.sections[section_filter] = make_module_section_gui(section_filter, { 3, 0, 1, 4 }, { 1, 1 });
-  result->gui.sections[section_cv_matrix] = make_module_section_gui(section_cv_matrix, { 0, 4, 3, 4 }, { 1, 1 });
-  result->gui.sections[section_delay_monitor] = make_module_section_gui(section_delay_monitor, { 3, 4, 1, 4 }, { 2, 1 });
+  result->gui.sections[section_env] = make_module_section_gui(section_env, { 1, 0 }, { 1, 1 });
+  result->gui.sections[section_osc] = make_module_section_gui(section_osc, { 2, 0 }, { 1, 1 });
+  result->gui.sections[section_lfos] = make_module_section_gui(section_lfos, { 0, 0 }, { 1, 2 });
+  result->gui.sections[section_filter] = make_module_section_gui(section_filter, { 3, 0 }, { 1, 1 });
+  result->gui.sections[section_cv_matrix] = make_module_section_gui(section_cv_matrix, { 0, 1, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_delay_monitor] = make_module_section_gui(section_delay_monitor, { 3, 1 }, { 2, 1 });
 
   result->modules.resize(module_count);
   result->modules[module_env] = env_topo(section_env, { 0, 0 });
