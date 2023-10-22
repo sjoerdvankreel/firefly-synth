@@ -67,7 +67,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 2 }, 
-      make_label(gui_label_contents::both, gui_label_align::left, gui_label_justify::center))));
+      make_label_none())));
   rate.gui.bindings.enabled.params = { param_type };
   rate.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_rate; };
   rate.gui.bindings.visible.params = { param_type };
@@ -77,7 +77,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 1, 0),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, 
-      make_label_none())));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   num.gui.bindings.visible.params = { param_type };
   num.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
 
@@ -85,7 +85,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
     make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Den", param_den, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 4, 0),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, 
-      make_label_none())));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   den.gui.bindings.visible.params = { param_type };
   den.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
 
