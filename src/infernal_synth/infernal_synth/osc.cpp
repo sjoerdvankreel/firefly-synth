@@ -45,7 +45,7 @@ osc_topo(plugin_base::gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
-    make_module_gui(gui_layout::tabbed, pos, { 1, 2 })));
+    make_module_gui(gui_layout::tabbed, pos, { { 1 }, { 3, 2 } })));
 
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
@@ -88,7 +88,7 @@ osc_topo(plugin_base::gui_position const& pos)
   result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_pitch, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.engine_factory = [](auto const&, int, int) ->
