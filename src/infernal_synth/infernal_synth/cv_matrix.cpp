@@ -18,8 +18,8 @@ static int constexpr route_count = 8;
 
 enum { section_main };
 enum { 
-  param_on, param_active, param_source, param_source_index, 
-  param_target, param_target_index, param_target_param, param_target_param_index };
+  param_active, param_source, param_source_index, param_target, 
+  param_target_index, param_target_param, param_target_param_index };
 
 class cv_matrix_engine:
 public module_engine { 
@@ -45,37 +45,29 @@ cv_matrix_topo(
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  std::vector<int> enabled_params = { param_on, param_active };
-  gui_binding_selector enabled_selector = [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; };
+  gui_binding_selector enabled_selector = [](auto const& vs) { return vs[0] != 0; };
 
   module_topo result(make_module(
     make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "CV", module_cv_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::cv, route_count, 0),
     make_module_gui(gui_layout::single, pos, { 1, 1 })));
+
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_section_gui({ 0, 0 }, { { 1, 5 }, { 1, 1, 1, 1, 1, 1, 1 } })));
+    make_section_gui({ 0, 0 }, { { 1 }, { 1, 1, 1, 1, 1, 1, 1 } })));
   
   result.params.emplace_back(make_param(
-    make_topo_info("{06512F9B-2B49-4C2E-BF1F-40070065CABB}", "On", param_on, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0, 1, 7 }, 
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  
-  auto& active = result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui(section_main, gui_edit_type::toggle, gui_layout::vertical, { 1, 0 }, 
+    make_param_gui(section_main, gui_edit_type::toggle, gui_layout::vertical, { 0, 0 }, 
       make_label_none())));
-  active.gui.bindings.enabled.params = { param_on };
-  active.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] != 0; };
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(vector_map(sources, list_item::from_topo_ptr<module_topo>), ""),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 1 }, 
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 0, 1 }, 
       make_label_none())));
-  source.gui.bindings.enabled.params = enabled_params;
+  source.gui.bindings.enabled.params = { param_active };
   source.gui.bindings.enabled.selector = enabled_selector;
   
   auto map_to_slot_domain_ptr = [](auto const& t) { return make_domain_step(0, t->info.slot_count - 1, 1, 1); };
@@ -83,9 +75,9 @@ cv_matrix_topo(
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(source_slot_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 2 }, 
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 2 }, 
       make_label_none())));
-  source_index.gui.bindings.enabled.params = enabled_params;
+  source_index.gui.bindings.enabled.params = { param_active };
   source_index.gui.bindings.enabled.selector = enabled_selector;
   source_index.dependency_indices = { param_source };
   source_index.dependent_selector = [](int const* vs) { return vs[0]; };
@@ -94,18 +86,18 @@ cv_matrix_topo(
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(vector_map(targets, list_item::from_topo_ptr<module_topo>), ""),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 1, 3 }, 
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 0, 3 }, 
       make_label_none())));
-  target.gui.bindings.enabled.params = enabled_params;
+  target.gui.bindings.enabled.params = { param_active };
   target.gui.bindings.enabled.selector = enabled_selector;
   
   auto target_slot_domains = vector_map(targets, map_to_slot_domain_ptr);
   auto& target_index = result.params.emplace_back(make_param(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(target_slot_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 4 },
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 4 },
       make_label_none())));
-  target_index.gui.bindings.enabled.params = enabled_params;
+  target_index.gui.bindings.enabled.params = { param_active };
   target_index.gui.bindings.enabled.selector = enabled_selector;
   target_index.dependency_indices = { param_target };
   target_index.dependent_selector = [](int const* vs) { return vs[0]; };
@@ -123,9 +115,9 @@ cv_matrix_topo(
   auto& target_param = result.params.emplace_back(make_param(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 5 },
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 5 },
       make_label_none())));
-  target_param.gui.bindings.enabled.params = enabled_params;
+  target_param.gui.bindings.enabled.params = { param_active };
   target_param.gui.bindings.enabled.selector = enabled_selector;
   target_param.dependency_indices = { param_target };
   target_param.dependent_selector = [](int const* vs) { return vs[0]; };
@@ -138,9 +130,9 @@ cv_matrix_topo(
   auto& target_param_index = result.params.emplace_back(make_param(
     make_topo_info("{05E7FB15-58AD-40EA-BA7F-FDAB255879ED}", "Target Param Index", param_target_param_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_param_index_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 1, 6 },
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 6 },
       make_label_none())));
-  target_param_index.gui.bindings.enabled.params = enabled_params;
+  target_param_index.gui.bindings.enabled.params = { param_active };
   target_param_index.gui.bindings.enabled.selector = enabled_selector;
   target_param_index.dependency_indices = { param_target, param_target_param };
   target_param_index.dependent_domains = vector_explicit_copy(modulatable_target_param_index_domains);
@@ -183,7 +175,6 @@ cv_matrix_engine::process(plugin_block& block)
   // apply modulation routing
   int modulation_index = 0;
   auto const& own_automation = block.state.own_block_automation;
-  if(own_automation[param_on][0].step() == 0) return;
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
