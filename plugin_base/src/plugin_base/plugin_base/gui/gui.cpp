@@ -123,9 +123,21 @@ plugin_gui::make_container()
 Component&
 plugin_gui::make_content()
 {
-  auto& result = make_component<grid_component>(_gui_state->desc().plugin->gui.dimension);
-  for (auto iter = _gui_state->desc().modules.begin(); iter != _gui_state->desc().modules.end(); iter += iter->module->info.slot_count)
-    result.add(make_modules(&(*iter)), iter->module->gui.position);
+  auto const& topo = *_gui_state->desc().plugin;
+  auto& result = make_component<grid_component>(topo.gui.dimension);
+  for(int s = 0; s < topo.gui.sections.size(); s++)
+    result.add(make_module_section(topo.gui.sections[s]), topo.gui.sections[s].position);
+  return result;
+}
+
+Component&
+plugin_gui::make_module_section(module_section_gui const& section)
+{
+  auto const& modules = _gui_state->desc().modules;
+  auto& result = make_component<grid_component>(section.dimension);
+  for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
+    if(iter->module->gui.section == section.index)
+      result.add(make_modules(&(*iter)), iter->module->gui.position);
   return result;
 }
 
