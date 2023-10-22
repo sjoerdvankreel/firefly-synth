@@ -24,7 +24,7 @@ lnf::drawLabel(Graphics& g, Label& label)
 void 
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
-  int const fixedHeight = 22;
+  int const fixedHeight = default_font_height + 6;
   int const comboTop = height < fixedHeight ? 0: (height - fixedHeight) / 2;
 
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
