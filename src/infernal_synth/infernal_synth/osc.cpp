@@ -49,7 +49,7 @@ osc_topo(plugin_base::gui_position const& pos)
 
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
-    make_section_gui({ 0, 0 }, { 1, 3 })));
+    make_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1 }))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),

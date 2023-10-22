@@ -274,29 +274,25 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   gui_position edit_position;
   gui_position label_position;
 
-  auto& label = make_param_label(module, param);
-  assert(label.getWidth() > 0);
-  assert(label.getHeight() > 0);
-
   switch (param.param->gui.label.align)
   {
   case gui_label_align::top:
-    dimension = gui_dimension({ -label.getHeight(), 1}, {1});
+    dimension = gui_dimension({ gui_dimension::auto_size, 1}, {1});
     label_position = { 0, 0 };
     edit_position = { 1, 0 };
     break;
   case gui_label_align::bottom:
-    dimension = gui_dimension({ 1, -label.getHeight(), }, { 1 });
+    dimension = gui_dimension({ 1, gui_dimension::auto_size, }, { 1 });
     label_position = { 1, 0 };
     edit_position = { 0, 0 };
     break;
   case gui_label_align::left:
-    dimension = gui_dimension({ 1 }, { -label.getWidth(), 1});
+    dimension = gui_dimension({ 1 }, { gui_dimension::auto_size, 1});
     label_position = { 0, 0 };
     edit_position = { 0, 1 };
     break;
   case gui_label_align::right:
-    dimension = gui_dimension({ 1 }, { 1, -label.getWidth() });
+    dimension = gui_dimension({ 1 }, { 1, gui_dimension::auto_size });
     label_position = { 0, 1 };
     edit_position = { 0, 0 };
     break;
@@ -306,7 +302,7 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   }
 
   auto& result = make_component<grid_component>(dimension);
-  result.add(label, label_position);
+  result.add(make_param_label(module, param), label_position);
   result.add(make_param_editor(module, param), edit_position);
   return result;
 }

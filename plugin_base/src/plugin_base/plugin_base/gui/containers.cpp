@@ -38,16 +38,30 @@ grid_component::resized()
       grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
     else if (_dimension.row_sizes[i] < 0)
       grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
-    else
-      assert(false);
+    else // autosize, dont bother with span
+    {
+      int max_col_height = 0;
+      for (int c = 0; c < _dimension.column_sizes.size(); c++)
+        for(int p = 0; p < _positions.size(); p++)
+          if(_positions[p].column == c && _positions[p].row == i)
+            max_col_height = std::max(max_col_height, getChildComponent(p)->getHeight());
+      grid.templateRows.add(Grid::Px(max_col_height));
+    }
 
   for(int i = 0; i < _dimension.column_sizes.size(); i++)
     if(_dimension.column_sizes[i] > 0)
       grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
-    else if(_dimension.column_sizes[i] < 0)
+    else if (_dimension.column_sizes[i] < 0)
       grid.templateColumns.add(Grid::Px(-_dimension.column_sizes[i]));
-    else
-      assert(false);
+    else // autosize, dont bother with span
+    { 
+      int max_row_width = 0;
+      for (int r = 0; r < _dimension.row_sizes.size(); r++)
+        for (int p = 0; p < _positions.size(); p++)
+          if (_positions[p].row == r && _positions[p].column == i)
+            max_row_width = std::max(max_row_width, getChildComponent(p)->getWidth());
+      grid.templateColumns.add(Grid::Px(max_row_width));
+    }
 
   for (int i = 0; i < _positions.size(); i++)
   {
