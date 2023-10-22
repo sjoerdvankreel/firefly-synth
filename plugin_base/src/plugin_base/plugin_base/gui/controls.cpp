@@ -21,12 +21,20 @@ autofit_label::textWasChanged()
 void
 autofit_combobox::autofit()
 {
-  float max_width = 0;
+  if(!_autofit) return;
+
+  float max_width = 0;  
+  int const hpadding = 42;
+  int count = getNumItems();
   auto const& font = getLookAndFeel().getComboBoxFont(*this);
   float text_height = font.getHeight();
-  for (int i = 0; i < getNumItems(); i++)
-    max_width = std::max(max_width, font.getStringWidthFloat(getItemText(i)));
-  setSize(std::ceil(max_width), std::ceil(text_height));
+  for (int i = 0; i < count; i++)
+  {
+    auto text = getItemText(i);
+    auto text_width = font.getStringWidthFloat(text);
+    max_width = std::max(max_width, text_width);
+  }
+  setSize(std::ceil(max_width + hpadding), std::ceil(text_height));
 }
 
 param_component::
