@@ -39,6 +39,8 @@ struct param_topo_gui final {
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
+
+  bool is_list() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
 };
 
@@ -56,5 +58,9 @@ struct param_topo final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module, int index) const;
 };
+
+inline bool
+param_topo_gui::is_list() const
+{ return edit_type == gui_edit_type::list || edit_type == gui_edit_type::autofit_list; }
 
 }

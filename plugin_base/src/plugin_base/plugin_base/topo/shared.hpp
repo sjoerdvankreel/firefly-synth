@@ -19,7 +19,7 @@ enum class gui_label_justify { near, center, far };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, both };
 enum class gui_layout { single, horizontal, vertical, tabbed };
-enum class gui_edit_type { toggle, list, dependent, text, knob, hslider, vslider };
+enum class gui_edit_type { toggle, list, autofit_list, dependent, text, knob, hslider, vslider };
 
 typedef bool(*
 gui_binding_selector)(

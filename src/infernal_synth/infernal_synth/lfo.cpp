@@ -60,7 +60,7 @@ lfo_topo(plugin_base::gui_position const& pos, bool global)
   result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
       make_label_none())));
   
   auto& rate = result.params.emplace_back(make_param(

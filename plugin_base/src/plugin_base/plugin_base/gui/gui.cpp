@@ -249,6 +249,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   case gui_edit_type::text:
     result = &make_component<param_textbox>(this, &module, &param); break;
   case gui_edit_type::list:
+  case gui_edit_type::autofit_list:
     result = &make_component<param_combobox>(this, &module, &param); break;
   case gui_edit_type::dependent:
     result = &make_component<param_dependent>(this, &module, &param); break;

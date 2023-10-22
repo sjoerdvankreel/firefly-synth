@@ -18,6 +18,17 @@ autofit_label::textWasChanged()
     setSize(nw, std::ceil(th) + border_size.getTopAndBottom());
 }
 
+void
+autofit_combobox::autofit()
+{
+  float max_width = 0;
+  auto const& font = getLookAndFeel().getComboBoxFont(*this);
+  float text_height = font.getHeight();
+  for (int i = 0; i < getNumItems(); i++)
+    max_width = std::max(max_width, font.getStringWidthFloat(getItemText(i)));
+  setSize(std::ceil(max_width), std::ceil(text_height));
+}
+
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 binding_component(gui, module, &param->param->gui.bindings, param->info.slot), _param(param)
@@ -124,11 +135,13 @@ param_component(gui, module, param), ToggleButton()
 
 param_combobox::
 param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param) :
-param_component(gui, module, param), ComboBox()
+param_component(gui, module, param), 
+autofit_combobox(param->param->gui.edit_type == gui_edit_type::autofit_list)
 {
   auto const& domain = param->param->domain;
   for(int i = domain.min; i <= domain.max; i++)
     addItem(domain.raw_to_text(false, i), i - domain.min + 1);
+  autofit();
   addListener(this);
   setEditableText(false);
   init();

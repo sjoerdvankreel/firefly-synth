@@ -17,6 +17,16 @@ public:
   virtual void textWasChanged() override final;
 };
 
+// dropdown that resizes to largest item
+class autofit_combobox :
+public juce::ComboBox
+{
+  bool const _autofit;
+public:
+  void autofit();
+  autofit_combobox(bool autofit): _autofit(autofit) {}
+};
+
 // binding_component that is additionally bound to a single parameter value
 // i.e., edit control or a label that displays a plugin parameter value
 class param_component:
@@ -118,7 +128,7 @@ public:
 // dropdown bound to single parameter
 class param_combobox :
 public param_component,
-public juce::ComboBox, 
+public autofit_combobox, 
 public juce::ComboBox::Listener
 {
 protected:

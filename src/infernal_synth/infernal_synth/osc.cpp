@@ -54,7 +54,7 @@ osc_topo(plugin_base::gui_position const& pos)
   result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
       make_label_none())));
 
   result.params.emplace_back(make_param(
@@ -76,13 +76,13 @@ osc_topo(plugin_base::gui_position const& pos)
   result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
     make_param_dsp_block(param_automate::automate), make_domain_name(note_names(), ""),
-    make_param_gui_single(section_pitch, gui_edit_type::list, { 0, 0 }, 
+    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, 
       make_label_none())));  
 
   result.params.emplace_back(make_param(
     make_topo_info("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", param_oct, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(0, 9, 4, 0),
-    make_param_gui_single(section_pitch, gui_edit_type::list, { 0, 1 }, 
+    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 1 },
       make_label_none())));  
 
   result.params.emplace_back(make_param(
