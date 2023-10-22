@@ -12,9 +12,6 @@ using namespace juce;
 
 namespace plugin_base {
 
-static inline int constexpr label_width = 80;
-static inline int constexpr label_height = 15;
-
 static Justification 
 justification_type(gui_label const& label)
 {
@@ -202,6 +199,14 @@ plugin_gui::make_params(module_desc const& module, param_desc const* params)
 }
 
 Component&
+plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
+{
+  if (param.param->gui.label.contents == gui_label_contents::none)
+    return make_param_editor(module, param);
+  return make_param_label_edit(module, param);
+}
+
+Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
   auto make_single = [this, &module](param_desc const& p, bool tabbed) -> Component& {
@@ -209,37 +214,26 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   return make_multi_slot(*slots[0].param, slots, make_single);
 }
 
-Component& 
-plugin_gui::make_param_label_edit(
-  module_desc const& module, param_desc const& param, 
-  gui_dimension const& dimension, gui_position const& label_position, gui_position const& edit_position)
-{
-  auto& result = make_component<grid_component>(dimension);
-  result.add(make_param_label(module, param), label_position);
-  result.add(make_param_editor(module, param), edit_position);
-  return result;
-}
-
 Component&
-plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
+plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
 {
-  if(param.param->gui.label.contents == gui_label_contents::none)
-    return make_param_editor(module, param);
-
-  switch(param.param->gui.label.align)
+  Label* result = {};
+  auto contents = param.param->gui.label.contents;
+  switch (contents)
   {
-  case gui_label_align::top:
-    return make_param_label_edit(module, param, gui_dimension({ -label_height, 1 }, { 1 }), { 0, 0 }, { 1, 0 });
-  case gui_label_align::bottom:
-    return make_param_label_edit(module, param, gui_dimension({ 1, -label_height, }, { 1 }), { 1, 0 }, { 0, 0 });
-  case gui_label_align::left:
-    return make_param_label_edit(module, param, gui_dimension({ 1 }, { -label_width, 1 }), { 0, 0 }, { 0, 1 });
-  case gui_label_align::right:
-    return make_param_label_edit(module, param, gui_dimension({ 1 }, { 1, -label_width }), { 0, 1 }, { 0, 0 });
+  case gui_label_contents::name:
+    result = &make_component<param_name_label>(this, &module, &param);
+    break;
+  case gui_label_contents::both:
+  case gui_label_contents::value:
+    result = &make_component<param_value_label>(this, &module, &param, contents == gui_label_contents::both);
+    break;
   default:
     assert(false);
-    return *((Component*)nullptr);
+    break;
   }
+  result->setJustificationType(justification_type(param.param->gui.label));
+  return *result;
 }
 
 Component&
@@ -266,32 +260,51 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   }
 
   // don't touch state for input in case it is a ui-state-bound parameter
-  if(param.param->dsp.direction == param_direction::output)
+  if (param.param->dsp.direction == param_direction::output)
     result->setEnabled(false);
 
   return *result;
 }
 
 Component&
-plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
+plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& param)
 {
-  Label* result = {};
-  auto contents = param.param->gui.label.contents;
-  switch (contents)
+  gui_dimension dimension;
+  gui_position edit_position;
+  gui_position label_position;
+
+  auto& label = make_param_label(module, param);
+  switch (param.param->gui.label.align)
   {
-  case gui_label_contents::name:
-    result = &make_component<param_name_label>(this, &module, &param);
+  case gui_label_align::top:
+    dimension = gui_dimension({ -label.getHeight(), 1}, {1});
+    label_position = { 0, 0 };
+    edit_position = { 1, 0 };
     break;
-  case gui_label_contents::both:
-  case gui_label_contents::value:
-    result = &make_component<param_value_label>(this, &module, &param, contents == gui_label_contents::both);
+  case gui_label_align::bottom:
+    dimension = gui_dimension({ 1, -label.getHeight(), }, { 1 });
+    label_position = { 1, 0 };
+    edit_position = { 0, 0 };
+    break;
+  case gui_label_align::left:
+    dimension = gui_dimension({ 1 }, { -label.getWidth(), 1});
+    label_position = { 0, 0 };
+    edit_position = { 0, 1 };
+    break;
+  case gui_label_align::right:
+    dimension = gui_dimension({ 1 }, { 1, -label.getWidth() });
+    label_position = { 0, 1 };
+    edit_position = { 0, 0 };
     break;
   default:
     assert(false);
-    break;
+    return *((Component*)nullptr);
   }
-  result->setJustificationType(justification_type(param.param->gui.label));
-  return *result;
+
+  auto& result = make_component<grid_component>(dimension);
+  result.add(label, label_position);
+  result.add(make_param_editor(module, param), edit_position);
+  return result;
 }
 
 template <class Topo, class Slot, class MakeSingle>

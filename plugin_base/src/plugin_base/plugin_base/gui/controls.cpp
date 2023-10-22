@@ -1,8 +1,17 @@
 #include <plugin_base/gui/controls.hpp>
+#include <algorithm>
 
 using namespace juce;
 
 namespace plugin_base {
+
+void
+autofit_label::textWasChanged()
+{
+  float fh = getFont().getHeight();
+  float fw = getFont().getStringWidthFloat(getText());
+  setSize(std::ceil(fw), std::ceil(fh));
+}
 
 param_component::
 param_component(plugin_gui* gui, module_desc const* module, param_desc const* param) :

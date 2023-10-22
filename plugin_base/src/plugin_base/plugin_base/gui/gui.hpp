@@ -58,8 +58,7 @@ private:
   Component& make_param_editor(module_desc const& module, param_desc const& param);
   Component& make_multi_param(module_desc const& module, param_desc const* params);
   Component& make_single_param(module_desc const& module, param_desc const& param);
-  Component& make_param_label_edit(module_desc const& module, param_desc const& param,
-      gui_dimension const& dimension, gui_position const& label_position, gui_position const& edit_position);
+  Component& make_param_label_edit(module_desc const& module, param_desc const& param);
 };
 
 }

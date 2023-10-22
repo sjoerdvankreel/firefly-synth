@@ -9,6 +9,14 @@
 
 namespace plugin_base {
 
+// label that resizes to text content
+class autofit_label:
+public juce::Label
+{
+public:
+  virtual void textWasChanged() override final;
+};
+
 // binding_component that is additionally bound to a single parameter value
 // i.e., edit control or a label that displays a plugin parameter value
 class param_component:
@@ -30,11 +38,11 @@ protected:
 // parameter name display
 class param_name_label:
 public binding_component,
-public juce::Label
+public autofit_label
 {
 public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param):
-  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), Label()
+  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label()
   { setText(param->info.name, juce::dontSendNotification); init(); }
 };
 
