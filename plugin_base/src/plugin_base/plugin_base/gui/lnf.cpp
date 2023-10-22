@@ -21,4 +21,29 @@ lnf::drawLabel(Graphics& g, Label& label)
   g.drawRect(label.getLocalBounds());
 }
 
+void 
+lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
+{
+  int const fixedHeight = 22;
+  int const comboTop = height < fixedHeight ? 0: (height - fixedHeight) / 2;
+
+  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
+  Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
+
+  g.setColour(box.findColour(ComboBox::backgroundColourId));
+  g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+
+  g.setColour(box.findColour(ComboBox::outlineColourId));
+  g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+
+  Rectangle<int> arrowZone(width - 30, 0, 20, height);
+  Path path;
+  path.startNewSubPath((float)arrowZone.getX() + 3.0f, (float)arrowZone.getCentreY() - 2.0f);
+  path.lineTo((float)arrowZone.getCentreX(), (float)arrowZone.getCentreY() + 3.0f);
+  path.lineTo((float)arrowZone.getRight() - 3.0f, (float)arrowZone.getCentreY() - 2.0f);
+
+  g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
+  g.strokePath(path, PathStrokeType(2.0f));
+}
+
 }
