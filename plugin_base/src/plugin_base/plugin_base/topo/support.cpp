@@ -52,6 +52,15 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
   return result;
 }
 
+module_section_gui
+make_module_section_gui(gui_position const& position, gui_dimension const& dimension)
+{
+  module_section_gui result = {};
+  result.position = position;
+  result.dimension = dimension;
+  return result; 
+}
+
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui)
 {

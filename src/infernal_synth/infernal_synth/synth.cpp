@@ -2,6 +2,7 @@
 #include <infernal_synth/plugin.hpp>
 
 #include <plugin_base/dsp/engine.hpp>
+#include <plugin_base/topo/support.hpp>
 
 using namespace plugin_base;
 
@@ -32,14 +33,14 @@ synth_topo()
   result->gui.dimension.column_sizes = std::vector<int>(8, 1);
 
   result->gui.sections.resize(section_count);
-  result->gui.sections[section_env] = { { 2, 0, 2, 4 } , { { 1 }, { 1 } } };
-  result->gui.sections[section_osc] = { { 4, 0, 2, 4 } , { { 1 }, { 1 } } };
-  result->gui.sections[section_delay] = { { 6, 4, 1, 4 } , { { 1 }, { 1 } } };
-  result->gui.sections[section_glfo] = { { 0, 0, 2, 2 } , { { 1 }, { 1 } } };
-  result->gui.sections[section_vlfo] = { { 0, 0, 2, 2 } , { { 1 }, { 1 } } };
-  result->gui.sections[section_monitor] = { { 7, 4, 1, 4 } , { { 1 }, { 1 } } };
-  result->gui.sections[section_filter] = { { 7, 4, 1, 4 } , { { 1 }, { 1 } } };
-  result->gui.sections[section_cv_matrix] = { { 0, 4, 6, 4 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_env] = make_module_section_gui({ 2, 0, 2, 4 } , { 1, 1 });
+  result->gui.sections[section_osc] = make_module_section_gui({ 4, 0, 2, 4 }, { 1, 1 });
+  result->gui.sections[section_delay] = make_module_section_gui({ 6, 4, 1, 4 }, { 1, 1 });
+  result->gui.sections[section_glfo] = make_module_section_gui({ 0, 0, 2, 2 }, { 1, 1 });
+  result->gui.sections[section_vlfo] = make_module_section_gui({ 0, 0, 2, 2 }, { 1, 1 });
+  result->gui.sections[section_monitor] = make_module_section_gui({ 7, 4, 1, 4 }, { 1, 1 });
+  result->gui.sections[section_filter] = make_module_section_gui({ 7, 4, 1, 4 }, { 1, 1 });
+  result->gui.sections[section_cv_matrix] = make_module_section_gui({ 0, 4, 6, 4 }, { 1, 1 });
 
   result->modules.resize(module_count);
   result->modules[module_env] = env_topo(section_env, { 1, 1 });

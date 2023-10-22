@@ -9,13 +9,16 @@
 
 namespace plugin_base {
 
+struct plugin_topo_gui;
 enum class plugin_type { synth, fx };
 
 // module ui grouping
 struct module_section_gui final {
   gui_position position;
   gui_dimension dimension;
-  //INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
+
+  void validate(plugin_topo const& plugin) const;
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
 };
 
 // plugin ui
