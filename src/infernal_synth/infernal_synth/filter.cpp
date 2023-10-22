@@ -32,7 +32,7 @@ filter_topo(int section, plugin_base::gui_position const& pos, int osc_slot_coun
 {
   module_topo result(make_module(
     make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", module_filter, 3), 
-    make_module_dsp(module_stage::voice, module_output::none, 0, 0),
+    make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
     make_module_gui(section, pos, gui_layout::tabbed, { 1, 1 })));
 
   result.sections.emplace_back(make_param_section(section_main,
@@ -66,21 +66,21 @@ filter_topo(int section, plugin_base::gui_position const& pos, int osc_slot_coun
 void
 filter_engine::process(plugin_block& block)
 {
+  if (block.state.own_block_automation[param_on][0].step() == 0) return;
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
   auto const& modulation = static_cast<cv_matrix_output const*>(cv_matrix_context)->modulation;
 
   auto const& osc_audio = block.voice->all_audio[module_osc];
   for(int o = 0; o < block.plugin.modules[module_osc].info.slot_count; o++)
   {
-    auto const& osc = *modulation[module_filter][0][param_osc][o];
+    auto const& osc = *modulation[module_filter][block.module_slot][param_osc][o];
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
-        block.voice->result[c][f] += osc_audio[o][0][c][f] * osc[f];
+        block.state.own_audio[0][c][f] += osc_audio[o][0][c][f] * osc[f];
   }
-  if(block.state.own_block_automation[param_on][0].step() == 0) return;
 
   float w = 2 * block.sample_rate;
-  auto const& freq = *modulation[module_filter][0][param_freq][0];
+  auto const& freq = *modulation[module_filter][block.module_slot][param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float angle = block.normalized_to_raw(module_filter, param_freq, freq[f]) * 2 * pi32;
@@ -89,10 +89,12 @@ filter_engine::process(plugin_block& block)
     float b = (w - angle) * norm;
     for (int c = 0; c < 2; c++)
     {
-      float filtered = block.voice->result[c][f] * a + _in[c] * a + _out[c] * b;
-      _in[c] = block.voice->result[c][f];
+      float filtered = block.state.own_audio[0][c][f] * a + _in[c] * a + _out[c] * b;
+      _in[c] = block.state.own_audio[0][c][f];
       _out[c] = filtered;
-      block.voice->result[c][f] = filtered;
+      block.state.own_audio[0][c][f] = filtered;
+      // mixdown to voice
+      block.voice->result[c][f] += filtered;
     }
   }
 }
