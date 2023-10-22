@@ -141,10 +141,10 @@ plugin_gui::make_modules(module_desc const* slots)
 Component&
 plugin_gui::make_single_module(module_desc const& slot, bool tabbed)
 {
-  if(tabbed) return make_sections(slot);
+  if(tabbed) return make_param_sections(slot);
   auto& result = make_component<group_component>();
   result.setText(slot.info.name);
-  add_and_make_visible(result, make_sections(slot));
+  add_and_make_visible(result, make_param_sections(slot));
   return result;
 }
 
@@ -157,21 +157,21 @@ plugin_gui::make_multi_module(module_desc const* slots)
 }
 
 Component&
-plugin_gui::make_sections(module_desc const& module)
+plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
   auto& result = make_component<grid_component>(topo.gui.dimension);
   for (int s = 0; s < topo.sections.size(); s++)
-    result.add(make_section(module, topo.sections[s]), topo.sections[s].gui.position);
+    result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
   return result;
 }
 
 Component&
-plugin_gui::make_section(module_desc const& module, section_topo const& section)
+plugin_gui::make_param_section(module_desc const& module, param_section const& section)
 {
   grid_component* grid = nullptr;
   if (module.module->sections.size() == 1)
-    grid = &make_component<section_grid_component>(this, &module, &section);
+    grid = &make_component<param_section_grid>(this, &module, &section);
   else
     grid = &make_component<grid_component>(section.gui.dimension);
 
@@ -183,7 +183,7 @@ plugin_gui::make_section(module_desc const& module, section_topo const& section)
   if(module.module->sections.size() == 1)
     return *grid;
 
-  auto& result = make_component<section_group_component>(this, &module, &section);
+  auto& result = make_component<param_section_group>(this, &module, &section);
   result.setText(section.tag.name);
   add_and_make_visible(result, *grid);
   return result;

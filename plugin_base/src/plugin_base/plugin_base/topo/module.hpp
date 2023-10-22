@@ -46,7 +46,7 @@ struct module_topo final {
   module_topo_gui gui;
 
   std::vector<param_topo> params;
-  std::vector<section_topo> sections;
+  std::vector<param_section> sections;
   module_engine_factory engine_factory;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);

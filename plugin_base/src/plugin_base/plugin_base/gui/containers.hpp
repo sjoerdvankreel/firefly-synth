@@ -38,23 +38,23 @@ public:
   grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }) {}
 };
 
-// binding_component that hosts a single section_grid_component
-class section_group_component :
+// binding_component that hosts a single param_section_grid
+class param_section_group :
 public binding_component,
 public group_component
 {
 public:
-  section_group_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
+  param_section_group(plugin_gui* gui, module_desc const* module, param_section const* section):
   binding_component(gui, module, &section->gui.bindings, 0), group_component() { init(); }
 };
 
 // binding_component that hosts a number of plugin parameters
-class section_grid_component :
+class param_section_grid :
 public binding_component,
 public grid_component
 {
 public:
-  section_grid_component(plugin_gui* gui, module_desc const* module, section_topo const* section):
+  param_section_grid(plugin_gui* gui, module_desc const* module, param_section const* section):
   binding_component(gui, module, &section->gui.bindings, 0), grid_component(section->gui.dimension) { init(); }
 };
 

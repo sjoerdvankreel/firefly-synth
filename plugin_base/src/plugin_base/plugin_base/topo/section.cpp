@@ -5,7 +5,7 @@
 namespace plugin_base {
 
 void 
-section_topo::validate(module_topo const& module, int index_) const
+param_section::validate(module_topo const& module, int index_) const
 {
   tag.validate();
   gui.bindings.validate(module, 1);

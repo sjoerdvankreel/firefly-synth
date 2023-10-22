@@ -34,9 +34,9 @@ delay_topo(int section, plugin_base::gui_position const& pos)
     make_module_dsp(module_stage::output, module_output::none, 0, 0),
     make_module_gui(section, pos, gui_layout::single, { 1, 1 })));
 
-  result.sections.emplace_back(make_section(section_main,
+  result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"),
-    make_section_gui({ 0, 0 }, { 1, 1 })));
+    make_param_section_gui({ 0, 0 }, { 1, 1 })));
 
   result.params.emplace_back(make_param(
     make_topo_info("{A8638DE3-B574-4584-99A2-EC6AEE725839}", "On", param_on, 1),

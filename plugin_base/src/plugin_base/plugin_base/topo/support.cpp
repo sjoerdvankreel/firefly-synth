@@ -33,20 +33,20 @@ make_label(gui_label_contents contents, gui_label_align align, gui_label_justify
   return result;
 }
 
-section_topo
-make_section(int index, topo_tag const& tag, section_topo_gui const& gui)
+param_section
+make_param_section(int index, topo_tag const& tag, param_section_gui const& gui)
 {
-  section_topo result = {};
+  param_section result = {};
   result.index = index;
   result.tag = topo_tag(tag);
-  result.gui = section_topo_gui(gui);
+  result.gui = param_section_gui(gui);
   return result;
 }
 
-section_topo_gui
-make_section_gui(gui_position const& position, gui_dimension const& dimension)
+param_section_gui
+make_param_section_gui(gui_position const& position, gui_dimension const& dimension)
 {
-  section_topo_gui result = {};
+  param_section_gui result = {};
   result.position = position;
   result.dimension = dimension;
   return result;

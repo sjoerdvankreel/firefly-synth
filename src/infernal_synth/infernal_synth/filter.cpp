@@ -35,9 +35,9 @@ filter_topo(int section, plugin_base::gui_position const& pos, int osc_slot_coun
     make_module_dsp(module_stage::voice, module_output::none, 0, 0),
     make_module_gui(section, pos, gui_layout::single, { 1, 1 })));
 
-  result.sections.emplace_back(make_section(section_main,
+  result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
-    make_section_gui({ 0, 0 }, { { 1 }, { 1, 1, 3 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { 1, 1, 3 } })));
 
   result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1),
