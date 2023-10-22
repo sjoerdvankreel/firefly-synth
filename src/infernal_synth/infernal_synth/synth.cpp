@@ -28,13 +28,13 @@ synth_topo()
   result->gui.dimension.column_sizes = std::vector<int>(8, 1);
 
   result->modules.resize(module_count);
-  result->modules[module_env] = env_topo({ 1, 0, 2, 4 });
+  result->modules[module_env] = env_topo({ 1, 0, 1, 4 });
   result->modules[module_osc] = osc_topo({ 3, 0, 1, 8 });
-  result->modules[module_delay] = delay_topo({ 4, 4, 1, 1 });
+  result->modules[module_delay] = delay_topo({ 4, 0, 1, 5 });
   result->modules[module_glfo] = lfo_topo({ 0, 0, 1, 2 }, true);
   result->modules[module_vlfo] = lfo_topo({ 0, 2, 1, 2 }, false);
   result->modules[module_monitor] = monitor_topo({ 4, 5, 1, 3 }, result->polyphony);
-  result->modules[module_filter] = filter_topo({ 4, 0, 1, 4 }, result->modules[module_osc].info.slot_count);
+  result->modules[module_filter] = filter_topo({ 2, 0, 1, 4 }, result->modules[module_osc].info.slot_count);
   result->modules[module_cv_matrix] = cv_matrix_topo({ 0, 4, 3, 4 },
     { &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
     { &result->modules[module_osc], &result->modules[module_filter] });
