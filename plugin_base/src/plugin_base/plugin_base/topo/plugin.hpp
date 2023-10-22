@@ -14,10 +14,11 @@ enum class plugin_type { synth, fx };
 
 // module ui grouping
 struct module_section_gui final {
+  int index;
   gui_position position;
   gui_dimension dimension;
 
-  void validate(plugin_topo const& plugin) const;
+  void validate(plugin_topo const& plugin, int index_) const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
 };
 

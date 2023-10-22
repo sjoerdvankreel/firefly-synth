@@ -4,11 +4,13 @@
 namespace plugin_base {
 
 void 
-module_section_gui::validate(plugin_topo const& plugin) const
+module_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
-  auto return_true = [](int) {return true; };
+  assert(this->index == index_);
+  auto always_visible = [](int) {return true; };
+  auto include = [this, &plugin](int m) { return plugin.modules[m].gui.section == this->index; };
   position.validate(plugin.gui.dimension); 
-  dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), return_true, return_true);
+  dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
 }
 
 void
@@ -29,7 +31,7 @@ plugin_topo::validate() const
   auto return_true = [](int) { return true; };
   gui.dimension.validate(vector_map(gui.sections, [](auto const& s) { return s.position; }), return_true, return_true);
   for(int s = 0; s < gui.sections.size(); s++)
-    gui.sections[s].validate(*this);
+    gui.sections[s].validate(*this, s);
 
   int stage = 0;
   std::set<std::string> module_ids;

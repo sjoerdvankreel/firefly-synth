@@ -53,9 +53,10 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
 }
 
 module_section_gui
-make_module_section_gui(gui_position const& position, gui_dimension const& dimension)
+make_module_section_gui(int index, gui_position const& position, gui_dimension const& dimension)
 {
   module_section_gui result = {};
+  result.index = index;
   result.position = position;
   result.dimension = dimension;
   return result; 
@@ -87,6 +88,7 @@ make_module_gui(int section, gui_position const& position, gui_layout layout, gu
 {
   module_topo_gui result = {};
   result.layout = layout;
+  result.section = section;
   result.position = position;
   result.dimension = dimension;
   return result;
