@@ -23,6 +23,7 @@ module_engine_factory;
 
 // module ui
 struct module_topo_gui final {
+  int section;
   gui_layout layout;
   gui_position position;
   gui_dimension dimension;

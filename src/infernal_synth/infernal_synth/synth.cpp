@@ -7,6 +7,10 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+enum { 
+  section_glfo, section_vlfo, section_env, section_osc, 
+  section_filter, section_cv_matrix, section_delay, section_monitor, section_count  };
+
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
@@ -27,15 +31,25 @@ synth_topo()
   result->gui.dimension.row_sizes = std::vector<int>(8, 1);
   result->gui.dimension.column_sizes = std::vector<int>(8, 1);
 
+  result->gui.sections.resize(section_count);
+  result->gui.sections[section_env] = { { 2, 0, 2, 4 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_osc] = { { 4, 0, 2, 4 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_delay] = { { 6, 4, 1, 4 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_glfo] = { { 0, 0, 2, 2 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_vlfo] = { { 0, 0, 2, 2 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_monitor] = { { 7, 4, 1, 4 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_filter] = { { 7, 4, 1, 4 } , { { 1 }, { 1 } } };
+  result->gui.sections[section_cv_matrix] = { { 0, 4, 6, 4 } , { { 1 }, { 1 } } };
+
   result->modules.resize(module_count);
-  result->modules[module_env] = env_topo({ 2, 0, 2, 4 });
-  result->modules[module_osc] = osc_topo({ 4, 0, 2, 4 });
-  result->modules[module_delay] = delay_topo({ 6, 4, 1, 4 });
-  result->modules[module_glfo] = lfo_topo({ 0, 0, 2, 2 }, true);
-  result->modules[module_vlfo] = lfo_topo({ 0, 2, 2, 2 }, false);
-  result->modules[module_monitor] = monitor_topo({ 7, 4, 1, 4 }, result->polyphony);
-  result->modules[module_filter] = filter_topo({ 6, 0, 2, 4 }, result->modules[module_osc].info.slot_count);
-  result->modules[module_cv_matrix] = cv_matrix_topo({ 0, 4, 6, 4 },
+  result->modules[module_env] = env_topo(section_env, { 1, 1 });
+  result->modules[module_osc] = osc_topo(section_osc, { 1, 1 });
+  result->modules[module_delay] = delay_topo(section_delay, { 1, 1 });
+  result->modules[module_glfo] = lfo_topo(section_glfo, { 1, 1 }, true);
+  result->modules[module_vlfo] = lfo_topo(section_vlfo, { 1, 1 }, false);
+  result->modules[module_monitor] = monitor_topo(section_monitor, { 1, 1 }, result->polyphony);
+  result->modules[module_filter] = filter_topo(section_filter, { 1, 1 }, result->modules[module_osc].info.slot_count);
+  result->modules[module_cv_matrix] = cv_matrix_topo(section_cv_matrix, { 1, 1 },
     { &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
     { &result->modules[module_osc], &result->modules[module_filter] });
   return result;

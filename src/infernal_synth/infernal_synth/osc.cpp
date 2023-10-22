@@ -40,12 +40,12 @@ public:
 };
 
 module_topo
-osc_topo(plugin_base::gui_position const& pos)
+osc_topo(int section, plugin_base::gui_position const& pos)
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
-    make_module_gui(gui_layout::tabbed, pos, { { 1 }, { 3, 2 } })));
+    make_module_gui(section, pos, gui_layout::tabbed, { { 1 }, { 3, 2 } })));
 
   result.sections.emplace_back(make_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),

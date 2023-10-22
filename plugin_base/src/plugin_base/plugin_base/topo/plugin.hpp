@@ -11,6 +11,13 @@ namespace plugin_base {
 
 enum class plugin_type { synth, fx };
 
+// module ui grouping
+struct module_section_gui final {
+  gui_position position;
+  gui_dimension dimension;
+  //INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
+};
+
 // plugin ui
 struct plugin_topo_gui final {
   int min_width;
@@ -20,6 +27,7 @@ struct plugin_topo_gui final {
   int aspect_ratio_width;
   int aspect_ratio_height;
   gui_dimension dimension;
+  std::vector<module_section_gui> sections;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };

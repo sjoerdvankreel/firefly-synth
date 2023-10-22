@@ -26,7 +26,7 @@ make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const&
 module_dsp
 make_module_dsp(module_stage stage, module_output output, int output_count, int scratch_count);
 module_topo_gui
-make_module_gui(gui_layout layout, gui_position const& position, gui_dimension const& dimension);
+make_module_gui(int section,gui_position const& position, gui_layout layout, gui_dimension const& dimension);
 
 param_dsp
 make_param_dsp(param_direction direction, param_rate rate, param_automate automate);

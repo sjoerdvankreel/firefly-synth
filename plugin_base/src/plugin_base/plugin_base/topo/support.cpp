@@ -74,7 +74,7 @@ make_module_dsp(module_stage stage, module_output output, int output_count, int 
 }
 
 module_topo_gui
-make_module_gui(gui_layout layout, gui_position const& position, gui_dimension const& dimension)
+make_module_gui(int section, gui_position const& position, gui_layout layout, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
   result.layout = layout;
