@@ -8,9 +8,14 @@ namespace plugin_base {
 void
 autofit_label::textWasChanged()
 {
-  float fh = getFont().getHeight();
-  float fw = getFont().getStringWidthFloat(getText());
-  setSize(std::ceil(fw), std::ceil(fh));
+  auto border_size = getBorderSize();
+  float th = getFont().getHeight();
+  float tw = getFont().getStringWidthFloat(getText());
+  float nw = std::ceil(tw) + border_size.getLeftAndRight();
+  if(getHeight() > 0)
+    setSize(nw, getHeight());
+  else
+    setSize(nw, std::ceil(th) + border_size.getTopAndBottom());
 }
 
 param_component::
@@ -47,7 +52,7 @@ param_textbox::textEditorTextChanged(TextEditor&)
 
 param_value_label::
 param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both) :
-param_component(gui, module, param), Label(), _both(both) 
+param_component(gui, module, param), autofit_label(), _both(both)
 {
   for (int d = 0; d < param->param->dependency_indices.size(); d++)
     _global_dependency_indices.push_back(gui->gui_state()->desc().mappings.topo_to_index

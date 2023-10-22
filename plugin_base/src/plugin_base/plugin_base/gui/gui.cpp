@@ -274,6 +274,9 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   gui_position label_position;
 
   auto& label = make_param_label(module, param);
+  assert(label.getWidth() > 0);
+  assert(label.getHeight() > 0);
+
   switch (param.param->gui.label.align)
   {
   case gui_label_align::top:

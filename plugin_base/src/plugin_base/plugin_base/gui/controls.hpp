@@ -49,7 +49,7 @@ public:
 // parameter value or name+value display
 class param_value_label:
 public param_component, 
-public juce::Label
+public autofit_label
 {
   bool const _both;
   std::vector<int> _global_dependency_indices = {};
