@@ -26,13 +26,13 @@ sync_or_rate_into_scratch(
   return result;
 }
 
-jarray<float, 1> const&
+inline jarray<float, 1> const&
 sync_or_freq_into_scratch(
   plugin_block const& block, bool sync, int module, 
   int freq_p, int num_p, int den_p, int scratch)
 { return sync_or_rate_into_scratch(block, sync, module, freq_p, num_p, den_p, scratch, timesig_to_freq); }
 
-jarray<float, 1> const&
+inline jarray<float, 1> const&
 sync_or_time_into_scratch(
   plugin_block const& block, bool sync, int module, 
   int time_p, int num_p, int den_p, int scratch)
