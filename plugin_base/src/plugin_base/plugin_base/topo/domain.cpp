@@ -50,8 +50,8 @@ param_domain::plain_to_text(bool io, plain_value plain) const
   assert(type != domain_type::dependent);
 
   std::string prefix = "";
-  if(min < 0 &&  ((is_real() && plain.real() > 0) 
-    || (!is_real() && plain.step() > 0)))
+  if(min < 0 &&  ((is_real() && plain.real() >= 0) 
+    || (!is_real() && plain.step() >= 0)))
     prefix = "+";
 
   switch (type)
@@ -66,6 +66,7 @@ param_domain::plain_to_text(bool io, plain_value plain) const
   std::ostringstream stream;
   int mul = display == domain_display::percentage ? 100 : 1;
   stream << std::fixed << std::setprecision(precision) << (plain.real() * mul);
+  stream << unit;
   return prefix + stream.str();
 }
 
