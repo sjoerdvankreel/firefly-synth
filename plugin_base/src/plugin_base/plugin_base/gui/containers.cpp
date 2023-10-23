@@ -28,6 +28,32 @@ grid_component::add(Component& child, gui_position const& position)
   _positions.push_back(position);
 }
 
+int 
+grid_component::autofit_width() const
+{
+  // ignore span
+  int result = 0;
+  for(int c = 0; c < _dimension.column_sizes.size(); c++)
+    for (int i = 0; i < _positions.size(); i++)
+      if(_positions[i].column == c)
+        if(_positions[i].row == 0)
+          result += dynamic_cast<autofit_component&>(*getChildComponent(i)).autofit_width();
+  return result;
+}
+
+int 
+grid_component::autofit_height() const
+{
+  // ignore span
+  int result = 0;
+  for (int r = 0; r < _dimension.row_sizes.size(); r++)
+    for (int i = 0; i < _positions.size(); i++)
+      if (_positions[i].row == r)
+        if (_positions[i].column == 0)
+          result += dynamic_cast<autofit_component&>(*getChildComponent(i)).autofit_height();
+  return result;
+}
+
 void 
 grid_component::resized()
 {
@@ -46,8 +72,8 @@ grid_component::resized()
           if(_positions[p].column == c && _positions[p].row == i)
           {
             auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-            assert(autofit_child);
-            max_col_height = std::max(max_col_height, autofit_child->autofit_size().getY());
+            assert(autofit_child && autofit_child->autofit_height() > 0);
+            max_col_height = std::max(max_col_height, autofit_child->autofit_height());
           }
       grid.templateRows.add(Grid::Px(max_col_height));
     }
@@ -65,8 +91,8 @@ grid_component::resized()
           if (_positions[p].row == r && _positions[p].column == i)
           {
             auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-            assert(autofit_child);
-            max_row_width = std::max(max_row_width, autofit_child->autofit_size().getX());
+            assert(autofit_child && autofit_child->autofit_width() > 0);
+            max_row_width = std::max(max_row_width, autofit_child->autofit_width());
           }
       grid.templateColumns.add(Grid::Px(max_row_width));
     }

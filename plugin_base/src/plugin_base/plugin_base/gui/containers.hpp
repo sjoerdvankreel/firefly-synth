@@ -19,13 +19,17 @@ public:
 // grid component as opposed to grid layout
 // resizes children on resize
 class grid_component:
-public juce::Component
+public juce::Component,
+public autofit_component
 {
   gui_dimension const _dimension;
   std::vector<gui_position> _positions = {};
 
 public:
   void resized() override;
+  int autofit_width() const override;
+  int autofit_height() const override;
+
   void add(Component& child, gui_position const& position);
   void add(Component& child, bool vertical, int position) 
   { add(child, gui_position { vertical? position: 0, vertical? 0: position }); }

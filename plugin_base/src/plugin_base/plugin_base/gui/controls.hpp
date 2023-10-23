@@ -16,8 +16,8 @@ public autofit_component
 {
 public:
   void textWasChanged() override final;
-  juce::Point<int> autofit_size() const override 
-  { return { getWidth(), getHeight() }; }
+  int autofit_width() const override { return getWidth(); }
+  int autofit_height() const override { return getHeight(); }
 };
 
 // fixed size checkbox
@@ -27,8 +27,8 @@ public autofit_component
 {
 public:
   autofit_togglebutton() { setSize(24, 24); }
-  juce::Point<int> autofit_size() const override 
-  { return { getWidth(), getHeight() }; }
+  int autofit_width() const override { return getWidth(); }
+  int autofit_height() const override { return getHeight(); }
 };
 
 // dropdown that resizes to largest item
@@ -40,8 +40,8 @@ public autofit_component
 public:
   void autofit();
   autofit_combobox(bool autofit): _autofit(autofit) {}
-  juce::Point<int> autofit_size() const override 
-  { return { getWidth(), getHeight() }; }
+  int autofit_width() const override { return getWidth(); }
+  int autofit_height() const override { return getHeight(); }
 };
 
 // binding_component that is additionally bound to a single parameter value
