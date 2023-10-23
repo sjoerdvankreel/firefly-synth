@@ -9,8 +9,7 @@
 namespace plugin_base {
 
 // for stuff that knows it's own size e.g. static labels, dropdowns, checkboxes 
-// and containers made up only of autofit components, to allow autofit in grids.
-// returns 0 if unknown, in which case it cannot be used in autofit mode
+// and containers made up only of autofit components, to allow autofit in grids
 class autofit_component
 {
 public:
