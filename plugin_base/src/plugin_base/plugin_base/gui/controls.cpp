@@ -133,7 +133,7 @@ param_component(gui, module, param), TextEditor()
 
 param_toggle_button::
 param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param):
-param_component(gui, module, param), ToggleButton()
+param_component(gui, module, param), autofit_togglebutton()
 { 
   auto value = param->param->domain.default_plain();
   _checked = value.step() != 0;

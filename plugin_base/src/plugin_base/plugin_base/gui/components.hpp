@@ -8,6 +8,15 @@
 
 namespace plugin_base {
 
+// for stuff that knows it's own size e.g. static labels, dropdowns, checkboxes 
+// and containers made up only of autofit components, to allow autofit in grids.
+// returns 0 if unknown, in which case it cannot be used in autofit mode
+class autofit_component
+{
+public:
+  virtual juce::Point<int> autofit_size() const = 0;
+};
+
 // base class for anything that should react to gui_bindings
 // i.e. has it's enabled/visible bound to a set of plugin parameters
 class binding_component:

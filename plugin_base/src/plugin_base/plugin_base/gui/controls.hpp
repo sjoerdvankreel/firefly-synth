@@ -11,20 +11,37 @@ namespace plugin_base {
 
 // label that resizes to text content
 class autofit_label:
-public juce::Label
+public juce::Label,
+public autofit_component
 {
 public:
-  virtual void textWasChanged() override final;
+  void textWasChanged() override final;
+  juce::Point<int> autofit_size() const override 
+  { return { getWidth(), getHeight() }; }
+};
+
+// fixed size checkbox
+class autofit_togglebutton :
+public juce::ToggleButton,
+public autofit_component
+{
+public:
+  autofit_togglebutton() { setSize(24, 24); }
+  juce::Point<int> autofit_size() const override 
+  { return { getWidth(), getHeight() }; }
 };
 
 // dropdown that resizes to largest item
 class autofit_combobox :
-public juce::ComboBox
+public juce::ComboBox,
+public autofit_component
 {
   bool const _autofit;
 public:
   void autofit();
   autofit_combobox(bool autofit): _autofit(autofit) {}
+  juce::Point<int> autofit_size() const override 
+  { return { getWidth(), getHeight() }; }
 };
 
 // binding_component that is additionally bound to a single parameter value
@@ -95,7 +112,7 @@ public:
 // checkbox bound to single parameter
 class param_toggle_button :
 public param_component,
-public juce::ToggleButton, 
+public autofit_togglebutton,
 public juce::Button::Listener
 {
   bool _checked = false;

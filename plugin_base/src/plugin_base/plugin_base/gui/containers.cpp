@@ -44,7 +44,11 @@ grid_component::resized()
       for (int c = 0; c < _dimension.column_sizes.size(); c++)
         for(int p = 0; p < _positions.size(); p++)
           if(_positions[p].column == c && _positions[p].row == i)
-            max_col_height = std::max(max_col_height, getChildComponent(p)->getHeight());
+          {
+            auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
+            assert(autofit_child);
+            max_col_height = std::max(max_col_height, autofit_child->autofit_size().getY());
+          }
       grid.templateRows.add(Grid::Px(max_col_height));
     }
 
@@ -59,7 +63,11 @@ grid_component::resized()
       for (int r = 0; r < _dimension.row_sizes.size(); r++)
         for (int p = 0; p < _positions.size(); p++)
           if (_positions[p].row == r && _positions[p].column == i)
-            max_row_width = std::max(max_row_width, getChildComponent(p)->getWidth());
+          {
+            auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
+            assert(autofit_child);
+            max_row_width = std::max(max_row_width, autofit_child->autofit_size().getX());
+          }
       grid.templateColumns.add(Grid::Px(max_row_width));
     }
 
