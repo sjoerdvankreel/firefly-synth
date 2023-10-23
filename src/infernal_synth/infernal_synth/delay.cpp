@@ -12,8 +12,8 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 enum { section_main };
-enum { type_off, type_rate, type_sync };
-enum { param_type, param_rate, param_num, param_den };
+enum { type_off, type_time, type_sync };
+enum { param_type, param_time, param_num, param_den };
 
 static std::vector<list_item>
 type_items()
@@ -56,15 +56,15 @@ delay_topo(int section, plugin_base::gui_position const& pos)
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
       make_label_none())));
 
-  auto& rate = result.params.emplace_back(make_param(
-    make_topo_info("{C39B97B3-B417-4C72-92C0-B8D764347792}", "Rate", param_rate, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 2, 1, 2, "Hz"),
+  auto& time = result.params.emplace_back(make_param(
+    make_topo_info("{C39B97B3-B417-4C72-92C0-B8D764347792}", "Time", param_time, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 2, 1, 2, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 2 },
-      make_label_none())));
-  rate.gui.bindings.enabled.params = { param_type };
-  rate.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_rate; };
-  rate.gui.bindings.visible.params = { param_type };
-  rate.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != type_sync; };
+      make_label(gui_label_contents::both, gui_label_align::left, gui_label_justify::center))));
+  time.gui.bindings.enabled.params = { param_type };
+  time.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_time; };
+  time.gui.bindings.visible.params = { param_type };
+  time.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != type_sync; };
 
   auto& num = result.params.emplace_back(make_param(
     make_topo_info("{D4A46363-DB92-425C-A9F7-D6641115812E}", "Num", param_num, 1),
@@ -112,14 +112,14 @@ delay_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   if (type == type_off) return;
 
-  auto const& rate_curve = sync_or_freq_into_scratch(block,
-    type == type_sync, module_delay, param_rate, param_num, param_den, 0);
+  auto const& time_curve = sync_or_freq_into_scratch(block,
+    type == type_sync, module_delay, param_time, param_num, param_den, 0);
   for (int c = 0; c < 2; c++)  
     for(int f = block.start_frame; f < block.end_frame; f++)
     {
-      int samples = block.sample_rate / rate_curve[f];
+      int samples = block.sample_rate * time_curve[f];
       block.out->host_audio[c][f] = block.out->mixdown[c][f];
-      block.out->host_audio[c][f] += _buffer[c][(_pos + f + samples) % _capacity] * 0.5f;
+      block.out->host_audio[c][f] += _buffer[c][(_pos + f + _capacity - samples) % _capacity] * 0.5f;
       _buffer[c][(_pos + f) % _capacity] = block.out->mixdown[c][f];
     }
   _pos += block.end_frame - block.start_frame;
