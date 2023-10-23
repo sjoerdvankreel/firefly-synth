@@ -1,5 +1,5 @@
 #include <plugin_base/dsp/engine.hpp>
-#include <plugin_base/dsp/support.hpp>
+#include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 
@@ -112,7 +112,7 @@ delay_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   if (type == type_off) return;
 
-  auto const& time_curve = sync_or_freq_into_scratch(block,
+  auto const& time_curve = sync_or_time_into_scratch(block,
     type == type_sync, module_delay, param_time, param_num, param_den, 0);
   for (int c = 0; c < 2; c++)  
     for(int f = block.start_frame; f < block.end_frame; f++)
