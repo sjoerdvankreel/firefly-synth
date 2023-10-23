@@ -20,7 +20,7 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{29E96CF3-6957-40EB-BE8D-6B3E9786B9A4}", "Off");
-  result.emplace_back("{0B4D8D4C-1969-4659-9ED9-0BB9EE1AA5B6}", "Rate");
+  result.emplace_back("{0B4D8D4C-1969-4659-9ED9-0BB9EE1AA5B6}", "Time");
   result.emplace_back("{6BD6BD00-A02B-478A-9463-8BAEC7A3BBFB}", "Sync");
   return result;
 }
@@ -60,7 +60,7 @@ delay_topo(int section, plugin_base::gui_position const& pos)
     make_topo_info("{C39B97B3-B417-4C72-92C0-B8D764347792}", "Time", param_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 2, 1, 2, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 2 },
-      make_label(gui_label_contents::both, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.params = { param_type };
   time.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_time; };
   time.gui.bindings.visible.params = { param_type };
