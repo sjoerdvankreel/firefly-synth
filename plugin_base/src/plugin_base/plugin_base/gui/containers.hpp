@@ -27,8 +27,8 @@ public autofit_component
 
 public:
   void resized() override;
-  int autofit_width() const override;
-  int autofit_height() const override;
+  int fixed_width() const override;
+  int fixed_height() const override;
 
   void add(Component& child, gui_position const& position);
   void add(Component& child, bool vertical, int position) 

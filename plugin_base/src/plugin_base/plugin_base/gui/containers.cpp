@@ -29,7 +29,7 @@ grid_component::add(Component& child, gui_position const& position)
 }
 
 int 
-grid_component::autofit_width() const
+grid_component::fixed_width() const
 {
   // ignore span
   int result = 0;
@@ -46,7 +46,7 @@ grid_component::autofit_width() const
 }
 
 int 
-grid_component::autofit_height() const
+grid_component::fixed_height() const
 {
   // ignore span
   int result = 0;
@@ -72,8 +72,9 @@ grid_component::resized()
       grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
     else if (_dimension.row_sizes[i] < 0)
       grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
-    else // autosize, dont bother with span
+    else 
     {
+      // autosize, dont bother with span
       int max_col_height = 0;
       for (int c = 0; c < _dimension.column_sizes.size(); c++)
         for(int p = 0; p < _positions.size(); p++)
@@ -91,8 +92,9 @@ grid_component::resized()
       grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
     else if (_dimension.column_sizes[i] < 0)
       grid.templateColumns.add(Grid::Px(-_dimension.column_sizes[i]));
-    else // autosize, dont bother with span
+    else 
     { 
+      // autosize, dont bother with span
       int max_row_width = 0;
       for (int r = 0; r < _dimension.row_sizes.size(); r++)
         for (int p = 0; p < _positions.size(); p++)
