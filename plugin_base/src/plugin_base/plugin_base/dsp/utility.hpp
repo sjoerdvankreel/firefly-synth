@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/topo/domain.hpp>
 #include <plugin_base/shared/jarray.hpp>
 
 #include <cmath>
@@ -20,11 +21,11 @@ inline void check_bipolar(T val)
 { assert((T)-1 <= val && val <= (T)1); }
 
 inline float
-timesig_to_freq(float bpm, float num, float den)
-{ return bpm / (60.0f * 4.0f * num / den); }
+timesig_to_freq(float bpm, timesig const& sig)
+{ return bpm / (60.0f * 4.0f * sig.num / sig.den); }
 inline float
-timesig_to_time(float bpm, float num, float den)
-{ return 1.0f / timesig_to_freq(bpm, num, den); }
+timesig_to_time(float bpm, timesig const& sig)
+{ return 1.0f / timesig_to_freq(bpm, sig); }
 
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);

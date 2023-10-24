@@ -13,7 +13,7 @@ namespace infernal_synth {
 
 enum { section_main };
 enum { type_off, type_time, type_sync };
-enum { param_type, param_time, param_num, param_den, param_gain };
+enum { param_type, param_time, param_tempo, param_gain };
 
 static std::vector<list_item>
 type_items()
@@ -48,7 +48,7 @@ delay_topo(int section, plugin_base::gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
 
   result.params.emplace_back(make_param(
     make_topo_info("{A8638DE3-B574-4584-99A2-EC6AEE725839}", "Type", param_type, 1),
@@ -59,7 +59,7 @@ delay_topo(int section, plugin_base::gui_position const& pos)
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{C39B97B3-B417-4C72-92C0-B8D764347792}", "Time", param_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 2, 1, 2, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 2 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.params = { param_type };
   time.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_time; };
@@ -67,25 +67,17 @@ delay_topo(int section, plugin_base::gui_position const& pos)
   time.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] != type_sync; };
 
   auto& num = result.params.emplace_back(make_param(
-    make_topo_info("{D4A46363-DB92-425C-A9F7-D6641115812E}", "Num", param_num, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 1, 0),
+    make_topo_info("{D4A46363-DB92-425C-A9F7-D6641115812E}", "Tempo", param_tempo, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig({ { 1, 16 }, { 1, 8, }, { 1, 4 } }, { 1, 8 }),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label_none())));
   num.gui.bindings.visible.params = { param_type };
   num.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
-
-  auto& den = result.params.emplace_back(make_param(
-    make_topo_info("{9A49BB43-1BD1-4794-B0B1-7094C188D6ED}", "Den", param_den, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 4, 0),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  den.gui.bindings.visible.params = { param_type };
-  den.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
 
   result.params.emplace_back(make_param(
     make_topo_info("{2E80A7CE-735B-48C4-8681-FBE1EE003297}", "Gain", param_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.engine_factory = [](auto const&, int sample_rate, int) ->
@@ -119,7 +111,7 @@ delay_engine::process(plugin_block& block)
   if (type == type_off) return;
 
   auto const& time_curve = sync_or_time_into_scratch(block,
-    type == type_sync, module_delay, param_time, param_num, param_den, 0);
+    type == type_sync, module_delay, param_time, param_tempo, 0);
   auto const& gain_curve = block.state.own_accurate_automation[param_gain][0];
   for (int c = 0; c < 2; c++)
     for(int f = block.start_frame; f < block.end_frame; f++)

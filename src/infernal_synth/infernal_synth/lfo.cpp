@@ -13,7 +13,7 @@ namespace infernal_synth {
 
 enum { section_main };
 enum { type_off, type_rate, type_sync };
-enum { param_type, param_rate, param_num, param_den };
+enum { param_type, param_rate, param_tempo };
 
 static std::vector<list_item>
 type_items()
@@ -55,7 +55,7 @@ lfo_topo(int section, plugin_base::gui_position const& pos, bool global)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
@@ -66,28 +66,20 @@ lfo_topo(int section, plugin_base::gui_position const& pos, bool global)
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1, 1, 2 }, 
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, 
     make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   rate.gui.bindings.enabled.params = { param_type };
   rate.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_rate; };
   rate.gui.bindings.visible.params = { param_type };
   rate.gui.bindings.visible.selector = [] (auto const& vs) { return vs[0] != type_sync; };
 
-  auto& num = result.params.emplace_back(make_param(
-    make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Num", param_num, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 1, 0),
+  auto& tempo = result.params.emplace_back(make_param(
+    make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig({ { 1, 16 }, { 1, 8, }, { 1, 4 } }, { 1, 8 }),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, 
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  num.gui.bindings.visible.params = { param_type };
-  num.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
-
-  auto& den = result.params.emplace_back(make_param(
-    make_topo_info("{84B58AC9-C401-4580-978C-60591AFB757B}", "Den", param_den, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, 16, 4, 0),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, 
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  den.gui.bindings.visible.params = { param_type };
-  den.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
+      make_label_none())));
+  tempo.gui.bindings.visible.params = { param_type };
+  tempo.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
 
   result.engine_factory = [module](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
@@ -100,8 +92,7 @@ lfo_engine::process(plugin_block& block)
 {
   int type = block.state.own_block_automation[param_type][0].step();
   if(type == type_off) return; 
-  auto const& rate_curve = sync_or_freq_into_scratch(block, 
-    type == type_sync, _module, param_rate, param_num, param_den, 0);
+  auto const& rate_curve = sync_or_freq_into_scratch(block, type == type_sync, _module, param_rate, param_tempo, 0);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;

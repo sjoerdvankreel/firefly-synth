@@ -16,26 +16,24 @@ template <class TransformTimesig>
 jarray<float, 1> const&
 sync_or_rate_into_scratch(
   plugin_block const& block, bool sync, int module, int rate_p,
-  int num_p, int den_p, int scratch, TransformTimesig transform_timesig)
+  int timesig_p, int scratch, TransformTimesig transform_timesig)
 {
   auto& result = block.state.own_scratch[scratch];
-  int num = block.state.own_block_automation[num_p][0].step();
-  int den = block.state.own_block_automation[den_p][0].step();
-  if (sync) std::fill(result.begin(), result.end(), transform_timesig(block.host.bpm, num, den));
+  int sig_index = block.state.own_block_automation[timesig_p][0].step();
+  timesig sig = block.plugin.modules[module].params[timesig_p].domain.timesigs[sig_index];
+  if (sync) std::fill(result.begin(), result.end(), transform_timesig(block.host.bpm, sig));
   else normalized_to_raw_into(block, module, rate_p, block.state.own_accurate_automation[rate_p][0], result);
   return result;
 }
 
 inline jarray<float, 1> const&
 sync_or_freq_into_scratch(
-  plugin_block const& block, bool sync, int module, 
-  int freq_p, int num_p, int den_p, int scratch)
-{ return sync_or_rate_into_scratch(block, sync, module, freq_p, num_p, den_p, scratch, timesig_to_freq); }
+  plugin_block const& block, bool sync, int module, int freq_p, int timesig_p, int scratch)
+{ return sync_or_rate_into_scratch(block, sync, module, freq_p, timesig_p, scratch, timesig_to_freq); }
 
 inline jarray<float, 1> const&
 sync_or_time_into_scratch(
-  plugin_block const& block, bool sync, int module, 
-  int time_p, int num_p, int den_p, int scratch)
-{ return sync_or_rate_into_scratch(block, sync, module, time_p, num_p, den_p, scratch, timesig_to_time); }
+  plugin_block const& block, bool sync, int module, int time_p, int timesig_p, int scratch)
+{ return sync_or_rate_into_scratch(block, sync, module, time_p, timesig_p, scratch, timesig_to_time); }
 
 }

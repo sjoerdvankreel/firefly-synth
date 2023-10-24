@@ -131,6 +131,18 @@ make_domain_step(int min, int max, int default_, int display_offset)
 }
 
 param_domain
+make_domain_timesig(std::vector<timesig> const& sigs, timesig const& default_)
+{
+  param_domain result = {};
+  result.min = 0;
+  result.timesigs = sigs;
+  result.max = sigs.size() - 1;
+  result.type = domain_type::timesig;
+  result.default_ = default_.to_text();
+  return result;
+}
+
+param_domain
 make_domain_item(std::vector<list_item> const& items, std::string const& default_)
 {
   param_domain result = {};

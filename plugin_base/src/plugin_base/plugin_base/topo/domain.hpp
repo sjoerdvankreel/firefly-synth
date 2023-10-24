@@ -12,13 +12,24 @@
 namespace plugin_base {
 
 enum class domain_display { normal, percentage };
-enum class domain_type { toggle, step, name, item, dependent, linear, log };
+enum class domain_type { toggle, step, name, item, timesig, dependent, linear, log };
+
+// tempo relative to bpm
+struct timesig
+{
+  int num;
+  int den;
+
+  void validate() const;
+  std::string to_text() const;
+};
 
 // item in list
 struct list_item final {
   std::string id = {};
   std::string name = {};
 
+  void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   list_item(topo_tag const& tag);
   list_item(std::string const& id, std::string const& name);
@@ -42,7 +53,8 @@ struct param_domain final {
   domain_type type;
   domain_display display;
   std::vector<list_item> items;
-  std::vector<std::string> names;  
+  std::vector<timesig> timesigs;
+  std::vector<std::string> names;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const;

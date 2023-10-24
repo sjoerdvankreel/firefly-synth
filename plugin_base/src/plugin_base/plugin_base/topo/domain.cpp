@@ -1,9 +1,34 @@
 #include <plugin_base/topo/domain.hpp>
 
+#include <set>
+#include <numeric>
 #include <sstream>
 #include <iomanip>
 
 namespace plugin_base {
+
+void
+list_item::validate() const
+{
+  assert(id.size());
+  assert(name.size());
+}
+
+void
+timesig::validate() const
+{
+  assert(num >= 0);
+  assert(num > 0 || den == 1);
+  assert(0 <= den && den < 100);
+  assert(num == 0 || std::gcd(num, den) == 1);
+}
+
+std::string
+timesig::to_text() const
+{
+  if (num == 0) return "0";
+  return std::to_string(num) + "/" + std::to_string(den);
+}
 
 plain_value
 param_domain::default_plain() const
@@ -58,6 +83,7 @@ param_domain::plain_to_text(bool io, plain_value plain) const
   {
   case domain_type::name: return names[plain.step()];
   case domain_type::toggle: return plain.step() == 0 ? "Off" : "On";
+  case domain_type::timesig: return timesigs[plain.step()].to_text();
   case domain_type::item: return io? items[plain.step()].id: items[plain.step()].name;
   case domain_type::step: return prefix + std::to_string(plain.step() + display_offset);
   default: break;
@@ -75,6 +101,14 @@ param_domain::text_to_plain(
   bool io, std::string const& textual, plain_value& plain) const
 {
   assert(type != domain_type::dependent);
+
+  if (type == domain_type::timesig)
+  {
+    for (int i = 0; i < timesigs.size(); i++)
+      if (textual == timesigs[i].to_text())
+        return plain = plain_value::from_step(i), true;
+    return false;
+  }
 
   if (type == domain_type::name)
   {
@@ -124,6 +158,12 @@ param_domain::validate() const
   assert((type == domain_type::step) || (display_offset == 0));
   assert(display == domain_display::normal || type == domain_type::linear);
 
+  if (type == domain_type::dependent)
+  {
+    assert(min == 0);
+    assert(display_offset == 0);
+  }
+
   if (type == domain_type::toggle)
   {
     assert(min == 0);
@@ -136,6 +176,10 @@ param_domain::validate() const
     assert(unit.size() == 0);
     assert(names.size() > 0);
     assert(max == names.size() - 1);
+    
+    std::set<std::string> seen;
+    for(int i = 0; i <names.size(); i++)
+      INF_ASSERT_EXEC(seen.insert(names[i]).second);
   }
 
   if (type == domain_type::item)
@@ -144,12 +188,30 @@ param_domain::validate() const
     assert(unit.size() == 0);
     assert(items.size() > 0);
     assert(max == items.size() - 1);
+
+    std::set<std::string> seen_id;
+    std::set<std::string> seen_name;
+    for(int i = 0; i < items.size(); i++)
+    {
+      items[i].validate();
+      INF_ASSERT_EXEC(seen_id.insert(items[i].id).second);
+      INF_ASSERT_EXEC(seen_name.insert(items[i].name).second);
+    }
   }
 
-  if (type == domain_type::dependent)
+  if (type == domain_type::timesig)
   {
     assert(min == 0);
-    assert(display_offset == 0);
+    assert(unit.size() == 0);
+    assert(timesigs.size() > 0);
+    assert(max == timesigs.size() - 1);
+
+    std::set<std::string> seen;
+    for (int i = 0; i < timesigs.size(); i++)
+    {
+      timesigs[i].validate();
+      INF_ASSERT_EXEC(seen.insert(timesigs[i].to_text()).second);
+    }
   }
 
   if (!is_real())
