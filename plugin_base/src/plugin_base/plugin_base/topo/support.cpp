@@ -1,7 +1,34 @@
 #include <plugin_base/topo/support.hpp>
+
 #include <cmath>
+#include <numeric>
 
 namespace plugin_base {
+
+std::vector<timesig>
+make_default_timesigs(int min, int max)
+{
+  assert(max > 0);
+  assert(min >= 0);
+
+  std::vector<timesig> result;
+  std::vector<int> steps { 1, 2, 3, 4, 8 };
+  for(int n = 0; n < steps.size(); n++)
+    for (int d = 0; d < steps.size(); d++)
+      result.push_back({steps[n], steps[d]});
+
+  auto filter_dups = [](auto const& s) { return std::gcd(s.num, s.den) == 1; };
+  result = vector_filter(result, filter_dups);
+  auto filter_max = [max](auto const& s) { return (float)s.num / s.den <= max; };
+  result = vector_filter(result, filter_max);
+  auto filter_min = [min](auto const& s) { return (float)s.num / s.den >= 1.0f / min; };
+  if(min > 0) result = vector_filter(result, filter_min);
+  auto compare = [](auto const& l, auto const& r) { return (float)l.num / l.den < (float)r.num / r.den; };
+  std::sort(result.begin(), result.end(), compare);
+
+  if (min == 0) result.push_back({ 0, 1 });
+  return result;
+}
 
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name)

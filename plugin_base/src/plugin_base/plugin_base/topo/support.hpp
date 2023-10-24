@@ -5,6 +5,9 @@
 
 namespace plugin_base {
 
+std::vector<timesig>
+make_default_timesigs(int min, int max);
+
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
 inline gui_label 
