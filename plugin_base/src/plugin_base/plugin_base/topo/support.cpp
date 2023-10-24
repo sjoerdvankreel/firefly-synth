@@ -1,34 +1,10 @@
 #include <plugin_base/topo/support.hpp>
 
+#include <map>
 #include <cmath>
 #include <numeric>
 
 namespace plugin_base {
-
-std::vector<timesig>
-make_default_timesigs(int min, int max)
-{
-  assert(max > 0);
-  assert(min >= 0);
-
-  std::vector<timesig> result;
-  std::vector<int> steps { 1, 2, 3, 4, 8 };
-  for(int n = 0; n < steps.size(); n++)
-    for (int d = 0; d < steps.size(); d++)
-      result.push_back({steps[n], steps[d]});
-
-  auto filter_dups = [](auto const& s) { return std::gcd(s.num, s.den) == 1; };
-  result = vector_filter(result, filter_dups);
-  auto filter_max = [max](auto const& s) { return (float)s.num / s.den <= max; };
-  result = vector_filter(result, filter_max);
-  auto filter_min = [min](auto const& s) { return (float)s.num / s.den >= 1.0f / min; };
-  if(min > 0) result = vector_filter(result, filter_min);
-  auto compare = [](auto const& l, auto const& r) { return (float)l.num / l.den < (float)r.num / r.den; };
-  std::sort(result.begin(), result.end(), compare);
-
-  if (min == 0) result.push_back({ 0, 1 });
-  return result;
-}
 
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name)
@@ -265,6 +241,40 @@ make_param(topo_info const& info, param_dsp const& dsp, param_domain const& doma
   result.gui = param_topo_gui(gui);
   result.domain = param_domain(domain);
   return result;
+}
+
+std::vector<gui_submenu>
+make_timesig_submenus(std::vector<timesig> const& sigs)
+{
+  std::vector<gui_submenu> result;
+  std::map<int, std::vector<int>> sigs_by_num;
+  for(int i = 0; i < sigs.size(); i++)
+    sigs_by_num[sigs[i].num].push_back(i);
+  for(auto const& sbn: sigs_by_num)
+     result.push_back({ std::to_string(sbn.first), sbn.second });
+  return result;
+}
+
+std::vector<timesig>
+make_timesigs(std::vector<int> const& steps, timesig low, timesig high)
+{
+  assert(low.den > 0);
+  assert(high.den > 0);
+  assert(steps.size());
+
+  std::vector<timesig> result;
+  for (int n = 0; n < steps.size(); n++)
+    for (int d = 0; d < steps.size(); d++)
+      result.push_back({ steps[n], steps[d] });
+
+  auto filter_dups = [](auto const& s) { return std::gcd(s.num, s.den) == 1; };
+  result = vector_filter(result, filter_dups);
+  auto filter_low = [low](auto const& s) { return (float)s.num / s.den >= (float)low.num / low.den; };
+  result = vector_filter(result, filter_low);
+  auto filter_high = [high](auto const& s) { return (float)s.num / s.den <= (float)high.num / high.den; };
+  result = vector_filter(result, filter_high);
+  auto compare = [](auto const& l, auto const& r) { return (float)l.num / l.den < (float)r.num / r.den; };
+  return vector_sort(result, compare);
 }
 
 }
