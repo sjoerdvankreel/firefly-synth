@@ -68,7 +68,7 @@ delay_topo(int section, plugin_base::gui_position const& pos)
 
   auto& num = result.params.emplace_back(make_param(
     make_topo_info("{D4A46363-DB92-425C-A9F7-D6641115812E}", "Tempo", param_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig({ { 1, 16 }, { 1, 8, }, { 1, 4 } }, { 1, 8 }),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 },
       make_label_none())));
   num.gui.bindings.visible.params = { param_type };

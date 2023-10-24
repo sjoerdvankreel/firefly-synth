@@ -8,19 +8,17 @@
 namespace plugin_base {
 
 void
+timesig::validate() const
+{
+  assert(num > 0);
+  assert(den > 0);
+}
+
+void
 list_item::validate() const
 {
   assert(id.size());
   assert(name.size());
-}
-
-void
-timesig::validate() const
-{
-  assert(num >= 0);
-  assert(num > 0 || den == 1);
-  assert(0 <= den && den < 100);
-  assert(num == 0 || std::gcd(num, den) == 1);
 }
 
 std::string

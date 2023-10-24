@@ -87,14 +87,6 @@ vector_index_count(std::vector<std::vector<T>> const& vs)
   return result;
 }
 
-template <class T, class Compare> std::vector<T>
-vector_sort(std::vector<T> const& in, Compare compare)
-{
-  std::vector<T> result(in.begin(), in.end());
-  std::sort(result.begin(), result.end(), compare);
-  return result;
-}
-
 template <class T, class Pred> std::vector<T> 
 vector_filter(std::vector<T> const& in, Pred pred)
 {

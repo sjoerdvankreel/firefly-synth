@@ -267,14 +267,10 @@ make_timesigs(std::vector<int> const& steps, timesig low, timesig high)
     for (int d = 0; d < steps.size(); d++)
       result.push_back({ steps[n], steps[d] });
 
-  auto filter_dups = [](auto const& s) { return std::gcd(s.num, s.den) == 1; };
-  result = vector_filter(result, filter_dups);
   auto filter_low = [low](auto const& s) { return (float)s.num / s.den >= (float)low.num / low.den; };
   result = vector_filter(result, filter_low);
   auto filter_high = [high](auto const& s) { return (float)s.num / s.den <= (float)high.num / high.den; };
-  result = vector_filter(result, filter_high);
-  auto compare = [](auto const& l, auto const& r) { return (float)l.num / l.den < (float)r.num / r.den; };
-  return vector_sort(result, compare);
+  return vector_filter(result, filter_high);
 }
 
 }

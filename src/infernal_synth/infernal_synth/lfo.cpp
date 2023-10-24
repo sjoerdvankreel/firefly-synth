@@ -75,7 +75,7 @@ lfo_topo(int section, plugin_base::gui_position const& pos, bool global)
 
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig(make_default_timesigs({ 1, 64 }, { 4, 1 }), { 1, 4}),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, 
       make_label_none())));
   tempo.gui.submenus = make_timesig_submenus(tempo.domain.timesigs);
