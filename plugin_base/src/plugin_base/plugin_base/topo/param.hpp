@@ -11,6 +11,7 @@
 
 namespace plugin_base {
 
+struct param_topo;
 struct module_topo;
 
 enum class param_rate { accurate, block };
@@ -41,8 +42,9 @@ struct param_topo_gui final {
   gui_edit_type edit_type;
   std::vector<std::vector<int>> submenu_bounds;
 
-  bool is_list() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
+  bool is_list() const;
+  void validate(module_topo const& module, param_topo const& param) const;
 };
 
 // parameter in module

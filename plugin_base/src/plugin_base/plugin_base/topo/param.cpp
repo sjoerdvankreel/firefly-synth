@@ -30,18 +30,33 @@ param_dsp::validate() const
 }
 
 void
+param_topo_gui::validate(module_topo const& module, param_topo const& param) const
+{
+  bindings.validate(module, param.info.slot_count);
+  position.validate(module.sections[section].gui.dimension);
+
+  if (submenu_bounds.size())
+  {
+    assert(is_list());
+    auto all_indices = vector_join(submenu_bounds);
+    std::set<int> indices_set(all_indices.begin(), all_indices.end());
+    assert(all_indices.size() == indices_set.size());
+    assert(*all_indices.begin() == 0);
+    assert(*(all_indices.end() - 1) == param.domain.max);
+  }
+  
+  for (int e = 0; e < bindings.enabled.params.size(); e++)
+    assert(param.info.index != bindings.enabled.params[e]);
+  for (int v = 0; v < bindings.visible.params.size(); v++)
+    assert(param.info.index != bindings.visible.params[v]);
+}
+
+void
 param_topo::validate(module_topo const& module, int index) const
 {
   dsp.validate();
   info.validate();
   domain.validate();
-  gui.bindings.validate(module, info.slot_count);
-  gui.position.validate(module.sections[gui.section].gui.dimension);
-
-  for (int e = 0; e < gui.bindings.enabled.params.size(); e++)
-    assert(info.index != gui.bindings.enabled.params[e]);
-  for (int v = 0; v < gui.bindings.visible.params.size(); v++)
-    assert(info.index != gui.bindings.visible.params[v]);
 
   if (domain.type != domain_type::dependent)
   {
@@ -81,16 +96,6 @@ param_topo::validate(module_topo const& module, int index) const
           || dependent_domains[i].type == domain_type::step);
     }
     assert(max == domain.max);
-  }
-
-  if (gui.submenu_bounds.size())
-  {
-    assert(gui.is_list());
-    auto all_indices = vector_join(gui.submenu_bounds);
-    std::set<int> indices_set(all_indices.begin(), all_indices.end());
-    assert(all_indices.size() == indices_set.size());
-    assert(*all_indices.begin() == 0);
-    assert(*(all_indices.end() - 1) == domain.max);
   }
 
   assert(info.index == index);
