@@ -1,5 +1,6 @@
 #include <plugin_base/topo/param.hpp>
 #include <plugin_base/topo/module.hpp>
+#include <set>
 
 namespace plugin_base {
 
@@ -80,6 +81,16 @@ param_topo::validate(module_topo const& module, int index) const
           || dependent_domains[i].type == domain_type::step);
     }
     assert(max == domain.max);
+  }
+
+  if (gui.submenu_bounds.size())
+  {
+    assert(gui.is_list());
+    auto all_indices = vector_join(gui.submenu_bounds);
+    std::set<int> indices_set(all_indices.begin(), all_indices.end());
+    assert(all_indices.size() == indices_set.size());
+    assert(*all_indices.begin() == 0);
+    assert(*(all_indices.end() - 1) == domain.max);
   }
 
   assert(info.index == index);

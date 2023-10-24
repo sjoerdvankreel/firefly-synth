@@ -80,6 +80,7 @@ lfo_topo(int section, plugin_base::gui_position const& pos, bool global)
       make_label_none())));
   tempo.gui.bindings.visible.params = { param_type };
   tempo.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
+  tempo.gui.submenu_bounds = { { 0, 1, 2, 3, 4, 5, 6, 7 }, { 8, 9, 10, 11, 12, 13, 14 } };
 
   result.engine_factory = [module](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
