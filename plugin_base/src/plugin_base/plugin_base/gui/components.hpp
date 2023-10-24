@@ -13,8 +13,8 @@ namespace plugin_base {
 class autofit_component
 {
 public:
-  virtual int autofit_width() const = 0;
-  virtual int autofit_height() const = 0;
+  virtual int fixed_width() const = 0;
+  virtual int fixed_height() const = 0;
 };
 
 // base class for anything that should react to gui_bindings

@@ -15,7 +15,7 @@ struct gui_dimension;
 // just a guess for validation, increase if needed
 inline int constexpr topo_max = 1024;
 
-enum class gui_label_justify { near, center, far };
+enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, both };
 enum class gui_layout { single, horizontal, vertical, tabbed };
@@ -50,6 +50,13 @@ struct gui_label final {
   gui_label_justify justify;
   gui_label_contents contents;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_label);
+};
+
+// submenu with header and indices into main list
+struct gui_submenu final {
+  std::string name;
+  std::vector<int> indices;
+  void validate() const;
 };
 
 // position in parent grid

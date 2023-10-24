@@ -35,20 +35,22 @@ param_topo_gui::validate(module_topo const& module, param_topo const& param) con
   bindings.validate(module, param.info.slot_count);
   position.validate(module.sections[section].gui.dimension);
 
-  if (submenu_bounds.size())
-  {
-    assert(is_list());
-    auto all_indices = vector_join(submenu_bounds);
-    std::set<int> indices_set(all_indices.begin(), all_indices.end());
-    assert(all_indices.size() == indices_set.size());
-    assert(*all_indices.begin() == 0);
-    assert(*(all_indices.end() - 1) == param.domain.max);
-  }
-  
   for (int e = 0; e < bindings.enabled.params.size(); e++)
     assert(param.info.index != bindings.enabled.params[e]);
   for (int v = 0; v < bindings.visible.params.size(); v++)
     assert(param.info.index != bindings.visible.params[v]);
+
+  if (submenus.size())
+  {
+    assert(is_list());
+    auto all_indices = vector_join(vector_map(submenus, [](auto const& s) { return s.indices; }));
+    std::set<int> indices_set(all_indices.begin(), all_indices.end());
+    assert(all_indices.size() == indices_set.size());
+    assert(*all_indices.begin() == 0);
+    assert(*(all_indices.end() - 1) == param.domain.max);
+    for(int i = 0; i < submenus.size(); i++)
+      submenus[i].validate();
+  }
 }
 
 void

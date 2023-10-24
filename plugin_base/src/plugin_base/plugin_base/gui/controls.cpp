@@ -147,8 +147,24 @@ param_component(gui, module, param),
 autofit_combobox(param->param->gui.edit_type == gui_edit_type::autofit_list)
 {
   auto const& domain = param->param->domain;
-  for(int i = domain.min; i <= domain.max; i++)
-    addItem(domain.raw_to_text(false, i), i - domain.min + 1);
+  auto const& param_gui = param->param->gui;
+  if(!param_gui.submenus.size())
+    for(int i = 0; i <= domain.max; i++)
+      addItem(domain.raw_to_text(false, i), i + 1);
+  else
+  {
+    assert(param_gui.edit_type == gui_edit_type::list);
+    for (int i = 0; i < param_gui.submenus.size(); i++)
+    {
+      PopupMenu submenu;
+      for(int j = 0; j < param_gui.submenus[i].indices.size(); j++)
+      {
+        int index = param_gui.submenus[i].indices[j];
+        submenu.addItem(index + 1, domain.raw_to_text(false, index));
+      }
+      getRootMenu()->addSubMenu(param_gui.submenus[i].name, submenu);
+    }
+  }
   autofit();
   addListener(this);
   setEditableText(false);

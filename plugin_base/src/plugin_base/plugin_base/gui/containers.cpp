@@ -37,7 +37,11 @@ grid_component::autofit_width() const
     for (int i = 0; i < _positions.size(); i++)
       if(_positions[i].column == c)
         if(_positions[i].row == 0)
-          result += dynamic_cast<autofit_component&>(*getChildComponent(i)).autofit_width();
+        {
+          auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
+          assert(child.fixed_width() > 0);
+          result += child.fixed_width();
+        }
   return result;
 }
 
@@ -50,7 +54,11 @@ grid_component::autofit_height() const
     for (int i = 0; i < _positions.size(); i++)
       if (_positions[i].row == r)
         if (_positions[i].column == 0)
-          result += dynamic_cast<autofit_component&>(*getChildComponent(i)).autofit_height();
+        {
+          auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
+          assert(child.fixed_height() > 0);
+          result += child.fixed_height();
+        }
   return result;
 }
 
@@ -72,8 +80,8 @@ grid_component::resized()
           if(_positions[p].column == c && _positions[p].row == i)
           {
             auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-            assert(autofit_child && autofit_child->autofit_height() > 0);
-            max_col_height = std::max(max_col_height, autofit_child->autofit_height());
+            assert(autofit_child && autofit_child->fixed_height() > 0);
+            max_col_height = std::max(max_col_height, autofit_child->fixed_height());
           }
       grid.templateRows.add(Grid::Px(max_col_height));
     }
@@ -91,8 +99,8 @@ grid_component::resized()
           if (_positions[p].row == r && _positions[p].column == i)
           {
             auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-            assert(autofit_child && autofit_child->autofit_width() > 0);
-            max_row_width = std::max(max_row_width, autofit_child->autofit_width());
+            assert(autofit_child && autofit_child->fixed_width() > 0);
+            max_row_width = std::max(max_row_width, autofit_child->fixed_width());
           }
       grid.templateColumns.add(Grid::Px(max_row_width));
     }

@@ -23,6 +23,17 @@ topo_info::validate() const
 }
 
 void
+gui_submenu::validate() const
+{
+  assert(name.size());
+  assert(indices.size());
+  for(int i = 0; i < indices.size(); i++)
+    assert(indices[i] >= 0);
+  std::set<int> indices_set(indices.begin(), indices.end());
+  assert(indices_set.size() == indices.size());
+}
+
+void
 gui_bindings::validate(module_topo const& module, int slot_count) const
 {
   enabled.validate(module, slot_count);
