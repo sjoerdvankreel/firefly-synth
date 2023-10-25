@@ -5,7 +5,7 @@
 namespace plugin_base {
 
 inline float const default_font_height = 14.0f;
-inline juce::String const default_font_typeface = "Cousine";
+inline juce::String const default_font_typeface = "Verdana";
 
 class lnf:
 public juce::LookAndFeel_V4 {
