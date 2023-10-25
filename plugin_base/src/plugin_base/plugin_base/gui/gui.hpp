@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/gui/utility.hpp>
 #include <plugin_base/shared/state.hpp>
@@ -15,6 +16,9 @@ class grid_component;
 class plugin_gui:
 public juce::Component
 {
+  lnf_properties const& lnf_properties() const 
+  { return dynamic_cast<lnf&>(getLookAndFeel()).properties(); }
+
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   plugin_gui(plugin_state* gui_state);

@@ -42,7 +42,7 @@ void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
   Path path;
-  int const fixedHeight = default_font_height + 6;
+  int const fixedHeight = properties().font_height + 6;
   int const comboTop = height < fixedHeight ? 0: (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
   Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
@@ -58,23 +58,15 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   g.strokePath(path, PathStrokeType(2.0f));
 }
 
-int	
-lnf::getTabButtonBestWidth(juce::TabBarButton& button, int tabDepth)
-{
-  float tw = getTabButtonFont(button, default_font_height).getStringWidthFloat(button.getButtonText());
-  return button.getIndex() == 0? tw + 10: 30;
-}
-
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  g.setColour(button.getTabBackgroundColour());
   g.setColour(Colours::red);
   g.fillRect(button.getActiveArea());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
-  g.setColour(Colours::blue);
-  g.setFont(getTabButtonFont(button, default_font_height));
-  g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
+  g.setFont(getTabButtonFont(button, properties().font_height));
+  auto justify = button.getIndex() == 0 ? Justification::left : Justification::centred;
+  g.drawText(button.getButtonText(), button.getTextArea(), justify, false);
 }
 
 }

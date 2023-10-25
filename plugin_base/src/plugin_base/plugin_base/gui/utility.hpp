@@ -1,11 +1,12 @@
 #pragma once
 
+#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace plugin_base {
 
-void gui_init();
+lnf* gui_init();
 void gui_terminate();
 
 void add_and_make_visible(

@@ -4,27 +4,35 @@
 
 namespace plugin_base {
 
-inline float const default_font_height = 14.0f;
-inline juce::String const default_font_typeface = "Verdana";
+struct lnf_properties
+{
+  // Intentionally crap, this should really be customized by the plug.
+  float font_height = 5;
+  int first_tab_width = 20;
+  int other_tab_width = 10;
+  juce::String default_typeface = "Courier";
+  int font_flags = juce::Font::bold | juce::Font::italic;
+  juce::Font font() const { return juce::Font(default_typeface, font_height, font_flags); }
+};
 
 class lnf:
 public juce::LookAndFeel_V4 {
   
-  juce::Font defaultFont(int styleFlags)
-  { return { juce::Font(default_font_typeface, default_font_height, juce::Font::plain) }; }
-
+  lnf_properties _properties = {};
 public:
-  juce::Font getPopupMenuFont() override { return defaultFont(0); }
-  juce::Font getLabelFont(juce::Label&) override { return defaultFont(0); }
-  juce::Font getComboBoxFont(juce::ComboBox&) override { return defaultFont(0); }
-  juce::Font getTextButtonFont(juce::TextButton&, int) override { return defaultFont(0); }
-  juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return defaultFont(0); }
+  lnf_properties& properties() { return _properties; }
 
-  int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
+  juce::Font getPopupMenuFont() override { return _properties.font(); }
+  juce::Font getLabelFont(juce::Label&) override { return _properties.font(); }
+  juce::Font getComboBoxFont(juce::ComboBox&) override { return _properties.font(); }
+  juce::Font getTextButtonFont(juce::TextButton&, int) override { return _properties.font(); }
+  juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return _properties.font(); }
+
   void drawLabel(juce::Graphics&, juce::Label& label) override;
   void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
   void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
+  int	getTabButtonBestWidth(juce::TabBarButton& b, int) override { return b.getIndex() == 0 ? _properties.first_tab_width : _properties.other_tab_width; }
 };
 
 }

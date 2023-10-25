@@ -41,7 +41,7 @@ InitModule()
 { 
   _topo = synth_topo();
   _desc = std::make_unique<plugin_desc>(_topo.get());
-  gui_init(); 
+  synth_init_lnf(gui_init());
   return true; 
 }
 

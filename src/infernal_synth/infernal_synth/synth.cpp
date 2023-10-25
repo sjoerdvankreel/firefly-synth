@@ -4,6 +4,7 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/topo/support.hpp>
 
+using namespace juce;
 using namespace plugin_base;
 
 namespace infernal_synth {
@@ -11,6 +12,12 @@ namespace infernal_synth {
 enum { 
   section_lfos, section_env, section_osc, section_filter, 
   section_cv_matrix, section_delay, section_monitor, section_count  };
+
+void 
+synth_init_lnf(lnf* lnf)
+{
+  lnf->setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colours::green);
+}
 
 std::unique_ptr<plugin_topo>
 synth_topo()
