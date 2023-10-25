@@ -47,16 +47,22 @@ struct param_topo_gui final {
   void validate(module_topo const& module, param_topo const& param) const;
 };
 
+// dependent parameter bindings
+struct dependent_param final {
+  std::vector<int> dependencies = {};
+  std::vector<param_domain> domains = {};
+  dependent_domain_selector selector = {};
+
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(dependent_param);
+};
+
 // parameter in module
 struct param_topo final {
   param_dsp dsp;
   topo_info info;
   param_topo_gui gui;
   param_domain domain;
-  
-  std::vector<int> dependency_indices = {};
-  std::vector<param_domain> dependent_domains = {};
-  dependent_domain_selector dependent_selector = {};
+  dependent_param dependent;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module, int index) const;

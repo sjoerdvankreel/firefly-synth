@@ -79,7 +79,7 @@ public param_component,
 public autofit_label
 {
   bool const _both;
-  std::vector<int> _global_dependency_indices = {};
+  std::vector<int> _global_dependencies = {};
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
@@ -170,7 +170,7 @@ protected:
 
 private:
   void update_editors();
-  std::vector<int> _global_dependency_indices = {};
+  std::vector<int> _global_dependencies = {};
   std::vector<std::unique_ptr<juce::ComboBox>> _editors = {};
 
 public:

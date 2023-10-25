@@ -86,7 +86,7 @@ plugin_state::dependent_domain_at_index(int index) const
   auto const& param = *desc().param_at_index(index).param;
   int domain_index = dependent_domain_index_at_index(index);
   if(domain_index == -1)  return &param.domain;
-  return &param.dependent_domains[domain_index];
+  return &param.dependent.domains[domain_index];
 }
 
 bool 
@@ -131,13 +131,13 @@ int
 plugin_state::dependent_domain_index_at_index(int index) const
 {
   auto const& param = desc().param_at_index(index);
-  if (param.param->dependency_indices.size() == 0) return -1;
+  if (param.param->dependent.dependencies.size() == 0) return -1;
   auto const& map = desc().mappings.params[index];
   int dependency_values[max_param_dependencies_count];
-  for (int d = 0; d < param.param->dependency_indices.size(); d++)
-    dependency_values[d] = get_plain_at(map.module_topo, map.module_slot, param.param->dependency_indices[d], map.param_slot).step();
-  int dependent_index = param.param->dependent_selector(dependency_values);
-  assert(0 <= dependent_index && dependent_index < param.param->dependent_domains.size());
+  for (int d = 0; d < param.param->dependent.dependencies.size(); d++)
+    dependency_values[d] = get_plain_at(map.module_topo, map.module_slot, param.param->dependent.dependencies[d], map.param_slot).step();
+  int dependent_index = param.param->dependent.selector(dependency_values);
+  assert(0 <= dependent_index && dependent_index < param.param->dependent.domains.size());
   return dependent_index;
 }
 

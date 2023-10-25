@@ -72,9 +72,9 @@ cv_matrix_topo(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(source_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 2 }, make_label_none())));
-  source_index.dependency_indices = { param_source };
-  source_index.dependent_selector = [](int const* vs) { return vs[0]; };
-  source_index.dependent_domains = vector_explicit_copy(source_slot_domains);
+  source_index.dependent.dependencies = { param_source };
+  source_index.dependent.selector = [](int const* vs) { return vs[0]; };
+  source_index.dependent.domains = vector_explicit_copy(source_slot_domains);
   source_index.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& target = result.params.emplace_back(make_param(
@@ -88,9 +88,9 @@ cv_matrix_topo(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(target_slot_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 4 }, make_label_none())));
-  target_index.dependency_indices = { param_target };
-  target_index.dependent_selector = [](int const* vs) { return vs[0]; };
-  target_index.dependent_domains = vector_explicit_copy(target_slot_domains);
+  target_index.dependent.dependencies = { param_target };
+  target_index.dependent.selector = [](int const* vs) { return vs[0]; };
+  target_index.dependent.domains = vector_explicit_copy(target_slot_domains);
   target_index.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   std::vector<param_domain> target_param_domains;
@@ -106,9 +106,9 @@ cv_matrix_topo(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 5 }, make_label_none())));
-  target_param.dependency_indices = { param_target };
-  target_param.dependent_selector = [](int const* vs) { return vs[0]; };
-  target_param.dependent_domains = vector_explicit_copy(modulatable_target_domains);
+  target_param.dependent.dependencies = { param_target };
+  target_param.dependent.selector = [](int const* vs) { return vs[0]; };
+  target_param.dependent.domains = vector_explicit_copy(modulatable_target_domains);
   target_param.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   auto map_to_slot_domain = [](auto const& t) { return make_domain_step(0, t.info.slot_count - 1, 1, 1); };
@@ -119,9 +119,9 @@ cv_matrix_topo(
     make_topo_info("{05E7FB15-58AD-40EA-BA7F-FDAB255879ED}", "Target Param Index", param_target_param_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_param_index_domains),
     make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 6 }, make_label_none())));
-  target_param_index.dependency_indices = { param_target, param_target_param };
-  target_param_index.dependent_domains = vector_explicit_copy(modulatable_target_param_index_domains);
-  target_param_index.dependent_selector = [mappings = modulatable_target_param_index_domain_mappings](int const* vs) { return mappings[vs[0]][vs[1]]; };
+  target_param_index.dependent.dependencies = { param_target, param_target_param };
+  target_param_index.dependent.domains = vector_explicit_copy(modulatable_target_param_index_domains);
+  target_param_index.dependent.selector = [mappings = modulatable_target_param_index_domain_mappings](int const* vs) { return mappings[vs[0]][vs[1]]; };
   target_param_index.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   result.engine_factory = [sources, targets, modulatable_target_params](auto const& topo, int, int) ->
