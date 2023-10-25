@@ -27,7 +27,7 @@ synth_topo()
   result->gui.min_width = 1000;
   result->gui.max_width = 2000;
   result->gui.default_width = 1000;
-  result->gui.aspect_ratio_width = 12;
+  result->gui.aspect_ratio_width = 14;
   result->gui.aspect_ratio_height = 5;
   result->gui.dimension.row_sizes = std::vector<int>(5, 1);
   result->gui.dimension.column_sizes = std::vector<int>(2, 1);
