@@ -9,8 +9,9 @@ void
 autofit_label::textWasChanged()
 {
   auto border_size = getBorderSize();
-  float th = getFont().getHeight();
-  float tw = getFont().getStringWidthFloat(getText());
+  auto const& label_font = getLookAndFeel().getLabelFont(*this);
+  float th = label_font.getHeight();
+  float tw = label_font.getStringWidthFloat(getText());
   float nw = std::ceil(tw) + border_size.getLeftAndRight();
   if(getHeight() > 0)
     setSize(nw, getHeight());

@@ -48,7 +48,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 int	
 lnf::getTabButtonBestWidth(juce::TabBarButton& button, int tabDepth)
 {
-  float tw = defaultFont(0).getStringWidthFloat(button.getButtonText());
+  float tw = getTabButtonFont(button, default_font_height).getStringWidthFloat(button.getButtonText());
   return button.getIndex() == 0? tw + 10: 30;
 }
 
