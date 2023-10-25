@@ -15,8 +15,10 @@ public juce::LookAndFeel_V4 {
 
 public:
   juce::Font getPopupMenuFont() override { return defaultFont(0); }
+  juce::Font getLabelFont(juce::Label&) override { return defaultFont(0); }
   juce::Font getComboBoxFont(juce::ComboBox&) override { return defaultFont(0); }
-  juce::Font getTabButtonFont(juce::TabBarButton& b, float height) override { return defaultFont(0); }
+  juce::Font getTextButtonFont(juce::TextButton&, int) override { return defaultFont(0); }
+  juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return defaultFont(0); }
 
   void drawLabel(juce::Graphics& g, juce::Label& label) override;
   int	getTabButtonBestWidth(juce::TabBarButton& button, int tabDepth) override;
