@@ -10,9 +10,9 @@ struct lnf_properties
   float font_height = 5;
   int first_tab_width = 20;
   int other_tab_width = 10;
-  juce::String default_typeface = "Courier";
+  juce::String typeface = "Courier";
   int font_flags = juce::Font::bold | juce::Font::italic;
-  juce::Font font() const { return juce::Font(default_typeface, font_height, font_flags); }
+  juce::Font font() const { return juce::Font(typeface, font_height, font_flags); }
 };
 
 class lnf:
@@ -20,6 +20,8 @@ public juce::LookAndFeel_V4 {
   
   lnf_properties _properties = {};
 public:
+  enum color_ids { tab_button_background };
+
   lnf_properties& properties() { return _properties; }
 
   juce::Font getPopupMenuFont() override { return _properties.font(); }

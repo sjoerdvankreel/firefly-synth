@@ -16,7 +16,15 @@ enum {
 void 
 synth_init_lnf(lnf* lnf)
 {
+  auto& props = lnf->properties();
+  props.font_height = 14;
+  props.typeface = "Verdana";
+  props.other_tab_width = 30;
+  props.first_tab_width = 60;
+  props.font_flags = Font::plain;
+  lnf->setColour(lnf::tab_button_background, Colours::red);
   lnf->setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colours::green);
+  lnf->setColour(TabbedComponent::ColourIds::backgroundColourId, Colours::blue);
 }
 
 std::unique_ptr<plugin_topo>

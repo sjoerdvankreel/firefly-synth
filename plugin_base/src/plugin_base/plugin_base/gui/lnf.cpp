@@ -61,7 +61,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  g.setColour(Colours::red);
+  g.setColour(findColour(tab_button_background));
   g.fillRect(button.getActiveArea());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.setFont(getTabButtonFont(button, properties().font_height));
