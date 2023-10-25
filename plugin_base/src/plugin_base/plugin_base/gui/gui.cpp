@@ -264,7 +264,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
     result = &make_component<param_slider>(this, &module, &param); break;
   case gui_edit_type::text:
     result = &make_component<param_textbox>(this, &module, &param); 
-    dynamic_cast<param_textbox*>(result)->setFont(lnf_properties().font());
+    dynamic_cast<param_textbox*>(result)->applyFontToAllText(lnf_properties().font());
     break;
   case gui_edit_type::list:
   case gui_edit_type::autofit_list:
