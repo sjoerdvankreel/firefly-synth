@@ -19,6 +19,18 @@ autofit_label::textWasChanged()
     setSize(nw, std::ceil(th) + border_size.getTopAndBottom());
 }
 
+autofit_button::
+autofit_button(std::string const& text)
+{
+  float vmargin = 6.0f;
+  float hmargin = 16.0f;
+  setButtonText(text);
+  auto const& button_font = getLookAndFeel().getTextButtonFont(*this, getHeight());
+  float th = button_font.getHeight();
+  float tw = button_font.getStringWidthFloat(getButtonText());
+  setSize(std::ceil(tw) + hmargin, std::ceil(th) + vmargin);
+}
+
 void
 autofit_combobox::autofit()
 {

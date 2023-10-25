@@ -11,7 +11,7 @@ class lnf:
 public juce::LookAndFeel_V4 {
   
   juce::Font defaultFont(int styleFlags)
-  { return { juce::Font(default_font_typeface, default_font_height, juce::Font::FontStyleFlags::plain) }; }
+  { return { juce::Font(default_font_typeface, default_font_height, juce::Font::plain) }; }
 
 public:
   juce::Font getPopupMenuFont() override { return defaultFont(0); }
@@ -20,10 +20,11 @@ public:
   juce::Font getTextButtonFont(juce::TextButton&, int) override { return defaultFont(0); }
   juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return defaultFont(0); }
 
-  void drawLabel(juce::Graphics& g, juce::Label& label) override;
-  int	getTabButtonBestWidth(juce::TabBarButton& button, int tabDepth) override;
-  void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool isMouseOver, bool isMouseDown) override;
-  void drawComboBox(juce::Graphics& g, int width, int height, bool, int, int, int, int, juce::ComboBox& box) override;
+  int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
+  void drawLabel(juce::Graphics&, juce::Label& label) override;
+  void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
+  void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
+  void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
 };
 
 }

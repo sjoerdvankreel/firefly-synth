@@ -116,7 +116,7 @@ plugin_gui::make_component(U&&... args)
 Component& 
 plugin_gui::make_container()
 {
-  auto& grid = make_component<grid_component>(gui_dimension({ -20, 1 }, { 1 }), 2.0f);
+  auto& grid = make_component<grid_component>(gui_dimension({ gui_dimension::auto_size, 1 }, { 1 }), 2.0f);
   grid.add(make_top_bar(), { 0, 0 });
   grid.add(make_content(), { 1, 0 });
   return make_component<margin_component>(&grid, BorderSize<int>(2));
@@ -360,10 +360,11 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
 Component&
 plugin_gui::make_top_bar()
 {
-  auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }), 1.0f);
+  auto& result = make_component<grid_component>(
+    gui_dimension({ gui_dimension::auto_size }, 
+    { gui_dimension::auto_size, gui_dimension::auto_size }), 1.0f);
 
-  auto& save = make_component<TextButton>();
-  save.setButtonText("Save");
+  auto& save = make_component<autofit_button>("Save");
   result.add(save, { 0, 1 });
   save.onClick = [this]() {
     int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
@@ -375,8 +376,7 @@ plugin_gui::make_top_bar()
       plugin_io_save_file(path.toStdString(), *_gui_state);
     });};
 
-  auto& load = make_component<TextButton>();
-  load.setButtonText("Load");
+  auto& load = make_component<autofit_button>("Load");
   result.add(load, { 0, 0 });
   load.onClick = [this]() {
     int flags = FileBrowserComponent::openMode;

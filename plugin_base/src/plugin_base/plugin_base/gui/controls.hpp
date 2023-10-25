@@ -20,6 +20,17 @@ public:
   int fixed_height() const override { return getHeight(); }
 };
 
+// button that resizes to text content
+class autofit_button :
+public juce::TextButton,
+public autofit_component
+{
+public:
+  autofit_button(std::string const& text);
+  int fixed_width() const override { return getWidth(); }
+  int fixed_height() const override { return getHeight(); }
+};
+
 // fixed size checkbox
 class autofit_togglebutton :
 public juce::ToggleButton,
