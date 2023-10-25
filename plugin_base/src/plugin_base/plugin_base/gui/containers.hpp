@@ -37,9 +37,9 @@ public:
 
   // Can't intercept mouse as we may be invisible on top of 
   // another grid in case of param or section dependent visibility.
-  grid_component(gui_dimension const& dimension, float gap_size = 0.0f) :
+  grid_component(gui_dimension const& dimension, float gap_size = 1.0f) :
   _gap_size(gap_size), _dimension(dimension) { setInterceptsMouseClicks(false, true); }
-  grid_component(bool vertical, int count, float gap_size = 0.0f) :
+  grid_component(bool vertical, int count, float gap_size = 1.0f) :
   grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size) {}
 };
 

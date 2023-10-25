@@ -124,7 +124,7 @@ Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& result = make_component<grid_component>(topo.gui.dimension);
+  auto& result = make_component<grid_component>(topo.gui.dimension, 2.0f);
   for(int s = 0; s < topo.gui.sections.size(); s++)
     result.add(make_module_section(topo.gui.sections[s]), topo.gui.sections[s].position);
   return result;
@@ -337,6 +337,7 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
   case gui_layout::tabbed:
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+    result.setTabBarDepth(default_font_height + 4);
     for (int i = 0; i < topo.info.slot_count; i++)
     {
       std::string prefix = i == 0? topo.info.tag.name + " ": std::string();
