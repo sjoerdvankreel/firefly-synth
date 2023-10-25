@@ -75,7 +75,7 @@ struct gui_binding final {
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_binding);
   void validate(module_topo const& module, int slot_count) const;
-  void bind(std::vector<int> const& params, gui_binding_selector selector);
+  void bind(std::vector<int> const& params_, gui_binding_selector selector_);
 };
 
 // binding to enabled/visible

@@ -34,12 +34,13 @@ gui_submenu::validate() const
 }
 
 void 
-gui_binding::bind(std::vector<int> const& params, gui_binding_selector selector)
+gui_binding::bind(std::vector<int> const& params_, gui_binding_selector selector_)
 {
-  assert(params.size());
-  assert(selector != nullptr);
-  this->params = params;
-  this->selector = selector;
+  assert(params_.size());
+  assert(selector == nullptr);
+  assert(selector_ != nullptr);
+  params = params_;
+  selector = selector_;
 }
 
 void

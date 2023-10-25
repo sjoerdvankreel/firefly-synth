@@ -11,6 +11,18 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+class lfo_engine: 
+public module_engine {
+  float _phase;
+  int const _module;
+
+public:
+  INF_PREVENT_ACCIDENTAL_COPY(lfo_engine);
+  void initialize() override { _phase = 0; }
+  void process(plugin_block& block) override;
+  lfo_engine(int module) : _module(module) { initialize(); }
+};
+
 enum { section_main };
 enum { type_off, type_rate, type_sync };
 enum { param_type, param_rate, param_tempo };
@@ -24,18 +36,6 @@ type_items()
   result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
   return result;
 }
-
-class lfo_engine: 
-public module_engine {
-  float _phase;
-  int const _module;
-
-public:
-  INF_PREVENT_ACCIDENTAL_COPY(lfo_engine);
-  void initialize() override { _phase = 0; }
-  void process(plugin_block& block) override;
-  lfo_engine(int module) : _module(module) { initialize(); }
-};
 
 module_topo
 lfo_topo(int section, plugin_base::gui_position const& pos, bool global)
@@ -75,7 +75,7 @@ lfo_topo(int section, plugin_base::gui_position const& pos, bool global)
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenus = make_timesig_submenus(tempo.domain.timesigs);
-  tempo.gui.bindings.visible.bind({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
+  tempo.gui.bindings.visible.bind({ param_type }, [](auto const& vs) { return vs[0] == type_sync; });
 
   result.engine_factory = [module](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
@@ -88,7 +88,8 @@ lfo_engine::process(plugin_block& block)
 {
   int type = block.state.own_block_automation[param_type][0].step();
   if(type == type_off) return; 
-  auto const& rate_curve = sync_or_freq_into_scratch(block, type == type_sync, _module, param_rate, param_tempo, 0);
+  auto const& rate_curve = sync_or_freq_into_scratch(
+    block, type == type_sync, _module, param_rate, param_tempo, 0);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;
