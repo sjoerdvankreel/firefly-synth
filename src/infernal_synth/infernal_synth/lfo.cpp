@@ -11,18 +11,6 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-class lfo_engine: 
-public module_engine {
-  float _phase;
-  int const _module;
-
-public:
-  INF_PREVENT_ACCIDENTAL_COPY(lfo_engine);
-  void initialize() override { _phase = 0; }
-  void process(plugin_block& block) override;
-  lfo_engine(int module) : _module(module) { initialize(); }
-};
-
 enum { section_main };
 enum { type_off, type_rate, type_sync };
 enum { param_type, param_rate, param_tempo };
@@ -36,6 +24,18 @@ type_items()
   result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
   return result;
 }
+
+class lfo_engine :
+  public module_engine {
+  float _phase;
+  int const _module;
+
+public:
+  INF_PREVENT_ACCIDENTAL_COPY(lfo_engine);
+  void initialize() override { _phase = 0; }
+  void process(plugin_block& block) override;
+  lfo_engine(int module) : _module(module) { initialize(); }
+};
 
 module_topo
 lfo_topo(int section, plugin_base::gui_position const& pos, bool global)

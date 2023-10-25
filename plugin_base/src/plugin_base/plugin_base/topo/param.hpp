@@ -53,6 +53,10 @@ struct dependent_param final {
   std::vector<param_domain> domains = {};
   dependent_domain_selector selector = {};
 
+  void bind(
+    std::vector<int> const& dependencies_, 
+    std::vector<param_domain> const& domains_, 
+    dependent_domain_selector selector_);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(dependent_param);
 };
 

@@ -5,6 +5,21 @@
 namespace plugin_base {
 
 void 
+dependent_param::bind(
+  std::vector<int> const& dependencies_,
+  std::vector<param_domain> const& domains_,
+  dependent_domain_selector selector_)
+{
+  assert(domains_.size());
+  assert(dependencies_.size());
+  assert(selector == nullptr);
+  assert(selector_ != nullptr);
+  selector = selector_;
+  dependencies = dependencies_;
+  domains = vector_explicit_copy(domains_);
+}
+
+void 
 param_dsp::validate() const
 {
   if (automate == param_automate::automate)
