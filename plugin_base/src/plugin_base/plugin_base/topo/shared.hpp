@@ -21,9 +21,8 @@ enum class gui_label_contents { none, name, value, both };
 enum class gui_layout { single, horizontal, vertical, tabbed };
 enum class gui_edit_type { toggle, list, autofit_list, dependent, text, knob, hslider, vslider };
 
-typedef bool(*
-gui_binding_selector)(
-  std::vector<int> const& values);
+typedef std::function<bool(std::vector<int> const& vs)>
+gui_binding_selector;
 
 // plugin and section metadata
 struct topo_tag final {
@@ -76,6 +75,7 @@ struct gui_binding final {
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_binding);
   void validate(module_topo const& module, int slot_count) const;
+  void bind(std::vector<int> const& params, gui_binding_selector selector);
 };
 
 // binding to enabled/visible

@@ -33,6 +33,15 @@ gui_submenu::validate() const
   assert(indices_set.size() == indices.size());
 }
 
+void 
+gui_binding::bind(std::vector<int> const& params, gui_binding_selector selector)
+{
+  assert(params.size());
+  assert(selector != nullptr);
+  this->params = params;
+  this->selector = selector;
+}
+
 void
 gui_bindings::validate(module_topo const& module, int slot_count) const
 {
