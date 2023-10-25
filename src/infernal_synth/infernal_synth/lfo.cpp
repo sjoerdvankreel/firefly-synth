@@ -60,27 +60,22 @@ lfo_topo(int section, plugin_base::gui_position const& pos, bool global)
   result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
-      make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, 
     make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
-  rate.gui.bindings.enabled.params = { param_type };
-  rate.gui.bindings.enabled.selector = [](auto const& vs) { return vs[0] == type_rate; };
-  rate.gui.bindings.visible.params = { param_type };
-  rate.gui.bindings.visible.selector = [] (auto const& vs) { return vs[0] != type_sync; };
+  rate.gui.bindings.enabled.bind({ param_type }, [](auto const& vs) { return vs[0] == type_rate; });
+  rate.gui.bindings.visible.bind({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
 
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, 
-      make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenus = make_timesig_submenus(tempo.domain.timesigs);
-  tempo.gui.bindings.visible.params = { param_type };
-  tempo.gui.bindings.visible.selector = [](auto const& vs) { return vs[0] == type_sync; };
+  tempo.gui.bindings.visible.bind({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
 
   result.engine_factory = [module](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };

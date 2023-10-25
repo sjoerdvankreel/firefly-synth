@@ -46,8 +46,6 @@ cv_matrix_topo(
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  gui_binding_selector enabled_selector = [](auto const& vs) { return vs[0] != 0; };
-
   module_topo result(make_module(
     make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "CV", module_cv_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::cv, route_count, 0),
@@ -60,49 +58,40 @@ cv_matrix_topo(
   result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui(section_main, gui_edit_type::toggle, gui_layout::vertical, { 0, 0 }, 
-      make_label_none())));
+    make_param_gui(section_main, gui_edit_type::toggle, gui_layout::vertical, { 0, 0 }, make_label_none())));
   
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(vector_map(sources, list_item::from_topo_ptr<module_topo>), ""),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 0, 1 }, 
-      make_label_none())));
-  source.gui.bindings.enabled.params = { param_active };
-  source.gui.bindings.enabled.selector = enabled_selector;
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 0, 1 }, make_label_none())));
+  source.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
   
   auto map_to_slot_domain_ptr = [](auto const& t) { return make_domain_step(0, t->info.slot_count - 1, 1, 1); };
   auto source_slot_domains = vector_map(sources, map_to_slot_domain_ptr);
   auto& source_index = result.params.emplace_back(make_param(
     make_topo_info("{5F6A54E9-50E6-4CDE-ACCB-4BA118F06780}", "Source Index", param_source_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(source_slot_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 2 }, 
-      make_label_none())));
-  source_index.gui.bindings.enabled.params = { param_active };
-  source_index.gui.bindings.enabled.selector = enabled_selector;
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 2 }, make_label_none())));
   source_index.dependency_indices = { param_source };
   source_index.dependent_selector = [](int const* vs) { return vs[0]; };
   source_index.dependent_domains = vector_explicit_copy(source_slot_domains);
+  source_index.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(vector_map(targets, list_item::from_topo_ptr<module_topo>), ""),
-    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 0, 3 }, 
-      make_label_none())));
-  target.gui.bindings.enabled.params = { param_active };
-  target.gui.bindings.enabled.selector = enabled_selector;
+    make_param_gui(section_main, gui_edit_type::list, gui_layout::vertical, { 0, 3 }, make_label_none())));
+  target.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
   
   auto target_slot_domains = vector_map(targets, map_to_slot_domain_ptr);
   auto& target_index = result.params.emplace_back(make_param(
     make_topo_info("{79366858-994F-485F-BA1F-34AE3DFD2CEE}", "Target Index", param_target_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(target_slot_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 4 },
-      make_label_none())));
-  target_index.gui.bindings.enabled.params = { param_active };
-  target_index.gui.bindings.enabled.selector = enabled_selector;
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 4 }, make_label_none())));
   target_index.dependency_indices = { param_target };
   target_index.dependent_selector = [](int const* vs) { return vs[0]; };
   target_index.dependent_domains = vector_explicit_copy(target_slot_domains);
+  target_index.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   std::vector<param_domain> target_param_domains;
   auto is_modulatable = [](auto const& p) { return p.dsp.automate == param_automate::modulate; };
@@ -116,13 +105,11 @@ cv_matrix_topo(
   auto& target_param = result.params.emplace_back(make_param(
     make_topo_info("{EA395DC3-A357-4B76-BBC9-CE857FB9BC2A}", "Target Param", param_target_param, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 5 },
-      make_label_none())));
-  target_param.gui.bindings.enabled.params = { param_active };
-  target_param.gui.bindings.enabled.selector = enabled_selector;
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 5 }, make_label_none())));
   target_param.dependency_indices = { param_target };
   target_param.dependent_selector = [](int const* vs) { return vs[0]; };
   target_param.dependent_domains = vector_explicit_copy(modulatable_target_domains);
+  target_param.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   auto map_to_slot_domain = [](auto const& t) { return make_domain_step(0, t.info.slot_count - 1, 1, 1); };
   auto modulatable_target_params_joined = vector_join(modulatable_target_params);
@@ -131,13 +118,11 @@ cv_matrix_topo(
   auto& target_param_index = result.params.emplace_back(make_param(
     make_topo_info("{05E7FB15-58AD-40EA-BA7F-FDAB255879ED}", "Target Param Index", param_target_param_index, route_count),
     make_param_dsp_block(param_automate::none), make_domain_dependent(modulatable_target_param_index_domains),
-    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 6 },
-      make_label_none())));
-  target_param_index.gui.bindings.enabled.params = { param_active };
-  target_param_index.gui.bindings.enabled.selector = enabled_selector;
+    make_param_gui(section_main, gui_edit_type::dependent, gui_layout::vertical, { 0, 6 }, make_label_none())));
   target_param_index.dependency_indices = { param_target, param_target_param };
   target_param_index.dependent_domains = vector_explicit_copy(modulatable_target_param_index_domains);
   target_param_index.dependent_selector = [mappings = modulatable_target_param_index_domain_mappings](int const* vs) { return mappings[vs[0]][vs[1]]; };
+  target_param_index.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   result.engine_factory = [sources, targets, modulatable_target_params](auto const& topo, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, sources, targets, modulatable_target_params); };
