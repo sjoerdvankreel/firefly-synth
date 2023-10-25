@@ -11,7 +11,7 @@ class lnf:
 public juce::LookAndFeel_V4 {
   
   juce::Font defaultFont(int styleFlags)
-  { return { juce::Font(default_font_typeface, default_font_height, juce::Font::bold) }; }
+  { return { juce::Font(default_font_typeface, default_font_height, juce::Font::FontStyleFlags::plain) }; }
 
 public:
   juce::Font getPopupMenuFont() override { return defaultFont(0); }
