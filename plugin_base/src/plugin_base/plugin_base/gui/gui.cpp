@@ -341,7 +341,7 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
   case gui_layout::tabbed:
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
-    result.setTabBarDepth(properties().font_height + 4);
+    result.setTabBarDepth(lnf_properties().font_height + 4);
     for (int i = 0; i < topo.info.slot_count; i++)
     {
       std::string prefix = i == 0? topo.info.tag.name + " ": std::string();
