@@ -42,7 +42,7 @@ grid_component::fixed_width() const
           assert(child.fixed_width() > 0);
           result += child.fixed_width();
         }
-  return result;
+  return result + (_dimension.column_sizes.size() - 1) * _gap_size;
 }
 
 int 
@@ -59,13 +59,15 @@ grid_component::fixed_height() const
           assert(child.fixed_height() > 0);
           result += child.fixed_height();
         }
-  return result;
+  return result + (_dimension.row_sizes.size() - 1) * _gap_size;
 }
 
 void 
 grid_component::resized()
 {
   Grid grid;
+  grid.rowGap = Grid::Px(_gap_size);
+  grid.columnGap = Grid::Px(_gap_size);
 
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
     if(_dimension.row_sizes[i] > 0)

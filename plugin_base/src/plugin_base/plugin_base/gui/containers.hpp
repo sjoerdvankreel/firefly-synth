@@ -22,6 +22,7 @@ class grid_component:
 public juce::Component,
 public autofit_component
 {
+  float const _gap_size;
   gui_dimension const _dimension;
   std::vector<gui_position> _positions = {};
 
@@ -36,10 +37,10 @@ public:
 
   // Can't intercept mouse as we may be invisible on top of 
   // another grid in case of param or section dependent visibility.
-  grid_component(gui_dimension const& dimension) :
-  _dimension(dimension) { setInterceptsMouseClicks(false, true); }
-  grid_component(bool vertical, int count) :
-  grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }) {}
+  grid_component(gui_dimension const& dimension, float gap_size = 0.0f) :
+  _gap_size(gap_size), _dimension(dimension) { setInterceptsMouseClicks(false, true); }
+  grid_component(bool vertical, int count, float gap_size = 0.0f) :
+  grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size) {}
 };
 
 // binding_component that hosts a single param_section_grid
@@ -58,8 +59,8 @@ public binding_component,
 public grid_component
 {
 public:
-  param_section_grid(plugin_gui* gui, module_desc const* module, param_section const* section):
-  binding_component(gui, module, &section->gui.bindings, 0), grid_component(section->gui.dimension) { init(); }
+  param_section_grid(plugin_gui* gui, module_desc const* module, param_section const* section, float gap_size):
+  binding_component(gui, module, &section->gui.bindings, 0), grid_component(section->gui.dimension, gap_size) { init(); }
 };
 
 }

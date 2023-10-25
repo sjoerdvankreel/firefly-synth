@@ -183,9 +183,9 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
 {
   grid_component* grid = nullptr;
   if (module.module->sections.size() == 1)
-    grid = &make_component<param_section_grid>(this, &module, &section);
+    grid = &make_component<param_section_grid>(this, &module, &section, 1.0f);
   else
-    grid = &make_component<grid_component>(section.gui.dimension);
+    grid = &make_component<grid_component>(section.gui.dimension, 1.0f);
 
   auto const& params = module.params;
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
