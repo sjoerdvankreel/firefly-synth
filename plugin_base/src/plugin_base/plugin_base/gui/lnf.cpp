@@ -45,16 +45,22 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   g.strokePath(path, PathStrokeType(2.0f));
 }
 
+int	
+lnf::getTabButtonBestWidth(juce::TabBarButton& button, int tabDepth)
+{
+  float tw = defaultFont(0).getStringWidthFloat(button.getButtonText());
+  return button.getIndex() == 0? tw + 10: 30;
+}
+
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  auto justify = button.getIndex() == 0? Justification::right: Justification::centred;
   g.setColour(button.getTabBackgroundColour());
   g.setColour(Colours::red);
   g.fillRect(button.getActiveArea());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.setColour(Colours::blue);
-  g.drawText(button.getButtonText(), button.getTextArea(), justify, false);
+  g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
 }
 
 }

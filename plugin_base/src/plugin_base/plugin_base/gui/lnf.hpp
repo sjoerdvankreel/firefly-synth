@@ -4,15 +4,22 @@
 
 namespace plugin_base {
 
-inline int const default_font_height = 14;
+inline float const default_font_height = 14.0f;
+inline juce::String const default_font_typeface = "Fixedsys";
 
 class lnf:
 public juce::LookAndFeel_V4 {
+  
+  juce::Font defaultFont(int styleFlags)
+  { return { juce::Font(default_font_typeface, default_font_height, styleFlags) }; }
+
 public:
-  juce::Font getPopupMenuFont() override { return { default_font_height }; }
-  juce::Font getComboBoxFont(juce::ComboBox&) override { return { default_font_height }; }
+  juce::Font getPopupMenuFont() override { return defaultFont(0); }
+  juce::Font getComboBoxFont(juce::ComboBox&) override { return defaultFont(0); }
+  juce::Font getTabButtonFont(juce::TabBarButton& b, float height) override { return defaultFont(0); }
 
   void drawLabel(juce::Graphics& g, juce::Label& label) override;
+  int	getTabButtonBestWidth(juce::TabBarButton& button, int tabDepth) override;
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool isMouseOver, bool isMouseDown) override;
   void drawComboBox(juce::Graphics& g, int width, int height, bool, int, int, int, int, juce::ComboBox& box) override;
 };

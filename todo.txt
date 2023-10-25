@@ -22,6 +22,7 @@ linux build
 resizing by content scaling
 monospace font
 make common rate-num-den-block
+embed the font
 
 * get some linux folks to comment (ycollete?)
 * continuing
