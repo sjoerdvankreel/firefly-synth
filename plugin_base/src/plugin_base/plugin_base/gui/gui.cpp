@@ -12,6 +12,8 @@ using namespace juce;
 
 namespace plugin_base {
 
+static BorderSize<int> const param_section_border(16, 6, 6, 6);
+
 static Justification 
 justification_type(gui_label const& label)
 {
@@ -114,10 +116,10 @@ plugin_gui::make_component(U&&... args)
 Component& 
 plugin_gui::make_container()
 {
-  auto& result = make_component<grid_component>(gui_dimension({ -20, 1 }, { 1 }));
-  result.add(make_top_bar(), { 0, 0 });
-  result.add(make_content(), { 1, 0 });
-  return result;
+  auto& grid = make_component<grid_component>(gui_dimension({ -20, 1 }, { 1 }), 2.0f);
+  grid.add(make_top_bar(), { 0, 0 });
+  grid.add(make_content(), { 1, 0 });
+  return make_component<margin_component>(&grid, BorderSize<int>(2));
 }
 
 Component&
@@ -134,7 +136,7 @@ Component&
 plugin_gui::make_module_section(module_section_gui const& section)
 {
   auto const& modules = _gui_state->desc().modules;
-  auto& result = make_component<grid_component>(section.dimension);
+  auto& result = make_component<grid_component>(section.dimension, 1.0f);
   for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
     if(iter->module->gui.section == section.index)
       result.add(make_modules(&(*iter)), iter->module->gui.position);
@@ -154,10 +156,11 @@ Component&
 plugin_gui::make_single_module(module_desc const& slot, bool tabbed)
 {
   if(tabbed) return make_param_sections(slot);
-  auto& result = make_component<group_component>();
-  result.setText(slot.info.name);
-  add_and_make_visible(result, make_param_sections(slot));
-  return result;
+  auto& group = make_component<group_component>();
+  group.setText(slot.info.name);
+  auto& margin = make_component<margin_component>(&make_param_sections(slot), param_section_border);
+  add_and_make_visible(group, margin);
+  return group;
 }
 
 Component&
@@ -172,7 +175,7 @@ Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  auto& result = make_component<grid_component>(topo.gui.dimension);
+  auto& result = make_component<grid_component>(topo.gui.dimension, 1.0f);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
   return result;
@@ -195,10 +198,11 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   if(module.module->sections.size() == 1)
     return *grid;
 
-  auto& result = make_component<param_section_group>(this, &module, &section);
-  result.setText(section.tag.name);
-  add_and_make_visible(result, *grid);
-  return result;
+  auto& group = make_component<param_section_group>(this, &module, &section);
+  group.setText(section.tag.name);
+  auto& margin = make_component<margin_component>(grid, param_section_border);
+  add_and_make_visible(group, margin);
+  return group;
 }
 
 Component&
@@ -313,7 +317,7 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
     return *((Component*)nullptr);
   }
 
-  auto& result = make_component<grid_component>(dimension);
+  auto& result = make_component<grid_component>(dimension, 1.0f);
   result.add(make_param_label(module, param), label_position);
   result.add(make_param_editor(module, param), edit_position);
   return result;
@@ -329,7 +333,7 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
   case gui_layout::horizontal:
   {
     bool vertical = topo.gui.layout == gui_layout::vertical;
-    auto& result = make_component<grid_component>(vertical, topo.info.slot_count);
+    auto& result = make_component<grid_component>(vertical, topo.info.slot_count, 1.0f);
     for (int i = 0; i < topo.info.slot_count; i++)
       result.add(make_single(slots[i], false), vertical, i);
     return result;
@@ -356,7 +360,7 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
 Component&
 plugin_gui::make_top_bar()
 {
-  auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }));
+  auto& result = make_component<grid_component>(gui_dimension({ 1 }, { -100, -100 }), 1.0f);
 
   auto& save = make_component<TextButton>();
   save.setButtonText("Save");

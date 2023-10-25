@@ -4,21 +4,24 @@ using namespace juce;
 
 namespace plugin_base {
 
-static inline int constexpr groupbox_padding = 6;
-static inline int constexpr groupbox_padding_top = 16;
-
 void
 group_component::resized()
 {
+  assert(getNumChildComponents() == 1);
+  getChildComponent(0)->setBounds(getLocalBounds());
+}
+
+void 
+margin_component::resized()
+{
   Rectangle<int> bounds(getLocalBounds());
   Rectangle<int> child_bounds(
-    bounds.getX() + groupbox_padding, 
-    bounds.getY() + groupbox_padding_top, 
-    bounds.getWidth() - 2 * groupbox_padding, 
-    bounds.getHeight() - groupbox_padding - groupbox_padding_top);
-  assert(getNumChildComponents() < 2);
-  if (getNumChildComponents() == 1)
-    getChildComponent(0)->setBounds(child_bounds);
+    bounds.getX() + _margin.getLeft(), 
+    bounds.getY() + _margin.getTop(), 
+    bounds.getWidth() - _margin.getLeftAndRight(), 
+    bounds.getHeight() - _margin.getTopAndBottom());
+  assert(getNumChildComponents() == 1);
+  getChildComponent(0)->setBounds(child_bounds);
 }
 
 void

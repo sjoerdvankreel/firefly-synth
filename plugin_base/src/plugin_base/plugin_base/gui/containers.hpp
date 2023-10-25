@@ -16,6 +16,18 @@ public:
   void resized() override;
 };
 
+// adds some margin around another component
+class margin_component :
+public juce::Component 
+{
+  juce::Component* const _child;
+  juce::BorderSize<int> const _margin;
+public:
+  void resized() override;
+  margin_component(juce::Component* child, juce::BorderSize<int> const& margin):
+  _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
+};
+
 // grid component as opposed to grid layout
 // resizes children on resize
 class grid_component:
@@ -37,9 +49,9 @@ public:
 
   // Can't intercept mouse as we may be invisible on top of 
   // another grid in case of param or section dependent visibility.
-  grid_component(gui_dimension const& dimension, float gap_size = 1.0f) :
+  grid_component(gui_dimension const& dimension, float gap_size) :
   _gap_size(gap_size), _dimension(dimension) { setInterceptsMouseClicks(false, true); }
-  grid_component(bool vertical, int count, float gap_size = 1.0f) :
+  grid_component(bool vertical, int count, float gap_size) :
   grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size) {}
 };
 
