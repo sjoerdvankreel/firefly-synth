@@ -5,13 +5,13 @@
 namespace plugin_base {
 
 inline float const default_font_height = 14.0f;
-inline juce::String const default_font_typeface = "Fixedsys";
+inline juce::String const default_font_typeface = "Cousine";
 
 class lnf:
 public juce::LookAndFeel_V4 {
   
   juce::Font defaultFont(int styleFlags)
-  { return { juce::Font(default_font_typeface, default_font_height, styleFlags) }; }
+  { return { juce::Font(default_font_typeface, default_font_height, juce::Font::bold) }; }
 
 public:
   juce::Font getPopupMenuFont() override { return defaultFont(0); }

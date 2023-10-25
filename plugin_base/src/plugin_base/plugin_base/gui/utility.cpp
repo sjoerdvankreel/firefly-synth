@@ -21,6 +21,12 @@ gui_terminate()
 void 
 gui_init()
 { 
+  bool found = false;
+  auto const& default_typeface = default_font_typeface;
+  auto available_typefaces = Font::findAllTypefaceNames();
+  for(int i = 0; i < available_typefaces.size(); i++)
+    if(available_typefaces[i] == default_typeface) { found = true; break;}
+  assert(found || !"Default font not found.");
   initialiseJuce_GUI(); 
   _lnf = std::make_unique<lnf>();
   LookAndFeel::setDefaultLookAndFeel(_lnf.get());
