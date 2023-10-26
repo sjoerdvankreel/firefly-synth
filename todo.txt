@@ -23,6 +23,7 @@ resizing by content scaling
 monospace font
 make common rate-num-den-block
 embed the font
+restore font check
 
 * get some linux folks to comment (ycollete?)
 * continuing
