@@ -8,8 +8,8 @@ namespace plugin_base {
 struct lnf_properties
 {
   float font_height = 5;
-  int first_tab_width = 20;
-  int other_tab_width = 10;
+  int tab_button_width = 10;
+  int tab_header_width = 20;
   int module_corner_radius = 5;
   juce::String typeface = "Courier";
   int font_flags = juce::Font::bold | juce::Font::italic;
@@ -30,13 +30,13 @@ public:
   juce::Font getComboBoxFont(juce::ComboBox&) override { return _properties.font(); }
   juce::Font getTextButtonFont(juce::TextButton&, int) override { return _properties.font(); }
   juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return _properties.font(); }
-
+  
+  int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
   void drawLabel(juce::Graphics&, juce::Label& label) override;
   void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
   void drawTabbedButtonBarBackground(juce::TabbedButtonBar&, juce::Graphics&) override;
   void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
-  int	getTabButtonBestWidth(juce::TabBarButton& b, int) override { return b.getIndex() == 0 ? _properties.first_tab_width : _properties.other_tab_width; }
 };
 
 }

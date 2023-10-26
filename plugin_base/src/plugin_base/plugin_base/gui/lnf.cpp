@@ -66,6 +66,14 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   g.strokePath(path, PathStrokeType(2.0f));
 }
 
+int	
+lnf::getTabButtonBestWidth(TabBarButton& b, int)
+{
+  int result = properties().tab_button_width;
+  if(b.getIndex() == 0) result += properties().tab_header_width;
+  return result;
+}
+
 void 
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
@@ -76,27 +84,31 @@ lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  if (button.getIndex() == 0)
+  if (button.getIndex() > 0)
   {
-    auto buttonArea = button.getActiveArea();
-    int radius = properties().module_corner_radius;
     g.setColour(findColour(tab_button_background));
-    g.fillRoundedRectangle(buttonArea.toFloat(), radius);
-    buttonArea.removeFromLeft(radius);
-    g.fillRect(buttonArea.toFloat());
-    auto textArea = button.getTextArea();
-    textArea.removeFromLeft(radius + 2);
+    g.fillRect(button.getActiveArea());
     g.setFont(properties().font());
     g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
-    g.drawText(button.getButtonText(), textArea, Justification::left, false);
+    g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
     return;
   }
 
+  auto headerArea = button.getActiveArea();
+  auto buttonArea = headerArea.removeFromRight(properties().tab_button_width);
+  int radius = properties().module_corner_radius;
   g.setColour(findColour(tab_button_background));
-  g.fillRect(button.getActiveArea());
+  g.fillRoundedRectangle(headerArea.toFloat(), radius);
+  headerArea.removeFromLeft(radius);
+  g.fillRect(headerArea.toFloat());
+  auto textArea = button.getTextArea();
+  textArea.removeFromLeft(radius + 2);
   g.setFont(properties().font());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
-  g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
+  g.drawText(button.getButtonText(), textArea, Justification::left, false);
+  buttonArea.removeFromLeft(1);
+  g.setColour(findColour(tab_button_background));
+  g.fillRect(buttonArea);
 }
 
 }
