@@ -109,6 +109,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.drawText(header, textArea, Justification::left, false);
 
+  if(button.getTabbedButtonBar().getNumTabs() == 1) return;
   buttonArea.removeFromLeft(1);
   g.setColour(findColour(tab_button_background).brighter(lighten));
   g.fillRect(buttonArea);
