@@ -33,6 +33,8 @@ public:
   juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return _properties.font(); }
   
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
+  void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;
+
   void drawLabel(juce::Graphics&, juce::Label& label) override;
   void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;

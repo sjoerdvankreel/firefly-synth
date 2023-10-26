@@ -81,6 +81,13 @@ lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
   g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), properties().module_corner_radius);
 }
 
+void
+lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardHeight, int& w, int& h)
+{
+  LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
+  h = properties().font_height + 8;
+}
+
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
