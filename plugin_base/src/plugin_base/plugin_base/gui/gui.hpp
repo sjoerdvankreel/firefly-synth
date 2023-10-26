@@ -49,8 +49,6 @@ private:
 
   template <class T, class... U>
   T& make_component(U&&... args);
-  template <class Topo, class Slot, class MakeSingle>
-  Component& make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single, int margin);
 
   Component& make_modules(module_desc const* slots);
   Component& make_multi_module(module_desc const* slots);

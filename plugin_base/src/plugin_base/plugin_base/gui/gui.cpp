@@ -170,9 +170,19 @@ plugin_gui::make_single_module(module_desc const& slot, bool tabbed)
 Component&
 plugin_gui::make_multi_module(module_desc const* slots)
 {
-  auto make_single = [this](module_desc const& m, bool tabbed) -> Component& {
-    return make_single_module(m, tabbed); };
-  return make_multi_slot(*slots[0].module, slots, make_single, margin_module);
+  auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+  result.setOutline(0);
+  result.setTabBarDepth(lnf_properties().font_height + 4);
+  result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
+  auto background = getLookAndFeel().findColour(lnf::tab_bar_background);
+  for (int i = 0; i < slots[0].module->info.slot_count; i++)
+  {
+    int radius = lnf_properties().module_corner_radius;
+    auto& corners = make_component<rounded_container>(&make_single_module(slots[i], true), radius, background);
+    auto& margin_comp = make_component<margin_component>(&corners, BorderSize<int>(1, 0, 0, 0));
+    result.addTab(std::to_string(i + 1), Colours::transparentBlack, &margin_comp, false);
+  }
+  return result;
 }
 
 Component&
@@ -229,9 +239,11 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
 Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
-  auto make_single = [this, &module](param_desc const& p, bool tabbed) -> Component& {
-    return make_single_param(module, p); };
-  return make_multi_slot(*slots[0].param, slots, make_single, margin_param);
+  bool vertical = slots[0].param->gui.layout == gui_layout::vertical;
+  auto& result = make_component<grid_component>(vertical, slots[0].param->info.slot_count, margin_param);
+  for (int i = 0; i < slots[0].param->info.slot_count; i++)
+    result.add(make_single_param(module, slots[i]), vertical, i);
+  return result;
 }
 
 Component&
@@ -327,43 +339,6 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   result.add(make_param_label(module, param), label_position);
   result.add(make_param_editor(module, param), edit_position);
   return result;
-}
-
-template <class Topo, class Slot, class MakeSingle>
-Component&
-plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single, int margin)
-{
-  switch (topo.gui.layout)
-  {
-  case gui_layout::vertical:
-  case gui_layout::horizontal:
-  {
-    bool vertical = topo.gui.layout == gui_layout::vertical;
-    auto& result = make_component<grid_component>(vertical, topo.info.slot_count, margin);
-    for (int i = 0; i < topo.info.slot_count; i++)
-      result.add(make_single(slots[i], false), vertical, i);
-    return result;
-  }
-  case gui_layout::tabbed:
-  {
-    auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
-    result.getTabbedButtonBar().setTitle(topo.info.tag.name);
-    result.setOutline(0);
-    result.setTabBarDepth(lnf_properties().font_height + 4);
-    auto background = getLookAndFeel().findColour(lnf::tab_bar_background);
-    for (int i = 0; i < topo.info.slot_count; i++)
-    {
-      int radius = lnf_properties().module_corner_radius;
-      auto& corners = make_component<rounded_container>(&make_single(slots[i], true), radius, background);
-      auto& margin_comp = make_component<margin_component>(&corners, BorderSize<int>(1, 0, 0, 0));
-      result.addTab(std::to_string(i + 1), Colours::transparentBlack, &margin_comp, false);
-    }
-    return result;
-  }
-  default:
-    assert(false);
-    return *((Component*)nullptr);
-  }
 }
 
 // TODO just for now.
