@@ -76,20 +76,27 @@ lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  auto textArea = button.getTextArea();
-  auto buttonArea = button.getActiveArea();
-  if(button.getIndex() == 0)
+  if (button.getIndex() == 0)
   {
+    auto buttonArea = button.getActiveArea();
     int radius = properties().module_corner_radius;
+    g.setColour(findColour(tab_button_background));
+    g.fillRoundedRectangle(buttonArea.toFloat(), radius);
     buttonArea.removeFromLeft(radius);
+    g.fillRect(buttonArea.toFloat());
+    auto textArea = button.getTextArea();
     textArea.removeFromLeft(radius + 2);
+    g.setFont(properties().font());
+    g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
+    g.drawText(button.getButtonText(), textArea, Justification::left, false);
+    return;
   }
+
   g.setColour(findColour(tab_button_background));
-  g.fillRect(buttonArea);
+  g.fillRect(button.getActiveArea());
+  g.setFont(properties().font());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
-  g.setFont(getTabButtonFont(button, properties().font_height));
-  auto justify = button.getIndex() == 0 ? Justification::left : Justification::centred;
-  g.drawText(button.getButtonText(), textArea, justify, false);  
+  g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
 }
 
 }
