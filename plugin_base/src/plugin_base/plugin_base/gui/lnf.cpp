@@ -68,12 +68,19 @@ lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
+  auto textArea = button.getTextArea();
+  auto buttonArea = button.getActiveArea();
+  if(button.getIndex() == 0)
+  {
+    textArea.removeFromLeft(1);
+    buttonArea.removeFromLeft(1);
+  }
   g.setColour(findColour(tab_button_background));
-  g.fillRect(button.getActiveArea());
+  g.fillRect(buttonArea);
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.setFont(getTabButtonFont(button, properties().font_height));
   auto justify = button.getIndex() == 0 ? Justification::left : Justification::centred;
-  g.drawText(button.getButtonText(), button.getTextArea(), justify, false);
+  g.drawText(button.getButtonText(), textArea, justify, false);
 }
 
 }
