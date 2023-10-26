@@ -70,7 +70,7 @@ void
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
   g.setColour(findColour(tab_bar_background));
-  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), 2);
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), properties().module_corner_radius);
 }
 
 void 
@@ -80,8 +80,9 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto buttonArea = button.getActiveArea();
   if(button.getIndex() == 0)
   {
-    textArea.removeFromLeft(1);
-    buttonArea.removeFromLeft(1);
+    int radius = properties().module_corner_radius;
+    buttonArea.removeFromLeft(radius);
+    textArea.removeFromLeft(radius + 2);
   }
   g.setColour(findColour(tab_button_background));
   g.fillRect(buttonArea);

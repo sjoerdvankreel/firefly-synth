@@ -22,6 +22,7 @@ synth_init_lnf(lnf* lnf)
   props.other_tab_width = 30;
   props.first_tab_width = 60;
   props.font_flags = Font::plain;
+  props.module_corner_radius = 2;
   lnf->setColour(lnf::tab_bar_background, Colours::yellow);
   lnf->setColour(lnf::tab_button_background, Colours::red);
   lnf->setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colours::green);

@@ -116,6 +116,7 @@ param_topo::validate(module_topo const& module, int index) const
   }
 
   assert(info.index == index);
+  assert(gui.layout != gui_layout::tabbed);
   assert(domain.is_real() || dsp.rate == param_rate::block);
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == gui_layout::single));

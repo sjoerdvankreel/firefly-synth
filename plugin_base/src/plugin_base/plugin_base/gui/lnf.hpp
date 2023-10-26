@@ -10,6 +10,7 @@ struct lnf_properties
   float font_height = 5;
   int first_tab_width = 20;
   int other_tab_width = 10;
+  int module_corner_radius = 5;
   juce::String typeface = "Courier";
   int font_flags = juce::Font::bold | juce::Font::italic;
   juce::Font font() const { return juce::Font(typeface, font_height, font_flags); }
