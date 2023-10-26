@@ -21,7 +21,6 @@ public juce::LookAndFeel_V4 {
   lnf_properties _properties = {};
 public:
   enum color_ids { tab_button_background };
-
   lnf_properties& properties() { return _properties; }
 
   juce::Font getPopupMenuFont() override { return _properties.font(); }
@@ -33,6 +32,7 @@ public:
   void drawLabel(juce::Graphics&, juce::Label& label) override;
   void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
+  void drawTabbedButtonBarBackground(juce::TabbedButtonBar&, juce::Graphics&) override;
   void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
   int	getTabButtonBestWidth(juce::TabBarButton& b, int) override { return b.getIndex() == 0 ? _properties.first_tab_width : _properties.other_tab_width; }
 };
