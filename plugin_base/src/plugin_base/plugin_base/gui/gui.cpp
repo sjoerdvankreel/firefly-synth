@@ -353,8 +353,7 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
     for (int i = 0; i < topo.info.slot_count; i++)
     {
       std::string prefix = i == 0 ? topo.info.tag.name + " " : std::string();
-      auto background = getLookAndFeel().findColour(TabbedComponent::ColourIds::backgroundColourId);
-      result.addTab(prefix + std::to_string(i + 1), background, &make_single(slots[i], true), false);
+      result.addTab(prefix + std::to_string(i + 1), Colours::transparentBlack, &make_single(slots[i], true), false);
     }
     return result;
   }

@@ -4,6 +4,14 @@ using namespace juce;
 
 namespace plugin_base {
 
+lnf::
+lnf()
+{
+  setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
+  setColour(TabbedButtonBar::ColourIds::tabOutlineColourId, Colours::transparentBlack);
+  setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);
+}
+
 void 
 lnf::drawLabel(Graphics& g, Label& label)
 {
@@ -61,8 +69,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 void 
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
-  g.setColour(findColour(TabbedComponent::ColourIds::backgroundColourId));
-  g.drawRect(bar.getLocalBounds());
+  g.setColour(findColour(tab_bar_background));
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), 2);
 }
 
 void 

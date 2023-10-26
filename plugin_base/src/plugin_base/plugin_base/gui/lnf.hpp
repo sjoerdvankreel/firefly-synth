@@ -4,9 +4,9 @@
 
 namespace plugin_base {
 
+// TODO un-uglify
 struct lnf_properties
 {
-  // Intentionally crap, this should really be customized by the plug.
   float font_height = 5;
   int first_tab_width = 20;
   int other_tab_width = 10;
@@ -20,8 +20,9 @@ public juce::LookAndFeel_V4 {
   
   lnf_properties _properties = {};
 public:
-  enum color_ids { tab_button_background };
+  lnf();
   lnf_properties& properties() { return _properties; }
+  enum color_ids { tab_button_background, tab_bar_background };
 
   juce::Font getPopupMenuFont() override { return _properties.font(); }
   juce::Font getLabelFont(juce::Label&) override { return _properties.font(); }
