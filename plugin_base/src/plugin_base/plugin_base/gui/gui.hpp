@@ -51,9 +51,7 @@ private:
   T& make_component(U&&... args);
 
   Component& make_modules(module_desc const* slots);
-  Component& make_multi_module(module_desc const* slots);
   Component& make_module_section(module_section_gui const& section);
-  Component& make_single_module(module_desc const& slot, bool tabbed);
   Component& make_param_label(module_desc const& module, param_desc const& param);
   Component& make_param_editor(module_desc const& module, param_desc const& param);
   Component& make_multi_param(module_desc const& module, param_desc const* params);

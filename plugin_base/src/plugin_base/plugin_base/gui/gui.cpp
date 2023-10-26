@@ -149,26 +149,6 @@ plugin_gui::make_module_section(module_section_gui const& section)
 
 Component&
 plugin_gui::make_modules(module_desc const* slots)
-{  
-  if (slots[0].module->info.slot_count == 1)
-    return make_single_module(slots[0], false);
-  else
-    return make_multi_module(slots);  
-}
-
-Component&
-plugin_gui::make_single_module(module_desc const& slot, bool tabbed)
-{
-  if(tabbed) return make_param_sections(slot);
-  auto& group = make_component<group_component>();
-  group.setText(slot.info.name);
-  auto& margin = make_component<margin_component>(&make_param_sections(slot), param_section_border);
-  add_and_make_visible(group, margin);
-  return group;
-}
-
-Component&
-plugin_gui::make_multi_module(module_desc const* slots)
 {
   auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
@@ -178,7 +158,7 @@ plugin_gui::make_multi_module(module_desc const* slots)
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {
     int radius = lnf_properties().module_corner_radius;
-    auto& corners = make_component<rounded_container>(&make_single_module(slots[i], true), radius, background);
+    auto& corners = make_component<rounded_container>(&make_param_sections(slots[i]), radius, background);
     auto& margin_comp = make_component<margin_component>(&corners, BorderSize<int>(1, 0, 0, 0));
     result.addTab(std::to_string(i + 1), Colours::transparentBlack, &margin_comp, false);
   }

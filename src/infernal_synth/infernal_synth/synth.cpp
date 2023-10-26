@@ -20,7 +20,7 @@ synth_init_lnf(lnf* lnf)
   props.lighten = 0.15f;
   props.font_height = 13;
   props.tab_button_width = 30;
-  props.tab_header_width = 50;
+  props.tab_header_width = 60;
   props.module_corner_radius = 4;
   props.font_flags = Font::plain;
   props.typeface = "Handel Gothic";
