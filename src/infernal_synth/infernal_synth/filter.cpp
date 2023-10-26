@@ -33,7 +33,7 @@ filter_topo(int section, plugin_base::gui_position const& pos, int osc_slot_coun
   module_topo result(make_module(
     make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", module_filter, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
-    make_module_gui(section, pos, gui_layout::tabbed, { 1, 1 })));
+    make_module_gui(section, pos, { 1, 1 })));
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
@@ -54,7 +54,7 @@ filter_topo(int section, plugin_base::gui_position const& pos, int osc_slot_coun
   result.params.emplace_back(make_param(
     make_topo_info("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc", param_osc, osc_slot_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, gui_layout::horizontal, { 0, 2 },
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::horizontal, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.engine_factory = [](auto const&, int, int) ->

@@ -33,7 +33,7 @@ env_topo(int section, plugin_base::gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", module_env, 3), 
     make_module_dsp(module_stage::voice, module_output::cv, 1, 0),
-    make_module_gui(section, pos, gui_layout::tabbed, { 1, 1 })));
+    make_module_gui(section, pos, { 1, 1 })));
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),

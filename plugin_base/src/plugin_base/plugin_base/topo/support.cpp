@@ -87,10 +87,9 @@ make_module_dsp(module_stage stage, module_output output, int output_count, int 
 }
 
 module_topo_gui
-make_module_gui(int section, gui_position const& position, gui_layout layout, gui_dimension const& dimension)
+make_module_gui(int section, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
-  result.layout = layout;
   result.section = section;
   result.position = position;
   result.dimension = dimension;
@@ -221,7 +220,7 @@ make_param_dsp(param_direction direction, param_rate rate, param_automate automa
 }
 
 param_topo_gui
-make_param_gui(int section, gui_edit_type edit_type, gui_layout layout, gui_position position, gui_label label)
+make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label label)
 {
   param_topo_gui result = {};
   result.layout = layout;

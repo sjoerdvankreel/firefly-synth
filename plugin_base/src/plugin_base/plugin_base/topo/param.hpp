@@ -17,6 +17,7 @@ struct module_topo;
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_automate { none, automate, modulate };
+enum class param_layout { single, horizontal, vertical };
 
 typedef std::function<int(int const* values)>
 dependent_domain_selector;
@@ -36,7 +37,7 @@ struct param_dsp final {
 struct param_topo_gui final {
   int section;
   gui_label label;
-  gui_layout layout;
+  param_layout layout;
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;

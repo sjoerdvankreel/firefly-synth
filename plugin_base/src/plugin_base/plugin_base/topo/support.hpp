@@ -35,10 +35,10 @@ make_module_section_gui(int index, gui_position const& position, gui_dimension c
 
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
+module_topo_gui
+make_module_gui(int section, gui_position const& position, gui_dimension const& dimension);
 module_dsp
 make_module_dsp(module_stage stage, module_output output, int output_count, int scratch_count);
-module_topo_gui
-make_module_gui(int section, gui_position const& position, gui_layout layout, gui_dimension const& dimension);
 
 param_dsp
 make_param_dsp(param_direction direction, param_rate rate, param_automate automate);
@@ -78,9 +78,9 @@ make_domain_log(double min, double max, double default_, double midpoint, int pr
 param_topo
 make_param(topo_info const& info, param_dsp const& dsp, param_domain const& domain, param_topo_gui const& gui);
 param_topo_gui
-make_param_gui(int section, gui_edit_type edit_type, gui_layout layout, gui_position position, gui_label label);
+make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label label);
 inline param_topo_gui
 make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label label)
-{ return make_param_gui(section, edit_type, gui_layout::single, position, gui_label(label)); }
+{ return make_param_gui(section, edit_type, param_layout::single, position, gui_label(label)); }
 
 }

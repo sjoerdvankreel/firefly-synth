@@ -239,9 +239,10 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
 Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
-  bool vertical = slots[0].param->gui.layout == gui_layout::vertical;
-  auto& result = make_component<grid_component>(vertical, slots[0].param->info.slot_count, margin_param);
-  for (int i = 0; i < slots[0].param->info.slot_count; i++)
+  auto const& param = slots[0].param;
+  bool vertical = param->gui.layout == param_layout::vertical;
+  auto& result = make_component<grid_component>(vertical, param->info.slot_count, margin_param);
+  for (int i = 0; i < param->info.slot_count; i++)
     result.add(make_single_param(module, slots[i]), vertical, i);
   return result;
 }
