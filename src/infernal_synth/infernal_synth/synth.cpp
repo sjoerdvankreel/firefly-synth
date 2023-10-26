@@ -17,13 +17,13 @@ void
 synth_init_lnf(lnf* lnf)
 {
   auto& props = lnf->properties();
-  props.lighten = 0.33f;
+  props.lighten = 0.15f;
   props.font_height = 14;
-  props.typeface = "Verdana";
   props.tab_button_width = 30;
   props.tab_header_width = 40;
+  props.module_corner_radius = 4;
   props.font_flags = Font::plain;
-  props.module_corner_radius = 2;
+  props.typeface = "Handel Gothic";
   lnf->setColour(lnf::tab_bar_background, Colour(0xFF222222));
   lnf->setColour(lnf::tab_button_background, Colour(0xFF333333));
   lnf->setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colour(0xFFFF8844));

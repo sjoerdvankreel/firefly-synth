@@ -84,7 +84,7 @@ lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  float lighten = button.getToggleState()? properties().lighten: 0;
+  float lighten = button.getToggleState() || isMouseOver? properties().lighten: 0;
   if (button.getIndex() > 0)
   {
     g.setColour(findColour(tab_button_background).brighter(lighten));
