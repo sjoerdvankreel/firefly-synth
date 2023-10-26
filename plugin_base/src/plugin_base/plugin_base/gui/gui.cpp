@@ -348,13 +348,13 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
   {
     auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
     result.setOutline(0);
+    result.setIndent(margin);
     result.setTabBarDepth(lnf_properties().font_height + 4);
     for (int i = 0; i < topo.info.slot_count; i++)
     {
       std::string prefix = i == 0 ? topo.info.tag.name + " " : std::string();
       auto background = getLookAndFeel().findColour(TabbedComponent::ColourIds::backgroundColourId);
-      auto& margin_comp = make_component<margin_component>(&make_single(slots[i], true), BorderSize<int>(margin));
-      result.addTab(prefix + std::to_string(i + 1), background, &margin_comp, false);
+      result.addTab(prefix + std::to_string(i + 1), background, &make_single(slots[i], true), false);
     }
     return result;
   }

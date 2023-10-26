@@ -80,7 +80,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.setFont(getTabButtonFont(button, properties().font_height));
   auto justify = button.getIndex() == 0 ? Justification::left : Justification::centred;
-  g.drawText(button.getButtonText(), textArea, justify, false);
+  g.drawText(button.getButtonText(), textArea, justify, false);  
 }
 
 }
