@@ -94,6 +94,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
     return;
   }
 
+  auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea();
   auto buttonArea = headerArea.removeFromRight(properties().tab_button_width);
   int radius = properties().module_corner_radius;
@@ -105,10 +106,13 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   textArea.removeFromLeft(radius + 2);
   g.setFont(properties().font());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
-  g.drawText(button.getButtonText(), textArea, Justification::left, false);
+  g.drawText(header, textArea, Justification::left, false);
+
   buttonArea.removeFromLeft(1);
   g.setColour(findColour(tab_button_background));
   g.fillRect(buttonArea);
+  g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
+  g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
 }
 
 }

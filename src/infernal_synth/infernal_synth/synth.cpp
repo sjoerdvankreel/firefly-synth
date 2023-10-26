@@ -20,7 +20,7 @@ synth_init_lnf(lnf* lnf)
   props.font_height = 14;
   props.typeface = "Verdana";
   props.tab_button_width = 30;
-  props.tab_header_width = 50;
+  props.tab_header_width = 40;
   props.font_flags = Font::plain;
   props.module_corner_radius = 2;
   lnf->setColour(lnf::tab_bar_background, Colour(0xFF222222));
