@@ -23,9 +23,9 @@ synth_init_lnf(lnf* lnf)
   props.first_tab_width = 60;
   props.font_flags = Font::plain;
   props.module_corner_radius = 2;
-  lnf->setColour(lnf::tab_bar_background, Colours::grey);
-  lnf->setColour(lnf::tab_button_background, Colours::darkgrey);
-  lnf->setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colours::red);
+  lnf->setColour(lnf::tab_bar_background, Colour(0xFF222222));
+  lnf->setColour(lnf::tab_button_background, Colour(0xFF333333));
+  lnf->setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colour(0xFFFF8844));
 }
 
 std::unique_ptr<plugin_topo>
