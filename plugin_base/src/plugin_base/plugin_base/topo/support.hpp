@@ -13,7 +13,7 @@ std::vector<timesig>
 make_timesigs(std::vector<int> const& steps, timesig low, timesig high);
 inline std::vector<timesig>
 make_default_timesigs(timesig low, timesig high)
-{ return make_timesigs({1, 2, 3, 4, 5, 6, 7, 8, 9, 16, 32, 64}, low, high); }
+{ return make_timesigs({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64}, low, high); }
 
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
