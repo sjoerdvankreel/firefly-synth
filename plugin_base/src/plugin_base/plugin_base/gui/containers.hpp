@@ -9,6 +9,7 @@
 
 namespace plugin_base {
 
+// TODO delete this ?
 // resizes single child on resize
 class group_component :
 public juce::GroupComponent {
@@ -26,6 +27,20 @@ public:
   void resized() override;
   margin_component(juce::Component* child, juce::BorderSize<int> const& margin):
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
+};
+
+// rounded rectangle container
+class rounded_container:
+public juce::Component
+{
+  int const _radius;
+  juce::Component* _child;
+  juce::Colour const _color;
+public:
+  void resized() override;
+  void paint(juce::Graphics& g) override;
+  rounded_container(juce::Component* child, int radius, juce::Colour const& color):
+  _child(child), _radius(radius), _color(color) { add_and_make_visible(*this, *child); }
 };
 
 // grid component as opposed to grid layout

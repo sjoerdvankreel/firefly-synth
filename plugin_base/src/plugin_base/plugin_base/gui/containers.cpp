@@ -25,6 +25,26 @@ margin_component::resized()
 }
 
 void
+rounded_container::resized()
+{
+  Rectangle<int> bounds(getLocalBounds());
+  Rectangle<int> child_bounds(
+    bounds.getX() + _radius,
+    bounds.getY() + _radius,
+    bounds.getWidth() - _radius * 2,
+    bounds.getHeight() - _radius * 2);
+  assert(getNumChildComponents() == 1);
+  getChildComponent(0)->setBounds(child_bounds);
+}
+
+void
+rounded_container::paint(Graphics& g)
+{
+  g.setColour(_color);
+  g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+}
+
+void
 grid_component::add(Component& child, gui_position const& position)
 {
   add_and_make_visible(*this, child);
