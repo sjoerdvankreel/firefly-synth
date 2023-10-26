@@ -84,12 +84,13 @@ lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
+  float lighten = button.getToggleState()? properties().lighten: 0;
   if (button.getIndex() > 0)
   {
-    g.setColour(findColour(tab_button_background));
+    g.setColour(findColour(tab_button_background).brighter(lighten));
     g.fillRect(button.getActiveArea());
     g.setFont(properties().font());
-    g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
+    g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
     g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
     return;
   }
@@ -109,9 +110,9 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.drawText(header, textArea, Justification::left, false);
 
   buttonArea.removeFromLeft(1);
-  g.setColour(findColour(tab_button_background));
+  g.setColour(findColour(tab_button_background).brighter(lighten));
   g.fillRect(buttonArea);
-  g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
+  g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
   g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
 }
 

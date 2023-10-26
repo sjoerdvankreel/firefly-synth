@@ -7,6 +7,7 @@ namespace plugin_base {
 // TODO un-uglify
 struct lnf_properties
 {
+  float lighten = 1;
   float font_height = 5;
   int tab_button_width = 10;
   int tab_header_width = 20;

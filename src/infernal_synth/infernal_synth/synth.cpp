@@ -17,6 +17,7 @@ void
 synth_init_lnf(lnf* lnf)
 {
   auto& props = lnf->properties();
+  props.lighten = 0.33f;
   props.font_height = 14;
   props.typeface = "Verdana";
   props.tab_button_width = 30;
