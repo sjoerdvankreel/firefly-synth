@@ -12,6 +12,10 @@ using namespace juce;
 
 namespace plugin_base {
 
+static int const margin_param = 1;
+static int const margin_module = 2;
+static int const margin_section = 0;
+static int const margin_container = 2;
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
 static Justification 
@@ -116,17 +120,17 @@ plugin_gui::make_component(U&&... args)
 Component& 
 plugin_gui::make_container()
 {
-  auto& grid = make_component<grid_component>(gui_dimension({ gui_dimension::auto_size, 1 }, { 1 }), 2.0f);
+  auto& grid = make_component<grid_component>(gui_dimension({ gui_dimension::auto_size, 1 }, { 1 }), margin_container);
   grid.add(make_top_bar(), { 0, 0 });
   grid.add(make_content(), { 1, 0 });
-  return make_component<margin_component>(&grid, BorderSize<int>(2));
+  return make_component<margin_component>(&grid, BorderSize<int>(margin_container));
 }
 
 Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& result = make_component<grid_component>(topo.gui.dimension, 2.0f);
+  auto& result = make_component<grid_component>(topo.gui.dimension, margin_module);
   for(int s = 0; s < topo.gui.sections.size(); s++)
     result.add(make_module_section(topo.gui.sections[s]), topo.gui.sections[s].position);
   return result;
@@ -136,7 +140,7 @@ Component&
 plugin_gui::make_module_section(module_section_gui const& section)
 {
   auto const& modules = _gui_state->desc().modules;
-  auto& result = make_component<grid_component>(section.dimension, 1.0f);
+  auto& result = make_component<grid_component>(section.dimension, margin_module);
   for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
     if(iter->module->gui.section == section.index)
       result.add(make_modules(&(*iter)), iter->module->gui.position);
@@ -168,14 +172,14 @@ plugin_gui::make_multi_module(module_desc const* slots)
 {
   auto make_single = [this](module_desc const& m, bool tabbed) -> Component& {
     return make_single_module(m, tabbed); };
-  return make_multi_slot(*slots[0].module, slots, make_single);
+  return make_multi_slot(*slots[0].module, slots, make_single, margin_module);
 }
 
 Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  auto& result = make_component<grid_component>(topo.gui.dimension, 1.0f);
+  auto& result = make_component<grid_component>(topo.gui.dimension, margin_section);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
   return result;
@@ -186,9 +190,9 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
 {
   grid_component* grid = nullptr;
   if (module.module->sections.size() == 1)
-    grid = &make_component<param_section_grid>(this, &module, &section, 1.0f);
+    grid = &make_component<param_section_grid>(this, &module, &section, margin_param);
   else
-    grid = &make_component<grid_component>(section.gui.dimension, 1.0f);
+    grid = &make_component<grid_component>(section.gui.dimension, margin_param);
 
   auto const& params = module.params;
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
@@ -227,7 +231,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
   auto make_single = [this, &module](param_desc const& p, bool tabbed) -> Component& {
     return make_single_param(module, p); };
-  return make_multi_slot(*slots[0].param, slots, make_single);
+  return make_multi_slot(*slots[0].param, slots, make_single, margin_param);
 }
 
 Component&
@@ -319,7 +323,7 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
     return *((Component*)nullptr);
   }
 
-  auto& result = make_component<grid_component>(dimension, 1.0f);
+  auto& result = make_component<grid_component>(dimension, margin_param);
   result.add(make_param_label(module, param), label_position);
   result.add(make_param_editor(module, param), edit_position);
   return result;
@@ -327,7 +331,7 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
 
 template <class Topo, class Slot, class MakeSingle>
 Component&
-plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single)
+plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make_single, int margin)
 {
   switch (topo.gui.layout)
   {
@@ -335,7 +339,7 @@ plugin_gui::make_multi_slot(Topo const& topo, Slot const* slots, MakeSingle make
   case gui_layout::horizontal:
   {
     bool vertical = topo.gui.layout == gui_layout::vertical;
-    auto& result = make_component<grid_component>(vertical, topo.info.slot_count, 1.0f);
+    auto& result = make_component<grid_component>(vertical, topo.info.slot_count, margin);
     for (int i = 0; i < topo.info.slot_count; i++)
       result.add(make_single(slots[i], false), vertical, i);
     return result;
@@ -366,7 +370,7 @@ plugin_gui::make_top_bar()
 {
   auto& result = make_component<grid_component>(
     gui_dimension({ gui_dimension::auto_size }, 
-    { gui_dimension::auto_size, gui_dimension::auto_size }), 1.0f);
+    { gui_dimension::auto_size, gui_dimension::auto_size }), margin_module);
 
   auto& save = make_component<autofit_button>("Save");
   result.add(save, { 0, 1 });
