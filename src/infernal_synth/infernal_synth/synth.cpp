@@ -18,10 +18,13 @@ synth_topo()
 {
   module_gui_colors cv_colors;
   cv_colors.tab_text = juce::Colour(0xFFFF8844);
+  cv_colors.dropdown_tick = juce::Colour(0xFFFF8844);
   module_gui_colors audio_colors;
   audio_colors.tab_text = juce::Colour(0xFF4488FF);
+  audio_colors.dropdown_tick = juce::Colour(0xFF4488FF);
   module_gui_colors other_colors;
   other_colors.tab_text = juce::Colour(0xFFFF4488);
+  other_colors.dropdown_tick = juce::Colour(0xFFFF4488);
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;

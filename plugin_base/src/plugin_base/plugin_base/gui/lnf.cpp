@@ -18,10 +18,15 @@ _topo(topo), _module(module)
   setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);
 
   setColour(ComboBox::ColourIds::textColourId, module_gui().colors.dropdown_text);
-  setColour(ComboBox::ColourIds::arrowColourId, module_gui().colors.dropdown_arrow);
+  setColour(ComboBox::ColourIds::arrowColourId, module_gui().colors.dropdown_tick);
   setColour(ComboBox::ColourIds::outlineColourId, module_gui().colors.dropdown_outline);
   setColour(ComboBox::ColourIds::backgroundColourId, module_gui().colors.dropdown_background);
   setColour(ComboBox::ColourIds::focusedOutlineColourId, module_gui().colors.dropdown_outline);
+
+  setColour(PopupMenu::ColourIds::textColourId, module_gui().colors.dropdown_text);
+  setColour(PopupMenu::ColourIds::backgroundColourId, module_gui().colors.dropdown_background);
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, module_gui().colors.dropdown_text.brighter(_topo->gui.lighten));
+  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, module_gui().colors.dropdown_background.brighter(_topo->gui.lighten));
 }
 
 void 

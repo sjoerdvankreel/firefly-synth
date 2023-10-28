@@ -30,10 +30,10 @@ struct module_gui_colors final {
   juce::Colour tab_header = juce::Colour(0xFF222222);
   juce::Colour tab_background1 = juce::Colour(0xFF222222);
   juce::Colour tab_background2 = juce::Colour(0xFF111111);
-  juce::Colour dropdown_text = juce::Colour(0xFFFF0000);
-  juce::Colour dropdown_arrow = juce::Colour(0xFF00FFFF);
-  juce::Colour dropdown_outline = juce::Colour(0xFF0000FF);
-  juce::Colour dropdown_background = juce::Colour(0xFF00FF00);
+  juce::Colour dropdown_text = juce::Colour(0xFFFFFFFF);
+  juce::Colour dropdown_tick = juce::Colour(0xFFFF8844);
+  juce::Colour dropdown_outline = juce::Colour(0xFFAAAAAA);
+  juce::Colour dropdown_background = juce::Colour(0xFF111111);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_gui_colors);
 };
 
