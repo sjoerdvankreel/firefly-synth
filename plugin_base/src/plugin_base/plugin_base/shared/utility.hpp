@@ -25,6 +25,9 @@
 
 namespace plugin_base {
 
+inline float constexpr pi32 = 3.14159265358979323846264338327950288f;
+inline double constexpr pi64 = 3.14159265358979323846264338327950288;
+
 template <class Exit>
 class scope_guard {
   Exit _exit;

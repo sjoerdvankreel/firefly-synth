@@ -15,6 +15,7 @@ public juce::LookAndFeel_V4 {
 public:
   lnf(plugin_topo const* topo, int module);
   
+  juce::Path getTickShape(float) override;
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
   void positionComboBoxText(juce::ComboBox&, juce::Label&) override;
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;

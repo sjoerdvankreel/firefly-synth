@@ -48,7 +48,7 @@ lnf::drawLabel(Graphics& g, Label& label)
 
 void
 lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
-{
+{ 
   Font font(getTextButtonFont(button, button.getHeight()));
   g.setFont(font);
   int id = button.getToggleState() ? TextButton::textColourOnId: TextButton::textColourOffId;
@@ -63,6 +63,13 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
     g.drawText(button.getButtonText(), leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2, Justification::centred, false);
 }
 
+Path 
+lnf::getTickShape(float h)
+{
+  Path result;
+  result.addArc(0, 0, h, h, 0, 2 * pi32 + 1);
+  return result;
+}
 
 void 
 lnf::positionComboBoxText(ComboBox& box, Label& label)
