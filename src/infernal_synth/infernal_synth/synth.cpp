@@ -17,7 +17,11 @@ std::unique_ptr<plugin_topo>
 synth_topo()
 {
   module_gui_colors cv_colors;
+  cv_colors.tab_text = juce::Colour(0xFFFF8844);
   module_gui_colors audio_colors;
+  audio_colors.tab_text = juce::Colour(0xFF4488FF);
+  module_gui_colors other_colors;
+  other_colors.tab_text = juce::Colour(0xFFFF4488);
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
@@ -51,7 +55,7 @@ synth_topo()
   result->modules[module_delay] = delay_topo(section_delay, audio_colors, { 0, 0 });
   result->modules[module_glfo] = lfo_topo(section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(section_lfos, cv_colors, { 0, 1 }, false);
-  result->modules[module_monitor] = monitor_topo(section_monitor, audio_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_monitor] = monitor_topo(section_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_filter] = filter_topo(section_filter, audio_colors, { 0, 0 }, result->modules[module_osc].info.slot_count);
   result->modules[module_cv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 },
     { &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
