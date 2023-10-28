@@ -25,6 +25,7 @@ make common rate-num-den-block
 embed the font
 restore font check
 host/os scaling broken
+drop param_dependent, squash into 1 combo
 
 * get some linux folks to comment (ycollete?)
 * continuing
