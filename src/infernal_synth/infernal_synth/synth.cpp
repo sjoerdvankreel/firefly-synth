@@ -35,9 +35,9 @@ synth_topo()
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
-  result->gui.min_width = 1000;
-  result->gui.max_width = 2000;
-  result->gui.default_width = 1000;
+  result->gui.min_width = 720;
+  result->gui.max_width = 1440;
+  result->gui.default_width = 720;
   result->gui.aspect_ratio_width = 14;
   result->gui.aspect_ratio_height = 5;
   result->gui.dimension.row_sizes = std::vector<int>(5, 1);
