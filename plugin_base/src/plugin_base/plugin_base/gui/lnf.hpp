@@ -15,6 +15,7 @@ public:
   lnf(plugin_topo const* topo, int module);
   
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
+  void positionComboBoxText(juce::ComboBox&, juce::Label&) override;
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;
 
   void drawLabel(juce::Graphics&, juce::Label& label) override;

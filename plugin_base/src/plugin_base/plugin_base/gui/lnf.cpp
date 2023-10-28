@@ -54,6 +54,14 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
     g.drawText(button.getButtonText(), leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2, Justification::centred, false);
 }
 
+
+void 
+lnf::positionComboBoxText(ComboBox& box, Label& label)
+{
+  label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
+  label.setFont(getComboBoxFont(box));
+}
+
 void 
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
