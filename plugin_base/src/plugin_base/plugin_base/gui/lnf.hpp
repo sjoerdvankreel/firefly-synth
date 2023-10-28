@@ -10,8 +10,9 @@ public juce::LookAndFeel_V4 {
   
   int const _module = -1;
   plugin_topo const* const _topo;
+  module_topo_gui const& module_gui() const { return _topo->modules[_module].gui; }
+
 public:
-  enum color_ids { tab_button_background, tab_bar_background };
   lnf(plugin_topo const* topo, int module);
   
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;

@@ -159,7 +159,7 @@ plugin_gui::make_modules(module_desc const* slots)
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
   result.setLookAndFeel(module_lnf(index));
-  auto background = module_lnf(index)->findColour(lnf::tab_bar_background);
+  auto background = slots[0].module->gui.colors.tab_background_1;
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {
     int radius = topo.gui.module_corner_radius;

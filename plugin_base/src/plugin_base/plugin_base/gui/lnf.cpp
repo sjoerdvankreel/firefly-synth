@@ -11,10 +11,7 @@ _topo(topo), _module(module)
 {
   assert(module < (int)topo->modules.size());
   if(module < 0) return;
-  auto const& colors = topo->modules[module].gui.colors;
-  setColour(lnf::tab_button_background, colors.tab_button);
-  setColour(lnf::tab_bar_background, colors.tab_background);
-  setColour(TabbedButtonBar::ColourIds::tabTextColourId, colors.tab_text);
+  setColour(TabbedButtonBar::ColourIds::tabTextColourId, module_gui().colors.tab_text);
   setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::tabOutlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);
@@ -95,7 +92,7 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
 void 
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
-  g.setColour(findColour(tab_bar_background));
+  g.setColour(module_gui().colors.tab_header);
   g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _topo->gui.module_corner_radius);
 }
 
@@ -112,7 +109,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   float lighten = button.getToggleState() || isMouseOver? _topo->gui.lighten: 0;
   if (button.getIndex() > 0)
   {
-    g.setColour(findColour(tab_button_background).brighter(lighten));
+    g.setColour(module_gui().colors.tab_button.brighter(lighten));
     g.fillRect(button.getActiveArea());
     g.setFont(_topo->gui.font());
     g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
@@ -124,7 +121,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto headerArea = button.getActiveArea();
   auto buttonArea = headerArea.removeFromRight(_topo->gui.module_tab_width);
   int radius = _topo->gui.module_corner_radius;
-  g.setColour(findColour(tab_button_background));
+  g.setColour(module_gui().colors.tab_button);
   g.fillRoundedRectangle(headerArea.toFloat(), radius);
   headerArea.removeFromLeft(radius);
   g.fillRect(headerArea.toFloat());
@@ -136,7 +133,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   if(button.getTabbedButtonBar().getNumTabs() == 1) return;
   buttonArea.removeFromLeft(1);
-  g.setColour(findColour(tab_button_background).brighter(lighten));
+  g.setColour(module_gui().colors.tab_button.brighter(lighten));
   g.fillRect(buttonArea);
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
   g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
