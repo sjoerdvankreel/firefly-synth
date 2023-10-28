@@ -9,7 +9,7 @@ lnf::
 lnf(plugin_topo const* topo, int module) :
 _topo(topo), _module(module)
 {
-  assert(module < topo->modules.size());
+  assert(module < (int)topo->modules.size());
   if(module < 0) return;
   auto const& colors = topo->modules[module].gui.colors;
   setColour(lnf::tab_button_background, colors.tab_button);

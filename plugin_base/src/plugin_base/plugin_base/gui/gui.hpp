@@ -35,8 +35,10 @@ public:
   void add_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
   
 private:
+  lnf _lnf;
   plugin_state* const _gui_state;
   std::vector<gui_listener*> _gui_listeners = {};
+  std::vector<std::unique_ptr<lnf>> _module_lnfs = {};
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 

@@ -1,13 +1,9 @@
 #pragma once
 
-#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace plugin_base {
-
-void gui_terminate();
-lnf* gui_init(plugin_topo const* topo);
 
 void add_and_make_visible(
   juce::Component& parent, 

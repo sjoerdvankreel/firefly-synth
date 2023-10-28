@@ -54,9 +54,10 @@ justification_type(gui_label const& label)
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state) :
-_gui_state(gui_state)
+_lnf(gui_state->desc().plugin, -1), _gui_state(gui_state)
 {
   setOpaque(true);
+  setLookAndFeel(&_lnf);
   auto const& topo = *gui_state->desc().plugin;
   add_and_make_visible(*this, make_container());
   setSize(topo.gui.default_width, topo.gui.default_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
@@ -152,9 +153,11 @@ plugin_gui::make_modules(module_desc const* slots)
 {
   auto const& topo = *_gui_state->desc().plugin;
   auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+  _module_lnfs.emplace_back(std::make_unique<lnf>(&topo, slots[0].module->info.index));
   result.setOutline(0);
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
+  result.setLookAndFeel(_module_lnfs[_module_lnfs.size() - 1].get());
   auto background = getLookAndFeel().findColour(lnf::tab_bar_background);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {

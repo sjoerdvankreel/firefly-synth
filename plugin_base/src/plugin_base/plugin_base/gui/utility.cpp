@@ -9,20 +9,6 @@ using namespace juce;
 namespace plugin_base {
 
 void 
-gui_terminate()
-{ 
-  shutdownJuce_GUI(); 
-}
-
-lnf* 
-gui_init()
-{ 
-  initialiseJuce_GUI(); 
-  LookAndFeel::setDefaultLookAndFeel(_lnf.get());
-  return _lnf.get();
-}
-
-void 
 add_and_make_visible(
   juce::Component& parent, juce::Component& child)
 {

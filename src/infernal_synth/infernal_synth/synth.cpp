@@ -17,12 +17,7 @@ std::unique_ptr<plugin_topo>
 synth_topo()
 {
   module_gui_colors cv_colors;
-  cv_colors.tab_text = Colours::yellow;
-
   module_gui_colors audio_colors;
-  audio_colors.tab_button = Colours::blue;
-  audio_colors.tab_text = Colours::green;
-  audio_colors.tab_background = Colours::red;
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;

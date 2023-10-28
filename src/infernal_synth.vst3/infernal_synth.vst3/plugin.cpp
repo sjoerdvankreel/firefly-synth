@@ -30,7 +30,7 @@ static std::unique_ptr<plugin_desc> _desc = {};
 bool
 DeinitModule()
 {
-  gui_terminate();
+  juce::shutdownJuce_GUI();
   _desc.reset();
   _topo.reset();
   return true;
@@ -41,7 +41,7 @@ InitModule()
 { 
   _topo = synth_topo();
   _desc = std::make_unique<plugin_desc>(_topo.get());
-  gui_init(_topo.get());
+  juce::initialiseJuce_GUI();
   return true; 
 }
 

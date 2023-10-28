@@ -5,6 +5,7 @@
 #include <plugin_base/gui/utility.hpp>
 #include <plugin_base.clap/inf_plugin.hpp>
 
+#include <juce_gui_basics/juce_gui_basics.h>
 #include <clap/clap.h>
 #include <cstring>
 
@@ -27,7 +28,7 @@ features[] = { PLUG_FEATURE, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
 static void CLAP_ABI
 deinit()
 {
-  gui_terminate();
+  juce::shutdownJuce_GUI();
   _desc.reset();
   _topo.reset();
 }
@@ -37,7 +38,7 @@ init(char const*)
 {
   _topo = synth_topo();
   _desc = std::make_unique<plugin_desc>(_topo.get());
-  gui_init(_topo.get());
+  juce::initialiseJuce_GUI();
   return true;
 }
 
