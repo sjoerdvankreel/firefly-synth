@@ -6,8 +6,8 @@
 
 namespace plugin_base {
 
-lnf* gui_init();
 void gui_terminate();
+lnf* gui_init(plugin_topo const* topo);
 
 void add_and_make_visible(
   juce::Component& parent, 

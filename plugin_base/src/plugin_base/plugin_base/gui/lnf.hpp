@@ -8,10 +8,10 @@ namespace plugin_base {
 class lnf:
 public juce::LookAndFeel_V4 {
   
-  plugin_topo_gui const* const _gui_topo;
+  plugin_topo const* const _topo;
 public:
   enum color_ids { tab_button_background, tab_bar_background };
-  lnf(plugin_topo_gui const* gui_topo);
+  lnf(plugin_topo const* topo);
   
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;
@@ -22,11 +22,11 @@ public:
   void drawTabbedButtonBarBackground(juce::TabbedButtonBar&, juce::Graphics&) override;
   void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
 
-  juce::Font getPopupMenuFont() override { return _gui_topo->font(); }
-  juce::Font getLabelFont(juce::Label&) override { return _gui_topo->font(); }
-  juce::Font getComboBoxFont(juce::ComboBox&) override { return _gui_topo->font(); }
-  juce::Font getTextButtonFont(juce::TextButton&, int) override { return _gui_topo->font(); }
-  juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return _gui_topo->font(); }
+  juce::Font getPopupMenuFont() override { return _topo->gui.font(); }
+  juce::Font getLabelFont(juce::Label&) override { return _topo->gui.font(); }
+  juce::Font getComboBoxFont(juce::ComboBox&) override { return _topo->gui.font(); }
+  juce::Font getTextButtonFont(juce::TextButton&, int) override { return _topo->gui.font(); }
+  juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return _topo->gui.font(); }
 };
 
 }

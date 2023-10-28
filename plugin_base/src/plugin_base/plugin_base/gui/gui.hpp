@@ -18,7 +18,7 @@ public juce::Component
 {
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
-  plugin_gui(plugin_topo_gui const* gui_topo, plugin_state* gui_state);
+  plugin_gui(plugin_state* gui_state);
 
   void gui_end_changes(int index);
   void gui_begin_changes(int index);
@@ -36,7 +36,6 @@ public:
   
 private:
   plugin_state* const _gui_state;
-  plugin_topo_gui const* const _gui_topo;
   std::vector<gui_listener*> _gui_listeners = {};
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};

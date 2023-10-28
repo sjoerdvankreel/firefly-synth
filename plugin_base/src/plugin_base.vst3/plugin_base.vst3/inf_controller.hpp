@@ -19,11 +19,13 @@ public any_state_listener
 {
   inf_editor* _editor = {};
   plugin_state _gui_state = {};
+  plugin_topo_gui const* const _gui_topo = {};
 
 public: 
   INF_PREVENT_ACCIDENTAL_COPY(inf_controller);
   ~inf_controller() { _gui_state.remove_any_listener(this); }
-  inf_controller(plugin_desc const* desc): _gui_state(desc, true) { _gui_state.add_any_listener(this); }
+  inf_controller(plugin_desc const* desc): 
+  _gui_state(desc, true), _gui_topo(&desc->plugin->gui) { _gui_state.add_any_listener(this); }
 
   plugin_state& gui_state() { return _gui_state; }
   plugin_state const& gui_state() const { return _gui_state; };

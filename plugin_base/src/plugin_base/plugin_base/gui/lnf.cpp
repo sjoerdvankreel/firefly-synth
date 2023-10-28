@@ -5,8 +5,8 @@ using namespace juce;
 namespace plugin_base {
 
 lnf::
-lnf(plugin_topo_gui const* gui_topo) :
-_gui_topo(gui_topo)
+lnf(plugin_topo const* topo) :
+_topo(topo)
 {
   setColour(lnf::tab_bar_background, Colour(0xFF222222));
   setColour(lnf::tab_button_background, Colour(0xFF333333));
@@ -54,7 +54,7 @@ void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
   Path path;
-  int const fixedHeight = _gui_topo->font_height + 6;
+  int const fixedHeight = _topo->gui.font_height + 6;
   int const comboTop = height < fixedHeight ? 0: (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
   Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
@@ -73,8 +73,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 int	
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
 {
-  int result = _gui_topo->module_tab_width;
-  if(b.getIndex() == 0) result += _gui_topo->module_header_width;
+  int result = _topo->gui.module_tab_width;
+  if(b.getIndex() == 0) result += _topo->gui.module_header_width;
   return result;
 }
 
@@ -82,25 +82,25 @@ void
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
   g.setColour(findColour(tab_bar_background));
-  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _gui_topo->module_corner_radius);
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _topo->gui.module_corner_radius);
 }
 
 void
 lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardHeight, int& w, int& h)
 {
   LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
-  h = _gui_topo->font_height + 8;
+  h = _topo->gui.font_height + 8;
 }
 
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  float lighten = button.getToggleState() || isMouseOver? _gui_topo->lighten: 0;
+  float lighten = button.getToggleState() || isMouseOver? _topo->gui.lighten: 0;
   if (button.getIndex() > 0)
   {
     g.setColour(findColour(tab_button_background).brighter(lighten));
     g.fillRect(button.getActiveArea());
-    g.setFont(_gui_topo->font());
+    g.setFont(_topo->gui.font());
     g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
     g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
     return;
@@ -108,15 +108,15 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea();
-  auto buttonArea = headerArea.removeFromRight(_gui_topo->module_tab_width);
-  int radius = _gui_topo->module_corner_radius;
+  auto buttonArea = headerArea.removeFromRight(_topo->gui.module_tab_width);
+  int radius = _topo->gui.module_corner_radius;
   g.setColour(findColour(tab_button_background));
   g.fillRoundedRectangle(headerArea.toFloat(), radius);
   headerArea.removeFromLeft(radius);
   g.fillRect(headerArea.toFloat());
   auto textArea = button.getTextArea();
   textArea.removeFromLeft(radius + 2);
-  g.setFont(_gui_topo->font());
+  g.setFont(_topo->gui.font());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.drawText(header, textArea, Justification::left, false);
 

@@ -19,10 +19,10 @@ gui_terminate()
 }
 
 lnf* 
-gui_init()
+gui_init(plugin_topo const* topo)
 { 
   initialiseJuce_GUI(); 
-  _lnf = std::make_unique<lnf>();
+  _lnf = std::make_unique<lnf>(topo);
   LookAndFeel::setDefaultLookAndFeel(_lnf.get());
   return _lnf.get();
 }
