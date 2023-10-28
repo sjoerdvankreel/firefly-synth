@@ -9,6 +9,7 @@ lnf::
 lnf(plugin_topo const* topo, int module) :
 _topo(topo), _module(module)
 {
+  _typeface = Typeface::createSystemTypefaceFor(topo->gui.font_typeface->data(), topo->gui.font_typeface->size());
   assert(module < (int)topo->modules.size());
   if(module < 0) return;
 
@@ -27,6 +28,15 @@ _topo(topo), _module(module)
   setColour(PopupMenu::ColourIds::backgroundColourId, module_gui().colors.dropdown_background);
   setColour(PopupMenu::ColourIds::highlightedTextColourId, module_gui().colors.dropdown_text.brighter(_topo->gui.lighten));
   setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, module_gui().colors.dropdown_background.brighter(_topo->gui.lighten));
+}
+
+Font 
+lnf::font() const
+{
+  Font result(_typeface);
+  result.setHeight(_topo->gui.font_height);
+  result.setStyleFlags(_topo->gui.font_flags);
+  return result;
 }
 
 void 
@@ -130,7 +140,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   {
     g.setColour(module_gui().colors.tab_button.brighter(lighten));
     g.fillRect(button.getActiveArea());
-    g.setFont(_topo->gui.font());
+    g.setFont(font());
     g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
     g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
     return;
@@ -146,7 +156,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.fillRect(headerArea.toFloat());
   auto textArea = button.getTextArea();
   textArea.removeFromLeft(radius + 2);
-  g.setFont(_topo->gui.font());
+  g.setFont(font());
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.drawText(header, textArea, Justification::left, false);
 

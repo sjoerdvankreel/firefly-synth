@@ -5,13 +5,16 @@
 #include <plugin_base/shared/utility.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
+
 #include <vector>
 #include <string>
+#include <cstdint>
 
 namespace plugin_base {
 
 struct plugin_topo_gui;
 enum class plugin_type { synth, fx };
+extern std::vector<std::uint8_t> const default_typeface;
 
 // module ui grouping
 struct module_section_gui final {
@@ -40,10 +43,9 @@ struct plugin_topo_gui final {
   int module_header_width = 60;
   int module_corner_radius = 4;
   int font_flags = juce::Font::plain;
-  std::string font_typeface = "Handel Gothic";
+  std::vector<std::uint8_t> const* font_typeface = &default_typeface;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
-  juce::Font font() const { return juce::Font(font_typeface, font_height, font_flags); }
 };
 
 // plugin definition

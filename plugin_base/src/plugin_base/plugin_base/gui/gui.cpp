@@ -259,7 +259,6 @@ Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
   Component* result = nullptr;
-  auto const& topo = *_gui_state->desc().plugin;
   switch (param.param->gui.edit_type)
   {
   case gui_edit_type::knob:
@@ -268,7 +267,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
     result = &make_component<param_slider>(this, &module, &param); break;
   case gui_edit_type::text:
     result = &make_component<param_textbox>(this, &module, &param); 
-    dynamic_cast<param_textbox*>(result)->applyFontToAllText(topo.gui.font());
+    dynamic_cast<param_textbox*>(result)->applyFontToAllText(_lnf.font());
     break;
   case gui_edit_type::dependent:
     result = &make_component<param_dependent>(this, &module, &param); break;

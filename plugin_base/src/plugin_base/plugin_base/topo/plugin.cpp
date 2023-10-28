@@ -3,6 +3,8 @@
 
 namespace plugin_base {
 
+std::vector<std::uint8_t> const default_typeface = {};
+
 void 
 module_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
