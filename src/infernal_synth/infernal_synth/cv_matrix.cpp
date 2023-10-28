@@ -42,6 +42,7 @@ public:
 module_topo 
 cv_matrix_topo(
   int section,
+  plugin_base::module_gui_colors const& colors, 
   plugin_base::gui_position const& pos,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)

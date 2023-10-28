@@ -8,10 +8,11 @@ namespace plugin_base {
 class lnf:
 public juce::LookAndFeel_V4 {
   
+  int const _module = -1;
   plugin_topo const* const _topo;
 public:
   enum color_ids { tab_button_background, tab_bar_background };
-  lnf(plugin_topo const* topo);
+  lnf(plugin_topo const* topo, int module);
   
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;

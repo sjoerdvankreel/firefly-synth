@@ -5,6 +5,8 @@
 #include <plugin_base/topo/section.hpp>
 #include <plugin_base/shared/utility.hpp>
 
+#include <juce_gui_basics/juce_gui_basics.h>
+
 #include <memory>
 #include <vector>
 #include <string>
@@ -21,11 +23,20 @@ typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
 
+// module color scheme
+struct module_gui_colors final {
+  juce::Colour tab_text = juce::Colour(0xFFFF8844);
+  juce::Colour tab_button = juce::Colour(0xFF333333);
+  juce::Colour tab_background = juce::Colour(0xFF222222);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_gui_colors);
+};
+
 // module ui
 struct module_topo_gui final {
   int section;
   gui_position position;
   gui_dimension dimension;
+  module_gui_colors colors;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 

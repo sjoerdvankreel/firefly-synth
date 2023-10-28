@@ -39,7 +39,9 @@ public:
 };
 
 module_topo
-delay_topo(int section, plugin_base::gui_position const& pos)
+delay_topo(
+  int section, plugin_base::module_gui_colors const& colors, 
+  plugin_base::gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Delay", module_delay, 1), 

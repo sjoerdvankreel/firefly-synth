@@ -20,13 +20,13 @@ enum {
   module_osc, module_filter, module_delay, module_monitor, module_count };
 
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
-plugin_base::module_topo env_topo(int section, plugin_base::gui_position const& pos);
-plugin_base::module_topo osc_topo(int section, plugin_base::gui_position const& pos);
-plugin_base::module_topo delay_topo(int section, plugin_base::gui_position const& pos);
-plugin_base::module_topo lfo_topo(int section, plugin_base::gui_position const& pos, bool global);
-plugin_base::module_topo monitor_topo(int section, plugin_base::gui_position const& pos, int polyphony);
-plugin_base::module_topo filter_topo(int section, plugin_base::gui_position const& pos, int osc_slot_count);
-plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_position const& pos,
+plugin_base::module_topo env_topo(int section, plugin_base::module_gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo osc_topo(int section, plugin_base::module_gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo delay_topo(int section, plugin_base::module_gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo lfo_topo(int section, plugin_base::module_gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
+plugin_base::module_topo monitor_topo(int section, plugin_base::module_gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony);
+plugin_base::module_topo filter_topo(int section, plugin_base::module_gui_colors const& colors, plugin_base::gui_position const& pos, int osc_slot_count);
+plugin_base::module_topo cv_matrix_topo(int section, plugin_base::module_gui_colors const& colors, plugin_base::gui_position const& pos,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 
 }

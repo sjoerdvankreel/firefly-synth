@@ -28,7 +28,9 @@ public:
 };
 
 module_topo
-filter_topo(int section, plugin_base::gui_position const& pos, int osc_slot_count)
+filter_topo(
+  int section, plugin_base::module_gui_colors const& colors, 
+  plugin_base::gui_position const& pos, int osc_slot_count)
 {
   module_topo result(make_module(
     make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Filter", module_filter, 3), 

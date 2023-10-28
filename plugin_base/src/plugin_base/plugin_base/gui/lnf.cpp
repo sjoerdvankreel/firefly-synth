@@ -1,16 +1,20 @@
 #include <plugin_base/gui/lnf.hpp>
+#include <cassert>
 
 using namespace juce;
 
 namespace plugin_base {
 
 lnf::
-lnf(plugin_topo const* topo) :
-_topo(topo)
+lnf(plugin_topo const* topo, int module) :
+_topo(topo), _module(module)
 {
-  setColour(lnf::tab_bar_background, Colour(0xFF222222));
-  setColour(lnf::tab_button_background, Colour(0xFF333333));
-  setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colour(0xFFFF8844));
+  assert(module < topo->modules.size());
+  if(module < 0) return;
+  auto const& colors = topo->modules[module].gui.colors;
+  setColour(lnf::tab_button_background, colors.tab_button);
+  setColour(lnf::tab_bar_background, colors.tab_background);
+  setColour(TabbedButtonBar::ColourIds::tabTextColourId, colors.tab_text);
   setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::tabOutlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);

@@ -16,6 +16,14 @@ enum {
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
+  module_gui_colors cv_colors;
+  cv_colors.tab_text = Colours::yellow;
+
+  module_gui_colors audio_colors;
+  audio_colors.tab_button = Colours::blue;
+  audio_colors.tab_text = Colours::green;
+  audio_colors.tab_background = Colours::red;
+
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
   result->extension = "infpreset";
@@ -43,14 +51,14 @@ synth_topo()
   result->gui.sections[section_cv_matrix] = make_module_section_gui(section_cv_matrix, { 0, 1, 4, 1 }, { 1, 1 });
 
   result->modules.resize(module_count);
-  result->modules[module_env] = env_topo(section_env, { 0, 0 });
-  result->modules[module_osc] = osc_topo(section_osc, { 0, 0 });
-  result->modules[module_delay] = delay_topo(section_delay, { 0, 0 });
-  result->modules[module_glfo] = lfo_topo(section_lfos, { 0, 0 }, true);
-  result->modules[module_vlfo] = lfo_topo(section_lfos, { 0, 1 }, false);
-  result->modules[module_monitor] = monitor_topo(section_monitor, { 0, 0 }, result->polyphony);
-  result->modules[module_filter] = filter_topo(section_filter, { 0, 0 }, result->modules[module_osc].info.slot_count);
-  result->modules[module_cv_matrix] = cv_matrix_topo(section_cv_matrix, { 0, 0 },
+  result->modules[module_env] = env_topo(section_env, cv_colors, { 0, 0 });
+  result->modules[module_osc] = osc_topo(section_osc, audio_colors, { 0, 0 });
+  result->modules[module_delay] = delay_topo(section_delay, audio_colors, { 0, 0 });
+  result->modules[module_glfo] = lfo_topo(section_lfos, cv_colors, { 0, 0 }, true);
+  result->modules[module_vlfo] = lfo_topo(section_lfos, cv_colors, { 0, 1 }, false);
+  result->modules[module_monitor] = monitor_topo(section_monitor, audio_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_filter] = filter_topo(section_filter, audio_colors, { 0, 0 }, result->modules[module_osc].info.slot_count);
+  result->modules[module_cv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 },
     { &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
     { &result->modules[module_osc], &result->modules[module_filter] });
   return result;

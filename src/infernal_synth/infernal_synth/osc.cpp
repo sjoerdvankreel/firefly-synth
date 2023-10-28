@@ -40,7 +40,9 @@ public:
 };
 
 module_topo
-osc_topo(int section, plugin_base::gui_position const& pos)
+osc_topo(
+  int section, plugin_base::module_gui_colors const& colors, 
+  plugin_base::gui_position const& pos)
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
