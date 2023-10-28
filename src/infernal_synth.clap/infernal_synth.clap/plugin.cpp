@@ -37,7 +37,7 @@ init(char const*)
 {
   _topo = synth_topo();
   _desc = std::make_unique<plugin_desc>(_topo.get());
-  synth_init_lnf(gui_init());
+  gui_init();
   return true;
 }
 

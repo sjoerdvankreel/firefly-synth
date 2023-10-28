@@ -24,6 +24,7 @@ monospace font
 make common rate-num-den-block
 embed the font
 restore font check
+host/os scaling broken
 
 * get some linux folks to comment (ycollete?)
 * continuing

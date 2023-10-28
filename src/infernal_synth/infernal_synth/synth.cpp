@@ -13,22 +13,6 @@ enum {
   section_lfos, section_env, section_osc, section_filter, 
   section_cv_matrix, section_delay, section_monitor, section_count  };
 
-void 
-synth_init_lnf(lnf* lnf)
-{
-  auto& props = lnf->properties();
-  props.lighten = 0.15f;
-  props.font_height = 13;
-  props.tab_button_width = 30;
-  props.tab_header_width = 60;
-  props.module_corner_radius = 4;
-  props.font_flags = Font::plain;
-  props.typeface = "Handel Gothic";
-  lnf->setColour(lnf::tab_bar_background, Colour(0xFF222222));
-  lnf->setColour(lnf::tab_button_background, Colour(0xFF333333));
-  lnf->setColour(TabbedButtonBar::ColourIds::tabTextColourId, Colour(0xFFFF8844));
-}
-
 std::unique_ptr<plugin_topo>
 synth_topo()
 {

@@ -19,9 +19,7 @@ enum {
   module_glfo, module_vlfo, module_env, module_cv_matrix, 
   module_osc, module_filter, module_delay, module_monitor, module_count };
 
-void synth_init_lnf(plugin_base::lnf* lnf);
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
-
 plugin_base::module_topo env_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_position const& pos);
 plugin_base::module_topo delay_topo(int section, plugin_base::gui_position const& pos);

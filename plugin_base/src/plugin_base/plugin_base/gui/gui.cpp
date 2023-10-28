@@ -53,8 +53,8 @@ justification_type(gui_label const& label)
 }
 
 plugin_gui::
-plugin_gui(plugin_state* gui_state) :
-_gui_state(gui_state)
+plugin_gui(plugin_topo_gui const* gui_topo, plugin_state* gui_state) :
+_gui_topo(gui_topo), _gui_state(gui_state)
 {
   setOpaque(true);
   auto const& topo = *gui_state->desc().plugin;
@@ -152,12 +152,12 @@ plugin_gui::make_modules(module_desc const* slots)
 {
   auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
-  result.setTabBarDepth(lnf_properties().font_height + 4);
+  result.setTabBarDepth(_gui_topo->font_height + 4);
   result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
   auto background = getLookAndFeel().findColour(lnf::tab_bar_background);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {
-    int radius = lnf_properties().module_corner_radius;
+    int radius = _gui_topo->module_corner_radius;
     auto& corners = make_component<rounded_container>(&make_param_sections(slots[i]), radius, background);
     auto& margin_comp = make_component<margin_component>(&corners, BorderSize<int>(1, 0, 0, 0));
     result.addTab(std::to_string(i + 1), Colours::transparentBlack, &margin_comp, false);
@@ -261,7 +261,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
     result = &make_component<param_slider>(this, &module, &param); break;
   case gui_edit_type::text:
     result = &make_component<param_textbox>(this, &module, &param); 
-    dynamic_cast<param_textbox*>(result)->applyFontToAllText(lnf_properties().font());
+    dynamic_cast<param_textbox*>(result)->applyFontToAllText(_gui_topo->font());
     break;
   case gui_edit_type::list:
   case gui_edit_type::autofit_list:

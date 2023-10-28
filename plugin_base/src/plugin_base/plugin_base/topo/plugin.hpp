@@ -4,6 +4,7 @@
 #include <plugin_base/topo/module.hpp>
 #include <plugin_base/shared/utility.hpp>
 
+#include <juce_gui_basics/juce_gui_basics.h>
 #include <vector>
 #include <string>
 
@@ -33,7 +34,16 @@ struct plugin_topo_gui final {
   gui_dimension dimension;
   std::vector<module_section_gui> sections;
 
+  float lighten = 0.15f;
+  int font_height = 13;
+  int module_tab_width = 30;
+  int module_header_width = 60;
+  int module_corner_radius = 4;
+  int font_flags = juce::Font::plain;
+  std::string font_typeface = "Handel Gothic";
+
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
+  juce::Font font() const { return juce::Font(font_typeface, font_height, font_flags); }
 };
 
 // plugin definition
