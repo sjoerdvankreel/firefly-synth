@@ -26,7 +26,7 @@ public juce::TextButton,
 public autofit_component
 {
 public:
-  autofit_button(std::string const& text);
+  autofit_button(lnf* lnf, std::string const& text);
   int fixed_width() const override { return getWidth(); }
   int fixed_height() const override { return getHeight(); }
 };
@@ -47,12 +47,13 @@ class autofit_combobox :
 public juce::ComboBox,
 public autofit_component
 {
+  lnf* const _lnf;
   bool const _autofit;
 public:
   void autofit();
-  autofit_combobox(bool autofit): _autofit(autofit) {}
   int fixed_width() const override { return getWidth(); }
   int fixed_height() const override { return getHeight(); }
+  autofit_combobox(lnf* lnf, bool autofit) : _lnf(lnf), _autofit(autofit) {}
 };
 
 // binding_component that is additionally bound to a single parameter value
@@ -165,7 +166,7 @@ protected:
 
 public:
   ~param_combobox() { removeListener(this); }
-  param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param);
+  param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
   void comboBoxChanged(ComboBox*) override final
   { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
 };

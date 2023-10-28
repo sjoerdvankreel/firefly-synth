@@ -20,12 +20,12 @@ autofit_label::textWasChanged()
 }
 
 autofit_button::
-autofit_button(std::string const& text)
+autofit_button(lnf* lnf, std::string const& text)
 {
   float vmargin = 6.0f;
   float hmargin = 16.0f;
   setButtonText(text);
-  auto const& button_font = getLookAndFeel().getTextButtonFont(*this, getHeight());
+  auto const& button_font = lnf->getTextButtonFont(*this, getHeight());
   float th = button_font.getHeight();
   float tw = button_font.getStringWidthFloat(getButtonText());
   setSize(std::ceil(tw) + hmargin, std::ceil(th) + vmargin);
@@ -39,7 +39,7 @@ autofit_combobox::autofit()
   float max_width = 0;  
   int const hpadding = 42;
   int count = getNumItems();
-  auto const& font = getLookAndFeel().getComboBoxFont(*this);
+  auto const& font = _lnf->getComboBoxFont(*this);
   float text_height = font.getHeight();
   for (int i = 0; i < count; i++)
   {
@@ -155,9 +155,9 @@ param_component(gui, module, param), autofit_togglebutton()
 }
 
 param_combobox::
-param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param) :
+param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
-autofit_combobox(param->param->gui.edit_type == gui_edit_type::autofit_list)
+autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list)
 {
   auto const& domain = param->param->domain;
   auto const& param_gui = param->param->gui;

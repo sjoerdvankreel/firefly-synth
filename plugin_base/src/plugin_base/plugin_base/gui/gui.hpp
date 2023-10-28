@@ -7,6 +7,8 @@
 #include <plugin_base/shared/value.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
+
+#include <map>
 #include <vector>
 
 namespace plugin_base {
@@ -16,6 +18,9 @@ class grid_component;
 class plugin_gui:
 public juce::Component
 {
+  lnf* module_lnf(int index) 
+  { return _module_lnfs[index].get(); }
+
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   plugin_gui(plugin_state* gui_state);
@@ -38,7 +43,7 @@ private:
   lnf _lnf;
   plugin_state* const _gui_state;
   std::vector<gui_listener*> _gui_listeners = {};
-  std::vector<std::unique_ptr<lnf>> _module_lnfs = {};
+  std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 

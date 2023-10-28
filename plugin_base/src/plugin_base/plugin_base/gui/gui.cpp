@@ -151,14 +151,15 @@ plugin_gui::make_module_section(module_section_gui const& section)
 Component&
 plugin_gui::make_modules(module_desc const* slots)
 {
+  int index = slots[0].module->info.index;
   auto const& topo = *_gui_state->desc().plugin;
+  _module_lnfs[index] = std::make_unique<lnf>(&topo, index);
   auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
-  _module_lnfs.emplace_back(std::make_unique<lnf>(&topo, slots[0].module->info.index));
   result.setOutline(0);
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
-  result.setLookAndFeel(_module_lnfs[_module_lnfs.size() - 1].get());
-  auto background = getLookAndFeel().findColour(lnf::tab_bar_background);
+  result.setLookAndFeel(module_lnf(index));
+  auto background = module_lnf(index)->findColour(lnf::tab_bar_background);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {
     int radius = topo.gui.module_corner_radius;
@@ -268,13 +269,13 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
     result = &make_component<param_textbox>(this, &module, &param); 
     dynamic_cast<param_textbox*>(result)->applyFontToAllText(topo.gui.font());
     break;
-  case gui_edit_type::list:
-  case gui_edit_type::autofit_list:
-    result = &make_component<param_combobox>(this, &module, &param); break;
   case gui_edit_type::dependent:
     result = &make_component<param_dependent>(this, &module, &param); break;
   case gui_edit_type::toggle:
     result = &make_component<param_toggle_button>(this, &module, &param); break;
+  case gui_edit_type::list:
+  case gui_edit_type::autofit_list:
+    result = &make_component<param_combobox>(this, &module, &param, _module_lnfs[module.module->info.index].get()); break;
   default:
     assert(false);
     return *((Component*)nullptr);
@@ -336,7 +337,7 @@ plugin_gui::make_top_bar()
     gui_dimension({ gui_dimension::auto_size }, 
     { gui_dimension::auto_size, gui_dimension::auto_size }), margin_module);
 
-  auto& save = make_component<autofit_button>("Save");
+  auto& save = make_component<autofit_button>(&_lnf, "Save");
   result.add(save, { 0, 1 });
   save.onClick = [this]() {
     int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
@@ -348,7 +349,7 @@ plugin_gui::make_top_bar()
       plugin_io_save_file(path.toStdString(), *_gui_state);
     });};
 
-  auto& load = make_component<autofit_button>("Load");
+  auto& load = make_component<autofit_button>(&_lnf, "Load");
   result.add(load, { 0, 0 });
   load.onClick = [this]() {
     int flags = FileBrowserComponent::openMode;
