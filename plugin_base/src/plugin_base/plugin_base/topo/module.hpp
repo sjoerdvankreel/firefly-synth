@@ -32,7 +32,7 @@ struct module_gui_colors final {
   juce::Colour tab_background2 = juce::Colour(0xFF111111);
   juce::Colour dropdown_text = juce::Colour(0xFFFF0000);
   juce::Colour dropdown_arrow = juce::Colour(0xFF00FFFF);
-  juce::Colour dropdown_outline = juce::Colour(0xFF0000FFFF);
+  juce::Colour dropdown_outline = juce::Colour(0xFF0000FF);
   juce::Colour dropdown_background = juce::Colour(0xFF00FF00);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_gui_colors);
 };
