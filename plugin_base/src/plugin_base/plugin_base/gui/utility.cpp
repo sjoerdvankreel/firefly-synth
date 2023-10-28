@@ -8,21 +8,16 @@ using namespace juce;
 
 namespace plugin_base {
 
-static std::unique_ptr<lnf> _lnf = {};
-
 void 
 gui_terminate()
 { 
-  LookAndFeel::setDefaultLookAndFeel(nullptr);
-  _lnf.reset();
   shutdownJuce_GUI(); 
 }
 
 lnf* 
-gui_init(plugin_topo const* topo)
+gui_init()
 { 
   initialiseJuce_GUI(); 
-  _lnf = std::make_unique<lnf>(topo);
   LookAndFeel::setDefaultLookAndFeel(_lnf.get());
   return _lnf.get();
 }

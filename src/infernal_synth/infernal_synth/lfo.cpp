@@ -53,7 +53,7 @@ lfo_topo(
   module_topo result(make_module(
     make_topo_info(id, name, module, 3),
     make_module_dsp(stage, module_output::cv, 1, 1),
-    make_module_gui(section, pos, { 1, 1 })));
+    make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),

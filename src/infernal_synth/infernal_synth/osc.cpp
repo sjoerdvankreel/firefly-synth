@@ -47,7 +47,7 @@ osc_topo(
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
-    make_module_gui(section, pos, { { 1 }, { 3, 2 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 3, 2 } })));
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
