@@ -58,6 +58,9 @@ void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
   Path path;
+  int arrowPad = 4;
+  int arrowWidth = 6;
+  int arrowHeight = 4;
   int const fixedHeight = _topo->gui.font_height + 6;
   int const comboTop = height < fixedHeight ? 0: (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
@@ -66,12 +69,11 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
   g.setColour(box.findColour(ComboBox::outlineColourId));
   g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
-  Rectangle<int> arrowZone(width - 30, 0, 20, height);
-  path.startNewSubPath((float)arrowZone.getX() + 3.0f, (float)arrowZone.getCentreY() - 2.0f);
-  path.lineTo((float)arrowZone.getCentreX(), (float)arrowZone.getCentreY() + 3.0f);
-  path.lineTo((float)arrowZone.getRight() - 3.0f, (float)arrowZone.getCentreY() - 2.0f);
+  path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
+  path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
+  path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
-  g.strokePath(path, PathStrokeType(2.0f));
+  g.fillPath(path);
 }
 
 int	

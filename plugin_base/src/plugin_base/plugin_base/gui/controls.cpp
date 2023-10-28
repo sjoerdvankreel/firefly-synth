@@ -37,7 +37,7 @@ autofit_combobox::autofit()
   if(!_autofit) return;
 
   float max_width = 0;  
-  int const hpadding = 42;
+  int const hpadding = 22;
   int count = getNumItems();
   auto const& font = _lnf->getComboBoxFont(*this);
   float text_height = font.getHeight();
