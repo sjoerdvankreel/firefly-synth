@@ -159,11 +159,12 @@ plugin_gui::make_modules(module_desc const* slots)
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
   result.setLookAndFeel(module_lnf(index));
-  auto background = slots[0].module->gui.colors.tab_background_1;
+  auto background1 = slots[0].module->gui.colors.tab_background1;
+  auto background2 = slots[0].module->gui.colors.tab_background2;
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {
     int radius = topo.gui.module_corner_radius;
-    auto& corners = make_component<rounded_container>(&make_param_sections(slots[i]), radius, background);
+    auto& corners = make_component<rounded_container>(&make_param_sections(slots[i]), radius, background1, background2);
     auto& margin_comp = make_component<margin_component>(&corners, BorderSize<int>(1, 0, 0, 0));
     result.addTab(std::to_string(i + 1), Colours::transparentBlack, &margin_comp, false);
   }

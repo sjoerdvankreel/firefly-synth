@@ -28,8 +28,8 @@ struct module_gui_colors final {
   juce::Colour tab_text = juce::Colour(0xFFFF8844);
   juce::Colour tab_button = juce::Colour(0xFF333333);
   juce::Colour tab_header = juce::Colour(0xFF222222);
-  juce::Colour tab_background_1 = juce::Colour(0xFF222222);
-  juce::Colour tab_background_2 = juce::Colour(0xFF111111);
+  juce::Colour tab_background1 = juce::Colour(0xFF222222);
+  juce::Colour tab_background2 = juce::Colour(0xFF111111);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_gui_colors);
 };
 

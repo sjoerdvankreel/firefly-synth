@@ -35,12 +35,13 @@ public juce::Component
 {
   int const _radius;
   juce::Component* _child;
-  juce::Colour const _color;
+  juce::Colour const _background1;
+  juce::Colour const _background2;
 public:
   void resized() override;
   void paint(juce::Graphics& g) override;
-  rounded_container(juce::Component* child, int radius, juce::Colour const& color):
-  _child(child), _radius(radius), _color(color) { add_and_make_visible(*this, *child); }
+  rounded_container(juce::Component* child, int radius, juce::Colour const& background1, juce::Colour const& background2):
+  _child(child), _radius(radius), _background1(background1), _background2(background2) { add_and_make_visible(*this, *child); }
 };
 
 // grid component as opposed to grid layout
