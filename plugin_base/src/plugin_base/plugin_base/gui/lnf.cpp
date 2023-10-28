@@ -11,10 +11,17 @@ _topo(topo), _module(module)
 {
   assert(module < (int)topo->modules.size());
   if(module < 0) return;
+
   setColour(TabbedButtonBar::ColourIds::tabTextColourId, module_gui().colors.tab_text);
   setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::tabOutlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);
+
+  setColour(ComboBox::ColourIds::textColourId, module_gui().colors.dropdown_text);
+  setColour(ComboBox::ColourIds::arrowColourId, module_gui().colors.dropdown_arrow);
+  setColour(ComboBox::ColourIds::outlineColourId, module_gui().colors.dropdown_outline);
+  setColour(ComboBox::ColourIds::backgroundColourId, module_gui().colors.dropdown_background);
+  setColour(ComboBox::ColourIds::focusedOutlineColourId, module_gui().colors.dropdown_outline);
 }
 
 void 
