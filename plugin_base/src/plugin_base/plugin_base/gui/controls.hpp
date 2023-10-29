@@ -9,17 +9,6 @@
 
 namespace plugin_base {
 
-// label that resizes to text content
-class autofit_label:
-public juce::Label,
-public autofit_component
-{
-public:
-  void textWasChanged() override final;
-  int fixed_width() const override { return getWidth(); }
-  int fixed_height() const override { return getHeight(); }
-};
-
 // button that resizes to text content
 class autofit_button :
 public juce::TextButton,
@@ -40,6 +29,17 @@ public:
   autofit_togglebutton() { setSize(24, 24); }
   int fixed_width() const override { return getWidth(); }
   int fixed_height() const override { return getHeight(); }
+};
+
+// label that resizes to text content
+class autofit_label :
+  public juce::Label,
+  public autofit_component
+{
+public:
+  int fixed_width() const override { return getWidth(); }
+  int fixed_height() const override { return getHeight(); }
+  autofit_label(lnf* lnf, std::string const& reference_text);
 };
 
 // dropdown that resizes to largest item
@@ -80,8 +80,8 @@ public binding_component,
 public autofit_label
 {
 public:
-  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param):
-  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label()
+  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
+  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label(lnf, param->param->info.tag.name)
   { setText(param->info.name, juce::dontSendNotification); init(); }
 };
 
@@ -94,8 +94,8 @@ public autofit_label
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
-  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both):
-  param_component(gui, module, param), autofit_label(), _both(both) { init(); }
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf):
+  param_component(gui, module, param), autofit_label(lnf, "loooooooooooooooong text"), _both(both) { init(); }
 };
 
 // textbox bound to single parameter

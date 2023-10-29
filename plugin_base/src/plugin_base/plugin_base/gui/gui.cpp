@@ -240,11 +240,13 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
   switch (contents)
   {
   case gui_label_contents::name:
-    result = &make_component<param_name_label>(this, &module, &param);
+    result = &make_component<param_name_label>(this, &module, 
+      &param, _module_lnfs[module.module->info.index].get());
     break;
   case gui_label_contents::both:
   case gui_label_contents::value:
-    result = &make_component<param_value_label>(this, &module, &param, contents == gui_label_contents::both);
+    result = &make_component<param_value_label>(this, &module, &param, 
+      contents == gui_label_contents::both, _module_lnfs[module.module->info.index].get());
     break;
   default:
     assert(false);

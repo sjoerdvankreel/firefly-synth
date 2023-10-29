@@ -19,18 +19,15 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   }
 }
 
-void
-autofit_label::textWasChanged()
+autofit_label::
+autofit_label(lnf* lnf, std::string const& reference_text)
 {
   auto border_size = getBorderSize();
-  auto const& label_font = getLookAndFeel().getLabelFont(*this);
+  auto const& label_font = lnf->getLabelFont(*this);
   float th = label_font.getHeight();
-  float tw = label_font.getStringWidthFloat(getText());
+  float tw = label_font.getStringWidthFloat(reference_text);
   float nw = std::ceil(tw) + border_size.getLeftAndRight();
-  if(getHeight() > 0)
-    setSize(nw, getHeight());
-  else
-    setSize(nw, std::ceil(th) + border_size.getTopAndBottom());
+  setSize(nw, std::ceil(th) + border_size.getTopAndBottom());
 }
 
 autofit_button::
