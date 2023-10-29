@@ -27,4 +27,12 @@ gui_listener::gui_changed(int index, plain_value plain)
   gui_end_changes(index);
 }
 
+juce::Colour
+color_to_grayscale(juce::Colour const& c)
+{
+  float gray = 0.299 * c.getRed() + 0.587 * c.getGreen() + 0.114 * c.getBlue();
+  auto rgb = (juce::uint8)(std::clamp((int)(gray), 0, 255));
+  return Colour(rgb, rgb, rgb, c.getAlpha());
+}
+
 }

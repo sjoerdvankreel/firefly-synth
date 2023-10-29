@@ -5,9 +5,12 @@
 
 namespace plugin_base {
 
-void add_and_make_visible(
+void 
+add_and_make_visible(
   juce::Component& parent, 
   juce::Component& child);
+juce::Colour
+color_to_grayscale(juce::Colour const& c);
 
 class gui_listener
 {

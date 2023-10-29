@@ -1,4 +1,5 @@
 #include <plugin_base/gui/lnf.hpp>
+#include <plugin_base/gui/utility.hpp>
 
 #include <cassert>
 #include <fstream>
@@ -205,7 +206,10 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   g.setGradientFill(ColourGradient(colors().slider_outline1, arrowWidth / 2, 0, colors().slider_outline2, s.getWidth() - arrowWidth, 0, false));
   g.drawRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, s.getWidth() - arrowWidth, fixedHeight, 2, 1);
 
-  g.setColour(colors().slider_thumb);
+  auto thumb_color = colors().slider_thumb;
+  if(!s.isEnabled()) 
+    thumb_color = color_to_grayscale(thumb_color);
+  g.setColour(thumb_color);
   path.startNewSubPath((s.getWidth() - arrowWidth) * pos, s.getHeight() / 2 + arrowHeight);
   path.lineTo((s.getWidth() - arrowWidth) * pos + arrowWidth / 2, s.getHeight() / 2);
   path.lineTo((s.getWidth() - arrowWidth) * pos + arrowWidth, s.getHeight() / 2 + arrowHeight);
