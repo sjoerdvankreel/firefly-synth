@@ -1,4 +1,3 @@
-gui
 graphs
 antialias
 host context menu
@@ -7,7 +6,6 @@ try out some airwindows stuff
 voice level unison ?
 am/fm/lfos/modmatrix
 am/fm->select relevant sources
-get the lnf in there
 handle clap midi notes
 handle clap is_modulatable
 get the graphs in there, see what adsr does
@@ -20,10 +18,6 @@ test all host+linux
 param value dependent on other param
 linux build
 resizing by content scaling
-monospace font
-make common rate-num-den-block
-embed the font
-restore font check
 host/os scaling broken
 drop param_dependent, squash into 1 combo
 
