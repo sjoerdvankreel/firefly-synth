@@ -163,6 +163,21 @@ param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
 {
+  auto contents = param->param->gui.label.contents;
+  switch (contents)
+  {
+  case gui_label_contents::none:
+  case gui_label_contents::name:
+    setPopupDisplayEnabled(true, true, nullptr);
+    break;
+  case gui_label_contents::both:
+  case gui_label_contents::value:
+    break;
+  default:
+    assert(false);
+    break;
+  }
+  
   switch (param->param->gui.edit_type)
   {
   case gui_edit_type::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;
@@ -170,6 +185,7 @@ param_component(gui, module, param), Slider()
   case gui_edit_type::hslider: setSliderStyle(Slider::LinearHorizontal); break;
   default: assert(false); break;
   }
+
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
   if (!param->param->domain.is_real()) setRange(param->param->domain.min, param->param->domain.max, 1);
   else setNormalisableRange(
