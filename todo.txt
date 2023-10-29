@@ -19,7 +19,6 @@ param value dependent on other param
 linux build
 resizing by content scaling
 host/os scaling broken
-fix value-label autofit for max
 
 * get some linux folks to comment (ycollete?)
 * continuing
