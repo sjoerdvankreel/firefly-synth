@@ -5,6 +5,20 @@ using namespace juce;
 
 namespace plugin_base {
 
+static void
+fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data)
+{
+  menu.clear();
+  for (int i = 0; i < data->indices.size(); i++)
+    menu.addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
+  for(int i = 0; i < data->children.size(); i++)
+  {
+    PopupMenu child;
+    fill_popup_menu(domain, child, data->children[i].get());
+    menu.addSubMenu(data->children[i]->name, child);
+  }
+}
+
 void
 autofit_label::textWasChanged()
 {
@@ -161,22 +175,13 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 {
   auto const& domain = param->param->domain;
   auto const& param_gui = param->param->gui;
-  if(!param_gui.submenus.size())
+  if(!param_gui.submenu)
     for(int i = 0; i <= domain.max; i++)
       addItem(domain.raw_to_text(false, i), i + 1);
   else
   {
     assert(param_gui.edit_type == gui_edit_type::list);
-    for (int i = 0; i < param_gui.submenus.size(); i++)
-    {
-      PopupMenu submenu;
-      for(int j = 0; j < param_gui.submenus[i].indices.size(); j++)
-      {
-        int index = param_gui.submenus[i].indices[j];
-        submenu.addItem(index + 1, domain.raw_to_text(false, index));
-      }
-      getRootMenu()->addSubMenu(param_gui.submenus[i].name, submenu);
-    }
+    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get());
   }
   autofit();
   addListener(this);

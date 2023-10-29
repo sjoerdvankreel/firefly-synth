@@ -41,7 +41,7 @@ struct param_topo_gui final {
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
-  std::vector<gui_submenu> submenus;
+  std::shared_ptr<gui_submenu> submenu;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;

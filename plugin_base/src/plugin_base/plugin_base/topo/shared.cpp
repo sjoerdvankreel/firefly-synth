@@ -25,12 +25,12 @@ topo_info::validate() const
 void
 gui_submenu::validate() const
 {
-  assert(name.size());
   assert(indices.size());
+  assert(name.size() || children.size());
   for(int i = 0; i < indices.size(); i++)
     assert(indices[i] >= 0);
-  std::set<int> indices_set(indices.begin(), indices.end());
-  assert(indices_set.size() == indices.size());
+  for(int i = 0; i < children.size(); i++)
+    children[i]->validate();
 }
 
 void 

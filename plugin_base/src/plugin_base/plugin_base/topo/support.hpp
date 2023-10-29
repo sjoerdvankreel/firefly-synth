@@ -7,8 +7,8 @@
 
 namespace plugin_base { 
 
-std::vector<gui_submenu>
-make_timesig_submenus(std::vector<timesig> const& sigs);
+std::shared_ptr<gui_submenu>
+make_timesig_submenu(std::vector<timesig> const& sigs);
 std::vector<timesig>
 make_timesigs(std::vector<int> const& steps, timesig low, timesig high);
 inline std::vector<timesig>

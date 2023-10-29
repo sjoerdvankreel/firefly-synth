@@ -55,7 +55,10 @@ struct gui_label final {
 struct gui_submenu final {
   std::string name;
   std::vector<int> indices;
+  std::vector<std::shared_ptr<gui_submenu>> children;
+  
   void validate() const;
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_submenu);
 };
 
 // position in parent grid

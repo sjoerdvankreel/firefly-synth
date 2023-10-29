@@ -69,7 +69,7 @@ delay_topo(
     make_topo_info("{D4A46363-DB92-425C-A9F7-D6641115812E}", "Tempo", param_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
-  tempo.gui.submenus = make_timesig_submenus(tempo.domain.timesigs);
+  tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.visible.bind({ param_type }, [](auto const& vs) { return vs[0] == type_sync; });
 
   result.params.emplace_back(make_param(

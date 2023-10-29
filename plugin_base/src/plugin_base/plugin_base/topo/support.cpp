@@ -243,15 +243,20 @@ make_param(topo_info const& info, param_dsp const& dsp, param_domain const& doma
   return result;
 }
 
-std::vector<gui_submenu>
-make_timesig_submenus(std::vector<timesig> const& sigs)
+std::shared_ptr<gui_submenu>
+make_timesig_submenu(std::vector<timesig> const& sigs)
 {
-  std::vector<gui_submenu> result;
   std::map<int, std::vector<int>> sigs_by_num;
-  for(int i = 0; i < sigs.size(); i++)
+  for (int i = 0; i < sigs.size(); i++)
     sigs_by_num[sigs[i].num].push_back(i);
+  auto result = std::make_shared<gui_submenu>();
   for(auto const& sbn: sigs_by_num)
-     result.push_back({ std::to_string(sbn.first), sbn.second });
+  {
+    auto sig_sub = std::make_shared<gui_submenu>();
+    sig_sub->name = std::to_string(sbn.first);
+    sig_sub->indices = sbn.second;
+    result->children.push_back(sig_sub);
+  }
   return result;
 }
 
