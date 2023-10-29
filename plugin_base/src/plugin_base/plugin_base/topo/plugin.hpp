@@ -31,11 +31,11 @@ struct plugin_topo_gui final {
   int max_width;
   int default_width;
 
-  gui_colors colors;
   int aspect_ratio_width;
   int aspect_ratio_height;
   gui_dimension dimension;
   std::vector<module_section_gui> sections;
+  gui_colors colors = gui_colors(default_colors());
 
   float lighten = 0.15f;
   int font_height = 13;

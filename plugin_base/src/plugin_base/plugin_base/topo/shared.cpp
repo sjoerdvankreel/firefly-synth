@@ -5,7 +5,28 @@
 #include <utility>
 #include <cassert>
 
+using namespace juce;
+
 namespace plugin_base {
+
+gui_colors const&
+default_colors() 
+{
+  static gui_colors result;
+  result.tab_text = Colour(0xFFFF8844);
+  result.tab_button = Colour(0xFF333333);
+  result.tab_header = Colour(0xFF222222);
+  result.tab_background1 = Colour(0xFF222222);
+  result.tab_background2 = Colour(0xFF111111);
+  result.control_tick = Colour(0xFFFF8844);
+  result.control_text = Colour(0xFFFFFFFF);
+  result.control_outline = Colour(0xFFAAAAAA);
+  result.control_background = Colour(0xFF111111);
+  result.slider_track = Colour(0xFFEEEEEE);
+  result.slider_outline = Colour(0xFFAAAAAA);
+  result.slider_background = Colour(0xFF000000);
+  return result;
+};
 
 void
 topo_tag::validate() const
