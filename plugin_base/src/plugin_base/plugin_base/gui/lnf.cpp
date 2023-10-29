@@ -206,9 +206,9 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   g.drawRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, s.getWidth() - arrowWidth, fixedHeight, 2, 1);
 
   g.setColour(colors().slider_thumb);
-  path.startNewSubPath(s.getWidth() * pos - arrowWidth / 2, s.getHeight() / 2 + arrowHeight);
-  path.lineTo(s.getWidth() * pos, s.getHeight() / 2);
-  path.lineTo(s.getWidth() * pos + arrowWidth / 2, s.getHeight() / 2 + arrowHeight);
+  path.startNewSubPath((s.getWidth() - arrowWidth) * pos, s.getHeight() / 2 + arrowHeight);
+  path.lineTo((s.getWidth() - arrowWidth) * pos + arrowWidth / 2, s.getHeight() / 2);
+  path.lineTo((s.getWidth() - arrowWidth) * pos + arrowWidth, s.getHeight() / 2 + arrowHeight);
   path.closeSubPath();
   g.fillPath(path);
 }
