@@ -195,7 +195,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   assert(style == Slider::SliderStyle::LinearHorizontal);
   g.setColour(colors().slider_background);
   g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight, 2);
-  ColourGradient gradient(colors().slider_background, 0, 0, colors().slider_outline, s.getWidth(), 0, false);
+  ColourGradient gradient(colors().slider_background, 0, 0, colors().slider_track, s.getWidth(), 0, false);
   g.setGradientFill(gradient);
   g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, (int)(pos * s.getWidth()), fixedHeight, 2);
   g.setColour(colors().slider_outline);
