@@ -14,7 +14,6 @@ namespace plugin_base {
 
 struct plugin_topo_gui;
 enum class plugin_type { synth, fx };
-extern std::vector<std::uint8_t> const default_typeface;
 
 // module ui grouping
 struct module_section_gui final {
@@ -42,8 +41,8 @@ struct plugin_topo_gui final {
   int module_tab_width = 30;
   int module_header_width = 60;
   int module_corner_radius = 4;
+  std::string typeface_file_name;
   int font_flags = juce::Font::plain;
-  std::vector<std::uint8_t> const* font_typeface = &default_typeface;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };
