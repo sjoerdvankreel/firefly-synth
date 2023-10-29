@@ -59,7 +59,7 @@ cv_matrix_topo(
       list_item item;
       auto const& tag = sources[m]->info.tag;
       item.id = tag.id + "-" + std::to_string(mi);
-      item.name = tag.name + "-" + std::to_string(mi + 1);
+      item.name = tag.name + " " + std::to_string(mi + 1);
       source_items.push_back(item);
     }
   auto& source = result.params.emplace_back(make_param(
@@ -79,7 +79,8 @@ cv_matrix_topo(
             auto const& module_tag = targets[m]->info.tag;
             auto const& param_tag = targets[m]->params[p].info.tag;
             item.id = module_tag.id + "-" + std::to_string(mi) + "-" + param_tag.id + "-" + std::to_string(pi);
-            item.name = module_tag.name + "-" + std::to_string(mi + 1) + "-" + param_tag.name + "-" + std::to_string(pi + 1);
+            item.name = module_tag.name + " " + std::to_string(mi + 1) + " " + param_tag.name;
+            if(targets[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
             target_items.push_back(item);
           }
 
