@@ -19,14 +19,8 @@ plugin_io_load_file(
   std::filesystem::path const& path, plugin_state& state)
 {
   load_result failed("Could not read file.");
-  std::ifstream stream(path, std::ios::binary | std::ios::ate);
-  if(stream.bad()) return failed;
-  std::streamsize size = stream.tellg();
-  if(size <= 0) return failed;
-  stream.seekg(0, std::ios::beg);
-  std::vector<char> data(size, 0);
-  stream.read(data.data(), size);
-  if (stream.bad()) return failed;
+  std::vector<char> data = file_load(path);
+  if(data.size() == 0) return failed;
   return plugin_io_load(data, state);
 };
 

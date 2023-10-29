@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <iterator>
 #include <algorithm>
+#include <filesystem>
 
 #define INF_PREVENT_ACCIDENTAL_COPY(x)  \
   x(x&&) = default;               \
@@ -44,6 +45,7 @@ public:
 
 double seconds_since_epoch();
 inline void debug_breakable() {};
+std::vector<char> file_load(std::filesystem::path const& path);
 
 template <class T> std::string 
 to_8bit_string(T const* source)

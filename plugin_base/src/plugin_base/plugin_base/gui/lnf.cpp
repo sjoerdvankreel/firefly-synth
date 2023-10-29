@@ -1,16 +1,20 @@
 #include <plugin_base/gui/lnf.hpp>
+
 #include <cassert>
+#include <fstream>
 
 using namespace juce;
 
 namespace plugin_base {
 
 lnf::
-lnf(plugin_topo const* topo, int module) :
-_topo(topo), _module(module)
+lnf(plugin_desc const* desc, int module) :
+_desc(desc), _module(module)
 {
-  _typeface = Typeface::createSystemTypefaceFor(topo->gui.font_typeface->data(), topo->gui.font_typeface->size());
-  assert(module < (int)topo->modules.size());
+  File file(File::getSpecialLocation(File::currentExecutableFile));
+  std::vector<char> typeface = file_load(file.getFullPathName().toStdString());
+  _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
+  assert(module < (int)_desc->plugin->modules.size());
   if(module < 0) return;
 
   setColour(TabbedButtonBar::ColourIds::tabTextColourId, module_gui().colors.tab_text);
@@ -26,16 +30,16 @@ _topo(topo), _module(module)
 
   setColour(PopupMenu::ColourIds::textColourId, module_gui().colors.dropdown_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, module_gui().colors.dropdown_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, module_gui().colors.dropdown_text.brighter(_topo->gui.lighten));
-  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, module_gui().colors.dropdown_background.brighter(_topo->gui.lighten));
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, module_gui().colors.dropdown_text.brighter(_desc->plugin->gui.lighten));
+  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, module_gui().colors.dropdown_background.brighter(_desc->plugin->gui.lighten));
 }
 
 Font 
 lnf::font() const
 {
   Font result(_typeface);
-  result.setHeight(_topo->gui.font_height);
-  result.setStyleFlags(_topo->gui.font_flags);
+  result.setHeight(_desc->plugin->gui.font_height);
+  result.setStyleFlags(_desc->plugin->gui.font_flags);
   return result;
 }
 
@@ -95,7 +99,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int arrowPad = 4;
   int arrowWidth = 6;
   int arrowHeight = 4;
-  int const fixedHeight = _topo->gui.font_height + 6;
+  int const fixedHeight = _desc->plugin->gui.font_height + 6;
   int const comboTop = height < fixedHeight ? 0: (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
   Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
@@ -113,8 +117,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 int	
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
 {
-  int result = _topo->gui.module_tab_width;
-  if(b.getIndex() == 0) result += _topo->gui.module_header_width;
+  int result = _desc->plugin->gui.module_tab_width;
+  if(b.getIndex() == 0) result += _desc->plugin->gui.module_header_width;
   return result;
 }
 
@@ -122,20 +126,20 @@ void
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
   g.setColour(module_gui().colors.tab_header);
-  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _topo->gui.module_corner_radius);
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _desc->plugin->gui.module_corner_radius);
 }
 
 void
 lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardHeight, int& w, int& h)
 {
   LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
-  h = _topo->gui.font_height + 8;
+  h = _desc->plugin->gui.font_height + 8;
 }
 
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  float lighten = button.getToggleState() || isMouseOver? _topo->gui.lighten: 0;
+  float lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
   if (button.getIndex() > 0)
   {
     g.setColour(module_gui().colors.tab_button.brighter(lighten));
@@ -148,8 +152,8 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea();
-  auto buttonArea = headerArea.removeFromRight(_topo->gui.module_tab_width);
-  int radius = _topo->gui.module_corner_radius;
+  auto buttonArea = headerArea.removeFromRight(_desc->plugin->gui.module_tab_width);
+  int radius = _desc->plugin->gui.module_corner_radius;
   g.setColour(module_gui().colors.tab_button);
   g.fillRoundedRectangle(headerArea.toFloat(), radius);
   headerArea.removeFromLeft(radius);

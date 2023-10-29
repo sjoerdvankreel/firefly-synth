@@ -1,6 +1,6 @@
 #pragma once
 
-#include <plugin_base/topo/plugin.hpp>
+#include <plugin_base/desc/plugin.hpp>
 #include <juce_gui_basics/juce_gui_basics.h>
 
 namespace plugin_base {
@@ -9,13 +9,13 @@ class lnf:
 public juce::LookAndFeel_V4 {
   
   int const _module = -1;
-  plugin_topo const* const _topo;
+  plugin_desc const* const _desc;
   juce::Typeface::Ptr _typeface = {};
-  module_topo_gui const& module_gui() const { return _topo->modules[_module].gui; }
+  module_topo_gui const& module_gui() const { return _desc->plugin->modules[_module].gui; }
 
 public:
   juce::Font font() const;
-  lnf(plugin_topo const* topo, int module);
+  lnf(plugin_desc const* desc, int module);
 
   juce::Font getPopupMenuFont() override { return font(); }
   juce::Font getLabelFont(juce::Label&) override { return font(); }
