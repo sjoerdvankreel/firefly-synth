@@ -14,6 +14,20 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+struct source_mapping
+{
+  int topo;
+  int slot;
+};
+
+struct target_mapping
+{
+  int module_topo;
+  int module_slot;
+  int param_topo;
+  int param_slot;
+};
+
 static int constexpr route_count = 8;
 
 enum { section_main };
@@ -22,11 +36,16 @@ enum { param_active, param_source, param_target };
 class cv_matrix_engine:
 public module_engine { 
   cv_matrix_output _output = {};
+  std::vector<source_mapping> const _sources;
+  std::vector<target_mapping> const _targets;
 public:
   void initialize() override {}
   void process(plugin_block& block) override;
 
-  cv_matrix_engine(plugin_topo const& topo);
+  cv_matrix_engine(
+    plugin_topo const& topo, 
+    std::vector<source_mapping> const& sources, 
+    std::vector<target_mapping> const& targets);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
@@ -54,6 +73,7 @@ cv_matrix_topo(
   
   int source_index = 0;
   std::vector<list_item> source_items;
+  std::vector<source_mapping> source_mappings;
   auto source_submenu = std::make_shared<gui_submenu>();
   for(int m = 0; m < sources.size(); m++)
   {
@@ -67,6 +87,7 @@ cv_matrix_topo(
       item.name = tag.name + " " + std::to_string(mi + 1);
       source_items.push_back(item);
       module_submenu->indices.push_back(source_index++);
+      source_mappings.push_back({ sources[m]->info.index, mi });
     }
     source_submenu->children.push_back(module_submenu);
   }
@@ -79,6 +100,7 @@ cv_matrix_topo(
 
   int target_index = 0;
   std::vector<list_item> target_items;
+  std::vector<target_mapping> target_mappings;
   auto target_submenu = std::make_shared<gui_submenu>();
   for(int m = 0; m < targets.size(); m++)
   {
@@ -101,6 +123,7 @@ cv_matrix_topo(
             if(targets[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
             target_items.push_back(item);
             module_slot_submenu->indices.push_back(target_index++);
+            target_mappings.push_back({ targets[m]->info.index, mi, targets[m]->params[p].info.index, pi });
           }
         }
       module_submenu->children.push_back(module_slot_submenu);
@@ -114,13 +137,17 @@ cv_matrix_topo(
   target.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.submenu = target_submenu;
 
-  result.engine_factory = [](auto const& topo, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo); };
+  result.engine_factory = [source_mappings, target_mappings](auto const& topo, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, source_mappings, target_mappings); };
   return result;
 }
 
 cv_matrix_engine::
-cv_matrix_engine(plugin_topo const& topo)
+cv_matrix_engine(
+  plugin_topo const& topo,
+  std::vector<source_mapping> const& sources,
+  std::vector<target_mapping> const& targets):
+_sources(sources), _targets(targets)
 {
   plugin_dims dims(topo);
   _output.modulation.resize(dims.module_slot_param_slot);
@@ -130,8 +157,12 @@ cv_matrix_engine(plugin_topo const& topo)
 void
 cv_matrix_engine::process(plugin_block& block)
 {
-#if 0
   // set every modulatable parameter to its corresponding automation curve
+  for (int m = 0; m < _targets.size(); m++)
+  {
+
+  }
+
   for (int tm = 0; tm < _targets.size(); tm++)
     for (int tmi = 0; tmi < _targets[tm]->info.slot_count; tmi++)
       for (int tp = 0; tp < _modulatable_params[tm].size(); tp++)
@@ -193,7 +224,6 @@ cv_matrix_engine::process(plugin_block& block)
   }
   
   *block.state.own_context = &_output;
-#endif
 }
 
 }
