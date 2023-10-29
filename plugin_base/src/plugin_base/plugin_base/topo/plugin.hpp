@@ -31,6 +31,7 @@ struct plugin_topo_gui final {
   int max_width;
   int default_width;
 
+  gui_colors colors;
   int aspect_ratio_width;
   int aspect_ratio_height;
   gui_dimension dimension;

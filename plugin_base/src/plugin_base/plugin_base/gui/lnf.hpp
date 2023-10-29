@@ -11,7 +11,9 @@ public juce::LookAndFeel_V4 {
   int const _module = -1;
   plugin_desc const* const _desc;
   juce::Typeface::Ptr _typeface = {};
-  module_topo_gui const& module_gui() const { return _desc->plugin->modules[_module].gui; }
+
+  gui_colors const& colors() const 
+  { return _module == -1? _desc->plugin->gui.colors: _desc->plugin->modules[_module].gui.colors; }
 
 public:
   juce::Font font() const;

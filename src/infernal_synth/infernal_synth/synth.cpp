@@ -16,15 +16,15 @@ enum {
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
-  module_gui_colors cv_colors;
+  gui_colors cv_colors;
   cv_colors.tab_text = juce::Colour(0xFFFF8844);
-  cv_colors.dropdown_tick = juce::Colour(0xFFFF8844);
-  module_gui_colors audio_colors;
+  cv_colors.dropdown_check = juce::Colour(0xFFFF8844);
+  gui_colors audio_colors;
   audio_colors.tab_text = juce::Colour(0xFF4488FF);
-  audio_colors.dropdown_tick = juce::Colour(0xFF4488FF);
-  module_gui_colors other_colors;
+  audio_colors.dropdown_check = juce::Colour(0xFF4488FF);
+  gui_colors other_colors;
   other_colors.tab_text = juce::Colour(0xFFFF4488);
-  other_colors.dropdown_tick = juce::Colour(0xFFFF4488);
+  other_colors.dropdown_check = juce::Colour(0xFFFF4488);
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
@@ -35,6 +35,7 @@ synth_topo()
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
+  result->gui.colors.control_text = Colours::greenyellow;
   result->gui.min_width = 720;
   result->gui.max_width = 1440;
   result->gui.default_width = 720;

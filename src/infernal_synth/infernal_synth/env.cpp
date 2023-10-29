@@ -29,7 +29,7 @@ public:
 
 module_topo
 env_topo(
-  int section, plugin_base::module_gui_colors const& colors, 
+  int section, plugin_base::gui_colors const& colors,
   plugin_base::gui_position const& pos)
 {
   module_topo result(make_module(

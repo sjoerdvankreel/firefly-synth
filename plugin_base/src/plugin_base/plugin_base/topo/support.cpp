@@ -87,13 +87,13 @@ make_module_dsp(module_stage stage, module_output output, int output_count, int 
 }
 
 module_topo_gui
-make_module_gui(int section, module_gui_colors const& colors, gui_position const& position, gui_dimension const& dimension)
+make_module_gui(int section, gui_colors const& colors, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
   result.section = section;
   result.position = position;
   result.dimension = dimension;
-  result.colors = module_gui_colors(colors);
+  result.colors = gui_colors(colors);
   return result;
 }
 

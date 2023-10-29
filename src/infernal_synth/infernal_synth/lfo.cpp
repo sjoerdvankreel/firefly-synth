@@ -39,7 +39,7 @@ public:
 
 module_topo
 lfo_topo(
-  int section, plugin_base::module_gui_colors const& colors, 
+  int section, plugin_base::gui_colors const& colors,
   plugin_base::gui_position const& pos, bool global)
 {
   std::string const glfo_id = "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}";

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <plugin_base/shared/utility.hpp>
+#include <juce_gui_basics/juce_gui_basics.h>
 
 #include <vector>
 #include <string>
@@ -102,6 +103,20 @@ struct gui_dimension final {
   gui_dimension(gui_dimension const&) = default;
   gui_dimension(int row_count, int column_count);
   gui_dimension(std::vector<int> const& row_sizes, std::vector<int> const& column_sizes);
+};
+
+// color scheme
+struct gui_colors final {
+  juce::Colour tab_text = juce::Colour(0xFFFF8844);
+  juce::Colour tab_button = juce::Colour(0xFF333333);
+  juce::Colour tab_header = juce::Colour(0xFF222222);
+  juce::Colour tab_background1 = juce::Colour(0xFF222222);
+  juce::Colour tab_background2 = juce::Colour(0xFF111111);
+  juce::Colour dropdown_check = juce::Colour(0xFFFF8844);
+  juce::Colour control_text = juce::Colour(0xFFFFFFFF);
+  juce::Colour control_outline = juce::Colour(0xFFAAAAAA);
+  juce::Colour control_background = juce::Colour(0xFF111111);
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
 };
 
 inline gui_dimension::

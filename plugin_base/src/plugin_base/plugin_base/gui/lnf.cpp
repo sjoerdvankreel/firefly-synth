@@ -16,24 +16,34 @@ _desc(desc), _module(module)
   std::vector<char> typeface = file_load(resources / desc->plugin->gui.typeface_file_name);
   assert(typeface.size());
   _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
-  assert(module < (int)_desc->plugin->modules.size());
-  if(module < 0) return;
+  assert(-1 <= module && module < (int)_desc->plugin->modules.size());
 
-  setColour(TabbedButtonBar::ColourIds::tabTextColourId, module_gui().colors.tab_text);
+  auto control_text_high = colors().control_text.brighter(_desc->plugin->gui.lighten);
+  auto control_bg_high = colors().control_background.brighter(_desc->plugin->gui.lighten);
+
+  setColour(TabbedButtonBar::ColourIds::tabTextColourId, colors().tab_text);
   setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::tabOutlineColourId, Colours::transparentBlack);
   setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);
 
-  setColour(ComboBox::ColourIds::textColourId, module_gui().colors.dropdown_text);
-  setColour(ComboBox::ColourIds::arrowColourId, module_gui().colors.dropdown_tick);
-  setColour(ComboBox::ColourIds::outlineColourId, module_gui().colors.dropdown_outline);
-  setColour(ComboBox::ColourIds::backgroundColourId, module_gui().colors.dropdown_background);
-  setColour(ComboBox::ColourIds::focusedOutlineColourId, module_gui().colors.dropdown_outline);
+  setColour(TextButton::ColourIds::textColourOnId, control_text_high);
+  setColour(TextButton::ColourIds::buttonOnColourId, control_bg_high);
+  setColour(TextButton::ColourIds::textColourOffId, colors().control_text);
+  setColour(TextButton::ColourIds::buttonColourId, colors().control_background);
 
-  setColour(PopupMenu::ColourIds::textColourId, module_gui().colors.dropdown_text);
-  setColour(PopupMenu::ColourIds::backgroundColourId, module_gui().colors.dropdown_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, module_gui().colors.dropdown_text.brighter(_desc->plugin->gui.lighten));
-  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, module_gui().colors.dropdown_background.brighter(_desc->plugin->gui.lighten));
+  setColour(TextEditor::ColourIds::textColourId, colors().control_text);
+  setColour(TextEditor::ColourIds::backgroundColourId, colors().control_background);
+
+  setColour(ComboBox::ColourIds::textColourId, colors().control_text);
+  setColour(ComboBox::ColourIds::arrowColourId, colors().dropdown_check);
+  setColour(ComboBox::ColourIds::outlineColourId, colors().control_outline);
+  setColour(ComboBox::ColourIds::backgroundColourId, colors().control_background);
+  setColour(ComboBox::ColourIds::focusedOutlineColourId, colors().control_outline);
+
+  setColour(PopupMenu::ColourIds::textColourId, colors().control_text);
+  setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text.brighter(_desc->plugin->gui.lighten));
+  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_desc->plugin->gui.lighten));
 }
 
 Font 
@@ -127,7 +137,7 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
 void 
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
-  g.setColour(module_gui().colors.tab_header);
+  g.setColour(colors().tab_header);
   g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _desc->plugin->gui.module_corner_radius);
 }
 
@@ -144,7 +154,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   float lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
   if (button.getIndex() > 0)
   {
-    g.setColour(module_gui().colors.tab_button.brighter(lighten));
+    g.setColour(colors().tab_button.brighter(lighten));
     g.fillRect(button.getActiveArea());
     g.setFont(font());
     g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
@@ -156,7 +166,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto headerArea = button.getActiveArea();
   auto buttonArea = headerArea.removeFromRight(_desc->plugin->gui.module_tab_width);
   int radius = _desc->plugin->gui.module_corner_radius;
-  g.setColour(module_gui().colors.tab_button);
+  g.setColour(colors().tab_button);
   g.fillRoundedRectangle(headerArea.toFloat(), radius);
   headerArea.removeFromLeft(radius);
   g.fillRect(headerArea.toFloat());
@@ -168,7 +178,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   if(button.getTabbedButtonBar().getNumTabs() == 1) return;
   buttonArea.removeFromLeft(1);
-  g.setColour(module_gui().colors.tab_button.brighter(lighten));
+  g.setColour(colors().tab_button.brighter(lighten));
   g.fillRect(buttonArea);
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
   g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
