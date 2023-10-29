@@ -42,6 +42,7 @@ synth_topo()
   result->gui.aspect_ratio_height = 5;
   result->gui.dimension.row_sizes = std::vector<int>(5, 1);
   result->gui.dimension.column_sizes = std::vector<int>(2, 1);
+  result->gui.typeface_file_name = "Fixedsys Excelsior 3.01 Regular.ttf";
 
   result->gui.sections.resize(section_count);
   result->gui.sections[section_env] = make_module_section_gui(section_env, { 1, 0 }, { 1, 1 });

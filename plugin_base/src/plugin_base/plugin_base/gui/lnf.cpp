@@ -12,7 +12,8 @@ lnf(plugin_desc const* desc, int module) :
 _desc(desc), _module(module)
 {
   File file(File::getSpecialLocation(File::currentExecutableFile));
-  std::vector<char> typeface = file_load(file.getFullPathName().toStdString());
+  std::filesystem::path path = desc->config->resources_folder(file.getFullPathName().toStdString());
+  std::vector<char> typeface = file_load(path / desc->plugin->gui.typeface_file_name);
   _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
   assert(module < (int)_desc->plugin->modules.size());
   if(module < 0) return;
