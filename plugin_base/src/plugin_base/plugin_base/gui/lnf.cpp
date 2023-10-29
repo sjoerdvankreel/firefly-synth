@@ -21,10 +21,8 @@ _desc(desc), _module(module)
   auto control_text_high = colors().control_text.brighter(_desc->plugin->gui.lighten);
   auto control_bg_high = colors().control_background.brighter(_desc->plugin->gui.lighten);
 
-  setColour(TabbedButtonBar::ColourIds::tabTextColourId, colors().tab_text);
-  setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
-  setColour(TabbedButtonBar::ColourIds::tabOutlineColourId, Colours::transparentBlack);
-  setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);
+  setColour(ToggleButton::ColourIds::textColourId, colors().control_text);
+  setColour(ToggleButton::ColourIds::tickColourId, colors().control_tick);
 
   setColour(TextButton::ColourIds::textColourOnId, control_text_high);
   setColour(TextButton::ColourIds::buttonOnColourId, control_bg_high);
@@ -34,8 +32,13 @@ _desc(desc), _module(module)
   setColour(TextEditor::ColourIds::textColourId, colors().control_text);
   setColour(TextEditor::ColourIds::backgroundColourId, colors().control_background);
 
+  setColour(TabbedButtonBar::ColourIds::tabTextColourId, colors().tab_text);
+  setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
+  setColour(TabbedButtonBar::ColourIds::tabOutlineColourId, Colours::transparentBlack);
+  setColour(TabbedButtonBar::ColourIds::frontOutlineColourId, Colours::transparentBlack);
+
   setColour(ComboBox::ColourIds::textColourId, colors().control_text);
-  setColour(ComboBox::ColourIds::arrowColourId, colors().dropdown_check);
+  setColour(ComboBox::ColourIds::arrowColourId, colors().control_tick);
   setColour(ComboBox::ColourIds::outlineColourId, colors().control_outline);
   setColour(ComboBox::ColourIds::backgroundColourId, colors().control_background);
   setColour(ComboBox::ColourIds::focusedOutlineColourId, colors().control_outline);
