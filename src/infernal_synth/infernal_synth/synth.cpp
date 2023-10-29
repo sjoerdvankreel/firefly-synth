@@ -9,6 +9,17 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+static gui_colors
+make_module_colors(Colour const& c)
+{
+  gui_colors result;
+  result.tab_text = c;
+  result.control_tick = c;
+  result.slider_thumb = c;
+  result.bubble_outline = c;
+  return result;
+}
+
 enum { 
   section_lfos, section_env, section_osc, section_filter, 
   section_cv_matrix, section_delay, section_monitor, section_count  };
@@ -16,18 +27,9 @@ enum {
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
-  gui_colors cv_colors;
-  cv_colors.tab_text = juce::Colour(0xFFFF8844);
-  cv_colors.control_tick = juce::Colour(0xFFFF8844);
-  cv_colors.slider_thumb = juce::Colour(0xFFFF8844);
-  gui_colors audio_colors;
-  audio_colors.tab_text = juce::Colour(0xFF4488FF);
-  audio_colors.control_tick = juce::Colour(0xFF4488FF);
-  audio_colors.slider_thumb = juce::Colour(0xFF4488FF);
-  gui_colors other_colors;
-  other_colors.tab_text = juce::Colour(0xFFFF4488);
-  other_colors.control_tick = juce::Colour(0xFFFF4488);
-  other_colors.slider_thumb = juce::Colour(0xFFFF4488);
+  gui_colors cv_colors(make_module_colors(Colour(0xFFFF8844)));
+  gui_colors audio_colors(make_module_colors(Colour(0xFF4488FF)));
+  gui_colors other_colors(make_module_colors(Colour(0xFFFF4488)));
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;

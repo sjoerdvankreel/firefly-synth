@@ -22,6 +22,7 @@ public:
   juce::Font getPopupMenuFont() override { return font(); }
   juce::Font getLabelFont(juce::Label&) override { return font(); }
   juce::Font getComboBoxFont(juce::ComboBox&) override { return font(); }
+  juce::Font getSliderPopupFont(juce::Slider&) override { return font(); }
   juce::Font getTextButtonFont(juce::TextButton&, int) override { return font(); }
   juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return font(); }
   
@@ -35,6 +36,7 @@ public:
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
   void drawTabbedButtonBarBackground(juce::TabbedButtonBar&, juce::Graphics&) override;
   void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
+  void drawBubble(juce::Graphics&, juce::BubbleComponent&, juce::Point<float> const&, juce::Rectangle<float> const& body) override;
   void drawLinearSlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider::SliderStyle, juce::Slider&) override;
 };
 

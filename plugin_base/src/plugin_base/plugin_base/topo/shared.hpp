@@ -115,6 +115,7 @@ struct gui_colors final {
   juce::Colour tab_header = juce::Colour(0xFF222222);
   juce::Colour tab_background1 = juce::Colour(0xFF222222);
   juce::Colour tab_background2 = juce::Colour(0xFF111111);
+  juce::Colour bubble_outline = juce::Colour(0xFFFF8844);
   juce::Colour control_tick = juce::Colour(0xFFFF8844);
   juce::Colour control_text = juce::Colour(0xFFFFFFFF);
   juce::Colour control_outline = juce::Colour(0xFFAAAAAA);

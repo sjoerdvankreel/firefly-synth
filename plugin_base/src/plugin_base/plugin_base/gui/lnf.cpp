@@ -189,6 +189,15 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
 }
 
+void
+lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectangle<float> const& body)
+{
+  g.setColour(colors().control_background);
+  g.fillRoundedRectangle(body, 2);
+  g.setColour(colors().bubble_outline);
+  g.drawRoundedRectangle(body, 2, 1);
+}
+
 void 	
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
