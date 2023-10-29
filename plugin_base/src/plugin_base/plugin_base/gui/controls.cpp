@@ -192,6 +192,9 @@ param_component(gui, module, param), Slider()
   }
 
   setTextBoxStyle(Slider::NoTextBox, true, 0, 0);
+  if(param->param->domain.unit.size())
+    setTextValueSuffix(" " + param->param->domain.unit);
+  setNumDecimalPlacesToDisplay(param->param->domain.precision);
   if (!param->param->domain.is_real()) setRange(param->param->domain.min, param->param->domain.max, 1);
   else setNormalisableRange(
     NormalisableRange<double>(param->param->domain.min, param->param->domain.max,
