@@ -35,7 +35,6 @@ synth_topo()
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
-  result->gui.colors.control_text = Colours::greenyellow;
   result->gui.min_width = 720;
   result->gui.max_width = 1440;
   result->gui.default_width = 720;
