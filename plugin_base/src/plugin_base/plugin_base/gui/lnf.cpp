@@ -43,6 +43,12 @@ _desc(desc), _module(module)
   setColour(ComboBox::ColourIds::backgroundColourId, colors().control_background);
   setColour(ComboBox::ColourIds::focusedOutlineColourId, colors().control_outline);
 
+  setColour(Slider::ColourIds::thumbColourId, colors().slider_thumb);
+  setColour(Slider::ColourIds::trackColourId, colors().slider_track);
+  setColour(Slider::ColourIds::backgroundColourId, colors().slider_background);
+  setColour(Slider::ColourIds::rotarySliderFillColourId, colors().slider_rotary_fill);
+  setColour(Slider::ColourIds::rotarySliderOutlineColourId, colors().slider_rotary_outline);
+
   setColour(PopupMenu::ColourIds::textColourId, colors().control_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
   setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text.brighter(_desc->plugin->gui.lighten));
