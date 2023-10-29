@@ -234,10 +234,9 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 }
 
 Component&
-plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
+plugin_gui::make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents)
 {
   Label* result = {};
-  auto contents = param.param->gui.label.contents;
   switch (contents)
   {
   case gui_label_contents::name:
@@ -258,6 +257,9 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param)
 Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
+  if(param.param->dsp.direction == param_direction::output)
+    return make_param_label(module, param, gui_label_contents::value);
+
   Component* result = nullptr;
   switch (param.param->gui.edit_type)
   {
@@ -323,7 +325,7 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   }
 
   auto& result = make_component<grid_component>(dimension, margin_param);
-  result.add(make_param_label(module, param), label_position);
+  result.add(make_param_label(module, param, param.param->gui.label.contents), label_position);
   result.add(make_param_editor(module, param), edit_position);
   return result;
 }
