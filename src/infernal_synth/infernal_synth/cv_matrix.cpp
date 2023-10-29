@@ -77,27 +77,45 @@ cv_matrix_topo(
   source.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.submenu = source_submenu;
 
+  int target_index = 0;
   std::vector<list_item> target_items;
+  auto target_submenu = std::make_shared<gui_submenu>();
   for(int m = 0; m < targets.size(); m++)
+  {
+    auto const& module_tag = targets[m]->info.tag;
+    auto module_submenu = std::make_shared<gui_submenu>();
+    module_submenu->name = module_tag.name;
     for (int mi = 0; mi < targets[m]->info.slot_count; mi++)
+    {
+      auto module_slot_submenu = std::make_shared<gui_submenu>();
+      module_slot_submenu->name = module_tag.name + " " + std::to_string(mi + 1);
       for(int p = 0; p < targets[m]->params.size(); p++)
         if(targets[m]->params[p].dsp.automate == param_automate::modulate)
+        {
+          auto const& param_tag = targets[m]->params[p].info.tag;
+          auto param_submenu = std::make_shared<gui_submenu>();
+          param_submenu->name = param_tag.name;
           for (int pi = 0; pi < targets[m]->params[p].info.slot_count; pi++)
           {
             list_item item;
-            auto const& module_tag = targets[m]->info.tag;
-            auto const& param_tag = targets[m]->params[p].info.tag;
             item.id = module_tag.id + "-" + std::to_string(mi) + "-" + param_tag.id + "-" + std::to_string(pi);
             item.name = module_tag.name + " " + std::to_string(mi + 1) + " " + param_tag.name;
             if(targets[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
             target_items.push_back(item);
+            param_submenu->indices.push_back(target_index++);
           }
-
+          module_slot_submenu->children.push_back(param_submenu);
+        }
+      module_submenu->children.push_back(module_slot_submenu);
+    }
+    target_submenu->children.push_back(module_submenu);
+  }
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
+  target.gui.submenu = target_submenu;
 
   result.engine_factory = [](auto const& topo, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo); };
