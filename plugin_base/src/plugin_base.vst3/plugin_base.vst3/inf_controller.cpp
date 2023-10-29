@@ -16,14 +16,6 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
-void 
-inf_controller::any_state_changed(int index, plain_value plain)
-{
-  // if some other parameter depends on this one, we need to re-render value-to-text
-  if (_gui_state.desc().param_dependents[index].size())
-    componentHandler->restartComponent(kParamTitlesChanged);
-}
-
 void
 inf_controller::gui_changing(int index, plain_value plain)
 {

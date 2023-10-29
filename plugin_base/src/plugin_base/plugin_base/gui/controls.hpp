@@ -91,13 +91,11 @@ public param_component,
 public autofit_label
 {
   bool const _both;
-  std::vector<int> _global_dependencies = {};
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
-  void state_changed(int index, plain_value plain) override;
-  ~param_value_label();
-  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both);
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both):
+  param_component(gui, module, param), autofit_label(), _both(both) { init(); }
 };
 
 // textbox bound to single parameter
@@ -169,29 +167,6 @@ public:
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
   void comboBoxChanged(ComboBox*) override final
   { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
-};
-
-// dropdown bound to single parameter with multiple domains
-class param_dependent:
-public param_component,
-public juce::Component,
-public juce::ComboBox::Listener
-{
-protected:
-  void own_param_changed(plain_value plain) override final;
-
-private:
-  void update_editors();
-  std::vector<int> _global_dependencies = {};
-  std::vector<std::unique_ptr<juce::ComboBox>> _editors = {};
-
-public:
-  void resized() override;
-  void comboBoxChanged(juce::ComboBox* box) override;
-  void state_changed(int index, plain_value plain) override;
-
-  ~param_dependent() override;
-  param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
 }

@@ -12,7 +12,7 @@
 namespace plugin_base {
 
 enum class domain_display { normal, percentage };
-enum class domain_type { toggle, step, name, item, timesig, dependent, linear, log };
+enum class domain_type { toggle, step, name, item, timesig, linear, log };
 
 // tempo relative to bpm
 struct timesig
@@ -33,11 +33,6 @@ struct list_item final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   list_item(topo_tag const& tag);
   list_item(std::string const& id, std::string const& name);
-
-  template <class T> static list_item 
-  from_topo(T const& topo) { return list_item(topo.info.tag); }
-  template <class T> static list_item 
-  from_topo_ptr(T const* topo) { return list_item(topo->info.tag); }
 };
 
 // parameter bounds
@@ -73,7 +68,7 @@ struct param_domain final {
   normalized_value plain_to_normalized(plain_value plain) const;
   plain_value normalized_to_plain(normalized_value normalized) const;
 
-  // parse and format of independent values
+  // parse and format
   std::string raw_to_text(bool io, double raw) const;
   std::string plain_to_text(bool io, plain_value plain) const;
   std::string normalized_to_text(bool io, normalized_value normalized) const;

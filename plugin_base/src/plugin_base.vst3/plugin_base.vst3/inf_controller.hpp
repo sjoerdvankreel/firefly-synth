@@ -14,8 +14,7 @@ class inf_editor;
 
 class inf_controller final:
 public Steinberg::Vst::EditControllerEx1,
-public gui_listener,
-public any_state_listener
+public gui_listener
 {
   inf_editor* _editor = {};
   plugin_state _gui_state = {};
@@ -23,16 +22,14 @@ public any_state_listener
 
 public: 
   INF_PREVENT_ACCIDENTAL_COPY(inf_controller);
-  ~inf_controller() { _gui_state.remove_any_listener(this); }
   inf_controller(plugin_desc const* desc): 
-  _gui_state(desc, true), _gui_topo(&desc->plugin->gui) { _gui_state.add_any_listener(this); }
+  _gui_state(desc, true), _gui_topo(&desc->plugin->gui) {}
 
   plugin_state& gui_state() { return _gui_state; }
   plugin_state const& gui_state() const { return _gui_state; };
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   void gui_changing(int index, plain_value plain) override;
-  void any_state_changed(int index, plain_value plain) override;
   void gui_end_changes(int index) override { endEdit(gui_state().desc().mappings.index_to_tag[index]); }
   void gui_begin_changes(int index) override { beginEdit(gui_state().desc().mappings.index_to_tag[index]); }
 

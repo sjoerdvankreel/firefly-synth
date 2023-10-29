@@ -98,19 +98,6 @@ make_module_gui(int section, gui_colors const& colors, gui_position const& posit
 }
 
 param_domain
-make_domain_dependent(std::vector<param_domain> const& dependents)
-{
-  param_domain result = {};
-  auto selector = [](auto const& d) { return d.max; };
-  auto domain_limits = vector_map(dependents, selector);
-  result.min = 0;
-  result.default_ = std::to_string(0);
-  result.type = domain_type::dependent;
-  result.max = *std::max_element(domain_limits.begin(), domain_limits.end());
-  return result;
-}
-
-param_domain
 make_domain_toggle(bool default_)
 {
   param_domain result = {};

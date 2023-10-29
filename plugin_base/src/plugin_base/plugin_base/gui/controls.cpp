@@ -96,42 +96,12 @@ param_textbox::textEditorTextChanged(TextEditor&)
   _gui->gui_changed(_param->info.global, plain);
 }
 
-param_value_label::
-param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both) :
-param_component(gui, module, param), autofit_label(), _both(both)
-{
-  for (int d = 0; d < param->param->dependent.dependencies.size(); d++)
-    _global_dependencies.push_back(gui->gui_state()->desc().mappings.topo_to_index
-      [module->info.topo][module->info.slot][param->param->dependent.dependencies[d]][param->info.slot]);
-  for (int d = 0; d < _global_dependencies.size(); d++)
-    _gui->gui_state()->add_listener(_global_dependencies[d], this);
-  init();
-}
-
-param_value_label::
-~param_value_label()
-{
-  for (int d = 0; d < _global_dependencies.size(); d++)
-    _gui->gui_state()->remove_listener(_global_dependencies[d], this);
-}
-
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
   if(_both) text = _param->info.name + " " + text;
   setText(text, dontSendNotification); 
-}
-
-void
-param_value_label::state_changed(int index, plain_value plain)
-{
-  if (std::find(
-    _global_dependencies.begin(),
-    _global_dependencies.end(), index) != _global_dependencies.end())
-    own_param_changed(_gui->gui_state()->get_plain_at_index(_param->info.global));
-  else
-    param_component::state_changed(index, plain);
 }
 
 void 
@@ -208,91 +178,6 @@ param_component(gui, module, param), Slider()
     [this](double s, double e, double v) { return _param->param->domain.raw_to_normalized(v).value(); }));
   setDoubleClickReturnValue(true, param->param->domain.default_raw(), ModifierKeys::noModifiers);
   param_component::init();
-}
-
-param_dependent::
-param_dependent(plugin_gui* gui, module_desc const* module, param_desc const* param):
-param_component(gui, module, param), Component()
-{
-  assert(param->param->dependent.dependencies.size() > 0);
-  for (int d = 0; d < param->param->dependent.dependencies.size(); d++)
-    _global_dependencies.push_back(gui->gui_state()->desc().mappings.topo_to_index
-      [module->info.topo][module->info.slot][param->param->dependent.dependencies[d]][param->info.slot]);
-  for (int d = 0; d < _global_dependencies.size(); d++)
-    gui->gui_state()->add_listener(_global_dependencies[d], this);
-
-  for (int i = 0; i < param->param->dependent.domains.size(); i++)
-  {
-    auto const& domain = param->param->dependent.domains[i];
-    auto& editor = _editors.emplace_back(std::make_unique<ComboBox>());
-    for (int j = domain.min; j <= domain.max; j++)
-      editor->addItem(domain.raw_to_text(false, j), j - domain.min + 1);
-    editor->setSelectedItemIndex(0, dontSendNotification);
-    addChildComponent(editor.get());
-    editor->addListener(this);
-  }
-
-  init();
-  update_editors();
-}
-
-param_dependent::
-~param_dependent() 
-{ 
-  for (int i = 0; i < _editors.size(); i++)
-    _editors[i]->removeListener(this);
-  for (int d = 0; d < _global_dependencies.size(); d++)
-    _gui->gui_state()->remove_listener(_global_dependencies[d], this);
-}
-
-void
-param_dependent::resized()
-{
-  for(int i = 0; i < _editors.size(); i++)
-    _editors[i]->setBounds(getLocalBounds());
-}
-
-void 
-param_dependent::state_changed(int index, plain_value plain)
-{
-  if (std::find(
-    _global_dependencies.begin(),
-    _global_dependencies.end(), index) != _global_dependencies.end())
-    update_editors();
-  else
-    param_component::state_changed(index, plain);
-}
-
-void
-param_dependent::comboBoxChanged(ComboBox* box)
-{
-  for(int i = 0; i < _editors.size(); i++)
-  {
-    if(_editors[i].get() != box) continue;
-    int value = box->getSelectedItemIndex();
-    plain_value plain = _param->param->domain.raw_to_plain(value);
-    _gui->gui_changed(_param->info.global, plain);
-    return;
-  }
-  assert(false);
-}
-
-void
-param_dependent::own_param_changed(plain_value plain)
-{
-  int domain_index = _gui->gui_state()->dependent_domain_index_at_index(_param->info.global);
-  _editors[domain_index]->setSelectedItemIndex(plain.step(), juce::dontSendNotification);
-}
-
-void
-param_dependent::update_editors()
-{
-  int domain_index = _gui->gui_state()->dependent_domain_index_at_index(_param->info.global);
-  for (int i = 0; i < _editors.size(); i++)
-  {
-    _editors[i]->setVisible(domain_index == i);
-    _editors[i]->setEnabled(_param->param->dependent.domains[i].max > 0);
-  }
 }
 
 }

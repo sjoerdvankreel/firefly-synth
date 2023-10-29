@@ -5,21 +5,6 @@
 namespace plugin_base {
 
 void 
-dependent_param::bind(
-  std::vector<int> const& dependencies_,
-  std::vector<param_domain> const& domains_,
-  dependent_domain_selector selector_)
-{
-  assert(domains_.size());
-  assert(dependencies_.size());
-  assert(selector == nullptr);
-  assert(selector_ != nullptr);
-  selector = selector_;
-  dependencies = dependencies_;
-  domains = vector_explicit_copy(domains_);
-}
-
-void 
 param_dsp::validate() const
 {
   if (automate == param_automate::automate)
@@ -65,52 +50,12 @@ param_topo::validate(module_topo const& module, int index) const
   info.validate();
   domain.validate();
 
-  if (domain.type != domain_type::dependent)
-  {
-    assert(domain.max > domain.min);
-    assert(dependent.selector == nullptr);
-    assert(dependent.domains.size() == 0);
-    assert(dependent.dependencies.size() == 0);
-    assert(gui.edit_type != gui_edit_type::dependent);
-  }
-  else
-  {
-    int max = -1;
-    assert(dependent.domains.size() > 1);
-    assert(dependent.selector != nullptr);
-    assert(dependent.dependencies.size() > 0);
-    assert(gui.edit_type == gui_edit_type::dependent);
-    assert(dependent.dependencies.size() <= max_param_dependencies_count);
-
-    for (int d = 0; d < dependent.dependencies.size(); d++)
-    {
-      assert(dependent.dependencies[d] < index);
-      auto const& other = module.params[dependent.dependencies[d]];
-      (void)other;
-      assert(other.domain.min == 0);
-      assert(!other.domain.is_real());
-      assert(info.slot_count == other.info.slot_count);
-      assert(other.dsp.direction != param_direction::output);
-    }
-
-    for(int i = 0; i < dependent.domains.size(); i++)
-    {
-      max = std::max(max, (int)dependent.domains[i].max);
-      dependent.domains[i].validate();
-      assert(dependent.domains[i].min == 0);
-      assert(dependent.domains[i].type == domain_type::item
-          || dependent.domains[i].type == domain_type::name
-          || dependent.domains[i].type == domain_type::step);
-    }
-    assert(max == domain.max);
-  }
-
   assert(info.index == index);
+  assert(domain.max > domain.min);
   assert(domain.is_real() || dsp.rate == param_rate::block);
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == param_layout::single));
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
-  assert(dsp.direction != param_direction::output || dependent.dependencies.size() == 0);
   assert(dsp.direction == param_direction::input || gui.bindings.enabled.selector == nullptr);
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
 }

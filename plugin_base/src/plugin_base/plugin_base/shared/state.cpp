@@ -29,19 +29,10 @@ void
 plugin_state::state_changed(int index, plain_value plain) const
 {
   assert(_notify);
-  for(int i = 0; i < _any_listeners.size(); i++)
-    _any_listeners[i]->any_state_changed(index, plain);
   auto iter = _listeners.find(index);
   if (iter == _listeners.end()) return;
   for (int i = 0; i < iter->second.size(); i++)
     iter->second[i]->state_changed(index, plain);
-}
-
-void 
-plugin_state::add_any_listener(any_state_listener* listener) const
-{
-  assert(_notify);
-  _any_listeners.push_back(listener);
 }
 
 void
@@ -49,15 +40,6 @@ plugin_state::add_listener(int index, state_listener* listener) const
 {
   assert(_notify);
   _listeners[index].push_back(listener);
-}
-
-void 
-plugin_state::remove_any_listener(any_state_listener* listener) const
-{
-  assert(_notify);
-  auto iter = std::find(_any_listeners.begin(), _any_listeners.end(), listener);
-  assert(iter != _any_listeners.end());
-  _any_listeners.erase(iter);
 }
 
 void
@@ -71,24 +53,6 @@ plugin_state::remove_listener(int index, state_listener* listener) const
   map_iter->second.erase(vector_iter);
 }
 
-plain_value
-plugin_state::clamp_dependent_at_index(int index, plain_value value) const
-{
-  auto domain = dependent_domain_at_index(index);
-  if (domain->is_real()) return value;
-  int result = std::clamp(value.step(), 0, (int)domain->max);
-  return domain->raw_to_plain(result);
-}
-
-param_domain const*
-plugin_state::dependent_domain_at_index(int index) const
-{
-  auto const& param = *desc().param_at_index(index).param;
-  int domain_index = dependent_domain_index_at_index(index);
-  if(domain_index == -1)  return &param.domain;
-  return &param.dependent.domains[domain_index];
-}
-
 bool 
 plugin_state::text_to_normalized_at_index(
   bool io, int index, std::string const& textual, normalized_value& normalized) const
@@ -99,46 +63,11 @@ plugin_state::text_to_normalized_at_index(
   return true;
 }
 
-std::string 
-plugin_state::plain_to_text_at_index(bool io, int index, plain_value plain) const
-{
-  auto clamped = clamp_dependent_at_index(index, plain);
-  return dependent_domain_at_index(index)->plain_to_text(io, clamped);
-}
-
 void
 plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 {
-  // get in sync first
   _state[m][mi][p][pi] = value;
-  int index = desc().mappings.topo_to_index[m][mi][p][pi];
-
-  auto const& dependents = desc().param_dependents[index];
-  for (auto iter = dependents.begin(); iter != dependents.end(); iter++)
-  {
-    auto const& map = desc().mappings.params[*iter];
-    auto dependent_value = get_plain_at_index(*iter);
-    auto clamped = clamp_dependent_at_index(*iter, dependent_value);
-    set_plain_at(map.module_topo, map.module_slot, map.param_topo, map.param_slot, clamped);
-  }
-  
-  // notify later, even notify if state did not change because of
-  // possible multiple bindings and/or changed value-to-text behaviour
-  if (_notify) state_changed(index, value);
-}
-
-int
-plugin_state::dependent_domain_index_at_index(int index) const
-{
-  auto const& param = desc().param_at_index(index);
-  if (param.param->dependent.dependencies.size() == 0) return -1;
-  auto const& map = desc().mappings.params[index];
-  int dependency_values[max_param_dependencies_count];
-  for (int d = 0; d < param.param->dependent.dependencies.size(); d++)
-    dependency_values[d] = get_plain_at(map.module_topo, map.module_slot, param.param->dependent.dependencies[d], map.param_slot).step();
-  int dependent_index = param.param->dependent.selector(dependency_values);
-  assert(0 <= dependent_index && dependent_index < param.param->dependent.domains.size());
-  return dependent_index;
+  if (_notify) state_changed(desc().mappings.topo_to_index[m][mi][p][pi], value);
 }
 
 }

@@ -52,31 +52,13 @@ Plugin(clap_desc, host),
 _engine(desc, forward_thread_pool_voice_processor, this), _gui_state(desc, true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
-{ 
-  _block_automation_seen.resize(_engine.state().desc().param_count); 
-  _gui_state.add_any_listener(this);
-}
-
-inf_plugin::
-~inf_plugin() 
-{
-  stopTimer(); 
-  _gui_state.remove_any_listener(this);
-}
+{ _block_automation_seen.resize(_engine.state().desc().param_count); }
 
 void
 inf_plugin::gui_changing(int index, plain_value plain)
 {
   push_to_audio(index, plain);
   _gui_state.set_plain_at_index(index, plain);
-}
-
-void 
-inf_plugin::any_state_changed(int index, plain_value plain)
-{
-  // if some other parameter depends on this one, we need to re-render value-to-text
-  if(_gui_state.desc().param_dependents[index].size())
-    _host.paramsRescan(CLAP_PARAM_RESCAN_TEXT | CLAP_PARAM_RESCAN_INFO);
 }
 
 bool

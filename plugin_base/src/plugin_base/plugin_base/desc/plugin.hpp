@@ -71,7 +71,6 @@ public:
   plugin_param_mappings mappings = {};
   std::vector<module_desc> modules = {};
   std::vector<param_desc const*> params = {};
-  std::vector<std::set<int>> param_dependents = {};
   std::map<std::string, int> module_id_to_index = {};
 
   void validate() const;

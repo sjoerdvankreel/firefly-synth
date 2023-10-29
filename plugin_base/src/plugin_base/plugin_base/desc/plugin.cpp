@@ -61,20 +61,6 @@ plugin(plugin), config(config)
 
   param_count = param_global;
   module_count = modules.size();
-
-  for(int p = 0; p < param_count; p++)
-  {
-    param_dependents.emplace_back();
-    auto const& m = mappings.params[p];
-    auto const& module = plugin->modules[m.module_topo];
-    auto const& param = module.params[m.param_topo];
-    if(param.domain.type != domain_type::dependent) continue;
-    for(int d = 0; d < param.dependent.dependencies.size(); d++)
-    {
-      int dependency_index = mappings.topo_to_index[m.module_topo][m.module_slot][param.dependent.dependencies[d]][m.param_slot];
-      param_dependents[dependency_index].insert(p);
-    }
-  }
 }
 
 void
@@ -106,20 +92,6 @@ plugin_desc::validate() const
       assert(param.info.global == param_global++);
       INF_ASSERT_EXEC(all_ids.insert(param.info.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
-    }
-  }
-
-  for (int p = 0; p < param_count; p++)
-  {
-    auto const& m = mappings.params[p];
-    auto const& this_param = param_at_mapping(m);
-    for(int d = 0; d < this_param.param->dependent.dependencies.size(); d++)
-    {
-      auto const& that_index = mappings.topo_to_index[m.module_topo][m.module_slot][this_param.param->dependent.dependencies[d]][m.param_slot];
-      assert(that_index < p);
-      auto const& dependents = param_dependents[that_index];
-      (void)dependents;
-      assert(std::find(dependents.begin(), dependents.end(), p) != dependents.end());
     }
   }
 }

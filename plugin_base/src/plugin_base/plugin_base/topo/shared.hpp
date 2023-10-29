@@ -19,7 +19,7 @@ inline int constexpr topo_max = 1024;
 enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, both };
-enum class gui_edit_type { toggle, list, autofit_list, dependent, text, knob, hslider, vslider };
+enum class gui_edit_type { toggle, list, autofit_list, text, knob, hslider, vslider };
 
 typedef std::function<bool(std::vector<int> const& vs)>
 gui_binding_selector;
