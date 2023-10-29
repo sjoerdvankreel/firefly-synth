@@ -93,6 +93,14 @@ param_textbox::textEditorTextChanged(TextEditor&)
   _gui->gui_changed(_param->info.global, plain);
 }
 
+// Just guess max value is representative of the longest text.
+param_value_label::
+param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf) :
+param_component(gui, module, param), 
+autofit_label(lnf, _gui->gui_state()->plain_to_text_at_index(false, 
+  _param->info.global, param->param->domain.raw_to_plain(param->param->domain.max))), _both(both)
+{ init(); }
+
 void
 param_value_label::own_param_changed(plain_value plain)
 { 

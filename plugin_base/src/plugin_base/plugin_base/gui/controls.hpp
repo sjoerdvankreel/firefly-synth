@@ -94,8 +94,7 @@ public autofit_label
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
-  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf):
-  param_component(gui, module, param), autofit_label(lnf, "loooooooooooooooong text"), _both(both) { init(); }
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf);
 };
 
 // textbox bound to single parameter
