@@ -43,12 +43,6 @@ _desc(desc), _module(module)
   setColour(ComboBox::ColourIds::backgroundColourId, colors().control_background);
   setColour(ComboBox::ColourIds::focusedOutlineColourId, colors().control_outline);
 
-  setColour(Slider::ColourIds::thumbColourId, colors().slider_thumb);
-  setColour(Slider::ColourIds::trackColourId, colors().slider_track);
-  setColour(Slider::ColourIds::backgroundColourId, colors().slider_background);
-  setColour(Slider::ColourIds::rotarySliderFillColourId, colors().slider_rotary_fill);
-  setColour(Slider::ColourIds::rotarySliderOutlineColourId, colors().slider_rotary_outline);
-
   setColour(PopupMenu::ColourIds::textColourId, colors().control_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
   setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text.brighter(_desc->plugin->gui.lighten));
@@ -199,13 +193,13 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   float pos = (p - x) / w;
   int const fixedHeight = 4;
   assert(style == Slider::SliderStyle::LinearHorizontal);
-  auto track = findColour(Slider::ColourIds::trackColourId);
-  auto background = findColour(Slider::ColourIds::backgroundColourId);
-  g.setColour(background);
-  g.fillRect(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight);
-  ColourGradient gradient(background, 0, 0, track, s.getWidth(), 0, false);
+  g.setColour(colors().slider_background);
+  g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight, 2);
+  ColourGradient gradient(colors().slider_background, 0, 0, colors().slider_outline, s.getWidth(), 0, false);
   g.setGradientFill(gradient);
-  g.fillRect(0, (s.getHeight() - fixedHeight) / 2, (int)(pos * s.getWidth()), fixedHeight);
+  g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, (int)(pos * s.getWidth()), fixedHeight, 2);
+  g.setColour(colors().slider_outline);
+  g.drawRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight, 2, 1);
 }
 
 }
