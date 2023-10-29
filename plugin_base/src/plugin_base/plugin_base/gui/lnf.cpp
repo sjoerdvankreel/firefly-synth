@@ -194,16 +194,18 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 }
 
 void 	
-lnf::drawLinearSlider(Graphics& g, int x, int y, int width, int height, float pos, float minPos, float maxPos, Slider::SliderStyle style, Slider& s)
+lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
+  float pos = (p - x) / w;
   int const fixedHeight = 4;
   assert(style == Slider::SliderStyle::LinearHorizontal);
-  g.setColour(Colours::red);
-  g.fillRect(s.getLocalBounds());
-  g.setColour(findColour(Slider::ColourIds::backgroundColourId));
-  g.fillRect(0, (height - fixedHeight) / 2, width, fixedHeight);
-  g.setColour(findColour(Slider::ColourIds::trackColourId));
-  g.fillRect(0, (height - fixedHeight) / 2, (int)pos - x, fixedHeight);
+  auto track = findColour(Slider::ColourIds::trackColourId);
+  auto background = findColour(Slider::ColourIds::backgroundColourId);
+  g.setColour(background);
+  g.fillRect(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight);
+  ColourGradient gradient(background, 0, 0, track, s.getWidth(), 0, false);
+  g.setGradientFill(gradient);
+  g.fillRect(0, (s.getHeight() - fixedHeight) / 2, (int)(pos * s.getWidth()), fixedHeight);
 }
 
 }
