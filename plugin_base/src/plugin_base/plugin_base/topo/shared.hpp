@@ -120,10 +120,10 @@ struct gui_colors final {
   juce::Colour control_outline = juce::Colour(0xFFAAAAAA);
   juce::Colour control_background = juce::Colour(0xFF111111);
   juce::Colour slider_thumb = juce::Colours::red;
-  juce::Colour slider_track = juce::Colours::yellow;
-  juce::Colour slider_background = juce::Colours::green;
   juce::Colour slider_rotary_fill = juce::Colours::blue;
   juce::Colour slider_rotary_outline = juce::Colours::orange;
+  juce::Colour slider_track = juce::Colour(0xFF888888);
+  juce::Colour slider_background = juce::Colour(0xFF000000);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
 };
 

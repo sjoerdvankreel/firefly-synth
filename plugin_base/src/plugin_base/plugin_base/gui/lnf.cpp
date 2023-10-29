@@ -193,4 +193,17 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
 }
 
+void 	
+lnf::drawLinearSlider(Graphics& g, int x, int y, int width, int height, float pos, float minPos, float maxPos, Slider::SliderStyle style, Slider& s)
+{
+  int const fixedHeight = 4;
+  assert(style == Slider::SliderStyle::LinearHorizontal);
+  g.setColour(Colours::red);
+  g.fillRect(s.getLocalBounds());
+  g.setColour(findColour(Slider::ColourIds::backgroundColourId));
+  g.fillRect(0, (height - fixedHeight) / 2, width, fixedHeight);
+  g.setColour(findColour(Slider::ColourIds::trackColourId));
+  g.fillRect(0, (height - fixedHeight) / 2, (int)pos - x, fixedHeight);
+}
+
 }
