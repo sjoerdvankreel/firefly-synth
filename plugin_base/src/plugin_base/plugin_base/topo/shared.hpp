@@ -10,11 +10,8 @@
 
 namespace plugin_base {
 
-struct gui_colors;
 struct module_topo;
 struct gui_dimension;
-
-gui_colors const& default_colors();
 
 // just a guess for validation, increase if needed
 inline int constexpr topo_max = 1024;
@@ -113,18 +110,18 @@ struct gui_dimension final {
 
 // color scheme
 struct gui_colors final {
-  juce::Colour tab_text;
-  juce::Colour tab_button;
-  juce::Colour tab_header;
-  juce::Colour tab_background1;
-  juce::Colour tab_background2;
-  juce::Colour control_tick;
-  juce::Colour control_text;
-  juce::Colour control_outline;
-  juce::Colour control_background;
-  juce::Colour slider_track;
-  juce::Colour slider_outline;
-  juce::Colour slider_background;
+  juce::Colour tab_text = juce::Colour(0xFFFF8844);
+  juce::Colour tab_button = juce::Colour(0xFF333333);
+  juce::Colour tab_header = juce::Colour(0xFF222222);
+  juce::Colour tab_background1 = juce::Colour(0xFF222222);
+  juce::Colour tab_background2 = juce::Colour(0xFF111111);
+  juce::Colour control_tick = juce::Colour(0xFFFF8844);
+  juce::Colour control_text = juce::Colour(0xFFFFFFFF);
+  juce::Colour control_outline = juce::Colour(0xFFAAAAAA);
+  juce::Colour control_background = juce::Colour(0xFF111111);
+  juce::Colour slider_track = juce::Colour(0xFFEEEEEE);
+  juce::Colour slider_outline = juce::Colour(0xFFAAAAAA);
+  juce::Colour slider_background = juce::Colour(0xFF000000);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
 };
 
