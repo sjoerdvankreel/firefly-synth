@@ -52,21 +52,30 @@ cv_matrix_topo(
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   
+  int source_index = 0;
   std::vector<list_item> source_items;
+  auto source_submenu = std::make_shared<gui_submenu>();
   for(int m = 0; m < sources.size(); m++)
+  {
+    auto const& tag = sources[m]->info.tag;
+    auto module_submenu = std::make_shared<gui_submenu>();
+    module_submenu->name = tag.name;
     for(int mi = 0; mi < sources[m]->info.slot_count; mi++)
     {
       list_item item;
-      auto const& tag = sources[m]->info.tag;
       item.id = tag.id + "-" + std::to_string(mi);
       item.name = tag.name + " " + std::to_string(mi + 1);
       source_items.push_back(item);
+      module_submenu->indices.push_back(source_index++);
     }
+    source_submenu->children.push_back(module_submenu);
+  }
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
+  source.gui.submenu = source_submenu;
 
   std::vector<list_item> target_items;
   for(int m = 0; m < targets.size(); m++)

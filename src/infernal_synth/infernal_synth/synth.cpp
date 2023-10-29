@@ -62,7 +62,7 @@ synth_topo()
   result->modules[module_monitor] = monitor_topo(section_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_filter] = filter_topo(section_filter, audio_colors, { 0, 0 }, result->modules[module_osc].info.slot_count);
   result->modules[module_cv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 },
-    { &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
+    { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo] },
     { &result->modules[module_osc], &result->modules[module_filter] });
   return result;
 }
