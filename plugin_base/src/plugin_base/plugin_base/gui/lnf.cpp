@@ -199,11 +199,11 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
   g.setColour(colors().slider_background);
-  g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight, 2);
-  g.setGradientFill(ColourGradient(colors().slider_track1, 0, 0, colors().slider_track2, s.getWidth(), 0, false));
-  g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, (int)(pos * s.getWidth()), fixedHeight, 2);
-  g.setGradientFill(ColourGradient(colors().slider_outline1, 0, 0, colors().slider_outline2, s.getWidth(), 0, false));
-  g.drawRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight, 2, 1);
+  g.fillRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, s.getWidth() - arrowWidth, fixedHeight, 2);
+  g.setGradientFill(ColourGradient(colors().slider_track1, arrowWidth / 2, 0, colors().slider_track2, s.getWidth() - arrowWidth, 0, false));
+  g.fillRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, (int)(pos * (s.getWidth() - arrowWidth)), fixedHeight, 2);
+  g.setGradientFill(ColourGradient(colors().slider_outline1, arrowWidth / 2, 0, colors().slider_outline2, s.getWidth() - arrowWidth, 0, false));
+  g.drawRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, s.getWidth() - arrowWidth, fixedHeight, 2, 1);
 
   g.setColour(colors().slider_thumb);
   path.startNewSubPath(s.getWidth() * pos - arrowWidth / 2, s.getHeight() / 2 + arrowHeight);
