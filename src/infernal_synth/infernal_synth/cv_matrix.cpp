@@ -93,8 +93,6 @@ cv_matrix_topo(
         if(targets[m]->params[p].dsp.automate == param_automate::modulate)
         {
           auto const& param_tag = targets[m]->params[p].info.tag;
-          auto param_submenu = std::make_shared<gui_submenu>();
-          param_submenu->name = param_tag.name;
           for (int pi = 0; pi < targets[m]->params[p].info.slot_count; pi++)
           {
             list_item item;
@@ -102,9 +100,8 @@ cv_matrix_topo(
             item.name = module_tag.name + " " + std::to_string(mi + 1) + " " + param_tag.name;
             if(targets[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
             target_items.push_back(item);
-            param_submenu->indices.push_back(target_index++);
+            module_slot_submenu->indices.push_back(target_index++);
           }
-          module_slot_submenu->children.push_back(param_submenu);
         }
       module_submenu->children.push_back(module_slot_submenu);
     }
