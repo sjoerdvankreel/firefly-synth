@@ -37,7 +37,7 @@ static bool CLAP_ABI
 init(char const*)
 {
   _topo = synth_topo();
-  _desc = std::make_unique<plugin_desc>(_topo.get());
+  _desc = std::make_unique<plugin_desc>(_topo.get(), clap_config::instance());
   juce::initialiseJuce_GUI();
   return true;
 }

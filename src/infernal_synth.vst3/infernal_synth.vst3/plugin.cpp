@@ -40,7 +40,7 @@ bool
 InitModule() 
 { 
   _topo = synth_topo();
-  _desc = std::make_unique<plugin_desc>(_topo.get());
+  _desc = std::make_unique<plugin_desc>(_topo.get(), vst3_config::instance());
   juce::initialiseJuce_GUI();
   return true; 
 }

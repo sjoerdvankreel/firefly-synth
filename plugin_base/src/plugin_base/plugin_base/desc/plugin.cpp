@@ -4,9 +4,12 @@
 namespace plugin_base {
 
 plugin_desc::
-plugin_desc(plugin_topo const* plugin):
-plugin(plugin)
+plugin_desc(plugin_topo const* plugin, format_config const* config):
+plugin(plugin), config(config)
 {
+  assert(plugin);
+  assert(config);
+
   int param_global = 0;
   int module_global = 0;
 

@@ -11,10 +11,18 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <filesystem>
 
 namespace plugin_base {
 
 struct plugin_desc;
+
+// differences between plugin formats
+struct format_config {
+  virtual std::filesystem::path 
+  resources_folder(std::filesystem::path const& binary_path) const = 0;
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
+};
 
 // mapping plugin level parameter index
 struct param_mapping final {
@@ -59,6 +67,7 @@ public:
   int module_output_start = {};
 
   plugin_topo const* plugin = {};
+  format_config const* config = {};
   plugin_param_mappings mappings = {};
   std::vector<module_desc> modules = {};
   std::vector<param_desc const*> params = {};
@@ -66,8 +75,8 @@ public:
   std::map<std::string, int> module_id_to_index = {};
 
   void validate() const;
-  plugin_desc(plugin_topo const* plugin);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
+  plugin_desc(plugin_topo const* plugin, format_config const* config);
 
   param_desc const& param_at_index(int index) const 
   { return param_at_mapping(mappings.params[index]); }
