@@ -54,7 +54,7 @@ justification_type(gui_label const& label)
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state) :
-_lnf(gui_state->desc().plugin, -1), _gui_state(gui_state)
+_lnf(&gui_state->desc(), -1), _gui_state(gui_state)
 {
   setOpaque(true);
   setLookAndFeel(&_lnf);
@@ -153,7 +153,7 @@ plugin_gui::make_modules(module_desc const* slots)
 {
   int index = slots[0].module->info.index;
   auto const& topo = *_gui_state->desc().plugin;
-  _module_lnfs[index] = std::make_unique<lnf>(&topo, index);
+  _module_lnfs[index] = std::make_unique<lnf>(&_gui_state->desc(), index);
   auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
   result.setTabBarDepth(topo.gui.font_height + 4);
