@@ -125,6 +125,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
   path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
+  path.closeSubPath();
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
   g.fillPath(path);
 }
@@ -190,16 +191,26 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 void 	
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
+  Path path;
   float pos = (p - x) / w;
+  int arrowWidth = 8;
+  int arrowHeight = 6;
   int const fixedHeight = 4;
   assert(style == Slider::SliderStyle::LinearHorizontal);
+
   g.setColour(colors().slider_background);
   g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight, 2);
-  ColourGradient gradient(colors().slider_background, 0, 0, colors().slider_track, s.getWidth(), 0, false);
-  g.setGradientFill(gradient);
+  g.setGradientFill(ColourGradient(colors().slider_track1, 0, 0, colors().slider_track2, s.getWidth(), 0, false));
   g.fillRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, (int)(pos * s.getWidth()), fixedHeight, 2);
-  g.setColour(colors().slider_outline);
+  g.setGradientFill(ColourGradient(colors().slider_outline1, 0, 0, colors().slider_outline2, s.getWidth(), 0, false));
   g.drawRoundedRectangle(0, (s.getHeight() - fixedHeight) / 2, s.getWidth(), fixedHeight, 2, 1);
+
+  g.setColour(colors().slider_thumb);
+  path.startNewSubPath(s.getWidth() / 2 - arrowWidth / 2, s.getHeight() / 2 + arrowHeight);
+  path.lineTo(s.getWidth() / 2, s.getHeight() / 2);
+  path.lineTo(s.getWidth() / 2 + arrowWidth / 2, s.getHeight() / 2 + arrowHeight);
+  path.closeSubPath();
+  g.fillPath(path);
 }
 
 }
