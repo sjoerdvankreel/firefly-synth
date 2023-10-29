@@ -160,20 +160,14 @@ cv_matrix_engine::process(plugin_block& block)
   // set every modulatable parameter to its corresponding automation curve
   for (int m = 0; m < _targets.size(); m++)
   {
-
+    int tp = _targets[m].param_topo;
+    int tpi = _targets[m].param_slot;
+    int tm = _targets[m].module_topo;
+    int tmi = _targets[m].module_slot;
+    _output.modulation_index[tm][tmi][tp][tpi] = -1;
+    auto const& curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
+    _output.modulation[tm][tmi][tp][tpi] = &curve;
   }
-
-  for (int tm = 0; tm < _targets.size(); tm++)
-    for (int tmi = 0; tmi < _targets[tm]->info.slot_count; tmi++)
-      for (int tp = 0; tp < _modulatable_params[tm].size(); tp++)
-        for (int tpi = 0; tpi < _modulatable_params[tm][tp].info.slot_count; tpi++)
-        {
-          int real_tm = _targets[tm]->info.index;
-          int real_tp = _modulatable_params[tm][tp].info.index;
-          _output.modulation_index[real_tm][tmi][real_tp][tpi] = -1;
-          auto const& curve = block.state.all_accurate_automation[real_tm][tmi][real_tp][tpi];
-          _output.modulation[real_tm][tmi][real_tp][tpi] = &curve;
-        }
 
   // apply modulation routing
   int modulation_index = 0;
@@ -185,10 +179,10 @@ cv_matrix_engine::process(plugin_block& block)
 
     // found out indices of modulation target
     int selected_target = own_automation[param_target][r].step();
-    int tm = _targets[selected_target]->info.index;
-    int tmi = own_automation[param_target_index][r].step();
-    int tpi = own_automation[param_target_param_index][r].step();
-    int tp = _modulatable_params[selected_target][own_automation[param_target_param][r].step()].info.index;
+    int tp = _targets[selected_target].param_topo;
+    int tpi = _targets[selected_target].param_slot;
+    int tm = _targets[selected_target].module_topo;
+    int tmi = _targets[selected_target].module_slot;
 
     // if already modulated, set target curve to own buffer
     int existing_modulation_index = _output.modulation_index[tm][tmi][tp][tpi];
@@ -209,11 +203,11 @@ cv_matrix_engine::process(plugin_block& block)
 
     // find out indices of modulation source
     int selected_source = own_automation[param_source][r].step();
-    int source_module = _sources[selected_source]->info.index;
-    int source_module_index = own_automation[param_source_index][r].step();
-    auto const& source_curve = _sources[selected_source]->dsp.stage == module_stage::voice
-      ? block.voice->all_cv[source_module][source_module_index][0]
-      : block.state.all_global_cv[source_module][source_module_index][0];
+    int sm = _sources[selected_source].topo;
+    int smi = _sources[selected_source].slot;
+    auto const& source_curve = block.plugin.modules[sm].dsp.stage == module_stage::voice
+      ? block.voice->all_cv[sm][smi][0]
+      : block.state.all_global_cv[sm][smi][0];
 
     // apply modulation
     for(int f = block.start_frame; f < block.end_frame; f++)
