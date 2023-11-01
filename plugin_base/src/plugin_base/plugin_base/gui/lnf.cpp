@@ -231,10 +231,28 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2 + top_margin;
 
+  bool bipolar = s.getMinimum() < 0;
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
-  draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_background1, colors().knob_background2, conic_count, 1.0f);
-  draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_track1, colors().knob_track2, conic_count, pos);
+  float angle_range = end_angle - start_angle;
+  auto track1 = colors().knob_track1;
+  auto track2 = colors().knob_track2;
+  auto background1 = colors().knob_background1;
+  auto background2 = colors().knob_background2;
+  if(!bipolar)
+  {
+    draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 1.0f);
+    draw_conic_arc(g, left, top, size, start_angle, end_angle, track1, track2, conic_count, pos);
+  }
+  else
+  {
+    draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, background2, background1, conic_count / 2, 1.0f);
+    draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, background1, background2, conic_count / 2, 1.0f);
+    if (pos >= 0.5f)
+    {
+      draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, track1, track2, conic_count / 2, (pos - 0.5f) * 2);
+    }
+  }
 
   g.setColour(colors().knob_thumb);
   float thumb_end_angle = 340 * pi32 / 180;
