@@ -36,6 +36,7 @@ public:
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
   void drawTabbedButtonBarBackground(juce::TabbedButtonBar&, juce::Graphics&) override;
   void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
+  void drawRotarySlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider&) override;
   void drawBubble(juce::Graphics&, juce::BubbleComponent&, juce::Point<float> const&, juce::Rectangle<float> const& body) override;
   void drawLinearSlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider::SliderStyle, juce::Slider&) override;
 };

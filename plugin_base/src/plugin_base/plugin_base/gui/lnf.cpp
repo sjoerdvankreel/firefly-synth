@@ -198,6 +198,25 @@ lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectan
   g.drawRoundedRectangle(body, 2, 1);
 }
 
+void 
+lnf::drawRotarySlider(Graphics& g, int, int, int, int, float, float, float, Slider& s)
+{
+  float path_size = 4;
+  float size = std::min(s.getWidth(), s.getHeight()) - path_size;
+  float top = (s.getHeight() - size) / 2;
+  float left = (s.getWidth() - size) / 2;
+
+  g.setColour(Colours::red);
+  g.fillRect(left, top, size, size);
+
+  Path background;
+  float end_angle = (180 + 340) * pi32 / 180;
+  float start_angle = (180 + 20) * pi32 / 180;
+  g.setColour(Colours::green);
+  background.addArc(left, top, size, size, start_angle, end_angle, true);
+  g.strokePath(background, PathStrokeType(4));
+}
+
 void 	
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
@@ -211,6 +230,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   float left = arrowWidth / 2;
   float top = (s.getHeight() - fixedHeight) / 2;
   float width = s.getWidth() - arrowWidth;
+  float centerx = left + width / 2;
   float height = fixedHeight;
 
   auto track1 = colors().slider_track1;
@@ -220,19 +240,44 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   auto thumb = colors().slider_thumb;
   if (!s.isEnabled()) thumb = color_to_grayscale(thumb);
 
+  bool bipolar = s.getMinimum() < 0;
   g.setColour(colors().slider_background);
   g.fillRoundedRectangle(left, top, width, height, 2);
-  g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
-  g.fillRoundedRectangle(left, top, (int)(pos * width), height, 2);
-  g.setGradientFill(ColourGradient(outline1, left, 0, outline2, width, 0, false));
-  g.drawRoundedRectangle(left, top, width, height, 2, 1);
+  if(!bipolar)
+  {
+    g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
+    g.fillRoundedRectangle(left, top, pos * width, height, 2);
+    g.setGradientFill(ColourGradient(outline1, left, 0, outline2, width, 0, false));
+    g.drawRoundedRectangle(left, top, width, height, 2, 1);
+  } else
+  {
+    if (pos >= 0.5)
+    {
+      g.setGradientFill(ColourGradient(track1, centerx, 0, track2, width, 0, false));
+      g.fillRoundedRectangle(centerx, top, (pos - 0.5f) * 2 * width / 2, height, 2);
+    } else
+    {
+      float trackw = (0.5f - pos) * 2 * width / 2;
+      g.setGradientFill(ColourGradient(track2, left, 0, track1, centerx, 0, false));
+      g.fillRoundedRectangle(centerx - trackw, top, trackw, height, 2);
+    }
 
-  float thumb_cx = width * pos;
+    Path pl;
+    pl.addRoundedRectangle(left, top, width / 2, height, 2, 2, true, false, true, false);
+    g.setGradientFill(ColourGradient(outline2, left, 0, outline1, centerx, 0, false));
+    g.strokePath(pl, PathStrokeType(1.0f));
+    Path pr;
+    pr.addRoundedRectangle(centerx, top, width / 2, height, 2, 2, false, true, false, true);
+    g.setGradientFill(ColourGradient(outline1, centerx, 0, outline2, centerx + width / 2, 0, false));
+    g.strokePath(pr, PathStrokeType(1.0f));
+  }
+
+  float thumb_centerx = width * pos;
   float thumb_top = s.getHeight() / 2;
   g.setColour(thumb);
-  path.startNewSubPath(thumb_cx, thumb_top + arrowHeight);
-  path.lineTo(thumb_cx + arrowWidth / 2, thumb_top);
-  path.lineTo(thumb_cx + arrowWidth, thumb_top + arrowHeight);
+  path.startNewSubPath(thumb_centerx, thumb_top + arrowHeight);
+  path.lineTo(thumb_centerx + arrowWidth / 2, thumb_top);
+  path.lineTo(thumb_centerx + arrowWidth, thumb_top + arrowHeight);
   path.closeSubPath();
   g.fillPath(path);
 }
