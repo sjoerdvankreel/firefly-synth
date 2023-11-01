@@ -12,6 +12,7 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 enum { section_main };
+enum { scratch_time, scratch_count };
 enum { type_off, type_time, type_sync };
 enum { param_type, param_time, param_tempo, param_gain };
 
@@ -45,7 +46,7 @@ delay_topo(
 {
   module_topo result(make_module(
     make_topo_info("{ADA77C05-5D2B-4AA0-B705-A5BE89C32F37}", "Delay", module_delay, 1), 
-    make_module_dsp(module_stage::output, module_output::none, 0, 1),
+    make_module_dsp(module_stage::output, module_output::none, 0, scratch_count),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.sections.emplace_back(make_param_section(section_main,
@@ -109,7 +110,7 @@ delay_engine::process(plugin_block& block)
   if (type == type_off) return;
 
   auto const& time_curve = sync_or_time_into_scratch(block,
-    type == type_sync, module_delay, param_time, param_tempo, 0);
+    type == type_sync, module_delay, param_time, param_tempo, scratch_time);
   auto const& gain_curve = block.state.own_accurate_automation[param_gain][0];
   for (int c = 0; c < 2; c++)
     for(int f = block.start_frame; f < block.end_frame; f++)

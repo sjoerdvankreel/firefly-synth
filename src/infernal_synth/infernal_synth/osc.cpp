@@ -10,6 +10,7 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
+enum { scratch_am, scratch_count };
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { param_type, param_gain, param_bal, param_am, param_note, param_oct, param_cent };
@@ -46,7 +47,7 @@ osc_topo(
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
-    make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
+    make_module_dsp(module_stage::voice, module_output::audio, 1, scratch_count),
     make_module_gui(section, colors, pos, { { 1 }, { 4, 3 } })));
 
   result.sections.emplace_back(make_param_section(section_main,
@@ -125,6 +126,10 @@ osc_engine::process(plugin_block& block)
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
+
+  auto& am = block.state.own_scratch[scratch_am];
+  if(block.module_slot == 0)
+    std::fill(am.begin() + block.start_frame, am.begin() + block.end_frame, 1.0f);
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)

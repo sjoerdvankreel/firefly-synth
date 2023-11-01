@@ -12,6 +12,7 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 enum { section_main };
+enum { scratch_time, scratch_count };
 enum { type_off, type_rate, type_sync };
 enum { param_type, param_rate, param_tempo };
 
@@ -91,7 +92,7 @@ lfo_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   if(type == type_off) return; 
   auto const& rate_curve = sync_or_freq_into_scratch(
-    block, type == type_sync, _module, param_rate, param_tempo, 0);
+    block, type == type_sync, _module, param_rate, param_tempo, scratch_time);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;
