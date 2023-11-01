@@ -243,7 +243,6 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 void 	
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
-  Path path;
   float pos = (p - x) / w;
   int const fixedHeight = 4;
   assert(style == Slider::SliderStyle::LinearHorizontal);
@@ -258,8 +257,6 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   auto track2 = colors().slider_track2;
   auto outline1 = colors().slider_outline1;
   auto outline2 = colors().slider_outline2;
-  auto thumb = colors().slider_thumb;
-  if (!s.isEnabled()) thumb = color_to_grayscale(thumb);
 
   bool bipolar = s.getMinimum() < 0;
   g.setColour(colors().slider_background);
@@ -293,14 +290,17 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.strokePath(pr, PathStrokeType(1.0f));
   }
 
+  Path thumb;
   float thumb_centerx = width * pos;
   float thumb_top = s.getHeight() / 2;
-  g.setColour(thumb);
-  path.startNewSubPath(thumb_centerx, thumb_top + thumb_height);
-  path.lineTo(thumb_centerx + thumb_width / 2, thumb_top);
-  path.lineTo(thumb_centerx + thumb_width, thumb_top + thumb_height);
-  path.closeSubPath();
-  g.fillPath(path);
+  auto thumb_color = colors().slider_thumb;
+  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
+  g.setColour(thumb_color);
+  thumb.startNewSubPath(thumb_centerx, thumb_top + thumb_height);
+  thumb.lineTo(thumb_centerx + thumb_width / 2, thumb_top);
+  thumb.lineTo(thumb_centerx + thumb_width, thumb_top + thumb_height);
+  thumb.closeSubPath();
+  g.fillPath(thumb);
 }
 
 }
