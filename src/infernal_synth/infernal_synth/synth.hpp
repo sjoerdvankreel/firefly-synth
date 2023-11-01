@@ -9,11 +9,7 @@
 
 namespace infernal_synth {
 
-struct cv_matrix_output
-{
-  plugin_base::jarray<int, 4> modulation_index = {};
-  plugin_base::jarray<plugin_base::jarray<float, 1> const*, 4> modulation = {};
-};
+typedef plugin_base::jarray<plugin_base::jarray<float, 1> const*, 4> cv_matrix_output;
 
 enum { 
   module_glfo, module_vlfo, module_env, module_cv_matrix, 

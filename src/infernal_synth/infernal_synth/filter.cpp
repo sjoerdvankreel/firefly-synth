@@ -70,7 +70,7 @@ filter_engine::process(plugin_block& block)
 {
   if (block.state.own_block_automation[param_on][0].step() == 0) return;
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
-  auto const& modulation = static_cast<cv_matrix_output const*>(cv_matrix_context)->modulation;
+  auto const& modulation = *static_cast<cv_matrix_output const*>(cv_matrix_context);
 
   auto const& osc_audio = block.voice->all_audio[module_osc];
   for(int o = 0; o < block.plugin.modules[module_osc].info.slot_count; o++)

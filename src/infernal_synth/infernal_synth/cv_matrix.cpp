@@ -36,6 +36,7 @@ enum { param_active, param_source, param_target };
 class cv_matrix_engine:
 public module_engine { 
   cv_matrix_output _output = {};
+  jarray<int, 4> _modulation_indices = {};
   std::vector<source_mapping> const _sources;
   std::vector<target_mapping> const _targets;
 public:
@@ -150,8 +151,8 @@ cv_matrix_engine(
 _sources(sources), _targets(targets)
 {
   plugin_dims dims(topo);
-  _output.modulation.resize(dims.module_slot_param_slot);
-  _output.modulation_index.resize(dims.module_slot_param_slot);
+  _output.resize(dims.module_slot_param_slot);
+  _modulation_indices.resize(dims.module_slot_param_slot);
 }
 
 void
@@ -164,9 +165,9 @@ cv_matrix_engine::process(plugin_block& block)
     int tpi = _targets[m].param_slot;
     int tm = _targets[m].module_topo;
     int tmi = _targets[m].module_slot;
-    _output.modulation_index[tm][tmi][tp][tpi] = -1;
+    _modulation_indices[tm][tmi][tp][tpi] = -1;
     auto const& curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-    _output.modulation[tm][tmi][tp][tpi] = &curve;
+    _output[tm][tmi][tp][tpi] = &curve;
   }
 
   // apply modulation routing
@@ -185,7 +186,7 @@ cv_matrix_engine::process(plugin_block& block)
     int tmi = _targets[selected_target].module_slot;
 
     // if already modulated, set target curve to own buffer
-    int existing_modulation_index = _output.modulation_index[tm][tmi][tp][tpi];
+    int existing_modulation_index = _modulation_indices[tm][tmi][tp][tpi];
     if (existing_modulation_index != -1)
       modulated_curve_ptr = &block.state.own_cv[existing_modulation_index];
     else
@@ -194,8 +195,8 @@ cv_matrix_engine::process(plugin_block& block)
       modulated_curve_ptr = &block.state.own_cv[modulation_index];
       auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
       std::copy(target_automation.cbegin(), target_automation.cend(), modulated_curve_ptr->begin());
-      _output.modulation[tm][tmi][tp][tpi] = modulated_curve_ptr;
-      _output.modulation_index[tm][tmi][tp][tpi] = modulation_index++;
+      _output[tm][tmi][tp][tpi] = modulated_curve_ptr;
+      _modulation_indices[tm][tmi][tp][tpi] = modulation_index++;
     }
 
     assert(modulated_curve_ptr != nullptr);

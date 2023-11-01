@@ -10,9 +10,9 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-enum { scratch_am, scratch_count };
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
+enum { scratch_mono, scratch_am, scratch_count };
 enum { param_type, param_gain, param_bal, param_am, param_note, param_oct, param_cent };
 
 static std::vector<list_item>
@@ -122,7 +122,7 @@ osc_engine::process(plugin_block& block)
 
   auto const& env_curve = block.voice->all_cv[module_env][0][0];
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
-  auto const& modulation = static_cast<cv_matrix_output const*>(cv_matrix_context)->modulation;
+  auto const& modulation = *static_cast<cv_matrix_output const*>(cv_matrix_context);
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
