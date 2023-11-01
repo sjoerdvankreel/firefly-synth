@@ -14,11 +14,11 @@ static int const thumb_height = 6;
 static void 
 draw_conic_arc(
   Graphics&g, float left, float top, float size, float start_angle, 
-  float end_angle, Colour color1, Colour color2, int segment_count, float max)
+  float end_angle, Colour color1, Colour color2, int segment_count, float min, float max)
 {
   float overlap = 0.01;
   float angle_range = end_angle - start_angle;
-  for (int i = 0; i < segment_count; i++)
+  for (int i = (int)(min * segment_count); i < segment_count; i++)
   {
     Path path;
     if ((float)i / segment_count >= max) break;
@@ -241,25 +241,27 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   auto background2 = colors().knob_background2;
   if(!bipolar)
   {
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 1.0f);
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, track1, track2, conic_count, pos);
+    draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 0, 1.0f);
+    draw_conic_arc(g, left, top, size, start_angle, end_angle, track1, track2, conic_count, 0, pos);
   }
   else
   {
-    draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, background2, background1, conic_count / 2, 1.0f);
-    draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, background1, background2, conic_count / 2, 1.0f);
+    draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, background2, background1, conic_count / 2, 0, 1.0f);
+    draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, background1, background2, conic_count / 2, 0, 1.0f);
     if (pos >= 0.5f)
-    {
-      draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, track1, track2, conic_count / 2, (pos - 0.5f) * 2);
-    }
+      draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, track1, track2, conic_count / 2, 0, (pos - 0.5f) * 2);
+    else
+      draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, track2, track1, conic_count / 2, pos * 2, 1);
   }
 
-  g.setColour(colors().knob_thumb);
+  Path thumb;
   float thumb_end_angle = 340 * pi32 / 180;
   float thumb_start_angle = 20 * pi32 / 180;
   float thum_angle_range = thumb_end_angle - thumb_start_angle;
+  auto thumb_color = colors().slider_thumb;
+  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
+  g.setColour(thumb_color);
 
-  Path thumb;
   float thumb_top = top + size - thumb_height * 1.25;
   float thumb_left = left + size / 2 - thumb_width / 2;
   thumb.startNewSubPath(thumb_left, thumb_top);
