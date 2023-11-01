@@ -11,17 +11,6 @@ namespace plugin_base {
 static int const thumb_width = 8;
 static int const thumb_height = 6;
 
-static Path 
-create_thumb(int left, int top)
-{
-  Path result;
-  result.startNewSubPath(left, top + thumb_height);
-  result.lineTo(left + thumb_width / 2, top);
-  result.lineTo(left + thumb_width, top + thumb_height);
-  result.closeSubPath();
-  return result;
-}
-
 static void 
 draw_conic_arc(
   Graphics&g, float left, float top, float size, float start_angle, 
@@ -251,7 +240,14 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float thumb_end_angle = 340 * pi32 / 180;
   float thumb_start_angle = 20 * pi32 / 180;
   float thum_angle_range = thumb_end_angle - thumb_start_angle;
-  Path thumb(create_thumb(left + size / 2 - thumb_width / 2, top + size - thumb_height));
+
+  Path thumb;
+  float thumb_top = top + size - thumb_height;
+  float thumb_left = left + size / 2 - thumb_width / 2;
+  thumb.startNewSubPath(thumb_left, thumb_top);
+  thumb.lineTo(thumb_left + thumb_width / 2, thumb_top + thumb_height);
+  thumb.lineTo(thumb_left + thumb_width, thumb_top);
+  thumb.closeSubPath();
   auto transform = AffineTransform::rotation(thumb_start_angle + pos * thum_angle_range, left + size / 2, top + size / 2);
   thumb.applyTransform(transform);
   g.fillPath(thumb);
@@ -307,12 +303,17 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.strokePath(pr, PathStrokeType(1.0f));
   }
 
+  Path thumb;
   float thumb_left = width * pos;
   float thumb_top = s.getHeight() / 2;
   auto thumb_color = colors().slider_thumb;
   if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
   g.setColour(thumb_color);
-  g.fillPath(create_thumb(thumb_left, thumb_top));
+  thumb.startNewSubPath(thumb_left, thumb_top + thumb_height);
+  thumb.lineTo(thumb_left + thumb_width / 2, thumb_top);
+  thumb.lineTo(thumb_left + thumb_width, thumb_top + thumb_height);
+  thumb.closeSubPath();
+  g.fillPath(thumb);
 }
 
 }
