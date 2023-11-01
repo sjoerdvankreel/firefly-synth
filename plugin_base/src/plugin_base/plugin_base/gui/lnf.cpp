@@ -8,6 +8,26 @@ using namespace juce;
 
 namespace plugin_base {
 
+static void 
+draw_conic_arc(
+  Graphics&g, float left, float top, float size, float start_angle, 
+  float end_angle, Colour color1, Colour color2, int segment_count, float max)
+{
+  float overlap = 0.01;
+  float angle_range = end_angle - start_angle;
+  for (int i = 0; i < segment_count; i++)
+  {
+    Path path;
+    if ((float)i / segment_count >= max) break;
+    g.setColour(color1.interpolatedWith(color2, (float)i / (segment_count - 1)));
+    float this_start_angle = start_angle + (float)i / segment_count * angle_range;
+    float this_end_angle = start_angle + (float)(i + 1) / segment_count * angle_range;
+    if (i < segment_count - 1) this_end_angle += overlap;
+    path.addArc(left, top, size, size, this_start_angle, this_end_angle, true);
+    g.strokePath(path, PathStrokeType(4));
+  }
+}
+
 lnf::
 lnf(plugin_desc const* desc, int module) :
 _desc(desc), _module(module)
@@ -207,28 +227,10 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float top = (s.getHeight() - size) / 2;
   float left = (s.getWidth() - size) / 2;
 
-  Path background;
-  auto track1 = colors().slider_track1;
-  auto track2 = colors().slider_track2;
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
-  g.setColour(colors().slider_background);
-  background.addArc(left, top, size, size, start_angle, end_angle, true);
-  g.strokePath(background, PathStrokeType(4));
-
-  float overlap = 0.01;
-  float angle_range = end_angle - start_angle;
-  for (int i = 0; i < conic_count; i++)
-  {
-    Path conic;
-    if((float)i/conic_count >= pos) break;
-    g.setColour(track1.interpolatedWith(track2, (float)i / (conic_count - 1)));
-    float this_start_angle = start_angle + (float)i / conic_count * angle_range;
-    float this_end_angle = start_angle + (float)(i + 1) / conic_count * angle_range;
-    if(i < conic_count - 1) this_end_angle += overlap;
-    conic.addArc(left, top, size, size, this_start_angle, this_end_angle, true);
-    g.strokePath(conic, PathStrokeType(4));
-  }
+  draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_background1, colors().knob_background2, conic_count, 1.0f);
+  draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_track1, colors().knob_track2, conic_count, pos);
 }
 
 void 	

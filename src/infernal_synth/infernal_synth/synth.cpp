@@ -14,8 +14,10 @@ make_module_colors(Colour const& c)
 {
   gui_colors result;
   result.tab_text = c;
-  result.control_tick = c;
+  result.knob_thumb = c;
+  result.knob_track2 = c;
   result.slider_thumb = c;
+  result.control_tick = c;
   result.bubble_outline = c;
   return result;
 }
