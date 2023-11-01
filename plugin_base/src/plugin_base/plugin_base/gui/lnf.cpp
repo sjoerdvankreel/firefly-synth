@@ -208,20 +208,31 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   int const fixedHeight = 4;
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
-  g.setColour(colors().slider_background);
-  g.fillRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, s.getWidth() - arrowWidth, fixedHeight, 2);
-  g.setGradientFill(ColourGradient(colors().slider_track1, arrowWidth / 2, 0, colors().slider_track2, s.getWidth() - arrowWidth, 0, false));
-  g.fillRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, (int)(pos * (s.getWidth() - arrowWidth)), fixedHeight, 2);
-  g.setGradientFill(ColourGradient(colors().slider_outline1, arrowWidth / 2, 0, colors().slider_outline2, s.getWidth() - arrowWidth, 0, false));
-  g.drawRoundedRectangle(arrowWidth / 2, (s.getHeight() - fixedHeight) / 2, s.getWidth() - arrowWidth, fixedHeight, 2, 1);
+  float left = arrowWidth / 2;
+  float top = (s.getHeight() - fixedHeight) / 2;
+  float width = s.getWidth() - arrowWidth;
+  float height = fixedHeight;
 
-  auto thumb_color = colors().slider_thumb;
-  if(!s.isEnabled()) 
-    thumb_color = color_to_grayscale(thumb_color);
-  g.setColour(thumb_color);
-  path.startNewSubPath((s.getWidth() - arrowWidth) * pos, s.getHeight() / 2 + arrowHeight);
-  path.lineTo((s.getWidth() - arrowWidth) * pos + arrowWidth / 2, s.getHeight() / 2);
-  path.lineTo((s.getWidth() - arrowWidth) * pos + arrowWidth, s.getHeight() / 2 + arrowHeight);
+  auto track1 = colors().slider_track1;
+  auto track2 = colors().slider_track2;
+  auto outline1 = colors().slider_outline1;
+  auto outline2 = colors().slider_outline2;
+  auto thumb = colors().slider_thumb;
+  if (!s.isEnabled()) thumb = color_to_grayscale(thumb);
+
+  g.setColour(colors().slider_background);
+  g.fillRoundedRectangle(left, top, width, height, 2);
+  g.setGradientFill(ColourGradient(track1, left, 0, track2, width, 0, false));
+  g.fillRoundedRectangle(left, top, (int)(pos * width), height, 2);
+  g.setGradientFill(ColourGradient(outline1, left, 0, outline2, width, 0, false));
+  g.drawRoundedRectangle(left, top, width, height, 2, 1);
+
+  float thumb_cx = width * pos;
+  float thumb_top = s.getHeight() / 2;
+  g.setColour(thumb);
+  path.startNewSubPath(thumb_cx, thumb_top + arrowHeight);
+  path.lineTo(thumb_cx + arrowWidth / 2, thumb_top);
+  path.lineTo(thumb_cx + arrowWidth, thumb_top + arrowHeight);
   path.closeSubPath();
   g.fillPath(path);
 }

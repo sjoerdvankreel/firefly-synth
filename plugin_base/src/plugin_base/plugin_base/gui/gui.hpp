@@ -24,6 +24,7 @@ public juce::Component
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   plugin_gui(plugin_state* gui_state);
+  ~plugin_gui() { setLookAndFeel(nullptr); }
 
   void gui_end_changes(int index);
   void gui_begin_changes(int index);
