@@ -242,7 +242,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float thum_angle_range = thumb_end_angle - thumb_start_angle;
 
   Path thumb;
-  float thumb_top = top + size - thumb_height;
+  float thumb_top = top + size - thumb_height * 1.25;
   float thumb_left = left + size / 2 - thumb_width / 2;
   thumb.startNewSubPath(thumb_left, thumb_top);
   thumb.lineTo(thumb_left + thumb_width / 2, thumb_top + thumb_height);
