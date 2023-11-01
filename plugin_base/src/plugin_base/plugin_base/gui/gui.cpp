@@ -198,11 +198,12 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   if(module.module->sections.size() == 1)
     return *grid;
 
-  auto& group = make_component<param_section_group>(this, &module, &section);
-  group.setText(section.tag.name);
-  auto& margin = make_component<margin_component>(grid, param_section_border);
-  add_and_make_visible(group, margin);
-  return group;
+  //auto& group = make_component<param_section_group>(this, &module, &section);
+  //group.setText(section.tag.name);
+  //auto& margin = make_component<margin_component>(grid, param_section_border);
+  //add_and_make_visible(group, margin);
+  return *grid;
+  //return group;
 }
 
 Component&
