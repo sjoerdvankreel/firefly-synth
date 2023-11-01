@@ -222,10 +222,11 @@ void
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
   float path_size = 4;
+  float top_margin = 1;
   int conic_count = 256;
   float size = std::min(s.getWidth(), s.getHeight()) - path_size;
-  float top = (s.getHeight() - size) / 2;
   float left = (s.getWidth() - size) / 2;
+  float top = (s.getHeight() - size) / 2 + top_margin;
 
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
