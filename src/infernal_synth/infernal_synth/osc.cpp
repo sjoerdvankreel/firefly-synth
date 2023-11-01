@@ -123,6 +123,7 @@ osc_engine::process(plugin_block& block)
   auto const& env_curve = block.voice->all_cv[module_env][0][0];
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
   auto const& modulation = *static_cast<cv_matrix_output const*>(cv_matrix_context);
+  auto const& am_curve = *modulation[module_osc][block.module_slot][param_am][0];
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
@@ -152,7 +153,8 @@ osc_engine::process(plugin_block& block)
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    mono = sample * gain_curve[f] * env_curve[f] * am_scratch[f];
+    sample *= gain_curve[f] * env_curve[f];
+    mono = (1.0f - am_curve[f]) * sample + am_curve[f] * (sample * am_scratch[f]);
     mono_scratch[f] = mono;
     block.state.own_audio[0][0][f] = mono * balance(0, bal);
     block.state.own_audio[0][1][f] = mono * balance(1, bal);
