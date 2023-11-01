@@ -8,6 +8,9 @@ using namespace juce;
 
 namespace plugin_base {
 
+static int const thumb_width = 8;
+static int const thumb_height = 6;
+
 static void 
 draw_conic_arc(
   Graphics&g, float left, float top, float size, float start_angle, 
@@ -232,6 +235,9 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float start_angle = (180 + 20) * pi32 / 180;
   draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_background1, colors().knob_background2, conic_count, 1.0f);
   draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_track1, colors().knob_track2, conic_count, pos);
+
+  Path thumb;
+
 }
 
 void 	
@@ -239,14 +245,12 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
 {
   Path path;
   float pos = (p - x) / w;
-  int arrowWidth = 8;
-  int arrowHeight = 6;
   int const fixedHeight = 4;
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
-  float left = arrowWidth / 2;
+  float left = thumb_width / 2;
   float top = (s.getHeight() - fixedHeight) / 2;
-  float width = s.getWidth() - arrowWidth;
+  float width = s.getWidth() - thumb_width;
   float centerx = left + width / 2;
   float height = fixedHeight;
 
@@ -292,9 +296,9 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   float thumb_centerx = width * pos;
   float thumb_top = s.getHeight() / 2;
   g.setColour(thumb);
-  path.startNewSubPath(thumb_centerx, thumb_top + arrowHeight);
-  path.lineTo(thumb_centerx + arrowWidth / 2, thumb_top);
-  path.lineTo(thumb_centerx + arrowWidth, thumb_top + arrowHeight);
+  path.startNewSubPath(thumb_centerx, thumb_top + thumb_height);
+  path.lineTo(thumb_centerx + thumb_width / 2, thumb_top);
+  path.lineTo(thumb_centerx + thumb_width, thumb_top + thumb_height);
   path.closeSubPath();
   g.fillPath(path);
 }
