@@ -47,7 +47,7 @@ osc_topo(
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
-    make_module_gui(section, colors, pos, { { 1 }, { 5, 3 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 4, 3 } })));
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
@@ -93,13 +93,22 @@ osc_topo(
   result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
 
   return result;
+}
+
+static float 
+blep(float phase, float inc)
+{
+  float b;
+  if (phase < inc) return b = phase / inc, (2.0f - b) * b - 1.0f;
+  if (phase >= 1.0f - inc) return b = (phase - 1.0f) / inc, (b + 2.0f) * b + 1.0f;
+  return 0.0f;
 }
 
 void
@@ -119,19 +128,20 @@ osc_engine::process(plugin_block& block)
 
   float sample;
   for (int f = block.start_frame; f < block.end_frame; f++)
-  {
+  { 
+    float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
+    float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
+    float inc = note_to_freq(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
     switch (type)
     {
-    case type_saw: sample = (_phase * 2 - 1); break;
     case type_sine: sample = std::sin(_phase * 2 * pi32); break;
+    case type_saw: sample = (_phase * 2 - 1) - blep(_phase, inc); break;
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
-    float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     block.state.own_audio[0][0][f] = sample * gain_curve[f] * env_curve[f] * balance(0, bal);
     block.state.own_audio[0][1][f] = sample * gain_curve[f] * env_curve[f] * balance(1, bal);
-    _phase += note_to_freq(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
+    _phase += inc;
     _phase -= std::floor(_phase);
   }
 }

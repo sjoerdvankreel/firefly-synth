@@ -224,12 +224,13 @@ lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectan
 void 
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
+  float padding = 2;
   float path_size = 4;
   float top_margin = 1;
   int conic_count = 256;
-  float size = std::min(s.getWidth(), s.getHeight()) - path_size;
-  float left = (s.getWidth() - size) / 2;
-  float top = (s.getHeight() - size) / 2 + top_margin;
+  float size = std::min(s.getWidth(), s.getHeight()) - path_size - padding;
+  float left = (s.getWidth() - size) / 2 + padding / 2;
+  float top = (s.getHeight() - size) / 2 - padding / 2 + top_margin;
 
   bool bipolar = s.getMinimum() < 0;
   float end_angle = (180 + 340) * pi32 / 180;
