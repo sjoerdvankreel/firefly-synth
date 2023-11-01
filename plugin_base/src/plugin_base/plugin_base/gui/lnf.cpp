@@ -249,10 +249,12 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   float half_tw = thumb_width / 2;
   float half_th = thumb_height / 2;
+  //float angle_range = end_angle - start_angle;
   g.setColour(colors().knob_thumb);
   Path thumb(create_thumb(0, 0));
-  auto transform = AffineTransform::rotation(pos * 2 * pi32, half_tw, half_th);
-  transform = transform.translated(left + size / 2 - half_tw, top + size / 2 - half_th);
+  auto transform = AffineTransform::verticalFlip(thumb_height);
+  transform = transform.translated(left + size / 2 - half_tw, top + size - half_th);
+  //transform = AffineTransform::rotation(start_angle + pos * angle_range , half_tw, half_th);
   thumb.applyTransform(transform);
   g.fillPath(thumb);
 }
