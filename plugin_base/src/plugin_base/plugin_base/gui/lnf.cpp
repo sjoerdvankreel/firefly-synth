@@ -202,19 +202,32 @@ void
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float, float, float, Slider& s)
 {
   float path_size = 4;
+  int conic_count = 256;
   float size = std::min(s.getWidth(), s.getHeight()) - path_size;
   float top = (s.getHeight() - size) / 2;
   float left = (s.getWidth() - size) / 2;
 
-  g.setColour(Colours::red);
-  g.fillRect(left, top, size, size);
-
   Path background;
+  auto track1 = colors().slider_track1;
+  auto track2 = colors().slider_track2;
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;
-  g.setColour(Colours::green);
+  g.setColour(colors().slider_background);
   background.addArc(left, top, size, size, start_angle, end_angle, true);
   g.strokePath(background, PathStrokeType(4));
+
+  float overlap = 0.01;
+  float angle_range = end_angle - start_angle;
+  for (int i = 0; i < conic_count; i++)
+  {
+    Path conic;
+    g.setColour(track1.interpolatedWith(track2, (float)i / (conic_count - 1)));
+    float this_start_angle = start_angle + (float)i / conic_count * angle_range;
+    float this_end_angle = start_angle + (float)(i + 1) / conic_count * angle_range;
+    if(i < conic_count - 1) this_end_angle += overlap;
+    conic.addArc(left, top, size, size, this_start_angle, this_end_angle, true);
+    g.strokePath(conic, PathStrokeType(4));
+  }
 }
 
 void 	
