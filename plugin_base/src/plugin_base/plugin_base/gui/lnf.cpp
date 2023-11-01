@@ -199,7 +199,7 @@ lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectan
 }
 
 void 
-lnf::drawRotarySlider(Graphics& g, int, int, int, int, float, float, float, Slider& s)
+lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
   float path_size = 4;
   int conic_count = 256;
@@ -221,6 +221,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float, float, float, Slid
   for (int i = 0; i < conic_count; i++)
   {
     Path conic;
+    if((float)i/conic_count >= pos) break;
     g.setColour(track1.interpolatedWith(track2, (float)i / (conic_count - 1)));
     float this_start_angle = start_angle + (float)i / conic_count * angle_range;
     float this_end_angle = start_angle + (float)(i + 1) / conic_count * angle_range;
