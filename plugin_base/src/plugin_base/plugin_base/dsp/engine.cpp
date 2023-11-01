@@ -64,7 +64,7 @@ plugin_engine::make_plugin_block(
     : _voice_audio_state[voice][module][slot];
   plugin_block_state state = {
     context_out, cv_out, audio_out, scratch,
-    _global_cv_state, _global_audio_state, _global_context,
+    _global_cv_state, _global_audio_state, _global_context, _global_scratch_state,
     _accurate_automation[module][slot], _accurate_automation,
     _block_automation.state()[module][slot], _block_automation.state()
   };
@@ -196,7 +196,7 @@ plugin_engine::process_voice(int v, bool threaded)
     {
       plugin_voice_block voice_block = {
         false, _voice_results[v], state,
-        _voice_cv_state[v], _voice_audio_state[v], _voice_context[v]
+        _voice_cv_state[v], _voice_audio_state[v], _voice_context[v], _voice_scratch_state[v]
       };
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;

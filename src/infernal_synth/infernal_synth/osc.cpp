@@ -127,11 +127,19 @@ osc_engine::process(plugin_block& block)
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
 
-  auto& am = block.state.own_scratch[scratch_am];
+  auto& am_scratch = block.state.own_scratch[scratch_am];
   if(block.module_slot == 0)
-    std::fill(am.begin() + block.start_frame, am.begin() + block.end_frame, 1.0f);
+    std::fill(am_scratch.begin() + block.start_frame, am_scratch.begin() + block.end_frame, 1.0f);
+  else
+  {
+    auto const& am_source = block.voice->all_scratch[module_osc][block.module_slot - 1][scratch_mono];
+    for(int f = block.start_frame; f < block.end_frame; f++)
+      am_scratch[f] = (am_source[f] + 1.0f) * 0.5f;
+  }
 
+  float mono;
   float sample;
+  auto& mono_scratch = block.state.own_scratch[scratch_mono];
   for (int f = block.start_frame; f < block.end_frame; f++)
   { 
     float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
@@ -144,8 +152,10 @@ osc_engine::process(plugin_block& block)
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    block.state.own_audio[0][0][f] = sample * gain_curve[f] * env_curve[f] * balance(0, bal);
-    block.state.own_audio[0][1][f] = sample * gain_curve[f] * env_curve[f] * balance(1, bal);
+    mono = sample * gain_curve[f] * env_curve[f] * am_scratch[f];
+    mono_scratch[f] = mono;
+    block.state.own_audio[0][0][f] = mono * balance(0, bal);
+    block.state.own_audio[0][1][f] = mono * balance(1, bal);
     _phase += inc;
     _phase -= std::floor(_phase);
   }
