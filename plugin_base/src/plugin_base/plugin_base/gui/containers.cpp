@@ -4,13 +4,6 @@ using namespace juce;
 
 namespace plugin_base {
 
-void
-group_component::resized()
-{
-  assert(getNumChildComponents() == 1);
-  getChildComponent(0)->setBounds(getLocalBounds());
-}
-
 void 
 margin_component::resized()
 {

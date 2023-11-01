@@ -14,7 +14,7 @@ namespace plugin_base {
 
 static int const margin_param = 1;
 static int const margin_module = 2;
-static int const margin_section = 0;
+static int const margin_section = 2;
 static int const margin_container = 2;
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
@@ -159,14 +159,13 @@ plugin_gui::make_modules(module_desc const* slots)
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
   result.setLookAndFeel(module_lnf(index));
+  int radius = topo.gui.module_corner_radius;
   auto background1 = slots[0].module->gui.colors.tab_background1;
   auto background2 = slots[0].module->gui.colors.tab_background2;
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {
-    int radius = topo.gui.module_corner_radius;
-    auto& corners = make_component<rounded_container>(&make_param_sections(slots[i]), radius, background1, background2);
-    auto& margin_comp = make_component<margin_component>(&corners, BorderSize<int>(1, 0, 0, 0));
-    result.addTab(std::to_string(i + 1), Colours::transparentBlack, &margin_comp, false);
+    auto& corners = make_component<rounded_container>(&make_param_sections(slots[i]), radius, true, background1, background2);
+    result.addTab(std::to_string(i + 1), Colours::transparentBlack, &corners, false);
   }
   return result;
 }
@@ -184,26 +183,15 @@ plugin_gui::make_param_sections(module_desc const& module)
 Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section)
 {
-  grid_component* grid = nullptr;
-  if (module.module->sections.size() == 1)
-    grid = &make_component<param_section_grid>(this, &module, &section, margin_param);
-  else
-    grid = &make_component<grid_component>(section.gui.dimension, margin_param);
-
   auto const& params = module.params;
+  grid_component& grid = make_component<param_section_grid>(this, &module, &section, margin_param);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->gui.section == section.index)
-      grid->add(make_params(module, &(*iter)), iter->param->gui.position);
+      grid.add(make_params(module, &(*iter)), iter->param->gui.position);
   
-  if(module.module->sections.size() == 1)
-    return *grid;
-
-  //auto& group = make_component<param_section_group>(this, &module, &section);
-  //group.setText(section.tag.name);
-  //auto& margin = make_component<margin_component>(grid, param_section_border);
-  //add_and_make_visible(group, margin);
-  return *grid;
-  //return group;
+  auto outline = module.module->gui.colors.section_outline;
+  int radius = _gui_state->desc().plugin->gui.section_corner_radius;
+  return make_component<rounded_container>(&grid, radius, false, outline, outline);
 }
 
 Component&

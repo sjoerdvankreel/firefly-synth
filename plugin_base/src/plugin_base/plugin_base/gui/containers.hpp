@@ -9,14 +9,6 @@
 
 namespace plugin_base {
 
-// TODO delete this ?
-// resizes single child on resize
-class group_component :
-public juce::GroupComponent {
-public:
-  void resized() override;
-};
-
 // adds some margin around another component
 class margin_component :
 public juce::Component 
@@ -70,16 +62,6 @@ public:
   _gap_size(gap_size), _dimension(dimension) { setInterceptsMouseClicks(false, true); }
   grid_component(bool vertical, int count, float gap_size) :
   grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size) {}
-};
-
-// binding_component that hosts a single param_section_grid
-class param_section_group :
-public binding_component,
-public group_component
-{
-public:
-  param_section_group(plugin_gui* gui, module_desc const* module, param_section const* section):
-  binding_component(gui, module, &section->gui.bindings, 0), group_component() { init(); }
 };
 
 // binding_component that hosts a number of plugin parameters
