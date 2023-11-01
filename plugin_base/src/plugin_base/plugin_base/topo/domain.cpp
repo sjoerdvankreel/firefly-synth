@@ -83,7 +83,7 @@ param_domain::plain_to_text(bool io, plain_value plain) const
   std::ostringstream stream;
   int mul = display == domain_display::percentage ? 100 : 1;
   stream << std::fixed << std::setprecision(precision) << (plain.real() * mul);
-  stream << " " << unit;
+  if(unit.size()) stream << " " << unit;
   return prefix + stream.str();
 }
 
