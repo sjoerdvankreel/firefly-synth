@@ -29,10 +29,10 @@ rounded_container::resized()
 {
   Rectangle<int> bounds(getLocalBounds());
   Rectangle<int> child_bounds(
-    bounds.getX() + _radius,
-    bounds.getY() + _radius,
-    bounds.getWidth() - _radius * 2,
-    bounds.getHeight() - _radius * 2);
+    bounds.getX() + _radius / 2,
+    bounds.getY() + _radius / 2,
+    bounds.getWidth() - _radius,
+    bounds.getHeight() - _radius);
   assert(getNumChildComponents() == 1);
   getChildComponent(0)->setBounds(child_bounds);
 }
@@ -40,8 +40,11 @@ rounded_container::resized()
 void
 rounded_container::paint(Graphics& g)
 {
-  g.setGradientFill(juce::ColourGradient(_background1, 0, 0, _background2, 0, getHeight(), false));
-  g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+  g.setGradientFill(juce::ColourGradient(_color1, 0, 0, _color2, 0, getHeight(), false));
+  if(_fill)
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+  else
+    g.drawRoundedRectangle(getLocalBounds().toFloat(), _radius, 1);
 }
 
 void
