@@ -247,8 +247,14 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_background1, colors().knob_background2, conic_count, 1.0f);
   draw_conic_arc(g, left, top, size, start_angle, end_angle, colors().knob_track1, colors().knob_track2, conic_count, pos);
 
-  Path thumb;
-
+  float half_tw = thumb_width / 2;
+  float half_th = thumb_height / 2;
+  g.setColour(colors().knob_thumb);
+  Path thumb(create_thumb(0, 0));
+  auto transform = AffineTransform::rotation(pos * 2 * pi32, half_tw, half_th);
+  transform = transform.translated(left + size / 2 - half_tw, top + size / 2 - half_th);
+  thumb.applyTransform(transform);
+  g.fillPath(thumb);
 }
 
 void 	
