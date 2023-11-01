@@ -12,7 +12,7 @@ namespace infernal_synth {
 
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
-enum { param_type, param_gain, param_bal, param_note, param_oct, param_cent };
+enum { param_type, param_gain, param_bal, param_am, param_note, param_oct, param_cent };
 
 static std::vector<list_item>
 type_items()
@@ -47,11 +47,11 @@ osc_topo(
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
-    make_module_gui(section, colors, pos, { { 1 }, { 3, 2 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 5, 3 } })));
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
@@ -61,13 +61,19 @@ osc_topo(
   result.params.emplace_back(make_param(
     make_topo_info("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", param_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+
+  result.params.emplace_back(make_param(
+    make_topo_info("{D03E5C05-E404-4394-BC1F-CE2CD6AAE357}", "AM", param_am, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.sections.emplace_back(make_param_section(section_pitch,

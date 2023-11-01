@@ -42,11 +42,11 @@ synth_topo()
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
-  result->gui.min_width = 800;
-  result->gui.max_width = 1600;
-  result->gui.default_width = 800;
-  result->gui.aspect_ratio_width = 14;
-  result->gui.aspect_ratio_height = 5;
+  result->gui.min_width = 860;
+  result->gui.max_width = 1720;
+  result->gui.default_width = 860;
+  result->gui.aspect_ratio_width = 3;
+  result->gui.aspect_ratio_height = 1;
   result->gui.dimension.row_sizes = std::vector<int>(5, 1);
   result->gui.dimension.column_sizes = std::vector<int>(2, 1);
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
