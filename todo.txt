@@ -1,5 +1,3 @@
-graphs
-antialias
 host context menu
 (polyphonic) modulation
 try out some airwindows stuff
@@ -19,6 +17,13 @@ param value dependent on other param
 linux build
 resizing by content scaling
 host/os scaling broken
+
+demo synth:
+cv mod amount
+pitch mod
+env 1 always enabled
+vfx/gfx -> lpf/hpf/feedback delay
+graphs
 
 * get some linux folks to comment (ycollete?)
 * continuing
