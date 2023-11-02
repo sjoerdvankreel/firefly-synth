@@ -24,6 +24,7 @@ pitch mod
 env 1 always enabled
 vfx/gfx -> lpf/hpf/feedback delay
 graphs
+clean up the dsp
 
 * get some linux folks to comment (ycollete?)
 * continuing

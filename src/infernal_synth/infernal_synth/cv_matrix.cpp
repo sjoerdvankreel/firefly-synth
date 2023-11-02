@@ -31,7 +31,7 @@ struct target_mapping
 static int constexpr route_count = 8;
 
 enum { section_main };
-enum { param_active, param_source, param_target };
+enum { param_active, param_source, param_target, param_amount };
 
 class cv_matrix_engine:
 public module_engine { 
@@ -65,7 +65,7 @@ cv_matrix_topo(
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 3, 3, 1 } })));
   
   result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count),
@@ -137,6 +137,12 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.submenu = target_submenu;
+
+  auto& amount = result.params.emplace_back(make_param(
+    make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amount", param_amount, route_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, make_label_none())));
+  amount.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   result.engine_factory = [source_mappings, target_mappings](auto const& topo, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, source_mappings, target_mappings); };
@@ -211,9 +217,10 @@ cv_matrix_engine::process(plugin_block& block)
       : block.state.all_global_cv[sm][smi][0];
 
     // apply modulation
+    auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];
     for(int f = block.start_frame; f < block.end_frame; f++)
     {
-      modulated_curve[f] *= source_curve[f];
+      modulated_curve[f] = (1 - amount_curve[f]) * modulated_curve[f] + amount_curve[f] * source_curve[f] * modulated_curve[f];
       check_unipolar(modulated_curve[f]);
     }
   }
