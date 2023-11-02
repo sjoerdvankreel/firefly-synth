@@ -141,7 +141,7 @@ cv_matrix_topo(
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amount", param_amount, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
 
   result.engine_factory = [source_mappings, target_mappings](auto const& topo, int, int) ->

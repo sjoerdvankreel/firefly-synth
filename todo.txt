@@ -19,7 +19,6 @@ resizing by content scaling
 host/os scaling broken
 
 demo synth:
-cv mod amount
 pitch mod
 env 1 always enabled
 vfx/gfx -> lpf/hpf/feedback delay
