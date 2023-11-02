@@ -33,14 +33,22 @@ gui_submenu::validate() const
     children[i]->validate();
 }
 
+void
+gui_binding::bind_slot(gui_slot_binding_selector selector_)
+{
+  assert(selector_ != nullptr);
+  assert(slot_selector == nullptr);
+  slot_selector = selector_;
+}
+
 void 
-gui_binding::bind(std::vector<int> const& params_, gui_binding_selector selector_)
+gui_binding::bind_params(std::vector<int> const& params_, gui_param_binding_selector selector_)
 {
   assert(params_.size());
-  assert(selector == nullptr);
   assert(selector_ != nullptr);
+  assert(param_selector == nullptr);
   params = params_;
-  selector = selector_;
+  param_selector = selector_;
 }
 
 void
@@ -64,7 +72,7 @@ gui_position::validate(gui_dimension const& parent_dimension) const
 void
 gui_binding::validate(module_topo const& module, int slot_count) const
 {
-  assert((params.size() == 0) == (selector == nullptr));
+  assert((params.size() == 0) == (param_selector == nullptr));
   for (int i = 0; i < params.size(); i++)
   {
     auto const& bound = module.params[params[i]];

@@ -10,8 +10,8 @@ binding_component(
   gui_bindings const* bindings, int own_slot_index):
 _gui(gui), _own_slot_index(own_slot_index), _bindings(bindings), _module(module)
 {
-  setup_bindings(bindings->enabled.params, _enabled_params);
-  setup_bindings(bindings->visible.params, _visibility_params);
+  setup_param_bindings(bindings->enabled.params, _enabled_params);
+  setup_param_bindings(bindings->visible.params, _visibility_params);
 }
 
 binding_component::
@@ -24,14 +24,14 @@ binding_component::
 }
 
 bool 
-binding_component::bind(
+binding_component::bind_param(
   gui_binding const& binding, 
   std::vector<int> const& params, std::vector<int>& values)
 {
   values.clear();
   for (int i = 0; i < params.size(); i++)
     values.push_back(_gui->gui_state()->get_plain_at_index(params[i]).step());
-  return binding.selector(values);
+  return binding.param_selector(values);
 }
 
 void
@@ -39,8 +39,10 @@ binding_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component.
   auto& self = dynamic_cast<Component&>(*this);
-  self.setVisible(true);
-  self.setEnabled(true);
+  self.setVisible(_bindings->visible.slot_selector == nullptr || 
+    _bindings->visible.slot_selector(_module->info.slot));
+  self.setEnabled(_bindings->enabled.slot_selector == nullptr || 
+    _bindings->enabled.slot_selector(_module->info.slot));
   if (_enabled_params.size() != 0)
     state_changed(_enabled_params[0], 
       _gui->gui_state()->get_plain_at_index(_enabled_params[0]));
@@ -49,8 +51,25 @@ binding_component::init()
       _gui->gui_state()->get_plain_at_index(_visibility_params[0]));
 }
 
+void
+binding_component::state_changed(int index, plain_value plain)
+{
+  auto& self = dynamic_cast<Component&>(*this);
+  auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
+  if (enabled_iter != _enabled_params.end())
+    self.setEnabled(bind_param(_bindings->enabled, _enabled_params, _enabled_values));
+
+  auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
+  if (visibility_iter != _visibility_params.end())
+  {
+    bool visible = bind_param(_bindings->visible, _visibility_params, _visibility_values);
+    self.setVisible(visible);
+    self.setInterceptsMouseClicks(visible, visible);
+  }
+}
+
 void 
-binding_component::setup_bindings(
+binding_component::setup_param_bindings(
   std::vector<int> const& topo_params, std::vector<int>& params)
 {
   for (int i = 0; i < topo_params.size(); i++)
@@ -61,23 +80,6 @@ binding_component::setup_bindings(
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);
     _gui->gui_state()->add_listener(state_index, this);
-  }
-}
-
-void
-binding_component::state_changed(int index, plain_value plain)
-{  
-  auto& self = dynamic_cast<Component&>(*this);
-  auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
-  if (enabled_iter != _enabled_params.end())
-    self.setEnabled(bind(_bindings->enabled, _enabled_params, _enabled_values));
-
-  auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
-  if (visibility_iter != _visibility_params.end())
-  {
-    bool visible = bind(_bindings->visible, _visibility_params, _visibility_values);
-    self.setVisible(visible);
-    self.setInterceptsMouseClicks(visible, visible);
   }
 }
 

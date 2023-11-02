@@ -63,15 +63,15 @@ delay_topo(
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 2, 1, 2, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
-  time.gui.bindings.enabled.bind({ param_type }, [](auto const& vs) { return vs[0] == type_time; });
-  time.gui.bindings.visible.bind({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
+  time.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_time; });
+  time.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
 
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{D4A46363-DB92-425C-A9F7-D6641115812E}", "Tempo", param_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
-  tempo.gui.bindings.visible.bind({ param_type }, [](auto const& vs) { return vs[0] == type_sync; });
+  tempo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_sync; });
 
   result.params.emplace_back(make_param(
     make_topo_info("{2E80A7CE-735B-48C4-8681-FBE1EE003297}", "Gain", param_gain, 1),

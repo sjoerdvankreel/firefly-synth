@@ -13,7 +13,7 @@ param_section::validate(module_topo const& module, int index_) const
 
   assert(this->index == index_);
   auto include = [this, &module](int p) { return module.params[p].gui.section == this->index; };
-  auto always_visible = [&module](int p) { return module.params[p].gui.bindings.visible.selector == nullptr; };
+  auto always_visible = [&module](int p) { return !module.params[p].gui.bindings.visible.is_bound(); };
   gui.dimension.validate(vector_map(module.params, [](auto const& p){ return p.gui.position; }), include, always_visible);
 }
 

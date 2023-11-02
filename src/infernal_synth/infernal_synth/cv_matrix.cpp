@@ -96,7 +96,7 @@ cv_matrix_topo(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
-  source.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
+  source.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.submenu = source_submenu;
 
   int target_index = 0;
@@ -135,7 +135,7 @@ cv_matrix_topo(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
-  target.gui.bindings.enabled.bind({ param_active }, [](auto const& vs) { return vs[0] != 0; });
+  target.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.submenu = target_submenu;
 
   result.engine_factory = [source_mappings, target_mappings](auto const& topo, int, int) ->
