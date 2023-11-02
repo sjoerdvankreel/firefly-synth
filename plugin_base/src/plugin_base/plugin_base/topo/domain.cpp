@@ -29,9 +29,10 @@ timesig::to_text() const
 }
 
 plain_value
-param_domain::default_plain() const
+param_domain::default_plain(int module_slot) const
 {
   plain_value result;
+  std::string default_ = default_selector(module_slot);
   INF_ASSERT_EXEC(text_to_plain(false, default_, result));
   return result;
 }
@@ -139,10 +140,9 @@ param_domain::text_to_plain(
 }
 
 void
-param_domain::validate() const
+param_domain::validate(int module_slot_count) const
 {
   assert(max >= min);
-  assert(default_.size());
   assert((type == domain_type::log) == (exp != 0));
   assert((type == domain_type::step) || (display_offset == 0));
   assert(display == domain_display::normal || type == domain_type::linear);
@@ -197,21 +197,30 @@ param_domain::validate() const
     }
   }
 
+  for(int mi = 0; mi < module_slot_count; mi++)
+    assert(default_selector(mi).size());
+
   if (!is_real())
   {
     assert(precision == 0);
     assert((int)min == min);
     assert((int)max == max);
-    assert(min <= default_plain().step());
-    assert(max >= default_plain().step());
     assert(display == domain_display::normal);
+    for(int mi = 0; mi < module_slot_count; mi++)
+    {
+      assert(min <= default_plain(mi).step());
+      assert(max >= default_plain(mi).step());
+    }
   }
 
   if (is_real())
   {
-    assert(min <= default_plain().real());
-    assert(max >= default_plain().real());
     assert(0 <= precision && precision <= 10);
+    for (int mi = 0; mi < module_slot_count; mi++)
+    {
+      assert(min <= default_plain(mi).real());
+      assert(max >= default_plain(mi).real());
+    }
   }
 }
 

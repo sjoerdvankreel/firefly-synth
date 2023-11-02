@@ -80,7 +80,7 @@ inf_controller::initialize(FUnknown* context)
       from_8bit_string(param_info.title, param.full_name.c_str());
       from_8bit_string(param_info.shortTitle, param.full_name.c_str());
       from_8bit_string(param_info.units, param.param->domain.unit.c_str());
-      param_info.defaultNormalizedValue = param.param->domain.default_normalized().value();
+      param_info.defaultNormalizedValue = param.param->domain.default_normalized(module.info.slot).value();
 
       param_info.flags = ParameterInfo::kNoFlags;
       if(param.param->dsp.automate != param_automate::none)

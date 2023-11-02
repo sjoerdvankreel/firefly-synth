@@ -48,7 +48,7 @@ param_topo::validate(module_topo const& module, int index) const
 {
   dsp.validate();
   info.validate();
-  domain.validate();
+  domain.validate(module.info.slot_count);
 
   assert(info.index == index);
   assert(domain.max > domain.min);

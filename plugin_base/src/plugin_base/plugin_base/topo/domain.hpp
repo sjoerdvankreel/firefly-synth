@@ -14,6 +14,9 @@ namespace plugin_base {
 enum class domain_display { normal, percentage };
 enum class domain_type { toggle, step, name, item, timesig, linear, log };
 
+typedef std::function<std::string(int module_slot)>
+default_selector;
+
 // tempo relative to bpm
 struct timesig
 {
@@ -43,22 +46,22 @@ struct param_domain final {
   int precision;
   int display_offset;
   std::string unit;
-  std::string default_;
 
   domain_type type;
   domain_display display;
   std::vector<list_item> items;
   std::vector<timesig> timesigs;
   std::vector<std::string> names;
+  default_selector default_selector;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const;
-  void validate() const;
+  void validate(int module_slot_count) const;
 
   // parse default text - slow!
-  double default_raw() const;
-  plain_value default_plain() const;
-  normalized_value default_normalized() const;
+  double default_raw(int module_slot) const;
+  plain_value default_plain(int module_slot) const;
+  normalized_value default_normalized(int module_slot) const;
 
   // representation conversion
   plain_value raw_to_plain(double raw) const;
@@ -84,11 +87,11 @@ list_item(std::string const& id, std::string const& name) :
 id(id), name(name) {}
 
 inline double 
-param_domain::default_raw() const 
-{ return plain_to_raw(default_plain()); }
+param_domain::default_raw(int module_slot) const
+{ return plain_to_raw(default_plain(module_slot)); }
 inline normalized_value 
-param_domain::default_normalized() const 
-{ return plain_to_normalized(default_plain()); }
+param_domain::default_normalized(int module_slot) const
+{ return plain_to_normalized(default_plain(module_slot)); }
 
 inline normalized_value
 param_domain::raw_to_normalized(double raw) const

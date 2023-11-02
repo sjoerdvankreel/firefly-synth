@@ -137,7 +137,7 @@ param_toggle_button::
 param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param):
 param_component(gui, module, param), autofit_togglebutton()
 { 
-  auto value = param->param->domain.default_plain();
+  auto value = param->param->domain.default_plain(module->info.slot);
   _checked = value.step() != 0;
   addListener(this);
   init();
@@ -200,7 +200,7 @@ param_component(gui, module, param), Slider()
     NormalisableRange<double>(param->param->domain.min, param->param->domain.max,
     [this](double s, double e, double v) { return _param->param->domain.normalized_to_raw(normalized_value(v)); },
     [this](double s, double e, double v) { return _param->param->domain.raw_to_normalized(v).value(); }));
-  setDoubleClickReturnValue(true, param->param->domain.default_raw(), ModifierKeys::noModifiers);
+  setDoubleClickReturnValue(true, param->param->domain.default_raw(_module->info.slot), ModifierKeys::noModifiers);
   param_component::init();
 }
 

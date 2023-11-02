@@ -6,6 +6,10 @@
 
 namespace plugin_base {
 
+static default_selector
+simple_default(std::string value)
+{ return [value](int) { return value; }; }
+
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name)
 {
@@ -104,7 +108,7 @@ make_domain_toggle(bool default_)
   result.min = 0;
   result.max = 1;
   result.type = domain_type::toggle;
-  result.default_ = default_ ? "On" : "Off";  
+  result.default_selector = simple_default(default_ ? "On" : "Off");  
   return result;
 }
 
@@ -116,7 +120,7 @@ make_domain_step(int min, int max, int default_, int display_offset)
   result.max = max;
   result.type = domain_type::step;
   result.display_offset = display_offset;
-  result.default_ = std::to_string(default_);
+  result.default_selector = simple_default(std::to_string(default_));
   return result;
 }
 
@@ -128,7 +132,7 @@ make_domain_timesig(std::vector<timesig> const& sigs, timesig const& default_)
   result.timesigs = sigs;
   result.max = sigs.size() - 1;
   result.type = domain_type::timesig;
-  result.default_ = default_.to_text();
+  result.default_selector = simple_default(default_.to_text());
   return result;
 }
 
@@ -140,7 +144,7 @@ make_domain_item(std::vector<list_item> const& items, std::string const& default
   result.max = items.size() - 1;
   result.type = domain_type::item;
   result.items = std::vector(items);
-  result.default_ = default_.size() ? default_ : result.items[0].name;
+  result.default_selector = simple_default(default_.size() ? default_ : result.items[0].name);
   return result;
 }
 
@@ -152,7 +156,7 @@ make_domain_name(std::vector<std::string> const& names, std::string const& defau
   result.names = names;
   result.max = names.size() - 1;
   result.type = domain_type::name;
-  result.default_ = default_.size() ? default_ : result.names[0];
+  result.default_selector = simple_default(default_.size() ? default_ : result.names[0]);
   return result;
 }
 
@@ -166,7 +170,7 @@ make_domain_percentage(double min, double max, double default_, int precision, b
   result.unit = unit ? "%" : "";
   result.type = domain_type::linear;
   result.display = domain_display::percentage;
-  result.default_ = std::to_string(default_ * 100);
+  result.default_selector = simple_default(std::to_string(default_ * 100));
   return result;
 }
 
@@ -179,7 +183,7 @@ make_domain_linear(double min, double max, double default_, int precision, std::
   result.unit = unit;
   result.precision = precision;
   result.type = domain_type::linear;
-  result.default_ = std::to_string(default_);
+  result.default_selector = simple_default(std::to_string(default_));
   return result;
 }
 
@@ -192,7 +196,7 @@ make_domain_log(double min, double max, double default_, double midpoint, int pr
   result.unit = unit;
   result.precision = precision;
   result.type = domain_type::log;
-  result.default_ = std::to_string(default_);
+  result.default_selector = simple_default(std::to_string(default_));
   result.exp = std::log((midpoint - min) / (max - min)) / std::log(0.5);
   return result;
 }
