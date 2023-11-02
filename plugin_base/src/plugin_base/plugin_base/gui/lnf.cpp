@@ -82,40 +82,6 @@ lnf::font() const
   return result;
 }
 
-void 
-lnf::drawLabel(Graphics& g, Label& label)
-{
-  g.fillAll(label.findColour(Label::backgroundColourId));
-  if (!label.isBeingEdited())
-  {
-    auto alpha = label.isEnabled() ? 1.0f : 0.5f;
-    auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
-    g.setFont(getLabelFont(label));
-    g.setColour(label.findColour(Label::textColourId).withMultipliedAlpha(alpha));
-    g.drawText(label.getText(), area, label.getJustificationType(), false);
-    g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
-  } else if (label.isEnabled())
-    g.setColour(label.findColour(Label::outlineColourId));
-  g.drawRect(label.getLocalBounds());
-}
-
-void
-lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
-{ 
-  Font font(getTextButtonFont(button, button.getHeight()));
-  g.setFont(font);
-  int id = button.getToggleState() ? TextButton::textColourOnId: TextButton::textColourOffId;
-  g.setColour(button.findColour(id).withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f));
-  const int yIndent = jmin(4, button.proportionOfHeight(0.3f));
-  const int cornerSize = jmin(button.getHeight(), button.getWidth()) / 2;
-  const int fontHeight = roundToInt(font.getHeight() * 0.6f);
-  const int leftIndent = jmin(fontHeight, 2 + cornerSize / (button.isConnectedOnLeft() ? 4 : 2));
-  const int rightIndent = jmin(fontHeight, 2 + cornerSize / (button.isConnectedOnRight() ? 4 : 2));
-  const int textWidth = button.getWidth() - leftIndent - rightIndent;
-  if (textWidth > 0)
-    g.drawText(button.getButtonText(), leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2, Justification::centred, false);
-}
-
 Path 
 lnf::getTickShape(float h)
 {
@@ -129,29 +95,6 @@ lnf::positionComboBoxText(ComboBox& box, Label& label)
 {
   label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
   label.setFont(getComboBoxFont(box));
-}
-
-void 
-lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
-{
-  Path path;
-  int arrowPad = 4;
-  int arrowWidth = 6;
-  int arrowHeight = 4;
-  int const fixedHeight = _desc->plugin->gui.font_height + 6;
-  int const comboTop = height < fixedHeight ? 0: (height - fixedHeight) / 2;
-  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
-  Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
-  g.setColour(box.findColour(ComboBox::backgroundColourId));
-  g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
-  g.setColour(box.findColour(ComboBox::outlineColourId));
-  g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
-  path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
-  path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
-  path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
-  path.closeSubPath();
-  g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
-  g.fillPath(path);
 }
 
 int	
@@ -174,6 +117,87 @@ lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardH
 {
   LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
   h = _desc->plugin->gui.font_height + 8;
+}
+
+void
+lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectangle<float> const& body)
+{
+  g.setColour(colors().control_background);
+  g.fillRoundedRectangle(body, 2);
+  g.setColour(colors().bubble_outline);
+  g.drawRoundedRectangle(body, 2, 1);
+}
+
+void
+lnf::drawTickBox(
+  Graphics& g, Component& c, float x, float y, float w, float h,
+  bool ticked, bool isEnabled, bool highlighted, bool down)
+{
+  Rectangle<float> tickBounds(x, y, w, h);
+  g.setColour(c.findColour(ToggleButton::tickDisabledColourId));
+  g.drawRoundedRectangle(tickBounds, 4.0f, 1.0f);
+  if (!ticked) return;
+  auto tick = getTickShape(0.75f);
+  if(c.isEnabled()) g.setColour(c.findColour(ToggleButton::tickColourId));
+  g.fillPath(tick, tick.getTransformToScaleToFit(tickBounds.reduced(4, 5).toFloat(), true));
+}
+
+void
+lnf::drawLabel(Graphics& g, Label& label)
+{
+  g.fillAll(label.findColour(Label::backgroundColourId));
+  if (!label.isBeingEdited())
+  {
+    auto alpha = label.isEnabled() ? 1.0f : 0.5f;
+    auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
+    g.setFont(getLabelFont(label));
+    g.setColour(label.findColour(Label::textColourId).withMultipliedAlpha(alpha));
+    g.drawText(label.getText(), area, label.getJustificationType(), false);
+    g.setColour(label.findColour(Label::outlineColourId).withMultipliedAlpha(alpha));
+  }
+  else if (label.isEnabled())
+    g.setColour(label.findColour(Label::outlineColourId));
+  g.drawRect(label.getLocalBounds());
+}
+
+void
+lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
+{
+  Font font(getTextButtonFont(button, button.getHeight()));
+  g.setFont(font);
+  int id = button.getToggleState() ? TextButton::textColourOnId : TextButton::textColourOffId;
+  g.setColour(button.findColour(id).withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f));
+  const int yIndent = jmin(4, button.proportionOfHeight(0.3f));
+  const int cornerSize = jmin(button.getHeight(), button.getWidth()) / 2;
+  const int fontHeight = roundToInt(font.getHeight() * 0.6f);
+  const int leftIndent = jmin(fontHeight, 2 + cornerSize / (button.isConnectedOnLeft() ? 4 : 2));
+  const int rightIndent = jmin(fontHeight, 2 + cornerSize / (button.isConnectedOnRight() ? 4 : 2));
+  const int textWidth = button.getWidth() - leftIndent - rightIndent;
+  if (textWidth > 0)
+    g.drawText(button.getButtonText(), leftIndent, yIndent, textWidth, button.getHeight() - yIndent * 2, Justification::centred, false);
+}
+
+void
+lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
+{
+  Path path;
+  int arrowPad = 4;
+  int arrowWidth = 6;
+  int arrowHeight = 4;
+  int const fixedHeight = _desc->plugin->gui.font_height + 6;
+  int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
+  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
+  Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
+  g.setColour(box.findColour(ComboBox::backgroundColourId));
+  g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+  g.setColour(box.findColour(ComboBox::outlineColourId));
+  g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+  path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
+  path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
+  path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
+  path.closeSubPath();
+  g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
+  g.fillPath(path);
 }
 
 void 
@@ -210,15 +234,6 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.fillRect(buttonArea);
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
   g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
-}
-
-void
-lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectangle<float> const& body)
-{
-  g.setColour(colors().control_background);
-  g.fillRoundedRectangle(body, 2);
-  g.setColour(colors().bubble_outline);
-  g.drawRoundedRectangle(body, 2, 1);
 }
 
 void 
