@@ -113,7 +113,7 @@ cv_matrix_topo(
       auto module_slot_submenu = std::make_shared<gui_submenu>();
       module_slot_submenu->name = module_tag.name + " " + std::to_string(mi + 1);
       for(int p = 0; p < targets[m]->params.size(); p++)
-        if(targets[m]->params[p].dsp.automate == param_automate::modulate)
+        if(targets[m]->params[p].dsp.automate_selector(mi) == param_automate::modulate)
         {
           auto const& param_tag = targets[m]->params[p].info.tag;
           for (int pi = 0; pi < targets[m]->params[p].info.slot_count; pi++)

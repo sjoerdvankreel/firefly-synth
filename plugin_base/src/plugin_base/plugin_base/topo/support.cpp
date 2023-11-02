@@ -206,8 +206,8 @@ make_param_dsp(param_direction direction, param_rate rate, param_automate automa
 {
   param_dsp result = {};
   result.rate = rate;
-  result.automate = automate;
   result.direction = direction;
+  result.automate_selector = [automate](int) { return automate; };
   return result;
 }
 

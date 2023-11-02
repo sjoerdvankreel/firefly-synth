@@ -5,8 +5,10 @@
 namespace plugin_base {
 
 void 
-param_dsp::validate() const
+param_dsp::validate(int module_slot) const
 {
+  param_automate automate = automate_selector(module_slot);
+
   if (automate == param_automate::automate)
     assert(direction == param_direction::input);
 
@@ -46,8 +48,8 @@ param_topo_gui::validate(module_topo const& module, param_topo const& param) con
 void
 param_topo::validate(module_topo const& module, int index) const
 {
-  dsp.validate();
   info.validate();
+  dsp.validate(module.info.slot_count);
   domain.validate(module.info.slot_count);
 
   assert(info.index == index);

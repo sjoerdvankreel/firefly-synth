@@ -12,7 +12,7 @@ namespace infernal_synth {
 
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
-enum { scratch_mono, scratch_am, scratch_count };
+enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
 enum { param_type, param_gain, param_bal, param_am, param_note, param_oct, param_cent };
 
 static std::vector<list_item>
@@ -76,7 +76,8 @@ osc_topo(
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  am.gui.bindings.enabled.slot_selector = [](int s) { return s > 0; };
+  am.gui.bindings.enabled.bind_slot([](int s) { return s > 0; });
+  am.dsp.automate_selector = [](int s) { return s > 0? param_automate::modulate: param_automate::none; };
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
@@ -124,16 +125,21 @@ osc_engine::process(plugin_block& block)
   auto const& env_curve = block.voice->all_cv[module_env][0][0];
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
   auto const& modulation = *static_cast<cv_matrix_output const*>(cv_matrix_context);
-  auto const& am_curve = *modulation[module_osc][block.module_slot][param_am][0];
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
+  auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
   if(block.module_slot == 0)
+  {
     std::fill(am_scratch.begin() + block.start_frame, am_scratch.begin() + block.end_frame, 1.0f);
+    std::fill(am_mod_scratch.begin() + block.start_frame, am_mod_scratch.begin() + block.end_frame, 0.0f);
+  }
   else
   {
+    auto const& am_curve = *modulation[module_osc][block.module_slot][param_am][0];
+    std::copy(am_curve.cbegin() + block.start_frame, am_curve.cbegin() + block.end_frame, am_mod_scratch.begin() + block.start_frame);
     auto const& am_source = block.voice->all_scratch[module_osc][block.module_slot - 1][scratch_mono];
     for(int f = block.start_frame; f < block.end_frame; f++)
       am_scratch[f] = (am_source[f] + 1.0f) * 0.5f;
@@ -155,7 +161,7 @@ osc_engine::process(plugin_block& block)
     }
     check_bipolar(sample);
     sample *= gain_curve[f] * env_curve[f];
-    mono = (1.0f - am_curve[f]) * sample + am_curve[f] * (sample * am_scratch[f]);
+    mono = (1.0f - am_mod_scratch[f]) * sample + am_mod_scratch[f] * (sample * am_scratch[f]);
     mono_scratch[f] = mono;
     block.state.own_audio[0][0][f] = mono * balance(0, bal);
     block.state.own_audio[0][1][f] = mono * balance(1, bal);

@@ -19,13 +19,16 @@ enum class param_direction { input, output };
 enum class param_automate { none, automate, modulate };
 enum class param_layout { single, horizontal, vertical };
 
+typedef std::function<param_automate(int module_slot)>
+automate_selector;
+
 // parameter dsp
 struct param_dsp final {
   param_rate rate;
-  param_automate automate;
   param_direction direction;
+  automate_selector automate_selector;
 
-  void validate() const;
+  void validate(int module_slot) const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
 };
 

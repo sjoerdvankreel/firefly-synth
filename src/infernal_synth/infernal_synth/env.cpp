@@ -46,8 +46,9 @@ env_topo(
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  on.domain.default_selector = [](int slot) { return slot == 0 ? "On" : "Off"; };
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
-  on.domain.default_selector = [](int slot) { return slot == 0? "On": "Off"; };
+  on.dsp.automate_selector = [](int s) { return s > 0 ? param_automate::automate : param_automate::none; };
       
   result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
