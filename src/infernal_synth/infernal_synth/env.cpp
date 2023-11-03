@@ -19,6 +19,7 @@ public module_engine {
   double _stage_pos = 0;
   env_stage _stage = {};
   double _release_level = 0;
+  int current_stage_param() const;
 
 public:
   env_engine() { initialize(); }
@@ -80,16 +81,27 @@ env_topo(
   return result;
 }
 
+int
+env_engine::current_stage_param() const
+{
+  switch (_stage)
+  {
+  case env_stage::a: return param_a;
+  case env_stage::d: return param_d;
+  case env_stage::r: return param_r;
+  assert(false); return -1;
+  }
+}
+
 void
 env_engine::process(plugin_block& block)
 {
   bool off = block.state.own_block_automation[param_on][0].step() == 0;
-  if (off && block.module_slot != 0) return;
+  if (_stage == env_stage::end) return;
+  if((off && block.module_slot != 0)) return;
 
-  auto const& a_curve = block.state.own_accurate_automation[param_a][0];
-  auto const& d_curve = block.state.own_accurate_automation[param_d][0];
-  auto const& s_curve = block.state.own_accurate_automation[param_s][0];
-  auto const& r_curve = block.state.own_accurate_automation[param_r][0];
+  auto const& automation = block.state.own_accurate_automation;
+  auto const& s_curve = automation[param_s][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -111,47 +123,55 @@ env_engine::process(plugin_block& block)
       continue;
     }
 
-    double stage_seconds;
-    switch (_stage)
-    {
-    case env_stage::a: stage_seconds = block.normalized_to_raw(module_env, param_a, a_curve[f]); break;
-    case env_stage::d: stage_seconds = block.normalized_to_raw(module_env, param_d, d_curve[f]); break;
-    case env_stage::r: stage_seconds = block.normalized_to_raw(module_env, param_r, r_curve[f]); break;
-    default: assert(false); stage_seconds = 0; break;
-    }
+    int stage_param = current_stage_param();
+    auto const& stage_curve = automation[stage_param][0];
+    double stage_seconds = block.normalized_to_raw(module_env, stage_param, stage_curve[f]);
+    _stage_pos = std::min(_stage_pos, stage_seconds);
 
-    if(_stage_pos > stage_seconds) _stage_pos = stage_seconds;
+    float out;
     if (stage_seconds == 0)
-      block.state.own_cv[0][f] = _release_level;
-    else 
-      switch (_stage)
-      {
-      case env_stage::a: block.state.own_cv[0][f] = _release_level = _stage_pos / stage_seconds; break;
-      case env_stage::d: block.state.own_cv[0][f] = _release_level = 1.0 - _stage_pos / stage_seconds * (1.0 - s_curve[f]); break;
-      case env_stage::r: block.state.own_cv[0][f] = (1.0 - _stage_pos / stage_seconds) * _release_level; break;
-      default: assert(false); stage_seconds = 0; break;
-      }
+      out = _release_level;
+    else switch (_stage)
+    {
+      case env_stage::a: 
+        out = _stage_pos / stage_seconds; 
+        _release_level = out;
+        break;
+      case env_stage::d: 
+        out = 1.0 - _stage_pos / stage_seconds * (1.0 - s_curve[f]); 
+        _release_level = out;
+        break;
+      case env_stage::r: 
+        out = (1.0 - _stage_pos / stage_seconds) * _release_level; 
+        break;
+      default: 
+        assert(false); 
+        stage_seconds = 0; 
+        break;
+    }
+    block.state.own_cv[0][f] = out;
 
     check_unipolar(_release_level);
     _stage_pos += 1.0 / block.sample_rate;
-    if (_stage_pos >= stage_seconds)
+    if(_stage_pos < stage_seconds) continue;
+
+    _stage_pos = 0;
+    switch (_stage)
     {
-      _stage_pos = 0;
-      switch (_stage)
-      {
-      case env_stage::a: 
-        _stage = env_stage::d; 
-        break;
-      case env_stage::d: 
-        _stage = env_stage::s; 
-        break;
-      case env_stage::r: 
-        _stage = env_stage::end; 
-        if(block.module_slot == 0)
-          block.voice->finished = true; 
-        break;
-      default: assert(false); break;
-      }
+    case env_stage::a: 
+      _stage = env_stage::d; 
+      break;
+    case env_stage::d: 
+      _stage = env_stage::s; 
+      break;
+    case env_stage::r: 
+      _stage = env_stage::end; 
+      if(block.module_slot == 0)
+        block.voice->finished = true; 
+      break;
+    default: 
+      assert(false); 
+      break;
     }
   }
 }
