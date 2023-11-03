@@ -27,14 +27,18 @@ public juce::Component
 {
   bool const _fill;
   int const _radius;
+  bool const _vertical;
   juce::Component* _child;
   juce::Colour const _color1;
   juce::Colour const _color2;
 public:
   void resized() override;
   void paint(juce::Graphics& g) override;
-  rounded_container(juce::Component* child, int radius, bool fill, juce::Colour const& color1, juce::Colour const& color2):
-  _fill(fill), _radius(radius), _child(child), _color1(color1), _color2(color2) { add_and_make_visible(*this, *child); }
+  rounded_container(
+    juce::Component* child, int radius, bool fill, bool vertical,
+    juce::Colour const& color1, juce::Colour const& color2):
+  _fill(fill), _radius(radius), _vertical(vertical), _child(child), _color1(color1), _color2(color2)
+  { add_and_make_visible(*this, *child); }
 };
 
 // grid component as opposed to grid layout

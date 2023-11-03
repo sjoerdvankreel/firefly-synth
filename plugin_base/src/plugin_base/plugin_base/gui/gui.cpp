@@ -164,7 +164,8 @@ plugin_gui::make_modules(module_desc const* slots)
   auto background2 = slots[0].module->gui.colors.tab_background2;
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
   {
-    auto& corners = make_component<rounded_container>(&make_param_sections(slots[i]), radius, true, background1, background2);
+    auto& corners = make_component<rounded_container>(
+      &make_param_sections(slots[i]), radius, true, true, background1, background2);
     result.addTab(std::to_string(i + 1), Colours::transparentBlack, &corners, false);
   }
   return result;
@@ -192,7 +193,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   auto outline1 = module.module->gui.colors.section_outline1;
   auto outline2 = module.module->gui.colors.section_outline2;
   int radius = _gui_state->desc().plugin->gui.section_corner_radius;
-  return make_component<rounded_container>(&grid, radius, false, outline1, outline2);
+  return make_component<rounded_container>(&grid, radius, false, false, outline1, outline2);
 }
 
 Component&

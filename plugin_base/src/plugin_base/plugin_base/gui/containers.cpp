@@ -33,7 +33,10 @@ rounded_container::resized()
 void
 rounded_container::paint(Graphics& g)
 {
-  g.setGradientFill(juce::ColourGradient(_color1, 0, 0, _color2, 0, getHeight(), false));
+  if(_vertical)
+    g.setGradientFill(juce::ColourGradient(_color1, 0, 0, _color2, 0, getHeight(), false));
+  else
+    g.setGradientFill(juce::ColourGradient(_color1, 0, 0, _color2, getWidth(), 0, false));
   if(_fill)
     g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
   else
