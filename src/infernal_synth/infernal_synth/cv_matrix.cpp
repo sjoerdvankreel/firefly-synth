@@ -200,7 +200,7 @@ cv_matrix_engine::process(plugin_block& block)
       // else pick the next of our own cv outputs
       modulated_curve_ptr = &block.state.own_cv[modulation_index];
       auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-      std::copy(target_automation.cbegin(), target_automation.cend(), modulated_curve_ptr->begin());
+      target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
       _output[tm][tmi][tp][tpi] = modulated_curve_ptr;
       _modulation_indices[tm][tmi][tp][tpi] = modulation_index++;
     }
