@@ -17,6 +17,8 @@ param value dependent on other param
 linux build
 resizing by content scaling
 host/os scaling broken
+release_count > 0 asserts
+default osc1 to sine
 
 demo synth:
 pitch mod
@@ -24,7 +26,6 @@ env 1 always enabled
 vfx/gfx -> lpf/hpf/feedback delay
 graphs
 clean up the dsp
-bipolar mod
 measure performance
 
 * get some linux folks to comment (ycollete?)

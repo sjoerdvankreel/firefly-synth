@@ -65,6 +65,8 @@ public:
   { std::fill(begin() + start, begin() + end, val); }
   void copy_to(int start, int end, jarray& rhs) const
   { std::copy(cbegin() + start, cbegin() + end, rhs.begin() + start); }
+  template <class Transform> void transform(int start, int end, Transform transform)
+  { std::transform(cbegin() + start, cbegin() + end, begin() + start, transform); }
   template <class Transform> void transform_to(int start, int end, jarray& rhs, Transform transform) const
   { std::transform(cbegin() + start, cbegin() + end, rhs.begin() + start, transform); }
 };

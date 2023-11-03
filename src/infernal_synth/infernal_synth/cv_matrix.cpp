@@ -191,10 +191,12 @@ cv_matrix_engine::process(plugin_block& block)
   // apply modulation routing
   int modulation_index = 0;
   auto const& own_automation = block.state.own_block_automation;
+  jarray<float, 1>* modulated_curve_ptrs[route_count] = { nullptr };
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
-    if(own_automation[param_type][r].step() == 0) continue;
+    int type = own_automation[param_type][r].step();
+    if(type == type_off) continue;
 
     // found out indices of modulation target
     int selected_target = own_automation[param_target][r].step();
@@ -213,6 +215,7 @@ cv_matrix_engine::process(plugin_block& block)
       modulated_curve_ptr = &block.state.own_cv[modulation_index];
       auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
       target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
+      modulated_curve_ptrs[r] = modulated_curve_ptr;
       _output[tm][tmi][tp][tpi] = modulated_curve_ptr;
       _modulation_indices[tm][tmi][tp][tpi] = modulation_index++;
     }
@@ -230,12 +233,31 @@ cv_matrix_engine::process(plugin_block& block)
 
     // apply modulation
     auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];
-    for(int f = block.start_frame; f < block.end_frame; f++)
+    switch (type)
     {
-      modulated_curve[f] = (1 - amount_curve[f]) * modulated_curve[f] + amount_curve[f] * source_curve[f] * modulated_curve[f];
-      check_unipolar(modulated_curve[f]);
+    case type_add:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] += source_curve[f] * amount_curve[f];
+      break;
+    case type_addbi:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] += unipolar_to_bipolar(source_curve[f]) * amount_curve[f] * 0.5f;
+      break;
+    case type_mul:
+      for(int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] = mix_signal(amount_curve[f], modulated_curve[f], source_curve[f] * modulated_curve[f]);
+      break;
+    default:
+      assert(false);
+      break;
     }
   }
+
+  // clamp, modulated_curve_ptrs[r] will point to the first 
+  // occurence of modulation, but mod effects are accumulated there
+  for(int r = 0; r < route_count; r++)
+    if(modulated_curve_ptrs[r] != nullptr)
+      modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
   
   *block.state.own_context = &_output;
 }
