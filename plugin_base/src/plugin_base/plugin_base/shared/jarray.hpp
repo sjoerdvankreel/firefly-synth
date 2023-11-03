@@ -26,7 +26,6 @@ template <class T, int Dims>
 struct jarray_traits final {
   typedef jarray<T, Dims - 1> elem_type;
   typedef jarray<int, Dims - 1> dims_type;
-  static void fill(std::vector<elem_type>& v, T value);
   static void resize(std::vector<elem_type>& v, dims_type const& dims);
 };
 
@@ -41,11 +40,8 @@ public:
   explicit jarray(std::size_t size, elem_type const& val) :
   _data(size, val) {}
   
-  void fill(T value) 
-  { jarray_traits<T, Dims>::fill(_data, value); }
   void resize(dims_type const& dims) 
   { jarray_traits<T, Dims>::resize(_data, dims); }
-
   elem_type& operator[](int i) { return _data[i]; }
   elem_type const& operator[](int i) const { return _data[i]; }
 
@@ -69,13 +65,6 @@ public:
   template <class Transform> void transform_to(int start, int end, jarray& rhs, Transform transform) const
   { std::transform(cbegin() + start, cbegin() + end, rhs.begin() + start, transform); }
 };
-
-template <class T, int Dims>
-void jarray_traits<T, Dims>::fill(std::vector<elem_type>& v, T value)
-{
-  for (int i = 0; i < v.size(); i++)
-    v[i].fill(value);
-}
 
 template <class T, int Dims>
 void jarray_traits<T, Dims>::resize(std::vector<elem_type>& v, dims_type const& dims)
