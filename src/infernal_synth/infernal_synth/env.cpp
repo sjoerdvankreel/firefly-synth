@@ -160,12 +160,8 @@ env_engine::process(plugin_block& block)
     _stage_pos = 0;
     switch (_stage)
     {
-    case env_stage::a: 
-      _stage = env_stage::d; 
-      break;
-    case env_stage::d: 
-      _stage = env_stage::s; 
-      break;
+    case env_stage::a: _stage = env_stage::d; break;
+    case env_stage::d: _stage = env_stage::s; break;
     case env_stage::r: 
       _stage = env_stage::end; 
       if(block.module_slot == 0)

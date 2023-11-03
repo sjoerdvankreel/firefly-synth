@@ -50,6 +50,9 @@ osc_topo(
     make_module_dsp(module_stage::voice, module_output::audio, 1, scratch_count),
     make_module_gui(section, colors, pos, { { 1 }, { 4, 3 } })));
 
+  result.engine_factory = [](auto const&, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
+
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
@@ -99,9 +102,6 @@ osc_topo(
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
 
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
-
   return result;
 }
 
@@ -109,18 +109,27 @@ static float
 blep(float phase, float inc)
 {
   float b;
-  if (phase < inc) return b = phase / inc, (2.0f - b) * b - 1.0f;
-  if (phase >= 1.0f - inc) return b = (phase - 1.0f) / inc, (b + 2.0f) * b + 1.0f;
+  if (phase < inc) 
+  {
+    b = phase / inc;
+    return (2.0f - b) * b - 1.0f;
+  }
+  if (phase >= 1.0f - inc)
+  {
+    b = (phase - 1.0f) / inc;
+    return (b + 2.0f) * b + 1.0f;
+  }
   return 0.0f;
 }
 
 void
 osc_engine::process(plugin_block& block)
 {
-  int type = block.state.own_block_automation[param_type][0].step();
-  if(type == type_off) return;
-  int oct = block.state.own_block_automation[param_oct][0].step();
-  int note = block.state.own_block_automation[param_note][0].step();
+  auto const& block_auto = block.state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+  int oct = block_auto[param_oct][0].step();
+  int note = block_auto[param_note][0].step();
+  if (type == type_off) return;
 
   auto const& env_curve = block.voice->all_cv[module_env][0][0];
   void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
@@ -145,7 +154,6 @@ osc_engine::process(plugin_block& block)
       am_scratch[f] = (am_source[f] + 1.0f) * 0.5f;
   }
 
-  float mono;
   float sample;
   auto& mono_scratch = block.state.own_scratch[scratch_mono];
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -155,18 +163,16 @@ osc_engine::process(plugin_block& block)
     float inc = note_to_freq(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
     switch (type)
     {
-    case type_sine: sample = std::sin(_phase * 2 * pi32); break;
+    case type_sine: sample = phase_to_sine(_phase); break;
     case type_saw: sample = (_phase * 2 - 1) - blep(_phase, inc); break;
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
     sample *= gain_curve[f] * env_curve[f];
-    mono = (1.0f - am_mod_scratch[f]) * sample + am_mod_scratch[f] * (sample * am_scratch[f]);
-    mono_scratch[f] = mono;
-    block.state.own_audio[0][0][f] = mono * balance(0, bal);
-    block.state.own_audio[0][1][f] = mono * balance(1, bal);
-    _phase += inc;
-    _phase -= std::floor(_phase);
+    mono_scratch[f] = mix_signal(am_mod_scratch[f], sample, sample * am_scratch[f]);
+    block.state.own_audio[0][0][f] = mono_scratch[f] * balance(0, bal);
+    block.state.own_audio[0][1][f] = mono_scratch[f] * balance(1, bal);
+    increment_and_wrap_phase(_phase, inc);
   }
 }
 
