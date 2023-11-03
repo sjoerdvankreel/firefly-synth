@@ -59,8 +59,15 @@ public:
   void clear() { _data.clear(); }
   std::size_t size() const { return _data.size(); }
   void push_back(elem_type const& val) { _data.push_back(val); }
+
   template <class... U> decltype(auto) emplace_back(U&&... args) 
   { return _data.emplace_back(std::forward<U>(args)...); }
+  void fill(int start, int end, elem_type const& val)
+  { std::fill(begin() + start, begin() + end, val); }
+  void copy_to(int start, int end, jarray& rhs) const
+  { std::copy(cbegin() + start, cbegin() + end, rhs.begin() + start); }
+  template <class Transform> void transform_to(int start, int end, jarray& rhs, Transform transform) const
+  { std::transform(cbegin() + start, cbegin() + end, rhs.begin() + start, transform); }
 };
 
 template <class T, int Dims>

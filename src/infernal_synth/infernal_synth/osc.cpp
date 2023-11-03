@@ -105,20 +105,12 @@ osc_topo(
   return result;
 }
 
-static float 
+static float
 blep(float phase, float inc)
 {
   float b;
-  if (phase < inc) 
-  {
-    b = phase / inc;
-    return (2.0f - b) * b - 1.0f;
-  }
-  if (phase >= 1.0f - inc)
-  {
-    b = (phase - 1.0f) / inc;
-    return (b + 2.0f) * b + 1.0f;
-  }
+  if (phase < inc) return b = phase / inc, (2.0f - b) * b - 1.0f;
+  if (phase >= 1.0f - inc) return b = (phase - 1.0f) / inc, (b + 2.0f) * b + 1.0f;
   return 0.0f;
 }
 
@@ -142,16 +134,15 @@ osc_engine::process(plugin_block& block)
   auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
   if(block.module_slot == 0)
   {
-    std::fill(am_scratch.begin() + block.start_frame, am_scratch.begin() + block.end_frame, 1.0f);
-    std::fill(am_mod_scratch.begin() + block.start_frame, am_mod_scratch.begin() + block.end_frame, 0.0f);
-  }
+    am_scratch.fill(block.start_frame, block.end_frame, 1.0f);
+    am_mod_scratch.fill(block.start_frame, block.end_frame, 0.0f);
+  } 
   else
   {
     auto const& am_curve = *modulation[module_osc][block.module_slot][param_am][0];
-    std::copy(am_curve.cbegin() + block.start_frame, am_curve.cbegin() + block.end_frame, am_mod_scratch.begin() + block.start_frame);
+    am_curve.copy_to(block.start_frame, block.end_frame, am_mod_scratch);
     auto const& am_source = block.voice->all_scratch[module_osc][block.module_slot - 1][scratch_mono];
-    for(int f = block.start_frame; f < block.end_frame; f++)
-      am_scratch[f] = (am_source[f] + 1.0f) * 0.5f;
+    am_source.transform_to(block.start_frame, block.end_frame, am_scratch, bipolar_to_unipolar);
   }
 
   float sample;
