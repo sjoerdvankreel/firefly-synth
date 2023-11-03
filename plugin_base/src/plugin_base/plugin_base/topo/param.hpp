@@ -16,8 +16,8 @@ struct module_topo;
 
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
-enum class param_automate { none, automate, modulate };
 enum class param_layout { single, horizontal, vertical };
+enum class param_automate { none, automate, modulate, both };
 
 typedef std::function<param_automate(int module_slot)>
 automate_selector;
@@ -29,6 +29,8 @@ struct param_dsp final {
   automate_selector automate_selector;
 
   void validate(int module_slot) const;
+  bool can_modulate(int module_slot) const;
+  bool can_automate(int module_slot) const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
 };
 
@@ -57,6 +59,20 @@ struct param_topo final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(module_topo const& module, int index) const;
 };
+
+inline bool 
+param_dsp::can_modulate(int module_slot) const
+{
+  auto mode = automate_selector(module_slot);
+  return mode == param_automate::both || mode == param_automate::modulate;
+}
+
+inline bool
+param_dsp::can_automate(int module_slot) const
+{
+  auto mode = automate_selector(module_slot);
+  return mode == param_automate::both || mode == param_automate::automate;
+}
 
 inline bool
 param_topo_gui::is_list() const

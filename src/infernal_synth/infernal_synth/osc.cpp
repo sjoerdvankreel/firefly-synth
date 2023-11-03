@@ -13,7 +13,7 @@ namespace infernal_synth {
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
-enum { param_type, param_gain, param_bal, param_am, param_note, param_oct, param_cent };
+enum { param_type, param_gain, param_bal, param_am, param_note, param_oct, param_cent, param_pitch };
 
 static std::vector<list_item>
 type_items()
@@ -64,23 +64,23 @@ osc_topo(
 
   result.params.emplace_back(make_param(
     make_topo_info("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   auto& am = result.params.emplace_back(make_param(
     make_topo_info("{D03E5C05-E404-4394-BC1F-CE2CD6AAE357}", "AM", param_am, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   am.gui.bindings.enabled.bind_slot([](int s) { return s > 0; });
-  am.dsp.automate_selector = [](int s) { return s > 0? param_automate::modulate: param_automate::none; };
+  am.dsp.automate_selector = [](int s) { return s > 0? param_automate::both : param_automate::none; };
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
@@ -98,9 +98,15 @@ osc_topo(
 
   result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
+
+  auto& pitch = result.params.emplace_back(make_param(
+    make_topo_info("{F87BA01D-19CE-4D46-83B6-8E2382D9F601}", "Pitch", param_pitch, 1),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_gui_none()));
+  pitch.gui.bindings.visible.bind_never();
 
   return result;
 }

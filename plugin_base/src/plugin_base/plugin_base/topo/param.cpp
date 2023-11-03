@@ -9,7 +9,7 @@ param_dsp::validate(int module_slot) const
 {
   param_automate automate = automate_selector(module_slot);
 
-  if (automate == param_automate::automate)
+  if (automate != param_automate::none)
     assert(direction == param_direction::input);
 
   if (direction == param_direction::output)
@@ -24,7 +24,7 @@ param_dsp::validate(int module_slot) const
     assert(direction == param_direction::input);
   }
 
-  if (automate == param_automate::modulate)
+  if (can_modulate(module_slot))
   {
     assert(rate == param_rate::accurate);
     assert(direction == param_direction::input);

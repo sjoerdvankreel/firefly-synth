@@ -125,7 +125,7 @@ cv_matrix_topo(
       auto module_slot_submenu = std::make_shared<gui_submenu>();
       module_slot_submenu->name = module_tag.name + " " + std::to_string(mi + 1);
       for(int p = 0; p < targets[m]->params.size(); p++)
-        if(targets[m]->params[p].dsp.automate_selector(mi) == param_automate::modulate)
+        if(targets[m]->params[p].dsp.can_modulate(mi))
         {
           auto const& param_tag = targets[m]->params[p].info.tag;
           for (int pi = 0; pi < targets[m]->params[p].info.slot_count; pi++)
@@ -152,7 +152,7 @@ cv_matrix_topo(
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amount", param_amount, route_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 

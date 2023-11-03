@@ -83,6 +83,7 @@ struct gui_binding final {
   void validate(module_topo const& module, int slot_count) const;
   
   void bind_slot(gui_slot_binding_selector selector_);
+  void bind_never() { bind_slot([](int) { return false; }); }
   void bind_params(std::vector<int> const& params_, gui_param_binding_selector selector_);
   bool is_bound() const { return slot_selector != nullptr || param_selector != nullptr; }
 };

@@ -68,13 +68,13 @@ env_topo(
 
   result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1),
-    make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
+    make_param_dsp_accurate(param_automate::both), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 

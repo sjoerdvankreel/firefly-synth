@@ -49,13 +49,13 @@ filter_topo(
 
   result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 1000, 1000, 0, "Hz"),
+    make_param_dsp_accurate(param_automate::both), make_domain_log(20, 20000, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc", param_osc, osc_slot_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::horizontal, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 

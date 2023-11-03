@@ -60,7 +60,7 @@ delay_topo(
 
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{C39B97B3-B417-4C72-92C0-B8D764347792}", "Time", param_time, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 2, 1, 2, "Sec"),
+    make_param_dsp_accurate(param_automate::both), make_domain_linear(0.1, 2, 1, 2, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_time; });
@@ -75,7 +75,7 @@ delay_topo(
 
   result.params.emplace_back(make_param(
     make_topo_info("{2E80A7CE-735B-48C4-8681-FBE1EE003297}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 

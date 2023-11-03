@@ -83,7 +83,7 @@ inf_controller::initialize(FUnknown* context)
       param_info.defaultNormalizedValue = param.param->domain.default_normalized(module.info.slot).value();
 
       param_info.flags = ParameterInfo::kNoFlags;
-      if(param.param->dsp.automate_selector(module.info.slot) != param_automate::none)
+      if(param.param->dsp.can_automate(module.info.slot))
         param_info.flags |= ParameterInfo::kCanAutomate;
       else
         param_info.flags |= ParameterInfo::kIsReadOnly;
