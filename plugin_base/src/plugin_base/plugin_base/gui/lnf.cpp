@@ -203,11 +203,20 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
+  int radius = _desc->plugin->gui.module_corner_radius;
   float lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
   if (button.getIndex() > 0)
   {
     g.setColour(colors().tab_button.brighter(lighten));
-    g.fillRect(button.getActiveArea());
+    if(button.getIndex() == button.getTabbedButtonBar().getNumTabs() - 1)
+    {
+      Path path;
+      auto rect = button.getActiveArea().toFloat();
+      path.addRoundedRectangle(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), radius, radius, false, true, false, true);
+      g.fillPath(path);
+    }
+    else
+      g.fillRect(button.getActiveArea());
     g.setFont(font());
     g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
     g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
@@ -217,7 +226,6 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea();
   auto buttonArea = headerArea.removeFromRight(_desc->plugin->gui.module_tab_width);
-  int radius = _desc->plugin->gui.module_corner_radius;
   g.setColour(colors().tab_button);
   g.fillRoundedRectangle(headerArea.toFloat(), radius);
   headerArea.removeFromLeft(radius);
