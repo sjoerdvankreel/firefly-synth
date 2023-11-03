@@ -224,12 +224,20 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   }
 
   auto const& header = button.getTabbedButtonBar().getTitle();
-  auto headerArea = button.getActiveArea();
+  auto headerArea = button.getActiveArea().toFloat();
   auto buttonArea = headerArea.removeFromRight(_desc->plugin->gui.module_tab_width);
   g.setColour(colors().tab_button);
-  g.fillRoundedRectangle(headerArea.toFloat(), radius);
-  headerArea.removeFromLeft(radius);
-  g.fillRect(headerArea.toFloat());
+  if(button.getTabbedButtonBar().getNumTabs() == 1)
+    g.fillRoundedRectangle(headerArea, radius);
+  else
+  {
+    Path path;
+    path.addRoundedRectangle(
+      headerArea.getX(), headerArea.getY(), headerArea.getWidth(), 
+      headerArea.getHeight(), radius, radius, true, false, true, false);
+    g.fillPath(path);
+  }
+
   auto textArea = button.getTextArea();
   textArea.removeFromLeft(radius + 2);
   g.setFont(font());
