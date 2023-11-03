@@ -6,7 +6,7 @@
 
 namespace plugin_base {
 
-jarray<float, 1> const&
+inline jarray<float, 1> const&
 normalized_to_raw_into(
   plugin_block const& block, int m, int p,
   jarray<float, 1> const& in, jarray<float, 1>& out)
