@@ -89,7 +89,7 @@ env_engine::current_stage_param() const
   case env_stage::a: return param_a;
   case env_stage::d: return param_d;
   case env_stage::r: return param_r;
-  assert(false); return -1;
+  default: assert(false); return -1;
   }
 }
 
@@ -128,7 +128,7 @@ env_engine::process(plugin_block& block)
     double stage_seconds = block.normalized_to_raw(module_env, stage_param, stage_curve[f]);
     _stage_pos = std::min(_stage_pos, stage_seconds);
 
-    float out;
+    float out = 0;
     if (stage_seconds == 0)
       out = _release_level;
     else switch (_stage)
