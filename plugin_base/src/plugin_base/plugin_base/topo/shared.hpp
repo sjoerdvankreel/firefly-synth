@@ -121,13 +121,14 @@ struct gui_colors final {
   juce::Colour tab_header = juce::Colour(0xFF222222);
   juce::Colour tab_background1 = juce::Colour(0xFF222222);
   juce::Colour tab_background2 = juce::Colour(0xFF111111);
-  juce::Colour section_outline = juce::Colour(0xFF000000);
   juce::Colour bubble_outline = juce::Colour(0xFFFF8844);
   juce::Colour knob_thumb = juce::Colour(0xFFFF8844);
   juce::Colour knob_track1 = juce::Colour(0xFF222222);
   juce::Colour knob_track2 = juce::Colour(0xFFFF8844);
   juce::Colour knob_background1 = juce::Colour(0xFF222222);
   juce::Colour knob_background2 = juce::Colour(0xFF999999);
+  juce::Colour section_outline1 = juce::Colour(0xFF000000);
+  juce::Colour section_outline2 = juce::Colour(0xFF000000);
   juce::Colour slider_thumb = juce::Colour(0xFFFF8844);
   juce::Colour slider_track1 = juce::Colour(0xFF222222);
   juce::Colour slider_track2 = juce::Colour(0xFF999999);

@@ -189,9 +189,10 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
     if(iter->param->gui.section == section.index)
       grid.add(make_params(module, &(*iter)), iter->param->gui.position);
   
-  auto outline = module.module->gui.colors.section_outline;
+  auto outline1 = module.module->gui.colors.section_outline1;
+  auto outline2 = module.module->gui.colors.section_outline2;
   int radius = _gui_state->desc().plugin->gui.section_corner_radius;
-  return make_component<rounded_container>(&grid, radius, false, outline, outline);
+  return make_component<rounded_container>(&grid, radius, false, outline1, outline2);
 }
 
 Component&
