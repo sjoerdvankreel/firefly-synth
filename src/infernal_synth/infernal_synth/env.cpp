@@ -107,7 +107,8 @@ env_engine::process(plugin_block& block)
   {
     if (_stage == env_stage::end)
     {
-      block.state.own_cv[0][f] = _release_level = 0;
+      _release_level = 0;
+      block.state.own_cv[0][f] = 0;
       continue;
     }
 
@@ -119,7 +120,8 @@ env_engine::process(plugin_block& block)
 
     if (_stage == env_stage::s)
     {
-      block.state.own_cv[0][f] = _release_level = s_curve[f];
+      _release_level = s_curve[f];
+      block.state.own_cv[0][f] = s_curve[f];
       continue;
     }
 
