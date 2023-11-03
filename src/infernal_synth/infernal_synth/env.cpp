@@ -37,6 +37,9 @@ env_topo(
     make_module_dsp(module_stage::voice, module_output::cv, 1, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  result.engine_factory = [](auto const&, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };
+
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1 } })));
@@ -74,16 +77,14 @@ env_topo(
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };
-
   return result;
 }
 
 void
 env_engine::process(plugin_block& block)
 {
-  if (block.state.own_block_automation[param_on][0].step() == 0 && block.module_slot != 0) return;
+  bool off = block.state.own_block_automation[param_on][0].step() == 0;
+  if (off && block.module_slot != 0) return;
 
   auto const& a_curve = block.state.own_accurate_automation[param_a][0];
   auto const& d_curve = block.state.own_accurate_automation[param_d][0];

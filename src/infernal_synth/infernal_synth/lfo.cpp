@@ -56,6 +56,9 @@ lfo_topo(
     make_module_dsp(stage, module_output::cv, 1, 1),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  result.engine_factory = [module](auto const&, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
+
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
@@ -79,9 +82,6 @@ lfo_topo(
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_sync; });
-
-  result.engine_factory = [module](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(module); };
 
   return result;
 }
