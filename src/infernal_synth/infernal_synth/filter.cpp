@@ -13,7 +13,7 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 enum { section_main };
-enum { param_on, param_freq, param_osc };
+enum { param_on, param_freq, param_res, param_osc };
 
 class filter_engine: 
 public module_engine {  
@@ -39,7 +39,7 @@ filter_topo(
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 3 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 3 } })));
 
   result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_on, 1),
@@ -54,9 +54,15 @@ filter_topo(
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
+    make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "Res", param_res, 1),
+    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+
+  result.params.emplace_back(make_param(
     make_topo_info("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc", param_osc, osc_slot_count),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::horizontal, { 0, 2 },
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::horizontal, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.engine_factory = [](auto const&, int, int) ->
@@ -95,7 +101,6 @@ filter_engine::process(plugin_block& block)
       _in[c] = block.state.own_audio[0][c][f];
       _out[c] = filtered;
       block.state.own_audio[0][c][f] = filtered;
-      // mixdown to voice
       block.voice->result[c][f] += filtered;
     }
   }
