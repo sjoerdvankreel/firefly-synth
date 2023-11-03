@@ -36,7 +36,7 @@ rounded_container::paint(Graphics& g)
   if(_vertical)
     g.setGradientFill(juce::ColourGradient(_color1, 0, 0, _color2, 0, getHeight(), false));
   else
-    g.setGradientFill(juce::ColourGradient(_color1, 0, 0, _color2, getWidth(), 0, false));
+    g.setGradientFill(juce::ColourGradient(_color2, 0, 0, _color1, getWidth(), 0, false));
   if(_fill)
     g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
   else
