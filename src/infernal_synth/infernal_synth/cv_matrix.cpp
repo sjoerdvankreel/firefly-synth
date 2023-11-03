@@ -31,7 +31,19 @@ struct target_mapping
 static int constexpr route_count = 8;
 
 enum { section_main };
-enum { param_active, param_source, param_target, param_amount };
+enum { type_off, type_mul, type_add, type_addbi };
+enum { param_type, param_source, param_target, param_amount };
+
+static std::vector<list_item>
+type_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}", "Off");
+  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul");
+  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add");
+  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "AddBi");
+  return result;
+}
 
 class cv_matrix_engine:
 public module_engine { 
@@ -68,10 +80,10 @@ cv_matrix_topo(
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, -30 } })));
   
   result.params.emplace_back(make_param(
-    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Active", param_active, route_count),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
-  
+    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Type", param_type, route_count),
+    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
+    make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
+
   int source_index = 0;
   std::vector<list_item> source_items;
   std::vector<source_mapping> source_mappings;
@@ -96,7 +108,7 @@ cv_matrix_topo(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
-  source.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
+  source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_submenu;
 
   int target_index = 0;
@@ -135,14 +147,14 @@ cv_matrix_topo(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
-  target.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
+  target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_submenu;
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amount", param_amount, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
-  amount.gui.bindings.enabled.bind_params({ param_active }, [](auto const& vs) { return vs[0] != 0; });
+  amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   result.engine_factory = [source_mappings, target_mappings](auto const& topo, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, source_mappings, target_mappings); };
@@ -182,7 +194,7 @@ cv_matrix_engine::process(plugin_block& block)
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
-    if(own_automation[param_active][r].step() == 0) continue;
+    if(own_automation[param_type][r].step() == 0) continue;
 
     // found out indices of modulation target
     int selected_target = own_automation[param_target][r].step();
