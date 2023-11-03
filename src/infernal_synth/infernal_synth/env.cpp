@@ -100,8 +100,8 @@ env_engine::process(plugin_block& block)
   if (_stage == env_stage::end) return;
   if((off && block.module_slot != 0)) return;
 
-  auto const& automation = block.state.own_accurate_automation;
-  auto const& s_curve = automation[param_s][0];
+  auto const& acc_auto = block.state.own_accurate_automation;
+  auto const& s_curve = acc_auto[param_s][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -124,7 +124,7 @@ env_engine::process(plugin_block& block)
     }
 
     int stage_param = current_stage_param();
-    auto const& stage_curve = automation[stage_param][0];
+    auto const& stage_curve = acc_auto[stage_param][0];
     double stage_seconds = block.normalized_to_raw(module_env, stage_param, stage_curve[f]);
     _stage_pos = std::min(_stage_pos, stage_seconds);
 
