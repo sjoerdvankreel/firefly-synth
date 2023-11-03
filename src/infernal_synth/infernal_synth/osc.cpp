@@ -104,7 +104,7 @@ osc_topo(
 
   auto& pitch = result.params.emplace_back(make_param(
     make_topo_info("{F87BA01D-19CE-4D46-83B6-8E2382D9F601}", "Pitch", param_pitch, 1),
-    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::both), make_domain_linear(0, 128, 0, 0, ""),
     make_param_gui_none()));
   pitch.gui.bindings.visible.bind_never();
 
@@ -135,6 +135,7 @@ osc_engine::process(plugin_block& block)
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
+  auto const& pitch_curve = *modulation[module_osc][block.module_slot][param_pitch][0];
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
   auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
@@ -157,7 +158,9 @@ osc_engine::process(plugin_block& block)
   { 
     float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
-    float inc = note_to_freq(oct, note, cent, block.voice->state.id.key) / block.sample_rate;
+    float pitch = note_to_pitch(oct, note, cent, block.voice->state.id.key);
+    float pitch_mod = block.normalized_to_raw(module_osc, param_pitch, pitch_curve[f]);
+    float inc = pitch_to_freq(pitch + pitch_mod) / block.sample_rate;
     switch (type)
     {
     case type_sine: sample = phase_to_sine(_phase); break;

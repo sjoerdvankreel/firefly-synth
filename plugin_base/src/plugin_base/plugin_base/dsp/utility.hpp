@@ -19,6 +19,9 @@ template <class T> inline T check_bipolar(T val)
 
 inline float mix_signal(float mix, float dry, float wet) 
 { return (1.0f - mix) * dry + mix * wet; }
+inline float pitch_to_freq(float pitch)
+{ return 440.0f * std::pow(2.0f, (pitch - 69.0f) / 12.0f); }
+
 inline float timesig_to_freq(float bpm, timesig const& sig) 
 { return bpm / (60.0f * 4.0f * sig.num / sig.den); }
 inline float timesig_to_time(float bpm, timesig const& sig) 
@@ -47,15 +50,14 @@ balance(int channel, float value)
   return channel == 0 ? 1.0f - pan: pan;
 }
 
-inline float
-note_to_freq(int oct, int note, float cent, int key)
+inline float 
+note_to_pitch(int oct, int note, float cent, int key)
 {
   int const middle_c = 60;
   assert(0 <= oct && oct <= 9);
   assert(0 <= note && note <= 11);
   assert(-1 <= cent && cent <= 1);
-  float pitch = (12 * oct + note) + cent + (key - middle_c);
-  return 440.0f * std::pow(2.0f, (pitch - 69.0f) / 12.0f);
+  return (12 * oct + note) + cent + (key - middle_c);
 }
 
 }
