@@ -46,10 +46,10 @@ lfo_topo(
   std::string const glfo_id = "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}";
   std::string const vlfo_id = "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}";
 
-  std::string const id = global ? glfo_id : vlfo_id;
-  int const module = global ? module_glfo : module_vlfo;
-  std::string const name = global ? "GLFO" : "VLFO";
-  module_stage const stage = global ? module_stage::input : module_stage::voice;
+  std::string id = global ? glfo_id : vlfo_id;
+  std::string name = global ? "GLFO" : "VLFO";
+  int module = global ? module_glfo : module_vlfo;
+  module_stage stage = global ? module_stage::input : module_stage::voice;
 
   module_topo result(make_module(
     make_topo_info(id, name, module, 3),
@@ -91,13 +91,13 @@ lfo_engine::process(plugin_block& block)
 {
   int type = block.state.own_block_automation[param_type][0].step();
   if(type == type_off) return; 
+
   auto const& rate_curve = sync_or_freq_into_scratch(
     block, type == type_sync, _module, param_rate, param_tempo, scratch_time);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    block.state.own_cv[0][f] = (std::sin(2.0f * pi32 * _phase) + 1.0f) * 0.5f;
-    _phase += rate_curve[f] / block.sample_rate;
-    if(_phase >= 1.0f) _phase = 0.0f;
+    block.state.own_cv[0][f] = bipolar_to_unipolar(phase_to_sine(_phase));
+    increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
   }
 }
 
