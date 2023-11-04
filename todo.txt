@@ -31,6 +31,7 @@ monitor gain over 100
 make sound by default
 rename from infernal
 do scrollbar
+fix single valued submenu
 
 * get some linux folks to comment (ycollete?)
 * continuing
