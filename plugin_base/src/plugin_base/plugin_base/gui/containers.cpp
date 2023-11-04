@@ -46,6 +46,12 @@ rounded_container::paint(Graphics& g)
 void
 grid_component::add(Component& child, gui_position const& position)
 {
+  assert(position.row >= 0);
+  assert(position.column >= 0);
+  assert(position.row_span > 0);
+  assert(position.column_span > 0);
+  assert(position.row + position.row_span <= _dimension.row_sizes.size());
+  assert(position.column + position.column_span <= _dimension.column_sizes.size());
   add_and_make_visible(*this, child);
   _positions.push_back(position);
 }

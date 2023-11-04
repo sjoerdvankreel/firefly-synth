@@ -187,7 +187,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   auto const& params = module.params;
   grid_component& grid = make_component<param_section_grid>(this, &module, &section, margin_param);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
-    if(iter->param->gui.section == section.index)
+    if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
       grid.add(make_params(module, &(*iter)), iter->param->gui.position);
   
   auto outline1 = module.module->gui.colors.section_outline1;

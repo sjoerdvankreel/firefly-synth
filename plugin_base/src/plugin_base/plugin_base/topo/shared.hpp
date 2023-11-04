@@ -19,7 +19,7 @@ inline int constexpr topo_max = 1024;
 enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, both };
-enum class gui_edit_type { toggle, list, autofit_list, text, knob, hslider, vslider };
+enum class gui_edit_type { none, toggle, list, autofit_list, text, knob, hslider, vslider };
 
 typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
@@ -83,7 +83,6 @@ struct gui_binding final {
   void validate(module_topo const& module, int slot_count) const;
   
   void bind_slot(gui_slot_binding_selector selector_);
-  void bind_never() { bind_slot([](int) { return false; }); }
   void bind_params(std::vector<int> const& params_, gui_param_binding_selector selector_);
   bool is_bound() const { return slot_selector != nullptr || param_selector != nullptr; }
 };

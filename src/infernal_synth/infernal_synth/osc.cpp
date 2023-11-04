@@ -103,11 +103,10 @@ osc_topo(
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
 
-  auto& pitch = result.params.emplace_back(make_param(
+  result.params.emplace_back(make_param(
     make_topo_info("{F87BA01D-19CE-4D46-83B6-8E2382D9F601}", "Pitch", param_pitch, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_linear(0, 128, 0, 0, ""),
     make_param_gui_none()));
-  pitch.gui.bindings.visible.bind_never();
 
   return result;
 }
