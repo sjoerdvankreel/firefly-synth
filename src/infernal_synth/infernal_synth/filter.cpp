@@ -17,14 +17,14 @@ enum { param_on, param_freq, param_res, param_osc };
 
 class filter_engine: 
 public module_engine {  
-  float _in[2];
-  float _out[2];
+  double _ic1eq[2];
+  double _ic2eq[2];
 
 public:
   filter_engine() { initialize(); }
   INF_PREVENT_ACCIDENTAL_COPY(filter_engine);
   void process(plugin_block& block) override;
-  void initialize() override { _in[0] = _in[1] = _out[0] = _out[1] = 0; }
+  void initialize() override { _ic1eq[0] = _ic1eq[1] = _ic2eq[0] = _ic2eq[1] = 0; }
 };
 
 module_topo
@@ -87,21 +87,27 @@ filter_engine::process(plugin_block& block)
         block.state.own_audio[0][c][f] += osc_audio[o][0][c][f] * osc[f];
   }
 
-  float w = 2 * block.sample_rate;
-  auto const& freq = *modulation[module_filter][block.module_slot][param_freq][0];
+  auto const& res_curve = *modulation[module_filter][block.module_slot][param_res][0];
+  auto const& freq_curve = *modulation[module_filter][block.module_slot][param_freq][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float angle = block.normalized_to_raw(module_filter, param_freq, freq[f]) * 2 * pi32;
-    float norm = 1 / (angle + w);
-    float a = angle * norm;
-    float b = (w - angle) * norm;
+    float freq = block.normalized_to_raw(module_filter, param_freq, freq_curve[f]);
+    double k = 2 - 2 * res_curve[f];
+    double g = std::tan(pi32 * freq / block.sample_rate);
+    double a1 = 1 / (1 + g * (g + k));
+    double a2 = g * a1;
+    double a3 = g * a2;
+
     for (int c = 0; c < 2; c++)
     {
-      float filtered = block.state.own_audio[0][c][f] * a + _in[c] * a + _out[c] * b;
-      _in[c] = block.state.own_audio[0][c][f];
-      _out[c] = filtered;
-      block.state.own_audio[0][c][f] = filtered;
-      block.voice->result[c][f] += filtered;
+      double v0 = block.state.own_audio[0][c][f];
+      double v3 = v0 - _ic2eq[c];
+      double v1 = a1 * _ic1eq[c] + a2 * v3;
+      double v2 = _ic2eq[c] + a2 * _ic1eq[c] + a3 * v3;
+      _ic1eq[c] = 2 * v1 - _ic1eq[c];
+      _ic2eq[c] = 2 * v2 - _ic2eq[c];
+      block.state.own_audio[0][c][f] = v2;
+      block.voice->result[c][f] += v2;
     }
   }
 }

@@ -24,6 +24,7 @@ vfx/gfx -> lpf/hpf/feedback delay
 graphs
 clean up the dsp
 measure performance
+master gain/midi/mod/pitch etc
 
 * get some linux folks to comment (ycollete?)
 * continuing
