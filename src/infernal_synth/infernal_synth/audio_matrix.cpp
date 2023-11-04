@@ -50,9 +50,6 @@ audio_matrix_topo(
     make_module_dsp(module_stage::voice, module_output::audio, route_count + 1, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
-  result.engine_factory = [](auto const& topo, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<audio_matrix_engine>(); };
-
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, -30 } })));
@@ -84,6 +81,9 @@ audio_matrix_topo(
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+
+  result.engine_factory = [sm = source_matrix, tm = target_matrix](auto const& topo, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<audio_matrix_engine>(sm.mappings, tm.mappings); };
 
   return result;
 }
