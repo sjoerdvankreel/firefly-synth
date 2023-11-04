@@ -14,7 +14,7 @@ namespace plugin_base {
 enum class domain_display { normal, percentage };
 enum class domain_type { toggle, step, name, item, timesig, linear, log };
 
-typedef std::function<std::string(int module_slot)>
+typedef std::function<std::string(int module_slot, int param_slot)>
 default_selector;
 
 // tempo relative to bpm
@@ -56,12 +56,7 @@ struct param_domain final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const;
-  void validate(int module_slot_count) const;
-
-  // parse default text - slow!
-  double default_raw(int module_slot) const;
-  plain_value default_plain(int module_slot) const;
-  normalized_value default_normalized(int module_slot) const;
+  void validate(int module_slot_count, int param_slot_count) const;
 
   // representation conversion
   plain_value raw_to_plain(double raw) const;
@@ -70,6 +65,11 @@ struct param_domain final {
   double normalized_to_raw(normalized_value normalized) const;
   normalized_value plain_to_normalized(plain_value plain) const;
   plain_value normalized_to_plain(normalized_value normalized) const;
+
+  // parse default text - slow!
+  double default_raw(int module_slot, int param_slot) const;
+  plain_value default_plain(int module_slot, int param_slot) const;
+  normalized_value default_normalized(int module_slot, int param_slot) const;
 
   // parse and format
   std::string raw_to_text(bool io, double raw) const;
@@ -87,11 +87,11 @@ list_item(std::string const& id, std::string const& name) :
 id(id), name(name) {}
 
 inline double 
-param_domain::default_raw(int module_slot) const
-{ return plain_to_raw(default_plain(module_slot)); }
+param_domain::default_raw(int module_slot, int param_slot) const
+{ return plain_to_raw(default_plain(module_slot, param_slot)); }
 inline normalized_value 
-param_domain::default_normalized(int module_slot) const
-{ return plain_to_normalized(default_plain(module_slot)); }
+param_domain::default_normalized(int module_slot, int param_slot) const
+{ return plain_to_normalized(default_plain(module_slot, param_slot)); }
 
 inline normalized_value
 param_domain::raw_to_normalized(double raw) const

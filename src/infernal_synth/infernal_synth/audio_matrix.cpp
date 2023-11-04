@@ -54,11 +54,11 @@ audio_matrix_topo(
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, -30 } })));
   
-  // todo enable first
-  result.params.emplace_back(make_param(
+  auto& on = result.params.emplace_back(make_param(
     make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
+  on.domain.default_selector = [](int, int s) { return s == 0? "On": "Off"; };
 
   auto source_matrix = make_module_matrix(sources);
   auto& source = result.params.emplace_back(make_param(

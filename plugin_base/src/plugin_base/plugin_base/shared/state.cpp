@@ -21,7 +21,7 @@ plugin_state::init_defaults()
     for (int mi = 0; mi < module.info.slot_count; mi++)
       for (int p = 0; p < module.params.size(); p++)
         for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi));
+          set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
   }
 }
 

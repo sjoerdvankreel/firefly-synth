@@ -317,7 +317,8 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
   }
 
   // this is what clap_value is for
-  info->default_value = normalized_to_clap(*param.param, param.param->domain.default_normalized(module.info.slot)).value();
+  auto default_normalized = param.param->domain.default_normalized(module.info.slot, param.info.slot);
+  info->default_value = normalized_to_clap(*param.param, default_normalized).value();
   if (param.param->domain.is_real())
   {
     info->min_value = 0;

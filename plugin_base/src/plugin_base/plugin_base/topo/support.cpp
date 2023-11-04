@@ -8,7 +8,7 @@ namespace plugin_base {
 
 static default_selector
 simple_default(std::string value)
-{ return [value](int) { return value; }; }
+{ return [value](int, int) { return value; }; }
 
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name)
