@@ -33,7 +33,7 @@ type_items()
 
 class cv_matrix_engine:
 public module_engine { 
-  cv_matrix_output _output = {};
+  cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
   std::vector<matrix_param_mapping> const _targets;
   std::vector<matrix_module_mapping> const _sources;
@@ -105,7 +105,7 @@ cv_matrix_engine(
 _sources(sources), _targets(targets)
 {
   plugin_dims dims(topo);
-  _output.resize(dims.module_slot_param_slot);
+  _mixdown.resize(dims.module_slot_param_slot);
   _modulation_indices.resize(dims.module_slot_param_slot);
 }
 
@@ -121,7 +121,7 @@ cv_matrix_engine::process(plugin_block& block)
     int tmi = _targets[m].module_slot;
     _modulation_indices[tm][tmi][tp][tpi] = -1;
     auto const& curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-    _output[tm][tmi][tp][tpi] = &curve;
+    _mixdown[tm][tmi][tp][tpi] = &curve;
   }
 
   // apply modulation routing
@@ -152,7 +152,7 @@ cv_matrix_engine::process(plugin_block& block)
       auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
       target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
       modulated_curve_ptrs[r] = modulated_curve_ptr;
-      _output[tm][tmi][tp][tpi] = modulated_curve_ptr;
+      _mixdown[tm][tmi][tp][tpi] = modulated_curve_ptr;
       _modulation_indices[tm][tmi][tp][tpi] = modulation_index++;
     }
 
@@ -195,7 +195,7 @@ cv_matrix_engine::process(plugin_block& block)
     if(modulated_curve_ptrs[r] != nullptr)
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
   
-  *block.state.own_context = &_output;
+  *block.state.own_context = &_mixdown;
 }
 
 }

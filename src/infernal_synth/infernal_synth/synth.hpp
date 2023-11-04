@@ -12,7 +12,7 @@ namespace infernal_synth {
 
 typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
-cv_matrix_output;
+cv_matrix_mixdown;
 
 struct matrix_module_mapping 
 { 
@@ -47,11 +47,11 @@ enum {
   module_audio_matrix, module_osc, module_fx, module_delay,
   module_monitor, module_count };
 
-inline cv_matrix_output const&
+inline cv_matrix_mixdown const&
 get_cv_matrix_output(plugin_base::plugin_block& block)
 {
-  void* cv_matrix_context = block.voice->all_context[module_cv_matrix][0];
-  return *static_cast<cv_matrix_output const*>(cv_matrix_context);
+  void* context = block.voice->all_context[module_cv_matrix][0];
+  return *static_cast<cv_matrix_mixdown const*>(context);
 }
 
 param_matrix
