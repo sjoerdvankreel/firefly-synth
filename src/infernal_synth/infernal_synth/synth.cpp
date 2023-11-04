@@ -110,7 +110,7 @@ synth_topo()
   result->gui.default_width = 750;
   result->gui.aspect_ratio_width = 9;
   result->gui.aspect_ratio_height = 4;
-  result->gui.dimension.column_sizes = { 2, 1 };
+  result->gui.dimension.column_sizes = { 3, 2 };
   result->gui.dimension.row_sizes = std::vector<int>(6, 1);
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
