@@ -10,6 +10,7 @@
 
 namespace infernal_synth {
 
+class audio_matrix_engine;
 typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
 cv_matrix_mixdown;
@@ -42,13 +43,22 @@ struct module_matrix
   std::vector<matrix_module_mapping> mappings;
 };
 
-enum { 
+class audio_matrix_mixer
+{
+  audio_matrix_engine* _engine;
+public:
+  INF_PREVENT_ACCIDENTAL_COPY(audio_matrix_mixer);
+  audio_matrix_mixer(audio_matrix_engine* engine) : _engine(engine) {}
+  plugin_base::jarray<float, 2> const& mix(plugin_base::plugin_block& block, int module, int slot);
+}; 
+
+enum {
   module_glfo, module_vlfo, module_env, module_cv_matrix, 
   module_audio_matrix, module_osc, module_fx, module_delay,
   module_monitor, module_count };
 
 inline cv_matrix_mixdown const&
-get_cv_matrix_output(plugin_base::plugin_block& block)
+get_cv_matrix_mixdown(plugin_base::plugin_block& block)
 {
   void* context = block.voice->all_context[module_cv_matrix][0];
   return *static_cast<cv_matrix_mixdown const*>(context);

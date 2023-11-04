@@ -89,7 +89,7 @@ void
 fx_engine::process_filter(plugin_block& block)
 {
   int type = block.state.own_block_automation[param_type][0].step();
-  auto const& modulation = get_cv_matrix_output(block);
+  auto const& modulation = get_cv_matrix_mixdown(block);
   auto const& res_curve = *modulation[module_fx][block.module_slot][param_res][0];
   auto const& freq_curve = *modulation[module_fx][block.module_slot][param_freq][0];
 
@@ -120,7 +120,7 @@ void
 fx_engine::process(plugin_block& block)
 {
   int type = block.state.own_block_automation[param_type][0].step();
-  auto const& modulation = get_cv_matrix_output(block);
+  auto const& modulation = get_cv_matrix_mixdown(block);
   auto const& osc_audio = block.voice->all_audio[module_osc];
   for(int o = 0; o < block.plugin.modules[module_osc].info.slot_count; o++)
   {
