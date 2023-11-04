@@ -63,6 +63,8 @@ public:
   { return _data.emplace_back(std::forward<U>(args)...); }
   void fill(int start, int end, elem_type const& val)
   { std::fill(begin() + start, begin() + end, val); }
+  void add_to(int start, int end, jarray& rhs) const
+  { for(int f = start; f < end; f++) rhs[f] += (*this)[f]; }
   void copy_to(int start, int end, jarray& rhs) const
   { std::copy(cbegin() + start, cbegin() + end, rhs.begin() + start); }
   template <class Transform> void transform(int start, int end, Transform transform)
