@@ -14,7 +14,7 @@ namespace infernal_synth {
 
 enum { section_main };
 enum { type_off, type_lpf, type_hpf };
-enum { param_type, param_freq, param_res, param_osc };
+enum { param_type, param_freq, param_res };
 
 static std::vector<list_item>
 type_items()
@@ -55,7 +55,7 @@ fx_topo(
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 3 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
 
   result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_type, 1),
@@ -75,12 +75,6 @@ fx_topo(
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_lpf || vs[0] == type_hpf; });
-
-  result.params.emplace_back(make_param(
-    make_topo_info("{B377EBB2-73E2-46F4-A2D6-867693ED9ACE}", "Osc", param_osc, osc_slot_count),
-    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::horizontal, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   return result;
 }
@@ -120,15 +114,10 @@ void
 fx_engine::process(plugin_block& block)
 {
   int type = block.state.own_block_automation[param_type][0].step();
-  auto const& modulation = get_cv_matrix_mixdown(block);
-  auto const& osc_audio = block.voice->all_audio[module_osc];
-  for(int o = 0; o < block.plugin.modules[module_osc].info.slot_count; o++)
-  {
-    auto const& osc = *modulation[module_fx][block.module_slot][param_osc][o];
-    for(int c = 0; c < 2; c++)
-      for(int f = block.start_frame; f < block.end_frame; f++)
-        block.state.own_audio[0][c][f] += osc_audio[o][0][c][f] * osc[f];
-  }
+  auto& mixer = get_audio_matrix_mixer(block);
+  auto const& audio_in = mixer.mix(block, module_fx, block.module_slot);
+  for(int c = 0; c < 2; c++)
+    audio_in[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][c]);
 
   if(type == type_lpf || type == type_hpf)
     process_filter(block);  

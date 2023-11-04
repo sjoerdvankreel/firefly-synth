@@ -110,13 +110,13 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 
   // loop through the routes
   // the first match we encounter becomes the mix target
-  auto const& block_auto = block.state.own_block_automation;
+  auto const& block_auto = block.state.all_block_automation[module_audio_matrix][0];
   for (int r = 0; r < route_count; r++)
   {
     if(block_auto[param_on][r].step() == 0) continue;
     int selected_target = block_auto[param_target][r].step();
-    int tm = _sources[selected_target].topo;
-    int tmi = _sources[selected_target].slot;
+    int tm = _targets[selected_target].topo;
+    int tmi = _targets[selected_target].slot;
     if(tm != module || tmi != slot) continue;
 
     if (!activated)

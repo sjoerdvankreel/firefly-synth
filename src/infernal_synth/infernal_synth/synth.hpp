@@ -49,13 +49,21 @@ class audio_matrix_mixer
 public:
   INF_PREVENT_ACCIDENTAL_COPY(audio_matrix_mixer);
   audio_matrix_mixer(audio_matrix_engine* engine) : _engine(engine) {}
-  plugin_base::jarray<float, 2> const& mix(plugin_base::plugin_block& block, int module, int slot);
+  plugin_base::jarray<float, 2> const& 
+  mix(plugin_base::plugin_block& block, int module, int slot);
 }; 
 
 enum {
   module_glfo, module_vlfo, module_env, module_cv_matrix, 
   module_audio_matrix, module_osc, module_fx, module_delay,
   module_monitor, module_count };
+
+inline audio_matrix_mixer&
+get_audio_matrix_mixer(plugin_base::plugin_block& block)
+{
+  void* context = block.voice->all_context[module_audio_matrix][0];
+  return *static_cast<audio_matrix_mixer*>(context);
+}
 
 inline cv_matrix_mixdown const&
 get_cv_matrix_mixdown(plugin_base::plugin_block& block)
