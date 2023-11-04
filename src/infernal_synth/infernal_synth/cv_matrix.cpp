@@ -14,13 +14,7 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-struct source_mapping
-{
-  int topo;
-  int slot;
-};
-
-struct target_mapping
+struct param_mapping
 {
   int module_topo;
   int module_slot;
@@ -49,16 +43,16 @@ class cv_matrix_engine:
 public module_engine { 
   cv_matrix_output _output = {};
   jarray<int, 4> _modulation_indices = {};
-  std::vector<source_mapping> const _sources;
-  std::vector<target_mapping> const _targets;
+  std::vector<param_mapping> const _targets;
+  std::vector<module_mapping> const _sources;
 public:
   void initialize() override {}
   void process(plugin_block& block) override;
 
   cv_matrix_engine(
     plugin_topo const& topo, 
-    std::vector<source_mapping> const& sources, 
-    std::vector<target_mapping> const& targets);
+    std::vector<module_mapping> const& sources, 
+    std::vector<param_mapping> const& targets);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
@@ -84,36 +78,17 @@ cv_matrix_topo(
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
 
-  int source_index = 0;
-  std::vector<list_item> source_items;
-  std::vector<source_mapping> source_mappings;
-  auto source_submenu = std::make_shared<gui_submenu>();
-  for(int m = 0; m < sources.size(); m++)
-  {
-    auto const& tag = sources[m]->info.tag;
-    auto module_submenu = std::make_shared<gui_submenu>();
-    module_submenu->name = tag.name;
-    for(int mi = 0; mi < sources[m]->info.slot_count; mi++)
-    {
-      list_item item;
-      item.id = tag.id + "-" + std::to_string(mi);
-      item.name = tag.name + " " + std::to_string(mi + 1);
-      source_items.push_back(item);
-      module_submenu->indices.push_back(source_index++);
-      source_mappings.push_back({ sources[m]->info.index, mi });
-    }
-    source_submenu->children.push_back(module_submenu);
-  }
+  auto source_modules = make_matrix_modules(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
-    make_param_dsp_block(param_automate::none), make_domain_item(source_items, ""),
+    make_param_dsp_block(param_automate::none), make_domain_item(source_modules.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  source.gui.submenu = source_submenu;
+  source.gui.submenu = source_modules.submenu;
 
   int target_index = 0;
   std::vector<list_item> target_items;
-  std::vector<target_mapping> target_mappings;
+  std::vector<param_mapping> target_mappings;
   auto target_submenu = std::make_shared<gui_submenu>();
   for(int m = 0; m < targets.size(); m++)
   {
@@ -156,16 +131,16 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  result.engine_factory = [source_mappings, target_mappings](auto const& topo, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, source_mappings, target_mappings); };
+  result.engine_factory = [source_modules, target_mappings](auto const& topo, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, source_modules.mappings, target_mappings); };
   return result;
 }
 
 cv_matrix_engine::
 cv_matrix_engine(
   plugin_topo const& topo,
-  std::vector<source_mapping> const& sources,
-  std::vector<target_mapping> const& targets):
+  std::vector<module_mapping> const& sources,
+  std::vector<param_mapping> const& targets):
 _sources(sources), _targets(targets)
 {
   plugin_dims dims(topo);

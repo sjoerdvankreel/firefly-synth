@@ -23,9 +23,34 @@ make_module_colors(Colour const& c)
   return result;
 }
 
+matrix_modules
+make_matrix_modules(std::vector<plugin_base::module_topo const*> const& modules)
+{
+  int index = 0;
+  matrix_modules result;
+  result.submenu = std::make_shared<gui_submenu>();
+  for (int m = 0; m < modules.size(); m++)
+  {
+    auto const& tag = modules[m]->info.tag;
+    auto module_submenu = std::make_shared<gui_submenu>();
+    module_submenu->name = tag.name;
+    for (int mi = 0; mi < modules[m]->info.slot_count; mi++)
+    {
+      list_item item;
+      item.id = tag.id + "-" + std::to_string(mi);
+      item.name = tag.name + " " + std::to_string(mi + 1);
+      result.items.push_back(item);
+      module_submenu->indices.push_back(index++);
+      result.mappings.push_back({ modules[m]->info.index, mi });
+    }
+    result.submenu->children.push_back(module_submenu);
+  }
+  return result;
+}
+
 enum { 
-  section_lfos, section_env, section_osc, section_filter, 
-  section_cv_matrix, section_delay, section_monitor, section_count  };
+  section_lfos, section_env, section_osc, section_filter, section_cv_matrix, 
+  section_audio_matrix, section_delay, section_monitor, section_count };
 
 std::unique_ptr<plugin_topo>
 synth_topo()
@@ -48,7 +73,7 @@ synth_topo()
   result->gui.default_width = 860;
   result->gui.aspect_ratio_width = 3;
   result->gui.aspect_ratio_height = 1;
-  result->gui.dimension.row_sizes = std::vector<int>(5, 1);
+  result->gui.dimension.row_sizes = std::vector<int>(6, 1);
   result->gui.dimension.column_sizes = std::vector<int>(2, 1);
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
@@ -58,8 +83,9 @@ synth_topo()
   result->gui.sections[section_lfos] = make_module_section_gui(section_lfos, { 0, 0 }, { 1, 2 });
   result->gui.sections[section_delay] = make_module_section_gui(section_delay, { 4, 0 }, { 1, 1 });
   result->gui.sections[section_filter] = make_module_section_gui(section_filter, { 3, 0 }, { 1, 1 });
-  result->gui.sections[section_monitor] = make_module_section_gui(section_monitor, { 4, 1 }, { 1, 1 });
-  result->gui.sections[section_cv_matrix] = make_module_section_gui(section_cv_matrix, { 0, 1, 4, 1 }, { 1, 1 });
+  result->gui.sections[section_monitor] = make_module_section_gui(section_monitor, { 5, 1 }, { 1, 1 });
+  result->gui.sections[section_cv_matrix] = make_module_section_gui(section_cv_matrix, { 3, 1, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_audio_matrix] = make_module_section_gui(section_cv_matrix, { 0, 1, 3, 1 }, { 1, 1 });
 
   result->modules.resize(module_count);
   result->modules[module_env] = env_topo(section_env, cv_colors, { 0, 0 });
@@ -72,6 +98,9 @@ synth_topo()
   result->modules[module_cv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 },
     { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo] },
     { &result->modules[module_osc], &result->modules[module_fx] });
+  result->modules[module_audio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 },
+    { &result->modules[module_osc], &result->modules[module_fx] },
+    { &result->modules[module_delay] });
   return result;
 }
 

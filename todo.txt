@@ -25,6 +25,11 @@ graphs
 clean up the dsp
 measure performance
 master gain/midi/mod/pitch etc
+only select relevant cv targets
+check right octave/frequency (c4)
+monitor gain over 100
+make sound by default
+rename from infernal
 
 * get some linux folks to comment (ycollete?)
 * continuing
