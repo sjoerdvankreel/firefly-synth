@@ -30,6 +30,7 @@ check right octave/frequency (c4)
 monitor gain over 100
 make sound by default
 rename from infernal
+do scrollbar
 
 * get some linux folks to comment (ycollete?)
 * continuing
