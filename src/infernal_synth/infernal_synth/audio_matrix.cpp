@@ -53,21 +53,21 @@ audio_matrix_topo(
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
 
-  auto source_modules = make_matrix_modules(sources);
+  auto source_matrix = make_module_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
-    make_param_dsp_block(param_automate::none), make_domain_item(source_modules.items, ""),
+    make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  source.gui.submenu = source_modules.submenu;
+  source.gui.submenu = source_matrix.submenu;
 
-  auto target_modules = make_matrix_modules(targets);
+  auto target_matrix = make_module_matrix(targets);
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
-    make_param_dsp_block(param_automate::none), make_domain_item(source_modules.items, ""),
+    make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  target.gui.submenu = target_modules.submenu;
+  target.gui.submenu = target_matrix.submenu;
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Amount", param_amount, route_count),

@@ -14,13 +14,32 @@ typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
 cv_matrix_output;
 
-struct module_mapping { int topo; int slot; };
+struct matrix_module_mapping 
+{ 
+  int topo; 
+  int slot; 
+};
 
-struct matrix_modules
+struct matrix_param_mapping 
+{ 
+  int module_topo; 
+  int module_slot; 
+  int param_topo; 
+  int param_slot; 
+};
+
+struct param_matrix
 {
-  std::vector<module_mapping> mappings;
   std::vector<plugin_base::list_item> items;
   std::shared_ptr<plugin_base::gui_submenu> submenu;
+  std::vector<matrix_param_mapping> mappings;
+};
+
+struct module_matrix
+{
+  std::vector<plugin_base::list_item> items;
+  std::shared_ptr<plugin_base::gui_submenu> submenu;
+  std::vector<matrix_module_mapping> mappings;
 };
 
 enum { 
@@ -35,8 +54,10 @@ get_cv_matrix_output(plugin_base::plugin_block& block)
   return *static_cast<cv_matrix_output const*>(cv_matrix_context);
 }
 
-matrix_modules
-make_matrix_modules(std::vector<plugin_base::module_topo const*> const& sources);
+param_matrix
+make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+module_matrix
+make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules);
 
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
