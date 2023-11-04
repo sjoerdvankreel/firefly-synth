@@ -14,7 +14,7 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-static int constexpr route_count = 8;
+static int constexpr route_count = 6;
 
 enum { section_main };
 enum { param_on, param_source, param_target, param_amount };
