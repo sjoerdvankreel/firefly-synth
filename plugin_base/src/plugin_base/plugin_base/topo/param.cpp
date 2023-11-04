@@ -53,7 +53,8 @@ param_topo::validate(module_topo const& module, int index) const
   domain.validate(module.info.slot_count);
 
   assert(info.index == index);
-  assert(domain.max > domain.min);
+  assert(domain.max >= domain.min);
+  assert(!domain.is_real() || domain.max > domain.min);
   assert(domain.is_real() || dsp.rate == param_rate::block);
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == param_layout::single));

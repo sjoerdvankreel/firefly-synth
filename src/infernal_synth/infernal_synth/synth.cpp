@@ -120,9 +120,9 @@ synth_topo()
   result->gui.sections[section_lfos] = make_module_section_gui(section_lfos, { 0, 0 }, { 1, 2 });
   result->gui.sections[section_delay] = make_module_section_gui(section_delay, { 4, 0 }, { 1, 1 });
   result->gui.sections[section_filter] = make_module_section_gui(section_filter, { 3, 0 }, { 1, 1 });
-  result->gui.sections[section_monitor] = make_module_section_gui(section_monitor, { 5, 1 }, { 1, 1 });
+  result->gui.sections[section_monitor] = make_module_section_gui(section_monitor, { 5, 0 }, { 1, 1 });
   result->gui.sections[section_cv_matrix] = make_module_section_gui(section_cv_matrix, { 3, 1, 3, 1 }, { 1, 1 });
-  result->gui.sections[section_audio_matrix] = make_module_section_gui(section_cv_matrix, { 0, 1, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_audio_matrix] = make_module_section_gui(section_audio_matrix, { 0, 1, 3, 1 }, { 1, 1 });
 
   result->modules.resize(module_count);
   result->modules[module_env] = env_topo(section_env, cv_colors, { 0, 0 });

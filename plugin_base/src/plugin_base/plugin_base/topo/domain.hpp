@@ -119,7 +119,7 @@ param_domain::plain_to_normalized(plain_value plain) const
 {
   double range = max - min;
   if (!is_real())
-    return normalized_value((plain.step() - min) / range);
+    return normalized_value((plain.step() - min) / (range == 0? 1: range));
   if (type == domain_type::linear)
     return normalized_value((plain.real() - min) / range);
   return normalized_value(std::pow((plain.real() - min) * (1 / range), 1 / exp));

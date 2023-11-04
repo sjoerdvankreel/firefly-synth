@@ -37,7 +37,7 @@ audio_matrix_topo(
 {
   module_topo result(make_module(
     make_topo_info("{196C3744-C766-46EF-BFB8-9FB4FEBC7810}", "Audio", module_audio_matrix, 1),
-    make_module_dsp(module_stage::voice, module_output::none, route_count, 0),
+    make_module_dsp(module_stage::voice, module_output::none, 0, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.engine_factory = [](auto const& topo, int, int) ->
@@ -49,7 +49,7 @@ audio_matrix_topo(
   
   // todo enable first
   result.params.emplace_back(make_param(
-    make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, 1),
+    make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
 
