@@ -18,6 +18,7 @@ enum class plugin_type { synth, fx };
 // module ui grouping
 struct module_section_gui final {
   int index;
+  bool tabbed;
   bool visible;
   gui_position position;
   gui_dimension dimension;

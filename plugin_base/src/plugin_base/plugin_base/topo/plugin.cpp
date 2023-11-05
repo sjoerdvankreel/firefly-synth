@@ -11,7 +11,8 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
   auto always_visible = [](int) {return true; };
   auto include = [this, &plugin](int m) { return plugin.modules[m].gui.section == this->index; };
   position.validate(plugin.gui.dimension); 
-  dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
+  if (tabbed) assert(dimension.column_sizes.size() == 1 && dimension.row_sizes.size() == 1);
+  if(!tabbed) dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
 }
 
 void
@@ -50,6 +51,7 @@ plugin_topo::validate() const
       INF_ASSERT_EXEC(section_ids.insert(modules[m].sections[s].tag.id).second);
     for (int p = 0; p < modules[m].params.size(); p++)
       INF_ASSERT_EXEC(param_ids.insert(modules[m].params[p].info.tag.id).second);
+    if (gui.sections[modules[m].gui.section].tabbed) assert(modules[m].info.slot_count == 1);
   }
 }
 

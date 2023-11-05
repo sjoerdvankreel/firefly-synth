@@ -69,10 +69,23 @@ make_module_section_gui_none(int index)
 }
 
 module_section_gui
+make_module_section_gui_tabbed(int index, gui_position const& position)
+{
+  module_section_gui result = {};
+  result.index = index;
+  result.tabbed = true;
+  result.visible = true;
+  result.position = position;
+  result.dimension = { 1, 1 };
+  return result;
+}
+
+module_section_gui
 make_module_section_gui(int index, gui_position const& position, gui_dimension const& dimension)
 {
   module_section_gui result = {};
   result.index = index;
+  result.tabbed = false;
   result.visible = true;
   result.position = position;
   result.dimension = dimension;

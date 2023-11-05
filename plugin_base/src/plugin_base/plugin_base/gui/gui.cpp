@@ -59,6 +59,8 @@ _lnf(&gui_state->desc(), -1), _gui_state(gui_state)
   setOpaque(true);
   setLookAndFeel(&_lnf);
   auto const& topo = *gui_state->desc().plugin;
+  for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
+    _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), i);
   add_and_make_visible(*this, make_container());
   setSize(topo.gui.default_width, topo.gui.default_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
 }
@@ -142,11 +144,36 @@ Component&
 plugin_gui::make_module_section(module_section_gui const& section)
 {
   auto const& modules = _gui_state->desc().modules;
-  auto& result = make_component<grid_component>(section.dimension, margin_module);
+  if (section.tabbed)
+  {
+    // todo merge this
+    int matched_module = -1;
+    auto const& topo = *_gui_state->desc().plugin;
+    for(int i = 0; i < topo.modules.size(); i++)
+      if(topo.modules[i].gui.section == section.index)
+        matched_module = i;
+    auto& tabs = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+    tabs.setOutline(0);
+    tabs.setTabBarDepth(topo.gui.font_height + 4);
+    tabs.getTabbedButtonBar().setTitle("VARKEN1");
+    tabs.setLookAndFeel(module_lnf(matched_module));
+    int radius = topo.gui.module_corner_radius;
+    auto background1 = topo.modules[matched_module].gui.colors.tab_background1;
+    auto background2 = topo.modules[matched_module].gui.colors.tab_background2;
+    for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
+      if (iter->module->gui.visible && iter->module->gui.section == section.index)
+      {
+        auto& corners = make_component<rounded_container>(
+          &make_param_sections(*iter), radius, true, true, background1, background2);
+        tabs.addTab(iter->module->info.tag.name, Colours::transparentBlack, &corners, false);
+      }
+    return tabs;
+  }
+  auto& grid = make_component<grid_component>(section.dimension, margin_module);
   for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
-    if(iter->module->gui.visible && iter->module->gui.section == section.index)
-      result.add(make_modules(&(*iter)), iter->module->gui.position);
-  return result;
+   if(iter->module->gui.visible && iter->module->gui.section == section.index)
+     grid.add(make_modules(&(*iter)), iter->module->gui.position);
+  return grid;
 }
 
 Component&
@@ -154,7 +181,6 @@ plugin_gui::make_modules(module_desc const* slots)
 {
   int index = slots[0].module->info.index;
   auto const& topo = *_gui_state->desc().plugin;
-  _module_lnfs[index] = std::make_unique<lnf>(&_gui_state->desc(), index);
   auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
   result.setTabBarDepth(topo.gui.font_height + 4);
