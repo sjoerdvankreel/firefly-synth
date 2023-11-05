@@ -118,11 +118,8 @@ fx_engine::process(plugin_block& block)
   auto const& audio_in = mixer.mix(block, module_fx, block.module_slot);
   for(int c = 0; c < 2; c++)
     audio_in[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][c]);
-
   if(type == type_lpf || type == type_hpf)
     process_filter(block);  
-  for(int c = 0; c < 2; c++)
-    block.state.own_audio[0][c].add_to(block.start_frame, block.end_frame, block.voice->result[c]);
 }
 
 }
