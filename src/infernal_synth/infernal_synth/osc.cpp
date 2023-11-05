@@ -13,7 +13,7 @@ namespace infernal_synth {
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
-enum { param_type, param_gain, param_bal, param_am, param_note, param_oct, param_cent, param_pitch };
+enum { param_type, param_bal, param_am, param_note, param_oct, param_cent, param_pitch };
 
 static std::vector<list_item>
 type_items()
@@ -62,12 +62,6 @@ osc_topo(
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   type.domain.default_selector = [] (int s, int) { return type_items()[s == 0? type_sine: type_off].name; };
-
-  result.params.emplace_back(make_param(
-    make_topo_info("{75E49B1F-0601-4E62-81FD-D01D778EDCB5}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
@@ -133,7 +127,6 @@ osc_engine::process(plugin_block& block)
   auto const& env_curve = block.voice->all_cv[module_env][0][0];
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
-  auto const& gain_curve = *modulation[module_osc][block.module_slot][param_gain][0];
   auto const& pitch_curve = *modulation[module_osc][block.module_slot][param_pitch][0];
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
@@ -167,7 +160,7 @@ osc_engine::process(plugin_block& block)
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    sample *= gain_curve[f] * env_curve[f];
+    sample *= env_curve[f];
     mono_scratch[f] = mix_signal(am_mod_scratch[f], sample, sample * am_scratch[f]);
     block.state.own_audio[0][0][f] = mono_scratch[f] * balance(0, bal);
     block.state.own_audio[0][1][f] = mono_scratch[f] * balance(1, bal);

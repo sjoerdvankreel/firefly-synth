@@ -69,7 +69,6 @@ lfo_topo(
     make_param_dsp_accurate(param_automate::both), make_domain_linear(0.1, 20, 1, 2, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, 
     make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
-  rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_rate; });
   rate.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
 
   auto& tempo = result.params.emplace_back(make_param(
@@ -88,7 +87,7 @@ lfo_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   if(type == type_off) return; 
 
-  int this_module = _global? module_gfx: module_vfx;
+  int this_module = _global? module_glfo: module_vlfo;
   auto const& rate_curve = sync_or_freq_into_scratch(
     block, type == type_sync, this_module, param_rate, param_tempo, scratch_time);
   for (int f = block.start_frame; f < block.end_frame; f++)
