@@ -34,7 +34,7 @@ do scrollbar
 fix single valued submenu
 default osc 1 to voice
 merge vcv/gcv / vaudio/gaudio into tabs
-drop osc bal
+do pitchwheel/modwheel/master cv section
 
 
 * get some linux folks to comment (ycollete?)
