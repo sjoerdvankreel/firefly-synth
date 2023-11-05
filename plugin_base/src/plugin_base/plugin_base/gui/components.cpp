@@ -52,23 +52,6 @@ binding_component::init()
 }
 
 void
-binding_component::state_changed(int index, plain_value plain)
-{
-  auto& self = dynamic_cast<Component&>(*this);
-  auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
-  if (enabled_iter != _enabled_params.end())
-    self.setEnabled(bind_param(_bindings->enabled, _enabled_params, _enabled_values));
-
-  auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
-  if (visibility_iter != _visibility_params.end())
-  {
-    bool visible = bind_param(_bindings->visible, _visibility_params, _visibility_values);
-    self.setVisible(visible);
-    self.setInterceptsMouseClicks(visible, visible);
-  }
-}
-
-void 
 binding_component::setup_param_bindings(
   std::vector<int> const& topo_params, std::vector<int>& params)
 {
@@ -80,6 +63,33 @@ binding_component::setup_param_bindings(
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);
     _gui->gui_state()->add_listener(state_index, this);
+  }
+}
+
+void
+binding_component::state_changed(int index, plain_value plain)
+{
+  auto& self = dynamic_cast<Component&>(*this);
+  if(_bindings->enabled.slot_selector != nullptr && !_bindings->enabled.slot_selector(_module->info.slot))
+    self.setEnabled(false);
+  else 
+  {
+    auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
+    if (enabled_iter != _enabled_params.end())
+      self.setEnabled(bind_param(_bindings->enabled, _enabled_params, _enabled_values));
+  }
+
+  if(_bindings->visible.slot_selector != nullptr && !_bindings->visible.slot_selector(_module->info.slot))
+    self.setVisible(false);
+  else
+  {
+    auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
+    if (visibility_iter != _visibility_params.end())
+    {
+      bool visible = bind_param(_bindings->visible, _visibility_params, _visibility_values);
+      self.setVisible(visible);
+      self.setInterceptsMouseClicks(visible, visible);
+    }
   }
 }
 
