@@ -48,14 +48,14 @@ osc_topo(
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, 1, scratch_count),
-    make_module_gui(section, colors, pos, { { 1 }, { 4, 3 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } })));
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1 }))));
 
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
@@ -66,13 +66,13 @@ osc_topo(
   result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   auto& am = result.params.emplace_back(make_param(
     make_topo_info("{D03E5C05-E404-4394-BC1F-CE2CD6AAE357}", "AM", param_am, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   am.gui.bindings.enabled.bind_slot([](int s) { return s > 0; });
   am.dsp.automate_selector = [](int s) { return s > 0? param_automate::both : param_automate::none; };
