@@ -68,29 +68,51 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
   result.submenu = std::make_shared<gui_submenu>();
   for (int m = 0; m < modules.size(); m++)
   {
+    int mod_slots = modules[m]->info.slot_count;
     auto const& module_tag = modules[m]->info.tag;
     auto module_submenu = std::make_shared<gui_submenu>();
     module_submenu->name = module_tag.name;
-    for (int mi = 0; mi < modules[m]->info.slot_count; mi++)
+    if (mod_slots == 1)
     {
-      auto module_slot_submenu = std::make_shared<gui_submenu>();
-      module_slot_submenu->name = module_tag.name + " " + std::to_string(mi + 1);
       for (int p = 0; p < modules[m]->params.size(); p++)
-        if (modules[m]->params[p].dsp.can_modulate(mi))
+        if (modules[m]->params[p].dsp.can_modulate(0))
         {
           auto const& param_tag = modules[m]->params[p].info.tag;
           for (int pi = 0; pi < modules[m]->params[p].info.slot_count; pi++)
           {
             list_item item;
-            item.id = module_tag.id + "-" + std::to_string(mi) + "-" + param_tag.id + "-" + std::to_string(pi);
-            item.name = module_tag.name + " " + std::to_string(mi + 1) + " " + param_tag.name;
+            item.id = module_tag.id + "-" + param_tag.id + "-" + std::to_string(pi);
+            item.name = module_tag.name + " " + param_tag.name;
             if (modules[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
             result.items.push_back(item);
-            module_slot_submenu->indices.push_back(index++);
-            result.mappings.push_back({ modules[m]->info.index, mi, modules[m]->params[p].info.index, pi });
+            module_submenu->indices.push_back(index++);
+            result.mappings.push_back({ modules[m]->info.index, 0, modules[m]->params[p].info.index, pi });
           }
         }
-      module_submenu->children.push_back(module_slot_submenu);
+    }
+    else
+    {
+      for (int mi = 0; mi < mod_slots; mi++)
+      {
+        auto module_slot_submenu = std::make_shared<gui_submenu>();
+        module_slot_submenu->name = module_tag.name + " " + std::to_string(mi + 1);
+        for (int p = 0; p < modules[m]->params.size(); p++)
+          if (modules[m]->params[p].dsp.can_modulate(mi))
+          {
+            auto const& param_tag = modules[m]->params[p].info.tag;
+            for (int pi = 0; pi < modules[m]->params[p].info.slot_count; pi++)
+            {
+              list_item item;
+              item.id = module_tag.id + "-" + std::to_string(mi) + "-" + param_tag.id + "-" + std::to_string(pi);
+              item.name = module_tag.name + " " + std::to_string(mi + 1) + " " + param_tag.name;
+              if (modules[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
+              result.items.push_back(item);
+              module_slot_submenu->indices.push_back(index++);
+              result.mappings.push_back({ modules[m]->info.index, mi, modules[m]->params[p].info.index, pi });
+            }
+          }
+        module_submenu->children.push_back(module_slot_submenu);
+      }
     }
     result.submenu->children.push_back(module_submenu);
   }

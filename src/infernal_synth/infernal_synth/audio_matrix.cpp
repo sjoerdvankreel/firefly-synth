@@ -17,7 +17,7 @@ namespace infernal_synth {
 static int constexpr route_count = 6;
 
 enum { section_main };
-enum { param_on, param_source, param_target, param_amount };
+enum { param_on, param_source, param_target, param_gain };
 
 class audio_matrix_engine:
 public module_engine { 
@@ -82,7 +82,7 @@ audio_matrix_topo(
   target.gui.submenu = target_matrix.submenu;
 
   auto& amount = result.params.emplace_back(make_param(
-    make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Amount", param_amount, route_count),
+    make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -139,11 +139,11 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 
     // add modulated amount to mixdown
     auto const& modulation = get_cv_matrix_mixdown(block, _global);
-    auto const& amount_curve = *modulation[this_module][0][param_amount][r];
+    auto const& gain_curve = *modulation[this_module][0][param_gain][r];
     auto const& source_audio = block.module_audio(sm, smi);
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
-        mix[c][f] += amount_curve[f] * source_audio[0][c][f];
+        mix[c][f] += gain_curve[f] * source_audio[0][c][f];
   }
 
   return *result;
