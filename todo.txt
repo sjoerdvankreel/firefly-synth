@@ -32,7 +32,8 @@ make sound by default
 rename from infernal
 do scrollbar
 fix single valued submenu
-make invisible voice target module
+default osc 1 to voice
+
 
 * get some linux folks to comment (ycollete?)
 * continuing

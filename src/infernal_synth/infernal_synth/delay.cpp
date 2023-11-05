@@ -49,6 +49,9 @@ delay_topo(
     make_module_dsp(module_stage::output, module_output::none, 0, scratch_count),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  result.engine_factory = [](auto const&, int sample_rate, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
+
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{05CF51D6-35F9-4115-A654-83EEE584B68E}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
@@ -78,9 +81,6 @@ delay_topo(
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-
-  result.engine_factory = [](auto const&, int sample_rate, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<delay_engine>(sample_rate); };
 
   return result;
 }

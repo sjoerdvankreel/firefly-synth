@@ -1,5 +1,6 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 
@@ -14,7 +15,8 @@ namespace infernal_synth {
 
 enum { section_main };
 enum { type_off, type_lpf, type_hpf, type_delay };
-enum { param_type, param_filter_freq, param_filter_res, param_delay_tempo, param_delay_gain, param_delay_feedback };
+enum { param_type, param_filter_freq, param_filter_res, 
+  param_delay_tempo, param_delay_gain, param_delay_feedback };
 
 static std::vector<list_item>
 type_items()
@@ -29,17 +31,24 @@ type_items()
 
 class fx_engine: 
 public module_engine {  
+
+  // filter
   double _ic1eq[2];
   double _ic2eq[2];
+
+  // delay
+  int _pos;
+  int const _capacity;
+  jarray<float, 2> _buffer = {};
 
   void process_delay(plugin_block& block);
   void process_filter(plugin_block& block);
 
 public:
-  fx_engine() { initialize(); }
+  fx_engine(int sample_rate);
   INF_PREVENT_ACCIDENTAL_COPY(fx_engine);
+  void initialize() override;
   void process(plugin_block& block) override;
-  void initialize() override { _ic1eq[0] = _ic1eq[1] = _ic2eq[0] = _ic2eq[1] = 0; }
 };
 
 module_topo
@@ -52,16 +61,16 @@ fx_topo(
     make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<fx_engine>(); };
+  result.engine_factory = [](auto const&, int sample_rate, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<fx_engine>(sample_rate); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1 } })));
 
   result.params.emplace_back(make_param(
-    make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "On", param_type, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
+    make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
+    make_param_dsp_block(param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
 
   auto& filter_freq = result.params.emplace_back(make_param(
@@ -104,6 +113,25 @@ fx_topo(
   return result;
 }
 
+fx_engine::
+fx_engine(int sample_rate) :
+_capacity(sample_rate * 10)
+{
+  _buffer.resize(jarray<int, 1>(2, _capacity));
+  initialize();
+}
+
+void
+fx_engine::initialize()
+{
+  _pos = 0;
+  _ic1eq[0] = 0;
+  _ic1eq[1] = 0;
+  _ic2eq[0] = 0;
+  _ic2eq[1] = 0;
+  _buffer.fill(0);
+}
+
 void
 fx_engine::process(plugin_block& block)
 {
@@ -121,7 +149,20 @@ fx_engine::process(plugin_block& block)
 
 void
 fx_engine::process_delay(plugin_block& block)
-{
+{ 
+  float time = get_timesig_time_value(block, module_fx, param_delay_tempo);
+  int samples = block.sample_rate * time;
+  auto const& gain_curve = block.state.own_accurate_automation[param_delay_gain][0];
+  //auto const& feedback_curve = block.state.own_accurate_automation[param_delay_feedback][0];
+  for (int c = 0; c < 2; c++)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      float dry = block.state.own_audio[0][c][f];
+      block.state.own_audio[0][c][f] += _buffer[c][(_pos + f + _capacity - samples) % _capacity] * gain_curve[f];
+      _buffer[c][(_pos + f) % _capacity] = dry;
+    }
+  _pos += block.end_frame - block.start_frame;
+  _pos %= _capacity;
 }
   
 void

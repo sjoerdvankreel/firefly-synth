@@ -6,6 +6,27 @@
 
 namespace plugin_base {
 
+inline timesig
+get_timesig_param_value(plugin_block const& block, int module, int timesig_p)
+{
+  int sig_index = block.state.own_block_automation[timesig_p][0].step();
+  return block.plugin.modules[module].params[timesig_p].domain.timesigs[sig_index];
+}
+
+inline float 
+get_timesig_time_value(plugin_block const& block, int module, int timesig_p)
+{
+  timesig sig = get_timesig_param_value(block, module, timesig_p);
+  return timesig_to_time(block.host.bpm, sig);
+}
+
+inline float
+get_timesig_freq_value(plugin_block const& block, int module, int timesig_p)
+{
+  timesig sig = get_timesig_param_value(block, module, timesig_p);
+  return timesig_to_freq(block.host.bpm, sig);
+}
+
 inline jarray<float, 1> const&
 normalized_to_raw_into(
   plugin_block const& block, int m, int p,
@@ -23,8 +44,7 @@ sync_or_rate_into_scratch(
   int timesig_p, int scratch, TransformTimesig transform_timesig)
 {
   auto& result = block.state.own_scratch[scratch];
-  int sig_index = block.state.own_block_automation[timesig_p][0].step();
-  timesig sig = block.plugin.modules[module].params[timesig_p].domain.timesigs[sig_index];
+  timesig sig = get_timesig_param_value(block, module, timesig_p);
   if (sync) result.fill(block.start_frame, block.end_frame, transform_timesig(block.host.bpm, sig));
   else normalized_to_raw_into(block, module, rate_p, block.state.own_accurate_automation[rate_p][0], result);
   return result;
