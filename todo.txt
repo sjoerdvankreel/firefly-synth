@@ -20,13 +20,11 @@ host/os scaling broken
 release_count > 0 asserts
 
 demo synth:
-vfx/gfx -> lpf/hpf/feedback delay
 graphs
 clean up the dsp
 measure performance
 master gain/midi/mod/pitch etc
 only select relevant cv targets
-check right octave/frequency (c4)
 rename from infernal
 do scrollbar
 merge vcv/gcv / vaudio/gaudio into tabs

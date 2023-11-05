@@ -20,7 +20,7 @@ template <class T> inline T check_bipolar(T val)
 inline float mix_signal(float mix, float dry, float wet) 
 { return (1.0f - mix) * dry + mix * wet; }
 inline float pitch_to_freq(float pitch)
-{ return 440.0f * std::pow(2.0f, (pitch - 69.0f) / 12.0f); }
+{ return 440.0f * std::pow(2.0f, (pitch + 12.0f - 69.0f) / 12.0f); }
 
 inline float timesig_to_freq(float bpm, timesig const& sig) 
 { return bpm / (60.0f * 4.0f * sig.num / sig.den); }
