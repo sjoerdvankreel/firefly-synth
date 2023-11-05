@@ -27,12 +27,8 @@ measure performance
 master gain/midi/mod/pitch etc
 only select relevant cv targets
 check right octave/frequency (c4)
-monitor gain over 100
-make sound by default
 rename from infernal
 do scrollbar
-fix single valued submenu
-default osc 1 to voice
 merge vcv/gcv / vaudio/gaudio into tabs
 do pitchwheel/modwheel/master cv section
 

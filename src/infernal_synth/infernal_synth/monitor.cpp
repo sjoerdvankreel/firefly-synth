@@ -38,7 +38,7 @@ monitor_topo(
 
   result.params.emplace_back(make_param(
     make_topo_info("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Gain", param_gain, 1),
-    make_param_dsp_output(), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::text, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
@@ -75,8 +75,8 @@ monitor_engine::process(plugin_block& block)
       max_out = std::max(max_out, block.out->host_audio[c][f]);
   block.set_out_param(param_voices, 0, block.out->voice_count);
   block.set_out_param(param_threads, 0, block.out->thread_count);
-  block.set_out_param(param_gain, 0, std::clamp(max_out, 0.0f, 1.0f));
   block.set_out_param(param_cpu, 0, std::clamp(block.out->cpu_usage, 0.0, 1.0));
+  block.set_out_param(param_gain, 0, std::clamp(max_out, 0.0f, (float)block.plugin.modules[module_monitor].params[param_gain].domain.max));
 }
 
 }
