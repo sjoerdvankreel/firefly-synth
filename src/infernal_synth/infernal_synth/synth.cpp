@@ -129,7 +129,8 @@ synth_topo()
   result->gui.sections[section_gaudio_matrix] = make_module_section_gui(section_gaudio_matrix, { 3, 2, 3, 1 }, { 1, 1 });
 
   result->modules.resize(module_count);
-  result->modules[module_voice] = voice_topo(section_voice);
+  result->modules[module_voice_in] = voice_topo(section_voice, false);
+  result->modules[module_voice_out] = voice_topo(section_voice, true);
   result->modules[module_env] = env_topo(section_env, cv_colors, { 0, 0 });
   result->modules[module_osc] = osc_topo(section_osc, audio_colors, { 0, 0 });
   result->modules[module_gfx] = fx_topo(section_fx, audio_colors, { 0, 1 }, true);
@@ -140,12 +141,12 @@ synth_topo()
   result->modules[module_monitor] = monitor_topo(section_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(section_vaudio_matrix, audio_colors, { 0, 0 }, false,
     { &result->modules[module_osc], &result->modules[module_vfx] },
-    { &result->modules[module_vfx], &result->modules[module_voice] });
+    { &result->modules[module_vfx], &result->modules[module_voice_out] });
   result->modules[module_vcv_matrix] = cv_matrix_topo(section_vcv_matrix, cv_colors, { 0, 0 }, false,
     { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo] },
     { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
   result->modules[module_gaudio_matrix] = audio_matrix_topo(section_gaudio_matrix, audio_colors, { 0, 0 }, true,
-    { &result->modules[module_gfx] },
+    { &result->modules[module_voice_in], &result->modules[module_gfx] },
     { &result->modules[module_gfx], &result->modules[module_master] });
   result->modules[module_gcv_matrix] = cv_matrix_topo(section_gcv_matrix, cv_colors, { 0, 0 }, true,
     { &result->modules[module_glfo] },

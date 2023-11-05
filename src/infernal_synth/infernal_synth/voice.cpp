@@ -11,33 +11,43 @@ namespace infernal_synth {
 
 class voice_engine :
 public module_engine {
-
+  bool const _out;
 public:
+  voice_engine(bool out): _out(out) {}
+  INF_PREVENT_ACCIDENTAL_COPY(voice_engine);
   void initialize() override { }
   void process(plugin_block& block) override;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_engine);
 };
 
 module_topo
-voice_topo(int section)
+voice_topo(int section, bool out)
 {
-  module_topo result(make_module(
-    make_topo_info("{7110215B-A6C2-47F2-8A2F-DECA85250DF1}", "Voice", module_voice, 1),
-    make_module_dsp(module_stage::voice, module_output::none, 0, 0), make_module_gui_none(section)));
-
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<voice_engine> { return std::make_unique<voice_engine>(); };
-
+  auto const in_dsp = make_module_dsp(module_stage::output, module_output::audio, 1, 0);
+  auto const out_dsp = make_module_dsp(module_stage::voice, module_output::none, 0, 0);
+  auto const in_info = make_topo_info("{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}", "Voice", module_voice_in, 1);
+  auto const out_info = make_topo_info("{94CC6FFA-2C0F-4B72-A484-65CD2974D288}", "Voice", module_voice_out, 1);
+  auto dsp = module_dsp(out ? out_dsp : in_dsp);
+  auto info = topo_info(out? out_info: in_info);
+  module_topo result(make_module(info, dsp, make_module_gui_none(section)));
+  result.engine_factory = [out](auto const&, int, int) ->
+    std::unique_ptr<voice_engine> { return std::make_unique<voice_engine>(out); };
   return result;
 }
 
 void
 voice_engine::process(plugin_block& block)
 {
-  auto& mixer = get_audio_matrix_mixer(block, false);
-  auto const& audio_in = mixer.mix(block, module_voice, 0);
-  for(int c = 0; c < 2; c++) 
-    audio_in[c].copy_to(block.start_frame, block.end_frame, block.voice->result[c]);
+  if(_out)
+  {
+    auto& mixer = get_audio_matrix_mixer(block, false);
+    auto const& audio_in = mixer.mix(block, module_voice_out, 0);
+    for(int c = 0; c < 2; c++) 
+      audio_in[c].copy_to(block.start_frame, block.end_frame, block.voice->result[c]);
+  } else 
+  {
+    for(int c = 0; c < 2; c++)
+      block.out->voice_mixdown[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][c]);
+  }
 }
 
 }

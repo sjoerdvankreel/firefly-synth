@@ -31,7 +31,7 @@ struct plugin_output_block final {
   double cpu_usage;
   float* const* host_audio;
   jarray<plain_value, 2>& params;
-  jarray<float, 2> const& mixdown;
+  jarray<float, 2> const& voice_mixdown;
 };
 
 // single per-voice module process call
