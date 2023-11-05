@@ -110,7 +110,7 @@ fx_topo(
   delay_gain.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
 
   auto& delay_feedback = result.params.emplace_back(make_param(
-    make_topo_info("{8FE78CA0-5752-4194-B4FE-E66017303687}", "Fbdk", param_delay_feedback, 1),
+    make_topo_info("{8FE78CA0-5752-4194-B4FE-E66017303687}", "Fdbk", param_delay_feedback, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
