@@ -86,9 +86,9 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
 }
 
 enum { 
-  section_lfos, section_env, section_cv_matrix, 
-  section_audio_matrix, section_osc, section_fx,  section_voice,
-  section_delay, section_monitor, section_count };
+  section_lfos, section_env, section_gcv_matrix, section_vcv_matrix,
+  section_vaudio_matrix, section_osc, section_fx, section_voice,
+  section_gaudio_matrix, section_master, section_monitor, section_count };
 
 std::unique_ptr<plugin_topo>
 synth_topo()
@@ -106,41 +106,50 @@ synth_topo()
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
-  result->gui.min_width = 750;
-  result->gui.max_width = 1500;
-  result->gui.default_width = 750;
+  result->gui.min_width = 1050;
+  result->gui.max_width = 2100;
+  result->gui.default_width = 1050;
   result->gui.aspect_ratio_width = 9;
   result->gui.aspect_ratio_height = 4;
-  result->gui.dimension.column_sizes = { 3, 2 };
+  result->gui.dimension.column_sizes = { 3, 2, 2 };
   result->gui.dimension.row_sizes = std::vector<int>(6, 1);
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   result->gui.sections.resize(section_count);
   result->gui.sections[section_voice] = make_module_section_gui_none(section_voice);
-  result->gui.sections[section_fx] = make_module_section_gui(section_fx, { 4, 0 }, { 1, 1 });
+  result->gui.sections[section_fx] = make_module_section_gui(section_fx, { 4, 0 }, { 1, 2 });
   result->gui.sections[section_env] = make_module_section_gui(section_env, { 2, 0 }, { 1, 1 });
   result->gui.sections[section_osc] = make_module_section_gui(section_osc, { 3, 0 }, { 1, 1 });
   result->gui.sections[section_lfos] = make_module_section_gui(section_lfos, { 1, 0 }, { 1, 2 });
-  result->gui.sections[section_delay] = make_module_section_gui(section_delay, { 5, 0 }, { 1, 1 });
+  result->gui.sections[section_master] = make_module_section_gui(section_master, { 5, 0 }, { 1, 1 });
   result->gui.sections[section_monitor] = make_module_section_gui(section_monitor, { 0, 0 }, { 1, 1 });
-  result->gui.sections[section_cv_matrix] = make_module_section_gui(section_cv_matrix, { 0, 1, 3, 1 }, { 1, 1 });
-  result->gui.sections[section_audio_matrix] = make_module_section_gui(section_audio_matrix, { 3, 1, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_vcv_matrix] = make_module_section_gui(section_vcv_matrix, { 0, 1, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_vaudio_matrix] = make_module_section_gui(section_vaudio_matrix, { 3, 1, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_gcv_matrix] = make_module_section_gui(section_gcv_matrix, { 0, 2, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_gaudio_matrix] = make_module_section_gui(section_gaudio_matrix, { 3, 2, 3, 1 }, { 1, 1 });
 
   result->modules.resize(module_count);
   result->modules[module_voice] = voice_topo(section_voice);
   result->modules[module_env] = env_topo(section_env, cv_colors, { 0, 0 });
   result->modules[module_osc] = osc_topo(section_osc, audio_colors, { 0, 0 });
-  result->modules[module_delay] = delay_topo(section_delay, audio_colors, { 0, 0 });
+  result->modules[module_gfx] = fx_topo(section_fx, audio_colors, { 0, 1 }, true);
+  result->modules[module_vfx] = fx_topo(section_fx, audio_colors, { 0, 0 }, false);
   result->modules[module_glfo] = lfo_topo(section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(section_lfos, cv_colors, { 0, 1 }, false);
+  result->modules[module_master] = master_topo(section_master, audio_colors, { 0, 0 });
   result->modules[module_monitor] = monitor_topo(section_monitor, other_colors, { 0, 0 }, result->polyphony);
-  result->modules[module_fx] = fx_topo(section_fx, audio_colors, { 0, 0 }, result->modules[module_osc].info.slot_count);
-  result->modules[module_audio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 },
-    { &result->modules[module_osc], &result->modules[module_fx] },
-    { &result->modules[module_fx], &result->modules[module_voice] });
-  result->modules[module_cv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 },
+  result->modules[module_vaudio_matrix] = audio_matrix_topo(section_vaudio_matrix, audio_colors, { 0, 0 }, false,
+    { &result->modules[module_osc], &result->modules[module_vfx] },
+    { &result->modules[module_vfx], &result->modules[module_voice] });
+  result->modules[module_vcv_matrix] = cv_matrix_topo(section_vcv_matrix, cv_colors, { 0, 0 }, false,
     { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo] },
-    { &result->modules[module_osc], &result->modules[module_fx], &result->modules[module_audio_matrix] });
+    { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
+  result->modules[module_gaudio_matrix] = audio_matrix_topo(section_gaudio_matrix, audio_colors, { 0, 0 }, true,
+    { &result->modules[module_gfx] },
+    { &result->modules[module_gfx], &result->modules[module_master] });
+  result->modules[module_gcv_matrix] = cv_matrix_topo(section_gcv_matrix, cv_colors, { 0, 0 }, true,
+    { &result->modules[module_glfo] },
+    { &result->modules[module_gaudio_matrix], &result->modules[module_master] });
   return result;
 }
 

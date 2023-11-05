@@ -21,17 +21,19 @@ enum { param_on, param_source, param_target, param_amount };
 
 class audio_matrix_engine:
 public module_engine { 
+  bool const _global;
   audio_matrix_mixer _mixer;
   jarray<float, 3>* _own_audio = {};
   std::vector<matrix_module_mapping> const _sources;
   std::vector<matrix_module_mapping> const _targets;
+
 public:
   void initialize() override {}
   INF_PREVENT_ACCIDENTAL_COPY(audio_matrix_engine);
-  audio_matrix_engine(
+  audio_matrix_engine(bool global,
     std::vector<matrix_module_mapping> const& sources, 
     std::vector<matrix_module_mapping> const& targets): 
-    _mixer(this), _sources(sources), _targets(targets) {}
+    _global(global), _mixer(this), _sources(sources), _targets(targets) {}
 
   void process(plugin_block& block) override;
   jarray<float, 2> const& mix(plugin_block& block, int module, int slot);
@@ -39,15 +41,18 @@ public:
 
 module_topo 
 audio_matrix_topo(
-  int section,
-  plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos,
+  int section, plugin_base::gui_colors const& colors,
+  plugin_base::gui_position const& pos, bool global,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  module_topo result(make_module(
-    make_topo_info("{196C3744-C766-46EF-BFB8-9FB4FEBC7810}", "Audio", module_audio_matrix, 1),
-    make_module_dsp(module_stage::voice, module_output::audio, route_count + 1, 0),
+  auto const voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "VAudio", module_vaudio_matrix, 1);
+  auto const global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "GAudio", module_gaudio_matrix, 1);
+  module_stage stage = global ? module_stage::output : module_stage::voice;
+  auto const info = topo_info(global ? global_info : voice_info);
+
+  module_topo result(make_module(info,
+    make_module_dsp(stage, module_output::audio, route_count + 1, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.sections.emplace_back(make_param_section(section_main,
@@ -82,8 +87,8 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
-  result.engine_factory = [sm = source_matrix, tm = target_matrix](auto const& topo, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<audio_matrix_engine>(sm.mappings, tm.mappings); };
+  result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<audio_matrix_engine>(global, sm.mappings, tm.mappings); };
 
   return result;
 }
@@ -110,7 +115,8 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 
   // loop through the routes
   // the first match we encounter becomes the mix target
-  auto const& block_auto = block.state.all_block_automation[module_audio_matrix][0];
+  int this_module = _global? module_gaudio_matrix: module_vaudio_matrix;
+  auto const& block_auto = block.state.all_block_automation[this_module][0];
   for (int r = 0; r < route_count; r++)
   {
     if(block_auto[param_on][r].step() == 0) continue;
@@ -132,8 +138,8 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     int smi = _sources[selected_source].slot;
 
     // add modulated amount to mixdown
-    auto const& modulation = get_cv_matrix_mixdown(block);
-    auto const& amount_curve = *modulation[module_audio_matrix][0][param_amount][r];
+    auto const& modulation = get_cv_matrix_mixdown(block, _global);
+    auto const& amount_curve = *modulation[this_module][0][param_amount][r];
     auto const& source_audio = block.module_audio(sm, smi);
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)

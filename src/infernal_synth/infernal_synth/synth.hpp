@@ -54,21 +54,23 @@ public:
 }; 
 
 enum {
-  module_glfo, module_vlfo, module_env, module_cv_matrix, 
-  module_audio_matrix, module_osc, module_fx, module_voice,
-  module_delay, module_monitor, module_count };
+  module_glfo, module_gcv_matrix, module_vlfo, module_env, module_vcv_matrix, 
+  module_vaudio_matrix, module_osc, module_vfx, module_voice,
+  module_gaudio_matrix, module_gfx, module_master, module_monitor, module_count };
 
 inline audio_matrix_mixer&
-get_audio_matrix_mixer(plugin_base::plugin_block& block)
+get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
 {
-  void* context = block.voice->all_context[module_audio_matrix][0];
+  int module = global? module_gaudio_matrix: module_vaudio_matrix;
+  void* context = block.module_context(module, 0);
   return *static_cast<audio_matrix_mixer*>(context);
 }
 
 inline cv_matrix_mixdown const&
-get_cv_matrix_mixdown(plugin_base::plugin_block& block)
+get_cv_matrix_mixdown(plugin_base::plugin_block& block, bool global)
 {
-  void* context = block.voice->all_context[module_cv_matrix][0];
+  int module = global ? module_gcv_matrix : module_vcv_matrix;
+  void* context = block.module_context(module, 0);
   return *static_cast<cv_matrix_mixdown const*>(context);
 }
 
@@ -81,13 +83,13 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo voice_topo(int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
-plugin_base::module_topo delay_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
-plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int osc_slot_count);
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony);
-plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos,
+plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
-plugin_base::module_topo audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos,
+plugin_base::module_topo audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global, 
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 
 }

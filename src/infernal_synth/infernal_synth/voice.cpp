@@ -34,7 +34,7 @@ voice_topo(int section)
 void
 voice_engine::process(plugin_block& block)
 {
-  auto& mixer = get_audio_matrix_mixer(block);
+  auto& mixer = get_audio_matrix_mixer(block, false);
   auto const& audio_in = mixer.mix(block, module_voice, 0);
   for(int c = 0; c < 2; c++) 
     audio_in[c].copy_to(block.start_frame, block.end_frame, block.voice->result[c]);

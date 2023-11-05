@@ -32,6 +32,8 @@ type_items()
 class fx_engine: 
 public module_engine {  
 
+  bool const _global;
+
   // filter
   double _ic1eq[2];
   double _ic2eq[2];
@@ -45,8 +47,8 @@ public module_engine {
   void process_filter(plugin_block& block);
 
 public:
-  fx_engine(int sample_rate);
   INF_PREVENT_ACCIDENTAL_COPY(fx_engine);
+  fx_engine(bool global, int sample_rate);
   void initialize() override;
   void process(plugin_block& block) override;
 };
@@ -54,15 +56,19 @@ public:
 module_topo
 fx_topo(
   int section, plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos, int osc_slot_count)
+  plugin_base::gui_position const& pos, bool global)
 {
-  module_topo result(make_module(
-    make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "FX", module_fx, 3), 
-    make_module_dsp(module_stage::voice, module_output::audio, 1, 0),
+  auto const voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "VFX", module_vfx, 3);
+  auto const global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", "GFX", module_gfx, 3);
+  module_stage stage = global ? module_stage::output : module_stage::voice;
+  auto const info = topo_info(global ? global_info : voice_info);
+
+  module_topo result(make_module(info,
+    make_module_dsp(stage, module_output::audio, 1, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
-  result.engine_factory = [](auto const&, int sample_rate, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<fx_engine>(sample_rate); };
+  result.engine_factory = [global](auto const&, int sample_rate, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<fx_engine>(global, sample_rate); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
@@ -114,8 +120,8 @@ fx_topo(
 }
 
 fx_engine::
-fx_engine(int sample_rate) :
-_capacity(sample_rate * 10)
+fx_engine(bool global, int sample_rate) :
+_global(global), _capacity(sample_rate * 10)
 {
   _buffer.resize(jarray<int, 1>(2, _capacity));
   initialize();
@@ -135,9 +141,10 @@ fx_engine::initialize()
 void
 fx_engine::process(plugin_block& block)
 {
+  int this_module = _global? module_gfx: module_vfx;
   int type = block.state.own_block_automation[param_type][0].step();
-  auto& mixer = get_audio_matrix_mixer(block);
-  auto const& audio_in = mixer.mix(block, module_fx, block.module_slot);
+  auto& mixer = get_audio_matrix_mixer(block, _global);
+  auto const& audio_in = mixer.mix(block, this_module, block.module_slot);
   for (int c = 0; c < 2; c++)
     audio_in[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][c]);
   
@@ -149,8 +156,9 @@ fx_engine::process(plugin_block& block)
 
 void
 fx_engine::process_delay(plugin_block& block)
-{ 
-  float time = get_timesig_time_value(block, module_fx, param_delay_tempo);
+{
+  int this_module = _global ? module_gfx : module_vfx;
+  float time = get_timesig_time_value(block, this_module, param_delay_tempo);
   int samples = block.sample_rate * time;
   auto const& gain_curve = block.state.own_accurate_automation[param_delay_gain][0];
   //auto const& feedback_curve = block.state.own_accurate_automation[param_delay_feedback][0];
@@ -168,14 +176,15 @@ fx_engine::process_delay(plugin_block& block)
 void
 fx_engine::process_filter(plugin_block& block)
 {
+  int this_module = _global ? module_gfx : module_vfx;
   int type = block.state.own_block_automation[param_type][0].step();
-  auto const& modulation = get_cv_matrix_mixdown(block);
-  auto const& res_curve = *modulation[module_fx][block.module_slot][param_filter_res][0];
-  auto const& freq_curve = *modulation[module_fx][block.module_slot][param_filter_freq][0];
+  auto const& modulation = get_cv_matrix_mixdown(block, _global);
+  auto const& res_curve = *modulation[this_module][block.module_slot][param_filter_res][0];
+  auto const& freq_curve = *modulation[this_module][block.module_slot][param_filter_freq][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float freq = block.normalized_to_raw(module_fx, param_filter_freq, freq_curve[f]);
+    float freq = block.normalized_to_raw(this_module, param_filter_freq, freq_curve[f]);
     double k = 2 - 2 * res_curve[f];
     double g = std::tan(pi32 * freq / block.sample_rate);
     double a1 = 1 / (1 + g * (g + k));

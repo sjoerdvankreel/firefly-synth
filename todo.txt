@@ -33,6 +33,8 @@ rename from infernal
 do scrollbar
 fix single valued submenu
 default osc 1 to voice
+merge vcv/gcv / vaudio/gaudio into tabs
+drop osc bal
 
 
 * get some linux folks to comment (ycollete?)

@@ -129,7 +129,7 @@ osc_engine::process(plugin_block& block)
   int note = block_auto[param_note][0].step();
   if (type == type_off) return;
 
-  auto const& modulation = get_cv_matrix_mixdown(block);
+  auto const& modulation = get_cv_matrix_mixdown(block, false);
   auto const& env_curve = block.voice->all_cv[module_env][0][0];
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];

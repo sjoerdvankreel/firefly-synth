@@ -50,15 +50,18 @@ public:
 
 module_topo 
 cv_matrix_topo(
-  int section,
-  plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos,
+  int section, plugin_base::gui_colors const& colors,
+  plugin_base::gui_position const& pos, bool global,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  module_topo result(make_module(
-    make_topo_info("{1762278E-5B1E-4495-B499-060EE997A8FD}", "CV", module_cv_matrix, 1),
-    make_module_dsp(module_stage::voice, module_output::cv, route_count, 0),
+  auto const voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "VCV", module_vcv_matrix, 1);
+  auto const global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "GCV", module_gcv_matrix, 1);
+  module_stage stage = global ? module_stage::input : module_stage::voice;
+  auto const info = topo_info(global? global_info: voice_info);
+
+  module_topo result(make_module(info,
+    make_module_dsp(stage, module_output::cv, route_count, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.sections.emplace_back(make_param_section(section_main,
