@@ -33,19 +33,29 @@ make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules)
   {
     auto const& tag = modules[m]->info.tag;
     int slots = modules[m]->info.slot_count;
-    auto module_submenu = std::make_shared<gui_submenu>();
-    module_submenu->name = tag.name;
-    for (int mi = 0; mi < slots; mi++)
+    if (slots == 1)
     {
       list_item item;
-      item.id = tag.id + "-" + std::to_string(mi);
-      item.name = tag.name; 
-      if(slots > 1) item.name += " " + std::to_string(mi + 1);
+      item.id = tag.id;
+      item.name = tag.name;
       result.items.push_back(item);
-      module_submenu->indices.push_back(index++);
-      result.mappings.push_back({ modules[m]->info.index, mi });
+      result.submenu->indices.push_back(index++);
+      result.mappings.push_back({ modules[m]->info.index, 0 });
+    } else
+    {
+      auto module_submenu = std::make_shared<gui_submenu>();
+      module_submenu->name = tag.name;
+      for (int mi = 0; mi < slots; mi++)
+      {
+        list_item item;
+        item.id = tag.id + "-" + std::to_string(mi);
+        item.name = tag.name + " " + std::to_string(mi + 1);
+        result.items.push_back(item);
+        module_submenu->indices.push_back(index++);
+        result.mappings.push_back({ modules[m]->info.index, mi });
+      }
+      result.submenu->children.push_back(module_submenu);
     }
-    result.submenu->children.push_back(module_submenu);
   }
   return result;
 }
@@ -143,16 +153,16 @@ synth_topo()
   result->modules[module_monitor] = monitor_topo(section_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(section_vaudio_matrix, audio_colors, { 0, 0 }, false,
     { &result->modules[module_osc], &result->modules[module_vfx] },
-    { &result->modules[module_vfx], &result->modules[module_voice_out] });
+    { &result->modules[module_voice_out], &result->modules[module_vfx] });
   result->modules[module_vcv_matrix] = cv_matrix_topo(section_vcv_matrix, cv_colors, { 0, 0 }, false,
     { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo] },
     { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
   result->modules[module_gaudio_matrix] = audio_matrix_topo(section_gaudio_matrix, audio_colors, { 0, 0 }, true,
     { &result->modules[module_voice_in], &result->modules[module_gfx] },
-    { &result->modules[module_gfx], &result->modules[module_master] });
+    { &result->modules[module_master], &result->modules[module_gfx] });
   result->modules[module_gcv_matrix] = cv_matrix_topo(section_gcv_matrix, cv_colors, { 0, 0 }, true,
     { &result->modules[module_glfo] },
-    { &result->modules[module_gfx], &result->modules[module_gaudio_matrix], &result->modules[module_master] });
+    { &result->modules[module_master], &result->modules[module_gfx], &result->modules[module_gaudio_matrix] });
   return result;
 }
 

@@ -6,15 +6,18 @@ using namespace juce;
 namespace plugin_base {
 
 static void
-fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data)
+fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data, int& index)
 {
   menu.clear();
   for (int i = 0; i < data->indices.size(); i++)
+  {
+    assert(index++ == data->indices[i]);
     menu.addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
+  }
   for(int i = 0; i < data->children.size(); i++)
   {
     PopupMenu child;
-    fill_popup_menu(domain, child, data->children[i].get());
+    fill_popup_menu(domain, child, data->children[i].get(), index);
     menu.addSubMenu(data->children[i]->name, child);
   }
 }
@@ -155,8 +158,9 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
       addItem(domain.raw_to_text(false, i), i + 1);
   else
   {
+    int index = 0;
     assert(param_gui.edit_type == gui_edit_type::list);
-    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get());
+    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get(), index);
   }
   autofit();
   addListener(this);
