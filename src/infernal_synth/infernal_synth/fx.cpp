@@ -166,8 +166,9 @@ fx_engine::process_delay(plugin_block& block)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
       float dry = block.state.own_audio[0][c][f];
-      block.state.own_audio[0][c][f] += _buffer[c][(_pos + f + _capacity - samples) % _capacity] * gain_curve[f];
-      _buffer[c][(_pos + f) % _capacity] = dry;
+      float wet = _buffer[c][(_pos + f + _capacity - samples) % _capacity];
+      block.state.own_audio[0][c][f] = dry + wet * gain_curve[f];
+      _buffer[c][(_pos + f) % _capacity] = block.state.own_audio[0][c][f];
     }
   _pos += block.end_frame - block.start_frame;
   _pos %= _capacity;
