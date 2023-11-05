@@ -140,61 +140,36 @@ plugin_gui::make_content()
   return result;
 }
 
-Component&
-plugin_gui::make_module_section(module_section_gui const& section)
+TabbedComponent&
+plugin_gui::make_tab_component(std::string const& title, int module)
 {
-  auto const& modules = _gui_state->desc().modules;
-  if (section.tabbed)
-  {
-    // todo merge this
-    int matched_module = -1;
-    auto const& topo = *_gui_state->desc().plugin;
-    for(int i = 0; i < topo.modules.size(); i++)
-      if(topo.modules[i].gui.section == section.index)
-        matched_module = i;
-    auto& tabs = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
-    tabs.setOutline(0);
-    tabs.setTabBarDepth(topo.gui.font_height + 4);
-    tabs.getTabbedButtonBar().setTitle("VARKEN1");
-    tabs.setLookAndFeel(module_lnf(matched_module));
-    int radius = topo.gui.module_corner_radius;
-    auto background1 = topo.modules[matched_module].gui.colors.tab_background1;
-    auto background2 = topo.modules[matched_module].gui.colors.tab_background2;
-    for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
-      if (iter->module->gui.visible && iter->module->gui.section == section.index)
-      {
-        auto& corners = make_component<rounded_container>(
-          &make_param_sections(*iter), radius, true, true, background1, background2);
-        tabs.addTab(iter->module->info.tag.name, Colours::transparentBlack, &corners, false);
-      }
-    return tabs;
-  }
-  auto& grid = make_component<grid_component>(section.dimension, margin_module);
-  for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
-   if(iter->module->gui.visible && iter->module->gui.section == section.index)
-     grid.add(make_modules(&(*iter)), iter->module->gui.position);
-  return grid;
+  auto const& topo = *_gui_state->desc().plugin;
+  auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+  result.setOutline(0);
+  result.getTabbedButtonBar().setTitle(title);
+  result.setTabBarDepth(topo.gui.font_height + 4);
+  result.setLookAndFeel(module_lnf(module)); 
+  return result;
+}
+
+void 
+plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
+{
+  auto const& topo = *_gui_state->desc().plugin;
+  int radius = topo.gui.module_corner_radius;
+  auto background1 = topo.modules[module].gui.colors.tab_background1;
+  auto background2 = topo.modules[module].gui.colors.tab_background2;
+  auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
+  tc.addTab(title, Colours::transparentBlack, &corners, false);
 }
 
 Component&
 plugin_gui::make_modules(module_desc const* slots)
 {
   int index = slots[0].module->info.index;
-  auto const& topo = *_gui_state->desc().plugin;
-  auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
-  result.setOutline(0);
-  result.setTabBarDepth(topo.gui.font_height + 4);
-  result.getTabbedButtonBar().setTitle(slots[0].module->info.tag.name);
-  result.setLookAndFeel(module_lnf(index));
-  int radius = topo.gui.module_corner_radius;
-  auto background1 = slots[0].module->gui.colors.tab_background1;
-  auto background2 = slots[0].module->gui.colors.tab_background2;
+  auto& result = make_tab_component(slots[0].module->info.tag.name, index);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
-  {
-    auto& corners = make_component<rounded_container>(
-      &make_param_sections(slots[i]), radius, true, true, background1, background2);
-    result.addTab(std::to_string(i + 1), Colours::transparentBlack, &corners, false);
-  }
+    add_component_tab(result, make_param_sections(slots[i]), index, std::to_string(i + 1));
   return result;
 }
 
@@ -206,21 +181,6 @@ plugin_gui::make_param_sections(module_desc const& module)
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
   return result;
-}
-
-Component&
-plugin_gui::make_param_section(module_desc const& module, param_section const& section)
-{
-  auto const& params = module.params;
-  grid_component& grid = make_component<param_section_grid>(this, &module, &section, margin_param);
-  for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
-    if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
-      grid.add(make_params(module, &(*iter)), iter->param->gui.position);
-  
-  auto outline1 = module.module->gui.colors.section_outline1;
-  auto outline2 = module.module->gui.colors.section_outline2;
-  int radius = _gui_state->desc().plugin->gui.section_corner_radius;
-  return make_component<rounded_container>(&grid, radius, false, false, outline1, outline2);
 }
 
 Component&
@@ -249,6 +209,47 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   for (int i = 0; i < param->info.slot_count; i++)
     result.add(make_single_param(module, slots[i]), vertical, i);
   return result;
+}
+
+Component&
+plugin_gui::make_param_section(module_desc const& module, param_section const& section)
+{
+  auto const& params = module.params;
+  grid_component& grid = make_component<param_section_grid>(this, &module, &section, margin_param);
+  for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
+    if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
+      grid.add(make_params(module, &(*iter)), iter->param->gui.position);
+  
+  auto outline1 = module.module->gui.colors.section_outline1;
+  auto outline2 = module.module->gui.colors.section_outline2;
+  int radius = _gui_state->desc().plugin->gui.section_corner_radius;
+  return make_component<rounded_container>(&grid, radius, false, false, outline1, outline2);
+}
+
+Component&
+plugin_gui::make_module_section(module_section_gui const& section)
+{
+  auto const& modules = _gui_state->desc().modules;
+  if (!section.tabbed)
+  {
+    auto& grid = make_component<grid_component>(section.dimension, margin_module);
+    for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
+      if (iter->module->gui.visible && iter->module->gui.section == section.index)
+        grid.add(make_modules(&(*iter)), iter->module->gui.position);
+    return grid;
+  }
+
+  int matched_module = -1;
+  auto const& topo = *_gui_state->desc().plugin;
+  for (int i = 0; i < topo.modules.size(); i++)
+    if (topo.modules[i].gui.section == section.index)
+      matched_module = i;
+  assert(matched_module >= 0);
+  auto& tabs = make_tab_component("VARKEN1", matched_module);
+  for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
+    if (iter->module->gui.visible && iter->module->gui.section == section.index)
+      add_component_tab(tabs, make_param_sections(*iter), matched_module, iter->module->info.tag.name);
+  return tabs;
 }
 
 Component&
