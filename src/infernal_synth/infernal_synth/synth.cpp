@@ -149,7 +149,7 @@ synth_topo()
     { &result->modules[module_gfx], &result->modules[module_master] });
   result->modules[module_gcv_matrix] = cv_matrix_topo(section_gcv_matrix, cv_colors, { 0, 0 }, true,
     { &result->modules[module_glfo] },
-    { &result->modules[module_gaudio_matrix], &result->modules[module_master] });
+    { &result->modules[module_gfx], &result->modules[module_gaudio_matrix], &result->modules[module_master] });
   return result;
 }
 
