@@ -7,6 +7,7 @@ void
 module_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
   assert(this->index == index_);
+  if(!visible) return;
   auto always_visible = [](int) {return true; };
   auto include = [this, &plugin](int m) { return plugin.modules[m].gui.section == this->index; };
   position.validate(plugin.gui.dimension); 

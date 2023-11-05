@@ -30,6 +30,9 @@ param_section
 make_param_section(int index, topo_tag const& tag, param_section_gui const& gui);
 param_section_gui
 make_param_section_gui(gui_position const& position, gui_dimension const& dimension);
+
+module_section_gui
+make_module_section_gui_none(int index);
 module_section_gui
 make_module_section_gui(int index, gui_position const& position, gui_dimension const& dimension);
 
@@ -37,6 +40,9 @@ module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
 module_dsp
 make_module_dsp(module_stage stage, module_output output, int output_count, int scratch_count);
+
+module_topo_gui
+make_module_gui_none(int section);
 module_topo_gui
 make_module_gui(int section, gui_colors const& colors, gui_position const& position, gui_dimension const& dimension);
 

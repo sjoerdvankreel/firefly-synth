@@ -55,8 +55,8 @@ public:
 
 enum {
   module_glfo, module_vlfo, module_env, module_cv_matrix, 
-  module_audio_matrix, module_osc, module_fx, module_delay,
-  module_monitor, module_count };
+  module_audio_matrix, module_osc, module_fx, module_voice,
+  module_delay, module_monitor, module_count };
 
 inline audio_matrix_mixer&
 get_audio_matrix_mixer(plugin_base::plugin_block& block)
@@ -78,6 +78,7 @@ module_matrix
 make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules);
 
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
+plugin_base::module_topo voice_topo(int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo delay_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);

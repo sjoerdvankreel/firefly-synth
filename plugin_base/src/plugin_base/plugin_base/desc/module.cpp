@@ -28,9 +28,9 @@ void
 module_desc::validate(plugin_desc const& plugin, int index) const
 {
   assert(module);
-  assert(params.size());
   assert(info.global == index);
   assert(info.topo == module->info.index);
+  assert(!module->gui.visible || params.size());
   info.validate(plugin.plugin->modules.size(), module->info.slot_count);
   for(int p = 0; p < params.size(); p++)
     params[p].validate(*this, p);

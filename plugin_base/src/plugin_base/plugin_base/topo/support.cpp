@@ -60,10 +60,20 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
 }
 
 module_section_gui
+make_module_section_gui_none(int index)
+{
+  module_section_gui result = {};
+  result.index = index;
+  result.visible = false;
+  return result;
+}
+
+module_section_gui
 make_module_section_gui(int index, gui_position const& position, gui_dimension const& dimension)
 {
   module_section_gui result = {};
   result.index = index;
+  result.visible = true;
   result.position = position;
   result.dimension = dimension;
   return result; 
@@ -91,9 +101,19 @@ make_module_dsp(module_stage stage, module_output output, int output_count, int 
 }
 
 module_topo_gui
+make_module_gui_none(int section)
+{
+  module_topo_gui result = {};
+  result.visible = false;
+  result.section = section;
+  return result;
+}
+
+module_topo_gui
 make_module_gui(int section, gui_colors const& colors, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
+  result.visible = true;
   result.section = section;
   result.position = position;
   result.dimension = dimension;

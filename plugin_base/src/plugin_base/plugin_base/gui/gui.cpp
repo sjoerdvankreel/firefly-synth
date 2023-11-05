@@ -133,7 +133,8 @@ plugin_gui::make_content()
   auto const& topo = *_gui_state->desc().plugin;
   auto& result = make_component<grid_component>(topo.gui.dimension, margin_module);
   for(int s = 0; s < topo.gui.sections.size(); s++)
-    result.add(make_module_section(topo.gui.sections[s]), topo.gui.sections[s].position);
+    if(topo.gui.sections[s].visible)
+      result.add(make_module_section(topo.gui.sections[s]), topo.gui.sections[s].position);
   return result;
 }
 
@@ -143,7 +144,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
   auto const& modules = _gui_state->desc().modules;
   auto& result = make_component<grid_component>(section.dimension, margin_module);
   for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
-    if(iter->module->gui.section == section.index)
+    if(iter->module->gui.visible && iter->module->gui.section == section.index)
       result.add(make_modules(&(*iter)), iter->module->gui.position);
   return result;
 }

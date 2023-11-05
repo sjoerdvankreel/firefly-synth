@@ -19,8 +19,6 @@ resizing by content scaling
 host/os scaling broken
 release_count > 0 asserts
 
-central is_voice/global check
-
 demo synth:
 vfx/gfx -> lpf/hpf/feedback delay
 graphs

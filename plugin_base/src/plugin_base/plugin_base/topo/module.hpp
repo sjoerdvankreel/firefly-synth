@@ -24,6 +24,7 @@ module_engine_factory;
 // module ui
 struct module_topo_gui final {
   int section;
+  bool visible;
   gui_colors colors;
   gui_position position;
   gui_dimension dimension;
