@@ -121,8 +121,8 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
 
 enum { 
   section_lfos, section_env, section_cv_matrix,
-  section_vaudio_matrix, section_osc, section_fx, section_voice,
-  section_gaudio_matrix, section_master, section_monitor, section_count };
+  section_audio_matrix, section_osc, section_fx, section_voice,
+  section_master, section_monitor, section_count };
 
 std::unique_ptr<plugin_topo>
 synth_topo()
@@ -140,12 +140,12 @@ synth_topo()
   result->version_minor = INF_SYNTH_VERSION_MINOR;
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
-  result->gui.min_width = 1200;
-  result->gui.max_width = 2400;
-  result->gui.default_width = 1200;
-  result->gui.aspect_ratio_width = 72;
-  result->gui.aspect_ratio_height = 20;
-  result->gui.dimension.column_sizes = { 3, 2, 2 };
+  result->gui.min_width = 860;
+  result->gui.max_width = 1720;
+  result->gui.default_width = 860;
+  result->gui.aspect_ratio_width = 13;
+  result->gui.aspect_ratio_height = 5;
+  result->gui.dimension.column_sizes = { 3, 2 };
   result->gui.dimension.row_sizes = std::vector<int>(6, 1);
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
@@ -157,9 +157,8 @@ synth_topo()
   result->gui.sections[section_lfos] = make_module_section_gui(section_lfos, { 1, 0 }, { 1, 2 });
   result->gui.sections[section_master] = make_module_section_gui(section_master, { 5, 0 }, { 1, 1 });
   result->gui.sections[section_monitor] = make_module_section_gui(section_monitor, { 0, 0 }, { 1, 1 });
-  result->gui.sections[section_cv_matrix] = make_module_section_gui_tabbed(section_cv_matrix, { 0, 1, 3, 2 });
-  result->gui.sections[section_vaudio_matrix] = make_module_section_gui(section_vaudio_matrix, { 3, 1, 3, 1 }, { 1, 1 });
-  result->gui.sections[section_gaudio_matrix] = make_module_section_gui(section_gaudio_matrix, { 3, 2, 3, 1 }, { 1, 1 });
+  result->gui.sections[section_cv_matrix] = make_module_section_gui_tabbed(section_cv_matrix, { 0, 1, 3, 1 });
+  result->gui.sections[section_audio_matrix] = make_module_section_gui_tabbed(section_audio_matrix, { 3, 1, 3, 1 });
 
   result->modules.resize(module_count);
   result->modules[module_voice_in] = voice_topo(section_voice, false);
@@ -172,13 +171,13 @@ synth_topo()
   result->modules[module_vlfo] = lfo_topo(section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_master] = master_topo(section_master, audio_colors, { 0, 0 });
   result->modules[module_monitor] = monitor_topo(section_monitor, other_colors, { 0, 0 }, result->polyphony);
-  result->modules[module_vaudio_matrix] = audio_matrix_topo(section_vaudio_matrix, audio_colors, { 0, 0 }, false,
+  result->modules[module_vaudio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 }, false,
     { &result->modules[module_osc], &result->modules[module_vfx] },
     { &result->modules[module_voice_out], &result->modules[module_vfx] });
   result->modules[module_vcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, false,
     { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo] },
     { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
-  result->modules[module_gaudio_matrix] = audio_matrix_topo(section_gaudio_matrix, audio_colors, { 0, 0 }, true,
+  result->modules[module_gaudio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 }, true,
     { &result->modules[module_voice_in], &result->modules[module_gfx] },
     { &result->modules[module_master], &result->modules[module_gfx] });
   result->modules[module_gcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, true,
