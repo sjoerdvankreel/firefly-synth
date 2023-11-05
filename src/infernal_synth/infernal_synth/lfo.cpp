@@ -69,6 +69,7 @@ lfo_topo(
     make_param_dsp_accurate(param_automate::both), make_domain_linear(0.1, 20, 1, 2, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, 
     make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
+  rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_rate; });
   rate.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
 
   auto& tempo = result.params.emplace_back(make_param(
