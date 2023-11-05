@@ -55,8 +55,8 @@ cv_matrix_topo(
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto const voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "VCV", module_vcv_matrix, 1);
-  auto const global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "GCV", module_gcv_matrix, 1);
+  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV", module_vcv_matrix, 1);
+  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "GCV", module_gcv_matrix, 1);
   module_stage stage = global ? module_stage::input : module_stage::voice;
   auto const info = topo_info(global? global_info: voice_info);
 
