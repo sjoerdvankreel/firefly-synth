@@ -36,7 +36,7 @@ make_module_section_gui_none(int index);
 module_section_gui
 make_module_section_gui(int index, gui_position const& position, gui_dimension const& dimension);
 module_section_gui
-make_module_section_gui_tabbed(int index, gui_position const& position, std::string const& header);
+make_module_section_gui_tabbed(int index, gui_position const& position, std::string const& header, int tab_width);
 
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);

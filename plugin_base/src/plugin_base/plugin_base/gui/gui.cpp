@@ -54,13 +54,13 @@ justification_type(gui_label const& label)
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state) :
-_lnf(&gui_state->desc(), -1), _gui_state(gui_state)
+_lnf(&gui_state->desc(), -1, -1), _gui_state(gui_state)
 {
   setOpaque(true);
   setLookAndFeel(&_lnf);
   auto const& topo = *gui_state->desc().plugin;
   for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
-    _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), i);
+    _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), gui_state->desc().plugin->modules[i].gui.section, i);
   add_and_make_visible(*this, make_container());
   setSize(topo.gui.default_width, topo.gui.default_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
 }

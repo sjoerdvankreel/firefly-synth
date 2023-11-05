@@ -9,15 +9,17 @@ class lnf:
 public juce::LookAndFeel_V4 {
   
   int const _module = -1;
+  int const _section = -1;
   plugin_desc const* const _desc;
   juce::Typeface::Ptr _typeface = {};
 
+  int tab_width() const;
   gui_colors const& colors() const 
   { return _module == -1? _desc->plugin->gui.colors: _desc->plugin->modules[_module].gui.colors; }
 
 public:
   juce::Font font() const;
-  lnf(plugin_desc const* desc, int module);
+  lnf(plugin_desc const* desc, int section, int module);
 
   juce::Font getPopupMenuFont() override { return font(); }
   juce::Font getLabelFont(juce::Label&) override { return font(); }

@@ -15,6 +15,7 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
     dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
   else
   {
+    assert(tab_width > 0);
     assert(tab_header.size());
     assert(dimension.column_sizes.size() == 1 && dimension.row_sizes.size() == 1);
   }

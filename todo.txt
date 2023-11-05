@@ -29,7 +29,7 @@ rename from infernal
 do scrollbar
 merge vcv/gcv / vaudio/gaudio into tabs
 do pitchwheel/modwheel/master cv section
-
+name the full thing firestorm?
 
 * get some linux folks to comment (ycollete?)
 * continuing

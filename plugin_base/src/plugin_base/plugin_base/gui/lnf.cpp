@@ -32,8 +32,8 @@ draw_conic_arc(
 }
 
 lnf::
-lnf(plugin_desc const* desc, int module) :
-_desc(desc), _module(module)
+lnf(plugin_desc const* desc, int section, int module) :
+_desc(desc), _module(module), _section(section)
 {
   File file(File::getSpecialLocation(File::currentExecutableFile));
   std::filesystem::path resources = desc->config->resources_folder(file.getFullPathName().toStdString());
@@ -82,6 +82,13 @@ lnf::font() const
   return result;
 }
 
+int
+lnf::tab_width() const
+{
+  auto const& section = _desc->plugin->gui.sections[_section];
+  return section.tabbed ? section.tab_width : _desc->plugin->gui.module_tab_width;
+}
+
 Path 
 lnf::getTickShape(float h)
 {
@@ -99,8 +106,8 @@ lnf::positionComboBoxText(ComboBox& box, Label& label)
 
 int	
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
-{
-  int result = _desc->plugin->gui.module_tab_width;
+{ 
+  int result = tab_width();
   if(b.getIndex() == 0) result += _desc->plugin->gui.module_header_width;
   return result;
 }
@@ -225,7 +232,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea().toFloat();
-  auto buttonArea = headerArea.removeFromRight(_desc->plugin->gui.module_tab_width);
+  auto buttonArea = headerArea.removeFromRight(tab_width());
   g.setColour(colors().tab_button);
   if(button.getTabbedButtonBar().getNumTabs() == 1)
     g.fillRoundedRectangle(headerArea, radius);

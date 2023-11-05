@@ -20,6 +20,7 @@ struct module_section_gui final {
   int index;
   bool tabbed;
   bool visible;
+  int tab_width;
   std::string tab_header;
   gui_position position;
   gui_dimension dimension;

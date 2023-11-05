@@ -81,7 +81,7 @@ make_module_section_gui(int index, gui_position const& position, gui_dimension c
 }
 
 module_section_gui
-make_module_section_gui_tabbed(int index, gui_position const& position, std::string const& header)
+make_module_section_gui_tabbed(int index, gui_position const& position, std::string const& header, int tab_width)
 {
   module_section_gui result = {};
   result.index = index;
@@ -89,6 +89,7 @@ make_module_section_gui_tabbed(int index, gui_position const& position, std::str
   result.visible = true;
   result.position = position;
   result.tab_header = header;
+  result.tab_width = tab_width;
   result.dimension = { 1, 1 };
   return result;
 }
