@@ -149,6 +149,7 @@ fx_engine::process(plugin_block& block)
 void
 fx_engine::process_delay(plugin_block& block)
 {
+  float max_feedback = 0.9f;
   int this_module = _global ? module_gfx : module_vfx;
   float time = get_timesig_time_value(block, this_module, param_delay_tempo);
   int samples = block.sample_rate * time;
@@ -158,7 +159,7 @@ fx_engine::process_delay(plugin_block& block)
     {
       float dry = block.state.own_audio[0][c][f];
       float wet = _buffer[c][(_pos + f + _capacity - samples) % _capacity];
-      block.state.own_audio[0][c][f] = dry + wet * feedback_curve[f];
+      block.state.own_audio[0][c][f] = dry + wet * feedback_curve[f] * max_feedback;
       _buffer[c][(_pos + f) % _capacity] = block.state.own_audio[0][c][f];
     }
   _pos += block.end_frame - block.start_frame;
