@@ -163,9 +163,7 @@ cv_matrix_engine::process(plugin_block& block)
     int selected_source = own_automation[param_source][r].step();
     int sm = _sources[selected_source].topo;
     int smi = _sources[selected_source].slot;
-    auto const& source_curve = block.plugin.modules[sm].dsp.stage == module_stage::voice
-      ? block.voice->all_cv[sm][smi][0]
-      : block.state.all_global_cv[sm][smi][0];
+    auto const& source_curve = block.module_cv(sm, smi)[0];
 
     // apply modulation
     auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];

@@ -333,29 +333,25 @@ plugin_engine::process()
         if(module.dsp.stage != module_stage::voice)
         {
           for(int oi = 0; oi < module.dsp.output_count; oi++)
-            std::fill(_global_cv_state[m][mi][oi].begin(),
-                      _global_cv_state[m][mi][oi].begin() + frame_count, 0.0f);
+            _global_cv_state[m][mi][oi].fill(0, frame_count, 0.0f);
         } else {
           for (int v = 0; v < _voice_states.size(); v++)
             if(_voice_states[v].stage != voice_stage::unused)
               for (int oi = 0; oi < module.dsp.output_count; oi++)
-                std::fill(_voice_cv_state[v][m][mi][oi].begin(),
-                          _voice_cv_state[v][m][mi][oi].begin() + frame_count, 0.0f);
+                _voice_cv_state[v][m][mi][oi].fill(0, frame_count, 0.0f);
         }
       else if (module.dsp.output == module_output::audio)
         if (module.dsp.stage != module_stage::voice)
         {
           for (int oi = 0; oi < module.dsp.output_count; oi++)
             for(int c = 0; c < 2; c++)
-              std::fill(_global_audio_state[m][mi][oi][c].begin(), 
-                       _global_audio_state[m][mi][oi][c].begin() + frame_count, 0.0f);
+              _global_audio_state[m][mi][oi][c].fill(0, frame_count, 0.0f);
         } else {
            for (int v = 0; v < _voice_states.size(); v++)
              if (_voice_states[v].stage != voice_stage::unused)
                for (int oi = 0; oi < module.dsp.output_count; oi++)
                  for (int c = 0; c < 2; c++)
-                   std::fill(_voice_audio_state[v][m][mi][oi][c].begin(), 
-                             _voice_audio_state[v][m][mi][oi][c].begin() + frame_count, 0.0f);
+                   _voice_audio_state[v][m][mi][oi][c].fill(0, frame_count, 0.0f);
         }
       else
         assert(module.dsp.output == module_output::none);

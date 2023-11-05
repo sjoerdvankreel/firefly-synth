@@ -134,14 +134,10 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     // add modulated amount to mixdown
     auto const& modulation = get_cv_matrix_mixdown(block);
     auto const& amount_curve = *modulation[module_audio_matrix][0][param_amount][r];
-    if(block.plugin.modules[sm].dsp.stage == module_stage::voice)
-      for(int c = 0; c < 2; c++)
-        for(int f = block.start_frame; f < block.end_frame; f++)
-          mix[c][f] += amount_curve[f] * block.voice->all_audio[sm][smi][0][c][f];
-    else
-      for (int c = 0; c < 2; c++)
-        for (int f = block.start_frame; f < block.end_frame; f++)
-          mix[c][f] += amount_curve[f] * block.state.all_global_audio[sm][smi][0][c][f];
+    auto const& source_audio = block.module_audio(sm, smi);
+    for(int c = 0; c < 2; c++)
+      for(int f = block.start_frame; f < block.end_frame; f++)
+        mix[c][f] += amount_curve[f] * source_audio[0][c][f];
   }
 
   return *result;

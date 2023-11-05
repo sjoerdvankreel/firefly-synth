@@ -76,8 +76,28 @@ struct plugin_block final {
   module_topo const& module;
 
   void set_out_param(int param, int slot, double raw) const;
+  jarray<float, 2> const& module_cv(int mod, int slot) const;
+  jarray<float, 3> const& module_audio(int mod, int slot) const;
   float normalized_to_raw(int module_, int param_, float normalized) const;
 };
+
+inline jarray<float, 2> const& 
+plugin_block::module_cv(int mod, int slot) const
+{
+  if(plugin.modules[mod].dsp.stage == module_stage::voice)
+    return voice->all_cv[mod][slot];
+  else
+    return state.all_global_cv[mod][slot];
+}
+
+inline jarray<float, 3> const& 
+plugin_block::module_audio(int mod, int slot) const
+{
+  if (plugin.modules[mod].dsp.stage == module_stage::voice)
+    return voice->all_audio[mod][slot];
+  else
+    return state.all_global_audio[mod][slot];
+}
 
 inline void 
 plugin_block::set_out_param(int param, int slot, double raw) const
