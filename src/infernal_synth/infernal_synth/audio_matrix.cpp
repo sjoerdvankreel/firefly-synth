@@ -54,6 +54,7 @@ audio_matrix_topo(
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, route_count + 1, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
+  result.gui.tabbed_name = global? "Global": "Voice";
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 

@@ -63,6 +63,7 @@ cv_matrix_topo(
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, route_count, 0),
     make_module_gui(section, colors, pos, { 1, 1 })));
+  result.gui.tabbed_name = global ? "Global" : "Voice";
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 

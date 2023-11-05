@@ -20,9 +20,10 @@ struct module_section_gui final {
   int index;
   bool tabbed;
   bool visible;
+  std::string tab_header;
   gui_position position;
   gui_dimension dimension;
-
+  
   void validate(plugin_topo const& plugin, int index_) const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
 };
