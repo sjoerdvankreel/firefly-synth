@@ -18,13 +18,13 @@ enum { type_off, type_lpf, type_hpf, type_delay };
 enum { param_type, param_filter_freq, param_filter_res, param_delay_tempo, param_delay_feedback };
 
 static std::vector<list_item>
-type_items()
+type_items(bool global)
 {
   std::vector<list_item> result;
   result.emplace_back("{F37A19CE-166A-45BF-9F75-237324221C39}", "Off");
   result.emplace_back("{8B7E5C75-C3F6-4F53-900C-0A75703F5570}", "LPF");
   result.emplace_back("{673C872A-F740-431C-8CD3-F577CE984C2D}", "HPF");
-  result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
+  if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   return result;
 }
 
@@ -75,7 +75,7 @@ fx_topo(
 
   result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
-    make_param_dsp_block(param_automate::none), make_domain_item(type_items(), ""),
+    make_param_dsp_block(param_automate::none), make_domain_item(type_items(global), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
 
   auto& filter_freq = result.params.emplace_back(make_param(
@@ -115,7 +115,7 @@ fx_engine::
 fx_engine(bool global, int sample_rate) :
 _global(global), _capacity(sample_rate * 10)
 {
-  _buffer.resize(jarray<int, 1>(2, _capacity));
+  if(global) _buffer.resize(jarray<int, 1>(2, _capacity));
   initialize();
 }
 

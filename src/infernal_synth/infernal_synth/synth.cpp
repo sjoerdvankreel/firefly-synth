@@ -32,13 +32,15 @@ make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules)
   for (int m = 0; m < modules.size(); m++)
   {
     auto const& tag = modules[m]->info.tag;
+    int slots = modules[m]->info.slot_count;
     auto module_submenu = std::make_shared<gui_submenu>();
     module_submenu->name = tag.name;
-    for (int mi = 0; mi < modules[m]->info.slot_count; mi++)
+    for (int mi = 0; mi < slots; mi++)
     {
       list_item item;
       item.id = tag.id + "-" + std::to_string(mi);
-      item.name = tag.name + " " + std::to_string(mi + 1);
+      item.name = tag.name; 
+      if(slots > 1) item.name += " " + std::to_string(mi + 1);
       result.items.push_back(item);
       module_submenu->indices.push_back(index++);
       result.mappings.push_back({ modules[m]->info.index, mi });
