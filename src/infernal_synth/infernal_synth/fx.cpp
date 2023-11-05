@@ -15,8 +15,7 @@ namespace infernal_synth {
 
 enum { section_main };
 enum { type_off, type_lpf, type_hpf, type_delay };
-enum { param_type, param_filter_freq, param_filter_res, 
-  param_delay_tempo, param_delay_gain, param_delay_feedback };
+enum { param_type, param_filter_freq, param_filter_res, param_delay_tempo, param_delay_feedback };
 
 static std::vector<list_item>
 type_items()
@@ -72,7 +71,7 @@ fx_topo(
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
 
   result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
@@ -82,7 +81,7 @@ fx_topo(
   auto& filter_freq = result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_filter_freq, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_log(20, 20000, 1000, 1000, 0, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   filter_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   filter_freq.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_delay; });
@@ -90,7 +89,7 @@ fx_topo(
   auto& filter_res = result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "Res", param_filter_res, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   filter_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   filter_res.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_delay; });
@@ -103,18 +102,11 @@ fx_topo(
   delay_tempo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
 
   auto& delay_gain = result.params.emplace_back(make_param(
-    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Gain", param_delay_gain, 1),
+    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Fdbk", param_delay_feedback, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_gain.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-
-  auto& delay_feedback = result.params.emplace_back(make_param(
-    make_topo_info("{8FE78CA0-5752-4194-B4FE-E66017303687}", "Fdbk", param_delay_feedback, 1),
-    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  delay_feedback.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
 
   return result;
 }
@@ -160,14 +152,13 @@ fx_engine::process_delay(plugin_block& block)
   int this_module = _global ? module_gfx : module_vfx;
   float time = get_timesig_time_value(block, this_module, param_delay_tempo);
   int samples = block.sample_rate * time;
-  auto const& gain_curve = block.state.own_accurate_automation[param_delay_gain][0];
-  //auto const& feedback_curve = block.state.own_accurate_automation[param_delay_feedback][0];
+  auto const& feedback_curve = block.state.own_accurate_automation[param_delay_feedback][0];
   for (int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
       float dry = block.state.own_audio[0][c][f];
       float wet = _buffer[c][(_pos + f + _capacity - samples) % _capacity];
-      block.state.own_audio[0][c][f] = dry + wet * gain_curve[f];
+      block.state.own_audio[0][c][f] = dry + wet * feedback_curve[f];
       _buffer[c][(_pos + f) % _capacity] = block.state.own_audio[0][c][f];
     }
   _pos += block.end_frame - block.start_frame;
