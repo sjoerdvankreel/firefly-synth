@@ -246,9 +246,10 @@ plugin_gui::make_module_section(module_section_gui const& section)
       matched_module = i;
   assert(matched_module >= 0);
   auto& tabs = make_tab_component(section.tab_header, matched_module);
-  for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
-    if (iter->module->gui.visible && iter->module->gui.section == section.index)
-      add_component_tab(tabs, make_param_sections(*iter), matched_module, iter->module->gui.tabbed_name);
+  for(int o = 0; o < section.tab_order.size(); o++)
+    for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
+      if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)
+        add_component_tab(tabs, make_param_sections(*iter), matched_module, iter->module->gui.tabbed_name);
   return tabs;
 }
 

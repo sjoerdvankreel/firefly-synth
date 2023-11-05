@@ -16,6 +16,7 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
   else
   {
     assert(tab_width > 0);
+    assert(tab_order.size());
     assert(tab_header.size());
     assert(dimension.column_sizes.size() == 1 && dimension.row_sizes.size() == 1);
   }
