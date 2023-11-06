@@ -79,10 +79,9 @@ osc_topo(
   am.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   am.dsp.automate_selector = [](int s) { return s > 0? param_automate::both : param_automate::none; };
 
-  auto& pitch = result.sections.emplace_back(make_param_section(section_pitch,
+  result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
@@ -103,10 +102,11 @@ osc_topo(
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  result.params.emplace_back(make_param(
+  auto& pitch = result.params.emplace_back(make_param(
     make_topo_info("{F87BA01D-19CE-4D46-83B6-8E2382D9F601}", "Pitch", param_pitch, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_linear(0, 128, 0, 0, ""),
-    make_param_gui_none()));
+    make_param_gui_none())); 
+  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   return result;
 }

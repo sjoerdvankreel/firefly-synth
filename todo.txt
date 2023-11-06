@@ -21,14 +21,11 @@ release_count > 0 asserts
 
 demo synth:
 graphs
+do scrollbar
 clean up the dsp
 measure performance
-master gain/midi/mod/pitch etc
-only select relevant cv targets
 rename from infernal
-do scrollbar
-merge vcv/gcv / vaudio/gaudio into tabs
-do pitchwheel/modwheel/master cv section
+master gain/midi/mod/pitch etc
 name the full thing firestorm?
 
 * get some linux folks to comment (ycollete?)
