@@ -49,6 +49,7 @@ public autofit_component
 {
   lnf* const _lnf;
   bool const _autofit;
+  float max_text_width(juce::PopupMenu const& menu);
 public:
   void autofit();
   int fixed_width() const override { return getWidth(); }
@@ -161,13 +162,13 @@ public juce::ComboBox::Listener
 {
 protected:
   void own_param_changed(plain_value plain) override final
-  { setSelectedItemIndex(plain.step() - _param->param->domain.min); }
+  { setSelectedId(plain.step() + 1 - _param->param->domain.min); }
 
 public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
   void comboBoxChanged(ComboBox*) override final
-  { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedItemIndex() + _param->param->domain.min)); }
+  { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedId() - 1 + _param->param->domain.min)); }
 };
 
 }

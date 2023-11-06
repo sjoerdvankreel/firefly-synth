@@ -6,18 +6,15 @@ using namespace juce;
 namespace plugin_base {
 
 static void
-fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data, int& index)
+fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data)
 {
   menu.clear();
   for (int i = 0; i < data->indices.size(); i++)
-  {
-    assert(index++ == data->indices[i]);
     menu.addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
-  }
   for(int i = 0; i < data->children.size(); i++)
   {
     PopupMenu child;
-    fill_popup_menu(domain, child, data->children[i].get(), index);
+    fill_popup_menu(domain, child, data->children[i].get());
     menu.addSubMenu(data->children[i]->name, child);
   }
 }
@@ -45,22 +42,33 @@ autofit_button(lnf* lnf, std::string const& text)
   setSize(std::ceil(tw) + hmargin, std::ceil(th) + vmargin);
 }
 
+float 
+autofit_combobox::max_text_width(PopupMenu const& menu)
+{
+  float result = 0;
+  PopupMenu::MenuItemIterator iter(menu);
+  auto const& font = _lnf->getComboBoxFont(*this);
+  while(iter.next())
+  {
+    auto text = iter.getItem().text;
+    auto text_width = font.getStringWidthFloat(text);
+    if(iter.getItem().subMenu)
+      result = std::max(result, max_text_width(*iter.getItem().subMenu));
+    else
+      result = std::max(result, text_width);
+  }
+  return result;
+}
+
 void
 autofit_combobox::autofit()
 {
   if(!_autofit) return;
 
-  float max_width = 0;  
   int const hpadding = 22;
-  int count = getNumItems();
   auto const& font = _lnf->getComboBoxFont(*this);
   float text_height = font.getHeight();
-  for (int i = 0; i < count; i++)
-  {
-    auto text = getItemText(i);
-    auto text_width = font.getStringWidthFloat(text);
-    max_width = std::max(max_width, text_width);
-  }
+  float max_width = max_text_width(*getRootMenu());
   setSize(std::ceil(max_width + hpadding), std::ceil(text_height));
 }
 
@@ -157,11 +165,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
     for(int i = 0; i <= domain.max; i++)
       addItem(domain.raw_to_text(false, i), i + 1);
   else
-  {
-    int index = 0;
-    assert(param_gui.edit_type == gui_edit_type::list);
-    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get(), index);
-  }
+    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get());
   autofit();
   addListener(this);
   setEditableText(false);

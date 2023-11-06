@@ -73,10 +73,18 @@ fx_topo(
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
 
-  result.params.emplace_back(make_param(
+  auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::none), make_domain_item(type_items(global), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  type.gui.submenu = std::make_shared<gui_submenu>();
+  type.gui.submenu->indices.push_back(type_off);
+  auto filter_menu = std::make_shared<gui_submenu>();
+  filter_menu->name = "Filter";
+  filter_menu->indices.push_back(type_lpf);
+  filter_menu->indices.push_back(type_hpf);
+  type.gui.submenu->children.push_back(filter_menu);
+  if(global) type.gui.submenu->indices.push_back(type_delay);
 
   auto& filter_freq = result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_filter_freq, 1),
