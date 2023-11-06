@@ -15,8 +15,6 @@ struct param_topo_mapping;
 enum class domain_display { normal, percentage };
 enum class domain_type { toggle, step, name, item, timesig, linear, log };
 
-typedef std::function<bool(int v)>
-gui_item_binding_selector;
 typedef std::function<std::string(int module_slot, int param_slot)>
 default_selector;
 
@@ -43,22 +41,10 @@ struct param_topo_mapping final {
   { return container[module_index][module_slot][param_index][param_slot]; }
 };
 
-// binding to item enabled
-struct gui_item_binding final {
-  param_topo_mapping param = {};
-  gui_item_binding_selector selector = {};
-  static inline int const match_param_slot = -1;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_item_binding);
-
-  bool is_bound() const { return selector != nullptr; }
-  void bind(param_topo_mapping param_, gui_item_binding_selector selector_);
-};
-
 // item in list
 struct list_item final {
   std::string id = {};
   std::string name = {};
-  gui_item_binding binding = {};
 
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);

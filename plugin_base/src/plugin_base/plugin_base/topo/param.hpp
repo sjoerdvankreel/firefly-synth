@@ -21,6 +21,19 @@ enum class param_automate { none, automate, modulate, both };
 
 typedef std::function<param_automate(int module_slot)>
 automate_selector;
+typedef std::function<bool(int that_val, int this_val)>
+gui_item_binding_selector;
+
+// binding to item enabled
+struct gui_item_binding final {
+  param_topo_mapping param = {};
+  gui_item_binding_selector selector = {};
+  static inline int const match_param_slot = -1;
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_item_binding);
+
+  bool is_bound() const { return selector != nullptr; }
+  void bind(param_topo_mapping param_, gui_item_binding_selector selector_);
+};
 
 // parameter dsp
 struct param_dsp final {
@@ -42,6 +55,7 @@ struct param_topo_gui final {
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
+  gui_item_binding item_enabled = {};
   std::shared_ptr<gui_submenu> submenu;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);

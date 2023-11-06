@@ -175,7 +175,15 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 void 
 param_combobox::showPopup()
 {
-  setItemEnabled(1, false);
+  if(_param->param->gui.item_enabled.is_bound())
+  {
+    auto m = _param->param->gui.item_enabled.param;
+    if(m.param_slot == gui_item_binding::match_param_slot) m.param_slot = _param->info.slot;
+    auto other = _gui->gui_state()->get_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot);
+    for(int i = 0; i < _param->param->domain.items.size(); i++)
+      setItemEnabled(i + 1, _param->param->gui.item_enabled.selector(other.step(), i));
+  }
+  ComboBox::showPopup();
 }
 
 param_slider::

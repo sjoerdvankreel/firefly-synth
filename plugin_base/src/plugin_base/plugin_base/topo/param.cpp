@@ -32,8 +32,18 @@ param_dsp::validate(int module_slot) const
 }
 
 void
+gui_item_binding::bind(param_topo_mapping param_, gui_item_binding_selector selector_)
+{
+  assert(selector == nullptr);
+  assert(selector_ != nullptr);
+  param = param_;
+  selector = selector_;
+}
+
+void
 param_topo_gui::validate(module_topo const& module, param_topo const& param) const
 {
+  assert(!item_enabled.is_bound() || is_list());
   bindings.validate(module, param.info.slot_count);
   position.validate(module.sections[section].gui.dimension);
 
