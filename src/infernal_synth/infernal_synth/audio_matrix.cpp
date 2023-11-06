@@ -24,15 +24,15 @@ public module_engine {
   bool const _global;
   audio_matrix_mixer _mixer;
   jarray<float, 3>* _own_audio = {};
-  std::vector<matrix_module_mapping> const _sources;
-  std::vector<matrix_module_mapping> const _targets;
+  std::vector<module_topo_mapping> const _sources;
+  std::vector<module_topo_mapping> const _targets;
 
 public:
   void initialize() override {}
   INF_PREVENT_ACCIDENTAL_COPY(audio_matrix_engine);
   audio_matrix_engine(bool global,
-    std::vector<matrix_module_mapping> const& sources, 
-    std::vector<matrix_module_mapping> const& targets): 
+    std::vector<module_topo_mapping> const& sources, 
+    std::vector<module_topo_mapping> const& targets): 
     _global(global), _mixer(this), _sources(sources), _targets(targets) {}
 
   void process(plugin_block& block) override;
@@ -122,7 +122,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
   {
     if(block_auto[param_on][r].step() == 0) continue;
     int selected_target = block_auto[param_target][r].step();
-    int tm = _targets[selected_target].topo;
+    int tm = _targets[selected_target].index;
     int tmi = _targets[selected_target].slot;
     if(tm != module || tmi != slot) continue;
 
@@ -135,7 +135,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     // find out audio source to add
     auto& mix = *result;
     int selected_source = block_auto[param_source][r].step();
-    int sm = _sources[selected_source].topo;
+    int sm = _sources[selected_source].index;
     int smi = _sources[selected_source].slot;
 
     // add modulated amount to mixdown

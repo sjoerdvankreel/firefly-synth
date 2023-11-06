@@ -24,10 +24,10 @@ class plugin_state final {
   std::map<int, std::vector<state_listener*>> mutable _listeners = {};
 
   void state_changed(int index, plain_value plain) const;
-  plain_value get_plain_at_mapping(param_mapping const& m) const 
-  { return get_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot); }
-  void set_plain_at_mapping(param_mapping const& m, plain_value value)
-  { set_plain_at(m.module_topo, m.module_slot, m.param_topo, m.param_slot, value); }
+  plain_value get_plain_at_mapping(param_topo_mapping const& m) const 
+  { return get_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot); }
+  void set_plain_at_mapping(param_topo_mapping const& m, plain_value value)
+  { set_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot, value); }
 
 public:
   plugin_state(plugin_desc const* desc, bool notify);
@@ -44,9 +44,9 @@ public:
   plain_value get_plain_at(int m, int mi, int p, int pi) const
   { return _state[m][mi][p][pi]; }
   plain_value get_plain_at_index(int index) const 
-  { return get_plain_at_mapping(desc().mappings.params[index]); }
+  { return get_plain_at_mapping(desc().mappings.params[index].topo); }
   void set_plain_at_index(int index, plain_value value) 
-  { set_plain_at_mapping(desc().mappings.params[index], value); }
+  { set_plain_at_mapping(desc().mappings.params[index].topo, value); }
   plain_value get_plain_at_tag(int tag) const 
   { return get_plain_at_index(desc().mappings.tag_to_index.at(tag)); }
   void set_plain_at_tag(int tag, plain_value value) 

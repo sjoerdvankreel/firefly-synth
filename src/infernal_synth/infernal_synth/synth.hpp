@@ -15,32 +15,18 @@ typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
 cv_matrix_mixdown;
 
-struct matrix_module_mapping 
-{ 
-  int topo; 
-  int slot; 
-};
-
-struct matrix_param_mapping 
-{ 
-  int module_topo; 
-  int module_slot; 
-  int param_topo; 
-  int param_slot; 
-};
-
 struct param_matrix
 {
   std::vector<plugin_base::list_item> items;
   std::shared_ptr<plugin_base::gui_submenu> submenu;
-  std::vector<matrix_param_mapping> mappings;
+  std::vector<plugin_base::param_topo_mapping> mappings;
 };
 
 struct module_matrix
 {
   std::vector<plugin_base::list_item> items;
   std::shared_ptr<plugin_base::gui_submenu> submenu;
-  std::vector<matrix_module_mapping> mappings;
+  std::vector<plugin_base::module_topo_mapping> mappings;
 };
 
 class audio_matrix_mixer

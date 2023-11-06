@@ -35,16 +35,16 @@ class cv_matrix_engine:
 public module_engine { 
   cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
-  std::vector<matrix_param_mapping> const _targets;
-  std::vector<matrix_module_mapping> const _sources;
+  std::vector<param_topo_mapping> const _targets;
+  std::vector<module_topo_mapping> const _sources;
 public:
   void initialize() override {}
   void process(plugin_block& block) override;
 
   cv_matrix_engine(
     plugin_topo const& topo, 
-    std::vector<matrix_module_mapping> const& sources,
-    std::vector<matrix_param_mapping> const& targets);
+    std::vector<module_topo_mapping> const& sources,
+    std::vector<param_topo_mapping> const& targets);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
@@ -104,8 +104,8 @@ cv_matrix_topo(
 cv_matrix_engine::
 cv_matrix_engine(
   plugin_topo const& topo,
-  std::vector<matrix_module_mapping> const& sources,
-  std::vector<matrix_param_mapping> const& targets):
+  std::vector<module_topo_mapping> const& sources,
+  std::vector<param_topo_mapping> const& targets):
 _sources(sources), _targets(targets)
 {
   plugin_dims dims(topo);
@@ -119,9 +119,9 @@ cv_matrix_engine::process(plugin_block& block)
   // set every modulatable parameter to its corresponding automation curve
   for (int m = 0; m < _targets.size(); m++)
   {
-    int tp = _targets[m].param_topo;
+    int tp = _targets[m].param_index;
     int tpi = _targets[m].param_slot;
-    int tm = _targets[m].module_topo;
+    int tm = _targets[m].module_index;
     int tmi = _targets[m].module_slot;
     _modulation_indices[tm][tmi][tp][tpi] = -1;
     auto const& curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
@@ -140,9 +140,9 @@ cv_matrix_engine::process(plugin_block& block)
 
     // found out indices of modulation target
     int selected_target = own_automation[param_target][r].step();
-    int tp = _targets[selected_target].param_topo;
+    int tp = _targets[selected_target].param_index;
     int tpi = _targets[selected_target].param_slot;
-    int tm = _targets[selected_target].module_topo;
+    int tm = _targets[selected_target].module_index;
     int tmi = _targets[selected_target].module_slot;
 
     // if already modulated, set target curve to own buffer
@@ -165,7 +165,7 @@ cv_matrix_engine::process(plugin_block& block)
 
     // find out indices of modulation source
     int selected_source = own_automation[param_source][r].step();
-    int sm = _sources[selected_source].topo;
+    int sm = _sources[selected_source].index;
     int smi = _sources[selected_source].slot;
     auto const& source_curve = block.module_cv(sm, smi)[0];
 
