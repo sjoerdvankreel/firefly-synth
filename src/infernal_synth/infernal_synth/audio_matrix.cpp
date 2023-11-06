@@ -50,6 +50,7 @@ audio_matrix_topo(
   auto const global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "GAudio", module_gaudio_matrix, 1);
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
+  int this_module = global? module_gaudio_matrix: module_vaudio_matrix;
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, route_count + 1, 0),
@@ -81,7 +82,7 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.submenu = target_matrix.submenu;  
-  target.gui.item_enabled.bind({ module_vaudio_matrix, 0, param_source, gui_item_binding::match_param_slot }, 
+  target.gui.item_enabled.bind({ this_module, 0, param_source, gui_item_binding::match_param_slot }, 
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
       int fx_index = global? module_gfx: module_vfx;
       if(sm[other].index == fx_index && tm[self].index == fx_index)
