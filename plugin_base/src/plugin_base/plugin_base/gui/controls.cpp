@@ -240,16 +240,25 @@ param_combobox::showPopup()
       {
         std::vector<int> that_values;
         for(int j = 0; j < that_topo.gui.bindings.enabled.params.size(); j++)
-          that_values.push_back(_gui->gui_state()->get_plain_at(that_param).step());
+        {
+          param_topo_mapping m = that_param;
+          m.param_index = that_topo.gui.bindings.enabled.params[j];
+          that_values.push_back(_gui->gui_state()->get_plain_at(m).step());
+        }
         enabled &= that_topo.gui.bindings.enabled.param_selector(that_values);
       }
       if (that_topo.gui.bindings.visible.param_selector != nullptr)
       {
         std::vector<int> that_values;
         for (int j = 0; j < that_topo.gui.bindings.visible.params.size(); j++)
-          that_values.push_back(_gui->gui_state()->get_plain_at(that_param).step());
+        {
+          param_topo_mapping m = that_param;
+          m.param_index = that_topo.gui.bindings.visible.params[j];
+          that_values.push_back(_gui->gui_state()->get_plain_at(m).step());
+        }
         enabled &= that_topo.gui.bindings.visible.param_selector(that_values);
       }
+      setItemEnabled(i + 1, enabled);
     }
   }
   ComboBox::showPopup();
