@@ -21,6 +21,15 @@ list_item::validate() const
   assert(name.size());
 }
 
+void 
+gui_item_binding::bind(param_topo_mapping param_, gui_item_binding_selector selector_)
+{
+  assert(selector == nullptr);
+  assert(selector_ != nullptr);
+  param_ = param;
+  selector_ = selector;
+}
+
 std::string
 timesig::to_text() const
 {

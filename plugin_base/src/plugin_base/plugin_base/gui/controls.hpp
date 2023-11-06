@@ -167,6 +167,8 @@ protected:
 public:
   ~param_combobox() { removeListener(this); }
   param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+
+  void showPopup() override;
   void comboBoxChanged(ComboBox*) override final
   { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedId() - 1 + _param->param->domain.min)); }
 };

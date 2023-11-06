@@ -80,7 +80,8 @@ audio_matrix_topo(
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  target.gui.submenu = target_matrix.submenu;
+  target.gui.submenu = target_matrix.submenu;  
+  target.domain.items[0].binding.bind({ module_vaudio_matrix, 0, param_source, gui_item_binding::match_param_slot }, [](int v) { return v == 1; });
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),

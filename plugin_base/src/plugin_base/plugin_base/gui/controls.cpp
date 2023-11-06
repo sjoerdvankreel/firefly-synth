@@ -172,6 +172,12 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   init();
 }
 
+void 
+param_combobox::showPopup()
+{
+  setItemEnabled(1, false);
+}
+
 param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
