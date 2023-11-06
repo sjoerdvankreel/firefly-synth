@@ -81,12 +81,13 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
           for (int pi = 0; pi < modules[m]->params[p].info.slot_count; pi++)
           {
             list_item item;
+            item.param_topo = { modules[m]->info.index, 0, modules[m]->params[p].info.index, pi };
             item.id = module_tag.id + "-" + param_tag.id + "-" + std::to_string(pi);
             item.name = module_tag.name + " " + param_tag.name;
             if (modules[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
             result.items.push_back(item);
             module_submenu->indices.push_back(index++);
-            result.mappings.push_back({ modules[m]->info.index, 0, modules[m]->params[p].info.index, pi });
+            result.mappings.push_back(item.param_topo);
           }
         }
     }
@@ -103,13 +104,13 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
             for (int pi = 0; pi < modules[m]->params[p].info.slot_count; pi++)
             {
               list_item item;
-              item.param_topo = { m, mi, p, pi };
+              item.param_topo = { modules[m]->info.index, mi, modules[m]->params[p].info.index, pi };
               item.id = module_tag.id + "-" + std::to_string(mi) + "-" + param_tag.id + "-" + std::to_string(pi);
               item.name = module_tag.name + " " + std::to_string(mi + 1) + " " + param_tag.name;
               if (modules[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);
               result.items.push_back(item);
               module_slot_submenu->indices.push_back(index++);
-              result.mappings.push_back({ modules[m]->info.index, mi, modules[m]->params[p].info.index, pi });
+              result.mappings.push_back(item.param_topo);
             }
           }
         module_submenu->children.push_back(module_slot_submenu);
