@@ -45,6 +45,8 @@ struct param_topo_mapping final {
 struct list_item final {
   std::string id = {};
   std::string name = {};
+  // in case of auto binding
+  param_topo_mapping param_topo = {};
 
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);

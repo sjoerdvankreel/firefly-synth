@@ -43,6 +43,8 @@ public:
   void set_plain_at(int m, int mi, int p, int pi, plain_value value);
   plain_value get_plain_at(int m, int mi, int p, int pi) const
   { return _state[m][mi][p][pi]; }
+  plain_value get_plain_at(param_topo_mapping m) const
+  { return _state[m.module_index][m.module_slot][m.param_index][m.param_slot]; }
   plain_value get_plain_at_index(int index) const 
   { return get_plain_at_mapping(desc().mappings.params[index].topo); }
   void set_plain_at_index(int index, plain_value value) 

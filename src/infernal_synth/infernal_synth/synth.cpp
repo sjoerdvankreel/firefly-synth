@@ -103,6 +103,7 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
             for (int pi = 0; pi < modules[m]->params[p].info.slot_count; pi++)
             {
               list_item item;
+              item.param_topo = { m, mi, p, pi };
               item.id = module_tag.id + "-" + std::to_string(mi) + "-" + param_tag.id + "-" + std::to_string(pi);
               item.name = module_tag.name + " " + std::to_string(mi + 1) + " " + param_tag.name;
               if (modules[m]->params[p].info.slot_count > 1) item.name += " " + std::to_string(pi + 1);

@@ -154,38 +154,6 @@ param_component(gui, module, param), autofit_togglebutton()
   init();
 }
 
-param_combobox::
-param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
-param_component(gui, module, param), 
-autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list)
-{
-  auto const& domain = param->param->domain;
-  auto const& param_gui = param->param->gui;
-  if(!param_gui.submenu)
-    for(int i = 0; i <= domain.max; i++)
-      addItem(domain.raw_to_text(false, i), i + 1);
-  else
-    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get());
-  autofit();
-  addListener(this);
-  setEditableText(false);
-  init();
-}
-
-void 
-param_combobox::showPopup()
-{
-  if(_param->param->gui.item_enabled.is_bound())
-  {
-    auto m = _param->param->gui.item_enabled.param;
-    if(m.param_slot == gui_item_binding::match_param_slot) m.param_slot = _param->info.slot;
-    auto other = _gui->gui_state()->get_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot);
-    for(int i = 0; i < _param->param->domain.items.size(); i++)
-      setItemEnabled(i + 1, _param->param->gui.item_enabled.selector(other.step(), i));
-  }
-  ComboBox::showPopup();
-}
-
 param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
@@ -224,6 +192,67 @@ param_component(gui, module, param), Slider()
     [this](double s, double e, double v) { return _param->param->domain.raw_to_normalized(v).value(); }));
   setDoubleClickReturnValue(true, param->param->domain.default_raw(_module->info.slot, _param->info.slot), ModifierKeys::noModifiers);
   param_component::init();
+}
+
+param_combobox::
+param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
+param_component(gui, module, param), 
+autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list)
+{
+  auto const& domain = param->param->domain;
+  auto const& param_gui = param->param->gui;
+  if(!param_gui.submenu)
+    for(int i = 0; i <= domain.max; i++)
+      addItem(domain.raw_to_text(false, i), i + 1);
+  else
+    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get());
+  autofit();
+  addListener(this);
+  setEditableText(false);
+  init();
+}
+
+void 
+param_combobox::showPopup()
+{
+  auto const& items = _param->param->domain.items;
+  if(_param->param->gui.item_enabled.is_param_bound())
+  {
+    auto m = _param->param->gui.item_enabled.param;
+    if(m.param_slot == gui_item_binding::match_param_slot) m.param_slot = _param->info.slot;
+    auto other = _gui->gui_state()->get_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot);
+    for(int i = 0; i < items.size(); i++)
+      setItemEnabled(i + 1, _param->param->gui.item_enabled.selector(other.step(), i));
+  }
+  else if (_param->param->gui.item_enabled.auto_bind)
+  {
+    auto const& topo = *_gui->gui_state()->desc().plugin;
+    for (int i = 0; i < items.size(); i++)
+    {
+      bool enabled = true;
+      auto const& that_param = items[i].param_topo;
+      auto const& that_topo = topo.modules[that_param.module_index].params[that_param.param_index];
+      if(that_topo.gui.bindings.enabled.slot_selector != nullptr)
+        enabled &= that_topo.gui.bindings.enabled.slot_selector(that_param.module_index);
+      if (that_topo.gui.bindings.visible.slot_selector != nullptr)
+        enabled &= that_topo.gui.bindings.visible.slot_selector(that_param.module_index);
+      if (that_topo.gui.bindings.enabled.param_selector != nullptr)
+      {
+        std::vector<int> that_values;
+        for(int j = 0; j < that_topo.gui.bindings.enabled.params.size(); j++)
+          that_values.push_back(_gui->gui_state()->get_plain_at(that_param).step());
+        enabled &= that_topo.gui.bindings.enabled.param_selector(that_values);
+      }
+      if (that_topo.gui.bindings.visible.param_selector != nullptr)
+      {
+        std::vector<int> that_values;
+        for (int j = 0; j < that_topo.gui.bindings.visible.params.size(); j++)
+          that_values.push_back(_gui->gui_state()->get_plain_at(that_param).step());
+        enabled &= that_topo.gui.bindings.visible.param_selector(that_values);
+      }
+    }
+  }
+  ComboBox::showPopup();
 }
 
 }

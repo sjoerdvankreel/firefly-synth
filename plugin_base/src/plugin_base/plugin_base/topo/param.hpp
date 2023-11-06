@@ -26,13 +26,16 @@ gui_item_binding_selector;
 
 // binding to item enabled
 struct gui_item_binding final {
+  bool auto_bind = false;
   param_topo_mapping param = {};
   gui_item_binding_selector selector = {};
   static inline int const match_param_slot = -1;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_item_binding);
 
-  bool is_bound() const { return selector != nullptr; }
-  void bind(param_topo_mapping param_, gui_item_binding_selector selector_);
+  void validate() const { assert(!is_param_bound() || !auto_bind); }
+  bool is_param_bound() const { return selector != nullptr; }
+  bool is_bound() const { return is_param_bound() || auto_bind; }
+  void bind_param(param_topo_mapping param_, gui_item_binding_selector selector_);
 };
 
 // parameter dsp

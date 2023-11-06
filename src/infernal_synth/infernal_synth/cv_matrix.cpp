@@ -89,6 +89,7 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
+  target.gui.item_enabled.auto_bind = true;
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amount", param_amount, route_count),
