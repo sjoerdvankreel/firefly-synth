@@ -27,6 +27,19 @@ struct timesig
   std::string to_text() const;
 };
 
+// param topo mapping
+struct param_topo_mapping final {
+  int module_index;
+  int module_slot;
+  int param_index;
+  int param_slot;
+
+  template <class T> auto& value_at(T& container) const 
+  { return container[module_index][module_slot][param_index][param_slot]; }
+  template <class T> auto const& value_at(T const& container) const 
+  { return container[module_index][module_slot][param_index][param_slot]; }
+};
+
 // item in list
 struct list_item final {
   std::string id = {};

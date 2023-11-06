@@ -21,6 +21,12 @@ typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
 
+// module topo mapping
+struct module_topo_mapping final {
+  int index;
+  int slot;
+};
+
 // module ui
 struct module_topo_gui final {
   int section;

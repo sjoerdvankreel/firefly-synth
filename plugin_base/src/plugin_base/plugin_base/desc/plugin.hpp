@@ -24,25 +24,6 @@ struct format_config {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
 };
 
-// module topo mapping
-struct module_topo_mapping final {
-  int index;
-  int slot;
-};
-
-// param topo mapping
-struct param_topo_mapping final {
-  int module_index;
-  int module_slot;
-  int param_index;
-  int param_slot;
-
-  template <class T> auto& value_at(T& container) const 
-  { return container[module_index][module_slot][param_index][param_slot]; }
-  template <class T> auto const& value_at(T const& container) const 
-  { return container[module_index][module_slot][param_index][param_slot]; }
-};
-
 // mapping plugin level parameter index
 struct param_mapping final {
   int param_local = {};
