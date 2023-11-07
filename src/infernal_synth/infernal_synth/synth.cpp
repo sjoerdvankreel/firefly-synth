@@ -132,7 +132,7 @@ synth_topo()
 {
   gui_colors cv_colors(make_module_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_module_colors(Colour(0xFF4488FF)));
-  gui_colors input_colors(make_module_colors(Colour(0xFF44FF88)));
+  gui_colors input_colors(make_module_colors(Colour(0xFF8844FF)));
   gui_colors output_colors(make_module_colors(Colour(0xFFFF4488)));
 
   auto result = std::make_unique<plugin_topo>();
@@ -160,7 +160,7 @@ synth_topo()
   result->gui.sections[section_osc] = make_module_section_gui(section_osc, { 3, 0 }, { 1, 1 });
   result->gui.sections[section_lfos] = make_module_section_gui(section_lfos, { 1, 0 }, { 1, 2 });
   result->gui.sections[section_input] = make_module_section_gui(section_input, { 0, 0 }, { 1, 1 });
-  result->gui.sections[section_master_monitor] = make_module_section_gui(section_master_monitor, { 5, 0 }, { { 1 }, { 3, 2 } } );
+  result->gui.sections[section_master_monitor] = make_module_section_gui(section_master_monitor, { 5, 0 }, { { 1 }, { 2, 1 } } );
   result->gui.sections[section_cv_matrix] = make_module_section_gui_tabbed(section_cv_matrix, { 0, 1, 3, 1 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
   result->gui.sections[section_audio_matrix] = make_module_section_gui_tabbed(section_audio_matrix, { 3, 1, 3, 1 }, 

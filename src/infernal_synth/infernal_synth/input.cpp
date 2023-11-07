@@ -30,7 +30,7 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Input", module_input, 1),
     make_module_dsp(module_stage::input, module_output::cv, param_count + aux_count - 1, 0),
-    make_module_gui(section, colors, pos, { { 1 }, { 2, 3 } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 1, 2 } } )));
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<input_engine>(); };
@@ -58,7 +58,7 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
   result.params.emplace_back(make_param(
     make_topo_info("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
+    make_param_gui(section_aux, gui_edit_type::hslider, param_layout::horizontal, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   return result;
