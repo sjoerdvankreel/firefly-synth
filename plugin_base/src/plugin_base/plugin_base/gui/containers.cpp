@@ -8,7 +8,7 @@ void
 autofit_viewport::resized()
 {
   auto& fit = dynamic_cast<autofit_component&>(*getViewedComponent());
-  getViewedComponent()->setSize(getWidth(), fit.fixed_height());
+  getViewedComponent()->setSize(getWidth() - _lnf->scrollbar_size() - 2, fit.fixed_height());
 }
 
 void 

@@ -226,7 +226,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   if(section.gui.scroll_mode == gui_scroll_mode::none)
     return make_component<rounded_container>(&grid, radius, false, false, outline1, outline2);
   
-  auto& viewer = make_component<autofit_viewport>();
+  auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
   return make_component<rounded_container>(&viewer, radius, false, false, outline1, outline2);

@@ -3,6 +3,7 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/gui/gui.hpp>
+#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/components.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -13,8 +14,10 @@ namespace plugin_base {
 class autofit_viewport:
 public juce::Viewport
 {
+  lnf* const _lnf;
 public:
   void resized() override;
+  autofit_viewport(lnf* lnf) : _lnf(lnf) {}
 };
 
 // adds some margin around another component
