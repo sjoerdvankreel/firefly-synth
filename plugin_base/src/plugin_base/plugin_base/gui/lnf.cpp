@@ -229,6 +229,9 @@ void
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
   int radius = _desc->plugin->gui.module_corner_radius;
+  int strip_left = radius + 2;
+  bool is_section = _section != -1 && _desc->plugin->gui.sections[_section].tabbed;
+  auto justify = is_section ? Justification::left : Justification::centred;
   float lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
   if (button.getIndex() > 0)
   {
@@ -242,9 +245,12 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
     }
     else
       g.fillRect(button.getActiveArea());
+
     g.setFont(font());
+    auto text_area = button.getTextArea();
+    if (is_section) text_area.removeFromLeft(strip_left);
     g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
-    g.drawText(button.getButtonText(), button.getTextArea(), Justification::centred, false);
+    g.drawText(button.getButtonText(), text_area, justify, false);
     return;
   }
 
@@ -273,8 +279,9 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   buttonArea.removeFromLeft(1);
   g.setColour(colors().tab_button.brighter(lighten));
   g.fillRect(buttonArea);
+  if (is_section) buttonArea.removeFromLeft(strip_left);
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
-  g.drawText(button.getButtonText(), buttonArea, Justification::centred, false);
+  g.drawText(button.getButtonText(), buttonArea, justify, false);
 }
 
 void 
