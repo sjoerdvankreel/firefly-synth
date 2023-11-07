@@ -168,17 +168,12 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
       _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, max_frame_count);
 }
 
-int 
+void 
 plugin_engine::process_voices_single_threaded()
 {
-  int thread_count = 0;
   for (int v = 0; v < _voice_states.size(); v++)
     if (_voice_states[v].stage != voice_stage::unused)
-    {
-      thread_count = 1;
       process_voice(v, false);
-    }
-  return thread_count;
 }
 
 void
@@ -418,27 +413,22 @@ plugin_engine::process()
 
   // run voice modules in order taking advantage of host threadpool if possible
   // note: multithreading over voices, not anything within a single voice
-  int thread_count;
+  int thread_count = 1;
   if (!_voice_processor)
-    thread_count = process_voices_single_threaded();
+    process_voices_single_threaded();
   else
   {
     for (int v = 0; v < _state.desc().plugin->polyphony; v++)
       _voice_thread_ids[v] = std::thread::id();
     std::atomic_thread_fence(std::memory_order_release);
     if (!_voice_processor(*this, _voice_processor_context))
-      thread_count = process_voices_single_threaded();
+      process_voices_single_threaded();
     else 
     {
       std::atomic_thread_fence(std::memory_order_acquire);
       std::sort(_voice_thread_ids.begin(), _voice_thread_ids.end());
       thread_count = std::unique(_voice_thread_ids.begin(), _voice_thread_ids.end()) - _voice_thread_ids.begin();
-      for (int v = 0; v < _state.desc().plugin->polyphony; v++)
-        if (_voice_thread_ids[v] == std::thread::id())
-        {
-          thread_count--;
-          break;
-        }
+      thread_count = std::max(1, thread_count);
     }
   }
 

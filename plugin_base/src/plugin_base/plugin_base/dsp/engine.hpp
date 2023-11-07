@@ -71,7 +71,7 @@ class plugin_engine final {
   plugin_block make_plugin_block(
     int voice, int module, int slot, 
     int start_frame, int end_frame);
-  int process_voices_single_threaded();
+  void process_voices_single_threaded();
 
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_engine);
