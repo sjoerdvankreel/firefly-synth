@@ -16,6 +16,7 @@ struct gui_dimension;
 // just a guess for validation, increase if needed
 inline int constexpr topo_max = 1024;
 
+enum class gui_scroll_mode { none, vertical };
 enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, both };

@@ -5,6 +5,13 @@ using namespace juce;
 namespace plugin_base {
 
 void 
+autofit_viewport::resized()
+{
+  auto& fit = dynamic_cast<autofit_component&>(*getViewedComponent());
+  getViewedComponent()->setSize(getMaximumVisibleWidth(), fit.fixed_height());
+}
+
+void 
 margin_component::resized()
 {
   Rectangle<int> bounds(getLocalBounds());
@@ -15,6 +22,22 @@ margin_component::resized()
     bounds.getHeight() - _margin.getTopAndBottom());
   assert(getNumChildComponents() == 1);
   getChildComponent(0)->setBounds(child_bounds);
+}
+
+int 
+rounded_container::fixed_width() const
+{
+  auto& fit = dynamic_cast<autofit_component&>(*getChildComponent(0));
+  assert(fit.fixed_width() > 0);
+  return fit.fixed_width() + _radius;
+}
+
+int 
+rounded_container::fixed_height() const
+{
+  auto& fit = dynamic_cast<autofit_component&>(*getChildComponent(0));
+  assert(fit.fixed_height() > 0);
+  return fit.fixed_height() + _radius;
 }
 
 void

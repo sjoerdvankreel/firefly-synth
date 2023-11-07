@@ -9,6 +9,14 @@
 
 namespace plugin_base {
 
+// needs child to be able to autofit in 1 direction
+class autofit_viewport:
+public juce::Viewport
+{
+public:
+  void resized() override;
+};
+
 // adds some margin around another component
 class margin_component :
 public juce::Component 
@@ -23,7 +31,8 @@ public:
 
 // rounded rectangle container
 class rounded_container:
-public juce::Component
+public juce::Component,
+public autofit_component
 {
   bool const _fill;
   int const _radius;
@@ -32,8 +41,12 @@ public juce::Component
   juce::Colour const _color1;
   juce::Colour const _color2;
 public:
+  int fixed_width() const override;
+  int fixed_height() const override;
+
   void resized() override;
   void paint(juce::Graphics& g) override;
+
   rounded_container(
     juce::Component* child, int radius, bool fill, bool vertical,
     juce::Colour const& color1, juce::Colour const& color2):

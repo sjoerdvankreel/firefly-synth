@@ -14,6 +14,7 @@ struct param_section_gui final {
   gui_bindings bindings;
   gui_position position;
   gui_dimension dimension;
+  gui_scroll_mode scroll_mode;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section_gui);
 };

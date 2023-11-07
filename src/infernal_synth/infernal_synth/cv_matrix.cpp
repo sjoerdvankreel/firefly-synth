@@ -14,7 +14,7 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-static int constexpr route_count = 6;
+static int constexpr route_count = 9;
 
 enum { section_main };
 enum { type_off, type_mul, type_add, type_addbi };
@@ -65,9 +65,10 @@ cv_matrix_topo(
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global ? "Global" : "Voice";
 
-  result.sections.emplace_back(make_param_section(section_main,
+  auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 3, 4, -30 } })));
+  main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Type", param_type, route_count),

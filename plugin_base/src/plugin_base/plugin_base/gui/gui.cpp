@@ -223,7 +223,13 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   auto outline1 = module.module->gui.colors.section_outline1;
   auto outline2 = module.module->gui.colors.section_outline2;
   int radius = _gui_state->desc().plugin->gui.section_corner_radius;
-  return make_component<rounded_container>(&grid, radius, false, false, outline1, outline2);
+  if(section.gui.scroll_mode == gui_scroll_mode::none)
+    return make_component<rounded_container>(&grid, radius, false, false, outline1, outline2);
+  
+  auto& viewer = make_component<autofit_viewport>();
+  viewer.setViewedComponent(&grid, false);
+  viewer.setScrollBarsShown(true, false);
+  return make_component<rounded_container>(&viewer, radius, false, false, outline1, outline2);
 }
 
 Component&
