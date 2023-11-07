@@ -40,7 +40,7 @@ public:
 }; 
 
 enum {
-  module_glfo, module_gcv_matrix, module_vlfo, module_env, module_vcv_matrix, 
+  module_input, module_glfo, module_gcv_matrix, module_vlfo, module_env, module_vcv_matrix, 
   module_vaudio_matrix, module_osc, module_vfx, module_voice_out, module_voice_in,
   module_gaudio_matrix, module_gfx, module_master, module_monitor, module_count };
 
@@ -69,6 +69,7 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo voice_topo(int section, bool out);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
