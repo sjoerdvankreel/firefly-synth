@@ -22,6 +22,9 @@ public:
   int combo_height() const { return _desc->plugin->gui.font_height + 6; }
   lnf(plugin_desc const* desc, int section, int module);
 
+  int getDefaultScrollbarWidth() override { return 8; }
+  bool areScrollbarButtonsVisible() override { return true; }
+
   juce::Font getPopupMenuFont() override { return font(); }
   juce::Font getLabelFont(juce::Label&) override { return font(); }
   juce::Font getComboBoxFont(juce::ComboBox&) override { return font(); }
@@ -30,7 +33,6 @@ public:
   juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return font(); }
   
   juce::Path getTickShape(float) override;
-  int getDefaultScrollbarWidth() override { return 8; }
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
   void positionComboBoxText(juce::ComboBox&, juce::Label&) override;
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;
