@@ -19,6 +19,7 @@ make_module_colors(Colour const& c)
   result.slider_thumb = c;
   result.control_tick = c;
   result.bubble_outline = c;
+  result.scrollbar_thumb = c.darker(1);
   result.section_outline1 = c.darker(1);
   return result;
 }

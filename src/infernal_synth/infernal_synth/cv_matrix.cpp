@@ -14,7 +14,8 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-static int constexpr route_count = 9;
+static int constexpr groute_count = 6;
+static int constexpr vroute_count = 9;
 
 enum { section_main };
 enum { type_off, type_mul, type_add, type_addbi };
@@ -33,6 +34,7 @@ type_items()
 
 class cv_matrix_engine:
 public module_engine { 
+  bool const _global;
   cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
   std::vector<param_topo_mapping> const _targets;
@@ -42,6 +44,7 @@ public:
   void process(plugin_block& block) override;
 
   cv_matrix_engine(
+    bool global,
     plugin_topo const& topo, 
     std::vector<module_topo_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
@@ -57,8 +60,9 @@ cv_matrix_topo(
 {
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV", module_vcv_matrix, 1);
   auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "GCV", module_gcv_matrix, 1);
-  module_stage stage = global ? module_stage::input : module_stage::voice;
+  int route_count = global ? groute_count : vroute_count;
   auto const info = topo_info(global? global_info: voice_info);
+  module_stage stage = global ? module_stage::input : module_stage::voice;
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, route_count, 0),
@@ -68,7 +72,7 @@ cv_matrix_topo(
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 2, 3, -30 } })));
-  main.gui.scroll_mode = gui_scroll_mode::vertical;
+  main.gui.scroll_mode = global? gui_scroll_mode::none: gui_scroll_mode::vertical;
   
   result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Type", param_type, route_count),
@@ -98,17 +102,18 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  result.engine_factory = [sm = source_matrix.mappings, tm = target_matrix.mappings]
-    (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(topo, sm, tm); };
+  result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings]
+    (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); };
   return result;
 }
 
 cv_matrix_engine::
 cv_matrix_engine(
+  bool global,
   plugin_topo const& topo,
   std::vector<module_topo_mapping> const& sources,
   std::vector<param_topo_mapping> const& targets):
-_sources(sources), _targets(targets)
+_global(global), _sources(sources), _targets(targets)
 {
   plugin_dims dims(topo);
   _mixdown.resize(dims.module_slot_param_slot);
@@ -118,6 +123,8 @@ _sources(sources), _targets(targets)
 void
 cv_matrix_engine::process(plugin_block& block)
 {
+  int route_count = _global? groute_count: vroute_count;
+
   // set every modulatable parameter to its corresponding automation curve
   for (int m = 0; m < _targets.size(); m++)
   {
@@ -133,7 +140,9 @@ cv_matrix_engine::process(plugin_block& block)
   // apply modulation routing
   int modulation_index = 0;
   auto const& own_automation = block.state.own_block_automation;
-  jarray<float, 1>* modulated_curve_ptrs[route_count] = { nullptr };
+  jarray<float, 1>* vmodulated_curve_ptrs[vroute_count] = { nullptr };
+  jarray<float, 1>* gmodulated_curve_ptrs[groute_count] = { nullptr };
+  jarray<float, 1>** modulated_curve_ptrs = _global? gmodulated_curve_ptrs: vmodulated_curve_ptrs;
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;

@@ -67,6 +67,9 @@ _desc(desc), _module(module), _section(section)
   setColour(ComboBox::ColourIds::backgroundColourId, colors().control_background);
   setColour(ComboBox::ColourIds::focusedOutlineColourId, colors().control_outline);
 
+  setColour(ScrollBar::ColourIds::thumbColourId, colors().scrollbar_thumb);
+  setColour(ScrollBar::ColourIds::backgroundColourId, colors().scrollbar_background);
+
   setColour(PopupMenu::ColourIds::textColourId, colors().control_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
   setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text.brighter(_desc->plugin->gui.lighten));
@@ -147,6 +150,21 @@ lnf::drawTickBox(
   auto tick = getTickShape(0.75f);
   if(c.isEnabled()) g.setColour(c.findColour(ToggleButton::tickColourId));
   g.fillPath(tick, tick.getTransformToScaleToFit(tickBounds.reduced(4, 5).toFloat(), true));
+}
+
+void
+lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
+  bool vertical, int pos, int size, bool over, bool down)
+{
+  g.setColour(findColour(ScrollBar::ColourIds::backgroundColourId));
+  g.fillRect(bar.getLocalBounds());
+
+  Rectangle<int> thumbBounds;
+  if (vertical) thumbBounds = { x, pos, w, size };
+  else thumbBounds = { pos, y, size, h };
+  auto c = bar.findColour(ScrollBar::ColourIds::thumbColourId);
+  g.setColour(over ? c.brighter(0.25f) : c);
+  g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), 2.0f);
 }
 
 void

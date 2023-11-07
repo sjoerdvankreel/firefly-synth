@@ -19,7 +19,6 @@ release_count > 0 asserts
 demo synth:
 graphs
 velocity
-do scrollbar
 clean up the dsp
 on-note type stuff
 measure performance
