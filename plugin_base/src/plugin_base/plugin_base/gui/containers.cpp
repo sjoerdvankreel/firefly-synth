@@ -8,7 +8,7 @@ void
 autofit_viewport::resized()
 {
   auto& fit = dynamic_cast<autofit_component&>(*getViewedComponent());
-  getViewedComponent()->setSize(getMaximumVisibleWidth(), fit.fixed_height());
+  getViewedComponent()->setSize(getWidth(), fit.fixed_height());
 }
 
 void 
