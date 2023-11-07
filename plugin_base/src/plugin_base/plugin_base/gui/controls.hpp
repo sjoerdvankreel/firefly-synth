@@ -2,6 +2,7 @@
 
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/topo/plugin.hpp>
+#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/gui/components.hpp>
 
@@ -53,7 +54,7 @@ public autofit_component
 public:
   void autofit();
   int fixed_width() const override { return getWidth(); }
-  int fixed_height() const override { return getHeight(); }
+  int fixed_height() const override { return _lnf->combo_height(); }
   autofit_combobox(lnf* lnf, bool autofit) : _lnf(lnf), _autofit(autofit) {}
 };
 

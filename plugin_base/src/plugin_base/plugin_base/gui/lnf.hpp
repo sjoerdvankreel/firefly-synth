@@ -19,6 +19,7 @@ public juce::LookAndFeel_V4 {
 
 public:
   juce::Font font() const;
+  int combo_height() const { return _desc->plugin->gui.font_height + 6; }
   lnf(plugin_desc const* desc, int section, int module);
 
   juce::Font getPopupMenuFont() override { return font(); }

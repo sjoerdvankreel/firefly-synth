@@ -191,7 +191,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int arrowPad = 4;
   int arrowWidth = 6;
   int arrowHeight = 4;
-  int const fixedHeight = _desc->plugin->gui.font_height + 6;
+  int const fixedHeight = combo_height();
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
   Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
