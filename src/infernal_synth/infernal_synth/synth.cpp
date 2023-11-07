@@ -24,7 +24,7 @@ make_module_colors(Colour const& c)
 }
 
 module_matrix
-make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules)
+make_module_matrix(std::vector<module_topo const*> const& modules)
 {
   int index = 0;
   module_matrix result;
