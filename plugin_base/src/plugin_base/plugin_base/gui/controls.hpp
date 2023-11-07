@@ -83,7 +83,7 @@ public autofit_label
 {
 public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
-  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label(lnf, param->param->info.tag.name)
+  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label(lnf, param->info.name)
   { setText(param->info.name, juce::dontSendNotification); init(); }
 };
 
