@@ -19,7 +19,6 @@ public juce::LookAndFeel_V4 {
 
 public:
   juce::Font font() const;
-  int scrollbar_size() const { return 15; }
   int combo_height() const { return _desc->plugin->gui.font_height + 6; }
   lnf(plugin_desc const* desc, int section, int module);
 
@@ -31,6 +30,7 @@ public:
   juce::Font getTabButtonFont(juce::TabBarButton& b, float) override { return font(); }
   
   juce::Path getTickShape(float) override;
+  int getDefaultScrollbarWidth() override { return 8; }
   int	getTabButtonBestWidth(juce::TabBarButton&, int) override;
   void positionComboBoxText(juce::ComboBox&, juce::Label&) override;
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;
