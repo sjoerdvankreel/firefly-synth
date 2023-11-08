@@ -38,7 +38,7 @@ public module_engine {
   cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
   std::vector<param_topo_mapping> const _targets;
-  std::vector<module_topo_mapping> const _sources;
+  std::vector<module_output_mapping> const _sources;
 public:
   void initialize() override {}
   void process(plugin_block& block) override;
@@ -46,7 +46,7 @@ public:
   cv_matrix_engine(
     bool global,
     plugin_topo const& topo, 
-    std::vector<module_topo_mapping> const& sources,
+    std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
@@ -80,7 +80,7 @@ cv_matrix_topo(
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
 
-  auto source_matrix = make_module_matrix(sources);
+  auto source_matrix = make_output_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
@@ -112,7 +112,7 @@ cv_matrix_engine::
 cv_matrix_engine(
   bool global,
   plugin_topo const& topo,
-  std::vector<module_topo_mapping> const& sources,
+  std::vector<module_output_mapping> const& sources,
   std::vector<param_topo_mapping> const& targets):
 _global(global), _sources(sources), _targets(targets)
 {
@@ -177,9 +177,11 @@ cv_matrix_engine::process(plugin_block& block)
 
     // find out indices of modulation source
     int selected_source = own_automation[param_source][r].step();
-    int sm = _sources[selected_source].index;
-    int smi = _sources[selected_source].slot;
-    auto const& source_curve = block.module_cv(sm, smi)[0][0];
+    int sm = _sources[selected_source].module_index;
+    int smi = _sources[selected_source].module_slot;
+    int so = _sources[selected_source].output_index;
+    int soi = _sources[selected_source].output_slot;
+    auto const& source_curve = block.module_cv(sm, smi)[so][soi];
 
     // apply modulation
     auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];
