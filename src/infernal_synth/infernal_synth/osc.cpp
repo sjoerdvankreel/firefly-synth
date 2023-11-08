@@ -40,6 +40,15 @@ public:
   void process(plugin_block& block) override;
 };
 
+static void
+init_default(plugin_state& state)
+{
+  state.set_text_at(module_osc, 0, param_type, 0, "Saw");
+  state.set_text_at(module_osc, 0, param_cent, 0, "-10");
+  state.set_text_at(module_osc, 1, param_type, 0, "Saw");
+  state.set_text_at(module_osc, 1, param_cent, 0, "+10");
+}
+
 module_topo
 osc_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -51,6 +60,7 @@ osc_topo(
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } })));
 
+  result.default_initializer = init_default;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
 

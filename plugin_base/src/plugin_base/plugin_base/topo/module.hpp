@@ -18,9 +18,8 @@ class module_engine;
 
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
-enum class module_init_type { none, minimal, default_ };
 
-typedef std::function<void(module_init_type type, plugin_state&)>
+typedef std::function<void(plugin_state&)>
 state_initializer;
 typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
@@ -77,8 +76,9 @@ struct module_topo final {
   std::vector<param_topo> params;
   std::vector<param_section> sections;
 
-  state_initializer initializer;
   module_engine_factory engine_factory;
+  state_initializer minimal_initializer;
+  state_initializer default_initializer;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;
 };

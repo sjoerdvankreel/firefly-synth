@@ -52,6 +52,22 @@ public:
   void process(plugin_block& block) override;
 };
 
+static void
+init_voice_default(plugin_state& state)
+{
+  state.set_text_at(module_vfx, 0, param_type, 0, "LPF");
+  state.set_text_at(module_vfx, 0, param_filter_res, 0, "50");
+  state.set_text_at(module_vfx, 0, param_filter_freq, 0, "20");
+}
+
+static void
+init_global_default(plugin_state& state)
+{
+  state.set_text_at(module_gfx, 0, param_type, 0, "LPF");
+  state.set_text_at(module_gfx, 1, param_type, 0, "Delay");
+  state.set_text_at(module_gfx, 1, param_delay_tempo, 0, "3/16");
+}
+
 module_topo
 fx_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -67,6 +83,8 @@ fx_topo(
       make_module_dsp_output(false, make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  if(global) result.default_initializer = init_global_default;
+  if(!global) result.default_initializer = init_voice_default;
   result.engine_factory = [global](auto const&, int sample_rate, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<fx_engine>(global, sample_rate); };
 

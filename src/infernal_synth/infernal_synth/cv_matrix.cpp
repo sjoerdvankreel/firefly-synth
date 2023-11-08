@@ -51,7 +51,31 @@ public:
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
-module_topo 
+static void
+init_voice_default(plugin_state& state)
+{
+  state.set_text_at(module_vcv_matrix, 0, param_type, 0, "Add");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 0, "VFX 1 Freq");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 1, "AddBi");
+  state.set_text_at(module_vcv_matrix, 0, param_amount, 1, "33");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 1, "Osc 1 Bal");
+}
+
+static void
+init_global_default(plugin_state& state)
+{
+  state.set_text_at(module_gcv_matrix, 0, param_type, 0, "AddBi");
+  state.set_text_at(module_gcv_matrix, 0, param_amount, 0, "33");
+  state.set_text_at(module_gcv_matrix, 0, param_source, 0, "GLFO 1");
+  state.set_text_at(module_gcv_matrix, 0, param_target, 0, "GFX 1 Freq");
+  state.set_text_at(module_gcv_matrix, 0, param_type, 1, "Add");
+  state.set_text_at(module_gcv_matrix, 0, param_source, 1, "In Mod");
+  state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
+}
+
+module_topo
 cv_matrix_topo(
   int section, plugin_base::gui_colors const& colors,
   plugin_base::gui_position const& pos, bool global,
@@ -103,6 +127,7 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
+  result.default_initializer = global? init_global_default: init_voice_default;
   result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings]
     (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); };
   return result;

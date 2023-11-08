@@ -41,41 +41,47 @@ public:
 };
 
 static void
-initializer(module_init_type init_type, bool global, plugin_state& state)
+init_voice_minimal(plugin_state& state)
 {
-  if(init_type == module_init_type::minimal && global)
-  {
-    state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
-    state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice");
-    state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "Master");
-  }
-  if (init_type == module_init_type::minimal && !global)
-  {
-    state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
-    state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
-    state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "Voice");
-  }
-  if (init_type == module_init_type::default_ && global)
-  {
-    state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
-    state.set_text_at(module_gaudio_matrix, 0, param_on, 1, "On");
-    state.set_text_at(module_gaudio_matrix, 0, param_on, 2, "On");
-    state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice");
-    state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "GFX 1");
-    state.set_text_at(module_gaudio_matrix, 0, param_source, 1, "GFX 1");
-    state.set_text_at(module_gaudio_matrix, 0, param_target, 1, "GFX 2");
-    state.set_text_at(module_gaudio_matrix, 0, param_source, 2, "GFX 2");
-    state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "Master");
-  }
-  if (init_type == module_init_type::default_ && !global)
-  {
-    state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
-    state.set_text_at(module_vaudio_matrix, 0, param_on, 1, "On");
-    state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
-    state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "VFX 1");
-    state.set_text_at(module_vaudio_matrix, 0, param_source, 1, "VFX 1");
-    state.set_text_at(module_vaudio_matrix, 0, param_target, 1, "Voice");
-  }
+  state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "Voice");
+}
+
+static void
+init_global_minimal(plugin_state& state)
+{
+  state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "Master");
+}
+
+static void
+init_voice_default(plugin_state& state)
+{
+  state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_vaudio_matrix, 0, param_on, 1, "On");
+  state.set_text_at(module_vaudio_matrix, 0, param_on, 2, "On");
+  state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "VFX 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_source, 1, "Osc 2");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 1, "VFX 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_source, 2, "VFX 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 2, "Voice");
+}
+
+static void
+init_global_default(plugin_state& state)
+{
+  state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_gaudio_matrix, 0, param_on, 1, "On");
+  state.set_text_at(module_gaudio_matrix, 0, param_on, 2, "On");
+  state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "GFX 1");
+  state.set_text_at(module_gaudio_matrix, 0, param_source, 1, "GFX 1");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 1, "GFX 2");
+  state.set_text_at(module_gaudio_matrix, 0, param_source, 2, "GFX 2");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "Master");
 }
 
 module_topo 
@@ -136,7 +142,8 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
-  result.initializer = [global](auto type, auto& state) { initializer(type, global, state); };
+  result.default_initializer = global? init_global_default: init_voice_default;
+  result.minimal_initializer = global? init_global_minimal: init_voice_minimal;
   result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<audio_matrix_engine>(global, sm.mappings, tm.mappings); };
 

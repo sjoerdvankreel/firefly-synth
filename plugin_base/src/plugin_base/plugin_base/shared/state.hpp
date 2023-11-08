@@ -11,6 +11,8 @@
 
 namespace plugin_base {
 
+enum class state_init_type { empty, minimal, default_ };
+
 class state_listener
 {
 public:
@@ -33,7 +35,7 @@ public:
   plugin_state(plugin_desc const* desc, bool notify);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
-  void init_defaults(module_init_type init_type);
+  void init(state_init_type init_type);
   void add_listener(int index, state_listener* listener) const;
   void remove_listener(int index, state_listener* listener) const;
 

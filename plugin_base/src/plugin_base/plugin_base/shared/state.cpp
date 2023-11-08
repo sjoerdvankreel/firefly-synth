@@ -9,7 +9,7 @@ _desc(desc), _notify(notify)
 {
   plugin_dims dims(*_desc->plugin);
   _state.resize(dims.module_slot_param_slot);
-  init_defaults(module_init_type::default_);
+  init(state_init_type::default_);
 }
 
 void 
@@ -66,7 +66,7 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 }
 
 void
-plugin_state::init_defaults(module_init_type init_type)
+plugin_state::init(state_init_type init_type)
 {
   for (int m = 0; m < desc().plugin->modules.size(); m++)
   {
@@ -76,10 +76,11 @@ plugin_state::init_defaults(module_init_type init_type)
         for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
           set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
   }
-  if (init_type != module_init_type::none)
-    for(int m = 0; m < desc().plugin->modules.size(); m++)
-      if(desc().plugin->modules[m].initializer) 
-        desc().plugin->modules[m].initializer(init_type, *this);
+  for(int m = 0; m < desc().plugin->modules.size(); m++)
+    if(init_type == state_init_type::minimal && desc().plugin->modules[m].minimal_initializer)
+      desc().plugin->modules[m].minimal_initializer(*this);
+    else if (init_type == state_init_type::default_ && desc().plugin->modules[m].default_initializer)
+    desc().plugin->modules[m].default_initializer(*this);
 }
 
 }
