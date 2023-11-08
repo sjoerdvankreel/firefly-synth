@@ -40,6 +40,21 @@ public:
   jarray<float, 2> const& mix(plugin_block& block, int module, int slot);
 };
 
+static void
+initializer(module_init_type init_type, bool global, plugin_state& state)
+{
+  if (global)
+  {
+    state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice");
+    state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "Master");
+  }
+  else
+  {
+    state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
+    state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "Voice");
+  }
+}
+
 module_topo 
 audio_matrix_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -99,6 +114,7 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
+  result.initializer = [global](auto type, auto& state) { initializer(type, global, state); };
   result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<audio_matrix_engine>(global, sm.mappings, tm.mappings); };
 
