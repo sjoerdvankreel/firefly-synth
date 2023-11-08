@@ -363,7 +363,21 @@ plugin_gui::make_top_bar()
 {
   auto& result = make_component<grid_component>(
     gui_dimension({ gui_dimension::auto_size }, 
-    { gui_dimension::auto_size, gui_dimension::auto_size }), margin_module);
+    std::vector<int>(4, gui_dimension::auto_size)), margin_module);
+
+  auto& init = make_component<autofit_button>(&_lnf, "Init");
+  result.add(init, { 0, 2 });
+  init.onClick = [this]() { 
+    _gui_state->init(state_init_type::default_); 
+    fire_state_loaded();
+  };
+
+  auto& clear = make_component<autofit_button>(&_lnf, "Clear");
+  result.add(clear, { 0, 3 });
+  clear.onClick = [this]() { 
+    _gui_state->init(state_init_type::minimal); 
+    fire_state_loaded();
+  };
 
   auto& save = make_component<autofit_button>(&_lnf, "Save");
   result.add(save, { 0, 1 });
