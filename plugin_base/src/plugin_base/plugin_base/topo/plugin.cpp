@@ -60,7 +60,7 @@ plugin_topo::validate() const
     for (int p = 0; p < modules[m].params.size(); p++)
       INF_ASSERT_EXEC(param_ids.insert(modules[m].params[p].info.tag.id).second);
     for (int o = 0; o < modules[m].dsp.outputs.size(); o++)
-      INF_ASSERT_EXEC(output_ids.insert(modules[m].dsp.outputs[o].tag.id).second);
+      INF_ASSERT_EXEC(output_ids.insert(modules[m].dsp.outputs[o].info.tag.id).second);
     if (gui.sections[modules[m].gui.section].tabbed) assert(modules[m].info.slot_count == 1);
     assert(!gui.sections[modules[m].gui.section].tabbed || modules[m].gui.tabbed_name.size());
   }

@@ -105,8 +105,17 @@ make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const&
   return result;
 }
 
+module_dsp_output
+make_module_dsp_output(bool is_modulation_source, topo_info const& info)
+{
+  module_dsp_output result;
+  result.info = topo_info(info);
+  result.is_modulation_source = is_modulation_source;
+  return result;
+}
+
 module_dsp
-make_module_dsp(module_stage stage, module_output output, int scratch_count, std::vector<topo_info> const& outputs)
+make_module_dsp(module_stage stage, module_output output, int scratch_count, std::vector<module_dsp_output> const& outputs)
 {
   module_dsp result = {};
   result.stage = stage;

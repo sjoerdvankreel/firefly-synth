@@ -51,12 +51,19 @@ struct module_topo_gui final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 
+// module output
+struct module_dsp_output final {
+  topo_info info;
+  bool is_modulation_source;
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp_output);
+};
+
 // module dsp
 struct module_dsp final {
   int scratch_count;
   module_stage stage;
   module_output output;
-  std::vector<topo_info> outputs;
+  std::vector<module_dsp_output> outputs;
   
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);

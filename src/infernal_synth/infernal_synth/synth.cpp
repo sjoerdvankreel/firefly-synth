@@ -102,7 +102,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
     if (module_slots > 1)
     {
       auto const& output = modules[m]->dsp.outputs[0];
-      assert(output.slot_count == 1);
+      assert(output.info.slot_count == 1);
       assert(modules[m]->dsp.outputs.size() == 1);
       auto module_submenu = result.submenu->add_submenu(module_tag.name);
       for (int mi = 0; mi < module_slots; mi++)
@@ -110,16 +110,16 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
         module_submenu->indices.push_back(index++);
         result.mappings.push_back({ modules[m]->info.index, mi, 0, 0 });
         result.items.push_back({
-          make_id(module_tag.id, mi, output.tag.id, 0),
+          make_id(module_tag.id, mi, output.info.tag.id, 0),
           make_name(module_tag.name, mi, module_slots) });
       }
-    } else if (modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].slot_count == 1)
+    } else if (modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].info.slot_count == 1)
     {
       auto const& output = modules[m]->dsp.outputs[0];
       result.submenu->indices.push_back(index++);
       result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
       result.items.push_back({
-        make_id(module_tag.id, 0, output.tag.id, 0),
+        make_id(module_tag.id, 0, output.info.tag.id, 0),
         make_name(module_tag.name, 0, 1) });
     }
     else
@@ -128,13 +128,13 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
       for (int o = 0; o < modules[m]->dsp.outputs.size(); o++)
       {
         auto const& output = modules[m]->dsp.outputs[o];
-        for (int oi = 0; oi < output.slot_count; oi++)
+        for (int oi = 0; oi < output.info.slot_count; oi++)
         {
           output_submenu->indices.push_back(index++);
           result.mappings.push_back({ modules[m]->info.index, 0, o, oi });
           result.items.push_back({
-            make_id(module_tag.id, 0, output.tag.id, oi),
-            make_name(module_tag.name, 0, 1, output.tag.name, oi, output.slot_count) });
+            make_id(module_tag.id, 0, output.info.tag.id, oi),
+            make_name(module_tag.name, 0, 1, output.info.tag.name, oi, output.info.slot_count) });
         }
       }
     }

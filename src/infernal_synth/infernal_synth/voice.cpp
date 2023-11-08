@@ -24,7 +24,7 @@ voice_topo(int section, bool out)
 {
   auto const out_dsp = make_module_dsp(module_stage::voice, module_output::none, 0, {});
   auto const in_dsp = make_module_dsp(module_stage::output, module_output::audio, 0, {
-    make_topo_info("{FFA367C9-23C1-4E89-95C5-90EE59CB034D}", "Output", 0, 1) });
+    make_module_dsp_output(false, make_topo_info("{FFA367C9-23C1-4E89-95C5-90EE59CB034D}", "Output", 0, 1)) });
   auto const in_info = make_topo_info("{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}", "Voice", module_voice_in, 1);
   auto const out_info = make_topo_info("{94CC6FFA-2C0F-4B72-A484-65CD2974D288}", "Voice", module_voice_out, 1);
   auto dsp = module_dsp(out ? out_dsp : in_dsp);

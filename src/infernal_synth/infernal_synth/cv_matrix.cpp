@@ -66,7 +66,7 @@ cv_matrix_topo(
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 0, {
-      make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count) }),
+      make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global ? "Global" : "Voice";
 
@@ -182,6 +182,10 @@ cv_matrix_engine::process(plugin_block& block)
     int so = _sources[selected_source].output_index;
     int soi = _sources[selected_source].output_slot;
     auto const& source_curve = block.module_cv(sm, smi)[so][soi];
+
+    // source must be regular unipolar otherwise add/bi/mul breaks
+    for(int f = block.start_frame; f < block.end_frame; f++)
+      check_unipolar(source_curve[f]);
 
     // apply modulation
     auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];

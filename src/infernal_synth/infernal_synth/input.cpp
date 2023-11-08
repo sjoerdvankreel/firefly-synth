@@ -31,9 +31,9 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "In", module_input, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
-      make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", param_aux, aux_count),
-      make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", param_mod, 1),
-      make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", param_pb, 1) }),
+      make_module_dsp_output(true, make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", param_aux, aux_count)),
+      make_module_dsp_output(false, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", param_mod, 1)),
+      make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", param_pb, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
 
   result.engine_factory = [](auto const&, int, int) ->

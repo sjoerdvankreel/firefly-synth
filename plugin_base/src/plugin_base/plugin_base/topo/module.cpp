@@ -11,8 +11,9 @@ module_dsp::validate() const
   assert(output == module_output::none || outputs.size() > 0 && outputs.size() < topo_max);
   for (int o = 0; o < outputs.size(); o++)
   {
-    outputs[o].validate();
-    assert(outputs[o].index == o);
+    outputs[o].info.validate();
+    assert(outputs[o].info.index == o);
+    assert(output == module_output::cv || !outputs[o].is_modulation_source);
   }
 }
 
