@@ -61,6 +61,7 @@ struct gui_submenu final {
   std::vector<std::shared_ptr<gui_submenu>> children;
   
   void validate() const;
+  std::shared_ptr<gui_submenu> add_submenu(std::string const& name);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_submenu);
 };
 

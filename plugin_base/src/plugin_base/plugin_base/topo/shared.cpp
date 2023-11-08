@@ -33,6 +33,15 @@ gui_submenu::validate() const
     children[i]->validate();
 }
 
+std::shared_ptr<gui_submenu> 
+gui_submenu::add_submenu(std::string const& name)
+{
+  auto result = std::make_shared<gui_submenu>();
+  result->name = name;
+  children.push_back(result);
+  return result;
+}
+
 void
 gui_binding::bind_slot(gui_slot_binding_selector selector_)
 {

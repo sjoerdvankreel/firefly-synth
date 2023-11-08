@@ -24,6 +24,42 @@ make_module_colors(Colour const& c)
   return result;
 }
 
+static std::string
+make_id(std::string const& id, int slot)
+{
+  std::string result = id;
+  result += "-" + std::to_string(slot);
+  return result;
+}
+
+static std::string
+make_name(std::string const& name, int slot, int slots)
+{
+  std::string result = name;
+  if(slots > 1) result += " " + std::to_string(slot + 1);
+  return result;
+}
+
+static std::string
+make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
+{
+  std::string result = id1;
+  result += "-" + std::to_string(slot1);
+  result += "-" + id2;
+  result += "-" + std::to_string(slot2);
+  return result;
+}
+
+static std::string
+make_name(std::string const& name1, int slot1, int slots1, std::string const& name2, int slot2, int slots2)
+{
+  std::string result = name1;
+  if (slots1 > 1) result += " " + std::to_string(slot1 + 1);
+  result += " " + name2;
+  if (slots2 > 1) result += " " + std::to_string(slot2 + 1);
+  return result;
+}
+
 routing_matrix<module_topo_mapping>
 make_module_matrix(std::vector<module_topo const*> const& modules)
 {
@@ -36,27 +72,18 @@ make_module_matrix(std::vector<module_topo const*> const& modules)
     int slots = modules[m]->info.slot_count;
     if (slots == 1)
     {
-      list_item item;
-      item.id = tag.id;
-      item.name = tag.name;
-      result.items.push_back(item);
       result.submenu->indices.push_back(index++);
       result.mappings.push_back({ modules[m]->info.index, 0 });
-    }
-    else
+      result.items.push_back({ make_id(tag.id, 0), make_name(tag.name, 0, slots) });
+    } else
     {
-      auto module_submenu = std::make_shared<gui_submenu>();
-      module_submenu->name = tag.name;
+      auto module_submenu = result.submenu->add_submenu(tag.name);
       for (int mi = 0; mi < slots; mi++)
       {
-        list_item item;
-        item.id = tag.id + "-" + std::to_string(mi);
-        item.name = tag.name + " " + std::to_string(mi + 1);
-        result.items.push_back(item);
         module_submenu->indices.push_back(index++);
         result.mappings.push_back({ modules[m]->info.index, mi });
+        result.items.push_back({ make_id(tag.id, mi), make_name(tag.name, mi, slots) });
       }
-      result.submenu->children.push_back(module_submenu);
     }
   }
   return result;
@@ -70,55 +97,46 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
   result.submenu = std::make_shared<gui_submenu>();
   for (int m = 0; m < modules.size(); m++)
   {
-    auto const& tag = modules[m]->info.tag;
-    int slots = modules[m]->info.slot_count;
-    if (slots == 1)
+    auto const& module_tag = modules[m]->info.tag;
+    int module_slots = modules[m]->info.slot_count;
+    if (module_slots > 1)
     {
-      if(modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].slot_count == 1)
-      {
-        list_item item;
-        item.id = tag.id;
-        item.name = tag.name;
-        result.items.push_back(item);
-        result.submenu->indices.push_back(index++);
-        result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
-      }
-      else
-      {
-        auto output_submenu = std::make_shared<gui_submenu>();
-        output_submenu->name = tag.name;
-        for (int o = 0; modules[m]->dsp.outputs.size(); o++)
-        {
-          auto const& output = modules[m]->dsp.outputs[o];
-          for(int oi = 0; oi < output.slot_count; oi++)
-          {
-            list_item item;
-            item.id = tag.id + "-" + std::to_string(0) + "-" + output.tag.id + "-" + std::to_string(oi);
-            item.name = tag.name + " " + output.tag.name;
-            if(output.slot_count > 1) item.name += " " + std::to_string(oi + 1);
-            result.items.push_back(item);
-            output_submenu->indices.push_back(index++);
-            result.mappings.push_back({ modules[m]->info.index, 0, o, oi });
-          }
-        }
-        result.submenu->children.push_back(output_submenu);
-      }
-    } else
-    {
+      auto const& output = modules[m]->dsp.outputs[0];
+      assert(output.slot_count == 1);
       assert(modules[m]->dsp.outputs.size() == 1);
-      assert(modules[m]->dsp.outputs[0].slot_count == 1);
-      auto module_submenu = std::make_shared<gui_submenu>();
-      module_submenu->name = tag.name;
-      for (int mi = 0; mi < slots; mi++)
+      auto module_submenu = result.submenu->add_submenu(module_tag.name);
+      for (int mi = 0; mi < module_slots; mi++)
       {
-        list_item item;
-        item.id = tag.id + "-" + std::to_string(mi);
-        item.name = tag.name + " " + std::to_string(mi + 1);
-        result.items.push_back(item);
         module_submenu->indices.push_back(index++);
         result.mappings.push_back({ modules[m]->info.index, mi, 0, 0 });
+        result.items.push_back({
+          make_id(module_tag.id, mi, output.tag.id, 0),
+          make_name(module_tag.name, mi, module_slots, output.tag.name, 0, 1) });
       }
-      result.submenu->children.push_back(module_submenu);
+    } else if (modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].slot_count == 1)
+    {
+      auto const& output = modules[m]->dsp.outputs[0];
+      result.submenu->indices.push_back(index++);
+      result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
+      result.items.push_back({
+        make_id(module_tag.id, 0, output.tag.id, 0),
+        make_name(module_tag.name, 0, 1, output.tag.name, 0, 1) });
+    }
+    else
+    {
+      auto output_submenu = result.submenu->add_submenu(module_tag.name);
+      for (int o = 0; modules[m]->dsp.outputs.size(); o++)
+      {
+        auto const& output = modules[m]->dsp.outputs[o];
+        for (int oi = 0; oi < output.slot_count; oi++)
+        {
+          output_submenu->indices.push_back(index++);
+          result.mappings.push_back({ modules[m]->info.index, 0, o, oi });
+          result.items.push_back({
+            make_id(module_tag.id, 0, output.tag.id, oi),
+            make_name(module_tag.name, 0, 1, output.tag.name, oi, output.slot_count) });
+        }
+      }
     }
   }
   return result;
