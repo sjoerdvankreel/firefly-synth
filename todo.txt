@@ -22,12 +22,10 @@ velocity
 clean up the dsp
 on-note type stuff
 measure performance
-rename from infernal
-master gain/midi/mod/pitch etc
-name the full thing firestorm/firefly?
-matrix defaults
+name it firefly?
 fx version
 do the midi stuff
+do the are you sure? stuff
 
 * get some linux folks to comment (ycollete?)
 * continuing
