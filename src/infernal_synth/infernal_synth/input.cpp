@@ -70,6 +70,12 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
 void
 input_engine::process(plugin_block& block)
 {
+  auto& own_cv = block.state.own_cv;
+  auto const& accurate = block.state.own_accurate_automation;
+  accurate[param_pb][0].copy_to(block.start_frame, block.end_frame, own_cv[param_pb][0]);
+  accurate[param_mod][0].copy_to(block.start_frame, block.end_frame, own_cv[param_mod][0]);
+  for(int i = 0; i < aux_count; i++)
+    accurate[param_aux][i].copy_to(block.start_frame, block.end_frame, own_cv[param_aux][i]);
 }
 
 }

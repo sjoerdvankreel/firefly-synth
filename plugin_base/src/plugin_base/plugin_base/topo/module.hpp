@@ -52,6 +52,8 @@ struct module_dsp final {
   module_stage stage;
   module_output output;
   std::vector<topo_info> outputs;
+  
+  void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);
 };
 

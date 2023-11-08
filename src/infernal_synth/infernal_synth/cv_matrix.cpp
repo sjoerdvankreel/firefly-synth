@@ -160,11 +160,11 @@ cv_matrix_engine::process(plugin_block& block)
     // if already modulated, set target curve to own buffer
     int existing_modulation_index = _modulation_indices[tm][tmi][tp][tpi];
     if (existing_modulation_index != -1)
-      modulated_curve_ptr = &block.state.own_cv[existing_modulation_index][0];
+      modulated_curve_ptr = &block.state.own_cv[0][existing_modulation_index];
     else
     {
       // else pick the next of our own cv outputs
-      modulated_curve_ptr = &block.state.own_cv[modulation_index][0];
+      modulated_curve_ptr = &block.state.own_cv[0][modulation_index];
       auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
       target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
       modulated_curve_ptrs[r] = modulated_curve_ptr;
