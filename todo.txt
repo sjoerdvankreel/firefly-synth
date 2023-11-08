@@ -27,6 +27,7 @@ master gain/midi/mod/pitch etc
 name the full thing firestorm/firefly?
 matrix defaults
 fx version
+do the midi stuff
 
 * get some linux folks to comment (ycollete?)
 * continuing
