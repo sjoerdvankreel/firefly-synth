@@ -34,10 +34,10 @@ gui_submenu::validate() const
 }
 
 std::shared_ptr<gui_submenu> 
-gui_submenu::add_submenu(std::string const& name)
+gui_submenu::add_submenu(std::string const& name_)
 {
   auto result = std::make_shared<gui_submenu>();
-  result->name = name;
+  result->name = name_;
   children.push_back(result);
   return result;
 }
