@@ -202,8 +202,11 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   auto const& domain = param->param->domain;
   auto const& param_gui = param->param->gui;
   if(!param_gui.submenu)
-    for(int i = 0; i <= domain.max; i++)
-      addItem(domain.raw_to_text(false, i), i + 1);
+  {
+    int index = 0;
+    for(int i = domain.min; i <= domain.max; i++, index++)
+      addItem(domain.raw_to_text(false, i), index + 1);
+  }
   else
     fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get());
   autofit();
@@ -222,7 +225,7 @@ param_combobox::showPopup()
     if(m.param_slot == gui_item_binding::match_param_slot) m.param_slot = _param->info.slot;
     auto other = _gui->gui_state()->get_plain_at(m.module_index, m.module_slot, m.param_index, m.param_slot);
     for(int i = 0; i < items.size(); i++)
-      setItemEnabled(i + 1, _param->param->gui.item_enabled.selector(other.step(), i));
+      setItemEnabled(i + 1, _param->param->gui.item_enabled.selector(other.step(), _param->param->domain.min + i));
   }
   else if (_param->param->gui.item_enabled.auto_bind)
   {
