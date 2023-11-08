@@ -102,6 +102,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
     if (module_slots > 1)
     {
       auto const& output = modules[m]->dsp.outputs[0];
+      if(!output.is_modulation_source) continue;
       assert(output.info.slot_count == 1);
       assert(modules[m]->dsp.outputs.size() == 1);
       auto module_submenu = result.submenu->add_submenu(module_tag.name);
@@ -116,6 +117,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
     } else if (modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].info.slot_count == 1)
     {
       auto const& output = modules[m]->dsp.outputs[0];
+      if (!output.is_modulation_source) continue;
       result.submenu->indices.push_back(index++);
       result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
       result.items.push_back({
@@ -128,6 +130,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
       for (int o = 0; o < modules[m]->dsp.outputs.size(); o++)
       {
         auto const& output = modules[m]->dsp.outputs[o];
+        if (!output.is_modulation_source) continue;
         for (int oi = 0; oi < output.info.slot_count; oi++)
         {
           output_submenu->indices.push_back(index++);
