@@ -43,15 +43,38 @@ public:
 static void
 initializer(module_init_type init_type, bool global, plugin_state& state)
 {
-  if (global)
+  if(init_type == module_init_type::minimal && global)
   {
+    state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
     state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice");
     state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "Master");
   }
-  else
+  if (init_type == module_init_type::minimal && !global)
   {
+    state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
     state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
     state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "Voice");
+  }
+  if (init_type == module_init_type::default_ && global)
+  {
+    state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
+    state.set_text_at(module_gaudio_matrix, 0, param_on, 1, "On");
+    state.set_text_at(module_gaudio_matrix, 0, param_on, 2, "On");
+    state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice");
+    state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "GFX 1");
+    state.set_text_at(module_gaudio_matrix, 0, param_source, 1, "GFX 1");
+    state.set_text_at(module_gaudio_matrix, 0, param_target, 1, "GFX 2");
+    state.set_text_at(module_gaudio_matrix, 0, param_source, 2, "GFX 2");
+    state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "Master");
+  }
+  if (init_type == module_init_type::default_ && !global)
+  {
+    state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
+    state.set_text_at(module_vaudio_matrix, 0, param_on, 1, "On");
+    state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
+    state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "VFX 1");
+    state.set_text_at(module_vaudio_matrix, 0, param_source, 1, "VFX 1");
+    state.set_text_at(module_vaudio_matrix, 0, param_target, 1, "Voice");
   }
 }
 
@@ -79,11 +102,10 @@ audio_matrix_topo(
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, -30 } })));
   
-  auto& on = result.params.emplace_back(make_param(
+  result.params.emplace_back(make_param(
     make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
-  on.domain.default_selector = [](int, int s) { return s == 0? "On": "Off"; };
 
   auto source_matrix = make_module_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
