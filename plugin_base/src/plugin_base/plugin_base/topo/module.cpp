@@ -10,15 +10,17 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   assert(info.index == index);
   assert(!gui.visible || params.size());
   assert(0 <= dsp.scratch_count && dsp.scratch_count < topo_max);
-  assert(dsp.output != module_output::none || dsp.output_count == 0);
+  assert(dsp.output != module_output::none || dsp.outputs.size() == 0);
   assert(0 <= gui.section && gui.section < plugin.gui.sections.size());
   assert(!gui.visible || (0 < sections.size() && sections.size() <= params.size()));
-  assert(dsp.output == module_output::none || dsp.output_count > 0 && dsp.output_count < topo_max);
+  assert(dsp.output == module_output::none || dsp.outputs.size() > 0 && dsp.outputs.size() < topo_max);
 
   for (int p = 0; p < params.size(); p++)
     params[p].validate(*this, p);
   for (int s = 0; s < sections.size(); s++)
     sections[s].validate(*this, s);
+  for(int o = 0; o < dsp.outputs.size(); o++)
+    dsp.outputs[o].validate();
 
   info.validate();
   if(!gui.visible) return;

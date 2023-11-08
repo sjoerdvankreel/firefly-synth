@@ -111,8 +111,8 @@ make_module_dsp(module_stage stage, module_output output, int scratch_count, std
   module_dsp result = {};
   result.stage = stage;
   result.output = output;
-  result.outputs = outputs;
   result.scratch_count = scratch_count;
+  result.outputs = vector_explicit_copy(outputs);
   return result;
 }
 
