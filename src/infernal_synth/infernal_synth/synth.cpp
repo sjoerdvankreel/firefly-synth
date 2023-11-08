@@ -111,7 +111,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
         result.mappings.push_back({ modules[m]->info.index, mi, 0, 0 });
         result.items.push_back({
           make_id(module_tag.id, mi, output.tag.id, 0),
-          make_name(module_tag.name, mi, module_slots, output.tag.name, 0, 1) });
+          make_name(module_tag.name, mi, module_slots) });
       }
     } else if (modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].slot_count == 1)
     {
@@ -120,12 +120,12 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
       result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
       result.items.push_back({
         make_id(module_tag.id, 0, output.tag.id, 0),
-        make_name(module_tag.name, 0, 1, output.tag.name, 0, 1) });
+        make_name(module_tag.name, 0, 1) });
     }
     else
     {
       auto output_submenu = result.submenu->add_submenu(module_tag.name);
-      for (int o = 0; modules[m]->dsp.outputs.size(); o++)
+      for (int o = 0; o < modules[m]->dsp.outputs.size(); o++)
       {
         auto const& output = modules[m]->dsp.outputs[o];
         for (int oi = 0; oi < output.slot_count; oi++)
@@ -255,16 +255,16 @@ synth_topo()
   result->modules[module_monitor] = monitor_topo(section_master_monitor, output_colors, { 0, 0 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 }, false,
     { &result->modules[module_osc], &result->modules[module_vfx] },
-    { &result->modules[module_voice_out], &result->modules[module_vfx] });
+    { &result->modules[module_vfx], &result->modules[module_voice_out] });
   result->modules[module_vcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, false,
-    { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo], &result->modules[module_input] },
+    { &result->modules[module_input], &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
     { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
   result->modules[module_gaudio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 }, true,
     { &result->modules[module_voice_in], &result->modules[module_gfx] },
-    { &result->modules[module_master], &result->modules[module_gfx] });
+    { &result->modules[module_gfx], &result->modules[module_master] });
   result->modules[module_gcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, true,
-    { &result->modules[module_glfo], &result->modules[module_input] },
-    { &result->modules[module_master], &result->modules[module_gfx], &result->modules[module_gaudio_matrix] });
+    { &result->modules[module_input], &result->modules[module_glfo] },
+    { &result->modules[module_gfx], &result->modules[module_gaudio_matrix], &result->modules[module_master] });
   return result;
 }
 

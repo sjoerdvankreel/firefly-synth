@@ -28,7 +28,7 @@ module_topo
 input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Input", module_input, 1),
+    make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "In", module_input, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", param_aux, aux_count),
       make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", param_pb, 1),

@@ -25,6 +25,7 @@ measure performance
 rename from infernal
 master gain/midi/mod/pitch etc
 name the full thing firestorm/firefly?
+matrix defaults
 
 * get some linux folks to comment (ycollete?)
 * continuing
