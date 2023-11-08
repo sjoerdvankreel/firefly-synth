@@ -10,9 +10,6 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-extern int const input_param_pb;
-extern int const input_param_pb_range;
-
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
@@ -138,9 +135,7 @@ osc_engine::process(plugin_block& block)
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve = *modulation[module_osc][block.module_slot][param_pitch][0];
-
-  auto const& pb_curve = block.state.all_accurate_automation[module_input][0][input_param_pb][0];
-  int pb_range = block.state.all_block_automation[module_input][0][input_param_pb_range][0].step();
+  auto const& pb_curve = block.state.all_global_cv[module_input][0][input_output_pb][0];
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
   auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
@@ -165,8 +160,7 @@ osc_engine::process(plugin_block& block)
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     float pitch = note_to_pitch(oct, note, cent, block.voice->state.id.key);
     float pitch_mod = block.normalized_to_raw(module_osc, param_pitch, pitch_curve[f]);
-    float pb_mod = block.normalized_to_raw(module_input, input_param_pb, pb_curve[f]) * pb_range;
-    float inc = pitch_to_freq(pitch + pitch_mod + pb_mod) / block.sample_rate;
+    float inc = pitch_to_freq(pitch + pitch_mod + pb_curve[f]) / block.sample_rate;
     switch (type)
     {
     case type_sine: sample = phase_to_sine(_phase); break;

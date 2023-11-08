@@ -9,20 +9,15 @@ _desc(desc), _notify(notify)
 {
   plugin_dims dims(*_desc->plugin);
   _state.resize(dims.module_slot_param_slot);
-  init_defaults();
+  init_defaults(module_init_type::default_);
 }
 
-void
-plugin_state::init_defaults()
+void 
+plugin_state::set_text_at(int m, int mi, int p, int pi, std::string const& value)
 {
-  for (int m = 0; m < desc().plugin->modules.size(); m++)
-  {
-    auto const& module = desc().plugin->modules[m];
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-          set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
-  }
+  plain_value plain;
+  INF_ASSERT_EXEC(desc().param_topo_at(m, p).domain.text_to_plain(false, value, plain));
+  set_plain_at(m, mi, p, pi, plain);
 }
 
 void
@@ -68,6 +63,23 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 {
   _state[m][mi][p][pi] = value;
   if (_notify) state_changed(desc().mappings.topo_to_index[m][mi][p][pi], value);
+}
+
+void
+plugin_state::init_defaults(module_init_type init_type)
+{
+  for (int m = 0; m < desc().plugin->modules.size(); m++)
+  {
+    auto const& module = desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+        for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
+          set_plain_at(m, mi, p, pi, module.params[p].domain.default_plain(mi, pi));
+  }
+  if (init_type != module_init_type::none)
+    for(int m = 0; m < desc().plugin->modules.size(); m++)
+      if(desc().plugin->modules[m].initializer) 
+        desc().plugin->modules[m].initializer(init_type, *this);
 }
 
 }

@@ -33,7 +33,7 @@ public:
   plugin_state(plugin_desc const* desc, bool notify);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
-  void init_defaults();
+  void init_defaults(module_init_type init_type);
   void add_listener(int index, state_listener* listener) const;
   void remove_listener(int index, state_listener* listener) const;
 
@@ -67,6 +67,7 @@ public:
   void set_raw_at_index(int index, double value) 
   { set_plain_at_index(index, desc().raw_to_plain_at_index(index, value)); }
 
+  void set_text_at(int m, int mi, int p, int pi, std::string const& value);
   normalized_value get_normalized_at(int m, int mi, int p, int pi) const 
   { return _desc->plain_to_normalized_at(m, p, get_plain_at(m, mi, p, pi)); }
   void set_normalized_at(int m, int mi, int p, int pi, normalized_value value)

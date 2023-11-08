@@ -33,6 +33,7 @@ public:
   mix(plugin_base::plugin_block& block, int module, int slot);
 }; 
 
+extern int const input_output_pb;
 enum {
   module_input, module_glfo, module_gcv_matrix, module_vlfo, module_env, module_vcv_matrix, 
   module_vaudio_matrix, module_osc, module_vfx, module_voice_out, module_voice_in,

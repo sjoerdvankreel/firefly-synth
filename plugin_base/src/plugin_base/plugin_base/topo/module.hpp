@@ -13,10 +13,15 @@
 namespace plugin_base {
 
 struct plugin_topo;
+class plugin_state;
+class module_engine;
+
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
+enum class module_init_type { none, minimal, default_ };
 
-class module_engine;
+typedef std::function<void(module_init_type type, plugin_state&)>
+state_initializer;
 typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
@@ -62,11 +67,11 @@ struct module_topo final {
   module_dsp dsp;
   topo_info info;
   module_topo_gui gui;
-
   std::vector<param_topo> params;
   std::vector<param_section> sections;
-  module_engine_factory engine_factory;
 
+  state_initializer initializer;
+  module_engine_factory engine_factory;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;
 };

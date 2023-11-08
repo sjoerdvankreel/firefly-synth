@@ -15,9 +15,7 @@ int aux_count = 3;
 
 enum { section_aux, section_midi };
 enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
-
-extern int const input_param_pb = param_pb;
-extern int const input_param_pb_range = param_pb_range;
+extern int const input_output_pb = param_pb;
 
 class input_engine :
 public module_engine {
@@ -81,7 +79,9 @@ input_engine::process(plugin_block& block)
 {
   auto& own_cv = block.state.own_cv;
   auto const& accurate = block.state.own_accurate_automation;
-  accurate[param_pb][0].copy_to(block.start_frame, block.end_frame, own_cv[param_pb][0]);
+  int range = block.state.own_block_automation[param_pb_range][0].step();
+  auto transform = [range, &block](float v) { return range * block.normalized_to_raw(module_input, param_pb, v); };
+  accurate[param_pb][0].transform_to(block.start_frame, block.end_frame, own_cv[param_pb][0], transform);
   accurate[param_mod][0].copy_to(block.start_frame, block.end_frame, own_cv[param_mod][0]);
   for(int i = 0; i < aux_count; i++)
     accurate[param_aux][i].copy_to(block.start_frame, block.end_frame, own_cv[param_aux][i]);

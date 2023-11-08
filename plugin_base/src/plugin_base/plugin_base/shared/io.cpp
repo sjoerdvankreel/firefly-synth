@@ -149,7 +149,7 @@ plugin_io_load(
 
   // good to go - only warnings from now on
   load_result result;
-  state.init_defaults();
+  state.init_defaults(module_init_type::none);
   for(int m = 0; m < plugin["modules"].size(); m++)
   {
     // check for old module not found
