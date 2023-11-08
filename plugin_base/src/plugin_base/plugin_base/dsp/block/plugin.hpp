@@ -39,8 +39,8 @@ struct plugin_voice_block final {
   bool finished;
   jarray<float, 2>& result;
   voice_state const& state;
-  jarray<float, 4> const& all_cv;
-  jarray<float, 5> const& all_audio;
+  jarray<float, 5> const& all_cv;
+  jarray<float, 6> const& all_audio;
   jarray<void*, 2> const& all_context;
   jarray<float, 4> const& all_scratch;
 };
@@ -48,11 +48,11 @@ struct plugin_voice_block final {
 // state and automation
 struct plugin_block_state final {
   void** own_context = {};
-  jarray<float, 2>& own_cv;
-  jarray<float, 3>& own_audio;
+  jarray<float, 3>& own_cv;
+  jarray<float, 4>& own_audio;
   jarray<float, 2>& own_scratch;
-  jarray<float, 4> const& all_global_cv;
-  jarray<float, 5> const& all_global_audio;
+  jarray<float, 5> const& all_global_cv;
+  jarray<float, 6> const& all_global_audio;
   jarray<void*, 2> const& all_global_context;
   jarray<float, 4> const& all_global_scratch;
   jarray<float, 3> const& own_accurate_automation;
@@ -76,8 +76,8 @@ struct plugin_block final {
   module_topo const& module;
 
   void* module_context(int mod, int slot) const;
-  jarray<float, 2> const& module_cv(int mod, int slot) const;
-  jarray<float, 3> const& module_audio(int mod, int slot) const;
+  jarray<float, 3> const& module_cv(int mod, int slot) const;
+  jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   void set_out_param(int param, int slot, double raw) const;
   float normalized_to_raw(int module_, int param_, float normalized) const;
@@ -92,7 +92,7 @@ plugin_block::module_context(int mod, int slot) const
     return state.all_global_context[mod][slot];
 }
 
-inline jarray<float, 2> const& 
+inline jarray<float, 3> const& 
 plugin_block::module_cv(int mod, int slot) const
 {
   if(plugin.modules[mod].dsp.stage == module_stage::voice)
@@ -101,7 +101,7 @@ plugin_block::module_cv(int mod, int slot) const
     return state.all_global_cv[mod][slot];
 }
 
-inline jarray<float, 3> const& 
+inline jarray<float, 4> const& 
 plugin_block::module_audio(int mod, int slot) const
 {
   if (plugin.modules[mod].dsp.stage == module_stage::voice)

@@ -50,10 +50,10 @@ class plugin_engine final {
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};
-  jarray<float, 5> _voice_cv_state = {};
-  jarray<float, 4> _global_cv_state = {};
-  jarray<float, 6> _voice_audio_state = {};
-  jarray<float, 5> _global_audio_state = {};
+  jarray<float, 6> _voice_cv_state = {};
+  jarray<float, 5> _global_cv_state = {};
+  jarray<float, 7> _voice_audio_state = {};
+  jarray<float, 6> _global_audio_state = {};
   jarray<float, 5> _accurate_automation = {};
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};

@@ -41,7 +41,7 @@ make_module_section_gui_tabbed(int index, gui_position const& position, std::str
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
 module_dsp
-make_module_dsp(module_stage stage, module_output output, int output_count, int scratch_count);
+make_module_dsp(module_stage stage, module_output output, int scratch_count, std::vector<topo_info> const& outputs);
 
 module_topo_gui
 make_module_gui_none(int section);

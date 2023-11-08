@@ -25,11 +25,16 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
       module_voice_scratch[v].emplace_back();
       for (int mi = 0; mi < module.info.slot_count; mi++)
       {
+        module_voice_cv[v][m].emplace_back();
         module_voice_audio[v][m].emplace_back();
-        module_voice_cv[v][m].emplace_back(module.dsp.output_count, cv_frames);
         module_voice_scratch[v][m].emplace_back(module.dsp.scratch_count, frame_count);
-        for(int oi = 0; oi < module.dsp.output_count; oi++)
-          module_voice_audio[v][m][mi].emplace_back(2, audio_frames);
+        for (int o = 0; o < module.dsp.outputs.size(); o++)
+        {
+          module_voice_audio[v][m][mi].emplace_back();
+          module_voice_cv[v][m][mi].emplace_back(module.dsp.outputs[o].slot_count, cv_frames);
+          for (int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+            module_voice_audio[v][m][mi][o].emplace_back(2, audio_frames);
+        }
       }
     }
   }
@@ -49,11 +54,16 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
       accurate_automation[m].emplace_back();
+      module_global_cv[m].emplace_back();
       module_global_audio[m].emplace_back();
-      module_global_cv[m].emplace_back(module.dsp.output_count, cv_frames);
       module_global_scratch[m].emplace_back(module.dsp.scratch_count, frame_count);
-      for(int oi = 0; oi < module.dsp.output_count; oi++)
-        module_global_audio[m][mi].emplace_back(2, audio_frames);
+      for (int o = 0; o < module.dsp.outputs.size(); o++)
+      {
+        module_global_audio[m][mi].emplace_back();
+        module_global_cv[m][mi].emplace_back(module.dsp.outputs[o].slot_count, cv_frames);
+        for (int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+          module_global_audio[m][mi][o].emplace_back(2, audio_frames);
+      }
       for (int p = 0; p < module.params.size(); p++)
       {
         int param_frames = module.params[p].dsp.rate == param_rate::accurate ? frame_count : 0;
@@ -100,18 +110,19 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int frame_count) const
       assert(module_voice_scratch[v][m].size() == module.info.slot_count);
       for (int mi = 0; mi < module.info.slot_count; mi++)
       {
-        assert(module_voice_cv[v][m][mi].size() == module.dsp.output_count);
-        assert(module_voice_audio[v][m][mi].size() == module.dsp.output_count);
+        assert(module_voice_cv[v][m][mi].size() == module.dsp.outputs.size());
+        assert(module_voice_audio[v][m][mi].size() == module.dsp.outputs.size());
         assert(module_voice_scratch[v][m][mi].size() == module.dsp.scratch_count);
 
-        for (int oi = 0; oi < module.dsp.scratch_count; oi++)
-          assert(module_voice_scratch[v][m][mi][oi] == frame_count);
-        for(int oi = 0; oi < module.dsp.output_count; oi++)
-        {
-          assert(module_voice_cv[v][m][mi][oi] == cv_frames);
-          assert(module_voice_audio[v][m][mi][oi].size() == 2);
-          for(int c = 0; c < 2; c++)
-            assert(module_voice_audio[v][m][mi][oi][c] == audio_frames);
+        for (int s = 0; s < module.dsp.scratch_count; s++)
+          assert(module_voice_scratch[v][m][mi][s] == frame_count);
+        for(int o = 0; o < module.dsp.outputs.size(); o++)
+          for(int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+          {
+            assert(module_voice_cv[v][m][mi][o][oi] == cv_frames);
+            assert(module_voice_audio[v][m][mi][o][oi].size() == 2);
+            for(int c = 0; c < 2; c++)
+              assert(module_voice_audio[v][m][mi][o][oi][c] == audio_frames);
         }
       }
     }
@@ -138,18 +149,19 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int frame_count) const
 
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
-      assert(module_global_cv[m][mi].size() == module.dsp.output_count);
-      assert(module_global_audio[m][mi].size() == module.dsp.output_count);
+      assert(module_global_cv[m][mi].size() == module.dsp.outputs.size());
+      assert(module_global_audio[m][mi].size() == module.dsp.outputs.size());
       assert(module_global_scratch[m][mi].size() == module.dsp.scratch_count);
-      for (int si = 0; si < module.dsp.scratch_count; si++)
-        assert(module_global_scratch[m][mi][si] == frame_count);
-      for(int oi = 0; oi < module.dsp.output_count; oi++)
-      {
-        assert(module_global_cv[m][mi][oi] == cv_frames);
-        assert(module_global_audio[m][mi][oi].size() == 2);
-        for(int c = 0; c < 2; c++)
-          assert(module_global_audio[m][mi][oi][c] == audio_frames);
-      }
+      for (int s = 0; s < module.dsp.scratch_count; s++)
+        assert(module_global_scratch[m][mi][s] == frame_count);
+      for (int o = 0; o < module.dsp.outputs.size(); o++)
+        for (int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+        {
+          assert(module_global_cv[m][mi][o][oi] == cv_frames);
+          assert(module_global_audio[m][mi][o][oi].size() == 2);
+          for(int c = 0; c < 2; c++)
+            assert(module_global_audio[m][mi][o][oi][c] == audio_frames);
+        }
 
       assert(accurate_automation[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)

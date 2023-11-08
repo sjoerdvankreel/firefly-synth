@@ -106,12 +106,12 @@ make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const&
 }
 
 module_dsp
-make_module_dsp(module_stage stage, module_output output, int output_count, int scratch_count)
+make_module_dsp(module_stage stage, module_output output, int scratch_count, std::vector<topo_info> const& outputs)
 {
   module_dsp result = {};
   result.stage = stage;
   result.output = output;
-  result.output_count = output_count;
+  result.outputs = outputs;
   result.scratch_count = scratch_count;
   return result;
 }

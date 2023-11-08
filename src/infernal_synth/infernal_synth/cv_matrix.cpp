@@ -65,7 +65,8 @@ cv_matrix_topo(
   module_stage stage = global ? module_stage::input : module_stage::voice;
 
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::cv, route_count, 0),
+    make_module_dsp(stage, module_output::cv, 0, {
+      make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global ? "Global" : "Voice";
 
@@ -159,11 +160,11 @@ cv_matrix_engine::process(plugin_block& block)
     // if already modulated, set target curve to own buffer
     int existing_modulation_index = _modulation_indices[tm][tmi][tp][tpi];
     if (existing_modulation_index != -1)
-      modulated_curve_ptr = &block.state.own_cv[existing_modulation_index];
+      modulated_curve_ptr = &block.state.own_cv[existing_modulation_index][0];
     else
     {
       // else pick the next of our own cv outputs
-      modulated_curve_ptr = &block.state.own_cv[modulation_index];
+      modulated_curve_ptr = &block.state.own_cv[modulation_index][0];
       auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
       target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
       modulated_curve_ptrs[r] = modulated_curve_ptr;
@@ -178,7 +179,7 @@ cv_matrix_engine::process(plugin_block& block)
     int selected_source = own_automation[param_source][r].step();
     int sm = _sources[selected_source].index;
     int smi = _sources[selected_source].slot;
-    auto const& source_curve = block.module_cv(sm, smi)[0];
+    auto const& source_curve = block.module_cv(sm, smi)[0][0];
 
     // apply modulation
     auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];

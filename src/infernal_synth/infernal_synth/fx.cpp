@@ -63,7 +63,8 @@ fx_topo(
   auto const info = topo_info(global ? global_info : voice_info);
 
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::audio, 1, 0),
+    make_module_dsp(stage, module_output::audio, 0, {
+      make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.engine_factory = [global](auto const&, int sample_rate, int) ->
@@ -146,7 +147,7 @@ fx_engine::process(plugin_block& block)
   auto& mixer = get_audio_matrix_mixer(block, _global);
   auto const& audio_in = mixer.mix(block, this_module, block.module_slot);
   for (int c = 0; c < 2; c++)
-    audio_in[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][c]);
+    audio_in[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);
   
   if (type == type_delay)
     process_delay(block);
@@ -165,10 +166,10 @@ fx_engine::process_delay(plugin_block& block)
   for (int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
-      float dry = block.state.own_audio[0][c][f];
+      float dry = block.state.own_audio[0][0][c][f];
       float wet = _buffer[c][(_pos + f + _capacity - samples) % _capacity];
-      block.state.own_audio[0][c][f] = dry + wet * feedback_curve[f] * max_feedback;
-      _buffer[c][(_pos + f) % _capacity] = block.state.own_audio[0][c][f];
+      block.state.own_audio[0][0][c][f] = dry + wet * feedback_curve[f] * max_feedback;
+      _buffer[c][(_pos + f) % _capacity] = block.state.own_audio[0][0][c][f];
     }
   _pos += block.end_frame - block.start_frame;
   _pos %= _capacity;
@@ -194,14 +195,14 @@ fx_engine::process_filter(plugin_block& block)
 
     for (int c = 0; c < 2; c++)
     {
-      double v0 = block.state.own_audio[0][c][f];
+      double v0 = block.state.own_audio[0][0][c][f];
       double v3 = v0 - _ic2eq[c];
       double v1 = a1 * _ic1eq[c] + a2 * v3;
       double v2 = _ic2eq[c] + a2 * _ic1eq[c] + a3 * v3;
       _ic1eq[c] = 2 * v1 - _ic1eq[c];
       _ic2eq[c] = 2 * v2 - _ic2eq[c];
       float out = type == type_lpf? v2: v0 - k * v1 - v2;
-      block.state.own_audio[0][c][f] = out;
+      block.state.own_audio[0][0][c][f] = out;
     }
   }
 }

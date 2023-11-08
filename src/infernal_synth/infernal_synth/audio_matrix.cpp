@@ -17,13 +17,14 @@ namespace infernal_synth {
 static int constexpr route_count = 6;
 
 enum { section_main };
+enum { output_silence, output_mixed };
 enum { param_on, param_source, param_target, param_gain };
 
 class audio_matrix_engine:
 public module_engine { 
   bool const _global;
   audio_matrix_mixer _mixer;
-  jarray<float, 3>* _own_audio = {};
+  jarray<float, 4>* _own_audio = {};
   std::vector<module_topo_mapping> const _sources;
   std::vector<module_topo_mapping> const _targets;
 
@@ -53,7 +54,9 @@ audio_matrix_topo(
   int this_module = global? module_gaudio_matrix: module_vaudio_matrix;
 
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::audio, route_count + 1, 0),
+    make_module_dsp(stage, module_output::audio, 0, { 
+      make_topo_info("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1), 
+      make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global? "Global": "Voice";
 
@@ -120,7 +123,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 {
   // audio 0 is silence
   bool activated = false;
-  jarray<float, 2>* result = &(*_own_audio)[0];
+  jarray<float, 2>* result = &(*_own_audio)[output_silence][0];
 
   // loop through the routes
   // the first match we encounter becomes the mix target
@@ -136,7 +139,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 
     if (!activated)
     {
-      result = &(*_own_audio)[r + 1];
+      result = &(*_own_audio)[output_mixed][r];
       activated = true;
     }
 
@@ -152,7 +155,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     auto const& source_audio = block.module_audio(sm, smi);
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
-        mix[c][f] += gain_curve[f] * source_audio[0][c][f];
+        mix[c][f] += gain_curve[f] * source_audio[0][0][c][f];
   }
 
   return *result;

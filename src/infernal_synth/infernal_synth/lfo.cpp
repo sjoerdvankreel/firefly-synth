@@ -49,7 +49,8 @@ lfo_topo(
   auto const info = topo_info(global ? global_info : voice_info);
 
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::cv, 1, 1),
+    make_module_dsp(stage, module_output::cv, 1, {
+      make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.engine_factory = [global](auto const&, int, int) ->
@@ -93,7 +94,7 @@ lfo_engine::process(plugin_block& block)
     block, type == type_sync, this_module, param_rate, param_tempo, scratch_time);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    block.state.own_cv[0][f] = bipolar_to_unipolar(phase_to_sine(_phase));
+    block.state.own_cv[0][0][f] = bipolar_to_unipolar(phase_to_sine(_phase));
     increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
   }
 }

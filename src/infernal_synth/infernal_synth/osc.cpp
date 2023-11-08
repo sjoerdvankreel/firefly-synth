@@ -47,7 +47,8 @@ osc_topo(
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
-    make_module_dsp(module_stage::voice, module_output::audio, 1, scratch_count),
+    make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
+      make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } })));
 
   result.engine_factory = [](auto const&, int, int) ->
@@ -130,7 +131,7 @@ osc_engine::process(plugin_block& block)
   if (type == type_off) return;
 
   auto const& modulation = get_cv_matrix_mixdown(block, false);
-  auto const& env_curve = block.voice->all_cv[module_env][0][0];
+  auto const& env_curve = block.voice->all_cv[module_env][0][0][0];
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve = *modulation[module_osc][block.module_slot][param_pitch][0];
@@ -168,8 +169,8 @@ osc_engine::process(plugin_block& block)
     check_bipolar(sample);
     sample *= env_curve[f];
     mono_scratch[f] = mix_signal(am_mod_scratch[f], sample, sample * am_scratch[f]);
-    block.state.own_audio[0][0][f] = mono_scratch[f] * balance(0, bal);
-    block.state.own_audio[0][1][f] = mono_scratch[f] * balance(1, bal);
+    block.state.own_audio[0][0][0][f] = mono_scratch[f] * balance(0, bal);
+    block.state.own_audio[0][0][1][f] = mono_scratch[f] * balance(1, bal);
     increment_and_wrap_phase(_phase, inc);
   }
 }

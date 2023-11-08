@@ -35,7 +35,8 @@ env_topo(
 {
   module_topo result(make_module(
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", module_env, 3), 
-    make_module_dsp(module_stage::voice, module_output::cv, 1, 0),
+    make_module_dsp(module_stage::voice, module_output::cv, 0, { 
+      make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.engine_factory = [](auto const&, int, int) ->
@@ -112,7 +113,7 @@ env_engine::process(plugin_block& block)
     if (_stage == env_stage::end)
     {
       _release_level = 0;
-      block.state.own_cv[0][f] = 0;
+      block.state.own_cv[0][0][f] = 0;
       continue;
     }
 
@@ -125,7 +126,7 @@ env_engine::process(plugin_block& block)
     if (_stage == env_stage::s)
     {
       _release_level = s_curve[f];
-      block.state.own_cv[0][f] = s_curve[f];
+      block.state.own_cv[0][0][f] = s_curve[f];
       continue;
     }
 
@@ -155,7 +156,7 @@ env_engine::process(plugin_block& block)
         stage_seconds = 0; 
         break;
     }
-    block.state.own_cv[0][f] = out;
+    block.state.own_cv[0][0][f] = out;
 
     check_unipolar(_release_level);
     _stage_pos += 1.0 / block.sample_rate;

@@ -10,10 +10,10 @@ namespace plugin_base {
 struct plugin_frame_dims final {
   jarray<int, 1> audio;
   jarray<int, 2> voices_audio;
-  jarray<int, 4> module_voice_cv;
-  jarray<int, 3> module_global_cv;
-  jarray<int, 5> module_voice_audio;
-  jarray<int, 4> module_global_audio;
+  jarray<int, 5> module_voice_cv;
+  jarray<int, 4> module_global_cv;
+  jarray<int, 6> module_voice_audio;
+  jarray<int, 5> module_global_audio;
   jarray<int, 4> accurate_automation;
   jarray<int, 4> module_voice_scratch;
   jarray<int, 3> module_global_scratch;

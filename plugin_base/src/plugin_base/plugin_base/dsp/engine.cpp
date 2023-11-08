@@ -53,13 +53,13 @@ plugin_engine::make_plugin_block(
   void** context_out = voice < 0
     ? &_global_context[module][slot]
     : &_voice_context[voice][module][slot];
-  jarray<float, 2>& cv_out = voice < 0
+  jarray<float, 3>& cv_out = voice < 0
     ? _global_cv_state[module][slot]
     : _voice_cv_state[voice][module][slot];
   jarray<float, 2>& scratch = voice < 0
     ? _global_scratch_state[module][slot]
     : _voice_scratch_state[voice][module][slot];
-  jarray<float, 3>& audio_out = voice < 0
+  jarray<float, 4>& audio_out = voice < 0
     ? _global_audio_state[module][slot] 
     : _voice_audio_state[voice][module][slot];
   plugin_block_state state = {
@@ -327,26 +327,30 @@ plugin_engine::process()
       if(module.dsp.output == module_output::cv)
         if(module.dsp.stage != module_stage::voice)
         {
-          for(int oi = 0; oi < module.dsp.output_count; oi++)
-            _global_cv_state[m][mi][oi].fill(0, frame_count, 0.0f);
+          for(int o = 0; o < module.dsp.outputs.size(); o++)
+            for(int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+              _global_cv_state[m][mi][o][oi].fill(0, frame_count, 0.0f);
         } else {
           for (int v = 0; v < _voice_states.size(); v++)
             if(_voice_states[v].stage != voice_stage::unused)
-              for (int oi = 0; oi < module.dsp.output_count; oi++)
-                _voice_cv_state[v][m][mi][oi].fill(0, frame_count, 0.0f);
+              for (int o = 0; o < module.dsp.outputs.size(); o++)
+                for (int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+                  _voice_cv_state[v][m][mi][o][oi].fill(0, frame_count, 0.0f);
         }
       else if (module.dsp.output == module_output::audio)
         if (module.dsp.stage != module_stage::voice)
         {
-          for (int oi = 0; oi < module.dsp.output_count; oi++)
-            for(int c = 0; c < 2; c++)
-              _global_audio_state[m][mi][oi][c].fill(0, frame_count, 0.0f);
+          for (int o = 0; o < module.dsp.outputs.size(); o++)
+            for (int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+              for(int c = 0; c < 2; c++)
+                _global_audio_state[m][mi][o][oi][c].fill(0, frame_count, 0.0f);
         } else {
            for (int v = 0; v < _voice_states.size(); v++)
              if (_voice_states[v].stage != voice_stage::unused)
-               for (int oi = 0; oi < module.dsp.output_count; oi++)
-                 for (int c = 0; c < 2; c++)
-                   _voice_audio_state[v][m][mi][oi][c].fill(0, frame_count, 0.0f);
+               for (int o = 0; o < module.dsp.outputs.size(); o++)
+                 for (int oi = 0; oi < module.dsp.outputs[o].slot_count; oi++)
+                   for (int c = 0; c < 2; c++)
+                     _voice_audio_state[v][m][mi][o][oi][c].fill(0, frame_count, 0.0f);
         }
       else
         assert(module.dsp.output == module_output::none);

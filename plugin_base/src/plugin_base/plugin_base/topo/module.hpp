@@ -40,10 +40,10 @@ struct module_topo_gui final {
 
 // module dsp
 struct module_dsp final {
-  int output_count;
   int scratch_count;
   module_stage stage;
   module_output output;
+  std::vector<topo_info> outputs;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);
 };
 
