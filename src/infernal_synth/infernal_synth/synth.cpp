@@ -42,7 +42,8 @@ make_module_matrix(std::vector<module_topo const*> const& modules)
       result.items.push_back(item);
       result.submenu->indices.push_back(index++);
       result.mappings.push_back({ modules[m]->info.index, 0 });
-    } else
+    }
+    else
     {
       auto module_submenu = std::make_shared<gui_submenu>();
       module_submenu->name = tag.name;
@@ -54,6 +55,68 @@ make_module_matrix(std::vector<module_topo const*> const& modules)
         result.items.push_back(item);
         module_submenu->indices.push_back(index++);
         result.mappings.push_back({ modules[m]->info.index, mi });
+      }
+      result.submenu->children.push_back(module_submenu);
+    }
+  }
+  return result;
+}
+
+output_matrix
+make_output_matrix(std::vector<module_topo const*> const& modules)
+{
+  int index = 0;
+  output_matrix result;
+  result.submenu = std::make_shared<gui_submenu>();
+  for (int m = 0; m < modules.size(); m++)
+  {
+    auto const& tag = modules[m]->info.tag;
+    int slots = modules[m]->info.slot_count;
+    if (slots == 1)
+    {
+      if(modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].slot_count == 1)
+      {
+        list_item item;
+        item.id = tag.id;
+        item.name = tag.name;
+        result.items.push_back(item);
+        result.submenu->indices.push_back(index++);
+        result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
+      }
+      else
+      {
+        auto output_submenu = std::make_shared<gui_submenu>();
+        output_submenu->name = tag.name;
+        for (int o = 0; modules[m]->dsp.outputs.size(); o++)
+        {
+          auto const& output = modules[m]->dsp.outputs[o];
+          for(int oi = 0; oi < output.slot_count; oi++)
+          {
+            list_item item;
+            item.id = tag.id + "-" + std::to_string(0) + "-" + output.tag.id + "-" + std::to_string(oi);
+            item.name = tag.name + " " + output.tag.name;
+            if(output.slot_count > 1) item.name += " " + std::to_string(oi + 1);
+            result.items.push_back(item);
+            output_submenu->indices.push_back(index++);
+            result.mappings.push_back({ modules[m]->info.index, 0, o, oi });
+          }
+        }
+        result.submenu->children.push_back(output_submenu);
+      }
+    } else
+    {
+      assert(modules[m]->dsp.outputs.size() == 1);
+      assert(modules[m]->dsp.outputs[0].slot_count == 1);
+      auto module_submenu = std::make_shared<gui_submenu>();
+      module_submenu->name = tag.name;
+      for (int mi = 0; mi < slots; mi++)
+      {
+        list_item item;
+        item.id = tag.id + "-" + std::to_string(mi);
+        item.name = tag.name + " " + std::to_string(mi + 1);
+        result.items.push_back(item);
+        module_submenu->indices.push_back(index++);
+        result.mappings.push_back({ modules[m]->info.index, mi, 0, 0 });
       }
       result.submenu->children.push_back(module_submenu);
     }
@@ -182,13 +245,13 @@ synth_topo()
     { &result->modules[module_osc], &result->modules[module_vfx] },
     { &result->modules[module_voice_out], &result->modules[module_vfx] });
   result->modules[module_vcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, false,
-    { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo] },
+    { &result->modules[module_env], &result->modules[module_vlfo], &result->modules[module_glfo], &result->modules[module_input] },
     { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
   result->modules[module_gaudio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 }, true,
     { &result->modules[module_voice_in], &result->modules[module_gfx] },
     { &result->modules[module_master], &result->modules[module_gfx] });
   result->modules[module_gcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, true,
-    { &result->modules[module_glfo] },
+    { &result->modules[module_glfo], &result->modules[module_input] },
     { &result->modules[module_master], &result->modules[module_gfx], &result->modules[module_gaudio_matrix] });
   return result;
 }

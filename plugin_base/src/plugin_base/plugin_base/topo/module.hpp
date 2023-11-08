@@ -27,6 +27,14 @@ struct module_topo_mapping final {
   int slot;
 };
 
+// module topo mapping
+struct module_output_mapping final {
+  int module_index;
+  int module_slot;
+  int output_index;
+  int output_slot;
+};
+
 // module ui
 struct module_topo_gui final {
   int section;

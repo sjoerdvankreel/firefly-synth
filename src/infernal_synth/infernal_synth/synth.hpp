@@ -29,6 +29,13 @@ struct module_matrix
   std::vector<plugin_base::module_topo_mapping> mappings;
 };
 
+struct output_matrix
+{
+  std::vector<plugin_base::list_item> items;
+  std::shared_ptr<plugin_base::gui_submenu> submenu;
+  std::vector<plugin_base::module_output_mapping> mappings;
+};
+
 class audio_matrix_mixer
 {
   audio_matrix_engine* _engine;
@@ -62,6 +69,8 @@ get_cv_matrix_mixdown(plugin_base::plugin_block& block, bool global)
 
 param_matrix
 make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+output_matrix
+make_output_matrix(std::vector<plugin_base::module_topo const*> const& modules);
 module_matrix
 make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules);
 
