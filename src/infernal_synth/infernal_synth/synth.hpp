@@ -15,25 +15,12 @@ typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
 cv_matrix_mixdown;
 
-struct param_matrix
+template <class M>
+struct routing_matrix
 {
+  std::vector<M> mappings;
   std::vector<plugin_base::list_item> items;
   std::shared_ptr<plugin_base::gui_submenu> submenu;
-  std::vector<plugin_base::param_topo_mapping> mappings;
-};
-
-struct module_matrix
-{
-  std::vector<plugin_base::list_item> items;
-  std::shared_ptr<plugin_base::gui_submenu> submenu;
-  std::vector<plugin_base::module_topo_mapping> mappings;
-};
-
-struct output_matrix
-{
-  std::vector<plugin_base::list_item> items;
-  std::shared_ptr<plugin_base::gui_submenu> submenu;
-  std::vector<plugin_base::module_output_mapping> mappings;
 };
 
 class audio_matrix_mixer
@@ -67,11 +54,11 @@ get_cv_matrix_mixdown(plugin_base::plugin_block& block, bool global)
   return *static_cast<cv_matrix_mixdown const*>(context);
 }
 
-param_matrix
+routing_matrix<plugin_base::param_topo_mapping>
 make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules);
-output_matrix
+routing_matrix<plugin_base::module_output_mapping>
 make_output_matrix(std::vector<plugin_base::module_topo const*> const& modules);
-module_matrix
+routing_matrix<plugin_base::module_topo_mapping>
 make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules);
 
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();

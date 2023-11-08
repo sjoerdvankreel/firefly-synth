@@ -25,14 +25,14 @@ public module_engine {
   bool const _global;
   audio_matrix_mixer _mixer;
   jarray<float, 4>* _own_audio = {};
-  std::vector<module_topo_mapping> const _sources;
   std::vector<module_topo_mapping> const _targets;
+  std::vector<module_output_mapping> const _sources;
 
 public:
   void initialize() override {}
   INF_PREVENT_ACCIDENTAL_COPY(audio_matrix_engine);
   audio_matrix_engine(bool global,
-    std::vector<module_topo_mapping> const& sources, 
+    std::vector<module_output_mapping> const& sources,
     std::vector<module_topo_mapping> const& targets): 
     _global(global), _mixer(this), _sources(sources), _targets(targets) {}
 
@@ -70,7 +70,7 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   on.domain.default_selector = [](int, int s) { return s == 0? "On": "Off"; };
 
-  auto source_matrix = make_module_matrix(sources);
+  auto source_matrix = make_output_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
@@ -88,8 +88,8 @@ audio_matrix_topo(
   target.gui.item_enabled.bind_param({ this_module, 0, param_source, gui_item_binding::match_param_slot }, 
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
       int fx_index = global? module_gfx: module_vfx;
-      if(sm[other].index == fx_index && tm[self].index == fx_index)
-        return sm[other].slot < tm[self].slot;
+      if(sm[other].module_index == fx_index && tm[self].index == fx_index)
+        return sm[other].module_slot < tm[self].slot;
       return true;
     });
 
@@ -146,8 +146,10 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     // find out audio source to add
     auto& mix = *result;
     int selected_source = block_auto[param_source][r].step();
-    int sm = _sources[selected_source].index;
-    int smi = _sources[selected_source].slot;
+    int sm = _sources[selected_source].module_index;
+    int smi = _sources[selected_source].module_slot;
+    int so = _sources[selected_source].output_index;
+    int soi = _sources[selected_source].output_slot;
 
     // add modulated amount to mixdown
     auto const& modulation = get_cv_matrix_mixdown(block, _global);
@@ -155,7 +157,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     auto const& source_audio = block.module_audio(sm, smi);
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
-        mix[c][f] += gain_curve[f] * source_audio[0][0][c][f];
+        mix[c][f] += gain_curve[f] * source_audio[so][soi][c][f];
   }
 
   return *result;

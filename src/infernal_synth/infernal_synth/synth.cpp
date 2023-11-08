@@ -24,11 +24,11 @@ make_module_colors(Colour const& c)
   return result;
 }
 
-module_matrix
+routing_matrix<module_topo_mapping>
 make_module_matrix(std::vector<module_topo const*> const& modules)
 {
   int index = 0;
-  module_matrix result;
+  routing_matrix<module_topo_mapping> result;
   result.submenu = std::make_shared<gui_submenu>();
   for (int m = 0; m < modules.size(); m++)
   {
@@ -62,11 +62,11 @@ make_module_matrix(std::vector<module_topo const*> const& modules)
   return result;
 }
 
-output_matrix
+routing_matrix<module_output_mapping>
 make_output_matrix(std::vector<module_topo const*> const& modules)
 {
   int index = 0;
-  output_matrix result;
+  routing_matrix<module_output_mapping> result;
   result.submenu = std::make_shared<gui_submenu>();
   for (int m = 0; m < modules.size(); m++)
   {
@@ -124,11 +124,11 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
   return result;
 }
 
-param_matrix
+routing_matrix<param_topo_mapping>
 make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
 {
   int index = 0;
-  param_matrix result;
+  routing_matrix<param_topo_mapping> result;
   result.submenu = std::make_shared<gui_submenu>();
   for (int m = 0; m < modules.size(); m++)
   {
