@@ -16,7 +16,8 @@ struct block_event final {
   normalized_value normalized;
 };
 
-// sample accurate automation
+// sample accurate automation, also for midi sources 
+// in which case param is the midi source id
 struct accurate_event final {
   int frame;
   int param;
@@ -36,6 +37,7 @@ struct host_events final {
   std::vector<block_event> out;
   std::vector<note_event> notes;
   std::vector<block_event> block;
+  std::vector<accurate_event> midi;
   std::vector<accurate_event> accurate;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_events);
 };

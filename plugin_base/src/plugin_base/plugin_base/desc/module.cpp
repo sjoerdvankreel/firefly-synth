@@ -6,8 +6,8 @@ namespace plugin_base {
 
 module_desc::
 module_desc(
-  module_topo const& module_, int topo, 
-  int slot, int global, int param_global_start)
+  module_topo const& module_, int topo, int slot, int global, 
+  int param_global_start, int midi_source_global_start)
 {
   module = &module_;
   info.topo = topo;
@@ -22,6 +22,8 @@ module_desc(
     for(int i = 0; i < module_.params[p].info.slot_count; i++)
       params.emplace_back(param_desc(module_, slot, 
         module_.params[p], p, i, param_local++, param_global_start++));
+
+  // TODO midi desc
 }
 
 void

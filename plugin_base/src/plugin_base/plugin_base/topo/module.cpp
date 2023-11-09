@@ -4,23 +4,11 @@
 namespace plugin_base {
 
 void
-module_midi_input::validate() const
-{
-  tag.validate();
-  if(message == midi_msg_cc) assert(0 <= cc_number && cc_number < 128);
-  else assert(cc_number == 0);
-  assert(message == midi_msg_cc || message == midi_msg_pb || message == midi_msg_cp);
-}
-
-void
 module_dsp::validate() const
 {
   assert(0 <= scratch_count && scratch_count < topo_max);
   assert(output != module_output::none || outputs.size() == 0);
-  assert(stage == module_stage::input || midi_inputs.size() == 0);
   assert(output == module_output::none || outputs.size() > 0 && outputs.size() < topo_max);
-  for(int mmi = 0; mmi < midi_inputs.size(); mmi++)
-    midi_inputs[mmi].validate();
   for (int o = 0; o < outputs.size(); o++)
   {
     outputs[o].info.validate();
@@ -36,12 +24,15 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   assert(info.index == index);
   assert(!gui.visible || params.size());
   assert(0 <= gui.section && gui.section < plugin.gui.sections.size());
+  assert(dsp.stage == module_stage::input || midi_sources.size() == 0);
   assert(!gui.visible || (0 < sections.size() && sections.size() <= params.size()));
 
   for (int p = 0; p < params.size(); p++)
     params[p].validate(*this, p);
   for (int s = 0; s < sections.size(); s++)
     sections[s].validate(*this, s);
+  for (int ms = 0; ms < midi_sources.size(); ms++)
+    midi_sources[ms].validate();
 
   dsp.validate();
   info.validate();

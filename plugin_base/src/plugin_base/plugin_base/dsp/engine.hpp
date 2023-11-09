@@ -52,7 +52,7 @@ class plugin_engine final {
   jarray<float, 3> _voice_results = {};
   jarray<float, 6> _voice_cv_state = {};
   jarray<float, 5> _global_cv_state = {};
-  jarray<float, 4> _midi_input_state = {};
+  jarray<float, 4> _midi_source_state = {};
   jarray<float, 7> _voice_audio_state = {};
   jarray<float, 6> _global_audio_state = {};
   jarray<float, 5> _accurate_automation = {};

@@ -19,14 +19,20 @@ desc_name(topo_info const& info, int slot)
 }
 
 void
-desc_info::validate(int topo_count, int slot_count) const
+desc_info::validate(int topo_count) const
 {
   assert(id.size());
   assert(name.size());
   assert(global >= 0);
   assert(id_hash >= 0);
-  assert(0 <= slot && slot < slot_count);
   assert(0 <= topo && topo < topo_count);
+}
+
+void
+topo_desc_info::validate(int topo_count, int slot_count) const
+{
+  desc_info::validate(topo_count);
+  assert(0 <= slot && slot < slot_count);
 }
 
 int

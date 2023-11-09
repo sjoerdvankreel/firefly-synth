@@ -3,6 +3,7 @@
 #include <plugin_base/topo/param.hpp>
 #include <plugin_base/topo/shared.hpp>
 #include <plugin_base/topo/section.hpp>
+#include <plugin_base/topo/midi_source.hpp>
 #include <plugin_base/shared/utility.hpp>
 
 #include <memory>
@@ -19,10 +20,6 @@ class module_engine;
 
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
-
-// vst3 kind of limits what we can do here.
-// basically amounts to all CC's plus some predefined messages
-enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
 
 typedef std::function<void(plugin_state&)>
 state_initializer;
@@ -55,16 +52,6 @@ struct module_topo_gui final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 
-// mapping midi inputs to continuous series
-struct module_midi_input final {
-  topo_tag tag;
-  std::int16_t message;
-  std::int16_t cc_number;
-
-  void validate() const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_midi_input);
-};
-
 // module output
 struct module_dsp_output final {
   topo_info info;
@@ -78,7 +65,6 @@ struct module_dsp final {
   module_stage stage;
   module_output output;
   std::vector<module_dsp_output> outputs;
-  std::vector<module_midi_input> midi_inputs;
 
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);
@@ -91,6 +77,7 @@ struct module_topo final {
   module_topo_gui gui;
   std::vector<param_topo> params;
   std::vector<param_section> sections;
+  std::vector<midi_source> midi_sources;
 
   module_engine_factory engine_factory;
   state_initializer minimal_initializer;
