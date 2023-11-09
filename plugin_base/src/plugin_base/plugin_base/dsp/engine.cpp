@@ -62,7 +62,6 @@ plugin_engine::make_plugin_block(
   jarray<float, 4>& audio_out = voice < 0
     ? _global_audio_state[module][slot] 
     : _voice_audio_state[voice][module][slot];
-    nullptr;
   plugin_block_state state = {
     context_out, cv_out, audio_out, scratch,
     _global_cv_state, _global_audio_state, _global_context, _global_scratch_state, 
@@ -119,6 +118,7 @@ plugin_engine::deactivate()
   _voice_audio_state = {};
   _global_cv_state = {};
   _global_audio_state = {};
+  _midi_source_state = {};
   _accurate_automation = {};
   _voice_scratch_state = {};
   _global_scratch_state = {};
@@ -157,6 +157,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _global_scratch_state.resize(frame_dims.module_global_scratch);
   _global_audio_state.resize(frame_dims.module_global_audio);
   _accurate_automation.resize(frame_dims.accurate_automation);
+  _midi_source_state.resize(frame_dims.module_midi_sources);
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
