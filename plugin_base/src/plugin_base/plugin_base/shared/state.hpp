@@ -48,22 +48,22 @@ public:
   plain_value get_plain_at(param_topo_mapping m) const
   { return _state[m.module_index][m.module_slot][m.param_index][m.param_slot]; }
   plain_value get_plain_at_index(int index) const 
-  { return get_plain_at_mapping(desc().mappings.params[index].topo); }
+  { return get_plain_at_mapping(desc().param_mappings.params[index].topo); }
   void set_plain_at_index(int index, plain_value value) 
-  { set_plain_at_mapping(desc().mappings.params[index].topo, value); }
+  { set_plain_at_mapping(desc().param_mappings.params[index].topo, value); }
   plain_value get_plain_at_tag(int tag) const 
-  { return get_plain_at_index(desc().mappings.tag_to_index.at(tag)); }
+  { return get_plain_at_index(desc().param_mappings.tag_to_index.at(tag)); }
   void set_plain_at_tag(int tag, plain_value value) 
-  { set_plain_at_index(desc().mappings.tag_to_index.at(tag), value); }
+  { set_plain_at_index(desc().param_mappings.tag_to_index.at(tag), value); }
 
   double get_raw_at(int m, int mi, int p, int pi) const 
   { return _desc->plain_to_raw_at(m, p, get_plain_at(m, mi, p, pi)); }
   void set_raw_at(int m, int mi, int p, int pi, double value)
   { set_plain_at(m, mi, p, pi, _desc->raw_to_plain_at(m, p, value)); }
   double get_raw_at_tag(int tag) const 
-  { return get_raw_at_index(desc().mappings.tag_to_index.at(tag)); }
+  { return get_raw_at_index(desc().param_mappings.tag_to_index.at(tag)); }
   void set_raw_at_tag(int tag, double value) 
-  { set_raw_at_index(desc().mappings.tag_to_index.at(tag), value); }
+  { set_raw_at_index(desc().param_mappings.tag_to_index.at(tag), value); }
   double get_raw_at_index(int index) const 
   { return desc().plain_to_raw_at_index(index, get_plain_at_index(index)); }
   void set_raw_at_index(int index, double value) 
@@ -75,9 +75,9 @@ public:
   void set_normalized_at(int m, int mi, int p, int pi, normalized_value value)
   { set_plain_at(m, mi, p, pi,_desc->normalized_to_plain_at(m, p, value)); }
   normalized_value get_normalized_at_tag(int tag) const 
-  { return get_normalized_at_index(desc().mappings.tag_to_index.at(tag)); }
+  { return get_normalized_at_index(desc().param_mappings.tag_to_index.at(tag)); }
   void set_normalized_at_tag(int tag, normalized_value value) 
-  { set_normalized_at_index(desc().mappings.tag_to_index.at(tag), value); }
+  { set_normalized_at_index(desc().param_mappings.tag_to_index.at(tag), value); }
   normalized_value get_normalized_at_index(int index) const 
   { return desc().plain_to_normalized_at_index(index, get_plain_at_index(index)); }
   void set_normalized_at_index(int index, normalized_value value) 

@@ -23,7 +23,10 @@ module_desc(
       params.emplace_back(param_desc(module_, slot, 
         module_.params[p], p, i, param_local++, param_global_start++));
 
-  // TODO midi desc
+  int midi_local = 0;
+  for(int ms = 0; ms < module_.midi_sources.size(); ms++)
+    midi_sources.emplace_back(midi_desc(module_, slot, module_.midi_sources[ms], 
+      ms, midi_local++, midi_source_global_start++));
 }
 
 void

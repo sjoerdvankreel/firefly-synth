@@ -247,8 +247,8 @@ inf_plugin::push_to_gui(int index, clap_value clap)
 std::int32_t
 inf_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
-  auto iter = _engine.state().desc().mappings.tag_to_index.find(param_id);
-  if (iter == _engine.state().desc().mappings.tag_to_index.end())
+  auto iter = _engine.state().desc().param_mappings.tag_to_index.find(param_id);
+  if (iter == _engine.state().desc().param_mappings.tag_to_index.end())
   {
     assert(false);
     return -1;
@@ -277,7 +277,7 @@ bool
 inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
   normalized_value normalized;
-  int index = _engine.state().desc().mappings.tag_to_index.at(param_id);
+  int index = _engine.state().desc().param_mappings.tag_to_index.at(param_id);
   auto const& param = *_engine.state().desc().param_at_tag(param_id).param;
   if (!_engine.state().text_to_normalized_at_index(false, index, display, normalized)) return false;
   *value = normalized_to_clap(param, normalized).value();
@@ -287,7 +287,7 @@ inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* val
 bool
 inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
 {
-  int index = _engine.state().desc().mappings.tag_to_index.at(param_id); 
+  int index = _engine.state().desc().param_mappings.tag_to_index.at(param_id);
   auto const& param = *_engine.state().desc().param_at_tag(param_id).param;
   normalized_value normalized = clap_to_normalized(param, clap_value(value));
   std::string text = _engine.state().normalized_to_text_at_index(false, index, normalized);
@@ -299,7 +299,7 @@ bool
 inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 {
   param_desc const& param = _engine.state().desc().param_at_index(index);
-  param_mapping const& mapping(_engine.state().desc().mappings.params[index]);
+  param_mapping const& mapping(_engine.state().desc().param_mappings.params[index]);
   module_desc const& module = _engine.state().desc().modules[mapping.module_global];
   
   info->cookie = nullptr;
@@ -394,7 +394,7 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
   sync_event e;
   while (_to_audio_events->try_dequeue(e))
   {
-    int tag = _engine.state().desc().mappings.index_to_tag[e.index];
+    int tag = _engine.state().desc().param_mappings.index_to_tag[e.index];
     switch(e.type) 
     {
     case sync_event_type::value_changing:

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/desc/midi.hpp>
 #include <plugin_base/desc/param.hpp>
 #include <plugin_base/desc/shared.hpp>
 #include <plugin_base/topo/module.hpp>
@@ -17,6 +18,7 @@ struct module_desc final {
   topo_desc_info info = {};
   module_topo const* module = {};
   std::vector<param_desc> params = {};
+  std::vector<midi_desc> midi_sources = {};
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_desc);
   void validate(plugin_desc const& plugin, int index) const;

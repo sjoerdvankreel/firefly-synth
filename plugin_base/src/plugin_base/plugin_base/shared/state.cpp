@@ -62,7 +62,7 @@ void
 plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 {
   _state[m][mi][p][pi] = value;
-  if (_notify) state_changed(desc().mappings.topo_to_index[m][mi][p][pi], value);
+  if (_notify) state_changed(desc().param_mappings.topo_to_index[m][mi][p][pi], value);
 }
 
 void
@@ -80,7 +80,7 @@ plugin_state::init(state_init_type init_type)
     if(init_type == state_init_type::minimal && desc().plugin->modules[m].minimal_initializer)
       desc().plugin->modules[m].minimal_initializer(*this);
     else if (init_type == state_init_type::default_ && desc().plugin->modules[m].default_initializer)
-    desc().plugin->modules[m].default_initializer(*this);
+      desc().plugin->modules[m].default_initializer(*this);
 }
 
 }

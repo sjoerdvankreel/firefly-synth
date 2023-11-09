@@ -12,32 +12,36 @@ plugin(plugin), config(config)
 
   int param_global = 0;
   int module_global = 0;
+  int midi_source_global = 0;
 
   for(int m = 0; m < plugin->modules.size(); m++)
   {
     auto const& module = plugin->modules[m];
-    mappings.topo_to_index.emplace_back();
+    param_mappings.topo_to_index.emplace_back();
     if(module.dsp.stage == module_stage::input) module_voice_start++;
     if(module.dsp.stage == module_stage::input) module_output_start++;
     if(module.dsp.stage == module_stage::voice) module_output_start++;
     module_id_to_index[module.info.tag.id] = m;
     for(int p = 0; p < module.params.size(); p++)
-      mappings.id_to_index[module.info.tag.id][module.params[p].info.tag.id] = p;
+      param_mappings.id_to_index[module.info.tag.id][module.params[p].info.tag.id] = p;
     for(int mi = 0; mi < module.info.slot_count; mi++)
     {
-      mappings.topo_to_index[m].emplace_back();
-      modules.emplace_back(module_desc(module, m, mi, module_global++, param_global));
+      param_mappings.topo_to_index[m].emplace_back();
+      modules.emplace_back(module_desc(module, m, mi, module_global++, param_global, midi_source_global));
+      for (int ms = 0; ms < module.midi_sources.size(); ms++)
+        midi_mappings.topo_to_index[m][mi].push_back(midi_source_global++);
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        mappings.topo_to_index[m][mi].emplace_back();
+        param_mappings.topo_to_index[m][mi].emplace_back();
         for(int pi = 0; pi < param.info.slot_count; pi++)
-          mappings.topo_to_index[m][mi][p].push_back(param_global++);
+          param_mappings.topo_to_index[m][mi][p].push_back(param_global++);
       }
     }
   }
 
   param_global = 0;
+  midi_source_global = 0;
   for(int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
@@ -52,14 +56,31 @@ plugin(plugin), config(config)
       mapping.topo.module_slot = module.info.slot;
       mapping.topo.module_index = module.info.topo;
       mapping.param_global = param_global++;
-      mappings.index_to_tag.push_back(param.info.id_hash);
-      mappings.tag_to_index[param.info.id_hash] = mappings.params.size();
-      mappings.params.push_back(std::move(mapping));
+      param_mappings.index_to_tag.push_back(param.info.id_hash);
+      param_mappings.tag_to_index[param.info.id_hash] = param_mappings.params.size();
+      param_mappings.params.push_back(std::move(mapping));
       params.push_back(&module.params[p]);
+    }
+
+    for (int ms = 0; ms < module.midi_sources.size(); ms++)
+    {
+      auto const& source = module.midi_sources[ms];
+      midi_mapping mapping;
+      mapping.midi_local = ms;
+      mapping.module_global = m;
+      mapping.topo.midi_index = source.info.topo;
+      mapping.topo.module_slot = module.info.slot;
+      mapping.topo.module_index = module.info.topo;
+      mapping.midi_global = midi_source_global++;
+      midi_mappings.index_to_tag.push_back(source.info.id_hash);
+      midi_mappings.tag_to_index[source.info.id_hash] = midi_mappings.midi_sources.size();
+      midi_mappings.midi_sources.push_back(std::move(mapping));
+      midi_sources.push_back(&module.midi_sources[ms]);
     }
   }
 
   param_count = param_global;
+  midi_count = midi_source_global;
   module_count = modules.size();
 }
 

@@ -19,7 +19,7 @@ namespace plugin_base::vst3 {
 void
 inf_controller::gui_changing(int index, plain_value plain)
 {
-  int tag = gui_state().desc().mappings.index_to_tag[index];
+  int tag = gui_state().desc().param_mappings.index_to_tag[index];
   auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
 
   // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
@@ -49,7 +49,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
-  int index = gui_state().desc().mappings.tag_to_index.at(tag);
+  int index = gui_state().desc().param_mappings.tag_to_index.at(tag);
   _gui_state.set_normalized_at_index(index, normalized_value(value));
   return kResultTrue;
 }
