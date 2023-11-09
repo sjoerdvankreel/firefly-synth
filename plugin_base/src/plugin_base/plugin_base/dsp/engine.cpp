@@ -397,7 +397,7 @@ plugin_engine::process()
   {
     // linear interpolate as normalized
     auto const& event = _host_block->events.accurate[e];
-    auto const& mapping = _state.desc().mappings.params[event.param];
+    auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
     int prev_frame = _accurate_frames[event.param];
     float range_frames = event.frame - prev_frame + 1;
