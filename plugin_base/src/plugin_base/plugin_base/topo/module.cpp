@@ -4,11 +4,23 @@
 namespace plugin_base {
 
 void
+module_midi_input::validate() const
+{
+  tag.validate();
+  if(message == midi_msg_cc) assert(0 <= cc_number && cc_number < 128);
+  else assert(cc_number == 0);
+  assert(message == midi_msg_cc || message == midi_msg_pb || message == midi_msg_cp);
+}
+
+void
 module_dsp::validate() const
 {
   assert(0 <= scratch_count && scratch_count < topo_max);
   assert(output != module_output::none || outputs.size() == 0);
+  assert(stage == module_stage::input || midi_inputs.size() == 0);
   assert(output == module_output::none || outputs.size() > 0 && outputs.size() < topo_max);
+  for(int mmi = 0; mmi < midi_inputs.size(); mmi++)
+    midi_inputs[mmi].validate();
   for (int o = 0; o < outputs.size(); o++)
   {
     outputs[o].info.validate();

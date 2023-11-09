@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include <cstdint>
 #include <functional>
 
 namespace plugin_base {
@@ -18,6 +19,10 @@ class module_engine;
 
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
+
+// vst3 kind of limits what we can do here.
+// basically amounts to all CC's plus some predefined messages
+enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
 
 typedef std::function<void(plugin_state&)>
 state_initializer;
@@ -50,6 +55,16 @@ struct module_topo_gui final {
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 
+// mapping midi inputs to continuous series
+struct module_midi_input final {
+  topo_tag tag;
+  std::int16_t message;
+  std::int16_t cc_number;
+
+  void validate() const;
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_midi_input);
+};
+
 // module output
 struct module_dsp_output final {
   topo_info info;
@@ -63,7 +78,8 @@ struct module_dsp final {
   module_stage stage;
   module_output output;
   std::vector<module_dsp_output> outputs;
-  
+  std::vector<module_midi_input> midi_inputs;
+
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);
 };
