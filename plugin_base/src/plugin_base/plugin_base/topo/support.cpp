@@ -146,6 +146,16 @@ make_module_gui(int section, gui_colors const& colors, gui_position const& posit
   return result;
 }
 
+midi_source
+make_midi_source(topo_tag const& tag, std::int16_t message, std::int16_t cc_number)
+{
+  midi_source result;
+  result.tag = topo_tag(tag);
+  result.message = message;
+  result.cc_number = cc_number;
+  return result;
+}
+
 param_domain
 make_domain_toggle(bool default_)
 {

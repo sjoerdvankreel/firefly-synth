@@ -44,6 +44,8 @@ module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
 module_dsp
 make_module_dsp(module_stage stage, module_output output, int scratch_count, std::vector<module_dsp_output> const& outputs);
+midi_source
+make_midi_source(topo_tag const& tag, std::int16_t message, std::int16_t cc_number);
 
 module_topo_gui
 make_module_gui_none(int section);
