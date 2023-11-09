@@ -62,13 +62,11 @@ plugin_engine::make_plugin_block(
   jarray<float, 4>& audio_out = voice < 0
     ? _global_audio_state[module][slot] 
     : _voice_audio_state[voice][module][slot];
-  jarray<float, 2>* midi_in = voice < 0
-    ? &_midi_source_state[module][slot]:
     nullptr;
   plugin_block_state state = {
     context_out, cv_out, audio_out, scratch,
-    _global_cv_state, _global_audio_state, _global_context, 
-    _global_scratch_state, _midi_source_state, midi_in,
+    _global_cv_state, _global_audio_state, _global_context, _global_scratch_state, 
+    _midi_source_state[module][slot], _midi_source_state,
     _accurate_automation[module][slot], _accurate_automation,
     _block_automation.state()[module][slot], _block_automation.state()
   };
