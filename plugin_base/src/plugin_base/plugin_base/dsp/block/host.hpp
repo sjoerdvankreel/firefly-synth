@@ -16,8 +16,14 @@ struct block_event final {
   normalized_value normalized;
 };
 
-// sample accurate automation, also for midi sources 
-// in which case param is the midi source id
+// midi automation
+struct midi_event final {
+  int frame;
+  midi_id id;
+  normalized_value normalized;
+};
+
+// sample accurate automation
 struct accurate_event final {
   int frame;
   int param;
@@ -34,10 +40,10 @@ struct note_event final {
 
 // these are translated to curves/values
 struct host_events final {
+  std::vector<midi_event> midi;
   std::vector<block_event> out;
   std::vector<note_event> notes;
   std::vector<block_event> block;
-  std::vector<accurate_event> midi;
   std::vector<accurate_event> accurate;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_events);
 };

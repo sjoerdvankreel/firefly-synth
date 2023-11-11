@@ -419,7 +419,7 @@ plugin_engine::process()
     for(int f = prev_frame; f <= event.frame; f++)
       curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
-    // denormalize current state value
+    // update current state
     _accurate_frames[event.param] = event.frame;
     _state.set_normalized_at_index(event.param, event.normalized);
   }
@@ -431,16 +431,20 @@ plugin_engine::process()
   {
     // linear interpolate
     auto const& event = _host_block->events.midi[e];
-    auto const& mapping = _state.desc().midi_mappings.midi_sources[event.param];
+    auto const& id_mapping = _state.desc().midi_mappings.id_to_index;
+    auto iter = id_mapping.find(event.id);
+    if(iter == id_mapping.end()) continue;
+    int midi_index = iter->second;
+    auto const& mapping = _state.desc().midi_mappings.midi_sources[midi_index];
     auto& curve = mapping.topo.value_at(_midi_automation);
-    int prev_frame = _midi_frames[event.param];
+    int prev_frame = _midi_frames[midi_index];
     float range_frames = event.frame - prev_frame + 1;
     float range = event.normalized.value() - curve[prev_frame];
     for (int f = prev_frame; f <= event.frame; f++)
       curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
 
-    // denormalize current state value
-    _midi_frames[event.param] = event.frame;
+    // update current state
+    _midi_frames[midi_index] = event.frame;
     _midi_values[mapping.topo.module_index][mapping.topo.module_slot][mapping.topo.midi_index] = event.normalized.value();
   }
 
