@@ -23,8 +23,9 @@ plugin(plugin), config(config)
     if(module.dsp.stage == module_stage::input) module_output_start++;
     if(module.dsp.stage == module_stage::voice) module_output_start++;
     module_id_to_index[module.info.tag.id] = m;
+    auto& id_mapping = param_mappings.id_to_index[module.info.tag.id];
     for(int p = 0; p < module.params.size(); p++)
-      param_mappings.id_to_index[module.info.tag.id][module.params[p].info.tag.id] = p;
+      id_mapping[module.params[p].info.tag.id] = p;
     for(int mi = 0; mi < module.info.slot_count; mi++)
     {
       midi_mappings.topo_to_index[m].emplace_back();
