@@ -424,8 +424,8 @@ plugin_engine::process()
     _state.set_normalized_at_index(event.param, event.normalized);
   }
 
-  // process midi automation values, this is pretty much the same as
-  // regular (accurate) parameter automation except that we expect all values as normalized
+  // process midi automation values
+  // pretty much the same as regular (accurate) parameter automation
   std::fill(_midi_frames.begin(), _midi_frames.end(), 0);
   for (int e = 0; e < _host_block->events.midi.size(); e++)
   {
