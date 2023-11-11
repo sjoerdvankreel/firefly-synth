@@ -13,8 +13,8 @@ enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
 // midi automation identifier
 struct midi_id
 {
-  std::int16_t message;
-  std::int16_t cc_number;
+  std::int16_t message = 0;
+  std::int16_t cc_number = 0;
 
   bool operator<(midi_id const& rhs) const 
   { return message < rhs.message && cc_number < rhs.cc_number; }

@@ -446,6 +446,8 @@ inf_plugin::process(clap_process const* process) noexcept
 
   for (std::uint32_t i = 0; i < process->in_events->size(process->in_events); i++)
   {
+    float midi_pb_value = 0;
+    bool publish_midi = true;
     auto header = process->in_events->get(process->in_events, i);
     if(header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     switch (header->type)
@@ -493,7 +495,35 @@ inf_plugin::process(clap_process const* process) noexcept
       }
       break;
     }
-    default: break;
+    case CLAP_EVENT_MIDI:
+    {
+      auto event = reinterpret_cast<clap_event_midi const*>(header);
+      if(event->port_index != 0) continue;
+      midi_event midi_event = {};
+      midi_event.frame = header->time;
+      midi_event.id.message = event->data[0] & 0xF0;
+      if(midi_event.id.message == midi_msg_cc) midi_event.id.cc_number = event->data[1];
+      switch (midi_event.id.message)
+      {
+      case midi_msg_cp: 
+        midi_event.normalized = normalized_value(event->data[1] / 127.0);
+        break;
+      case midi_msg_cc:
+        midi_event.normalized = normalized_value(event->data[2] / 127.0);
+        break;
+      case midi_msg_pb:
+        midi_pb_value = ((event->data[2] << 7) | event->data[1]) / static_cast<double>(1U << 14);
+        midi_event.normalized = normalized_value(midi_pb_value);
+        break;
+      default:
+        publish_midi = false;
+        break;
+      }
+      if(publish_midi) 
+        block.events.midi.push_back(midi_event);
+    }
+    default: 
+      break;
     }
   }
 
