@@ -47,6 +47,7 @@ class plugin_engine final {
   double _block_start_time_sec = {};
   std::int64_t _stream_time = {};
 
+  std::vector<int> _midi_frames = {};
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};

@@ -27,6 +27,7 @@ _voice_processor_context(voice_processor_context)
   // reserve this much but allocate on the audio thread if necessary
   // still seems better than dropping events
   int block_events_guess = _state.desc().param_count;
+  int midi_events_guess = _state.desc().midi_count * 64;
   int accurate_events_guess = _state.desc().param_count * 64;
   int note_limit_guess = _state.desc().plugin->polyphony * 64;
 
@@ -37,11 +38,13 @@ _voice_processor_context(voice_processor_context)
   _input_engines.resize(_dims.module_slot);
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
+  _midi_frames.resize(_state.desc().midi_count);
   _accurate_frames.resize(_state.desc().param_count);
   _voice_states.resize(_state.desc().plugin->polyphony);
   _host_block->events.notes.reserve(note_limit_guess);
   _host_block->events.out.reserve(block_events_guess);
   _host_block->events.block.reserve(block_events_guess);
+  _host_block->events.midi.reserve(midi_events_guess);
   _host_block->events.accurate.reserve(accurate_events_guess);
 }
 
@@ -95,6 +98,7 @@ plugin_engine::prepare_block()
   _host_block->events.out.clear();
   _host_block->events.notes.clear();
   _host_block->events.block.clear();
+  _host_block->events.midi.clear();
   _host_block->events.accurate.clear();
   _host_block->frame_count = 0;
   _host_block->shared.bpm = 0;
@@ -123,6 +127,7 @@ plugin_engine::deactivate()
   _voice_scratch_state = {};
   _global_scratch_state = {};
   _host_block->events.out.clear();
+  _host_block->events.midi.clear();
   _host_block->events.block.clear();
   _host_block->events.accurate.clear();
 
