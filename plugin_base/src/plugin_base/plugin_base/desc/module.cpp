@@ -39,6 +39,8 @@ module_desc::validate(plugin_desc const& plugin, int index) const
   info.validate(plugin.plugin->modules.size(), module->info.slot_count);
   for(int p = 0; p < params.size(); p++)
     params[p].validate(*this, p);
+  for (int ms = 0; ms < midi_sources.size(); ms++)
+    midi_sources[ms].validate(*this, ms);
 }
 
 }

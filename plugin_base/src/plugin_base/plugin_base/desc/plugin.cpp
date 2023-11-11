@@ -90,10 +90,16 @@ void
 plugin_desc::validate() const
 {
   int param_global = 0;
+  int midi_source_global = 0;
   (void)param_global;
+  (void)midi_source_global;
+
   std::set<int> all_hashes;
   std::set<std::string> all_ids;
+
   plugin->validate();
+  midi_mappings.validate(*this);
+  param_mappings.validate(*this);
 
   assert(param_count > 0);
   assert(module_count > 0);
@@ -109,12 +115,43 @@ plugin_desc::validate() const
     module.validate(*this, m);
     INF_ASSERT_EXEC(all_ids.insert(module.info.id).second);
     INF_ASSERT_EXEC(all_hashes.insert(module.info.id_hash).second);
+    for (int ms = 0; ms < module.midi_sources.size(); ms++)
+    {
+      auto const& source = module.midi_sources[ms];
+      assert(source.info.global == midi_source_global++);
+      INF_ASSERT_EXEC(all_ids.insert(source.info.id).second);
+      INF_ASSERT_EXEC(all_hashes.insert(source.info.id_hash).second);
+    }
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
       assert(param.info.global == param_global++);
       INF_ASSERT_EXEC(all_ids.insert(param.info.id).second);
       INF_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
+    }
+  }
+}
+
+void
+plugin_midi_mappings::validate(plugin_desc const& plugin) const
+{
+  assert(midi_sources.size() == plugin.midi_count);
+  assert(tag_to_index.size() == plugin.midi_count);
+  assert(index_to_tag.size() == plugin.midi_count);
+  assert(topo_to_index.size() == plugin.plugin->modules.size());
+
+  int midi_source_global = 0;
+  (void)midi_source_global;
+  for (int m = 0; m < plugin.plugin->modules.size(); m++)
+  {
+    auto const& module = plugin.plugin->modules[m];
+    (void)module;
+    assert(topo_to_index[m].size() == module.info.slot_count);
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+    {
+      assert(topo_to_index[m][mi].size() == module.midi_sources.size());
+      for (int ms = 0; ms < module.midi_sources.size(); ms++)
+        assert(topo_to_index[m][mi][ms] == midi_source_global++);
     }
   }
 }
