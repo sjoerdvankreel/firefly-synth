@@ -17,6 +17,7 @@ plugin(plugin), config(config)
   for(int m = 0; m < plugin->modules.size(); m++)
   {
     auto const& module = plugin->modules[m];
+    midi_mappings.topo_to_index.emplace_back();
     param_mappings.topo_to_index.emplace_back();
     if(module.dsp.stage == module_stage::input) module_voice_start++;
     if(module.dsp.stage == module_stage::input) module_output_start++;
@@ -26,6 +27,7 @@ plugin(plugin), config(config)
       param_mappings.id_to_index[module.info.tag.id][module.params[p].info.tag.id] = p;
     for(int mi = 0; mi < module.info.slot_count; mi++)
     {
+      midi_mappings.topo_to_index[m].emplace_back();
       param_mappings.topo_to_index[m].emplace_back();
       modules.emplace_back(module_desc(module, m, mi, module_global++, param_global, midi_source_global));
       for (int ms = 0; ms < module.midi_sources.size(); ms++)
