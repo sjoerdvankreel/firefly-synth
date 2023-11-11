@@ -151,8 +151,8 @@ make_midi_source(topo_tag const& tag, std::int16_t message, std::int16_t cc_numb
 {
   midi_source result;
   result.tag = topo_tag(tag);
-  result.message = message;
-  result.cc_number = cc_number;
+  result.id.message = message;
+  result.id.cc_number = cc_number;
   return result;
 }
 

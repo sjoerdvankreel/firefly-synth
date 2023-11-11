@@ -10,6 +10,13 @@ namespace plugin_base {
 // basically amounts to all CC's plus some predefined messages
 enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
 
+// midi automation identifier
+struct midi_id
+{
+  std::int16_t message;
+  std::int16_t cc_number;
+};
+
 // midi topo mapping
 struct midi_topo_mapping final {
   int module_index;
@@ -24,9 +31,8 @@ struct midi_topo_mapping final {
 
 // mapping midi inputs to continuous series
 struct midi_source final {
+  midi_id id;
   topo_tag tag;
-  std::int16_t message;
-  std::int16_t cc_number;
 
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_source);
