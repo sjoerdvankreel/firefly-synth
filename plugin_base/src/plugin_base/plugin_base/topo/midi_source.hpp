@@ -15,6 +15,9 @@ struct midi_id
 {
   std::int16_t message;
   std::int16_t cc_number;
+
+  bool operator<(midi_id const& rhs) const 
+  { return message < rhs.message && cc_number < rhs.cc_number; }
 };
 
 // midi topo mapping
