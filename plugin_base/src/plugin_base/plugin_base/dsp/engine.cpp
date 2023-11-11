@@ -32,6 +32,7 @@ _voice_processor_context(voice_processor_context)
   int note_limit_guess = _state.desc().plugin->polyphony * 64;
 
   // init everything that is not frame-count dependent
+  _midi_values.resize(_dims.module_slot_midi);
   _global_context.resize(_dims.module_slot);
   _voice_context.resize(_dims.voice_module_slot);
   _output_values.resize(_dims.module_slot_param_slot);
@@ -68,7 +69,7 @@ plugin_engine::make_plugin_block(
   plugin_block_state state = {
     context_out, cv_out, audio_out, scratch,
     _global_cv_state, _global_audio_state, _global_context, _global_scratch_state, 
-    _midi_source_state[module][slot], _midi_source_state,
+    _midi_automation[module][slot], _midi_automation,
     _accurate_automation[module][slot], _accurate_automation,
     _block_automation.state()[module][slot], _block_automation.state()
   };
@@ -122,7 +123,7 @@ plugin_engine::deactivate()
   _voice_audio_state = {};
   _global_cv_state = {};
   _global_audio_state = {};
-  _midi_source_state = {};
+  _midi_automation = {};
   _accurate_automation = {};
   _voice_scratch_state = {};
   _global_scratch_state = {};
@@ -161,8 +162,8 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _global_cv_state.resize(frame_dims.module_global_cv);
   _global_scratch_state.resize(frame_dims.module_global_scratch);
   _global_audio_state.resize(frame_dims.module_global_audio);
+  _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
-  _midi_source_state.resize(frame_dims.module_midi_sources);
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -370,6 +371,13 @@ plugin_engine::process()
   {
     auto const& module = _state.desc().plugin->modules[m];
     for(int mi = 0; mi < module.info.slot_count; mi++)
+    {
+      for (int ms = 0; ms < module.midi_sources.size(); ms++)
+        std::fill(
+          _midi_automation[m][mi][ms].begin(),
+          _midi_automation[m][mi][ms].begin() + frame_count,
+          _midi_values[m][mi][ms]);
+
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
@@ -383,6 +391,7 @@ plugin_engine::process()
               _accurate_automation[m][mi][p][pi].begin() + frame_count,
               (float)_state.get_normalized_at(m, mi, p, pi).value());
       }
+    }
   }
     
   // process per-block automation values
@@ -413,6 +422,26 @@ plugin_engine::process()
     // denormalize current state value
     _accurate_frames[event.param] = event.frame;
     _state.set_normalized_at_index(event.param, event.normalized);
+  }
+
+  // process midi automation values, this is pretty much the same as
+  // regular (accurate) parameter automation except that we expect all values as normalized
+  std::fill(_midi_frames.begin(), _midi_frames.end(), 0);
+  for (int e = 0; e < _host_block->events.midi.size(); e++)
+  {
+    // linear interpolate
+    auto const& event = _host_block->events.midi[e];
+    auto const& mapping = _state.desc().midi_mappings.midi_sources[event.param];
+    auto& curve = mapping.topo.value_at(_midi_automation);
+    int prev_frame = _midi_frames[event.param];
+    float range_frames = event.frame - prev_frame + 1;
+    float range = event.normalized.value() - curve[prev_frame];
+    for (int f = prev_frame; f <= event.frame; f++)
+      curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
+
+    // denormalize current state value
+    _midi_frames[event.param] = event.frame;
+    _midi_values[mapping.topo.module_index][mapping.topo.module_slot][mapping.topo.midi_index] = event.normalized.value();
   }
 
   // run input modules in order

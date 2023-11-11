@@ -47,17 +47,17 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     bool is_audio = module.dsp.output == module_output::audio;
     int cv_frames = is_cv && is_global ? frame_count : 0;
     int audio_frames = is_audio && is_global ? frame_count : 0;
+    midi_automation.emplace_back();
     module_global_cv.emplace_back();
     module_global_audio.emplace_back();
     module_global_scratch.emplace_back();
-    module_midi_sources.emplace_back();
     accurate_automation.emplace_back();
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
       accurate_automation[m].emplace_back();
       module_global_cv[m].emplace_back();
       module_global_audio[m].emplace_back();
-      module_midi_sources[m].emplace_back(module.midi_sources.size(), frame_count);
+      midi_automation[m].emplace_back(module.midi_sources.size(), frame_count);
       module_global_scratch[m].emplace_back(module.dsp.scratch_count, frame_count);
       for (int o = 0; o < module.dsp.outputs.size(); o++)
       {
@@ -130,10 +130,10 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int frame_count) const
     }
   }
 
+  assert(midi_automation.size() == plugin.modules.size());
   assert(module_global_cv.size() == plugin.modules.size());
   assert(module_global_audio.size() == plugin.modules.size());
   assert(module_global_scratch.size() == plugin.modules.size());
-  assert(module_midi_sources.size() == plugin.modules.size());
   assert(accurate_automation.size() == plugin.modules.size());
   for (int m = 0; m < plugin.modules.size(); m++)
   {
@@ -145,10 +145,10 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int frame_count) const
     int audio_frames = is_audio && is_global ? frame_count : 0;
     (void)cv_frames;
     (void)audio_frames;
+    assert(midi_automation[m].size() == module.info.slot_count);
     assert(module_global_cv[m].size() == module.info.slot_count);
     assert(module_global_audio[m].size() == module.info.slot_count);
     assert(module_global_scratch[m].size() == module.info.slot_count);
-    assert(module_midi_sources[m].size() == module.info.slot_count);
     assert(accurate_automation[m].size() == module.info.slot_count);
 
     for (int mi = 0; mi < module.info.slot_count; mi++)
@@ -156,9 +156,9 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int frame_count) const
       assert(module_global_cv[m][mi].size() == module.dsp.outputs.size());
       assert(module_global_audio[m][mi].size() == module.dsp.outputs.size());
       assert(module_global_scratch[m][mi].size() == module.dsp.scratch_count);
-      assert(module_midi_sources[m][mi].size() == module.midi_sources.size());
+      assert(midi_automation[m][mi].size() == module.midi_sources.size());
       for (int ms = 0; ms < module.midi_sources.size(); ms++)
-        assert(module_midi_sources[m][mi][ms] == frame_count);
+        assert(midi_automation[m][mi][ms] == frame_count);
       for (int s = 0; s < module.dsp.scratch_count; s++)
         assert(module_global_scratch[m][mi][s] == frame_count);
       for (int o = 0; o < module.dsp.outputs.size(); o++)

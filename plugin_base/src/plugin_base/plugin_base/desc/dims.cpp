@@ -19,10 +19,12 @@ plugin_dims(plugin_topo const& plugin)
   {
     auto const& module = plugin.modules[m];
     module_slot.push_back(module.info.slot_count);
+    module_slot_midi.emplace_back();
     module_slot_param_slot.emplace_back();
     for(int mi = 0; mi < module.info.slot_count; mi++)
     {
       module_slot_param_slot[m].emplace_back();
+      module_slot_midi[m].emplace_back(module.midi_sources.size());
       for (int p = 0; p < module.params.size(); p++)
         module_slot_param_slot[m][mi].push_back(module.params[p].info.slot_count);
     }

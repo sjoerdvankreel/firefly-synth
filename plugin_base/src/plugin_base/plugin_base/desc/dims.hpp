@@ -9,6 +9,7 @@ namespace plugin_base {
 // runtime plugin dsp dimensions
 struct plugin_dims final {
   jarray<int, 1> module_slot;
+  jarray<int, 2> module_slot_midi;
   jarray<int, 2> voice_module_slot;
   jarray<int, 3> module_slot_param_slot;
 

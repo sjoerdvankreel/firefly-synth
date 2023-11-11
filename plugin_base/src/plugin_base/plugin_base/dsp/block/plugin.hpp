@@ -55,8 +55,8 @@ struct plugin_block_state final {
   jarray<float, 6> const& all_global_audio;
   jarray<void*, 2> const& all_global_context;
   jarray<float, 4> const& all_global_scratch;
-  jarray<float, 2> const& own_midi_sources;
-  jarray<float, 4> const& all_midi_sources;
+  jarray<float, 2> const& own_midi_automation;
+  jarray<float, 4> const& all_midi_automation;
   jarray<float, 3> const& own_accurate_automation;
   jarray<float, 5> const& all_accurate_automation;
   jarray<plain_value, 2> const& own_block_automation;

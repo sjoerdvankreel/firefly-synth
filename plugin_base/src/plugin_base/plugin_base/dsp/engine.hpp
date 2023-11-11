@@ -37,6 +37,7 @@ class plugin_engine final {
   plugin_dims const _dims;
   plugin_state _state = {};
   plugin_state _block_automation = {};
+  jarray<float, 3> _midi_values = {};
   jarray<void*, 3> _voice_context = {};
   jarray<void*, 2> _global_context = {};
   jarray<plain_value, 4> _output_values = {};
@@ -53,9 +54,9 @@ class plugin_engine final {
   jarray<float, 3> _voice_results = {};
   jarray<float, 6> _voice_cv_state = {};
   jarray<float, 5> _global_cv_state = {};
-  jarray<float, 4> _midi_source_state = {};
   jarray<float, 7> _voice_audio_state = {};
   jarray<float, 6> _global_audio_state = {};
+  jarray<float, 4> _midi_automation = {};
   jarray<float, 5> _accurate_automation = {};
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};
