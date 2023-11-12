@@ -39,6 +39,7 @@ _voice_processor_context(voice_processor_context)
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
   _midi_frames.resize(_state.desc().midi_count);
+  _midi_was_automated.resize(_state.desc().midi_count);
   _accurate_frames.resize(_state.desc().param_count);
   _voice_states.resize(_state.desc().plugin->polyphony);
   _host_block->events.notes.reserve(note_limit_guess);
@@ -430,8 +431,9 @@ plugin_engine::process()
   }
 
   // process midi automation values
-  // pretty much the same as regular (accurate) parameter automation
+  // pretty much the same as regular (accurate) parameter automation, but see below
   std::fill(_midi_frames.begin(), _midi_frames.end(), 0);
+  std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);
   for (int e = 0; e < _host_block->events.midi.size(); e++)
   {
     // linear interpolate
@@ -440,6 +442,7 @@ plugin_engine::process()
     auto iter = id_mapping.find(event.id);
     if(iter == id_mapping.end()) continue;
     int midi_index = iter->second;
+    _midi_was_automated[midi_index] = 1;
     auto const& mapping = _state.desc().midi_mappings.midi_sources[midi_index];
     auto& curve = mapping.topo.value_at(_midi_automation);
     int prev_frame = _midi_frames[midi_index];
@@ -452,6 +455,18 @@ plugin_engine::process()
     _midi_frames[midi_index] = event.frame;
     _midi_values[mapping.topo.module_index][mapping.topo.module_slot][mapping.topo.midi_index] = event.normalized.value();
   }
+
+  // but: it seems not all hosts transmit midi events at block boundaries
+  // like it's done for parameter automation (not even for built-in host midi automation)
+  // so we need to take that into account. best we can do is just re-use the last midi value
+  for(int i = 0; i < _midi_was_automated.size(); i++)
+    if (_midi_was_automated[i])
+    {
+      auto const& mapping = _state.desc().midi_mappings.midi_sources[i];
+      auto& curve = mapping.topo.value_at(_midi_automation);
+      for(int f = _midi_frames[i]; f < frame_count; f++)
+        curve[f] = curve[_midi_frames[i]];
+    }
 
   // run input modules in order
   for (int m = 0; m < _state.desc().module_voice_start; m++)
