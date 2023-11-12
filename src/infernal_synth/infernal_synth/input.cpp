@@ -51,7 +51,7 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.sections.emplace_back(make_param_section(section_midi,
-    make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "MIDI"),
+    make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 2, 2, 3 }))));
   
   result.params.emplace_back(make_param(

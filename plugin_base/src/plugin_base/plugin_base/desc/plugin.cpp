@@ -34,7 +34,7 @@ plugin(plugin), config(config)
       for (int ms = 0; ms < module.midi_sources.size(); ms++)
       {
         auto const& source = module.midi_sources[ms];
-        INF_ASSERT_EXEC(midi_mappings.message_to_index.insert(std::pair(source.message, midi_source_global)).second);
+        INF_ASSERT_EXEC(midi_mappings.id_to_index.insert(std::pair(source.id, midi_source_global)).second);
         midi_mappings.topo_to_index[m][mi].push_back(midi_source_global++);
       }
       for(int p = 0; p < module.params.size(); p++)

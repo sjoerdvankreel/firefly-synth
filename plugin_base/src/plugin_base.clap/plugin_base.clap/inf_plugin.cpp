@@ -499,19 +499,21 @@ inf_plugin::process(clap_process const* process) noexcept
     {
       auto event = reinterpret_cast<clap_event_midi const*>(header);
       if(event->port_index != 0) continue;
+      int message = event->data[0] & 0xF0;
       midi_event midi_event = {};
       midi_event.frame = header->time;
-      midi_event.message = event->data[0] & 0xF0;
-      switch (midi_event.message)
+      switch (message)
       {
       case midi_msg_cp: 
+        midi_event.id = midi_source_cp;
         midi_event.normalized = normalized_value(event->data[1] / 127.0);
         break;
       case midi_msg_cc:
-        midi_event.message = event->data[1];
+        midi_event.id = event->data[1];
         midi_event.normalized = normalized_value(event->data[2] / 127.0);
         break;
       case midi_msg_pb:
+        midi_event.id = midi_source_pb;
         midi_pb_value = ((event->data[2] << 7) | event->data[1]) / static_cast<double>(1U << 14);
         midi_event.normalized = normalized_value(midi_pb_value);
         break;

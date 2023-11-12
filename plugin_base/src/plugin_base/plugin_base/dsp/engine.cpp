@@ -436,9 +436,9 @@ plugin_engine::process()
   {
     // linear interpolate
     auto const& event = _host_block->events.midi[e];
-    auto const& msg_mapping = _state.desc().midi_mappings.message_to_index;
-    auto iter = msg_mapping.find(event.message);
-    if(iter == msg_mapping.end()) continue;
+    auto const& id_mapping = _state.desc().midi_mappings.id_to_index;
+    auto iter = id_mapping.find(event.id);
+    if(iter == id_mapping.end()) continue;
     int midi_index = iter->second;
     auto const& mapping = _state.desc().midi_mappings.midi_sources[midi_index];
     auto& curve = mapping.topo.value_at(_midi_automation);

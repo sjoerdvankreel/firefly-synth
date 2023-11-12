@@ -45,8 +45,8 @@ struct param_mapping final {
 // mapping to/from global midi source info
 struct plugin_midi_mappings final {
   std::vector<int> index_to_tag = {};
+  std::map<int, int> id_to_index = {};
   std::map<int, int> tag_to_index = {};
-  std::map<int, int> message_to_index = {};
   std::vector<midi_mapping> midi_sources = {};
   std::vector<std::vector<std::vector<int>>> topo_to_index = {};
 

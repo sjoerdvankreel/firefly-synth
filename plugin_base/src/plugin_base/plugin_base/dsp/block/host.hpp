@@ -18,8 +18,9 @@ struct block_event final {
 
 // midi automation
 struct midi_event final {
+  // midi_source_id
+  int id;
   int frame;
-  int message;
   normalized_value normalized;
 };
 
