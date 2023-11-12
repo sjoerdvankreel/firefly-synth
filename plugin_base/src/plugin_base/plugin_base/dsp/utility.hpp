@@ -9,6 +9,29 @@
 
 namespace plugin_base {
 
+// for smoothing parameter changes
+// https://www.musicdsp.org/en/latest/Filters/117-one-pole-one-zero-lp-hp.html
+class param_filter
+{
+  float a = 0;
+  float b = 0;
+  float in = 0;
+  float out = 0;
+
+public:
+  float next(float x);
+  param_filter(float rate, float freq);
+};
+
+inline float
+param_filter::next(float x)
+{
+  float result = x * a + in * a + out * b;
+  in = x;
+  out = result;
+  return result;
+}
+
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 

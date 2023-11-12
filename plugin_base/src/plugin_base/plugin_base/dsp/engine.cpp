@@ -130,6 +130,7 @@ plugin_engine::deactivate()
   _global_cv_state = {};
   _global_audio_state = {};
   _midi_automation = {};
+  _midi_filters = {};
   _accurate_automation = {};
   _voice_scratch_state = {};
   _global_scratch_state = {};
@@ -170,6 +171,10 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _global_audio_state.resize(frame_dims.module_global_audio);
   _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
+
+  // smoothing filters are SR dependent
+  float smooth_freq = _state.desc().plugin->midi_smoothing_hz;
+  _midi_filters.resize(_state.desc().midi_count, param_filter(sample_rate, smooth_freq));
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -459,6 +464,7 @@ plugin_engine::process()
   // but: it seems not all hosts transmit midi events at block boundaries
   // like it's done for parameter automation (not even for built-in host midi automation)
   // so we need to take that into account. best we can do is just re-use the last midi value
+  // and filter the curve a bit
   for(int i = 0; i < _midi_was_automated.size(); i++)
     if (_midi_was_automated[i])
     {
@@ -466,6 +472,8 @@ plugin_engine::process()
       auto& curve = mapping.topo.value_at(_midi_automation);
       for(int f = _midi_frames[i]; f < frame_count; f++)
         curve[f] = curve[_midi_frames[i]];
+      for(int f = 0; f < frame_count; f++)
+        curve[f] = _midi_filters[i].next(curve[f]);
     }
 
   // run input modules in order

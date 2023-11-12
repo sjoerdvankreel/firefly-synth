@@ -6,6 +6,7 @@
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/block/host.hpp>
 #include <plugin_base/dsp/block/plugin.hpp>
 
@@ -50,6 +51,7 @@ class plugin_engine final {
 
   std::vector<int> _midi_frames = {};
   std::vector<int> _midi_was_automated = {};
+  std::vector<param_filter> _midi_filters = {};
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};

@@ -3,6 +3,16 @@
 
 namespace plugin_base {
 
+param_filter::
+param_filter(float rate, float freq)
+{
+  float w = 2.0f * rate;
+  float angle = freq * 2.0f * pi32;
+  float norm = 1.0f / (angle + w);
+  b = (w - angle) * norm;
+  a = angle * norm;
+}
+
 std::pair<std::uint32_t, std::uint32_t>
 disable_denormals()
 {
