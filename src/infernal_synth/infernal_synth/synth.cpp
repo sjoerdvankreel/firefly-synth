@@ -51,12 +51,12 @@ make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
 }
 
 static std::string
-make_name(std::string const& name1, int slot1, int slots1, std::string const& name2, int slot2, int slots2)
+make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int slot2, int slots2)
 {
-  std::string result = name1;
-  if (slots1 > 1) result += " " + std::to_string(slot1 + 1);
-  result += " " + name2;
-  if (slots2 > 1) result += " " + std::to_string(slot2 + 1);
+  std::string result = tag1.name;
+  if (slots1 > 1) result += " " + std::to_string(slot1 + (tag1.name_one_based ? 1: 0));
+  result += " " + tag2.name;
+  if (slots2 > 1) result += " " + std::to_string(slot2 + (tag2.name_one_based ? 1 : 0));
   return result;
 }
 
@@ -137,7 +137,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
           result.mappings.push_back({ modules[m]->info.index, 0, o, oi });
           result.items.push_back({
             make_id(module_tag.id, 0, output.info.tag.id, oi),
-            make_name(module_tag.name, 0, 1, output.info.tag.name, oi, output.info.slot_count) });
+            make_name(module_tag, 0, 1, output.info.tag, oi, output.info.slot_count) });
         }
       }
     }
@@ -165,7 +165,7 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
           {
             list_item item = {
               make_id(module_info.tag.id, 0, param_info.tag.id, pi),
-              make_name(module_info.tag.name, 0, 1, param_info.tag.name, pi, param_info.slot_count) };
+              make_name(module_info.tag, 0, 1, param_info.tag, pi, param_info.slot_count) };
             item.param_topo = { modules[m]->info.index, 0, modules[m]->params[p].info.index, pi };
             result.items.push_back(item);
             module_submenu->indices.push_back(index++);
@@ -187,7 +187,7 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
             {
               list_item item = {
                 make_id(module_info.tag.id, mi, param_info.tag.id, pi),
-                make_name(module_info.tag.name, mi, module_info.slot_count, param_info.tag.name, pi, param_info.slot_count) };
+                make_name(module_info.tag, mi, module_info.slot_count, param_info.tag, pi, param_info.slot_count) };
               item.param_topo = { module_info.index, mi, param_info.index, pi };
               result.items.push_back(item);
               result.mappings.push_back(item.param_topo);

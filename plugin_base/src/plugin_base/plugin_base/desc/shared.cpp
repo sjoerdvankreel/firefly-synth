@@ -14,7 +14,7 @@ std::string
 desc_name(topo_info const& info, int slot)
 {
   std::string result = info.tag.name;
-  if (info.slot_count > 1) result += " " + std::to_string(slot + 1);
+  if (info.slot_count > 1) result += " " + std::to_string(slot + (info.tag.name_one_based? 1: 0));
   return result;
 }
 
