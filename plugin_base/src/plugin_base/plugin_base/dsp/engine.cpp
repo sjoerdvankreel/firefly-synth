@@ -428,7 +428,7 @@ plugin_engine::process()
     float range_frames = event.frame - prev_frame + 1;
     float range = event.normalized.value() - curve[prev_frame];
     for(int f = prev_frame; f <= event.frame; f++)
-      curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
+      curve[f] = curve[prev_frame] + (f - prev_frame + 1) / range_frames * range;
 
     // update current state
     _accurate_frames[event.param] = event.frame;
@@ -454,7 +454,7 @@ plugin_engine::process()
     float range_frames = event.frame - prev_frame + 1;
     float range = event.normalized.value() - curve[prev_frame];
     for (int f = prev_frame; f <= event.frame; f++)
-      curve[f] = curve[prev_frame] + (f - prev_frame) / range_frames * range;
+      curve[f] = curve[prev_frame] + (f - prev_frame + 1) / range_frames * range;
 
     // update current state
     _midi_frames[midi_index] = event.frame;

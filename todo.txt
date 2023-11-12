@@ -29,6 +29,7 @@ do the are you sure? stuff
 host menu
 do clap midi notes
 do midi link (only midi as auto source)
+do user settings
 
 * get some linux folks to comment (ycollete?)
 * continuing
