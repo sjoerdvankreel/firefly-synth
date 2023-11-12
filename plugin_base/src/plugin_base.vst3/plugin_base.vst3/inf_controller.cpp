@@ -55,6 +55,16 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 }
 
 tresult PLUGIN_API 
+inf_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber number, ParamID& id)
+{
+  if(bus != 0) return kResultFalse;
+  auto iter = _midi_id_to_param.find(number);
+  if(iter == _midi_id_to_param.end()) return kResultFalse;
+  id = iter->second;
+  return kResultTrue;
+}
+
+tresult PLUGIN_API 
 inf_controller::initialize(FUnknown* context)
 {
   int unit_id = 1;
@@ -93,6 +103,24 @@ inf_controller::initialize(FUnknown* context)
       if (!param.param->domain.is_real())
         param_info.stepCount = param.param->domain.max - param.param->domain.min;
       parameters.addParameter(new inf_param(&_gui_state, module.params[p].param, module.params[p].info.global, param_info));
+    }
+  }
+
+  // be sure to append fake midi params *after* the real ones
+  // to not mess up the tag to index mapping
+  for (int m = 0; m < gui_state().desc().modules.size(); m++)
+  {
+    auto const& module = gui_state().desc().modules[m];
+    for (int ms = 0; ms < module.midi_sources.size(); ms++)
+    {
+      ParameterInfo param_info = {};
+      auto const& source = module.midi_sources[ms];
+      param_info.stepCount = 0;
+      param_info.id = source.info.id_hash;
+      param_info.flags = ParameterInfo::kIsHidden;
+      param_info.defaultNormalizedValue = source.source->default_;
+      parameters.addParameter(new Parameter(param_info));
+      _midi_id_to_param[source.source->id] = param_info.id;
     }
   }
 

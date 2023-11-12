@@ -7,6 +7,7 @@ void
 midi_source::validate() const
 {
   tag.validate();
+  assert(0 <= default_ && default_ <= 1);
   assert(0 <= id && id < midi_source_count);
 }
 

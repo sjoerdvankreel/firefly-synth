@@ -20,6 +20,18 @@ _engine(desc, nullptr, nullptr)
   processContextRequirements.needTempo();
   processContextRequirements.needFrameRate();
   processContextRequirements.needContinousTimeSamples();
+
+  // each midi source can be attached to at most 1 module instance (topo+slot)!
+  for(int m = 0; m < desc->modules.size(); m++)
+  {
+    auto const& module = desc->modules[m];
+    for(int ms = 0; ms < module.midi_sources.size(); ms++)
+    {
+      auto const& source = module.midi_sources[ms];
+      assert(_param_to_midi_id.find(source.info.id_hash) == _param_to_midi_id.end());
+      _param_to_midi_id[source.info.id_hash] = source.source->id;
+    }
+  }
 }
 
 tresult PLUGIN_API
@@ -117,25 +129,45 @@ inf_component::process(ProcessData& data)
     for(int i = 0; i < data.inputParameterChanges->getParameterCount(); i++)
       if ((queue = data.inputParameterChanges->getParameterData(i)) != nullptr)
       {
-        int param_index = _engine.state().desc().param_mappings.tag_to_index.at(queue->getParameterId());
-        auto rate = _engine.state().desc().param_at_index(param_index).param->dsp.rate;
-        if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
+        int param_id = queue->getParameterId();
+        auto iter = _param_to_midi_id.find(param_id);
+        if(iter != _param_to_midi_id.end())
         {
-          block_event event;
-          event.param = param_index;
-          event.normalized = normalized_value(value);
-          block.events.block.push_back(event);
-        }
-        else if (rate == param_rate::accurate)
-          for(int p = 0; p < queue->getPointCount(); p++)
+          // fake midi parameter - this is not part of the plugin's parameter topology
+          // translate param events back to midi events for plugin_base
+          for (int p = 0; p < queue->getPointCount(); p++)
             if (queue->getPoint(p, frame_index, value) == kResultTrue)
             {
-              accurate_event event;
+              midi_event event;
+              event.id = iter->second;
               event.frame = frame_index;
-              event.param = param_index;
               event.normalized = normalized_value(value);
-              block.events.accurate.push_back(event);
+              block.events.midi.push_back(event);
             }
+        }
+        else
+        {
+          // regular parameter
+          int param_index = _engine.state().desc().param_mappings.tag_to_index.at(queue->getParameterId());
+          auto rate = _engine.state().desc().param_at_index(param_index).param->dsp.rate;
+          if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
+          {
+            block_event event;
+            event.param = param_index;
+            event.normalized = normalized_value(value);
+            block.events.block.push_back(event);
+          }
+          else if (rate == param_rate::accurate)
+            for(int p = 0; p < queue->getPointCount(); p++)
+              if (queue->getPoint(p, frame_index, value) == kResultTrue)
+              {
+                accurate_event event;
+                event.frame = frame_index;
+                event.param = param_index;
+                event.normalized = normalized_value(value);
+                block.events.accurate.push_back(event);
+              }
+        }
       }
   
   _engine.process();

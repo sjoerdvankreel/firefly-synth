@@ -5,12 +5,15 @@
 #include <plugin_base/shared/utility.hpp>
 
 #include <public.sdk/source/vst/vstaudioeffect.h>
+#include <map>
 
 namespace plugin_base::vst3 {
 
 class inf_component final:
 public Steinberg::Vst::AudioEffect {
   plugin_engine _engine;
+
+  std::map<int, int> _param_to_midi_id = {};
 
 public:
   INF_PREVENT_ACCIDENTAL_COPY(inf_component);

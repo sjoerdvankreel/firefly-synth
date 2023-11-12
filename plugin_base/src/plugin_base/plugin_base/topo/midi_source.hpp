@@ -9,7 +9,6 @@
 namespace plugin_base {
 
 // mapping to vst3
-enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
 enum midi_source_id { midi_source_cc = 0, midi_source_cp = 128, midi_source_pb = 129, midi_source_count };
 
 // midi topo mapping

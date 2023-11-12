@@ -19,6 +19,8 @@ using namespace plugin_base;
 
 namespace plugin_base::clap {
 
+enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
+
 static inline normalized_value
 clap_to_normalized(param_topo const& topo, clap_value clap)
 {
