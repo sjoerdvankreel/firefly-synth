@@ -96,7 +96,7 @@ cv_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 2, 3, -30 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, -30 } })));
   main.gui.scroll_mode = global? gui_scroll_mode::none: gui_scroll_mode::vertical;
   
   result.params.emplace_back(make_param(
