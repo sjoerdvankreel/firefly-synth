@@ -39,7 +39,9 @@ plugin_topo::validate() const
 
   tag.validate();
   auto return_true = [](int) { return true; };
-  gui.dimension.validate(vector_map(gui.sections, [](auto const& s) { return s.position; }), return_true, return_true);
+  gui.dimension.validate(vector_map(gui.sections, 
+    [](auto const& s) { return s.position; }), 
+    [this](int i) { return gui.sections[i].visible; }, return_true);
   for(int s = 0; s < gui.sections.size(); s++)
     gui.sections[s].validate(*this, s);
 
