@@ -15,7 +15,6 @@ int aux_count = 3;
 
 enum { section_aux, section_midi };
 enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
-extern int const input_output_pb = param_pb;
 
 class input_engine :
 public module_engine {
