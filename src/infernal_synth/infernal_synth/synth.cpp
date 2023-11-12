@@ -33,10 +33,10 @@ make_id(std::string const& id, int slot)
 }
 
 static std::string
-make_name(std::string const& name, int slot, int slots)
+make_name(topo_tag const& tag, int slot, int slots)
 {
-  std::string result = name;
-  if(slots > 1) result += " " + std::to_string(slot + 1);
+  std::string result = tag.name;
+  if(slots > 1) result += " " + std::to_string(slot + (tag.name_one_based? 1: 0));
   return result;
 }
 
@@ -74,7 +74,7 @@ make_module_matrix(std::vector<module_topo const*> const& modules)
     {
       result.submenu->indices.push_back(index++);
       result.mappings.push_back({ modules[m]->info.index, 0 });
-      result.items.push_back({ make_id(tag.id, 0), make_name(tag.name, 0, slots) });
+      result.items.push_back({ make_id(tag.id, 0), make_name(tag, 0, slots) });
     } else
     {
       auto module_submenu = result.submenu->add_submenu(tag.name);
@@ -82,7 +82,7 @@ make_module_matrix(std::vector<module_topo const*> const& modules)
       {
         module_submenu->indices.push_back(index++);
         result.mappings.push_back({ modules[m]->info.index, mi });
-        result.items.push_back({ make_id(tag.id, mi), make_name(tag.name, mi, slots) });
+        result.items.push_back({ make_id(tag.id, mi), make_name(tag, mi, slots) });
       }
     }
   }
@@ -112,7 +112,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
         result.mappings.push_back({ modules[m]->info.index, mi, 0, 0 });
         result.items.push_back({
           make_id(module_tag.id, mi, output.info.tag.id, 0),
-          make_name(module_tag.name, mi, module_slots) });
+          make_name(module_tag, mi, module_slots) });
       }
     } else if (modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].info.slot_count == 1)
     {
@@ -122,7 +122,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
       result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
       result.items.push_back({
         make_id(module_tag.id, 0, output.info.tag.id, 0),
-        make_name(module_tag.name, 0, 1) });
+        make_name(module_tag, 0, 1) });
     }
     else
     {
@@ -178,7 +178,7 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
       for (int mi = 0; mi < module_info.slot_count; mi++)
       {
         auto module_slot_submenu = module_submenu->add_submenu(
-          make_name(module_info.tag.name, mi, module_info.slot_count));
+          make_name(module_info.tag, mi, module_info.slot_count));
         for (int p = 0; p < modules[m]->params.size(); p++)
           if (modules[m]->params[p].dsp.can_modulate(mi))
           {

@@ -24,7 +24,7 @@ make_label_none()
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name);
 topo_info
-make_topo_info(std::string const& id, std::string const& name, int index, int slot_count);
+make_topo_info(std::string const& id, std::string const& name, int index, int slot_count, bool name_one_based = true);
 
 param_section
 make_param_section(int index, topo_tag const& tag, param_section_gui const& gui);

@@ -31,6 +31,7 @@ gui_param_binding_selector;
 struct topo_tag final {
   std::string id;
   std::string name;
+  bool name_one_based = true;
 
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_tag);

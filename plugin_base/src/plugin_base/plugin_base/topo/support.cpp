@@ -20,13 +20,14 @@ make_topo_tag(std::string const& id, std::string const& name)
 }
 
 topo_info
-make_topo_info(std::string const& id, std::string const& name, int index, int slot_count)
+make_topo_info(std::string const& id, std::string const& name, int index, int slot_count, bool name_one_based)
 {
   topo_info result = {};
   result.tag.id = id;
   result.tag.name = name;
   result.index = index;
   result.slot_count = slot_count;
+  result.tag.name_one_based = name_one_based;
   return result;
 }
 
