@@ -38,11 +38,8 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<input_engine>(); };
-  result.midi_sources.emplace_back(make_midi_source(
-    make_topo_tag("{366EC7E8-35F6-4C91-96A4-E5FDF8995846}", "MIDI PB"), midi_msg_pb, 0));
-  result.midi_sources.emplace_back(make_midi_source(
-    make_topo_tag("{4FB475BF-94AE-4369-A1B3-B5F21C5C6DB0}", "MIDI Mod"), midi_msg_cc, 1));
-    
+  result.midi_sources = midi_source::all_sources();
+
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1 }))));

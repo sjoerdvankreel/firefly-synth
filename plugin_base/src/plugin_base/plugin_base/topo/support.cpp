@@ -59,6 +59,16 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
   return result;
 }
 
+midi_source
+make_midi_source(topo_tag const& tag, int message, float default_)
+{
+  midi_source result;
+  result.message = message;
+  result.default_ = default_;
+  result.tag = topo_tag(tag);
+  return result;
+}
+
 module_section_gui
 make_module_section_gui_none(int index)
 {
@@ -143,16 +153,6 @@ make_module_gui(int section, gui_colors const& colors, gui_position const& posit
   result.position = position;
   result.dimension = dimension;
   result.colors = gui_colors(colors);
-  return result;
-}
-
-midi_source
-make_midi_source(topo_tag const& tag, std::int16_t message, std::int16_t cc_number)
-{
-  midi_source result;
-  result.tag = topo_tag(tag);
-  result.id.message = message;
-  result.id.cc_number = cc_number;
   return result;
 }
 

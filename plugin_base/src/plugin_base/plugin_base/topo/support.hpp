@@ -38,14 +38,14 @@ make_module_section_gui(int index, gui_position const& position, gui_dimension c
 module_section_gui
 make_module_section_gui_tabbed(int index, gui_position const& position, std::string const& header, int tab_width, std::vector<int> const& tab_order);
 
+midi_source
+make_midi_source(topo_tag const& tag, int message, float default_);
 module_dsp_output
 make_module_dsp_output(bool is_modulation_source, topo_info const& info);
 module_topo
 make_module(topo_info const& info, module_dsp const& dsp, module_topo_gui const& gui);
 module_dsp
 make_module_dsp(module_stage stage, module_output output, int scratch_count, std::vector<module_dsp_output> const& outputs);
-midi_source
-make_midi_source(topo_tag const& tag, std::int16_t message, std::int16_t cc_number);
 
 module_topo_gui
 make_module_gui_none(int section);

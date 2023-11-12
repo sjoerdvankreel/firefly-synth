@@ -501,14 +501,14 @@ inf_plugin::process(clap_process const* process) noexcept
       if(event->port_index != 0) continue;
       midi_event midi_event = {};
       midi_event.frame = header->time;
-      midi_event.id.message = event->data[0] & 0xF0;
-      if(midi_event.id.message == midi_msg_cc) midi_event.id.cc_number = event->data[1];
-      switch (midi_event.id.message)
+      midi_event.message = event->data[0] & 0xF0;
+      switch (midi_event.message)
       {
       case midi_msg_cp: 
         midi_event.normalized = normalized_value(event->data[1] / 127.0);
         break;
       case midi_msg_cc:
+        midi_event.message = event->data[1];
         midi_event.normalized = normalized_value(event->data[2] / 127.0);
         break;
       case midi_msg_pb:
@@ -521,6 +521,7 @@ inf_plugin::process(clap_process const* process) noexcept
       }
       if(publish_midi) 
         block.events.midi.push_back(midi_event);
+      break;
     }
     default: 
       break;

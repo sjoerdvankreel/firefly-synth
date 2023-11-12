@@ -32,7 +32,6 @@ _voice_processor_context(voice_processor_context)
   int note_limit_guess = _state.desc().plugin->polyphony * 64;
 
   // init everything that is not frame-count dependent
-  _midi_values.resize(_dims.module_slot_midi);
   _global_context.resize(_dims.module_slot);
   _voice_context.resize(_dims.voice_module_slot);
   _output_values.resize(_dims.module_slot_param_slot);
@@ -47,6 +46,12 @@ _voice_processor_context(voice_processor_context)
   _host_block->events.block.reserve(block_events_guess);
   _host_block->events.midi.reserve(midi_events_guess);
   _host_block->events.accurate.reserve(accurate_events_guess);
+
+  _midi_values.resize(_dims.module_slot_midi);
+  for(int m = 0; m < desc->plugin->modules.size(); m++)
+    for(int mi = 0; mi < desc->plugin->modules[m].info.slot_count; mi++)
+      for(int ms = 0; ms < desc->plugin->modules[m].midi_sources.size(); ms++)
+        _midi_values[m][mi][ms] = desc->plugin->modules[m].midi_sources[ms].default_;
 }
 
 plugin_block
@@ -431,9 +436,9 @@ plugin_engine::process()
   {
     // linear interpolate
     auto const& event = _host_block->events.midi[e];
-    auto const& id_mapping = _state.desc().midi_mappings.id_to_index;
-    auto iter = id_mapping.find(event.id);
-    if(iter == id_mapping.end()) continue;
+    auto const& msg_mapping = _state.desc().midi_mappings.message_to_index;
+    auto iter = msg_mapping.find(event.message);
+    if(iter == msg_mapping.end()) continue;
     int midi_index = iter->second;
     auto const& mapping = _state.desc().midi_mappings.midi_sources[midi_index];
     auto& curve = mapping.topo.value_at(_midi_automation);

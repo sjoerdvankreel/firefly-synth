@@ -2,23 +2,13 @@
 
 #include <plugin_base/topo/shared.hpp>
 #include <plugin_base/shared/utility.hpp>
+
+#include <vector>
 #include <cstdint>
 
 namespace plugin_base {
 
-// vst3 kind of limits what we can do here.
-// basically amounts to all CC's plus some predefined messages
 enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
-
-// midi automation identifier
-struct midi_id
-{
-  std::int16_t message = 0;
-  std::int16_t cc_number = 0;
-
-  bool operator<(midi_id const& rhs) const 
-  { return message < rhs.message && cc_number < rhs.cc_number; }
-};
 
 // midi topo mapping
 struct midi_topo_mapping final {
@@ -33,11 +23,14 @@ struct midi_topo_mapping final {
 };
 
 // mapping midi inputs to continuous series
+// message must be 0-127 for cc, midi_msg_cp or midi_msg_pb
 struct midi_source final {
-  midi_id id;
+  int message;
   topo_tag tag;
+  float default_;
 
   void validate() const;
+  static std::vector<midi_source> all_sources();
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_source);
 };
 
