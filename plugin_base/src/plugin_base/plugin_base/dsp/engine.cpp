@@ -458,7 +458,6 @@ plugin_engine::process()
 
     // update current state
     _midi_frames[midi_index] = event.frame;
-    _midi_values[mapping.topo.module_index][mapping.topo.module_slot][mapping.topo.midi_index] = event.normalized.value();
   }
 
   // but: it seems not all hosts transmit midi events at block boundaries
@@ -474,6 +473,7 @@ plugin_engine::process()
         curve[f] = curve[_midi_frames[i]];
       for(int f = 0; f < frame_count; f++)
         curve[f] = _midi_filters[i].next(curve[f]);
+      _midi_values[mapping.topo.module_index][mapping.topo.module_slot][mapping.topo.midi_index] = curve[frame_count - 1];
     }
 
   // run input modules in order
