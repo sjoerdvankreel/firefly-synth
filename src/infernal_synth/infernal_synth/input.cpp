@@ -12,10 +12,9 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 int aux_count = 3;
-
-enum { section_aux, section_midi };
+enum { section_aux, section_linked };
+enum { output_aux, output_mod, output_pb };
 enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
-enum { output_aux, output_mod, output_pb, output_midi_cp, output_midi_pb, output_midi_cc };
 
 class input_engine :
 public module_engine {
@@ -33,15 +32,11 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
-      make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)),
-      make_module_dsp_output(true, make_topo_info("{D38E46EA-4064-410C-BB33-DB6DA418463B}", "MIDI CP", output_midi_cp, 1)),
-      make_module_dsp_output(true, make_topo_info("{C3A35C9F-3F80-4DE0-8C8D-D18D340F9DBC}", "MIDI PB", output_midi_pb, 1)),
-      make_module_dsp_output(true, make_topo_info("{023C1F1C-873C-4D43-9469-6F36D948EE7A}", "MIDI CC", output_midi_cc, 128)) }),
+      make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<input_engine>(); };
-  result.midi_sources = midi_source::all_sources();
 
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
@@ -53,26 +48,26 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
     make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
-  result.sections.emplace_back(make_param_section(section_midi,
+  result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 2, 2, 3 }))));
   
   result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod", param_mod, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_midi, gui_edit_type::knob, { 0, 0 },
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", "PB", param_pb, 1),
     make_param_dsp_accurate(param_automate::both), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_midi, gui_edit_type::knob, { 0, 1 }, 
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 1 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", "Range", param_pb_range, 1),
     make_param_dsp_block(param_automate::none), make_domain_step(1, 24, 12, 0),
-    make_param_gui_single(section_midi, gui_edit_type::autofit_list, { 0, 2 },
+    make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   return result;
@@ -87,12 +82,6 @@ input_engine::process(plugin_block& block)
   accurate[param_mod][0].copy_to(block.start_frame, block.end_frame, own_cv[output_mod][0]);
   for(int i = 0; i < aux_count; i++)
     accurate[param_aux][i].copy_to(block.start_frame, block.end_frame, own_cv[output_aux][i]);
-  
-  auto const& midi = block.state.own_midi_automation;
-  midi[midi_source_cp].copy_to(block.start_frame, block.end_frame, own_cv[output_midi_cp][0]);
-  midi[midi_source_pb].copy_to(block.start_frame, block.end_frame, own_cv[output_midi_pb][0]);
-  for(int i = 0; i < 128; i++)
-    midi[midi_source_cc].copy_to(block.start_frame, block.end_frame, own_cv[output_midi_cc][i]);
 }
 
 }

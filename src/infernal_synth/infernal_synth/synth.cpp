@@ -201,7 +201,7 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
 }
 
 enum { 
-  section_input, section_lfos, section_env, section_cv_matrix,
+  section_midi, section_input, section_lfos, section_env, section_cv_matrix,
   section_audio_matrix, section_osc, section_fx, section_voice,
   section_master_monitor, section_count };
 
@@ -232,6 +232,7 @@ synth_topo()
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   result->gui.sections.resize(section_count);
+  result->gui.sections[section_midi] = make_module_section_gui_none(section_midi);
   result->gui.sections[section_voice] = make_module_section_gui_none(section_voice);
   result->gui.sections[section_fx] = make_module_section_gui(section_fx, { 4, 0 }, { 1, 2 });
   result->gui.sections[section_env] = make_module_section_gui(section_env, { 2, 0 }, { 1, 1 });
@@ -245,6 +246,7 @@ synth_topo()
     "Audio", result->gui.module_header_width, { module_vaudio_matrix, module_gaudio_matrix });
 
   result->modules.resize(module_count);
+  result->modules[module_midi] = midi_topo(section_midi);
   result->modules[module_voice_in] = voice_topo(section_voice, false);
   result->modules[module_voice_out] = voice_topo(section_voice, true);
   result->modules[module_env] = env_topo(section_env, cv_colors, { 0, 0 });
@@ -260,13 +262,13 @@ synth_topo()
     { &result->modules[module_osc], &result->modules[module_vfx] },
     { &result->modules[module_vfx], &result->modules[module_voice_out] });
   result->modules[module_vcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, false,
-    { &result->modules[module_input], &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
+    { &result->modules[module_midi], &result->modules[module_input], &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
     { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
   result->modules[module_gaudio_matrix] = audio_matrix_topo(section_audio_matrix, audio_colors, { 0, 0 }, true,
     { &result->modules[module_voice_in], &result->modules[module_gfx] },
     { &result->modules[module_gfx], &result->modules[module_master] });
   result->modules[module_gcv_matrix] = cv_matrix_topo(section_cv_matrix, cv_colors, { 0, 0 }, true,
-    { &result->modules[module_input], &result->modules[module_glfo] },
+    { &result->modules[module_midi], &result->modules[module_input], &result->modules[module_glfo] },
     { &result->modules[module_gfx], &result->modules[module_gaudio_matrix], &result->modules[module_master] });
   return result;
 }
