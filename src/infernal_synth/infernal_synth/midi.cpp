@@ -48,7 +48,7 @@ midi_engine::process(plugin_block& block)
   midi[midi_source_cp].copy_to(block.start_frame, block.end_frame, own_cv[output_cp][0]);
   midi[midi_source_pb].copy_to(block.start_frame, block.end_frame, own_cv[output_pb][0]);
   for(int i = 0; i < 128; i++)
-    midi[midi_source_cc].copy_to(block.start_frame, block.end_frame, own_cv[output_cc][i]);
+    midi[midi_source_cc + i].copy_to(block.start_frame, block.end_frame, own_cv[output_cc][i]);
 }
 
 }
