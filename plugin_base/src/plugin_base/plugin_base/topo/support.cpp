@@ -279,9 +279,18 @@ make_param_dsp(param_direction direction, param_rate rate, param_automate automa
 }
 
 param_topo_gui
+make_param_gui_none()
+{
+  param_topo_gui result = {};
+  result.visible = false;
+  return result;
+}
+
+param_topo_gui
 make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label label)
 {
   param_topo_gui result = {};
+  result.visible = true;
   result.layout = layout;
   result.section = section;
   result.position = position;

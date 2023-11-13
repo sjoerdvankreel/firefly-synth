@@ -87,12 +87,12 @@ make_domain_linear(double min, double max, double default_, int precision, std::
 param_domain
 make_domain_log(double min, double max, double default_, double midpoint, int precision, std::string const& unit);
 
-param_topo
-make_param(topo_info const& info, param_dsp const& dsp, param_domain const& domain, param_topo_gui const& gui);
+param_topo_gui
+make_param_gui_none();
 param_topo_gui
 make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label label);
-inline param_topo_gui 
-make_param_gui_none() { return make_param_gui(0, gui_edit_type::none, {}, {}, {}); }
+param_topo
+make_param(topo_info const& info, param_dsp const& dsp, param_domain const& domain, param_topo_gui const& gui);
 inline param_topo_gui
 make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label label)
 { return make_param_gui(section, edit_type, param_layout::single, position, gui_label(label)); }
