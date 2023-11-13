@@ -395,13 +395,11 @@ plugin_engine::process()
           for(int pi = 0; pi < param.info.slot_count; pi++)
             _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
         else 
-          // for midi linked params, we copy over the midi curve later
-          if(!param.dsp.is_midi(mi))
-            for (int pi = 0; pi < param.info.slot_count; pi++)
-              std::fill(
-                _accurate_automation[m][mi][p][pi].begin(),
-                _accurate_automation[m][mi][p][pi].begin() + frame_count,
-                (float)_state.get_normalized_at(m, mi, p, pi).value());
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+            std::fill(
+              _accurate_automation[m][mi][p][pi].begin(),
+              _accurate_automation[m][mi][p][pi].begin() + frame_count,
+              (float)_state.get_normalized_at(m, mi, p, pi).value());
       }
     }
   }
@@ -424,11 +422,6 @@ plugin_engine::process()
     // linear interpolate as normalized
     auto const& event = _host_block->events.accurate[e];
     auto const& mapping = _state.desc().param_mappings.params[event.param];
-    
-    // host binding should not generate events for this case
-    // instead we pick up midi mapped midi events later (see below)
-    assert(mapping.midi_source_global == -1);
-
     auto& curve = mapping.topo.value_at(_accurate_automation);
     int prev_frame = _accurate_frames[event.param];
     float range_frames = event.frame - prev_frame + 1;
@@ -480,27 +473,24 @@ plugin_engine::process()
       for(int f = 0; f < frame_count; f++)
         curve[f] = _midi_filters[i].next(curve[f]);
       _midi_values[mapping.topo.module_index][mapping.topo.module_slot][mapping.topo.midi_index] = curve[frame_count - 1];
-    }
 
-  // take care of midi linked parameters now
-  // note that we do need to copy the buffer regardless of whether it was automated or not
-  for (int ms = 0; ms < _state.desc().midi_mappings.midi_sources.size(); ms++)
-  {
-    auto const& midi_mapping = _state.desc().midi_mappings.midi_sources[ms];
-    for (int lp = 0; lp < midi_mapping.linked_params.size(); lp++)
-    {
-      auto const& param_mapping = _state.desc().param_mappings.params[lp];
-      auto const& mt = midi_mapping.topo;
-      auto const& pt = param_mapping.topo;
-      std::copy(
-        _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin(),
-        _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin() + frame_count,
-        _accurate_automation[pt.module_index][pt.module_slot][pt.param_index][pt.param_slot].begin());
-      _state.set_normalized_at_index(lp, normalized_value(_midi_values[mt.module_index][mt.module_slot][mt.midi_index]));
-
-      // TODO push output event ?
+      // take care of midi linked parameters now
+      // overwriting ui interaction with midi controller values if there are midi events
+      auto const& midi_mapping = _state.desc().midi_mappings.midi_sources[i];
+      for (int lp = 0; lp < midi_mapping.linked_params.size(); lp++)
+      {
+        int param_index = midi_mapping.linked_params[lp];
+        auto const& param_mapping = _state.desc().param_mappings.params[param_index];
+        assert(param_mapping.midi_source_global == i);
+        auto const& mt = midi_mapping.topo;
+        auto const& pt = param_mapping.topo;
+        std::copy(
+          _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin(),
+          _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin() + frame_count,
+          _accurate_automation[pt.module_index][pt.module_slot][pt.param_index][pt.param_slot].begin());
+        _state.set_normalized_at_index(param_index, normalized_value(curve[frame_count - 1]));
+      }
     }
-  }
 
   // run input modules in order
   for (int m = 0; m < _state.desc().module_voice_start; m++)
