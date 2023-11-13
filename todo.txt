@@ -6,7 +6,6 @@ handle clap is_modulatable
 get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
 ui set exact values
-handle generic midi in
 on-note/hold-type cv
 do cakewalk bug report
 test all host+linux
@@ -24,11 +23,9 @@ on-note type stuff
 measure performance
 name it firefly?
 fx version
-do the midi stuff
 do the are you sure? stuff
 host menu
 do clap midi notes
-do midi link (only midi as auto source)
 do user settings
 not select vfx1 fbdk in matrix and automation
 midi defaults
