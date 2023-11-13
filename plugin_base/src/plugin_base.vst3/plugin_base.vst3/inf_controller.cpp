@@ -49,8 +49,10 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
-  int index = gui_state().desc().param_mappings.tag_to_index.at(tag);
-  _gui_state.set_normalized_at_index(index, normalized_value(value));
+  // fake midi params are not mapped
+  auto iter = gui_state().desc().param_mappings.tag_to_index.find(tag);
+  if(iter != gui_state().desc().param_mappings.tag_to_index.end())
+    _gui_state.set_normalized_at_index(iter->second, normalized_value(value));
   return kResultTrue;
 }
 
