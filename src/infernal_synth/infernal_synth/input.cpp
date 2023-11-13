@@ -15,6 +15,7 @@ int aux_count = 3;
 enum { section_aux, section_linked };
 enum { output_aux, output_mod, output_pb };
 enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
+extern int const input_param_pb_range = param_pb_range;
 
 class input_engine :
 public module_engine {
