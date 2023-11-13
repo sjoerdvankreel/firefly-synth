@@ -38,8 +38,6 @@ _voice_processor_context(voice_processor_context)
   _input_engines.resize(_dims.module_slot);
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
-  _midi_frames.resize(_state.desc().midi_count);
-  _midi_was_automated.resize(_state.desc().midi_count);
   _accurate_frames.resize(_state.desc().param_count);
   _voice_states.resize(_state.desc().plugin->polyphony);
   _host_block->events.notes.reserve(note_limit_guess);
@@ -47,12 +45,6 @@ _voice_processor_context(voice_processor_context)
   _host_block->events.block.reserve(block_events_guess);
   _host_block->events.midi.reserve(midi_events_guess);
   _host_block->events.accurate.reserve(accurate_events_guess);
-
-  _midi_values.resize(_dims.module_slot_midi);
-  for(int m = 0; m < desc->plugin->modules.size(); m++)
-    for(int mi = 0; mi < desc->plugin->modules[m].info.slot_count; mi++)
-      for(int ms = 0; ms < desc->plugin->modules[m].midi_sources.size(); ms++)
-        _midi_values[m][mi][ms] = desc->plugin->modules[m].midi_sources[ms].default_;
 }
 
 plugin_block
@@ -174,7 +166,7 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
 
   // smoothing filters are SR dependent
   float smooth_freq = _state.desc().plugin->midi_smoothing_hz;
-  _midi_filters.resize(_state.desc().midi_count, param_filter(sample_rate, smooth_freq));
+  _midi_filters.resize(_state.desc().midi_count, midi_filter(sample_rate, smooth_freq));
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -379,17 +371,12 @@ plugin_engine::process()
   }
 
   // set automation values to state, automation may overwrite
+  // note that we cannot initialize current midi state since
+  // midi smoothing filters introduce delay
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
     auto const& module = _state.desc().plugin->modules[m];
     for(int mi = 0; mi < module.info.slot_count; mi++)
-    {
-      for (int ms = 0; ms < module.midi_sources.size(); ms++)
-        std::fill(
-          _midi_automation[m][mi][ms].begin(),
-          _midi_automation[m][mi][ms].begin() + frame_count,
-          _midi_values[m][mi][ms]);
-
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
@@ -403,7 +390,6 @@ plugin_engine::process()
               _accurate_automation[m][mi][p][pi].begin() + frame_count,
               (float)_state.get_normalized_at(m, mi, p, pi).value());
       }
-    }
   }
     
   // process per-block automation values
@@ -437,69 +423,61 @@ plugin_engine::process()
   }
 
   // process midi automation values
-  // pretty much the same as regular (accurate) parameter automation, but see below
-  std::fill(_midi_frames.begin(), _midi_frames.end(), 0);
-  std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);
-  for (int e = 0; e < _host_block->events.midi.size(); e++)
+  // this works a bit different from parameter automation
+  // as the host is not expected (or cannot, in the case of external controllers)
+  // to provide events at block boundaries so we cannot interpolate as for parameters
+  // also for vst3 events come from different queues, so have to sort by frame pos first
+  int event_index = 0;
+  auto frame_comp = [](auto const& l, auto const& r) { return l.frame < r.frame; };
+  std::sort(_host_block->events.midi.begin(), _host_block->events.midi.end(), frame_comp);
+  for (int f = 0; f < frame_count; f++)
   {
-    // linear interpolate
-    auto const& event = _host_block->events.midi[e];
-    auto const& id_mapping = _state.desc().midi_mappings.id_to_index;
-    auto iter = id_mapping.find(event.id);
-    if(iter == id_mapping.end()) continue;
-    int midi_index = iter->second;
-    _midi_was_automated[midi_index] = 1;
-    auto const& mapping = _state.desc().midi_mappings.midi_sources[midi_index];
-    auto& curve = mapping.topo.value_at(_midi_automation);
-    int prev_frame = _midi_frames[midi_index];
-    float range_frames = event.frame - prev_frame + 1;
-    float range = event.normalized.value() - curve[prev_frame];
-    for (int f = prev_frame; f <= event.frame; f++)
-      curve[f] = curve[prev_frame] + (f - prev_frame + 1) / range_frames * range;
+    for (; event_index < _host_block->events.midi.size() && _host_block->events.midi[event_index].frame == f; event_index++)
+    {
+      // if midi event is mapped, set the next target value for interpolation
+      auto const& event = _host_block->events.midi[event_index];
+      auto const& id_mapping = _state.desc().midi_mappings.id_to_index;
+      auto iter = id_mapping.find(event.id);
+      if (iter == id_mapping.end()) continue;
+      int midi_index = iter->second;
+      _midi_filters[midi_index].set(event.normalized.value());
+    }
 
-    // update current state
-    _midi_frames[midi_index] = event.frame;
+    // keep running the filters even if no event was added this time
+    for (int ms = 0; ms < _midi_filters.size(); ms++)
+    {
+      auto const& mapping = _state.desc().midi_mappings.midi_sources[ms];
+      auto& curve = mapping.topo.value_at(_midi_automation);
+      curve[f] = _midi_filters[ms].next();
+    }
   }
 
-  // but: it seems not all hosts transmit midi events at block boundaries
-  // like it's done for parameter automation (not even for built-in host midi automation)
-  // so we need to take that into account. best we can do is just re-use the last midi value
-  // and filter the curve a bit
-  for(int i = 0; i < _midi_was_automated.size(); i++)
-    if (_midi_was_automated[i])
+  // take care of linked parameters
+  for(int ms = 0; ms < _midi_filters.size(); ms++)
+  {
+    auto const& midi_mapping = _state.desc().midi_mappings.midi_sources[ms];
+    auto last_value = midi_mapping.topo.value_at(_midi_automation)[frame_count - 1];
+    for (int lp = 0; lp < midi_mapping.linked_params.size(); lp++)
     {
-      auto const& mapping = _state.desc().midi_mappings.midi_sources[i];
-      auto& curve = mapping.topo.value_at(_midi_automation);
-      for(int f = _midi_frames[i]; f < frame_count; f++)
-        curve[f] = curve[_midi_frames[i]];
-      for(int f = 0; f < frame_count; f++)
-        curve[f] = _midi_filters[i].next(curve[f]);
-      _midi_values[mapping.topo.module_index][mapping.topo.module_slot][mapping.topo.midi_index] = curve[frame_count - 1];
+      int param_index = midi_mapping.linked_params[lp];
+      auto const& param_mapping = _state.desc().param_mappings.params[param_index];
+      assert(param_mapping.midi_source_global == ms);
+      auto const& mt = midi_mapping.topo;
+      auto const& pt = param_mapping.topo;
+      std::copy(
+        _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin(),
+        _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin() + frame_count,
+        _accurate_automation[pt.module_index][pt.module_slot][pt.param_index][pt.param_slot].begin());
+      _state.set_normalized_at_index(param_index, normalized_value(last_value));
 
-      // take care of midi linked parameters now
-      // overwriting ui interaction with midi controller values if there are midi events
-      auto const& midi_mapping = _state.desc().midi_mappings.midi_sources[i];
-      for (int lp = 0; lp < midi_mapping.linked_params.size(); lp++)
-      {
-        int param_index = midi_mapping.linked_params[lp];
-        auto const& param_mapping = _state.desc().param_mappings.params[param_index];
-        assert(param_mapping.midi_source_global == i);
-        auto const& mt = midi_mapping.topo;
-        auto const& pt = param_mapping.topo;
-        std::copy(
-          _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin(),
-          _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin() + frame_count,
-          _accurate_automation[pt.module_index][pt.module_slot][pt.param_index][pt.param_slot].begin());
-        _state.set_normalized_at_index(param_index, normalized_value(curve[frame_count - 1]));
-
-        // have the host update the gui with the midi value
-        // note that we don't handle the other direction (i.e. no midi cc out)
-        block_event out_event;
-        out_event.param = param_index;
-        out_event.normalized = normalized_value(curve[frame_count - 1]);
-        _host_block->events.out.push_back(out_event);
-      }
+      // have the host update the gui with the midi value
+      // note that we don't handle the other direction (i.e. no midi cc out)
+      block_event out_event;
+      out_event.param = param_index;
+      out_event.normalized = normalized_value(last_value);
+      _host_block->events.out.push_back(out_event);
     }
+  }
 
   // run input modules in order
   for (int m = 0; m < _state.desc().module_voice_start; m++)

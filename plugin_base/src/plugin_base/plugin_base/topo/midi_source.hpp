@@ -29,7 +29,6 @@ struct midi_topo_mapping final {
 struct midi_source final {
   int id;
   topo_tag tag;
-  float default_;
 
   void validate() const;
   static std::vector<midi_source> all_sources();

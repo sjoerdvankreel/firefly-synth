@@ -61,11 +61,10 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
 }
 
 midi_source
-make_midi_source(topo_tag const& tag, int id, float default_)
+make_midi_source(topo_tag const& tag, int id)
 {
   midi_source result;
   result.id = id;
-  result.default_ = default_;
   result.tag = topo_tag(tag);
   return result;
 }

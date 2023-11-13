@@ -7,7 +7,6 @@ void
 midi_source::validate() const
 {
   tag.validate();
-  assert(0 <= default_ && default_ <= 1);
   assert(0 <= id && id < midi_source_count);
 }
 
@@ -21,9 +20,9 @@ midi_source::all_sources()
   for(int i = 0; i < 128; i++)
     result.push_back(make_midi_source(
       make_topo_tag(cc_id + "-" + std::to_string(i), 
-      "MIDI CC " + std::to_string(i)), midi_source_cc + i, 0.0f));
-  result.push_back(make_midi_source(make_topo_tag(cp_id, "MIDI CP"), midi_source_cp, 0.0f));
-  result.push_back(make_midi_source(make_topo_tag(pb_id, "MIDI PB"), midi_source_pb, 0.5f));
+      "MIDI CC " + std::to_string(i)), midi_source_cc + i));
+  result.push_back(make_midi_source(make_topo_tag(cp_id, "MIDI CP"), midi_source_cp));
+  result.push_back(make_midi_source(make_topo_tag(pb_id, "MIDI PB"), midi_source_pb));
   return result;
 }
 

@@ -9,27 +9,34 @@
 
 namespace plugin_base {
 
-// for smoothing parameter changes
-// https://www.musicdsp.org/en/latest/Filters/117-one-pole-one-zero-lp-hp.html
-class param_filter
+// for smoothing midi changes
+class midi_filter
 {
-  float a = 0;
-  float b = 0;
-  float in = 0;
-  float out = 0;
-
+  int _length;
+  int _pos = 0;
+  float _to = 0;
+  float _from = 0;
+  float _current = 0;
 public:
-  float next(float x);
-  param_filter(float rate, float freq);
+  float next();
+  void set(float val);
+  midi_filter(float rate, float freq): _length(rate / freq) {}
 };
 
-inline float
-param_filter::next(float x)
+inline void
+midi_filter::set(float val)
 {
-  float result = x * a + in * a + out * b;
-  in = x;
-  out = result;
-  return result;
+  _pos = 0;
+  _to = val;
+  _from = _current;
+}
+
+inline float
+midi_filter::next()
+{
+  if(_pos == _length) return _to;
+  _current = _from + (_to - _from) * (_pos++ / (float)_length);
+  return _current;
 }
 
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
