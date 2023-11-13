@@ -22,7 +22,7 @@ public:
   void set(float val);
   std::pair<float, bool> next();
   midi_filter(float rate, float freq, float default_):
-  _length(rate / freq), _current(default_) {}
+  _length(rate / freq), _to(default_) {}
 };
 
 inline void
