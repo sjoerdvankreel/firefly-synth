@@ -53,6 +53,8 @@ module_topo_gui
 make_module_gui(int section, gui_colors const& colors, gui_position const& position, gui_dimension const& dimension);
 
 param_dsp
+make_param_dsp_midi(midi_topo_mapping const& source);
+param_dsp
 make_param_dsp(param_direction direction, param_rate rate, param_automate automate);
 inline param_dsp
 make_param_dsp_block(param_automate automate)

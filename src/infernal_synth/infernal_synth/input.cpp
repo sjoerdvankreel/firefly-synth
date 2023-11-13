@@ -54,13 +54,13 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
   
   result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod", param_mod, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", "PB", param_pb, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 1 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 

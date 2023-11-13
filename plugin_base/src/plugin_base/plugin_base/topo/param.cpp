@@ -1,11 +1,13 @@
 #include <plugin_base/topo/param.hpp>
 #include <plugin_base/topo/module.hpp>
+#include <plugin_base/topo/plugin.hpp>
+
 #include <set>
 
 namespace plugin_base {
 
 void 
-param_dsp::validate(int module_slot) const
+param_dsp::validate(plugin_topo const& plugin, int module_slot) const
 {
   param_automate automate = automate_selector(module_slot);
 
@@ -24,10 +26,17 @@ param_dsp::validate(int module_slot) const
     assert(direction == param_direction::input);
   }
 
-  if (can_modulate(module_slot))
+  if (can_modulate(module_slot) || is_midi(module_slot))
   {
     assert(rate == param_rate::accurate);
     assert(direction == param_direction::input);
+  }
+
+  if (is_midi(module_slot))
+  {
+    assert(0 <= midi_source.module_index && midi_source.module_index < plugin.modules.size());
+    assert(0 <= midi_source.module_slot && midi_source.module_index < plugin.modules[midi_source.module_index].info.slot_count);
+    assert(0 <= midi_source.midi_index && midi_source.midi_index < plugin.modules[midi_source.module_index].midi_sources.size());
   }
 }
 
@@ -56,10 +65,10 @@ param_topo_gui::validate(module_topo const& module, param_topo const& param) con
 }
 
 void
-param_topo::validate(module_topo const& module, int index) const
+param_topo::validate(plugin_topo const& plugin, module_topo const& module, int index) const
 {
   info.validate();
-  dsp.validate(module.info.slot_count);
+  dsp.validate(plugin, module.info.slot_count);
   domain.validate(module.info.slot_count, info.slot_count);
   
   assert(info.index == index);

@@ -1,9 +1,10 @@
 #pragma once
 
-#include <plugin_base/topo/domain.hpp>
-#include <plugin_base/topo/shared.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/topo/shared.hpp>
+#include <plugin_base/topo/domain.hpp>
+#include <plugin_base/topo/midi_source.hpp>
 
 #include <vector>
 #include <string>
@@ -13,11 +14,12 @@ namespace plugin_base {
 
 struct param_topo;
 struct module_topo;
+struct plugin_topo;
 
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_layout { single, horizontal, vertical };
-enum class param_automate { none, automate, modulate, automate_modulate };
+enum class param_automate { none, midi, automate, modulate, automate_modulate };
 
 typedef std::function<param_automate(int module_slot)>
 automate_selector;
@@ -38,18 +40,6 @@ struct gui_item_binding final {
   void bind_param(param_topo_mapping param_, gui_item_binding_selector selector_);
 };
 
-// parameter dsp
-struct param_dsp final {
-  param_rate rate;
-  param_direction direction;
-  automate_selector automate_selector;
-
-  void validate(int module_slot) const;
-  bool can_modulate(int module_slot) const;
-  bool can_automate(int module_slot) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
-};
-
 // parameter ui
 struct param_topo_gui final {
   int section;
@@ -66,6 +56,21 @@ struct param_topo_gui final {
   void validate(module_topo const& module, param_topo const& param) const;
 };
 
+// parameter dsp
+struct param_dsp final {
+  param_rate rate;
+  param_direction direction;
+  midi_topo_mapping midi_source;
+  automate_selector automate_selector;
+
+  bool is_midi(int module_slot) const;
+  bool can_modulate(int module_slot) const;
+  bool can_automate(int module_slot) const;
+
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
+  void validate(plugin_topo const& plugin, int module_slot) const;
+};
+
 // parameter in module
 struct param_topo final {
   param_dsp dsp;
@@ -74,8 +79,15 @@ struct param_topo final {
   param_domain domain;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
-  void validate(module_topo const& module, int index) const;
+  void validate(plugin_topo const& plugin, module_topo const& module, int index) const;
 };
+
+inline bool
+param_dsp::is_midi(int module_slot) const
+{
+  auto mode = automate_selector(module_slot);
+  return mode == param_automate::midi;
+}
 
 inline bool 
 param_dsp::can_modulate(int module_slot) const

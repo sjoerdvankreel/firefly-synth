@@ -258,6 +258,17 @@ make_domain_log(double min, double max, double default_, double midpoint, int pr
 }
 
 param_dsp
+make_param_dsp_midi(midi_topo_mapping const& source)
+{
+  param_dsp result = {};
+  result.midi_source = source;
+  result.rate = param_rate::accurate;
+  result.direction = param_direction::input;
+  result.automate_selector = [](int) { return param_automate::midi; };
+  return result;
+}
+
+param_dsp
 make_param_dsp(param_direction direction, param_rate rate, param_automate automate)
 {
   param_dsp result = {};
