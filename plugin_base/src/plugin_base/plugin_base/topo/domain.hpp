@@ -35,6 +35,7 @@ struct param_topo_mapping final {
   int param_index;
   int param_slot;
 
+  bool operator==(param_topo_mapping const&) const = default;
   template <class T> auto& value_at(T& container) const 
   { return container[module_index][module_slot][param_index][param_slot]; }
   template <class T> auto const& value_at(T const& container) const 

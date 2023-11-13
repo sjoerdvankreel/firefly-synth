@@ -17,6 +17,7 @@ struct midi_topo_mapping final {
   int module_slot;
   int midi_index;
 
+  bool operator==(midi_topo_mapping const&) const = default;
   template <class T> auto& value_at(T& container) const
   { return container[module_index][module_slot][midi_index]; }
   template <class T> auto const& value_at(T const& container) const 

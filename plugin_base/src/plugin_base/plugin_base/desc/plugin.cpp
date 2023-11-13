@@ -86,6 +86,27 @@ plugin(plugin), config(config)
     }
   }
 
+  // link midi sources <-> regular params
+  param_global = 0;
+  for (int m = 0; m < modules.size(); m++)
+  {
+    auto const& module = modules[m];
+    for (int p = 0; p < module.params.size(); p++)
+    {
+      auto const& param = module.params[p];
+      if (param.param->dsp.is_midi(module.info.slot))
+      {
+        auto const& source = param.param->dsp.midi_source;
+        int midi_source = midi_mappings.topo_to_index[source.module_index][source.module_slot][source.midi_index];
+        param_mappings.params[param_global].midi_source_global = midi_source;
+        auto& linked_params = midi_mappings.midi_sources[midi_source].linked_params;
+        assert(std::find(linked_params.begin(), linked_params.end(), param_global) == linked_params.end());
+        linked_params.push_back(param_global);
+      }
+      param_global++;
+    }
+  }
+
   param_count = param_global;
   midi_count = midi_source_global;
   module_count = modules.size();
@@ -159,6 +180,18 @@ plugin_midi_mappings::validate(plugin_desc const& plugin) const
         assert(topo_to_index[m][mi][ms] == midi_source_global++);
     }
   }
+
+  for (int ms = 0; ms < midi_sources.size(); ms++)
+  {
+    auto const& source = midi_sources[ms];
+    for (int p = 0; p < source.linked_params.size(); p++)
+    {
+      auto const& dsp = plugin.params[source.linked_params[p]]->param->dsp;
+      auto const& mapping = plugin.param_mappings.params[source.linked_params[p]];
+      assert(dsp.midi_source == source.topo);
+      assert(dsp.is_midi(mapping.topo.module_slot));
+    }
+  }
 }
 
 void
@@ -189,6 +222,19 @@ plugin_param_mappings::validate(plugin_desc const& plugin) const
         for (int pi = 0; pi < param.info.slot_count; pi++)
           assert(topo_to_index[m][mi][p][pi] == param_global++);
       }
+    }
+  }
+
+  for (int p = 0; p < plugin.params.size(); p++)
+  {
+    auto const& pm = params[p];
+    auto const& param = *plugin.params[p];
+    if (param.param->dsp.is_midi(pm.topo.module_slot))
+    {
+      assert(0 <= pm.midi_source_global && pm.midi_source_global < plugin.midi_count);
+      assert(param.param->dsp.midi_source == plugin.midi_mappings.midi_sources[pm.midi_source_global].topo);
+      auto const& linked_params = plugin.midi_mappings.midi_sources[pm.midi_source_global].linked_params;
+      assert(std::find(linked_params.begin(), linked_params.end(), p) != linked_params.end());
     }
   }
 }

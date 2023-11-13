@@ -30,6 +30,7 @@ struct midi_mapping final {
   int midi_global = {};
   int module_global = {};
   midi_topo_mapping topo = {};
+  std::vector<int> linked_params = {};
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_mapping);
 };
 
@@ -38,6 +39,7 @@ struct param_mapping final {
   int param_local = {};
   int param_global = {};
   int module_global = {};
+  int midi_source_global = -1; // for midi linked params
   param_topo_mapping topo = {};
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_mapping);
 };
