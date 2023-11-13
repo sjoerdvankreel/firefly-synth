@@ -239,6 +239,8 @@ plugin_engine::process()
 {
   int voice_count = 0;
   int frame_count = _host_block->frame_count;
+
+  _host_block->events.out.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();
   scope_guard denormals([denormal_state]() { restore_denormals(denormal_state); });
 
@@ -489,6 +491,13 @@ plugin_engine::process()
           _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin() + frame_count,
           _accurate_automation[pt.module_index][pt.module_slot][pt.param_index][pt.param_slot].begin());
         _state.set_normalized_at_index(param_index, normalized_value(curve[frame_count - 1]));
+
+        // have the host update the gui with the midi value
+        // note that we don't handle the other direction (i.e. no midi cc out)
+        block_event out_event;
+        out_event.param = param_index;
+        out_event.normalized = normalized_value(curve[frame_count - 1]);
+        _host_block->events.out.push_back(out_event);
       }
     }
 
@@ -554,7 +563,6 @@ plugin_engine::process()
 
   // update output params 3 times a second
   // push all out params - we don't check for changes
-  _host_block->events.out.clear();
   auto now_sec = seconds_since_epoch();
   if(now_sec - _output_updated_sec > 0.33)
   {
