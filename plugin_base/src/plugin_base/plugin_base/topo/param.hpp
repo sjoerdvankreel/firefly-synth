@@ -17,7 +17,7 @@ struct module_topo;
 enum class param_rate { accurate, block };
 enum class param_direction { input, output };
 enum class param_layout { single, horizontal, vertical };
-enum class param_automate { none, automate, modulate, both };
+enum class param_automate { none, automate, modulate, automate_modulate };
 
 typedef std::function<param_automate(int module_slot)>
 automate_selector;
@@ -81,14 +81,14 @@ inline bool
 param_dsp::can_modulate(int module_slot) const
 {
   auto mode = automate_selector(module_slot);
-  return mode == param_automate::both || mode == param_automate::modulate;
+  return mode == param_automate::automate_modulate || mode == param_automate::modulate;
 }
 
 inline bool
 param_dsp::can_automate(int module_slot) const
 {
   auto mode = automate_selector(module_slot);
-  return mode == param_automate::both || mode == param_automate::automate;
+  return mode == param_automate::automate_modulate || mode == param_automate::automate;
 }
 
 inline bool

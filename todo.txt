@@ -30,6 +30,9 @@ host menu
 do clap midi notes
 do midi link (only midi as auto source)
 do user settings
+not select vfx1 fbdk in matrix
+midi defaults
+polymod/mpe/note_exprs
 
 * get some linux folks to comment (ycollete?)
 * continuing

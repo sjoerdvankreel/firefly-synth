@@ -76,19 +76,19 @@ osc_topo(
 
   auto& bal = result.params.emplace_back(make_param(
     make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
-    make_param_dsp_accurate(param_automate::both), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   bal.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& am = result.params.emplace_back(make_param(
     make_topo_info("{D03E5C05-E404-4394-BC1F-CE2CD6AAE357}", "AM", param_am, 1),
-    make_param_dsp_accurate(param_automate::both), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   am.gui.bindings.enabled.bind_slot([](int s) { return s > 0; });
   am.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  am.dsp.automate_selector = [](int s) { return s > 0? param_automate::both : param_automate::none; };
+  am.dsp.automate_selector = [](int s) { return s > 0? param_automate::automate_modulate : param_automate::none; };
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
@@ -108,14 +108,14 @@ osc_topo(
 
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
-    make_param_dsp_accurate(param_automate::both), make_domain_percentage(-1, 1, 0, 0, false),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& pitch = result.params.emplace_back(make_param(
     make_topo_info("{F87BA01D-19CE-4D46-83B6-8E2382D9F601}", "Pitch", param_pitch, 1),
-    make_param_dsp_accurate(param_automate::both), make_domain_linear(0, 128, 0, 0, ""),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0, 128, 0, 0, ""),
     make_param_gui_none())); 
   pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
