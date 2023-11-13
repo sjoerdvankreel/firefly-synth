@@ -39,6 +39,7 @@ _voice_processor_context(voice_processor_context)
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
   _accurate_frames.resize(_state.desc().param_count);
+  _midi_was_automated.resize(_state.desc().midi_count);
   _voice_states.resize(_state.desc().plugin->polyphony);
   _host_block->events.notes.reserve(note_limit_guess);
   _host_block->events.out.reserve(block_events_guess);
@@ -431,6 +432,7 @@ plugin_engine::process()
   int event_index = 0;
   auto frame_comp = [](auto const& l, auto const& r) { return l.frame < r.frame; };
   std::sort(_host_block->events.midi.begin(), _host_block->events.midi.end(), frame_comp);
+  std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);
   for (int f = 0; f < frame_count; f++)
   {
     for (; event_index < _host_block->events.midi.size() && _host_block->events.midi[event_index].frame == f; event_index++)
@@ -449,13 +451,16 @@ plugin_engine::process()
     {
       auto const& mapping = _state.desc().midi_mappings.midi_sources[ms];
       auto& curve = mapping.topo.value_at(_midi_automation);
-      curve[f] = _midi_filters[ms].next();
+      auto filter_result = _midi_filters[ms].next();
+      curve[f] = filter_result.first;
+      _midi_was_automated[ms] |= filter_result.second? 1: 0;
     }
   }
 
   // take care of linked parameters
   for(int ms = 0; ms < _midi_filters.size(); ms++)
   {
+    if(!_midi_was_automated[ms]) continue;
     auto const& midi_mapping = _state.desc().midi_mappings.midi_sources[ms];
     auto last_value = midi_mapping.topo.value_at(_midi_automation)[frame_count - 1];
     for (int lp = 0; lp < midi_mapping.linked_params.size(); lp++)

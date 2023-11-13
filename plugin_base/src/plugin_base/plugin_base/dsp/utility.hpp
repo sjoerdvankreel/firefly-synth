@@ -4,6 +4,7 @@
 #include <plugin_base/shared/jarray.hpp>
 
 #include <cmath>
+#include <utility>
 #include <cassert>
 #include <cstdint>
 
@@ -18,9 +19,9 @@ class midi_filter
   float _from = 0;
   float _current = 0;
 public:
-  float next();
   void set(float val);
-  midi_filter(float rate, float freq, float default_): 
+  std::pair<float, bool> next();
+  midi_filter(float rate, float freq, float default_):
   _length(rate / freq), _current(default_) {}
 };
 
@@ -32,12 +33,12 @@ midi_filter::set(float val)
   _from = _current;
 }
 
-inline float
+inline std::pair<float, bool>
 midi_filter::next()
 {
-  if(_pos == _length) return _to;
+  if(_pos == _length) return std::make_pair(_to, false);
   _current = _from + (_to - _from) * (_pos++ / (float)_length);
-  return _current;
+  return std::make_pair(_current, true);
 }
 
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
