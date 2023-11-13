@@ -117,9 +117,9 @@ inf_controller::initialize(FUnknown* context)
       auto const& source = module.midi_sources[ms];
       param_info.stepCount = 0;
       param_info.id = source.info.id_hash;
-      param_info.defaultNormalizedValue = 0;
       param_info.flags = ParameterInfo::kIsHidden;
       parameters.addParameter(new Parameter(param_info));
+      param_info.defaultNormalizedValue = source.source->default_;
       _midi_id_to_param[source.source->id] = param_info.id;
     }
   }

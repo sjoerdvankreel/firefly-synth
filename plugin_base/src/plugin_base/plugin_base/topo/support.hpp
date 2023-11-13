@@ -39,7 +39,7 @@ module_section_gui
 make_module_section_gui_tabbed(int index, gui_position const& position, std::string const& header, int tab_width, std::vector<int> const& tab_order);
 
 midi_source
-make_midi_source(topo_tag const& tag, int id);
+make_midi_source(topo_tag const& tag, int id, float default_);
 module_dsp_output
 make_module_dsp_output(bool is_modulation_source, topo_info const& info);
 module_topo

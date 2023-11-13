@@ -20,7 +20,8 @@ class midi_filter
 public:
   float next();
   void set(float val);
-  midi_filter(float rate, float freq): _length(rate / freq) {}
+  midi_filter(float rate, float freq, float default_): 
+  _length(rate / freq), _current(default_) {}
 };
 
 inline void
