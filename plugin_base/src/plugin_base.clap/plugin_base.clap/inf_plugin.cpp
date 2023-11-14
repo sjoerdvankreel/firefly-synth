@@ -148,7 +148,7 @@ inf_plugin::guiSetParent(clap_window const* window) noexcept
 #endif
   _gui->setVisible(true);
   _gui->add_listener(this);
-  _gui->resized();
+  _gui->reloaded();
   return true;
 }
 

@@ -31,6 +31,7 @@ public:
   void gui_changed(int index, plain_value plain);
   void gui_changing(int index, plain_value plain);
 
+  void reloaded();
   void resized() override;
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 

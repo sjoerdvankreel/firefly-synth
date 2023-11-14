@@ -134,6 +134,15 @@ plugin_gui::resized()
   user_io_save_num(*_gui_state->desc().plugin, user_io::base, "width", w);
 }
 
+void
+plugin_gui::reloaded()
+{
+  auto const& topo = *_gui_state->desc().plugin;
+  float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
+  float w = user_io_load_num(topo, user_io::base, "width", topo.gui.min_width, topo.gui.max_width, topo.gui.min_width);
+  setSize(w, topo.gui.min_width * ratio);
+}
+
 Component& 
 plugin_gui::make_container()
 {

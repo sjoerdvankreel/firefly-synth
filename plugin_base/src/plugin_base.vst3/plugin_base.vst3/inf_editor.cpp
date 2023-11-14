@@ -84,7 +84,7 @@ inf_editor::attached(void* parent, FIDString type)
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
   _gui->add_listener(_controller);
-  _gui->resized();
+  _gui->reloaded();
   return EditorView::attached(parent, type);
 }
 
