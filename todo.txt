@@ -30,6 +30,7 @@ do user settings
 not select vfx1 fbdk in matrix and automation
 midi defaults
 polymod/mpe/note_exprs
+midi note as mod source
 
 * get some linux folks to comment (ycollete?)
 * continuing

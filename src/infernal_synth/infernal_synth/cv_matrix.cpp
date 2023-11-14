@@ -15,7 +15,7 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 static int constexpr groute_count = 6;
-static int constexpr vroute_count = 9;
+static int constexpr vroute_count = 12;
 
 enum { section_main };
 enum { type_off, type_mul, type_add, type_addbi };
@@ -61,6 +61,12 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_amount, 1, "33");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "Osc 1 Bal");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 2, "AddBi");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 2, "In PB");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 2, "Osc 1 PB");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 3, "AddBi");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 3, "In PB");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 3, "Osc 2 PB");
 }
 
 static void
