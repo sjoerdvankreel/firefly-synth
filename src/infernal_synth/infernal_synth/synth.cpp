@@ -224,7 +224,6 @@ synth_topo()
   result->version_major = INF_SYNTH_VERSION_MAJOR;
 
   result->gui.min_width = 800;
-  result->gui.max_width = 1600;
   result->gui.aspect_ratio_width = 52;
   result->gui.aspect_ratio_height = 21;
   result->gui.dimension.column_sizes = { 10, 7 };

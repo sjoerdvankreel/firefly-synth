@@ -34,7 +34,7 @@ tresult PLUGIN_API
 inf_editor::checkSizeConstraint(ViewRect* new_size)
 {
   auto const& topo = *_controller->gui_state().desc().plugin;
-  int new_width = std::clamp(new_size->getWidth(), topo.gui.min_width, topo.gui.max_width);
+  int new_width = std::max(new_size->getWidth(), topo.gui.min_width);
   new_size->right = new_size->left + new_width;
   new_size->bottom = new_size->top + (new_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
   return kResultTrue;

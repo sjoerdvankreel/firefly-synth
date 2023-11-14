@@ -72,7 +72,7 @@ user_io_load_text(plugin_topo const& topo, user_io where, std::string const& key
 }
 
 double
-user_io_load_num(plugin_topo const& topo, user_io where, std::string const& key, double min, double max, double default_)
+user_io_load_num(plugin_topo const& topo, user_io where, std::string const& key, double default_, double min, double max)
 {
   auto action = [default_](auto store, auto const& k) { return store->getDoubleValue(k, default_); };
   return std::clamp(user_action(topo, where, key, action), min, max);

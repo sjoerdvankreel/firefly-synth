@@ -33,11 +33,10 @@ struct module_section_gui final {
 // plugin ui
 struct plugin_topo_gui final {
   int min_width;
-  int max_width;
-
-  gui_colors colors;
   int aspect_ratio_width;
   int aspect_ratio_height;
+
+  gui_colors colors;
   gui_dimension dimension;
   std::vector<module_section_gui> sections;
 
