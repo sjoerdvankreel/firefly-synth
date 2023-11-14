@@ -33,7 +33,6 @@ public:
 
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
-  void content_scale(float factor) { setTransform(juce::AffineTransform::scale(factor)); }
 
   void fire_state_loaded();
   void remove_listener(gui_listener* listener);

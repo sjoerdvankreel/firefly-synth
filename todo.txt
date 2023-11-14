@@ -20,20 +20,19 @@ graphs
 velocity
 clean up the dsp
 on-note type stuff
-measure performance
 name it firefly?
 fx version
 do the are you sure? stuff
 host menu
 do clap midi notes
 do user settings
-not select vfx1 fbdk in matrix and automation
-midi defaults
 polymod/mpe/note_exprs
 midi note as mod source
+do top level section with firefly image
 
 * get some linux folks to comment (ycollete?)
 * continuing
+- measure performance
 - keep updating the demo tracks
 
 * host bugs:

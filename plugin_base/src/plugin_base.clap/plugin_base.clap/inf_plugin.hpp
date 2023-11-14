@@ -67,7 +67,6 @@ public:
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;
   void guiDestroy() noexcept override;
-  bool guiSetScale(double scale) noexcept override;
   bool guiSetParent(clap_window const* window) noexcept override;
   bool guiCreate(char const* api, bool is_floating) noexcept override;
   bool guiSetSize(uint32_t width, uint32_t height) noexcept override;

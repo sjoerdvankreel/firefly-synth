@@ -14,13 +14,6 @@ EditorView(controller), _controller(controller),
 _gui(std::make_unique<plugin_gui>(&controller->gui_state())) {}
 
 tresult PLUGIN_API
-inf_editor::setContentScaleFactor(float factor)
-{
-  _gui->content_scale(factor);
-  return kResultOk;
-}
-
-tresult PLUGIN_API
 inf_editor::getSize(ViewRect* new_size)
 {
   new_size->right = new_size->left + _gui->getWidth();
@@ -98,7 +91,6 @@ inf_editor::attached(void* parent, FIDString type)
 tresult PLUGIN_API
 inf_editor::queryInterface(TUID const iid, void** obj)
 {
-  QUERY_INTERFACE(iid, obj, IPlugViewContentScaleSupport::iid, IPlugViewContentScaleSupport)
 #if (defined __linux__) || (defined  __FreeBSD__)
   QUERY_INTERFACE(iid, obj, Steinberg::Linux::IEventHandler::iid, Steinberg::Linux::IEventHandler)
 #endif

@@ -121,6 +121,8 @@ fx_topo(
   filter_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   filter_res.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_delay; });
 
+  if(!global) return result;
+
   auto& delay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Tempo", param_delay_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),

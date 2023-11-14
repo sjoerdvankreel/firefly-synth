@@ -119,13 +119,6 @@ inf_plugin::guiHide() noexcept
   return true;
 }
 
-bool 
-inf_plugin::guiSetScale(double scale) noexcept
-{
-  _gui->content_scale(scale);
-  return true;
-}
-
 #if (defined __linux__) || (defined  __FreeBSD__)
 void
 inf_plugin::onPosixFd(int fd, int flags) noexcept
