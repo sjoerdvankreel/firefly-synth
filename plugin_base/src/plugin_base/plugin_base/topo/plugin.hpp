@@ -34,7 +34,6 @@ struct module_section_gui final {
 struct plugin_topo_gui final {
   int min_width;
   int max_width;
-  int default_width;
 
   gui_colors colors;
   int aspect_ratio_width;

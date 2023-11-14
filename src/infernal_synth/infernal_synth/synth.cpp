@@ -224,7 +224,6 @@ synth_topo()
 
   result->gui.min_width = 800;
   result->gui.max_width = 1600;
-  result->gui.default_width = 800;
   result->gui.aspect_ratio_width = 13;
   result->gui.aspect_ratio_height = 5;
   result->gui.dimension.column_sizes = { 10, 7 };

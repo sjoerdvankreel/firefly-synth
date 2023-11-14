@@ -29,13 +29,12 @@ plugin_topo::validate() const
   assert(extension.size());
   assert(version_major >= 0);
   assert(version_minor >= 0);
-  assert(gui.default_width <= 3840);
   assert(gui.typeface_file_name.size());
   assert(polyphony >= 0 && polyphony < topo_max);
+  assert(0 < gui.min_width && gui.min_width <= gui.max_width);
   assert(0 < gui.aspect_ratio_width && gui.aspect_ratio_width <= 100);
   assert(0 < gui.aspect_ratio_height && gui.aspect_ratio_height <= 100);
   assert(0 < gui.sections.size() && gui.sections.size() <= modules.size());
-  assert(0 < gui.min_width && gui.min_width <= gui.default_width && gui.default_width <= gui.max_width);
 
   tag.validate();
   auto return_true = [](int) { return true; };

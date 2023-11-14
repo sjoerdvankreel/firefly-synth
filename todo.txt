@@ -11,8 +11,6 @@ do cakewalk bug report
 test all host+linux
 param value dependent on other param
 linux build
-resizing by content scaling
-host/os scaling broken
 release_count > 0 asserts
 
 demo synth:

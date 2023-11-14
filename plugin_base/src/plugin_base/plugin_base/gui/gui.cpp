@@ -61,8 +61,11 @@ _lnf(&gui_state->desc(), -1, -1), _gui_state(gui_state)
   auto const& topo = *gui_state->desc().plugin;
   for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
     _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), gui_state->desc().plugin->modules[i].gui.section, i);
+
   add_and_make_visible(*this, make_container());
-  setSize(topo.gui.default_width, topo.gui.default_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
+  float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
+  getChildComponent(0)->setSize(topo.gui.min_width, topo.gui.min_width * ratio);
+  setSize(topo.gui.min_width, topo.gui.min_width * ratio);
 }
 
 void
@@ -118,6 +121,13 @@ plugin_gui::make_component(U&&... args)
   T* result = component.get();
   _components.emplace_back(std::move(component));
   return *result;
+}
+
+void
+plugin_gui::resized()
+{
+  float scale = getLocalBounds().getWidth() / (float)_gui_state->desc().plugin->gui.min_width;
+  getChildComponent(0)->setTransform(AffineTransform::scale(scale));
 }
 
 Component& 

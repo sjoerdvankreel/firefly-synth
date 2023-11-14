@@ -31,8 +31,8 @@ public:
   void gui_changed(int index, plain_value plain);
   void gui_changing(int index, plain_value plain);
 
+  void resized() override;
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
-  void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
 
   void fire_state_loaded();
   void remove_listener(gui_listener* listener);
