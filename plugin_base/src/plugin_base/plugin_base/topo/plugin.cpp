@@ -25,6 +25,7 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
 void
 plugin_topo::validate() const
 {
+  assert(vendor.size());
   assert(modules.size());
   assert(extension.size());
   assert(version_major >= 0);

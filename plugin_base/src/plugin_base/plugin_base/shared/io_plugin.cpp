@@ -1,4 +1,4 @@
-#include <plugin_base/shared/io.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 
 #include <juce_core/juce_core.h>
 #include <juce_cryptography/juce_cryptography.h>

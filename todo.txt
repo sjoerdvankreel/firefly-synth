@@ -14,6 +14,7 @@ linux build
 release_count > 0 asserts
 
 demo synth:
+rename the repository
 graphs
 velocity
 clean up the dsp
@@ -27,6 +28,8 @@ do user settings
 polymod/mpe/note_exprs
 midi note as mod source
 do top level section with firefly image
+drop the fx version
+read all the comments from github and kvr and forums
 
 * get some linux folks to comment (ycollete?)
 * continuing

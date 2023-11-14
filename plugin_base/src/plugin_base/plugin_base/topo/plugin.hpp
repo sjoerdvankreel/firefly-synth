@@ -62,6 +62,7 @@ struct plugin_topo final {
 
   topo_tag tag;
   plugin_type type;
+  std::string vendor;
   plugin_topo_gui gui;
   std::string extension;
   std::vector<module_topo> modules;

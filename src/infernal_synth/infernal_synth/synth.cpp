@@ -216,6 +216,7 @@ synth_topo()
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
   result->extension = "infpreset";
+  result->vendor = "Sjoerd van Kreel";
   result->type = plugin_type::synth;
   result->tag.id = INF_SYNTH_ID;
   result->tag.name = INF_SYNTH_NAME;

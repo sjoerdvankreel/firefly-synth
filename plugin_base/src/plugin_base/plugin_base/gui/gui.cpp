@@ -1,9 +1,10 @@
-#include <plugin_base/shared/io.hpp>
-#include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/controls.hpp>
 #include <plugin_base/gui/containers.hpp>
+#include <plugin_base/topo/plugin.hpp>
+#include <plugin_base/shared/io_user.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 
 #include <vector>
 #include <algorithm>
@@ -65,7 +66,8 @@ _lnf(&gui_state->desc(), -1, -1), _gui_state(gui_state)
   add_and_make_visible(*this, make_container());
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
   getChildComponent(0)->setSize(topo.gui.min_width, topo.gui.min_width * ratio);
-  setSize(topo.gui.min_width, topo.gui.min_width * ratio);
+  float w = user_io_load_num(topo, user_io::base, "width", topo.gui.min_width, topo.gui.max_width, topo.gui.min_width);
+  setSize(w, topo.gui.min_width * ratio);
 }
 
 void
@@ -126,8 +128,10 @@ plugin_gui::make_component(U&&... args)
 void
 plugin_gui::resized()
 {
-  float scale = getLocalBounds().getWidth() / (float)_gui_state->desc().plugin->gui.min_width;
+  float w = getLocalBounds().getWidth();
+  float scale = w / _gui_state->desc().plugin->gui.min_width;
   getChildComponent(0)->setTransform(AffineTransform::scale(scale));
+  user_io_save_num(*_gui_state->desc().plugin, user_io::base, "width", w);
 }
 
 Component& 
