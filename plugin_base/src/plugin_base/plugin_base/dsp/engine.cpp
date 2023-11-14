@@ -429,31 +429,34 @@ plugin_engine::process()
   // as the host is not expected (or cannot, in the case of external controllers)
   // to provide events at block boundaries so we cannot interpolate as for parameters
   // also for vst3 events come from different queues, so have to sort by frame pos first
-  int event_index = 0;
   auto frame_comp = [](auto const& l, auto const& r) { return l.frame < r.frame; };
   std::sort(_host_block->events.midi.begin(), _host_block->events.midi.end(), frame_comp);
   std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);
-  for (int f = 0; f < frame_count; f++)
-  {
-    for (; event_index < _host_block->events.midi.size() && _host_block->events.midi[event_index].frame == f; event_index++)
-    {
-      // if midi event is mapped, set the next target value for interpolation
-      auto const& event = _host_block->events.midi[event_index];
-      auto const& id_mapping = _state.desc().midi_mappings.id_to_index;
-      auto iter = id_mapping.find(event.id);
-      if (iter == id_mapping.end()) continue;
-      int midi_index = iter->second;
-      _midi_filters[midi_index].set(event.normalized.value());
-    }
 
-    // keep running the filters even if no event was added this time
-    for (int ms = 0; ms < _midi_filters.size(); ms++)
+  // note: midi_source * frame_count loop rather than frame_count * midi_source loop for performance
+  for (int ms = 0; ms < _midi_filters.size(); ms++)
+  {
+    int event_index = 0;
+    auto const& mapping = _state.desc().midi_mappings.midi_sources[ms];
+    auto& curve = mapping.topo.value_at(_midi_automation);
+
+    for (int f = 0; f < frame_count; f++)
     {
-      auto const& mapping = _state.desc().midi_mappings.midi_sources[ms];
-      auto& curve = mapping.topo.value_at(_midi_automation);
+      for (; event_index < _host_block->events.midi.size() && _host_block->events.midi[event_index].frame == f; event_index++)
+      {
+        // if midi event is mapped, set the next target value for interpolation
+        auto const& event = _host_block->events.midi[event_index];
+        auto const& id_mapping = _state.desc().midi_mappings.id_to_index;
+        auto iter = id_mapping.find(event.id);
+        if (iter == id_mapping.end()) continue;
+        int midi_index = iter->second;
+        if(midi_index == ms)
+          _midi_filters[midi_index].set(event.normalized.value());
+      }
+
       auto filter_result = _midi_filters[ms].next();
       curve[f] = filter_result.first;
-      _midi_was_automated[ms] |= filter_result.second? 1: 0;
+      _midi_was_automated[ms] |= filter_result.second ? 1 : 0;
     }
   }
 
