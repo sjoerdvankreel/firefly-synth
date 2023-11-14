@@ -8,8 +8,10 @@ using namespace juce;
 
 namespace plugin_base {
 
-static int const thumb_width = 8;
-static int const thumb_height = 6;
+static int const knob_thumb_width = 6;
+static int const knob_thumb_height = 6;
+static int const slider_thumb_width = 8;
+static int const slider_thumb_height = 6;
 
 static void 
 draw_conic_arc(
@@ -288,7 +290,7 @@ void
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
   float padding = 2;
-  float path_size = 4;
+  float path_size = 3;
   float top_margin = 1;
   int conic_count = 256;
   float size = std::min(s.getWidth(), s.getHeight()) - path_size - padding;
@@ -326,11 +328,11 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
   g.setColour(thumb_color);
 
-  float thumb_top = top + size - thumb_height * 1.25;
-  float thumb_left = left + size / 2 - thumb_width / 2;
+  float thumb_top = top + size - knob_thumb_height * 1.25;
+  float thumb_left = left + size / 2 - knob_thumb_width / 2;
   thumb.startNewSubPath(thumb_left, thumb_top);
-  thumb.lineTo(thumb_left + thumb_width / 2, thumb_top + thumb_height);
-  thumb.lineTo(thumb_left + thumb_width, thumb_top);
+  thumb.lineTo(thumb_left + knob_thumb_width / 2, thumb_top + knob_thumb_height);
+  thumb.lineTo(thumb_left + knob_thumb_width, thumb_top);
   thumb.closeSubPath();
   auto transform = AffineTransform::rotation(thumb_start_angle + pos * thum_angle_range, left + size / 2, top + size / 2);
   thumb.applyTransform(transform);
@@ -344,9 +346,9 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   int const fixedHeight = 4;
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
-  float left = thumb_width / 2;
+  float left = slider_thumb_width / 2;
   float top = (s.getHeight() - fixedHeight) / 2;
-  float width = s.getWidth() - thumb_width;
+  float width = s.getWidth() - slider_thumb_width;
   float centerx = left + width / 2;
   float height = fixedHeight;
 
@@ -393,9 +395,9 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   auto thumb_color = colors().slider_thumb;
   if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
   g.setColour(thumb_color);
-  thumb.startNewSubPath(thumb_left, thumb_top + thumb_height);
-  thumb.lineTo(thumb_left + thumb_width / 2, thumb_top);
-  thumb.lineTo(thumb_left + thumb_width, thumb_top + thumb_height);
+  thumb.startNewSubPath(thumb_left, thumb_top + slider_thumb_height);
+  thumb.lineTo(thumb_left + slider_thumb_width / 2, thumb_top);
+  thumb.lineTo(thumb_left + slider_thumb_width, thumb_top + slider_thumb_height);
   thumb.closeSubPath();
   g.fillPath(thumb);
 }
