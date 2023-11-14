@@ -188,6 +188,8 @@ plugin_midi_mappings::validate(plugin_desc const& plugin) const
     {
       auto const& dsp = plugin.params[source.linked_params[p]]->param->dsp;
       auto const& mapping = plugin.param_mappings.params[source.linked_params[p]];
+      (void)dsp;
+      (void)mapping;
       assert(dsp.midi_source == source.topo);
       assert(dsp.is_midi(mapping.topo.module_slot));
     }
@@ -234,6 +236,7 @@ plugin_param_mappings::validate(plugin_desc const& plugin) const
       assert(0 <= pm.midi_source_global && pm.midi_source_global < plugin.midi_count);
       assert(param.param->dsp.midi_source == plugin.midi_mappings.midi_sources[pm.midi_source_global].topo);
       auto const& linked_params = plugin.midi_mappings.midi_sources[pm.midi_source_global].linked_params;
+      (void)linked_params;
       assert(std::find(linked_params.begin(), linked_params.end(), p) != linked_params.end());
     }
   }
