@@ -24,12 +24,12 @@ fx version
 do the are you sure? stuff
 host menu
 do clap midi notes
-do user settings
 polymod/mpe/note_exprs
 midi note as mod source
 do top level section with firefly image
 drop the fx version
 read all the comments from github and kvr and forums
+save preset + make base param for preset
 
 * get some linux folks to comment (ycollete?)
 * continuing
