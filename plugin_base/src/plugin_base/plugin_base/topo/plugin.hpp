@@ -2,6 +2,7 @@
 
 #include <plugin_base/topo/shared.hpp>
 #include <plugin_base/topo/module.hpp>
+#include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -12,6 +13,7 @@
 
 namespace plugin_base {
 
+class plugin_state;
 struct plugin_topo_gui;
 enum class plugin_type { synth, fx };
 

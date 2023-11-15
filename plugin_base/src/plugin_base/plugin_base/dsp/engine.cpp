@@ -40,6 +40,7 @@ _voice_processor_context(voice_processor_context)
   _voice_engines.resize(_dims.voice_module_slot);
   _accurate_frames.resize(_state.desc().param_count);
   _midi_was_automated.resize(_state.desc().midi_count);
+  _midi_active_selection.resize(_dims.module_slot_midi);
   _voice_states.resize(_state.desc().plugin->polyphony);
   _host_block->events.notes.reserve(note_limit_guess);
   _host_block->events.out.reserve(block_events_guess);
@@ -69,6 +70,7 @@ plugin_engine::make_plugin_block(
     context_out, cv_out, audio_out, scratch,
     _global_cv_state, _global_audio_state, _global_context, _global_scratch_state, 
     _midi_automation[module][slot], _midi_automation,
+    _midi_active_selection[module][slot], _midi_active_selection,
     _accurate_automation[module][slot], _accurate_automation,
     _block_automation.state()[module][slot], _block_automation.state()
   };
@@ -424,6 +426,20 @@ plugin_engine::process()
     _state.set_normalized_at_index(event.param, event.normalized);
   }
 
+  // find out which midi sources are actually used
+  // since it is quite expensive to just keep them all active
+  // note: midi_active_selector probably depends on per-block automation values
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+    {
+      std::fill(_midi_active_selection[m][mi].begin(), _midi_active_selection[m][mi].end(), 0);
+      if (module.midi_active_selector != nullptr)
+        module.midi_active_selector(_state, mi, _midi_active_selection);
+    }
+  }
+
   // process midi automation values
   // this works a bit different from parameter automation
   // as the host is not expected (or cannot, in the case of external controllers)
@@ -438,8 +454,9 @@ plugin_engine::process()
   {
     int event_index = 0;
     auto const& mapping = _state.desc().midi_mappings.midi_sources[ms];
-    auto& curve = mapping.topo.value_at(_midi_automation);
+    if(!mapping.topo.value_at(_midi_active_selection)) continue;
 
+    auto& curve = mapping.topo.value_at(_midi_automation);
     for (int f = 0; f < frame_count; f++)
     {
       for (; event_index < _host_block->events.midi.size() && _host_block->events.midi[event_index].frame == f; event_index++)
@@ -463,8 +480,15 @@ plugin_engine::process()
   // take care of linked parameters
   for(int ms = 0; ms < _midi_filters.size(); ms++)
   {
-    if(!_midi_was_automated[ms]) continue;
     auto const& midi_mapping = _state.desc().midi_mappings.midi_sources[ms];
+    if(!midi_mapping.topo.value_at(_midi_active_selection)) 
+    {
+      // midi source linked to a parameter should always be active
+      assert(!midi_mapping.linked_params.size());
+      continue;
+    }
+
+    if (!_midi_was_automated[ms]) continue;
     auto last_value = midi_mapping.topo.value_at(_midi_automation)[frame_count - 1];
     for (int lp = 0; lp < midi_mapping.linked_params.size(); lp++)
     {

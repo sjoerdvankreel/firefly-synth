@@ -15,6 +15,9 @@ typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
 cv_matrix_mixdown;
 
+extern int const input_param_pb_range;
+enum { midi_output_cp, midi_output_pb, midi_output_cc };
+
 template <class M>
 struct routing_matrix
 {

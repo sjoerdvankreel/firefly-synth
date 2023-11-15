@@ -56,6 +56,7 @@ class plugin_engine final {
   jarray<float, 7> _voice_audio_state = {};
   jarray<float, 6> _global_audio_state = {};
   jarray<float, 4> _midi_automation = {};
+  jarray<int, 3> _midi_active_selection = {};
   jarray<float, 5> _accurate_automation = {};
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};

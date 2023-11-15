@@ -23,8 +23,9 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   assert(engine_factory);
   assert(info.index == index);
   assert(!gui.visible || params.size());
+  assert(midi_sources.size() == 0 || info.slot_count == 1);
+  assert(midi_sources.size() == 0 || dsp.stage == module_stage::input);
   assert(0 <= gui.section && gui.section < plugin.gui.sections.size());
-  assert(dsp.stage == module_stage::input || midi_sources.size() == 0);
   assert(!gui.visible || (0 < sections.size() && sections.size() <= params.size()));
 
   for (int p = 0; p < params.size(); p++)

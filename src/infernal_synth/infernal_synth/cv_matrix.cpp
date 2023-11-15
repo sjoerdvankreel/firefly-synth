@@ -81,6 +81,36 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
 }
 
+void
+select_midi_active(
+  plugin_state const& state, int slot, bool global,
+  std::vector<module_output_mapping> const& mappings, jarray<int, 3>& active)
+{
+  int route_count = global? groute_count: vroute_count;
+  int module = global? module_gcv_matrix: module_vcv_matrix;
+
+  for (int r = 0; r < route_count; r++)
+  {
+    int type = state.get_plain_at(module, 0, param_type, r).step();
+    if (type != type_off)
+    {
+      int source = state.get_plain_at(module, 0, param_source, r).step();
+      auto const& mapping = mappings[source];
+      if (mapping.module_index == module_midi)
+      {
+        if(mapping.output_index == midi_output_pb)
+          active[module_midi][0][midi_source_pb] = 1;
+        else if (mapping.output_index == midi_output_cp)
+          active[module_midi][0][midi_source_pb] = 1;
+        else if (mapping.output_index == midi_output_cc)
+          active[module_midi][0][midi_source_cc + mapping.output_slot] = 1;
+        else
+          assert(false);
+      }
+    }
+  }
+}
+
 module_topo
 cv_matrix_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -133,7 +163,9 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  result.default_initializer = global? init_global_default: init_voice_default;
+  result.default_initializer = global ? init_global_default : init_voice_default;
+  result.midi_active_selector = [global, sm = source_matrix.mappings](
+    plugin_state const& state, int slot, jarray<int, 3>& active) { select_midi_active(state, slot, global, sm, active); };
   result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings]
     (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); };
   return result;

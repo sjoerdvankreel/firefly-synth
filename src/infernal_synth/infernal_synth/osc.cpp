@@ -10,7 +10,8 @@ using namespace plugin_base;
 
 namespace infernal_synth {
 
-extern int const input_param_pb_range;
+// defined in input module
+
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
