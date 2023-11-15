@@ -19,8 +19,10 @@ class plugin_state;
 struct plugin_topo_gui;
 enum class plugin_type { synth, fx };
 
-typedef std::function<std::unique_ptr<juce::Component>(
-plugin_topo const&)> custom_gui_factory;
+typedef std::function<juce::Component&(std::unique_ptr<juce::Component>&&)>
+component_store;
+typedef std::function<juce::Component&(plugin_topo const&, component_store store)>
+custom_gui_factory;
 
 // free-form ui
 struct custom_section_gui final {
@@ -87,5 +89,14 @@ struct plugin_topo final {
   void validate() const;
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
+
+template <class T, class... U> T&
+store_component(component_store store, U&&... args)
+{
+  auto component = std::make_unique<T>(std::forward<U>(args)...);
+  T* result = component.get();
+  store(std::move(component));
+  return *result;
+}
 
 }

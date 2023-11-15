@@ -211,20 +211,20 @@ enum {
   module_section_audio_matrix, module_section_osc, module_section_fx, 
   module_section_voice, module_section_master_monitor, module_section_count };
 
-static std::unique_ptr<Component>
-make_title_section(plugin_topo const& topo, Colour const& color)
+static Component&
+make_controls_section(plugin_topo const& topo, component_store store)
 {
-  auto result = std::make_unique<Label>();
-  result->setText("FIREFLY SYNTH", dontSendNotification);
-  result->setColour(Label::ColourIds::textColourId, color);
+  auto& result = store_component<Label>(store);
+  result.setText("CONTROLS", dontSendNotification);
   return result;
 }
 
-static std::unique_ptr<Component>
-make_controls_section(plugin_topo const& topo)
+static Component&
+make_title_section(plugin_topo const& topo, Colour const& color, component_store store)
 {
-  auto result = std::make_unique<Label>();
-  result->setText("CONTROLS", dontSendNotification);
+  auto& result = store_component<Label>(store);
+  result.setText("FIREFLY SYNTH", dontSendNotification);
+  result.setColour(Label::ColourIds::textColourId, color);
   return result;
 }
 
@@ -262,7 +262,8 @@ synth_topo()
   
   custom_section_gui title_section = {};
   title_section.position = { 0, 1 };
-  title_section.gui_factory = [custom_color](auto const& topo) { return make_title_section(topo, custom_color); };
+  title_section.gui_factory = [custom_color](auto const& topo, auto store) -> Component& { 
+    return make_title_section(topo, custom_color, store); };
   title_section.colors = gui_colors(custom_colors);
 
   result->gui.custom_sections.resize(custom_section_count);
