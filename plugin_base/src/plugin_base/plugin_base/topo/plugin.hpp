@@ -26,7 +26,10 @@ plugin_topo const&)> custom_gui_factory;
 struct custom_section_gui final {
   gui_colors colors;
   gui_position position;
-  custom_gui_factory make_content;
+  custom_gui_factory gui_factory;
+
+  void validate(plugin_topo const& topo) const;
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(custom_section_gui);
 };
 
 // module ui grouping

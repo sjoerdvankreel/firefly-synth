@@ -4,6 +4,13 @@
 namespace plugin_base {
 
 void 
+custom_section_gui::validate(plugin_topo const& plugin) const
+{
+  position.validate(plugin.gui.dimension);
+  assert(gui_factory != nullptr);
+}
+
+void 
 module_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
   assert(this->index == index_);
@@ -38,10 +45,20 @@ plugin_topo::validate() const
   assert(0 < gui.module_sections.size() && gui.module_sections.size() <= modules.size());
 
   tag.validate();
+
+  // need to validate module and custom sections together
   auto return_true = [](int) { return true; };
-  gui.dimension.validate(vector_map(gui.module_sections,
-    [](auto const& s) { return s.position; }), 
-    [this](int i) { return gui.module_sections[i].visible; }, return_true);
+  std::vector<std::pair<gui_position, bool>> all_sections;
+  for(int i = 0; i < gui.custom_sections.size(); i++)
+    all_sections.push_back(std::make_pair(gui.custom_sections[i].position, true));
+  for (int i = 0; i < gui.module_sections.size(); i++)
+    all_sections.push_back(std::make_pair(gui.module_sections[i].position, gui.module_sections[i].visible));
+  gui.dimension.validate(vector_map(all_sections,
+    [](auto const& s) { return s.first; }), 
+    [&all_sections](int i) { return all_sections[i].second; }, return_true);
+  
+  for(int s = 0; s < gui.custom_sections.size(); s++)
+    gui.custom_sections[s].validate(*this);
   for(int s = 0; s < gui.module_sections.size(); s++)
     gui.module_sections[s].validate(*this, s);
 
