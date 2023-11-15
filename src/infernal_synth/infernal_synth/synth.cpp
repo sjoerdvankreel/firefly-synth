@@ -212,10 +212,11 @@ enum {
   module_section_voice, module_section_master_monitor, module_section_count };
 
 static std::unique_ptr<Component>
-make_title_section(plugin_topo const& topo)
+make_title_section(plugin_topo const& topo, Colour const& color)
 {
   auto result = std::make_unique<Label>();
-  result->setText("TITLE", dontSendNotification);
+  result->setText("Firefly Synth", dontSendNotification);
+  result->setColour(Label::ColourIds::textColourId, color);
   return result;
 }
 
@@ -230,11 +231,12 @@ make_controls_section(plugin_topo const& topo)
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
+  Colour custom_color(0xFF8888FF);
+  gui_colors custom_colors(make_module_colors(custom_color));
   gui_colors cv_colors(make_module_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_module_colors(Colour(0xFF4488FF)));
   gui_colors input_colors(make_module_colors(Colour(0xFFFF4488)));
   gui_colors output_colors(make_module_colors(Colour(0xFF8888FF)));
-  gui_colors custom_colors(make_module_colors(Colour(0xFF8888FF)));
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
@@ -253,15 +255,15 @@ synth_topo()
   result->gui.dimension.row_sizes = std::vector<int>(7, 1);
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
-  custom_section_gui title_section = {};
-  title_section.position = { 0, 0 };
-  title_section.gui_factory = make_title_section;
-  title_section.colors = gui_colors(custom_colors);
-  
   custom_section_gui controls_section = {};
   controls_section.position = { 0, 1 };
   controls_section.gui_factory = make_controls_section;
   controls_section.colors = gui_colors(custom_colors);
+
+  custom_section_gui title_section = {};
+  title_section.position = { 0, 0 };
+  title_section.colors = gui_colors(custom_colors);
+  title_section.gui_factory = [custom_color](auto const& topo) { return make_title_section(topo, custom_color); };
   
   result->gui.custom_sections.resize(custom_section_count);
   result->gui.custom_sections[custom_section_title] = custom_section_gui(title_section);
