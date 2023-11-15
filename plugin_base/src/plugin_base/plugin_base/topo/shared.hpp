@@ -142,6 +142,8 @@ struct gui_colors final {
   juce::Colour control_text = juce::Colour(0xFFFFFFFF);
   juce::Colour control_outline = juce::Colour(0xFFAAAAAA);
   juce::Colour control_background = juce::Colour(0xFF111111);
+  juce::Colour custom_background1 = juce::Colour(0xFF222222);
+  juce::Colour custom_background2 = juce::Colour(0xFF111111);
   juce::Colour scrollbar_thumb = juce::Colour(0xFFFF8844);
   juce::Colour scrollbar_background = juce::Colour(0xFF444444);
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);

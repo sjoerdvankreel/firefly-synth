@@ -214,14 +214,16 @@ enum {
 static std::unique_ptr<Component>
 make_title_section(plugin_topo const& topo)
 {
-  auto result = std::make_unique<Component>();
+  auto result = std::make_unique<Label>();
+  result->setText("TITLE", dontSendNotification);
   return result;
 }
 
 static std::unique_ptr<Component>
 make_controls_section(plugin_topo const& topo)
 {
-  auto result = std::make_unique<Component>();
+  auto result = std::make_unique<Label>();
+  result->setText("CONTROLS", dontSendNotification);
   return result;
 }
 

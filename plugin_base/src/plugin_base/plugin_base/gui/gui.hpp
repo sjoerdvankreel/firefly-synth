@@ -45,6 +45,7 @@ private:
   plugin_state* const _gui_state;
   std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
+  std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 
@@ -66,6 +67,7 @@ private:
 
   Component& make_modules(module_desc const* slots);
   Component& make_module_section(module_section_gui const& section);
+  Component& make_custom_section(custom_section_gui const& section);
   juce::TabbedComponent& make_tab_component(std::string const& title, int module);
   void add_component_tab(juce::TabbedComponent& tc, juce::Component& child, int module, std::string const& title);
 };
