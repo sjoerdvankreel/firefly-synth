@@ -51,7 +51,6 @@ private:
 
   Component& make_top_bar();
   Component& make_content();
-  Component& make_container();
 
   template <class T, class... U>
   T& make_component(U&&... args);

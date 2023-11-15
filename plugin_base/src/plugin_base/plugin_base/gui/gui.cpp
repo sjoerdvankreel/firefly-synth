@@ -16,7 +16,6 @@ namespace plugin_base {
 static int const margin_param = 1;
 static int const margin_module = 2;
 static int const margin_section = 2;
-static int const margin_container = 2;
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
 static Justification 
@@ -66,7 +65,7 @@ _lnf(&gui_state->desc(), -1, -1, -1), _gui_state(gui_state)
   for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
     _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), -1, gui_state->desc().plugin->modules[i].gui.section, i);
 
-  add_and_make_visible(*this, make_container());
+  add_and_make_visible(*this, make_content());
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
   getChildComponent(0)->setSize(topo.gui.min_width, topo.gui.min_width * ratio);
   float w = user_io_load_num(topo, user_io::base, "width", topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
@@ -144,15 +143,6 @@ plugin_gui::reloaded()
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
   float w = user_io_load_num(topo, user_io::base, "width", topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
   setSize(w, topo.gui.min_width * ratio);
-}
-
-Component& 
-plugin_gui::make_container()
-{
-  auto& grid = make_component<grid_component>(gui_dimension({ gui_dimension::auto_size, 1 }, { 1 }), margin_container);
-  grid.add(make_top_bar(), { 0, 0 });
-  grid.add(make_content(), { 1, 0 });
-  return make_component<margin_component>(&grid, BorderSize<int>(margin_container));
 }
 
 Component&
