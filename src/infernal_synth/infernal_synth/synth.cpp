@@ -233,8 +233,8 @@ synth_topo()
   gui_colors cv_colors(make_module_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_module_colors(Colour(0xFF4488FF)));
   gui_colors input_colors(make_module_colors(Colour(0xFFFF4488)));
-  gui_colors output_colors(make_module_colors(Colour(0xFF8844FF)));
-  gui_colors custom_colors(make_module_colors(Colour(0xFF44FF88)));
+  gui_colors output_colors(make_module_colors(Colour(0xFF8888FF)));
+  gui_colors custom_colors(make_module_colors(Colour(0xFF8888FF)));
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;

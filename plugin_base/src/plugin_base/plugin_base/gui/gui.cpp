@@ -178,7 +178,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   auto background1 = section.colors.custom_background1;
   auto background2 = section.colors.custom_background2;
   auto& content = *section.gui_factory(*gui_state()->desc().plugin).release();
-  auto& content_outline = make_component<rounded_container>(&content, radius, false, true, outline1, outline2);
+  auto& content_outline = make_component<rounded_container>(&content, radius, false, false, outline1, outline2);
   return make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
 }
 
