@@ -30,7 +30,6 @@ do top level section with firefly image
 drop the fx version
 read all the comments from github and kvr and forums
 save preset + make base param for preset
-do NOT zero out result buffers
 
 * get some linux folks to comment (ycollete?)
 * continuing

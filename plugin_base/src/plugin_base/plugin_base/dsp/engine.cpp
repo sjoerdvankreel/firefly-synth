@@ -327,53 +327,6 @@ plugin_engine::process()
     assert(release_count > 0);
   }
 
-  // clear audio outputs
-  for (int c = 0; c < 2; c++)
-  {
-    std::fill(_host_block->audio_out[c], _host_block->audio_out[c] + frame_count, 0.0f);
-    std::fill(_voices_mixdown[c].begin(), _voices_mixdown[c].begin() + frame_count, 0.0f);
-    for (int v = 0; v < _voice_results.size(); v++)
-      if(_voice_states[v].stage != voice_stage::unused)
-        std::fill(_voice_results[v][c].begin(), _voice_results[v][c].begin() + frame_count, 0.0f);
-  }
-
-  // clear module cv/audio out
-  for(int m = 0; m < _state.desc().plugin->modules.size(); m++)
-  {
-    auto const& module = _state.desc().plugin->modules[m];
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-      if(module.dsp.output == module_output::cv)
-        if(module.dsp.stage != module_stage::voice)
-        {
-          for(int o = 0; o < module.dsp.outputs.size(); o++)
-            for(int oi = 0; oi < module.dsp.outputs[o].info.slot_count; oi++)
-              _global_cv_state[m][mi][o][oi].fill(0, frame_count, 0.0f);
-        } else {
-          for (int v = 0; v < _voice_states.size(); v++)
-            if(_voice_states[v].stage != voice_stage::unused)
-              for (int o = 0; o < module.dsp.outputs.size(); o++)
-                for (int oi = 0; oi < module.dsp.outputs[o].info.slot_count; oi++)
-                  _voice_cv_state[v][m][mi][o][oi].fill(0, frame_count, 0.0f);
-        }
-      else if (module.dsp.output == module_output::audio)
-        if (module.dsp.stage != module_stage::voice)
-        {
-          for (int o = 0; o < module.dsp.outputs.size(); o++)
-            for (int oi = 0; oi < module.dsp.outputs[o].info.slot_count; oi++)
-              for(int c = 0; c < 2; c++)
-                _global_audio_state[m][mi][o][oi][c].fill(0, frame_count, 0.0f);
-        } else {
-           for (int v = 0; v < _voice_states.size(); v++)
-             if (_voice_states[v].stage != voice_stage::unused)
-               for (int o = 0; o < module.dsp.outputs.size(); o++)
-                 for (int oi = 0; oi < module.dsp.outputs[o].info.slot_count; oi++)
-                   for (int c = 0; c < 2; c++)
-                     _voice_audio_state[v][m][mi][o][oi][c].fill(0, frame_count, 0.0f);
-        }
-      else
-        assert(module.dsp.output == module_output::none);
-  }
-
   // set automation values to state, automation may overwrite
   // note that we cannot initialize current midi state since
   // midi smoothing filters introduce delay
@@ -542,6 +495,8 @@ plugin_engine::process()
   }
 
   // combine voices output
+  _voices_mixdown[0].fill(0, frame_count, 0.0f);
+  _voices_mixdown[1].fill(0, frame_count, 0.0f);
   for (int v = 0; v < _voice_states.size(); v++)
     if (_voice_states[v].stage != voice_stage::unused)
       for(int c = 0; c < 2; c++)

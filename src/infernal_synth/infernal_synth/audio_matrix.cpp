@@ -186,6 +186,8 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     if (!activated)
     {
       result = &(*_own_audio)[output_mixed][r];
+      (*result)[0].fill(block.start_frame, block.end_frame, 0.0f);
+      (*result)[1].fill(block.start_frame, block.end_frame, 0.0f);
       activated = true;
     }
 

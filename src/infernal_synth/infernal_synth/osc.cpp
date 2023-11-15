@@ -146,7 +146,12 @@ osc_engine::process(plugin_block& block)
   int type = block_auto[param_type][0].step();
   int oct = block_auto[param_oct][0].step();
   int note = block_auto[param_note][0].step();
-  if (type == type_off) return;
+  if (type == type_off)
+  {
+    block.state.own_audio[0][0][0].fill(block.start_frame, block.end_frame, 0.0f);
+    block.state.own_audio[0][0][1].fill(block.start_frame, block.end_frame, 0.0f);
+    return;
+  }
 
   auto const& modulation = get_cv_matrix_mixdown(block, false);
   auto const& env_curve = block.voice->all_cv[module_env][0][0][0];

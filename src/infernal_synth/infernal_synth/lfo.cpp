@@ -96,7 +96,11 @@ void
 lfo_engine::process(plugin_block& block)
 {
   int type = block.state.own_block_automation[param_type][0].step();
-  if(type == type_off) return; 
+  if(type == type_off)
+  {
+    block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
+    return; 
+  }
 
   int this_module = _global? module_glfo: module_vlfo;
   auto const& rate_curve = sync_or_freq_into_scratch(

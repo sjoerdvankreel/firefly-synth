@@ -108,9 +108,12 @@ env_engine::current_stage_param() const
 void
 env_engine::process(plugin_block& block)
 {
-  bool off = block.state.own_block_automation[param_on][0].step() == 0;
-  if (_stage == env_stage::end) return;
-  if((off && block.module_slot != 0)) return;
+  bool on = block.state.own_block_automation[param_on][0].step();
+  if (_stage == env_stage::end || (!on && block.module_slot != 0))
+  {
+    block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
+    return;
+  }
 
   auto const& acc_auto = block.state.own_accurate_automation;
   auto const& s_curve = acc_auto[param_s][0];
