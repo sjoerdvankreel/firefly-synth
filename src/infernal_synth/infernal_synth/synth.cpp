@@ -200,11 +200,30 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
   return result;
 }
 
+enum {
+  custom_section_title,
+  custom_section_controls,
+  custom_section_count };
+
 enum { 
   module_section_midi, module_section_input, 
   module_section_lfos, module_section_env, module_section_cv_matrix,
   module_section_audio_matrix, module_section_osc, module_section_fx, 
   module_section_voice, module_section_master_monitor, module_section_count };
+
+static std::unique_ptr<Component>
+make_title_section(plugin_topo const& topo)
+{
+  auto result = std::make_unique<Component>();
+  return result;
+}
+
+static std::unique_ptr<Component>
+make_controls_section(plugin_topo const& topo)
+{
+  auto result = std::make_unique<Component>();
+  return result;
+}
 
 std::unique_ptr<plugin_topo>
 synth_topo()
@@ -213,6 +232,7 @@ synth_topo()
   gui_colors audio_colors(make_module_colors(Colour(0xFF4488FF)));
   gui_colors input_colors(make_module_colors(Colour(0xFFFF4488)));
   gui_colors output_colors(make_module_colors(Colour(0xFF8844FF)));
+  gui_colors custom_colors(make_module_colors(Colour(0xFF44FF88)));
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
@@ -230,6 +250,20 @@ synth_topo()
   result->gui.dimension.column_sizes = { 10, 7 };
   result->gui.dimension.row_sizes = std::vector<int>(7, 1);
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
+
+  custom_section_gui title_section = {};
+  title_section.position = { 0, 0 };
+  title_section.gui_factory = make_title_section;
+  title_section.colors = gui_colors(custom_colors);
+  
+  custom_section_gui controls_section = {};
+  controls_section.position = { 0, 1 };
+  controls_section.gui_factory = make_controls_section;
+  controls_section.colors = gui_colors(custom_colors);
+  
+  result->gui.custom_sections.resize(custom_section_count);
+  result->gui.custom_sections[custom_section_title] = custom_section_gui(title_section);
+  result->gui.custom_sections[custom_section_controls] = custom_section_gui(controls_section);
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(module_section_midi);
