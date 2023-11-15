@@ -105,7 +105,7 @@ select_midi_active(
         if(mapping.output_index == midi_output_pb)
           active[module_midi][0][midi_source_pb] = 1;
         else if (mapping.output_index == midi_output_cp)
-          active[module_midi][0][midi_source_pb] = 1;
+          active[module_midi][0][midi_source_cp] = 1;
         else if (mapping.output_index == midi_output_cc)
           active[module_midi][0][midi_source_cc + mapping.output_slot] = 1;
         else
