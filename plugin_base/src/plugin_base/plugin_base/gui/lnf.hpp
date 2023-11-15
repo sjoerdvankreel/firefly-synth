@@ -9,18 +9,18 @@ class lnf:
 public juce::LookAndFeel_V4 {
   
   int const _module = -1;
-  int const _section = -1;
+  int const _module_section = -1;
+  int const _custom_section = -1;
   plugin_desc const* const _desc;
   juce::Typeface::Ptr _typeface = {};
 
   int tab_width() const;
-  gui_colors const& colors() const 
-  { return _module == -1? _desc->plugin->gui.colors: _desc->plugin->modules[_module].gui.colors; }
+  gui_colors const& colors() const;
 
 public:
   juce::Font font() const;
   int combo_height() const { return _desc->plugin->gui.font_height + 6; }
-  lnf(plugin_desc const* desc, int section, int module);
+  lnf(plugin_desc const* desc, int custom_section, int module_section, int module);
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }

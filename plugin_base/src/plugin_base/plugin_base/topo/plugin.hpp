@@ -13,9 +13,21 @@
 
 namespace plugin_base {
 
+struct plugin_topo;
 class plugin_state;
+
 struct plugin_topo_gui;
 enum class plugin_type { synth, fx };
+
+typedef std::function<std::unique_ptr<juce::Component>(
+plugin_topo const&)> custom_gui_factory;
+
+// free-form ui
+struct custom_section_gui final {
+  gui_colors colors;
+  gui_position position;
+  custom_gui_factory make_content;
+};
 
 // module ui grouping
 struct module_section_gui final {
@@ -37,10 +49,8 @@ struct plugin_topo_gui final {
   int min_width;
   int aspect_ratio_width;
   int aspect_ratio_height;
-
   gui_colors colors;
   gui_dimension dimension;
-  std::vector<module_section_gui> sections;
 
   float lighten = 0.15f;
   int font_height = 13;
@@ -50,6 +60,9 @@ struct plugin_topo_gui final {
   int section_corner_radius = 4;
   std::string typeface_file_name;
   int font_flags = juce::Font::plain;
+
+  std::vector<custom_section_gui> custom_sections;
+  std::vector<module_section_gui> module_sections;
 
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };

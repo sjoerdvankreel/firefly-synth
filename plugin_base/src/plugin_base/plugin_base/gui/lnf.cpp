@@ -34,9 +34,12 @@ draw_conic_arc(
 }
 
 lnf::
-lnf(plugin_desc const* desc, int section, int module) :
-_desc(desc), _module(module), _section(section)
+lnf(plugin_desc const* desc, int custom_section, int module_section, int module) :
+_desc(desc), _custom_section(custom_section), _module_section(module_section), _module(module)
 {
+  assert(module_section == -1 || module >= 0);
+  assert(custom_section == -1 || module == -1);
+
   File file(File::getSpecialLocation(File::currentExecutableFile));
   std::filesystem::path resources = desc->config->resources_folder(file.getFullPathName().toStdString());
   std::vector<char> typeface = file_load(resources / desc->plugin->gui.typeface_file_name);
@@ -78,6 +81,16 @@ _desc(desc), _module(module), _section(section)
   setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_desc->plugin->gui.lighten));
 }
 
+gui_colors const& 
+lnf::colors() const
+{
+  if(_custom_section != -1)
+    return _desc->plugin->gui.custom_sections[_custom_section].colors;
+  if(_module != -1)
+    return  _desc->plugin->modules[_module].gui.colors;
+  return _desc->plugin->gui.colors;
+}
+
 Font 
 lnf::font() const
 {
@@ -90,7 +103,8 @@ lnf::font() const
 int
 lnf::tab_width() const
 {
-  auto const& section = _desc->plugin->gui.sections[_section];
+  assert(_module_section != -1);
+  auto const& section = _desc->plugin->gui.module_sections[_module_section];
   return section.tabbed ? section.tab_width : _desc->plugin->gui.module_tab_width;
 }
 
@@ -232,7 +246,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 {
   int radius = _desc->plugin->gui.module_corner_radius;
   int strip_left = radius + 2;
-  bool is_section = _section != -1 && _desc->plugin->gui.sections[_section].tabbed;
+  bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   float lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
   if (button.getIndex() > 0)

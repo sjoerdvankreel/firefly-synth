@@ -35,15 +35,15 @@ plugin_topo::validate() const
   assert(0 < gui.min_width && gui.min_width <= 16384);
   assert(0 < gui.aspect_ratio_width && gui.aspect_ratio_width <= 100);
   assert(0 < gui.aspect_ratio_height && gui.aspect_ratio_height <= 100);
-  assert(0 < gui.sections.size() && gui.sections.size() <= modules.size());
+  assert(0 < gui.module_sections.size() && gui.module_sections.size() <= modules.size());
 
   tag.validate();
   auto return_true = [](int) { return true; };
-  gui.dimension.validate(vector_map(gui.sections, 
+  gui.dimension.validate(vector_map(gui.module_sections,
     [](auto const& s) { return s.position; }), 
-    [this](int i) { return gui.sections[i].visible; }, return_true);
-  for(int s = 0; s < gui.sections.size(); s++)
-    gui.sections[s].validate(*this, s);
+    [this](int i) { return gui.module_sections[i].visible; }, return_true);
+  for(int s = 0; s < gui.module_sections.size(); s++)
+    gui.module_sections[s].validate(*this, s);
 
   int stage = 0;
   std::set<std::string> module_ids;
@@ -63,8 +63,8 @@ plugin_topo::validate() const
       INF_ASSERT_EXEC(param_ids.insert(modules[m].params[p].info.tag.id).second);
     for (int o = 0; o < modules[m].dsp.outputs.size(); o++)
       INF_ASSERT_EXEC(output_ids.insert(modules[m].dsp.outputs[o].info.tag.id).second);
-    if (gui.sections[modules[m].gui.section].tabbed) assert(modules[m].info.slot_count == 1);
-    assert(!gui.sections[modules[m].gui.section].tabbed || modules[m].gui.tabbed_name.size());
+    if (gui.module_sections[modules[m].gui.section].tabbed) assert(modules[m].info.slot_count == 1);
+    assert(!gui.module_sections[modules[m].gui.section].tabbed || modules[m].gui.tabbed_name.size());
   }
 }
 

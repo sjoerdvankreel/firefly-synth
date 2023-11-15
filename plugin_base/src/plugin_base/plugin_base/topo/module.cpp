@@ -25,7 +25,7 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   assert(!gui.visible || params.size());
   assert(midi_sources.size() == 0 || info.slot_count == 1);
   assert(midi_sources.size() == 0 || dsp.stage == module_stage::input);
-  assert(0 <= gui.section && gui.section < plugin.gui.sections.size());
+  assert(0 <= gui.section && gui.section < plugin.gui.module_sections.size());
   assert(!gui.visible || (0 < sections.size() && sections.size() <= params.size()));
 
   for (int p = 0; p < params.size(); p++)
@@ -41,7 +41,7 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   auto include = [](int) { return true; };
   auto always_visible = [this](int s) { return !sections[s].gui.bindings.visible.is_bound(); };
   gui.dimension.validate(vector_map(sections, [](auto const& s) { return s.gui.position; }), include, always_visible);
-  gui.position.validate(plugin.gui.sections[gui.section].dimension);
+  gui.position.validate(plugin.gui.module_sections[gui.section].dimension);
 }
 
 }
