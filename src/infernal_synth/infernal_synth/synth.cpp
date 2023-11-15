@@ -201,8 +201,8 @@ make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
 }
 
 enum {
-  custom_section_title,
   custom_section_controls,
+  custom_section_title,
   custom_section_count };
 
 enum { 
@@ -215,7 +215,7 @@ static std::unique_ptr<Component>
 make_title_section(plugin_topo const& topo, Colour const& color)
 {
   auto result = std::make_unique<Label>();
-  result->setText("Firefly Synth", dontSendNotification);
+  result->setText("FIREFLY SYNTH", dontSendNotification);
   result->setColour(Label::ColourIds::textColourId, color);
   return result;
 }
@@ -231,7 +231,7 @@ make_controls_section(plugin_topo const& topo)
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
-  Colour custom_color(0xFF8888FF);
+  Colour custom_color(0xFFFF4488);
   gui_colors custom_colors(make_module_colors(custom_color));
   gui_colors cv_colors(make_module_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_module_colors(Colour(0xFF4488FF)));
@@ -256,15 +256,15 @@ synth_topo()
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   custom_section_gui controls_section = {};
-  controls_section.position = { 0, 1 };
+  controls_section.position = { 0, 0 };
   controls_section.gui_factory = make_controls_section;
   controls_section.colors = gui_colors(custom_colors);
-
-  custom_section_gui title_section = {};
-  title_section.position = { 0, 0 };
-  title_section.colors = gui_colors(custom_colors);
-  title_section.gui_factory = [custom_color](auto const& topo) { return make_title_section(topo, custom_color); };
   
+  custom_section_gui title_section = {};
+  title_section.position = { 0, 1 };
+  title_section.gui_factory = [custom_color](auto const& topo) { return make_title_section(topo, custom_color); };
+  title_section.colors = gui_colors(custom_colors);
+
   result->gui.custom_sections.resize(custom_section_count);
   result->gui.custom_sections[custom_section_title] = custom_section_gui(title_section);
   result->gui.custom_sections[custom_section_controls] = custom_section_gui(controls_section);
