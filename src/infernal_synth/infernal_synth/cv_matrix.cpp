@@ -89,6 +89,10 @@ select_midi_active(
   int route_count = global? groute_count: vroute_count;
   int module = global? module_gcv_matrix: module_vcv_matrix;
 
+  // PB and mod wheel are linked so must be always on
+  active[module_midi][0][midi_source_pb] = 1;
+  active[module_midi][0][midi_source_cc + 1] = 1;
+
   for (int r = 0; r < route_count; r++)
   {
     int type = state.get_plain_at(module, 0, param_type, r).step();
