@@ -214,16 +214,17 @@ enum {
   module_section_voice, module_section_master_monitor, module_section_count };
 
 static Component&
-make_controls_section(plugin_topo const& topo, lnf* lnf, component_store store)
+make_controls_section(plugin_desc const& desc, lnf* lnf, component_store store)
 {
   auto& result = store_component<autofit_label>(store, lnf, "CONTROLS");
   return result;
 }
 
 static Component&
-make_title_section(plugin_topo const& topo, lnf* lnf, component_store store, Colour const& color)
+make_title_section(plugin_desc const& desc, lnf* lnf, component_store store, Colour const& color)
 {
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { 1, gui_dimension::auto_size } }), 2, 0, 1);
+  grid.add(store_component<image_component>(store, desc.config, "firefly.png"), { 0, 0 });
   auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
   label.setColour(Label::ColourIds::textColourId, color);
   grid.add(label, { 0, 1 });
@@ -256,7 +257,7 @@ synth_topo()
   result->gui.dimension.row_sizes = { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 };
 
   result->gui.custom_sections.resize(custom_section_count);
-  auto make_title_section_ui = [other_color](auto const& topo, lnf* lnf, auto store) -> Component& { return make_title_section(topo, lnf, store, other_color); };
+  auto make_title_section_ui = [other_color](auto const& desc, lnf* lnf, auto store) -> Component& { return make_title_section(desc, lnf, store, other_color); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 1 }, other_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 0 }, other_colors, make_controls_section);
 

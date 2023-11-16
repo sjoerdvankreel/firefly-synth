@@ -35,4 +35,11 @@ color_to_grayscale(juce::Colour const& c)
   return Colour(rgb, rgb, rgb, c.getAlpha());
 }
 
+std::filesystem::path
+get_resource_location(format_config const* config, std::string const& file_name)
+{
+  File file(File::getSpecialLocation(File::currentExecutableFile));
+  return config->resources_folder(file.getFullPathName().toStdString()) / file_name;
+}
+
 }

@@ -15,14 +15,14 @@ namespace plugin_base {
 
 class lnf;
 class plugin_state;
-struct plugin_topo;
+struct plugin_desc;
 
 struct plugin_topo_gui;
 enum class plugin_type { synth, fx };
 
 typedef std::function<juce::Component&(std::unique_ptr<juce::Component>&&)>
 component_store;
-typedef std::function<juce::Component&(plugin_topo const&, lnf* lnf, component_store store)>
+typedef std::function<juce::Component&(plugin_desc const&, lnf* lnf, component_store store)>
 custom_gui_factory;
 
 // free-form ui
@@ -30,6 +30,7 @@ struct custom_section_gui final {
   int index;
   gui_colors colors;
   gui_position position;
+  std::string background_image;
   custom_gui_factory gui_factory;
 
   void validate(plugin_topo const& topo, int index_) const;

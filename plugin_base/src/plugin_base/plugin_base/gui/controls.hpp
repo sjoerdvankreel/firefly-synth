@@ -62,6 +62,17 @@ public:
   autofit_combobox(lnf* lnf, bool autofit) : _lnf(lnf), _autofit(autofit) {}
 };
 
+// same as juce version but loads from resources folder
+class image_component :
+public juce::ImageComponent,
+public autofit_component
+{
+public:
+  int fixed_width() const override { return getImage().getWidth(); }
+  int fixed_height() const override { return getImage().getHeight(); }
+  image_component(format_config const* config, std::string const& file_name);
+};
+
 // binding_component that is additionally bound to a single parameter value
 // i.e., edit control or a label that displays a plugin parameter value
 class param_component:

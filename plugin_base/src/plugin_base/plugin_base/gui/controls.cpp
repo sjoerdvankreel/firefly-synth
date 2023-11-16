@@ -19,6 +19,14 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   }
 }
 
+image_component::
+image_component(format_config const* config, std::string const& file_name):
+ImageComponent()
+{
+  String path(get_resource_location(config, file_name).string());
+  setImage(ImageCache::getFromFile(path), RectanglePlacement::doNotResize);
+}
+
 autofit_label::
 autofit_label(lnf* lnf, std::string const& reference_text, bool bold, int height):
 _bold(bold), _font_height(height)
