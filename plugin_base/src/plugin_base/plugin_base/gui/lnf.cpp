@@ -1,5 +1,6 @@
 #include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/utility.hpp>
+#include <plugin_base/gui/controls.hpp>
 
 #include <cassert>
 #include <fstream>
@@ -97,6 +98,19 @@ lnf::font() const
   Font result(_typeface);
   result.setHeight(_desc->plugin->gui.font_height);
   result.setStyleFlags(_desc->plugin->gui.font_flags);
+  return result;
+}
+
+Font 
+lnf::getLabelFont(Label& label) 
+{ 
+  Font result = font();
+  auto fit = dynamic_cast<autofit_label*>(&label);
+  if (fit)
+  {
+    if (fit->bold()) result = result.boldened();
+    if(fit->font_height() != -1) result = result.withHeight(fit->font_height());
+  }
   return result;
 }
 

@@ -230,12 +230,10 @@ make_title_section(plugin_topo const& topo, lnf* lnf, component_store store, Col
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
-  Colour custom_color(0xFFFF4488);
-  gui_colors custom_colors(make_module_colors(custom_color));
+  Colour other_color(0xFFFF4488);
+  gui_colors other_colors(make_module_colors(other_color));
   gui_colors cv_colors(make_module_colors(Colour(0xFFFF8844)));
-  gui_colors audio_colors(make_module_colors(Colour(0xFF4488FF)));
-  gui_colors input_colors(make_module_colors(Colour(0xFFFF4488)));
-  gui_colors output_colors(make_module_colors(Colour(0xFF8888FF)));
+  gui_colors audio_colors(make_module_colors(Colour(0xFF8888FF)));
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
@@ -255,9 +253,9 @@ synth_topo()
   result->gui.dimension.row_sizes = { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 };
 
   result->gui.custom_sections.resize(custom_section_count);
-  auto make_title_section_ui = [custom_color](auto const& topo, lnf* lnf, auto store) -> Component& { return make_title_section(topo, lnf, store, custom_color); };
-  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 1 }, custom_colors, make_title_section_ui);
-  result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 0 }, custom_colors, make_controls_section);
+  auto make_title_section_ui = [other_color](auto const& topo, lnf* lnf, auto store) -> Component& { return make_title_section(topo, lnf, store, other_color); };
+  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 1 }, other_colors, make_title_section_ui);
+  result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 0 }, other_colors, make_controls_section);
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(module_section_midi);
@@ -283,9 +281,9 @@ synth_topo()
   result->modules[module_vfx] = fx_topo(module_section_fx, audio_colors, { 0, 0 }, false);
   result->modules[module_glfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
-  result->modules[module_input] = input_topo(module_section_input, input_colors, { 0, 0 });
+  result->modules[module_input] = input_topo(module_section_input, other_colors, { 0, 0 });
   result->modules[module_master] = master_topo(module_section_master_monitor, audio_colors, { 0, 1 });
-  result->modules[module_monitor] = monitor_topo(module_section_master_monitor, output_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_monitor] = monitor_topo(module_section_master_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
     { &result->modules[module_osc], &result->modules[module_vfx] },
     { &result->modules[module_vfx], &result->modules[module_voice_out] });

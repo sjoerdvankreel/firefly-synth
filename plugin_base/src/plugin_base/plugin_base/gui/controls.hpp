@@ -37,7 +37,11 @@ class autofit_label :
   public juce::Label,
   public autofit_component
 {
+  bool const _bold;
+  int const _font_height;
 public:
+  bool bold() const { return _bold; }
+  int font_height() const { return _font_height; }
   int fixed_width() const override { return getWidth(); }
   int fixed_height() const override { return getHeight(); }
   autofit_label(lnf* lnf, std::string const& reference_text, bool bold = false, int font_height = -1);
