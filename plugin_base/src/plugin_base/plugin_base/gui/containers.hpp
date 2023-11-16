@@ -64,6 +64,8 @@ public juce::Component,
 public autofit_component
 {
   float const _gap_size;
+  int const _autofit_row;
+  int const _autofit_column;
   gui_dimension const _dimension;
   std::vector<gui_position> _positions = {};
 
@@ -78,10 +80,11 @@ public:
 
   // Can't intercept mouse as we may be invisible on top of 
   // another grid in case of param or section dependent visibility.
-  grid_component(gui_dimension const& dimension, float gap_size) :
-  _gap_size(gap_size), _dimension(dimension) { setInterceptsMouseClicks(false, true); }
-  grid_component(bool vertical, int count, float gap_size) :
-  grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size) {}
+  grid_component(gui_dimension const& dimension, float gap_size, int autofit_row = 0, int autofit_column = 0) :
+  _gap_size(gap_size), _dimension(dimension), _autofit_row(autofit_row), _autofit_column(autofit_column)
+  { setInterceptsMouseClicks(false, true); }
+  grid_component(bool vertical, int count, float gap_size, int autofit_row = 0, int autofit_column = 0) :
+  grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size, autofit_row, autofit_column) {}
 };
 
 // binding_component that hosts a number of plugin parameters

@@ -4,6 +4,7 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/gui/controls.hpp>
+#include <plugin_base/gui/containers.hpp>
 
 using namespace juce;
 using namespace plugin_base;
@@ -222,9 +223,11 @@ make_controls_section(plugin_topo const& topo, lnf* lnf, component_store store)
 static Component&
 make_title_section(plugin_topo const& topo, lnf* lnf, component_store store, Colour const& color)
 {
-  auto& result = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
-  result.setColour(Label::ColourIds::textColourId, color);
-  return result;
+  auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { 1, gui_dimension::auto_size } }), 2, 0, 1);
+  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
+  label.setColour(Label::ColourIds::textColourId, color);
+  grid.add(label, { 0, 1 });
+  return grid;
 }
 
 std::unique_ptr<plugin_topo>

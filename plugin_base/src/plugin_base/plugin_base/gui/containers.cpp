@@ -89,7 +89,7 @@ grid_component::fixed_width() const
   for(int c = 0; c < _dimension.column_sizes.size(); c++)
     for (int i = 0; i < _positions.size(); i++)
       if(_positions[i].column == c)
-        if(_positions[i].row == 0)
+        if(_positions[i].row == _autofit_row)
         {
           auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
           assert(child.fixed_width() > 0);
@@ -106,7 +106,7 @@ grid_component::fixed_height() const
   for (int r = 0; r < _dimension.row_sizes.size(); r++)
     for (int i = 0; i < _positions.size(); i++)
       if (_positions[i].row == r)
-        if (_positions[i].column == 0)
+        if (_positions[i].column == _autofit_column)
         {
           auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
           assert(child.fixed_height() > 0);
