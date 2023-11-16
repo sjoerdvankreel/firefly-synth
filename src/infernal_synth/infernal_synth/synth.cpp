@@ -254,7 +254,7 @@ synth_topo()
   result->gui.aspect_ratio_height = 21;
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   result->gui.dimension.column_sizes = { 10, 7 };
-  result->gui.dimension.row_sizes = { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 };
+  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1 };
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [other_color](auto const& desc, lnf* lnf, auto store) -> Component& { return make_title_section(desc, lnf, store, other_color); };
