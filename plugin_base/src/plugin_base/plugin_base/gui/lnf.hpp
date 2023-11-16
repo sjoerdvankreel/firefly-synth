@@ -26,7 +26,6 @@ public:
   bool areScrollbarButtonsVisible() override { return true; }
 
   juce::Font getPopupMenuFont() override { return font(); }
-  juce::Font getLabelFont(juce::Label&) override { return font(); }
   juce::Font getComboBoxFont(juce::ComboBox&) override { return font(); }
   juce::Font getSliderPopupFont(juce::Slider&) override { return font(); }
   juce::Font getTextButtonFont(juce::TextButton&, int) override { return font(); }

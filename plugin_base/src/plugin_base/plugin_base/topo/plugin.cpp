@@ -4,10 +4,11 @@
 namespace plugin_base {
 
 void 
-custom_section_gui::validate(plugin_topo const& plugin) const
+custom_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
-  position.validate(plugin.gui.dimension);
+  assert(index == index_);
   assert(gui_factory != nullptr);
+  position.validate(plugin.gui.dimension);
 }
 
 void 
@@ -58,7 +59,7 @@ plugin_topo::validate() const
     [&all_sections](int i) { return all_sections[i].second; }, return_true);
   
   for(int s = 0; s < gui.custom_sections.size(); s++)
-    gui.custom_sections[s].validate(*this);
+    gui.custom_sections[s].validate(*this, s);
   for(int s = 0; s < gui.module_sections.size(); s++)
     gui.module_sections[s].validate(*this, s);
 

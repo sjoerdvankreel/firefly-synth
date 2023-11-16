@@ -3,6 +3,7 @@
 
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/gui/controls.hpp>
 
 using namespace juce;
 using namespace plugin_base;
@@ -212,18 +213,16 @@ enum {
   module_section_voice, module_section_master_monitor, module_section_count };
 
 static Component&
-make_controls_section(plugin_topo const& topo, component_store store)
+make_controls_section(plugin_topo const& topo, lnf* lnf, component_store store)
 {
-  auto& result = store_component<Label>(store);
-  result.setText("CONTROLS", dontSendNotification);
+  auto& result = store_component<autofit_label>(store, lnf, "CONTROLS");
   return result;
 }
 
 static Component&
-make_title_section(plugin_topo const& topo, Colour const& color, component_store store)
+make_title_section(plugin_topo const& topo, lnf* lnf, component_store store, Colour const& color)
 {
-  auto& result = store_component<Label>(store);
-  result.setText("FIREFLY SYNTH", dontSendNotification);
+  auto& result = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
   result.setColour(Label::ColourIds::textColourId, color);
   return result;
 }
@@ -253,22 +252,12 @@ synth_topo()
   result->gui.aspect_ratio_height = 21;
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   result->gui.dimension.column_sizes = { 10, 7 };
-  result->gui.dimension.row_sizes = { -30, 1, 1, 1, 1, 1, 1 };
-
-  custom_section_gui controls_section = {};
-  controls_section.position = { 0, 0 };
-  controls_section.gui_factory = make_controls_section;
-  controls_section.colors = gui_colors(custom_colors);
-  
-  custom_section_gui title_section = {};
-  title_section.position = { 0, 1 };
-  title_section.gui_factory = [custom_color](auto const& topo, auto store) -> Component& { 
-    return make_title_section(topo, custom_color, store); };
-  title_section.colors = gui_colors(custom_colors);
+  result->gui.dimension.row_sizes = { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 };
 
   result->gui.custom_sections.resize(custom_section_count);
-  result->gui.custom_sections[custom_section_title] = custom_section_gui(title_section);
-  result->gui.custom_sections[custom_section_controls] = custom_section_gui(controls_section);
+  auto make_title_section_ui = [custom_color](auto const& topo, lnf* lnf, auto store) -> Component& { return make_title_section(topo, lnf, store, custom_color); };
+  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 1 }, custom_colors, make_title_section_ui);
+  result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 0 }, custom_colors, make_controls_section);
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(module_section_midi);

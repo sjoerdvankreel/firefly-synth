@@ -40,7 +40,7 @@ class autofit_label :
 public:
   int fixed_width() const override { return getWidth(); }
   int fixed_height() const override { return getHeight(); }
-  autofit_label(lnf* lnf, std::string const& reference_text);
+  autofit_label(lnf* lnf, std::string const& reference_text, bool bold = false, int font_height = -1);
 };
 
 // dropdown that resizes to largest item

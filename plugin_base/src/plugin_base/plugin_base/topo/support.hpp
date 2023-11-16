@@ -30,6 +30,8 @@ param_section
 make_param_section(int index, topo_tag const& tag, param_section_gui const& gui);
 param_section_gui
 make_param_section_gui(gui_position const& position, gui_dimension const& dimension);
+custom_section_gui 
+make_custom_section_gui(int index, gui_position const& position, gui_colors const& colors, custom_gui_factory factory);
 
 module_section_gui
 make_module_section_gui_none(int index);

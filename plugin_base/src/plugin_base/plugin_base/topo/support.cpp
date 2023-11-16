@@ -60,6 +60,17 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
   return result;
 }
 
+custom_section_gui
+make_custom_section_gui(int index, gui_position const& position, gui_colors const& colors, custom_gui_factory factory)
+{
+  custom_section_gui result = {};
+  result.index = index;
+  result.position = position;
+  result.gui_factory = factory;
+  result.colors = gui_colors(colors);
+  return result;
+}
+
 midi_source
 make_midi_source(topo_tag const& tag, int id, float default_)
 {

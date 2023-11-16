@@ -27,7 +27,8 @@ margin_component::resized()
 int 
 rounded_container::fixed_width() const
 {
-  auto& fit = dynamic_cast<autofit_component&>(*getChildComponent(0));
+  auto child = getChildComponent(0);
+  auto& fit = dynamic_cast<autofit_component&>(*child);
   assert(fit.fixed_width() > 0);
   return fit.fixed_width() + _radius;
 }
@@ -35,7 +36,8 @@ rounded_container::fixed_width() const
 int 
 rounded_container::fixed_height() const
 {
-  auto& fit = dynamic_cast<autofit_component&>(*getChildComponent(0));
+  auto child = getChildComponent(0);
+  auto& fit = dynamic_cast<autofit_component&>(*child);
   assert(fit.fixed_height() > 0);
   return fit.fixed_height() + _radius;
 }

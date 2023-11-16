@@ -16,6 +16,7 @@ namespace plugin_base {
 static int const margin_param = 1;
 static int const margin_module = 2;
 static int const margin_section = 2;
+static int const margin_content = 2;
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
 static Justification 
@@ -149,13 +150,13 @@ Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& result = make_component<grid_component>(topo.gui.dimension, margin_module);
+  auto& grid = make_component<grid_component>(topo.gui.dimension, margin_module);
   for(int s = 0; s < topo.gui.custom_sections.size(); s++)
-    result.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
+    grid.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
   for(int s = 0; s < topo.gui.module_sections.size(); s++)
     if(topo.gui.module_sections[s].visible)
-      result.add(make_module_section(topo.gui.module_sections[s]), topo.gui.module_sections[s].position);
-  return result;
+      grid.add(make_module_section(topo.gui.module_sections[s]), topo.gui.module_sections[s].position);
+  return make_component<margin_component>(&grid, BorderSize<int>(margin_content));
 }
 
 Component& 
@@ -172,7 +173,8 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
     _components.emplace_back(std::move(owned)); 
     return *result; 
   };
-  auto& content = section.gui_factory(*gui_state()->desc().plugin, store);
+  lnf* lnf = _custom_lnfs[section.index].get();
+  auto& content = section.gui_factory(*gui_state()->desc().plugin, lnf, store);
   auto& content_outline = make_component<rounded_container>(&content, radius, false, false, outline1, outline2);
   return make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
 }

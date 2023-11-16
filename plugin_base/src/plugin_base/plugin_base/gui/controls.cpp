@@ -20,14 +20,18 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
 }
 
 autofit_label::
-autofit_label(lnf* lnf, std::string const& reference_text)
+autofit_label(lnf* lnf, std::string const& reference_text, bool bold, int height)
 {
   auto border_size = getBorderSize();
-  auto const& label_font = lnf->getLabelFont(*this);
+  auto label_font = lnf->getLabelFont(*this);
+  if(bold) label_font = label_font.boldened();
+  if(height != -1) label_font = label_font.withHeight(height);
   float th = label_font.getHeight();
   float tw = label_font.getStringWidthFloat(reference_text);
   float nw = std::ceil(tw) + border_size.getLeftAndRight();
   setSize(nw, std::ceil(th) + border_size.getTopAndBottom());
+  setText(reference_text, dontSendNotification);
+  setFont(label_font);
 }
 
 autofit_button::
