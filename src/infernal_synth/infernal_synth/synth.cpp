@@ -224,7 +224,7 @@ static Component&
 make_title_section(plugin_desc const& desc, lnf* lnf, component_store store, Colour const& color)
 {
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { 1, gui_dimension::auto_size } }), 2, 0, 1);
-  grid.add(store_component<image_component>(store, desc.config, "firefly.png"), { 0, 0 });
+  grid.add(store_component<image_component>(store, desc.config, "firefly.png", RectanglePlacement::xLeft), { 0, 0 });
   auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
   label.setColour(Label::ColourIds::textColourId, color);
   grid.add(label, { 0, 1 });

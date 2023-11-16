@@ -10,6 +10,17 @@
 
 namespace plugin_base {
 
+// same as juce version but loads from resources folder
+class image_component :
+public juce::ImageComponent
+{
+public:
+  image_component(
+  format_config const* config, 
+    std::string const& file_name, 
+    juce::RectanglePlacement placement);
+};
+
 // button that resizes to text content
 class autofit_button :
 public juce::TextButton,
@@ -60,17 +71,6 @@ public:
   int fixed_width() const override { return getWidth(); }
   int fixed_height() const override { return _lnf->combo_height(); }
   autofit_combobox(lnf* lnf, bool autofit) : _lnf(lnf), _autofit(autofit) {}
-};
-
-// same as juce version but loads from resources folder
-class image_component :
-public juce::ImageComponent,
-public autofit_component
-{
-public:
-  int fixed_width() const override { return getImage().getWidth(); }
-  int fixed_height() const override { return getImage().getHeight(); }
-  image_component(format_config const* config, std::string const& file_name);
 };
 
 // binding_component that is additionally bound to a single parameter value
