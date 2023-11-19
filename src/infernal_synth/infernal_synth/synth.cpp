@@ -249,6 +249,7 @@ synth_topo()
   gui_colors cv_colors(make_section_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_section_colors(Colour(0xFF8888FF)));
   monitor_colors.control_text = other_color;
+  other_colors.control_text = other_color;
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;

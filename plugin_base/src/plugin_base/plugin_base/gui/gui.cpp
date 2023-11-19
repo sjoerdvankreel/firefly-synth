@@ -176,7 +176,9 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   lnf* lnf = _custom_lnfs[section.index].get();
   auto& content = section.gui_factory(this, lnf, store);
   auto& content_outline = make_component<rounded_container>(&content, radius, false, false, outline1, outline2);
-  return make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
+  auto& result = make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
+  result.setLookAndFeel(lnf);
+  return result;
 }
 
 TabbedComponent&
