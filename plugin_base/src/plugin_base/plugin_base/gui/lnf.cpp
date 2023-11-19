@@ -167,6 +167,19 @@ lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectan
   g.drawRoundedRectangle(body, 2, 1);
 }
 
+void 
+lnf::drawTextEditorOutline(juce::Graphics& g, int w, int h, TextEditor& te)
+{
+  auto cornerSize = 6.0f;
+  if (!te.isEnabled()) return;
+  if (dynamic_cast<AlertWindow*> (te.getParentComponent()) != nullptr) return;
+  if (te.hasKeyboardFocus(true) && !te.isReadOnly())
+    g.setColour(te.findColour(TextEditor::focusedOutlineColourId));
+  else
+    g.setColour(te.findColour(TextEditor::outlineColourId));
+  g.drawRoundedRectangle(0, 0, w, h, cornerSize, 2);
+}
+
 void
 lnf::drawTickBox(
   Graphics& g, Component& c, float x, float y, float w, float h,

@@ -40,6 +40,7 @@ public:
   void drawLabel(juce::Graphics&, juce::Label& label) override;
   void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
+  void drawTextEditorOutline(juce::Graphics&, int, int, juce::TextEditor&) override;
   void drawTabbedButtonBarBackground(juce::TabbedButtonBar&, juce::Graphics&) override;
   void drawComboBox(juce::Graphics&, int, int, bool, int, int, int, int, juce::ComboBox&) override;
   void drawRotarySlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider&) override;
