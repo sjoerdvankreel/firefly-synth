@@ -398,15 +398,29 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
 void 
 plugin_gui::init_patch()
 {
-  _gui_state->init(state_init_type::default_);
-  fire_state_loaded();
+  auto options = MessageBoxOptions::makeOptionsOkCancel(
+    MessageBoxIconType::QuestionIcon, "Init patch", "Are you sure?");
+  NativeMessageBox::showAsync(options, [this](int result) {
+    if(result == 0)
+    {
+      _gui_state->init(state_init_type::default_);
+      fire_state_loaded();
+    }
+  });
 }
 
 void
 plugin_gui::clear_patch()
 {
-  _gui_state->init(state_init_type::minimal);
-  fire_state_loaded();
+  auto options = MessageBoxOptions::makeOptionsOkCancel(
+    MessageBoxIconType::QuestionIcon, "Clear patch", "Are you sure?");
+  NativeMessageBox::showAsync(options, [this](int result) {
+    if (result == 0)
+    {
+      _gui_state->init(state_init_type::minimal);
+      fire_state_loaded();
+    }
+  });
 }
 
 void

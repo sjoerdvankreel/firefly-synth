@@ -36,6 +36,8 @@ knob thickness relative
 audio output graph
 any output graph
 swap module incl swap routing
+background color button section
+gui provide buttons
 
 * get some linux folks to comment (ycollete?)
 * continuing
