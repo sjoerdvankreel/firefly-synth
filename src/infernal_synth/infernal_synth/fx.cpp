@@ -81,7 +81,7 @@ fx_topo(
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { 1, 1 })));
+    make_module_gui(section, false, colors, pos, { 1, 1 })));
 
   if(global) result.default_initializer = init_global_default;
   if(!global) result.default_initializer = init_voice_default;

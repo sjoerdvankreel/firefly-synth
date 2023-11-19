@@ -60,7 +60,7 @@ osc_topo(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } })));
+    make_module_gui(section, false, colors, pos, { { 1 }, { 1, 1 } })));
 
   result.default_initializer = init_default;
   result.engine_factory = [](auto const&, int, int) ->

@@ -49,6 +49,7 @@ struct module_output_mapping final {
 struct module_topo_gui final {
   int section;
   bool visible;
+  bool header_left;
   gui_colors colors;
   gui_position position;
   gui_dimension dimension;

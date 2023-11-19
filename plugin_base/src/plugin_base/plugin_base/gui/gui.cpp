@@ -182,11 +182,13 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
 TabbedComponent&
 plugin_gui::make_tab_component(std::string const& title, int module)
 {
-  auto const& topo = *_gui_state->desc().plugin;
-  auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+  auto const& plugin_topo = *_gui_state->desc().plugin;
+  auto const& module_topo = plugin_topo.modules[module];
+  auto orientation = module_topo.gui.header_left? TabbedButtonBar::Orientation::TabsAtLeft: TabbedButtonBar::Orientation::TabsAtTop;
+  auto& result = make_component<TabbedComponent>(orientation);
   result.setOutline(0);
   result.getTabbedButtonBar().setTitle(title);
-  result.setTabBarDepth(topo.gui.font_height + 4);
+  result.setTabBarDepth(plugin_topo.gui.font_height + 4);
   result.setLookAndFeel(module_lnf(module)); 
   return result;
 }

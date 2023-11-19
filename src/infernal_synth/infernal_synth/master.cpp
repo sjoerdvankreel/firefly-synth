@@ -27,7 +27,7 @@ master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui
   module_topo result(make_module(
     make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", "Master", module_master, 1),
     make_module_dsp(module_stage::output, module_output::none, 0, {}),
-    make_module_gui(section, colors, pos, { 1, 1 })));
+    make_module_gui(section, true, colors, pos, { 1, 1 })));
 
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<master_engine> { return std::make_unique<master_engine>(); };
