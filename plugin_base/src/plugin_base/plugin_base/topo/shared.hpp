@@ -20,7 +20,7 @@ enum class gui_scroll_mode { none, vertical };
 enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
 enum class gui_label_contents { none, name, value, both };
-enum class gui_edit_type { none, toggle, list, autofit_list, text, knob, hslider, vslider };
+enum class gui_edit_type { none, output, toggle, list, autofit_list, knob, hslider, vslider };
 
 typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
