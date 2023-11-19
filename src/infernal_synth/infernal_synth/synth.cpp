@@ -287,7 +287,7 @@ synth_topo()
   result->modules[module_glfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_input] = input_topo(module_section_input, other_colors, { 0, 0 });
-  result->modules[module_master] = master_topo(module_section_master, audio_colors, { 0, 0 });
+  result->modules[module_master] = master_topo(module_section_master, other_colors, { 0, 0 });
   result->modules[module_monitor] = monitor_topo(module_section_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
     { &result->modules[module_osc], &result->modules[module_vfx] },
