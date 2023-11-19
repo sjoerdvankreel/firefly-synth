@@ -229,15 +229,12 @@ make_controls_section(plugin_desc const& desc, lnf* lnf, component_store store)
   auto& clear = store_component<TextButton>(store);
   clear.setButtonText("Clear");
   result.add(clear, { 0, 3 });
-  auto& tweak = store_component<Label>(store);
-  tweak.setText("Tweak", dontSendNotification);
-  result.add(tweak, { 1, 0 });
-  auto& tweaked_label = store_component<Label>(store);
-  tweaked_label.setText("Osc 1 Bal", dontSendNotification);
-  result.add(tweaked_label, { 1, 1 });
-  auto& tweaked_value = store_component<TextEditor>(store);
-  tweaked_value.setText("20 %", dontSendNotification);
-  result.add(tweaked_value, { 1, 2 });
+  auto& tweak_label = store_component<Label>(store);
+  tweak_label.setText("Tweak: Osc 1 Bal", dontSendNotification);
+  result.add(tweak_label, { 1, 0, 1, 2 });
+  auto& tweak_value = store_component<TextEditor>(store);
+  tweak_value.setText("20 %", dontSendNotification);
+  result.add(tweak_value, { 1, 2 });
   auto& factory = store_component<TextButton>(store);
   factory.setButtonText("Factory");
   result.add(factory, { 1, 3 });
@@ -282,8 +279,8 @@ synth_topo()
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [other_color](auto const& desc, lnf* lnf, auto store) -> Component& { return make_title_section(desc, lnf, store, other_color); };
-  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 2, 1, 2 }, other_colors, make_title_section_ui);
-  result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 0, 1, 1 }, other_colors, make_controls_section);
+  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 0, 1, 1 }, other_colors, make_title_section_ui);
+  result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 2, 1, 2 }, other_colors, make_controls_section);
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(module_section_midi);
