@@ -211,7 +211,7 @@ enum {
   module_section_midi, module_section_input, 
   module_section_lfos, module_section_env, module_section_cv_matrix,
   module_section_audio_matrix, module_section_osc, module_section_fx, 
-  module_section_voice, module_section_master, module_section_monitor, module_section_count };
+  module_section_voice, module_section_monitor_master, module_section_count };
 
 static Component&
 make_controls_section(plugin_desc const& desc, lnf* lnf, component_store store)
@@ -279,7 +279,7 @@ synth_topo()
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [other_color](auto const& desc, lnf* lnf, auto store) -> Component& { return make_title_section(desc, lnf, store, other_color); };
-  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 1, 1, 1 }, other_colors, make_title_section_ui);
+  result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 0, 1, 2 }, other_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 2, 1, 2 }, other_colors, make_controls_section);
 
   result->gui.module_sections.resize(module_section_count);
@@ -290,8 +290,7 @@ synth_topo()
   result->gui.module_sections[module_section_osc] = make_module_section_gui(module_section_osc, { 4, 0, 1, 2 }, { 1, 1 });
   result->gui.module_sections[module_section_lfos] = make_module_section_gui(module_section_lfos, { 2, 0, 1, 2 }, { 1, 2 });
   result->gui.module_sections[module_section_input] = make_module_section_gui(module_section_input, { 1, 0, 1, 2 }, { 1, 1 });
-  result->gui.module_sections[module_section_master] = make_module_section_gui(module_section_master, { 0, 0, 1, 1 }, { 1, 1 });
-  result->gui.module_sections[module_section_monitor] = make_module_section_gui(module_section_monitor, { 6, 0, 1, 2 }, { 1, 1 } );
+  result->gui.module_sections[module_section_monitor_master] = make_module_section_gui(module_section_monitor_master, { 6, 0, 1, 2 }, { { 1 }, { 2, 1 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(module_section_cv_matrix, { 1, 2, 3, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
   result->gui.module_sections[module_section_audio_matrix] = make_module_section_gui_tabbed(module_section_audio_matrix, { 4, 2, 3, 2 },
@@ -308,8 +307,8 @@ synth_topo()
   result->modules[module_glfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_input] = input_topo(module_section_input, other_colors, { 0, 0 });
-  result->modules[module_master] = master_topo(module_section_master, other_colors, { 0, 0 });
-  result->modules[module_monitor] = monitor_topo(module_section_monitor, other_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_master] = master_topo(module_section_monitor_master, audio_colors, { 0, 1 });
+  result->modules[module_monitor] = monitor_topo(module_section_monitor_master, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
     { &result->modules[module_osc], &result->modules[module_vfx] },
     { &result->modules[module_vfx], &result->modules[module_voice_out] });
