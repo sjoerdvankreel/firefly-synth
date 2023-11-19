@@ -141,6 +141,16 @@ param_component::init()
   binding_component::init();
 }
 
+void
+param_textbox::textEditorTextChanged(TextEditor&)
+{
+  plain_value plain;
+  std::string text(getText().toStdString());
+  if (!_param->param->domain.text_to_plain(false, text, plain)) return;
+  _last_parsed = text;
+  _gui->gui_changed(_param->info.global, plain);
+}
+
 // Just guess max value is representative of the longest text.
 param_value_label::
 param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf) :
@@ -171,6 +181,14 @@ param_toggle_button::buttonStateChanged(Button*)
   plain_value plain = _param->param->domain.raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
   _gui->gui_changed(_param->info.global, plain);
+}
+
+param_textbox::
+param_textbox(plugin_gui* gui, module_desc const* module, param_desc const* param) :
+param_component(gui, module, param), TextEditor()
+{
+  addListener(this);
+  init();
 }
 
 param_toggle_button::
