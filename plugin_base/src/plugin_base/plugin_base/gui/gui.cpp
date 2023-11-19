@@ -325,7 +325,11 @@ Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
   if(param.param->dsp.direction == param_direction::output)
-    return make_param_label(module, param, gui_label_contents::value);
+  {
+    auto& result = make_param_label(module, param, gui_label_contents::value);
+    result.setColour(Label::ColourIds::textColourId, module.module->gui.colors.control_text);
+    return result;
+  }
 
   Component* result = nullptr;
   switch (param.param->gui.edit_type)
@@ -347,10 +351,6 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
     assert(false);
     return *((Component*)nullptr);
   }
-
-  // don't touch state for input in case it is a ui-state-bound parameter
-  if (param.param->dsp.direction == param_direction::output)
-    result->setEnabled(false);
 
   return *result;
 }
