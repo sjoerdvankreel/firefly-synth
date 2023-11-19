@@ -26,12 +26,17 @@ public:
   plugin_gui(plugin_state* gui_state);
   ~plugin_gui() { setLookAndFeel(nullptr); }
 
-  void reloaded();
   void load_patch();
   void save_patch();
   void init_patch();
   void clear_patch();
 
+  Component& make_load_button();
+  Component& make_save_button();
+  Component& make_init_button();
+  Component& make_clear_button();
+
+  void reloaded();
   void gui_end_changes(int index);
   void gui_begin_changes(int index);
   void gui_changed(int index, plain_value plain);

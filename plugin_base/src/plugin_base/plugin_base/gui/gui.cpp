@@ -395,6 +395,42 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   return result;
 }
 
+Component&
+plugin_gui::make_init_button()
+{
+  auto& result = make_component<TextButton>();
+  result.setButtonText("Init");
+  result.onClick = [this] { init_patch(); };
+  return result;
+}
+
+Component&
+plugin_gui::make_clear_button()
+{
+  auto& result = make_component<TextButton>();
+  result.setButtonText("Clear");
+  result.onClick = [this] { clear_patch(); };
+  return result;
+}
+
+Component&
+plugin_gui::make_load_button()
+{
+  auto& result = make_component<TextButton>();
+  result.setButtonText("Load");
+  result.onClick = [this] { load_patch(); };
+  return result;
+}
+
+Component&
+plugin_gui::make_save_button()
+{
+  auto& result = make_component<TextButton>();
+  result.setButtonText("Save");
+  result.onClick = [this] { save_patch(); };
+  return result;
+}
+
 void 
 plugin_gui::init_patch()
 {

@@ -21,23 +21,16 @@ clean up the dsp
 on-note type stuff
 name it firefly?
 fx version
-do the are you sure? stuff
 host menu
 do clap midi notes
 polymod/mpe/note_exprs
 midi note as mod source
-do top level section with firefly image
 drop the fx version
 read all the comments from github and kvr and forums
-save preset + make base param for preset
 do better labels/popups
-thrds->threads+CPU
-knob thickness relative
 audio output graph
 any output graph
 swap module incl swap routing
-background color button section
-gui provide buttons
 move routing matrix stuff to base
 
 * get some linux folks to comment (ycollete?)

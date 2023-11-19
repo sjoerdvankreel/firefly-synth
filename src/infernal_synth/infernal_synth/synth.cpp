@@ -12,7 +12,7 @@ using namespace plugin_base;
 namespace infernal_synth {
 
 static gui_colors
-make_module_colors(Colour const& c)
+make_section_colors(Colour const& c)
 {
   gui_colors result;
   result.tab_text = c;
@@ -228,22 +228,10 @@ static Component&
 make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto& result = store_component<grid_component>(store, gui_dimension { 2, 4 }, 2);
-  auto& load = store_component<TextButton>(store);
-  load.setButtonText("Load");
-  load.onClick = [gui]() { gui->load_patch(); };
-  result.add(load, {0, 0});
-  auto& save = store_component<TextButton>(store);
-  save.setButtonText("Save");
-  save.onClick = [gui]() { gui->save_patch(); };
-  result.add(save, { 0, 1 });
-  auto& init = store_component<TextButton>(store);
-  init.setButtonText("Init");
-  init.onClick = [gui]() { gui->init_patch(); };
-  result.add(init, { 0, 2 });
-  auto& clear = store_component<TextButton>(store);
-  clear.setButtonText("Clear");
-  clear.onClick = [gui]() { gui->clear_patch(); };
-  result.add(clear, { 0, 3 });
+  result.add(gui->make_load_button(), {0, 0});
+  result.add(gui->make_save_button(), {0, 1});
+  result.add(gui->make_init_button(), {0, 2});
+  result.add(gui->make_clear_button(), {0, 3});
   auto& tweak_label = store_component<Label>(store);
   tweak_label.setText("Tweak: Osc 1 Bal", dontSendNotification);
   result.add(tweak_label, { 1, 0, 1, 2 });
@@ -260,9 +248,9 @@ std::unique_ptr<plugin_topo>
 synth_topo()
 {
   Colour other_color(0xFFFF4488);
-  gui_colors other_colors(make_module_colors(other_color));
-  gui_colors cv_colors(make_module_colors(Colour(0xFFFF8844)));
-  gui_colors audio_colors(make_module_colors(Colour(0xFF8888FF)));
+  gui_colors other_colors(make_section_colors(other_color));
+  gui_colors cv_colors(make_section_colors(Colour(0xFFFF8844)));
+  gui_colors audio_colors(make_section_colors(Colour(0xFF8888FF)));
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
