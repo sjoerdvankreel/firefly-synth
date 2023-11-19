@@ -58,7 +58,7 @@ _desc(desc), _custom_section(custom_section), _module_section(module_section), _
   setColour(TextButton::ColourIds::textColourOffId, colors().control_text);
   setColour(TextButton::ColourIds::buttonColourId, colors().control_background);
 
-  setColour(TextEditor::ColourIds::textColourId, colors().control_text);
+  setColour(TextEditor::ColourIds::textColourId, colors().edit_text);
   setColour(TextEditor::ColourIds::backgroundColourId, colors().control_background);
 
   setColour(TabbedButtonBar::ColourIds::tabTextColourId, colors().tab_text);

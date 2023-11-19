@@ -232,7 +232,7 @@ make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(gui->make_save_button(), {0, 1});
   result.add(gui->make_init_button(), {0, 2});
   result.add(gui->make_clear_button(), {0, 3});
-  result.add(store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak"), {1, 0, 1, 2});
+  result.add(store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak:"), {1, 0, 1, 2});
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 2 });
   auto& factory = store_component<TextButton>(store);
   factory.setButtonText("Factory");
@@ -248,8 +248,8 @@ synth_topo()
   gui_colors monitor_colors(make_section_colors(other_color));
   gui_colors cv_colors(make_section_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_section_colors(Colour(0xFF8888FF)));
+  other_colors.edit_text = other_color;
   monitor_colors.control_text = other_color;
-  other_colors.control_text = other_color;
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
