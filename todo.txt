@@ -35,6 +35,7 @@ thrds->threads+CPU
 knob thickness relative
 audio output graph
 any output graph
+swap module incl swap routing
 
 * get some linux folks to comment (ycollete?)
 * continuing

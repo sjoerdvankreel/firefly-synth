@@ -214,20 +214,35 @@ enum {
   module_section_voice, module_section_monitor_master, module_section_count };
 
 static Component&
-make_controls_section(plugin_desc const& desc, lnf* lnf, component_store store)
+make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour const& color)
+{
+  auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { 1, gui_dimension::auto_size } }), 2, 0, 1);
+  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xLeft), { 0, 0 });
+  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
+  label.setColour(Label::ColourIds::textColourId, color);
+  grid.add(label, { 0, 1 });
+  return grid;
+}
+
+static Component&
+make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto& result = store_component<grid_component>(store, gui_dimension { 2, 4 }, 2);
   auto& load = store_component<TextButton>(store);
   load.setButtonText("Load");
+  load.onClick = [gui]() { gui->load_patch(); };
   result.add(load, {0, 0});
   auto& save = store_component<TextButton>(store);
   save.setButtonText("Save");
+  save.onClick = [gui]() { gui->save_patch(); };
   result.add(save, { 0, 1 });
   auto& init = store_component<TextButton>(store);
   init.setButtonText("Init");
+  init.onClick = [gui]() { gui->init_patch(); };
   result.add(init, { 0, 2 });
   auto& clear = store_component<TextButton>(store);
   clear.setButtonText("Clear");
+  clear.onClick = [gui]() { gui->clear_patch(); };
   result.add(clear, { 0, 3 });
   auto& tweak_label = store_component<Label>(store);
   tweak_label.setText("Tweak: Osc 1 Bal", dontSendNotification);
@@ -239,17 +254,6 @@ make_controls_section(plugin_desc const& desc, lnf* lnf, component_store store)
   factory.setButtonText("Factory");
   result.add(factory, { 1, 3 });
   return result;
-}
-
-static Component&
-make_title_section(plugin_desc const& desc, lnf* lnf, component_store store, Colour const& color)
-{
-  auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { 1, gui_dimension::auto_size } }), 2, 0, 1);
-  grid.add(store_component<image_component>(store, desc.config, "firefly.png", RectanglePlacement::xLeft), { 0, 0 });
-  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
-  label.setColour(Label::ColourIds::textColourId, color);
-  grid.add(label, { 0, 1 });
-  return grid;
 }
 
 std::unique_ptr<plugin_topo>
@@ -278,7 +282,7 @@ synth_topo()
   result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1 };
 
   result->gui.custom_sections.resize(custom_section_count);
-  auto make_title_section_ui = [other_color](auto const& desc, lnf* lnf, auto store) -> Component& { return make_title_section(desc, lnf, store, other_color); };
+  auto make_title_section_ui = [other_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { return make_title_section(gui, lnf, store, other_color); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(custom_section_title, { 0, 0, 1, 2 }, other_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(custom_section_controls, { 0, 2, 1, 2 }, other_colors, make_controls_section);
 

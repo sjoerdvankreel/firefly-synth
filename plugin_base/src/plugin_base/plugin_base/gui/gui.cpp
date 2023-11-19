@@ -174,7 +174,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
     return *result; 
   };
   lnf* lnf = _custom_lnfs[section.index].get();
-  auto& content = section.gui_factory(gui_state()->desc(), lnf, store);
+  auto& content = section.gui_factory(this, lnf, store);
   auto& content_outline = make_component<rounded_container>(&content, radius, false, false, outline1, outline2);
   return make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
 }
@@ -395,74 +395,64 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
   return result;
 }
 
-// TODO just for now.
-// Give plugin more control over this.
-Component&
-plugin_gui::make_top_bar()
+void 
+plugin_gui::init_patch()
 {
-  auto& result = make_component<grid_component>(
-    gui_dimension({ gui_dimension::auto_size }, 
-    std::vector<int>(4, gui_dimension::auto_size)), margin_module);
+  _gui_state->init(state_init_type::default_);
+  fire_state_loaded();
+}
 
-  auto& init = make_component<autofit_button>(&_lnf, "Init");
-  result.add(init, { 0, 2 });
-  init.onClick = [this]() { 
-    _gui_state->init(state_init_type::default_); 
+void
+plugin_gui::clear_patch()
+{
+  _gui_state->init(state_init_type::minimal);
+  fire_state_loaded();
+}
+
+void
+plugin_gui::save_patch()
+{
+  int save_flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
+  FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  chooser->launchAsync(save_flags, [this](FileChooser const& chooser) {
+    auto path = chooser.getResult().getFullPathName();
+    delete& chooser;
+    if (path.length() == 0) return;
+    plugin_io_save_file(path.toStdString(), *_gui_state);
+    });
+}
+
+void
+plugin_gui::load_patch()
+{
+  int load_flags = FileBrowserComponent::openMode;
+  FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  chooser->launchAsync(load_flags, [this](FileChooser const& chooser) {
+    auto path = chooser.getResult().getFullPathName();
+    delete& chooser;
+    if (path.length() == 0) return;
+
+    auto icon = MessageBoxIconType::WarningIcon;
+    auto result = plugin_io_load_file(path.toStdString(), *_gui_state);
+    if (result.error.size())
+    {
+      auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
+      AlertWindow::showAsync(options, nullptr);
+      return;
+    }
+
     fire_state_loaded();
-  };
-
-  auto& clear = make_component<autofit_button>(&_lnf, "Clear");
-  result.add(clear, { 0, 3 });
-  clear.onClick = [this]() { 
-    _gui_state->init(state_init_type::minimal); 
-    fire_state_loaded();
-  };
-
-  auto& save = make_component<autofit_button>(&_lnf, "Save");
-  result.add(save, { 0, 1 });
-  save.onClick = [this]() {
-    int flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
-    FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
-    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
-      auto path = chooser.getResult().getFullPathName();
-      delete& chooser;
-      if (path.length() == 0) return;
-      plugin_io_save_file(path.toStdString(), *_gui_state);
-    });};
-
-  auto& load = make_component<autofit_button>(&_lnf, "Load");
-  result.add(load, { 0, 0 });
-  load.onClick = [this]() {
-    int flags = FileBrowserComponent::openMode;
-    FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
-    chooser->launchAsync(flags, [this](FileChooser const& chooser) {
-      auto path = chooser.getResult().getFullPathName();
-      delete &chooser;
-      if(path.length() == 0) return;
-
-      auto icon = MessageBoxIconType::WarningIcon;
-      auto result = plugin_io_load_file(path.toStdString(), *_gui_state);
-      if(result.error.size())
-      {
-        auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
-        AlertWindow::showAsync(options, nullptr);
-        return;
-      }
-
-      fire_state_loaded();
-      if (result.warnings.size())
-      {
-        String warnings;
-        for(int i = 0; i < result.warnings.size() && i < 5; i++)
-          warnings += String(result.warnings[i]) + "\n";
-        if(result.warnings.size() > 5)
-          warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
-        auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
-        AlertWindow::showAsync(options, nullptr);
-      }
-    });};
-
-  return result;
+    if (result.warnings.size())
+    {
+      String warnings;
+      for (int i = 0; i < result.warnings.size() && i < 5; i++)
+        warnings += String(result.warnings[i]) + "\n";
+      if (result.warnings.size() > 5)
+        warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
+      auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
+      AlertWindow::showAsync(options, nullptr);
+    }
+  });
 }
 
 }

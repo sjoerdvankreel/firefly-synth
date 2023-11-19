@@ -26,16 +26,20 @@ public:
   plugin_gui(plugin_state* gui_state);
   ~plugin_gui() { setLookAndFeel(nullptr); }
 
+  void reloaded();
+  void load_patch();
+  void save_patch();
+  void init_patch();
+  void clear_patch();
+
   void gui_end_changes(int index);
   void gui_begin_changes(int index);
   void gui_changed(int index, plain_value plain);
   void gui_changing(int index, plain_value plain);
 
-  void reloaded();
   void resized() override;
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
-  void fire_state_loaded();
   void remove_listener(gui_listener* listener);
   plugin_state const* gui_state() const { return _gui_state; }
   void add_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
@@ -49,7 +53,7 @@ private:
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 
-  Component& make_top_bar();
+  void fire_state_loaded();
   Component& make_content();
 
   template <class T, class... U>
