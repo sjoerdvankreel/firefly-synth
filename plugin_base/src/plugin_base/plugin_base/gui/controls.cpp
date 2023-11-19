@@ -36,10 +36,12 @@ last_tweaked_label::any_state_changed(int index, plain_value plain)
 }
 
 last_tweaked_editor::
-last_tweaked_editor(plugin_state const* state) :
+last_tweaked_editor(plugin_state const* state, lnf* lnf) :
 _state(state)
 {
+  setFont(lnf->font());
   state->add_any_listener(this);
+  setJustification(Justification::centredRight);
   any_state_changed(0, state->get_plain_at_index(0));
 }
 

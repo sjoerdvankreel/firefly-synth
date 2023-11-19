@@ -94,7 +94,7 @@ public any_state_listener
   int _last_tweaked = -1;
   plugin_state const* const _state;
 public:
-  last_tweaked_editor(plugin_state const* state);
+  last_tweaked_editor(plugin_state const* state, lnf* lnf);
   ~last_tweaked_editor() { _state->remove_any_listener(this); }
   void any_state_changed(int index, plain_value plain) override;
 };

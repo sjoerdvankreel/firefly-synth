@@ -233,7 +233,7 @@ make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(gui->make_init_button(), {0, 2});
   result.add(gui->make_clear_button(), {0, 3});
   result.add(store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak"), {1, 0, 1, 2});
-  result.add(store_component<last_tweaked_editor>(store, gui->gui_state()), { 1, 2 });
+  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 2 });
   auto& factory = store_component<TextButton>(store);
   factory.setButtonText("Factory");
   result.add(factory, { 1, 3 });
