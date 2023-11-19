@@ -102,6 +102,19 @@ public:
   { setText(param->info.name, juce::dontSendNotification); init(); }
 };
 
+// tracks last parameter change
+class last_tweaked_label :
+public juce::Label,
+public any_state_listener
+{
+  std::string const _prefix;
+  plugin_state const* const _state;
+public:
+  void any_state_changed(int index, plain_value plain) override;
+  ~last_tweaked_label() { _state->remove_any_listener(this); }
+  last_tweaked_label(plugin_state const* state, std::string const& prefix);
+};
+
 // parameter value or name+value display
 class param_value_label:
 public param_component, 

@@ -28,6 +28,15 @@ plugin_state::state_changed(int index, plain_value plain) const
   if (iter == _listeners.end()) return;
   for (int i = 0; i < iter->second.size(); i++)
     iter->second[i]->state_changed(index, plain);
+  for(int i = 0; i < _any_listeners.size(); i++)
+    _any_listeners[i]->any_state_changed(index, plain);
+}
+
+void
+plugin_state::add_any_listener(any_state_listener* listener) const
+{
+  assert(_notify);
+  _any_listeners.push_back(listener);
 }
 
 void
@@ -35,6 +44,15 @@ plugin_state::add_listener(int index, state_listener* listener) const
 {
   assert(_notify);
   _listeners[index].push_back(listener);
+}
+
+void
+plugin_state::remove_any_listener(any_state_listener* listener) const
+{
+  assert(_notify);
+  auto iter = std::find(_any_listeners.begin(), _any_listeners.end(), listener);
+  assert(iter != _any_listeners.end());
+  _any_listeners.erase(iter);
 }
 
 void

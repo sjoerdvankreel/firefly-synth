@@ -19,10 +19,17 @@ public:
   virtual void state_changed(int index, plain_value plain) = 0;
 };
 
+class any_state_listener
+{
+public:
+  virtual void any_state_changed(int index, plain_value plain) = 0;
+};
+
 class plugin_state final {
   bool const _notify = {};
   jarray<plain_value, 4> _state = {};
   plugin_desc const* const _desc = {};
+  std::vector<any_state_listener*> mutable _any_listeners = {};
   std::map<int, std::vector<state_listener*>> mutable _listeners = {};
 
   void state_changed(int index, plain_value plain) const;
@@ -36,6 +43,8 @@ public:
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
   void init(state_init_type init_type);
+  void add_any_listener(any_state_listener* listener) const;
+  void remove_any_listener(any_state_listener* listener) const;
   void add_listener(int index, state_listener* listener) const;
   void remove_listener(int index, state_listener* listener) const;
 
