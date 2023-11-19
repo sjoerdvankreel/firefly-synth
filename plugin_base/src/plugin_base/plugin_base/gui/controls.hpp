@@ -89,13 +89,16 @@ public:
 // tracks last parameter change
 class last_tweaked_editor :
 public juce::TextEditor,
+public juce::TextEditor::Listener,
 public any_state_listener
 {
   int _last_tweaked = -1;
-  plugin_state const* const _state;
+  plugin_state* const _state;
 public:
-  last_tweaked_editor(plugin_state const* state, lnf* lnf);
-  ~last_tweaked_editor() { _state->remove_any_listener(this); }
+  ~last_tweaked_editor();
+  last_tweaked_editor(plugin_state* state, lnf* lnf);
+
+  void textEditorTextChanged(juce::TextEditor&) override;
   void any_state_changed(int index, plain_value plain) override;
 };
 

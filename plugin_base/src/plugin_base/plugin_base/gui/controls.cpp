@@ -36,20 +36,39 @@ last_tweaked_label::any_state_changed(int index, plain_value plain)
 }
 
 last_tweaked_editor::
-last_tweaked_editor(plugin_state const* state, lnf* lnf) :
+last_tweaked_editor(plugin_state* state, lnf* lnf) :
 _state(state)
 {
+  addListener(this);
   setFont(lnf->font());
   state->add_any_listener(this);
   setJustification(Justification::centredRight);
   any_state_changed(0, state->get_plain_at_index(0));
 }
 
+last_tweaked_editor::
+~last_tweaked_editor()
+{
+  _state->remove_any_listener(this);
+  removeListener(this);
+}
+
 void
 last_tweaked_editor::any_state_changed(int index, plain_value plain)
 {
   if (_state->desc().params[index]->param->dsp.direction == param_direction::output) return;
+  _last_tweaked = index;
   setText(String(_state->desc().params[index]->param->domain.plain_to_text(false, plain)), dontSendNotification);
+}
+
+void 
+last_tweaked_editor::textEditorTextChanged(TextEditor& te)
+{
+  plain_value plain;
+  if(_last_tweaked == -1) return;
+  std::string value = te.getText().toStdString();
+  if(!_state->desc().params[_last_tweaked]->param->domain.text_to_plain(false, value, plain)) return;
+  _state->set_plain_at_index(_last_tweaked, plain);
 }
 
 image_component::

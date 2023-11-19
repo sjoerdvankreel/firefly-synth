@@ -46,7 +46,7 @@ public:
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
   void remove_listener(gui_listener* listener);
-  plugin_state const* gui_state() const { return _gui_state; }
+  plugin_state* gui_state() const { return _gui_state; }
   void add_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
   
 private:
