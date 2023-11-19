@@ -338,10 +338,6 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   case gui_edit_type::hslider:
   case gui_edit_type::vslider:
     result = &make_component<param_slider>(this, &module, &param); break;
-  case gui_edit_type::text:
-    result = &make_component<param_textbox>(this, &module, &param); 
-    dynamic_cast<param_textbox*>(result)->applyFontToAllText(_lnf.font());
-    break;
   case gui_edit_type::toggle:
     result = &make_component<param_toggle_button>(this, &module, &param); break;
   case gui_edit_type::list:

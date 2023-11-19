@@ -140,27 +140,6 @@ public:
   param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf);
 };
 
-// textbox bound to single parameter
-class param_textbox :
-public param_component,
-public juce::TextEditor, 
-public juce::TextEditor::Listener
-{
-  std::string _last_parsed;
-protected:
-  void own_param_changed(plain_value plain) override final
-  { setText(_last_parsed = _param->param->domain.plain_to_text(false, plain), false); }
-
-public:
-  void textEditorTextChanged(TextEditor&) override;
-  void textEditorFocusLost(TextEditor&) override { setText(_last_parsed, false); }
-  void textEditorReturnKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
-  void textEditorEscapeKeyPressed(TextEditor&) override { setText(_last_parsed, false); }
-
-  ~param_textbox() { removeListener(this); }
-  param_textbox(plugin_gui* gui, module_desc const* module, param_desc const* param);
-};
-
 // checkbox bound to single parameter
 class param_toggle_button :
 public param_component,
