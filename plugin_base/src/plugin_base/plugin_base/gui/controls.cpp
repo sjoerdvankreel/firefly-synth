@@ -35,6 +35,21 @@ last_tweaked_label::any_state_changed(int index, plain_value plain)
   setText(String(_prefix + " " + label), dontSendNotification);
 }
 
+last_tweaked_editor::
+last_tweaked_editor(plugin_state const* state) :
+_state(state)
+{
+  state->add_any_listener(this);
+  any_state_changed(0, state->get_plain_at_index(0));
+}
+
+void
+last_tweaked_editor::any_state_changed(int index, plain_value plain)
+{
+  if (_state->desc().params[index]->param->dsp.direction == param_direction::output) return;
+  setText(String(_state->desc().params[index]->param->domain.plain_to_text(false, plain)), dontSendNotification);
+}
+
 image_component::
 image_component(
   format_config const* config, 
