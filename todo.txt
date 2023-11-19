@@ -31,8 +31,6 @@ drop the fx version
 read all the comments from github and kvr and forums
 save preset + make base param for preset
 do better labels/popups
-thrds->threads+CPU
-knob thickness relative
 
 * get some linux folks to comment (ycollete?)
 * continuing

@@ -59,7 +59,7 @@ lfo_topo(
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, false, colors, pos, { 1, 1 })));
+    make_module_gui(section, colors, pos, { 1, 1 })));
 
   if(global) result.default_initializer = init_global_default;
   result.engine_factory = [global](auto const&, int, int) ->

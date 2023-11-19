@@ -101,7 +101,7 @@ audio_matrix_topo(
     make_module_dsp(stage, module_output::audio, 0, { 
       make_module_dsp_output(false, make_topo_info("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
       make_module_dsp_output(false, make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
-    make_module_gui(section, false, colors, pos, { 1, 1 })));
+    make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global? "Global": "Voice";
 
   result.sections.emplace_back(make_param_section(section_main,

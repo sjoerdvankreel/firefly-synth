@@ -157,14 +157,13 @@ make_module_gui_none(int section)
 }
 
 module_topo_gui
-make_module_gui(int section, bool header_left, gui_colors const& colors, gui_position const& position, gui_dimension const& dimension)
+make_module_gui(int section, gui_colors const& colors, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
   result.visible = true;
   result.section = section;
   result.position = position;
   result.dimension = dimension;
-  result.header_left = header_left;
   result.colors = gui_colors(colors);
   return result;
 }
