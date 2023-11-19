@@ -38,6 +38,7 @@ any output graph
 swap module incl swap routing
 background color button section
 gui provide buttons
+move routing matrix stuff to base
 
 * get some linux folks to comment (ycollete?)
 * continuing
