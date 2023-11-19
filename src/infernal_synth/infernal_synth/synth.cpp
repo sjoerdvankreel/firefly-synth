@@ -216,7 +216,31 @@ enum {
 static Component&
 make_controls_section(plugin_desc const& desc, lnf* lnf, component_store store)
 {
-  auto& result = store_component<autofit_label>(store, lnf, "CONTROLS");
+  auto& result = store_component<grid_component>(store, gui_dimension { 2, 4 }, 2);
+  auto& load = store_component<TextButton>(store);
+  load.setButtonText("Load");
+  result.add(load, {0, 0});
+  auto& save = store_component<TextButton>(store);
+  save.setButtonText("Save");
+  result.add(save, { 0, 1 });
+  auto& init = store_component<TextButton>(store);
+  init.setButtonText("Init");
+  result.add(init, { 0, 2 });
+  auto& clear = store_component<TextButton>(store);
+  clear.setButtonText("Clear");
+  result.add(clear, { 0, 3 });
+  auto& tweak = store_component<Label>(store);
+  tweak.setText("Tweak", dontSendNotification);
+  result.add(tweak, { 1, 0 });
+  auto& tweaked_label = store_component<Label>(store);
+  tweaked_label.setText("Osc 1 Bal", dontSendNotification);
+  result.add(tweaked_label, { 1, 1 });
+  auto& tweaked_value = store_component<TextEditor>(store);
+  tweaked_value.setText("20 %", dontSendNotification);
+  result.add(tweaked_value, { 1, 2 });
+  auto& factory = store_component<TextButton>(store);
+  factory.setButtonText("Factory");
+  result.add(factory, { 1, 3 });
   return result;
 }
 
