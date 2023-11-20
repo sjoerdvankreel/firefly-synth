@@ -56,6 +56,7 @@ last_tweaked_editor::
 void
 last_tweaked_editor::any_state_changed(int index, plain_value plain)
 {
+  if(_updating) return;
   if (_state->desc().params[index]->param->dsp.direction == param_direction::output) return;
   _last_tweaked = index;
   setText(String(_state->desc().params[index]->param->domain.plain_to_text(false, plain)), dontSendNotification);
@@ -68,7 +69,9 @@ last_tweaked_editor::textEditorTextChanged(TextEditor& te)
   if(_last_tweaked == -1) return;
   std::string value = te.getText().toStdString();
   if(!_state->desc().params[_last_tweaked]->param->domain.text_to_plain(false, value, plain)) return;
+  _updating = true;
   _state->set_plain_at_index(_last_tweaked, plain);
+  _updating = false;
 }
 
 image_component::

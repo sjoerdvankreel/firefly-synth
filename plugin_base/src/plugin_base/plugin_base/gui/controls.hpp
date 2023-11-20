@@ -92,6 +92,7 @@ public juce::TextEditor,
 public juce::TextEditor::Listener,
 public any_state_listener
 {
+  bool _updating = false;
   int _last_tweaked = -1;
   plugin_state* const _state;
 public:
