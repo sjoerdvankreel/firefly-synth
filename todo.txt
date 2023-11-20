@@ -5,7 +5,6 @@ handle clap midi notes
 handle clap is_modulatable
 get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
-ui set exact values
 on-note/hold-type cv
 do cakewalk bug report
 test all host+linux
@@ -27,11 +26,12 @@ polymod/mpe/note_exprs
 midi note as mod source
 drop the fx version
 read all the comments from github and kvr and forums
-do better labels/popups
 audio output graph
 any output graph
 swap module incl swap routing
 move routing matrix stuff to base
+store selected tab
+factory preset
 
 * get some linux folks to comment (ycollete?)
 * continuing
