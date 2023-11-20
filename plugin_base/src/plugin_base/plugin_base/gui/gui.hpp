@@ -1,8 +1,9 @@
 #pragma once
 
 #include <plugin_base/gui/lnf.hpp>
-#include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/gui/state.hpp>
 #include <plugin_base/gui/utility.hpp>
+#include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/value.hpp>
 
