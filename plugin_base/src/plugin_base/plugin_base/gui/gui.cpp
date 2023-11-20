@@ -17,7 +17,23 @@ static int const margin_param = 1;
 static int const margin_module = 2;
 static int const margin_section = 2;
 static int const margin_content = 2;
+
+static std::string const extra_state_tab_index = "tab";
+static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
+
+static std::set<std::string>
+extra_state_num_keys(plugin_topo const& topo)
+{
+  std::set<std::string> result = {};
+  for(int i = 0; i < topo.modules.size(); i++)
+    if(topo.modules[i].info.slot_count > 1)
+      result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);
+  for(int i = 0; i < topo.gui.module_sections.size(); i++)
+    if(topo.gui.module_sections[i].tabbed)
+      result.insert(topo.gui.module_sections[i].id + "/" + extra_state_tab_index);
+  return result;
+}
 
 static Justification 
 justification_type(gui_label const& label)
@@ -55,7 +71,9 @@ justification_type(gui_label const& label)
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state) :
-_lnf(&gui_state->desc(), -1, -1, -1), _gui_state(gui_state)
+_lnf(&gui_state->desc(), -1, -1, -1), 
+_extra_state(extra_state_num_keys(*gui_state->desc().plugin), {}),
+_gui_state(gui_state)
 {
   setOpaque(true);
   setLookAndFeel(&_lnf);
@@ -69,7 +87,7 @@ _lnf(&gui_state->desc(), -1, -1, -1), _gui_state(gui_state)
   add_and_make_visible(*this, make_content());
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
   getChildComponent(0)->setSize(topo.gui.min_width, topo.gui.min_width * ratio);
-  float w = user_io_load_num(topo, user_io::base, "width", topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
   setSize(w, topo.gui.min_width * ratio);
 }
 
@@ -134,7 +152,7 @@ plugin_gui::resized()
   float w = getLocalBounds().getWidth();
   float scale = w / _gui_state->desc().plugin->gui.min_width;
   getChildComponent(0)->setTransform(AffineTransform::scale(scale));
-  user_io_save_num(*_gui_state->desc().plugin, user_io::base, "width", w);
+  user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
 }
 
 void
@@ -142,7 +160,7 @@ plugin_gui::reloaded()
 {
   auto const& topo = *_gui_state->desc().plugin;
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
-  float w = user_io_load_num(topo, user_io::base, "width", topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
   setSize(w, topo.gui.min_width * ratio);
 }
 
@@ -182,14 +200,14 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
 }
 
 TabbedComponent&
-plugin_gui::make_tab_component(std::string const& title, int module)
+plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module)
 {
   auto const& topo = *_gui_state->desc().plugin;
   auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
   result.getTabbedButtonBar().setTitle(title);
   result.setTabBarDepth(topo.gui.font_height + 4);
-  result.setLookAndFeel(module_lnf(module)); 
+  result.setLookAndFeel(module_lnf(module));
   return result;
 }
 
@@ -208,9 +226,11 @@ Component&
 plugin_gui::make_modules(module_desc const* slots)
 {
   int index = slots[0].module->info.index;
-  auto& result = make_tab_component(slots[0].module->info.tag.name, index);
+  auto const& tag = slots[0].module->info.tag;
+  auto& result = make_tab_component(tag.name, tag.id, index);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
     add_component_tab(result, make_param_sections(slots[i]), index, std::to_string(i + 1));
+  result.setCurrentTabIndex(std::clamp((int)get_extra_state_num(tag.id, extra_state_tab_index, 0), 0, result.getNumTabs() - 1));
   return result;
 }
 
@@ -292,11 +312,12 @@ plugin_gui::make_module_section(module_section_gui const& section)
     if (topo.modules[i].gui.section == section.index)
       matched_module = i;
   assert(matched_module >= 0);
-  auto& tabs = make_tab_component(section.tab_header, matched_module);
+  auto& tabs = make_tab_component(section.id, section.tab_header, matched_module);
   for(int o = 0; o < section.tab_order.size(); o++)
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)
         add_component_tab(tabs, make_param_sections(*iter), matched_module, iter->module->gui.tabbed_name);
+  tabs.setCurrentTabIndex(std::clamp((int)get_extra_state_num(section.id, extra_state_tab_index, 0), 0, tabs.getNumTabs() - 1));
   return tabs;
 }
 

@@ -34,11 +34,11 @@ custom_section_gui
 make_custom_section_gui(int index, gui_position const& position, gui_colors const& colors, custom_gui_factory factory);
 
 module_section_gui
-make_module_section_gui_none(int index);
+make_module_section_gui_none(std::string const& id, int index);
 module_section_gui
-make_module_section_gui(int index, gui_position const& position, gui_dimension const& dimension);
+make_module_section_gui(std::string const& id, int index, gui_position const& position, gui_dimension const& dimension);
 module_section_gui
-make_module_section_gui_tabbed(int index, gui_position const& position, std::string const& header, int tab_width, std::vector<int> const& tab_order);
+make_module_section_gui_tabbed(std::string const& id, int index, gui_position const& position, std::string const& header, int tab_width, std::vector<int> const& tab_order);
 
 midi_source
 make_midi_source(topo_tag const& tag, int id, float default_);

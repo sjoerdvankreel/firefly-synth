@@ -8,6 +8,8 @@
 
 namespace plugin_base {
 
+// per-instance state (plugin parameters and ui specific stuff like selected tabs)
+
 struct load_result
 {
   std::string error = {};

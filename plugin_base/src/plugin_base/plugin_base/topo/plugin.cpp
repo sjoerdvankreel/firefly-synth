@@ -14,6 +14,7 @@ custom_section_gui::validate(plugin_topo const& plugin, int index_) const
 void 
 module_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
+  assert(id.size());
   assert(this->index == index_);
   if(!visible) return;
   auto always_visible = [](int) {return true; };

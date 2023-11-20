@@ -6,13 +6,15 @@
 
 namespace plugin_base {
 
-class gui_state final {
+// per-instance ui specific state like selected tabs
+
+class extra_state final {
   std::map<std::string, double> _num = {};
   std::map<std::string, std::string> _text = {};
   std::set<std::string> const _num_keys = {};
   std::set<std::string> const _text_keys = {};
 public:
-  gui_state(
+  extra_state(
     std::set<std::string> const& num_keys, 
     std::set<std::string> const& text_keys): 
   _num_keys(num_keys), _text_keys(text_keys) {}

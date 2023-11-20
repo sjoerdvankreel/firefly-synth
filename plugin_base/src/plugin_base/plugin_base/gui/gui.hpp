@@ -1,9 +1,9 @@
 #pragma once
 
-#include <plugin_base/gui/lnf.hpp>
-#include <plugin_base/gui/state.hpp>
-#include <plugin_base/gui/utility.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/gui/lnf.hpp>
+#include <plugin_base/gui/utility.hpp>
+#include <plugin_base/gui/extra_state.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/value.hpp>
 
@@ -52,6 +52,7 @@ public:
   
 private:
   lnf _lnf;
+  extra_state _extra_state;
   plugin_state* const _gui_state;
   std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
@@ -65,6 +66,11 @@ private:
   template <class T, class... U>
   T& make_component(U&&... args);
 
+  void set_extra_state_num(std::string const& id, std::string const& part, double val)
+  { _extra_state.set_num(id + "/" + part, val); }
+  double get_extra_state_num(std::string const& id, std::string const& part, double default_)
+  { return _extra_state.get_num(id + "/" + part, default_); }
+
   Component& make_param_sections(module_desc const& module);
   Component& make_params(module_desc const& module, param_desc const* params);
   Component& make_multi_param(module_desc const& module, param_desc const* params);
@@ -77,7 +83,7 @@ private:
   Component& make_modules(module_desc const* slots);
   Component& make_module_section(module_section_gui const& section);
   Component& make_custom_section(custom_section_gui const& section);
-  juce::TabbedComponent& make_tab_component(std::string const& title, int module);
+  juce::TabbedComponent& make_tab_component(std::string const& id, std::string const& title, int module);
   void add_component_tab(juce::TabbedComponent& tc, juce::Component& child, int module, std::string const& title);
 };
 

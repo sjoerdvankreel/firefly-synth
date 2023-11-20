@@ -5,6 +5,8 @@
 
 namespace plugin_base {
 
+// per-user state (e.g. plugin window size)
+
 enum class user_io { base, plugin };
 
 void user_io_save_num(plugin_topo const& topo, user_io where, std::string const& key, double val);

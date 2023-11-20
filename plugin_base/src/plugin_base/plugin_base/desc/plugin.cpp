@@ -135,6 +135,9 @@ plugin_desc::validate() const
   assert(module_voice_start <= module_output_start);
   assert(module_output_start < plugin->modules.size());
 
+  for (int ms = 0; ms < plugin->gui.module_sections.size(); ms++)
+    INF_ASSERT_EXEC(all_ids.insert(plugin->gui.module_sections[ms].id).second);
+
   for (int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
