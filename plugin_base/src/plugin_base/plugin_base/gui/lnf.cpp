@@ -60,6 +60,7 @@ _desc(desc), _custom_section(custom_section), _module_section(module_section), _
 
   setColour(TextEditor::ColourIds::textColourId, colors().edit_text);
   setColour(TextEditor::ColourIds::backgroundColourId, colors().control_background);
+  setColour(CaretComponent::ColourIds::caretColourId, colors().edit_text);
 
   setColour(TabbedButtonBar::ColourIds::tabTextColourId, colors().tab_text);
   setColour(TabbedComponent::ColourIds::outlineColourId, Colours::transparentBlack);
