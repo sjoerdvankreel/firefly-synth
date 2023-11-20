@@ -32,6 +32,16 @@ public:
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
 };
 
+// tab component with change listener
+class tab_component :
+public juce::TabbedComponent
+{
+public:
+  std::function<void(int)> tab_changed;
+  tab_component(juce::TabbedButtonBar::Orientation orientation): juce::TabbedComponent(orientation) {}
+  void currentTabChanged(int index, juce::String const& name) { if(tab_changed != nullptr) tab_changed(index); }
+};
+
 // rounded rectangle container
 class rounded_container:
 public juce::Component,

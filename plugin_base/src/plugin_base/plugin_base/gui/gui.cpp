@@ -203,11 +203,12 @@ TabbedComponent&
 plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module)
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& result = make_component<TabbedComponent>(TabbedButtonBar::Orientation::TabsAtTop);
+  auto& result = make_component<tab_component>(TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
   result.getTabbedButtonBar().setTitle(title);
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.setLookAndFeel(module_lnf(module));
+  result.tab_changed = [this, id](int index) { set_extra_state_num(id, extra_state_tab_index, index); };
   return result;
 }
 
