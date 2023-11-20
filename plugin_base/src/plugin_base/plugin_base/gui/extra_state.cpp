@@ -3,6 +3,13 @@
 
 namespace plugin_base {
 
+void
+extra_state::clear()
+{
+  _num.clear();
+  _text.clear();
+}
+
 void 
 extra_state::set_num(std::string const& key, double val)
 {
@@ -11,24 +18,10 @@ extra_state::set_num(std::string const& key, double val)
 }
 
 void 
-extra_state::load_num(std::string const& key, double val)
-{
-  if(_num_keys.find(key) != _num_keys.end())
-    _num[key] = val;
-}
-
-void 
 extra_state::set_text(std::string const& key, std::string const& val)
 {
   assert(_text_keys.find(key) != _text_keys.end());
   _text[key] = val;
-}
-
-void 
-extra_state::load_text(std::string const& key, std::string const& val)
-{
-  if (_text_keys.find(key) != _text_keys.end())
-    _text[key] = val;
 }
 
 double 

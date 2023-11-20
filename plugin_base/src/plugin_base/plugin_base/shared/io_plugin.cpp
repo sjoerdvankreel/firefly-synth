@@ -10,33 +10,145 @@ using namespace juce;
 
 namespace plugin_base {
 
+// TODO
+// load/save with headers
+
 // file format
 static int const version = 1;
 static std::string const magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
+static load_result load_extra_internal(var const& json, extra_state& state);
+static load_result load_state_internal(var const& json, plugin_state& state);
+static std::unique_ptr<DynamicObject> save_extra_internal(extra_state const& state);
+static std::unique_ptr<DynamicObject> save_state_internal(plugin_state const& state);
+
+static std::vector<char>
+release_json_to_buffer(std::unique_ptr<DynamicObject>&& json)
+{
+  std::string text = JSON::toString(var(json.release())).toStdString();
+  return std::vector<char>(text.begin(), text.end());
+}
+
+static load_result
+load_json_from_buffer(std::vector<char> const& buffer, var& json)
+{
+  std::string text(buffer.size(), '\0');
+  std::copy(text.begin(), text.end(), buffer.begin());
+  auto parse_result = JSON::parse(String(text), json);
+  if (!parse_result.wasOk())
+    return load_result("Invalid json.");
+  return load_result();
+}
+
+std::vector<char>
+plugin_io_save_extra(extra_state const& state)
+{
+  auto json = save_extra_internal(state);
+  return release_json_to_buffer(std::move(json));
+}
+
+std::vector<char>
+plugin_io_save_state(plugin_state const& state)
+{
+  auto json = save_state_internal(state);
+  return release_json_to_buffer(std::move(json));
+}
+
 load_result
-plugin_io_load_file(
-  std::filesystem::path const& path, plugin_state& state)
+plugin_io_load_extra(std::vector<char> const& data, extra_state& state)
+{
+  var json;
+  auto result = load_json_from_buffer(data, json);
+  if (!result.ok()) return result;
+  return load_extra_internal(json, state);
+}
+
+load_result
+plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
+{
+  var json;
+  auto result = load_json_from_buffer(data, json);
+  if (!result.ok()) return result;
+  return load_state_internal(json, state);
+}
+
+load_result
+plugin_io_load_file_all(
+  std::filesystem::path const& path, plugin_state& plugin, extra_state& extra)
 {
   load_result failed("Could not read file.");
   std::vector<char> data = file_load(path);
   if(data.size() == 0) return failed;
-  return plugin_io_load(data, state);
+  return plugin_io_load_all(data, plugin, extra);
 };
 
 bool
-plugin_io_save_file(
-  std::filesystem::path const& path, plugin_state const& state)
+plugin_io_save_file_all(
+  std::filesystem::path const& path, plugin_state const& plugin, extra_state const& extra)
 {
   std::ofstream stream(path, std::ios::out | std::ios::binary);
   if (stream.bad()) return false;
-  auto data(plugin_io_save(state));
+  auto data(plugin_io_save_all(plugin, extra));
   stream.write(data.data(), data.size());
   return !stream.bad();
 }
 
-std::vector<char>
-plugin_io_save(plugin_state const& state)
+std::vector<char> 
+plugin_io_save_all(plugin_state const& plugin, extra_state const& extra)
+{
+  auto root = std::make_unique<DynamicObject>();
+  root->setProperty("extra", var(save_extra_internal(extra).release()));
+  root->setProperty("plugin", var(save_state_internal(plugin).release()));
+  return release_json_to_buffer(std::move(root));
+}
+
+load_result 
+plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_state& extra)
+{
+  var json;
+  auto result = load_json_from_buffer(data, json);
+  if(!result.ok()) return result;
+  auto extra_state_load = extra_state(extra.num_keys(), extra.text_keys());
+  auto extra_result = load_extra_internal(json["extra"], extra_state_load);
+  
+  // can't produce warnings, only errors
+  if (!extra_result.ok()) return extra_result; 
+  auto plugin_result = load_state_internal(json["plugin"], plugin);
+  if(!plugin_result.ok()) return plugin_result;
+  for(auto k: extra_state_load.num_keys())
+    extra.set_num(k, extra_state_load.get_num(k, 0));
+  for (auto k : extra_state_load.text_keys())
+    extra.set_text(k, extra_state_load.get_text(k, ""));
+  return plugin_result;
+}
+
+std::unique_ptr<DynamicObject>
+save_extra_internal(extra_state const& state)
+{
+  // todo: save_with_checksum
+  auto root = std::make_unique<DynamicObject>();
+  for(auto iter = state.num_keys().begin(); iter != state.num_keys().end(); iter++)
+    root->setProperty(String(*iter), var(state.get_num(*iter, 0)));
+  for (auto iter = state.text_keys().begin(); iter != state.text_keys().end(); iter++)
+    root->setProperty(String(*iter), var(state.get_text(*iter, "")));
+  return root;
+}
+
+load_result 
+load_extra_internal(var const& json, extra_state& state)
+{
+  state.clear();
+  for(auto iter = state.num_keys().begin(); iter != state.num_keys().end(); iter++)
+    if(json.hasProperty(String(*iter)))
+      state.set_num(*iter, json[Identifier(*iter)]);
+  for (auto iter = state.text_keys().begin(); iter != state.text_keys().end(); iter++)
+    if (json.hasProperty(String(*iter)))
+      state.set_text(*iter, json[Identifier(*iter)].toString().toStdString());
+  return load_result();
+}
+
+std::unique_ptr<DynamicObject>
+save_state_internal(plugin_state const& state)
 {
   auto root = std::make_unique<DynamicObject>();
   root->setProperty("magic", var(magic));
@@ -112,31 +224,24 @@ plugin_io_save(plugin_state const& state)
   String plugin_text(JSON::toString(plugin_var));
   root->setProperty("checksum", var(MD5(plugin_text.toUTF8()).toHexString()));
 
-  root->setProperty("plugin", plugin_var);
-  std::string json = JSON::toString(var(root.release())).toStdString();
-  return std::vector<char>(json.begin(), json.end());
+  root->setProperty("state", plugin_var);
+  return root;
 }
 
 load_result
-plugin_io_load(
-  std::vector<char> const& data, plugin_state& state)
+load_state_internal(
+  var const& json, plugin_state& state)
 {
-  var root;
-  std::string json(data.size(), '\0');
-  std::copy(data.begin(), data.end(), json.begin());
-  auto parse_result = JSON::parse(String(json), root);
-  if(!parse_result.wasOk()) 
-    return load_result("Invalid json.");
-  if(!root.hasProperty("plugin")) 
+  if(!json.hasProperty("state"))
     return load_result("Invalid plugin.");
-  if(!root.hasProperty("checksum")) 
+  if(!json.hasProperty("checksum"))
     return load_result("Invalid checksum.");
-  if(!root.hasProperty("magic") || root["magic"] != magic) 
+  if(!json.hasProperty("magic") || json["magic"] != magic)
     return load_result("Invalid magic.");
-  if(!root.hasProperty("version") || (int)root["version"] > version) 
+  if(!json.hasProperty("version") || (int)json["version"] > version)
     return load_result("Invalid version.");
 
-  var plugin = root["plugin"];
+  var plugin = json["plugin"];
   if(plugin["id"] != state.desc().plugin->tag.id)
     return load_result("Invalid plugin id.");
   if((int)plugin["version_major"] > state.desc().plugin->version_major)
@@ -144,7 +249,7 @@ plugin_io_load(
   if((int)plugin["version_major"] == state.desc().plugin->version_major)
     if((int)plugin["version_minor"] > state.desc().plugin->version_minor)
       return load_result("Invalid plugin version.");
-  if(root["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString()) 
+  if(json["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString())
     return load_result("Invalid checksum.");
 
   // good to go - only warnings from now on

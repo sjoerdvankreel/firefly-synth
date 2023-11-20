@@ -37,7 +37,7 @@ inf_controller::createView(char const* name)
 tresult PLUGIN_API
 inf_controller::setComponentState(IBStream* state)
 {
-  if (!load_state(state, gui_state()))
+  if (!load_plugin_state(state, gui_state()))
     return kResultFalse;
   for (int p = 0; p < gui_state().desc().param_count; p++)
     gui_changed(p, gui_state().get_plain_at_index(p));

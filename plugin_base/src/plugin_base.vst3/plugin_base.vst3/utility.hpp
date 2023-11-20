@@ -9,7 +9,7 @@
 namespace plugin_base::vst3 {
 
 Steinberg::FUID fuid_from_text(char const* text);
-bool load_state(Steinberg::IBStream* stream, plugin_state& state);
+bool load_plugin_state(Steinberg::IBStream* stream, plugin_state& state);
 
 struct vst3_config:
 public format_config

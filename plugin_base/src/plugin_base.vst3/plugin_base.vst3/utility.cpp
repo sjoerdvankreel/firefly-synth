@@ -14,14 +14,14 @@ fuid_from_text(char const* text)
 }
 
 bool 
-load_state(IBStream* stream, plugin_state& state)
+load_plugin_state(IBStream* stream, plugin_state& state)
 {
   char byte;
   int read = 1;
   std::vector<char> data;
   while (stream->read(&byte, 1, &read) == kResultTrue && read == 1)
     data.push_back(byte);
-  return plugin_io_load(data, state).ok();
+  return plugin_io_load_state(data, state).ok();
 }
 
 }

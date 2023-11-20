@@ -37,7 +37,7 @@ _engine(desc, nullptr, nullptr)
 tresult PLUGIN_API
 inf_component::setState(IBStream* state)
 {
-  if (load_state(state, _engine.state()))
+  if (load_plugin_state(state, _engine.state()))
     return kResultOk;
   return kResultFalse;
 }
@@ -45,7 +45,7 @@ inf_component::setState(IBStream* state)
 tresult PLUGIN_API
 inf_component::getState(IBStream* state)
 {
-  std::vector<char> data(plugin_io_save(_engine.state()));
+  std::vector<char> data(plugin_io_save_state(_engine.state()));
   return state->write(data.data(), data.size());
 }
 
