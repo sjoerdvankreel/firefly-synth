@@ -145,21 +145,25 @@ plugin_io_save_all(plugin_state const& plugin, extra_state const& extra)
   auto root = std::make_unique<DynamicObject>();
   root->setProperty("extra", var(save_extra_internal(extra).release()));
   root->setProperty("plugin", var(save_state_internal(plugin).release()));
-  return release_json_to_buffer(std::move(root));
+  return release_json_to_buffer(wrap_json_with_meta(*plugin.desc().plugin, var(root.release())));
 }
 
 load_result 
 plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_state& extra)
 {
   var json;
+  var content;
   auto result = load_json_from_buffer(data, json);
   if(!result.ok()) return result;
+  result = unwrap_json_from_meta(*plugin.desc().plugin, json, content);
+  if (!result.ok()) return result;
+
   auto extra_state_load = extra_state(extra.keyset());
-  auto extra_result = load_extra_internal(json["extra"], extra_state_load);
+  auto extra_result = load_extra_internal(content["extra"], extra_state_load);
   
   // can't produce warnings, only errors
   if (!extra_result.ok()) return extra_result; 
-  auto plugin_result = load_state_internal(json["plugin"], plugin);
+  auto plugin_result = load_state_internal(content["plugin"], plugin);
   if(!plugin_result.ok()) return plugin_result;
   for(auto k: extra_state_load.keyset())
     if(extra_state_load.contains_key(k))
