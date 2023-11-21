@@ -108,15 +108,15 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
   var json;
   auto result = load_json_from_buffer(data, json);
   if(!result.ok()) return result;
-  auto extra_state_load = extra_state(extra.num_keys(), extra.text_keys());
+  auto extra_state_load = extra_state(extra.keyset());
   auto extra_result = load_extra_internal(json["extra"], extra_state_load);
   
   // can't produce warnings, only errors
   if (!extra_result.ok()) return extra_result; 
   auto plugin_result = load_state_internal(json["plugin"], plugin);
   if(!plugin_result.ok()) return plugin_result;
-  for(auto k: extra_state_load.num_keys())
-    extra.set_num(k, extra_state_load.get_num(k, 0));
+  for(auto k: extra_state_load.keyset())
+    extra.set(k, extra_state_load.get_num(k, 0));
   for (auto k : extra_state_load.text_keys())
     extra.set_text(k, extra_state_load.get_text(k, ""));
   return plugin_result;

@@ -3,29 +3,35 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/utility.hpp>
-#include <plugin_base/gui/extra_state.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/value.hpp>
+#include <plugin_base/shared/extra_state.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include <map>
+#include <set>
 #include <vector>
 
 namespace plugin_base {
 
 class grid_component;
 
+std::set<std::string>
+gui_extra_state_keyset(plugin_topo const& topo);
+
 class plugin_gui:
 public juce::Component
 {
   lnf* module_lnf(int index) 
   { return _module_lnfs[index].get(); }
+  lnf* custom_lnf(int index) 
+  { return _custom_lnfs[index].get(); }
 
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
-  plugin_gui(plugin_state* gui_state);
   ~plugin_gui() { setLookAndFeel(nullptr); }
+  plugin_gui(plugin_state* gui_state, extra_state* extra_state);
 
   void load_patch();
   void save_patch();
@@ -52,8 +58,8 @@ public:
   
 private:
   lnf _lnf;
-  extra_state _extra_state;
   plugin_state* const _gui_state;
+  extra_state* const _extra_state;
   std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
@@ -67,9 +73,9 @@ private:
   T& make_component(U&&... args);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
-  { _extra_state.set_num(id + "/" + part, val); }
+  { _extra_state->set_num(id + "/" + part, val); }
   double get_extra_state_num(std::string const& id, std::string const& part, double default_)
-  { return _extra_state.get_num(id + "/" + part, default_); }
+  { return _extra_state->get_num(id + "/" + part, default_); }
 
   Component& make_param_sections(module_desc const& module);
   Component& make_params(module_desc const& module, param_desc const* params);

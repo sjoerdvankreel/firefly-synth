@@ -1,7 +1,7 @@
 #pragma once
 
 #include <plugin_base/shared/state.hpp>
-#include <plugin_base/gui/extra_state.hpp>
+#include <plugin_base/shared/extra_state.hpp>
 
 #include <vector>
 #include <string>

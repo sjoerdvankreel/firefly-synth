@@ -22,8 +22,8 @@ static std::string const extra_state_tab_index = "tab";
 static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
-static std::set<std::string>
-extra_state_num_keys(plugin_topo const& topo)
+std::set<std::string>
+gui_extra_state_keyset(plugin_topo const& topo)
 {
   std::set<std::string> result = {};
   for(int i = 0; i < topo.modules.size(); i++)
@@ -70,10 +70,9 @@ justification_type(gui_label const& label)
 }
 
 plugin_gui::
-plugin_gui(plugin_state* gui_state) :
+plugin_gui(plugin_state* gui_state, extra_state* extra_state):
 _lnf(&gui_state->desc(), -1, -1, -1), 
-_extra_state(extra_state_num_keys(*gui_state->desc().plugin), {}),
-_gui_state(gui_state)
+_gui_state(gui_state), _extra_state(extra_state)
 {
   setOpaque(true);
   setLookAndFeel(&_lnf);
@@ -191,7 +190,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
     _components.emplace_back(std::move(owned)); 
     return *result; 
   };
-  lnf* lnf = _custom_lnfs[section.index].get();
+  lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
   auto& content_outline = make_component<rounded_container>(&content, radius, false, false, outline1, outline2);
   auto& result = make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
@@ -209,6 +208,7 @@ plugin_gui::make_tab_component(std::string const& id, std::string const& title, 
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.setLookAndFeel(module_lnf(module));
   result.tab_changed = [this, id](int index) { set_extra_state_num(id, extra_state_tab_index, index); };
+  // todo add listener
   return result;
 }
 
@@ -488,7 +488,7 @@ plugin_gui::save_patch()
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() == 0) return;
-    plugin_io_save_file_all(path.toStdString(), *_gui_state, _extra_state);
+    plugin_io_save_file_all(path.toStdString(), *_gui_state, *_extra_state);
     });
 }
 
@@ -504,7 +504,7 @@ plugin_gui::load_patch()
 
     auto icon = MessageBoxIconType::WarningIcon;
     // todo set the state
-    auto result = plugin_io_load_file_all(path.toStdString(), *_gui_state, _extra_state);
+    auto result = plugin_io_load_file_all(path.toStdString(), *_gui_state, *_extra_state);
     if (result.error.size())
     {
       auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
