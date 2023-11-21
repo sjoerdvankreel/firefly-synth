@@ -198,8 +198,8 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   return result;
 }
 
-TabbedComponent&
-plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module)
+tab_component&
+plugin_gui::make_tab_component(std::string const& title, int module)
 {
   auto const& topo = *_gui_state->desc().plugin;
   auto& result = make_component<tab_component>(TabbedButtonBar::Orientation::TabsAtTop);
@@ -207,8 +207,6 @@ plugin_gui::make_tab_component(std::string const& id, std::string const& title, 
   result.getTabbedButtonBar().setTitle(title);
   result.setTabBarDepth(topo.gui.font_height + 4);
   result.setLookAndFeel(module_lnf(module));
-  result.tab_changed = [this, id](int index) { set_extra_state_num(id, extra_state_tab_index, index); };
-  // todo add listener
   return result;
 }
 
@@ -228,10 +226,14 @@ plugin_gui::make_modules(module_desc const* slots)
 {
   int index = slots[0].module->info.index;
   auto const& tag = slots[0].module->info.tag;
-  auto& result = make_tab_component(tag.name, tag.id, index);
+  auto& result = make_tab_component(tag.name, index);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
     add_component_tab(result, make_param_sections(slots[i]), index, std::to_string(i + 1));
-  result.setCurrentTabIndex(std::clamp((int)get_extra_state_num(tag.id, extra_state_tab_index, 0), 0, result.getNumTabs() - 1));
+  if(slots[0].module->info.slot_count > 1)
+  {
+    result.tab_changed = [this, id = tag.id](int index) { set_extra_state_num(id, extra_state_tab_index, index); };
+    result.setCurrentTabIndex(std::clamp((int)get_extra_state_num(tag.id, extra_state_tab_index, 0), 0, result.getNumTabs() - 1));
+  }
   return result;
 }
 
@@ -313,11 +315,12 @@ plugin_gui::make_module_section(module_section_gui const& section)
     if (topo.modules[i].gui.section == section.index)
       matched_module = i;
   assert(matched_module >= 0);
-  auto& tabs = make_tab_component(section.id, section.tab_header, matched_module);
+  auto& tabs = make_tab_component(section.tab_header, matched_module);
   for(int o = 0; o < section.tab_order.size(); o++)
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)
         add_component_tab(tabs, make_param_sections(*iter), matched_module, iter->module->gui.tabbed_name);
+  tabs.tab_changed = [this, id = section.id](int index) { set_extra_state_num(id, extra_state_tab_index, index); };
   tabs.setCurrentTabIndex(std::clamp((int)get_extra_state_num(section.id, extra_state_tab_index, 0), 0, tabs.getNumTabs() - 1));
   return tabs;
 }
