@@ -142,10 +142,11 @@ plugin_io_save_file_all(
 std::vector<char> 
 plugin_io_save_all(plugin_state const& plugin, extra_state const& extra)
 {
+  auto const& topo = *plugin.desc().plugin;
   auto root = std::make_unique<DynamicObject>();
-  root->setProperty("extra", var(save_extra_internal(extra).release()));
-  root->setProperty("plugin", var(save_state_internal(plugin).release()));
-  return release_json_to_buffer(wrap_json_with_meta(*plugin.desc().plugin, var(root.release())));
+  root->setProperty("extra", var(wrap_json_with_meta(topo, var(save_extra_internal(extra).release())).release()));
+  root->setProperty("plugin", var(wrap_json_with_meta(topo, var(save_state_internal(plugin).release())).release()));
+  return release_json_to_buffer(wrap_json_with_meta(topo, var(root.release())));
 }
 
 load_result 
