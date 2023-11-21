@@ -33,7 +33,7 @@ static load_result
 load_json_from_buffer(std::vector<char> const& buffer, var& json)
 {
   std::string text(buffer.size(), '\0');
-  std::copy(text.begin(), text.end(), buffer.begin());
+  std::copy(buffer.begin(), buffer.end(), text.begin());
   auto parse_result = JSON::parse(String(text), json);
   if (!parse_result.wasOk())
     return load_result("Invalid json.");
@@ -125,7 +125,6 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
 std::unique_ptr<DynamicObject>
 save_extra_internal(extra_state const& state)
 {
-  // todo: save_with_checksum
   auto root = std::make_unique<DynamicObject>();
   for(auto iter = state.num_keys().begin(); iter != state.num_keys().end(); iter++)
     root->setProperty(String(*iter), var(state.get_num(*iter, 0)));

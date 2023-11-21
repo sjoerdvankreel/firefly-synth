@@ -488,7 +488,7 @@ plugin_gui::save_patch()
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() == 0) return;
-    plugin_io_save_file(path.toStdString(), *_gui_state, _extra_state);
+    plugin_io_save_file_all(path.toStdString(), *_gui_state, _extra_state);
     });
 }
 
@@ -504,7 +504,7 @@ plugin_gui::load_patch()
 
     auto icon = MessageBoxIconType::WarningIcon;
     // todo set the state
-    auto result = plugin_io_load_file(path.toStdString(), *_gui_state, _extra_state);
+    auto result = plugin_io_load_file_all(path.toStdString(), *_gui_state, _extra_state);
     if (result.error.size())
     {
       auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
