@@ -32,6 +32,7 @@ swap module incl swap routing
 move routing matrix stuff to base
 factory preset
 right align output labels
+clap gui reload not good
 
 * get some linux folks to comment (ycollete?)
 * continuing
