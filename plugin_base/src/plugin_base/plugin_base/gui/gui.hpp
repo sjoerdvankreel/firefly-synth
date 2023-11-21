@@ -67,11 +67,12 @@ private:
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 
-  void fire_state_loaded();
-  Component& make_content();
-
   template <class T, class... U>
   T& make_component(U&&... args);
+
+  void fire_state_loaded();
+  Component& make_content();
+  void init_multi_tab_component(tab_component& tab, std::string const& id);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
   { _extra_state->set_num(id + "/" + part, val); }
