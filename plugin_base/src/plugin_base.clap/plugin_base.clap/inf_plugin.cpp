@@ -51,7 +51,8 @@ inf_plugin(
   clap_plugin_descriptor const* clap_desc, 
   clap_host const* host, plugin_desc const* desc):
 Plugin(clap_desc, host), 
-_engine(desc, forward_thread_pool_voice_processor, this), _gui_state(desc, true),
+_engine(desc, forward_thread_pool_voice_processor, this), 
+_extra_state(gui_extra_state_keyset(*desc->plugin)), _gui_state(desc, true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 { _block_automation_seen.resize(_engine.state().desc().param_count); }
@@ -83,7 +84,7 @@ inf_plugin::timerCallback()
 bool 
 inf_plugin::stateSave(clap_ostream const* stream) noexcept
 {
-  std::vector<char> data(plugin_io_save(_gui_state));
+  std::vector<char> data(plugin_io_save_all(_gui_state, _extra_state));
   return stream->write(stream, data.data(), data.size()) == data.size();
 }
 
@@ -99,7 +100,7 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
     data.push_back(byte);
   } while(true);
 
-  if (!plugin_io_load(data, _gui_state).ok()) return false;
+  if (!plugin_io_load_all(data, _gui_state, _extra_state).ok()) return false;
   for (int p = 0; p < _engine.state().desc().param_count; p++)
     gui_changed(p, _gui_state.get_plain_at_index(p));
   return true;
@@ -176,7 +177,7 @@ inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 bool
 inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
-  _gui = std::make_unique<plugin_gui>(&_gui_state);
+  _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state);
   return true;
 }
 

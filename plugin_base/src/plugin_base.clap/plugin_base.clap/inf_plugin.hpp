@@ -24,6 +24,7 @@ public juce::Timer
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
 
   plugin_engine _engine;
+  extra_state _extra_state;
   plugin_state _gui_state = {};
   std::unique_ptr<plugin_gui> _gui = {};
   std::vector<int> _block_automation_seen = {};

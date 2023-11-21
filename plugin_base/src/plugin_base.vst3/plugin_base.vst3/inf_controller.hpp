@@ -21,6 +21,7 @@ public gui_listener
 {
   inf_editor* _editor = {};
   plugin_state _gui_state = {};
+  extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
   plugin_topo_gui const* const _gui_topo = {};
 
@@ -33,10 +34,12 @@ public:
   INF_PREVENT_ACCIDENTAL_COPY(inf_controller);
 
   inf_controller(plugin_desc const* desc): 
-  _gui_state(desc, true), _gui_topo(&desc->plugin->gui) {}
+  _gui_state(desc, true), 
+  _extra_state(gui_extra_state_keyset(*desc->plugin)), 
+  _gui_topo(&desc->plugin->gui) {}
 
   plugin_state& gui_state() { return _gui_state; }
-  plugin_state const& gui_state() const { return _gui_state; };
+  extra_state& extra_state() { return _extra_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   void gui_changing(int index, plain_value plain) override;

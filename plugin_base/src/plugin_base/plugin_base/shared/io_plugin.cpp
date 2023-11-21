@@ -116,9 +116,8 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
   auto plugin_result = load_state_internal(json["plugin"], plugin);
   if(!plugin_result.ok()) return plugin_result;
   for(auto k: extra_state_load.keyset())
-    extra.set(k, extra_state_load.get_num(k, 0));
-  for (auto k : extra_state_load.text_keys())
-    extra.set_text(k, extra_state_load.get_text(k, ""));
+    if(extra_state_load.contains_key(k))
+      extra.set_var(k, extra_state_load.get_var(k));
   return plugin_result;
 }
 
@@ -126,10 +125,9 @@ std::unique_ptr<DynamicObject>
 save_extra_internal(extra_state const& state)
 {
   auto root = std::make_unique<DynamicObject>();
-  for(auto iter = state.num_keys().begin(); iter != state.num_keys().end(); iter++)
-    root->setProperty(String(*iter), var(state.get_num(*iter, 0)));
-  for (auto iter = state.text_keys().begin(); iter != state.text_keys().end(); iter++)
-    root->setProperty(String(*iter), var(state.get_text(*iter, "")));
+  for(auto k: state.keyset())
+    if(state.contains_key(k))
+      root->setProperty(String(k), var(state.get_var(k)));
   return root;
 }
 
@@ -137,12 +135,9 @@ load_result
 load_extra_internal(var const& json, extra_state& state)
 {
   state.clear();
-  for(auto iter = state.num_keys().begin(); iter != state.num_keys().end(); iter++)
-    if(json.hasProperty(String(*iter)))
-      state.set_num(*iter, json[Identifier(*iter)]);
-  for (auto iter = state.text_keys().begin(); iter != state.text_keys().end(); iter++)
-    if (json.hasProperty(String(*iter)))
-      state.set_text(*iter, json[Identifier(*iter)].toString().toStdString());
+  for(auto k: state.keyset())
+    if(json.hasProperty(String(k)))
+      state.set_var(k, json[Identifier(k)]);
   return load_result();
 }
 

@@ -6,22 +6,23 @@ using namespace juce;
 namespace plugin_base {
 
 void
-extra_state::remove_listener(extra_state_listener* listener)
+extra_state::remove_listener(std::string const& key)
 {
-  auto iter = std::find(_listeners.begin(), _listeners.end(), listener);
+  auto iter = _listeners.find(key);
   assert(iter != _listeners.end());
   _listeners.erase(iter);
 }
 
 void 
-extra_state::set_num(std::string const& key, int val)
+extra_state::add_listener(std::string const& key, extra_state_listener* listener)
 {
-  assert(_keyset.find(key) != _keyset.end());
-  _values[key] = val;
+  auto iter = _listeners.find(key);
+  assert(iter == _listeners.end());
+  _listeners[key] = listener;
 }
 
-void
-extra_state::set_var(std::string const& key, var const& val)
+void 
+extra_state::set_num(std::string const& key, int val)
 {
   assert(_keyset.find(key) != _keyset.end());
   _values[key] = val;
@@ -40,6 +41,13 @@ extra_state::get_var(std::string const& key) const
   assert(_keyset.find(key) != _keyset.end());
   assert(_values.find(key) != _values.end());
   return _values.at(key);
+}
+
+void
+extra_state::set_var(std::string const& key, var const& val)
+{
+  if(_keyset.find(key) != _keyset.end())
+    _values[key] = val;
 }
 
 int 

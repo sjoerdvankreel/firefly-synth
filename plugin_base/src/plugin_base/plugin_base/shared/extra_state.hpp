@@ -11,7 +11,7 @@
 namespace plugin_base {
 
 class extra_state_listener {
-  virtual void extra_state_changed(std::string const& key) = 0;
+  virtual void extra_state_changed() = 0;
 };
 
 // per-instance controller state
@@ -22,16 +22,18 @@ class extra_state final {
 
 public:
   INF_PREVENT_ACCIDENTAL_COPY(extra_state);
-  std::set<std::string> const& keyset() const { return _keyset; }
   extra_state(std::set<std::string> const& keyset) : _keyset(keyset) {}
 
   void clear() { _values.clear(); }
-  void add_listener(extra_state_listener* listener);
-  void remove_listener(extra_state_listener* listener);
+  std::set<std::string> const& keyset() const { return _keyset; }
+  bool contains_key(std::string const& key) const { return _values.find(key) != _values.end(); }
 
   void set_num(std::string const& key, int val);
   void set_var(std::string const& key, juce::var const& val);
   void set_text(std::string const& key, std::string const& val);
+
+  void remove_listener(std::string const& key);
+  void add_listener(std::string const& key, extra_state_listener* listener);
 
   juce::var get_var(std::string const& key) const;
   int get_num(std::string const& key, int default_) const;
