@@ -10,9 +10,6 @@ using namespace juce;
 
 namespace plugin_base {
 
-// TODO
-// load/save with headers
-
 // file format
 static int const file_version = 1;
 static std::string const file_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
@@ -51,21 +48,37 @@ wrap_json_with_meta(plugin_topo const& topo, var const& json)
   meta->setProperty("plugin_version_major", topo.version_major);
   meta->setProperty("plugin_version_minor", topo.version_minor);  
 
+  auto checked = std::make_unique<DynamicObject>();
+  checked->setProperty("meta", var(meta.release()));
+  checked->setProperty("content", json);
+
+  // checksum so on load we can assume integrity of the block 
+  // instead of doing lots of structural json validation
+  var checked_var(checked.release());
+  String checked_text(JSON::toString(checked_var));
   auto result = std::make_unique<DynamicObject>();
-  result->setProperty("meta", var(meta.release()));
-  result->setProperty("content", json);
+  result->setProperty("checksum", var(MD5(checked_text.toUTF8()).toHexString()));
+  result->setProperty("checked", checked_var);
   return result;
 }
 
 static load_result
 unwrap_json_from_meta(plugin_topo const& topo, var const& json, var& result)
 {
-  if(!json.hasProperty("content"))
+  if(!json.hasProperty("checksum"))
+    return load_result("Invalid checksum.");
+  if (!json.hasProperty("checked"))
+    return load_result("Invalid checked.");
+  if (json["checksum"] != MD5(JSON::toString(json["checked"]).toUTF8()).toHexString())
+    return load_result("Invalid checksum.");
+
+  auto const& checked = json["checked"];
+  if(!checked.hasProperty("content"))
     return load_result("Invalid content.");
-  if(!json.hasProperty("meta"))
+  if(!checked.hasProperty("meta"))
     return load_result("Invalid meta data.");
 
-  auto const& meta = json["meta"];
+  auto const& meta = checked["meta"];
   if (!meta.hasProperty("file_magic") || meta["file_magic"] != file_magic)
     return load_result("Invalid file magic.");
   if (!meta.hasProperty("file_version") || (int)meta["file_version"] > file_version)
@@ -78,7 +91,7 @@ unwrap_json_from_meta(plugin_topo const& topo, var const& json, var& result)
     if ((int)meta["plugin_version_minor"] > topo.version_minor)
       return load_result("Invalid plugin version.");
 
-  result = json["content"];
+  result = checked["content"];
   return load_result();
 }
 
