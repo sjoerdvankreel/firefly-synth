@@ -40,36 +40,82 @@ load_json_from_buffer(std::vector<char> const& buffer, var& json)
   return load_result();
 }
 
-std::vector<char>
-plugin_io_save_extra(extra_state const& state)
+static std::unique_ptr<DynamicObject>
+wrap_json_with_meta(plugin_topo const& topo, var const& json)
 {
-  auto json = save_extra_internal(state);
+  auto meta = std::make_unique<DynamicObject>();
+  meta->setProperty("file_magic", var(file_magic));
+  meta->setProperty("file_version", var(file_version));
+  meta->setProperty("plugin_id", String(topo.tag.id));
+  meta->setProperty("plugin_name", String(topo.tag.name));
+  meta->setProperty("plugin_version_major", topo.version_major);
+  meta->setProperty("plugin_version_minor", topo.version_minor);  
+
+  auto result = std::make_unique<DynamicObject>();
+  result->setProperty("meta", var(meta.release()));
+  result->setProperty("content", json);
+  return result;
+}
+
+static load_result
+unwrap_json_from_meta(plugin_topo const& topo, var const& json, var& result)
+{
+  if(!json.hasProperty("content"))
+    return load_result("Invalid content.");
+  if(!json.hasProperty("meta"))
+    return load_result("Invalid meta data.");
+
+  auto const& meta = json["meta"];
+  if (!meta.hasProperty("file_magic") || json["file_magic"] != file_magic)
+    return load_result("Invalid file magic.");
+  if (!meta.hasProperty("file_version") || (int)json["file_version"] > file_version)
+    return load_result("Invalid file version.");
+  if (meta["plugin_id"] != topo.tag.id)
+    return load_result("Invalid plugin id.");
+  if ((int)meta["plugin_version_major"] > topo.version_major)
+    return load_result("Invalid plugin version.");
+  if ((int)meta["plugin_version_major"] == topo.version_major)
+    if ((int)meta["plugin_version_minor"] > topo.version_minor)
+      return load_result("Invalid plugin version.");
+
+  result = json["content"];
+  return load_result();
+}
+
+std::vector<char>
+plugin_io_save_extra(plugin_topo const& topo, extra_state const& state)
+{
+  auto json = wrap_json_with_meta(topo, var(save_extra_internal(state).release()));
   return release_json_to_buffer(std::move(json));
 }
 
 std::vector<char>
 plugin_io_save_state(plugin_state const& state)
 {
-  auto json = save_state_internal(state);
+  auto json = wrap_json_with_meta(*state.desc().plugin, var(save_state_internal(state).release()));
   return release_json_to_buffer(std::move(json));
-}
-
-load_result
-plugin_io_load_extra(std::vector<char> const& data, extra_state& state)
-{
-  var json;
-  auto result = load_json_from_buffer(data, json);
-  if (!result.ok()) return result;
-  return load_extra_internal(json, state);
 }
 
 load_result
 plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
 {
   var json;
+  var content;
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
-  return load_state_internal(json, state);
+  result = unwrap_json_from_meta(*state.desc().plugin, json, content);
+  return load_state_internal(content, state);
+}
+
+load_result
+plugin_io_load_extra(plugin_topo const& topo, std::vector<char> const& data, extra_state& state)
+{
+  var json;
+  var content;
+  auto result = load_json_from_buffer(data, json);
+  if (!result.ok()) return result;
+  result = unwrap_json_from_meta(topo, json, content);
+  return load_extra_internal(content, state);
 }
 
 load_result

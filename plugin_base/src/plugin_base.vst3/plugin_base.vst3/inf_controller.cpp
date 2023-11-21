@@ -35,19 +35,19 @@ inf_controller::createView(char const* name)
   return _editor = new inf_editor(this);
 }
 
-tresult PLUGIN_API 
-inf_controller::setState(IBStream* state)
+tresult PLUGIN_API
+inf_controller::getState(IBStream* state)
 {
-  if (!plugin_io_load_extra(load_ibstream(state), _extra_state).ok())
-    return kResultFalse;
-  return kResultOk;
+  std::vector<char> data(plugin_io_save_extra(*_gui_state.desc().plugin, _extra_state));
+  return state->write(data.data(), data.size());
 }
 
 tresult PLUGIN_API 
-inf_controller::getState(IBStream* state)
+inf_controller::setState(IBStream* state)
 {
-  std::vector<char> data(plugin_io_save_extra(_extra_state));
-  return state->write(data.data(), data.size());
+  if (!plugin_io_load_extra(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
+    return kResultFalse;
+  return kResultOk;
 }
 
 tresult PLUGIN_API

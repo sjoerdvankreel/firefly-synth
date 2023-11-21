@@ -23,7 +23,6 @@ public gui_listener
   plugin_state _gui_state = {};
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
-  plugin_topo_gui const* const _gui_topo = {};
 
 public: 
   OBJ_METHODS(inf_controller, EditControllerEx1)
@@ -35,8 +34,7 @@ public:
 
   inf_controller(plugin_desc const* desc): 
   _gui_state(desc, true), 
-  _extra_state(gui_extra_state_keyset(*desc->plugin)), 
-  _gui_topo(&desc->plugin->gui) {}
+  _extra_state(gui_extra_state_keyset(*desc->plugin)) {}
 
   plugin_state& gui_state() { return _gui_state; }
   extra_state& extra_state() { return _extra_state; }

@@ -21,10 +21,11 @@ struct load_result
   load_result(std::string const& error): error(error) {}
 };
 
-std::vector<char> plugin_io_save_extra(extra_state const& state);
 std::vector<char> plugin_io_save_state(plugin_state const& state);
-load_result plugin_io_load_extra(std::vector<char> const& data, extra_state& state);
 load_result plugin_io_load_state(std::vector<char> const& data, plugin_state& state);
+std::vector<char> plugin_io_save_extra(plugin_topo const& topo, extra_state const& state);
+load_result plugin_io_load_extra(plugin_topo const& topo, std::vector<char> const& data, extra_state& state);
+
 std::vector<char> plugin_io_save_all(plugin_state const& plugin, extra_state const& extra);
 load_result plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_state& extra);
 load_result plugin_io_load_file_all(std::filesystem::path const& path, plugin_state& plugin, extra_state& extra);
