@@ -164,13 +164,13 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
   result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content);
   if (!result.ok()) return result;
   auto extra_state_load = extra_state(extra.keyset());
-  auto result = load_extra_internal(extra_content, extra_state_load);
+  result = load_extra_internal(extra_content, extra_state_load);
   if (!result.ok()) return result;
 
   var plugin_content;
   result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content);
   if (!result.ok()) return result;
-  result = load_state_internal(content["plugin"], plugin);
+  result = load_state_internal(plugin_content, plugin);
   if(!result.ok()) return result;
   for(auto k: extra_state_load.keyset())
     if(extra_state_load.contains_key(k))

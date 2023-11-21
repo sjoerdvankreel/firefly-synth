@@ -4,6 +4,15 @@ using namespace juce;
 
 namespace plugin_base {
 
+tab_component::
+~tab_component()
+{ _state->remove_listener(_storage_id); }
+
+tab_component::
+tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation) :
+juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id)
+{ state->add_listener(storage_id, this); }
+
 void 
 autofit_viewport::resized()
 {

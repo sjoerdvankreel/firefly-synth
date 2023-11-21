@@ -32,14 +32,22 @@ public:
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
 };
 
-// tab component with change listener
+// tab component with persistent selection and change listener
 class tab_component :
-public juce::TabbedComponent
+public juce::TabbedComponent,
+public extra_state_listener
 {
+  extra_state* const _state;
+  std::string const _storage_id;
 public:
   std::function<void(int)> tab_changed;
-  tab_component(juce::TabbedButtonBar::Orientation orientation): juce::TabbedComponent(orientation) {}
-  void currentTabChanged(int index, juce::String const& name) { if(tab_changed != nullptr) tab_changed(index); }
+  ~tab_component();
+  tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation);
+
+  void extra_state_changed() override
+  { setCurrentTabIndex(std::clamp(_state->get_num(_storage_id, 0), 0, getNumTabs())); }
+  void currentTabChanged(int index, juce::String const& name) 
+  { if (tab_changed != nullptr) tab_changed(index); }
 };
 
 // rounded rectangle container

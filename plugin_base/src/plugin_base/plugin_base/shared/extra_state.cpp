@@ -5,6 +5,14 @@ using namespace juce;
 
 namespace plugin_base {
 
+void 
+extra_state::fire_changed(std::string const& key)
+{
+  auto iter = _listeners.find(key);
+  if(iter != _listeners.end())
+    iter->second->extra_state_changed();
+}
+
 void
 extra_state::remove_listener(std::string const& key)
 {
@@ -26,6 +34,7 @@ extra_state::set_num(std::string const& key, int val)
 {
   assert(_keyset.find(key) != _keyset.end());
   _values[key] = val;
+  fire_changed(key);
 }
 
 void 
@@ -33,6 +42,7 @@ extra_state::set_text(std::string const& key, std::string const& val)
 {
   assert(_keyset.find(key) != _keyset.end());
   _values[key] = String(val);
+  fire_changed(key);
 }
 
 var
@@ -46,8 +56,9 @@ extra_state::get_var(std::string const& key) const
 void
 extra_state::set_var(std::string const& key, var const& val)
 {
-  if(_keyset.find(key) != _keyset.end())
-    _values[key] = val;
+  if(_keyset.find(key) == _keyset.end()) return;
+  _values[key] = val;
+  fire_changed(key);
 }
 
 int 

@@ -91,7 +91,7 @@ private:
   Component& make_modules(module_desc const* slots);
   Component& make_module_section(module_section_gui const& section);
   Component& make_custom_section(custom_section_gui const& section);
-  tab_component& make_tab_component(std::string const& title, int module);
+  tab_component& make_tab_component(std::string const& id, std::string const& title, int module);
   void add_component_tab(juce::TabbedComponent& tc, juce::Component& child, int module, std::string const& title);
 };
 

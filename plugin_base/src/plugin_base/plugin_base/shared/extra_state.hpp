@@ -11,6 +11,7 @@
 namespace plugin_base {
 
 class extra_state_listener {
+public:
   virtual void extra_state_changed() = 0;
 };
 
@@ -19,6 +20,8 @@ class extra_state final {
   std::set<std::string> _keyset = {};
   std::map<std::string, juce::var> _values = {};
   std::map<std::string, extra_state_listener*> _listeners = {};
+
+  void fire_changed(std::string const& key);
 
 public:
   INF_PREVENT_ACCIDENTAL_COPY(extra_state);
