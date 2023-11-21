@@ -503,7 +503,6 @@ plugin_gui::load_patch()
     if (path.length() == 0) return;
 
     auto icon = MessageBoxIconType::WarningIcon;
-    // todo set the state
     auto result = plugin_io_load_file_all(path.toStdString(), *_gui_state, *_extra_state);
     if (result.error.size())
     {
