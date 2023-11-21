@@ -15,7 +15,7 @@ release_count > 0 asserts
 demo synth:
 rename the repository
 graphs
-velocity
+velocity + note as modsource
 clean up the dsp
 on-note type stuff
 name it firefly?
@@ -30,10 +30,8 @@ audio output graph
 any output graph
 swap module incl swap routing
 move routing matrix stuff to base
-store selected tab
 factory preset
 right align output labels
-do the checksum
 
 * get some linux folks to comment (ycollete?)
 * continuing
