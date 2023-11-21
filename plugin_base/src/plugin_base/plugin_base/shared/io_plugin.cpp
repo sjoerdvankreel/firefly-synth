@@ -66,9 +66,9 @@ unwrap_json_from_meta(plugin_topo const& topo, var const& json, var& result)
     return load_result("Invalid meta data.");
 
   auto const& meta = json["meta"];
-  if (!meta.hasProperty("file_magic") || json["file_magic"] != file_magic)
+  if (!meta.hasProperty("file_magic") || meta["file_magic"] != file_magic)
     return load_result("Invalid file magic.");
-  if (!meta.hasProperty("file_version") || (int)json["file_version"] > file_version)
+  if (!meta.hasProperty("file_version") || (int)meta["file_version"] > file_version)
     return load_result("Invalid file version.");
   if (meta["plugin_id"] != topo.tag.id)
     return load_result("Invalid plugin id.");
