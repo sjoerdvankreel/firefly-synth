@@ -14,8 +14,8 @@ namespace plugin_base {
 // load/save with headers
 
 // file format
-static int const version = 1;
-static std::string const magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
+static int const file_version = 1;
+static std::string const file_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
 static load_result load_extra_internal(var const& json, extra_state& state);
 static load_result load_state_internal(var const& json, plugin_state& state);
@@ -144,18 +144,10 @@ load_extra_internal(var const& json, extra_state& state)
 std::unique_ptr<DynamicObject>
 save_state_internal(plugin_state const& state)
 {
-  auto root = std::make_unique<DynamicObject>();
-  root->setProperty("magic", var(magic));
-  root->setProperty("version", var(version));
-
+  var modules;
   auto plugin = std::make_unique<DynamicObject>();
-  plugin->setProperty("id", String(state.desc().plugin->tag.id));
-  plugin->setProperty("name", String(state.desc().plugin->tag.name));
-  plugin->setProperty("version_major", state.desc().plugin->version_major);
-  plugin->setProperty("version_minor", state.desc().plugin->version_minor);
   
   // store some topo info so we can provide meaningful warnings
-  var modules;
   for (int m = 0; m < state.desc().plugin->modules.size(); m++)
   {
     var params;
@@ -177,7 +169,7 @@ save_state_internal(plugin_state const& state)
     module->setProperty("params", params);
     modules.append(var(module.release()));
   }  
-  plugin->setProperty("modules", modules); 
+  plugin->setProperty("modules", modules);
 
   // dump the textual values in 4d format
   var module_states;
@@ -211,15 +203,7 @@ save_state_internal(plugin_state const& state)
     module_states.append(var(module_state.release()));
   }  
   plugin->setProperty("state", module_states);
-
-  // checksum so on load we can assume integrity of the plugin block 
-  // instead of doing lots of structural json validation
-  var plugin_var(plugin.release());
-  String plugin_text(JSON::toString(plugin_var));
-  root->setProperty("checksum", var(MD5(plugin_text.toUTF8()).toHexString()));
-
-  root->setProperty("state", plugin_var);
-  return root;
+  return plugin;
 }
 
 load_result
@@ -228,32 +212,17 @@ load_state_internal(
 {
   if(!json.hasProperty("state"))
     return load_result("Invalid plugin.");
-  if(!json.hasProperty("checksum"))
-    return load_result("Invalid checksum.");
-  if(!json.hasProperty("magic") || json["magic"] != magic)
-    return load_result("Invalid magic.");
-  if(!json.hasProperty("version") || (int)json["version"] > version)
-    return load_result("Invalid version.");
-
-  var plugin = json["plugin"];
-  if(plugin["id"] != state.desc().plugin->tag.id)
-    return load_result("Invalid plugin id.");
-  if((int)plugin["version_major"] > state.desc().plugin->version_major)
-    return load_result("Invalid plugin version.");
-  if((int)plugin["version_major"] == state.desc().plugin->version_major)
-    if((int)plugin["version_minor"] > state.desc().plugin->version_minor)
-      return load_result("Invalid plugin version.");
-  if(json["checksum"] != MD5(JSON::toString(plugin).toUTF8()).toHexString())
-    return load_result("Invalid checksum.");
-
+  if (!json.hasProperty("modules"))
+    return load_result("Invalid plugin.");
+  
   // good to go - only warnings from now on
   load_result result;
   state.init(state_init_type::empty);
-  for(int m = 0; m < plugin["modules"].size(); m++)
+  for(int m = 0; m < json["modules"].size(); m++)
   {
     // check for old module not found
-    auto module_id = plugin["modules"][m]["id"].toString().toStdString();
-    auto module_name = plugin["modules"][m]["name"].toString().toStdString();
+    auto module_id = json["modules"][m]["id"].toString().toStdString();
+    auto module_name = json["modules"][m]["name"].toString().toStdString();
     auto module_iter = state.desc().module_id_to_index.find(module_id);
     if (module_iter == state.desc().module_id_to_index.end())
     {
@@ -262,16 +231,16 @@ load_state_internal(
     }
 
     // check for changed module slot count
-    var module_slot_count = plugin["modules"][m]["slot_count"];
+    var module_slot_count = json["modules"][m]["slot_count"];
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
     if ((int)module_slot_count != new_module.info.slot_count)
       result.warnings.push_back("Module '" + new_module.info.tag.name + "' changed slot count.");
 
-    for (int p = 0; p < plugin["modules"][m]["params"].size(); p++)
+    for (int p = 0; p < json["modules"][m]["params"].size(); p++)
     {
       // check for old param not found
-      auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
-      auto param_name = plugin["modules"][m]["params"][p]["name"].toString().toStdString();
+      auto param_id = json["modules"][m]["params"][p]["id"].toString().toStdString();
+      auto param_name = json["modules"][m]["params"][p]["name"].toString().toStdString();
       auto param_iter = state.desc().param_mappings.id_to_index.at(module_id).find(param_id);
       if (param_iter == state.desc().param_mappings.id_to_index.at(module_id).end())
       {
@@ -280,7 +249,7 @@ load_state_internal(
       }
 
       // check for changed param slot count
-      var param_slot_count = plugin["modules"][m]["params"][p]["slot_count"];
+      var param_slot_count = json["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
       if ((int)param_slot_count != new_param.info.slot_count)
         result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "' slot count changed.");
@@ -288,27 +257,27 @@ load_state_internal(
   }
 
   // copy over old state, push parse warnings as we go
-  for (int m = 0; m < plugin["state"].size(); m++)
+  for (int m = 0; m < json["state"].size(); m++)
   {
-    auto module_id = plugin["modules"][m]["id"].toString().toStdString();
+    auto module_id = json["modules"][m]["id"].toString().toStdString();
     auto module_iter = state.desc().module_id_to_index.find(module_id);
     if(module_iter == state.desc().module_id_to_index.end()) continue;
-    var module_slots = plugin["state"][m]["slots"];
+    var module_slots = json["state"][m]["slots"];
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
 
     for(int mi = 0; mi < module_slots.size() && mi < new_module.info.slot_count; mi++)
       for (int p = 0; p < module_slots[mi]["params"].size(); p++)
       {
-        auto param_id = plugin["modules"][m]["params"][p]["id"].toString().toStdString();
+        auto param_id = json["modules"][m]["params"][p]["id"].toString().toStdString();
         auto param_iter = state.desc().param_mappings.id_to_index.at(module_id).find(param_id);
         if (param_iter == state.desc().param_mappings.id_to_index.at(module_id).end()) continue;
-        var param_slots = plugin["state"][m]["slots"][mi]["params"][p]["slots"];
+        var param_slots = json["state"][m]["slots"][mi]["params"][p]["slots"];
         auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
         for (int pi = 0; pi < param_slots.size() && pi < new_param.info.slot_count; pi++)
         {
           plain_value plain;
           int index = state.desc().param_mappings.topo_to_index[new_module.info.index][mi][new_param.info.index][pi];
-          std::string text = plugin["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
+          std::string text = json["state"][m]["slots"][mi]["params"][p]["slots"][pi].toString().toStdString();
           if(state.text_to_plain_at_index(true, index, text, plain))
             state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, plain);
           else
