@@ -1,6 +1,7 @@
 #include <plugin_base/desc/dims.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/shared/value.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 
 #include <plugin_base.vst3/utility.hpp>
 #include <plugin_base.vst3/inf_param.hpp>
@@ -34,10 +35,25 @@ inf_controller::createView(char const* name)
   return _editor = new inf_editor(this);
 }
 
+tresult PLUGIN_API 
+inf_controller::setState(IBStream* state)
+{
+  if (!plugin_io_load_extra(load_ibstream(state), _extra_state).ok())
+    return kResultFalse;
+  return kResultOk;
+}
+
+tresult PLUGIN_API 
+inf_controller::getState(IBStream* state)
+{
+  std::vector<char> data(plugin_io_save_extra(_extra_state));
+  return state->write(data.data(), data.size());
+}
+
 tresult PLUGIN_API
 inf_controller::setComponentState(IBStream* state)
 {
-  if (!load_plugin_state(state, gui_state()))
+  if (!plugin_io_load_state(load_ibstream(state), gui_state()).ok())
     return kResultFalse;
   for (int p = 0; p < gui_state().desc().param_count; p++)
     gui_changed(p, gui_state().get_plain_at_index(p));

@@ -35,18 +35,18 @@ _engine(desc, nullptr, nullptr)
 }
 
 tresult PLUGIN_API
-inf_component::setState(IBStream* state)
-{
-  if (load_plugin_state(state, _engine.state()))
-    return kResultOk;
-  return kResultFalse;
-}
-
-tresult PLUGIN_API
 inf_component::getState(IBStream* state)
 {
   std::vector<char> data(plugin_io_save_state(_engine.state()));
   return state->write(data.data(), data.size());
+}
+
+tresult PLUGIN_API
+inf_component::setState(IBStream* state)
+{
+  if (plugin_io_load_state(load_ibstream(state), _engine.state()).ok())
+    return kResultOk;
+  return kResultFalse;
 }
 
 tresult PLUGIN_API
