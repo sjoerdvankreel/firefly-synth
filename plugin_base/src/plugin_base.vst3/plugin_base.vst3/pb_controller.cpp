@@ -126,7 +126,8 @@ pb_controller::context_menu(int param_id) const
   result->clicked = [vst_menu](int tag) { 
     IContextMenu::Item item = {};
     IContextMenuTarget* target = nullptr;
-    assert(0 <= tag && tag < vst_menu->getItemCount());
+    if(tag < 0) return; // can happen on close
+    assert(tag < vst_menu->getItemCount());
     if(vst_menu->getItem(tag, item, &target) != kResultOk) return;
     if(target == nullptr) return;
     target->executeMenuItem(item.tag);
