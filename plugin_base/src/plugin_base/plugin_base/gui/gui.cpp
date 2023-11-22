@@ -68,6 +68,7 @@ std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo)
 {
   std::set<std::string> result = {};
+  result.insert(factory_preset_key);
   for (int i = 0; i < topo.modules.size(); i++)
     if (topo.modules[i].info.slot_count > 1)
       result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);

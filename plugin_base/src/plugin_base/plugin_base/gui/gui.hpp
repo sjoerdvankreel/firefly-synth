@@ -17,6 +17,7 @@ namespace plugin_base {
 
 class tab_component;
 class grid_component;
+inline std::string const factory_preset_key = "factory_preset";
 
 std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo);
