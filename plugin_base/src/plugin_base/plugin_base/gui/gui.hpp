@@ -41,7 +41,7 @@ public juce::Component
 public:
   INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   ~plugin_gui() { setLookAndFeel(nullptr); }
-  plugin_gui(plugin_state* gui_state, extra_state* extra_state);
+  plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state);
 
   void load_patch();
   void save_patch();
@@ -64,12 +64,13 @@ public:
 
   void remove_listener(gui_listener* listener);
   plugin_state* gui_state() const { return _gui_state; }
+  extra_state* extra_state() const { return _extra_state; }
   void add_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
   
 private:
   lnf _lnf;
   plugin_state* const _gui_state;
-  extra_state* const _extra_state;
+  plugin_base::extra_state* const _extra_state;
   std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};

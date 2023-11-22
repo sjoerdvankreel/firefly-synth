@@ -17,11 +17,18 @@ namespace plugin_base {
 
 struct plugin_desc;
 
+// from resources folder
+struct factory_preset
+{
+  std::string name;
+  std::string path;
+};
+
 // differences between plugin formats
 struct format_config {
+  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
   virtual std::filesystem::path 
   resources_folder(std::filesystem::path const& binary_path) const = 0;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
 };
 
 // mapping plugin level midi source index
@@ -93,6 +100,8 @@ public:
   std::map<std::string, int> module_id_to_index = {};
 
   void validate() const;
+  std::vector<factory_preset> presets() const;
+
   INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
   plugin_desc(plugin_topo const* plugin, format_config const* config);
 

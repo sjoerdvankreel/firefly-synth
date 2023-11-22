@@ -79,12 +79,13 @@ class menu_button :
 public juce::TextButton
 {
   int _selected_index = 0;
-  std::vector<std::string> const _items;
+  std::vector<std::string> _items;
 protected:
   void clicked() override;
 public:
   std::function<void(int)> selected_index_changed;
-  menu_button(std::vector<std::string> const& items): _items(items) {}
+  std::vector<std::string> const& get_items() const { return _items; }
+  void set_items(std::vector<std::string> const& items) { _items = items; }
   void set_selected_index(int index) { _selected_index = std::clamp(index, 0, (int)_items.size() - 1); }
 };
 
@@ -116,6 +117,20 @@ public:
 
   void textEditorTextChanged(juce::TextEditor&) override;
   void any_state_changed(int index, plain_value plain) override;
+};
+
+// binds factory preset to extra_state
+class preset_button:
+public menu_button,
+public extra_state_listener
+{
+  extra_state* const _state;
+  std::vector<factory_preset> _presets = {};
+  static inline std::string const preset_key = "factory_preset";
+public:
+  void extra_state_changed() override;
+  ~preset_button() { _state->remove_listener(preset_key); }
+  preset_button(plugin_desc const* desc, extra_state* state);
 };
 
 // binding_component that is additionally bound to a single parameter value

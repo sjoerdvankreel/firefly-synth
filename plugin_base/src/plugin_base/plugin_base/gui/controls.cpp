@@ -19,30 +19,30 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   }
 }
 
+void
+menu_button::clicked()
+{
+  PopupMenu menu;
+  menu.setLookAndFeel(&getLookAndFeel());
+  for (int i = 0; i < _items.size(); i++)
+    menu.addItem(i + 1, _items[i], true, i == _selected_index);
+  PopupMenu::Options options;
+  options = options.withTargetComponent(this);
+  menu.showMenuAsync(options, [this](int id) {
+    int index = id - 1;
+    if (index == _selected_index) return;
+    _selected_index = index;
+    if (selected_index_changed != nullptr)
+      selected_index_changed(index);
+    });
+}
+
 last_tweaked_label::
 last_tweaked_label(plugin_state const* state, std::string const& prefix):
 _state(state), _prefix(prefix)
 {
   state->add_any_listener(this);
   any_state_changed(0, state->get_plain_at_index(0));
-}
-
-void 
-menu_button::clicked()
-{
-  PopupMenu menu;
-  menu.setLookAndFeel(&getLookAndFeel());
-  for(int i = 0; i < _items.size(); i++)
-    menu.addItem(i + 1, _items[i], true, i == _selected_index);
-  PopupMenu::Options options;
-  options = options.withTargetComponent(this);
-  menu.showMenuAsync(options, [this](int id) {
-    int index = id - 1;
-    if(index == _selected_index) return;
-    _selected_index = index;
-    if(selected_index_changed != nullptr)
-      selected_index_changed(index);
-  });
 }
 
 void 
@@ -92,13 +92,35 @@ last_tweaked_editor::textEditorTextChanged(TextEditor& te)
   _updating = false;
 }
 
+preset_button::
+preset_button(plugin_desc const* desc, extra_state* state) :
+_state(state), _presets(desc->presets())
+{ 
+  set_items(vector_map(_presets, [](auto const& p) { return p.name; }));
+  extra_state_changed();
+  setButtonText("Preset");
+  selected_index_changed = [this](int index) {
+    index = std::clamp(index, 0, (int)get_items().size());
+    _state->set_text(preset_key, get_items()[index]);
+  };
+}
+
+void 
+preset_button::extra_state_changed()
+{
+  std::string selected_preset = _state->get_text(preset_key, "");
+  auto iter = std::find(get_items().begin(), get_items().end(), selected_preset);
+  if (iter != get_items().end())
+    set_selected_index((int)(iter - get_items().begin()));
+}
+
 image_component::
 image_component(
   format_config const* config, 
   std::string const& file_name, 
   RectanglePlacement placement)
 {
-  String path(get_resource_location(config, resource_folder_ui, file_name).string());
+  String path((get_resource_location(config) / resource_folder_ui / file_name).string());
   setImage(ImageCache::getFromFile(path), placement);
 }
 

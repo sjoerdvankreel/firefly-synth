@@ -41,7 +41,7 @@ _desc(desc), _custom_section(custom_section), _module_section(module_section), _
   assert(module_section == -1 || module >= 0);
   assert(custom_section == -1 || module == -1);
 
-  auto font_path = get_resource_location(desc->config, resource_folder_ui, desc->plugin->gui.typeface_file_name);
+  auto font_path = get_resource_location(desc->config) / resource_folder_ui / desc->plugin->gui.typeface_file_name;
   std::vector<char> typeface = file_load(font_path);
   assert(typeface.size());
   _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());

@@ -1,4 +1,5 @@
 #include <plugin_base/desc/plugin.hpp>
+#include <plugin_base/shared/utility.hpp> 
 #include <set>
 
 namespace plugin_base {
@@ -110,6 +111,17 @@ plugin(plugin), config(config)
   param_count = param_global;
   midi_count = midi_source_global;
   module_count = modules.size();
+}
+
+std::vector<factory_preset>
+plugin_desc::presets() const
+{
+  std::vector<factory_preset> result;
+  auto preset_folder = get_resource_location(config) / resource_folder_presets;
+  for (auto const& entry : std::filesystem::directory_iterator{ preset_folder })
+    if (entry.is_regular_file() && entry.path().extension().string() == plugin->extension)
+      result.push_back({ entry.path().stem().string(), entry.path().string() });
+  return result;
 }
 
 void

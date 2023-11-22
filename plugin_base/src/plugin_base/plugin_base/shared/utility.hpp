@@ -26,6 +26,9 @@
 
 namespace plugin_base {
 
+struct format_config;
+inline char constexpr resource_folder_ui[] = "ui";
+inline char constexpr resource_folder_presets[] = "presets";
 inline float constexpr pi32 = 3.14159265358979323846264338327950288f;
 inline double constexpr pi64 = 3.14159265358979323846264338327950288;
 
@@ -46,6 +49,8 @@ public:
 double seconds_since_epoch();
 inline void debug_breakable() {};
 std::vector<char> file_load(std::filesystem::path const& path);
+std::filesystem::path get_resource_location(format_config const* config);
+
 
 template <class T> std::string 
 to_8bit_string(T const* source)

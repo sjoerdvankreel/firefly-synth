@@ -1,7 +1,11 @@
+#include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <juce_core/juce_core.h>
 
 #include <chrono>
 #include <fstream>
+
+using namespace juce;
 
 namespace plugin_base {
 
@@ -10,6 +14,13 @@ seconds_since_epoch()
 {
   auto ticks = std::chrono::system_clock::now().time_since_epoch();
   return std::chrono::duration_cast<std::chrono::nanoseconds>(ticks).count() / 1000000000.0;
+}
+
+std::filesystem::path
+get_resource_location(format_config const* config)
+{
+  File file(File::getSpecialLocation(File::currentExecutableFile));
+  return config->resources_folder(file.getFullPathName().toStdString());
 }
 
 std::vector<char>
