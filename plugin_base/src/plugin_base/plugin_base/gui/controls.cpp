@@ -31,6 +31,7 @@ void
 menu_button::clicked()
 {
   PopupMenu menu;
+  menu.setLookAndFeel(&getLookAndFeel());
   for(int i = 0; i < _items.size(); i++)
     menu.addItem(i + 1, _items[i], true, i == _selected_index);
   PopupMenu::Options options;
