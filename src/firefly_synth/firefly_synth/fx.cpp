@@ -4,14 +4,14 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 
-#include <infernal_synth/synth.hpp>
+#include <firefly_synth/synth.hpp>
 
 #include <cmath>
 #include <algorithm>
 
 using namespace plugin_base;
 
-namespace infernal_synth {
+namespace firefly_synth {
 
 enum { section_main };
 enum { type_off, type_lpf, type_hpf, type_delay };

@@ -5,14 +5,14 @@
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/shared/utility.hpp>
 
-#include <infernal_synth/synth.hpp>
+#include <firefly_synth/synth.hpp>
 
 #include <cmath>
 #include <algorithm>
 
 using namespace plugin_base;
 
-namespace infernal_synth {
+namespace firefly_synth {
 
 static int constexpr route_count = 6;
 

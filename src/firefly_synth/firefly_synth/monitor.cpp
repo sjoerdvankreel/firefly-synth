@@ -2,13 +2,13 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 
-#include <infernal_synth/synth.hpp>
+#include <firefly_synth/synth.hpp>
 #include <array>
 #include <algorithm>
 
 using namespace plugin_base;
 
-namespace infernal_synth {
+namespace firefly_synth {
 
 enum { section_main };
 enum { param_gain, param_voices, param_cpu, param_threads };

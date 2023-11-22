@@ -8,7 +8,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <vector>
 
-namespace infernal_synth {
+namespace firefly_synth {
 
 class audio_matrix_engine;
 typedef plugin_base::jarray<

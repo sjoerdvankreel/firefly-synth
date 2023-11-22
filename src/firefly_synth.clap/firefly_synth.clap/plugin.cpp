@@ -1,5 +1,5 @@
-#include <infernal_synth/synth.hpp>
-#include <infernal_synth/plugin.hpp>
+#include <firefly_synth/synth.hpp>
+#include <firefly_synth/plugin.hpp>
 
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/gui/utility.hpp>
@@ -10,7 +10,7 @@
 #include <cstring>
 
 using namespace plugin_base;
-using namespace infernal_synth;
+using namespace firefly_synth;
 using namespace plugin_base::clap;
 
 #if INF_IS_FX

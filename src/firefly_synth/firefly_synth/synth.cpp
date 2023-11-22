@@ -1,5 +1,5 @@
-#include <infernal_synth/synth.hpp>
-#include <infernal_synth/plugin.hpp>
+#include <firefly_synth/synth.hpp>
+#include <firefly_synth/plugin.hpp>
 
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/topo/support.hpp>
@@ -9,7 +9,7 @@
 using namespace juce;
 using namespace plugin_base;
 
-namespace infernal_synth {
+namespace firefly_synth {
 
 static gui_colors
 make_section_colors(Colour const& c)

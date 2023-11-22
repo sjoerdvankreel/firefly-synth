@@ -1,5 +1,5 @@
-#include <infernal_synth/synth.hpp>
-#include <infernal_synth/plugin.hpp>
+#include <firefly_synth/synth.hpp>
+#include <firefly_synth/plugin.hpp>
 
 #include <plugin_base/gui/utility.hpp>
 #include <plugin_base.vst3/utility.hpp>
@@ -13,7 +13,7 @@
 using namespace Steinberg;
 using namespace Steinberg::Vst;
 using namespace plugin_base;
-using namespace infernal_synth;
+using namespace firefly_synth;
 using namespace plugin_base::vst3;
 
 #if INF_IS_FX
