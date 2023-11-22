@@ -49,10 +49,11 @@ forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
 pb_plugin::
 pb_plugin(
   clap_plugin_descriptor const* clap_desc, 
-  clap_host const* host, plugin_desc const* desc):
+  clap_host const* host, plugin_topo const* topo):
 Plugin(clap_desc, host), 
-_engine(desc, forward_thread_pool_voice_processor, this), 
-_extra_state(gui_extra_state_keyset(*desc->plugin)), _gui_state(desc, true),
+_desc(std::make_unique<plugin_desc>(topo, this)),
+_engine(_desc.get(), forward_thread_pool_voice_processor, this),
+_extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 { _block_automation_seen.resize(_engine.state().desc().param_count); }

@@ -17,14 +17,12 @@ using namespace firefly_synth;
 using namespace plugin_base::vst3;
 
 static std::unique_ptr<plugin_topo> _topo = {};
-static std::unique_ptr<plugin_desc> _desc = {};
 #define FF_SYNTH_CONTROLLER_ID "E5EC671A225942D5B03FE8131DB8CD46"
 
 bool
 DeinitModule()
 {
   juce::shutdownJuce_GUI();
-  _desc.reset();
   _topo.reset();
   return true;
 }
@@ -33,7 +31,6 @@ bool
 InitModule() 
 { 
   _topo = synth_topo();
-  _desc = std::make_unique<plugin_desc>(_topo.get(), vst3_config::instance());
   juce::initialiseJuce_GUI();
   return true; 
 }
@@ -41,7 +38,7 @@ InitModule()
 static FUnknown*
 controller_factory(void*)
 {
-  auto result = new pb_controller(_desc.get());
+  auto result = new pb_controller(_topo.get());
   return static_cast<IEditController*>(result);
 }
 
@@ -49,7 +46,7 @@ static FUnknown*
 component_factory(void*)
 {
   FUID controller_id(fuid_from_text(FF_SYNTH_CONTROLLER_ID));
-  auto result = new pb_component(_desc.get(), controller_id);
+  auto result = new pb_component(_topo.get(), controller_id);
   return static_cast<IAudioProcessor*>(result);
 }
 

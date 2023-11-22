@@ -32,13 +32,4 @@ public:
   explicit clap_value(double value) : _value(value) {}
 };
 
-struct clap_config:
-public format_config
-{
-  static inline clap_config const* instance() 
-  { static clap_config result; return &result; }
-  std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
-  { return binary_path.parent_path(); }
-};
-
 }

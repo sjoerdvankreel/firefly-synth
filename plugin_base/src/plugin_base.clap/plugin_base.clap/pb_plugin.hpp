@@ -19,10 +19,13 @@ public ::clap::helpers::Plugin<
   ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>,
 public gui_listener,
+public format_config,
 public juce::Timer
 {
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
 
+  // needs to be first, everyone else needs it
+  std::unique_ptr<plugin_desc> _desc;
   plugin_engine _engine;
   extra_state _extra_state;
   plugin_state _gui_state = {};
@@ -43,7 +46,7 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_plugin);
   pb_plugin(
     clap_plugin_descriptor const* clap_desc, 
-    clap_host const* host, plugin_desc const* desc);
+    clap_host const* host, plugin_topo const* topo);
   
   bool implementsGui() const noexcept override { return true; }
   bool implementsState() const noexcept override { return true; }
@@ -100,6 +103,10 @@ public:
   void gui_changing(int index, plain_value plain) override;
   void gui_end_changes(int index) override { push_to_audio(index, sync_event_type::end_edit); }
   void gui_begin_changes(int index) override { push_to_audio(index, sync_event_type::begin_edit); }
+
+  std::unique_ptr<host_context_menu> context_menu(int param_id) const override { return {}; }
+  std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
+  { return binary_path.parent_path(); }
 };
 
 }

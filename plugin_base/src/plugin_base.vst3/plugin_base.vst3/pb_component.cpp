@@ -13,8 +13,9 @@ using namespace Steinberg::Vst;
 namespace plugin_base::vst3 {
 
 pb_component::
-pb_component(plugin_desc const* desc, FUID const& controller_id) :
-_engine(desc, nullptr, nullptr)
+pb_component(plugin_topo const* topo, FUID const& controller_id) :
+_desc(std::make_unique<plugin_desc>(topo, nullptr)),
+_engine(_desc.get(), nullptr, nullptr)
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
@@ -22,9 +23,9 @@ _engine(desc, nullptr, nullptr)
   processContextRequirements.needContinousTimeSamples();
 
   // each midi source can be attached to at most 1 module instance (topo+slot)!
-  for(int m = 0; m < desc->modules.size(); m++)
+  for(int m = 0; m < _desc->modules.size(); m++)
   {
-    auto const& module = desc->modules[m];
+    auto const& module = _desc->modules[m];
     for(int ms = 0; ms < module.midi_sources.size(); ms++)
     {
       auto const& source = module.midi_sources[ms];

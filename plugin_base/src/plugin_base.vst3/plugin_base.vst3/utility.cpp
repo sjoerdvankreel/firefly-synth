@@ -1,5 +1,5 @@
-#include <plugin_base/shared/io_plugin.hpp>
 #include <plugin_base.vst3/utility.hpp>
+#include <plugin_base/shared/utility.hpp>
 
 using namespace Steinberg;
 
