@@ -24,7 +24,7 @@ enum {
 
 struct host_menu_item
 {
-  int id;
+  int tag;
   int flags;
   std::string name;
   std::vector<std::shared_ptr<host_menu_item>> children;
@@ -34,7 +34,7 @@ struct host_menu_item
 struct host_menu
 {
   host_menu_item root;
-  std::function<void(int id)> clicked;
+  std::function<void(int tag)> clicked;
 };
 
 // differences between plugin formats

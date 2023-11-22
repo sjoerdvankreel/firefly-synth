@@ -9,7 +9,10 @@
 #include <plugin_base.vst3/pb_controller.hpp>
 
 #include <base/source/fstring.h>
+#include <pluginterfaces/vst/ivstcontextmenu.h>
+
 #include <juce_events/juce_events.h>
+#include <stack>
 
 using namespace juce;
 using namespace Steinberg;
@@ -85,26 +88,48 @@ pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber 
 std::unique_ptr<host_menu>
 pb_controller::context_menu(int param_id) const
 {
-  int id = 1;
+  FUnknownPtr<IComponentHandler3> handler(componentHandler);
+  if (handler == nullptr) return {};
+  if (_editor == nullptr) return {};
+
+  ParamID id = param_id;
+  IContextMenuTarget* target;
+  IPtr<IContextMenu> vst_menu(handler->createContextMenu(_editor, &id));
   auto result = std::make_unique<host_menu>();
-  for (int i = 0; i < 2; i++)
+  std::stack<host_menu_item*> menu_stack;
+  menu_stack.push(&result->root);
+
+  for (int i = 0; i < vst_menu->getItemCount(); i++)
   {
-    auto submenu = result->root.children.emplace_back(std::make_shared<host_menu_item>());
-    submenu->name = std::to_string(i);
-    for(int j = 0; j < 3; j++)
-    {
-      auto item = submenu->children.emplace_back(std::make_shared<host_menu_item>());
-      item->name = std::to_string(j);
-      item->id = id++;
+    IContextMenu::Item vst_item;
+    if (vst_menu->getItem(i, vst_item, &target) != kResultOk) return {};
+    
+    auto item = menu_stack.top()->children.emplace_back(std::make_shared<host_menu_item>());
+    item->tag = i;
+    item->name = to_8bit_string(vst_item.name);
+    if((vst_item.flags & IContextMenuItem::kIsChecked) == IContextMenuItem::kIsChecked)
+      item->flags |= host_menu_flags_checked;
+    if ((vst_item.flags & IContextMenuItem::kIsDisabled) != IContextMenuItem::kIsDisabled)
+      item->flags |= host_menu_flags_enabled;
+    if ((vst_item.flags & IContextMenuItem::kIsSeparator) == IContextMenuItem::kIsSeparator)
+      item->flags |= host_menu_flags_separator;
+    if ((vst_item.flags & IContextMenuItem::kIsGroupStart) == IContextMenuItem::kIsGroupStart)
+      menu_stack.push(item.get());
+    if ((vst_item.flags & IContextMenuItem::kIsGroupStart) == IContextMenuItem::kIsGroupEnd)
+    { 
+      assert(menu_stack.size());
+      menu_stack.pop();
     }
-    submenu->flags = host_menu_flags_enabled;
-    submenu->children[0]->flags = host_menu_flags_checked;
-    submenu->children[1]->flags = host_menu_flags_separator;
-    submenu->children[2]->flags = host_menu_flags_enabled;
   }
-  result->clicked = [](int id) {
-    int z = 0;
-    z++;
+  assert(menu_stack.size() == 1);
+  menu_stack.pop();
+
+  result->clicked = [vst_menu](int tag) { 
+    IContextMenu::Item item;
+    IContextMenuTarget* target;
+    if(vst_menu->getItem(tag, item, &target) != kResultOk) return;
+    if(target == nullptr) return;
+    target->executeMenuItem(item.tag);
   };
   return result;
 }

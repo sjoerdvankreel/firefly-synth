@@ -29,8 +29,8 @@ fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> con
       menu.addSeparator();
     else if(child.children.empty())
     {
-      assert(child.id >= 0);
-      menu.addItem(child.id + 1, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
+      assert(child.tag >= 0);
+      menu.addItem(child.tag + 1, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
     }
     else
     {
@@ -250,8 +250,8 @@ param_component::mouseUp(MouseEvent const& e)
   menu.setLookAndFeel(&self.getLookAndFeel());
 
   fill_host_menu(menu, host_menu->root.children);
-  menu.showMenuAsync(options, [host_menu = host_menu.release()](int id) {
-    host_menu->clicked(id - 1);
+  menu.showMenuAsync(options, [host_menu = host_menu.release()](int tag) {
+    host_menu->clicked(tag - 1);
     delete host_menu;
   });
 }
