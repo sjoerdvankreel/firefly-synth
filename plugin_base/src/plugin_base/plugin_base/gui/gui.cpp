@@ -157,9 +157,9 @@ plugin_gui::resized()
 void
 plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id)
 {
-  set_extra_state_num(id, extra_state_tab_index, 0);
   tab.tab_changed = [this, id](int index) { set_extra_state_num(id, extra_state_tab_index, index); };
   tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_tab_index, 0), 0, tab.getNumTabs() - 1));
+  set_extra_state_num(id, extra_state_tab_index, tab.getCurrentTabIndex());
 }
 
 void
