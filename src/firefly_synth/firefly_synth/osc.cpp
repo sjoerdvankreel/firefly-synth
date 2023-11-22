@@ -37,7 +37,7 @@ public module_engine {
 
 public:
   osc_engine() { initialize(); }
-  INF_PREVENT_ACCIDENTAL_COPY(osc_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   void initialize() override { _phase = 0; }
   void process(plugin_block& block) override;
 };

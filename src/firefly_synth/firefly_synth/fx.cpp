@@ -46,7 +46,7 @@ public module_engine {
   void process_filter(plugin_block& block);
 
 public:
-  INF_PREVENT_ACCIDENTAL_COPY(fx_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
   fx_engine(bool global, int sample_rate);
   void initialize() override;
   void process(plugin_block& block) override;

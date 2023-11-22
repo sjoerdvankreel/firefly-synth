@@ -30,7 +30,7 @@ public module_engine {
 
 public:
   void initialize() override {}
-  INF_PREVENT_ACCIDENTAL_COPY(audio_matrix_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(audio_matrix_engine);
   audio_matrix_engine(bool global,
     std::vector<module_topo_mapping> const& sources,
     std::vector<module_topo_mapping> const& targets): 

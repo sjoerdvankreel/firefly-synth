@@ -14,7 +14,7 @@ public module_engine {
   bool const _out;
 public:
   voice_engine(bool out): _out(out) {}
-  INF_PREVENT_ACCIDENTAL_COPY(voice_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(voice_engine);
   void initialize() override { }
   void process(plugin_block& block) override;
 };

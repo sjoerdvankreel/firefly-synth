@@ -19,7 +19,7 @@ public:
   monitor_engine() {}
   void initialize() override {}
   void process(plugin_block& block) override;
-  INF_PREVENT_ACCIDENTAL_COPY(monitor_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(monitor_engine);
 };
 
 module_topo

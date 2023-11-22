@@ -32,7 +32,7 @@ public module_engine {
   bool const _global;
 
 public:
-  INF_PREVENT_ACCIDENTAL_COPY(lfo_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void initialize() override { _phase = 0; }
   void process(plugin_block& block) override;
   lfo_engine(bool global) : _global(global) { initialize(); }

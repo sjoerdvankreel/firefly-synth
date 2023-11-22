@@ -23,7 +23,7 @@ public module_engine {
 
 public:
   env_engine() { initialize(); }
-  INF_PREVENT_ACCIDENTAL_COPY(env_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(env_engine);
   void process(plugin_block& block) override;
   void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
 };

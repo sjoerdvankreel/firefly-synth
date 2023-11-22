@@ -13,17 +13,11 @@ using namespace plugin_base;
 using namespace firefly_synth;
 using namespace plugin_base::clap;
 
-#if INF_IS_FX
-#define PLUG_FEATURE CLAP_PLUGIN_FEATURE_AUDIO_EFFECT
-#else
-#define PLUG_FEATURE CLAP_PLUGIN_FEATURE_INSTRUMENT
-#endif
-
 static std::unique_ptr<plugin_topo> _topo = {};
 static std::unique_ptr<plugin_desc> _desc = {};
 
 static char const*
-features[] = { PLUG_FEATURE, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
+features[] = { CLAP_PLUGIN_FEATURE_INSTRUMENT, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
 
 static void CLAP_ABI
 deinit()
@@ -45,14 +39,14 @@ init(char const*)
 static clap_plugin_descriptor_t const descriptor =
 {
   .clap_version = CLAP_VERSION_INIT,
-  .id = INF_SYNTH_REVERSE_URI INF_SYNTH_ID,
-  .name = INF_SYNTH_FULL_NAME,
-  .vendor = INF_SYNTH_VENDOR_NAME,
-  .url = INF_SYNTH_VENDOR_URL,
-  .manual_url = INF_SYNTH_VENDOR_URL,
-  .support_url = INF_SYNTH_VENDOR_URL,
-  .version = INF_SYNTH_VERSION_TEXT,
-  .description = INF_SYNTH_FULL_NAME,
+  .id = FF_SYNTH_REVERSE_URI FF_SYNTH_ID,
+  .name = FF_SYNTH_FULL_NAME,
+  .vendor = FF_SYNTH_VENDOR_NAME,
+  .url = FF_SYNTH_VENDOR_URL,
+  .manual_url = FF_SYNTH_VENDOR_URL,
+  .support_url = FF_SYNTH_VENDOR_URL,
+  .version = FF_SYNTH_VERSION_TEXT,
+  .description = FF_SYNTH_FULL_NAME,
   .features = features
 };
 

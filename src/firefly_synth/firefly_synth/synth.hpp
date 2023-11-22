@@ -30,7 +30,7 @@ class audio_matrix_mixer
 {
   audio_matrix_engine* _engine;
 public:
-  INF_PREVENT_ACCIDENTAL_COPY(audio_matrix_mixer);
+  PB_PREVENT_ACCIDENTAL_COPY(audio_matrix_mixer);
   audio_matrix_mixer(audio_matrix_engine* engine) : _engine(engine) {}
   plugin_base::jarray<float, 2> const& 
   mix(plugin_base::plugin_block& block, int module, int slot);
