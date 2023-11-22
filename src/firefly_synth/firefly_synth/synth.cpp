@@ -63,7 +63,7 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
 }
 
 routing_matrix<module_topo_mapping>
-make_module_matrix(std::vector<module_topo const*> const& modules)
+make_audio_matrix(std::vector<module_topo const*> const& modules)
 {
   int index = 0;
   routing_matrix<module_topo_mapping> result;
@@ -92,7 +92,7 @@ make_module_matrix(std::vector<module_topo const*> const& modules)
 }
 
 routing_matrix<module_output_mapping>
-make_output_matrix(std::vector<module_topo const*> const& modules)
+make_cv_source_matrix(std::vector<module_topo const*> const& modules)
 {
   int index = 0;
   routing_matrix<module_output_mapping> result;
@@ -148,7 +148,7 @@ make_output_matrix(std::vector<module_topo const*> const& modules)
 }
 
 routing_matrix<param_topo_mapping>
-make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules)
+make_cv_target_matrix(std::vector<plugin_base::module_topo const*> const& modules)
 {
   int index = 0;
   routing_matrix<param_topo_mapping> result;

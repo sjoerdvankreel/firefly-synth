@@ -144,7 +144,7 @@ cv_matrix_topo(
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
 
-  auto source_matrix = make_output_matrix(sources);
+  auto source_matrix = make_cv_source_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
@@ -152,7 +152,7 @@ cv_matrix_topo(
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_matrix.submenu;
 
-  auto target_matrix = make_param_matrix(targets);
+  auto target_matrix = make_cv_target_matrix(targets);
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, ""),

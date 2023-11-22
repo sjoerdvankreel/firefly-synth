@@ -113,7 +113,7 @@ audio_matrix_topo(
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
 
-  auto source_matrix = make_module_matrix(sources);
+  auto source_matrix = make_audio_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
@@ -122,7 +122,7 @@ audio_matrix_topo(
   source.gui.submenu = source_matrix.submenu;
 
   auto default_target = global? "Master": "Voice";
-  auto target_matrix = make_module_matrix(targets);
+  auto target_matrix = make_audio_matrix(targets);
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, default_target),

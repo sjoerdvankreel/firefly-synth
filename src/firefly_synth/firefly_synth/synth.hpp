@@ -57,12 +57,15 @@ get_cv_matrix_mixdown(plugin_base::plugin_block& block, bool global)
   return *static_cast<cv_matrix_mixdown const*>(context);
 }
 
+// targets any modulatable parameter in modules
 routing_matrix<plugin_base::param_topo_mapping>
-make_param_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+make_cv_target_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+// sources are any cv outputs in modules
 routing_matrix<plugin_base::module_output_mapping>
-make_output_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+make_cv_source_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+// any audio module as a source or target
 routing_matrix<plugin_base::module_topo_mapping>
-make_module_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+make_audio_matrix(std::vector<plugin_base::module_topo const*> const& modules);
 
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo midi_topo(int section);
