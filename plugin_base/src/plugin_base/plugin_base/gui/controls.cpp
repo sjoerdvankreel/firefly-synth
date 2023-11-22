@@ -29,8 +29,8 @@ fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> con
       menu.addSeparator();
     else if(child.children.empty())
     {
-      assert(child.id > 0);
-      menu.addItem(child.id, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
+      assert(child.id >= 0);
+      menu.addItem(child.id + 1, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
     }
     else
     {
@@ -236,17 +236,23 @@ void
 param_component::mouseUp(MouseEvent const& e)
 {
   if(!e.mods.isRightButtonDown()) return;
+  auto& self = dynamic_cast<Component&>(*this);
+  if(!self.isEnabled()) return;
+  if(_param->param->dsp.direction == param_direction::output) return;
+
+  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
+  if(!host_menu || host_menu->root.children.size() == 0) return;
+  assert(host_menu->clicked);
 
   PopupMenu menu;
   PopupMenu::Options options;
-  auto& self = dynamic_cast<Component&>(*this);
   options = options.withTargetComponent(self);
   menu.setLookAndFeel(&self.getLookAndFeel());
 
-  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
   fill_host_menu(menu, host_menu->root.children);
-  menu.showMenuAsync(options, [](int id) {
-
+  menu.showMenuAsync(options, [host_menu = host_menu.release()](int id) {
+    host_menu->clicked(id - 1);
+    delete host_menu;
   });
 }
 
