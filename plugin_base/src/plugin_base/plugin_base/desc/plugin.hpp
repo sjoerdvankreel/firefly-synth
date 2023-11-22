@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/desc/host.hpp>
 #include <plugin_base/desc/param.hpp>
 #include <plugin_base/desc/module.hpp>
 #include <plugin_base/topo/plugin.hpp>
@@ -11,25 +12,12 @@
 #include <set>
 #include <vector>
 #include <string>
+#include <functional>
 #include <filesystem>
 
 namespace plugin_base {
 
 struct plugin_desc;
-
-// from resources folder
-struct factory_preset
-{
-  std::string name;
-  std::string path;
-};
-
-// differences between plugin formats
-struct format_config {
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
-  virtual std::filesystem::path 
-  resources_folder(std::filesystem::path const& binary_path) const = 0;
-};
 
 // mapping plugin level midi source index
 struct midi_mapping final {
