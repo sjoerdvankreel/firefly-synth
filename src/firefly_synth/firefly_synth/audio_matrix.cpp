@@ -4,6 +4,7 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/helpers/matrix.hpp>
 
 #include <firefly_synth/synth.hpp>
 

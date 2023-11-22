@@ -18,14 +18,6 @@ cv_matrix_mixdown;
 extern int const input_param_pb_range;
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 
-template <class M>
-struct routing_matrix
-{
-  std::vector<M> mappings;
-  std::vector<plugin_base::list_item> items;
-  std::shared_ptr<plugin_base::gui_submenu> submenu;
-};
-
 class audio_matrix_mixer
 {
   audio_matrix_engine* _engine;
@@ -56,16 +48,6 @@ get_cv_matrix_mixdown(plugin_base::plugin_block& block, bool global)
   void* context = block.module_context(module, 0);
   return *static_cast<cv_matrix_mixdown const*>(context);
 }
-
-// targets any modulatable parameter in modules
-routing_matrix<plugin_base::param_topo_mapping>
-make_cv_target_matrix(std::vector<plugin_base::module_topo const*> const& modules);
-// sources are any cv outputs in modules
-routing_matrix<plugin_base::module_output_mapping>
-make_cv_source_matrix(std::vector<plugin_base::module_topo const*> const& modules);
-// any audio module as a source or target
-routing_matrix<plugin_base::module_topo_mapping>
-make_audio_matrix(std::vector<plugin_base::module_topo const*> const& modules);
 
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo midi_topo(int section);
