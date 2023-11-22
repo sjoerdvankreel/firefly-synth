@@ -106,20 +106,19 @@ pb_controller::context_menu(int param_id) const
     
     auto item = menu_stack.top()->children.emplace_back(std::make_shared<host_menu_item>());
     item->tag = i;
+    item->flags = host_menu_flags_enabled;
     item->name = to_8bit_string(vst_item.name);
     if((vst_item.flags & IContextMenuItem::kIsChecked) == IContextMenuItem::kIsChecked)
       item->flags |= host_menu_flags_checked;
-    if ((vst_item.flags & IContextMenuItem::kIsDisabled) != IContextMenuItem::kIsDisabled)
-      item->flags |= host_menu_flags_enabled;
     if ((vst_item.flags & IContextMenuItem::kIsSeparator) == IContextMenuItem::kIsSeparator)
       item->flags |= host_menu_flags_separator;
+    
     if ((vst_item.flags & IContextMenuItem::kIsGroupStart) == IContextMenuItem::kIsGroupStart)
       menu_stack.push(item.get());
-    if ((vst_item.flags & IContextMenuItem::kIsGroupStart) == IContextMenuItem::kIsGroupEnd)
-    { 
-      assert(menu_stack.size());
+    else if ((vst_item.flags & IContextMenuItem::kIsGroupEnd) == IContextMenuItem::kIsGroupEnd)
       menu_stack.pop();
-    }
+    else if ((vst_item.flags & IContextMenuItem::kIsDisabled) == IContextMenuItem::kIsDisabled)
+      item->flags &= ~host_menu_flags_enabled;
   }
   assert(menu_stack.size() == 1);
   menu_stack.pop();
