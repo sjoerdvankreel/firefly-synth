@@ -134,13 +134,16 @@ public:
 
 // binding_component that is additionally bound to a single parameter value
 // i.e., edit control or a label that displays a plugin parameter value
+// also provides host context menu
 class param_component:
-public binding_component
+public binding_component,
+public juce::MouseListener
 {
 protected:
   param_desc const* const _param;
 
 public:
+  void mouseUp(juce::MouseEvent const& e) override;
   void state_changed(int index, plain_value plain) override;
   virtual ~param_component() { _gui->gui_state()->remove_listener(_param->info.global, this); }
 

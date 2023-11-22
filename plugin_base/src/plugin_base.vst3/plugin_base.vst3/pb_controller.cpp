@@ -82,6 +82,30 @@ pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber 
   return kResultTrue;
 }
 
+std::unique_ptr<host_menu_item>
+pb_controller::context_menu(int param_id) const
+{
+  auto result = std::make_unique<host_menu_item>();
+  for (int i = 0; i < 2; i++)
+  {
+    auto submenu = result->children.emplace_back(std::make_shared<host_menu_item>());
+    submenu->name = std::to_string(i);
+    for(int j = 0; j < 3; j++)
+    {
+      auto item = submenu->children.emplace_back(std::make_shared<host_menu_item>());
+      item->name = std::to_string(j);
+      item->clicked = []() {
+        int z = 0;
+        z++;
+      };    
+    }
+    submenu->children[0]->flags = host_menu_flags_checked;
+    submenu->children[1]->flags = host_menu_flags_separator;
+    submenu->children[2]->flags = host_menu_flags_enabled;
+  }
+  return result;
+}
+
 tresult PLUGIN_API 
 pb_controller::initialize(FUnknown* context)
 {

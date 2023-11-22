@@ -19,6 +19,25 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   }
 }
 
+static void
+fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> const& children, int& item_id)
+{
+  for(int i = 0; i < children.size(); i++)
+  {
+    auto const& child = *children[i].get();
+    if(child.flags & host_menu_flags_separator)
+      menu.addSeparator();
+    else if(child.children.empty())
+      menu.addItem(item_id++, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
+    else
+    {
+      PopupMenu submenu;
+      fill_host_menu(submenu, child.children, item_id);
+      menu.addSubMenu(child.name, submenu, child.flags & host_menu_flags_enabled);
+    }
+  }
+}
+
 void
 menu_button::clicked()
 {
@@ -202,7 +221,29 @@ param_component::init()
 {
   // Must be called by subclass constructor as we dynamic_cast to Component inside.
   state_changed(_param->info.global, _gui->gui_state()->get_plain_at_index(_param->info.global));
+
   binding_component::init();
+
+  // note that we never deregister since we cannot dynamic_cast in the destructor
+  // should not be a problem as we are our own listener
+  dynamic_cast<Component&>(*this).addMouseListener(this, true);
+}
+
+void 
+param_component::mouseUp(MouseEvent const& e)
+{
+  if(!e.mods.isRightButtonDown()) return;
+
+  PopupMenu menu;
+  PopupMenu::Options options;
+  options = options.withTargetComponent(dynamic_cast<Component&>(*this));
+
+  int item_id = 1;
+  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
+  fill_host_menu(menu, host_menu->children, item_id);
+  menu.showMenuAsync(options, [host_menu = std::move(host_menu)](int id) {
+
+  });
 }
 
 // Just guess max value is representative of the longest text.

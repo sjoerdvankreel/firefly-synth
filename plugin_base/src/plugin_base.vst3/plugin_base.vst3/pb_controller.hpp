@@ -48,7 +48,7 @@ public:
   void gui_end_changes(int index) override { endEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
   void gui_begin_changes(int index) override { beginEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
 
-  std::unique_ptr<host_context_menu> context_menu(int param_id) const override { return {}; }
+  std::unique_ptr<host_menu_item> context_menu(int param_id) const override;
   std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
   { return binary_path.parent_path().parent_path() / "Resources"; }
 
