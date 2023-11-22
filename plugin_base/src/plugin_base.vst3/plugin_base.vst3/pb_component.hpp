@@ -9,15 +9,15 @@
 
 namespace plugin_base::vst3 {
 
-class inf_component final:
+class pb_component final:
 public Steinberg::Vst::AudioEffect {
   plugin_engine _engine;
 
   std::map<int, int> _param_to_midi_id = {};
 
 public:
-  PB_PREVENT_ACCIDENTAL_COPY(inf_component);
-  inf_component(plugin_desc const* desc, Steinberg::FUID const& controller_id);
+  PB_PREVENT_ACCIDENTAL_COPY(pb_component);
+  pb_component(plugin_desc const* desc, Steinberg::FUID const& controller_id);
 
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;
   Steinberg::tresult PLUGIN_API getState(Steinberg::IBStream* state) override;

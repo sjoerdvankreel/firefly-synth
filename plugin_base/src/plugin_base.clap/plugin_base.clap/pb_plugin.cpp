@@ -1,6 +1,6 @@
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
-#include <plugin_base.clap/inf_plugin.hpp>
+#include <plugin_base.clap/pb_plugin.hpp>
 #if (defined __linux__) || (defined  __FreeBSD__)
 #include <juce_events/native/juce_EventLoopInternal_linux.h>
 #endif
@@ -42,12 +42,12 @@ normalized_to_clap(param_topo const& topo, normalized_value normalized)
 static bool
 forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
 {
-  auto plugin = static_cast<inf_plugin*>(context);
+  auto plugin = static_cast<pb_plugin*>(context);
   return plugin->thread_pool_voice_processor(engine);
 }
 
-inf_plugin::
-inf_plugin(
+pb_plugin::
+pb_plugin(
   clap_plugin_descriptor const* clap_desc, 
   clap_host const* host, plugin_desc const* desc):
 Plugin(clap_desc, host), 
@@ -58,14 +58,14 @@ _to_audio_events(std::make_unique<event_queue>(default_q_size))
 { _block_automation_seen.resize(_engine.state().desc().param_count); }
 
 void
-inf_plugin::gui_changing(int index, plain_value plain)
+pb_plugin::gui_changing(int index, plain_value plain)
 {
   push_to_audio(index, plain);
   _gui_state.set_plain_at_index(index, plain);
 }
 
 bool
-inf_plugin::init() noexcept
+pb_plugin::init() noexcept
 {
   // Need to start timer on the main thread. 
   // Constructor is not guaranteed to run there.
@@ -74,7 +74,7 @@ inf_plugin::init() noexcept
 }
 
 void 
-inf_plugin::timerCallback()
+pb_plugin::timerCallback()
 {
   sync_event e;
   while (_to_gui_events->try_dequeue(e))
@@ -82,14 +82,14 @@ inf_plugin::timerCallback()
 }
 
 bool 
-inf_plugin::stateSave(clap_ostream const* stream) noexcept
+pb_plugin::stateSave(clap_ostream const* stream) noexcept
 {
   std::vector<char> data(plugin_io_save_all(_gui_state, _extra_state));
   return stream->write(stream, data.data(), data.size()) == data.size();
 }
 
 bool 
-inf_plugin::stateLoad(clap_istream const* stream) noexcept
+pb_plugin::stateLoad(clap_istream const* stream) noexcept
 {
   std::vector<char> data;
   do {
@@ -107,14 +107,14 @@ inf_plugin::stateLoad(clap_istream const* stream) noexcept
 }
 
 bool
-inf_plugin::guiShow() noexcept
+pb_plugin::guiShow() noexcept
 {
   _gui->setVisible(true);
   return true;
 }
 
 bool
-inf_plugin::guiHide() noexcept
+pb_plugin::guiHide() noexcept
 {
   _gui->setVisible(false);
   return true;
@@ -122,12 +122,12 @@ inf_plugin::guiHide() noexcept
 
 #if (defined __linux__) || (defined  __FreeBSD__)
 void
-inf_plugin::onPosixFd(int fd, int flags) noexcept
+pb_plugin::onPosixFd(int fd, int flags) noexcept
 { LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd); }
 #endif
 
 void 
-inf_plugin::guiDestroy() noexcept
+pb_plugin::guiDestroy() noexcept
 {
   _gui->remove_listener(this);
   _gui->setVisible(false);
@@ -140,7 +140,7 @@ inf_plugin::guiDestroy() noexcept
 }
 
 bool
-inf_plugin::guiSetParent(clap_window const* window) noexcept
+pb_plugin::guiSetParent(clap_window const* window) noexcept
 {
   _gui->addToDesktop(0, window->ptr);
 #if (defined __linux__) || (defined  __FreeBSD__)
@@ -154,7 +154,7 @@ inf_plugin::guiSetParent(clap_window const* window) noexcept
 }
 
 bool
-inf_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
+pb_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
 {
   if (is_floating) return false;
 #if(WIN32)
@@ -167,7 +167,7 @@ inf_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
 }
 
 bool
-inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
+pb_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 {
   guiAdjustSize(&width, &height);
   _gui->setSize(width, height);
@@ -175,14 +175,14 @@ inf_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 }
 
 bool
-inf_plugin::guiCreate(char const* api, bool is_floating) noexcept
+pb_plugin::guiCreate(char const* api, bool is_floating) noexcept
 {
   _gui = std::make_unique<plugin_gui>(&_gui_state, &_extra_state);
   return true;
 }
 
 bool
-inf_plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
+pb_plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 {
   *width = _gui->getWidth();
   *height = _gui->getHeight();
@@ -191,7 +191,7 @@ inf_plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 }
 
 bool
-inf_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
+pb_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
   auto const& topo = *_engine.state().desc().plugin;
   *width = std::max((int)*width, topo.gui.min_width);
@@ -200,7 +200,7 @@ inf_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 }
 
 bool
-inf_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
+pb_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 {
   hints->preserve_aspect_ratio = true;
   hints->can_resize_vertically = true;
@@ -211,7 +211,7 @@ inf_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
 }
 
 void 
-inf_plugin::push_to_audio(int index, plain_value plain)
+pb_plugin::push_to_audio(int index, plain_value plain)
 {
   sync_event e;
   e.plain = plain;
@@ -221,7 +221,7 @@ inf_plugin::push_to_audio(int index, plain_value plain)
 }
 
 void 
-inf_plugin::push_to_audio(int index, sync_event_type type)
+pb_plugin::push_to_audio(int index, sync_event_type type)
 {
   sync_event e;
   e.type = type;
@@ -230,7 +230,7 @@ inf_plugin::push_to_audio(int index, sync_event_type type)
 }
 
 void
-inf_plugin::push_to_gui(int index, clap_value clap)
+pb_plugin::push_to_gui(int index, clap_value clap)
 {
   sync_event e;
   auto const& topo = *_engine.state().desc().param_at_index(index).param;
@@ -241,7 +241,7 @@ inf_plugin::push_to_gui(int index, clap_value clap)
 }
 
 std::int32_t
-inf_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
+pb_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
   auto iter = _engine.state().desc().param_mappings.tag_to_index.find(param_id);
   if (iter == _engine.state().desc().param_mappings.tag_to_index.end())
@@ -253,7 +253,7 @@ inf_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 }
 
 bool 
-inf_plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept
+pb_plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const noexcept
 {
   std::int32_t index = getParamIndexForParamId(param_id);
   if(index == -1) return false;
@@ -261,7 +261,7 @@ inf_plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) cons
 } 
 
 bool
-inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
+pb_plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
   auto const& topo = *_gui_state.desc().param_at_tag(param_id).param;
   auto normalized = _gui_state.get_normalized_at_tag(param_id);
@@ -270,7 +270,7 @@ inf_plugin::paramsValue(clap_id param_id, double* value) noexcept
 }
 
 bool
-inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
+pb_plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
   normalized_value normalized;
   int index = _engine.state().desc().param_mappings.tag_to_index.at(param_id);
@@ -281,7 +281,7 @@ inf_plugin::paramsTextToValue(clap_id param_id, char const* display, double* val
 }
 
 bool
-inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
+pb_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
 {
   int index = _engine.state().desc().param_mappings.tag_to_index.at(param_id);
   auto const& param = *_engine.state().desc().param_at_tag(param_id).param;
@@ -292,7 +292,7 @@ inf_plugin::paramsValueToText(clap_id param_id, double value, char* display, std
 }
 
 bool
-inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
+pb_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 {
   param_desc const& param = _engine.state().desc().param_at_index(index);
   param_mapping const& mapping(_engine.state().desc().param_mappings.params[index]);
@@ -330,7 +330,7 @@ inf_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcep
 }
 
 void
-inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept
+pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept
 {
   for (std::uint32_t i = 0; i < in->size(in); i++)
   {
@@ -348,7 +348,7 @@ inf_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* o
 }
 
 bool
-inf_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
+pb_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
 {
   if (!is_input || index != 0) return false;
   info->id = 0;
@@ -358,14 +358,14 @@ inf_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_inf
 }
 
 std::uint32_t 
-inf_plugin::audioPortsCount(bool is_input) const noexcept
+pb_plugin::audioPortsCount(bool is_input) const noexcept
 {
   if (!is_input) return 1;
   return _engine.state().desc().plugin->type == plugin_type::fx? 1: 0;
 }
 
 bool
-inf_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
+pb_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
 {
   if (index != 0) return false;
   if (is_input && _engine.state().desc().plugin->type == plugin_type::synth) return false;
@@ -378,14 +378,14 @@ inf_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_i
 }
 
 bool
-inf_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
+pb_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
 {
   _engine.activate(sample_rate, max_frame_count);
   return true;
 }
 
 void 
-inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
+pb_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
 {
   sync_event e;
   while (_to_audio_events->try_dequeue(e))
@@ -427,7 +427,7 @@ inf_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
 }
 
 clap_process_status
-inf_plugin::process(clap_process const* process) noexcept
+pb_plugin::process(clap_process const* process) noexcept
 {
   host_block& block = _engine.prepare_block();
   block.frame_count = process->frames_count;

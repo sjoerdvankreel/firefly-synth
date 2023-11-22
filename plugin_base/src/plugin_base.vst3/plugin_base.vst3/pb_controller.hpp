@@ -12,27 +12,27 @@
 
 namespace plugin_base::vst3 {
 
-class inf_editor;
+class pb_editor;
 
-class inf_controller final:
+class pb_controller final:
 public Steinberg::Vst::EditControllerEx1,
 public Steinberg::Vst::IMidiMapping,
 public gui_listener
 {
-  inf_editor* _editor = {};
+  pb_editor* _editor = {};
   plugin_state _gui_state = {};
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
 
 public: 
-  OBJ_METHODS(inf_controller, EditControllerEx1)
+  OBJ_METHODS(pb_controller, EditControllerEx1)
   DEFINE_INTERFACES
     DEF_INTERFACE(IMidiMapping)
   END_DEFINE_INTERFACES(EditControllerEx1)
   REFCOUNT_METHODS(EditControllerEx1)
-  PB_PREVENT_ACCIDENTAL_COPY(inf_controller);
+  PB_PREVENT_ACCIDENTAL_COPY(pb_controller);
 
-  inf_controller(plugin_desc const* desc): 
+  pb_controller(plugin_desc const* desc):
   _gui_state(desc, true), 
   _extra_state(gui_extra_state_keyset(*desc->plugin)) {}
 

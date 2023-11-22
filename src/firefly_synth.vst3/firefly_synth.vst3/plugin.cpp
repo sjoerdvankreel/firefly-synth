@@ -3,8 +3,8 @@
 
 #include <plugin_base/gui/utility.hpp>
 #include <plugin_base.vst3/utility.hpp>
-#include <plugin_base.vst3/inf_component.hpp>
-#include <plugin_base.vst3/inf_controller.hpp>
+#include <plugin_base.vst3/pb_component.hpp>
+#include <plugin_base.vst3/pb_controller.hpp>
 
 #include <public.sdk/source/main/pluginfactory.h>
 #include <public.sdk/source/vst/vstaudioeffect.h>
@@ -48,7 +48,7 @@ InitModule()
 static FUnknown*
 controller_factory(void*)
 {
-  auto result = new inf_controller(_desc.get());
+  auto result = new pb_controller(_desc.get());
   return static_cast<IEditController*>(result);
 }
 
@@ -56,7 +56,7 @@ static FUnknown*
 component_factory(void*)
 {
   FUID controller_id(fuid_from_text(INF_SYNTH_CONTROLLER_ID));
-  auto result = new inf_component(_desc.get(), controller_id);
+  auto result = new pb_component(_desc.get(), controller_id);
   return static_cast<IAudioProcessor*>(result);
 }
 

@@ -8,7 +8,7 @@
 
 namespace plugin_base::vst3 {
 
-class inf_param:
+class pb_param :
 public Steinberg::Vst::Parameter
 {
   int const _index;
@@ -22,7 +22,7 @@ public:
 
   void toString(Steinberg::Vst::ParamValue normalized, Steinberg::Vst::String128 string) const override;
   bool fromString(Steinberg::Vst::TChar const* string, Steinberg::Vst::ParamValue& normalized) const override;
-  inf_param(plugin_state const* state, param_topo const* topo, int index, Steinberg::Vst::ParameterInfo const& info);
+  pb_param(plugin_state const* state, param_topo const* topo, int index, Steinberg::Vst::ParameterInfo const& info);
 };
 
 }

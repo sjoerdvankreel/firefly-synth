@@ -1,24 +1,24 @@
 #pragma once
 
 #include <plugin_base/gui/gui.hpp>
-#include <plugin_base.vst3/inf_controller.hpp>
+#include <plugin_base.vst3/pb_controller.hpp>
 
 #include <public.sdk/source/vst/vsteditcontroller.h>
 #include <utility>
 
 namespace plugin_base::vst3 {
 
-class inf_editor final:
+class pb_editor final:
 public Steinberg::Vst::EditorView
 #if (defined __linux__) || (defined  __FreeBSD__)
 , public Steinberg::Linux::IEventHandler
 #endif
 {
   std::unique_ptr<plugin_gui> _gui = {};
-  inf_controller* const _controller = {};
+  pb_controller* const _controller = {};
 public: 
-  inf_editor(inf_controller* controller);
-  PB_PREVENT_ACCIDENTAL_COPY(inf_editor);
+  pb_editor(pb_controller* controller);
+  PB_PREVENT_ACCIDENTAL_COPY(pb_editor);
 
 #if (defined __linux__) || (defined  __FreeBSD__)
   void PLUGIN_API onFDIsSet(Steinberg::Linux::FileDescriptor fd) override;

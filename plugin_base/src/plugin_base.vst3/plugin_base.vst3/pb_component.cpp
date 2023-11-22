@@ -1,6 +1,6 @@
 #include <plugin_base/shared/io_plugin.hpp>
 #include <plugin_base.vst3/utility.hpp>
-#include <plugin_base.vst3/inf_component.hpp>
+#include <plugin_base.vst3/pb_component.hpp>
 
 #include <pluginterfaces/base/ibstream.h>
 #include <pluginterfaces/vst/ivstevents.h>
@@ -12,8 +12,8 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
-inf_component::
-inf_component(plugin_desc const* desc, FUID const& controller_id) :
+pb_component::
+pb_component(plugin_desc const* desc, FUID const& controller_id) :
 _engine(desc, nullptr, nullptr)
 {
   setControllerClass(controller_id);
@@ -35,14 +35,14 @@ _engine(desc, nullptr, nullptr)
 }
 
 tresult PLUGIN_API
-inf_component::getState(IBStream* state)
+pb_component::getState(IBStream* state)
 {
   std::vector<char> data(plugin_io_save_state(_engine.state()));
   return state->write(data.data(), data.size());
 }
 
 tresult PLUGIN_API
-inf_component::setState(IBStream* state)
+pb_component::setState(IBStream* state)
 {
   if (plugin_io_load_state(load_ibstream(state), _engine.state()).ok())
     return kResultOk;
@@ -50,21 +50,21 @@ inf_component::setState(IBStream* state)
 }
 
 tresult PLUGIN_API
-inf_component::canProcessSampleSize(int32 symbolic_size)
+pb_component::canProcessSampleSize(int32 symbolic_size)
 {
   if (symbolic_size == kSample32) return kResultTrue;
   return kResultFalse;
 }
 
 tresult PLUGIN_API
-inf_component::setupProcessing(ProcessSetup& setup)
+pb_component::setupProcessing(ProcessSetup& setup)
 {
   _engine.activate(setup.sampleRate, setup.maxSamplesPerBlock);
   return AudioEffect::setupProcessing(setup);
 }
 
 tresult PLUGIN_API
-inf_component::initialize(FUnknown* context)
+pb_component::initialize(FUnknown* context)
 {
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
@@ -74,7 +74,7 @@ inf_component::initialize(FUnknown* context)
 }
 
 tresult PLUGIN_API
-inf_component::setBusArrangements(
+pb_component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
@@ -85,7 +85,7 @@ inf_component::setBusArrangements(
 }
 
 tresult PLUGIN_API
-inf_component::process(ProcessData& data)
+pb_component::process(ProcessData& data)
 {
   host_block& block = _engine.prepare_block();
   block.frame_count = data.numSamples;

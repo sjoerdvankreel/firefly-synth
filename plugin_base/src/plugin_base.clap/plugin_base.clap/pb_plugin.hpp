@@ -14,7 +14,7 @@
 
 namespace plugin_base::clap {
 
-class inf_plugin:
+class pb_plugin:
 public ::clap::helpers::Plugin<
   ::clap::helpers::MisbehaviourHandler::Ignore,
   ::clap::helpers::CheckingLevel::Maximal>,
@@ -39,9 +39,9 @@ public juce::Timer
   void process_gui_to_audio_events(clap_output_events_t const* out);
 
 public:
-  ~inf_plugin() { stopTimer(); }
-  PB_PREVENT_ACCIDENTAL_COPY(inf_plugin);
-  inf_plugin(
+  ~pb_plugin() { stopTimer(); }
+  PB_PREVENT_ACCIDENTAL_COPY(pb_plugin);
+  pb_plugin(
     clap_plugin_descriptor const* clap_desc, 
     clap_host const* host, plugin_desc const* desc);
   

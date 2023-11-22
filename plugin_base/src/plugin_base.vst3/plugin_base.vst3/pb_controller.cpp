@@ -4,9 +4,9 @@
 #include <plugin_base/shared/io_plugin.hpp>
 
 #include <plugin_base.vst3/utility.hpp>
-#include <plugin_base.vst3/inf_param.hpp>
-#include <plugin_base.vst3/inf_editor.hpp>
-#include <plugin_base.vst3/inf_controller.hpp>
+#include <plugin_base.vst3/pb_param.hpp>
+#include <plugin_base.vst3/pb_editor.hpp>
+#include <plugin_base.vst3/pb_controller.hpp>
 
 #include <base/source/fstring.h>
 #include <juce_events/juce_events.h>
@@ -18,7 +18,7 @@ using namespace Steinberg::Vst;
 namespace plugin_base::vst3 {
 
 void
-inf_controller::gui_changing(int index, plain_value plain)
+pb_controller::gui_changing(int index, plain_value plain)
 {
   int tag = gui_state().desc().param_mappings.index_to_tag[index];
   auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
@@ -29,21 +29,21 @@ inf_controller::gui_changing(int index, plain_value plain)
 }
 
 IPlugView* PLUGIN_API 
-inf_controller::createView(char const* name)
+pb_controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;
-  return _editor = new inf_editor(this);
+  return _editor = new pb_editor(this);
 }
 
 tresult PLUGIN_API
-inf_controller::getState(IBStream* state)
+pb_controller::getState(IBStream* state)
 {
   std::vector<char> data(plugin_io_save_extra(*_gui_state.desc().plugin, _extra_state));
   return state->write(data.data(), data.size());
 }
 
 tresult PLUGIN_API 
-inf_controller::setState(IBStream* state)
+pb_controller::setState(IBStream* state)
 {
   if (!plugin_io_load_extra(*_gui_state.desc().plugin, load_ibstream(state), _extra_state).ok())
     return kResultFalse;
@@ -51,7 +51,7 @@ inf_controller::setState(IBStream* state)
 }
 
 tresult PLUGIN_API
-inf_controller::setComponentState(IBStream* state)
+pb_controller::setComponentState(IBStream* state)
 {
   if (!plugin_io_load_state(load_ibstream(state), gui_state()).ok())
     return kResultFalse;
@@ -61,7 +61,7 @@ inf_controller::setComponentState(IBStream* state)
 }
 
 tresult PLUGIN_API 
-inf_controller::setParamNormalized(ParamID tag, ParamValue value)
+pb_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
     return kResultFalse;
@@ -73,7 +73,7 @@ inf_controller::setParamNormalized(ParamID tag, ParamValue value)
 }
 
 tresult PLUGIN_API 
-inf_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber number, ParamID& id)
+pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber number, ParamID& id)
 {
   if(bus != 0) return kResultFalse;
   auto iter = _midi_id_to_param.find(number);
@@ -83,7 +83,7 @@ inf_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber
 }
 
 tresult PLUGIN_API 
-inf_controller::initialize(FUnknown* context)
+pb_controller::initialize(FUnknown* context)
 {
   int unit_id = 1;
   if(EditController::initialize(context) != kResultTrue) 
@@ -120,7 +120,7 @@ inf_controller::initialize(FUnknown* context)
       param_info.stepCount = 0;
       if (!param.param->domain.is_real())
         param_info.stepCount = param.param->domain.max - param.param->domain.min;
-      parameters.addParameter(new inf_param(&_gui_state, module.params[p].param, module.params[p].info.global, param_info));
+      parameters.addParameter(new pb_param(&_gui_state, module.params[p].param, module.params[p].info.global, param_info));
     }
   }
 
