@@ -24,6 +24,8 @@ audio output graph
 any output graph
 swap module incl swap routing
 make new test files
+test host menu for bitwig vst3
+test host menu for clap
 
 * get some linux folks to comment (ycollete?)
 * continuing
