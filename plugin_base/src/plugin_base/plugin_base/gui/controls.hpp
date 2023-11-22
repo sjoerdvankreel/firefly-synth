@@ -73,6 +73,21 @@ public:
   autofit_combobox(lnf* lnf, bool autofit) : _lnf(lnf), _autofit(autofit) {}
 };
 
+// button that opens a popupmenu
+// basically a combobox that shows a fixed button text
+class menu_button :
+public juce::TextButton
+{
+  int _selected_index = 0;
+  std::vector<std::string> const _items;
+protected:
+  void clicked() override;
+public:
+  std::function<void(int)> selected_index_changed;
+  menu_button(std::vector<std::string> const& items): _items(items) {}
+  void set_selected_index(int index) { _selected_index = std::clamp(index, 0, (int)_items.size() - 1); }
+};
+
 // tracks last parameter change
 class last_tweaked_label :
 public juce::Label,

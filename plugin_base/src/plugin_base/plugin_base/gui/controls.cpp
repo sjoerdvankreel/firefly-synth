@@ -28,6 +28,23 @@ _state(state), _prefix(prefix)
 }
 
 void 
+menu_button::clicked()
+{
+  PopupMenu menu;
+  for(int i = 0; i < _items.size(); i++)
+    menu.addItem(i + 1, _items[i], true, i == _selected_index);
+  PopupMenu::Options options;
+  options = options.withTargetComponent(this);
+  menu.showMenuAsync(options, [this](int id) {
+    int index = id - 1;
+    if(index == _selected_index) return;
+    _selected_index = index;
+    if(selected_index_changed != nullptr)
+      selected_index_changed(index);
+  });
+}
+
+void 
 last_tweaked_label::any_state_changed(int index, plain_value plain)
 {
   if(_state->desc().params[index]->param->dsp.direction == param_direction::output) return;
