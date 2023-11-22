@@ -124,13 +124,14 @@ class preset_button:
 public menu_button,
 public extra_state_listener
 {
+  plugin_gui* const _gui;
   extra_state* const _state;
   std::vector<factory_preset> _presets = {};
   static inline std::string const preset_key = "factory_preset";
 public:
   void extra_state_changed() override;
   ~preset_button() { _state->remove_listener(preset_key); }
-  preset_button(plugin_desc const* desc, extra_state* state);
+  preset_button(plugin_gui* gui, extra_state* state);
 };
 
 // binding_component that is additionally bound to a single parameter value

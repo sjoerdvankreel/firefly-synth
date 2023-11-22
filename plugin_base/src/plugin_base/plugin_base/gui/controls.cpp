@@ -93,8 +93,8 @@ last_tweaked_editor::textEditorTextChanged(TextEditor& te)
 }
 
 preset_button::
-preset_button(plugin_desc const* desc, extra_state* state) :
-_state(state), _presets(desc->presets())
+preset_button(plugin_gui* gui, extra_state* state) :
+_gui(gui), _state(state), _presets(gui->gui_state()->desc().presets())
 { 
   set_items(vector_map(_presets, [](auto const& p) { return p.name; }));
   extra_state_changed();
@@ -102,6 +102,7 @@ _state(state), _presets(desc->presets())
   selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
     _state->set_text(preset_key, get_items()[index]);
+    _gui->load_patch(_presets[index].path);
   };
 }
 

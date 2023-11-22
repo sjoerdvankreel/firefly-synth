@@ -43,10 +43,12 @@ public:
   ~plugin_gui() { setLookAndFeel(nullptr); }
   plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state);
 
-  void load_patch();
   void save_patch();
   void init_patch();
   void clear_patch();
+  
+  void load_patch();
+  void load_patch(std::string const& path);
 
   Component& make_load_button();
   Component& make_save_button();

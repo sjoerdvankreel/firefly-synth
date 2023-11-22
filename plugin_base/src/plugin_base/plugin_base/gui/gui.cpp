@@ -515,29 +515,34 @@ plugin_gui::load_patch()
   chooser->launchAsync(load_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
-    if (path.length() == 0) return;
-
-    auto icon = MessageBoxIconType::WarningIcon;
-    auto result = plugin_io_load_file_all(path.toStdString(), *_gui_state, *_extra_state);
-    if (result.error.size())
-    {
-      auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
-      AlertWindow::showAsync(options, nullptr);
-      return;
-    }
-
-    fire_state_loaded();
-    if (result.warnings.size())
-    {
-      String warnings;
-      for (int i = 0; i < result.warnings.size() && i < 5; i++)
-        warnings += String(result.warnings[i]) + "\n";
-      if (result.warnings.size() > 5)
-        warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
-      auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
-      AlertWindow::showAsync(options, nullptr);
-    }
+    if (path.length() != 0)
+      load_patch(path.toStdString());
   });
+}
+
+void
+plugin_gui::load_patch(std::string const& path)
+{
+  auto icon = MessageBoxIconType::WarningIcon;
+  auto result = plugin_io_load_file_all(path, *_gui_state, *_extra_state);
+  if (result.error.size())
+  {
+    auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
+    AlertWindow::showAsync(options, nullptr);
+    return;
+  }
+
+  fire_state_loaded();
+  if (result.warnings.size())
+  {
+    String warnings;
+    for (int i = 0; i < result.warnings.size() && i < 5; i++)
+      warnings += String(result.warnings[i]) + "\n";
+    if (result.warnings.size() > 5)
+      warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
+    auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
+    AlertWindow::showAsync(options, nullptr);
+  }
 }
 
 }
