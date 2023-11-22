@@ -11,9 +11,10 @@ namespace plugin_base::vst3 {
 
 class pb_component final:
 public Steinberg::Vst::AudioEffect {
-  plugin_engine _engine;
-
+  
+  // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
+  plugin_engine _engine;
   std::map<int, int> _param_to_midi_id = {};
 
 public:
