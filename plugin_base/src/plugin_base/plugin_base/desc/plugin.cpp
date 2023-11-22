@@ -119,7 +119,7 @@ plugin_desc::presets() const
   std::vector<factory_preset> result;
   auto preset_folder = get_resource_location(config) / resource_folder_presets;
   for (auto const& entry : std::filesystem::directory_iterator{ preset_folder })
-    if (entry.is_regular_file() && entry.path().extension().string() == plugin->extension)
+    if (entry.is_regular_file() && entry.path().extension().string() == std::string(".") + plugin->extension)
       result.push_back({ entry.path().stem().string(), entry.path().string() });
   return result;
 }

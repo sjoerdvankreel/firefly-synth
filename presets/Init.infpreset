@@ -1,5 +1,5 @@
 {
-  "checksum": "547088a72623795bcd13bab48ebc3bfa",
+  "checksum": "9565fa9563defd0ceb8ac9eafc132573",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "5a1cf6442bb4653dee8cc8e7d4fa58e0",
+        "checksum": "adf6d1cd61db1025e8af9974201449cc",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,6 +22,7 @@
             "plugin_version_minor": 0
           },
           "content": {
+            "factory_preset": "Init",
             "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
             "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
             "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
