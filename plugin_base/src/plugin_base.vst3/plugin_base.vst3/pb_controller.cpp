@@ -95,7 +95,7 @@ pb_controller::context_menu(int param_id) const
   ParamID id = param_id;
   IContextMenuTarget* target;
   IPtr<IContextMenu> vst_menu(handler->createContextMenu(_editor, &id));
-  if(!vst_menu) return;
+  if(!vst_menu) return {};
   auto result = std::make_unique<host_menu>();
   std::stack<host_menu_item*> menu_stack;
   menu_stack.push(&result->root);
