@@ -9,7 +9,7 @@ FUID
 fuid_from_text(char const* text)
 {
   FUID result;
-  INF_ASSERT_EXEC(result.fromString(text));
+  PB_ASSERT_EXEC(result.fromString(text));
   return result;
 }
 

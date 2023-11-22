@@ -66,7 +66,7 @@ inf_editor::removed()
   _gui->removeFromDesktop();
 #if (defined __linux__) || (defined  __FreeBSD__)
   Steinberg::Linux::IRunLoop* loop = {};
-  INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
+  PB_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
   loop->unregisterEventHandler(this);
 #endif
   return EditorView::removed();
@@ -77,7 +77,7 @@ inf_editor::attached(void* parent, FIDString type)
 {
 #if (defined __linux__) || (defined  __FreeBSD__)
   Steinberg::Linux::IRunLoop* loop = {};
-  INF_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
+  PB_ASSERT_EXEC(!plugFrame->queryInterface(Steinberg::Linux::IRunLoop::iid, (void**)&loop));
   for (int fd: LinuxEventLoopInternal::getRegisteredFds())
     loop->registerEventHandler(this, fd);
 #endif

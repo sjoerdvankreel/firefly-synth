@@ -33,7 +33,7 @@ param_domain::default_plain(int module_slot, int param_slot) const
 {
   plain_value result;
   std::string default_ = default_selector(module_slot, param_slot);
-  INF_ASSERT_EXEC(text_to_plain(false, default_, result));
+  PB_ASSERT_EXEC(text_to_plain(false, default_, result));
   return result;
 }
 
@@ -162,7 +162,7 @@ param_domain::validate(int module_slot_count, int param_slot_count) const
     
     std::set<std::string> seen;
     for(int i = 0; i <names.size(); i++)
-      INF_ASSERT_EXEC(seen.insert(names[i]).second);
+      PB_ASSERT_EXEC(seen.insert(names[i]).second);
   }
 
   if (type == domain_type::item)
@@ -177,8 +177,8 @@ param_domain::validate(int module_slot_count, int param_slot_count) const
     for(int i = 0; i < items.size(); i++)
     {
       items[i].validate();
-      INF_ASSERT_EXEC(seen_id.insert(items[i].id).second);
-      INF_ASSERT_EXEC(seen_name.insert(items[i].name).second);
+      PB_ASSERT_EXEC(seen_id.insert(items[i].id).second);
+      PB_ASSERT_EXEC(seen_name.insert(items[i].name).second);
     }
   }
 
@@ -193,7 +193,7 @@ param_domain::validate(int module_slot_count, int param_slot_count) const
     for (int i = 0; i < timesigs.size(); i++)
     {
       timesigs[i].validate();
-      INF_ASSERT_EXEC(seen.insert(timesigs[i].to_text()).second);
+      PB_ASSERT_EXEC(seen.insert(timesigs[i].to_text()).second);
     }
   }
 

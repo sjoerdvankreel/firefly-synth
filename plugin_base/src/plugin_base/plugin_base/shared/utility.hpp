@@ -20,8 +20,8 @@
   x() = default
 
 #define PB_STR_(x) #x
-#define PB_STR(x) INF_STR_(x)
-#define PB_VERSION_TEXT(major, minor) INF_STR(major.minor)
+#define PB_STR(x) PB_STR_(x)
+#define PB_VERSION_TEXT(major, minor) PB_STR(major.minor)
 #define PB_ASSERT_EXEC(x) do { if(!(x)) assert(false); } while(false)
 
 namespace plugin_base {

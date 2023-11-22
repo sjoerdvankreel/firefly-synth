@@ -107,7 +107,7 @@ gui_dimension::validate(
     auto const& pos = children[k];
     for (int r = pos.row; r < pos.row + pos.row_span; r++)
       for (int c = pos.column; c < pos.column + pos.column_span; c++)
-        INF_ASSERT_EXEC(taken.insert(std::make_pair(r, c)).second || !always_visible(k));
+        PB_ASSERT_EXEC(taken.insert(std::make_pair(r, c)).second || !always_visible(k));
   }
   for (int r = 0; r < row_sizes.size(); r++)
     for (int c = 0; c < column_sizes.size(); c++)
