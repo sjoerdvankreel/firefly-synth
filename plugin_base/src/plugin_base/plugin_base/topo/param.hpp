@@ -32,7 +32,7 @@ struct gui_item_binding final {
   param_topo_mapping param = {};
   gui_item_binding_selector selector = {};
   static inline int const match_param_slot = -1;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_item_binding);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_item_binding);
 
   void validate() const { assert(!is_param_bound() || !auto_bind); }
   bool is_param_bound() const { return selector != nullptr; }
@@ -52,7 +52,7 @@ struct param_topo_gui final {
   gui_item_binding item_enabled = {};
   std::shared_ptr<gui_submenu> submenu;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;
   void validate(module_topo const& module, param_topo const& param) const;
 };
@@ -68,7 +68,7 @@ struct param_dsp final {
   bool can_modulate(int module_slot) const;
   bool can_automate(int module_slot) const;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
   void validate(plugin_topo const& plugin, int module_slot) const;
 };
 
@@ -79,7 +79,7 @@ struct param_topo final {
   param_topo_gui gui;
   param_domain domain;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo);
   void validate(plugin_topo const& plugin, module_topo const& module, int index) const;
 };
 

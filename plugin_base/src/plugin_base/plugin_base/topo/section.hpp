@@ -16,7 +16,7 @@ struct param_section_gui final {
   gui_dimension dimension;
   gui_scroll_mode scroll_mode;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section_gui);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section_gui);
 };
 
 // param ui section
@@ -25,7 +25,7 @@ struct param_section final {
   topo_tag tag;
   param_section_gui gui;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section);
   void validate(module_topo const& module, int index_) const;
 };
 

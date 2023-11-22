@@ -48,7 +48,7 @@ public:
     plugin_topo const& topo, 
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
 };
 
 static void

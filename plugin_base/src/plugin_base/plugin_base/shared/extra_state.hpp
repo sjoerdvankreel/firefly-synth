@@ -24,7 +24,7 @@ class extra_state final {
   void fire_changed(std::string const& key);
 
 public:
-  INF_PREVENT_ACCIDENTAL_COPY(extra_state);
+  PB_PREVENT_ACCIDENTAL_COPY(extra_state);
   extra_state(std::set<std::string> const& keyset) : _keyset(keyset) {}
 
   void clear() { _values.clear(); }

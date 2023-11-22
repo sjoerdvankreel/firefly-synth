@@ -79,7 +79,7 @@ class plugin_engine final {
   void process_voices_single_threaded();
 
 public:
-  INF_PREVENT_ACCIDENTAL_COPY(plugin_engine);
+  PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
   plugin_engine(
     plugin_desc const* desc,
     thread_pool_voice_processor voice_processor,

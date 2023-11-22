@@ -20,7 +20,7 @@ struct module_desc final {
   std::vector<param_desc> params = {};
   std::vector<midi_desc> midi_sources = {};
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_desc);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_desc);
   void validate(plugin_desc const& plugin, int index) const;
   module_desc(
     module_topo const& module_, int topo, int slot, int global,

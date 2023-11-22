@@ -37,7 +37,7 @@ class jarray final {
   std::vector<elem_type> _data;
 
 public:
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(jarray);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(jarray);
   explicit jarray(std::size_t size, elem_type const& val) :
   _data(size, val) {}
 

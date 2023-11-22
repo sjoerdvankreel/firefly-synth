@@ -50,7 +50,7 @@ struct list_item final {
   param_topo_mapping param_topo = {};
 
   void validate() const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   list_item(topo_tag const& tag);
   list_item(std::string const& id, std::string const& name);
 };
@@ -70,7 +70,7 @@ struct param_domain final {
   std::vector<timesig> timesigs;
   std::vector<std::string> names;
   default_selector default_selector;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const;
   void validate(int module_slot_count, int param_slot_count) const;

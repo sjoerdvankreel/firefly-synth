@@ -22,7 +22,7 @@ public module_engine {
 public:
   void initialize() override { }
   void process(plugin_block& block) override;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(input_engine);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(input_engine);
 };
 
 module_topo

@@ -10,19 +10,19 @@
 #include <algorithm>
 #include <filesystem>
 
-#define INF_PREVENT_ACCIDENTAL_COPY(x)  \
+#define PB_PREVENT_ACCIDENTAL_COPY(x)  \
   x(x&&) = default;               \
   x& operator = (x&&) = default;  \
   explicit x(x const&) = default; \
   x& operator = (x const&) = delete
-#define INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(x) \
-  INF_PREVENT_ACCIDENTAL_COPY(x); \
+#define PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(x) \
+  PB_PREVENT_ACCIDENTAL_COPY(x); \
   x() = default
 
-#define INF_STR_(x) #x
-#define INF_STR(x) INF_STR_(x)
-#define INF_VERSION_TEXT(major, minor) INF_STR(major.minor)
-#define INF_ASSERT_EXEC(x) do { if(!(x)) assert(false); } while(false)
+#define PB_STR_(x) #x
+#define PB_STR(x) INF_STR_(x)
+#define PB_VERSION_TEXT(major, minor) INF_STR(major.minor)
+#define PB_ASSERT_EXEC(x) do { if(!(x)) assert(false); } while(false)
 
 namespace plugin_base {
 
@@ -50,7 +50,6 @@ double seconds_since_epoch();
 inline void debug_breakable() {};
 std::vector<char> file_load(std::filesystem::path const& path);
 std::filesystem::path get_resource_location(format_config const* config);
-
 
 template <class T> std::string 
 to_8bit_string(T const* source)

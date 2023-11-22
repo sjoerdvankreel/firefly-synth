@@ -16,7 +16,7 @@ public Steinberg::Vst::AudioEffect {
   std::map<int, int> _param_to_midi_id = {};
 
 public:
-  INF_PREVENT_ACCIDENTAL_COPY(inf_component);
+  PB_PREVENT_ACCIDENTAL_COPY(inf_component);
   inf_component(plugin_desc const* desc, Steinberg::FUID const& controller_id);
 
   Steinberg::tresult PLUGIN_API setState(Steinberg::IBStream* state) override;

@@ -40,7 +40,7 @@ class plugin_state final {
 
 public:
   plugin_state(plugin_desc const* desc, bool notify);
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
   void init(state_init_type init_type);
   void add_any_listener(any_state_listener* listener) const;

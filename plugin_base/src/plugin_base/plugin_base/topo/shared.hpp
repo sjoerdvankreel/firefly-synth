@@ -34,7 +34,7 @@ struct topo_tag final {
   bool name_one_based = true;
 
   void validate() const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_tag);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_tag);
 };
 
 // module and parameter metadata
@@ -44,7 +44,7 @@ struct topo_info final {
   topo_tag tag;
 
   void validate() const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_info);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_info);
 };
 
 // label positioning
@@ -52,7 +52,7 @@ struct gui_label final {
   gui_label_align align;
   gui_label_justify justify;
   gui_label_contents contents;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_label);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_label);
 };
 
 // submenu with header and indices into main list
@@ -63,7 +63,7 @@ struct gui_submenu final {
   
   void validate() const;
   std::shared_ptr<gui_submenu> add_submenu(std::string const& name);
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_submenu);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_submenu);
 };
 
 // position in parent grid
@@ -82,7 +82,7 @@ struct gui_binding final {
   gui_slot_binding_selector slot_selector = {};
   gui_param_binding_selector param_selector = {};
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_binding);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_binding);
   void validate(module_topo const& module, int slot_count) const;
   
   void bind_slot(gui_slot_binding_selector selector_);
@@ -95,7 +95,7 @@ struct gui_bindings final {
   gui_binding enabled;
   gui_binding visible;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_bindings);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_bindings);
   void validate(module_topo const& module, int slot_count) const;
 };
 
@@ -147,7 +147,7 @@ struct gui_colors final {
   juce::Colour custom_background2 = juce::Colour(0xFF111111);
   juce::Colour scrollbar_thumb = juce::Colour(0xFFFF8844);
   juce::Colour scrollbar_background = juce::Colour(0xFF444444);
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
 };
 
 inline gui_dimension::

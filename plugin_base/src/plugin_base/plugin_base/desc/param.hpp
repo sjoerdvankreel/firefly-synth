@@ -18,7 +18,7 @@ struct param_desc final {
   std::string full_name = {};
   param_topo const* param = {};
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_desc);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_desc);
   void validate(module_desc const& module, int index) const;
   param_desc(
     module_topo const& module_, int module_slot,

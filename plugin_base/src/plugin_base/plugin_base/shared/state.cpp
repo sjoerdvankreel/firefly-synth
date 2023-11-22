@@ -16,7 +16,7 @@ void
 plugin_state::set_text_at(int m, int mi, int p, int pi, std::string const& value)
 {
   plain_value plain;
-  INF_ASSERT_EXEC(desc().param_topo_at(m, p).domain.text_to_plain(false, value, plain));
+  PB_ASSERT_EXEC(desc().param_topo_at(m, p).domain.text_to_plain(false, value, plain));
   set_plain_at(m, mi, p, pi, plain);
 }
 

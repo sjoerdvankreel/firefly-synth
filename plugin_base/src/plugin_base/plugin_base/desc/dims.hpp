@@ -15,7 +15,7 @@ struct plugin_dims final {
 
   plugin_dims(plugin_topo const& plugin);
   void validate(plugin_topo const& plugin) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_dims);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_dims);
 };
 
 }

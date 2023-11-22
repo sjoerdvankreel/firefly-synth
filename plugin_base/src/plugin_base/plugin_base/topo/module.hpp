@@ -53,14 +53,14 @@ struct module_topo_gui final {
   gui_position position;
   gui_dimension dimension;
   std::string tabbed_name;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 
 // module output
 struct module_dsp_output final {
   topo_info info;
   bool is_modulation_source;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp_output);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp_output);
 };
 
 // module dsp
@@ -71,7 +71,7 @@ struct module_dsp final {
   std::vector<module_dsp_output> outputs;
 
   void validate() const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_dsp);
 };
 
 // module in plugin

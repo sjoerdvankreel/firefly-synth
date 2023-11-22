@@ -40,7 +40,7 @@ public juce::Component
   { return _custom_lnfs[index].get(); }
 
 public:
-  INF_PREVENT_ACCIDENTAL_COPY(plugin_gui);
+  PB_PREVENT_ACCIDENTAL_COPY(plugin_gui);
   ~plugin_gui() { setLookAndFeel(nullptr); }
   plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state);
 

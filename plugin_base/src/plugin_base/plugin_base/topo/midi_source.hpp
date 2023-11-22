@@ -33,7 +33,7 @@ struct midi_source final {
 
   void validate() const;
   static std::vector<midi_source> all_sources();
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_source);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_source);
 };
 
 }

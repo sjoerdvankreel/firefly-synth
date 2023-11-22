@@ -18,7 +18,7 @@ struct midi_desc final {
   std::string full_name = {};
   midi_source const* source = {};
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_desc);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_desc);
   void validate(module_desc const& module, int index) const;
 
   midi_desc(

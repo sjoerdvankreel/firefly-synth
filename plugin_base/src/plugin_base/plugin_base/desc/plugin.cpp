@@ -35,7 +35,7 @@ plugin(plugin), config(config)
       for (int ms = 0; ms < module.midi_sources.size(); ms++)
       {
         auto const& source = module.midi_sources[ms];
-        INF_ASSERT_EXEC(midi_mappings.id_to_index.insert(std::pair(source.id, midi_source_global)).second);
+        PB_ASSERT_EXEC(midi_mappings.id_to_index.insert(std::pair(source.id, midi_source_global)).second);
         midi_mappings.topo_to_index[m][mi].push_back(midi_source_global++);
       }
       for(int p = 0; p < module.params.size(); p++)
@@ -148,27 +148,27 @@ plugin_desc::validate() const
   assert(module_output_start < plugin->modules.size());
 
   for (int ms = 0; ms < plugin->gui.module_sections.size(); ms++)
-    INF_ASSERT_EXEC(all_ids.insert(plugin->gui.module_sections[ms].id).second);
+    PB_ASSERT_EXEC(all_ids.insert(plugin->gui.module_sections[ms].id).second);
 
   for (int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
     module.validate(*this, m);
-    INF_ASSERT_EXEC(all_ids.insert(module.info.id).second);
-    INF_ASSERT_EXEC(all_hashes.insert(module.info.id_hash).second);
+    PB_ASSERT_EXEC(all_ids.insert(module.info.id).second);
+    PB_ASSERT_EXEC(all_hashes.insert(module.info.id_hash).second);
     for (int ms = 0; ms < module.midi_sources.size(); ms++)
     {
       auto const& source = module.midi_sources[ms];
       assert(source.info.global == midi_source_global++);
-      INF_ASSERT_EXEC(all_ids.insert(source.info.id).second);
-      INF_ASSERT_EXEC(all_hashes.insert(source.info.id_hash).second);
+      PB_ASSERT_EXEC(all_ids.insert(source.info.id).second);
+      PB_ASSERT_EXEC(all_hashes.insert(source.info.id_hash).second);
     }
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];
       assert(param.info.global == param_global++);
-      INF_ASSERT_EXEC(all_ids.insert(param.info.id).second);
-      INF_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
+      PB_ASSERT_EXEC(all_ids.insert(param.info.id).second);
+      PB_ASSERT_EXEC(all_hashes.insert(param.info.id_hash).second);
     }
   }
 }

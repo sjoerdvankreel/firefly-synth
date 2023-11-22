@@ -30,7 +30,7 @@ public:
     DEF_INTERFACE(IMidiMapping)
   END_DEFINE_INTERFACES(EditControllerEx1)
   REFCOUNT_METHODS(EditControllerEx1)
-  INF_PREVENT_ACCIDENTAL_COPY(inf_controller);
+  PB_PREVENT_ACCIDENTAL_COPY(inf_controller);
 
   inf_controller(plugin_desc const* desc): 
   _gui_state(desc, true), 

@@ -40,7 +40,7 @@ public juce::Timer
 
 public:
   ~inf_plugin() { stopTimer(); }
-  INF_PREVENT_ACCIDENTAL_COPY(inf_plugin);
+  PB_PREVENT_ACCIDENTAL_COPY(inf_plugin);
   inf_plugin(
     clap_plugin_descriptor const* clap_desc, 
     clap_host const* host, plugin_desc const* desc);

@@ -26,7 +26,7 @@ struct factory_preset
 
 // differences between plugin formats
 struct format_config {
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
   virtual std::filesystem::path 
   resources_folder(std::filesystem::path const& binary_path) const = 0;
 };
@@ -38,7 +38,7 @@ struct midi_mapping final {
   int module_global = {};
   midi_topo_mapping topo = {};
   std::vector<int> linked_params = {};
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_mapping);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(midi_mapping);
 };
 
 // mapping plugin level parameter index
@@ -48,7 +48,7 @@ struct param_mapping final {
   int module_global = {};
   int midi_source_global = -1; // for midi linked params
   param_topo_mapping topo = {};
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_mapping);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_mapping);
 };
 
 // mapping to/from global midi source info
@@ -60,7 +60,7 @@ struct plugin_midi_mappings final {
   std::vector<std::vector<std::vector<int>>> topo_to_index = {};
 
   void validate(plugin_desc const& plugin) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_midi_mappings);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_midi_mappings);
 };
 
 // mapping to/from global parameter info
@@ -72,7 +72,7 @@ struct plugin_param_mappings final {
   std::vector<std::vector<std::vector<std::vector<int>>>> topo_to_index = {};
 
   void validate(plugin_desc const& plugin) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_param_mappings);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_param_mappings);
 };
 
 // runtime plugin descriptor
@@ -102,7 +102,7 @@ public:
   void validate() const;
   std::vector<factory_preset> presets() const;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
   plugin_desc(plugin_topo const* plugin, format_config const* config);
 
   param_desc const& param_at_index(int index) const 

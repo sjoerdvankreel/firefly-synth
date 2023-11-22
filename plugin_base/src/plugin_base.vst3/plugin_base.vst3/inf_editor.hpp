@@ -18,7 +18,7 @@ public Steinberg::Vst::EditorView
   inf_controller* const _controller = {};
 public: 
   inf_editor(inf_controller* controller);
-  INF_PREVENT_ACCIDENTAL_COPY(inf_editor);
+  PB_PREVENT_ACCIDENTAL_COPY(inf_editor);
 
 #if (defined __linux__) || (defined  __FreeBSD__)
   void PLUGIN_API onFDIsSet(Steinberg::Linux::FileDescriptor fd) override;

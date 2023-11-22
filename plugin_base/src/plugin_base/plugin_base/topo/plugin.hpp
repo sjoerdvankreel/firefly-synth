@@ -35,7 +35,7 @@ struct custom_section_gui final {
   custom_gui_factory gui_factory;
 
   void validate(plugin_topo const& topo, int index_) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(custom_section_gui);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(custom_section_gui);
 };
 
 // module ui grouping
@@ -53,7 +53,7 @@ struct module_section_gui final {
   std::vector<int> tab_order;
   
   void validate(plugin_topo const& plugin, int index_) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
 };
 
 // plugin ui
@@ -76,7 +76,7 @@ struct plugin_topo_gui final {
   std::vector<custom_section_gui> custom_sections;
   std::vector<module_section_gui> module_sections;
 
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };
 
 // plugin definition
@@ -94,7 +94,7 @@ struct plugin_topo final {
   std::vector<module_topo> modules;
 
   void validate() const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
 
 template <class T, class... U> T&

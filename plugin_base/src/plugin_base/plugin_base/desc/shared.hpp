@@ -21,7 +21,7 @@ struct desc_info {
   std::string name = {};
 
   void validate(int topo_count) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(desc_info);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(desc_info);
 };
 
 // param_desc and module_desc info
@@ -30,7 +30,7 @@ public desc_info {
   int slot = {};
 
   void validate(int topo_count, int slot_count) const;
-  INF_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_desc_info);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_desc_info);
 };
 
 }
