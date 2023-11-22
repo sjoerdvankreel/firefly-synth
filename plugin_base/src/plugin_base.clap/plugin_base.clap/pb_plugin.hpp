@@ -104,7 +104,7 @@ public:
   void gui_end_changes(int index) override { push_to_audio(index, sync_event_type::end_edit); }
   void gui_begin_changes(int index) override { push_to_audio(index, sync_event_type::begin_edit); }
 
-  std::unique_ptr<host_menu_item> context_menu(int param_id) const override { return {}; }
+  std::unique_ptr<host_menu> context_menu(int param_id) const override { return {}; }
   std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
   { return binary_path.parent_path(); }
 };

@@ -20,7 +20,7 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
 }
 
 static void
-fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> const& children, int& item_id)
+fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> const& children)
 {
   for(int i = 0; i < children.size(); i++)
   {
@@ -28,11 +28,14 @@ fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> con
     if(child.flags & host_menu_flags_separator)
       menu.addSeparator();
     else if(child.children.empty())
-      menu.addItem(item_id++, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
+    {
+      assert(child.id > 0);
+      menu.addItem(child.id, child.name, child.flags & host_menu_flags_enabled, child.flags & host_menu_flags_checked);
+    }
     else
     {
       PopupMenu submenu;
-      fill_host_menu(submenu, child.children, item_id);
+      fill_host_menu(submenu, child.children);
       menu.addSubMenu(child.name, submenu, child.flags & host_menu_flags_enabled);
     }
   }
@@ -236,12 +239,13 @@ param_component::mouseUp(MouseEvent const& e)
 
   PopupMenu menu;
   PopupMenu::Options options;
-  options = options.withTargetComponent(dynamic_cast<Component&>(*this));
+  auto& self = dynamic_cast<Component&>(*this);
+  options = options.withTargetComponent(self);
+  menu.setLookAndFeel(&self.getLookAndFeel());
 
-  int item_id = 1;
   auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
-  fill_host_menu(menu, host_menu->children, item_id);
-  menu.showMenuAsync(options, [host_menu = std::move(host_menu)](int id) {
+  fill_host_menu(menu, host_menu->root.children);
+  menu.showMenuAsync(options, [](int id) {
 
   });
 }
