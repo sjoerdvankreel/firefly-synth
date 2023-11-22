@@ -80,7 +80,7 @@ image_component(
   std::string const& file_name, 
   RectanglePlacement placement)
 {
-  String path(get_resource_location(config, file_name).string());
+  String path(get_resource_location(config, resource_folder_ui, file_name).string());
   setImage(ImageCache::getFromFile(path), placement);
 }
 

@@ -8,6 +8,9 @@
 
 namespace plugin_base {
 
+inline char constexpr resource_folder_ui[] = "ui";
+inline char constexpr resource_folder_presets[] = "presets";
+
 void 
 add_and_make_visible(
   juce::Component& parent, 
@@ -15,16 +18,9 @@ add_and_make_visible(
 
 juce::Colour
 color_to_grayscale(juce::Colour const& c);
-std::filesystem::path
-get_resource_location(format_config const* config, std::string const& file_name);
 
-class gui_listener
-{
-public:
-  void gui_changed(int index, plain_value plain);
-  virtual void gui_end_changes(int index) = 0;
-  virtual void gui_begin_changes(int index) = 0;
-  virtual void gui_changing(int index, plain_value plain) = 0;
-};
+std::filesystem::path
+get_resource_location(format_config const* config, 
+  std::string const& folder, std::string const& file_name);
 
 }

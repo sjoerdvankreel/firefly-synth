@@ -22,19 +22,6 @@ static std::string const extra_state_tab_index = "tab";
 static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
-std::set<std::string>
-gui_extra_state_keyset(plugin_topo const& topo)
-{
-  std::set<std::string> result = {};
-  for(int i = 0; i < topo.modules.size(); i++)
-    if(topo.modules[i].info.slot_count > 1)
-      result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);
-  for(int i = 0; i < topo.gui.module_sections.size(); i++)
-    if(topo.gui.module_sections[i].tabbed)
-      result.insert(topo.gui.module_sections[i].id + "/" + extra_state_tab_index);
-  return result;
-}
-
 static Justification 
 justification_type(gui_label const& label)
 {
@@ -67,6 +54,27 @@ justification_type(gui_label const& label)
   }
   assert(false);
   return Justification::centred;
+}
+
+void
+gui_listener::gui_changed(int index, plain_value plain)
+{
+  gui_begin_changes(index);
+  gui_changing(index, plain);
+  gui_end_changes(index);
+}
+
+std::set<std::string>
+gui_extra_state_keyset(plugin_topo const& topo)
+{
+  std::set<std::string> result = {};
+  for (int i = 0; i < topo.modules.size(); i++)
+    if (topo.modules[i].info.slot_count > 1)
+      result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);
+  for (int i = 0; i < topo.gui.module_sections.size(); i++)
+    if (topo.gui.module_sections[i].tabbed)
+      result.insert(topo.gui.module_sections[i].id + "/" + extra_state_tab_index);
+  return result;
 }
 
 plugin_gui::

@@ -19,14 +19,6 @@ add_and_make_visible(
     parent.addAndMakeVisible(child);
 }
 
-void
-gui_listener::gui_changed(int index, plain_value plain) 
-{
-  gui_begin_changes(index);
-  gui_changing(index, plain);
-  gui_end_changes(index);
-}
-
 juce::Colour
 color_to_grayscale(juce::Colour const& c)
 {
@@ -36,10 +28,11 @@ color_to_grayscale(juce::Colour const& c)
 }
 
 std::filesystem::path
-get_resource_location(format_config const* config, std::string const& file_name)
+get_resource_location(format_config const* config, 
+  std::string const& folder, std::string const& file_name)
 {
   File file(File::getSpecialLocation(File::currentExecutableFile));
-  return config->resources_folder(file.getFullPathName().toStdString()) / file_name;
+  return config->resources_folder(file.getFullPathName().toStdString()) / folder / file_name;
 }
 
 }
