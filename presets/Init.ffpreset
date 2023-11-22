@@ -1,28 +1,27 @@
 {
-  "checksum": "18bcef39599d19e13b7b3d5254a0bf59",
+  "checksum": "4bd19d04908ae950ac6185e9916a87b0",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
       "file_version": 1,
       "plugin_id": "56AFFFF7565F48348C4359D5E6C856A4",
-      "plugin_name": "Infernal Synth",
-      "plugin_version_major": 2,
+      "plugin_name": "Firefly Synth",
+      "plugin_version_major": 1,
       "plugin_version_minor": 0
     },
     "content": {
       "extra": {
-        "checksum": "65e55e36fdb40a1347284cebf6411695",
+        "checksum": "e8102fbbfbd6165e78992006c4ead0a9",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
             "file_version": 1,
             "plugin_id": "56AFFFF7565F48348C4359D5E6C856A4",
-            "plugin_name": "Infernal Synth",
-            "plugin_version_major": 2,
+            "plugin_name": "Firefly Synth",
+            "plugin_version_major": 1,
             "plugin_version_minor": 0
           },
           "content": {
-            "factory_preset": "Clear",
             "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
             "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
             "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
@@ -35,14 +34,14 @@
         }
       },
       "plugin": {
-        "checksum": "8b11d5aa2358bd7c7cc163b5f3eb1d9b",
+        "checksum": "44e555d7997ebb587e888635e26a142a",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
             "file_version": 1,
             "plugin_id": "56AFFFF7565F48348C4359D5E6C856A4",
-            "plugin_name": "Infernal Synth",
-            "plugin_version_major": 2,
+            "plugin_name": "Firefly Synth",
+            "plugin_version_major": 1,
             "plugin_version_minor": 0
           },
           "content": {
@@ -445,7 +444,7 @@
                     "params": [
                       {
                         "slots": [
-                          "{6940ADC8-DF91-468A-8FA1-25843B1A5707}"
+                          "{E2692483-F48B-4037-BF74-64BB62110538}"
                         ]
                       },
                       {
@@ -455,7 +454,7 @@
                       },
                       {
                         "slots": [
-                          "1/4"
+                          "3/1"
                         ]
                       }
                     ]
@@ -464,7 +463,7 @@
                     "params": [
                       {
                         "slots": [
-                          "{6940ADC8-DF91-468A-8FA1-25843B1A5707}"
+                          "{5F57863F-4157-4F53-BB02-C6693675B881}"
                         ]
                       },
                       {
@@ -506,8 +505,8 @@
                     "params": [
                       {
                         "slots": [
-                          "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
-                          "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
+                          "{169406D2-E86F-4275-A49F-59ED67CD7661}",
+                          "{000C0860-B191-4554-9249-85846B1AFFD1}",
                           "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
                           "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
                           "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
@@ -516,8 +515,8 @@
                       },
                       {
                         "slots": [
-                          "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
-                          "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
+                          "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}-0-{197CB1D4-8A48-4093-A5E7-2781C731BBFC}-0",
+                          "{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}-0-{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}-0",
                           "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
                           "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
                           "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
@@ -536,7 +535,7 @@
                       },
                       {
                         "slots": [
-                          "100 %",
+                          "33 %",
                           "100 %",
                           "100 %",
                           "100 %",
@@ -644,7 +643,7 @@
                     "params": [
                       {
                         "slots": [
-                          "Off"
+                          "On"
                         ]
                       },
                       {
@@ -706,10 +705,10 @@
                     "params": [
                       {
                         "slots": [
-                          "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
-                          "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
-                          "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
-                          "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
+                          "{000C0860-B191-4554-9249-85846B1AFFD1}",
+                          "{169406D2-E86F-4275-A49F-59ED67CD7661}",
+                          "{169406D2-E86F-4275-A49F-59ED67CD7661}",
+                          "{169406D2-E86F-4275-A49F-59ED67CD7661}",
                           "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
                           "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
                           "{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}",
@@ -722,10 +721,10 @@
                       },
                       {
                         "slots": [
-                          "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
-                          "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
-                          "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
-                          "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
+                          "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}-1-{2CDB809A-17BF-4936-99A0-B90E1035CBE6}-0",
+                          "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}-1-{197CB1D4-8A48-4093-A5E7-2781C731BBFC}-0",
+                          "{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}-0-{EB8CBA31-212A-42EA-956E-69063BF93C58}-0",
+                          "{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}-0-{EB8CBA31-212A-42EA-956E-69063BF93C58}-0",
                           "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
                           "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
                           "{4E70A342-A95A-4860-8223-D4F029E22874}-0-{D38E46EA-4064-410C-BB33-DB6DA418463B}-0",
@@ -738,10 +737,10 @@
                       },
                       {
                         "slots": [
+                          "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}-0-{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}-0",
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{23C6BC03-0978-4582-981B-092D68338ADA}-0",
-                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{23C6BC03-0978-4582-981B-092D68338ADA}-0",
-                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{23C6BC03-0978-4582-981B-092D68338ADA}-0",
-                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{23C6BC03-0978-4582-981B-092D68338ADA}-0",
+                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{C644681E-0634-4774-B65C-7FFC3B65AADE}-0",
+                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-1-{C644681E-0634-4774-B65C-7FFC3B65AADE}-0",
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{23C6BC03-0978-4582-981B-092D68338ADA}-0",
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{23C6BC03-0978-4582-981B-092D68338ADA}-0",
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0-{23C6BC03-0978-4582-981B-092D68338ADA}-0",
@@ -755,7 +754,7 @@
                       {
                         "slots": [
                           "100 %",
-                          "100 %",
+                          "33 %",
                           "100 %",
                           "100 %",
                           "100 %",
@@ -779,8 +778,8 @@
                       {
                         "slots": [
                           "On",
-                          "Off",
-                          "Off",
+                          "On",
+                          "On",
                           "Off",
                           "Off",
                           "Off"
@@ -789,8 +788,8 @@
                       {
                         "slots": [
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0",
-                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0",
-                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0",
+                          "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-1",
+                          "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}-0",
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0",
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0",
                           "{45C2CCFE-48D9-4231-A327-319DAE5C9366}-0"
@@ -798,8 +797,8 @@
                       },
                       {
                         "slots": [
-                          "{94CC6FFA-2C0F-4B72-A484-65CD2974D288}-0",
-                          "{94CC6FFA-2C0F-4B72-A484-65CD2974D288}-0",
+                          "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}-0",
+                          "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}-0",
                           "{94CC6FFA-2C0F-4B72-A484-65CD2974D288}-0",
                           "{94CC6FFA-2C0F-4B72-A484-65CD2974D288}-0",
                           "{94CC6FFA-2C0F-4B72-A484-65CD2974D288}-0",
@@ -826,7 +825,7 @@
                     "params": [
                       {
                         "slots": [
-                          "{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}"
+                          "{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}"
                         ]
                       },
                       {
@@ -851,7 +850,7 @@
                       },
                       {
                         "slots": [
-                          "+0"
+                          "-10"
                         ]
                       },
                       {
@@ -870,7 +869,7 @@
                     "params": [
                       {
                         "slots": [
-                          "{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}"
+                          "{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}"
                         ]
                       },
                       {
@@ -895,7 +894,7 @@
                       },
                       {
                         "slots": [
-                          "+0"
+                          "+10"
                         ]
                       },
                       {
@@ -962,17 +961,17 @@
                     "params": [
                       {
                         "slots": [
-                          "{F37A19CE-166A-45BF-9F75-237324221C39}"
+                          "{8B7E5C75-C3F6-4F53-900C-0A75703F5570}"
                         ]
                       },
                       {
                         "slots": [
-                          "1000 Hz"
+                          "20 Hz"
                         ]
                       },
                       {
                         "slots": [
-                          "0 %"
+                          "50 %"
                         ]
                       }
                     ]
@@ -1038,8 +1037,8 @@
                       {
                         "slots": [
                           "On",
-                          "Off",
-                          "Off",
+                          "On",
+                          "On",
                           "Off",
                           "Off",
                           "Off"
@@ -1048,8 +1047,8 @@
                       {
                         "slots": [
                           "{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}-0",
-                          "{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}-0",
-                          "{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}-0",
+                          "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}-0",
+                          "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}-1",
                           "{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}-0",
                           "{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}-0",
                           "{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}-0"
@@ -1057,8 +1056,8 @@
                       },
                       {
                         "slots": [
-                          "{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}-0",
-                          "{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}-0",
+                          "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}-0",
+                          "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}-1",
                           "{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}-0",
                           "{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}-0",
                           "{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}-0",
@@ -1085,7 +1084,7 @@
                     "params": [
                       {
                         "slots": [
-                          "{F37A19CE-166A-45BF-9F75-237324221C39}"
+                          "{8B7E5C75-C3F6-4F53-900C-0A75703F5570}"
                         ]
                       },
                       {
@@ -1114,7 +1113,7 @@
                     "params": [
                       {
                         "slots": [
-                          "{F37A19CE-166A-45BF-9F75-237324221C39}"
+                          "{789D430C-9636-4FFF-8C75-11B839B9D80D}"
                         ]
                       },
                       {
@@ -1129,7 +1128,7 @@
                       },
                       {
                         "slots": [
-                          "1/4"
+                          "3/16"
                         ]
                       },
                       {
