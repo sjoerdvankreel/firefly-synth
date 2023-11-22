@@ -93,15 +93,15 @@ last_tweaked_editor::textEditorTextChanged(TextEditor& te)
 }
 
 preset_button::
-preset_button(plugin_gui* gui, extra_state* state) :
-_gui(gui), _state(state), _presets(gui->gui_state()->desc().presets())
+preset_button(plugin_gui* gui) :
+_gui(gui), _presets(gui->gui_state()->desc().presets())
 { 
   set_items(vector_map(_presets, [](auto const& p) { return p.name; }));
   extra_state_changed();
   setButtonText("Preset");
   selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
-    _state->set_text(preset_key, get_items()[index]);
+    _gui->extra_state()->set_text(preset_key, get_items()[index]);
     _gui->load_patch(_presets[index].path);
   };
 }
@@ -109,7 +109,7 @@ _gui(gui), _state(state), _presets(gui->gui_state()->desc().presets())
 void 
 preset_button::extra_state_changed()
 {
-  std::string selected_preset = _state->get_text(preset_key, "");
+  std::string selected_preset = _gui->extra_state()->get_text(preset_key, "");
   auto iter = std::find(get_items().begin(), get_items().end(), selected_preset);
   if (iter != get_items().end())
     set_selected_index((int)(iter - get_items().begin()));
