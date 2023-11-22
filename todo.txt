@@ -30,7 +30,6 @@ audio output graph
 any output graph
 swap module incl swap routing
 move routing matrix stuff to base
-factory preset
 
 * get some linux folks to comment (ycollete?)
 * continuing
