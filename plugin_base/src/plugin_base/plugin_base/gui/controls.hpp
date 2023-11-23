@@ -10,6 +10,22 @@
 
 namespace plugin_base {
 
+// same as juce version but does not react to right-click
+class text_button:
+public juce::TextButton
+{
+public:
+  void mouseUp(juce::MouseEvent const& e) override;
+};
+
+// same as juce version but does not react to right-click
+class toggle_button :
+public juce::ToggleButton
+{
+public:
+  void mouseUp(juce::MouseEvent const& e) override;
+};
+
 // same as juce version but loads from resources folder
 class image_component :
 public juce::ImageComponent
@@ -23,7 +39,7 @@ public:
 
 // button that resizes to text content
 class autofit_button :
-public juce::TextButton,
+public text_button,
 public autofit_component
 {
 public:
@@ -34,7 +50,7 @@ public:
 
 // fixed size checkbox
 class autofit_togglebutton :
-public juce::ToggleButton,
+public toggle_button,
 public autofit_component
 {
 public:
@@ -76,7 +92,7 @@ public:
 // button that opens a popupmenu
 // basically a combobox that shows a fixed button text
 class menu_button :
-public juce::TextButton
+public text_button
 {
   int _selected_index = 0;
   std::vector<std::string> _items;

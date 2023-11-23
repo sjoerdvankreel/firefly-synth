@@ -41,6 +41,20 @@ fill_host_menu(PopupMenu& menu, std::vector<std::shared_ptr<host_menu_item>> con
   }
 }
 
+void 
+text_button::mouseUp(MouseEvent const& e)
+{
+  if(!e.mods.isRightButtonDown())
+    TextButton::mouseUp(e);
+}
+
+void
+toggle_button::mouseUp(MouseEvent const& e)
+{
+  if (!e.mods.isRightButtonDown())
+    ToggleButton::mouseUp(e);
+}
+
 void
 menu_button::clicked()
 {
