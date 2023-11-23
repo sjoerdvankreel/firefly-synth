@@ -8,6 +8,7 @@
 #include <clap/helpers/plugin.hxx>
 #include <clap/helpers/host-proxy.hxx>
 
+#include <stack>
 #include <vector>
 #include <cstring>
 #include <utility>
@@ -425,6 +426,80 @@ pb_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
     default: assert(false); break;
     }
   }
+}
+
+std::unique_ptr<host_menu>
+pb_plugin::context_menu(int param_id) const
+{
+  if (!_host.canUseContextMenu()) return {};
+
+  clap_context_menu_target target;
+  target.id = param_id;
+  target.kind = CLAP_CONTEXT_MENU_TARGET_KIND_PARAM;
+
+  clap_context_menu_builder builder;
+  auto result = std::make_unique<host_menu>();
+  std::stack<host_menu_item*> menu_stack;
+  menu_stack.push(&result->root);
+  builder.ctx = &menu_stack;
+  builder.supports = [](auto, auto) { return true; };
+
+  builder.add_item = [](auto const* builder, auto kind, void const* data) {
+
+    clap_context_menu_entry const* entry;
+    clap_context_menu_item_title const* title;
+    clap_context_menu_submenu const* sub_menu;
+    clap_context_menu_check_entry const* check_entry;
+    auto menu_stack = static_cast<std::stack<host_menu_item*>*>(builder->ctx);
+    auto item = menu_stack->top()->children.emplace_back(std::make_shared<host_menu_item>());
+    item->tag = host_menu_item::no_tag;
+
+    switch (kind)
+    {
+    case CLAP_CONTEXT_MENU_ITEM_SEPARATOR:
+      item->flags = host_menu_flags_separator;
+      break;
+    case CLAP_CONTEXT_MENU_ITEM_TITLE:
+      title = static_cast<clap_context_menu_item_title const*>(data);
+      item->name = title->title;
+      item->flags |= title->is_enabled ? host_menu_flags_enabled : 0;
+      break;
+    case CLAP_CONTEXT_MENU_ITEM_ENTRY:
+      entry = static_cast<clap_context_menu_entry const*>(data);
+      item->name = entry->label;
+      item->tag = entry->action_id;
+      item->flags |= entry->is_enabled ? host_menu_flags_enabled : 0;
+      break;
+    case CLAP_CONTEXT_MENU_ITEM_CHECK_ENTRY:
+      check_entry = static_cast<clap_context_menu_check_entry const*>(data);
+      item->name = check_entry->label;
+      item->tag = check_entry->action_id;
+      item->flags |= check_entry->is_enabled ? host_menu_flags_enabled : 0;
+      item->flags |= check_entry->is_checked ? host_menu_flags_checked : 0;
+      break;
+    case CLAP_CONTEXT_MENU_ITEM_BEGIN_SUBMENU:
+      sub_menu = static_cast<clap_context_menu_submenu const*>(data);
+      item->name = sub_menu->label;
+      item->flags |= sub_menu->is_enabled? host_menu_flags_enabled: 0;
+      menu_stack->push(item.get());
+      break;
+    case CLAP_CONTEXT_MENU_ITEM_END_SUBMENU:
+      menu_stack->pop();
+      break;
+    default:
+      assert(false);
+    }
+
+    return true;
+  };
+
+  // bitwig returns false
+  _host.contextMenuPopulate(_host.host(), &target, &builder);
+  assert(menu_stack.size() == 1);
+  menu_stack.pop();
+  if(result->root.children.empty()) return {};
+  result->clicked = [](int) {};
+  return result;
 }
 
 clap_process_status

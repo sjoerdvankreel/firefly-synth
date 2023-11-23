@@ -24,8 +24,11 @@ enum {
 
 struct host_menu_item
 {
-  int tag;
+  // no action associated
+  static inline int const no_tag = -1;
+
   int flags;
+  int tag = no_tag;
   std::string name;
   std::vector<std::shared_ptr<host_menu_item>> children;
 };
