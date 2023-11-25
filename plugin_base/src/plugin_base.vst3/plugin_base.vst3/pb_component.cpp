@@ -171,7 +171,7 @@ pb_component::process(ProcessData& data)
         }
       }
   
-  _engine.process();
+  _engine.process(nullptr);
   int unused_index = 0;
   for (int e = 0; e < block.events.out.size(); e++)
   {

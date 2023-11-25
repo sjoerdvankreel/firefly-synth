@@ -32,20 +32,6 @@ inline char constexpr resource_folder_presets[] = "presets";
 inline float constexpr pi32 = 3.14159265358979323846264338327950288f;
 inline double constexpr pi64 = 3.14159265358979323846264338327950288;
 
-template <class Exit>
-class scope_guard {
-  Exit _exit;
-
-public:
-  ~scope_guard() { _exit(); }
-  scope_guard(Exit exit) : _exit(exit) {}
-
-  scope_guard(scope_guard&) = delete;
-  scope_guard(scope_guard const&) = delete;          
-  scope_guard& operator = (scope_guard&&) = delete;
-  scope_guard& operator = (scope_guard const&) = delete;
-};
-
 double seconds_since_epoch();
 inline void debug_breakable() {};
 std::vector<char> file_load(std::filesystem::path const& path);

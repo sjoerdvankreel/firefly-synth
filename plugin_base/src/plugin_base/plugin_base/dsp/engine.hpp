@@ -32,6 +32,15 @@ typedef bool (*
 thread_pool_voice_processor)(
   plugin_engine& engine, void* context);
 
+// used for graph processing, to selectively run parts of the engine and/our alter inputs/outputs
+class engine_callbacks
+{
+public:
+  virtual void after_block(plugin_block& block) {}
+  virtual void before_block(plugin_block& block) {}
+  virtual bool process_module(int topo, int slot) { return false; }
+};
+  
 // global plugin audio processor
 class plugin_engine final {
 
@@ -66,6 +75,7 @@ class plugin_engine final {
   std::unique_ptr<host_block> _host_block = {};
   
   void* _voice_processor_context = nullptr;
+  engine_callbacks* _process_callbacks = nullptr;
   std::vector<std::thread::id> _voice_thread_ids;
   thread_pool_voice_processor _voice_processor = {};
 
@@ -85,16 +95,17 @@ public:
     thread_pool_voice_processor voice_processor,
     void* voice_processor_context);
 
-  // per-voice public for threadpool
-  void process();
-  void process_voice(int v, bool threaded); 
-
   void deactivate();
   void release_block();
   host_block& prepare_block();
   void activate(int sample_rate, int max_frame_count);
 
-  plugin_state& state() { return _state; } 
+  // per-voice public for threadpool
+  // callbacks is optional
+  void process_voice(int v, bool threaded);
+  void process(engine_callbacks* callbacks);
+
+  plugin_state& state() { return _state; }
   plugin_state const& state() const { return _state; }
 };
 

@@ -8,6 +8,18 @@
 
 namespace plugin_base {
 
+static void
+process_module_with_callbacks(module_engine* engine, 
+  plugin_block& block, engine_callbacks* callbacks)
+{
+  if(callbacks == nullptr)
+    engine->process(block);
+  callbacks->before_block(block);
+  if(callbacks->process_module(block.module.info.index, block.module_slot))
+    engine->process(block);
+  callbacks->after_block(block);
+}
+
 plugin_engine::
 plugin_engine(
   plugin_desc const* desc,
@@ -211,7 +223,7 @@ plugin_engine::process_voice(int v, bool threaded)
       };
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
-      _voice_engines[v][m][mi]->process(block);
+      process_module_with_callbacks(_voice_engines[v][m][mi].get(), block, _process_callbacks);
 
       // plugin completed its envelope
       if (block.voice->finished)
@@ -231,14 +243,13 @@ plugin_engine::process_voice(int v, bool threaded)
 }
 
 void 
-plugin_engine::process()
+plugin_engine::process(engine_callbacks* callbacks)
 {
   int voice_count = 0;
   int frame_count = _host_block->frame_count;
 
   _host_block->events.out.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();
-  scope_guard denormals([denormal_state]() { restore_denormals(denormal_state); });
 
   // TODO monophonic portamento
 
@@ -470,7 +481,7 @@ plugin_engine::process()
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
-      _input_engines[m][mi]->process(block);
+      process_module_with_callbacks(_input_engines[m][mi].get(), block, callbacks);
     }
 
   // run voice modules in order taking advantage of host threadpool if possible
@@ -480,6 +491,7 @@ plugin_engine::process()
     process_voices_single_threaded();
   else
   {
+    _process_callbacks = callbacks;
     for (int v = 0; v < _state.desc().plugin->polyphony; v++)
       _voice_thread_ids[v] = std::thread::id();
     std::atomic_thread_fence(std::memory_order_release);
@@ -492,6 +504,7 @@ plugin_engine::process()
       thread_count = std::unique(_voice_thread_ids.begin(), _voice_thread_ids.end()) - _voice_thread_ids.begin();
       thread_count = std::max(1, thread_count);
     }
+    _process_callbacks = nullptr;
   }
 
   // combine voices output
@@ -515,7 +528,7 @@ plugin_engine::process()
       };
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
       block.out = &out_block;
-      _output_engines[m][mi]->process(block);
+      process_module_with_callbacks(_output_engines[m][mi].get(), block, callbacks);
 
       // copy back output parameter values
       for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
@@ -552,6 +565,9 @@ plugin_engine::process()
           }
     }
   }
+
+  // cleanup
+  restore_denormals(denormal_state);
 }
 
 }
