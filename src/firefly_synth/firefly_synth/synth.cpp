@@ -12,6 +12,20 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+class synth_graph:
+public graph,
+public any_state_listener
+{
+  plugin_state* const _state;
+  int _last_tweaked_module = -1;
+public:
+  void any_state_changed(int index, plain_value plain);
+  ~synth_graph() { _state->remove_any_listener(this); }
+
+  synth_graph(plugin_state* state, lnf* lnf):
+  _state(state), graph(lnf) { _state->add_any_listener(this); }
+};
+
 static gui_colors
 make_section_colors(Colour const& c)
 {
@@ -75,6 +89,14 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour cons
   label.setColour(Label::ColourIds::textColourId, color);
   grid.add(label, { 0, 0 });
   return grid;
+}
+
+void 
+synth_graph::any_state_changed(int index, plain_value plain)
+{
+  int this_module = _state->desc().param_mappings.params[index].module_global;
+  if(_last_tweaked_module == this_module) return;
+  _last_tweaked_module = this_module;
 }
 
 std::unique_ptr<plugin_topo>
