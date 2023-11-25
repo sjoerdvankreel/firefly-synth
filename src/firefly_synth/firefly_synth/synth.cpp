@@ -29,8 +29,9 @@ make_section_colors(Colour const& c)
 }
 
 enum {
-  custom_section_module_graph,
   custom_section_title,
+  custom_section_audio_graph,
+  custom_section_module_graph,
   custom_section_controls,
   custom_section_count };
 
@@ -101,18 +102,20 @@ synth_topo()
   result->gui.aspect_ratio_width = 52;
   result->gui.aspect_ratio_height = 23;
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
-  result->gui.dimension.column_sizes = { 6, 14, 7, 7 };
+  result->gui.dimension.column_sizes = { 10, 5, 5, 7, 7 };
   result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1 };
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [other_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
     return make_title_section(gui, lnf, store, other_color); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, { 0, 1, 1, 1 }, other_colors, make_title_section_ui);
+    custom_section_title, { 0, 0, 1, 1 }, other_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 0, 2, 1, 2 }, other_colors, make_controls_section);
+    custom_section_controls, { 0, 3, 1, 2 }, other_colors, make_controls_section);
+  result->gui.custom_sections[custom_section_audio_graph] = make_custom_section_gui(
+    custom_section_audio_graph, { 0, 1, 1, 1 }, other_colors, make_module_graph_section);
   result->gui.custom_sections[custom_section_module_graph] = make_custom_section_gui(
-    custom_section_module_graph, { 0, 0, 1, 1 }, other_colors, make_module_graph_section);
+    custom_section_module_graph, { 0, 2, 1, 1 }, other_colors, make_module_graph_section);
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(
@@ -120,22 +123,22 @@ synth_topo()
   result->gui.module_sections[module_section_voice] = make_module_section_gui_none(
     "{45767DB3-D1BE-4202-91B7-F6558F148D3D}", module_section_voice);
   result->gui.module_sections[module_section_fx] = make_module_section_gui(
-    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_fx, { 5, 0, 1, 2 }, { 1, 2 });
+    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_fx, { 5, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_env] = make_module_section_gui(
-    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 3, 0, 1, 2 }, { 1, 1 });
+    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 3, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_osc] = make_module_section_gui(
-    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 4, 0, 1, 2 }, { 1, 1 });
+    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 4, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_lfos] = make_module_section_gui(
-    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_lfos, { 2, 0, 1, 2 }, { 1, 2 });
+    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_lfos, { 2, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_input] = make_module_section_gui(
-    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_input, { 1, 0, 1, 2 }, { 1, 1 });
+    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_input, { 1, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_monitor_master] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_master, { 6, 0, 1, 2 }, { { 1 }, { 2, 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_master, { 6, 0, 1, 3 }, { { 1 }, { 2, 1 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 2, 3, 2 },
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 3, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
   result->gui.module_sections[module_section_audio_matrix] = make_module_section_gui_tabbed(
-    "{950B6610-5CE1-4629-943F-CB2057CA7346}", module_section_audio_matrix, { 4, 2, 3, 2 },
+    "{950B6610-5CE1-4629-943F-CB2057CA7346}", module_section_audio_matrix, { 4, 3, 3, 2 },
     "Audio", result->gui.module_header_width, { module_vaudio_matrix, module_gaudio_matrix });
 
   result->modules.resize(module_count);
