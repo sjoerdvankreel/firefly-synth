@@ -15,10 +15,10 @@ public juce::LookAndFeel_V4 {
   juce::Typeface::Ptr _typeface = {};
 
   int tab_width() const;
-  gui_colors const& colors() const;
 
 public:
   juce::Font font() const;
+  gui_colors const& colors() const;
   int combo_height() const { return _desc->plugin->gui.font_height + 6; }
   lnf(plugin_desc const* desc, int custom_section, int module_section, int module);
 

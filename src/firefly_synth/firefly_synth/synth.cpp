@@ -3,6 +3,7 @@
 
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/gui/graph.hpp>
 #include <plugin_base/gui/controls.hpp>
 #include <plugin_base/gui/containers.hpp>
 
@@ -22,13 +23,15 @@ make_section_colors(Colour const& c)
   result.control_tick = c;
   result.bubble_outline = c;
   result.scrollbar_thumb = c;
+  result.graph_foreground = c;
   result.section_outline1 = c.darker(1);
   return result;
 }
 
 enum {
-  custom_section_controls,
+  custom_section_module_graph,
   custom_section_title,
+  custom_section_controls,
   custom_section_count };
 
 enum { 
@@ -38,14 +41,14 @@ enum {
   module_section_voice, module_section_monitor_master, module_section_count };
 
 static Component&
-make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour const& color)
+make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { 1, gui_dimension::auto_size } }), 2, 0, 1);
-  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xLeft), { 0, 0 });
-  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
-  label.setColour(Label::ColourIds::textColourId, color);
-  grid.add(label, { 0, 1 });
-  return grid;
+  auto& result = store_component<graph>(store, lnf);
+  std::vector<float> data;
+  for (int i = 0; i < 100; i++)
+    data.push_back(std::sin((float)i / 100 * 2.0f * pi32) * 0.5f + 0.5f);
+  result.render(data, false);
+  return result;
 }
 
 static Component&
@@ -60,6 +63,17 @@ make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak:"), {1, 0, 1, 2});
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 2 });
   return result;
+}
+
+static Component&
+make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour const& color)
+{
+  auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { 1, gui_dimension::auto_size } }), 2, 0, 1);
+  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xLeft), { 0, 0 });
+  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
+  label.setColour(Label::ColourIds::textColourId, color);
+  grid.add(label, { 0, 1 });
+  return grid;
 }
 
 std::unique_ptr<plugin_topo>
@@ -94,9 +108,11 @@ synth_topo()
   auto make_title_section_ui = [other_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
     return make_title_section(gui, lnf, store, other_color); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, { 0, 0, 1, 2 }, other_colors, make_title_section_ui);
+    custom_section_title, { 0, 1, 1, 1 }, other_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
     custom_section_controls, { 0, 2, 1, 2 }, other_colors, make_controls_section);
+  result->gui.custom_sections[custom_section_module_graph] = make_custom_section_gui(
+    custom_section_module_graph, { 0, 0, 1, 1 }, other_colors, make_module_graph_section);
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(
