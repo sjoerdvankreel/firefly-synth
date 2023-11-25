@@ -24,6 +24,14 @@ graph::paint(Graphics& g)
   g.fillAll(_lnf->colors().graph_background);
   if(_data.size() == 0) return;
 
+  int grid_rows = 5;
+  int grid_cols = 13;
+  g.setColour(_lnf->colors().graph_grid.withAlpha(0.25f));
+  for(int i = 1; i <= grid_rows; i++)
+    g.fillRect(0.0f, i / (float)(grid_rows + 1) * h, w, 1.0f);
+  for (int i = 1; i <= grid_cols; i++)
+    g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, h);
+
   float count = _data.size();
   p.startNewSubPath(0, vpad + _data[0] * (h - 2 * vpad));
   for(int i = 1; i < _data.size(); i++)

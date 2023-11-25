@@ -10,14 +10,13 @@ namespace plugin_base {
 class graph:
 public juce::Component
 {
-  bool _bipolar;
   lnf* const _lnf;
   std::vector<float> _data;
 
 public:
   graph(lnf* lnf): _lnf(lnf) {}
   void paint(juce::Graphics& g) override;
-  void render(std::vector<float> const& data, bool bipolar);
+  void render(std::vector<float> const& data);
 };
 
 }
