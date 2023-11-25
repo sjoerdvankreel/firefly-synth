@@ -5,10 +5,9 @@ using namespace juce;
 namespace plugin_base {
 
 void 
-graph::render(std::vector<float> const& data, bool bipolar)
+graph::render(std::vector<float> const& data)
 {
   _data = data;
-  _bipolar = bipolar;
   for (int i = 0; i < _data.size(); i++)
     _data[i] = 1 - _data[i];
   repaint();
