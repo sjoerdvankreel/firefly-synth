@@ -62,7 +62,7 @@ make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   std::vector<float> data;
   for (int i = 0; i < 100; i++)
     data.push_back(std::sin((float)i / 100 * 2.0f * pi32) * 0.5f + 0.5f);
-  result.render(data);
+  result.paint(data);
   return result;
 }
 
