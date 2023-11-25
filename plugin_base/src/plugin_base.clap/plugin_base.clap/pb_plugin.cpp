@@ -605,7 +605,7 @@ pb_plugin::process(clap_process const* process) noexcept
     }
   }
 
-  _engine.process(nullptr);
+  _engine.process();
   for (int e = 0; e < block.events.out.size(); e++)
   {
     sync_event to_gui_event = {};
