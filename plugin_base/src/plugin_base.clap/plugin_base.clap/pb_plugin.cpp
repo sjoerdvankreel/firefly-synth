@@ -433,10 +433,6 @@ pb_plugin::context_menu(int param_id) const
 {
   if (!_host.canUseContextMenu()) return {};
 
-  clap_context_menu_target target;
-  target.id = param_id;
-  target.kind = CLAP_CONTEXT_MENU_TARGET_KIND_PARAM;
-
   clap_context_menu_builder builder;
   auto result = std::make_unique<host_menu>();
   std::stack<host_menu_item*> menu_stack;
@@ -494,11 +490,18 @@ pb_plugin::context_menu(int param_id) const
   };
 
   // bitwig returns false
-  _host.contextMenuPopulate(_host.host(), &target, &builder);
+  auto target = std::make_unique<clap_context_menu_target>();
+  target->id = param_id;
+  target->kind = CLAP_CONTEXT_MENU_TARGET_KIND_PARAM;
+  _host.contextMenuPopulate(_host.host(), target.get(), &builder);
   assert(menu_stack.size() == 1);
   menu_stack.pop();
+
   if(result->root.children.empty()) return {};
-  result->clicked = [](int) {};
+  result->clicked = [this, target = target.release()](int action) {
+    _host.contextMenuPerform(_host.host(), target, action);
+    delete target;
+  };
   return result;
 }
 

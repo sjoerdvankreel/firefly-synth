@@ -1,4 +1,3 @@
-host context menu
 (polyphonic) modulation
 handle clap midi notes
 handle clap is_modulatable
@@ -15,7 +14,6 @@ demo synth:
 graphs
 velocity + note as modsource
 on-note type stuff
-host menu
 do clap midi notes
 polymod/mpe/note_exprs
 midi note as mod source
@@ -24,7 +22,6 @@ audio output graph
 any output graph
 swap module incl swap routing
 make new test files
-test host menu for clap
 
 * get some linux folks to comment (ycollete?)
 * continuing
