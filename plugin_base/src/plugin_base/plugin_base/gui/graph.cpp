@@ -5,7 +5,7 @@ using namespace juce;
 namespace plugin_base {
 
 void 
-graph::paint(std::vector<float> const& data)
+graph::render(std::vector<float> const& data)
 {
   _data = data;
   for (int i = 0; i < _data.size(); i++)
@@ -42,13 +42,6 @@ graph::paint(Graphics& g)
   g.fillPath(p);
   g.setColour(_lnf->colors().graph_foreground);
   g.strokePath(pStroke, PathStrokeType(1));
-}
-
-void 
-plugin_graph::any_state_changed(int index, plain_value plain)
-{
-  if(should_render(index))
-    paint(render());
 }
 
 }
