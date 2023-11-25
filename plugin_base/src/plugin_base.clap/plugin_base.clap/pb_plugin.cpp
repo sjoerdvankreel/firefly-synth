@@ -489,10 +489,10 @@ pb_plugin::context_menu(int param_id) const
     return true;
   };
 
-  // bitwig returns false
   auto target = std::make_unique<clap_context_menu_target>();
   target->id = param_id;
   target->kind = CLAP_CONTEXT_MENU_TARGET_KIND_PARAM;
+  // bitwig returns false
   _host.contextMenuPopulate(_host.host(), target.get(), &builder);
   assert(menu_stack.size() == 1);
   menu_stack.pop();
