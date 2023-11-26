@@ -5,11 +5,9 @@ using namespace juce;
 namespace plugin_base {
 
 void 
-graph::any_state_changed(int param, plain_value plain)
+graph::render(std::vector<float> const& data)
 {
-  if (!_source->should_render(_state->desc(), param))
-    return;
-  _data = _source->render(*_state, param);
+  _data = data;
   for (int i = 0; i < _data.size(); i++)
     _data[i] = 1 - _data[i];
   repaint();
