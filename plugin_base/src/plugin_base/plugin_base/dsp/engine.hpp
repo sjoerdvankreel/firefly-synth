@@ -87,6 +87,7 @@ public:
   plugin_block make_plugin_block(
     int voice, int module, int slot,
     int start_frame, int end_frame);
+  plugin_voice_block make_voice_block(int v);
 
   // per-voice public for threadpool
   void process();
