@@ -74,7 +74,6 @@ graph::paint(Graphics& g)
   float w = getWidth();
   float h = getHeight();
   g.fillAll(_lnf->colors().graph_background);
-  if(_data.size() == 0) return;
 
   int grid_rows = 5;
   int grid_cols = 13;
@@ -84,6 +83,7 @@ graph::paint(Graphics& g)
   for (int i = 1; i <= grid_cols; i++)
     g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, h);
 
+  if (_data.size() == 0) return;
   float count = _data.size();
   p.startNewSubPath(0, vpad + _data[0] * (h - 2 * vpad));
   for(int i = 1; i < _data.size(); i++)

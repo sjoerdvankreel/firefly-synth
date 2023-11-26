@@ -42,7 +42,7 @@ render_graph(plugin_state const& state, int slot)
   float a = state.get_plain_at(module_env, slot, param_a, 0).real();
   float d = state.get_plain_at(module_env, slot, param_d, 0).real();
   float r = state.get_plain_at(module_env, slot, param_r, 0).real();
-  float s = (a + d) / 2;
+  float s = std::max((a + d + r) / 3, 0.01f);
   params.bpm = 120;
   params.sample_rate = 100;
   params.module_slot = slot;
@@ -57,6 +57,7 @@ render_graph(plugin_state const& state, int slot)
     graph_data result;
     result.bipolar = false;
     result.data = block.state.own_cv[0][0].data();
+    result.data.push_back(0);
     return result;
   });
 }
