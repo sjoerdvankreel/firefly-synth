@@ -42,12 +42,13 @@ render_graph(plugin_state const& state, int slot)
   float a = state.get_plain_at(module_env, slot, param_a, 0).real();
   float d = state.get_plain_at(module_env, slot, param_d, 0).real();
   float r = state.get_plain_at(module_env, slot, param_r, 0).real();
+  float s = (a + d) / 2;
   params.bpm = 120;
   params.sample_rate = 100;
   params.module_slot = slot;
   params.module_index = module_env;
-  params.frame_count = (a + d + r) * 4 / 3 * params.sample_rate;
-  params.voice_release_at = params.frame_count * 3 / 4;
+  params.frame_count = (a + d + s + r) * params.sample_rate;
+  params.voice_release_at = (a + d + s) * params.sample_rate;
   module_graph_engine engine(&state, params);
   return engine.render([frame_count = params.frame_count](plugin_block& block) {
     env_engine engine;
