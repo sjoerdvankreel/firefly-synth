@@ -10,6 +10,8 @@
 
 namespace plugin_base {
 
+int const midi_middle_c = 60;
+
 // for smoothing midi changes
 class midi_filter
 {
@@ -85,11 +87,10 @@ balance(int channel, float value)
 inline float 
 note_to_pitch(int oct, int note, float cent, int key)
 {
-  int const middle_c = 60;
   assert(0 <= oct && oct <= 9);
   assert(0 <= note && note <= 11);
   assert(-1 <= cent && cent <= 1);
-  return (12 * oct + note) + cent + (key - middle_c);
+  return (12 * oct + note) + cent + (key - midi_middle_c);
 }
 
 }

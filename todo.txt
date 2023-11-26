@@ -22,6 +22,7 @@ audio output graph
 any output graph
 swap module incl swap routing
 make new test files
+react graphs to mouseover
 
 * get some linux folks to comment (ycollete?)
 * continuing
