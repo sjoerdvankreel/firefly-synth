@@ -21,4 +21,21 @@ public:
   void paint(juce::Graphics& g) override;
 };
 
+class module_graph:
+public graph,
+public any_state_listener
+{
+  int const _module_slot;
+  int const _module_index;
+  plugin_state const* const _state;
+
+public:
+  ~module_graph() { _state->remove_any_listener(this); }
+  void any_state_changed(int param, plain_value plain) override;
+
+  module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot):
+  graph(lnf), _module_slot(module_slot), _module_index(module_index), _state(state)
+  { state->add_any_listener(this); }
+};
+
 }
