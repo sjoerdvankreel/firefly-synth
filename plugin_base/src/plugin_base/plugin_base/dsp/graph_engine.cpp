@@ -29,7 +29,7 @@ module_graph_engine::render(graph_renderer renderer)
     result = renderer(plugin_block);
   else
   {
-    plugin_voice_block voice_block(_engine.make_voice_block(voice));
+    plugin_voice_block voice_block(_engine.make_voice_block(voice, _params.voice_release_at));
     plugin_block.voice = &voice_block;
     result = renderer(plugin_block);
   }

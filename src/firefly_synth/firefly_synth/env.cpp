@@ -46,9 +46,10 @@ render_graph(plugin_state const& state, int slot)
   params.sample_rate = 100;
   params.module_slot = slot;
   params.module_index = module_env;
-  params.frame_count = (a + d + r) * params.sample_rate;
+  params.frame_count = (a + d + r) * 4 / 3 * params.sample_rate;
+  params.voice_release_at = params.frame_count * 3 / 4;
   module_graph_engine engine(&state, params);
-  return engine.render([](plugin_block& block) {
+  return engine.render([frame_count = params.frame_count](plugin_block& block) {
     env_engine engine;
     engine.initialize();
     engine.process(block);
