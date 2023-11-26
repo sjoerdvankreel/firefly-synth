@@ -11,6 +11,7 @@ namespace plugin_base {
 plugin_engine::
 plugin_engine(
   plugin_desc const* desc,
+  plugin_state const* initial_state,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
 _state(desc, false), _block_automation(desc, false),
