@@ -80,12 +80,8 @@ class plugin_engine final {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
-
-  // initial_state is only used for graphs,
-  // otherwise host binding is expected to push any events that change the default state
   plugin_engine(
     plugin_desc const* desc,
-    plugin_state const* initial_state,
     thread_pool_voice_processor voice_processor,
     void* voice_processor_context);
 
