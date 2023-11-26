@@ -14,8 +14,8 @@ _engine(&state->desc(), nullptr, nullptr), _audio(), _state(state), _params(para
 graph_data 
 module_graph_engine::render(graph_renderer renderer)
 {
-  float* audio_out[2] = { _audio[2].data(), _audio[3].data() };
-  float const* audio_in[2] = { _audio[0].data(), _audio[1].data() };
+  float* audio_out[2] = { _audio[2].data().data(), _audio[3].data().data() };
+  float const* audio_in[2] = { _audio[0].data().data(), _audio[1].data().data() };
   auto& host_block = _engine.prepare_block();
   host_block.audio_out = audio_out;
   host_block.frame_count = _params.frame_count;

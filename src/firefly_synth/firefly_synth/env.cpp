@@ -1,7 +1,8 @@
-#include <plugin_base/dsp/engine.hpp>
-#include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/dsp/engine.hpp>
+#include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
@@ -37,7 +38,27 @@ init_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, int slot)
 {
-  return {};
+  module_graph_params params;
+  float a = state.get_plain_at(module_env, slot, param_a, 0).real();
+  float d = state.get_plain_at(module_env, slot, param_d, 0).real();
+  float s = state.get_plain_at(module_env, slot, param_s, 0).real();
+  float r = state.get_plain_at(module_env, slot, param_r, 0).real();
+  float length = a + d + s + r;
+  params.bpm = 120;
+  params.sample_rate = 100;
+  params.module_slot = slot;
+  params.module_index = module_env;
+  params.frame_count = length * params.sample_rate;
+  module_graph_engine engine(&state, params);
+  return engine.render([](plugin_block& block) {
+    env_engine engine;
+    engine.initialize();
+    engine.process(block);
+    graph_data result;
+    result.bipolar = false;
+    result.data = block.state.own_cv[0][0].data();
+    return result;
+  });
 }
 
 module_topo
