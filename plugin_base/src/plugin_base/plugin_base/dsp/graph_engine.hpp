@@ -30,7 +30,7 @@ class module_graph_engine {
 public:
   ~module_graph_engine() { _engine.deactivate(); }
   graph_data render(graph_renderer renderer);
-  module_graph_engine(plugin_desc const* desc, plugin_state const* state, module_graph_params const& params);
+  module_graph_engine(plugin_state const* state, module_graph_params const& params);
 };
 
 }
