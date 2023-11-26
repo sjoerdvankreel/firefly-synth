@@ -34,6 +34,12 @@ init_default(plugin_state& state)
   state.set_text_at(module_env, 1, param_on, 0, "On");
 }
 
+static graph_data
+render_graph(plugin_state const& state, int slot)
+{
+  return {};
+}
+
 module_topo
 env_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -45,6 +51,7 @@ env_topo(
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  result.graph_renderer = render_graph;
   result.default_initializer = init_default;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };
