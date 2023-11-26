@@ -22,11 +22,13 @@ public:
 };
 
 // taps into module_topo.graph_renderer
+// set both slot and index to -1 to respond to last tweaked parameter
 class module_graph:
 public graph,
 public juce::Timer,
 public any_state_listener
 {
+  bool const _any_module;
   int const _module_slot;
   int const _module_index;
   int _tweaked_param = -1;

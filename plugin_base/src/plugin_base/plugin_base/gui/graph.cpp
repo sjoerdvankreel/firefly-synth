@@ -14,8 +14,9 @@ module_graph::
 
 module_graph::
 module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot, int fps):
-graph(lnf), _module_slot(module_slot), _module_index(module_index), _state(state)
+graph(lnf), _any_module(module_index == -1), _module_slot(module_slot), _module_index(module_index), _state(state)
 { 
+  assert((module_index == -1 && module_slot == -1) || (module_index >= 0 && module_slot >= 0));
   startTimerHz(fps);
   state->add_any_listener(this);
 }
@@ -39,9 +40,20 @@ void
 module_graph::render_if_dirty()
 {
   if (!_render_dirty) return;
-  auto const& module = _state->desc().plugin->modules[_module_index];
-  assert(module.graph_renderer != nullptr);
-  render(module.graph_renderer(*_state, _module_slot));
+  _render_dirty = false;
+  int module_slot = _module_slot;
+  int module_index = _module_index;
+  if (_any_module)
+  {
+    if(_tweaked_param == -1) return;
+    auto const& mapping = _state->desc().param_mappings.params[_tweaked_param];
+    module_slot = mapping.topo.module_slot;
+    module_index = mapping.topo.module_index;
+  }
+
+  auto const& module = _state->desc().plugin->modules[module_index];
+  if(module.graph_renderer != nullptr)
+    render(module.graph_renderer(*_state, module_slot));
   _render_dirty = false;
 }
 
@@ -49,7 +61,7 @@ void
 module_graph::any_state_changed(int param, plain_value plain)
 {
   auto const& mapping = _state->desc().param_mappings.params[param];
-  if(mapping.topo.module_index != _module_index || mapping.topo.module_slot != _module_slot) return;
+  if(!_any_module && (mapping.topo.module_index != _module_index || mapping.topo.module_slot != _module_slot)) return;
   _tweaked_param = param;
   _render_dirty = true;
 }

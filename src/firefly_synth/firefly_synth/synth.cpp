@@ -44,7 +44,7 @@ enum {
 static Component&
 make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  return store_component<module_graph>(store, gui->gui_state(), lnf, module_env, 0);
+  return store_component<module_graph>(store, gui->gui_state(), lnf, -1, -1);
 }
 
 static Component&
