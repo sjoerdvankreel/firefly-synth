@@ -13,6 +13,11 @@ namespace plugin_base {
 struct module_topo;
 struct gui_dimension;
 
+struct graph_data {
+  bool bipolar;
+  std::vector<float> data;
+};
+
 // just a guess for validation, increase if needed
 inline int constexpr topo_max = 1024;
 
@@ -24,6 +29,7 @@ enum class gui_edit_type { none, output, toggle, list, autofit_list, knob, hslid
 
 typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
+
 typedef std::function<bool(std::vector<int> const& vs)>
 gui_param_binding_selector;
 

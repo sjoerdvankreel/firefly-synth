@@ -22,11 +22,17 @@ class module_engine;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
+typedef std::function<graph_data(
+  plugin_state const& state, int slot)>
+module_graph_renderer;
+
 typedef std::function<void(plugin_state& state)>
 state_initializer;
+
 typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
+
 typedef std::function<void(
   plugin_state const& state, int slot, jarray<int, 3>& active)>
 midi_active_selector;
@@ -84,6 +90,7 @@ struct module_topo final {
   std::vector<midi_source> midi_sources;
   midi_active_selector midi_active_selector;
 
+  module_graph_renderer graph_renderer;
   module_engine_factory engine_factory;
   state_initializer minimal_initializer;
   state_initializer default_initializer;

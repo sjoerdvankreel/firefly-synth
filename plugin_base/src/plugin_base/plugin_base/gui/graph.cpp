@@ -1,13 +1,17 @@
 #include <plugin_base/gui/graph.hpp>
+#include <plugin_base/dsp/utility.hpp>
 
 using namespace juce;
 
 namespace plugin_base {
 
 void 
-graph::render(std::vector<float> const& data)
+graph::render(graph_data const& data)
 {
-  _data = data;
+  _data = data.data;
+  if(data.bipolar)
+    for (int i = 0; i < _data.size(); i++)
+      _data[i] = bipolar_to_unipolar(_data[i]);
   for (int i = 0; i < _data.size(); i++)
     _data[i] = 1 - _data[i];
   repaint();
