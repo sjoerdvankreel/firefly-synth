@@ -83,6 +83,13 @@ plugin_engine::make_plugin_block(
 }
 
 void
+plugin_engine::init_static(plugin_state const* state, int frame_count)
+{
+  _state.copy_from(state);
+  init_automation_from_state(frame_count);
+}
+
+void
 plugin_engine::release_block()
 {
   double now = seconds_since_epoch();
@@ -182,6 +189,32 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, max_frame_count);
+}
+
+void
+plugin_engine::init_automation_from_state(int frame_count)
+{
+  // set automation values to state, automation may overwrite
+  // note that we cannot initialize current midi state since
+  // midi smoothing filters introduce delay
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        if (param.dsp.rate == param_rate::block)
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+            _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
+        else
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+            std::fill(
+              _accurate_automation[m][mi][p][pi].begin(),
+              _accurate_automation[m][mi][p][pi].begin() + frame_count,
+              (float)_state.get_normalized_at(m, mi, p, pi).value());
+      }
+  }
 }
 
 void 
@@ -327,27 +360,8 @@ plugin_engine::process()
     assert(release_count > 0);
   }
 
-  // set automation values to state, automation may overwrite
-  // note that we cannot initialize current midi state since
-  // midi smoothing filters introduce delay
-  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-  {
-    auto const& module = _state.desc().plugin->modules[m];
-    for(int mi = 0; mi < module.info.slot_count; mi++)
-      for(int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        if(param.dsp.rate == param_rate::block)
-          for(int pi = 0; pi < param.info.slot_count; pi++)
-            _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
-        else 
-          for (int pi = 0; pi < param.info.slot_count; pi++)
-            std::fill(
-              _accurate_automation[m][mi][p][pi].begin(),
-              _accurate_automation[m][mi][p][pi].begin() + frame_count,
-              (float)_state.get_normalized_at(m, mi, p, pi).value());
-      }
-  }
+  // set automation values to current state, events may overwrite
+  init_automation_from_state(frame_count);
     
   // process per-block automation values
   for (int e = 0; e < _host_block->events.block.size(); e++)

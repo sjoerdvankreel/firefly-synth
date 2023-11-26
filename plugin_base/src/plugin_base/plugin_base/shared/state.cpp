@@ -83,6 +83,22 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
   if (_notify) state_changed(desc().param_mappings.topo_to_index[m][mi][p][pi], value);
 }
 
+void 
+plugin_state::copy_from(plugin_state const* state)
+{
+  for (int m = 0; m < desc().plugin->modules.size(); m++)
+  {
+    auto const& module = desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        for (int pi = 0; pi < param.info.slot_count; pi++)
+          set_plain_at(m, mi, p, pi, state->get_plain_at(m, mi, p, pi));
+      }
+  }
+}
+
 void
 plugin_state::init(state_init_type init_type)
 {

@@ -43,6 +43,7 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
   void init(state_init_type init_type);
+  void copy_from(plugin_state const* state);
   void add_any_listener(any_state_listener* listener) const;
   void remove_any_listener(any_state_listener* listener) const;
   void add_listener(int index, state_listener* listener) const;

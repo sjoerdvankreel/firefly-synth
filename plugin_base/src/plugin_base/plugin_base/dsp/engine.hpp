@@ -73,10 +73,8 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
-  plugin_block make_plugin_block(
-    int voice, int module, int slot, 
-    int start_frame, int end_frame);
   void process_voices_single_threaded();
+  void init_automation_from_state(int frame_count);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
@@ -84,6 +82,11 @@ public:
     plugin_desc const* desc,
     thread_pool_voice_processor voice_processor,
     void* voice_processor_context);
+
+  // public for graph_engine
+  plugin_block make_plugin_block(
+    int voice, int module, int slot,
+    int start_frame, int end_frame);
 
   // per-voice public for threadpool
   void process();
@@ -96,6 +99,9 @@ public:
 
   plugin_state& state() { return _state; } 
   plugin_state const& state() const { return _state; }
+
+  // set all state and automation to these values
+  void init_static(plugin_state const* state, int frame_count);
 };
 
 }
