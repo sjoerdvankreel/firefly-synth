@@ -11,23 +11,26 @@ typedef std::function<graph_data(plugin_block&)> graph_renderer;
 
 // graph source should decide on this
 // e.g. CV sources don't need audio rate to plot
-struct graph_engine_params
+struct module_graph_params
 {
   int bpm;
   int sample_rate;
   int frame_count;
+  int module_slot;
+  int module_index;
 };
 
 // utility dsp engine based on static state only
-class graph_engine {
+class module_graph_engine {
   plugin_engine _engine;
+  jarray<float, 2> _audio;
   plugin_state const* const _state;
-  graph_engine_params const _params;
+  module_graph_params const _params;
 
 public:
-  ~graph_engine() { _engine.deactivate(); }
+  ~module_graph_engine() { _engine.deactivate(); }
   graph_data render(graph_renderer renderer);
-  graph_engine(plugin_desc const* desc, plugin_state const* state, graph_engine_params const& params);
+  module_graph_engine(plugin_desc const* desc, plugin_state const* state, module_graph_params const& params);
 };
 
 }

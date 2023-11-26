@@ -48,6 +48,8 @@ public:
   elem_type& operator[](int i) { return _data[i]; }
   elem_type const& operator[](int i) const { return _data[i]; }
 
+  decltype(_data.data()) data() { return _data.data(); }
+  decltype(_data.data()) data() const { return _data.data(); }
   decltype(_data.end()) end() { return _data.end(); }
   decltype(_data.begin()) begin() { return _data.begin(); }
   decltype(_data.end()) end() const { return _data.end(); }
