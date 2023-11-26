@@ -21,8 +21,10 @@ public:
   void paint(juce::Graphics& g) override;
 };
 
+// taps into module_topo.graph_renderer
 class module_graph:
 public graph,
+public juce::Timer,
 public any_state_listener
 {
   int const _module_slot;
@@ -34,11 +36,12 @@ public any_state_listener
   void render_if_dirty();
 
 public:
-  ~module_graph() { _state->remove_any_listener(this); }
-  module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot);
-
+  void timerCallback() override;
   void paint(juce::Graphics& g) override;
   void any_state_changed(int param, plain_value plain) override;
+
+  ~module_graph();
+  module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot, int fps = 10);
 };
 
 }

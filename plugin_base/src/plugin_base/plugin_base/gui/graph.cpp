@@ -6,11 +6,18 @@ using namespace juce;
 namespace plugin_base {
 
 module_graph::
-module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot):
+~module_graph() 
+{ 
+  _state->remove_any_listener(this); 
+  stopTimer();
+}
+
+module_graph::
+module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot, int fps):
 graph(lnf), _module_slot(module_slot), _module_index(module_index), _state(state)
 { 
+  startTimerHz(fps);
   state->add_any_listener(this);
-  render_if_dirty();
 }
 
 void
@@ -18,6 +25,14 @@ module_graph::paint(Graphics& g)
 {
   render_if_dirty();
   graph::paint(g);
+}
+
+void
+module_graph::timerCallback()
+{
+  if(!_render_dirty) return;
+  render_if_dirty();
+  repaint();
 }
 
 void
@@ -37,7 +52,6 @@ module_graph::any_state_changed(int param, plain_value plain)
   if(mapping.topo.module_index != _module_index || mapping.topo.module_slot != _module_slot) return;
   _tweaked_param = param;
   _render_dirty = true;
-  repaint();
 }
 
 void 
