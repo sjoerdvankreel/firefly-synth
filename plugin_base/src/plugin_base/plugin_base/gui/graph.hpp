@@ -31,14 +31,14 @@ public any_state_listener
   bool _render_dirty = true;
   plugin_state const* const _state;
 
+  void render_if_dirty();
+
 public:
   ~module_graph() { _state->remove_any_listener(this); }
-  void any_state_changed(int param, plain_value plain) override;
+  module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot);
 
   void paint(juce::Graphics& g) override;
-  module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot):
-  graph(lnf), _module_slot(module_slot), _module_index(module_index), _state(state)
-  { state->add_any_listener(this); }
+  void any_state_changed(int param, plain_value plain) override;
 };
 
 }

@@ -5,18 +5,29 @@ using namespace juce;
 
 namespace plugin_base {
 
+module_graph::
+module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot):
+graph(lnf), _module_slot(module_slot), _module_index(module_index), _state(state)
+{ 
+  state->add_any_listener(this);
+  render_if_dirty();
+}
+
 void
 module_graph::paint(Graphics& g)
 {
-  if (_render_dirty)
-  {
-    auto const& mapping = _state->desc().param_mappings.params[_tweaked_param];
-    auto const& module = _state->desc().plugin->modules[_module_index];
-    assert(module.graph_renderer != nullptr);
-    render(module.graph_renderer(*_state, mapping.topo.module_slot));
-    _render_dirty = false;
-  }
+  render_if_dirty();
   graph::paint(g);
+}
+
+void
+module_graph::render_if_dirty()
+{
+  if (!_render_dirty) return;
+  auto const& module = _state->desc().plugin->modules[_module_index];
+  assert(module.graph_renderer != nullptr);
+  render(module.graph_renderer(*_state, _module_slot));
+  _render_dirty = false;
 }
 
 void 
