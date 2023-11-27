@@ -39,8 +39,15 @@ module_graph::timerCallback()
   repaint();
 }
 
-void 
-module_graph::module_hover_changed(int module)
+void
+module_graph::module_mouse_exit(int module)
+{
+  if (!_any_module) return;
+  render({});
+}
+
+void
+module_graph::module_mouse_enter(int module)
 {
   if (!_any_module) return;
 

@@ -28,7 +28,8 @@ gui_extra_state_keyset(plugin_topo const& topo);
 class gui_listener
 {
 public:
-  virtual void module_hover_changed(int module) = 0;
+  virtual void module_mouse_exit(int module) = 0;
+  virtual void module_mouse_enter(int module) = 0;
 };
 
 // triggers module_hover_changed
@@ -39,6 +40,7 @@ public juce::MouseListener
   plugin_gui* const _gui;  
   juce::Component* const _component;
 public:
+  void mouseExit(juce::MouseEvent const&) override;
   void mouseEnter(juce::MouseEvent const&) override;
   ~module_hover_listener() { _component->removeMouseListener(this); }
   module_hover_listener(plugin_gui* gui, juce::Component* component, int module):
@@ -88,7 +90,8 @@ public:
   void param_changing(int index, plain_value plain);
 
   void resized() override;
-  void module_hover(int module);
+  void module_mouse_exit(int module);
+  void module_mouse_enter(int module);
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
   plugin_state* gui_state() const { return _gui_state; }
@@ -101,7 +104,6 @@ public:
   
 private:
   lnf _lnf;
-  int _hovered_module = -1;
   plugin_state* const _gui_state;
   plugin_base::extra_state* const _extra_state;
   std::vector<gui_listener*> _gui_listeners = {};

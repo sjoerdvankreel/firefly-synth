@@ -43,7 +43,8 @@ public any_state_listener
 public:
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
-  void module_hover_changed(int module) override;
+  void module_mouse_exit(int module) override;
+  void module_mouse_enter(int module) override;
   void any_state_changed(int param, plain_value plain) override;
 
   ~module_graph();

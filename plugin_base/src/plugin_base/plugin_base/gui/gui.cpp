@@ -57,9 +57,15 @@ justification_type(gui_label const& label)
 }
 
 void
+module_hover_listener::mouseExit(MouseEvent const&)
+{
+  _gui->module_mouse_exit(_module);
+}
+
+void
 module_hover_listener::mouseEnter(MouseEvent const&)
 {
-  _gui->module_hover(_module);
+  _gui->module_mouse_enter(_module);
 }
 
 void
@@ -159,12 +165,17 @@ plugin_gui::fire_state_loaded()
 }
 
 void
-plugin_gui::module_hover(int module)
+plugin_gui::module_mouse_exit(int module)
 {
-  if(_hovered_module == module) return;
-  _hovered_module = module;
+  for (int i = 0; i < _gui_listeners.size(); i++)
+    _gui_listeners[i]->module_mouse_exit(module);
+}
+
+void
+plugin_gui::module_mouse_enter(int module)
+{
   for(int i = 0; i < _gui_listeners.size(); i++)
-    _gui_listeners[i]->module_hover_changed(module);
+    _gui_listeners[i]->module_mouse_enter(module);
 }
 
 void
