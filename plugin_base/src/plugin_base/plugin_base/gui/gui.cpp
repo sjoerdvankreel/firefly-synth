@@ -272,8 +272,9 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
 {
   auto const& topo = *_gui_state->desc().plugin;
   int radius = topo.gui.module_corner_radius;
-  auto background1 = topo.modules[module].gui.colors.tab_background1;
-  auto background2 = topo.modules[module].gui.colors.tab_background2;
+  int module_index = _gui_state->desc().modules[module].info.topo;
+  auto background1 = topo.modules[module_index].gui.colors.tab_background1;
+  auto background2 = topo.modules[module_index].gui.colors.tab_background2;
   auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
 }
@@ -285,7 +286,7 @@ plugin_gui::make_modules(module_desc const* slots)
   auto const& tag = slots[0].module->info.tag;
   auto& result = make_tab_component(tag.id, tag.name, index);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
-    add_component_tab(result, make_param_sections(slots[i]), index, std::to_string(i + 1));
+    add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
   if(slots[0].module->info.slot_count > 1)
     init_multi_tab_component(result, tag.id);
   return result;
@@ -374,7 +375,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
   for(int o = 0; o < section.tab_order.size(); o++)
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)
-        add_component_tab(tabs, make_param_sections(*iter), matched_module, iter->module->gui.tabbed_name);
+        add_component_tab(tabs, make_param_sections(*iter), iter->info.global, iter->module->gui.tabbed_name);
   init_multi_tab_component(tabs, section.id);
   return tabs;
 }

@@ -110,9 +110,9 @@ private:
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
   std::vector<gui_param_listener*> _param_listeners = {};
-  // must be destructed first, will unregister listeners
-  std::vector<std::unique_ptr<module_hover_listener>> _hover_listeners = {};
+  // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
+  std::vector<std::unique_ptr<module_hover_listener>> _hover_listeners = {};
 
   template <class T, class... U>
   T& make_component(U&&... args);
