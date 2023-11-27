@@ -54,7 +54,7 @@ render_graph(plugin_state const& state, int slot)
   params.voice_release_at = ads / adsr * params.frame_count;
 
   module_graph_engine engine(&state, params);
-  return engine.render([frame_count = params.frame_count](plugin_block& block) {
+  return engine.render([](plugin_block& block) {
     env_engine engine;
     engine.initialize();
     engine.process(block);

@@ -3,6 +3,7 @@
 #include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
@@ -46,6 +47,33 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_glfo, 1, param_type, 0, "Rate");
 }
 
+static graph_data
+render_graph(plugin_state const& state, int slot, bool global)
+{
+  int module_index = global? module_glfo: module_vlfo;
+  bool sync = state.get_plain_at(module_index, slot, param_type, 0).step() == type_sync;
+  float freq = sync_or_freq_from_state(state, 120, sync, module_index, slot, param_rate, param_tempo);
+
+  module_graph_params params = {};
+  params.bpm = 120;
+  params.frame_count = 200;
+  params.module_slot = slot;
+  params.module_index = module_env;
+  params.sample_rate = params.frame_count / freq;
+
+  module_graph_engine engine(&state, params);
+  return engine.render([frame_count = params.frame_count](plugin_block& block) {
+    env_engine engine;
+    engine.initialize();
+    engine.process(block);
+    graph_data result;
+    result.bipolar = false;
+    result.data = block.state.own_cv[0][0].data();
+    result.data.push_back(0);
+    return result;
+    });
+}
+
 module_topo
 lfo_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -64,6 +92,7 @@ lfo_topo(
   if(global) result.default_initializer = init_global_default;
   result.engine_factory = [global](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(global); };
+  result.graph_renderer = [global](auto const& state, int slot) { return render_graph(state, slot, global); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
