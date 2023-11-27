@@ -31,6 +31,7 @@ public:
   virtual void module_hover_changed(int module) = 0;
 };
 
+// triggers module_hover_changed
 class module_hover_listener:
 public juce::MouseListener
 {
@@ -41,7 +42,7 @@ public:
   void mouseEnter(juce::MouseEvent const&) override;
   ~module_hover_listener() { _component->removeMouseListener(this); }
   module_hover_listener(plugin_gui* gui, juce::Component* component, int module):
-  _module(module), _gui(gui), _component(component) { _component->addMouseListener(this); }
+  _module(module), _gui(gui), _component(component) { _component->addMouseListener(this, true); }
 };
 
 // tracking gui parameter changes

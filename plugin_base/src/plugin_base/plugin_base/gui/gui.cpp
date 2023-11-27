@@ -170,7 +170,7 @@ plugin_gui::module_hover(int module)
 void
 plugin_gui::add_hover_listener(Component& component, int module)
 {
-  auto listener = std::make_unique<module_hover_listener>(this, module);
+  auto listener = std::make_unique<module_hover_listener>(this, &component, module);
   _hover_listeners.push_back(std::move(listener));
 }
 
