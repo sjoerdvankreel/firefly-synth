@@ -277,6 +277,8 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   auto background2 = topo.modules[module_index].gui.colors.tab_background2;
   auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
+  auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
+  add_hover_listener(*tab_button, module);
 }
 
 Component&
