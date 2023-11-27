@@ -42,6 +42,12 @@ enum {
   module_section_voice, module_section_monitor_master, module_section_count };
 
 static Component&
+make_audio_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
+{
+  return store_component<Label>(store);
+}
+
+static Component&
 make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   return store_component<module_graph>(store, gui->gui_state(), lnf, -1, -1);
@@ -108,7 +114,7 @@ synth_topo()
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
     custom_section_controls, { 0, 3, 1, 2 }, other_colors, make_controls_section);
   result->gui.custom_sections[custom_section_audio_graph] = make_custom_section_gui(
-    custom_section_audio_graph, { 0, 1, 1, 1 }, other_colors, make_module_graph_section);
+    custom_section_audio_graph, { 0, 1, 1, 1 }, other_colors, make_audio_graph_section);
   result->gui.custom_sections[custom_section_module_graph] = make_custom_section_gui(
     custom_section_module_graph, { 0, 2, 1, 1 }, other_colors, make_module_graph_section);
 
