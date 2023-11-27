@@ -116,7 +116,13 @@ graph::paint(Graphics& g)
   for (int i = 1; i <= grid_cols; i++)
     g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, h);
 
-  if (_data.size() == 0) return;
+  if (_data.size() == 0)
+  {
+    g.setColour(_lnf->colors().graph_foreground);
+    g.fillRect(0.0f, h / 2.0f, w, 1.0f);
+    return;
+  }
+
   float count = _data.size();
   p.startNewSubPath(0, vpad + _data[0] * (h - 2 * vpad));
   for(int i = 1; i < _data.size(); i++)
