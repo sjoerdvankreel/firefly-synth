@@ -42,14 +42,16 @@ render_graph(plugin_state const& state, int slot)
   float d = state.get_plain_at(module_env, slot, param_d, 0).real();
   float r = state.get_plain_at(module_env, slot, param_r, 0).real();
   float s = std::max((a + d + r) / 3, 0.01f);
+  float ads = a + d + s;
+  float adsr = ads + r;
 
   module_graph_params params = {};
   params.bpm = 120;
-  params.sample_rate = 100;
+  params.frame_count = 200;
   params.module_slot = slot;
   params.module_index = module_env;
-  params.frame_count = (a + d + s + r) * params.sample_rate;
-  params.voice_release_at = (a + d + s) * params.sample_rate;
+  params.sample_rate = params.frame_count / adsr;
+  params.voice_release_at = ads / adsr * params.frame_count;
 
   module_graph_engine engine(&state, params);
   return engine.render([frame_count = params.frame_count](plugin_block& block) {
