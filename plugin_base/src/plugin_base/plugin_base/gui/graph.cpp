@@ -9,17 +9,19 @@ module_graph::
 ~module_graph() 
 { 
   _done = true;
-  _state->remove_any_listener(this); 
+  _gui->gui_state()->remove_any_listener(this);
+  _gui->remove_gui_listener(this);
   stopTimer();
 }
 
 module_graph::
-module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot, int fps):
-graph(lnf), _any_module(module_index == -1), _module_slot(module_slot), _module_index(module_index), _state(state)
+module_graph(plugin_gui* gui, lnf* lnf, int module_index, int module_slot, int fps):
+graph(lnf), _gui(gui), _any_module(module_index == -1), _module_slot(module_slot), _module_index(module_index)
 { 
   assert((module_index == -1 && module_slot == -1) || (module_index >= 0 && module_slot >= 0));
   startTimerHz(fps);
-  state->add_any_listener(this);
+  gui->add_gui_listener(this);
+  gui->gui_state()->add_any_listener(this);
 }
 
 void
@@ -37,6 +39,17 @@ module_graph::timerCallback()
   repaint();
 }
 
+void 
+module_graph::module_hover_changed(int module)
+{
+  if (!_any_module) return;
+
+  // trigger re-render based on first new module param
+  auto const& params = _gui->gui_state()->desc().modules[module].params;
+  if(params.size() == 0) return;
+  any_state_changed(params[0].info.global, {});
+}
+
 void
 module_graph::render_if_dirty()
 {
@@ -46,22 +59,22 @@ module_graph::render_if_dirty()
   if (_any_module)
   {
     if(_tweaked_param == -1) return;
-    auto const& mapping = _state->desc().param_mappings.params[_tweaked_param];
+    auto const& mapping = _gui->gui_state()->desc().param_mappings.params[_tweaked_param];
     module_slot = mapping.topo.module_slot;
     module_index = mapping.topo.module_index;
   }
 
-  auto const& module = _state->desc().plugin->modules[module_index];
+  auto const& module = _gui->gui_state()->desc().plugin->modules[module_index];
   if(module.graph_renderer != nullptr)
-    render(module.graph_renderer(*_state, module_slot));
+    render(module.graph_renderer(*_gui->gui_state(), module_slot));
   _render_dirty = false;
 }
 
 void 
 module_graph::any_state_changed(int param, plain_value plain)
 {
-  auto const& mapping = _state->desc().param_mappings.params[param];
-  if (_state->desc().plugin->modules[mapping.topo.module_index].params[mapping.topo.param_index].dsp.direction == param_direction::output) return;
+  auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
+  if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].params[mapping.topo.param_index].dsp.direction == param_direction::output) return;
   if(!_any_module && (mapping.topo.module_index != _module_index || mapping.topo.module_slot != _module_slot)) return;
   _tweaked_param = param;
   _render_dirty = true;

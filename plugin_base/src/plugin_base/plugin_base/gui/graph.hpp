@@ -1,6 +1,7 @@
 #pragma once
 
 #include <plugin_base/gui/lnf.hpp>
+#include <plugin_base/gui/gui.hpp>
 #include <plugin_base/topo/module.hpp>
 #include <plugin_base/shared/state.hpp>
 
@@ -26,25 +27,27 @@ public:
 class module_graph:
 public graph,
 public juce::Timer,
+public gui_listener,
 public any_state_listener
 {
   bool _done = false;
+  plugin_gui* const _gui;
   bool const _any_module;
   int const _module_slot;
   int const _module_index;
   int _tweaked_param = -1;
   bool _render_dirty = true;
-  plugin_state const* const _state;
 
   void render_if_dirty();
 
 public:
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
+  void module_hover_changed(int module) override;
   void any_state_changed(int param, plain_value plain) override;
 
   ~module_graph();
-  module_graph(plugin_state const* state, lnf* lnf, int module_index, int module_slot, int fps = 10);
+  module_graph(plugin_gui* gui, lnf* lnf, int module_index, int module_slot, int fps = 10);
 };
 
 }
