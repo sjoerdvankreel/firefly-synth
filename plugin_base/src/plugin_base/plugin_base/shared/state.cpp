@@ -79,8 +79,19 @@ plugin_state::text_to_normalized_at_index(
 void
 plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
 {
+  if(!_notify)
+  {
+    _state[m][mi][p][pi] = value;
+    return;
+  }
+  bool changed;
+  if(desc().plugin->modules[m].params[p].domain.is_real())
+    changed = _state[m][mi][p][pi].real() != value.real();
+  else
+    changed = _state[m][mi][p][pi].step() != value.step();
   _state[m][mi][p][pi] = value;
-  if (_notify) state_changed(desc().param_mappings.topo_to_index[m][mi][p][pi], value);
+  if (_notify && changed) 
+    state_changed(desc().param_mappings.topo_to_index[m][mi][p][pi], value);
 }
 
 void 
