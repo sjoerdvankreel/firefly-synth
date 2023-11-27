@@ -50,16 +50,14 @@ init_global_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, int slot, bool global)
 {
-  int module_index = global? module_glfo: module_vlfo;
-  bool sync = state.get_plain_at(module_index, slot, param_type, 0).step() == type_sync;
-  float freq = sync_or_freq_from_state(state, 120, sync, module_index, slot, param_rate, param_tempo);
-
   module_graph_params params = {};
+  int module_index = global? module_glfo: module_vlfo;
+
   params.bpm = 120;
   params.frame_count = 200;
   params.module_slot = slot;
   params.module_index = module_index;
-  params.sample_rate = params.frame_count / freq;
+  params.sample_rate = params.frame_count;
 
   module_graph_engine engine(&state, params);
   return engine.render([global](plugin_block& block) {
