@@ -38,6 +38,8 @@ init_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, int slot)
 {
+  if (state.get_plain_at(module_env, slot, param_on, 0).step() == 0) return {};
+
   float a = state.get_plain_at(module_env, slot, param_a, 0).real();
   float d = state.get_plain_at(module_env, slot, param_d, 0).real();
   float r = state.get_plain_at(module_env, slot, param_r, 0).real();

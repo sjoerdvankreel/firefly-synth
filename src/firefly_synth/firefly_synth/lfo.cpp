@@ -52,6 +52,7 @@ render_graph(plugin_state const& state, int slot, bool global)
 {
   module_graph_params params = {};
   int module_index = global? module_glfo: module_vlfo;
+  if(state.get_plain_at(module_index, slot, param_type, 0).step() == type_off) return {};
 
   params.bpm = 120;
   params.frame_count = 200;
