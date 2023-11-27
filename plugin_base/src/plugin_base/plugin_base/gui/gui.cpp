@@ -57,6 +57,12 @@ justification_type(gui_label const& label)
 }
 
 void
+module_hover_listener::mouseEnter(MouseEvent const&)
+{
+  _gui->module_hover(_module);
+}
+
+void
 gui_param_listener::gui_param_changed(int index, plain_value plain)
 {
   gui_param_begin_changes(index);
@@ -159,6 +165,13 @@ plugin_gui::module_hover(int module)
   _hovered_module = module;
   for(int i = 0; i < _gui_listeners.size(); i++)
     _gui_listeners[i]->module_hover_changed(module);
+}
+
+void
+plugin_gui::add_hover_listener(Component& component, int module)
+{
+  auto listener = std::make_unique<module_hover_listener>(this, module);
+  _hover_listeners.push_back(std::move(listener));
 }
 
 template <class T, class... U> T&
@@ -274,6 +287,7 @@ plugin_gui::make_param_sections(module_desc const& module)
   auto& result = make_component<grid_component>(topo.gui.dimension, margin_section);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
+  add_hover_listener(result, module.info.global);
   return result;
 }
 

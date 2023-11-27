@@ -15,8 +15,10 @@
 
 namespace plugin_base {
 
+class plugin_gui;
 class tab_component;
 class grid_component;
+
 inline std::string const factory_preset_key = "factory_preset";
 
 std::set<std::string>
@@ -27,6 +29,19 @@ class gui_listener
 {
 public:
   virtual void module_hover_changed(int module) = 0;
+};
+
+class module_hover_listener:
+public juce::MouseListener
+{
+  int const _module;
+  plugin_gui* const _gui;  
+  juce::Component* const _component;
+public:
+  void mouseEnter(juce::MouseEvent const&) override;
+  ~module_hover_listener() { _component->removeMouseListener(this); }
+  module_hover_listener(plugin_gui* gui, juce::Component* component, int module):
+  _module(module), _gui(gui), _component(component) { _component->addMouseListener(this); }
 };
 
 // tracking gui parameter changes
@@ -72,6 +87,7 @@ public:
   void param_changing(int index, plain_value plain);
 
   void resized() override;
+  void module_hover(int module);
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
   plugin_state* gui_state() const { return _gui_state; }
@@ -92,6 +108,7 @@ private:
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
   std::vector<gui_param_listener*> _param_listeners = {};
   // must be destructed first, will unregister listeners
+  std::vector<std::unique_ptr<module_hover_listener>> _hover_listeners = {};
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 
   template <class T, class... U>
@@ -99,8 +116,7 @@ private:
 
   void fire_state_loaded();
   Component& make_content();
-
-  void module_hover(int module);
+  void add_hover_listener(juce::Component& component, int module);
   void init_multi_tab_component(tab_component& tab, std::string const& id);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
