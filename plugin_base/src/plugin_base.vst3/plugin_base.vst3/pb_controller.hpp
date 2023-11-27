@@ -17,8 +17,8 @@ class pb_editor;
 class pb_controller final:
 public Steinberg::Vst::EditControllerEx1,
 public Steinberg::Vst::IMidiMapping,
-public gui_listener,
-public format_config
+public format_config,
+public gui_param_listener
 {
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
@@ -44,9 +44,9 @@ public:
   extra_state& extra_state() { return _extra_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
-  void gui_changing(int index, plain_value plain) override;
-  void gui_end_changes(int index) override { endEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
-  void gui_begin_changes(int index) override { beginEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
+  void gui_param_changing(int index, plain_value plain) override;
+  void gui_param_end_changes(int index) override { endEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
+  void gui_param_begin_changes(int index) override { beginEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
 
   std::unique_ptr<host_menu> context_menu(int param_id) const override;
   std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override

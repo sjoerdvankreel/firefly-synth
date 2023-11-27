@@ -57,11 +57,11 @@ justification_type(gui_label const& label)
 }
 
 void
-gui_listener::gui_changed(int index, plain_value plain)
+gui_param_listener::gui_param_changed(int index, plain_value plain)
 {
-  gui_begin_changes(index);
-  gui_changing(index, plain);
-  gui_end_changes(index);
+  gui_param_begin_changes(index);
+  gui_param_changing(index, plain);
+  gui_param_end_changes(index);
 }
 
 std::set<std::string>
@@ -100,49 +100,49 @@ _gui_state(gui_state), _extra_state(extra_state)
 }
 
 void
-plugin_gui::gui_changed(int index, plain_value plain)
+plugin_gui::param_changed(int index, plain_value plain)
 {
   if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_changed(index, plain);
+    for (int i = 0; i < _param_listeners.size(); i++)
+      _param_listeners[i]->gui_param_changed(index, plain);
 }
 
 void
-plugin_gui::gui_begin_changes(int index)
+plugin_gui::param_begin_changes(int index)
 {
   if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_begin_changes(index);
+    for (int i = 0; i < _param_listeners.size(); i++)
+      _param_listeners[i]->gui_param_begin_changes(index);
 }
 
 void
-plugin_gui::gui_end_changes(int index)
+plugin_gui::param_end_changes(int index)
 {
   if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_end_changes(index);
+    for (int i = 0; i < _param_listeners.size(); i++)
+      _param_listeners[i]->gui_param_end_changes(index);
 }
 
 void
-plugin_gui::gui_changing(int index, plain_value plain)
+plugin_gui::param_changing(int index, plain_value plain)
 {
   if (_gui_state->desc().params[index]->param->dsp.direction == param_direction::input)
-    for (int i = 0; i < _gui_listeners.size(); i++)
-      _gui_listeners[i]->gui_changing(index, plain);
+    for (int i = 0; i < _param_listeners.size(); i++)
+      _param_listeners[i]->gui_param_changing(index, plain);
 }
 
 void
-plugin_gui::remove_listener(gui_listener* listener)
+plugin_gui::remove_param_listener(gui_param_listener* listener)
 {
-  auto iter = std::find(_gui_listeners.begin(), _gui_listeners.end(), listener);
-  if (iter != _gui_listeners.end()) _gui_listeners.erase(iter);
+  auto iter = std::find(_param_listeners.begin(), _param_listeners.end(), listener);
+  if (iter != _param_listeners.end()) _param_listeners.erase(iter);
 }
 
 void
 plugin_gui::fire_state_loaded()
 {
   for(int i = 0; i < _gui_state->desc().param_count; i++)
-    gui_changed(i, _gui_state->get_plain_at_index(i));
+    param_changed(i, _gui_state->get_plain_at_index(i));
 }
 
 template <class T, class... U> T&

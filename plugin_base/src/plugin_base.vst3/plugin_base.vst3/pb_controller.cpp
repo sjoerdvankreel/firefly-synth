@@ -21,7 +21,7 @@ using namespace Steinberg::Vst;
 namespace plugin_base::vst3 {
 
 void
-pb_controller::gui_changing(int index, plain_value plain)
+pb_controller::gui_param_changing(int index, plain_value plain)
 {
   int tag = gui_state().desc().param_mappings.index_to_tag[index];
   auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
@@ -59,7 +59,7 @@ pb_controller::setComponentState(IBStream* state)
   if (!plugin_io_load_state(load_ibstream(state), gui_state()).ok())
     return kResultFalse;
   for (int p = 0; p < gui_state().desc().param_count; p++)
-    gui_changed(p, gui_state().get_plain_at_index(p));
+    gui_param_changed(p, gui_state().get_plain_at_index(p));
   return kResultOk;
 }
 

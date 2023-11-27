@@ -296,7 +296,7 @@ param_toggle_button::buttonStateChanged(Button*)
   if(_checked == getToggleState()) return;
   plain_value plain = _param->param->domain.raw_to_plain(getToggleState() ? 1 : 0);
   _checked = getToggleState();
-  _gui->gui_changed(_param->info.global, plain);
+  _gui->param_changed(_param->info.global, plain);
 }
 
 param_toggle_button::

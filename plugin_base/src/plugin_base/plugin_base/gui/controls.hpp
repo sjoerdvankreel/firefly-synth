@@ -220,9 +220,9 @@ protected:
 
 public: 
   param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param);
-  void stoppedDragging() override { _gui->gui_end_changes(_param->info.global); }
-  void startedDragging() override { _gui->gui_begin_changes(_param->info.global); }
-  void valueChanged() override { _gui->gui_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); }
+  void stoppedDragging() override { _gui->param_end_changes(_param->info.global); }
+  void startedDragging() override { _gui->param_begin_changes(_param->info.global); }
+  void valueChanged() override { _gui->param_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); }
   juce::String getTextFromValue(double value) override 
   { return juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage? 100 : 1)); }
 };
@@ -243,7 +243,7 @@ public:
 
   void showPopup() override;
   void comboBoxChanged(ComboBox*) override final
-  { _gui->gui_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedId() - 1 + _param->param->domain.min)); }
+  { _gui->param_changed(_param->info.global, _param->param->domain.raw_to_plain(getSelectedId() - 1 + _param->param->domain.min)); }
 };
 
 }

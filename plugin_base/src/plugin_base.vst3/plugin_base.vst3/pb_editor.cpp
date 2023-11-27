@@ -61,7 +61,7 @@ pb_editor::isPlatformTypeSupported(FIDString type)
 tresult PLUGIN_API
 pb_editor::removed()
 {
-  _gui->remove_listener(_controller);
+  _gui->remove_param_listener(_controller);
   _gui->setVisible(false);
   _gui->removeFromDesktop();
 #if (defined __linux__) || (defined  __FreeBSD__)
@@ -83,7 +83,7 @@ pb_editor::attached(void* parent, FIDString type)
 #endif
   _gui->addToDesktop(0, parent);
   _gui->setVisible(true);
-  _gui->add_listener(_controller);
+  _gui->add_param_listener(_controller);
   _gui->reloaded();
   return EditorView::attached(parent, type);
 }

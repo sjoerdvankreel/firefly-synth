@@ -22,13 +22,15 @@ inline std::string const factory_preset_key = "factory_preset";
 std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo);
 
-class gui_listener
+// tracking gui parameter changes
+// host binding is expected to update actual gui/controller state
+class gui_param_listener
 {
 public:
-  void gui_changed(int index, plain_value plain);
-  virtual void gui_end_changes(int index) = 0;
-  virtual void gui_begin_changes(int index) = 0;
-  virtual void gui_changing(int index, plain_value plain) = 0;
+  void gui_param_changed(int index, plain_value plain);
+  virtual void gui_param_end_changes(int index) = 0;
+  virtual void gui_param_begin_changes(int index) = 0;
+  virtual void gui_param_changing(int index, plain_value plain) = 0;
 };
 
 class plugin_gui:
@@ -57,26 +59,26 @@ public:
   Component& make_clear_button();
 
   void reloaded();
-  void gui_end_changes(int index);
-  void gui_begin_changes(int index);
-  void gui_changed(int index, plain_value plain);
-  void gui_changing(int index, plain_value plain);
+  void param_end_changes(int index);
+  void param_begin_changes(int index);
+  void param_changed(int index, plain_value plain);
+  void param_changing(int index, plain_value plain);
 
   void resized() override;
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
-  void remove_listener(gui_listener* listener);
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state() const { return _extra_state; }
-  void add_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
+  void remove_param_listener(gui_param_listener* listener);
+  void add_param_listener(gui_param_listener* listener) { _param_listeners.push_back(listener); }
   
 private:
   lnf _lnf;
   plugin_state* const _gui_state;
   plugin_base::extra_state* const _extra_state;
-  std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
+  std::vector<gui_param_listener*> _param_listeners = {};
   // must be destructed first, will unregister listeners
   std::vector<std::unique_ptr<juce::Component>> _components = {};
 
