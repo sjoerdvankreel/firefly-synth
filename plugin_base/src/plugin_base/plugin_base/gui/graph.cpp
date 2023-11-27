@@ -8,6 +8,7 @@ namespace plugin_base {
 module_graph::
 ~module_graph() 
 { 
+  _done = true;
   _state->remove_any_listener(this); 
   stopTimer();
 }
@@ -31,7 +32,7 @@ module_graph::paint(Graphics& g)
 void
 module_graph::timerCallback()
 {
-  if(!_render_dirty) return;
+  if(_done || !_render_dirty) return;
   render_if_dirty();
   repaint();
 }

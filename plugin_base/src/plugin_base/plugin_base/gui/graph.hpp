@@ -28,6 +28,7 @@ public graph,
 public juce::Timer,
 public any_state_listener
 {
+  bool _done = false;
   bool const _any_module;
   int const _module_slot;
   int const _module_index;
