@@ -132,6 +132,13 @@ plugin_gui::param_changing(int index, plain_value plain)
 }
 
 void
+plugin_gui::remove_gui_listener(gui_listener* listener)
+{
+  auto iter = std::find(_gui_listeners.begin(), _gui_listeners.end(), listener);
+  if (iter != _gui_listeners.end()) _gui_listeners.erase(iter);
+}
+
+void
 plugin_gui::remove_param_listener(gui_param_listener* listener)
 {
   auto iter = std::find(_param_listeners.begin(), _param_listeners.end(), listener);
@@ -143,6 +150,15 @@ plugin_gui::fire_state_loaded()
 {
   for(int i = 0; i < _gui_state->desc().param_count; i++)
     param_changed(i, _gui_state->get_plain_at_index(i));
+}
+
+void
+plugin_gui::module_hover(int module)
+{
+  if(_hovered_module == module) return;
+  _hovered_module = module;
+  for(int i = 0; i < _gui_listeners.size(); i++)
+    _gui_listeners[i]->module_hover_changed(module);
 }
 
 template <class T, class... U> T&

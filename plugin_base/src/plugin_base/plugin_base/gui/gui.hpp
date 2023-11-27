@@ -22,6 +22,13 @@ inline std::string const factory_preset_key = "factory_preset";
 std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo);
 
+// gui events for anyone who needs it
+class gui_listener
+{
+public:
+  virtual void module_hover_changed(int module) = 0;
+};
+
 // tracking gui parameter changes
 // host binding is expected to update actual gui/controller state
 class gui_param_listener
@@ -69,13 +76,18 @@ public:
 
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state() const { return _extra_state; }
+  
+  void remove_gui_listener(gui_listener* listener);
   void remove_param_listener(gui_param_listener* listener);
+  void add_gui_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
   void add_param_listener(gui_param_listener* listener) { _param_listeners.push_back(listener); }
   
 private:
   lnf _lnf;
+  int _hovered_module = -1;
   plugin_state* const _gui_state;
   plugin_base::extra_state* const _extra_state;
+  std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
   std::vector<gui_param_listener*> _param_listeners = {};
@@ -87,6 +99,8 @@ private:
 
   void fire_state_loaded();
   Component& make_content();
+
+  void module_hover(int module);
   void init_multi_tab_component(tab_component& tab, std::string const& id);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
