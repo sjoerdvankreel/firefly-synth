@@ -18,7 +18,6 @@ read all the comments from github and kvr and forums
 audio output graph
 swap module incl swap routing
 make new test files
-do firefly as default graph image
 finalize graphs
 
 * get some linux folks to comment (ycollete?)
