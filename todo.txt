@@ -1,17 +1,14 @@
 (polyphonic) modulation
 handle clap midi notes
 handle clap is_modulatable
-get the graphs in there, see what adsr does
 handle automation changes at voice vs block start
 on-note/hold-type cv
 do cakewalk bug report
 test all host+linux
-param value dependent on other param
 linux build
 release_count > 0 asserts
 
 demo synth:
-graphs
 velocity + note as modsource
 on-note type stuff
 do clap midi notes
@@ -19,10 +16,10 @@ polymod/mpe/note_exprs
 midi note as mod source
 read all the comments from github and kvr and forums
 audio output graph
-any output graph
 swap module incl swap routing
 make new test files
-react graphs to mouseover
+do firefly as default graph image
+finalize graphs
 
 * get some linux folks to comment (ycollete?)
 * continuing
