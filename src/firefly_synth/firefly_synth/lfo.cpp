@@ -58,20 +58,20 @@ render_graph(plugin_state const& state, int slot, bool global)
   params.bpm = 120;
   params.frame_count = 200;
   params.module_slot = slot;
-  params.module_index = module_env;
+  params.module_index = module_index;
   params.sample_rate = params.frame_count / freq;
 
   module_graph_engine engine(&state, params);
-  return engine.render([frame_count = params.frame_count](plugin_block& block) {
-    env_engine engine;
+  return engine.render([global](plugin_block& block) {
+    lfo_engine engine(global);
     engine.initialize();
     engine.process(block);
     graph_data result;
     result.bipolar = false;
     result.data = block.state.own_cv[0][0].data();
-    result.data.push_back(0);
+    result.data.push_back(0.5f);
     return result;
-    });
+  });
 }
 
 module_topo

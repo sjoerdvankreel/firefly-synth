@@ -41,7 +41,6 @@ void
 module_graph::render_if_dirty()
 {
   if (!_render_dirty) return;
-  _render_dirty = false;
   int module_slot = _module_slot;
   int module_index = _module_index;
   if (_any_module)
@@ -62,6 +61,7 @@ void
 module_graph::any_state_changed(int param, plain_value plain)
 {
   auto const& mapping = _state->desc().param_mappings.params[param];
+  if (_state->desc().plugin->modules[mapping.topo.module_index].params[mapping.topo.param_index].dsp.direction == param_direction::output) return;
   if(!_any_module && (mapping.topo.module_index != _module_index || mapping.topo.module_slot != _module_slot)) return;
   _tweaked_param = param;
   _render_dirty = true;
