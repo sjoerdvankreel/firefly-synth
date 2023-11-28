@@ -78,6 +78,27 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour cons
   return grid;
 }
 
+cv_matrix_mixdown
+make_static_cv_matrix_mixdown(plugin_base::plugin_block& block)
+{
+  cv_matrix_mixdown result;
+  plugin_dims dims(block.plugin);
+  result.resize(dims.module_slot_param_slot);
+  for (int m = 0; m < block.plugin.modules.size(); m++)
+  {
+    auto const& module = block.plugin.modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for(int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        if(param.dsp.can_modulate(mi))
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+            result[m][mi][p][pi] = &block.state.all_accurate_automation[m][mi][p][pi];
+      }
+  }
+  return result;
+}
+
 std::unique_ptr<plugin_topo>
 synth_topo()
 {

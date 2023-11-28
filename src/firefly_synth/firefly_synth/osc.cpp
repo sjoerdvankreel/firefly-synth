@@ -2,6 +2,7 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
@@ -9,8 +10,6 @@
 using namespace plugin_base;
 
 namespace firefly_synth {
-
-// defined in input module
 
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
@@ -39,7 +38,8 @@ public:
   osc_engine() { initialize(); }
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   void initialize() override { _phase = 0; }
-  void process(plugin_block& block) override;
+  void process(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process(plugin_block& block) override { process(block, get_cv_matrix_mixdown(block, false)); }
 };
 
 static void
@@ -49,6 +49,38 @@ init_default(plugin_state& state)
   state.set_text_at(module_osc, 0, param_cent, 0, "-10");
   state.set_text_at(module_osc, 1, param_type, 0, "Saw");
   state.set_text_at(module_osc, 1, param_cent, 0, "+10");
+}
+
+static graph_data
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+{
+  module_graph_params params = {};
+  if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
+  
+  int oct = state.get_plain_at(mapping.module_index, mapping.module_slot, param_oct, 0).step();
+  int note = state.get_plain_at(mapping.module_index, mapping.module_slot, param_note, 0).step();
+  float cent = state.get_plain_at(mapping.module_index, mapping.module_slot, param_cent, 0).real();
+  float freq = pitch_to_freq(note_to_pitch(oct, note, cent, midi_middle_c));
+
+  params.bpm = 120;
+  params.sample_rate = 20000;
+  params.midi_key = midi_middle_c;
+  params.module_slot = mapping.module_slot;
+  params.module_index = mapping.module_index;
+  params.frame_count = params.sample_rate / freq;
+
+  module_graph_engine engine(&state, params);
+  return engine.render([mapping](plugin_block& block) {
+    osc_engine engine;
+    engine.initialize();
+    engine.process(block, make_static_cv_matrix_mixdown(block));
+    graph_data result = {};
+    result.series = true;
+    result.bipolar = true;
+    result.series_data = block.state.own_audio[0][0][0].data();
+    result.series_data.push_back(0.0f);
+    return result;
+  });
 }
 
 module_topo
@@ -62,6 +94,7 @@ osc_topo(
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } })));
 
+  result.graph_renderer = render_graph;
   result.default_initializer = init_default;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
@@ -140,7 +173,7 @@ blep(float phase, float inc)
 }
 
 void
-osc_engine::process(plugin_block& block)
+osc_engine::process(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -153,7 +186,6 @@ osc_engine::process(plugin_block& block)
     return;
   }
 
-  auto const& modulation = get_cv_matrix_mixdown(block, false);
   auto const& env_curve = block.voice->all_cv[module_env][0][0][0];
   auto const& pb_curve = *modulation[module_osc][block.module_slot][param_pb][0];
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
@@ -163,11 +195,11 @@ osc_engine::process(plugin_block& block)
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
   auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
-  if(block.module_slot == 0)
+  if (block.module_slot == 0)
   {
     am_scratch.fill(block.start_frame, block.end_frame, 1.0f);
     am_mod_scratch.fill(block.start_frame, block.end_frame, 0.0f);
-  } 
+  }
   else
   {
     auto const& am_curve = *modulation[module_osc][block.module_slot][param_am][0];
@@ -179,7 +211,7 @@ osc_engine::process(plugin_block& block)
   float sample;
   auto& mono_scratch = block.state.own_scratch[scratch_mono];
   for (int f = block.start_frame; f < block.end_frame; f++)
-  { 
+  {
     float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     float pitch = note_to_pitch(oct, note, cent, block.voice->state.id.key);

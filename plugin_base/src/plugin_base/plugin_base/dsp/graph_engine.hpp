@@ -18,6 +18,7 @@ struct module_graph_params
   int frame_count;
   int module_slot;
   int module_index;
+  int midi_key = -1;
   int voice_release_at = -1;
 };
 

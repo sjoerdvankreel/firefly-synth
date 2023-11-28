@@ -50,8 +50,9 @@ _voice_processor_context(voice_processor_context)
 }
 
 plugin_voice_block 
-plugin_engine::make_voice_block(int v, int release_frame)
+plugin_engine::make_voice_block(int v, int midi_key, int release_frame)
 {
+  _voice_states[v].id.key = midi_key;
   _voice_states[v].release_frame = release_frame;
   return {
     false, _voice_results[v], _voice_states[v], _voice_cv_state[v], 
@@ -248,7 +249,7 @@ plugin_engine::process_voice(int v, bool threaded)
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame));
+      plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].id.key, _voice_states[v].release_frame));
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
       _voice_engines[v][m][mi]->process(block);

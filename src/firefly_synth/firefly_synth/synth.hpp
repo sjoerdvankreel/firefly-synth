@@ -33,6 +33,10 @@ enum {
   module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_out, 
   module_voice_in, module_gaudio_matrix, module_gfx, module_master, module_monitor, module_count };
 
+// set all outputs to current automation values
+cv_matrix_mixdown
+make_static_cv_matrix_mixdown(plugin_base::plugin_block& block);
+
 inline audio_matrix_mixer&
 get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
 {
