@@ -14,6 +14,8 @@ struct module_topo;
 struct gui_dimension;
 
 struct graph_data {
+  static graph_data empty();
+
   bool series;
   bool bipolar;
   float scalar_data;

@@ -7,6 +7,16 @@
 
 namespace plugin_base {
 
+graph_data 
+graph_data::empty()
+{
+  graph_data result = {};
+  result.series = false;
+  result.bipolar = true;
+  result.scalar_data = 0;
+  return result;
+}
+
 void
 topo_tag::validate() const
 {

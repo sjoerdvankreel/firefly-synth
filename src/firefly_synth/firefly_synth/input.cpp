@@ -30,11 +30,14 @@ public:
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-   graph_data result;
-   result.series = false;
-   result.bipolar = mapping.param_index == param_pb;
-   result.scalar_data =  state.get_plain_at(mapping).real();
-   return result;
+  if (mapping.param_index == param_pb_range)
+    return graph_data::empty();
+
+  graph_data result;
+  result.series = false;
+  result.bipolar = mapping.param_index == param_pb;
+  result.scalar_data =  state.get_plain_at(mapping).real();
+  return result;
 }
 
 module_topo

@@ -43,11 +43,7 @@ void
 module_graph::mouse_exit()
 {
   if (!_any_module) return;
-  graph_data empty;
-  empty.series = false;
-  empty.bipolar = true;
-  empty.scalar_data = 0;
-  render(empty);
+  render(graph_data::empty());
 }
 
 void
