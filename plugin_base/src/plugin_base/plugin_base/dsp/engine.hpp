@@ -95,15 +95,16 @@ public:
   void process_voice(int v, bool threaded); 
 
   void deactivate();
-  void release_block();
   host_block& prepare_block();
-  void activate(int sample_rate, int max_frame_count);
 
-  plugin_state& state() { return _state; } 
+  plugin_state& state() { return _state; }
   plugin_state const& state() const { return _state; }
 
   // set all state and automation to these values
   void init_static(plugin_state const* state, int frame_count);
+
+  void release_block();
+  void activate(bool activate_module_engines, int sample_rate, int max_frame_count);
 };
 
 }

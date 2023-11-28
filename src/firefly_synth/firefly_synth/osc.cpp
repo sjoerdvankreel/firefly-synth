@@ -65,9 +65,9 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   float freq = pitch_to_freq(note_to_pitch(oct, note, cent, midi_middle_c));
 
   params.bpm = 120;
-  params.sample_rate = 20000;
+  params.frame_count = 1000;
   params.midi_key = midi_middle_c;
-  params.frame_count = params.sample_rate / freq;
+  params.sample_rate = params.frame_count * freq;
 
   graph_data result = {};
   result.series = true;

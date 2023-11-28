@@ -13,7 +13,7 @@ module_graph_engine::
 module_graph_engine(plugin_state const* state, module_graph_params const& params):
 _engine(&state->desc(), nullptr, nullptr), _audio(), _state(state), _params(params)
 { 
-  _engine.activate(_params.sample_rate, _params.frame_count); 
+  _engine.activate(false, _params.sample_rate, _params.frame_count); 
   _engine.init_static(state, params.frame_count);
   _audio.resize(jarray<int, 1>(4, params.frame_count));
 

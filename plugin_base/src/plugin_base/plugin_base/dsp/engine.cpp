@@ -165,7 +165,7 @@ plugin_engine::deactivate()
 }
 
 void
-plugin_engine::activate(int sample_rate, int max_frame_count)
+plugin_engine::activate(bool activate_module_engines, int sample_rate, int max_frame_count)
 {  
   deactivate();
   _stream_time = 0;
@@ -184,6 +184,8 @@ plugin_engine::activate(int sample_rate, int max_frame_count)
   _global_audio_state.resize(frame_dims.module_global_audio);
   _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
+
+  if(!activate_module_engines) return;
 
   // smoothing filters are SR dependent
   float smooth_freq = _state.desc().plugin->midi_smoothing_hz;
