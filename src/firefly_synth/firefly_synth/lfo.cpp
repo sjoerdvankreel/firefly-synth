@@ -56,21 +56,19 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.bpm = 120;
   params.frame_count = 200;
   params.sample_rate = params.frame_count;
-  params.module_slot = mapping.module_slot;
-  params.module_index = mapping.module_index;
 
   module_graph_engine engine(&state, params);
-  return engine.render([mapping](plugin_block& block) {
+  engine.process(mapping.module_index, mapping.module_slot, [mapping](plugin_block& block) {
     lfo_engine engine(mapping.module_index == module_glfo);
     engine.initialize();
     engine.process(block);
-    graph_data result = {};
-    result.series = true;
-    result.bipolar = false;
-    result.series_data = block.state.own_cv[0][0].data();
-    result.series_data.push_back(0.5f);
-    return result;
   });
+  graph_data result = {};
+  result.series = true;
+  result.bipolar = false;
+  result.series_data = engine.last_block()->state.own_cv[0][0].data();
+  result.series_data.push_back(0.5f);
+  return result;
 }
 
 module_topo

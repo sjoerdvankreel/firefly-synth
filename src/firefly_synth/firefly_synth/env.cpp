@@ -50,23 +50,21 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   module_graph_params params = {};
   params.bpm = 120;
   params.frame_count = 200;
-  params.module_index = module_env;
-  params.module_slot = mapping.module_slot;
   params.sample_rate = params.frame_count / adsr;
   params.voice_release_at = ads / adsr * params.frame_count;
 
   module_graph_engine engine(&state, params);
-  return engine.render([](plugin_block& block) {
+  engine.process(module_env, mapping.module_slot, [](plugin_block& block) {
     env_engine engine;
     engine.initialize();
     engine.process(block);
-    graph_data result = {};
-    result.series = true;
-    result.bipolar = false;
-    result.series_data = block.state.own_cv[0][0].data();
-    result.series_data.push_back(0);
-    return result;
   });
+  graph_data result = {};
+  result.series = true;
+  result.bipolar = false;
+  result.series_data = engine.last_block()->state.own_cv[0][0].data();
+  result.series_data.push_back(0);
+  return result;
 }
 
 module_topo

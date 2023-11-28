@@ -67,22 +67,20 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.bpm = 120;
   params.sample_rate = 20000;
   params.midi_key = midi_middle_c;
-  params.module_slot = mapping.module_slot;
-  params.module_index = mapping.module_index;
   params.frame_count = params.sample_rate / freq;
 
   module_graph_engine engine(&state, params);
-  return engine.render([mapping](plugin_block& block) {
+  engine.process(mapping.module_index, mapping.module_slot, [mapping](plugin_block& block) {
     osc_engine engine;
     engine.initialize();
     engine.process(block, jarray<float, 1>(block.end_frame, 1.0f), make_static_cv_matrix_mixdown(block));
-    graph_data result = {};
-    result.series = true;
-    result.bipolar = true;
-    result.series_data = block.state.own_audio[0][0][0].data();
-    result.series_data.push_back(0.0f);
-    return result;
   });
+  graph_data result = {};
+  result.series = true;
+  result.bipolar = true;
+  result.series_data = engine.last_block()->state.own_audio[0][0][0].data();
+  result.series_data.push_back(0.0f);
+  return result;
 }
 
 module_topo
