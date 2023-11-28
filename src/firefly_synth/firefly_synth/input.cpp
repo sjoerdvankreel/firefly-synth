@@ -32,8 +32,8 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
    graph_data result;
    result.series = false;
-   result.bipolar = false;
-   result.scalar_data = state.get_plain_at(mapping).real();
+   result.bipolar = mapping.param_index == param_pb;
+   result.scalar_data =  state.get_plain_at(mapping).real();
    return result;
 }
 

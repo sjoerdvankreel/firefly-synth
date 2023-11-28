@@ -46,7 +46,7 @@ module_graph::module_mouse_exit(int module)
   graph_data empty;
   empty.series = false;
   empty.bipolar = true;
-  empty.scalar_data = 0.5f;
+  empty.scalar_data = 0;
   render(empty);
 }
 
@@ -101,6 +101,7 @@ graph::render(graph_data const& data)
   {
     if(data.bipolar)
       _data.scalar_data = bipolar_to_unipolar(data.scalar_data);
+    _data.scalar_data = 1 - _data.scalar_data;
   }
   else
   {
@@ -134,13 +135,23 @@ graph::paint(Graphics& g)
   {
     if (_data.bipolar)
     {
+      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
+      if (_data.scalar_data <= 0.5f)
+        g.fillRect(0.0f, _data.scalar_data * h, w, (0.5f - _data.scalar_data) * h);
+      else
+        g.fillRect(0.0f, 0.5f * h, w, (_data.scalar_data - 0.5f) * h);
+      g.setColour(_lnf->colors().graph_foreground);
+      if (_data.scalar_data <= 0.5f)
+        g.fillRect(0.0f, _data.scalar_data * h, w, 1.0f);
+      else
+        g.fillRect(0.0f, 0.5f * h, w, 1.0f);
     }
     else 
     {
       g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
-      g.fillRect(0.0f, (1 - _data.scalar_data) * h, w, _data.scalar_data * h);
+      g.fillRect(0.0f, _data.scalar_data * h, w, (1 - _data.scalar_data) * h);
       g.setColour(_lnf->colors().graph_foreground);
-      g.fillRect(0.0f, (1 - _data.scalar_data) * h, w, 1.0f);
+      g.fillRect(0.0f, _data.scalar_data * h, w, 1.0f);
     }
     return;
   }
