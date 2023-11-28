@@ -138,23 +138,26 @@ graph::paint(Graphics& g)
   for (int i = 1; i <= grid_cols; i++)
     g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, full_h);
 
+  auto foreground = _lnf->colors().graph_foreground;
+  if(!_data.enabled) foreground = color_to_grayscale(foreground);
+
   if (!_data.series)
   {
     if (_data.bipolar)
     {
-      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
+      g.setColour(foreground.withAlpha(0.5f));
       if (_data.scalar_data <= 0.5f)
         g.fillRect(0.0f, _data.scalar_data * full_h, w, (0.5f - _data.scalar_data) * pad_h);
       else
         g.fillRect(0.0f, 0.5f * full_h, w, (_data.scalar_data - 0.5f) * pad_h);
-      g.setColour(_lnf->colors().graph_foreground);
+      g.setColour(foreground);
       g.fillRect(0.0f, _data.scalar_data * pad_h, w, 1.0f);
     }
     else 
     {
-      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
+      g.setColour(foreground.withAlpha(0.5f));
       g.fillRect(0.0f, _data.scalar_data * full_h, w, (1 - _data.scalar_data) * pad_h);
-      g.setColour(_lnf->colors().graph_foreground);
+      g.setColour(foreground);
       g.fillRect(0.0f, _data.scalar_data * pad_h, w, 1.0f);
     }
     return;
@@ -162,7 +165,7 @@ graph::paint(Graphics& g)
 
   if (_data.series && _data.series_data.size() == 0)
   {
-    g.setColour(_lnf->colors().graph_foreground);
+    g.setColour(foreground);
     g.fillRect(0.0f, full_h / 2.0f, w, 1.0f);
     return;
   }
@@ -174,9 +177,9 @@ graph::paint(Graphics& g)
   Path pStroke(p);
   p.closeSubPath();
   
-  g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
+  g.setColour(foreground.withAlpha(0.5f));
   g.fillPath(p);
-  g.setColour(_lnf->colors().graph_foreground);
+  g.setColour(foreground);
   g.strokePath(pStroke, PathStrokeType(1));
 }
 

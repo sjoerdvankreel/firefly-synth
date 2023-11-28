@@ -64,7 +64,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     lfo_engine engine(mapping.module_index == module_glfo);
     engine.initialize();
     engine.process(block);
-    graph_data result;
+    graph_data result = {};
     result.series = true;
     result.bipolar = false;
     result.series_data = block.state.own_cv[0][0].data();

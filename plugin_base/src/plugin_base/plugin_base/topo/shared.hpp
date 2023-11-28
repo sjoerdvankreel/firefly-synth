@@ -16,9 +16,10 @@ struct gui_dimension;
 struct graph_data {
   static graph_data empty();
 
-  bool series;
-  bool bipolar;
   float scalar_data;
+  bool series = false;
+  bool enabled = true;
+  bool bipolar = false;
   std::vector<float> series_data;
 };
 

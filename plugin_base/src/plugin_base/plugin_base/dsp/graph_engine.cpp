@@ -22,7 +22,7 @@ module_graph_engine::render(graph_renderer renderer)
   host_block.shared.bpm = _params.bpm;
   host_block.shared.audio_in = audio_in;
 
-  graph_data result;
+  graph_data result = {};
   int voice = _state->desc().plugin->modules[_params.module_index].dsp.stage == module_stage::voice ? 0 : -1;
   auto plugin_block = _engine.make_plugin_block(voice, _params.module_index, _params.module_slot, 0, _params.frame_count);
   if(voice == -1)
