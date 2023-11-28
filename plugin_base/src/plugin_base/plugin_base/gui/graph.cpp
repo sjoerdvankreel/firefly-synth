@@ -58,7 +58,8 @@ module_graph::module_mouse_enter(int module)
   // trigger re-render based on first new module param
   auto const& params = _gui->gui_state()->desc().modules[module].params;
   if(params.size() == 0) return;
-  any_state_changed(params[0].info.global, {});
+  if (!_gui->gui_state()->desc().modules[module].module->rerender_on_param_hover)
+    any_state_changed(params[0].info.global, {});
 }
 
 void

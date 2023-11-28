@@ -337,9 +337,13 @@ plugin_gui::make_params(module_desc const& module, param_desc const* params)
 Component&
 plugin_gui::make_single_param(module_desc const& module, param_desc const& param)
 {
+  Component* result = nullptr;
   if (param.param->gui.label.contents == gui_label_contents::none)
-    return make_param_editor(module, param);
-  return make_param_label_edit(module, param);
+    result = &make_param_editor(module, param);
+  else
+    result = &make_param_label_edit(module, param);
+  add_hover_listener(*result, false, param.info.global);
+  return *result;
 }
 
 Component&
