@@ -36,13 +36,13 @@ init_default(plugin_state& state)
 }
 
 static graph_data
-render_graph(plugin_state const& state, int slot)
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  if (state.get_plain_at(module_env, slot, param_on, 0).step() == 0) return {};
+  if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) return {};
 
-  float a = state.get_plain_at(module_env, slot, param_a, 0).real();
-  float d = state.get_plain_at(module_env, slot, param_d, 0).real();
-  float r = state.get_plain_at(module_env, slot, param_r, 0).real();
+  float a = state.get_plain_at(module_env, mapping.module_slot, param_a, 0).real();
+  float d = state.get_plain_at(module_env, mapping.module_slot, param_d, 0).real();
+  float r = state.get_plain_at(module_env, mapping.module_slot, param_r, 0).real();
   float s = std::max((a + d + r) / 3, 0.01f);
   float ads = a + d + s;
   float adsr = ads + r;
@@ -50,8 +50,8 @@ render_graph(plugin_state const& state, int slot)
   module_graph_params params = {};
   params.bpm = 120;
   params.frame_count = 200;
-  params.module_slot = slot;
   params.module_index = module_env;
+  params.module_slot = mapping.module_slot;
   params.sample_rate = params.frame_count / adsr;
   params.voice_release_at = ads / adsr * params.frame_count;
 

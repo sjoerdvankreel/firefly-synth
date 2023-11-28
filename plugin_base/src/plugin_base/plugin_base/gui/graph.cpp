@@ -65,19 +65,21 @@ void
 module_graph::render_if_dirty()
 {
   if (!_render_dirty) return;
-  int module_slot = _module_slot;
-  int module_index = _module_index;
+
+  param_topo_mapping mapping;
+  mapping.param_slot = 0;
+  mapping.param_index = 0;
+  mapping.module_slot = _module_slot;
+  mapping.module_index = _module_index;
   if (_any_module)
   {
     if(_tweaked_param == -1) return;
-    auto const& mapping = _gui->gui_state()->desc().param_mappings.params[_tweaked_param];
-    module_slot = mapping.topo.module_slot;
-    module_index = mapping.topo.module_index;
+    mapping = _gui->gui_state()->desc().param_mappings.params[_tweaked_param].topo;
   }
 
-  auto const& module = _gui->gui_state()->desc().plugin->modules[module_index];
+  auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
-    render(module.graph_renderer(*_gui->gui_state(), module_slot));
+    render(module.graph_renderer(*_gui->gui_state(), mapping));
   _render_dirty = false;
 }
 

@@ -28,12 +28,12 @@ public:
 };
 
 static graph_data
-render_graph(plugin_state const& state, int slot)
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
    graph_data result;
    result.series = false;
    result.bipolar = false;
-   result.scalar_data = state.get_plain_at(module_input, slot, param_aux, 0).real();
+   result.scalar_data = state.get_plain_at(mapping).real();
    return result;
 }
 

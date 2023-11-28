@@ -48,21 +48,20 @@ init_global_default(plugin_state& state)
 }
 
 static graph_data
-render_graph(plugin_state const& state, int slot, bool global)
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   module_graph_params params = {};
-  int module_index = global? module_glfo: module_vlfo;
-  if(state.get_plain_at(module_index, slot, param_type, 0).step() == type_off) return {};
+  if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
 
   params.bpm = 120;
   params.frame_count = 200;
-  params.module_slot = slot;
-  params.module_index = module_index;
   params.sample_rate = params.frame_count;
+  params.module_slot = mapping.module_slot;
+  params.module_index = mapping.module_index;
 
   module_graph_engine engine(&state, params);
-  return engine.render([global](plugin_block& block) {
-    lfo_engine engine(global);
+  return engine.render([mapping](plugin_block& block) {
+    lfo_engine engine(mapping.module_index == module_glfo);
     engine.initialize();
     engine.process(block);
     graph_data result;
@@ -89,10 +88,10 @@ lfo_topo(
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  result.graph_renderer = render_graph;
   if(global) result.default_initializer = init_global_default;
   result.engine_factory = [global](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(global); };
-  result.graph_renderer = [global](auto const& state, int slot) { return render_graph(state, slot, global); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),

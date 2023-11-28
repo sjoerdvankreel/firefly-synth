@@ -22,12 +22,12 @@ class module_engine;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
-typedef std::function<graph_data(
-  plugin_state const& state, int slot)>
-module_graph_renderer;
-
 typedef std::function<void(plugin_state& state)>
 state_initializer;
+
+typedef std::function<graph_data(
+  plugin_state const& state, param_topo_mapping const& mapping)>
+module_graph_renderer;
 
 typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
