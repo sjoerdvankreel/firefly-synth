@@ -57,15 +57,21 @@ justification_type(gui_label const& label)
 }
 
 void
-module_hover_listener::mouseExit(MouseEvent const&)
+gui_hover_listener::mouseExit(MouseEvent const&)
 {
-  _gui->module_mouse_exit(_module);
+  if(_is_module)
+    _gui->module_mouse_exit(_global_index);
+  else
+    _gui->param_mouse_exit(_global_index);
 }
 
 void
-module_hover_listener::mouseEnter(MouseEvent const&)
+gui_hover_listener::mouseEnter(MouseEvent const&)
 {
-  _gui->module_mouse_enter(_module);
+  if(_is_module)
+    _gui->module_mouse_enter(_global_index);
+  else
+    _gui->param_mouse_enter(_global_index);
 }
 
 void
@@ -165,6 +171,20 @@ plugin_gui::fire_state_loaded()
 }
 
 void
+plugin_gui::param_mouse_exit(int param)
+{
+  for (int i = 0; i < _gui_listeners.size(); i++)
+    _gui_listeners[i]->param_mouse_exit(param);
+}
+
+void
+plugin_gui::param_mouse_enter(int param)
+{
+  for (int i = 0; i < _gui_listeners.size(); i++)
+    _gui_listeners[i]->param_mouse_enter(param);
+}
+
+void
 plugin_gui::module_mouse_exit(int module)
 {
   for (int i = 0; i < _gui_listeners.size(); i++)
@@ -179,9 +199,9 @@ plugin_gui::module_mouse_enter(int module)
 }
 
 void
-plugin_gui::add_hover_listener(Component& component, int module)
+plugin_gui::add_hover_listener(Component& component, bool is_module, int global_index)
 {
-  auto listener = std::make_unique<module_hover_listener>(this, &component, module);
+  auto listener = std::make_unique<gui_hover_listener>(this, &component, is_module, global_index);
   _hover_listeners.push_back(std::move(listener));
 }
 
@@ -278,7 +298,7 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
-  add_hover_listener(*tab_button, module);
+  add_hover_listener(*tab_button, true, module);
 }
 
 Component&
@@ -301,7 +321,7 @@ plugin_gui::make_param_sections(module_desc const& module)
   auto& result = make_component<grid_component>(topo.gui.dimension, margin_section);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
-  add_hover_listener(result, module.info.global);
+  add_hover_listener(result, true, module.info.global);
   return result;
 }
 

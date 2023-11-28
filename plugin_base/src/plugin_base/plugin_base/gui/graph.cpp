@@ -40,7 +40,7 @@ module_graph::timerCallback()
 }
 
 void
-module_graph::module_mouse_exit(int module)
+module_graph::mouse_exit()
 {
   if (!_any_module) return;
   graph_data empty;
@@ -59,6 +59,15 @@ module_graph::module_mouse_enter(int module)
   auto const& params = _gui->gui_state()->desc().modules[module].params;
   if(params.size() == 0) return;
   any_state_changed(params[0].info.global, {});
+}
+
+void
+module_graph::param_mouse_enter(int param)
+{
+  // trigger re-render based on specific param
+  auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
+  if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].rerender_on_param_hover)
+    any_state_changed(param, {});
 }
 
 void

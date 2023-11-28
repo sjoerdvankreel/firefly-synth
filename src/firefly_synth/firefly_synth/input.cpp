@@ -49,6 +49,7 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
 
   result.graph_renderer = render_graph;
+  result.rerender_on_param_hover = true;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<input_engine>(); };
 

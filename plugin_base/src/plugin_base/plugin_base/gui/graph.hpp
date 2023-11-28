@@ -38,13 +38,17 @@ public any_state_listener
   int _tweaked_param = -1;
   bool _render_dirty = true;
 
+  void mouse_exit();
   void render_if_dirty();
 
 public:
+  void param_mouse_enter(int module) override;
+  void module_mouse_enter(int module) override;
+  void param_mouse_exit(int param) override { mouse_exit(); }
+  void module_mouse_exit(int module) override { mouse_exit(); }
+
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
-  void module_mouse_exit(int module) override;
-  void module_mouse_enter(int module) override;
   void any_state_changed(int param, plain_value plain) override;
 
   ~module_graph();

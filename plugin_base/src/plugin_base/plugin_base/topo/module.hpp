@@ -90,6 +90,7 @@ struct module_topo final {
   std::vector<midi_source> midi_sources;
   midi_active_selector midi_active_selector;
 
+  bool rerender_on_param_hover = false;
   module_graph_renderer graph_renderer;
   module_engine_factory engine_factory;
   state_initializer minimal_initializer;

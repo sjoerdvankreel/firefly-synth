@@ -28,23 +28,26 @@ gui_extra_state_keyset(plugin_topo const& topo);
 class gui_listener
 {
 public:
-  virtual void module_mouse_exit(int module) = 0;
-  virtual void module_mouse_enter(int module) = 0;
+  virtual void param_mouse_exit(int param) {};
+  virtual void param_mouse_enter(int param) {};
+  virtual void module_mouse_exit(int module) {};
+  virtual void module_mouse_enter(int module) {};
 };
 
-// triggers module_hover_changed
-class module_hover_listener:
+// triggers gui_listener
+class gui_hover_listener:
 public juce::MouseListener
 {
-  int const _module;
-  plugin_gui* const _gui;  
+  bool const _is_module;
+  plugin_gui* const _gui;
+  int const _global_index;
   juce::Component* const _component;
 public:
   void mouseExit(juce::MouseEvent const&) override;
   void mouseEnter(juce::MouseEvent const&) override;
-  ~module_hover_listener() { _component->removeMouseListener(this); }
-  module_hover_listener(plugin_gui* gui, juce::Component* component, int module):
-  _module(module), _gui(gui), _component(component) { _component->addMouseListener(this, true); }
+  ~gui_hover_listener() { _component->removeMouseListener(this); }
+  gui_hover_listener(plugin_gui* gui, juce::Component* component, bool is_module, int global_index):
+  _is_module(is_module), _global_index(global_index), _gui(gui), _component(component) { _component->addMouseListener(this, true); }
 };
 
 // tracking gui parameter changes
@@ -89,13 +92,16 @@ public:
   void param_changed(int index, plain_value plain);
   void param_changing(int index, plain_value plain);
 
-  void resized() override;
+  void param_mouse_exit(int param);
+  void param_mouse_enter(int param);
   void module_mouse_exit(int module);
   void module_mouse_enter(int module);
-  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
 
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state() const { return _extra_state; }
+
+  void resized() override;
+  void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   
   void remove_gui_listener(gui_listener* listener);
   void remove_param_listener(gui_param_listener* listener);
@@ -112,15 +118,15 @@ private:
   std::vector<gui_param_listener*> _param_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
-  std::vector<std::unique_ptr<module_hover_listener>> _hover_listeners = {};
+  std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};
 
   template <class T, class... U>
   T& make_component(U&&... args);
 
   void fire_state_loaded();
   Component& make_content();
-  void add_hover_listener(juce::Component& component, int module);
   void init_multi_tab_component(tab_component& tab, std::string const& id);
+  void add_hover_listener(juce::Component& component, bool is_module, int global_index);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
   { _extra_state->set_num(id + "/" + part, val); }
