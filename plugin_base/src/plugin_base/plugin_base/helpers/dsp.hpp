@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/dsp/block/plugin.hpp>
 #include <vector>

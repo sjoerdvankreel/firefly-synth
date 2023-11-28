@@ -66,9 +66,10 @@ render_graph(plugin_state const& state, int slot, bool global)
     engine.initialize();
     engine.process(block);
     graph_data result;
+    result.series = true;
     result.bipolar = false;
-    result.data = block.state.own_cv[0][0].data();
-    result.data.push_back(0.5f);
+    result.series_data = block.state.own_cv[0][0].data();
+    result.series_data.push_back(0.5f);
     return result;
   });
 }

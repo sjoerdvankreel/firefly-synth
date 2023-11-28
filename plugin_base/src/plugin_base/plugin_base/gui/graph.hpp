@@ -14,7 +14,7 @@ class graph:
 public juce::Component
 {
   lnf* const _lnf;
-  std::vector<float> _data;
+  graph_data _data = {};
 
 public:
   graph(lnf* lnf): _lnf(lnf) {}

@@ -14,8 +14,10 @@ struct module_topo;
 struct gui_dimension;
 
 struct graph_data {
+  bool series;
   bool bipolar;
-  std::vector<float> data;
+  float scalar_data;
+  std::vector<float> series_data;
 };
 
 // just a guess for validation, increase if needed

@@ -43,7 +43,11 @@ void
 module_graph::module_mouse_exit(int module)
 {
   if (!_any_module) return;
-  render({});
+  graph_data empty;
+  empty.series = false;
+  empty.bipolar = true;
+  empty.scalar_data = 0.5f;
+  render(empty);
 }
 
 void
@@ -90,12 +94,20 @@ module_graph::any_state_changed(int param, plain_value plain)
 void 
 graph::render(graph_data const& data)
 {
-  _data = data.data;
-  if(data.bipolar)
-    for (int i = 0; i < _data.size(); i++)
-      _data[i] = bipolar_to_unipolar(_data[i]);
-  for (int i = 0; i < _data.size(); i++)
-    _data[i] = 1 - _data[i];
+  _data = data;
+  if (!data.series)
+  {
+    if(data.bipolar)
+      _data.scalar_data = bipolar_to_unipolar(data.scalar_data);
+  }
+  else
+  {
+    if(data.bipolar)
+      for (int i = 0; i < _data.series_data.size(); i++)
+        _data.series_data[i] = bipolar_to_unipolar(_data.series_data[i]);
+    for (int i = 0; i < _data.series_data.size(); i++)
+      _data.series_data[i] = 1 - _data.series_data[i];
+  }
   repaint();
 }
 
@@ -116,17 +128,32 @@ graph::paint(Graphics& g)
   for (int i = 1; i <= grid_cols; i++)
     g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, h);
 
-  if (_data.size() == 0)
+  if (!_data.series)
+  {
+    if (_data.bipolar)
+    {
+    }
+    else 
+    {
+      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
+      g.fillRect(0.0f, (1 - _data.scalar_data) * h, w, _data.scalar_data * h);
+      g.setColour(_lnf->colors().graph_foreground);
+      g.fillRect(0.0f, (1 - _data.scalar_data) * h, w, 1.0f);
+    }
+    return;
+  }
+
+  if (_data.series && _data.series_data.size() == 0)
   {
     g.setColour(_lnf->colors().graph_foreground);
     g.fillRect(0.0f, h / 2.0f, w, 1.0f);
     return;
   }
 
-  float count = _data.size();
-  p.startNewSubPath(0, vpad + _data[0] * (h - 2 * vpad));
-  for(int i = 1; i < _data.size(); i++)
-    p.lineTo(i / count * w, vpad + _data[i] * (h - 2 * vpad));
+  float count = _data.series_data.size();
+  p.startNewSubPath(0, vpad + _data.series_data[0] * (h - 2 * vpad));
+  for(int i = 1; i < _data.series_data.size(); i++)
+    p.lineTo(i / count * w, vpad + _data.series_data[i] * (h - 2 * vpad));
   Path pStroke(p);
   p.closeSubPath();
   

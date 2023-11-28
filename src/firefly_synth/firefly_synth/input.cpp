@@ -1,8 +1,10 @@
-#include <plugin_base/dsp/engine.hpp>
-#include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/shared/state.hpp>
+#include <plugin_base/dsp/engine.hpp>
+#include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
@@ -25,6 +27,16 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(input_engine);
 };
 
+static graph_data
+render_graph(plugin_state const& state, int slot)
+{
+   graph_data result;
+   result.series = false;
+   result.bipolar = false;
+   result.scalar_data = state.get_plain_at(module_input, slot, param_aux, 0).real();
+   return result;
+}
+
 module_topo
 input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos)
 {
@@ -36,6 +48,7 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
 
+  result.graph_renderer = render_graph;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<input_engine>(); };
 
