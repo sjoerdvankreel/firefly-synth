@@ -37,9 +37,11 @@ public module_engine {
 public:
   osc_engine() { initialize(); }
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
+  
   void initialize() override { _phase = 0; }
-  void process(plugin_block& block, cv_matrix_mixdown const& modulation);
-  void process(plugin_block& block) override { process(block, get_cv_matrix_mixdown(block, false)); }
+  void process(plugin_block& block) override
+  { process(block, block.voice->all_cv[module_env][0][0][0], get_cv_matrix_mixdown(block, false)); }
+  void process(plugin_block& block, jarray<float, 1> const& env_curve, cv_matrix_mixdown const& modulation);
 };
 
 static void
@@ -73,7 +75,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   return engine.render([mapping](plugin_block& block) {
     osc_engine engine;
     engine.initialize();
-    engine.process(block, make_static_cv_matrix_mixdown(block));
+    engine.process(block, jarray<float, 1>(block.end_frame, 1.0f), make_static_cv_matrix_mixdown(block));
     graph_data result = {};
     result.series = true;
     result.bipolar = true;
@@ -173,7 +175,7 @@ blep(float phase, float inc)
 }
 
 void
-osc_engine::process(plugin_block& block, cv_matrix_mixdown const& modulation)
+osc_engine::process(plugin_block& block, jarray<float, 1> const& env_curve, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -186,7 +188,6 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const& modulation)
     return;
   }
 
-  auto const& env_curve = block.voice->all_cv[module_env][0][0][0];
   auto const& pb_curve = *modulation[module_osc][block.module_slot][param_pb][0];
   auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
