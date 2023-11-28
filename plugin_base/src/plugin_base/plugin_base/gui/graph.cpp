@@ -120,16 +120,17 @@ graph::paint(Graphics& g)
   Path p;
   float vpad = 1;
   float w = getWidth();
-  float h = getHeight();
+  float full_h = getHeight();
+  float pad_h = full_h - 2 * vpad;
   g.fillAll(_lnf->colors().graph_background);
 
   int grid_rows = 5;
   int grid_cols = 13;
   g.setColour(_lnf->colors().graph_grid.withAlpha(0.25f));
   for(int i = 1; i <= grid_rows; i++)
-    g.fillRect(0.0f, i / (float)(grid_rows + 1) * h, w, 1.0f);
+    g.fillRect(0.0f, i / (float)(grid_rows + 1) * full_h, w, 1.0f);
   for (int i = 1; i <= grid_cols; i++)
-    g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, h);
+    g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, full_h);
 
   if (!_data.series)
   {
@@ -137,21 +138,18 @@ graph::paint(Graphics& g)
     {
       g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
       if (_data.scalar_data <= 0.5f)
-        g.fillRect(0.0f, _data.scalar_data * h, w, (0.5f - _data.scalar_data) * h);
+        g.fillRect(0.0f, _data.scalar_data * full_h, w, (0.5f - _data.scalar_data) * pad_h);
       else
-        g.fillRect(0.0f, 0.5f * h, w, (_data.scalar_data - 0.5f) * h);
+        g.fillRect(0.0f, 0.5f * full_h, w, (_data.scalar_data - 0.5f) * pad_h);
       g.setColour(_lnf->colors().graph_foreground);
-      if (_data.scalar_data <= 0.5f)
-        g.fillRect(0.0f, _data.scalar_data * h, w, 1.0f);
-      else
-        g.fillRect(0.0f, 0.5f * h, w, 1.0f);
+      g.fillRect(0.0f, _data.scalar_data * pad_h, w, 1.0f);
     }
     else 
     {
       g.setColour(_lnf->colors().graph_foreground.withAlpha(0.5f));
-      g.fillRect(0.0f, _data.scalar_data * h, w, (1 - _data.scalar_data) * h);
+      g.fillRect(0.0f, _data.scalar_data * full_h, w, (1 - _data.scalar_data) * pad_h);
       g.setColour(_lnf->colors().graph_foreground);
-      g.fillRect(0.0f, _data.scalar_data * h, w, 1.0f);
+      g.fillRect(0.0f, _data.scalar_data * pad_h, w, 1.0f);
     }
     return;
   }
@@ -159,14 +157,14 @@ graph::paint(Graphics& g)
   if (_data.series && _data.series_data.size() == 0)
   {
     g.setColour(_lnf->colors().graph_foreground);
-    g.fillRect(0.0f, h / 2.0f, w, 1.0f);
+    g.fillRect(0.0f, full_h / 2.0f, w, 1.0f);
     return;
   }
 
   float count = _data.series_data.size();
-  p.startNewSubPath(0, vpad + _data.series_data[0] * (h - 2 * vpad));
+  p.startNewSubPath(0, vpad + _data.series_data[0] * pad_h);
   for(int i = 1; i < _data.series_data.size(); i++)
-    p.lineTo(i / count * w, vpad + _data.series_data[i] * (h - 2 * vpad));
+    p.lineTo(i / count * w, vpad + _data.series_data[i] * pad_h);
   Path pStroke(p);
   p.closeSubPath();
   

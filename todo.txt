@@ -22,6 +22,7 @@ finalize graphs
 do graphs for all components incl in/midi
 main thread hangs on shutdown
 rerender on param hover
+do the route switching thing on swap module
 
 * get some linux folks to comment (ycollete?)
 * continuing
