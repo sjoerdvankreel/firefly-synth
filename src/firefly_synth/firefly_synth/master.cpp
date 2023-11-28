@@ -21,6 +21,16 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_engine);
 };
 
+static graph_data
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+{
+  graph_data result = {};
+  result.series = false;
+  result.bipolar = mapping.param_index == param_bal;
+  result.scalar_data = state.get_plain_at(mapping).real();
+  return result;
+}
+
 module_topo
 master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos)
 {
@@ -29,6 +39,8 @@ master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui
     make_module_dsp(module_stage::output, module_output::none, 0, {}),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  result.graph_renderer = render_graph;
+  result.rerender_on_param_hover = true;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<master_engine> { return std::make_unique<master_engine>(); };
 
