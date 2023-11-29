@@ -78,19 +78,19 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   if (state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
 
   params.bpm = 120;
-  params.frame_count = 1000;
-  params.sample_rate = 1000;
+  params.sample_rate = 48000;
+  params.frame_count = 48000 / 200;
   params.midi_key = midi_middle_c;
 
   jarray<float, 2> audio;
   module_graph_engine graph_engine(&state, params);
-  graph_engine.process(mapping.module_index, mapping.module_slot, [mapping, &audio](plugin_block& block) {
-    fx_engine engine(mapping.module_index == module_gfx, 1000);
+  graph_engine.process(mapping.module_index, mapping.module_slot, [mapping, params, &audio](plugin_block& block) {
+    fx_engine engine(mapping.module_index == module_gfx, params.sample_rate);
     engine.initialize();
     jarray<float, 2> impulse;
-    impulse.resize(jarray<int, 1>(2, 1000));
+    impulse.resize(jarray<int, 1>(2, params.frame_count));
     impulse[0][0] = 1;
-    impulse[0][1] = 1;
+    impulse[1][0] = 1;
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &impulse);
     audio = jarray<float, 2>(block.state.own_audio[0][0]);
