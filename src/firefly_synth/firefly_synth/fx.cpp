@@ -3,6 +3,7 @@
 #include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
 
@@ -42,14 +43,16 @@ public module_engine {
   int const _capacity;
   jarray<float, 2> _buffer = {};
 
-  void process_delay(plugin_block& block);
-  void process_filter(plugin_block& block);
+  void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_filter(plugin_block& block, cv_matrix_mixdown const& modulation);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
   fx_engine(bool global, int sample_rate);
+  
   void initialize() override;
-  void process(plugin_block& block) override;
+  void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
+  void process(plugin_block& block) override { process(block, nullptr, nullptr); }
 };
 
 static void
@@ -68,6 +71,36 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gfx, 1, param_delay_tempo, 0, "3/16");
 }
 
+static graph_data
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+{
+  module_graph_params params = {};
+  if (state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
+
+  params.bpm = 120;
+  params.frame_count = 1000;
+  params.sample_rate = 1000;
+  params.midi_key = midi_middle_c;
+
+  jarray<float, 2> audio;
+  module_graph_engine graph_engine(&state, params);
+  graph_engine.process(mapping.module_index, mapping.module_slot, [mapping, &audio](plugin_block& block) {
+    fx_engine engine(mapping.module_index == module_gfx, 1000);
+    engine.initialize();
+    jarray<float, 2> impulse;
+    impulse.resize(jarray<int, 1>(2, 1000));
+    impulse[0][0] = 1;
+    impulse[0][1] = 1;
+    cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
+    engine.process(block, &modulation, &impulse);
+    audio = jarray<float, 2>(block.state.own_audio[0][0]);
+  });
+
+  audio[0].push_back(0.0f);
+  audio[1].push_back(0.0f);
+  return graph_data(audio);
+}
+
 module_topo
 fx_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -83,6 +116,7 @@ fx_topo(
       make_module_dsp_output(false, make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
+  result.graph_renderer = render_graph;
   if(global) result.default_initializer = init_global_default;
   if(!global) result.default_initializer = init_voice_default;
   result.engine_factory = [global](auto const&, int sample_rate, int) ->
@@ -160,29 +194,37 @@ fx_engine::initialize()
 }
 
 void
-fx_engine::process(plugin_block& block)
-{
-  int this_module = _global? module_gfx: module_vfx;
-  int type = block.state.own_block_automation[param_type][0].step();
-  auto& mixer = get_audio_matrix_mixer(block, _global);
-  auto const& audio_in = mixer.mix(block, this_module, block.module_slot);
+fx_engine::process(plugin_block& block, 
+  cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in)
+{ 
+  if (audio_in == nullptr)
+  {
+    int this_module = _global ? module_gfx : module_vfx;
+    auto& mixer = get_audio_matrix_mixer(block, _global);
+    audio_in = &mixer.mix(block, this_module, block.module_slot);
+  }
+   
   for (int c = 0; c < 2; c++)
-    audio_in[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);
-  
+    (*audio_in)[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);  
+  int type = block.state.own_block_automation[param_type][0].step();
+  if(type == type_off) return;
+  if(modulation == nullptr)
+    modulation = &get_cv_matrix_mixdown(block, _global);
   if (type == type_delay)
-    process_delay(block);
+    process_delay(block, *modulation);
   if (type == type_lpf || type == type_hpf)
-    process_filter(block);
+    process_filter(block, *modulation);
 }
 
 void
-fx_engine::process_delay(plugin_block& block)
+fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   float max_feedback = 0.9f;
   int this_module = _global ? module_gfx : module_vfx;
   float time = get_timesig_time_value(block, this_module, param_delay_tempo);
   int samples = block.sample_rate * time;
-  auto const& feedback_curve = block.state.own_accurate_automation[param_delay_feedback][0];
+  
+  auto const& feedback_curve = *modulation[this_module][block.module_slot][param_delay_feedback][0];
   for (int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
@@ -196,11 +238,10 @@ fx_engine::process_delay(plugin_block& block)
 }
   
 void
-fx_engine::process_filter(plugin_block& block)
+fx_engine::process_filter(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   int this_module = _global ? module_gfx : module_vfx;
   int type = block.state.own_block_automation[param_type][0].step();
-  auto const& modulation = get_cv_matrix_mixdown(block, _global);
   auto const& res_curve = *modulation[this_module][block.module_slot][param_filter_res][0];
   auto const& freq_curve = *modulation[this_module][block.module_slot][param_filter_freq][0];
 

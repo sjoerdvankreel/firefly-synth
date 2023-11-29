@@ -39,9 +39,8 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   
   void initialize() override { _phase = 0; }
-  void process(plugin_block& block) override
-  { process(block, block.voice->all_cv[module_env][0][0][0], get_cv_matrix_mixdown(block, false)); }
-  void process(plugin_block& block, jarray<float, 1> const& env_curve, cv_matrix_mixdown const& modulation);
+  void process(plugin_block& block) override { process(block, nullptr, nullptr); }
+  void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 1> const* env_curve);
 };
 
 static void
@@ -75,7 +74,9 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     graph_engine.process(mapping.module_index, i, [mapping, i, &graph_engine, &audio](plugin_block& block) {
       osc_engine engine;
       engine.initialize();
-      engine.process(block, jarray<float, 1>(block.end_frame, 1.0f), make_static_cv_matrix_mixdown(block));
+      jarray<float, 1> env_curve(block.end_frame, 1.0f);
+      cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
+      engine.process(block, &modulation, &env_curve);
       if(mapping.module_slot == i)
         audio = jarray<float, 2>(graph_engine.last_block()->state.own_audio[0][0]);
     });
@@ -175,7 +176,7 @@ blep(float phase, float inc)
 }
 
 void
-osc_engine::process(plugin_block& block, jarray<float, 1> const& env_curve, cv_matrix_mixdown const& modulation)
+osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 1> const* env_curve)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -187,11 +188,17 @@ osc_engine::process(plugin_block& block, jarray<float, 1> const& env_curve, cv_m
     block.state.own_audio[0][0][1].fill(block.start_frame, block.end_frame, 0.0f);
     return;
   }
+  
+  // allow custom data for graphs
+  if(env_curve == nullptr)
+    env_curve = &block.voice->all_cv[module_env][0][0][0];
+  if(modulation == nullptr)
+    modulation = &get_cv_matrix_mixdown(block, false);
 
-  auto const& pb_curve = *modulation[module_osc][block.module_slot][param_pb][0];
-  auto const& bal_curve = *modulation[module_osc][block.module_slot][param_bal][0];
-  auto const& cent_curve = *modulation[module_osc][block.module_slot][param_cent][0];
-  auto const& pitch_curve = *modulation[module_osc][block.module_slot][param_pitch][0];
+  auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
+  auto const& bal_curve = *(*modulation)[module_osc][block.module_slot][param_bal][0];
+  auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
   int pb_range = block.state.all_block_automation[module_input][0][input_param_pb_range][0].step();
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
@@ -203,7 +210,7 @@ osc_engine::process(plugin_block& block, jarray<float, 1> const& env_curve, cv_m
   }
   else
   {
-    auto const& am_curve = *modulation[module_osc][block.module_slot][param_am][0];
+    auto const& am_curve = *(*modulation)[module_osc][block.module_slot][param_am][0];
     am_curve.copy_to(block.start_frame, block.end_frame, am_mod_scratch);
     auto const& am_source = block.voice->all_scratch[module_osc][block.module_slot - 1][scratch_mono];
     am_source.transform_to(block.start_frame, block.end_frame, am_scratch, bipolar_to_unipolar);
@@ -226,7 +233,7 @@ osc_engine::process(plugin_block& block, jarray<float, 1> const& env_curve, cv_m
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    sample *= env_curve[f];
+    sample *= (*env_curve)[f];
     mono_scratch[f] = mix_signal(am_mod_scratch[f], sample, sample * am_scratch[f]);
     block.state.own_audio[0][0][0][f] = mono_scratch[f] * balance(0, bal);
     block.state.own_audio[0][0][1][f] = mono_scratch[f] * balance(1, bal);
