@@ -74,29 +74,51 @@ init_global_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
+  jarray<float, 2> audio_in;
+  jarray<float, 1> audio_out;
   module_graph_params params = {};
-  if (state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
+
+  int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
+  if(type == type_off) return {};
 
   params.bpm = 120;
-  params.sample_rate = 48000;
-  params.frame_count = 48000 / 200;
   params.midi_key = midi_middle_c;
 
-  jarray<float, 1> audio;
+  if (type == type_delay)
+  {
+    int count = 100;
+    params.sample_rate = 500;
+    params.frame_count = 2000;
+    audio_in.resize(jarray<int, 1>(2, params.frame_count));
+    for (int i = 0; i < count; i++)
+    {
+      float sample = std::sin(i / (float)count * pi32 * 2.0f) * (1 - i / (float)count);
+      audio_in[0][i] = sample;
+      audio_in[1][i] = sample;
+    }
+  }
+  else 
+  {
+    params.sample_rate = 48000;
+    params.frame_count = 48000 / 200;
+    audio_in.resize(jarray<int, 1>(2, params.frame_count));
+    audio_in[0][0] = 1;
+    audio_in[1][0] = 1;
+  }
+
   module_graph_engine graph_engine(&state, params);
-  graph_engine.process(mapping.module_index, mapping.module_slot, [mapping, params, &audio](plugin_block& block) {
+  graph_engine.process(mapping.module_index, mapping.module_slot, [mapping, params, &audio_in, &audio_out](plugin_block& block) {
     fx_engine engine(mapping.module_index == module_gfx, params.sample_rate);
     engine.initialize();
-    jarray<float, 2> impulse;
-    impulse.resize(jarray<int, 1>(2, params.frame_count));
-    impulse[0][0] = 1;
-    impulse[1][0] = 1;
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
-    engine.process(block, &modulation, &impulse);
-    audio = jarray<float, 1>(block.state.own_audio[0][0][0]);
+    engine.process(block, &modulation, &audio_in);
+    audio_out = jarray<float, 1>(block.state.own_audio[0][0][0]);
   });
 
-  std::vector<float> response(fft(audio.data()));
+  if (type == type_delay)
+    return graph_data(jarray<float, 1>(audio_out), true);
+
+  std::vector<float> response(fft(audio_out.data()));
   response.push_back(0);
   response.insert(response.begin(), 0);
   return graph_data(jarray<float, 1>(response), false);
