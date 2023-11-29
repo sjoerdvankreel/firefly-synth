@@ -41,7 +41,7 @@ module_graph::timerCallback()
 }
 
 void
-module_graph::mouse_exit()
+module_graph::module_mouse_exit(int module)
 {
   if (!_any_module) return;
   render(graph_data());
