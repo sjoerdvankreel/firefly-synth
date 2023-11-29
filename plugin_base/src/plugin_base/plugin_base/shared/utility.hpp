@@ -32,24 +32,20 @@ inline char constexpr resource_folder_presets[] = "presets";
 inline float constexpr pi32 = 3.14159265358979323846264338327950288f;
 inline double constexpr pi64 = 3.14159265358979323846264338327950288;
 
-template <class Exit>
-class scope_guard {
-  Exit _exit;
-
-public:
-  ~scope_guard() { _exit(); }
-  scope_guard(Exit exit) : _exit(exit) {}
-
-  scope_guard(scope_guard&) = delete;
-  scope_guard(scope_guard const&) = delete;          
-  scope_guard& operator = (scope_guard&&) = delete;
-  scope_guard& operator = (scope_guard const&) = delete;
-};
-
 double seconds_since_epoch();
-inline void debug_breakable() {};
+std::vector<float> fft(std::vector<float> const& in);
 std::vector<char> file_load(std::filesystem::path const& path);
 std::filesystem::path get_resource_location(format_config const* config);
+
+inline std::uint64_t
+next_pow2(std::uint64_t x)
+{
+  std::uint64_t result = 0;
+  if (x == 0) return 0;
+  if (x && !(x & (x - 1))) return x;
+  while (x != 0) x >>= 1, result++;
+  return 1ULL << result;
+}
 
 template <class T> std::string 
 to_8bit_string(T const* source)

@@ -281,7 +281,6 @@ plugin_engine::process()
 
   _host_block->events.out.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();
-  scope_guard denormals([denormal_state]() { restore_denormals(denormal_state); });
 
   // TODO monophonic portamento
 
@@ -576,6 +575,8 @@ plugin_engine::process()
           }
     }
   }
+
+  restore_denormals(denormal_state);
 }
 
 }

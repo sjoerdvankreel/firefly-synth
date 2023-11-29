@@ -38,6 +38,8 @@ class jarray final {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(jarray);
+  explicit jarray(std::vector<elem_type> const& data):
+  _data(data) {}
   explicit jarray(std::size_t size, elem_type const& val) :
   _data(size, val) {}
 
