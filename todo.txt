@@ -22,7 +22,7 @@ do the route switching thing on swap module
 * get some linux folks to comment (ycollete?)
 * continuing
 - measure performance
-- keep updating the demo tracks
+- keep updating the demo stuff
 
 * host bugs:
 - waveform: lots, not supported
