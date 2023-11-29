@@ -33,9 +33,11 @@ inline float constexpr pi32 = 3.14159265358979323846264338327950288f;
 inline double constexpr pi64 = 3.14159265358979323846264338327950288;
 
 double seconds_since_epoch();
-std::vector<float> fft(std::vector<float> const& in);
 std::vector<char> file_load(std::filesystem::path const& path);
 std::filesystem::path get_resource_location(format_config const* config);
+
+std::vector<float> fft(std::vector<float> const& in);
+std::vector<float> log_remap_series_x(std::vector<float> const& in, float midpoint);
 
 inline std::uint64_t
 next_pow2(std::uint64_t x)
