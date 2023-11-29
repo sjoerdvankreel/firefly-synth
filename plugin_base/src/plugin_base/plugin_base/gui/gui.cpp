@@ -98,7 +98,7 @@ gui_extra_state_keyset(plugin_topo const& topo)
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
-_lnf(&gui_state->desc(), -1, -1, -1), 
+_lnf(&gui_state->desc(), -1, -1, -1), _tooltip(this), 
 _gui_state(gui_state), _extra_state(extra_state)
 {
   setOpaque(true);

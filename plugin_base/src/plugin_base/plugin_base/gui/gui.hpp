@@ -110,6 +110,7 @@ public:
   
 private:
   lnf _lnf;
+  juce::TooltipWindow _tooltip;
   plugin_state* const _gui_state;
   plugin_base::extra_state* const _extra_state;
   std::vector<gui_listener*> _gui_listeners = {};

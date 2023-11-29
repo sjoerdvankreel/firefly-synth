@@ -18,6 +18,7 @@ make new test files
 finalize graphs
 main thread hangs on shutdown
 do the route switching thing on swap module
+matrix graphs
 
 * get some linux folks to comment (ycollete?)
 * continuing

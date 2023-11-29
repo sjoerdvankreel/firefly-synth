@@ -34,9 +34,10 @@ struct module_graph_params
 // taps into module_topo.graph_renderer based on task tweaked/hovered param
 class module_graph:
 public graph,
+public gui_listener,
+public any_state_listener,
 public juce::Timer,
-public gui_listener, 
-public any_state_listener
+public juce::SettableTooltipClient
 {
   bool _done = false;
   plugin_gui* const _gui;
@@ -54,9 +55,9 @@ public:
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
   void param_mouse_enter(int param) override;
+  void module_mouse_exit(int module) override;
   void module_mouse_enter(int module) override;
 
-  void module_mouse_exit(int module) override { render(graph_data()); }
   void any_state_changed(int param, plain_value plain) override { request_rerender(param); }
 };
 
