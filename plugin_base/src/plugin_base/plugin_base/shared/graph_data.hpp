@@ -1,6 +1,9 @@
 #pragma once
 
 #include <plugin_base/shared/jarray.hpp>
+#include <plugin_base/shared/utility.hpp>
+
+#include <map>
 #include <cassert>
 
 namespace plugin_base {
@@ -13,7 +16,7 @@ class graph_data {
   
   float _scalar = {};
   jarray<float, 2> _audio = {};
-  jarray<float, 1> _series = {};
+  std::map<float, float> _series = {};
 
   void init(graph_data const& rhs);
 
@@ -25,7 +28,7 @@ public:
   { assert(_type == graph_data_type::scalar); return _scalar; }
   jarray<float, 2> const& audio() const 
   { assert(_type == graph_data_type::audio); return _audio; }
-  jarray<float, 1> const& series() const 
+  std::map<float, float> const& series() const 
   { assert(_type == graph_data_type::series); return _series; }
 
   graph_data(graph_data const& rhs) { init(rhs); }
@@ -36,8 +39,10 @@ public:
   _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
   graph_data(float scalar, bool bipolar): 
   _bipolar(bipolar), _type(graph_data_type::scalar), _scalar(scalar) {}
-  graph_data(jarray<float, 1> const& series, bool bipolar) : 
+  graph_data(std::map<float, float> const& series, bool bipolar) :
   _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
+  graph_data(jarray<float, 1> const& series, bool bipolar) : 
+  _bipolar(bipolar), _type(graph_data_type::series), _series(linear_map_series_x(series.data())) {}
 };
 
 }

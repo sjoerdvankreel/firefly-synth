@@ -7,6 +7,8 @@
 #include <plugin_base/shared/graph_data.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
+
+#include <map>
 #include <vector>
 
 namespace plugin_base {
@@ -16,7 +18,7 @@ public juce::Component
 {
   lnf* const _lnf;
   graph_data _data = {};  
-  void paint_series(juce::Graphics& g, jarray<float, 1> const& series);
+  void paint_series(juce::Graphics& g, std::map<float, float> const& series);
 
 public:
   graph(lnf* lnf): _lnf(lnf) {}

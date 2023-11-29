@@ -98,20 +98,23 @@ graph::render(graph_data const& data)
 }
 
 void 
-graph::paint_series(Graphics& g, jarray<float, 1> const& series)
+graph::paint_series(Graphics& g, std::map<float, float> const& series)
 {
   Path p;
   float w = getWidth();
   float h = getHeight();
   float count = series.size();
 
+  if(count == 0) return;
   auto foreground = _lnf->colors().graph_foreground;
   if(_data.type() == graph_data_type::empty)
     foreground = color_to_grayscale(foreground);
 
-  p.startNewSubPath(0, (1 - std::clamp(series[0], 0.0f, 1.0f)) * h);
-  for (int i = 1; i < series.size(); i++)
-    p.lineTo(i / count * w, (1 - std::clamp(series[i], 0.0f, 1.0f)) * h);
+  auto kv = series.begin();
+  p.startNewSubPath(0, (1 - std::clamp(kv->second, 0.0f, 1.0f)) * h);
+  kv++;
+  for (; kv != series.end(); kv++)
+    p.lineTo(kv->first / count * w, (1 - std::clamp(kv->second, 0.0f, 1.0f)) * h);
   Path pStroke(p);
   p.closeSubPath();
 
@@ -175,8 +178,8 @@ graph::paint(Graphics& g)
     for(int c = 0; c < 2; c++)
       for (int i = 0; i < audio[c].size(); i++)
         audio[c][i] = ((1 - c) + std::clamp(bipolar_to_unipolar(audio[c][i]), 0.0f, 1.0f)) * 0.5f;
-    paint_series(g, audio[0]);
-    paint_series(g, audio[1]);
+    paint_series(g, linear_map_series_x(audio[0].data()));
+    paint_series(g, linear_map_series_x(audio[1].data()));
     return;
   }
 
@@ -196,10 +199,10 @@ graph::paint(Graphics& g)
     data = graph_data(empty, true);
   }
 
-  jarray<float, 1> series(data.series());
+  std::map<float, float> series(data.series());
   if(data.bipolar())
-    for(int i = 0; i < series.size(); i++)
-      series[i] = bipolar_to_unipolar(series[i]);
+    for(auto& kv: series)
+      kv.second = bipolar_to_unipolar(kv.second);
   paint_series(g, series);
 }
 

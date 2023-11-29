@@ -118,10 +118,10 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true);
 
   // remap over 0.8 just to look pretty
-  std::vector<float> response(log_remap_series_x(fft(block->state.own_audio[0][0][0].data()), 0.8f));
-  response.push_back(0);
-  response.insert(response.begin(), 0);
-  return graph_data(jarray<float, 1>(response), false);
+  std::vector<float> fft = ::fft(block->state.own_audio[0][0][0].data());
+  fft.push_back(0);
+  fft.insert(fft.end(), 0);
+  return graph_data(log_map_series_x(fft, 0.8f), false);
 }
 
 module_topo
