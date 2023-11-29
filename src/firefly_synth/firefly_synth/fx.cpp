@@ -117,7 +117,8 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   if (type == type_delay)
     return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true);
 
-  std::vector<float> response(fft(block->state.own_audio[0][0][0].data()));
+  // remap over 0.8 just to look pretty
+  std::vector<float> response(log_remap_series_x(fft(block->state.own_audio[0][0][0].data()), 0.8f));
   response.push_back(0);
   response.insert(response.begin(), 0);
   return graph_data(jarray<float, 1>(response), false);
