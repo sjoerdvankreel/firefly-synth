@@ -30,8 +30,8 @@ make_section_colors(Colour const& c)
 
 enum {
   custom_section_title,
-  custom_section_tweak_graph,
   custom_section_hover_graph,
+  custom_section_tweak_graph,
   custom_section_controls,
   custom_section_count };
 
@@ -46,8 +46,8 @@ make_graph_section(plugin_gui* gui, lnf* lnf, component_store store, bool render
 {
   module_graph_params params;
   params.fps = 10;
-  params.render_on_tweak = true;
   params.render_on_hover = render_on_hover;
+  params.render_on_tweak = !render_on_hover;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -132,12 +132,12 @@ synth_topo()
     custom_section_title, { 0, 0, 1, 1 }, other_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
     custom_section_controls, { 0, 3, 1, 2 }, other_colors, make_controls_section);
-  result->gui.custom_sections[custom_section_tweak_graph] = make_custom_section_gui(
-    custom_section_tweak_graph, { 0, 1, 1, 1 }, other_colors, [](auto* gui, auto* lnf, auto store) 
-      -> Component& { return make_graph_section(gui, lnf, store, false); });
   result->gui.custom_sections[custom_section_hover_graph] = make_custom_section_gui(
-    custom_section_hover_graph, { 0, 2, 1, 1 }, other_colors, [](auto* gui, auto* lnf, auto store) 
-      -> Component& { return make_graph_section(gui, lnf, store, true); });
+    custom_section_hover_graph, { 0, 1, 1, 1 }, other_colors, [](auto* gui, auto* lnf, auto store)
+    -> Component& { return make_graph_section(gui, lnf, store, true); });
+  result->gui.custom_sections[custom_section_tweak_graph] = make_custom_section_gui(
+    custom_section_tweak_graph, { 0, 2, 1, 1 }, other_colors, [](auto* gui, auto* lnf, auto store) 
+      -> Component& { return make_graph_section(gui, lnf, store, false); });
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(
