@@ -87,30 +87,4 @@ fft(std::vector<float> const& in)
   return result;
 }
 
-std::vector<float> 
-log_remap_series_x(std::vector<float> const& in, float midpoint)
-{
-  assert(0 <= midpoint && midpoint <= 1);
-  int last_remapped = 0;
-  std::vector<float> result(in.size(), 0.0f);
-  float exp = std::log(midpoint) / std::log(0.5);
-  for (int i = 0; i < in.size(); i++)
-  {
-    float x = i / (float)in.size();
-    int x_remapped = (int)(std::pow(x, exp) * in.size());
-    result[x_remapped] = in[i];
-    if (x_remapped != last_remapped)
-    {
-      for(int j = last_remapped + 1; j < x_remapped; j++)
-      {
-        float w = (j - last_remapped) / (float)(x_remapped - last_remapped);
-        result[j] = result[last_remapped] + w * (result[x_remapped] - result[last_remapped]);
-      }
-      last_remapped = x_remapped;
-    }
-  }
-
-  return result;
-}
-
 }
