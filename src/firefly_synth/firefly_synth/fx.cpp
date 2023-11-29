@@ -96,7 +96,10 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     audio = jarray<float, 1>(block.state.own_audio[0][0][0]);
   });
 
-  return graph_data(jarray<float, 1>(fft(audio.data())), false);
+  std::vector<float> response(fft(audio.data()));
+  response.push_back(0);
+  response.insert(response.begin(), 0);
+  return graph_data(jarray<float, 1>(response), false);
 }
 
 module_topo
