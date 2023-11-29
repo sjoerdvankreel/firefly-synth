@@ -55,7 +55,7 @@ init_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  module_graph_params params = {};
+  graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
   
   int oct = state.get_plain_at(mapping.module_index, mapping.module_slot, param_oct, 0).step();
@@ -68,19 +68,18 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.midi_key = midi_middle_c;
   params.sample_rate = params.frame_count * freq;
 
-  jarray<float, 2> audio;
-  module_graph_engine graph_engine(&state, params);
+  plugin_block const* block = nullptr;
+  graph_engine graph_engine(&state, params);
   for(int i = 0; i <= mapping.module_slot; i++)
-    graph_engine.process(mapping.module_index, i, [mapping, i, &graph_engine, &audio](plugin_block& block) {
+    block = graph_engine.process_module(mapping.module_index, i, [mapping, i, &graph_engine](plugin_block& block) {
       osc_engine engine;
       engine.initialize();
       jarray<float, 1> env_curve(block.end_frame, 1.0f);
       cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process(block, &modulation, &env_curve);
-      if(mapping.module_slot == i)
-        audio = jarray<float, 2>(graph_engine.last_block()->state.own_audio[0][0]);
     });
-    
+
+  jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);
   audio[0].push_back(0.0f);
   audio[1].push_back(0.0f);
   return graph_data(audio);

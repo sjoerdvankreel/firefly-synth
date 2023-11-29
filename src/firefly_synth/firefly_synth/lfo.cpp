@@ -50,21 +50,21 @@ init_global_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  module_graph_params params = {};
+  graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
 
   params.bpm = 120;
   params.frame_count = 200;
   params.sample_rate = params.frame_count;
 
-  module_graph_engine engine(&state, params);
-  engine.process(mapping.module_index, mapping.module_slot, [mapping](plugin_block& block) {
+  graph_engine engine(&state, params);
+  auto const* block = engine.process_module(mapping.module_index, mapping.module_slot, [mapping](plugin_block& block) {
     lfo_engine engine(mapping.module_index == module_glfo);
     engine.initialize();
     engine.process(block);
   });
 
-  jarray<float, 1> series(engine.last_block()->state.own_cv[0][0]);
+  jarray<float, 1> series(block->state.own_cv[0][0]);
   series.push_back(0.5f);
   return graph_data(series, false);
 }

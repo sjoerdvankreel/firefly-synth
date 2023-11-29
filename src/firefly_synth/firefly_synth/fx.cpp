@@ -75,8 +75,7 @@ static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   jarray<float, 2> audio_in;
-  jarray<float, 1> audio_out;
-  module_graph_params params = {};
+  graph_engine_params params = {};
 
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
   if(type == type_off) return {};
@@ -106,19 +105,19 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     audio_in[1][0] = 1;
   }
 
-  module_graph_engine graph_engine(&state, params);
-  graph_engine.process(mapping.module_index, mapping.module_slot, [mapping, params, &audio_in, &audio_out](plugin_block& block) {
+  graph_engine graph_engine(&state, params);
+  auto const* block = graph_engine.process_module(
+    mapping.module_index, mapping.module_slot, [mapping, params, &audio_in](plugin_block& block) {
     fx_engine engine(mapping.module_index == module_gfx, params.sample_rate);
     engine.initialize();
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &audio_in);
-    audio_out = jarray<float, 1>(block.state.own_audio[0][0][0]);
   });
 
   if (type == type_delay)
-    return graph_data(jarray<float, 1>(audio_out), true);
+    return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true);
 
-  std::vector<float> response(fft(audio_out.data()));
+  std::vector<float> response(fft(block->state.own_audio[0][0][0].data()));
   response.push_back(0);
   response.insert(response.begin(), 0);
   return graph_data(jarray<float, 1>(response), false);

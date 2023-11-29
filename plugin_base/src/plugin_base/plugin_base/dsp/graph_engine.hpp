@@ -11,34 +11,38 @@ typedef std::function<void(plugin_block&)> graph_processor;
 
 // graph source should decide on this
 // e.g. CV sources don't need audio rate to plot
-struct module_graph_params
+struct graph_engine_params
 {
   int bpm;
   int sample_rate;
   int frame_count;
   int midi_key = -1;
   int voice_release_at = -1;
+  bool activate_modules = false;
 };
 
 // utility dsp engine based on static state only
-class module_graph_engine {
+class graph_engine {
   plugin_engine _engine;
-  jarray<float, 2> _audio;
+  jarray<float, 2> _audio_in = {};
+  jarray<float, 2> _audio_out = {};
   plugin_state const* const _state;
-  module_graph_params const _params;
+  graph_engine_params const _params;
 
-  float* _audio_out[2] = {};
-  float const* _audio_in[2] = {};
   host_block* _host_block = {};
+  float* _audio_out_ptrs[2] = {};
+  float const* _audio_in_ptrs[2] = {};
   std::unique_ptr<plugin_block> _last_block = {};
   std::unique_ptr<plugin_voice_block> _last_voice_block = {};
 
 public:
-  plugin_block const* last_block() const { return _last_block.get(); }
-  void process(int module_index, int module_slot, graph_processor processor);
+  ~graph_engine();
+  graph_engine(plugin_state const* state, graph_engine_params const& params);
 
-  ~module_graph_engine();
-  module_graph_engine(plugin_state const* state, module_graph_params const& params);
+  // run entire plugin and get global audio output
+  jarray<float, 2> const& process();
+  // run module and get modules audio/cv state
+  plugin_block const* process_module(int module_index, int module_slot, graph_processor processor);
 };
 
 }

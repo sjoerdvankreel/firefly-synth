@@ -47,19 +47,19 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   float ads = a + d + s;
   float adsr = ads + r;
 
-  module_graph_params params = {};
+  graph_engine_params params = {};
   params.bpm = 120;
   params.frame_count = 200;
   params.sample_rate = params.frame_count / adsr;
   params.voice_release_at = ads / adsr * params.frame_count;
 
-  module_graph_engine engine(&state, params);
-  engine.process(module_env, mapping.module_slot, [](plugin_block& block) {
+  graph_engine engine(&state, params);
+  auto const* block = engine.process_module(module_env, mapping.module_slot, [](plugin_block& block) {
     env_engine engine;
     engine.initialize();
     engine.process(block);
   });
-  jarray<float, 1> series(engine.last_block()->state.own_cv[0][0]);
+  jarray<float, 1> series(block->state.own_cv[0][0]);
   series.push_back(0);
   return graph_data(series, false);
 }

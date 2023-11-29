@@ -5,6 +5,12 @@ using namespace juce;
 
 namespace plugin_base {
 
+void 
+audio_graph::paint(Graphics& g)
+{
+
+}
+
 module_graph::
 ~module_graph() 
 { 
