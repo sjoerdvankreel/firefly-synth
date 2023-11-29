@@ -54,7 +54,6 @@ public:
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
   void param_mouse_enter(int param) override;
-  void module_mouse_exit(int module) override;
   void module_mouse_enter(int module) override;
 
   void module_mouse_exit(int module) override { render(graph_data()); }
