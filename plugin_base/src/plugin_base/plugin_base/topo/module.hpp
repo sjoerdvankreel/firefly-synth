@@ -6,6 +6,7 @@
 #include <plugin_base/topo/midi_source.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/shared/graph_data.hpp>
 
 #include <memory>
 #include <vector>

@@ -13,16 +13,6 @@ namespace plugin_base {
 struct module_topo;
 struct gui_dimension;
 
-struct graph_data {
-  static graph_data empty();
-
-  float scalar_data;
-  bool series = false;
-  bool enabled = true;
-  bool bipolar = false;
-  std::vector<float> series_data;
-};
-
 // just a guess for validation, increase if needed
 inline int constexpr topo_max = 1024;
 

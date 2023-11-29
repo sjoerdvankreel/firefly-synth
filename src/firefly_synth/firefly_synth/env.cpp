@@ -59,12 +59,9 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     engine.initialize();
     engine.process(block);
   });
-  graph_data result = {};
-  result.series = true;
-  result.bipolar = false;
-  result.series_data = engine.last_block()->state.own_cv[0][0].data();
-  result.series_data.push_back(0);
-  return result;
+  jarray<float, 1> series(engine.last_block()->state.own_cv[0][0]);
+  series.push_back(0);
+  return graph_data(series, false);
 }
 
 module_topo

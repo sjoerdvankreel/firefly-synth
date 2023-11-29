@@ -4,6 +4,7 @@
 #include <plugin_base/gui/gui.hpp>
 #include <plugin_base/topo/module.hpp>
 #include <plugin_base/shared/state.hpp>
+#include <plugin_base/shared/graph_data.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <vector>

@@ -69,22 +69,20 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.midi_key = midi_middle_c;
   params.sample_rate = params.frame_count * freq;
 
-  graph_data result = {};
-  result.series = true;
-  result.bipolar = true;
-
+  jarray<float, 2> audio;
   module_graph_engine graph_engine(&state, params);
   for(int i = 0; i <= mapping.module_slot; i++)
-    graph_engine.process(mapping.module_index, i, [mapping, i, &graph_engine, &result](plugin_block& block) {
+    graph_engine.process(mapping.module_index, i, [mapping, i, &graph_engine, &audio](plugin_block& block) {
       osc_engine engine;
       engine.initialize();
       engine.process(block, jarray<float, 1>(block.end_frame, 1.0f), make_static_cv_matrix_mixdown(block));
       if(mapping.module_slot == i)
-        result.series_data = graph_engine.last_block()->state.own_audio[0][0][0].data();
+        audio = jarray<float, 2>(graph_engine.last_block()->state.own_audio[0][0]);
     });
-  
-  result.series_data.push_back(0.0f);
-  return result;
+    
+  audio[0].push_back(0.0f);
+  audio[1].push_back(0.0f);
+  return graph_data(audio);
 }
 
 module_topo

@@ -24,11 +24,9 @@ public:
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  graph_data result = {};
-  result.series = false;
-  result.bipolar = mapping.param_index == param_bal;
-  result.scalar_data = state.get_plain_at(mapping).real();
-  return result;
+  bool bipolar = mapping.param_index == param_bal;
+  float value = state.get_plain_at(mapping).real();
+  return graph_data(value, bipolar);
 }
 
 module_topo
