@@ -40,22 +40,25 @@ public any_state_listener
 {
   bool _done = false;
   plugin_gui* const _gui;
-  int _tweaked_param = -1;
   bool _render_dirty = true;
+  module_graph_params const _params;
+  int _hovered_or_tweaked_param = -1;
 
   void render_if_dirty();
+  void request_rerender(int param);
 
 public:
   ~module_graph();
-  module_graph(plugin_gui* gui, lnf* lnf, int fps = 10);
-
-  void param_mouse_enter(int module) override;
-  void module_mouse_exit(int module) override;
-  void module_mouse_enter(int module) override;
+  module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params);
 
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
-  void any_state_changed(int param, plain_value plain) override;
+  void param_mouse_enter(int param) override;
+  void module_mouse_exit(int module) override;
+  void module_mouse_enter(int module) override;
+
+  void module_mouse_exit(int module) override { render(graph_data()); }
+  void any_state_changed(int param, plain_value plain) override { request_rerender(param); }
 };
 
 }

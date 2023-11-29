@@ -30,8 +30,8 @@ make_section_colors(Colour const& c)
 
 enum {
   custom_section_title,
-  custom_section_audio_graph,
-  custom_section_module_graph,
+  custom_section_tweak_graph,
+  custom_section_hover_graph,
   custom_section_controls,
   custom_section_count };
 
@@ -42,15 +42,21 @@ enum {
   module_section_voice, module_section_monitor_master, module_section_count };
 
 static Component&
-make_audio_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
+make_tweak_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
+  module_graph_params params;
+  params.fps = 10;
+  params.render_on_tweak = true;
   return store_component<Label>(store);
 }
 
 static Component&
-make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
+make_hover_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  return store_component<module_graph>(store, gui, lnf);
+  module_graph_params params;
+  params.fps = 10;
+  params.render_on_hover = true;
+  return store_component<module_graph>(store, gui, lnf, params);
 }
 
 static Component&
@@ -134,10 +140,10 @@ synth_topo()
     custom_section_title, { 0, 0, 1, 1 }, other_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
     custom_section_controls, { 0, 3, 1, 2 }, other_colors, make_controls_section);
-  result->gui.custom_sections[custom_section_audio_graph] = make_custom_section_gui(
-    custom_section_audio_graph, { 0, 1, 1, 1 }, other_colors, make_audio_graph_section);
-  result->gui.custom_sections[custom_section_module_graph] = make_custom_section_gui(
-    custom_section_module_graph, { 0, 2, 1, 1 }, other_colors, make_module_graph_section);
+  result->gui.custom_sections[custom_section_tweak_graph] = make_custom_section_gui(
+    custom_section_tweak_graph, { 0, 1, 1, 1 }, other_colors, make_tweak_graph_section);
+  result->gui.custom_sections[custom_section_hover_graph] = make_custom_section_gui(
+    custom_section_hover_graph, { 0, 2, 1, 1 }, other_colors, make_hover_graph_section);
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_midi] = make_module_section_gui_none(

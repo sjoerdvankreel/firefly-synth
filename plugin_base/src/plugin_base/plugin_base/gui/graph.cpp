@@ -10,18 +10,24 @@ module_graph::
 ~module_graph() 
 { 
   _done = true;
-  _gui->gui_state()->remove_any_listener(this);
-  _gui->remove_gui_listener(this);
   stopTimer();
+  if(_params.render_on_tweak)
+    _gui->gui_state()->remove_any_listener(this);
+  if(_params.render_on_hover)
+    _gui->remove_gui_listener(this);
 }
 
 module_graph::
-module_graph(plugin_gui* gui, lnf* lnf, int fps):
-graph(lnf), _gui(gui)
+module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params):
+graph(lnf), _gui(gui), _params(params)
 { 
-  startTimerHz(fps);
-  gui->add_gui_listener(this);
-  gui->gui_state()->add_any_listener(this);
+  assert(params.fps > 0);
+  assert(params.render_on_tweak || params.render_on_hover);
+  if(_params.render_on_hover)
+    gui->add_gui_listener(this);
+  if(_params.render_on_tweak)
+    gui->gui_state()->add_any_listener(this);
+  startTimerHz(params.fps);
 }
 
 void
@@ -40,19 +46,13 @@ module_graph::timerCallback()
 }
 
 void
-module_graph::module_mouse_exit(int module)
-{
-  render(graph_data());
-}
-
-void
 module_graph::module_mouse_enter(int module)
 {
   // trigger re-render based on first new module param
   auto const& params = _gui->gui_state()->desc().modules[module].params;
   if(params.size() == 0) return;
   if (!_gui->gui_state()->desc().modules[module].module->rerender_on_param_hover)
-    any_state_changed(params[0].info.global, {});
+    request_rerender(params[0].info.global);
 }
 
 void
@@ -61,29 +61,33 @@ module_graph::param_mouse_enter(int param)
   // trigger re-render based on specific param
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
   if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].rerender_on_param_hover)
-    any_state_changed(param, {});
+    request_rerender(param);
+}
+
+void
+module_graph::request_rerender(int param)
+{
+  auto const& desc = _gui->gui_state()->desc();
+  auto const& mapping = desc.param_mappings.params[param];
+  int m = mapping.topo.module_index;
+  int p = mapping.topo.param_index;
+  if (desc.plugin->modules[m].params[p].dsp.direction == param_direction::output) return;
+  _render_dirty = true;
+  _hovered_or_tweaked_param = param;
 }
 
 void
 module_graph::render_if_dirty()
 {
   if (!_render_dirty) return;
-  if (_tweaked_param == -1) return;
+  if (_hovered_or_tweaked_param == -1) return;
 
-  param_topo_mapping mapping = mapping = _gui->gui_state()->desc().param_mappings.params[_tweaked_param].topo;
+  auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
+  param_topo_mapping mapping = mapping = mappings[_hovered_or_tweaked_param].topo;
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(*_gui->gui_state(), mapping));
   _render_dirty = false;
-}
-
-void 
-module_graph::any_state_changed(int param, plain_value plain)
-{
-  auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
-  if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].params[mapping.topo.param_index].dsp.direction == param_direction::output) return;
-  _tweaked_param = param;
-  _render_dirty = true;
 }
 
 void 
