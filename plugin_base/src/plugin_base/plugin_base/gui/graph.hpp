@@ -16,6 +16,9 @@ public juce::Component
 {
   lnf* const _lnf;
   graph_data _data = {};
+  static inline int const vertical_pad = 2;
+  
+  void paint_series(juce::Graphics& g, jarray<float, 1> const& series);
 
 public:
   graph(lnf* lnf): _lnf(lnf) {}

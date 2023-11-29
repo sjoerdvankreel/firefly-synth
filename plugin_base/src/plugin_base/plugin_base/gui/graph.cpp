@@ -106,14 +106,33 @@ graph::render(graph_data const& data)
   repaint();
 }
 
+void 
+graph::paint_series(Graphics& g, jarray<float, 1> const& series)
+{
+  Path p;
+  float count = series.size();
+  float pad_h = getHeight() - 2 * vertical_pad;
+  auto foreground = _lnf->colors().graph_foreground;
+
+  p.startNewSubPath(0, vertical_pad + (1 - series[0]) * pad_h);
+  for (int i = 1; i < series.size(); i++)
+    p.lineTo(i / count * getWidth(), vertical_pad + (1 - series[i]) * pad_h);
+  Path pStroke(p);
+  p.closeSubPath();
+
+  g.setColour(foreground.withAlpha(0.5f));
+  g.fillPath(p);
+  g.setColour(foreground);
+  g.strokePath(pStroke, PathStrokeType(1));
+}
+
 void
 graph::paint(Graphics& g)
 {
   Path p;
-  float vpad = 1;
   float w = getWidth();
   float full_h = getHeight();
-  float pad_h = full_h - 2 * vpad;
+  float pad_h = full_h - 2 * vertical_pad;
   g.fillAll(_lnf->colors().graph_background);
 
   int grid_rows = 5;
@@ -177,20 +196,7 @@ graph::paint(Graphics& g)
   if(data.bipolar())
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
-  for (int i = 0; i < series.size(); i++)
-    series[i] = 1 - series[i];
-
-  float count = series.size();
-  p.startNewSubPath(0, vpad + series[0] * pad_h);
-  for (int i = 1; i < series.size(); i++)
-    p.lineTo(i / count * w, vpad + series[i] * pad_h);
-  Path pStroke(p);
-  p.closeSubPath();
-
-  g.setColour(foreground.withAlpha(0.5f));
-  g.fillPath(p);
-  g.setColour(foreground);
-  g.strokePath(pStroke, PathStrokeType(1));
+  paint_series(g, series);
 }
 
 }
