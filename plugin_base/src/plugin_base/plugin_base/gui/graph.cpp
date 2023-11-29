@@ -107,19 +107,20 @@ graph::render(graph_data const& data)
 }
 
 void 
-graph::paint_series(Graphics& g, jarray<float, 1> const& series, int voffset)
+graph::paint_series(Graphics& g, jarray<float, 1> const& series)
 {
   Path p;
+  float w = getWidth();
+  float h = getHeight();
   float count = series.size();
-  float pad_h = getHeight() - 2 * vertical_pad;
 
   auto foreground = _lnf->colors().graph_foreground;
   if(_data.type() == graph_data_type::empty)
     foreground = color_to_grayscale(foreground);
 
-  p.startNewSubPath(0, vertical_pad + voffset + (1 - series[0]) * pad_h);
+  p.startNewSubPath(0, (1 - series[0]) * h);
   for (int i = 1; i < series.size(); i++)
-    p.lineTo(i / count * getWidth(), voffset + vertical_pad + (1 - series[i]) * pad_h);
+    p.lineTo(i / count * w, (1 - series[i]) * h);
   Path pStroke(p);
   p.closeSubPath();
 
@@ -134,8 +135,7 @@ graph::paint(Graphics& g)
 {
   Path p;
   float w = getWidth();
-  float full_h = getHeight();
-  float pad_h = full_h - 2 * vertical_pad;
+  float h = getHeight();
   g.fillAll(_lnf->colors().graph_background);
 
   int grid_rows = 5;
@@ -148,9 +148,9 @@ graph::paint(Graphics& g)
 
   g.setColour(_lnf->colors().graph_grid.withAlpha(0.25f));
   for(int i = 1; i <= grid_rows; i++)
-    g.fillRect(0.0f, i / (float)(grid_rows + 1) * full_h, w, 1.0f);
+    g.fillRect(0.0f, i / (float)(grid_rows + 1) * h, w, 1.0f);
   for (int i = 1; i <= grid_cols; i++)
-    g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, full_h);
+    g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, h);
 
   auto foreground = _lnf->colors().graph_foreground;
   if (_data.type() == graph_data_type::scalar)
@@ -161,19 +161,19 @@ graph::paint(Graphics& g)
       scalar = 1.0f - bipolar_to_unipolar(scalar);
       g.setColour(foreground.withAlpha(0.5f));
       if (scalar <= 0.5f)
-        g.fillRect(0.0f, scalar * full_h, w, (0.5f - scalar) * pad_h);
+        g.fillRect(0.0f, scalar * h, w, (0.5f - scalar) * h);
       else
-        g.fillRect(0.0f, 0.5f * full_h, w, (scalar - 0.5f) * pad_h);
+        g.fillRect(0.0f, 0.5f * h, w, (scalar - 0.5f) * h);
       g.setColour(foreground);
-      g.fillRect(0.0f, scalar * pad_h, w, 1.0f);
+      g.fillRect(0.0f, scalar * h, w, 1.0f);
     }
     else
     {
       scalar = 1.0f - scalar;
       g.setColour(foreground.withAlpha(0.5f));
-      g.fillRect(0.0f, scalar * full_h, w, (1 - scalar) * pad_h);
+      g.fillRect(0.0f, scalar * h, w, (1 - scalar) * h);
       g.setColour(foreground);
-      g.fillRect(0.0f, scalar * pad_h, w, 1.0f);
+      g.fillRect(0.0f, scalar * h, w, 1.0f);
     }
     return;
   }
@@ -184,8 +184,8 @@ graph::paint(Graphics& g)
     for(int c = 0; c < 2; c++)
       for (int i = 0; i < audio[c].size(); i++)
         audio[c][i] = ((1 - c) + bipolar_to_unipolar(audio[c][i])) * 0.5f;
-    paint_series(g, audio[0], 0);
-    paint_series(g, audio[1], 1);
+    paint_series(g, audio[0]);
+    paint_series(g, audio[1]);
     return;
   }
 
@@ -209,7 +209,7 @@ graph::paint(Graphics& g)
   if(data.bipolar())
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
-  paint_series(g, series, 0);
+  paint_series(g, series);
 }
 
 }
