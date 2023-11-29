@@ -13,7 +13,7 @@ graph_engine::
 graph_engine(plugin_state const* state, graph_engine_params const& params):
 _engine(&state->desc(), nullptr, nullptr), _state(state), _params(params)
 { 
-  _engine.activate(_params.activate_modules, _params.sample_rate, _params.frame_count);
+  _engine.activate(false, _params.sample_rate, _params.frame_count);
   _engine.init_static(state, params.frame_count);
   _audio_in.resize(jarray<int, 1>(2, params.frame_count));
   _audio_out.resize(jarray<int, 1>(2, params.frame_count));
@@ -29,18 +29,9 @@ _engine(&state->desc(), nullptr, nullptr), _state(state), _params(params)
   _host_block->shared.audio_in = _audio_in_ptrs;
 }
 
-jarray<float, 2> const&
-graph_engine::process()
-{
-  assert(_params.activate_modules);
-  _engine.process();
-  return _audio_out;
-}
-
 plugin_block const*
-graph_engine::process_module(int module_index, int module_slot, graph_processor processor)
+graph_engine::process(int module_index, int module_slot, graph_processor processor)
 {
-  assert(!_params.activate_modules);
   int voice = _state->desc().plugin->modules[module_index].dsp.stage == module_stage::voice ? 0 : -1;
   _last_block = std::make_unique<plugin_block>(
     _engine.make_plugin_block(voice, module_index, module_slot, 0, _params.frame_count));

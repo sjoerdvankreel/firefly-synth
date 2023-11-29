@@ -24,25 +24,6 @@ public:
   void paint(juce::Graphics& g) override;
 };
 
-// full audio engine graph
-class audio_graph:
-public graph,
-public juce::Timer
-{
-  int const _midi_key;
-  float const _duration;
-  int const _sample_rate;
-  plugin_state const* const _state;
-
-public:
-  void paint(juce::Graphics& g) override;
-  void timerCallback() override { repaint(); }
-  
-  ~audio_graph() { stopTimer(); }
-  audio_graph(plugin_state const* state, lnf* lnf, int sample_rate, int midi_key, float duration, int fps = 1):
-  graph(lnf), _midi_key(midi_key), _duration(duration), _sample_rate(sample_rate), _state(state) { startTimerHz(fps); }
-};
-
 // taps into module_topo.graph_renderer
 // set both slot and index to -1 to respond to last tweaked parameter
 class module_graph:

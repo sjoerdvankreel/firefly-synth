@@ -1,15 +1,10 @@
 #include <plugin_base/gui/graph.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 using namespace juce;
 
 namespace plugin_base {
-
-void 
-audio_graph::paint(Graphics& g)
-{
-
-}
 
 module_graph::
 ~module_graph() 

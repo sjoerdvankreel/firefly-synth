@@ -71,7 +71,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   plugin_block const* block = nullptr;
   graph_engine graph_engine(&state, params);
   for(int i = 0; i <= mapping.module_slot; i++)
-    block = graph_engine.process_module(mapping.module_index, i, [mapping, i, &graph_engine](plugin_block& block) {
+    block = graph_engine.process(mapping.module_index, i, [mapping, i, &graph_engine](plugin_block& block) {
       osc_engine engine;
       engine.initialize();
       jarray<float, 1> env_curve(block.end_frame, 1.0f);

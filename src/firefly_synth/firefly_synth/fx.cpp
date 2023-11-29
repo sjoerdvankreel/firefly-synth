@@ -106,7 +106,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   }
 
   graph_engine graph_engine(&state, params);
-  auto const* block = graph_engine.process_module(
+  auto const* block = graph_engine.process(
     mapping.module_index, mapping.module_slot, [mapping, params, &audio_in](plugin_block& block) {
     fx_engine engine(mapping.module_index == module_gfx, params.sample_rate);
     engine.initialize();

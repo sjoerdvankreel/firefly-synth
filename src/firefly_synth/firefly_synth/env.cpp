@@ -54,7 +54,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.voice_release_at = ads / adsr * params.frame_count;
 
   graph_engine engine(&state, params);
-  auto const* block = engine.process_module(module_env, mapping.module_slot, [](plugin_block& block) {
+  auto const* block = engine.process(module_env, mapping.module_slot, [](plugin_block& block) {
     env_engine engine;
     engine.initialize();
     engine.process(block);

@@ -18,7 +18,6 @@ struct graph_engine_params
   int frame_count;
   int midi_key = -1;
   int voice_release_at = -1;
-  bool activate_modules = false;
 };
 
 // utility dsp engine based on static state only
@@ -38,11 +37,7 @@ class graph_engine {
 public:
   ~graph_engine();
   graph_engine(plugin_state const* state, graph_engine_params const& params);
-
-  // run entire plugin and get global audio output
-  jarray<float, 2> const& process();
-  // run module and get modules audio/cv state
-  plugin_block const* process_module(int module_index, int module_slot, graph_processor processor);
+  plugin_block const* process(int module_index, int module_slot, graph_processor processor);
 };
 
 }

@@ -58,7 +58,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.sample_rate = params.frame_count;
 
   graph_engine engine(&state, params);
-  auto const* block = engine.process_module(mapping.module_index, mapping.module_slot, [mapping](plugin_block& block) {
+  auto const* block = engine.process(mapping.module_index, mapping.module_slot, [mapping](plugin_block& block) {
     lfo_engine engine(mapping.module_index == module_glfo);
     engine.initialize();
     engine.process(block);
