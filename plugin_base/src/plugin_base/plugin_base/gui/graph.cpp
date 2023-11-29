@@ -107,7 +107,7 @@ graph::render(graph_data const& data)
 }
 
 void 
-graph::paint_series(Graphics& g, jarray<float, 1> const& series)
+graph::paint_series(Graphics& g, jarray<float, 1> const& series, int voffset)
 {
   Path p;
   float count = series.size();
@@ -117,9 +117,9 @@ graph::paint_series(Graphics& g, jarray<float, 1> const& series)
   if(_data.type() == graph_data_type::empty)
     foreground = color_to_grayscale(foreground);
 
-  p.startNewSubPath(0, vertical_pad + (1 - series[0]) * pad_h);
+  p.startNewSubPath(0, vertical_pad + voffset + (1 - series[0]) * pad_h);
   for (int i = 1; i < series.size(); i++)
-    p.lineTo(i / count * getWidth(), vertical_pad + (1 - series[i]) * pad_h);
+    p.lineTo(i / count * getWidth(), voffset + vertical_pad + (1 - series[i]) * pad_h);
   Path pStroke(p);
   p.closeSubPath();
 
@@ -140,6 +140,12 @@ graph::paint(Graphics& g)
 
   int grid_rows = 5;
   int grid_cols = 13;
+  if (_data.type() == graph_data_type::audio)
+  {
+    grid_rows = 7;
+    grid_cols = 17;
+  }
+
   g.setColour(_lnf->colors().graph_grid.withAlpha(0.25f));
   for(int i = 1; i <= grid_rows; i++)
     g.fillRect(0.0f, i / (float)(grid_rows + 1) * full_h, w, 1.0f);
@@ -177,9 +183,9 @@ graph::paint(Graphics& g)
     jarray<float, 2> audio(_data.audio());
     for(int c = 0; c < 2; c++)
       for (int i = 0; i < audio[c].size(); i++)
-        audio[c][i] = (c + bipolar_to_unipolar(audio[c][i])) * 0.5f;
-    paint_series(g, audio[0]);
-    paint_series(g, audio[1]);
+        audio[c][i] = ((1 - c) + bipolar_to_unipolar(audio[c][i])) * 0.5f;
+    paint_series(g, audio[0], 0);
+    paint_series(g, audio[1], 1);
     return;
   }
 
@@ -203,7 +209,7 @@ graph::paint(Graphics& g)
   if(data.bipolar())
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
-  paint_series(g, series);
+  paint_series(g, series, 0);
 }
 
 }
