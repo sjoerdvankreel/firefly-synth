@@ -174,6 +174,12 @@ graph::paint(Graphics& g)
 
   if (_data.type() == graph_data_type::audio)
   {
+    jarray<float, 2> audio(_data.audio());
+    for(int c = 0; c < 2; c++)
+      for (int i = 0; i < audio[c].size(); i++)
+        audio[c][i] = (c + bipolar_to_unipolar(audio[c][i])) * 0.5f;
+    paint_series(g, audio[0]);
+    paint_series(g, audio[1]);
     return;
   }
 
