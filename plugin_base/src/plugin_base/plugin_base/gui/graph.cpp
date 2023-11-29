@@ -118,9 +118,9 @@ graph::paint_series(Graphics& g, jarray<float, 1> const& series)
   if(_data.type() == graph_data_type::empty)
     foreground = color_to_grayscale(foreground);
 
-  p.startNewSubPath(0, (1 - series[0]) * h);
+  p.startNewSubPath(0, (1 - std::clamp(series[0], 0.0f, 1.0f)) * h);
   for (int i = 1; i < series.size(); i++)
-    p.lineTo(i / count * w, (1 - series[i]) * h);
+    p.lineTo(i / count * w, (1 - std::clamp(series[i], 0.0f, 1.0f)) * h);
   Path pStroke(p);
   p.closeSubPath();
 
@@ -183,7 +183,7 @@ graph::paint(Graphics& g)
     jarray<float, 2> audio(_data.audio());
     for(int c = 0; c < 2; c++)
       for (int i = 0; i < audio[c].size(); i++)
-        audio[c][i] = ((1 - c) + bipolar_to_unipolar(audio[c][i])) * 0.5f;
+        audio[c][i] = ((1 - c) + std::clamp(bipolar_to_unipolar(audio[c][i]), 0.0f, 1.0f)) * 0.5f;
     paint_series(g, audio[0]);
     paint_series(g, audio[1]);
     return;
