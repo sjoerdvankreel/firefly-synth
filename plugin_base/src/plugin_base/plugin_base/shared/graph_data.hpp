@@ -8,12 +8,14 @@ namespace plugin_base {
 enum class graph_data_type { empty, scalar, series, audio };
 
 class graph_data {
-  graph_data_type const _type;
-  bool const _bipolar = false;
+  bool _bipolar = false;
+  graph_data_type _type = {};
   
-  float const _scalar = {};
-  jarray<float, 2> const _audio = {};
-  jarray<float, 1> const _series = {};
+  float _scalar = {};
+  jarray<float, 2> _audio = {};
+  jarray<float, 1> _series = {};
+
+  void init(graph_data const& rhs);
 
 public:
   bool bipolar() const { return _bipolar; }
@@ -26,13 +28,16 @@ public:
   jarray<float, 1> const& series() const 
   { assert(_type == graph_data_type::series); return _series; }
 
+  graph_data(graph_data const& rhs) { init(rhs); }
+  graph_data& operator=(graph_data const& rhs) { init(rhs); return *this; }
+
   graph_data(): _type(graph_data_type::empty) {}
-  explicit graph_data(jarray<float, 2> const& audio) : 
-  _type(graph_data_type::audio), _bipolar(true), _audio(audio) {}
+  explicit graph_data(jarray<float, 2> const& audio) :
+  _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
   graph_data(float scalar, bool bipolar): 
-  _type(graph_data_type::scalar), _bipolar(bipolar), _scalar(scalar) {}
+  _bipolar(bipolar), _type(graph_data_type::scalar), _scalar(scalar) {}
   graph_data(jarray<float, 1> const& series, bool bipolar) : 
-  _type(graph_data_type::series), _bipolar(bipolar), _series(series) {}
+  _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
 };
 
 }

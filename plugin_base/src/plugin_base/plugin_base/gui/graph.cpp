@@ -43,7 +43,7 @@ void
 module_graph::mouse_exit()
 {
   if (!_any_module) return;
-  render(graph_data::empty());
+  render(graph_data());
 }
 
 void
@@ -103,20 +103,6 @@ void
 graph::render(graph_data const& data)
 {
   _data = data;
-  if (!data.series)
-  {
-    if(data.bipolar)
-      _data.scalar_data = bipolar_to_unipolar(data.scalar_data);
-    _data.scalar_data = 1 - _data.scalar_data;
-  }
-  else
-  {
-    if(data.bipolar)
-      for (int i = 0; i < _data.series_data.size(); i++)
-        _data.series_data[i] = bipolar_to_unipolar(_data.series_data[i]);
-    for (int i = 0; i < _data.series_data.size(); i++)
-      _data.series_data[i] = 1 - _data.series_data[i];
-  }
   repaint();
 }
 
@@ -139,7 +125,43 @@ graph::paint(Graphics& g)
     g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, full_h);
 
   auto foreground = _lnf->colors().graph_foreground;
-  if(!_data.enabled) foreground = color_to_grayscale(foreground);
+  if (_data.type() == graph_data_type::scalar)
+  {
+    float scalar = _data.scalar();
+    if (_data.bipolar())
+    {
+      scalar = 1.0f - bipolar_to_unipolar(scalar);
+      g.setColour(foreground.withAlpha(0.5f));
+      if (scalar <= 0.5f)
+        g.fillRect(0.0f, scalar * full_h, w, (0.5f - scalar) * pad_h);
+      else
+        g.fillRect(0.0f, 0.5f * full_h, w, (scalar - 0.5f) * pad_h);
+      g.setColour(foreground);
+      g.fillRect(0.0f, scalar * pad_h, w, 1.0f);
+    }
+    else
+    {
+      scalar = 1.0f - scalar;
+      g.setColour(foreground.withAlpha(0.5f));
+      g.fillRect(0.0f, scalar * full_h, w, (1 - scalar) * pad_h);
+      g.setColour(foreground);
+      g.fillRect(0.0f, scalar * pad_h, w, 1.0f);
+    }
+  }
+
+  /*
+  if (_data.type() == graph_data_type::empty)
+  {
+    jarray<float, 1> result;
+    for (int i = 0; i < 33; i++)
+      result.push_back(0);
+    for (int i = 0; i < 34; i++)
+      result.push_back(std::sin((float)i / 33 * 2.0f * pi32));
+    for (int i = 0; i < 33; i++)
+      result.push_back(0);
+  }
+
+  if(_data.type) foreground = color_to_grayscale(foreground);
 
   if (!_data.series)
   {
@@ -181,6 +203,7 @@ graph::paint(Graphics& g)
   g.fillPath(p);
   g.setColour(foreground);
   g.strokePath(pStroke, PathStrokeType(1));
+  */
 }
 
 }

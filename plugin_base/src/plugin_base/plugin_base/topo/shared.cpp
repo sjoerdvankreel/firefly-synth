@@ -9,22 +9,6 @@
 
 namespace plugin_base {
 
-graph_data 
-graph_data::empty()
-{
-  graph_data result = {};
-  result.series = true;
-  result.bipolar = true;
-  result.enabled = false;
-  for(int i = 0; i < 33; i++)
-    result.series_data.push_back(0);
-  for(int i = 0; i < 34; i++)
-    result.series_data.push_back(std::sin((float)i / 33 * 2.0f * pi32));
-  for (int i = 0; i < 33; i++)
-    result.series_data.push_back(0);
-  return result;
-}
-
 void
 topo_tag::validate() const
 {
