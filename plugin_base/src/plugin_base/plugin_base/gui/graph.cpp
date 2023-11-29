@@ -147,63 +147,50 @@ graph::paint(Graphics& g)
       g.setColour(foreground);
       g.fillRect(0.0f, scalar * pad_h, w, 1.0f);
     }
+    return;
   }
 
-  /*
-  if (_data.type() == graph_data_type::empty)
+  if (_data.type() == graph_data_type::audio)
   {
-    jarray<float, 1> result;
+    return;
+  }
+
+  graph_data data;
+  if(_data.type() == graph_data_type::series)
+    data = _data;
+  else
+  {
+    assert(_data.type() == graph_data_type::empty);
+    foreground = color_to_grayscale(foreground);
+
+    jarray<float, 1> empty;
     for (int i = 0; i < 33; i++)
-      result.push_back(0);
+      empty.push_back(0);
     for (int i = 0; i < 34; i++)
-      result.push_back(std::sin((float)i / 33 * 2.0f * pi32));
+      empty.push_back(std::sin((float)i / 33 * 2.0f * pi32));
     for (int i = 0; i < 33; i++)
-      result.push_back(0);
+      empty.push_back(0);
+    data = graph_data(empty, true);
   }
 
-  if(_data.type) foreground = color_to_grayscale(foreground);
+  jarray<float, 1> series(data.series());
+  if(data.bipolar())
+    for(int i = 0; i < series.size(); i++)
+      series[i] = bipolar_to_unipolar(series[i]);
+  for (int i = 0; i < series.size(); i++)
+    series[i] = 1 - series[i];
 
-  if (!_data.series)
-  {
-    if (_data.bipolar)
-    {
-      g.setColour(foreground.withAlpha(0.5f));
-      if (_data.scalar_data <= 0.5f)
-        g.fillRect(0.0f, _data.scalar_data * full_h, w, (0.5f - _data.scalar_data) * pad_h);
-      else
-        g.fillRect(0.0f, 0.5f * full_h, w, (_data.scalar_data - 0.5f) * pad_h);
-      g.setColour(foreground);
-      g.fillRect(0.0f, _data.scalar_data * pad_h, w, 1.0f);
-    }
-    else 
-    {
-      g.setColour(foreground.withAlpha(0.5f));
-      g.fillRect(0.0f, _data.scalar_data * full_h, w, (1 - _data.scalar_data) * pad_h);
-      g.setColour(foreground);
-      g.fillRect(0.0f, _data.scalar_data * pad_h, w, 1.0f);
-    }
-    return;
-  }
-
-  if (_data.series && _data.series_data.size() == 0)
-  {
-    g.setColour(foreground);
-    g.fillRect(0.0f, full_h / 2.0f, w, 1.0f);
-    return;
-  }
-
-  float count = _data.series_data.size();
-  p.startNewSubPath(0, vpad + _data.series_data[0] * pad_h);
-  for(int i = 1; i < _data.series_data.size(); i++)
-    p.lineTo(i / count * w, vpad + _data.series_data[i] * pad_h);
+  float count = series.size();
+  p.startNewSubPath(0, vpad + series[0] * pad_h);
+  for (int i = 1; i < series.size(); i++)
+    p.lineTo(i / count * w, vpad + series[i] * pad_h);
   Path pStroke(p);
   p.closeSubPath();
-  
+
   g.setColour(foreground.withAlpha(0.5f));
   g.fillPath(p);
   g.setColour(foreground);
   g.strokePath(pStroke, PathStrokeType(1));
-  */
 }
 
 }
