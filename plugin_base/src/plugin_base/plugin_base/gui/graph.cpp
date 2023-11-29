@@ -16,10 +16,9 @@ module_graph::
 }
 
 module_graph::
-module_graph(plugin_gui* gui, lnf* lnf, int module_index, int module_slot, int fps):
-graph(lnf), _gui(gui), _any_module(module_index == -1), _module_slot(module_slot), _module_index(module_index)
+module_graph(plugin_gui* gui, lnf* lnf, int fps):
+graph(lnf), _gui(gui)
 { 
-  assert((module_index == -1 && module_slot == -1) || (module_index >= 0 && module_slot >= 0));
   startTimerHz(fps);
   gui->add_gui_listener(this);
   gui->gui_state()->add_any_listener(this);
@@ -43,15 +42,12 @@ module_graph::timerCallback()
 void
 module_graph::module_mouse_exit(int module)
 {
-  if (!_any_module) return;
   render(graph_data());
 }
 
 void
 module_graph::module_mouse_enter(int module)
 {
-  if (!_any_module) return;
-
   // trigger re-render based on first new module param
   auto const& params = _gui->gui_state()->desc().modules[module].params;
   if(params.size() == 0) return;
@@ -72,18 +68,9 @@ void
 module_graph::render_if_dirty()
 {
   if (!_render_dirty) return;
+  if (_tweaked_param == -1) return;
 
-  param_topo_mapping mapping;
-  mapping.param_slot = 0;
-  mapping.param_index = 0;
-  mapping.module_slot = _module_slot;
-  mapping.module_index = _module_index;
-  if (_any_module)
-  {
-    if(_tweaked_param == -1) return;
-    mapping = _gui->gui_state()->desc().param_mappings.params[_tweaked_param].topo;
-  }
-
+  param_topo_mapping mapping = mapping = _gui->gui_state()->desc().param_mappings.params[_tweaked_param].topo;
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(*_gui->gui_state(), mapping));
@@ -95,7 +82,6 @@ module_graph::any_state_changed(int param, plain_value plain)
 {
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
   if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].params[mapping.topo.param_index].dsp.direction == param_direction::output) return;
-  if(!_any_module && (mapping.topo.module_index != _module_index || mapping.topo.module_slot != _module_slot)) return;
   _tweaked_param = param;
   _render_dirty = true;
 }

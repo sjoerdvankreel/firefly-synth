@@ -50,7 +50,7 @@ make_audio_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 static Component&
 make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  return store_component<module_graph>(store, gui, lnf, -1, -1);
+  return store_component<module_graph>(store, gui, lnf);
 }
 
 static Component&
