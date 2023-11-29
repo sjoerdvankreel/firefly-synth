@@ -99,7 +99,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   else 
   {
     params.sample_rate = 48000;
-    params.frame_count = 48000 / 200;
+    params.frame_count = 48000 / 10;
     audio_in.resize(jarray<int, 1>(2, params.frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
