@@ -112,7 +112,10 @@ graph::paint_series(Graphics& g, jarray<float, 1> const& series)
   Path p;
   float count = series.size();
   float pad_h = getHeight() - 2 * vertical_pad;
+
   auto foreground = _lnf->colors().graph_foreground;
+  if(_data.type() == graph_data_type::empty)
+    foreground = color_to_grayscale(foreground);
 
   p.startNewSubPath(0, vertical_pad + (1 - series[0]) * pad_h);
   for (int i = 1; i < series.size(); i++)
@@ -180,8 +183,6 @@ graph::paint(Graphics& g)
   else
   {
     assert(_data.type() == graph_data_type::empty);
-    foreground = color_to_grayscale(foreground);
-
     jarray<float, 1> empty;
     for (int i = 0; i < 33; i++)
       empty.push_back(0);
