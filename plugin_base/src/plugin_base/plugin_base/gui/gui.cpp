@@ -59,19 +59,25 @@ justification_type(gui_label const& label)
 void
 gui_hover_listener::mouseExit(MouseEvent const&)
 {
-  if(_is_module)
-    _gui->module_mouse_exit(_global_index);
-  else
-    _gui->param_mouse_exit(_global_index);
+  switch (_type)
+  {
+  case gui_hover_type::param: _gui->param_mouse_exit(_global_index); break;
+  case gui_hover_type::module: _gui->module_mouse_exit(_global_index); break;
+  case gui_hover_type::custom: _gui->custom_mouse_exit(_global_index); break;
+  default: assert(false); break;
+  }
 }
 
 void
 gui_hover_listener::mouseEnter(MouseEvent const&)
 {
-  if(_is_module)
-    _gui->module_mouse_enter(_global_index);
-  else
-    _gui->param_mouse_enter(_global_index);
+  switch (_type)
+  {
+  case gui_hover_type::param: _gui->param_mouse_enter(_global_index); break;
+  case gui_hover_type::module: _gui->module_mouse_enter(_global_index); break;
+  case gui_hover_type::custom: _gui->custom_mouse_enter(_global_index); break;
+  default: assert(false); break;
+  }
 }
 
 void
@@ -185,6 +191,21 @@ plugin_gui::param_mouse_enter(int param)
 }
 
 void
+plugin_gui::custom_mouse_exit(int section)
+{
+  for (int i = 0; i < _gui_listeners.size(); i++)
+    _gui_listeners[i]->custom_mouse_exit(section);
+}
+
+void
+plugin_gui::custom_mouse_enter(int section)
+{
+  _tooltip.setLookAndFeel(_custom_lnfs[section].get());
+  for (int i = 0; i < _gui_listeners.size(); i++)
+    _gui_listeners[i]->custom_mouse_enter(section);
+}
+
+void
 plugin_gui::module_mouse_exit(int module)
 {
   for (int i = 0; i < _gui_listeners.size(); i++)
@@ -194,14 +215,16 @@ plugin_gui::module_mouse_exit(int module)
 void
 plugin_gui::module_mouse_enter(int module)
 {
+  int index = gui_state()->desc().modules[module].module->info.index;
+  _tooltip.setLookAndFeel(_module_lnfs[index].get());
   for(int i = 0; i < _gui_listeners.size(); i++)
     _gui_listeners[i]->module_mouse_enter(module);
 }
 
 void
-plugin_gui::add_hover_listener(Component& component, bool is_module, int global_index)
+plugin_gui::add_hover_listener(Component& component, gui_hover_type type, int global_index)
 {
-  auto listener = std::make_unique<gui_hover_listener>(this, &component, is_module, global_index);
+  auto listener = std::make_unique<gui_hover_listener>(this, &component, type, global_index);
   _hover_listeners.push_back(std::move(listener));
 }
 
@@ -272,6 +295,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   auto& content_outline = make_component<rounded_container>(&content, radius, false, false, outline1, outline2);
   auto& result = make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
   result.setLookAndFeel(lnf);
+  add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
 }
 
@@ -298,7 +322,7 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
-  add_hover_listener(*tab_button, true, module);
+  add_hover_listener(*tab_button, gui_hover_type::module, module);
 }
 
 Component&
@@ -321,7 +345,7 @@ plugin_gui::make_param_sections(module_desc const& module)
   auto& result = make_component<grid_component>(topo.gui.dimension, margin_section);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
-  add_hover_listener(result, true, module.info.global);
+  add_hover_listener(result, gui_hover_type::module, module.info.global);
   return result;
 }
 
@@ -342,7 +366,7 @@ plugin_gui::make_single_param(module_desc const& module, param_desc const& param
     result = &make_param_editor(module, param);
   else
     result = &make_param_label_edit(module, param);
-  add_hover_listener(*result, false, param.info.global);
+  add_hover_listener(*result, gui_hover_type::param, param.info.global);
   return *result;
 }
 

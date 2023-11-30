@@ -32,22 +32,26 @@ public:
   virtual void param_mouse_enter(int param) {};
   virtual void module_mouse_exit(int module) {};
   virtual void module_mouse_enter(int module) {};
+  virtual void custom_mouse_exit(int section) {};
+  virtual void custom_mouse_enter(int section) {};
 };
+
+enum class gui_hover_type { param, module, custom };
 
 // triggers gui_listener
 class gui_hover_listener:
 public juce::MouseListener
 {
-  bool const _is_module;
   plugin_gui* const _gui;
   int const _global_index;
+  gui_hover_type const _type;
   juce::Component* const _component;
 public:
   void mouseExit(juce::MouseEvent const&) override;
   void mouseEnter(juce::MouseEvent const&) override;
   ~gui_hover_listener() { _component->removeMouseListener(this); }
-  gui_hover_listener(plugin_gui* gui, juce::Component* component, bool is_module, int global_index):
-  _is_module(is_module), _global_index(global_index), _gui(gui), _component(component) { _component->addMouseListener(this, true); }
+  gui_hover_listener(plugin_gui* gui, juce::Component* component, gui_hover_type type, int global_index):
+  _gui(gui), _global_index(global_index), _type(type), _component(component) { _component->addMouseListener(this, true); }
 };
 
 // tracking gui parameter changes
@@ -96,6 +100,8 @@ public:
   void param_mouse_enter(int param);
   void module_mouse_exit(int module);
   void module_mouse_enter(int module);
+  void custom_mouse_exit(int section);
+  void custom_mouse_enter(int section);
 
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state() const { return _extra_state; }
@@ -127,7 +133,7 @@ private:
   void fire_state_loaded();
   Component& make_content();
   void init_multi_tab_component(tab_component& tab, std::string const& id);
-  void add_hover_listener(juce::Component& component, bool is_module, int global_index);
+  void add_hover_listener(juce::Component& component, gui_hover_type type, int global_index);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
   { _extra_state->set_num(id + "/" + part, val); }
