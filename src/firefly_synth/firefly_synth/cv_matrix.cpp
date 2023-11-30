@@ -128,8 +128,11 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.voice_release_at = params.frame_count * 3 / 4;
 
   graph_engine graph_engine(&state, params);
-  auto const* block = graph_engine.process_default(module_glfo, 0);
-  return graph_data(block->state.own_cv[0][0], false);
+  std::vector<int> relevant_modules({ module_input, module_glfo, module_vlfo, module_env });
+  for(int m = 0; m < relevant_modules.size(); m++)
+    for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
+      graph_engine.process_default(m, mi);
+  return graph_data();
 }
 
 module_topo
