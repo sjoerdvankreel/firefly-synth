@@ -38,6 +38,7 @@ public:
   void getIdealPopupMenuItemSize(juce::String const&, bool, int, int& , int&) override;
 
   void drawLabel(juce::Graphics&, juce::Label& label) override;
+  void drawTooltip(juce::Graphics&, juce::String const&, int, int) override;
   void drawButtonText(juce::Graphics&, juce::TextButton&, bool, bool) override;
   void drawTabButton(juce::TabBarButton&, juce::Graphics&, bool, bool) override;
   void drawTextEditorOutline(juce::Graphics&, int, int, juce::TextEditor&) override;
