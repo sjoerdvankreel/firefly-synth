@@ -89,6 +89,8 @@ static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   auto const& m = mapping;
+  int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
+  if(on == 0) return graph_data();
   float value = state.get_plain_at(m.module_index, m.module_slot, param_gain, m.param_slot).real();
   return graph_data(value, false);
 }
