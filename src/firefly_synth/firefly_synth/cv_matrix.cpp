@@ -140,7 +140,10 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
       graph_engine.process_default(relevant_modules[m], mi);
   auto* block = graph_engine.process_default(map.module_index, map.module_slot);
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
-  return graph_data(*modulation[module_osc][0][1][0], false);
+  jarray<float, 1> stacked = jarray<float, 1>(*modulation[module_osc][0][1][0]);
+  stacked.push_back(0);
+  stacked.insert(stacked.begin(), 0);
+  return graph_data(stacked, false);
 }
 
 module_topo

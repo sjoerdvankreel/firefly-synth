@@ -63,6 +63,7 @@ public:
   void clear() { _data.clear(); }
   std::size_t size() const { return _data.size(); }
   void push_back(elem_type const& val) { _data.push_back(val); }
+  void insert(decltype(_data.begin()) where, elem_type const& val) { _data.insert(where, val); }
 
   template <class... U> decltype(auto) emplace_back(U&&... args) 
   { return _data.emplace_back(std::forward<U>(args)...); }
