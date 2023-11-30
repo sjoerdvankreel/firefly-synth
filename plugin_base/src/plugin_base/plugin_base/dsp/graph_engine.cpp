@@ -32,10 +32,18 @@ _engine(&state->desc(), nullptr, nullptr), _state(state), _params(params)
 plugin_block const*
 graph_engine::process_default(int module_index, int module_slot)
 {
-  auto factory = _state->desc().plugin->modules[module_index].engine_factory;
-  auto module_engine = factory(*_state->desc().plugin, _params.sample_rate, _params.frame_count);
-  module_engine->initialize();
-  return process(module_index, module_slot, [engine = module_engine.get()](auto& block) { engine->process(block); });
+  module_engine* engine = nullptr;
+  auto& slot_map = _activated[module_index];
+  if (slot_map.find(module_slot) == slot_map.end())
+  {
+    auto factory = _state->desc().plugin->modules[module_index].engine_factory;
+    auto module_engine = factory(*_state->desc().plugin, _params.sample_rate, _params.frame_count);
+    module_engine->initialize();
+    engine = module_engine.get();
+    slot_map[module_slot] = std::move(module_engine);
+  } else
+    engine = slot_map[module_slot].get();
+  return process(module_index, module_slot, [engine](auto& block) { engine->process(block); });
 }
 
 plugin_block const*

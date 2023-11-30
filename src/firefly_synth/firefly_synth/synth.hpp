@@ -46,7 +46,7 @@ get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
 }
 
 inline cv_matrix_mixdown const&
-get_cv_matrix_mixdown(plugin_base::plugin_block& block, bool global)
+get_cv_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
 {
   int module = global ? module_gcv_matrix : module_vcv_matrix;
   void* context = block.module_context(module, 0);

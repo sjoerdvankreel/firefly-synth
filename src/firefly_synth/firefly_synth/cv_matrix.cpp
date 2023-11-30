@@ -120,6 +120,10 @@ select_midi_active(
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
+  auto const& map = mapping;
+  int type = state.get_plain_at(map.module_index, map.module_slot, param_type, map.param_slot).step();
+  if(type == type_off) return graph_data();
+
   graph_engine_params params = {};
   params.bpm = 120;
   params.frame_count = 1000;
@@ -129,12 +133,14 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 
   graph_engine graph_engine(&state, params);
   std::vector<int> relevant_modules({ module_input, module_glfo });
-  if(mapping.module_index == module_vcv_matrix) 
+  if(map.module_index == module_vcv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
       graph_engine.process_default(relevant_modules[m], mi);
-  return graph_data();
+  auto* block = graph_engine.process_default(map.module_index, map.module_slot);
+  auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
+  return graph_data(*modulation[module_osc][0][1][0], false);
 }
 
 module_topo

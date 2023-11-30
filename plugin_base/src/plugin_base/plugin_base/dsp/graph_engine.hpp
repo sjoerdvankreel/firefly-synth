@@ -3,6 +3,7 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/topo/shared.hpp>
 
+#include <map>
 #include <functional>
 
 namespace plugin_base {
@@ -33,6 +34,7 @@ class graph_engine {
   float const* _audio_in_ptrs[2] = {};
   std::unique_ptr<plugin_block> _last_block = {};
   std::unique_ptr<plugin_voice_block> _last_voice_block = {};
+  std::map<int, std::map<int, std::unique_ptr<module_engine>>> _activated = {};
 
 public:
   ~graph_engine();
