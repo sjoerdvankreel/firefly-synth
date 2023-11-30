@@ -85,6 +85,14 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "Master");
 }
 
+static graph_data
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+{
+  auto const& m = mapping;
+  float value = state.get_plain_at(m.module_index, m.module_slot, param_gain, m.param_slot).real();
+  return graph_data(value, false);
+}
+
 module_topo 
 audio_matrix_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -144,6 +152,8 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
+  result.graph_renderer = render_graph;
+  result.rerender_on_param_hover = true;
   result.default_initializer = global? init_global_default: init_voice_default;
   result.minimal_initializer = global? init_global_minimal: init_voice_minimal;
   result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) ->
