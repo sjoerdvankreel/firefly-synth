@@ -2,6 +2,7 @@
 #include <plugin_base/gui/utility.hpp>
 #include <plugin_base/gui/controls.hpp>
 
+#include <juce_gui_basics/detail/juce_LookAndFeelHelpers.h>
 #include <cassert>
 #include <fstream>
 
@@ -166,6 +167,18 @@ lnf::drawBubble(Graphics& g, BubbleComponent& c, Point<float> const& pos, Rectan
   g.fillRoundedRectangle(body, 2);
   g.setColour(colors().bubble_outline);
   g.drawRoundedRectangle(body, 2, 1);
+}
+
+void 
+lnf::drawTooltip(Graphics& g, String const& text, int w, int h)
+{
+  Rectangle<int> bounds(w, h);
+  g.setColour(colors().control_background);
+  g.fillRect(bounds.toFloat());
+  g.setColour(colors().bubble_outline);
+  g.drawRect(bounds.toFloat().reduced(0.5f, 0.5f), 1.0f);
+  auto layout = detail::LookAndFeelHelpers::layoutTooltipText(text, findColour(TooltipWindow::textColourId));
+  layout.draw(g, Rectangle<float>(w, h));
 }
 
 void 
