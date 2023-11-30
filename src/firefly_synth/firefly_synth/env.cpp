@@ -54,11 +54,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.voice_release_at = ads / adsr * params.frame_count;
 
   graph_engine engine(&state, params);
-  auto const* block = engine.process(module_env, mapping.module_slot, [](plugin_block& block) {
-    env_engine engine;
-    engine.initialize();
-    engine.process(block);
-  });
+  auto const* block = engine.process_default(module_env, mapping.module_slot);
   jarray<float, 1> series(block->state.own_cv[0][0]);
   series.push_back(0);
   return graph_data(series, false);
