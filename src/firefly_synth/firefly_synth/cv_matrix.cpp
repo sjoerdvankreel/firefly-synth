@@ -116,6 +116,12 @@ select_midi_active(
   }
 }
 
+static graph_data
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+{
+  return graph_data();
+}
+
 module_topo
 cv_matrix_topo(
   int section, plugin_base::gui_colors const& colors,
@@ -168,6 +174,8 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
+  result.graph_renderer = render_graph;
+  result.rerender_on_param_hover = true;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.midi_active_selector = [global, sm = source_matrix.mappings](
     plugin_state const& state, int slot, jarray<int, 3>& active) { select_midi_active(state, slot, global, sm, active); };
