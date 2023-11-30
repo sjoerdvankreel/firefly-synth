@@ -30,6 +30,14 @@ _engine(&state->desc(), nullptr, nullptr), _state(state), _params(params)
 }
 
 plugin_block const*
+graph_engine::process_default(int module_index, int module_slot)
+{
+  auto factory = _state->desc().plugin->modules[module_index].engine_factory;
+  auto module_engine = factory(*_state->desc().plugin, _params.sample_rate, _params.frame_count);
+  return process(module_index, module_slot, [engine = module_engine.get()](auto& block) { engine->process(block); });
+}
+
+plugin_block const*
 graph_engine::process(int module_index, int module_slot, graph_processor processor)
 {
   int voice = _state->desc().plugin->modules[module_index].dsp.stage == module_stage::voice ? 0 : -1;

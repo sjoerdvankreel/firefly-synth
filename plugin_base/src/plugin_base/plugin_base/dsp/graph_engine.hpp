@@ -37,6 +37,8 @@ class graph_engine {
 public:
   ~graph_engine();
   graph_engine(plugin_state const* state, graph_engine_params const& params);
+
+  plugin_block const* process_default(int module_index, int module_slot);
   plugin_block const* process(int module_index, int module_slot, graph_processor processor);
 };
 

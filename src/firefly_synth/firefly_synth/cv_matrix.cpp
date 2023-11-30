@@ -5,6 +5,7 @@
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/shared/utility.hpp>
 #include <plugin_base/helpers/matrix.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
 
@@ -119,7 +120,16 @@ select_midi_active(
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  return graph_data();
+  graph_engine_params params = {};
+  params.bpm = 120;
+  params.frame_count = 1000;
+  params.midi_key = midi_middle_c;
+  params.sample_rate = params.frame_count;
+  params.voice_release_at = params.frame_count * 3 / 4;
+
+  graph_engine graph_engine(&state, params);
+  auto const* block = graph_engine.process_default(module_glfo, 0);
+  return graph_data(block->state.own_cv[0][0], false);
 }
 
 module_topo
