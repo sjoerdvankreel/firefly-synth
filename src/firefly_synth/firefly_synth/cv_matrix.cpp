@@ -118,7 +118,7 @@ select_midi_active(
 }
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::vector<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
   int type = state.get_plain_at(map.module_index, map.module_slot, param_type, map.param_slot).step();
@@ -129,7 +129,6 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   params.frame_count = 1000;
   params.midi_key = midi_middle_c;
   params.sample_rate = params.frame_count;
-  params.voice_release_at = params.frame_count * 3 / 4;
 
   graph_engine graph_engine(&state, params);
   std::vector<int> relevant_modules({ module_input, module_glfo });
@@ -138,9 +137,11 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
       graph_engine.process_default(relevant_modules[m], mi);
+  
   auto* block = graph_engine.process_default(map.module_index, map.module_slot);
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
-  jarray<float, 1> stacked = jarray<float, 1>(*modulation[module_osc][0][1][0]);
+  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
+  jarray<float, 1> stacked = jarray<float, 1>(*targets[ti].value_at(modulation));
   stacked.push_back(0);
   stacked.insert(stacked.begin(), 0);
   return graph_data(stacked, false);
@@ -198,13 +199,13 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.midi_active_selector = [global, sm = source_matrix.mappings](
     plugin_state const& state, int slot, jarray<int, 3>& active) { select_midi_active(state, slot, global, sm, active); };
   result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings]
     (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); };
+  result.graph_renderer = [tm = target_matrix.mappings](auto const& state, auto const& mapping) { return render_graph(state, mapping, tm); };
   return result;
 }
 
