@@ -386,16 +386,16 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
 {
   auto const& topo = *_gui_state->desc().plugin;
   int radius = topo.gui.module_corner_radius;
-  int slot = tc.getTabbedButtonBar().getNumTabs();
+  int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
   auto background1 = topo.modules[module_index].gui.colors.tab_background1;
   auto background2 = topo.modules[module_index].gui.colors.tab_background2;
   auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
-  auto tab_button = tc.getTabbedButtonBar().getTabButton(slot);
+  auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
   if(topo.modules[module_index].gui.enable_tab_menu)
-    add_tab_listener(*tab_button, module_index, slot);
+    add_tab_listener(*tab_button, module_index, module_slot);
 }
 
 Component&
