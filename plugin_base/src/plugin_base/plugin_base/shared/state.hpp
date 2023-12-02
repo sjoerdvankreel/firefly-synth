@@ -44,13 +44,19 @@ public:
 
   void init(state_init_type init_type);
   void copy_from(plugin_state const* state);
+
+  plugin_desc const& desc() const { return *_desc; }
+  jarray<plain_value, 4> const& state() const { return _state; }
+
   void add_any_listener(any_state_listener* listener) const;
   void remove_any_listener(any_state_listener* listener) const;
   void add_listener(int index, state_listener* listener) const;
   void remove_listener(int index, state_listener* listener) const;
 
-  plugin_desc const& desc() const { return *_desc; }
-  jarray<plain_value, 4> const& state() const { return _state; }
+  void clear_module(int index, int slot);
+  void copy_module_to(int index, int source_slot, int target_slot);
+  void move_module_to(int index, int source_slot, int target_slot);
+  void swap_module_with(int index, int source_slot, int target_slot);
 
   void set_plain_at(int m, int mi, int p, int pi, plain_value value);
   plain_value get_plain_at(int m, int mi, int p, int pi) const

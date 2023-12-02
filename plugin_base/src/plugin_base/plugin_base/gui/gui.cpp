@@ -57,6 +57,14 @@ justification_type(gui_label const& label)
 }
 
 void
+gui_param_listener::gui_param_changed(int index, plain_value plain)
+{
+  gui_param_begin_changes(index);
+  gui_param_changing(index, plain);
+  gui_param_end_changes(index);
+}
+
+void
 gui_hover_listener::mouseExit(MouseEvent const&)
 {
   switch (_type)
@@ -80,12 +88,41 @@ gui_hover_listener::mouseEnter(MouseEvent const&)
   }
 }
 
-void
-gui_param_listener::gui_param_changed(int index, plain_value plain)
+void 
+gui_tab_listener::mouseUp(MouseEvent const& event)
 {
-  gui_param_begin_changes(index);
-  gui_param_changing(index, plain);
-  gui_param_end_changes(index);
+  if(!event.mods.isRightButtonDown()) return;
+  int slots = _state->desc().plugin->modules[_module].info.slot_count;
+
+  PopupMenu menu;
+  menu.addItem(1000, "Clear");
+  if (slots > 1)
+  {
+    PopupMenu copy_menu;
+    for(int i = 0; i < slots; i++)
+      copy_menu.addItem(2000 + i, std::to_string(i + 1), i != _slot);
+    menu.addSubMenu("Copy to", copy_menu);
+
+    PopupMenu move_menu;
+    for (int i = 0; i < slots; i++)
+      move_menu.addItem(3000 + i, std::to_string(i + 1), i != _slot);
+    menu.addSubMenu("Move to", move_menu);
+
+    PopupMenu swap_menu;
+    for (int i = 0; i < slots; i++)
+      swap_menu.addItem(4000 + i, std::to_string(i + 1), i != _slot);
+    menu.addSubMenu("Swap with", swap_menu);
+  }
+
+  PopupMenu::Options options;
+  options = options.withTargetComponent(_button);
+  menu.setLookAndFeel(&_button->getLookAndFeel());
+  menu.showMenuAsync(options, [this](int id) {
+    if(id == 1000) _state->clear_module(_module, _slot);
+    else if(2000 <= id && id < 3000) _state->copy_module_to(_module, _slot, id - 2000);
+    else if(3000 <= id && id < 4000) _state->move_module_to(_module, _slot, id - 3000);
+    else if(4000 <= id && id < 5000) _state->swap_module_with(_module, _slot, id - 4000);
+  });
 }
 
 std::set<std::string>
@@ -222,6 +259,13 @@ plugin_gui::module_mouse_enter(int module)
 }
 
 void
+plugin_gui::add_tab_listener(juce::TabBarButton& button, int module, int slot)
+{
+  auto listener = std::make_unique<gui_tab_listener>(gui_state(), &button, module, slot);
+  _tab_listeners.push_back(std::move(listener));
+}
+
+void
 plugin_gui::add_hover_listener(Component& component, gui_hover_type type, int global_index)
 {
   auto listener = std::make_unique<gui_hover_listener>(this, &component, type, global_index);
@@ -316,13 +360,16 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
 {
   auto const& topo = *_gui_state->desc().plugin;
   int radius = topo.gui.module_corner_radius;
+  int slot = tc.getTabbedButtonBar().getNumTabs();
   int module_index = _gui_state->desc().modules[module].info.topo;
   auto background1 = topo.modules[module_index].gui.colors.tab_background1;
   auto background2 = topo.modules[module_index].gui.colors.tab_background2;
   auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
-  auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
+  auto tab_button = tc.getTabbedButtonBar().getTabButton(slot);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
+  if(topo.modules[module_index].gui.enable_tab_menu)
+    add_tab_listener(*tab_button, module_index, slot);
 }
 
 Component&

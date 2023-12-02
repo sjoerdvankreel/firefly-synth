@@ -94,6 +94,44 @@ plugin_state::set_plain_at(int m, int mi, int p, int pi, plain_value value)
     state_changed(desc().param_mappings.topo_to_index[m][mi][p][pi], value);
 }
 
+void
+plugin_state::move_module_to(int index, int source_slot, int target_slot)
+{
+  copy_module_to(index, source_slot, target_slot);
+  clear_module(index, source_slot);
+}
+
+void 
+plugin_state::clear_module(int index, int slot)
+{
+  auto const& topo = desc().plugin->modules[index];
+  for(int p = 0; p < topo.params.size(); p++)
+    for(int pi = 0; pi < topo.params[p].info.slot_count; pi++)
+      set_plain_at(index, slot, p, pi, topo.params[p].domain.default_plain(slot, pi));
+}
+
+void 
+plugin_state::copy_module_to(int index, int source_slot, int target_slot)
+{
+  auto const& topo = desc().plugin->modules[index];
+  for (int p = 0; p < topo.params.size(); p++)
+    for (int pi = 0; pi < topo.params[p].info.slot_count; pi++)
+      set_plain_at(index, target_slot, p, pi, get_plain_at(index, source_slot, p, pi));
+}
+
+void 
+plugin_state::swap_module_with(int index, int source_slot, int target_slot)
+{
+  auto const& topo = desc().plugin->modules[index];
+  for (int p = 0; p < topo.params.size(); p++)
+    for (int pi = 0; pi < topo.params[p].info.slot_count; pi++)
+    {
+      plain_value target = get_plain_at(index, target_slot, p, pi);
+      set_plain_at(index, target_slot, p, pi, get_plain_at(index, source_slot, p, pi));
+      set_plain_at(index, source_slot, p, pi, target);
+    }
+}
+
 void 
 plugin_state::copy_from(plugin_state const* state)
 {

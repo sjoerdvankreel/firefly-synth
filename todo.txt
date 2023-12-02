@@ -17,6 +17,7 @@ make new test files
 main thread hangs on shutdown
 do the route switching thing on swap module
 fix up the gui (control sizes etc)
+check all infernal functionality, see what needs to be in the base
 
 * get some linux folks to comment (ycollete?)
 * continuing

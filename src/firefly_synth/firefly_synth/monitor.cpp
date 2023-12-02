@@ -31,6 +31,7 @@ monitor_topo(
     make_topo_info("{C20F2D2C-23C6-41BE-BFB3-DE9EDFB051EC}", "Monitor", module_monitor, 1), 
     make_module_dsp(module_stage::output, module_output::none, 0, {}),
     make_module_gui(section, colors, pos, { 1, 1 })));
+  result.gui.enable_tab_menu = false;
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{988E6A84-A012-413C-B33B-80B8B135D203}", "Main"),
