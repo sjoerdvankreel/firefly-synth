@@ -32,14 +32,6 @@ public:
     mix(plugin_base::plugin_block& block, int module, int slot);
 };
 
-// allows to tidy up cv/audio matrix
-class tidy_tab_menu_handler:
-public plugin_base::tab_menu_handler {
-public:
-  void extra(plugin_base::plugin_state* state, int module, int slot, int index) override {};
-  std::vector<std::string> const extra_items() const override { return { "Tidy" }; };
-};
-
 // allows to clear/swap/copy/move with updating routes
 class routing_tab_menu_handler:
 public plugin_base::tab_menu_handler {

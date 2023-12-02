@@ -1,3 +1,4 @@
+#include <plugin_base/shared/state.hpp>
 #include <plugin_base/helpers/matrix.hpp>
 
 namespace plugin_base {
@@ -36,6 +37,43 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
   result += " " + tag2.name;
   if (slots2 > 1) result += " " + std::to_string(slot2 + (tag2.name_one_based ? 1 : 0));
   return result;
+}
+
+void 
+tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int action)
+{
+  auto const& topo = state->desc().plugin->modules[module];
+  std::vector<std::map<int, plain_value>> route_value_maps;
+  int route_count = topo.params[_on_param].info.slot_count;
+  for (int r = 0; r < route_count; r++)
+    if (state->get_plain_at(module, slot, _on_param, r).step() != _off_value)
+    {
+      std::map<int, plain_value> route_value_map;
+      for(int p = 0; p < topo.params.size(); p++)
+        route_value_map[p] = state->get_plain_at(module, slot, p, r);
+      route_value_maps.push_back(route_value_map);
+    }
+  state->clear_module(module, slot);
+
+  // sort
+  if (action == 1)
+    std::sort(route_value_maps.begin(), route_value_maps.end(), [this, state, &topo](auto const& l, auto const& r) {
+      for (int p = 0; p < _sort_params.size(); p++)
+      {
+        assert(!topo.params[_sort_params[p]].domain.is_real());
+        if(l.at(_sort_params[p]).step() < r.at(_sort_params[p]).step())
+          return true;
+      } 
+      return false;
+    });
+
+  // tidy
+  for (int r = 0; r < route_value_maps.size(); r++)
+  {
+    auto const& map = route_value_maps[r];
+    for(int p = 0; p < topo.params.size(); p++)
+      state->set_plain_at(module, slot, p, r, map.at(p));
+  }
 }
 
 routing_matrix<module_topo_mapping>

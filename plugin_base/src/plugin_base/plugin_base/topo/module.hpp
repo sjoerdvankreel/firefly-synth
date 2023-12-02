@@ -32,7 +32,7 @@ public:
   virtual std::vector<std::string> const extra_items() const { return {}; };
 
   virtual void clear(plugin_state* state, int module, int slot) {};
-  virtual void extra(plugin_state* state, int module, int slot, int index) {};
+  virtual void extra(plugin_state* state, int module, int slot, int action) {};
   virtual void move(plugin_state* state, int module, int source_slot, int target_slot) {};
   virtual void copy(plugin_state* state, int module, int source_slot, int target_slot) {};
   virtual void swap(plugin_state* state, int module, int source_slot, int target_slot) {};
