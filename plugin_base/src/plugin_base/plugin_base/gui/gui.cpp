@@ -22,6 +22,30 @@ static std::string const extra_state_tab_index = "tab";
 static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
+static void
+fill_tab_menu(PopupMenu menu, int base_id, int indent, int slot, int slots)
+{
+  std::string indentation(indent, ' ');
+  menu.addItem(base_id + 1000, indentation + "Clear");
+  if (slots > 1)
+  {
+    PopupMenu copy_menu;
+    for (int i = 0; i < slots; i++)
+      copy_menu.addItem(base_id + 2000 + i, std::to_string(i + 1), i != slot);
+    menu.addSubMenu(indentation + "Copy to", copy_menu);
+
+    PopupMenu move_menu;
+    for (int i = 0; i < slots; i++)
+      move_menu.addItem(base_id + 3000 + i, std::to_string(i + 1), i != slot);
+    menu.addSubMenu(indentation + "Move to", move_menu);
+
+    PopupMenu swap_menu;
+    for (int i = 0; i < slots; i++)
+      swap_menu.addItem(base_id + 4000 + i, std::to_string(i + 1), i != slot);
+    menu.addSubMenu(indentation + "Swap with", swap_menu);
+  }
+}
+
 static Justification 
 justification_type(gui_label const& label)
 {
@@ -92,36 +116,35 @@ void
 gui_tab_listener::mouseUp(MouseEvent const& event)
 {
   if(!event.mods.isRightButtonDown()) return;
-  int slots = _state->desc().plugin->modules[_module].info.slot_count;
+  auto const& topo = _state->desc().plugin->modules[_module];
+  int slots = topo.info.slot_count;
 
   PopupMenu menu;
-  menu.addItem(1000, "Clear");
-  if (slots > 1)
+  std::unique_ptr<module_tab_menu_handler> handler = {};
+  if(topo.gui.menu_handler_factory == nullptr)
+    fill_tab_menu(menu, 0, 0, _slot, slots);
+  else
   {
-    PopupMenu copy_menu;
-    for(int i = 0; i < slots; i++)
-      copy_menu.addItem(2000 + i, std::to_string(i + 1), i != _slot);
-    menu.addSubMenu("Copy to", copy_menu);
-
-    PopupMenu move_menu;
-    for (int i = 0; i < slots; i++)
-      move_menu.addItem(3000 + i, std::to_string(i + 1), i != _slot);
-    menu.addSubMenu("Move to", move_menu);
-
-    PopupMenu swap_menu;
-    for (int i = 0; i < slots; i++)
-      swap_menu.addItem(4000 + i, std::to_string(i + 1), i != _slot);
-    menu.addSubMenu("Swap with", swap_menu);
+    handler = topo.gui.menu_handler_factory();
+    menu.addItem(1, "Plain", false);
+    fill_tab_menu(menu, 0, 4, _slot, slots);
+    menu.addItem(2, handler->menu_name(), false);
+    fill_tab_menu(menu, 10000, 4, _slot, slots);
   }
 
   PopupMenu::Options options;
   options = options.withTargetComponent(_button);
   menu.setLookAndFeel(&_button->getLookAndFeel());
-  menu.showMenuAsync(options, [this](int id) {
+  menu.showMenuAsync(options, [this, handler = handler.release()](int id) {
     if(id == 1000) _state->clear_module(_module, _slot);
     else if(2000 <= id && id < 3000) _state->copy_module_to(_module, _slot, id - 2000);
     else if(3000 <= id && id < 4000) _state->move_module_to(_module, _slot, id - 3000);
     else if(4000 <= id && id < 5000) _state->swap_module_with(_module, _slot, id - 4000);
+    else if(id == 11000) handler->clear(_state, _module, _slot);
+    else if(12000 <= id && id < 13000) handler->copy(_state, _module, _slot, id - 12000);
+    else if(13000 <= id && id < 14000) handler->move(_state, _module, _slot, id - 13000);
+    else if(14000 <= id && id < 15000) handler->swap(_state, _module, _slot, id - 14000);
+    delete handler;
   });
 }
 

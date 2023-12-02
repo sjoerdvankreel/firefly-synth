@@ -23,8 +23,21 @@ class module_engine;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
+// allows to extend right-click menu on tab headers
+class tab_menu_handler {
+public:
+  virtual std::string menu_name() const = 0;
+  virtual void clear(plugin_state* state, int module, int slot) = 0;
+  virtual void move(plugin_state* state, int module, int source_slot, int target_slot) = 0;
+  virtual void copy(plugin_state* state, int module, int source_slot, int target_slot) = 0;
+  virtual void swap(plugin_state* state, int module, int source_slot, int target_slot) = 0;
+};
+
 typedef std::function<void(plugin_state& state)>
 state_initializer;
+
+typedef std::function<std::unique_ptr<tab_menu_handler>()>
+tab_menu_handler_factory;
 
 typedef std::function<graph_data(
   plugin_state const& state, param_topo_mapping const& mapping)>
@@ -61,6 +74,7 @@ struct module_topo_gui final {
   gui_dimension dimension;
   std::string tabbed_name;
   bool enable_tab_menu = true;
+  tab_menu_handler_factory menu_handler_factory;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 

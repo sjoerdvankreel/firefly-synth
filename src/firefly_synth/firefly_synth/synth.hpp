@@ -17,6 +17,10 @@ cv_matrix_mixdown;
 
 extern int const input_param_pb_range;
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
+enum {
+  module_midi, module_input, module_glfo, module_gcv_matrix, module_vlfo, module_env, 
+  module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_out, 
+  module_voice_in, module_gaudio_matrix, module_gfx, module_master, module_monitor, module_count };
 
 class audio_matrix_mixer
 {
@@ -24,14 +28,20 @@ class audio_matrix_mixer
 public:
   PB_PREVENT_ACCIDENTAL_COPY(audio_matrix_mixer);
   audio_matrix_mixer(audio_matrix_engine* engine) : _engine(engine) {}
-  plugin_base::jarray<float, 2> const& 
-  mix(plugin_base::plugin_block& block, int module, int slot);
-}; 
+  plugin_base::jarray<float, 2> const&
+    mix(plugin_base::plugin_block& block, int module, int slot);
+};
 
-enum {
-  module_midi, module_input, module_glfo, module_gcv_matrix, module_vlfo, module_env, 
-  module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_out, 
-  module_voice_in, module_gaudio_matrix, module_gfx, module_master, module_monitor, module_count };
+// allows to clear/swap/copy/move with updating routes
+class synth_tab_menu_handler:
+public plugin_base::tab_menu_handler {
+public:
+  std::string menu_name() const override { return "With Routing"; }
+  void clear(plugin_base::plugin_state* state, int module, int slot) {}
+  void move(plugin_base::plugin_state* state, int module, int source_slot, int target_slot) {}
+  void copy(plugin_base::plugin_state* state, int module, int source_slot, int target_slot) {}
+  void swap(plugin_base::plugin_state* state, int module, int source_slot, int target_slot) {}
+};
 
 // set all outputs to current automation values
 cv_matrix_mixdown
