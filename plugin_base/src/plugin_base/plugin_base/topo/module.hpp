@@ -26,6 +26,7 @@ enum class module_stage { input, voice, output };
 // allows to extend right-click menu on tab headers
 class tab_menu_handler {
 public:
+  virtual ~tab_menu_handler() {}
   virtual std::string menu_name() const = 0;
   virtual void clear(plugin_state* state, int module, int slot) = 0;
   virtual void move(plugin_state* state, int module, int source_slot, int target_slot) = 0;

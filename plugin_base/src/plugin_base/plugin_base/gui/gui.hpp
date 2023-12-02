@@ -28,6 +28,7 @@ gui_extra_state_keyset(plugin_topo const& topo);
 class gui_listener
 {
 public:
+  virtual ~gui_listener() {}
   virtual void param_mouse_exit(int param) {};
   virtual void param_mouse_enter(int param) {};
   virtual void module_mouse_exit(int module) {};
@@ -75,7 +76,9 @@ public:
 class gui_param_listener
 {
 public:
+  virtual ~gui_param_listener() {}
   void gui_param_changed(int index, plain_value plain);
+
   virtual void gui_param_end_changes(int index) = 0;
   virtual void gui_param_begin_changes(int index) = 0;
   virtual void gui_param_changing(int index, plain_value plain) = 0;

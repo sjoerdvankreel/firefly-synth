@@ -13,6 +13,7 @@ namespace plugin_base {
 class autofit_component
 {
 public:
+  virtual ~autofit_component() {}
   virtual int fixed_width() const = 0;
   virtual int fixed_height() const = 0;
 };

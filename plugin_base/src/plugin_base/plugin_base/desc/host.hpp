@@ -44,6 +44,7 @@ struct host_menu
 struct format_config {
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(format_config);
 
+  virtual ~format_config() {}
   virtual std::unique_ptr<host_menu>
   context_menu(int param_id) const = 0;
   virtual std::filesystem::path 

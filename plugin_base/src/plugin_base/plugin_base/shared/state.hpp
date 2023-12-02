@@ -16,12 +16,14 @@ enum class state_init_type { empty, minimal, default_ };
 class state_listener
 {
 public:
+  virtual ~state_listener() {}
   virtual void state_changed(int index, plain_value plain) = 0;
 };
 
 class any_state_listener
 {
 public:
+  virtual ~any_state_listener() {}
   virtual void any_state_changed(int index, plain_value plain) = 0;
 };
 

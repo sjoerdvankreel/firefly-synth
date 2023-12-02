@@ -22,6 +22,7 @@ class plugin_engine;
 // single module audio processors
 class module_engine { 
 public: 
+  virtual ~module_engine() {}
   virtual void initialize() = 0;
   virtual void process(plugin_block& block) = 0;
 };

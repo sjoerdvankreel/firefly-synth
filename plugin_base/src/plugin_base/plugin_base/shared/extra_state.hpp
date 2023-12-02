@@ -12,6 +12,7 @@ namespace plugin_base {
 
 class extra_state_listener {
 public:
+  virtual ~extra_state_listener() {}
   virtual void extra_state_changed() = 0;
 };
 

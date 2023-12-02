@@ -23,9 +23,10 @@ static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
 static void
-fill_tab_menu(PopupMenu menu, int base_id, int indent, int slot, int slots)
+fill_tab_menu(PopupMenu& menu, int base_id, int indent, int slot, int slots)
 {
   std::string indentation(indent, ' ');
+  indentation = "." + indentation;
   menu.addItem(base_id + 1000, indentation + "Clear");
   if (slots > 1)
   {
@@ -120,7 +121,7 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
   int slots = topo.info.slot_count;
 
   PopupMenu menu;
-  std::unique_ptr<module_tab_menu_handler> handler = {};
+  std::unique_ptr<tab_menu_handler> handler = {};
   if(topo.gui.menu_handler_factory == nullptr)
     fill_tab_menu(menu, 0, 0, _slot, slots);
   else
