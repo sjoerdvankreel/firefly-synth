@@ -16,6 +16,7 @@ swap module incl swap routing
 make new test files
 main thread hangs on shutdown
 do the route switching thing on swap module
+fix up the gui (control sizes etc)
 
 * get some linux folks to comment (ycollete?)
 * continuing
