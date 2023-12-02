@@ -22,25 +22,29 @@ static std::string const extra_state_tab_index = "tab";
 static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
-static void
-fill_tab_menu(PopupMenu& menu, int base_id, int slot, int slots)
+static std::vector<std::function<void(int)>>
+fill_default_tab_menu(PopupMenu& menu, plugin_state* state, int base_id, int module, int slot, int slots)
 {
-  menu.addItem(base_id + 1000, "Clear");
+  std::vector<std::function<void(int)>> result;
+  menu.addItem(base_id++, "Clear");
   if (slots > 1)
   {
     PopupMenu copy_menu;
     for (int i = 0; i < slots; i++)
-      copy_menu.addItem(base_id + 2000 + i, std::to_string(i + 1), i != slot);
+    {
+      copy_menu.addItem(base_id++, std::to_string(i + 1), i != slot);
+      result.push_back([state, module, slot, i](int) { state->copy_module_to(module, slot, i); });
+    }
     menu.addSubMenu("Copy to", copy_menu);
 
     PopupMenu move_menu;
     for (int i = 0; i < slots; i++)
-      move_menu.addItem(base_id + 3000 + i, std::to_string(i + 1), i != slot);
+      move_menu.addItem(base_id++, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Move to", move_menu);
 
     PopupMenu swap_menu;
     for (int i = 0; i < slots; i++)
-      swap_menu.addItem(base_id + 4000 + i, std::to_string(i + 1), i != slot);
+      swap_menu.addItem(base_id++, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Swap with", swap_menu);
   }
 }
