@@ -63,7 +63,9 @@ tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int a
         assert(!topo.params[_sort_params[p]].domain.is_real());
         if(l.at(_sort_params[p]).step() < r.at(_sort_params[p]).step())
           return true;
-      } 
+        if (l.at(_sort_params[p]).step() > r.at(_sort_params[p]).step())
+          return false;
+      }
       return false;
     });
 
