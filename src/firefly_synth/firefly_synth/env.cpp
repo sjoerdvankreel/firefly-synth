@@ -70,6 +70,7 @@ env_topo(
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
+  result.gui.menu_handler_factory = []() { return std::make_unique<routing_tab_menu_handler>(); };
 
   result.graph_renderer = render_graph;
   result.default_initializer = init_default;

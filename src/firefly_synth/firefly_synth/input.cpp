@@ -47,6 +47,7 @@ input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
+  result.gui.menu_handler_factory = []() { return std::make_unique<routing_tab_menu_handler>(); };
 
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;

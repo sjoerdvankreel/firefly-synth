@@ -100,6 +100,7 @@ osc_topo(
   result.default_initializer = init_default;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
+  result.gui.menu_handler_factory = []() { return std::make_unique<routing_tab_menu_handler>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),

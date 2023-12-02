@@ -165,6 +165,7 @@ cv_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global ? "Global" : "Voice";
+  result.gui.menu_handler_factory = []() { return std::make_unique<tidy_tab_menu_handler>(); };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 

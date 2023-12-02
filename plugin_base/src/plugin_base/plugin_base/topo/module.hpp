@@ -27,11 +27,15 @@ enum class module_stage { input, voice, output };
 class tab_menu_handler {
 public:
   virtual ~tab_menu_handler() {}
-  virtual std::string menu_name() const = 0;
-  virtual void clear(plugin_state* state, int module, int slot) = 0;
-  virtual void move(plugin_state* state, int module, int source_slot, int target_slot) = 0;
-  virtual void copy(plugin_state* state, int module, int source_slot, int target_slot) = 0;
-  virtual void swap(plugin_state* state, int module, int source_slot, int target_slot) = 0;
+  virtual bool has_module_menu() const { return false; }
+  virtual std::string module_menu_name() const { return {}; };
+  virtual std::vector<std::string> const extra_items() const { return {}; };
+
+  virtual void clear(plugin_state* state, int module, int slot) {};
+  virtual void extra(plugin_state* state, int module, int slot, int index) {};
+  virtual void move(plugin_state* state, int module, int source_slot, int target_slot) {};
+  virtual void copy(plugin_state* state, int module, int source_slot, int target_slot) {};
+  virtual void swap(plugin_state* state, int module, int source_slot, int target_slot) {};
 };
 
 typedef std::function<void(plugin_state& state)>

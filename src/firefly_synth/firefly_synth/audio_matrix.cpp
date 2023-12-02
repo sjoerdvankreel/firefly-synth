@@ -114,6 +114,7 @@ audio_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global? "Global": "Voice";
+  result.gui.menu_handler_factory = []() { return std::make_unique<tidy_tab_menu_handler>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 

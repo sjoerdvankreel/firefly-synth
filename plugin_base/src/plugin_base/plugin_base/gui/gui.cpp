@@ -23,27 +23,25 @@ static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
 static void
-fill_tab_menu(PopupMenu& menu, int base_id, int indent, int slot, int slots)
+fill_tab_menu(PopupMenu& menu, int base_id, int slot, int slots)
 {
-  std::string indentation(indent, ' ');
-  indentation = "." + indentation;
-  menu.addItem(base_id + 1000, indentation + "Clear");
+  menu.addItem(base_id + 1000, "Clear");
   if (slots > 1)
   {
     PopupMenu copy_menu;
     for (int i = 0; i < slots; i++)
       copy_menu.addItem(base_id + 2000 + i, std::to_string(i + 1), i != slot);
-    menu.addSubMenu(indentation + "Copy to", copy_menu);
+    menu.addSubMenu("Copy to", copy_menu);
 
     PopupMenu move_menu;
     for (int i = 0; i < slots; i++)
       move_menu.addItem(base_id + 3000 + i, std::to_string(i + 1), i != slot);
-    menu.addSubMenu(indentation + "Move to", move_menu);
+    menu.addSubMenu("Move to", move_menu);
 
     PopupMenu swap_menu;
     for (int i = 0; i < slots; i++)
       swap_menu.addItem(base_id + 4000 + i, std::to_string(i + 1), i != slot);
-    menu.addSubMenu(indentation + "Swap with", swap_menu);
+    menu.addSubMenu("Swap with", swap_menu);
   }
 }
 
@@ -122,15 +120,18 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
 
   PopupMenu menu;
   std::unique_ptr<tab_menu_handler> handler = {};
-  if(topo.gui.menu_handler_factory == nullptr)
-    fill_tab_menu(menu, 0, 0, _slot, slots);
-  else
+  fill_tab_menu(menu, 0, _slot, slots);
+  if(topo.gui.menu_handler_factory != nullptr)
   {
     handler = topo.gui.menu_handler_factory();
-    menu.addItem(1, "Plain", false);
-    fill_tab_menu(menu, 0, 4, _slot, slots);
-    menu.addItem(2, handler->menu_name(), false);
-    fill_tab_menu(menu, 10000, 4, _slot, slots);
+    if(handler->has_module_menu())
+    {
+      menu.addItem(2, handler->module_menu_name(), false);
+      fill_tab_menu(menu, 10000, _slot, slots);
+    }
+    auto extra_items = handler->extra_items();
+    for(int i = 0; i < extra_items.size(); i++)
+      menu.addItem(20000 + i, extra_items[i]);
   }
 
   PopupMenu::Options options;
@@ -145,6 +146,7 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
     else if(12000 <= id && id < 13000) handler->copy(_state, _module, _slot, id - 12000);
     else if(13000 <= id && id < 14000) handler->move(_state, _module, _slot, id - 13000);
     else if(14000 <= id && id < 15000) handler->swap(_state, _module, _slot, id - 14000);
+    else if(20000 <= id) handler->extra(_state, _module, _slot, id - 20000);
     delete handler;
   });
 }
