@@ -32,6 +32,10 @@ struct tab_menu_result
 
 // allows to extend right-click menu on tab headers
 class tab_menu_handler {
+protected:
+  plugin_state* const _state;
+  tab_menu_handler(plugin_state* state): _state(state) {}
+
 public:
   virtual ~tab_menu_handler() {}
   virtual bool has_module_menu() const { return false; }
@@ -39,18 +43,19 @@ public:
   virtual std::vector<std::string> const extra_items() const { return {}; };
 
   // pop up a message box if these return a non-empty text
-  virtual tab_menu_result clear(plugin_state* state, int module, int slot) { return {}; };
-  virtual tab_menu_result extra(plugin_state* state, int module, int slot, int action) { return {}; };
-  virtual tab_menu_result move(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
-  virtual tab_menu_result copy(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
-  virtual tab_menu_result swap(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result clear(int module, int slot) { return {}; };
+  virtual tab_menu_result extra(int module, int slot, int action) { return {}; };
+  virtual tab_menu_result move(int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result copy(int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result swap(int module, int source_slot, int target_slot) { return {}; };
 };
 
 typedef std::function<void(plugin_state& state)>
 state_initializer;
 
-typedef std::function<std::unique_ptr<tab_menu_handler>()>
-tab_menu_handler_factory;
+typedef std::function<void(
+  plugin_state const& state, int slot, jarray<int, 3>& active)>
+midi_active_selector;
 
 typedef std::function<graph_data(
   plugin_state const& state, param_topo_mapping const& mapping)>
@@ -60,9 +65,8 @@ typedef std::function<std::unique_ptr<module_engine>(
   plugin_topo const& topo, int sample_rate, int max_frame_count)> 
 module_engine_factory;
 
-typedef std::function<void(
-  plugin_state const& state, int slot, jarray<int, 3>& active)>
-midi_active_selector;
+typedef std::function<std::unique_ptr<tab_menu_handler>(plugin_state*)>
+tab_menu_handler_factory;
 
 // module topo mapping
 struct module_topo_mapping final {

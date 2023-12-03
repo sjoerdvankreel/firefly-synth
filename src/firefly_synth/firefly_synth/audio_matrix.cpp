@@ -96,12 +96,12 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 }
 
 std::unique_ptr<tab_menu_handler>
-make_audio_routing_menu_handler(bool global)
+make_audio_routing_menu_handler(plugin_state* state, bool global)
 {
   int module = global? module_gaudio_matrix: module_vaudio_matrix;
-  return std::make_unique<audio_routing_menu_handler>(module, param_source, param_target, param_on, 0, 
-    [global](plugin_topo const* topo) { return make_audio_matrix_sources(topo, global); }, 
-    [global](plugin_topo const* topo) { return make_audio_matrix_targets(topo, global); });
+  std::vector<module_topo_mapping> sources = make_audio_matrix(make_audio_matrix_sources(state->desc().plugin, global)).mappings;
+  std::vector<module_topo_mapping> targets = make_audio_matrix(make_audio_matrix_targets(state->desc().plugin, global)).mappings;
+  return std::make_unique<audio_routing_menu_handler>(state, module, param_source, param_target, param_on, 0, sources, targets);
 }
 
 module_topo 
@@ -125,7 +125,8 @@ audio_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global? "Global": "Voice";
-  result.gui.menu_handler_factory = []() { return std::make_unique<tidy_matrix_menu_handler>(param_on, 0, std::vector<int>({ param_target, param_source })); };
+  result.gui.menu_handler_factory = [](plugin_state* state) { 
+    return std::make_unique<tidy_matrix_menu_handler>(state, param_on, 0, std::vector<int>({ param_target, param_source })); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 

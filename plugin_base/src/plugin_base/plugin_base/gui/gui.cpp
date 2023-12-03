@@ -123,7 +123,7 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
   fill_tab_menu(menu, 0, _slot, slots);
   if(topo.gui.menu_handler_factory != nullptr)
   {
-    handler = topo.gui.menu_handler_factory();
+    handler = topo.gui.menu_handler_factory(_state);
     if(handler->has_module_menu())
     {
       menu.addItem(2, handler->module_menu_name(), false);
@@ -143,11 +143,11 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
     else if(2000 <= id && id < 3000) _state->copy_module_to(_module, _slot, id - 2000);
     else if(3000 <= id && id < 4000) _state->move_module_to(_module, _slot, id - 3000);
     else if(4000 <= id && id < 5000) _state->swap_module_with(_module, _slot, id - 4000);
-    else if(id == 11000) result = handler->clear(_state, _module, _slot);
-    else if(12000 <= id && id < 13000) result = handler->copy(_state, _module, _slot, id - 12000);
-    else if(13000 <= id && id < 14000) result = handler->move(_state, _module, _slot, id - 13000);
-    else if(14000 <= id && id < 15000) result = handler->swap(_state, _module, _slot, id - 14000);
-    else if(20000 <= id) result = handler->extra(_state, _module, _slot, id - 20000);
+    else if(id == 11000) result = handler->clear(_module, _slot);
+    else if(12000 <= id && id < 13000) result = handler->copy(_module, _slot, id - 12000);
+    else if(13000 <= id && id < 14000) result = handler->move(_module, _slot, id - 13000);
+    else if(14000 <= id && id < 15000) result = handler->swap(_module, _slot, id - 14000);
+    else if(20000 <= id) result = handler->extra(_module, _slot, id - 20000);
     delete handler;
 
     if(!result.show_warning) return;

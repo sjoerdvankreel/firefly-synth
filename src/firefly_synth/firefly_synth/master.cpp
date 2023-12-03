@@ -41,7 +41,7 @@ master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui
   result.rerender_on_param_hover = true;
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<master_engine> { return std::make_unique<master_engine>(); };
-  result.gui.menu_handler_factory = []() { return make_audio_routing_menu_handler(true); };
+  result.gui.menu_handler_factory = [](plugin_state* state) { return make_audio_routing_menu_handler(state, true); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),

@@ -84,11 +84,12 @@ init_global_default(plugin_state& state)
 }
 
 std::unique_ptr<tab_menu_handler>
-make_cv_routing_menu_handler()
+make_cv_routing_menu_handler(plugin_state* state)
 {
-  std::vector<int> matrices({ module_vcv_matrix, module_gcv_matrix });
-  auto factory = [](plugin_topo const* topo, int module) { return make_cv_matrix_sources(topo, module == module_gcv_matrix); };
-  return std::make_unique<cv_routing_menu_handler>(matrices, param_source, param_type, type_off, factory);
+  std::map<int, std::vector<module_output_mapping>> matrix_sources;
+  matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
+  matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
+  return std::make_unique<cv_routing_menu_handler>(state, param_source, param_type, type_off, matrix_sources);
 }
 
 void
@@ -173,7 +174,8 @@ cv_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global ? "Global" : "Voice";
-  result.gui.menu_handler_factory = []() { return std::make_unique<tidy_matrix_menu_handler>(param_type, type_off, std::vector<int>({ param_target, param_source })); };
+  result.gui.menu_handler_factory = [](plugin_state* state) { 
+    return std::make_unique<tidy_matrix_menu_handler>(state, param_type, type_off, std::vector<int>({ param_target, param_source })); };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
