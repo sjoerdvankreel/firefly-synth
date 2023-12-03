@@ -47,13 +47,44 @@ public:
 };
 
 // allows to clear/swap/copy/move with updating routes
+class cv_routing_menu_handler :
+public tab_menu_handler {
+  int const _on_param;
+  int const _off_value;
+  int const _source_param;
+  int const _matrix_module;
+  module_routes_factory const _sources_factory;
+
+  bool is_selected(
+    plugin_state* state, int param, int route, int module, int slot,
+    std::vector<module_output_mapping> const& mappings);
+  bool update_matched_slot(
+    plugin_state* state, int param, int route, int module,
+    int from_slot, int to_slot, std::vector<module_output_mapping> const& mappings);
+
+public:
+  bool has_module_menu() const override { return true; }
+  std::string module_menu_name() const override { return "With Routing"; };
+
+  cv_routing_menu_handler(int matrix_module, int source_param, 
+    int on_param, int off_value, module_routes_factory const& sources_factory):
+  _on_param(on_param), _off_value(off_value), _source_param(source_param),
+  _matrix_module(matrix_module), _sources_factory(sources_factory) {}
+
+  tab_menu_result clear(plugin_state* state, int module, int slot) override;
+  tab_menu_result move(plugin_state* state, int module, int source_slot, int target_slot) override;
+  tab_menu_result copy(plugin_state* state, int module, int source_slot, int target_slot) override;
+  tab_menu_result swap(plugin_state* state, int module, int source_slot, int target_slot) override;
+};
+
+// allows to clear/swap/copy/move with updating routes
 class audio_routing_menu_handler :
 public tab_menu_handler {
-  int _on_param;
-  int _off_value;
-  int _source_param;
-  int _target_param;   
-  int _matrix_module;
+  int const _on_param;
+  int const _off_value;
+  int const _source_param;
+  int const _target_param;
+  int const _matrix_module;
   module_routes_factory const _sources_factory;
   module_routes_factory const _targets_factory;
 

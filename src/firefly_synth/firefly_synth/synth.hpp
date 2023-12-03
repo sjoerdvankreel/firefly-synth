@@ -32,15 +32,9 @@ public:
     mix(plugin_base::plugin_block& block, int module, int slot);
 };
 
-// allows to clear/swap/copy/move with updating routes
-class routing_tab_menu_handler:
-public plugin_base::tab_menu_handler {
-public:
-  bool has_module_menu() const override { return true; }
-  std::string module_menu_name() const override { return "With Routing"; };
-};
-
 // menu handlers to update routing on clear/move/swap/copy
+std::unique_ptr<plugin_base::tab_menu_handler>
+make_cv_routing_menu_handler(bool global);
 std::unique_ptr<plugin_base::tab_menu_handler>
 make_audio_routing_menu_handler(bool global);
 

@@ -83,6 +83,14 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
 }
 
+std::unique_ptr<tab_menu_handler>
+make_cv_routing_menu_handler(bool global)
+{
+  int module = global ? module_gcv_matrix : module_vcv_matrix;
+  return std::make_unique<cv_routing_menu_handler>(module, param_source, param_type, type_off,
+    [global](plugin_topo const* topo) { return make_cv_matrix_sources(topo, global); });
+}
+
 void
 select_midi_active(
   plugin_state const& state, int slot, bool global,
