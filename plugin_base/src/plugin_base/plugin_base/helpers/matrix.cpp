@@ -240,26 +240,6 @@ audio_routing_menu_handler::update_matched_slot(
 }
 
 void 
-audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
-{
-  state->clear_module(module, slot);
-
-  // set any route matching this module to all defaults
-  auto const& topo = state->desc().plugin->modules[_matrix_module];
-  auto sources = make_audio_matrix(_sources_factory(state->desc().plugin)).mappings;
-  auto targets = make_audio_matrix(_targets_factory(state->desc().plugin)).mappings;
-  for(int r = 0; r < topo.params[_on_param].info.slot_count; r++)
-  {
-    int selected_source = state->get_plain_at(_matrix_module, 0, _source_param, r).step();
-    int selected_target = state->get_plain_at(_matrix_module, 0, _target_param, r).step();
-    if((sources[selected_source].index == module && sources[selected_source].slot == slot) ||
-      (targets[selected_target].index == module && targets[selected_target].slot == slot))
-      for(int p = 0; p < topo.params.size(); p++)
-        state->set_plain_at(_matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
-  }
-}
-
-void 
 audio_routing_menu_handler::move(plugin_state* state, int module, int source_slot, int target_slot)
 {
   state->move_module_to(module, source_slot, target_slot);
@@ -292,6 +272,26 @@ audio_routing_menu_handler::swap(plugin_state* state, int module, int source_slo
       update_matched_slot(state, module, _source_param, r, target_slot, source_slot, sources);
     if (!update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets))
       update_matched_slot(state, module, _target_param, r, target_slot, source_slot, targets);
+  }
+}
+
+void
+audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
+{
+  state->clear_module(module, slot);
+
+  // set any route matching this module to all defaults
+  auto const& topo = state->desc().plugin->modules[_matrix_module];
+  auto sources = make_audio_matrix(_sources_factory(state->desc().plugin)).mappings;
+  auto targets = make_audio_matrix(_targets_factory(state->desc().plugin)).mappings;
+  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  {
+    int selected_source = state->get_plain_at(_matrix_module, 0, _source_param, r).step();
+    int selected_target = state->get_plain_at(_matrix_module, 0, _target_param, r).step();
+    if ((sources[selected_source].index == module && sources[selected_source].slot == slot) ||
+      (targets[selected_target].index == module && targets[selected_target].slot == slot))
+      for (int p = 0; p < topo.params.size(); p++)
+        state->set_plain_at(_matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
   }
 }
 
