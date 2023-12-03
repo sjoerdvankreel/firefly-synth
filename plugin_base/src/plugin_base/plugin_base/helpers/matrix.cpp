@@ -318,10 +318,11 @@ cv_routing_menu_handler::copy(int module, int source_slot, int target_slot)
   for (auto const& sources : _matrix_sources)
     if(routes_to_copy.at(sources.first).size() > slots_available.at(sources.first))
     {
+      auto const& topo = _state->desc().plugin->modules[sources.first];
       tab_menu_result result;
       result.show_warning = true;
       result.title = "Copy failed";
-      result.content = "No matrix slots available.";
+      result.content = "No slots available for " + topo.info.tag.name + " matrix.";
       return result;
     }
 
@@ -436,7 +437,7 @@ audio_routing_menu_handler::copy(int module, int source_slot, int target_slot)
     tab_menu_result result;
     result.show_warning = true;
     result.title = "Copy failed";
-    result.content = "No matrix slots available.";
+    result.content = "No slots available for " + topo.info.tag.name + " matrix.";
     return result;
   }
 
