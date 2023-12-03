@@ -43,7 +43,7 @@ public:
   _on_param(on_param), _off_value(off_value), _sort_params(sort_params) {}
 
   std::vector<std::string> const extra_items() const override { return { "Tidy", "Sort" }; };
-  std::string extra(plugin_base::plugin_state* state, int module, int slot, int action) override;
+  tab_menu_result extra(plugin_base::plugin_state* state, int module, int slot, int action) override;
 };
 
 // allows to clear/swap/copy/move with updating routes
@@ -68,10 +68,10 @@ public:
   bool has_module_menu() const override { return true; }
   std::string module_menu_name() const override { return "With Routing"; };
 
-  std::string clear(plugin_state* state, int module, int slot) override;
-  std::string move(plugin_state* state, int module, int source_slot, int target_slot) override;
-  std::string copy(plugin_state* state, int module, int source_slot, int target_slot) override;
-  std::string swap(plugin_state* state, int module, int source_slot, int target_slot) override;
+  tab_menu_result clear(plugin_state* state, int module, int slot) override;
+  tab_menu_result move(plugin_state* state, int module, int source_slot, int target_slot) override;
+  tab_menu_result copy(plugin_state* state, int module, int source_slot, int target_slot) override;
+  tab_menu_result swap(plugin_state* state, int module, int source_slot, int target_slot) override;
 
   audio_routing_menu_handler(
     int matrix_module, int source_param, int target_param, int on_param, int off_value, 

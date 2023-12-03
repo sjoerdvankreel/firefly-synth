@@ -23,6 +23,13 @@ class module_engine;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
+struct tab_menu_result
+{
+  bool show_warning;
+  std::string title;
+  std::string content;
+};
+
 // allows to extend right-click menu on tab headers
 class tab_menu_handler {
 public:
@@ -32,11 +39,11 @@ public:
   virtual std::vector<std::string> const extra_items() const { return {}; };
 
   // pop up a message box if these return a non-empty text
-  virtual std::string clear(plugin_state* state, int module, int slot) { return {}; };
-  virtual std::string extra(plugin_state* state, int module, int slot, int action) { return {}; };
-  virtual std::string move(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
-  virtual std::string copy(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
-  virtual std::string swap(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result clear(plugin_state* state, int module, int slot) { return {}; };
+  virtual tab_menu_result extra(plugin_state* state, int module, int slot, int action) { return {}; };
+  virtual tab_menu_result move(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result copy(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result swap(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
 };
 
 typedef std::function<void(plugin_state& state)>
