@@ -151,7 +151,7 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
     delete handler;
 
     if(message.empty()) return;
-    auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::InfoIcon, "Info", message);
+    auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::WarningIcon, "Info", message);
     NativeMessageBox::showAsync(options, [](int){});
   });
 }

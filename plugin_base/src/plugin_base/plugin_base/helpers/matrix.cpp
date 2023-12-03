@@ -320,7 +320,7 @@ audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slo
   }
 
   if(routes_to_copy.size() > slots_available)
-    return "No routes available.";
+    return "Audio matrix is full.";
 
   // copy each route entirely (all params), only replace source by target
   state->copy_module_to(module, source_slot, target_slot);
