@@ -276,6 +276,20 @@ audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slo
 void 
 audio_routing_menu_handler::swap(plugin_state* state, int module, int source_slot, int target_slot)
 {
+  state->move_module_to(module, source_slot, target_slot);
+
+  // swap source_slot with target_slot for both source and target parameter
+  auto const& topo = state->desc().plugin->modules[_matrix_module];
+  auto const& sources = make_audio_matrix(_sources_factory(state->desc().plugin)).mappings;
+  auto const& targets = make_audio_matrix(_targets_factory(state->desc().plugin)).mappings;
+  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  {
+    if (state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value) continue;
+    if(!update_matched_slot(state, module, _source_param, r, source_slot, target_slot, sources))
+      update_matched_slot(state, module, _source_param, r, target_slot, source_slot, sources);
+    if (!update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets))
+      update_matched_slot(state, module, _target_param, r, target_slot, source_slot, targets);
+  }
 }
 
 }
