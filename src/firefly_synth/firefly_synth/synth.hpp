@@ -44,9 +44,23 @@ public:
   void swap(plugin_base::plugin_state* state, int module, int source_slot, int target_slot) override {}
 };
 
+// menu handlers to update routing on clear/move/swap/copy
+std::unique_ptr<plugin_base::tab_menu_handler>
+make_audio_routing_menu_handler(bool global);
+
 // set all outputs to current automation values
 cv_matrix_mixdown
 make_static_cv_matrix_mixdown(plugin_base::plugin_block& block);
+
+// routing matrices sources/targets
+std::vector<plugin_base::module_topo const*> 
+make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
+std::vector<plugin_base::module_topo const*>
+make_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
+std::vector<plugin_base::module_topo const*>
+make_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
+std::vector<plugin_base::module_topo const*>
+make_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 
 inline audio_matrix_mixer&
 get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)

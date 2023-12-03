@@ -39,45 +39,6 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
   return result;
 }
 
-void 
-tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int action)
-{
-  auto const& topo = state->desc().plugin->modules[module];
-  std::vector<std::map<int, plain_value>> route_value_maps;
-  int route_count = topo.params[_on_param].info.slot_count;
-  for (int r = 0; r < route_count; r++)
-    if (state->get_plain_at(module, slot, _on_param, r).step() != _off_value)
-    {
-      std::map<int, plain_value> route_value_map;
-      for(int p = 0; p < topo.params.size(); p++)
-        route_value_map[p] = state->get_plain_at(module, slot, p, r);
-      route_value_maps.push_back(route_value_map);
-    }
-  state->clear_module(module, slot);
-
-  // sort
-  if (action == 1)
-    std::sort(route_value_maps.begin(), route_value_maps.end(), [this, state, &topo](auto const& l, auto const& r) {
-      for (int p = 0; p < _sort_params.size(); p++)
-      {
-        assert(!topo.params[_sort_params[p]].domain.is_real());
-        if(l.at(_sort_params[p]).step() < r.at(_sort_params[p]).step())
-          return true;
-        if (l.at(_sort_params[p]).step() > r.at(_sort_params[p]).step())
-          return false;
-      }
-      return false;
-    });
-
-  // tidy
-  for (int r = 0; r < route_value_maps.size(); r++)
-  {
-    auto const& map = route_value_maps[r];
-    for(int p = 0; p < topo.params.size(); p++)
-      state->set_plain_at(module, slot, p, r, map.at(p));
-  }
-}
-
 routing_matrix<module_topo_mapping>
 make_audio_matrix(std::vector<module_topo const*> const& modules)
 {
@@ -216,6 +177,80 @@ make_cv_target_matrix(std::vector<plugin_base::module_topo const*> const& module
     }
   }
   return result;
+}
+
+void 
+tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int action)
+{
+  auto const& topo = state->desc().plugin->modules[module];
+  std::vector<std::map<int, plain_value>> route_value_maps;
+  int route_count = topo.params[_on_param].info.slot_count;
+  for (int r = 0; r < route_count; r++)
+    if (state->get_plain_at(module, slot, _on_param, r).step() != _off_value)
+    {
+      std::map<int, plain_value> route_value_map;
+      for(int p = 0; p < topo.params.size(); p++)
+        route_value_map[p] = state->get_plain_at(module, slot, p, r);
+      route_value_maps.push_back(route_value_map);
+    }
+  state->clear_module(module, slot);
+
+  // sort
+  if (action == 1)
+    std::sort(route_value_maps.begin(), route_value_maps.end(), [this, state, &topo](auto const& l, auto const& r) {
+      for (int p = 0; p < _sort_params.size(); p++)
+      {
+        assert(!topo.params[_sort_params[p]].domain.is_real());
+        if(l.at(_sort_params[p]).step() < r.at(_sort_params[p]).step())
+          return true;
+        if (l.at(_sort_params[p]).step() > r.at(_sort_params[p]).step())
+          return false;
+      }
+      return false;
+    });
+
+  // tidy
+  for (int r = 0; r < route_value_maps.size(); r++)
+  {
+    auto const& map = route_value_maps[r];
+    for(int p = 0; p < topo.params.size(); p++)
+      state->set_plain_at(module, slot, p, r, map.at(p));
+  }
+}
+
+void 
+audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
+{
+  state->clear_module(module, slot);
+  auto const& topo = state->desc().plugin->modules[_matrix_module];
+  int param_count = topo.params.size();
+  int route_count = topo.params[_on_param].info.slot_count;  
+  auto sources = make_audio_matrix(_sources_factory(state->desc().plugin)).mappings;
+  auto targets = make_audio_matrix(_targets_factory(state->desc().plugin)).mappings;
+  for(int r = 0; r < route_count; r++)
+  {
+    int selected_source = state->get_plain_at(_matrix_module, 0, _source_param, r).step();
+    int selected_target = state->get_plain_at(_matrix_module, 0, _target_param, r).step();
+    if((sources[selected_source].index == module && sources[selected_source].slot == slot) ||
+      (targets[selected_target].index == module && targets[selected_target].slot == slot))
+      for(int p = 0; p < param_count; p++)
+        state->set_plain_at(_matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
+  }
+}
+
+void 
+audio_routing_menu_handler::move(plugin_state* state, int module, int source_slot, int target_slot)
+{
+}
+
+void 
+audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slot, int target_slot)
+{
+}
+
+void 
+audio_routing_menu_handler::swap(plugin_state* state, int module, int source_slot, int target_slot)
+{
 }
 
 }

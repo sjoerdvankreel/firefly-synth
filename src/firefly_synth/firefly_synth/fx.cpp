@@ -138,7 +138,7 @@ fx_topo(
     make_module_dsp(stage, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
-  result.gui.menu_handler_factory = []() { return std::make_unique<routing_tab_menu_handler>(); };
+  result.gui.menu_handler_factory = [global]() { return make_audio_routing_menu_handler(global); };
 
   result.graph_renderer = render_graph;
   if(global) result.default_initializer = init_global_default;

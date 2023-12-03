@@ -12,6 +12,19 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+enum {
+  custom_section_title,
+  custom_section_hover_graph,
+  custom_section_tweak_graph,
+  custom_section_controls,
+  custom_section_count };
+
+enum { 
+  module_section_midi, module_section_input, 
+  module_section_lfos, module_section_env, module_section_cv_matrix,
+  module_section_audio_matrix, module_section_osc, module_section_fx, 
+  module_section_voice, module_section_monitor_master, module_section_count };
+
 static gui_colors
 make_section_colors(Colour const& c)
 {
@@ -27,19 +40,6 @@ make_section_colors(Colour const& c)
   result.section_outline1 = c.darker(1);
   return result;
 }
-
-enum {
-  custom_section_title,
-  custom_section_hover_graph,
-  custom_section_tweak_graph,
-  custom_section_controls,
-  custom_section_count };
-
-enum { 
-  module_section_midi, module_section_input, 
-  module_section_lfos, module_section_env, module_section_cv_matrix,
-  module_section_audio_matrix, module_section_osc, module_section_fx, 
-  module_section_voice, module_section_monitor_master, module_section_count };
 
 static Component&
 make_graph_section(plugin_gui* gui, lnf* lnf, component_store store, bool render_on_hover)
@@ -77,7 +77,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour cons
 }
 
 cv_matrix_mixdown
-make_static_cv_matrix_mixdown(plugin_base::plugin_block& block)
+make_static_cv_matrix_mixdown(plugin_block& block)
 {
   cv_matrix_mixdown result;
   plugin_dims dims(block.plugin);
@@ -86,15 +86,51 @@ make_static_cv_matrix_mixdown(plugin_base::plugin_block& block)
   {
     auto const& module = block.plugin.modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
-      for(int p = 0; p < module.params.size(); p++)
+      for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        if(param.dsp.can_modulate(mi))
+        if (param.dsp.can_modulate(mi))
           for (int pi = 0; pi < param.info.slot_count; pi++)
             result[m][mi][p][pi] = &block.state.all_accurate_automation[m][mi][p][pi];
       }
   }
   return result;
+}
+
+std::vector<module_topo const*>
+make_audio_matrix_sources(plugin_topo const* topo, bool global)
+{
+  if (global)
+    return { &topo->modules[module_voice_in], &topo->modules[module_gfx] };
+  else
+    return { &topo->modules[module_osc], &topo->modules[module_vfx] };
+}
+
+std::vector<module_topo const*>
+make_audio_matrix_targets(plugin_topo const* topo, bool global)
+{
+  if (global)
+    return { &topo->modules[module_gfx], &topo->modules[module_master] };
+  else
+    return { &topo->modules[module_vfx], &topo->modules[module_voice_out] };
+}
+
+std::vector<module_topo const*>
+make_cv_matrix_targets(plugin_topo const* topo, bool global)
+{
+  if (global)
+    return { &topo->modules[module_gfx], &topo->modules[module_gaudio_matrix], &topo->modules[module_master] };
+  else
+    return { &topo->modules[module_osc], &topo->modules[module_vfx], &topo->modules[module_vaudio_matrix] };
+}
+
+std::vector<module_topo const*>
+make_cv_matrix_sources(plugin_topo const* topo, bool global)
+{
+  if(global)
+    return { &topo->modules[module_midi], &topo->modules[module_input], &topo->modules[module_glfo] };
+  else
+    return { &topo->modules[module_midi], &topo->modules[module_input], &topo->modules[module_glfo], &topo->modules[module_vlfo], &topo->modules[module_env] };
 }
 
 std::unique_ptr<plugin_topo>
@@ -176,18 +212,14 @@ synth_topo()
   result->modules[module_input] = input_topo(module_section_input, other_colors, { 0, 0 });
   result->modules[module_master] = master_topo(module_section_monitor_master, audio_colors, { 0, 1 });
   result->modules[module_monitor] = monitor_topo(module_section_monitor_master, monitor_colors, { 0, 0 }, result->polyphony);
-  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
-    { &result->modules[module_osc], &result->modules[module_vfx] },
-    { &result->modules[module_vfx], &result->modules[module_voice_out] });
+  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false, 
+    make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
   result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, false,
-    { &result->modules[module_midi], &result->modules[module_input], &result->modules[module_glfo], &result->modules[module_vlfo], &result->modules[module_env] },
-    { &result->modules[module_osc], &result->modules[module_vfx], &result->modules[module_vaudio_matrix] });
+    make_cv_matrix_sources(result.get(), false), make_cv_matrix_targets(result.get(), false));
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
-    { &result->modules[module_voice_in], &result->modules[module_gfx] },
-    { &result->modules[module_gfx], &result->modules[module_master] });
+    make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, true,
-    { &result->modules[module_midi], &result->modules[module_input], &result->modules[module_glfo] },
-    { &result->modules[module_gfx], &result->modules[module_gaudio_matrix], &result->modules[module_master] });
+    make_cv_matrix_sources(result.get(), true), make_cv_matrix_targets(result.get(), true));
   return result;
 }
 
