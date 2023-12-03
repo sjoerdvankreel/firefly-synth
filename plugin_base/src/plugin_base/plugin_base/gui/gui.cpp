@@ -138,16 +138,21 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
   options = options.withTargetComponent(_button);
   menu.setLookAndFeel(&_button->getLookAndFeel());
   menu.showMenuAsync(options, [this, handler = handler.release()](int id) {
+    std::string message;
     if(id == 1000) _state->clear_module(_module, _slot);
     else if(2000 <= id && id < 3000) _state->copy_module_to(_module, _slot, id - 2000);
     else if(3000 <= id && id < 4000) _state->move_module_to(_module, _slot, id - 3000);
     else if(4000 <= id && id < 5000) _state->swap_module_with(_module, _slot, id - 4000);
-    else if(id == 11000) handler->clear(_state, _module, _slot);
-    else if(12000 <= id && id < 13000) handler->copy(_state, _module, _slot, id - 12000);
-    else if(13000 <= id && id < 14000) handler->move(_state, _module, _slot, id - 13000);
-    else if(14000 <= id && id < 15000) handler->swap(_state, _module, _slot, id - 14000);
-    else if(20000 <= id) handler->extra(_state, _module, _slot, id - 20000);
+    else if(id == 11000) message = handler->clear(_state, _module, _slot);
+    else if(12000 <= id && id < 13000) message = handler->copy(_state, _module, _slot, id - 12000);
+    else if(13000 <= id && id < 14000) message = handler->move(_state, _module, _slot, id - 13000);
+    else if(14000 <= id && id < 15000) message = handler->swap(_state, _module, _slot, id - 14000);
+    else if(20000 <= id) message = handler->extra(_state, _module, _slot, id - 20000);
     delete handler;
+
+    if(message.empty()) return;
+    auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::InfoIcon, "Info", message);
+    NativeMessageBox::showAsync(options, [](int){});
   });
 }
 

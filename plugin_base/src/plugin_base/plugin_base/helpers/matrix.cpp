@@ -179,7 +179,7 @@ make_cv_target_matrix(std::vector<plugin_base::module_topo const*> const& module
   return result;
 }
 
-void 
+std::string 
 tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int action)
 {
   auto const& topo = state->desc().plugin->modules[module];
@@ -216,6 +216,8 @@ tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int a
     for(int p = 0; p < topo.params.size(); p++)
       state->set_plain_at(module, slot, p, r, map.at(p));
   }
+
+  return std::string();
 }
 
 bool 
@@ -239,7 +241,7 @@ audio_routing_menu_handler::update_matched_slot(
   return true;
 }
 
-void 
+std::string
 audio_routing_menu_handler::move(plugin_state* state, int module, int source_slot, int target_slot)
 {
   state->move_module_to(module, source_slot, target_slot);
@@ -254,9 +256,11 @@ audio_routing_menu_handler::move(plugin_state* state, int module, int source_slo
     update_matched_slot(state, module, _source_param, r, source_slot, target_slot, sources);
     update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets);
   }
+
+  return std::string();
 }
 
-void 
+std::string
 audio_routing_menu_handler::swap(plugin_state* state, int module, int source_slot, int target_slot)
 {
   state->move_module_to(module, source_slot, target_slot);
@@ -273,9 +277,11 @@ audio_routing_menu_handler::swap(plugin_state* state, int module, int source_slo
     if (!update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets))
       update_matched_slot(state, module, _target_param, r, target_slot, source_slot, targets);
   }
+
+  return std::string();
 }
 
-void
+std::string
 audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
 {
   state->clear_module(module, slot);
@@ -293,9 +299,11 @@ audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
       for (int p = 0; p < topo.params.size(); p++)
         state->set_plain_at(_matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
   }
+
+  return std::string();
 }
 
-void
+std::string
 audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slot, int target_slot)
 {
   // copy is a bit annoying since we might run out of slots, so check that first
@@ -311,8 +319,8 @@ audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slo
     else if(is_selected(state, module, _target_param, r, source_slot, targets)) routes_to_copy.push_back(r);
   }
 
-  // TODO
-  if(routes_to_copy.size() > slots_available) return;
+  if(routes_to_copy.size() > slots_available)
+    return "No routes available.";
 
   // copy each route entirely (all params), only replace source by target
   state->copy_module_to(module, source_slot, target_slot);
@@ -326,6 +334,8 @@ audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slo
         update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets);
         break;
       }
+
+  return std::string();
 }
 
 }

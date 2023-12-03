@@ -38,10 +38,6 @@ public plugin_base::tab_menu_handler {
 public:
   bool has_module_menu() const override { return true; }
   std::string module_menu_name() const override { return "With Routing"; };
-  void clear(plugin_base::plugin_state* state, int module, int slot) override {}
-  void move(plugin_base::plugin_state* state, int module, int source_slot, int target_slot) override {}
-  void copy(plugin_base::plugin_state* state, int module, int source_slot, int target_slot) override {}
-  void swap(plugin_base::plugin_state* state, int module, int source_slot, int target_slot) override {}
 };
 
 // menu handlers to update routing on clear/move/swap/copy

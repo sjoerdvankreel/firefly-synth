@@ -31,11 +31,12 @@ public:
   virtual std::string module_menu_name() const { return {}; };
   virtual std::vector<std::string> const extra_items() const { return {}; };
 
-  virtual void clear(plugin_state* state, int module, int slot) {};
-  virtual void extra(plugin_state* state, int module, int slot, int action) {};
-  virtual void move(plugin_state* state, int module, int source_slot, int target_slot) {};
-  virtual void copy(plugin_state* state, int module, int source_slot, int target_slot) {};
-  virtual void swap(plugin_state* state, int module, int source_slot, int target_slot) {};
+  // pop up a message box if these return a non-empty text
+  virtual std::string clear(plugin_state* state, int module, int slot) { return {}; };
+  virtual std::string extra(plugin_state* state, int module, int slot, int action) { return {}; };
+  virtual std::string move(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
+  virtual std::string copy(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
+  virtual std::string swap(plugin_state* state, int module, int source_slot, int target_slot) { return {}; };
 };
 
 typedef std::function<void(plugin_state& state)>
