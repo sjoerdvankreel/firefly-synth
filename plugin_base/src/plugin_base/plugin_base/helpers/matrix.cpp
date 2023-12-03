@@ -396,10 +396,13 @@ audio_routing_menu_handler::move(int module, int source_slot, int target_slot)
   auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
   for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    if(_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) continue;
-    update_matched_cv_slot(r, module, source_slot, target_slot);
-    update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources);
-    update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets);
+    if (_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.on_param, r).step() != _cv_params.off_value)
+      update_matched_cv_slot(r, module, source_slot, target_slot);
+    if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() != _audio_params.off_value)
+    {
+      update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources);
+      update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets);
+    }
   }
 
   return {};
@@ -413,13 +416,18 @@ audio_routing_menu_handler::swap(int module, int source_slot, int target_slot)
   auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
   for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) continue;
-    if (!update_matched_cv_slot(r, module, source_slot, target_slot))
-      update_matched_cv_slot(r, module, target_slot, source_slot);
-    if(!update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources))
-      update_matched_audio_slot(_audio_params.source_param, r, module, target_slot, source_slot, _audio_params.sources);
-    if (!update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets))
-      update_matched_audio_slot(_audio_params.target_param, r, module, target_slot, source_slot, _audio_params.targets);
+    if (_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.on_param, r).step() != _cv_params.off_value)
+    {
+      if (!update_matched_cv_slot(r, module, source_slot, target_slot))
+        update_matched_cv_slot(r, module, target_slot, source_slot);
+    }
+    if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() != _audio_params.off_value)
+    {
+      if(!update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources))
+        update_matched_audio_slot(_audio_params.source_param, r, module, target_slot, source_slot, _audio_params.sources);
+      if (!update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets))
+        update_matched_audio_slot(_audio_params.target_param, r, module, target_slot, source_slot, _audio_params.targets);
+    }
   }
   return {};
 }
