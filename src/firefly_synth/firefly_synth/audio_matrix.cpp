@@ -116,6 +116,8 @@ audio_matrix_topo(
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
   int this_module = global? module_gaudio_matrix: module_vaudio_matrix;
+  auto source_matrix = make_audio_matrix(sources);
+  auto target_matrix = make_audio_matrix(targets);
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, 0, { 
@@ -134,16 +136,21 @@ audio_matrix_topo(
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
 
-  auto source_matrix = make_audio_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.submenu = source_matrix.submenu;
+  source.gui.item_enabled.bind_param({ this_module, 0, param_target, gui_item_binding::match_param_slot },
+    [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
+      int fx_index = global ? module_gfx : module_vfx;
+      if (sm[self].index == fx_index && tm[other].index == fx_index)
+        return sm[self].slot < tm[other].slot;
+      return true;
+    });
 
   auto default_target = global? "Master": "Voice";
-  auto target_matrix = make_audio_matrix(targets);
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, default_target),
