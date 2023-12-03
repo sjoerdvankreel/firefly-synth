@@ -39,6 +39,16 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
   return result;
 }
 
+static tab_menu_result
+make_copy_failed_result(std::string const& matrix_name)
+{
+  tab_menu_result result;
+  result.show_warning = true;
+  result.title = "Copy failed";
+  result.content = "No slots available for " + matrix_name + " matrix.";
+  return result;
+}
+
 routing_matrix<module_topo_mapping>
 make_audio_matrix(std::vector<module_topo const*> const& modules)
 {
@@ -319,11 +329,7 @@ cv_routing_menu_handler::copy(int module, int source_slot, int target_slot)
     if(routes_to_copy.at(sources.first).size() > slots_available.at(sources.first))
     {
       auto const& topo = _state->desc().plugin->modules[sources.first];
-      tab_menu_result result;
-      result.show_warning = true;
-      result.title = "Copy failed";
-      result.content = "No slots available for " + topo.info.tag.name + " matrix.";
-      return result;
+      return make_copy_failed_result(topo.info.tag.name);
     }
 
   // copy each route entirely (all params), only replace source by target
@@ -458,33 +464,48 @@ tab_menu_result
 audio_routing_menu_handler::copy(int module, int source_slot, int target_slot)
 {
   // copy is a bit annoying since we might run out of slots, so check that first
-  int slots_available = 0;
-  std::vector<int> routes_to_copy;
-  auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
-  for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
+  int cv_slots_available = 0;
+  std::vector<int> cv_routes_to_copy;
+  auto const& cv_topo = _state->desc().plugin->modules[_cv_params.matrix_module];
+  for (int r = 0; r < cv_topo.params[_cv_params.on_param].info.slot_count; r++)
   {
-    if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) slots_available++;
-    else if(is_audio_selected(_audio_params.source_param, r, module, source_slot, _audio_params.sources)) routes_to_copy.push_back(r);
-    else if(is_audio_selected(_audio_params.target_param, r, module, source_slot, _audio_params.targets)) routes_to_copy.push_back(r);
+    if (_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.on_param, r).step() == _cv_params.off_value) cv_slots_available++;
+    else if (is_cv_selected(r, module, source_slot, _cv_params.targets)) cv_routes_to_copy.push_back(r);
   }
 
-  if(routes_to_copy.size() > slots_available)
+  if (cv_routes_to_copy.size() > cv_slots_available)
+    return make_copy_failed_result(cv_topo.info.tag.name);
+
+  int audio_slots_available = 0;
+  std::vector<int> audio_routes_to_copy;
+  auto const& audio_topo = _state->desc().plugin->modules[_audio_params.matrix_module];
+  for (int r = 0; r < audio_topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    tab_menu_result result;
-    result.show_warning = true;
-    result.title = "Copy failed";
-    result.content = "No slots available for " + topo.info.tag.name + " matrix.";
-    return result;
+    if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) audio_slots_available++;
+    else if(is_audio_selected(_audio_params.source_param, r, module, source_slot, _audio_params.sources)) audio_routes_to_copy.push_back(r);
+    else if(is_audio_selected(_audio_params.target_param, r, module, source_slot, _audio_params.targets)) audio_routes_to_copy.push_back(r);
   }
+
+  if (audio_routes_to_copy.size() > audio_slots_available)
+    return make_copy_failed_result(audio_topo.info.tag.name);
 
   // copy each route entirely (all params), only replace source by target
   _state->copy_module_to(module, source_slot, target_slot);
-  for (int rc = 0; rc < routes_to_copy.size(); rc++)
-    for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
+  for (int rc = 0; rc < cv_routes_to_copy.size(); rc++)
+    for (int r = 0; r < cv_topo.params[_cv_params.on_param].info.slot_count; r++)
+      if (_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.on_param, r).step() == _cv_params.off_value)
+      {
+        for (int p = 0; p < cv_topo.params.size(); p++)
+          _state->set_plain_at(_cv_params.matrix_module, 0, p, r, _state->get_plain_at(_cv_params.matrix_module, 0, p, cv_routes_to_copy[rc]));
+        update_matched_cv_slot(r, module, source_slot, target_slot);
+        break;
+      }
+  for (int rc = 0; rc < audio_routes_to_copy.size(); rc++)
+    for (int r = 0; r < audio_topo.params[_audio_params.on_param].info.slot_count; r++)
       if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value)
       {
-        for (int p = 0; p < topo.params.size(); p++)
-          _state->set_plain_at(_audio_params.matrix_module, 0, p, r, _state->get_plain_at(_audio_params.matrix_module, 0, p, routes_to_copy[rc]));
+        for (int p = 0; p < audio_topo.params.size(); p++)
+          _state->set_plain_at(_audio_params.matrix_module, 0, p, r, _state->get_plain_at(_audio_params.matrix_module, 0, p, audio_routes_to_copy[rc]));
         update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources);
         update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets);
         break;
