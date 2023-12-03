@@ -218,13 +218,21 @@ tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int a
   }
 }
 
+bool 
+audio_routing_menu_handler::is_selected(
+  plugin_state* state, int module, int param, int route, int slot,
+  std::vector<module_topo_mapping> const& mappings)
+{
+  int selected = state->get_plain_at(_matrix_module, 0, param, route).step();
+  return mappings[selected].index == module && mappings[selected].slot == slot;
+}
+
 bool
 audio_routing_menu_handler::update_matched_slot(
   plugin_state* state, int module, int param, int route,
   int from_slot, int to_slot, std::vector<module_topo_mapping> const& mappings)
 {
-  int selected = state->get_plain_at(_matrix_module, 0, param, route).step();
-  if (mappings[selected].index != module || mappings[selected].slot != from_slot) return false;
+  if(!is_selected(state, module, param, route, from_slot, mappings)) return false;
   auto replace_iter = std::find_if(mappings.begin(), mappings.end(),
     [module, to_slot](auto const& m) { return m.index == module && m.slot == to_slot; });
   state->set_raw_at(_matrix_module, 0, param, route, (int)(replace_iter - mappings.begin()));
@@ -269,11 +277,6 @@ audio_routing_menu_handler::move(plugin_state* state, int module, int source_slo
 }
 
 void 
-audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slot, int target_slot)
-{
-}
-
-void 
 audio_routing_menu_handler::swap(plugin_state* state, int module, int source_slot, int target_slot)
 {
   state->move_module_to(module, source_slot, target_slot);
@@ -290,6 +293,39 @@ audio_routing_menu_handler::swap(plugin_state* state, int module, int source_slo
     if (!update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets))
       update_matched_slot(state, module, _target_param, r, target_slot, source_slot, targets);
   }
+}
+
+void
+audio_routing_menu_handler::copy(plugin_state* state, int module, int source_slot, int target_slot)
+{
+  // copy is a bit annoying since we might run out of slots, so check that first
+  int slots_available = 0;
+  std::vector<int> routes_to_copy;
+  auto const& topo = state->desc().plugin->modules[_matrix_module];
+  auto const& sources = make_audio_matrix(_sources_factory(state->desc().plugin)).mappings;
+  auto const& targets = make_audio_matrix(_targets_factory(state->desc().plugin)).mappings;
+  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  {
+    if (state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value) slots_available++;
+    else if(is_selected(state, module, _source_param, r, source_slot, sources)) routes_to_copy.push_back(r);
+    else if(is_selected(state, module, _target_param, r, source_slot, targets)) routes_to_copy.push_back(r);
+  }
+
+  // TODO
+  if(routes_to_copy.size() > slots_available) return;
+
+  // copy each route entirely (all params), only replace source by target
+  state->copy_module_to(module, source_slot, target_slot);
+  for (int rc = 0; rc < routes_to_copy.size(); rc++)
+    for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+      if (state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value)
+      {
+        for (int p = 0; p < topo.params.size(); p++)
+          state->set_plain_at(_matrix_module, 0, p, r, state->get_plain_at(_matrix_module, 0, p, routes_to_copy[rc]));
+        update_matched_slot(state, module, _source_param, r, source_slot, target_slot, sources);
+        update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets);
+        break;
+      }
 }
 
 }
