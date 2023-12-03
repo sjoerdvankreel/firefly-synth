@@ -9,7 +9,7 @@
 namespace plugin_base {
 
 typedef std::function<std::vector<module_topo const*>(plugin_topo const*)>
-audio_routes_factory;
+module_routes_factory;
 
 template <class M>
 struct routing_matrix
@@ -54,8 +54,8 @@ public tab_menu_handler {
   int _source_param;
   int _target_param;   
   int _matrix_module;
-  audio_routes_factory const _sources_factory;
-  audio_routes_factory const _targets_factory;
+  module_routes_factory const _sources_factory;
+  module_routes_factory const _targets_factory;
 
   bool is_selected(
     plugin_state* state, int module, int param, int route, int slot, 
@@ -75,7 +75,7 @@ public:
 
   audio_routing_menu_handler(
     int matrix_module, int source_param, int target_param, int on_param, int off_value, 
-    audio_routes_factory const& sources_factory, audio_routes_factory const& targets_factory):
+    module_routes_factory const& sources_factory, module_routes_factory const& targets_factory):
   _on_param(on_param), _off_value(off_value), _source_param(source_param), _target_param(target_param), 
   _matrix_module(matrix_module), _sources_factory(sources_factory), _targets_factory(targets_factory) {}
 };
