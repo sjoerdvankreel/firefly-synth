@@ -19,6 +19,7 @@ do the route switching thing on swap module
 fix up the gui (control sizes etc)
 check all infernal functionality, see what needs to be in the base
 document the header files a bit
+clear vgaudio with routing
 
 * get some linux folks to comment (ycollete?)
 * continuing

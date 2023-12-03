@@ -222,18 +222,18 @@ void
 audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
 {
   state->clear_module(module, slot);
+
+  // set any route matching this module to all defaults
   auto const& topo = state->desc().plugin->modules[_matrix_module];
-  int param_count = topo.params.size();
-  int route_count = topo.params[_on_param].info.slot_count;  
   auto sources = make_audio_matrix(_sources_factory(state->desc().plugin)).mappings;
   auto targets = make_audio_matrix(_targets_factory(state->desc().plugin)).mappings;
-  for(int r = 0; r < route_count; r++)
+  for(int r = 0; r < topo.params[_on_param].info.slot_count; r++)
   {
     int selected_source = state->get_plain_at(_matrix_module, 0, _source_param, r).step();
     int selected_target = state->get_plain_at(_matrix_module, 0, _target_param, r).step();
     if((sources[selected_source].index == module && sources[selected_source].slot == slot) ||
       (targets[selected_target].index == module && targets[selected_target].slot == slot))
-      for(int p = 0; p < param_count; p++)
+      for(int p = 0; p < topo.params.size(); p++)
         state->set_plain_at(_matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
   }
 }
@@ -241,6 +241,30 @@ audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
 void 
 audio_routing_menu_handler::move(plugin_state* state, int module, int source_slot, int target_slot)
 {
+  state->move_module_to(module, source_slot, target_slot);
+
+  // overwrite source_slot with target_slot for both source and target parameter
+  auto const& topo = state->desc().plugin->modules[_matrix_module];
+  auto const& sources = make_audio_matrix(_sources_factory(state->desc().plugin)).mappings;
+  auto const& targets = make_audio_matrix(_targets_factory(state->desc().plugin)).mappings;
+  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  {
+    if(state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value) continue;
+    int selected_source = state->get_plain_at(_matrix_module, 0, _source_param, r).step();
+    if (sources[selected_source].index == module && sources[selected_source].slot == source_slot)
+    {
+      auto replace_target = std::find_if(sources.begin(), sources.end(), 
+        [module, target_slot](auto const& s) { return s.index == module && s.slot == target_slot; });
+      state->set_raw_at(_matrix_module, 0, _source_param, r, (int)(replace_target - sources.begin()));
+    }
+    int selected_target = state->get_plain_at(_matrix_module, 0, _target_param, r).step();
+    if (targets[selected_target].index == module && targets[selected_target].slot == source_slot)
+    {
+      auto replace_target = std::find_if(targets.begin(), targets.end(),
+        [module, target_slot](auto const& t) { return t.index == module && t.slot == target_slot; });
+      state->set_raw_at(_matrix_module, 0, _target_param, r, (int)(replace_target - targets.begin()));
+    }
+  }
 }
 
 void 
