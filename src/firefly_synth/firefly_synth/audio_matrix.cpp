@@ -95,13 +95,18 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   return graph_data(value, false);
 }
 
-std::unique_ptr<tab_menu_handler>
-make_audio_routing_menu_handler(plugin_state* state, bool global)
+audio_routing_audio_params
+make_audio_routing_audio_params(plugin_state* state, bool global)
 {
-  int module = global? module_gaudio_matrix: module_vaudio_matrix;
-  std::vector<module_topo_mapping> sources = make_audio_matrix(make_audio_matrix_sources(state->desc().plugin, global)).mappings;
-  std::vector<module_topo_mapping> targets = make_audio_matrix(make_audio_matrix_targets(state->desc().plugin, global)).mappings;
-  return std::make_unique<audio_routing_menu_handler>(state, module, param_source, param_target, param_on, 0, sources, targets);
+  audio_routing_audio_params result;
+  result.off_value = 0;
+  result.on_param = param_on;
+  result.source_param = param_source;
+  result.target_param = param_target;
+  result.matrix_module = global ? module_gaudio_matrix : module_vaudio_matrix;
+  result.sources = make_audio_matrix(make_audio_matrix_sources(state->desc().plugin, global)).mappings;
+  result.targets = make_audio_matrix(make_audio_matrix_targets(state->desc().plugin, global)).mappings;
+  return result;
 }
 
 module_topo 

@@ -133,6 +133,14 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
     return { &topo->modules[module_midi], &topo->modules[module_input], &topo->modules[module_glfo], &topo->modules[module_vlfo], &topo->modules[module_env] };
 }
 
+std::unique_ptr<tab_menu_handler>
+make_audio_routing_menu_handler(plugin_state* state, bool global)
+{
+  auto cv_params = make_audio_routing_cv_params(state, global);
+  auto audio_params = make_audio_routing_audio_params(state, global);
+  return std::make_unique<audio_routing_menu_handler>(state, cv_params, audio_params);
+}
+
 std::unique_ptr<plugin_topo>
 synth_topo()
 {

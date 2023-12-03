@@ -346,23 +346,23 @@ cv_routing_menu_handler::copy(int module, int source_slot, int target_slot)
 }
 
 bool 
-audio_routing_menu_handler::is_selected(
+audio_routing_menu_handler::is_audio_selected(
   int param, int route, int module, int slot,
   std::vector<module_topo_mapping> const& mappings)
 {
-  int selected = _state->get_plain_at(_matrix_module, 0, param, route).step();
+  int selected = _state->get_plain_at(_audio_params.matrix_module, 0, param, route).step();
   return mappings[selected].index == module && mappings[selected].slot == slot;
 }
 
 bool
-audio_routing_menu_handler::update_matched_slot(
+audio_routing_menu_handler::update_matched_audio_slot(
   int param, int route, int module, int from_slot, 
   int to_slot, std::vector<module_topo_mapping> const& mappings)
 {
-  if(!is_selected(param, route, module, from_slot, mappings)) return false;
+  if(!is_audio_selected(param, route, module, from_slot, mappings)) return false;
   auto replace_iter = std::find_if(mappings.begin(), mappings.end(),
     [module, to_slot](auto const& m) { return m.index == module && m.slot == to_slot; });
-  _state->set_raw_at(_matrix_module, 0, param, route, (int)(replace_iter - mappings.begin()));
+  _state->set_raw_at(_audio_params.matrix_module, 0, param, route, (int)(replace_iter - mappings.begin()));
   return true;
 }
 
@@ -372,12 +372,12 @@ audio_routing_menu_handler::move(int module, int source_slot, int target_slot)
   _state->move_module_to(module, source_slot, target_slot);
 
   // overwrite source_slot with target_slot for both source and target parameter
-  auto const& topo = _state->desc().plugin->modules[_matrix_module];
-  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
+  for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    if(_state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value) continue;
-    update_matched_slot(_source_param, r, module, source_slot, target_slot, _sources);
-    update_matched_slot(_target_param, r, module, source_slot, target_slot, _targets);
+    if(_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) continue;
+    update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources);
+    update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets);
   }
 
   return {};
@@ -388,14 +388,14 @@ audio_routing_menu_handler::swap(int module, int source_slot, int target_slot)
 {
   // swap source_slot with target_slot for both source and target parameter
   _state->move_module_to(module, source_slot, target_slot);
-  auto const& topo = _state->desc().plugin->modules[_matrix_module];
-  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
+  for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    if (_state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value) continue;
-    if(!update_matched_slot(_source_param, r, module, source_slot, target_slot, _sources))
-      update_matched_slot(_source_param, r, module, target_slot, source_slot, _sources);
-    if (!update_matched_slot(_target_param, r, module, source_slot, target_slot, _targets))
-      update_matched_slot(_target_param, r, module, target_slot, source_slot, _targets);
+    if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) continue;
+    if(!update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources))
+      update_matched_audio_slot(_audio_params.source_param, r, module, target_slot, source_slot, _audio_params.sources);
+    if (!update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets))
+      update_matched_audio_slot(_audio_params.target_param, r, module, target_slot, source_slot, _audio_params.targets);
   }
   return {};
 }
@@ -405,15 +405,15 @@ audio_routing_menu_handler::clear(int module, int slot)
 {
   // set any route matching this module to all defaults
   _state->clear_module(module, slot);
-  auto const& topo = _state->desc().plugin->modules[_matrix_module];
-  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
+  for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    int selected_source = _state->get_plain_at(_matrix_module, 0, _source_param, r).step();
-    int selected_target = _state->get_plain_at(_matrix_module, 0, _target_param, r).step();
-    if ((_sources[selected_source].index == module && _sources[selected_source].slot == slot) ||
-      (_targets[selected_target].index == module && _targets[selected_target].slot == slot))
+    int selected_source = _state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.source_param, r).step();
+    int selected_target = _state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.target_param, r).step();
+    if ((_audio_params.sources[selected_source].index == module && _audio_params.sources[selected_source].slot == slot) ||
+      (_audio_params.targets[selected_target].index == module && _audio_params.targets[selected_target].slot == slot))
       for (int p = 0; p < topo.params.size(); p++)
-        _state->set_plain_at(_matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
+        _state->set_plain_at(_audio_params.matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
   }
   return {};
 }
@@ -424,12 +424,12 @@ audio_routing_menu_handler::copy(int module, int source_slot, int target_slot)
   // copy is a bit annoying since we might run out of slots, so check that first
   int slots_available = 0;
   std::vector<int> routes_to_copy;
-  auto const& topo = _state->desc().plugin->modules[_matrix_module];
-  for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
+  auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
+  for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    if (_state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value) slots_available++;
-    else if(is_selected(_source_param, r, module, source_slot, _sources)) routes_to_copy.push_back(r);
-    else if(is_selected(_target_param, r, module, source_slot, _targets)) routes_to_copy.push_back(r);
+    if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) slots_available++;
+    else if(is_audio_selected(_audio_params.source_param, r, module, source_slot, _audio_params.sources)) routes_to_copy.push_back(r);
+    else if(is_audio_selected(_audio_params.target_param, r, module, source_slot, _audio_params.targets)) routes_to_copy.push_back(r);
   }
 
   if(routes_to_copy.size() > slots_available)
@@ -444,13 +444,13 @@ audio_routing_menu_handler::copy(int module, int source_slot, int target_slot)
   // copy each route entirely (all params), only replace source by target
   _state->copy_module_to(module, source_slot, target_slot);
   for (int rc = 0; rc < routes_to_copy.size(); rc++)
-    for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
-      if (_state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value)
+    for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
+      if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value)
       {
         for (int p = 0; p < topo.params.size(); p++)
-          _state->set_plain_at(_matrix_module, 0, p, r, _state->get_plain_at(_matrix_module, 0, p, routes_to_copy[rc]));
-        update_matched_slot(_source_param, r, module, source_slot, target_slot, _sources);
-        update_matched_slot(_target_param, r, module, source_slot, target_slot, _targets);
+          _state->set_plain_at(_audio_params.matrix_module, 0, p, r, _state->get_plain_at(_audio_params.matrix_module, 0, p, routes_to_copy[rc]));
+        update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources);
+        update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets);
         break;
       }
 

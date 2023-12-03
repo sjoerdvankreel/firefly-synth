@@ -3,6 +3,7 @@
 #include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/shared/jarray.hpp>
+#include <plugin_base/helpers/matrix.hpp>
 #include <plugin_base/dsp/block/plugin.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -51,6 +52,10 @@ std::unique_ptr<plugin_base::tab_menu_handler>
 make_cv_routing_menu_handler(plugin_base::plugin_state* state);
 std::unique_ptr<plugin_base::tab_menu_handler>
 make_audio_routing_menu_handler(plugin_base::plugin_state* state, bool global);
+plugin_base::audio_routing_cv_params
+make_audio_routing_cv_params(plugin_base::plugin_state* state, bool global);
+plugin_base::audio_routing_audio_params
+make_audio_routing_audio_params(plugin_base::plugin_state* state, bool global);
 
 inline audio_matrix_mixer&
 get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)

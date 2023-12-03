@@ -83,6 +83,18 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
 }
 
+audio_routing_cv_params
+make_audio_routing_cv_params(plugin_state* state, bool global)
+{
+  audio_routing_cv_params result;
+  result.off_value = type_off;
+  result.on_param = param_type;
+  result.target_param = param_target;
+  result.matrix_module = global ? module_gcv_matrix : module_vcv_matrix;
+  result.targets = make_cv_target_matrix(make_cv_matrix_targets(state->desc().plugin, global)).mappings;
+  return result;
+}
+
 std::unique_ptr<tab_menu_handler>
 make_cv_routing_menu_handler(plugin_state* state)
 {

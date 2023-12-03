@@ -16,6 +16,28 @@ struct routing_matrix
   std::shared_ptr<plugin_base::gui_submenu> submenu;
 };
 
+// for audio_routing_menu_handler
+struct audio_routing_cv_params
+{
+  int on_param;
+  int off_value;
+  int target_param;
+  int matrix_module;
+  std::vector<param_topo_mapping> targets;
+};
+
+// for audio_routing_menu_handler
+struct audio_routing_audio_params
+{
+  int on_param;
+  int off_value;
+  int source_param;
+  int target_param;
+  int matrix_module;
+  std::vector<module_topo_mapping> sources;
+  std::vector<module_topo_mapping> targets;
+};
+
 // any audio module as a source or target
 routing_matrix<plugin_base::module_topo_mapping>
 make_audio_matrix(std::vector<plugin_base::module_topo const*> const& modules);
@@ -76,18 +98,13 @@ public:
 // allows to clear/swap/copy/move with updating routes
 class audio_routing_menu_handler :
 public tab_menu_handler {
-  int const _on_param;
-  int const _off_value;
-  int const _source_param;
-  int const _target_param;
-  int const _matrix_module;
-  std::vector<module_topo_mapping> const _sources;
-  std::vector<module_topo_mapping> const _targets;
+  audio_routing_cv_params const _cv_params;
+  audio_routing_audio_params const _audio_params;
 
-  bool is_selected(
+  bool is_audio_selected(
     int param, int route, int module, int slot,
     std::vector<module_topo_mapping> const& mappings);
-  bool update_matched_slot(
+  bool update_matched_audio_slot(
     int param, int route, int module, int from_slot, 
     int to_slot, std::vector<module_topo_mapping> const& mappings);
 
@@ -100,11 +117,9 @@ public:
   tab_menu_result copy(int module, int source_slot, int target_slot) override;
   tab_menu_result swap(int module, int source_slot, int target_slot) override;
 
-  audio_routing_menu_handler(
-    plugin_state* state, int matrix_module, int source_param, int target_param, int on_param, 
-    int off_value, std::vector<module_topo_mapping> const& sources, std::vector<module_topo_mapping> const& targets):
-  tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _source_param(source_param), 
-  _target_param(target_param), _matrix_module(matrix_module), _sources(sources), _targets(targets) {}
+  audio_routing_menu_handler(plugin_state* state, 
+    audio_routing_cv_params const& cv_params, audio_routing_audio_params const& audio_params):
+  tab_menu_handler(state), _cv_params(cv_params), _audio_params(audio_params) {}
 };
 
 }
