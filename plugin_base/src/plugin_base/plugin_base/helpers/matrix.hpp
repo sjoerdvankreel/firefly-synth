@@ -58,10 +58,10 @@ public tab_menu_handler {
   module_routes_factory const _targets_factory;
 
   bool is_selected(
-    plugin_state* state, int module, int param, int route, int slot, 
+    plugin_state* state, int param, int route, int module, int slot,
     std::vector<module_topo_mapping> const& mappings);
   bool update_matched_slot(
-    plugin_state* state, int module, int param, int route,
+    plugin_state* state, int param, int route, int module,
     int from_slot, int to_slot, std::vector<module_topo_mapping> const& mappings);
 
 public:
