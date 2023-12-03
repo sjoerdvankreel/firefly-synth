@@ -308,8 +308,8 @@ tab_menu_result
 cv_routing_menu_handler::copy(plugin_state* state, int module, int source_slot, int target_slot)
 {
   // copy is a bit annoying since we might run out of slots, so check that first
-  std::vector<int> slots_available;
-  std::vector<std::vector<int>> routes_to_copy;
+  std::map<int, int> slots_available;
+  std::map<int, std::vector<int>> routes_to_copy;
   for (int matrix : _matrix_modules)
   {
     int this_slots_available = 0;
@@ -321,12 +321,12 @@ cv_routing_menu_handler::copy(plugin_state* state, int module, int source_slot, 
       if (state->get_plain_at(matrix, 0, _on_param, r).step() == _off_value) this_slots_available++;
       else if(is_selected(state, matrix, _source_param, r, module, source_slot, sources)) this_routes_to_copy.push_back(r);
     }
-    routes_to_copy.push_back(this_routes_to_copy);
-    slots_available.push_back(this_slots_available);
+    routes_to_copy[matrix] = this_routes_to_copy;
+    slots_available[matrix] = this_slots_available;
   }
 
   for(int m = 0; m < _matrix_modules.size(); m++)
-    if(routes_to_copy[m].size() > slots_available[m])
+    if(routes_to_copy.at(_matrix_modules[m]).size() > slots_available.at(_matrix_modules[m]))
     {
       tab_menu_result result;
       result.show_warning = true;
@@ -341,12 +341,12 @@ cv_routing_menu_handler::copy(plugin_state* state, int module, int source_slot, 
   {
     auto const& topo = state->desc().plugin->modules[matrix];
     auto const& sources = make_cv_source_matrix(_sources_factory(state->desc().plugin, matrix)).mappings;
-    for (int rc = 0; rc < routes_to_copy[matrix].size(); rc++)
+    for (int rc = 0; rc < routes_to_copy.at(matrix).size(); rc++)
       for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
         if (state->get_plain_at(matrix, 0, _on_param, r).step() == _off_value)
         {
           for (int p = 0; p < topo.params.size(); p++)
-            state->set_plain_at(matrix, 0, p, r, state->get_plain_at(matrix, 0, p, routes_to_copy[matrix][rc]));
+            state->set_plain_at(matrix, 0, p, r, state->get_plain_at(matrix, 0, p, routes_to_copy.at(matrix)[rc]));
           update_matched_slot(state, matrix, _source_param, r, module, source_slot, target_slot, sources);
           break;
         }
