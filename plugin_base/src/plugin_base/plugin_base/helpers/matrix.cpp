@@ -366,6 +366,27 @@ audio_routing_menu_handler::update_matched_audio_slot(
   return true;
 }
 
+bool
+audio_routing_menu_handler::is_cv_selected(
+  int route, int module, int slot,
+  std::vector<param_topo_mapping> const& mappings)
+{
+  int selected = _state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.target_param, route).step();
+  return mappings[selected].module_index == module && mappings[selected].module_slot == slot;
+}
+
+bool
+audio_routing_menu_handler::update_matched_cv_slot(
+  int route, int module, int from_slot, int to_slot)
+{
+  if (!is_cv_selected(route, module, from_slot, _cv_params.targets)) return false;
+  auto const& mapping = _cv_params.targets[_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.target_param, route).step()];
+  auto replace_iter = std::find_if(_cv_params.targets.begin(), _cv_params.targets.end(), [module, to_slot, mapping](auto const& m) {
+    return m.module_index == module && m.module_slot == to_slot && m.param_index == mapping.param_index && m.param_slot == mapping.param_slot; });
+  _state->set_raw_at(_cv_params.matrix_module, 0, _cv_params.target_param, route, (int)(replace_iter - _cv_params.targets.begin()));
+  return true;
+}
+
 tab_menu_result
 audio_routing_menu_handler::move(int module, int source_slot, int target_slot)
 {
@@ -376,6 +397,7 @@ audio_routing_menu_handler::move(int module, int source_slot, int target_slot)
   for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
     if(_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) continue;
+    update_matched_cv_slot(r, module, source_slot, target_slot);
     update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources);
     update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets);
   }
@@ -392,6 +414,8 @@ audio_routing_menu_handler::swap(int module, int source_slot, int target_slot)
   for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
     if (_state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.on_param, r).step() == _audio_params.off_value) continue;
+    if (!update_matched_cv_slot(r, module, source_slot, target_slot))
+      update_matched_cv_slot(r, module, target_slot, source_slot);
     if(!update_matched_audio_slot(_audio_params.source_param, r, module, source_slot, target_slot, _audio_params.sources))
       update_matched_audio_slot(_audio_params.source_param, r, module, target_slot, source_slot, _audio_params.sources);
     if (!update_matched_audio_slot(_audio_params.target_param, r, module, source_slot, target_slot, _audio_params.targets))
@@ -408,10 +432,10 @@ audio_routing_menu_handler::clear(int module, int slot)
   auto const& topo = _state->desc().plugin->modules[_audio_params.matrix_module];
   for (int r = 0; r < topo.params[_audio_params.on_param].info.slot_count; r++)
   {
-    int selected_source = _state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.source_param, r).step();
-    int selected_target = _state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.target_param, r).step();
-    if ((_audio_params.sources[selected_source].index == module && _audio_params.sources[selected_source].slot == slot) ||
-      (_audio_params.targets[selected_target].index == module && _audio_params.targets[selected_target].slot == slot))
+    int selected_audio_source = _state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.source_param, r).step();
+    int selected_audio_target = _state->get_plain_at(_audio_params.matrix_module, 0, _audio_params.target_param, r).step();
+    if ((_audio_params.sources[selected_audio_source].index == module && _audio_params.sources[selected_audio_source].slot == slot) ||
+      (_audio_params.targets[selected_audio_target].index == module && _audio_params.targets[selected_audio_target].slot == slot))
       for (int p = 0; p < topo.params.size(); p++)
         _state->set_plain_at(_audio_params.matrix_module, 0, p, r, topo.params[p].domain.default_plain(0, r));
   }

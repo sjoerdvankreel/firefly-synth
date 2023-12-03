@@ -101,6 +101,12 @@ public tab_menu_handler {
   audio_routing_cv_params const _cv_params;
   audio_routing_audio_params const _audio_params;
 
+  bool is_cv_selected(
+    int route, int module, int slot,
+    std::vector<param_topo_mapping> const& mappings);
+  bool update_matched_cv_slot(
+    int route, int module, int from_slot, int to_slot);
+
   bool is_audio_selected(
     int param, int route, int module, int slot,
     std::vector<module_topo_mapping> const& mappings);
