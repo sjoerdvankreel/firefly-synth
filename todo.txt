@@ -20,6 +20,7 @@ fix up the gui (control sizes etc)
 check all infernal functionality, see what needs to be in the base
 document the header files a bit
 clear vgaudio with routing
+better no slot available msg
 
 * get some linux folks to comment (ycollete?)
 * continuing

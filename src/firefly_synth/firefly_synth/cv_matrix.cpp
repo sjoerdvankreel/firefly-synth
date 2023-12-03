@@ -84,11 +84,11 @@ init_global_default(plugin_state& state)
 }
 
 std::unique_ptr<tab_menu_handler>
-make_cv_routing_menu_handler(bool global)
+make_cv_routing_menu_handler()
 {
-  int module = global ? module_gcv_matrix : module_vcv_matrix;
-  return std::make_unique<cv_routing_menu_handler>(module, param_source, param_type, type_off,
-    [global](plugin_topo const* topo) { return make_cv_matrix_sources(topo, global); });
+  std::vector<int> matrices({ module_vcv_matrix, module_gcv_matrix });
+  auto factory = [](plugin_topo const* topo, int module) { return make_cv_matrix_sources(topo, module == module_gcv_matrix); };
+  return std::make_unique<cv_routing_menu_handler>(matrices, param_source, param_type, type_off, factory);
 }
 
 void

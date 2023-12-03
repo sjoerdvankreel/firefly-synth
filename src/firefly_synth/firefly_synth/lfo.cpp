@@ -78,7 +78,7 @@ lfo_topo(
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
-  result.gui.menu_handler_factory = [global]() { return make_cv_routing_menu_handler(global); };
+  result.gui.menu_handler_factory = make_cv_routing_menu_handler;
 
   result.graph_renderer = render_graph;
   if(global) result.default_initializer = init_global_default;

@@ -34,7 +34,7 @@ public:
 
 // menu handlers to update routing on clear/move/swap/copy
 std::unique_ptr<plugin_base::tab_menu_handler>
-make_cv_routing_menu_handler(bool global);
+make_cv_routing_menu_handler();
 std::unique_ptr<plugin_base::tab_menu_handler>
 make_audio_routing_menu_handler(bool global);
 

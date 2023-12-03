@@ -9,7 +9,9 @@
 namespace plugin_base {
 
 typedef std::function<std::vector<module_topo const*>(plugin_topo const*)>
-module_routes_factory;
+audio_routes_factory;
+typedef std::function<std::vector<module_topo const*>(plugin_topo const*, int module)>
+cv_source_routes_factory;
 
 template <class M>
 struct routing_matrix
@@ -52,24 +54,24 @@ public tab_menu_handler {
   int const _on_param;
   int const _off_value;
   int const _source_param;
-  int const _matrix_module;
-  module_routes_factory const _sources_factory;
+  std::vector<int> const _matrix_modules;
+  cv_source_routes_factory const _sources_factory;
 
   bool is_selected(
-    plugin_state* state, int param, int route, int module, int slot,
-    std::vector<module_output_mapping> const& mappings);
+    plugin_state* state, int matrix, int param, int route, int module, 
+    int slot, std::vector<module_output_mapping> const& mappings);
   bool update_matched_slot(
-    plugin_state* state, int param, int route, int module,
+    plugin_state* state, int matrix, int param, int route, int module,
     int from_slot, int to_slot, std::vector<module_output_mapping> const& mappings);
 
 public:
   bool has_module_menu() const override { return true; }
   std::string module_menu_name() const override { return "With Routing"; };
 
-  cv_routing_menu_handler(int matrix_module, int source_param, 
-    int on_param, int off_value, module_routes_factory const& sources_factory):
+  cv_routing_menu_handler(std::vector<int> const& matrix_modules, int source_param, 
+    int on_param, int off_value, cv_source_routes_factory const& sources_factory):
   _on_param(on_param), _off_value(off_value), _source_param(source_param),
-  _matrix_module(matrix_module), _sources_factory(sources_factory) {}
+  _matrix_modules(matrix_modules), _sources_factory(sources_factory) {}
 
   tab_menu_result clear(plugin_state* state, int module, int slot) override;
   tab_menu_result move(plugin_state* state, int module, int source_slot, int target_slot) override;
@@ -85,8 +87,8 @@ public tab_menu_handler {
   int const _source_param;
   int const _target_param;
   int const _matrix_module;
-  module_routes_factory const _sources_factory;
-  module_routes_factory const _targets_factory;
+  audio_routes_factory const _sources_factory;
+  audio_routes_factory const _targets_factory;
 
   bool is_selected(
     plugin_state* state, int param, int route, int module, int slot,
@@ -106,7 +108,7 @@ public:
 
   audio_routing_menu_handler(
     int matrix_module, int source_param, int target_param, int on_param, int off_value, 
-    module_routes_factory const& sources_factory, module_routes_factory const& targets_factory):
+    audio_routes_factory const& sources_factory, audio_routes_factory const& targets_factory):
   _on_param(on_param), _off_value(off_value), _source_param(source_param), _target_param(target_param), 
   _matrix_module(matrix_module), _sources_factory(sources_factory), _targets_factory(targets_factory) {}
 };
