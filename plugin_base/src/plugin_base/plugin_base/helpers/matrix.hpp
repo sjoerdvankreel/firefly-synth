@@ -55,6 +55,10 @@ public tab_menu_handler {
   audio_routes_factory const _sources_factory;
   audio_routes_factory const _targets_factory;
 
+  bool update_matched_slot(
+    plugin_state* state, int module, int param, int route,
+    int from_slot, int to_slot, std::vector<module_topo_mapping> const& mappings);
+
 public:
   bool has_module_menu() const override { return true; }
   std::string module_menu_name() const override { return "With Routing"; };

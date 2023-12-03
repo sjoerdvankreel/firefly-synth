@@ -218,6 +218,19 @@ tidy_matrix_menu_handler::extra(plugin_state* state, int module, int slot, int a
   }
 }
 
+bool
+audio_routing_menu_handler::update_matched_slot(
+  plugin_state* state, int module, int param, int route,
+  int from_slot, int to_slot, std::vector<module_topo_mapping> const& mappings)
+{
+  int selected = state->get_plain_at(_matrix_module, 0, param, route).step();
+  if (mappings[selected].index != module || mappings[selected].slot != from_slot) return false;
+  auto replace_iter = std::find_if(mappings.begin(), mappings.end(),
+    [module, to_slot](auto const& m) { return m.index == module && m.slot == to_slot; });
+  state->set_raw_at(_matrix_module, 0, param, route, (int)(replace_iter - mappings.begin()));
+  return true;
+}
+
 void 
 audio_routing_menu_handler::clear(plugin_state* state, int module, int slot)
 {
@@ -250,20 +263,8 @@ audio_routing_menu_handler::move(plugin_state* state, int module, int source_slo
   for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
   {
     if(state->get_plain_at(_matrix_module, 0, _on_param, r).step() == _off_value) continue;
-    int selected_source = state->get_plain_at(_matrix_module, 0, _source_param, r).step();
-    if (sources[selected_source].index == module && sources[selected_source].slot == source_slot)
-    {
-      auto replace_target = std::find_if(sources.begin(), sources.end(), 
-        [module, target_slot](auto const& s) { return s.index == module && s.slot == target_slot; });
-      state->set_raw_at(_matrix_module, 0, _source_param, r, (int)(replace_target - sources.begin()));
-    }
-    int selected_target = state->get_plain_at(_matrix_module, 0, _target_param, r).step();
-    if (targets[selected_target].index == module && targets[selected_target].slot == source_slot)
-    {
-      auto replace_target = std::find_if(targets.begin(), targets.end(),
-        [module, target_slot](auto const& t) { return t.index == module && t.slot == target_slot; });
-      state->set_raw_at(_matrix_module, 0, _target_param, r, (int)(replace_target - targets.begin()));
-    }
+    update_matched_slot(state, module, _source_param, r, source_slot, target_slot, sources);
+    update_matched_slot(state, module, _target_param, r, source_slot, target_slot, targets);
   }
 }
 
