@@ -19,6 +19,7 @@ document the header files a bit
 negative cv amount
 am matrix
 more space for freq slider
+fix the initialize/reset for module engines (wtf allocate on voice activation?)
 
 * get some linux folks to comment (ycollete?)
 * continuing
