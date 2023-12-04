@@ -20,10 +20,10 @@ enum {
   custom_section_count };
 
 enum { 
-  module_section_midi, module_section_input, 
+  module_section_hidden, module_section_input, 
   module_section_lfos, module_section_env, module_section_cv_matrix,
   module_section_audio_matrix, module_section_osc, module_section_fx, 
-  module_section_voice, module_section_monitor_master, module_section_count };
+  module_section_monitor_master, module_section_count };
 
 static gui_colors
 make_section_colors(Colour const& c)
@@ -101,7 +101,7 @@ std::vector<module_topo const*>
 make_audio_matrix_sources(plugin_topo const* topo, bool global)
 {
   if (global)
-    return { &topo->modules[module_voice_in], &topo->modules[module_gfx] };
+    return { &topo->modules[module_voice_mix_in], &topo->modules[module_gfx] };
   else
     return { &topo->modules[module_osc], &topo->modules[module_vfx] };
 }
@@ -112,7 +112,7 @@ make_audio_matrix_targets(plugin_topo const* topo, bool global)
   if (global)
     return { &topo->modules[module_gfx], &topo->modules[module_master] };
   else
-    return { &topo->modules[module_vfx], &topo->modules[module_voice_out] };
+    return { &topo->modules[module_vfx], &topo->modules[module_voice_mix_out] };
 }
 
 std::vector<module_topo const*>
@@ -184,10 +184,8 @@ synth_topo()
       -> Component& { return make_graph_section(gui, lnf, store, false); });
 
   result->gui.module_sections.resize(module_section_count);
-  result->gui.module_sections[module_section_midi] = make_module_section_gui_none(
-    "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_midi);
-  result->gui.module_sections[module_section_voice] = make_module_section_gui_none(
-    "{45767DB3-D1BE-4202-91B7-F6558F148D3D}", module_section_voice);
+  result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
+    "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_hidden);
   result->gui.module_sections[module_section_fx] = make_module_section_gui(
     "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_fx, { 5, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_env] = make_module_section_gui(
@@ -208,9 +206,9 @@ synth_topo()
     "Audio", result->gui.module_header_width, { module_vaudio_matrix, module_gaudio_matrix });
 
   result->modules.resize(module_count);
-  result->modules[module_midi] = midi_topo(module_section_midi);
-  result->modules[module_voice_in] = voice_topo(module_section_voice, false);
-  result->modules[module_voice_out] = voice_topo(module_section_voice, true);
+  result->modules[module_midi] = midi_topo(module_section_hidden);
+  result->modules[module_voice_mix_in] = voice_topo(module_section_hidden, false);
+  result->modules[module_voice_mix_out] = voice_topo(module_section_hidden, true);
   result->modules[module_env] = env_topo(module_section_env, cv_colors, { 0, 0 });
   result->modules[module_osc] = osc_topo(module_section_osc, audio_colors, { 0, 0 });
   result->modules[module_gfx] = fx_topo(module_section_fx, audio_colors, { 0, 1 }, true);
