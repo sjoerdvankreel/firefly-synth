@@ -15,10 +15,11 @@ namespace plugin_base::vst3 {
 class pb_editor;
 
 class pb_controller final:
-public Steinberg::Vst::EditControllerEx1,
-public Steinberg::Vst::IMidiMapping,
 public format_config,
-public gui_param_listener
+public any_state_listener,
+public gui_param_listener,
+public Steinberg::Vst::IMidiMapping,
+public Steinberg::Vst::EditControllerEx1
 {
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
@@ -27,7 +28,12 @@ public gui_param_listener
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
 
+  void param_state_changed(int index, plain_value plain);
+
 public: 
+  pb_controller(plugin_topo const* topo);
+  ~pb_controller() { _gui_state.remove_any_listener(this); }
+
   OBJ_METHODS(pb_controller, EditControllerEx1)
   DEFINE_INTERFACES
     DEF_INTERFACE(IMidiMapping)
@@ -35,16 +41,12 @@ public:
   REFCOUNT_METHODS(EditControllerEx1)
   PB_PREVENT_ACCIDENTAL_COPY(pb_controller);
 
-  pb_controller(plugin_topo const* topo):
-  _desc(std::make_unique<plugin_desc>(topo, this)),
-  _gui_state(_desc.get(), true),
-  _extra_state(gui_extra_state_keyset(*_desc->plugin)) {}
-
   plugin_state& gui_state() { return _gui_state; }
   extra_state& extra_state() { return _extra_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
-  void gui_param_changing(int index, plain_value plain) override;
+  void any_state_changed(int index, plain_value plain) override { param_state_changed(index, plain); }
+  void gui_param_changing(int index, plain_value plain) override { param_state_changed(index, plain); }
   void gui_param_end_changes(int index) override { endEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
   void gui_param_begin_changes(int index) override { beginEdit(gui_state().desc().param_mappings.index_to_tag[index]); }
 

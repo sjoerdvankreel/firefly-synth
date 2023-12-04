@@ -20,6 +20,7 @@ public ::clap::helpers::Plugin<
   ::clap::helpers::CheckingLevel::Maximal>,
 public juce::Timer,
 public format_config,
+public any_state_listener,
 public gui_param_listener
 {
   typedef moodycamel::ReaderWriterQueue<sync_event, default_q_size> event_queue;
@@ -36,13 +37,15 @@ public gui_param_listener
 
   // Pull in values from audio->main regardless of whether ui is present.
   void timerCallback() override;
+  void param_state_changed(int index, plain_value plain);
+
   void push_to_gui(int index, clap_value clap);
   void push_to_audio(int index, plain_value plain);
   void push_to_audio(int index, sync_event_type type);
   void process_gui_to_audio_events(clap_output_events_t const* out);
 
 public:
-  ~pb_plugin() { stopTimer(); }
+  ~pb_plugin();
   PB_PREVENT_ACCIDENTAL_COPY(pb_plugin);
   pb_plugin(
     clap_plugin_descriptor const* clap_desc, 
@@ -100,7 +103,8 @@ public:
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
-  void gui_param_changing(int index, plain_value plain) override;
+  void any_state_changed(int index, plain_value plain) override { param_state_changed(index, plain); }
+  void gui_param_changing(int index, plain_value plain) override { param_state_changed(index, plain); }
   void gui_param_end_changes(int index) override { push_to_audio(index, sync_event_type::end_edit); }
   void gui_param_begin_changes(int index) override { push_to_audio(index, sync_event_type::begin_edit); }
 

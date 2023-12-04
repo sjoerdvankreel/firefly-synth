@@ -20,16 +20,12 @@ using namespace Steinberg::Vst;
 
 namespace plugin_base::vst3 {
 
-void
-pb_controller::gui_param_changing(int index, plain_value plain)
-{
-  int tag = gui_state().desc().param_mappings.index_to_tag[index];
-  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
-
-  // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
-  performEdit(tag, normalized);
-  setParamNormalized(tag, normalized);
-}
+pb_controller::
+pb_controller(plugin_topo const* topo):
+_desc(std::make_unique<plugin_desc>(topo, this)),
+_gui_state(_desc.get(), true),
+_extra_state(gui_extra_state_keyset(*_desc->plugin))
+{ _gui_state.add_any_listener(this); }
 
 IPlugView* PLUGIN_API 
 pb_controller::createView(char const* name)
@@ -83,6 +79,18 @@ pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber 
   if(iter == _midi_id_to_param.end()) return kResultFalse;
   id = iter->second;
   return kResultTrue;
+}
+
+void
+pb_controller::param_state_changed(int index, plain_value plain)
+{
+  if (_gui_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
+  int tag = gui_state().desc().param_mappings.index_to_tag[index];
+  auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
+
+  // Per-the-spec we should not have to call setParamNormalized here but not all hosts agree.
+  performEdit(tag, normalized);
+  setParamNormalized(tag, normalized);
 }
 
 std::unique_ptr<host_menu>

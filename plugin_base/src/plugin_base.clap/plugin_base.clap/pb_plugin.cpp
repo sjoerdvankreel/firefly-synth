@@ -48,6 +48,13 @@ forward_thread_pool_voice_processor(plugin_engine& engine, void* context)
 }
 
 pb_plugin::
+~pb_plugin() 
+{ 
+  stopTimer();
+  _gui_state.remove_any_listener(this);
+}
+
+pb_plugin::
 pb_plugin(
   clap_plugin_descriptor const* clap_desc, 
   clap_host const* host, plugin_topo const* topo):
@@ -57,11 +64,15 @@ _engine(_desc.get(), forward_thread_pool_voice_processor, this),
 _extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
-{ _block_automation_seen.resize(_engine.state().desc().param_count); }
+{ 
+  _gui_state.add_any_listener(this);
+  _block_automation_seen.resize(_engine.state().desc().param_count); 
+}
 
 void
-pb_plugin::gui_param_changing(int index, plain_value plain)
+pb_plugin::param_state_changed(int index, plain_value plain)
 {
+  if (_gui_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
   push_to_audio(index, plain);
   _gui_state.set_plain_at_index(index, plain);
 }
