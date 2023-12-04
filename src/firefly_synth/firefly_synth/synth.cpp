@@ -196,7 +196,7 @@ synth_topo()
   result->gui.module_sections[module_section_master_cv] = make_module_section_gui(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_cv, { 1, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_monitor_master] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_master, { 6, 0, 1, 3 }, { { 1 }, { 2, 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_master, { 6, 0, 1, 3 }, { { 1 }, { 1, 2 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 3, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
@@ -215,8 +215,8 @@ synth_topo()
   result->modules[module_glfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_master_cv] = master_cv_topo(module_section_master_cv, master_colors, { 0, 0 });
-  result->modules[module_master_audio] = master_audio_topo(module_section_monitor_master, master_colors, { 0, 1 });
-  result->modules[module_monitor] = monitor_topo(module_section_monitor_master, other_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_master_audio] = master_audio_topo(module_section_monitor_master, master_colors, { 0, 0 });
+  result->modules[module_monitor] = monitor_topo(module_section_monitor_master, other_colors, { 0, 1 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false, 
     make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
   result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, false,
