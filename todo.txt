@@ -18,6 +18,7 @@ check all infernal functionality, see what needs to be in the base
 document the header files a bit
 negative cv amount
 am matrix
+more space for freq slider
 
 * get some linux folks to comment (ycollete?)
 * continuing
