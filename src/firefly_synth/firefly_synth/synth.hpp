@@ -75,7 +75,8 @@ get_cv_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
 
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo midi_topo(int section);
-plugin_base::module_topo voice_topo(int section, bool out);
+plugin_base::module_topo voice_mix_in_topo(int section);
+plugin_base::module_topo voice_mix_out_topo(int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo input_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);

@@ -18,7 +18,7 @@ public:
 };
 
 module_topo
-voice_topo(int section, bool out)
+voice_mix_out_topo(int section)
 {
   module_topo result(make_module(
     make_topo_info("{94CC6FFA-2C0F-4B72-A484-65CD2974D288}", "Voice", module_voice_mix_out, 1), 

@@ -207,8 +207,8 @@ synth_topo()
 
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
-  result->modules[module_voice_mix_in] = voice_topo(module_section_hidden, false);
-  result->modules[module_voice_mix_out] = voice_topo(module_section_hidden, true);
+  result->modules[module_voice_mix_in] = voice_mix_in_topo(module_section_hidden);
+  result->modules[module_voice_mix_out] = voice_mix_out_topo(module_section_hidden);
   result->modules[module_env] = env_topo(module_section_env, cv_colors, { 0, 0 });
   result->modules[module_osc] = osc_topo(module_section_osc, audio_colors, { 0, 0 });
   result->modules[module_gfx] = fx_topo(module_section_fx, audio_colors, { 0, 1 }, true);
