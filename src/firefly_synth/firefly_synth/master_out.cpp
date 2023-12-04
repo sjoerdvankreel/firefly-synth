@@ -12,13 +12,13 @@ namespace firefly_synth {
 enum { section_main };
 enum { param_gain, param_bal };
 
-class master_engine :
+class master_out_engine :
 public module_engine {
 
 public:
   void initialize() override { }
   void process(plugin_block& block) override;
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_engine);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_out_engine);
 };
 
 static graph_data
@@ -30,17 +30,17 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 }
 
 module_topo
-master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos)
+master_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", "Master", module_master, 1),
+    make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", "Master", module_master_out, 1),
     make_module_dsp(module_stage::output, module_output::none, 0, {}),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
   result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<master_engine> { return std::make_unique<master_engine>(); };
+    std::unique_ptr<master_out_engine> { return std::make_unique<master_out_engine>(); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return make_audio_routing_menu_handler(state, true); };
 
   result.sections.emplace_back(make_param_section(section_main,
@@ -63,16 +63,16 @@ master_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui
 }
 
 void
-master_engine::process(plugin_block& block)
+master_out_engine::process(plugin_block& block)
 {
   auto& mixer = get_audio_matrix_mixer(block, true);
-  auto const& audio_in = mixer.mix(block, module_master, 0);
+  auto const& audio_in = mixer.mix(block, module_master_out, 0);
   auto const& modulation = get_cv_matrix_mixdown(block, true);
-  auto const& bal_curve = *modulation[module_master][0][param_bal][0];
-  auto const& gain_curve = *modulation[module_master][0][param_gain][0];
+  auto const& bal_curve = *modulation[module_master_out][0][param_bal][0];
+  auto const& gain_curve = *modulation[module_master_out][0][param_gain][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float bal = block.normalized_to_raw(module_master, param_bal, bal_curve[f]);
+    float bal = block.normalized_to_raw(module_master_out, param_bal, bal_curve[f]);
     for(int c = 0; c < 2; c++)
       block.out->host_audio[c][f] = audio_in[c][f] * gain_curve[f] * balance(c, bal);
   }

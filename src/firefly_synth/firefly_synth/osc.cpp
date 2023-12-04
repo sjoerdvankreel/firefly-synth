@@ -200,7 +200,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   auto const& bal_curve = *(*modulation)[module_osc][block.module_slot][param_bal][0];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
-  int pb_range = block.state.all_block_automation[module_input][0][input_param_pb_range][0].step();
+  int pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
   auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];

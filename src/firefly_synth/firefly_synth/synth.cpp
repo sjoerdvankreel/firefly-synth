@@ -110,7 +110,7 @@ std::vector<module_topo const*>
 make_audio_matrix_targets(plugin_topo const* topo, bool global)
 {
   if (global)
-    return { &topo->modules[module_gfx], &topo->modules[module_master] };
+    return { &topo->modules[module_gfx], &topo->modules[module_master_out] };
   else
     return { &topo->modules[module_vfx], &topo->modules[module_voice_mix_out] };
 }
@@ -119,7 +119,7 @@ std::vector<module_topo const*>
 make_cv_matrix_targets(plugin_topo const* topo, bool global)
 {
   if (global)
-    return { &topo->modules[module_gfx], &topo->modules[module_gaudio_matrix], &topo->modules[module_master] };
+    return { &topo->modules[module_gfx], &topo->modules[module_gaudio_matrix], &topo->modules[module_master_out] };
   else
     return { &topo->modules[module_osc], &topo->modules[module_vfx], &topo->modules[module_vaudio_matrix] };
 }
@@ -128,9 +128,9 @@ std::vector<module_topo const*>
 make_cv_matrix_sources(plugin_topo const* topo, bool global)
 {
   if(global)
-    return { &topo->modules[module_midi], &topo->modules[module_input], &topo->modules[module_glfo] };
+    return { &topo->modules[module_midi], &topo->modules[module_master_in], &topo->modules[module_glfo] };
   else
-    return { &topo->modules[module_midi], &topo->modules[module_input], &topo->modules[module_glfo], &topo->modules[module_vlfo], &topo->modules[module_env] };
+    return { &topo->modules[module_midi], &topo->modules[module_master_in], &topo->modules[module_glfo], &topo->modules[module_vlfo], &topo->modules[module_env] };
 }
 
 std::unique_ptr<tab_menu_handler>
@@ -215,8 +215,8 @@ synth_topo()
   result->modules[module_vfx] = fx_topo(module_section_fx, audio_colors, { 0, 0 }, false);
   result->modules[module_glfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
-  result->modules[module_input] = input_topo(module_section_input, other_colors, { 0, 0 });
-  result->modules[module_master] = master_topo(module_section_monitor_master, audio_colors, { 0, 1 });
+  result->modules[module_master_in] = master_in_topo(module_section_input, other_colors, { 0, 0 });
+  result->modules[module_master_out] = master_out_topo(module_section_monitor_master, audio_colors, { 0, 1 });
   result->modules[module_monitor] = monitor_topo(module_section_monitor_master, monitor_colors, { 0, 0 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false, 
     make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
