@@ -152,7 +152,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::
   params.sample_rate = params.frame_count;
 
   graph_engine graph_engine(&state, params);
-  std::vector<int> relevant_modules({ module_master_in, module_glfo });
+  std::vector<int> relevant_modules({ module_master_cv, module_glfo });
   if(map.module_index == module_vcv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
