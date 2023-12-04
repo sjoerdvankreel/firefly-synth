@@ -144,13 +144,11 @@ make_audio_routing_menu_handler(plugin_state* state, bool global)
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
-  //Colour other_color(0xFF88FF88);
-  // Colour other_color(0xFFFF8888); ken wel
-  Colour other_color(0xFF4488FF);
+  Colour other_color(0xFFFF4488);
   gui_colors other_colors(make_section_colors(other_color));
   gui_colors cv_colors(make_section_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_section_colors(Colour(0xFF8888FF)));
-  gui_colors master_colors(make_section_colors(Colour(0xFFFF4488)));
+  gui_colors master_colors(make_section_colors(Colour(0xFF4488FF)));
   other_colors.edit_text = other_color;
 
   auto result = std::make_unique<plugin_topo>();
