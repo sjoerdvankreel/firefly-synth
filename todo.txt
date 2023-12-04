@@ -16,6 +16,7 @@ make new test files
 fix up the gui (control sizes etc)
 check all infernal functionality, see what needs to be in the base
 document the header files a bit
+negative cv amount
 
 * get some linux folks to comment (ycollete?)
 * continuing
