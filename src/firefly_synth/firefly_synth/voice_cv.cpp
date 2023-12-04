@@ -41,7 +41,7 @@ void
 voice_cv_engine::process(plugin_block& block)
 {  
   block.state.own_cv[output_velo][0].fill(block.start_frame, block.end_frame, block.voice->state.velocity);
-  block.state.own_cv[output_key][0].fill(block.start_frame, block.end_frame, block.voice->state.id.key / (float)(midi_middle_c * 2));
+  block.state.own_cv[output_key][0].fill(block.start_frame, block.end_frame, std::clamp(block.voice->state.id.key / 127.0f, 0.0f, 1.0f));
 }
 
 }
