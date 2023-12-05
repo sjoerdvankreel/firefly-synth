@@ -131,8 +131,10 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
     return { { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] } };
   else
     return { 
-      { "Global", nullptr }, { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] },
-      { "Voice", nullptr }, { "", &topo->modules[module_voice_note] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_env] } };
+      { "Global", nullptr }, { "", &topo->modules[module_midi] }, 
+      { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] },
+      { "Voice", nullptr }, { "", &topo->modules[module_voice_note] }, 
+      { "", &topo->modules[module_voice_on_note] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_env] } };
 }
 
 std::unique_ptr<tab_menu_handler>
@@ -209,6 +211,7 @@ synth_topo()
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
+  result->modules[module_voice_on_note] = voice_on_note_topo(module_section_hidden);
   result->modules[module_voice_audio_in] = voice_audio_in_topo(module_section_hidden);
   result->modules[module_voice_audio_out] = voice_audio_out_topo(module_section_hidden);
   result->modules[module_env] = env_topo(module_section_env, cv_colors, { 0, 0 });
