@@ -133,8 +133,8 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
     return { 
       { "Global", nullptr }, 
       { "", &topo->modules[module_master_cv]}, {"", &topo->modules[module_glfo]}, { "", &topo->modules[module_midi] },
-      { "Voice", nullptr }, { "", &topo->modules[module_voice_note] }, 
-      { "", &topo->modules[module_voice_on_note] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_env] } };
+      { "Voice", nullptr }, 
+      { "", &topo->modules[module_env] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_voice_note] }, { "", &topo->modules[module_voice_on_note] }};
 }
 
 std::unique_ptr<tab_menu_handler>
