@@ -128,11 +128,11 @@ std::vector<cv_source_entry>
 make_cv_matrix_sources(plugin_topo const* topo, bool global)
 {
   if(global)
-    return { { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] } };
+    return { { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] }, { "", &topo->modules[module_midi] } };
   else
     return { 
       { "Global", nullptr }, 
-      { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv]}, {"", &topo->modules[module_glfo]},
+      { "", &topo->modules[module_master_cv]}, {"", &topo->modules[module_glfo]}, { "", &topo->modules[module_midi] },
       { "Voice", nullptr }, { "", &topo->modules[module_voice_note] }, 
       { "", &topo->modules[module_voice_on_note] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_env] } };
 }
