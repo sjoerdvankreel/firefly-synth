@@ -135,7 +135,7 @@ make_cv_source_matrix(std::vector<module_topo const*> const& modules)
 }
 
 routing_matrix<param_topo_mapping>
-make_cv_target_matrix(std::vector<plugin_base::module_topo const*> const& modules)
+make_cv_target_matrix(std::vector<module_topo const*> const& modules)
 {
   int index = 0;
   routing_matrix<param_topo_mapping> result;

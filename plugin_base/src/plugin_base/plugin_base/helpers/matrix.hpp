@@ -12,8 +12,8 @@ template <class M>
 struct routing_matrix
 {
   std::vector<M> mappings;
-  std::vector<plugin_base::list_item> items;
-  std::shared_ptr<plugin_base::gui_submenu> submenu;
+  std::vector<list_item> items;
+  std::shared_ptr<gui_submenu> submenu;
 };
 
 // for audio_routing_menu_handler
@@ -39,16 +39,16 @@ struct audio_routing_audio_params
 };
 
 // any audio module as a source or target
-routing_matrix<plugin_base::module_topo_mapping>
-make_audio_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+routing_matrix<module_topo_mapping>
+make_audio_matrix(std::vector<module_topo const*> const& modules);
 
 // targets any modulatable parameter in modules
-routing_matrix<plugin_base::param_topo_mapping>
-make_cv_target_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+routing_matrix<param_topo_mapping>
+make_cv_target_matrix(std::vector<module_topo const*> const& modules);
 
 // sources are any cv outputs in modules
-routing_matrix<plugin_base::module_output_mapping>
-make_cv_source_matrix(std::vector<plugin_base::module_topo const*> const& modules);
+routing_matrix<module_output_mapping>
+make_cv_source_matrix(std::vector<module_topo const*> const& modules);
 
 // allows to tidy up cv/audio matrix
 class tidy_matrix_menu_handler :
