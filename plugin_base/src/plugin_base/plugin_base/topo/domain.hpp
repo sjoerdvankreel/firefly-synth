@@ -46,13 +46,14 @@ struct param_topo_mapping final {
 struct list_item final {
   std::string id = {};
   std::string name = {};
+  std::string short_name = {};
   // in case of auto binding
   param_topo_mapping param_topo = {};
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
   list_item(topo_tag const& tag);
-  list_item(std::string const& id, std::string const& name);
+  list_item(std::string const& id, std::string const& name, std::string const& short_name);
 };
 
 // parameter bounds
@@ -98,10 +99,10 @@ struct param_domain final {
 
 inline list_item::
 list_item(topo_tag const& tag):
-id(tag.id), name(tag.name) {}
+id(tag.id), name(tag.name), short_name(tag.name) {}
 inline list_item::
-list_item(std::string const& id, std::string const& name) :
-id(id), name(name) {}
+list_item(std::string const& id, std::string const& name, std::string const& short_name) :
+id(id), name(name), short_name(short_name) {}
 
 inline double 
 param_domain::default_raw(int module_slot, int param_slot) const
