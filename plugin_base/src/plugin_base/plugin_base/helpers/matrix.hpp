@@ -3,6 +3,7 @@
 #include <plugin_base/topo/plugin.hpp>
 
 #include <vector>
+#include <string>
 #include <functional>
 
 // helper functions for audio and cv routing matrices
@@ -14,6 +15,13 @@ struct routing_matrix
   std::vector<M> mappings;
   std::vector<list_item> items;
   std::shared_ptr<gui_submenu> submenu;
+};
+
+// for make_cv_source_matrix
+struct cv_source_entry
+{
+  std::string subheader;
+  module_topo const* module;
 };
 
 // for audio_routing_menu_handler
@@ -42,13 +50,13 @@ struct audio_routing_audio_params
 routing_matrix<module_topo_mapping>
 make_audio_matrix(std::vector<module_topo const*> const& modules);
 
+// sources are any cv outputs in modules
+routing_matrix<module_output_mapping>
+make_cv_source_matrix(std::vector<cv_source_entry> const& entries);
+
 // targets any modulatable parameter in modules
 routing_matrix<param_topo_mapping>
 make_cv_target_matrix(std::vector<module_topo const*> const& modules);
-
-// sources are any cv outputs in modules
-routing_matrix<module_output_mapping>
-make_cv_source_matrix(std::vector<module_topo const*> const& modules);
 
 // allows to tidy up cv/audio matrix
 class tidy_matrix_menu_handler :

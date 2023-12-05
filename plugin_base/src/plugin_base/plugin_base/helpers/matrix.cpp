@@ -79,36 +79,44 @@ make_audio_matrix(std::vector<module_topo const*> const& modules)
 }
 
 routing_matrix<module_output_mapping>
-make_cv_source_matrix(std::vector<module_topo const*> const& modules)
+make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
 {
   int index = 0;
   routing_matrix<module_output_mapping> result;
   result.submenu = std::make_shared<gui_submenu>();
-  for (int m = 0; m < modules.size(); m++)
+  for (int e = 0; e < entries.size(); e++)
   {
-    auto const& module_tag = modules[m]->info.tag;
-    int module_slots = modules[m]->info.slot_count;
+    assert((entries[e].module == nullptr) != (entries[e].subheader.empty()));
+    if (entries[e].module == nullptr)
+    {
+      result.submenu->add_subheader(entries[e].subheader);
+      continue;
+    }
+
+    module_topo const* module = entries[e].module;
+    auto const& module_tag = module->info.tag;
+    int module_slots = module->info.slot_count;
     if (module_slots > 1)
     {
-      auto const& output = modules[m]->dsp.outputs[0];
+      auto const& output = module->dsp.outputs[0];
       if(!output.is_modulation_source) continue;
       assert(output.info.slot_count == 1);
-      assert(modules[m]->dsp.outputs.size() == 1);
+      assert(module->dsp.outputs.size() == 1);
       auto module_submenu = result.submenu->add_submenu(module_tag.name);
       for (int mi = 0; mi < module_slots; mi++)
       {
         module_submenu->indices.push_back(index++);
-        result.mappings.push_back({ modules[m]->info.index, mi, 0, 0 });
+        result.mappings.push_back({ module->info.index, mi, 0, 0 });
         result.items.push_back({
           make_id(module_tag.id, mi, output.info.tag.id, 0),
           make_name(module_tag, mi, module_slots) });
       }
-    } else if (modules[m]->dsp.outputs.size() == 1 && modules[m]->dsp.outputs[0].info.slot_count == 1)
+    } else if (module->dsp.outputs.size() == 1 && module->dsp.outputs[0].info.slot_count == 1)
     {
-      auto const& output = modules[m]->dsp.outputs[0];
+      auto const& output = module->dsp.outputs[0];
       if (!output.is_modulation_source) continue;
       result.submenu->indices.push_back(index++);
-      result.mappings.push_back({ modules[m]->info.index, 0, 0, 0 });
+      result.mappings.push_back({ module->info.index, 0, 0, 0 });
       result.items.push_back({
         make_id(module_tag.id, 0, output.info.tag.id, 0),
         make_name(module_tag, 0, 1) });
@@ -116,14 +124,14 @@ make_cv_source_matrix(std::vector<module_topo const*> const& modules)
     else
     {
       auto output_submenu = result.submenu->add_submenu(module_tag.name);
-      for (int o = 0; o < modules[m]->dsp.outputs.size(); o++)
+      for (int o = 0; o < module->dsp.outputs.size(); o++)
       {
-        auto const& output = modules[m]->dsp.outputs[o];
+        auto const& output = module->dsp.outputs[o];
         if (!output.is_modulation_source) continue;
         for (int oi = 0; oi < output.info.slot_count; oi++)
         {
           output_submenu->indices.push_back(index++);
-          result.mappings.push_back({ modules[m]->info.index, 0, o, oi });
+          result.mappings.push_back({ module->info.index, 0, o, oi });
           result.items.push_back({
             make_id(module_tag.id, 0, output.info.tag.id, oi),
             make_name(module_tag, 0, 1, output.info.tag, oi, output.info.slot_count) });

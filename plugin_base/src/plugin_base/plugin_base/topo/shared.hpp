@@ -59,10 +59,12 @@ struct gui_label final {
 // submenu with header and indices into main list
 struct gui_submenu final {
   std::string name;
+  bool is_subheader;
   std::vector<int> indices;
   std::vector<std::shared_ptr<gui_submenu>> children;
   
   void validate() const;
+  void add_subheader(std::string const& name);
   std::shared_ptr<gui_submenu> add_submenu(std::string const& name);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_submenu);
 };

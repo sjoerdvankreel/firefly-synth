@@ -1,4 +1,6 @@
 #include <plugin_base/gui/controls.hpp>
+
+#include <limits>
 #include <algorithm>
 
 using namespace juce;
@@ -13,9 +15,14 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
     menu.addItem(data->indices[i] + 1, domain.raw_to_text(false, data->indices[i]));
   for(int i = 0; i < data->children.size(); i++)
   {
-    PopupMenu child;
-    fill_popup_menu(domain, child, data->children[i].get());
-    menu.addSubMenu(data->children[i]->name, child);
+    if (data->children[i]->is_subheader)
+      menu.addItem(std::numeric_limits<int>::max(), data->children[i]->name, false);
+    else
+    {
+      PopupMenu child;
+      fill_popup_menu(domain, child, data->children[i].get());
+      menu.addSubMenu(data->children[i]->name, child);
+    }
   }
 }
 

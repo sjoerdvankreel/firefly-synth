@@ -27,12 +27,28 @@ topo_info::validate() const
 void
 gui_submenu::validate() const
 {
+  if (is_subheader)
+  {
+    assert(name.size());
+    assert(!indices.size());
+    assert(!children.size());
+    return;
+  }
   assert(indices.size());
   assert(name.size() || children.size());
   for(int i = 0; i < indices.size(); i++)
     assert(indices[i] >= 0);
   for(int i = 0; i < children.size(); i++)
     children[i]->validate();
+}
+
+void
+gui_submenu::add_subheader(std::string const& name_)
+{
+  auto result = std::make_shared<gui_submenu>();
+  result->name = name_;
+  result->is_subheader = true;
+  children.push_back(result);
 }
 
 std::shared_ptr<gui_submenu> 

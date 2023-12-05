@@ -172,7 +172,7 @@ module_topo
 cv_matrix_topo(
   int section, plugin_base::gui_colors const& colors,
   plugin_base::gui_position const& pos, bool global,
-  std::vector<module_topo const*> const& sources,
+  std::vector<cv_source_entry> const& sources,
   std::vector<module_topo const*> const& targets)
 {
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV", module_vcv_matrix, 1);

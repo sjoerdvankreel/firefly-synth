@@ -124,14 +124,15 @@ make_cv_matrix_targets(plugin_topo const* topo, bool global)
     return { &topo->modules[module_osc], &topo->modules[module_vfx], &topo->modules[module_vaudio_matrix] };
 }
 
-std::vector<module_topo const*>
+std::vector<cv_source_entry>
 make_cv_matrix_sources(plugin_topo const* topo, bool global)
 {
   if(global)
-    return { &topo->modules[module_midi], &topo->modules[module_master_cv], &topo->modules[module_glfo] };
+    return { { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] } };
   else
-    return { &topo->modules[module_midi], &topo->modules[module_master_cv], &topo->modules[module_voice_cv], 
-      &topo->modules[module_glfo], &topo->modules[module_vlfo], &topo->modules[module_env] };
+    return { 
+      { "Global", nullptr }, { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] },
+      { "Voice", nullptr }, { "", &topo->modules[module_voice_cv] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_env] } };
 }
 
 std::unique_ptr<tab_menu_handler>
