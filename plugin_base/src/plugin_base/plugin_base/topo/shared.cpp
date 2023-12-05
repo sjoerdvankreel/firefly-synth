@@ -14,7 +14,6 @@ topo_tag::validate() const
 {
   assert(id.size());
   assert(name.size());
-  assert(1 <= short_name.size() && short_name.size() <= name.size());
 }
 
 void

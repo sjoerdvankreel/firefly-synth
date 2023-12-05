@@ -32,7 +32,6 @@ gui_param_binding_selector;
 struct topo_tag final {
   std::string id;
   std::string name;
-  std::string short_name;
   bool name_one_based = true;
 
   void validate() const;
