@@ -131,8 +131,8 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
     return { { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] } };
   else
     return { 
-      { "Global", nullptr }, { "", &topo->modules[module_midi] }, 
-      { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] },
+      { "Global", nullptr }, 
+      { "", &topo->modules[module_midi] }, { "", &topo->modules[module_master_cv]}, {"", &topo->modules[module_glfo]},
       { "Voice", nullptr }, { "", &topo->modules[module_voice_note] }, 
       { "", &topo->modules[module_voice_on_note] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_env] } };
 }
@@ -211,7 +211,6 @@ synth_topo()
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
-  result->modules[module_voice_on_note] = voice_on_note_topo(module_section_hidden);
   result->modules[module_voice_audio_in] = voice_audio_in_topo(module_section_hidden);
   result->modules[module_voice_audio_out] = voice_audio_out_topo(module_section_hidden);
   result->modules[module_env] = env_topo(module_section_env, cv_colors, { 0, 0 });
@@ -221,6 +220,7 @@ synth_topo()
   result->modules[module_glfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_master_cv] = master_cv_topo(module_section_master_cv, master_colors, { 0, 0 });
+  result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv
   result->modules[module_master_audio] = master_audio_topo(module_section_monitor_master, master_colors, { 0, 0 });
   result->modules[module_monitor] = monitor_topo(module_section_monitor_master, other_colors, { 0, 1 }, result->polyphony);
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false, 

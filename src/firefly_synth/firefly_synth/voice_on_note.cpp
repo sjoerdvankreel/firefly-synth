@@ -12,7 +12,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { output_on_note_1, output_on_note_2, output_count };
+enum { output_on_note, output_count };
 
 class voice_on_note_engine :
 public module_engine {
@@ -23,14 +23,19 @@ public:
 };
 
 module_topo
-voice_on_note_topo(int section)
+voice_on_note_topo(plugin_topo const* topo, int section)
 {
+  std::vector<module_dsp_output> outputs;
+  std::string const on_note_id("{68360340-68B2-4B88-95BD-B1929F240BAA}");
+  auto global_sources(make_cv_source_matrix(make_cv_matrix_sources(topo, true)));
+  for(int i = 0; i < global_sources.items.size(); i++)
+    outputs.push_back(make_module_dsp_output(true, make_topo_info(
+      global_sources.items[i].id,
+      global_sources.items[i].name, i, 1)));
+
   module_topo result(make_module(
     make_topo_info("{EF1A4E73-BCAD-4D38-A54E-44B83EF46CB5}", "On Note", module_voice_on_note, 1),
-    make_module_dsp(module_stage::voice, module_output::cv, 0, {
-      make_module_dsp_output(true, make_topo_info("{63A2F991-5403-45BF-BC42-CF03CA56BF26}", "On Note 1", output_on_note_1, 1)),
-      make_module_dsp_output(true, make_topo_info("{1D909BEE-0447-47D8-8FA8-7A3DF5605AFF}", "On Note 2", output_on_note_2, 1)) }),
-      make_module_gui_none(section)));
+    make_module_dsp(module_stage::voice, module_output::cv, 0, outputs), make_module_gui_none(section)));
   result.engine_factory = [](auto const&, int, int) ->
     std::unique_ptr<module_engine> { return std::make_unique<voice_on_note_engine>(); };
   return result;
