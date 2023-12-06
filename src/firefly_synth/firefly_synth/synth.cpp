@@ -173,12 +173,12 @@ synth_topo()
   result->version_minor = FF_SYNTH_VERSION_MINOR;
   result->version_major = FF_SYNTH_VERSION_MAJOR;
 
-  result->gui.min_width = 800;
-  result->gui.aspect_ratio_width = 52;
+  result->gui.min_width = 816;
+  result->gui.aspect_ratio_width = 53;
   result->gui.aspect_ratio_height = 23;
-  result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
-  result->gui.dimension.column_sizes = { 8, 6, 6, 7, 7 };
   result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1 };
+  result->gui.dimension.column_sizes = { 16, 12, 12, 15, 14 };
+  result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [other_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
