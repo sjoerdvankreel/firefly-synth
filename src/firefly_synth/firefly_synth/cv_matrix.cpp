@@ -16,7 +16,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int constexpr groute_count = 6;
+static int constexpr groute_count = 8;
 static int constexpr vroute_count = 12;
 
 enum { section_main };
