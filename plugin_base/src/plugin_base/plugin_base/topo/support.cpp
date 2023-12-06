@@ -11,23 +11,25 @@ simple_default(std::string value)
 { return [value](int, int) { return value; }; }
 
 topo_tag
-make_topo_tag(std::string const& id, std::string const& name)
+make_topo_tag(std::string const& id, std::string const& name, std::string short_name)
 {
   topo_tag result = {};
   result.id = id;
   result.name = name;
+  result.short_name = short_name;
   return result;
 }
 
 topo_info
-make_topo_info(std::string const& id, std::string const& name, int index, int slot_count, bool name_one_based)
+make_topo_info(std::string const& id, std::string const& name, std::string const& short_name, bool name_one_based, int index, int slot_count)
 {
   topo_info result = {};
   result.tag.id = id;
   result.tag.name = name;
+  result.tag.short_name = short_name;
+  result.tag.name_one_based = name_one_based;
   result.index = index;
   result.slot_count = slot_count;
-  result.tag.name_one_based = name_one_based;
   return result;
 }
 

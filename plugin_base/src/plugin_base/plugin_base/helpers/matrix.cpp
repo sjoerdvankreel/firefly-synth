@@ -12,9 +12,9 @@ make_id(std::string const& id, int slot)
 }
 
 static std::string
-make_name(topo_tag const& tag, int slot, int slots)
+make_name(topo_tag const& tag, bool short_name, int slot, int slots)
 {
-  std::string result = tag.name;
+  std::string result = short_name && tag.short_name.size() ? tag.short_name : tag.name;
   if(slots > 1) result += " " + std::to_string(slot + (tag.name_one_based? 1: 0));
   return result;
 }
@@ -30,11 +30,11 @@ make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
 }
 
 static std::string
-make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int slot2, int slots2)
+make_name(topo_tag const& tag1, bool short_name1, int slot1, int slots1, topo_tag const& tag2, bool short_name2, int slot2, int slots2)
 {
-  std::string result = tag1.name;
+  std::string result = short_name1 && tag1.short_name.size() ? tag1.short_name : tag1.name;
   if (slots1 > 1) result += " " + std::to_string(slot1 + (tag1.name_one_based ? 1: 0));
-  result += " " + tag2.name;
+  result += " " + ((short_name2 && tag2.short_name.size()) ? tag2.short_name : tag2.name);
   if (slots2 > 1) result += " " + std::to_string(slot2 + (tag2.name_one_based ? 1 : 0));
   return result;
 }
@@ -63,7 +63,7 @@ make_audio_matrix(std::vector<module_topo const*> const& modules)
     {
       result.submenu->indices.push_back(index++);
       result.mappings.push_back({ modules[m]->info.index, 0 });
-      result.items.push_back({ make_id(tag.id, 0), make_name(tag, 0, slots) });
+      result.items.push_back({ make_id(tag.id, 0), make_name(tag, false, 0, slots) });
     } else
     {
       auto module_submenu = result.submenu->add_submenu(tag.name);
@@ -71,7 +71,7 @@ make_audio_matrix(std::vector<module_topo const*> const& modules)
       {
         module_submenu->indices.push_back(index++);
         result.mappings.push_back({ modules[m]->info.index, mi });
-        result.items.push_back({ make_id(tag.id, mi), make_name(tag, mi, slots) });
+        result.items.push_back({ make_id(tag.id, mi), make_name(tag, false, mi, slots) });
       }
     }
   }
@@ -109,7 +109,7 @@ make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
         result.mappings.push_back({ module->info.index, mi, 0, 0 });
         result.items.push_back({
           make_id(module_tag.id, mi, output.info.tag.id, 0),
-          make_name(module_tag, mi, module_slots) });
+          make_name(module_tag, entries[e].use_short_name, mi, module_slots) });
       }
     } else if (module->dsp.outputs.size() == 1 && module->dsp.outputs[0].info.slot_count == 1)
     {
@@ -119,7 +119,7 @@ make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
       result.mappings.push_back({ module->info.index, 0, 0, 0 });
       result.items.push_back({
         make_id(module_tag.id, 0, output.info.tag.id, 0),
-        make_name(module_tag, 0, 1) });
+        make_name(module_tag, entries[e].use_short_name, 0, 1) });
     }
     else
     {
@@ -134,7 +134,7 @@ make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
           result.mappings.push_back({ module->info.index, 0, o, oi });
           result.items.push_back({
             make_id(module_tag.id, 0, output.info.tag.id, oi),
-            make_name(module_tag, 0, 1, output.info.tag, oi, output.info.slot_count) });
+            make_name(module_tag, entries[e].use_short_name, 0, 1, output.info.tag, entries[e].use_short_name, oi, output.info.slot_count) });
         }
       }
     }
@@ -162,7 +162,7 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules)
           {
             list_item item = {
               make_id(module_info.tag.id, 0, param_info.tag.id, pi),
-              make_name(module_info.tag, 0, 1, param_info.tag, pi, param_info.slot_count) };
+              make_name(module_info.tag, false, 0, 1, param_info.tag, false, pi, param_info.slot_count) };
             item.param_topo = { modules[m]->info.index, 0, modules[m]->params[p].info.index, pi };
             result.items.push_back(item);
             module_submenu->indices.push_back(index++);
@@ -175,7 +175,7 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules)
       for (int mi = 0; mi < module_info.slot_count; mi++)
       {
         auto module_slot_submenu = module_submenu->add_submenu(
-          make_name(module_info.tag, mi, module_info.slot_count));
+          make_name(module_info.tag, false, mi, module_info.slot_count));
         for (int p = 0; p < modules[m]->params.size(); p++)
           if (modules[m]->params[p].dsp.can_modulate(mi))
           {
@@ -184,7 +184,7 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules)
             {
               list_item item = {
                 make_id(module_info.tag.id, mi, param_info.tag.id, pi),
-                make_name(module_info.tag, mi, module_info.slot_count, param_info.tag, pi, param_info.slot_count) };
+                make_name(module_info.tag, false, mi, module_info.slot_count, param_info.tag, false, pi, param_info.slot_count) };
               item.param_topo = { module_info.index, mi, param_info.index, pi };
               result.items.push_back(item);
               result.mappings.push_back(item.param_topo);

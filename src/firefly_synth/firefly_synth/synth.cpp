@@ -125,16 +125,24 @@ make_cv_matrix_targets(plugin_topo const* topo, bool global)
 }
 
 std::vector<cv_source_entry>
-make_cv_matrix_sources(plugin_topo const* topo, bool global)
+make_cv_matrix_sources(plugin_topo const* topo, bool global, std::set<int> short_name_modules)
 {
   if(global)
-    return { { "", &topo->modules[module_master_cv] }, { "", &topo->modules[module_glfo] }, { "", &topo->modules[module_midi] } };
+    return { 
+      { short_name_modules.contains(module_master_cv), "", &topo->modules[module_master_cv]},
+      { short_name_modules.contains(module_glfo), "", &topo->modules[module_glfo] },
+      { short_name_modules.contains(module_midi), "", &topo->modules[module_midi] } };
   else
     return { 
-      { "Global", nullptr }, 
-      { "", &topo->modules[module_master_cv]}, {"", &topo->modules[module_glfo]}, { "", &topo->modules[module_midi] },
-      { "Voice", nullptr }, 
-      { "", &topo->modules[module_env] }, { "", &topo->modules[module_vlfo] }, { "", &topo->modules[module_voice_note] }, { "", &topo->modules[module_voice_on_note] }};
+      { false, "Global", nullptr }, 
+      { short_name_modules.contains(module_master_cv), "", &topo->modules[module_master_cv]},
+      { short_name_modules.contains(module_glfo), "", &topo->modules[module_glfo] },
+      { short_name_modules.contains(module_midi), "", &topo->modules[module_midi] },
+      { false, "Voice", nullptr }, 
+      { short_name_modules.contains(module_env), "", &topo->modules[module_env] },
+      { short_name_modules.contains(module_vlfo), "", &topo->modules[module_vlfo] },
+      { short_name_modules.contains(module_voice_note), "", &topo->modules[module_voice_note] },
+      { short_name_modules.contains(module_voice_on_note), "", &topo->modules[module_voice_on_note] }};
 }
 
 std::unique_ptr<tab_menu_handler>
@@ -226,11 +234,11 @@ synth_topo()
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false, 
     make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
   result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, false,
-    make_cv_matrix_sources(result.get(), false), make_cv_matrix_targets(result.get(), false));
+    make_cv_matrix_sources(result.get(), false, {}), make_cv_matrix_targets(result.get(), false));
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, true,
-    make_cv_matrix_sources(result.get(), true), make_cv_matrix_targets(result.get(), true));
+    make_cv_matrix_sources(result.get(), true, {}), make_cv_matrix_targets(result.get(), true));
   return result;
 }
 

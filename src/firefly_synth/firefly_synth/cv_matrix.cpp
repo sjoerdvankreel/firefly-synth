@@ -99,8 +99,8 @@ std::unique_ptr<tab_menu_handler>
 make_cv_routing_menu_handler(plugin_state* state)
 {
   std::map<int, std::vector<module_output_mapping>> matrix_sources;
-  matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
-  matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
+  matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true, {})).mappings;
+  matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false, {})).mappings;
   return std::make_unique<cv_routing_menu_handler>(state, param_source, param_type, type_off, matrix_sources);
 }
 

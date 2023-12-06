@@ -20,6 +20,7 @@ struct routing_matrix
 // for make_cv_source_matrix
 struct cv_source_entry
 {
+  bool use_short_name;
   std::string subheader;
   module_topo const* module;
 };

@@ -38,14 +38,14 @@ cv_matrix_mixdown
 make_static_cv_matrix_mixdown(plugin_base::plugin_block& block);
 
 // routing matrices sources/targets
-std::vector<plugin_base::cv_source_entry> 
-make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
-std::vector<plugin_base::module_topo const*>
-make_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
 make_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
 make_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
+std::vector<plugin_base::module_topo const*>
+make_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
+std::vector<plugin_base::cv_source_entry>
+make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global, std::set<int> short_name_modules);
 
 // menu handlers to update routing on clear/move/swap/copy
 std::unique_ptr<plugin_base::tab_menu_handler>
