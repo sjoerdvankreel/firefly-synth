@@ -77,16 +77,15 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo midi_topo(int section);
 plugin_base::module_topo voice_note_topo(int section);
 plugin_base::module_topo voice_audio_in_topo(int section);
-plugin_base::module_topo voice_audio_out_topo(int section);
 plugin_base::module_topo voice_on_note_topo(plugin_base::plugin_topo const* topo, int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo master_cv_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
-plugin_base::module_topo master_audio_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
+plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony);
-plugin_base::module_topo audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global, 
+plugin_base::module_topo audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::cv_source_entry> const& sources, std::vector<plugin_base::cv_source_entry> const& on_note_sources, std::vector<plugin_base::module_topo const*> const& targets);

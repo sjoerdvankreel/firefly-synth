@@ -23,7 +23,7 @@ enum {
   module_section_hidden, module_section_master_cv, 
   module_section_lfos, module_section_env, module_section_cv_matrix,
   module_section_audio_matrix, module_section_osc, module_section_fx, 
-  module_section_monitor_master, module_section_count };
+  module_section_voice_master_audio, module_section_monitor, module_section_count };
 
 static gui_colors
 make_section_colors(Colour const& c)
@@ -176,8 +176,8 @@ synth_topo()
   result->gui.min_width = 816;
   result->gui.aspect_ratio_width = 53;
   result->gui.aspect_ratio_height = 23;
-  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1 };
   result->gui.dimension.column_sizes = { 16, 12, 12, 15, 14 };
+  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1, 1 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   result->gui.custom_sections.resize(custom_section_count);
@@ -207,8 +207,10 @@ synth_topo()
     "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_lfos, { 2, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_master_cv] = make_module_section_gui(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_cv, { 1, 0, 1, 3 }, { 1, 1 });
-  result->gui.module_sections[module_section_monitor_master] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_master, { 6, 0, 1, 3 }, { { 1 }, { 1, 2 } });
+  result->gui.module_sections[module_section_voice_master_audio] = make_module_section_gui(
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_voice_master_audio, { 6, 0, 1, 3 }, { { 1 }, { 1, 1 } });
+  result->gui.module_sections[module_section_monitor] = make_module_section_gui(
+    "{1EA5EFDE-85F0-4E7D-B39C-820CDE270966}", module_section_monitor, { 7, 0, 1, 3 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 3, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
@@ -220,7 +222,6 @@ synth_topo()
   result->modules[module_midi] = midi_topo(module_section_hidden);
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
   result->modules[module_voice_audio_in] = voice_audio_in_topo(module_section_hidden);
-  result->modules[module_voice_audio_out] = voice_audio_out_topo(module_section_hidden);
   result->modules[module_env] = env_topo(module_section_env, cv_colors, { 0, 0 });
   result->modules[module_osc] = osc_topo(module_section_osc, audio_colors, { 0, 0 });
   result->modules[module_gfx] = fx_topo(module_section_fx, audio_colors, { 0, 1 }, true);
@@ -229,8 +230,9 @@ synth_topo()
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_master_cv] = master_cv_topo(module_section_master_cv, master_colors, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv
-  result->modules[module_master_audio_out] = master_audio_topo(module_section_monitor_master, master_colors, { 0, 0 });
-  result->modules[module_monitor] = monitor_topo(module_section_monitor_master, other_colors, { 0, 1 }, result->polyphony);
+  result->modules[module_voice_audio_out] = audio_out_topo(module_section_voice_master_audio, master_colors, { 0, 0 }, true);
+  result->modules[module_master_audio_out] = audio_out_topo(module_section_voice_master_audio, master_colors, { 0, 1 }, true);
+  result->modules[module_monitor] = monitor_topo(module_section_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
