@@ -43,7 +43,10 @@ graph_engine::process_default(int module_index, int module_slot)
     slot_map[module_slot] = std::move(module_engine);
   } else
     engine = slot_map[module_slot].get();
-  return process(module_index, module_slot, [engine](auto& block) { engine->process(block); });
+  return process(module_index, module_slot, [engine](auto& block) { 
+    engine->reset(&block);
+    engine->process(block); 
+  });
 }
 
 plugin_block const*

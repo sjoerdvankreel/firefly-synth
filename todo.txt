@@ -2,15 +2,11 @@
 handle clap midi notes
 handle clap is_modulatable
 handle automation changes at voice vs block start
-on-note/hold-type cv
 do cakewalk bug report
 
 demo synth:
-velocity + note as modsource
-on-note type stuff
 do clap midi notes
 polymod/mpe/note_exprs
-midi note as mod source
 read all the comments from github and kvr and forums
 make new test files
 fix up the gui (control sizes etc)
@@ -19,7 +15,6 @@ document the header files a bit
 negative cv amount
 am matrix
 more space for freq slider
-fix the initialize/reset for module engines (wtf allocate on voice activation?)
 make per-voice control section
 color scheme : group gcv/vcv/gaudio/vaudio
 number modules by processing order or by group
