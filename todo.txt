@@ -23,9 +23,7 @@ fix the initialize/reset for module engines (wtf allocate on voice activation?)
 make per-voice control section
 color scheme : group gcv/vcv/gaudio/vaudio
 number modules by processing order or by group
-make routing explicit in module_stage (global cv -> voice cv -> voice audio -> global audio)
 default note velocity to voice amp
-fix the clipping of  "on note master aux 1"
 tidy up the audio matrix
 
 * get some linux folks to comment (ycollete?)
