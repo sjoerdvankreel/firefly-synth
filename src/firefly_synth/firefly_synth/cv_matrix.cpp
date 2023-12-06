@@ -20,7 +20,7 @@ static int constexpr route_count = 12;
 
 enum { section_main };
 enum { op_off, op_mul, op_add, op_addbi };
-enum { param_op, param_source, param_target, param_amount };
+enum { param_op, param_source, param_target, param_amt };
 
 static std::vector<list_item>
 type_items()
@@ -59,7 +59,7 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 0, "VFX 1 Freq");
   state.set_text_at(module_vcv_matrix, 0, param_op, 1, "AddBi");
-  state.set_text_at(module_vcv_matrix, 0, param_amount, 1, "33");
+  state.set_text_at(module_vcv_matrix, 0, param_amt, 1, "33");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "Osc 1 Bal");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
@@ -77,7 +77,7 @@ static void
 init_global_default(plugin_state& state)
 {
   state.set_text_at(module_gcv_matrix, 0, param_op, 0, "AddBi");
-  state.set_text_at(module_gcv_matrix, 0, param_amount, 0, "33");
+  state.set_text_at(module_gcv_matrix, 0, param_amt, 0, "33");
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "GLFO 1");
   state.set_text_at(module_gcv_matrix, 0, param_target, 0, "GFX 1 Freq");
   state.set_text_at(module_gcv_matrix, 0, param_op, 1, "Add");
@@ -201,7 +201,7 @@ cv_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 5, 4, -30 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 5, 4, -35 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
@@ -230,7 +230,7 @@ cv_matrix_topo(
   target.gui.item_enabled.auto_bind = true;
 
   auto& amount = result.params.emplace_back(make_param(
-    make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amount", param_amount, route_count),
+    make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amt", param_amt, route_count),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
@@ -335,7 +335,7 @@ cv_matrix_engine::process(plugin_block& block)
       check_unipolar(source_curve[f]);
 
     // apply modulation
-    auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];
+    auto const& amount_curve = block.state.own_accurate_automation[param_amt][r];
     switch (op)
     {
     case op_add:
