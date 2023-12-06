@@ -453,9 +453,18 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
   auto const& param = slots[0].param;
   bool vertical = param->gui.layout == param_layout::vertical;
-  auto& result = make_component<grid_component>(vertical, param->info.slot_count, margin_param);
+  int autofit_row = param->gui.tabular && vertical ? 1 : 0;
+  int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
+  auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), margin_param, autofit_row, autofit_column);
+  if (param->gui.tabular)
+  {
+    std::string name = param->info.tag.name;
+    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), name);
+    header.setText(name, dontSendNotification);
+    result.add(header, vertical, 0);
+  }
   for (int i = 0; i < param->info.slot_count; i++)
-    result.add(make_single_param(module, slots[i]), vertical, i);
+    result.add(make_single_param(module, slots[i]), vertical, i + (param->gui.tabular? 1: 0));
   return result;
 }
 

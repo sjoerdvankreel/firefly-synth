@@ -16,8 +16,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int constexpr groute_count = 8;
-static int constexpr vroute_count = 12;
+static int constexpr route_count = 12;
 
 enum { section_main };
 enum { type_off, type_mul, type_add, type_addbi };
@@ -112,9 +111,7 @@ select_midi_active(
   plugin_state const& state, bool global, int on_note_midi_start,
   std::vector<module_output_mapping> const& mappings, jarray<int, 3>& active)
 {
-  int route_count = global? groute_count: vroute_count;
-  int module = global? module_gcv_matrix: module_vcv_matrix;
-
+  int module = global ? module_gcv_matrix : module_vcv_matrix;
   // PB and mod wheel are linked so must be always on
   active[module_midi][0][midi_source_pb] = 1;
   active[module_midi][0][midi_source_cc + 1] = 1;
@@ -191,7 +188,6 @@ cv_matrix_topo(
 {
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV", module_vcv_matrix, 1);
   auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "GCV", module_gcv_matrix, 1);
-  int route_count = global ? groute_count : vroute_count;
   auto const info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
 
@@ -206,18 +202,20 @@ cv_matrix_topo(
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 5, 4, -30 } })));
-  main.gui.scroll_mode = global? gui_scroll_mode::none: gui_scroll_mode::vertical;
+  main.gui.scroll_mode = gui_scroll_mode::vertical;
   
-  result.params.emplace_back(make_param(
+  auto& type = result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Type", param_type, route_count),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
+  type.gui.tabular = true;
 
   auto source_matrix = make_cv_source_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
+  source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_matrix.submenu;
 
@@ -226,6 +224,7 @@ cv_matrix_topo(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
+  target.gui.tabular = true;
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
@@ -234,6 +233,7 @@ cv_matrix_topo(
     make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amount", param_amount, route_count),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
+  amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   int on_note_midi_start = -1;
@@ -275,8 +275,6 @@ _global(global), _sources(sources), _targets(targets)
 void
 cv_matrix_engine::process(plugin_block& block)
 {
-  int route_count = _global? groute_count: vroute_count;
-
   // set every modulatable parameter to its corresponding automation curve
   for (int m = 0; m < _targets.size(); m++)
   {
@@ -292,9 +290,7 @@ cv_matrix_engine::process(plugin_block& block)
   // apply modulation routing
   int modulation_index = 0;
   auto const& own_automation = block.state.own_block_automation;
-  jarray<float, 1>* vmodulated_curve_ptrs[vroute_count] = { nullptr };
-  jarray<float, 1>* gmodulated_curve_ptrs[groute_count] = { nullptr };
-  jarray<float, 1>** modulated_curve_ptrs = _global? gmodulated_curve_ptrs: vmodulated_curve_ptrs;
+  jarray<float, 1>* modulated_curve_ptrs[route_count] = { nullptr };
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;

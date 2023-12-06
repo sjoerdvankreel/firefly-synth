@@ -44,6 +44,7 @@ struct gui_item_binding final {
 struct param_topo_gui final {
   int section;
   bool visible;
+  bool tabular;
   gui_label label;
   param_layout layout;
   gui_position position;
