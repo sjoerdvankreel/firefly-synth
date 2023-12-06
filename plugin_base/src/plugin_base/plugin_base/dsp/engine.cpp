@@ -504,8 +504,6 @@ plugin_engine::process()
   {
     auto const& event = _host_block->events.notes[e];
     if (event.type == note_event_type::on) continue;
-    int release_count = 0;
-    (void)release_count;
     for (int v = 0; v < _voice_states.size(); v++)
     {
       auto& state = _voice_states[v];
@@ -514,7 +512,6 @@ plugin_engine::process()
         ((event.id.id != -1 && state.id.id == event.id.id) ||
           (event.id.id == -1 && (state.id.key == event.id.key && state.id.channel == event.id.channel))))
       {
-        release_count++;
         if (event.type == note_event_type::cut)
         {
           state.end_frame = event.frame;
@@ -528,7 +525,6 @@ plugin_engine::process()
         }
       }
     }
-    assert(release_count > 0);
   }
 
   /*************************************************************/
