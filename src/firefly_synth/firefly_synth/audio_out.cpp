@@ -12,12 +12,15 @@ namespace firefly_synth {
 enum { section_main };
 enum { param_gain, param_bal };
 
-class voice_audio_out_engine :
+class audio_out_engine :
 public module_engine {
+  bool const _global;
 public:
   void process(plugin_block& block) override;
   void reset(plugin_block const*) override {}
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_audio_out_engine);
+
+  PB_PREVENT_ACCIDENTAL_COPY(audio_out_engine);
+  audio_out_engine(bool global): _global(global) {}
 };
 
 class master_audio_out_engine :
@@ -50,10 +53,7 @@ audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::
 
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
-  if(global)
-    result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_audio_out_engine>(); };
-  else
-    result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_audio_out_engine>(); };
+  result.engine_factory = [global](auto const&, int, int) { return std::make_unique<audio_out_engine>(global); };
   result.gui.menu_handler_factory = [global](plugin_state* state) { return make_audio_routing_menu_handler(state, global); };
 
   result.sections.emplace_back(make_param_section(section_main,
@@ -76,27 +76,32 @@ audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::
 }
 
 void
-voice_audio_out_engine::process(plugin_block& block)
+audio_out_engine::process(plugin_block& block)
 {
-  auto& mixer = get_audio_matrix_mixer(block, false);
-  auto const& audio_in = mixer.mix(block, module_voice_audio_out, 0);
-  for (int c = 0; c < 2; c++)
-    audio_in[c].copy_to(block.start_frame, block.end_frame, block.voice->result[c]);
-}
+  float* audio_out[2];
+  int module = _global? module_master_audio_out: module_voice_audio_out;
+  auto& mixer = get_audio_matrix_mixer(block, _global);
+  auto const& audio_in = mixer.mix(block, module, 0);
+  auto const& modulation = get_cv_matrix_mixdown(block, _global);
+  auto const& bal_curve = *modulation[module][0][param_bal][0];
+  auto const& gain_curve = *modulation[module][0][param_gain][0];
 
-void
-master_audio_out_engine::process(plugin_block& block)
-{
-  auto& mixer = get_audio_matrix_mixer(block, true);
-  auto const& audio_in = mixer.mix(block, module_master_audio_out, 0);
-  auto const& modulation = get_cv_matrix_mixdown(block, true);
-  auto const& bal_curve = *modulation[module_master_audio_out][0][param_bal][0];
-  auto const& gain_curve = *modulation[module_master_audio_out][0][param_gain][0];
+  if (_global)
+  {
+    audio_out[0] = block.out->host_audio[0];
+    audio_out[1] = block.out->host_audio[1];
+  }
+  else
+  {
+    audio_out[0] = block.voice->result[0].data().data();
+    audio_out[1] = block.voice->result[1].data().data();
+  }
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float bal = block.normalized_to_raw(module_master_audio_out, param_bal, bal_curve[f]);
+    float bal = block.normalized_to_raw(module, param_bal, bal_curve[f]);
     for(int c = 0; c < 2; c++)
-      block.out->host_audio[c][f] = audio_in[c][f] * gain_curve[f] * balance(c, bal);
+      audio_out[c][f] = audio_in[c][f] * gain_curve[f] * balance(c, bal);
   }
 }
 

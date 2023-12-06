@@ -119,9 +119,16 @@ std::vector<module_topo const*>
 make_cv_matrix_targets(plugin_topo const* topo, bool global)
 {
   if (global)
-    return { &topo->modules[module_gfx], &topo->modules[module_gaudio_matrix], &topo->modules[module_master_audio_out] };
+    return {
+      &topo->modules[module_gfx], 
+      &topo->modules[module_gaudio_matrix], 
+      &topo->modules[module_master_audio_out] };
   else
-    return { &topo->modules[module_osc], &topo->modules[module_vfx], &topo->modules[module_vaudio_matrix] };
+    return { 
+      &topo->modules[module_osc], 
+      &topo->modules[module_vfx], 
+      &topo->modules[module_vaudio_matrix], 
+      &topo->modules[module_voice_audio_out] };
 }
 
 std::vector<cv_source_entry>
@@ -175,7 +182,7 @@ synth_topo()
 
   result->gui.min_width = 816;
   result->gui.aspect_ratio_width = 53;
-  result->gui.aspect_ratio_height = 26;
+  result->gui.aspect_ratio_height = 27;
   result->gui.dimension.column_sizes = { 16, 12, 12, 15, 14 };
   result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1, 1 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
