@@ -106,7 +106,7 @@ make_cv_routing_menu_handler(plugin_state* state)
 
 void
 select_midi_active(
-  plugin_state const& state, int slot, bool global,
+  plugin_state const& state, bool global,
   std::vector<module_output_mapping> const& mappings, jarray<int, 3>& active)
 {
   int route_count = global? groute_count: vroute_count;
@@ -225,7 +225,7 @@ cv_matrix_topo(
   result.rerender_on_param_hover = true;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.midi_active_selector = [global, sm = source_matrix.mappings](
-    plugin_state const& state, int slot, jarray<int, 3>& active) { select_midi_active(state, slot, global, sm, active); };
+    plugin_state const& state, int, jarray<int, 3>& active) { select_midi_active(state, global, sm, active); };
   result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings]
     (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); };
   result.graph_renderer = [tm = target_matrix.mappings](auto const& state, auto const& mapping) { return render_graph(state, mapping, tm); };
