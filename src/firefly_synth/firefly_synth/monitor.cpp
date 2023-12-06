@@ -17,7 +17,7 @@ class monitor_engine:
 public module_engine {
 public:
   monitor_engine() {}
-  void initialize() override {}
+  void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY(monitor_engine);
 };

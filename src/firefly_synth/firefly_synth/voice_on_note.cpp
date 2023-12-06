@@ -18,10 +18,10 @@ class voice_on_note_engine :
 public module_engine {
   std::vector<module_output_mapping> const _global_outputs;
 public:
-  void initialize() override {}
   void process(plugin_block& block) override;
-  
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_on_note_engine);
+  void reset(plugin_block const* block) override {}
+
+  PB_PREVENT_ACCIDENTAL_COPY(voice_on_note_engine);
   voice_on_note_engine(std::vector<module_output_mapping> const& global_outputs) : 
   _global_outputs(global_outputs) {}
 };

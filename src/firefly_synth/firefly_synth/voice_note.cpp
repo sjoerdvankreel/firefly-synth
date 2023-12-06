@@ -17,8 +17,8 @@ enum { output_key, output_velo, output_count };
 class voice_note_engine :
 public module_engine {
 public:
-  void initialize() override { }
   void process(plugin_block& block) override;
+  void reset(plugin_block const*) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_note_engine);
 };
 

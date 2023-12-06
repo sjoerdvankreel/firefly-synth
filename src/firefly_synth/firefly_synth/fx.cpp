@@ -50,9 +50,9 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
   fx_engine(bool global, int sample_rate);
   
-  void initialize() override;
-  void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
+  void reset(plugin_block const*) override;
   void process(plugin_block& block) override { process(block, nullptr, nullptr); }
+  void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
 };
 
 static void
@@ -109,7 +109,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   auto const* block = graph_engine.process(
     mapping.module_index, mapping.module_slot, [mapping, params, &audio_in](plugin_block& block) {
     fx_engine engine(mapping.module_index == module_gfx, params.sample_rate);
-    engine.initialize();
+    engine.reset(nullptr);
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &audio_in);
   });
@@ -201,20 +201,18 @@ fx_topo(
 fx_engine::
 fx_engine(bool global, int sample_rate) :
 _global(global), _capacity(sample_rate * 10)
-{
-  if(global) _buffer.resize(jarray<int, 1>(2, _capacity));
-  initialize();
-}
+{ if(global) _buffer.resize(jarray<int, 1>(2, _capacity)); }
 
 void
-fx_engine::initialize()
+fx_engine::reset(plugin_block const*)
 {
   _pos = 0;
   _ic1eq[0] = 0;
   _ic1eq[1] = 0;
   _ic2eq[0] = 0;
   _ic2eq[1] = 0;
-  _buffer.fill(0);
+  if(_global)
+    _buffer.fill(0);
 }
 
 void

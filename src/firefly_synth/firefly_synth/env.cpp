@@ -23,10 +23,9 @@ public module_engine {
   int current_stage_param() const;
 
 public:
-  env_engine() { initialize(); }
-  PB_PREVENT_ACCIDENTAL_COPY(env_engine);
+  void reset(plugin_block const*) override;
   void process(plugin_block& block) override;
-  void initialize() override { _release_level = 0; _stage_pos = 0; _stage = env_stage::a; }
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
 };
 
 static void
@@ -119,6 +118,14 @@ env_topo(
   r.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   return result;
+}
+
+void
+env_engine::reset(plugin_block const*)
+{
+  _stage_pos = 0;
+  _release_level = 0;
+  _stage = env_stage::a;
 }
 
 int

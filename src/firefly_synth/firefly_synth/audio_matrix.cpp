@@ -30,13 +30,13 @@ public module_engine {
   std::vector<module_topo_mapping> const _targets;
 
 public:
-  void initialize() override {}
   PB_PREVENT_ACCIDENTAL_COPY(audio_matrix_engine);
   audio_matrix_engine(bool global,
     std::vector<module_topo_mapping> const& sources,
     std::vector<module_topo_mapping> const& targets): 
     _global(global), _mixer(this), _sources(sources), _targets(targets) {}
 
+  void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
   jarray<float, 2> const& mix(plugin_block& block, int module, int slot);
 };

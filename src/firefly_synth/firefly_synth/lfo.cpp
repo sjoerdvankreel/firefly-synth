@@ -34,9 +34,10 @@ public module_engine {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
-  void initialize() override { _phase = 0; }
+  lfo_engine(bool global) : _global(global) {}
+
   void process(plugin_block& block) override;
-  lfo_engine(bool global) : _global(global) { initialize(); }
+  void reset(plugin_block const*) override { _phase = 0; }
 };
 
 static void

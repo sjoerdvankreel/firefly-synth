@@ -36,10 +36,8 @@ public module_engine {
   float _phase;
 
 public:
-  osc_engine() { initialize(); }
-  PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
-  
-  void initialize() override { _phase = 0; }
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(osc_engine);
+  void reset(plugin_block const*) override { _phase = 0; }
   void process(plugin_block& block) override { process(block, nullptr, nullptr); }
   void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 1> const* env_curve);
 };

@@ -42,7 +42,7 @@ public module_engine {
   std::vector<param_topo_mapping> const _targets;
   std::vector<module_output_mapping> const _sources;
 public:
-  void initialize() override {}
+  void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
 
   cv_matrix_engine(

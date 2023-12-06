@@ -38,7 +38,7 @@ graph_engine::process_default(int module_index, int module_slot)
   {
     auto factory = _state->desc().plugin->modules[module_index].engine_factory;
     auto module_engine = factory(*_state->desc().plugin, _params.sample_rate, _params.frame_count);
-    module_engine->initialize();
+    module_engine->reset(nullptr);
     engine = module_engine.get();
     slot_map[module_slot] = std::move(module_engine);
   } else

@@ -12,8 +12,8 @@ namespace firefly_synth {
 class voice_audio_in_engine :
 public module_engine {
 public:
-  void initialize() override {}
   void process(plugin_block& block) override;
+  void reset(plugin_block const*) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_audio_in_engine);
 };
 

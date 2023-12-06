@@ -16,8 +16,8 @@ class master_audio_engine :
 public module_engine {
 
 public:
-  void initialize() override { }
   void process(plugin_block& block) override;
+  void reset(plugin_block const*) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_audio_engine);
 };
 

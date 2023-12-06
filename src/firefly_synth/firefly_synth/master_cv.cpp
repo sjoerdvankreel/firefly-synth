@@ -22,7 +22,7 @@ extern int const master_cv_param_pb_range = param_pb_range;
 class master_cv_engine :
 public module_engine {
 public:
-  void initialize() override { }
+  void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_cv_engine);
 };
