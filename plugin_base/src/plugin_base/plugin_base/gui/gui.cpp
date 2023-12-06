@@ -461,6 +461,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
     std::string name = param->info.tag.name;
     auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), name);
     header.setText(name, dontSendNotification);
+    header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
     result.add(header, vertical, 0);
   }
   for (int i = 0; i < param->info.slot_count; i++)

@@ -37,6 +37,7 @@ make_section_colors(Colour const& c)
   result.bubble_outline = c;
   result.scrollbar_thumb = c;
   result.graph_foreground = c;
+  result.table_header = c.darker(0.3f);
   result.section_outline1 = c.darker(1);
   return result;
 }

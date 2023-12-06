@@ -146,6 +146,7 @@ struct gui_colors final {
   juce::Colour slider_outline2 = juce::Colour(0xFFBBBBBB);
   juce::Colour slider_background = juce::Colour(0xFF000000);
   juce::Colour edit_text = juce::Colour(0xFFFFFFFF);
+  juce::Colour table_header = juce::Colour(0xFFFF8844);
   juce::Colour control_tick = juce::Colour(0xFFFF8844);
   juce::Colour control_text = juce::Colour(0xFFFFFFFF);
   juce::Colour control_outline = juce::Colour(0xFFAAAAAA);

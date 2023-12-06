@@ -19,8 +19,8 @@ namespace firefly_synth {
 static int constexpr route_count = 12;
 
 enum { section_main };
-enum { type_off, type_mul, type_add, type_addbi };
-enum { param_type, param_source, param_target, param_amount };
+enum { op_off, op_mul, op_add, op_addbi };
+enum { param_op, param_source, param_target, param_amount };
 
 static std::vector<list_item>
 type_items()
@@ -55,20 +55,20 @@ public:
 static void
 init_voice_default(plugin_state& state)
 {
-  state.set_text_at(module_vcv_matrix, 0, param_type, 0, "Add");
+  state.set_text_at(module_vcv_matrix, 0, param_op, 0, "Add");
   state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 0, "VFX 1 Freq");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 1, "AddBi");
+  state.set_text_at(module_vcv_matrix, 0, param_op, 1, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_amount, 1, "33");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "Osc 1 Bal");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 2, "AddBi");
+  state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_source, 2, "Master PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 2, "Osc 1 PB");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 3, "AddBi");
+  state.set_text_at(module_vcv_matrix, 0, param_op, 3, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Master PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 3, "Osc 2 PB");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 4, "Mul");
+  state.set_text_at(module_vcv_matrix, 0, param_op, 4, "Mul");
   state.set_text_at(module_vcv_matrix, 0, param_source, 4, "Note Velo");
   state.set_text_at(module_vcv_matrix, 0, param_target, 4, "Voice Gain");
 }
@@ -76,11 +76,11 @@ init_voice_default(plugin_state& state)
 static void
 init_global_default(plugin_state& state)
 {
-  state.set_text_at(module_gcv_matrix, 0, param_type, 0, "AddBi");
+  state.set_text_at(module_gcv_matrix, 0, param_op, 0, "AddBi");
   state.set_text_at(module_gcv_matrix, 0, param_amount, 0, "33");
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "GLFO 1");
   state.set_text_at(module_gcv_matrix, 0, param_target, 0, "GFX 1 Freq");
-  state.set_text_at(module_gcv_matrix, 0, param_type, 1, "Add");
+  state.set_text_at(module_gcv_matrix, 0, param_op, 1, "Add");
   state.set_text_at(module_gcv_matrix, 0, param_source, 1, "Master Mod");
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
 }
@@ -89,8 +89,8 @@ audio_routing_cv_params
 make_audio_routing_cv_params(plugin_state* state, bool global)
 {
   audio_routing_cv_params result;
-  result.off_value = type_off;
-  result.on_param = param_type;
+  result.off_value = op_off;
+  result.on_param = param_op;
   result.target_param = param_target;
   result.matrix_module = global ? module_gcv_matrix : module_vcv_matrix;
   result.targets = make_cv_target_matrix(make_cv_matrix_targets(state->desc().plugin, global)).mappings;
@@ -103,7 +103,7 @@ make_cv_routing_menu_handler(plugin_state* state)
   std::map<int, std::vector<module_output_mapping>> matrix_sources;
   matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true, {})).mappings;
   matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false, {})).mappings;
-  return std::make_unique<cv_routing_menu_handler>(state, param_source, param_type, type_off, matrix_sources);
+  return std::make_unique<cv_routing_menu_handler>(state, param_source, param_op, op_off, matrix_sources);
 }
 
 void
@@ -118,8 +118,8 @@ select_midi_active(
 
   for (int r = 0; r < route_count; r++)
   {
-    int type = state.get_plain_at(module, 0, param_type, r).step();
-    if (type != type_off)
+    int op = state.get_plain_at(module, 0, param_op, r).step();
+    if (op != op_off)
     {
       int source = state.get_plain_at(module, 0, param_source, r).step();
       auto const& mapping = mappings[source];
@@ -152,8 +152,8 @@ static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::vector<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
-  int type = state.get_plain_at(map.module_index, map.module_slot, param_type, map.param_slot).step();
-  if(type == type_off) return graph_data();
+  int op = state.get_plain_at(map.module_index, map.module_slot, param_op, map.param_slot).step();
+  if(op == op_off) return graph_data();
 
   graph_engine_params params = {};
   params.bpm = 120;
@@ -197,7 +197,7 @@ cv_matrix_topo(
     make_module_gui(section, colors, pos, { 1, 1 })));
   result.gui.tabbed_name = global ? "Global" : "Voice";
   result.gui.menu_handler_factory = [](plugin_state* state) { 
-    return std::make_unique<tidy_matrix_menu_handler>(state, param_type, type_off, std::vector<int>({ param_target, param_source })); };
+    return std::make_unique<tidy_matrix_menu_handler>(state, param_op, op_off, std::vector<int>({ param_target, param_source })); };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
@@ -205,7 +205,7 @@ cv_matrix_topo(
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Type", param_type, route_count),
+    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", param_op, route_count),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
   type.gui.tabular = true;
@@ -216,7 +216,7 @@ cv_matrix_topo(
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
-  source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  source.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
   source.gui.submenu = source_matrix.submenu;
 
   auto target_matrix = make_cv_target_matrix(targets);
@@ -225,7 +225,7 @@ cv_matrix_topo(
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
-  target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  target.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
 
@@ -234,7 +234,7 @@ cv_matrix_topo(
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
-  amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  amount.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
 
   int on_note_midi_start = -1;
   if (!global)
@@ -294,8 +294,8 @@ cv_matrix_engine::process(plugin_block& block)
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
-    int type = own_automation[param_type][r].step();
-    if(type == type_off) continue;
+    int op = own_automation[param_op][r].step();
+    if(op == op_off) continue;
 
     // found out indices of modulation target
     int selected_target = own_automation[param_target][r].step();
@@ -336,17 +336,17 @@ cv_matrix_engine::process(plugin_block& block)
 
     // apply modulation
     auto const& amount_curve = block.state.own_accurate_automation[param_amount][r];
-    switch (type)
+    switch (op)
     {
-    case type_add:
+    case op_add:
       for (int f = block.start_frame; f < block.end_frame; f++)
         modulated_curve[f] += source_curve[f] * amount_curve[f];
       break;
-    case type_addbi:
+    case op_addbi:
       for (int f = block.start_frame; f < block.end_frame; f++)
         modulated_curve[f] += unipolar_to_bipolar(source_curve[f]) * amount_curve[f] * 0.5f;
       break;
-    case type_mul:
+    case op_mul:
       for(int f = block.start_frame; f < block.end_frame; f++)
         modulated_curve[f] = mix_signal(amount_curve[f], modulated_curve[f], source_curve[f] * modulated_curve[f]);
       break;
