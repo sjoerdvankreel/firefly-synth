@@ -72,7 +72,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   for(int i = 0; i <= mapping.module_slot; i++)
     block = graph_engine.process(mapping.module_index, i, [mapping, i, &graph_engine](plugin_block& block) {
       osc_engine engine;
-      engine.initialize();
+      engine.reset(nullptr);
       jarray<float, 1> env_curve(block.end_frame, 1.0f);
       cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process(block, &modulation, &env_curve);
