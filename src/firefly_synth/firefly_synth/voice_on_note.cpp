@@ -16,10 +16,14 @@ enum { output_on_note, output_count };
 
 class voice_on_note_engine :
 public module_engine {
+  std::vector<module_output_mapping> const _global_outputs;
 public:
-  void initialize() override { }
+  void initialize() override {}
   void process(plugin_block& block) override;
+  
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_on_note_engine);
+  voice_on_note_engine(std::vector<module_output_mapping> const& global_outputs) : 
+  _global_outputs(global_outputs) {}
 };
 
 module_topo
@@ -37,8 +41,8 @@ voice_on_note_topo(plugin_topo const* topo, int section)
   module_topo result(make_module(
     make_topo_info("{EF1A4E73-BCAD-4D38-A54E-44B83EF46CB5}", "On Note", "On Nt", true, module_voice_on_note, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, outputs), make_module_gui_none(section)));
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<voice_on_note_engine>(); };
+  result.engine_factory = [gm = global_sources.mappings](auto const&, int, int) ->
+    std::unique_ptr<module_engine> { return std::make_unique<voice_on_note_engine>(gm); };
   return result;
 }
 
