@@ -19,7 +19,7 @@ static int constexpr route_count = 8;
 
 enum { section_main };
 enum { output_silence, output_mixed };
-enum { param_on, param_source, param_target, param_gain };
+enum { param_on, param_source, param_target, param_gain, param_bal };
 
 class audio_matrix_engine:
 public module_engine { 
@@ -135,7 +135,7 @@ audio_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, -35 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, -35, -35 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& on = result.params.emplace_back(make_param(
@@ -181,6 +181,13 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+
+  auto& bal = result.params.emplace_back(make_param(
+    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", "Bal", param_bal, route_count),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
+  bal.gui.tabular = true;
+  bal.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
@@ -239,12 +246,16 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     int smi = _sources[selected_source].slot;
 
     // add modulated amount to mixdown
-    auto const& modulation = get_cv_matrix_mixdown(block, _global);
-    auto const& gain_curve = *modulation[this_module][0][param_gain][r];
     auto const& source_audio = block.module_audio(sm, smi);
+    auto const& modulation = get_cv_matrix_mixdown(block, _global);
+    auto const& bal_curve = *modulation[this_module][0][param_bal][r];
+    auto const& gain_curve = *modulation[this_module][0][param_gain][r];
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
-        mix[c][f] += gain_curve[f] * source_audio[0][0][c][f];
+      {
+        float bal = block.normalized_to_raw(this_module, param_bal, bal_curve[f]);
+        mix[c][f] += gain_curve[f] * balance(c, bal) * source_audio[0][0][c][f];
+      }
   }
 
   return *result;
