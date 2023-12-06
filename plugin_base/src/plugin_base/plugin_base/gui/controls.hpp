@@ -54,7 +54,7 @@ public toggle_button,
 public autofit_component
 {
 public:
-  autofit_togglebutton() { setSize(24, 24); }
+  autofit_togglebutton() { setSize(21, 21); } // empirically determined
   int fixed_width() const override { return getWidth(); }
   int fixed_height() const override { return getHeight(); }
 };
