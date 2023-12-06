@@ -234,7 +234,7 @@ synth_topo()
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false, 
     make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
   result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, false,
-    make_cv_matrix_sources(result.get(), false, {}), make_cv_matrix_targets(result.get(), false));
+    make_cv_matrix_sources(result.get(), false, { module_voice_on_note }), make_cv_matrix_targets(result.get(), false));
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, true,
