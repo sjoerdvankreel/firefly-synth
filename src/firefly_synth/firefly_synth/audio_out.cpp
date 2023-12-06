@@ -12,13 +12,20 @@ namespace firefly_synth {
 enum { section_main };
 enum { param_gain, param_bal };
 
-class master_audio_engine :
+class voice_audio_out_engine :
 public module_engine {
-
 public:
   void process(plugin_block& block) override;
   void reset(plugin_block const*) override {}
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_audio_engine);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_audio_out_engine);
+};
+
+class master_audio_out_engine :
+public module_engine {
+public:
+  void process(plugin_block& block) override;
+  void reset(plugin_block const*) override {}
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_audio_out_engine);
 };
 
 static graph_data
@@ -30,18 +37,24 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 }
 
 module_topo
-master_audio_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos)
+audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global)
 {
-  module_topo result(make_module(
-    make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", "Master", module_master_audio, 1),
-    make_module_dsp(module_stage::output, module_output::none, 0, {}),
+  auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", "Voice", module_voice_audio_out, 1));
+  auto master_info(make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", "Master", module_master_audio_out, 1));
+  module_stage stage = global ? module_stage::output : module_stage::voice;
+  auto const info = topo_info(global ? master_info : voice_info);
+
+  module_topo result(make_module(info,
+    make_module_dsp(stage, module_output::none, 0, {}),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<master_audio_engine> { return std::make_unique<master_audio_engine>(); };
-  result.gui.menu_handler_factory = [](plugin_state* state) { return make_audio_routing_menu_handler(state, true); };
+  if(global)
+    result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_audio_out_engine>(); };
+  else
+    result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_audio_out_engine>(); };
+  result.gui.menu_handler_factory = [global](plugin_state* state) { return make_audio_routing_menu_handler(state, global); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),
@@ -63,16 +76,25 @@ master_audio_topo(int section, plugin_base::gui_colors const& colors, plugin_bas
 }
 
 void
-master_audio_engine::process(plugin_block& block)
+voice_audio_out_engine::process(plugin_block& block)
+{
+  auto& mixer = get_audio_matrix_mixer(block, false);
+  auto const& audio_in = mixer.mix(block, module_voice_audio_out, 0);
+  for (int c = 0; c < 2; c++)
+    audio_in[c].copy_to(block.start_frame, block.end_frame, block.voice->result[c]);
+}
+
+void
+master_audio_out_engine::process(plugin_block& block)
 {
   auto& mixer = get_audio_matrix_mixer(block, true);
-  auto const& audio_in = mixer.mix(block, module_master_audio, 0);
+  auto const& audio_in = mixer.mix(block, module_master_audio_out, 0);
   auto const& modulation = get_cv_matrix_mixdown(block, true);
-  auto const& bal_curve = *modulation[module_master_audio][0][param_bal][0];
-  auto const& gain_curve = *modulation[module_master_audio][0][param_gain][0];
+  auto const& bal_curve = *modulation[module_master_audio_out][0][param_bal][0];
+  auto const& gain_curve = *modulation[module_master_audio_out][0][param_gain][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float bal = block.normalized_to_raw(module_master_audio, param_bal, bal_curve[f]);
+    float bal = block.normalized_to_raw(module_master_audio_out, param_bal, bal_curve[f]);
     for(int c = 0; c < 2; c++)
       block.out->host_audio[c][f] = audio_in[c][f] * gain_curve[f] * balance(c, bal);
   }

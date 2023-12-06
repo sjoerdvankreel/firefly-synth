@@ -110,7 +110,7 @@ std::vector<module_topo const*>
 make_audio_matrix_targets(plugin_topo const* topo, bool global)
 {
   if (global)
-    return { &topo->modules[module_gfx], &topo->modules[module_master_audio] };
+    return { &topo->modules[module_gfx], &topo->modules[module_master_audio_out] };
   else
     return { &topo->modules[module_vfx], &topo->modules[module_voice_audio_out] };
 }
@@ -119,7 +119,7 @@ std::vector<module_topo const*>
 make_cv_matrix_targets(plugin_topo const* topo, bool global)
 {
   if (global)
-    return { &topo->modules[module_gfx], &topo->modules[module_gaudio_matrix], &topo->modules[module_master_audio] };
+    return { &topo->modules[module_gfx], &topo->modules[module_gaudio_matrix], &topo->modules[module_master_audio_out] };
   else
     return { &topo->modules[module_osc], &topo->modules[module_vfx], &topo->modules[module_vaudio_matrix] };
 }
@@ -229,7 +229,7 @@ synth_topo()
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_master_cv] = master_cv_topo(module_section_master_cv, master_colors, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv
-  result->modules[module_master_audio] = master_audio_topo(module_section_monitor_master, master_colors, { 0, 0 });
+  result->modules[module_master_audio_out] = master_audio_topo(module_section_monitor_master, master_colors, { 0, 0 });
   result->modules[module_monitor] = monitor_topo(module_section_monitor_master, other_colors, { 0, 1 }, result->polyphony);
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
