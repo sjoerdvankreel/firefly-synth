@@ -12,18 +12,17 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { output_on_note, output_count };
-
 class voice_on_note_engine :
 public module_engine {
+  std::vector<float> _on_note_values;
   std::vector<module_output_mapping> const _global_outputs;
 public:
   void process(plugin_block& block) override;
-  void reset(plugin_block const* block) override {}
+  void reset(plugin_block const* block) override;
 
   PB_PREVENT_ACCIDENTAL_COPY(voice_on_note_engine);
   voice_on_note_engine(std::vector<module_output_mapping> const& global_outputs) : 
-  _global_outputs(global_outputs) {}
+  _on_note_values(global_outputs.size(), 0.0f), _global_outputs(global_outputs) {}
 };
 
 module_topo
@@ -48,7 +47,21 @@ voice_on_note_topo(plugin_topo const* topo, int section)
 
 void
 voice_on_note_engine::process(plugin_block& block)
-{  
+{
+  for (int i = 0; i < _global_outputs.size(); i++)
+    block.state.own_cv[i][0].fill(block.start_frame, block.end_frame, _on_note_values[i]);
+}
+
+void 
+voice_on_note_engine::reset(plugin_block const* block)
+{
+  // non-null block indicates start of a new voice
+  if(block == nullptr) return;
+  for(int i = 0; i < _global_outputs.size(); i++)
+  {
+    auto const& o = _global_outputs[i];
+    _on_note_values[i] = block->state.all_global_cv[o.module_index][o.module_slot][o.output_index][o.output_slot][block->start_frame];
+  }
 }
 
 }
