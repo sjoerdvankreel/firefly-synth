@@ -106,7 +106,7 @@ make_cv_routing_menu_handler(plugin_state* state)
 
 void
 select_midi_active(
-  plugin_state const& state, bool global,
+  plugin_state const& state, bool global, int on_note_midi_start,
   std::vector<module_output_mapping> const& mappings, jarray<int, 3>& active)
 {
   int route_count = global? groute_count: vroute_count;
@@ -133,6 +133,16 @@ select_midi_active(
           active[module_midi][0][midi_source_cc + mapping.output_slot] = 1;
         else
           assert(false);
+      }
+      else if (mapping.module_index == module_voice_on_note)
+      {
+        // on note flattens the list of all global cv sources, with midi at end
+        if(mapping.output_index == on_note_midi_start + midi_output_pb)
+          active[module_midi][0][midi_source_pb] = 1;
+        else if (mapping.output_index == on_note_midi_start + midi_output_cp)
+          active[module_midi][0][midi_source_cp] = 1;
+        else if (mapping.output_index >= on_note_midi_start + midi_output_cc)
+          active[module_midi][0][midi_source_cc + mapping.output_index - on_note_midi_start - midi_output_cc] = 1;
       }
     }
   }
@@ -173,6 +183,7 @@ cv_matrix_topo(
   int section, plugin_base::gui_colors const& colors,
   plugin_base::gui_position const& pos, bool global,
   std::vector<cv_source_entry> const& sources,
+  std::vector<plugin_base::cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
 {
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV", module_vcv_matrix, 1);
@@ -222,10 +233,23 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
+  int on_note_midi_start = -1;
+  if (!global)
+  {
+    auto on_note_matrix(make_cv_source_matrix(on_note_sources).mappings);
+    for(int m = 0; m < on_note_matrix.size(); m++)
+      if(on_note_matrix[m].module_index == module_midi)
+      {
+        on_note_midi_start = m;
+        break;
+      }
+    assert(on_note_midi_start != -1);
+  }
+
   result.rerender_on_param_hover = true;
   result.default_initializer = global ? init_global_default : init_voice_default;
-  result.midi_active_selector = [global, sm = source_matrix.mappings](
-    plugin_state const& state, int, jarray<int, 3>& active) { select_midi_active(state, global, sm, active); };
+  result.midi_active_selector = [global, on_note_midi_start, sm = source_matrix.mappings](
+    plugin_state const& state, int, jarray<int, 3>& active) { select_midi_active(state, global, on_note_midi_start, sm, active); };
   result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings]
     (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); };
   result.graph_renderer = [tm = target_matrix.mappings](auto const& state, auto const& mapping) { return render_graph(state, mapping, tm); };

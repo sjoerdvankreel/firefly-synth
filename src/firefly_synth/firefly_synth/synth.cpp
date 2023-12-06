@@ -231,14 +231,16 @@ synth_topo()
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv
   result->modules[module_master_audio] = master_audio_topo(module_section_monitor_master, master_colors, { 0, 0 });
   result->modules[module_monitor] = monitor_topo(module_section_monitor_master, other_colors, { 0, 1 }, result->polyphony);
-  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false, 
-    make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
-  result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, false,
-    make_cv_matrix_sources(result.get(), false, { module_voice_on_note }), make_cv_matrix_targets(result.get(), false));
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
+  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
+    make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
   result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, true,
-    make_cv_matrix_sources(result.get(), true, {}), make_cv_matrix_targets(result.get(), true));
+    make_cv_matrix_sources(result.get(), true, {}), {}, make_cv_matrix_targets(result.get(), true));
+  result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, cv_colors, { 0, 0 }, false,
+    make_cv_matrix_sources(result.get(), false, { module_voice_on_note }),
+    make_cv_matrix_sources(result.get(), true, {}),
+    make_cv_matrix_targets(result.get(), false));
   return result;
 }
 
