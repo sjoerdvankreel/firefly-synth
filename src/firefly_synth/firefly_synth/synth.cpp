@@ -175,7 +175,7 @@ synth_topo()
 
   result->gui.min_width = 816;
   result->gui.aspect_ratio_width = 53;
-  result->gui.aspect_ratio_height = 23;
+  result->gui.aspect_ratio_height = 26;
   result->gui.dimension.column_sizes = { 16, 12, 12, 15, 14 };
   result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1, 1 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
@@ -212,10 +212,10 @@ synth_topo()
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{1EA5EFDE-85F0-4E7D-B39C-820CDE270966}", module_section_monitor, { 7, 0, 1, 3 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 3, 2 },
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 4, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
   result->gui.module_sections[module_section_audio_matrix] = make_module_section_gui_tabbed(
-    "{950B6610-5CE1-4629-943F-CB2057CA7346}", module_section_audio_matrix, { 4, 3, 3, 2 },
+    "{950B6610-5CE1-4629-943F-CB2057CA7346}", module_section_audio_matrix, { 5, 3, 3, 2 },
     "Audio", result->gui.module_header_width, { module_vaudio_matrix, module_gaudio_matrix });
 
   result->modules.resize(module_count);
@@ -230,7 +230,7 @@ synth_topo()
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
   result->modules[module_master_cv] = master_cv_topo(module_section_master_cv, master_colors, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv
-  result->modules[module_voice_audio_out] = audio_out_topo(module_section_voice_master_audio, master_colors, { 0, 0 }, true);
+  result->modules[module_voice_audio_out] = audio_out_topo(module_section_voice_master_audio, master_colors, { 0, 0 }, false);
   result->modules[module_master_audio_out] = audio_out_topo(module_section_voice_master_audio, master_colors, { 0, 1 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, other_colors, { 0, 0 }, result->polyphony);
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
