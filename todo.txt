@@ -18,7 +18,6 @@ more space for freq slider
 make per-voice control section
 color scheme : group gcv/vcv/gaudio/vaudio
 number modules by processing order or by group
-default note velocity to voice amp
 tidy up the audio matrix
 move osc bal to audio matrix
 do matrix headers

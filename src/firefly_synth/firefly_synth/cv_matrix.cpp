@@ -69,6 +69,9 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_type, 3, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Master PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 3, "Osc 2 PB");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 4, "Mul");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 4, "Note Velo");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 4, "Voice Gain");
 }
 
 static void
