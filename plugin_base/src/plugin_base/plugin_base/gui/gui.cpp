@@ -709,7 +709,7 @@ plugin_gui::load_patch(std::string const& path)
   if (result.error.size())
   {
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
-    AlertWindow::showAsync(options, nullptr);
+    NativeMessageBox::showAsync(options, nullptr);
     return;
   }
 
@@ -722,7 +722,7 @@ plugin_gui::load_patch(std::string const& path)
     if (result.warnings.size() > 5)
       warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
-    AlertWindow::showAsync(options, nullptr);
+    NativeMessageBox::showAsync(options, nullptr);
   }
 }
 
