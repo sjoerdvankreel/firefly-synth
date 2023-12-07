@@ -125,9 +125,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 }
 
 module_topo
-fx_topo(
-  int section, plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos, bool global)
+fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
   auto const voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "VFX", module_vfx, 3);
   auto const global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", "GFX", module_gfx, 3);

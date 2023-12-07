@@ -23,9 +23,7 @@ public:
 };
 
 module_topo
-monitor_topo(
-  int section, plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos, int polyphony)
+monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int polyphony)
 {
   module_topo result(make_module(
     make_topo_info("{C20F2D2C-23C6-41BE-BFB3-DE9EDFB051EC}", "Monitor", module_monitor, 1), 

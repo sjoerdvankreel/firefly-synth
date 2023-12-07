@@ -180,10 +180,10 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::
 
 module_topo
 cv_matrix_topo(
-  int section, plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos, bool global,
+  int section, gui_colors const& colors,
+  gui_position const& pos, bool global,
   std::vector<cv_source_entry> const& sources,
-  std::vector<plugin_base::cv_source_entry> const& on_note_sources,
+  std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
 {
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV", module_vcv_matrix, 1);

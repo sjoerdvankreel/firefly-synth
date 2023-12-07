@@ -38,7 +38,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 }
 
 module_topo
-master_cv_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos)
+master_cv_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Master", "Mst", true, module_master_cv, 1),

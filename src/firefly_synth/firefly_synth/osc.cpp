@@ -80,9 +80,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 }
 
 module_topo
-osc_topo(
-  int section, plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos)
+osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Osc", module_osc, 3), 

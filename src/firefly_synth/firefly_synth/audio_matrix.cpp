@@ -111,8 +111,8 @@ make_audio_routing_audio_params(plugin_state* state, bool global)
 
 module_topo 
 audio_matrix_topo(
-  int section, plugin_base::gui_colors const& colors,
-  plugin_base::gui_position const& pos, bool global,
+  int section, gui_colors const& colors,
+  gui_position const& pos, bool global,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {

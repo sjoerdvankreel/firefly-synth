@@ -22,6 +22,8 @@ clear patch clicks on voice recycle
 pb range to voice ?
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
 note + cent on voice in
+voice cv graph
+tooltip on combos
 
 * get some linux folks to comment (ycollete?)
 * continuing
