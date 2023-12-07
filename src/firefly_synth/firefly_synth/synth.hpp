@@ -19,8 +19,8 @@ cv_matrix_mixdown;
 extern int const master_cv_param_pb_range;
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 enum {
-  module_midi, module_master_cv, module_glfo, module_gcv_matrix, module_voice_note, module_voice_on_note, module_voice_cv,
-  module_vlfo, module_env, module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_audio_out,
+  module_midi, module_master_cv, module_glfo, module_gcv_matrix, module_voice_note, module_voice_on_note, module_vlfo, 
+  module_env, module_voice_cv, module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_audio_out,
   module_voice_audio_in, module_gaudio_matrix, module_gfx, module_master_audio_out, module_monitor, module_count };
 
 class audio_matrix_mixer
