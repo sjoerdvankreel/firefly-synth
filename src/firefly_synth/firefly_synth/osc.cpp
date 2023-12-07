@@ -15,7 +15,7 @@ namespace firefly_synth {
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
-enum { param_type, param_pan, param_am, param_note, param_oct, param_cent, param_pitch, param_pb };
+enum { param_type, param_pan, param_am, param_note, param_cent, param_pitch, param_pb };
 
 static std::vector<list_item>
 type_items()
@@ -26,10 +26,6 @@ type_items()
   result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw");
   return result;
 }
-
-static std::vector<std::string>
-note_names()
-{ return { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" }; }
 
 class osc_engine:
 public module_engine {
@@ -57,10 +53,9 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
   
-  int oct = state.get_plain_at(mapping.module_index, mapping.module_slot, param_oct, 0).step();
   int note = state.get_plain_at(mapping.module_index, mapping.module_slot, param_note, 0).step();
   float cent = state.get_plain_at(mapping.module_index, mapping.module_slot, param_cent, 0).real();
-  float freq = pitch_to_freq(note_to_pitch(oct, note, cent, midi_middle_c));
+  float freq = pitch_to_freq(note_to_pitch(note, cent, midi_middle_c));
 
   params.bpm = 120;
   params.frame_count = 1000;
@@ -129,24 +124,18 @@ osc_topo(
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
 
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
-    make_param_dsp_block(param_automate::automate), make_domain_name(note_names(), ""),
+    make_param_dsp_block(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
     make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));  
   note.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-
-  auto& oct = result.params.emplace_back(make_param(
-    make_topo_info("{38C78D40-840A-4EBE-A336-2C81D23B426D}", "Oct", param_oct, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(0, 9, 4, 0),
-    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));  
-  oct.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
@@ -179,7 +168,6 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
-  int oct = block_auto[param_oct][0].step();
   int note = block_auto[param_note][0].step();
   if (type == type_off)
   {
@@ -220,7 +208,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
-    float pitch = note_to_pitch(oct, note, cent, block.voice->state.id.key);
+    float pitch = note_to_pitch(note, cent, block.voice->state.id.key);
     float pitch_mod = block.normalized_to_raw(module_osc, param_pitch, pitch_curve[f]);
     float pitch_pb = block.normalized_to_raw(module_osc, param_pb, pb_curve[f]) * pb_range;
     float inc = pitch_to_freq(pitch + pitch_mod + pitch_pb) / block.sample_rate;

@@ -1,3 +1,4 @@
+#include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/topo/support.hpp>
 
 #include <map>
@@ -9,6 +10,17 @@ namespace plugin_base {
 static default_selector
 simple_default(std::string value)
 { return [value](int, int) { return value; }; }
+
+std::vector<list_item>
+make_midi_note_list()
+{
+  std::vector<list_item> result;
+  std::string id = "{97B77668-0B4D-4678-BBD9-842AE601E815}";
+  std::vector<std::string> note_names = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
+  for (int i = 0; i < 128; i++)
+    result.push_back(list_item(id + "-" + std::to_string(i), note_names[i % 12] + std::to_string(i / 12 - 1)));
+  return result;
+}
 
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name, std::string short_name)

@@ -23,6 +23,7 @@ clear patch clicks on voice recycle
 pb range to voice ?
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
 move oct + note into 1 
+note + cent on voice in
 
 * get some linux folks to comment (ycollete?)
 * continuing
