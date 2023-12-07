@@ -54,7 +54,7 @@ template <class T> inline T check_bipolar(T val)
 inline float mix_signal(float mix, float dry, float wet) 
 { return (1.0f - mix) * dry + mix * wet; }
 inline float pitch_to_freq(float pitch)
-{ return 440.0f * std::pow(2.0f, (pitch + 12.0f - 69.0f) / 12.0f); }
+{ return 440.0f * std::pow(2.0f, (pitch - 69.0f) / 12.0f); }
 
 inline float timesig_to_freq(float bpm, timesig const& sig) 
 { return bpm / (60.0f * 4.0f * sig.num / sig.den); }
@@ -76,6 +76,15 @@ increment_and_wrap_phase(float& phase, float freq, float rate)
 { increment_and_wrap_phase(phase, phase_increment(freq, rate)); }
 
 inline float
+note_to_pitch(int note, float cent, int key)
+{
+  assert(0 <= key && key < 128);
+  assert(0 <= note && note < 128);
+  assert(-1 <= cent && cent <= 1);
+  return note + cent + key - midi_middle_c;
+}
+
+inline float
 mono_pan_sqrt3(int channel, float panning)
 {
   assert(channel == 0 || channel == 1);
@@ -93,15 +102,6 @@ stereo_balance(int channel, float balance)
   if(channel == 1 && balance >= 0) return 1.0f;
   if(channel == 0) return 1.0f - balance;
   return 1.0f + balance;
-}
-
-inline float
-note_to_pitch(int note, float cent, int key)
-{
-  assert(0 <= key && key < 128);
-  assert(0 <= note && note < 128);
-  assert(-1 <= cent && cent <= 1);
-  return note + cent + key - midi_middle_c - 12;
 }
 
 }

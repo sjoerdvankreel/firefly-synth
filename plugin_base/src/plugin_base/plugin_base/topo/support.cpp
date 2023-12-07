@@ -11,12 +11,31 @@ static default_selector
 simple_default(std::string value)
 { return [value](int, int) { return value; }; }
 
+static std::vector<std::string> const note_names = { 
+  "C", "C#", "D", "D#", 
+  "E", "F", "F#", "G", 
+  "G#", "A", "A#", "B" 
+};
+
+std::shared_ptr<gui_submenu>
+make_midi_note_submenu()
+{
+  auto result = std::make_shared<gui_submenu>();
+  for (int i = 0; i < 12; i++)
+  {
+    auto note_sub = result->add_submenu(note_names[i]);
+    for(int j = 0; j < 128; j++)
+      if(j % 12 == i)
+        note_sub->indices.push_back(j);
+  }
+  return result;
+}
+
 std::vector<list_item>
 make_midi_note_list()
 {
   std::vector<list_item> result;
   std::string id = "{97B77668-0B4D-4678-BBD9-842AE601E815}";
-  std::vector<std::string> note_names = { "C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B" };
   for (int i = 0; i < 128; i++)
     result.push_back(list_item(id + "-" + std::to_string(i), note_names[i % 12] + std::to_string(i / 12 - 1)));
   return result;

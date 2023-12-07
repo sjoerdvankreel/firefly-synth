@@ -130,6 +130,7 @@ osc_topo(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
     make_param_dsp_block(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
     make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));  
+  note.gui.submenu = make_midi_note_submenu();
   note.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& cent = result.params.emplace_back(make_param(

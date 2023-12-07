@@ -9,6 +9,8 @@ namespace plugin_base {
 
 std::vector<list_item>
 make_midi_note_list();
+std::shared_ptr<gui_submenu>
+make_midi_note_submenu();
 
 std::shared_ptr<gui_submenu>
 make_timesig_submenu(std::vector<timesig> const& sigs);
