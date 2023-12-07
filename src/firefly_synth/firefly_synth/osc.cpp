@@ -15,7 +15,7 @@ namespace firefly_synth {
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
-enum { param_type, param_bal, param_am, param_note, param_oct, param_cent, param_pitch, param_pb };
+enum { param_type, param_pan, param_am, param_note, param_oct, param_cent, param_pitch, param_pb };
 
 static std::vector<list_item>
 type_items()
@@ -112,7 +112,7 @@ osc_topo(
   type.domain.default_selector = [] (int s, int) { return type_items()[s == 0? type_sine: type_off].name; };
 
   auto& bal = result.params.emplace_back(make_param(
-    make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Bal", param_bal, 1),
+    make_topo_info("{23C6BC03-0978-4582-981B-092D68338ADA}", "Pan", param_pan, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -195,7 +195,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
     modulation = &get_cv_matrix_mixdown(block, false);
 
   auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
-  auto const& bal_curve = *(*modulation)[module_osc][block.module_slot][param_bal][0];
+  auto const& pan_curve = *(*modulation)[module_osc][block.module_slot][param_pan][0];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
   int pb_range = block.state.all_block_automation[module_master_cv][0][master_cv_param_pb_range][0].step();
@@ -219,7 +219,6 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   auto& mono_scratch = block.state.own_scratch[scratch_mono];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float bal = block.normalized_to_raw(module_osc, param_bal, bal_curve[f]);
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     float pitch = note_to_pitch(oct, note, cent, block.voice->state.id.key);
     float pitch_mod = block.normalized_to_raw(module_osc, param_pitch, pitch_curve[f]);
@@ -234,8 +233,10 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
     check_bipolar(sample);
     sample *= (*env_curve)[f];
     mono_scratch[f] = mix_signal(am_mod_scratch[f], sample, sample * am_scratch[f]);
-    block.state.own_audio[0][0][0][f] = mono_scratch[f] * balance(0, bal);
-    block.state.own_audio[0][0][1][f] = mono_scratch[f] * balance(1, bal);
+
+    // pan needs to be in [0, 1]
+    block.state.own_audio[0][0][0][f] = mono_scratch[f] * mono_pan_sqrt3(0, pan_curve[f]);
+    block.state.own_audio[0][0][1][f] = mono_scratch[f] * mono_pan_sqrt3(1, pan_curve[f]);
     increment_and_wrap_phase(_phase, inc);
   }
 }

@@ -101,7 +101,7 @@ audio_out_engine::process(plugin_block& block)
   {
     float bal = block.normalized_to_raw(module, param_bal, bal_curve[f]);
     for(int c = 0; c < 2; c++)
-      audio_out[c][f] = audio_in[c][f] * gain_curve[f] * balance(c, bal);
+      audio_out[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
   }
 }
 

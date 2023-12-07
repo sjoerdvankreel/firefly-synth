@@ -75,13 +75,24 @@ inline void
 increment_and_wrap_phase(float& phase, float freq, float rate)
 { increment_and_wrap_phase(phase, phase_increment(freq, rate)); }
 
-inline float
-balance(int channel, float value)
+static inline float
+mono_pan_sqrt3(int channel, float panning)
 {
-  assert(-1 <= value && value <= 1);
   assert(channel == 0 || channel == 1);
-  float pan = (value + 1) * 0.5f;
-  return channel == 0 ? 1.0f - pan: pan;
+  assert(0 <= panning && panning <= 1);
+  if (channel == 1) return std::sqrt(panning);
+  return std::sqrt(1 - panning);
+}
+
+inline float
+stereo_balance(int channel, float balance)
+{
+  assert(channel == 0 || channel == 1);
+  assert(-1 <= balance && balance <= 1);
+  if(channel == 0 && balance <= 0) return 1.0f;
+  if(channel == 1 && balance >= 0) return 1.0f;
+  if(channel == 0) return 1.0f - balance;
+  return 1.0f + balance;
 }
 
 inline float 

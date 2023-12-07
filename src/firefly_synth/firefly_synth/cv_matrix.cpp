@@ -61,7 +61,7 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_op, 1, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_amt, 1, "33");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 1, "Osc 1 Bal");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 1, "Osc 1 Pan");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_source, 2, "Master PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 2, "Osc 1 PB");
