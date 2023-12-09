@@ -63,14 +63,14 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "VAudio Bal 1");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 2, "Master PB");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 2, "Master CV PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 2, "Osc 1 PB");
   state.set_text_at(module_vcv_matrix, 0, param_op, 3, "AddBi");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Master PB");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Master CV PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 3, "Osc 2 PB");
   state.set_text_at(module_vcv_matrix, 0, param_op, 4, "Mul");
   state.set_text_at(module_vcv_matrix, 0, param_source, 4, "Note Velo");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 4, "Voice Gain");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 4, "Voice Out Gain");
 }
 
 static void
@@ -81,7 +81,7 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "GLFO 1");
   state.set_text_at(module_gcv_matrix, 0, param_target, 0, "GFX 1 Freq");
   state.set_text_at(module_gcv_matrix, 0, param_op, 1, "Add");
-  state.set_text_at(module_gcv_matrix, 0, param_source, 1, "Master Mod");
+  state.set_text_at(module_gcv_matrix, 0, param_source, 1, "Master CV Mod");
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
 }
 

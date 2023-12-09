@@ -25,6 +25,7 @@ note + cent on voice in
 voice cv graph
 tooltip on combos
 explicit naming master / voice / in / out / mix  / cv etc
+do pb on voice in
 
 * get some linux folks to comment (ycollete?)
 * continuing
