@@ -33,26 +33,26 @@ mode_items()
   return result;
 }
 
-class voice_cv_engine :
+class voice_in_engine :
 public module_engine {
 public:
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override {}
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_cv_engine);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_in_engine);
 };
 
 module_topo
-voice_cv_topo(int section, gui_colors const& colors, gui_position const& pos)
+voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice CV", module_voice_cv, 1),
+    make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
     make_module_dsp_output(false, make_topo_info("{7E7D2004-A053-466E-BF9A-3C2ADF78E168}", "Pitch", output_pitch, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
 
   result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<voice_cv_engine>(); };
+    std::unique_ptr<module_engine> { return std::make_unique<voice_in_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
