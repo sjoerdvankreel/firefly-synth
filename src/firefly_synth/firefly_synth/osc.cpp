@@ -14,8 +14,14 @@ namespace firefly_synth {
 
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
+enum { param_type, param_am, param_note, param_cent };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
-enum { param_type, param_am, param_note, param_cent, param_pitch, param_pb };
+
+extern int const voice_in_param_pb;
+extern int const voice_in_param_cent;
+extern int const voice_in_param_note;
+extern int const voice_in_param_pitch;
+extern int const master_in_param_pb_range;
 
 static std::vector<list_item>
 type_items()
@@ -131,18 +137,6 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  auto& pitch = result.params.emplace_back(make_param(
-    make_topo_info("{F87BA01D-19CE-4D46-83B6-8E2382D9F601}", "Pitch", param_pitch, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-128, 128, 0, 0, ""),
-    make_param_gui_none())); 
-  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-
-  auto& pb = result.params.emplace_back(make_param(
-    make_topo_info("{C644681E-0634-4774-B65C-7FFC3B65AADE}", "PB", param_pb, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_none()));
-  pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-
   return result;
 }
 
@@ -160,7 +154,6 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
-  int note = block_auto[param_note][0].step();
   if (type == type_off)
   {
     block.state.own_audio[0][0][0].fill(block.start_frame, block.end_frame, 0.0f);
@@ -174,10 +167,14 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   if(modulation == nullptr)
     modulation = &get_cv_matrix_mixdown(block, false);
 
-  auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
-  auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
-  auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
-  int pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
+  int osc_note = block_auto[param_note][0].step();
+  int voice_note = block.state.all_block_automation[module_voice_in][0][voice_in_param_note][0].step();
+  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
+
+  auto const& osc_cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& voice_pb_curve = *(*modulation)[module_voice_in][0][voice_in_param_pb][0];
+  auto const& voice_cent_curve = *(*modulation)[module_voice_in][0][voice_in_param_cent][0];
+  auto const& voice_pitch_curve = *(*modulation)[module_voice_in][0][voice_in_param_pitch][0];
 
   auto& am_scratch = block.state.own_scratch[scratch_am];
   auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
@@ -198,11 +195,12 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   auto& mono_scratch = block.state.own_scratch[scratch_mono];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
-    float pitch = note_to_pitch(note, cent, block.voice->state.id.key);
-    float pitch_mod = block.normalized_to_raw(module_osc, param_pitch, pitch_curve[f]);
-    float pitch_pb = block.normalized_to_raw(module_osc, param_pb, pb_curve[f]) * pb_range;
-    float inc = pitch_to_freq(pitch + pitch_mod + pitch_pb) / block.sample_rate;
+    float osc_cent = block.normalized_to_raw(module_osc, param_cent, osc_cent_curve[f]);
+    float voice_pb = block.normalized_to_raw(module_voice_in, voice_in_param_pb, voice_pb_curve[f]);
+    float voice_cent = block.normalized_to_raw(module_voice_in, voice_in_param_cent, voice_cent_curve[f]);
+    float voice_pitch = block.normalized_to_raw(module_voice_in, voice_in_param_pitch, voice_pitch_curve[f]);
+    float pitch = note_to_pitch(osc_note + voice_note - midi_middle_c, osc_cent + voice_cent, block.voice->state.id.key);
+    float inc = pitch_to_freq(pitch + voice_pitch + voice_pb * master_pb_range) / block.sample_rate;
     switch (type)
     {
     case type_sine: sample = phase_to_sine(_phase); break;

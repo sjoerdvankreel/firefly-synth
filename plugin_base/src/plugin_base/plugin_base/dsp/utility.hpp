@@ -80,7 +80,6 @@ note_to_pitch(int note, float cent, int key)
 {
   assert(0 <= key && key < 128);
   assert(0 <= note && note < 128);
-  assert(-1 <= cent && cent <= 1);
   return note + cent + key - midi_middle_c;
 }
 

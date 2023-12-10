@@ -19,11 +19,8 @@ make per-voice control section
 color scheme : group gcv/vcv/gaudio/vaudio
 number modules by processing order or by group
 clear patch clicks on voice recycle
-pb range to voice ?
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
-note + cent on voice in
 voice cv graph
-do pb + pitch on voice in
 do incdecbuttons on cent?
 
 * get some linux folks to comment (ycollete?)

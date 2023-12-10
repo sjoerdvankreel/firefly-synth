@@ -13,9 +13,13 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { output_pitch };
 enum { section_main, section_pitch };
 enum { param_mode, param_note, param_cent, param_pitch, param_pb, param_count };
+
+extern int const voice_in_param_pb = param_pb;
+extern int const voice_in_param_note = param_note;
+extern int const voice_in_param_cent = param_cent;
+extern int const voice_in_param_pitch = param_pitch;
 
 static std::vector<list_item>
 mode_items()
@@ -46,13 +50,10 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", "V.In", true, module_voice_in, 1),
-    make_module_dsp(module_stage::voice, module_output::cv, 0, {
-    make_module_dsp_output(false, make_topo_info("{7E7D2004-A053-466E-BF9A-3C2ADF78E168}", "Pitch", output_pitch, 1)) }),
+    make_module_dsp(module_stage::voice, module_output::none, 0, {}),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
-
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<voice_in_engine>(); };
+  result.engine_factory = [](auto const&, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<voice_in_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),

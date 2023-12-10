@@ -16,7 +16,6 @@ typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
 cv_matrix_mixdown;
 
-extern int const master_in_param_pb_range;
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 enum {
   module_midi, module_master_in, module_glfo, module_gcv_matrix, module_voice_note, module_voice_on_note, module_vlfo, 
