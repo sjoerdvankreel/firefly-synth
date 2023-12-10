@@ -167,10 +167,12 @@ synth_topo()
 {
   Colour other_color(0xFFFF4488);
   gui_colors other_colors(make_section_colors(other_color));
+  gui_colors monitor_colors(make_section_colors(other_color));
   gui_colors cv_colors(make_section_colors(Colour(0xFFFF8844)));
   gui_colors audio_colors(make_section_colors(Colour(0xFF8888FF)));
   gui_colors master_colors(make_section_colors(Colour(0xFF4488FF)));
   other_colors.edit_text = other_color;
+  monitor_colors.control_text = other_color;
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
@@ -244,7 +246,7 @@ synth_topo()
   result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, master_colors, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(module_section_voice_master_out, master_colors, { 0, 0 }, false);
   result->modules[module_master_out] = audio_out_topo(module_section_voice_master_out, master_colors, { 0, 1 }, true);
-  result->modules[module_monitor] = monitor_topo(module_section_monitor, other_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->polyphony);
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
