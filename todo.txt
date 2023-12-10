@@ -18,7 +18,6 @@ more space for freq slider
 make per-voice control section
 color scheme : group gcv/vcv/gaudio/vaudio
 number modules by processing order or by group
-clear patch clicks on voice recycle
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
 voice cv graph
 do incdecbuttons on cent?

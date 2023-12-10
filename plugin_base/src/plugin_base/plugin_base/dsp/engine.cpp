@@ -558,7 +558,7 @@ plugin_engine::process()
   for (int v = 0; v < _voice_states.size(); v++)
     if (_voice_states[v].stage != voice_stage::unused)
       for(int c = 0; c < 2; c++)
-        for(int f = 0; f < frame_count; f++)
+        for(int f = _voice_states[v].start_frame; f < _voice_states[v].end_frame; f++)
           _voices_mixdown[c][f] += _voice_results[v][c][f];
 
   /****************************************************************************************/
