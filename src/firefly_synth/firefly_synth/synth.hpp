@@ -16,10 +16,10 @@ typedef plugin_base::jarray<
   plugin_base::jarray<float, 1> const*, 4> 
 cv_matrix_mixdown;
 
-extern int const master_cv_param_pb_range;
+extern int const master_in_param_pb_range;
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 enum {
-  module_midi, module_master_cv, module_glfo, module_gcv_matrix, module_voice_note, module_voice_on_note, module_vlfo, 
+  module_midi, module_master_in, module_glfo, module_gcv_matrix, module_voice_note, module_voice_on_note, module_vlfo, 
   module_env, module_voice_cv, module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_out,
   module_voice_mix, module_gaudio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
@@ -81,7 +81,7 @@ plugin_base::module_topo voice_on_note_topo(plugin_base::plugin_topo const* topo
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo voice_cv_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
-plugin_base::module_topo master_cv_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo master_in_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);

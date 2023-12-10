@@ -31,7 +31,7 @@ voice_on_note_topo(plugin_topo const* topo, int section)
   // see also cv_matrix.select_midi_active
   std::vector<module_dsp_output> outputs;
   std::string const on_note_id("{68360340-68B2-4B88-95BD-B1929F240BAA}");
-  std::set<int> short_name_modules = { module_master_cv };
+  std::set<int> short_name_modules = { module_master_in };
   auto global_sources(make_cv_source_matrix(make_cv_matrix_sources(topo, true, short_name_modules)));
   for(int i = 0; i < global_sources.items.size(); i++)
     outputs.push_back(make_module_dsp_output(true, make_topo_info(

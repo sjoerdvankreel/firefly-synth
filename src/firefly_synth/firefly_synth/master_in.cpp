@@ -17,14 +17,14 @@ int aux_count = 3;
 enum { section_aux, section_linked };
 enum { output_aux, output_mod, output_pb };
 enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
-extern int const master_cv_param_pb_range = param_pb_range;
+extern int const master_in_param_pb_range = param_pb_range;
 
-class master_cv_engine :
+class master_in_engine :
 public module_engine {
 public:
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_cv_engine);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_in_engine);
 };
 
 static graph_data
@@ -38,10 +38,10 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 }
 
 module_topo
-master_cv_topo(int section, gui_colors const& colors, gui_position const& pos)
+master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Master CV", "Mst", true, module_master_cv, 1),
+    make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Master In", "M.In", true, module_master_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
@@ -52,7 +52,7 @@ master_cv_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
   result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<master_cv_engine>(); };
+    std::unique_ptr<module_engine> { return std::make_unique<master_in_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
@@ -90,7 +90,7 @@ master_cv_topo(int section, gui_colors const& colors, gui_position const& pos)
 }
 
 void
-master_cv_engine::process(plugin_block& block)
+master_in_engine::process(plugin_block& block)
 {
   auto& own_cv = block.state.own_cv;  
   auto const& accurate = block.state.own_accurate_automation;

@@ -20,7 +20,7 @@ enum {
   custom_section_count };
 
 enum { 
-  module_section_hidden, module_section_master_cv, module_section_lfos, 
+  module_section_hidden, module_section_master_in, module_section_lfos, 
   module_section_env, module_section_voice_cv, module_section_cv_matrix,
   module_section_audio_matrix, module_section_osc, module_section_fx, 
   module_section_voice_master_out, module_section_monitor, module_section_count };
@@ -146,13 +146,13 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global, std::set<int> short
 {
   if(global)
     return { 
-      { short_name_modules.contains(module_master_cv), "", &topo->modules[module_master_cv]},
+      { short_name_modules.contains(module_master_in), "", &topo->modules[module_master_in]},
       { short_name_modules.contains(module_glfo), "", &topo->modules[module_glfo] },
       { short_name_modules.contains(module_midi), "", &topo->modules[module_midi] } };
   else
     return { 
       { false, "Global", nullptr }, 
-      { short_name_modules.contains(module_master_cv), "", &topo->modules[module_master_cv]},
+      { short_name_modules.contains(module_master_in), "", &topo->modules[module_master_in]},
       { short_name_modules.contains(module_glfo), "", &topo->modules[module_glfo] },
       { short_name_modules.contains(module_midi), "", &topo->modules[module_midi] },
       { false, "Voice", nullptr }, 
@@ -214,8 +214,8 @@ synth_topo()
     "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 5, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_lfos] = make_module_section_gui(
     "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_lfos, { 2, 0, 1, 3 }, { 1, 2 });
-  result->gui.module_sections[module_section_master_cv] = make_module_section_gui(
-    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_cv, { 1, 0, 1, 3 }, { 1, 1 });
+  result->gui.module_sections[module_section_master_in] = make_module_section_gui(
+    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_voice_cv] = make_module_section_gui(
     "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_cv, { 4, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_voice_master_out] = make_module_section_gui(
@@ -239,7 +239,7 @@ synth_topo()
   result->modules[module_vfx] = fx_topo(module_section_fx, audio_colors, { 0, 0 }, false);
   result->modules[module_glfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_lfos, cv_colors, { 0, 1 }, false);
-  result->modules[module_master_cv] = master_cv_topo(module_section_master_cv, master_colors, { 0, 0 });  
+  result->modules[module_master_in] = master_in_topo(module_section_master_in, master_colors, { 0, 0 });  
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_cv] = voice_cv_topo(module_section_voice_cv, master_colors, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(module_section_voice_master_out, master_colors, { 0, 0 }, false);
