@@ -45,6 +45,14 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_in_engine);
 };
 
+static graph_data
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+{
+  if (mapping.param_index != param_cent)  return graph_data();
+  float value = state.get_plain_at(mapping).real();
+  return graph_data(value, true);
+}
+
 module_topo
 voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
@@ -52,6 +60,8 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", "V.In", true, module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::none, 0, {}),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
+  result.graph_renderer = render_graph;
+  result.rerender_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<voice_in_engine>(); };
 
