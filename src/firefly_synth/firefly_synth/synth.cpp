@@ -221,7 +221,7 @@ synth_topo()
   result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
     "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 2, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_monitor_out] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_out, { 3, 0, 1, 3 }, { { 1 }, { 2, 1, 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_out, { 3, 0, 1, 3 }, { { 1 }, { 5, 5, 9 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 4, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
