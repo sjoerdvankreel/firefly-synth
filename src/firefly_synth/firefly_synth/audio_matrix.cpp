@@ -46,7 +46,7 @@ init_voice_minimal(plugin_state& state)
 {
   state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "Voice Out");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "V.Out");
 }
 
 static void
@@ -54,7 +54,7 @@ init_global_minimal(plugin_state& state)
 {
   state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "Voice Mix");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "Master Out");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "M.Out");
 }
 
 static void
@@ -68,7 +68,7 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vaudio_matrix, 0, param_source, 1, "Osc 2");
   state.set_text_at(module_vaudio_matrix, 0, param_target, 1, "VFX 1");
   state.set_text_at(module_vaudio_matrix, 0, param_source, 2, "VFX 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 2, "Voice Out");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 2, "V.Out");
 }
 
 static void
@@ -82,7 +82,7 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gaudio_matrix, 0, param_target, 1, "GFX 2");
   state.set_text_at(module_gaudio_matrix, 0, param_on, 2, "On");
   state.set_text_at(module_gaudio_matrix, 0, param_source, 2, "GFX 2");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "Master Out");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "M.Out");
 }
 
 static graph_data
@@ -159,7 +159,7 @@ audio_matrix_topo(
       return true;
     });
 
-  auto default_target = global? "Master Out": "Voice Out";
+  auto default_target = global? "M.Out": "V.Out";
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, default_target),

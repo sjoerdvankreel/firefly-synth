@@ -70,7 +70,7 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_target, 3, "Osc 2 PB");
   state.set_text_at(module_vcv_matrix, 0, param_op, 4, "Mul");
   state.set_text_at(module_vcv_matrix, 0, param_source, 4, "Note Velo");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 4, "Voice Out Gain");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 4, "V.Out Gain");
 }
 
 static void
