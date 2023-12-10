@@ -166,10 +166,10 @@ std::unique_ptr<plugin_topo>
 synth_topo()
 {
   Colour custom_color(0xFFFF4488);
-  Colour control_color(0xFFFF8844);
+  Colour control_color(0xFF4488FF);
   gui_colors custom_colors(make_section_colors(custom_color));
   gui_colors monitor_colors(make_section_colors(control_color));
-  gui_colors module_colors(make_section_colors(Colour(0xFF4488FF)));
+  gui_colors module_colors(make_section_colors(Colour(0xFFFF8844)));
   gui_colors matrix_colors(make_section_colors(Colour(0xFF8888FF)));
   gui_colors control_colors(make_section_colors(Colour(control_color)));
   custom_colors.edit_text = custom_color;
