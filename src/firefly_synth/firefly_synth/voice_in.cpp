@@ -15,7 +15,7 @@ namespace firefly_synth {
 
 enum { section_main, section_pitch };
 enum { porta_off, porta_on, porta_auto };
-enum { param_mode, param_porta, param_porta_sync, param_note, param_cent, param_pitch, param_pb, param_count };
+enum { param_mode, param_porta, param_porta_sync, param_porta_time, param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const voice_in_param_pb = param_pb;
 extern int const voice_in_param_note = param_note;
@@ -63,7 +63,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", "V.In", true, module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::none, 0, {}),
-    make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 2, 1 } } )));
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
@@ -71,7 +71,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
@@ -89,6 +89,13 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 }, gui_label_contents::none, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
+
+  auto& time = result.params.emplace_back(make_param(
+    make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Time", param_porta_time, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, gui_label_contents::value,
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
