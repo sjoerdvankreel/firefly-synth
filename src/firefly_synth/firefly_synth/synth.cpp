@@ -165,15 +165,15 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
-  Colour other_color(0xFFFF4488);
-  Colour voice_master_monitor_color(0xFFFF8844);
-  gui_colors other_colors(make_section_colors(other_color));
-  gui_colors voice_colors(make_section_colors(Colour(0xFF4488FF)));
-  gui_colors global_colors(make_section_colors(Colour(0xFF8888FF)));
-  gui_colors monitor_colors(make_section_colors(voice_master_monitor_color));
-  gui_colors voice_master_monitor_colors(make_section_colors(Colour(voice_master_monitor_color)));
-  other_colors.edit_text = other_color;
-  monitor_colors.control_text = voice_master_monitor_color;
+  Colour custom_color(0xFFFF4488);
+  Colour control_color(0xFFFF8844);
+  gui_colors custom_colors(make_section_colors(custom_color));
+  //gui_colors voice_colors(make_section_colors(Colour(0xFF4488FF)));
+  gui_colors module_colors(make_section_colors(Colour(0xFF8888FF)));
+  gui_colors monitor_colors(make_section_colors(control_color));
+  gui_colors control_colors(make_section_colors(Colour(control_color)));
+  custom_colors.edit_text = custom_color;
+  monitor_colors.control_text = control_color;
 
   auto result = std::make_unique<plugin_topo>();
   result->polyphony = 32;
@@ -193,17 +193,17 @@ synth_topo()
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   result->gui.custom_sections.resize(custom_section_count);
-  auto make_title_section_ui = [other_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
-    return make_title_section(gui, lnf, store, other_color); };
+  auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
+    return make_title_section(gui, lnf, store, custom_color); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, { 0, 0, 1, 1 }, other_colors, make_title_section_ui);
+    custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 0, 3, 1, 2 }, other_colors, make_controls_section);
+    custom_section_controls, { 0, 3, 1, 2 }, custom_colors, make_controls_section);
   result->gui.custom_sections[custom_section_hover_graph] = make_custom_section_gui(
-    custom_section_hover_graph, { 0, 1, 1, 1 }, other_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_hover_graph, { 0, 1, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_graph_section(gui, lnf, store, true); });
   result->gui.custom_sections[custom_section_tweak_graph] = make_custom_section_gui(
-    custom_section_tweak_graph, { 0, 2, 1, 1 }, other_colors, [](auto* gui, auto* lnf, auto store) 
+    custom_section_tweak_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_graph_section(gui, lnf, store, false); });
 
   result->gui.module_sections.resize(module_section_count);
@@ -234,25 +234,25 @@ synth_topo()
   result->modules[module_midi] = midi_topo(module_section_hidden);
   result->modules[module_voice_mix] = voice_mix_topo(module_section_hidden);
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
-  result->modules[module_env] = env_topo(module_section_env, voice_colors, { 0, 0 });
-  result->modules[module_osc] = osc_topo(module_section_osc, voice_colors, { 0, 0 });
-  result->modules[module_gfx] = fx_topo(module_section_g_lfo_fx, global_colors, { 0, 1 }, true);
-  result->modules[module_vfx] = fx_topo(module_section_v_lfo_fx, voice_colors, { 0, 1 }, false);
-  result->modules[module_glfo] = lfo_topo(module_section_g_lfo_fx, global_colors, { 0, 0 }, true);
-  result->modules[module_vlfo] = lfo_topo(module_section_v_lfo_fx, voice_colors, { 0, 0 }, false);
-  result->modules[module_master_in] = master_in_topo(module_section_master_in, voice_master_monitor_colors, { 0, 0 });
+  result->modules[module_env] = env_topo(module_section_env, module_colors, { 0, 0 });
+  result->modules[module_osc] = osc_topo(module_section_osc, module_colors, { 0, 0 });
+  result->modules[module_gfx] = fx_topo(module_section_g_lfo_fx, module_colors, { 0, 1 }, true);
+  result->modules[module_vfx] = fx_topo(module_section_v_lfo_fx, module_colors, { 0, 1 }, false);
+  result->modules[module_glfo] = lfo_topo(module_section_g_lfo_fx, module_colors, { 0, 0 }, true);
+  result->modules[module_vlfo] = lfo_topo(module_section_v_lfo_fx, module_colors, { 0, 0 }, false);
+  result->modules[module_master_in] = master_in_topo(module_section_master_in, control_colors, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
-  result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, voice_master_monitor_colors, { 0, 0 }); // must be after all cv
-  result->modules[module_voice_out] = audio_out_topo(module_section_monitor_out, voice_master_monitor_colors, { 0, 0 }, false);
-  result->modules[module_master_out] = audio_out_topo(module_section_monitor_out, voice_master_monitor_colors, { 0, 1 }, true);
+  result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, control_colors, { 0, 0 }); // must be after all cv
+  result->modules[module_voice_out] = audio_out_topo(module_section_monitor_out, control_colors, { 0, 0 }, false);
+  result->modules[module_master_out] = audio_out_topo(module_section_monitor_out, control_colors, { 0, 1 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor_out, monitor_colors, { 0, 2 }, result->polyphony);
-  result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, other_colors, { 0, 0 }, true,
+  result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, control_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
-  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, other_colors, { 0, 0 }, false,
+  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, control_colors, { 0, 0 }, false,
     make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
-  result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, other_colors, { 0, 0 }, true,
+  result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, control_colors, { 0, 0 }, true,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_matrix_targets(result.get(), true));
-  result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, other_colors, { 0, 0 }, false,
+  result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, control_colors, { 0, 0 }, false,
     make_cv_matrix_sources(result.get(), false),
     make_cv_matrix_sources(result.get(), true),
     make_cv_matrix_targets(result.get(), false));
