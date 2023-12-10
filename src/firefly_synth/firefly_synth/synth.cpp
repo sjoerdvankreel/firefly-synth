@@ -169,8 +169,8 @@ synth_topo()
   Colour control_color(0xFFFF8844);
   gui_colors custom_colors(make_section_colors(custom_color));
   gui_colors monitor_colors(make_section_colors(control_color));
-  gui_colors matrix_colors(make_section_colors(Colour(0xFF4488FF)));
-  gui_colors module_colors(make_section_colors(Colour(0xFF8888FF)));
+  gui_colors module_colors(make_section_colors(Colour(0xFF4488FF)));
+  gui_colors matrix_colors(make_section_colors(Colour(0xFF8888FF)));
   gui_colors control_colors(make_section_colors(Colour(control_color)));
   custom_colors.edit_text = custom_color;
   monitor_colors.control_text = control_color;
