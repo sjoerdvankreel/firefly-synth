@@ -377,6 +377,23 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   init();
 }
 
+
+void 
+param_combobox::own_param_changed(plain_value plain)
+{
+  setSelectedId(plain.step() + 1 - _param->param->domain.min);
+  auto contents = _param->param->gui.label.contents;
+  if (contents == gui_label_contents::both) return;
+  std::string value = _param->param->domain.plain_to_text(false, plain);
+  std::string name = _param->param->info.tag.name;
+  if(contents == gui_label_contents::name)
+    setTooltip(value);
+  else if(contents == gui_label_contents::value)
+    setTooltip(name);
+  else
+    setTooltip(name + ": " + value);
+}
+
 void 
 param_combobox::showPopup()
 {

@@ -234,8 +234,7 @@ public autofit_combobox,
 public juce::ComboBox::Listener
 {
 protected:
-  void own_param_changed(plain_value plain) override final
-  { setSelectedId(plain.step() + 1 - _param->param->domain.min); }
+  void own_param_changed(plain_value plain) override final;
 
 public:
   ~param_combobox() { removeListener(this); }
