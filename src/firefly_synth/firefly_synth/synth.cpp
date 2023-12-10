@@ -166,9 +166,9 @@ std::unique_ptr<plugin_topo>
 synth_topo()
 {
   Colour other_color(0xFFFF4488);
-  Colour voice_master_monitor_color(0xFF4488FF);
+  Colour voice_master_monitor_color(0xFFFF8844);
   gui_colors other_colors(make_section_colors(other_color));
-  gui_colors voice_colors(make_section_colors(Colour(0xFFFF8844)));
+  gui_colors voice_colors(make_section_colors(Colour(0xFF4488FF)));
   gui_colors global_colors(make_section_colors(Colour(0xFF8888FF)));
   gui_colors monitor_colors(make_section_colors(voice_master_monitor_color));
   gui_colors voice_master_monitor_colors(make_section_colors(Colour(voice_master_monitor_color)));
