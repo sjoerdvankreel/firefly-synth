@@ -61,7 +61,7 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_op, 1, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_amt, 1, "33");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 1, "VAudio Bal 1");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 1, "V.Audio Bal 1");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_source, 2, "M.In PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 2, "Osc 1 PB");
@@ -186,8 +186,8 @@ cv_matrix_topo(
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV", module_vcv_matrix, 1);
-  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "GCV", module_gcv_matrix, 1);
+  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", module_vcv_matrix, 1);
+  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", module_gcv_matrix, 1);
   auto const info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
 
