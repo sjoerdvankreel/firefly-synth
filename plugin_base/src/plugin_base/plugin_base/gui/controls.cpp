@@ -376,15 +376,12 @@ param_combobox::own_param_changed(plain_value plain)
 {
   setSelectedId(plain.step() + 1 - _param->param->domain.min);
   auto tooltip = _param->param->gui.tooltip;
-  if (tooltip == gui_label_contents::both) return;
+  if (tooltip == gui_label_contents::none) return;
   std::string value = _param->param->domain.plain_to_text(false, plain);
   std::string name = _param->param->info.tag.name;
-  if(tooltip == gui_label_contents::name)
-    setTooltip(value);
-  else if(tooltip == gui_label_contents::value)
-    setTooltip(name);
-  else
-    setTooltip(name + ": " + value);
+  if(tooltip == gui_label_contents::name) setTooltip(name);
+  else if(tooltip == gui_label_contents::value) setTooltip(value);
+  else setTooltip(name + ": " + value);
 }
 
 void 
