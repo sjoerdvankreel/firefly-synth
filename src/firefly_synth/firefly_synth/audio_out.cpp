@@ -18,17 +18,8 @@ public module_engine {
 public:
   void process(plugin_block& block) override;
   void reset(plugin_block const*) override {}
-
   PB_PREVENT_ACCIDENTAL_COPY(audio_out_engine);
   audio_out_engine(bool global): _global(global) {}
-};
-
-class master_audio_out_engine :
-public module_engine {
-public:
-  void process(plugin_block& block) override;
-  void reset(plugin_block const*) override {}
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_audio_out_engine);
 };
 
 static graph_data
@@ -42,8 +33,8 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 module_topo
 audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
-  auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", "Voice Out", module_voice_audio_out, 1));
-  auto master_info(make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", "Master Out", module_master_audio_out, 1));
+  auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", "Voice Out", module_voice_out, 1));
+  auto master_info(make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", "Master Out", module_master_out, 1));
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? master_info : voice_info);
 
@@ -79,7 +70,7 @@ void
 audio_out_engine::process(plugin_block& block)
 {
   float* audio_out[2];
-  int module = _global? module_master_audio_out: module_voice_audio_out;
+  int module = _global? module_master_out: module_voice_out;
   auto& mixer = get_audio_matrix_mixer(block, _global);
   auto const& audio_in = mixer.mix(block, module, 0);
   auto const& modulation = get_cv_matrix_mixdown(block, _global);
