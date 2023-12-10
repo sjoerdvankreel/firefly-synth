@@ -14,7 +14,8 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { section_main, section_pitch };
-enum { param_mode, param_porta, param_note, param_cent, param_pitch, param_pb, param_count };
+enum { porta_off, porta_on, porta_auto };
+enum { param_mode, param_porta, param_porta_sync, param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const voice_in_param_pb = param_pb;
 extern int const voice_in_param_note = param_note;
@@ -70,7 +71,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
@@ -81,6 +82,12 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Porta", param_porta, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(porta_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, gui_label_contents::name, make_label_none())));
+
+  auto& sync = result.params.emplace_back(make_param(
+    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", "Sync", param_porta_sync, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 }, gui_label_contents::name, make_label_none())));
+  sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
