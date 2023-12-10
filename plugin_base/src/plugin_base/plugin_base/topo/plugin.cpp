@@ -42,8 +42,8 @@ plugin_topo::validate() const
   assert(gui.typeface_file_name.size());
   assert(polyphony >= 0 && polyphony < topo_max);
   assert(0 < gui.min_width && gui.min_width <= 16384);
-  assert(0 < gui.aspect_ratio_width && gui.aspect_ratio_width <= 100);
-  assert(0 < gui.aspect_ratio_height && gui.aspect_ratio_height <= 100);
+  assert(0 < gui.aspect_ratio_width && gui.aspect_ratio_width <= 1000);
+  assert(0 < gui.aspect_ratio_height && gui.aspect_ratio_height <= 1000);
   assert(0 < gui.module_sections.size() && gui.module_sections.size() <= modules.size());
 
   tag.validate();

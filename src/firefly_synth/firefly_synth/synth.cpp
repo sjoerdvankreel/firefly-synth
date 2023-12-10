@@ -23,7 +23,7 @@ enum {
   module_section_hidden, module_section_master_in, module_section_voice_in, 
   module_section_lfos, module_section_env, module_section_cv_matrix,
   module_section_audio_matrix, module_section_osc, module_section_fx, 
-  module_section_voice_master_out, module_section_monitor, module_section_count };
+  module_section_monitor_out, module_section_count };
 
 static gui_colors
 make_section_colors(Colour const& c)
@@ -185,10 +185,10 @@ synth_topo()
   result->version_major = FF_SYNTH_VERSION_MAJOR;
 
   result->gui.min_width = 792;
-  result->gui.aspect_ratio_width = 13;
-  result->gui.aspect_ratio_height = 7;
+  result->gui.aspect_ratio_width = 117;
+  result->gui.aspect_ratio_height = 56;
   result->gui.dimension.column_sizes = { 16, 12, 12, 13, 14 };
-  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1, 1 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   result->gui.custom_sections.resize(custom_section_count);
@@ -220,15 +220,13 @@ synth_topo()
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
     "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 2, 0, 1, 3 }, { 1, 1 });
-  result->gui.module_sections[module_section_voice_master_out] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_voice_master_out, { 7, 0, 1, 3 }, { { 1 }, { 1, 1 } });
-  result->gui.module_sections[module_section_monitor] = make_module_section_gui(
-    "{1EA5EFDE-85F0-4E7D-B39C-820CDE270966}", module_section_monitor, { 8, 0, 1, 3 }, { { 1 }, { 1 } });
+  result->gui.module_sections[module_section_monitor_out] = make_module_section_gui(
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor_out, { 7, 0, 1, 3 }, { { 1 }, { 2, 1, 1 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 4, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
   result->gui.module_sections[module_section_audio_matrix] = make_module_section_gui_tabbed(
-    "{950B6610-5CE1-4629-943F-CB2057CA7346}", module_section_audio_matrix, { 5, 3, 4, 2 },
+    "{950B6610-5CE1-4629-943F-CB2057CA7346}", module_section_audio_matrix, { 5, 3, 3, 2 },
     "Audio", result->gui.module_header_width, { module_vaudio_matrix, module_gaudio_matrix });
 
   result->modules.resize(module_count);
@@ -244,9 +242,9 @@ synth_topo()
   result->modules[module_master_in] = master_in_topo(module_section_master_in, master_colors, { 0, 0 });  
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, master_colors, { 0, 0 }); // must be after all cv
-  result->modules[module_voice_out] = audio_out_topo(module_section_voice_master_out, master_colors, { 0, 0 }, false);
-  result->modules[module_master_out] = audio_out_topo(module_section_voice_master_out, master_colors, { 0, 1 }, true);
-  result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_voice_out] = audio_out_topo(module_section_monitor_out, master_colors, { 0, 0 }, false);
+  result->modules[module_master_out] = audio_out_topo(module_section_monitor_out, master_colors, { 0, 1 }, true);
+  result->modules[module_monitor] = monitor_topo(module_section_monitor_out, monitor_colors, { 0, 2 }, result->polyphony);
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, audio_colors, { 0, 0 }, false,
