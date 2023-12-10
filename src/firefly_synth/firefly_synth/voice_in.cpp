@@ -14,7 +14,7 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { section_main, section_pitch };
-enum { param_mode, param_note, param_cent, param_pitch, param_pb, param_count };
+enum { param_mode, param_porta, param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const voice_in_param_pb = param_pb;
 extern int const voice_in_param_note = param_note;
@@ -26,14 +26,17 @@ mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{88F746C4-1A70-4A64-A11D-584D87D3059C}", "Poly");
-  result.emplace_back("{BAC73AB6-BEBF-44DA-8D8B-AE7A9E31F62B}", "Poly Porta");
-  result.emplace_back("{477EB0C5-66E5-40BA-B25B-357E6F92B653}", "Poly Porta Sync");
-  result.emplace_back("{EDAFF7F8-7A52-45CE-BC68-12B2A3994EC6}", "Poly Porta Auto");
-  result.emplace_back("{3A60F0FE-C792-4B9B-AD88-104553205377}", "Poly Porta Auto Sync");
-  result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Mono Porta");
-  result.emplace_back("{E9A634CE-BD35-4CA3-A0E1-613BF15E1218}", "Mono Porta Sync");
-  result.emplace_back("{B381E0DE-8DC2-4304-AC28-93E4FCB866D7}", "Mono Porta Auto");
-  result.emplace_back("{D968914B-E2AE-44A0-BCA7-F635D2AA81F7}", "Mono Porta Auto Sync");
+  result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Mono");
+  return result;
+}
+
+static std::vector<list_item>
+porta_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{51C360E5-967A-4218-B375-5052DAC4FD02}", "Porta Off");
+  result.emplace_back("{112A9728-8564-469E-95A7-34FE5CC7C8FC}", "Porta On");
+  result.emplace_back("{0E3AF80A-F242-4176-8C72-C0C91D72AEBB}", "Porta Auto");
   return result;
 }
 
@@ -67,12 +70,17 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1, 1 }))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
+
+  result.params.emplace_back(make_param(
+    make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Porta", param_porta, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(porta_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, gui_label_contents::name, make_label_none())));
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
