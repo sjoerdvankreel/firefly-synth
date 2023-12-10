@@ -21,6 +21,7 @@ number modules by processing order or by group
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
 voice cv graph
 do incdecbuttons on cent?
+voice arp?
 
 * get some linux folks to comment (ycollete?)
 * continuing
