@@ -15,7 +15,7 @@ namespace firefly_synth {
 
 enum { output_pitch };
 enum { section_main, section_pitch };
-enum { param_mode, param_note, param_cent, param_count };
+enum { param_mode, param_note, param_cent, param_pitch, param_pb, param_count };
 
 static std::vector<list_item>
 mode_items()
@@ -78,6 +78,16 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::name,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
+
+  result.params.emplace_back(make_param(
+    make_topo_info("{034AE513-9AB6-46EE-8246-F6ECCC11CAE0}", "Pitch", param_pitch, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-128, 128, 0, 0, ""),
+    make_param_gui_none()));
+
+  result.params.emplace_back(make_param(
+    make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", "PB", param_pb, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_none()));
 
   return result;
 }
