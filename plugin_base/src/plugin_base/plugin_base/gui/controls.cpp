@@ -324,6 +324,7 @@ param_component(gui, module, param), Slider()
   switch (tooltip)
   {
   case gui_label_contents::none: break;
+  case gui_label_contents::name: setTooltip(param->param->info.tag.name); break;
   case gui_label_contents::value: setPopupDisplayEnabled(true, true, nullptr); break;
   default: assert(false); break;
   }

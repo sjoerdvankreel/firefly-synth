@@ -127,7 +127,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::none,
+    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::name,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 

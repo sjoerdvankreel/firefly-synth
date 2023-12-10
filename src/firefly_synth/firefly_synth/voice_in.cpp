@@ -76,7 +76,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.params.emplace_back(make_param(
     make_topo_info("{57A908CD-ED0A-4FCD-BA5F-92257175A9DE}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::none,
+    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::name,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
 
   return result;
