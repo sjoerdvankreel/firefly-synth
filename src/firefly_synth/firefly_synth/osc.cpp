@@ -133,7 +133,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& pitch = result.params.emplace_back(make_param(
     make_topo_info("{F87BA01D-19CE-4D46-83B6-8E2382D9F601}", "Pitch", param_pitch, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0, 128, 0, 0, ""),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-128, 128, 0, 0, ""),
     make_param_gui_none())); 
   pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
