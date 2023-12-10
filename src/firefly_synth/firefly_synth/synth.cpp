@@ -102,7 +102,7 @@ std::vector<module_topo const*>
 make_audio_matrix_sources(plugin_topo const* topo, bool global)
 {
   if (global)
-    return { &topo->modules[module_voice_audio_in], &topo->modules[module_gfx] };
+    return { &topo->modules[module_voice_mix_in], &topo->modules[module_gfx] };
   else
     return { &topo->modules[module_osc], &topo->modules[module_vfx] };
 }
@@ -232,7 +232,7 @@ synth_topo()
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
-  result->modules[module_voice_audio_in] = voice_audio_in_topo(module_section_hidden);
+  result->modules[module_voice_mix_in] = voice_mix_in_topo(module_section_hidden);
   result->modules[module_env] = env_topo(module_section_env, cv_colors, { 0, 0 });
   result->modules[module_osc] = osc_topo(module_section_osc, audio_colors, { 0, 0 });
   result->modules[module_gfx] = fx_topo(module_section_fx, audio_colors, { 0, 1 }, true);

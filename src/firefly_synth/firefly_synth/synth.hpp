@@ -21,7 +21,7 @@ enum { midi_output_cp, midi_output_pb, midi_output_cc };
 enum {
   module_midi, module_master_cv, module_glfo, module_gcv_matrix, module_voice_note, module_voice_on_note, module_vlfo, 
   module_env, module_voice_cv, module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_audio_out,
-  module_voice_audio_in, module_gaudio_matrix, module_gfx, module_master_audio_out, module_monitor, module_count };
+  module_voice_mix_in, module_gaudio_matrix, module_gfx, module_master_audio_out, module_monitor, module_count };
 
 class audio_matrix_mixer
 {
@@ -76,7 +76,7 @@ get_cv_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 plugin_base::module_topo midi_topo(int section);
 plugin_base::module_topo voice_note_topo(int section);
-plugin_base::module_topo voice_audio_in_topo(int section);
+plugin_base::module_topo voice_mix_in_topo(int section);
 plugin_base::module_topo voice_on_note_topo(plugin_base::plugin_topo const* topo, int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
