@@ -168,9 +168,9 @@ synth_topo()
   Colour custom_color(0xFFFF4488);
   Colour control_color(0xFFFF8844);
   gui_colors custom_colors(make_section_colors(custom_color));
-  //gui_colors voice_colors(make_section_colors(Colour(0xFF4488FF)));
-  gui_colors module_colors(make_section_colors(Colour(0xFF8888FF)));
   gui_colors monitor_colors(make_section_colors(control_color));
+  gui_colors matrix_colors(make_section_colors(Colour(0xFF4488FF)));
+  gui_colors module_colors(make_section_colors(Colour(0xFF8888FF)));
   gui_colors control_colors(make_section_colors(Colour(control_color)));
   custom_colors.edit_text = custom_color;
   monitor_colors.control_text = control_color;
@@ -246,13 +246,13 @@ synth_topo()
   result->modules[module_voice_out] = audio_out_topo(module_section_monitor_out, control_colors, { 0, 0 }, false);
   result->modules[module_master_out] = audio_out_topo(module_section_monitor_out, control_colors, { 0, 1 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor_out, monitor_colors, { 0, 2 }, result->polyphony);
-  result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, control_colors, { 0, 0 }, true,
+  result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, matrix_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
-  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, control_colors, { 0, 0 }, false,
+  result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, matrix_colors, { 0, 0 }, false,
     make_audio_matrix_sources(result.get(), false), make_audio_matrix_targets(result.get(), false));
-  result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, control_colors, { 0, 0 }, true,
+  result->modules[module_gcv_matrix] = cv_matrix_topo(module_section_cv_matrix, matrix_colors, { 0, 0 }, true,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_matrix_targets(result.get(), true));
-  result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, control_colors, { 0, 0 }, false,
+  result->modules[module_vcv_matrix] = cv_matrix_topo(module_section_cv_matrix, matrix_colors, { 0, 0 }, false,
     make_cv_matrix_sources(result.get(), false),
     make_cv_matrix_sources(result.get(), true),
     make_cv_matrix_targets(result.get(), false));
