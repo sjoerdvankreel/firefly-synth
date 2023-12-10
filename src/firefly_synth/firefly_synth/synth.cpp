@@ -210,13 +210,13 @@ synth_topo()
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
     "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_hidden);
   result->gui.module_sections[module_section_g_lfo_fx] = make_module_section_gui(
-    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_g_lfo_fx, { 7, 0, 1, 3 }, { 1, 2 });
+    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_g_lfo_fx, { 4, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_env] = make_module_section_gui(
-    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 5, 0, 1, 3 }, { 1, 1 });
+    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 6, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_osc] = make_module_section_gui(
-    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 4, 0, 1, 3 }, { 1, 1 });
+    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 5, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_v_lfo_fx] = make_module_section_gui(
-    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_v_lfo_fx, { 6, 0, 1, 3 }, { 1, 2 });
+    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_v_lfo_fx, { 7, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_master_in] = make_module_section_gui(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
