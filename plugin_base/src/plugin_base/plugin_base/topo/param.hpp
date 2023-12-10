@@ -50,6 +50,7 @@ struct param_topo_gui final {
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
+  gui_label_contents tooltip;
   gui_item_binding item_enabled = {};
   std::shared_ptr<gui_submenu> submenu;
 

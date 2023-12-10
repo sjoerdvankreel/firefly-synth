@@ -151,7 +151,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::none), make_domain_item(type_items(global), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   auto filter_menu = std::make_shared<gui_submenu>();
@@ -164,7 +164,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& filter_freq = result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_filter_freq, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(20, 20000, 1000, 1000, 0, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   filter_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   filter_freq.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_delay; });
@@ -172,7 +172,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& filter_res = result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "Res", param_filter_res, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   filter_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   filter_res.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_delay; });
@@ -182,14 +182,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& delay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Tempo", param_delay_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, gui_label_contents::name, make_label_none())));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
   delay_tempo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
 
   auto& delay_gain = result.params.emplace_back(make_param(
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Fdbk", param_delay_feedback, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_gain.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
 

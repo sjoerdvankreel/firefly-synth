@@ -61,7 +61,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
@@ -70,13 +70,13 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{CB6D7BC8-5DE6-4A84-97C9-4E405A96E0C8}", "Note", param_note, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
-    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   note.gui.submenu = make_midi_note_submenu();
 
   result.params.emplace_back(make_param(
     make_topo_info("{57A908CD-ED0A-4FCD-BA5F-92257175A9DE}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::none,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
 
   return result;

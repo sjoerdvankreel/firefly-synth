@@ -81,7 +81,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, gui_label_contents::none, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   on.domain.default_selector = [](int s, int) { return s == 0 ? "On" : "Off"; };
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
@@ -90,28 +90,28 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& a = result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_a, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   a.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& d = result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_d, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   d.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& s = result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_s, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   s.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& r = result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_r, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   r.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 

@@ -91,12 +91,12 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, 
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::none,
     make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_rate; });
   rate.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_sync; });
@@ -104,7 +104,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, gui_label_contents::name, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_sync; });
 

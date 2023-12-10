@@ -320,19 +320,12 @@ param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
 {
-  auto contents = param->param->gui.label.contents;
-  switch (contents)
+  auto tooltip = param->param->gui.tooltip;
+  switch (tooltip)
   {
-  case gui_label_contents::none:
-  case gui_label_contents::name:
-    setPopupDisplayEnabled(true, true, nullptr);
-    break;
-  case gui_label_contents::both:
-  case gui_label_contents::value:
-    break;
-  default:
-    assert(false);
-    break;
+  case gui_label_contents::none: break;
+  case gui_label_contents::value: setPopupDisplayEnabled(true, true, nullptr); break;
+  default: assert(false); break;
   }
   
   switch (param->param->gui.edit_type)
@@ -382,13 +375,13 @@ void
 param_combobox::own_param_changed(plain_value plain)
 {
   setSelectedId(plain.step() + 1 - _param->param->domain.min);
-  auto contents = _param->param->gui.label.contents;
-  if (contents == gui_label_contents::both) return;
+  auto tooltip = _param->param->gui.tooltip;
+  if (tooltip == gui_label_contents::both) return;
   std::string value = _param->param->domain.plain_to_text(false, plain);
   std::string name = _param->param->info.tag.name;
-  if(contents == gui_label_contents::name)
+  if(tooltip == gui_label_contents::name)
     setTooltip(value);
-  else if(contents == gui_label_contents::value)
+  else if(tooltip == gui_label_contents::value)
     setTooltip(name);
   else
     setTooltip(name + ": " + value);
