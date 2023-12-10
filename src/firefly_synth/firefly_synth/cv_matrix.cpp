@@ -63,10 +63,10 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "VAudio Bal 1");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 2, "Master In PB");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 2, "M.In PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 2, "Osc 1 PB");
   state.set_text_at(module_vcv_matrix, 0, param_op, 3, "AddBi");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Master In PB");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 3, "M.In PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 3, "Osc 2 PB");
   state.set_text_at(module_vcv_matrix, 0, param_op, 4, "Mul");
   state.set_text_at(module_vcv_matrix, 0, param_source, 4, "Note Velo");
@@ -81,7 +81,7 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "GLFO 1");
   state.set_text_at(module_gcv_matrix, 0, param_target, 0, "GFX 1 Freq");
   state.set_text_at(module_gcv_matrix, 0, param_op, 1, "Add");
-  state.set_text_at(module_gcv_matrix, 0, param_source, 1, "Master In Mod");
+  state.set_text_at(module_gcv_matrix, 0, param_source, 1, "M.In Mod");
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
 }
 
@@ -101,8 +101,8 @@ std::unique_ptr<tab_menu_handler>
 make_cv_routing_menu_handler(plugin_state* state)
 {
   std::map<int, std::vector<module_output_mapping>> matrix_sources;
-  matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true, {})).mappings;
-  matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false, {})).mappings;
+  matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
+  matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
   return std::make_unique<cv_routing_menu_handler>(state, param_source, param_op, op_off, matrix_sources);
 }
 
