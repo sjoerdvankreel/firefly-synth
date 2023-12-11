@@ -42,9 +42,13 @@ porta_items()
 
 class voice_in_engine :
 public module_engine {
+  int _position = -1;
+  int _to_note = -1;
+  int _from_note = -1;
+  int _porta_samples = -1;
 public:
+  void reset(plugin_block const*) override;
   void process(plugin_block& block) override;
-  void reset(plugin_block const*) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_in_engine);
 };
 
@@ -92,7 +96,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Time", param_porta_time, 1),
-    make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
+    make_param_dsp_block(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
@@ -135,6 +139,31 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   return result;
 }
 
+void
+voice_in_engine::reset(plugin_block const* block)
+{
+  if(block == nullptr) return;
+
+  _position = 0;
+  _to_note = block->voice->state.id.key;
+  _from_note = block->voice->state.id.key;
+  if (block->voice->state.id.channel == block->voice->state.last_note_channel)
+    _from_note = block->voice->state.last_note_key;
+
+  int porta_mode = block->state.own_block_automation[param_porta][0].step();
+  bool porta_sync = block->state.own_block_automation[param_porta_sync][0].step() != 0;
+  float porta_time_time = block->state.own_block_automation[param_porta_time][0].real();
+  float porta_time_tempo = get_timesig_time_value(*block, module_voice_in, param_porta_tempo);
+  float porta_time = porta_sync? porta_time_tempo: porta_time_time;
+  switch (porta_mode)
+  {
+  case porta_off: _porta_samples = 0; break;
+  case porta_auto: _porta_samples = porta_time * block->sample_rate; break;
+  case porta_on: _porta_samples = porta_time * block->sample_rate * std::abs(_from_note - _to_note); break;
+  default: assert(false); break;
+  }
+}
+
 void 
 voice_in_engine::process(plugin_block& block)
 {
@@ -142,13 +171,15 @@ voice_in_engine::process(plugin_block& block)
   auto const& pb_curve = *(modulation)[module_voice_in][0][param_pb][0];
   auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
   auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  
-  int note = block.state.own_block_automation[param_note][0].step() + block.voice->state.id.key - midi_middle_c;
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();  
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
+    float note = 0;
     float pb = block.normalized_to_raw(module_voice_in, param_pb, pb_curve[f]);
     float cent = block.normalized_to_raw(module_voice_in, param_cent, cent_curve[f]);
     float pitch = block.normalized_to_raw(module_voice_in, param_pitch, pitch_curve[f]);
+    if(_position == _porta_samples) note = _to_note;
+    else note = _from_note + (_position++ / (float)_porta_samples * (_to_note - _from_note));
     block.state.own_cv[output_pitch][0][f] = note + cent + pitch + pb * master_pb_range;
   }
 }
