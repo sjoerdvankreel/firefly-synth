@@ -238,8 +238,8 @@ synth_topo()
   result->modules[module_osc] = osc_topo(module_section_osc, voice_colors, { 0, 0 });
   result->modules[module_gfx] = fx_topo(module_section_fxs, global_colors, { 0, 1 }, true);
   result->modules[module_vfx] = fx_topo(module_section_fxs, voice_colors, { 0, 0 }, false);
-  result->modules[module_glfo] = lfo_topo(module_section_lfos, global_colors, { 0, 0 }, true);
-  result->modules[module_vlfo] = lfo_topo(module_section_lfos, voice_colors, { 0, 1 }, false);
+  result->modules[module_glfo] = lfo_topo(module_section_lfos, global_colors, { 0, 1 }, true);
+  result->modules[module_vlfo] = lfo_topo(module_section_lfos, voice_colors, { 0, 0 }, false);
   result->modules[module_master_in] = master_in_topo(module_section_master_in, global_colors, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, voice_colors, { 0, 0 }); // must be after all cv
