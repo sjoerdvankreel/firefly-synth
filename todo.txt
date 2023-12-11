@@ -20,6 +20,7 @@ poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only
 do incdecbuttons on cent?
 voice arp?
 more flexibility in plugin_base -> "give me a voice"
+clamp freq 0 / nyquist
 
 * get some linux folks to comment (ycollete?)
 * continuing
