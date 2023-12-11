@@ -50,10 +50,13 @@ _voice_processor_context(voice_processor_context)
 }
 
 plugin_voice_block 
-plugin_engine::make_voice_block(int v, int midi_key, int release_frame)
+plugin_engine::make_voice_block(
+  int v, int release_frame, note_id id, int last_note_key, int last_note_channel)
 {
-  _voice_states[v].id.key = midi_key;
+  _voice_states[v].id = id;
   _voice_states[v].release_frame = release_frame;
+  _voice_states[v].last_note_key = last_note_key;
+  _voice_states[v].last_note_channel = last_note_channel;
   return {
     false, _voice_results[v], _voice_states[v], _voice_cv_state[v], 
     _voice_audio_state[v], _voice_context[v], _voice_scratch_state[v]
@@ -260,7 +263,10 @@ plugin_engine::process_voice(int v, bool threaded)
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].id.key, _voice_states[v].release_frame));
+      // state has already been copied from note event to 
+      // _voice_states during voice stealing (to allow per-voice init)
+      plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame, 
+        _voice_states[v].id, _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
       _voice_engines[v][m][mi]->process(block);
@@ -487,11 +493,15 @@ plugin_engine::process()
     for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
       for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       {
-        plugin_voice_block voice_block(make_voice_block(slot, event.id.key, _voice_states[slot].release_frame));
+        plugin_voice_block voice_block(make_voice_block(slot, _voice_states[slot].release_frame, event.id, _last_note_key, _last_note_channel));
         plugin_block block(make_plugin_block(slot, m, mi, state.start_frame, state.end_frame));
         block.voice = &voice_block;
         _voice_engines[slot][m][mi]->reset(&block);
       }
+
+    // for portamento
+    _last_note_key = event.id.key;
+    _last_note_channel = event.id.channel;
   }
 
   // mark voices for completion the next block

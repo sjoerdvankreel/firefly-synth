@@ -66,6 +66,8 @@ class plugin_engine final {
   std::vector<voice_state> _voice_states = {};
   std::unique_ptr<host_block> _host_block = {};
   
+  int _last_note_key = -1;
+  int _last_note_channel = -1;
   void* _voice_processor_context = nullptr;
   std::vector<std::thread::id> _voice_thread_ids;
   thread_pool_voice_processor _voice_processor = {};
@@ -89,7 +91,8 @@ public:
     int voice, int module, int slot,
     int start_frame, int end_frame);
   plugin_voice_block make_voice_block(
-    int v, int midi_key, int release_frame);
+    int v, int release_frame, note_id id, 
+    int last_note_key, int last_note_channel);
 
   // per-voice public for threadpool
   void process();

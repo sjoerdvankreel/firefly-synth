@@ -7,8 +7,8 @@ namespace plugin_base {
 // note id or PCK (port is 0)
 struct note_id final {
   int id;
-  short key;
-  short channel;
+  int key;
+  int channel;
 };
 
 // shared host/plug

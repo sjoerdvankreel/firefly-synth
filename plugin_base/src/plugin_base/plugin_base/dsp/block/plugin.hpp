@@ -22,6 +22,10 @@ struct voice_state final {
   float velocity = 0.0f;
   std::int64_t time = -1;
   voice_stage stage = {};
+
+  // for portamento
+  int last_note_key = -1;
+  int last_note_channel = -1;
 };
 
 // single output module process call

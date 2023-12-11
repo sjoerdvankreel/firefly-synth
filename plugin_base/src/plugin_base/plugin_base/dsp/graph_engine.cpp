@@ -59,8 +59,12 @@ graph_engine::process(int module_index, int module_slot, graph_processor process
     processor(*_last_block.get());
   else
   {
+    note_id id;
+    id.id = 0;
+    id.channel = 0;
+    id.key = _params.midi_key;
     _last_voice_block = std::make_unique<plugin_voice_block>(
-      _engine.make_voice_block(voice, _params.midi_key, _params.voice_release_at));
+      _engine.make_voice_block(voice, _params.voice_release_at, id, -1, -1));
     _last_block->voice = _last_voice_block.get();
     processor(*_last_block.get());
   }
