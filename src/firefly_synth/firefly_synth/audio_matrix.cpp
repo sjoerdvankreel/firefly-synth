@@ -64,10 +64,10 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vaudio_matrix, 0, param_on, 1, "On");
   state.set_text_at(module_vaudio_matrix, 0, param_on, 2, "On");
   state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "VFX 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "V.FX 1");
   state.set_text_at(module_vaudio_matrix, 0, param_source, 1, "Osc 2");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 1, "VFX 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_source, 2, "VFX 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_target, 1, "V.FX 1");
+  state.set_text_at(module_vaudio_matrix, 0, param_source, 2, "V.FX 1");
   state.set_text_at(module_vaudio_matrix, 0, param_target, 2, "V.Out");
 }
 
@@ -76,12 +76,12 @@ init_global_default(plugin_state& state)
 {
   state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "V.Mix");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "GFX 1");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "G.FX 1");
   state.set_text_at(module_gaudio_matrix, 0, param_on, 1, "On");
-  state.set_text_at(module_gaudio_matrix, 0, param_source, 1, "GFX 1");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 1, "GFX 2");
+  state.set_text_at(module_gaudio_matrix, 0, param_source, 1, "G.FX 1");
+  state.set_text_at(module_gaudio_matrix, 0, param_target, 1, "G.FX 2");
   state.set_text_at(module_gaudio_matrix, 0, param_on, 2, "On");
-  state.set_text_at(module_gaudio_matrix, 0, param_source, 2, "GFX 2");
+  state.set_text_at(module_gaudio_matrix, 0, param_source, 2, "G.FX 2");
   state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "M.Out");
 }
 

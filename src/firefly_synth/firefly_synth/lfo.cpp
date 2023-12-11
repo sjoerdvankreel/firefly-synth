@@ -68,8 +68,8 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 module_topo
 lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
-  auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", "VLFO", module_vlfo, 3);
-  auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "GLFO", module_glfo, 3);
+  auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", "Voice LFO", "V.LFO", true, module_vlfo, 3);
+  auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", "G.LFO", true, module_glfo, 3);
   module_stage stage = global ? module_stage::input : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
 

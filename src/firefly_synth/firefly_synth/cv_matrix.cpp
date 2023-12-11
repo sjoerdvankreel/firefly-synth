@@ -57,10 +57,10 @@ init_voice_default(plugin_state& state)
 {
   state.set_text_at(module_vcv_matrix, 0, param_op, 0, "Add");
   state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 0, "VFX 1 Freq");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 0, "V.FX 1 Freq");
   state.set_text_at(module_vcv_matrix, 0, param_op, 1, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_amt, 1, "33");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 1, "GLFO 2");
+  state.set_text_at(module_vcv_matrix, 0, param_source, 1, "G.LFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "V.Audio Bal 1");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_source, 2, "M.In PB");
@@ -75,11 +75,11 @@ init_global_default(plugin_state& state)
 {
   state.set_text_at(module_gcv_matrix, 0, param_op, 0, "AddBi");
   state.set_text_at(module_gcv_matrix, 0, param_amt, 0, "33");
-  state.set_text_at(module_gcv_matrix, 0, param_source, 0, "GLFO 1");
-  state.set_text_at(module_gcv_matrix, 0, param_target, 0, "GFX 1 Freq");
+  state.set_text_at(module_gcv_matrix, 0, param_source, 0, "G.LFO 1");
+  state.set_text_at(module_gcv_matrix, 0, param_target, 0, "G.FX 1 Freq");
   state.set_text_at(module_gcv_matrix, 0, param_op, 1, "Add");
   state.set_text_at(module_gcv_matrix, 0, param_source, 1, "M.In Mod");
-  state.set_text_at(module_gcv_matrix, 0, param_target, 1, "GFX 1 Freq");
+  state.set_text_at(module_gcv_matrix, 0, param_target, 1, "G.FX 1 Freq");
 }
 
 audio_routing_cv_params
