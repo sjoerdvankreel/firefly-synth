@@ -63,7 +63,7 @@ module_topo
 env_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Env", module_env, 3), 
+    make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Envelope", "Env", true, module_env, 3),
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
