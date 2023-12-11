@@ -76,14 +76,6 @@ increment_and_wrap_phase(float& phase, float freq, float rate)
 { increment_and_wrap_phase(phase, phase_increment(freq, rate)); }
 
 inline float
-note_to_pitch(int note, float cent, int key)
-{
-  assert(0 <= key && key < 128);
-  assert(0 <= note && note < 128);
-  return note + cent + key - midi_middle_c;
-}
-
-inline float
 mono_pan_sqrt3(int channel, float panning)
 {
   assert(channel == 0 || channel == 1);

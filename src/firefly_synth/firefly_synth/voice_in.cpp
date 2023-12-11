@@ -13,14 +13,13 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+enum { output_pitch };
 enum { section_main, section_pitch };
 enum { porta_off, porta_on, porta_auto };
 enum { param_mode, param_porta, param_porta_sync, param_porta_time, param_porta_tempo, param_note, param_cent, param_pitch, param_pb, param_count };
 
-extern int const voice_in_param_pb = param_pb;
-extern int const voice_in_param_note = param_note;
-extern int const voice_in_param_cent = param_cent;
-extern int const voice_in_param_pitch = param_pitch;
+extern int const master_in_param_pb_range;
+extern int const voice_in_output_pitch = output_pitch;
 
 static std::vector<list_item>
 mode_items()
@@ -44,8 +43,8 @@ porta_items()
 class voice_in_engine :
 public module_engine {
 public:
+  void process(plugin_block& block) override;
   void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_in_engine);
 };
 
@@ -62,7 +61,8 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", "V.In", true, module_voice_in, 1),
-    make_module_dsp(module_stage::voice, module_output::none, 0, {}),
+    make_module_dsp(module_stage::voice, module_output::cv, 0, {
+      make_module_dsp_output(false, make_topo_info("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 2, 1 } } )));
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
@@ -133,6 +133,24 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_none()));
 
   return result;
+}
+
+void 
+voice_in_engine::process(plugin_block& block)
+{
+  auto const& modulation = get_cv_matrix_mixdown(block, false);
+  auto const& pb_curve = *(modulation)[module_voice_in][0][param_pb][0];
+  auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
+  auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  
+  int note = block.state.own_block_automation[param_note][0].step() + block.voice->state.id.key - midi_middle_c;
+  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();  
+  for(int f = block.start_frame; f < block.end_frame; f++)
+  {
+    float pb = block.normalized_to_raw(module_voice_in, param_pb, pb_curve[f]);
+    float cent = block.normalized_to_raw(module_voice_in, param_cent, cent_curve[f]);
+    float pitch = block.normalized_to_raw(module_voice_in, param_pitch, pitch_curve[f]);
+    block.state.own_cv[output_pitch][0][f] = note + cent + pitch + pb * master_pb_range;
+  }
 }
 
 }

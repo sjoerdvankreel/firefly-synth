@@ -17,11 +17,7 @@ enum { type_off, type_sine, type_saw };
 enum { param_type, param_am, param_note, param_cent };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
 
-extern int const voice_in_param_pb;
-extern int const voice_in_param_cent;
-extern int const voice_in_param_note;
-extern int const voice_in_param_pitch;
-extern int const master_in_param_pb_range;
+extern int const voice_in_output_pitch;
 
 static std::vector<list_item>
 type_items()
@@ -61,7 +57,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   
   int note = state.get_plain_at(mapping.module_index, mapping.module_slot, param_note, 0).step();
   float cent = state.get_plain_at(mapping.module_index, mapping.module_slot, param_cent, 0).real();
-  float freq = pitch_to_freq(note_to_pitch(note, cent, midi_middle_c));
+  float freq = pitch_to_freq(note + cent);
 
   params.bpm = 120;
   params.frame_count = 1000;
@@ -167,15 +163,6 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   if(modulation == nullptr)
     modulation = &get_cv_matrix_mixdown(block, false);
 
-  int osc_note = block_auto[param_note][0].step();
-  int voice_note = block.state.all_block_automation[module_voice_in][0][voice_in_param_note][0].step();
-  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
-
-  auto const& osc_cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
-  auto const& voice_pb_curve = *(*modulation)[module_voice_in][0][voice_in_param_pb][0];
-  auto const& voice_cent_curve = *(*modulation)[module_voice_in][0][voice_in_param_cent][0];
-  auto const& voice_pitch_curve = *(*modulation)[module_voice_in][0][voice_in_param_pitch][0];
-
   auto& am_scratch = block.state.own_scratch[scratch_am];
   auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
   if (block.module_slot == 0)
@@ -192,15 +179,14 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   }
 
   float sample;
+  int note = block_auto[param_note][0].step();
   auto& mono_scratch = block.state.own_scratch[scratch_mono];
+  auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& voice_pitch_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float osc_cent = block.normalized_to_raw(module_osc, param_cent, osc_cent_curve[f]);
-    float voice_pb = block.normalized_to_raw(module_voice_in, voice_in_param_pb, voice_pb_curve[f]);
-    float voice_cent = block.normalized_to_raw(module_voice_in, voice_in_param_cent, voice_cent_curve[f]);
-    float voice_pitch = block.normalized_to_raw(module_voice_in, voice_in_param_pitch, voice_pitch_curve[f]);
-    float pitch = note_to_pitch(osc_note + voice_note - midi_middle_c, osc_cent + voice_cent, block.voice->state.id.key);
-    float inc = pitch_to_freq(pitch + voice_pitch + voice_pb * master_pb_range) / block.sample_rate;
+    float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
+    float inc = pitch_to_freq(note + cent + voice_pitch_curve[f] - midi_middle_c) / block.sample_rate;
     switch (type)
     {
     case type_sine: sample = phase_to_sine(_phase); break;

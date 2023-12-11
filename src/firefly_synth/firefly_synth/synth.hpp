@@ -19,7 +19,7 @@ cv_matrix_mixdown;
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 enum {
   module_midi, module_master_in, module_glfo, module_gcv_matrix, module_voice_note, module_voice_on_note, module_vlfo, 
-  module_env, module_voice_in, module_vcv_matrix, module_vaudio_matrix, module_osc, module_vfx, module_voice_out,
+  module_env, module_vcv_matrix, module_voice_in, module_vaudio_matrix, module_osc, module_vfx, module_voice_out,
   module_voice_mix, module_gaudio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
 class audio_matrix_mixer
