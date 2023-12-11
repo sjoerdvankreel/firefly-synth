@@ -19,6 +19,7 @@ number modules by processing order or by group
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
 do incdecbuttons on cent?
 voice arp?
+more flexibility in plugin_base -> "give me a voice"
 
 * get some linux folks to comment (ycollete?)
 * continuing
