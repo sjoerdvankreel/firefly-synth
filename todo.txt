@@ -21,7 +21,7 @@ do incdecbuttons on cent?
 voice arp?
 more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
-drop existing am
+do 5 am and 5 fm routes
 
 * get some linux folks to comment (ycollete?)
 * continuing

@@ -15,7 +15,6 @@ namespace firefly_synth {
 enum { section_main, section_pitch };
 enum { type_off, type_sine, type_saw };
 enum { param_type, param_am, param_note, param_cent };
-enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
 
 extern int const voice_in_output_pitch_offset;
 
@@ -95,7 +94,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Oscillator", "Osc", true, module_osc, 4),
-    make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
+    make_module_dsp(module_stage::voice, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } })));
 
@@ -113,15 +112,6 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.domain.default_selector = [] (int s, int) { return type_items()[s == 0? type_sine: type_off].name; };
-
-  auto& am = result.params.emplace_back(make_param(
-    make_topo_info("{D03E5C05-E404-4394-BC1F-CE2CD6AAE357}", "AM", param_am, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  am.gui.bindings.enabled.bind_slot([](int s) { return s > 0; });
-  am.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  am.dsp.automate_selector = [](int s) { return s > 0? param_automate::automate_modulate : param_automate::none; };
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
@@ -171,24 +161,8 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   if(modulation == nullptr)
     modulation = &get_cv_matrix_mixdown(block, false);
 
-  auto& am_scratch = block.state.own_scratch[scratch_am];
-  auto& am_mod_scratch = block.state.own_scratch[scratch_am_mod];
-  if (block.module_slot == 0)
-  {
-    am_scratch.fill(block.start_frame, block.end_frame, 1.0f);
-    am_mod_scratch.fill(block.start_frame, block.end_frame, 0.0f);
-  }
-  else
-  {
-    auto const& am_curve = *(*modulation)[module_osc][block.module_slot][param_am][0];
-    am_curve.copy_to(block.start_frame, block.end_frame, am_mod_scratch);
-    auto const& am_source = block.voice->all_scratch[module_osc][block.module_slot - 1][scratch_mono];
-    am_source.transform_to(block.start_frame, block.end_frame, am_scratch, bipolar_to_unipolar);
-  }
-
   float sample;
   int note = block_auto[param_note][0].step();
-  auto& mono_scratch = block.state.own_scratch[scratch_mono];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -204,9 +178,8 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
     }
     check_bipolar(sample);
     sample *= (*env_curve)[f];
-    mono_scratch[f] = mix_signal(am_mod_scratch[f], sample, sample * am_scratch[f]);
-    block.state.own_audio[0][0][0][f] = mono_scratch[f];
-    block.state.own_audio[0][0][1][f] = mono_scratch[f];
+    block.state.own_audio[0][0][0][f] = sample;
+    block.state.own_audio[0][0][1][f] = sample;
     increment_and_wrap_phase(_phase, inc);
   }
 }
