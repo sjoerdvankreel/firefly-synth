@@ -60,6 +60,8 @@ make_osc_routing_menu_handler(plugin_state* state)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
+  return {}; // TODO
+#if 0
   graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
   
@@ -87,6 +89,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   audio[0].push_back(0.0f);
   audio[1].push_back(0.0f);
   return graph_data(audio);
+#endif
 }
 
 module_topo
