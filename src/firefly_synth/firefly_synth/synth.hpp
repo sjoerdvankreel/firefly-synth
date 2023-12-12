@@ -22,7 +22,7 @@ enum {
   module_vaudio_matrix, module_am_matrix, module_osc, module_vfx, module_voice_out,
   module_voice_mix, module_gaudio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
-// gets the modulation signal to be applied by the oscillator at the end of it's process call
+// used by the oscillator at the end of it's process call to apply amp/ring mod
 // (e.g. osc 2 is modulated by both osc 1 and osc 2 itself)
 class am_matrix_engine;
 class am_matrix_modulator
