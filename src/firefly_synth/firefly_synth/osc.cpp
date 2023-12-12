@@ -49,6 +49,15 @@ init_default(plugin_state& state)
   state.set_text_at(module_osc, 1, param_cent, 0, "+10");
 }
 
+static std::unique_ptr<tab_menu_handler>
+make_osc_routing_menu_handler(plugin_state* state)
+{
+  auto am_params = make_audio_routing_am_params(state);
+  auto cv_params = make_audio_routing_cv_params(state, false);
+  auto audio_params = make_audio_routing_audio_params(state, false);
+  return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params, am_params }));
+}
+
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
@@ -92,9 +101,8 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.graph_renderer = render_graph;
   result.default_initializer = init_default;
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<osc_engine>(); };
-  result.gui.menu_handler_factory = [](plugin_state* state) { return make_audio_routing_menu_handler(state, false); };
+  result.gui.menu_handler_factory = make_osc_routing_menu_handler;
+  result.engine_factory = [](auto const&, int, int) { return std::make_unique<osc_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),

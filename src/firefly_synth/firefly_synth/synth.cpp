@@ -83,7 +83,7 @@ make_audio_routing_menu_handler(plugin_state* state, bool global)
 {
   auto cv_params = make_audio_routing_cv_params(state, global);
   auto audio_params = make_audio_routing_audio_params(state, global);
-  return std::make_unique<audio_routing_menu_handler>(state, cv_params, audio_params);
+  return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params }));
 }
 
 cv_matrix_mixdown

@@ -136,13 +136,12 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_module_dsp(stage, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
-  result.gui.menu_handler_factory = [global](plugin_state* state) { return make_audio_routing_menu_handler(state, global); };
-
+ 
   result.graph_renderer = render_graph;
   if(global) result.default_initializer = init_global_default;
   if(!global) result.default_initializer = init_voice_default;
-  result.engine_factory = [global](auto const&, int sample_rate, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<fx_engine>(global, sample_rate); };
+  result.gui.menu_handler_factory = [global](plugin_state* state) { return make_audio_routing_menu_handler(state, global); };
+  result.engine_factory = [global](auto const&, int sample_rate, int) { return std::make_unique<fx_engine>(global, sample_rate); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),

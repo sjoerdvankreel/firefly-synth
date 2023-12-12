@@ -25,8 +25,8 @@ voice_mix_topo(int section)
     make_module_dsp(module_stage::output, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{FFA367C9-23C1-4E89-95C5-90EE59CB034D}", "Output", 0, 1)) }), 
     make_module_gui_none(section)));
-  result.engine_factory = [](auto const&, int, int) -> std::unique_ptr<module_engine> { 
-    return std::make_unique<voice_mix_engine>(); };
+  
+  result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_mix_engine>(); };
   return result;
 }
 

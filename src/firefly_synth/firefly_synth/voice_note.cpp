@@ -30,9 +30,9 @@ voice_note_topo(int section)
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info("{376846A2-33FC-4DB0-BCB9-7A43A8488A7F}", "Key", output_key, 1)),
       make_module_dsp_output(true, make_topo_info("{2D59B6B8-3B08-430C-9A8A-E882C8E14597}", "Velo", output_velo, 1)) }),
-      make_module_gui_none(section)));
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<voice_note_engine>(); };
+    make_module_gui_none(section)));
+  
+  result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_note_engine>(); };
   return result;
 }
 

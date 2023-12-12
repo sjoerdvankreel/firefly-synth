@@ -129,7 +129,14 @@ audio_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
       make_module_dsp_output(false, make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
+
+  result.graph_renderer = render_graph;
+  result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.short_name;
+  result.default_initializer = global ? init_global_default : init_voice_default;
+  result.minimal_initializer = global ? init_global_minimal : init_voice_minimal;
+  result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) {
+    return std::make_unique<audio_matrix_engine>(global, sm.mappings, tm.mappings); };
   result.gui.menu_handler_factory = [](plugin_state* state) { 
     return std::make_unique<tidy_matrix_menu_handler>(state, param_on, 0, std::vector<int>({ param_target, param_source })); };
 
@@ -188,13 +195,6 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, gui_label_contents::value, make_label_none())));
   bal.gui.tabular = true;
   bal.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-
-  result.graph_renderer = render_graph;
-  result.rerender_on_param_hover = true;
-  result.default_initializer = global? init_global_default: init_voice_default;
-  result.minimal_initializer = global? init_global_minimal: init_voice_minimal;
-  result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<audio_matrix_engine>(global, sm.mappings, tm.mappings); };
 
   return result;
 }

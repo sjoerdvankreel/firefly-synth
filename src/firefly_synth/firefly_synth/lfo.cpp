@@ -77,12 +77,11 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
-  result.gui.menu_handler_factory = make_cv_routing_menu_handler;
-
+  
   result.graph_renderer = render_graph;
   if(global) result.default_initializer = init_global_default;
-  result.engine_factory = [global](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<lfo_engine>(global); };
+  result.gui.menu_handler_factory = make_cv_routing_menu_handler;
+  result.engine_factory = [global](auto const&, int, int) { return std::make_unique<lfo_engine>(global); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),

@@ -183,18 +183,46 @@ cv_matrix_topo(
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
 {
+  int on_note_midi_start = -1;
+  auto source_matrix = make_cv_source_matrix(sources);
+  auto target_matrix = make_cv_target_matrix(targets);
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, module_vcv_matrix, 1);
   auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, module_gcv_matrix, 1);
   auto const info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
 
+  if (!global)
+  {
+    auto on_note_matrix(make_cv_source_matrix(on_note_sources).mappings);
+    for (int m = 0; m < on_note_matrix.size(); m++)
+      if (on_note_matrix[m].module_index == module_midi) { on_note_midi_start = m; break; }
+    assert(on_note_midi_start != -1);
+  }
+
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
+  
+  result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.short_name;
-  result.gui.menu_handler_factory = [](plugin_state* state) { 
-    return std::make_unique<tidy_matrix_menu_handler>(state, param_op, op_off, std::vector<int>({ param_target, param_source })); };
+  result.default_initializer = global ? init_global_default : init_voice_default;
+  result.graph_renderer = [tm = target_matrix.mappings](
+    auto const& state, auto const& mapping) {
+      return render_graph(state, mapping, tm);
+  };
+  result.gui.menu_handler_factory = [](plugin_state* state) {
+    return std::make_unique<tidy_matrix_menu_handler>(
+      state, param_op, op_off, std::vector<int>({ param_target, param_source })); 
+  };
+  result.midi_active_selector = [global, on_note_midi_start, sm = source_matrix.mappings](
+    plugin_state const& state, int, jarray<int, 3>& active) { 
+      select_midi_active(state, global, on_note_midi_start, sm, active); 
+  };
+  result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
+    auto const& topo, int, int) { 
+      return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); 
+  };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
@@ -207,7 +235,6 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, gui_label_contents::none, make_label_none())));
   type.gui.tabular = true;
 
-  auto source_matrix = make_cv_source_matrix(sources);
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
@@ -216,7 +243,6 @@ cv_matrix_topo(
   source.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
   source.gui.submenu = source_matrix.submenu;
 
-  auto target_matrix = make_cv_target_matrix(targets);
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, ""),
@@ -233,26 +259,6 @@ cv_matrix_topo(
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
 
-  int on_note_midi_start = -1;
-  if (!global)
-  {
-    auto on_note_matrix(make_cv_source_matrix(on_note_sources).mappings);
-    for(int m = 0; m < on_note_matrix.size(); m++)
-      if(on_note_matrix[m].module_index == module_midi)
-      {
-        on_note_midi_start = m;
-        break;
-      }
-    assert(on_note_midi_start != -1);
-  }
-
-  result.rerender_on_param_hover = true;
-  result.default_initializer = global ? init_global_default : init_voice_default;
-  result.midi_active_selector = [global, on_note_midi_start, sm = source_matrix.mappings](
-    plugin_state const& state, int, jarray<int, 3>& active) { select_midi_active(state, global, on_note_midi_start, sm, active); };
-  result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings]
-    (auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); };
-  result.graph_renderer = [tm = target_matrix.mappings](auto const& state, auto const& mapping) { return render_graph(state, mapping, tm); };
   return result;
 }
 

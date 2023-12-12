@@ -38,7 +38,19 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   return graph_data(value, false);
 }
 
-// TODO audio routing audio params, audio routing cv params
+audio_routing_audio_params
+make_audio_routing_am_params(plugin_state* state)
+{
+  audio_routing_audio_params result;
+  result.off_value = 0;
+  result.on_param = param_on;
+  result.source_param = param_source;
+  result.target_param = param_target;
+  result.matrix_module = module_am_matrix;
+  result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }).mappings;
+  result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }).mappings;
+  return result;
+}
 
 module_topo 
 am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
@@ -49,9 +61,13 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc AM", "AM", true, module_am_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::none, 0, {}),
     make_module_gui(section, colors, pos, { 1, 1 })));
+
+  result.graph_renderer = render_graph;
+  result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.name;
-  result.gui.menu_handler_factory = [](plugin_state* state) { 
-    return std::make_unique<tidy_matrix_menu_handler>(state, param_on, 0, std::vector<int>({ param_target, param_source })); };
+  result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<am_matrix_engine>(); };
+  result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
+    state, param_on, 0, std::vector<int>({ param_target, param_source })); };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "Main"), 
@@ -95,10 +111,6 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, gui_label_contents::value, make_label_none())));
   ring.gui.tabular = true;
   ring.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-
-  result.graph_renderer = render_graph;
-  result.rerender_on_param_hover = true;
-  result.engine_factory = [](auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<am_matrix_engine>(); };
 
   return result;
 }

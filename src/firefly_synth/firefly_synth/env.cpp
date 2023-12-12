@@ -67,12 +67,11 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
-  result.gui.menu_handler_factory = make_cv_routing_menu_handler;
 
   result.graph_renderer = render_graph;
   result.default_initializer = init_default;
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<env_engine>(); };
+  result.gui.menu_handler_factory = make_cv_routing_menu_handler;
+  result.engine_factory = [](auto const&, int, int) { return std::make_unique<env_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),

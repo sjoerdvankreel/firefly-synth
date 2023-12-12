@@ -32,9 +32,7 @@ midi_topo(int section)
     make_module_gui_none(section)));
 
   result.midi_sources = midi_source::all_sources();
-  result.engine_factory = [](auto const&, int, int) ->
-    std::unique_ptr<module_engine> { return std::make_unique<midi_engine>(); };
-
+  result.engine_factory = [](auto const&, int, int) { return std::make_unique<midi_engine>(); };
   return result;
 }
 

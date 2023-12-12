@@ -50,13 +50,11 @@ audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, b
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1, 1 }))));
-
   result.params.emplace_back(make_param(
     make_topo_info("{2156DEE6-A147-4B93-AEF3-ABE69F53DBF9}", "Gain", param_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-
   result.params.emplace_back(make_param(
     make_topo_info("{7CCD4A32-FD84-402E-B099-BB94AAAD3C9E}", "Bal", param_bal, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),

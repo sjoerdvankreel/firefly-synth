@@ -68,20 +68,19 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 2, 1 } } )));
+  
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
-  result.engine_factory = [](auto const&, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<voice_in_engine>(); };
+  result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_in_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-
   result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
-
   result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Porta", param_porta, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(porta_items(), ""),
@@ -112,25 +111,21 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
-  
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));  
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{CB6D7BC8-5DE6-4A84-97C9-4E405A96E0C8}", "Note", param_note, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
     make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   note.gui.submenu = make_midi_note_submenu();
-
   result.params.emplace_back(make_param(
     make_topo_info("{57A908CD-ED0A-4FCD-BA5F-92257175A9DE}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::name,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
-
   result.params.emplace_back(make_param(
     make_topo_info("{034AE513-9AB6-46EE-8246-F6ECCC11CAE0}", "Pitch", param_pitch, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-128, 128, 0, 0, ""),
     make_param_gui_none()));
-
   result.params.emplace_back(make_param(
     make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", "PB", param_pb, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
