@@ -137,7 +137,8 @@ make_cv_matrix_targets(plugin_topo const* topo, bool global)
     return { 
       &topo->modules[module_voice_in],
       &topo->modules[module_osc], 
-      &topo->modules[module_vfx], 
+      &topo->modules[module_am_matrix],
+      &topo->modules[module_vfx],
       &topo->modules[module_vaudio_matrix], 
       &topo->modules[module_voice_out] };
 }
