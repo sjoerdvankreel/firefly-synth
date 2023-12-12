@@ -188,8 +188,8 @@ synth_topo()
   result->gui.min_width = 820;
   result->gui.aspect_ratio_width = 121;
   result->gui.aspect_ratio_height = 56;
+  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1 };
   result->gui.dimension.column_sizes = { 16, 12, 12, 13, 13 };
-  result->gui.dimension.row_sizes = { 1, 1, 1, 1, 1, 1, 1, 1 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
 
   result->gui.custom_sections.resize(custom_section_count);
@@ -222,9 +222,9 @@ synth_topo()
   result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
     "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 3, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 7, 0, 1, 3 }, { { 1 }, { 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 1, 3, 1, 2 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 3, 7, 2 }, "Matrix", 
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 2, 3, 5, 2 }, "Matrix", 
     result->gui.module_header_width, { module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
 
   result->modules.resize(module_count);
