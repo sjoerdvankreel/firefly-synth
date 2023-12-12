@@ -13,13 +13,13 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { output_pitch };
+enum { output_pitch_offset };
 enum { section_main, section_pitch };
 enum { porta_off, porta_on, porta_auto };
 enum { param_mode, param_porta, param_porta_sync, param_porta_time, param_porta_tempo, param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const master_in_param_pb_range;
-extern int const voice_in_output_pitch = output_pitch;
+extern int const voice_in_output_pitch_offset = output_pitch_offset;
 
 static std::vector<list_item>
 mode_items()
@@ -175,7 +175,7 @@ voice_in_engine::process(plugin_block& block)
     float pitch = block.normalized_to_raw(module_voice_in, param_pitch, pitch_curve[f]);
     if(_position == _porta_samples) note = _to_note;
     else note = _from_note + (_position++ / (float)_porta_samples * (_to_note - _from_note));
-    block.state.own_cv[output_pitch][0][f] = note + cent + pitch + pb * master_pb_range;
+    block.state.own_cv[output_pitch_offset][0][f] = note + cent + pitch + pb * master_pb_range - midi_middle_c;
   }
 }
 

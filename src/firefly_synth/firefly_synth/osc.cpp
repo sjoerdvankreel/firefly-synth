@@ -17,7 +17,7 @@ enum { type_off, type_sine, type_saw };
 enum { param_type, param_am, param_note, param_cent };
 enum { scratch_mono, scratch_am, scratch_am_mod, scratch_count };
 
-extern int const voice_in_output_pitch;
+extern int const voice_in_output_pitch_offset;
 
 static std::vector<list_item>
 type_items()
@@ -76,7 +76,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   plugin_block const* block = nullptr;
   graph_engine graph_engine(&state, params);
   for(int i = 0; i <= mapping.module_slot; i++)
-    block = graph_engine.process(mapping.module_index, i, [mapping, i, &graph_engine](plugin_block& block) {
+    block = graph_engine.process(mapping.module_index, i, [](plugin_block& block) {
       osc_engine engine;
       engine.reset(nullptr);
       jarray<float, 1> env_curve(block.end_frame, 1.0f);
@@ -190,11 +190,11 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   int note = block_auto[param_note][0].step();
   auto& mono_scratch = block.state.own_scratch[scratch_mono];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
-  auto const& voice_pitch_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch][0];
+  auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
-    float inc = pitch_to_freq(note + cent + voice_pitch_curve[f] - midi_middle_c) / block.sample_rate;
+    float inc = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]) / block.sample_rate;
     switch (type)
     {
     case type_sine: sample = phase_to_sine(_phase); break;
