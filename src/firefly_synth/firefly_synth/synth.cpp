@@ -209,19 +209,19 @@ synth_topo()
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
     "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_hidden);
   result->gui.module_sections[module_section_lfos] = make_module_section_gui(
-    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_lfos, { 2, 0, 1, 3 }, { 1, 2 });
+    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_lfos, { 5, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_env] = make_module_section_gui(
-    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 3, 0, 1, 3 }, { 1, 1 });
+    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 4, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_osc] = make_module_section_gui(
-    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 5, 0, 1, 3 }, { 1, 1 });
+    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 3, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_fxs] = make_module_section_gui(
     "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_fxs, { 6, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_master_in] = make_module_section_gui(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
-    "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 4, 0, 1, 3 }, { 1, 1 });
+    "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 2, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_out_monitor] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_out_monitor, { 7, 0, 1, 3 }, { { 1 }, { 1, 1, 2 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_out_monitor, { 7, 0, 1, 3 }, { { 1 }, { 1, 2, 1 } });
   result->gui.module_sections[module_section_cv_matrix] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_cv_matrix, { 1, 3, 4, 2 },
     "CV", result->gui.module_header_width, { module_vcv_matrix, module_gcv_matrix });
@@ -243,8 +243,8 @@ synth_topo()
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, cv_colors, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(module_section_out_monitor, audio_colors, { 0, 0 }, false);
-  result->modules[module_master_out] = audio_out_topo(module_section_out_monitor, audio_colors, { 0, 1 }, true);
-  result->modules[module_monitor] = monitor_topo(module_section_out_monitor, monitor_colors, { 0, 2 }, result->polyphony);
+  result->modules[module_master_out] = audio_out_topo(module_section_out_monitor, audio_colors, { 0, 2 }, true);
+  result->modules[module_monitor] = monitor_topo(module_section_out_monitor, monitor_colors, { 0, 1 }, result->polyphony);
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, matrix_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_audio_matrix, matrix_colors, { 0, 0 }, false,
