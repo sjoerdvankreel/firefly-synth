@@ -194,7 +194,8 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
-    float inc = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]) / block.sample_rate;
+    float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
+    float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
     switch (type)
     {
     case type_sine: sample = phase_to_sine(_phase); break;
