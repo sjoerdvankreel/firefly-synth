@@ -107,7 +107,7 @@ public:
 class audio_routing_menu_handler :
 public tab_menu_handler {
   audio_routing_cv_params const _cv_params;
-  audio_routing_audio_params const _audio_params;
+  std::vector<audio_routing_audio_params> const _audio_params;
 
   bool is_cv_selected(
     int route, int module, int slot,
@@ -116,10 +116,10 @@ public tab_menu_handler {
     int route, int module, int from_slot, int to_slot);
 
   bool is_audio_selected(
-    int param, int route, int module, int slot,
+    int matrix, int param, int route, int module, int slot,
     std::vector<module_topo_mapping> const& mappings);
   bool update_matched_audio_slot(
-    int param, int route, int module, int from_slot, 
+    int matrix, int param, int route, int module, int from_slot,
     int to_slot, std::vector<module_topo_mapping> const& mappings);
 
 public:
@@ -132,7 +132,7 @@ public:
   tab_menu_result swap(int module, int source_slot, int target_slot) override;
 
   audio_routing_menu_handler(plugin_state* state, 
-    audio_routing_cv_params const& cv_params, audio_routing_audio_params const& audio_params):
+    audio_routing_cv_params const& cv_params, std::vector<audio_routing_audio_params> const& audio_params):
   tab_menu_handler(state), _cv_params(cv_params), _audio_params(audio_params) {}
 };
 
