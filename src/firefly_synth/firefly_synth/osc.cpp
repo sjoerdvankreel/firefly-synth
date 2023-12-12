@@ -12,9 +12,9 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { section_main, section_pitch };
+enum { section_main };
 enum { type_off, type_sine, type_saw };
-enum { param_type, param_am, param_note, param_cent };
+enum { param_type, param_note, param_cent };
 
 extern int const voice_in_output_pitch_offset;
 
@@ -96,7 +96,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Oscillator", "Osc", true, module_osc, 4),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 1 } })));
 
   result.graph_renderer = render_graph;
   result.default_initializer = init_default;
@@ -105,7 +105,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
 
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
@@ -113,21 +113,17 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.domain.default_selector = [] (int s, int) { return type_items()[s == 0? type_sine: type_off].name; };
 
-  result.sections.emplace_back(make_param_section(section_pitch,
-    make_topo_tag("{4CA0A189-9C44-4260-A5B5-B481527BD04A}", "Pitch"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
-
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
     make_param_dsp_block(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
-    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, gui_label_contents::name, make_label_none())));
   note.gui.submenu = make_midi_note_submenu();
   note.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::name,
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::name,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 

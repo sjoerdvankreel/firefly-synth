@@ -14,6 +14,7 @@ check all infernal functionality, see what needs to be in the base
 document the header files a bit
 negative cv amount
 am matrix
+fully do the cv matrix with offset/spread
 more space for freq slider
 number modules by processing order or by group
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
