@@ -199,7 +199,7 @@ audio_matrix_topo(
   return result;
 }
 
-plugin_base::jarray<float, 2> const& 
+jarray<float, 2> const& 
 audio_matrix_mixer::mix(plugin_block& block, int module, int slot)
 { return _engine->mix(block, module, slot); }
 

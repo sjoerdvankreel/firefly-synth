@@ -178,6 +178,13 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
     block.state.own_audio[0][0][1][f] = sample;
     increment_and_wrap_phase(_phase, inc);
   }
+
+  // apply AM/RM afterwards (since we can self-modulate)
+  auto& modulator = get_am_matrix_modulator(block);
+  auto const& am_mod_source = modulator.modulate(block, block.module_slot);
+  for(int c = 0; c < 2; c++)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+      block.state.own_audio[0][0][c][f] *= am_mod_source[c][f];
 }
 
 }

@@ -18,14 +18,22 @@ namespace firefly_synth {
 static int constexpr route_count = 10;
 
 enum { section_main };
+enum { output_modulation };
 enum { param_on, param_source, param_target, param_amt, param_ring };
 
 class am_matrix_engine:
 public module_engine { 
+  am_matrix_modulator _modulator;
+  jarray<float, 2> _noop = {};
+  jarray<float, 4>* _own_audio = {};
 public:
+  PB_PREVENT_ACCIDENTAL_COPY(am_matrix_engine);
+  am_matrix_engine(int max_frame_count): 
+  _noop(2, jarray<float, 1>(max_frame_count, 1.0f)), _modulator(this) {}
+
   void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override {}
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(am_matrix_engine);
+  void process(plugin_block& block) override;
+  jarray<float, 2> const& modulate(plugin_block& block, int slot);
 };
 
 static graph_data
@@ -59,13 +67,15 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 
   module_topo result(make_module(
     make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc AM", "AM", true, module_am_matrix, 1),
-    make_module_dsp(module_stage::voice, module_output::none, 0, {}),
+    make_module_dsp(module_stage::voice, module_output::audio, 0, {
+      make_module_dsp_output(false, make_topo_info("{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}", "Modulation", output_modulation, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.name;
-  result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<am_matrix_engine>(); };
+  result.engine_factory = [](auto const& topo, int, int max_frame_count) { 
+    return std::make_unique<am_matrix_engine>(max_frame_count); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, param_on, 0, std::vector<int>({ param_target, param_source })); };
 
@@ -113,6 +123,63 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   ring.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   return result;
+}
+
+jarray<float, 2> const&
+am_matrix_modulator::modulate(plugin_block& block, int slot)
+{ return _engine->modulate(block, slot); }
+
+void
+am_matrix_engine::process(plugin_block& block)
+{
+  // need to capture own audio here because when we start 
+  // modulating "own" does not refer to us but to the caller
+  *block.state.own_context = &_modulator;
+  _own_audio = &block.state.own_audio;
+}
+
+jarray<float, 2> const& 
+am_matrix_engine::modulate(plugin_block& block, int slot)
+{
+  // audio 0 is silence
+  bool activated = false;
+  jarray<float, 2>* result = &_noop;
+
+  // loop through the routes
+  // the first match we encounter becomes the modulation target
+  auto const& block_auto = block.state.all_block_automation[module_am_matrix][0];
+  for (int r = 0; r < route_count; r++)
+  {
+    if(block_auto[param_on][r].step() == 0) continue;
+    int target_osc = block_auto[param_target][r].step();
+    if(target_osc != slot) continue;
+    if (!activated)
+    {
+      result = &(*_own_audio)[output_modulation][r];
+      (*result)[0].fill(block.start_frame, block.end_frame, 1.0f);
+      (*result)[1].fill(block.start_frame, block.end_frame, 1.0f);
+      activated = true;
+    }
+
+    // find out audio source to apply
+    auto& modulation = *result;
+    int source_osc = block_auto[param_source][r].step();
+
+    // add modulated amount to mixdown
+    auto const& source_audio = block.module_audio(module_osc, source_osc);
+    //auto const& modulation = get_cv_matrix_mixdown(block, false);
+    //auto const& amt_curve = *modulation[module_am_matrix][0][param_amt][r];
+    //auto const& ring_curve = *modulation[module_am_matrix][0][param_ring][r];
+    for(int c = 0; c < 2; c++)
+      for(int f = block.start_frame; f < block.end_frame; f++)
+      {
+        modulation[c][f] *= source_audio[0][0][c][f];
+        //float bal = block.normalized_to_raw(this_module, param_bal, bal_curve[f]);
+        //mix[c][f] += gain_curve[f] * stereo_balance(c, bal) * source_audio[0][0][c][f];
+      }
+  }
+
+  return *result;
 }
 
 }
