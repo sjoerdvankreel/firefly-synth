@@ -183,8 +183,8 @@ cv_matrix_topo(
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", module_vcv_matrix, 1);
-  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", module_gcv_matrix, 1);
+  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, module_vcv_matrix, 1);
+  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, module_gcv_matrix, 1);
   auto const info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
 
@@ -192,7 +192,7 @@ cv_matrix_topo(
     make_module_dsp(stage, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
-  result.gui.tabbed_name = global ? "Global" : "Voice";
+  result.gui.tabbed_name = result.info.tag.short_name;
   result.gui.menu_handler_factory = [](plugin_state* state) { 
     return std::make_unique<tidy_matrix_menu_handler>(state, param_op, op_off, std::vector<int>({ param_target, param_source })); };
 

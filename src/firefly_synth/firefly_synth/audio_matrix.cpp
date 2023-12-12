@@ -15,7 +15,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int constexpr route_count = 8;
+static int constexpr route_count = 12;
 
 enum { section_main };
 enum { output_silence, output_mixed };
@@ -129,7 +129,7 @@ audio_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
       make_module_dsp_output(false, make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
-  result.gui.tabbed_name = global? "Global": "Voice";
+  result.gui.tabbed_name = result.info.tag.short_name;
   result.gui.menu_handler_factory = [](plugin_state* state) { 
     return std::make_unique<tidy_matrix_menu_handler>(state, param_on, 0, std::vector<int>({ param_target, param_source })); };
 
