@@ -509,7 +509,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
     if (topo.modules[i].gui.section == section.index)
       matched_module = i;
   assert(matched_module >= 0);
-  auto& tabs = make_tab_component(section.id, section.tab_header, matched_module);
+  auto& tabs = make_tab_component(section.id, "", matched_module);
   for(int o = 0; o < section.tab_order.size(); o++)
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)

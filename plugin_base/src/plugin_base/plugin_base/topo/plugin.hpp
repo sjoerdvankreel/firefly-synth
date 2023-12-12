@@ -41,15 +41,12 @@ struct custom_section_gui final {
 // module ui grouping
 struct module_section_gui final {
   int index;
-  int tab_width;
   bool tabbed;
   bool visible;
 
+  std::string id;
   gui_position position;
   gui_dimension dimension;
-
-  std::string id;
-  std::string tab_header;
   std::vector<int> tab_order;
   
   void validate(plugin_topo const& plugin, int index_) const;

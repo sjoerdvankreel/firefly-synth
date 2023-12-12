@@ -20,15 +20,12 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
   auto always_visible = [](int) {return true; };
   auto include = [this, &plugin](int m) { return plugin.modules[m].gui.section == this->index; };
   position.validate(plugin.gui.dimension); 
-  if (!tabbed) 
-    dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
-  else
+  if (tabbed) 
   {
-    assert(tab_width > 0);
     assert(tab_order.size());
-    assert(tab_header.size());
     assert(dimension.column_sizes.size() == 1 && dimension.row_sizes.size() == 1);
-  }
+  } else
+    dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
 }
 
 void

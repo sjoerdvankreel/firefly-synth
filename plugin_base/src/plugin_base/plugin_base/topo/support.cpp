@@ -138,7 +138,7 @@ make_module_section_gui(std::string const& id, int index, gui_position const& po
 }
 
 module_section_gui
-make_module_section_gui_tabbed(std::string const& id, int index, gui_position const& position, std::string const& header, int tab_width, std::vector<int> const& tab_order)
+make_module_section_gui_tabbed(std::string const& id, int index, gui_position const& position, std::vector<int> const& tab_order)
 {
   module_section_gui result = {};
   result.id = id;
@@ -146,8 +146,6 @@ make_module_section_gui_tabbed(std::string const& id, int index, gui_position co
   result.tabbed = true;
   result.visible = true;
   result.position = position;
-  result.tab_header = header;
-  result.tab_width = tab_width;
   result.tab_order = tab_order;
   result.dimension = { 1, 1 };
   return result;

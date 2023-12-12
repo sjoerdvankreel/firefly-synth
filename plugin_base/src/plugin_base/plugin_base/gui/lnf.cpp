@@ -120,7 +120,7 @@ lnf::tab_width() const
 {
   assert(_module_section != -1);
   auto const& section = _desc->plugin->gui.module_sections[_module_section];
-  return section.tabbed ? section.tab_width : _desc->plugin->gui.module_tab_width;
+  return section.tabbed ? -1 : _desc->plugin->gui.module_tab_width;
 }
 
 Path 
@@ -142,6 +142,7 @@ int
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
 { 
   int result = tab_width();
+  if(result == -1) return b.getTabbedButtonBar().getWidth() / b.getTabbedButtonBar().getNumTabs();
   if(b.getIndex() == 0) result += _desc->plugin->gui.module_header_width;
   return result;
 }
@@ -303,19 +304,29 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   float lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
-  if (button.getIndex() > 0)
-  {
-    g.setColour(colors().tab_button.brighter(lighten));
-    if(button.getIndex() == button.getTabbedButtonBar().getNumTabs() - 1)
-    {
-      Path path;
-      auto rect = button.getActiveArea().toFloat();
-      path.addRoundedRectangle(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), radius, radius, false, true, false, true);
-      g.fillPath(path);
-    }
-    else
-      g.fillRect(button.getActiveArea());
 
+  g.setColour(colors().tab_button.brighter(lighten));
+
+  // no header, evenly distributed, left tab has rounded corners
+  // right tab always has rounded corners
+  bool left_no_header = button.getIndex() == 0 && tab_width() == -1;
+  bool right_most = button.getIndex() > 0 && button.getIndex() == button.getTabbedButtonBar().getNumTabs() - 1;
+  if (left_no_header || right_most)
+  {
+    Path path;
+    auto rect = button.getActiveArea().toFloat();
+    path.addRoundedRectangle(rect.getX(), rect.getY(), rect.getWidth(), rect.getHeight(), 
+      radius, radius, left_no_header, right_most, left_no_header, right_most);
+    g.fillPath(path);
+  }
+
+  // any tab not left or rightmost
+  if (!left_no_header && !right_most && button.getIndex() > 0)
+    g.fillRect(button.getActiveArea());
+
+  // fill text for all tab types excluding left with header
+  if(left_no_header || button.getIndex() > 0)
+  {
     g.setFont(font());
     auto text_area = button.getTextArea();
     if (is_section) text_area.removeFromLeft(strip_left);
@@ -324,6 +335,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
     return;
   }
 
+  // leftmost tab with header
   auto const& header = button.getTabbedButtonBar().getTitle();
   auto headerArea = button.getActiveArea().toFloat();
   auto buttonArea = headerArea.removeFromRight(tab_width());
@@ -345,7 +357,10 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.setColour(button.findColour(TabbedButtonBar::tabTextColourId));
   g.drawText(header, textArea, Justification::left, false);
 
+  // case header only
   if(button.getTabbedButtonBar().getNumTabs() == 1) return;
+
+  // case tab header and first button
   buttonArea.removeFromLeft(1);
   g.setColour(colors().tab_button.brighter(lighten));
   g.fillRect(buttonArea);
