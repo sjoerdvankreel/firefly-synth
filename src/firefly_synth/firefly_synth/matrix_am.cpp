@@ -15,7 +15,7 @@ using namespace plugin_base;
 
 namespace firefly_synth { 
 
-static int constexpr route_count = 3; // TODO
+static int constexpr route_count = 10;
 
 enum { section_main };
 enum { param_on, param_source, param_target, param_amt, param_ring };
@@ -27,6 +27,16 @@ public:
   void process(plugin_block& block) override {}
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(am_matrix_engine);
 };
+
+static graph_data
+render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+{
+  auto const& m = mapping;
+  int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
+  if (on == 0) return graph_data();
+  float value = state.get_plain_at(mapping).real();
+  return graph_data(value, false);
+}
 
 // TODO audio routing audio params, audio routing cv params
 
@@ -59,7 +69,6 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_param_dsp_block(param_automate::none), make_domain_item(am_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, gui_label_contents::value, make_label_none())));
   source.gui.tabular = true;
-  source.gui.submenu = am_matrix.submenu;
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.item_enabled.bind_param({ module_am_matrix, 0, param_target, gui_item_binding::match_param_slot },
     [am = am_matrix.mappings](int other, int self) { return am[self].slot <= am[other].slot; });
@@ -69,7 +78,6 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_param_dsp_block(param_automate::none), make_domain_item(am_matrix.items, "Osc 1"),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, gui_label_contents::value, make_label_none())));
   target.gui.tabular = true;
-  target.gui.submenu = am_matrix.submenu;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.item_enabled.bind_param({ module_am_matrix, 0, param_source, gui_item_binding::match_param_slot },
     [am = am_matrix.mappings](int other, int self) { return am[other].slot <= am[self].slot; });
@@ -88,7 +96,7 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   ring.gui.tabular = true;
   ring.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
-  // TODO result.graph_renderer = render_graph;
+  result.graph_renderer = render_graph;
   result.rerender_on_param_hover = true;
   result.engine_factory = [](auto const& topo, int, int) -> std::unique_ptr<module_engine> { return std::make_unique<am_matrix_engine>(); };
 
