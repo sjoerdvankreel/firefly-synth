@@ -13,7 +13,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-int aux_count = 3;
+int aux_count = 2;
 enum { section_aux, section_linked };
 enum { output_aux, output_mod, output_pb };
 enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
@@ -46,7 +46,7 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 1, 1 } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 2, 3 } } )));
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
 
   result.graph_renderer = render_graph;
