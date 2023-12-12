@@ -21,6 +21,7 @@ do incdecbuttons on cent?
 voice arp?
 more flexibility in plugin_base -> "give me a voice"
 clamp freq 0 / nyquist
+right outline gfx header
 
 * get some linux folks to comment (ycollete?)
 * continuing
