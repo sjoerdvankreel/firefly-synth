@@ -22,7 +22,6 @@ voice arp?
 more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 drop existing am
-swap am matrix position
 
 * get some linux folks to comment (ycollete?)
 * continuing

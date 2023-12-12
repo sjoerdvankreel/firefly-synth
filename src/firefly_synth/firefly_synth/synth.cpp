@@ -226,7 +226,7 @@ synth_topo()
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 1, 3, 1, 2 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 2, 3, 5, 2 },
-    { module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix, module_am_matrix });
+    { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
 
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
