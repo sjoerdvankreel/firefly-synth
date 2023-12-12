@@ -13,7 +13,7 @@
 
 using namespace plugin_base;
 
-namespace firefly_synth {
+namespace firefly_synth { 
 
 static int constexpr route_count = 12;
 
@@ -149,8 +149,8 @@ audio_matrix_topo(
     make_param_dsp_block(param_automate::none), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, gui_label_contents::value, make_label_none())));
   source.gui.tabular = true;
-  source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.submenu = source_matrix.submenu;
+  source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.item_enabled.bind_param({ this_module, 0, param_target, gui_item_binding::match_param_slot },
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
       int fx_index = global ? module_gfx : module_vfx;
@@ -165,8 +165,8 @@ audio_matrix_topo(
     make_param_dsp_block(param_automate::none), make_domain_item(target_matrix.items, default_target),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, gui_label_contents::value, make_label_none())));
   target.gui.tabular = true;
+  target.gui.submenu = target_matrix.submenu;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  target.gui.submenu = target_matrix.submenu;  
   target.gui.item_enabled.bind_param({ this_module, 0, param_source, gui_item_binding::match_param_slot }, 
     [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
       int fx_index = global? module_gfx: module_vfx;

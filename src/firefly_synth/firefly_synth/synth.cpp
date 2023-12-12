@@ -225,7 +225,7 @@ synth_topo()
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 1, 3, 1, 2 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 2, 3, 5, 2 },
-    { module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
+    { module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix, module_am_matrix });
 
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
@@ -243,6 +243,7 @@ synth_topo()
   result->modules[module_voice_out] = audio_out_topo(module_section_osc_voice_out, voice_colors, { 0, 1 }, false);
   result->modules[module_master_out] = audio_out_topo(module_section_master_in_out, global_colors, { 0, 1 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_am_matrix] = am_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, result.get());
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false,

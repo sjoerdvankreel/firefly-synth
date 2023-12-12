@@ -22,6 +22,8 @@ voice arp?
 more flexibility in plugin_base -> "give me a voice"
 clamp freq 0 / nyquist
 hardsync, unison
+4 osc + env
+drop existing am
 
 * get some linux folks to comment (ycollete?)
 * continuing

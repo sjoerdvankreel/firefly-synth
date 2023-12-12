@@ -12,7 +12,7 @@
 #include <cmath>
 #include <algorithm>
 
-using namespace plugin_base;
+using namespace plugin_base; 
 
 namespace firefly_synth {
 
