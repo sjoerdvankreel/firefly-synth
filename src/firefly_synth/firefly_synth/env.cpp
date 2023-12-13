@@ -232,19 +232,19 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& attack_slope = result.params.emplace_back(make_param(
     make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "S", param_attack_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_slope, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
+    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   attack_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "S", param_decay_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_slope, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
+    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "S", param_release_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_slope, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
+    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
