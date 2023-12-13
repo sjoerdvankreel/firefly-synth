@@ -178,14 +178,14 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 0, 1, 1, 1 }, { 1, 3 })));
     
   auto& attack_time = result.params.emplace_back(make_param(
-    make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_attack_time, 1),
+    make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "Attack Time", "A", true, param_attack_time, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
     make_param_gui_single(section_adr, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   attack_time.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   attack_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& attack_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{3130A19C-AA2C-40C8-B586-F3A1E96ED8C6}", "A", param_attack_tempo, 1),
+    make_topo_info("{3130A19C-AA2C-40C8-B586-F3A1E96ED8C6}", "Attack Tempo", "A", true, param_attack_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_adr, gui_edit_type::list, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -194,14 +194,14 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   attack_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& decay_time = result.params.emplace_back(make_param(
-    make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_decay_time, 1),
+    make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "Decay Time", "D", true, param_decay_time, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_adr, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_time.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   decay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& decay_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{47253C57-FBCA-4A49-AF88-88AC9F4781D7}", "D", param_decay_tempo, 1),
+    make_topo_info("{47253C57-FBCA-4A49-AF88-88AC9F4781D7}", "Decay Tempo", "D", true, param_decay_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_adr, gui_edit_type::list, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -210,14 +210,14 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   decay_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& release_time = result.params.emplace_back(make_param(
-    make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_release_time, 1),
+    make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "Release Time", "R", true, param_release_time, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
     make_param_gui_single(section_adr, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_time.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   release_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& release_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{FDC00AA5-8648-4064-BE77-1A9CDB6B53EE}", "R", param_release_tempo, 1),
+    make_topo_info("{FDC00AA5-8648-4064-BE77-1A9CDB6B53EE}", "Release Tempo", "R", true, param_release_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
     make_param_gui_single(section_adr, gui_edit_type::list, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -230,19 +230,19 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 1, 1, 1, 1 }, { 1, 3 })));
 
   auto& attack_slope = result.params.emplace_back(make_param(
-    make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "S", param_attack_slope, 1),
+    make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "Attack Slope", "S", true, param_attack_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   attack_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   auto& decay_slope = result.params.emplace_back(make_param(
-    make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "S", param_decay_slope, 1),
+    make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "Decay Slope", "S", true, param_decay_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   auto& release_slope = result.params.emplace_back(make_param(
-    make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "S", param_release_slope, 1),
+    make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "Release Slope", "S", true, param_release_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
