@@ -89,7 +89,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Envelope", "Env", true, module_env, 4),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, { 
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { 1, 1 } })));
+    make_module_gui(section, colors, pos, { { 1, 1 }, { 7, 6 } })));
 
   result.graph_renderer = render_graph;
   result.default_initializer = init_default;
@@ -126,8 +126,8 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
     make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, gui_label_contents::none,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, gui_label_contents::name,
+      make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   result.sections.emplace_back(make_param_section(section_dhs,
