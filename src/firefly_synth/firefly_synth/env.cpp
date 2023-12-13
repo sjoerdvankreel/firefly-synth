@@ -261,9 +261,9 @@ env_engine::process(plugin_block& block)
         else
           slope_exp = std::log(1.0f - slope_bounded);
         if (slope_pos < split_pos)
-          out = sustain_curve[f] + (1 - sustain_curve[f]) * (std::pow(slope_pos / split_pos, slope_exp / log_half) * split_pos);
+          out = sustain_curve[f] + (1 - sustain_curve[f]) * (std::pow(1 - slope_pos / split_pos, slope_exp / log_half) * split_pos);
         else
-          out = sustain_curve[f] + (1- sustain_curve[f]) * (1 - std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos));
+          out = sustain_curve[f] + (1- sustain_curve[f]) * (1 - std::pow((slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos));
         _release_level = out;
         break;
       case env_stage::release:
