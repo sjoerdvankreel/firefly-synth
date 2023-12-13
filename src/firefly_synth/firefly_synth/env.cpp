@@ -177,10 +177,10 @@ env_engine::current_stage_param() const
 void
 env_engine::process(plugin_block& block)
 {
-  float const slope_min = 0.001;
-  float const slope_max = 0.999;
-  float const slope_range = slope_max - slope_min;
-  float const log_half = std::log(0.5f);
+  double const slope_min = 0.0001;
+  double const slope_max = 0.9999;
+  double const slope_range = slope_max - slope_min;
+  double const log_half = std::log(0.5);
 
   bool on = block.state.own_block_automation[param_on][0].step();
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
@@ -223,10 +223,10 @@ env_engine::process(plugin_block& block)
     _stage_pos = std::min(_stage_pos, stage_seconds);
 
     float out = 0;
-    float slope_exp = 0;
-    float split_pos = 0;
-    float slope_bounded = 0;
-    float slope_pos = _stage_pos / stage_seconds;
+    double slope_exp = 0;
+    double split_pos = 0;
+    double slope_bounded = 0;
+    double slope_pos = _stage_pos / stage_seconds;
     
     if (stage_seconds == 0)
       out = _release_level;
