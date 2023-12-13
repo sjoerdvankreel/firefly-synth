@@ -261,12 +261,12 @@ env_engine::process(plugin_block& block)
           if (slope_pos < split_pos)
           {
             slope_exp = std::log(1.0f - slope_bounded);
-            out = std::pow(slope_pos / split_pos, slope_exp / log_half) * (1 - split_pos);
+            out = std::pow(slope_pos / split_pos, slope_exp / log_half) * split_pos;
           }
           else
           {
             slope_exp = std::log(1.0f - slope_bounded);
-            out = (slope_pos - split_pos) / (1.0f - split_pos) * split_pos + (1 - split_pos);
+            out = std::pow((slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos) + split_pos;
           }
         }
         _release_level = out;
