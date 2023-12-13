@@ -26,8 +26,10 @@ do 5 am and 5 fm routes
 check if get_cv_matrix_mixdown works on audio/am matrix
 check the AM OSC graph
 voice-in-note not working
-global fx swap-with broken
 make all stuff visible / not tabbed
+do "with audio/cv/all routing"
+double check all routing menu handlers
+prevent routing handlers from making invalid gui values
 
 * get some linux folks to comment (ycollete?)
 * continuing
