@@ -195,10 +195,6 @@ make_section_curve(double slope, double split_pos, double slope_pos)
 void
 env_engine::process(plugin_block& block)
 {
-  double const slope_min = 0.0001;
-  double const slope_max = 0.9999;
-  double const slope_range = slope_max - slope_min;
-
   bool on = block.state.own_block_automation[param_on][0].step();
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
   {
@@ -240,30 +236,21 @@ env_engine::process(plugin_block& block)
     _stage_pos = std::min(_stage_pos, stage_seconds);
 
     float out = 0;
-    double slope_exp = 0;
-    
+    double slope_pos = _stage_pos / stage_seconds;
     if (stage_seconds == 0) out = _release_level;
     else switch (_stage)
     {
     case env_stage::hold: _release_level = out = 1; break;
     case env_stage::delay: _release_level = out = 0; break;
-    case env_stage::attack: _release_level = out = make_section_curve(
-      as_curve[f], 1.0f - as_curve[f], _stage_pos / stage_seconds); break;
-    case env_stage::decay: _release_level = out = s_curve[f] + (1 - s_curve[f]) * (
-      1 - make_section_curve(ds_curve[f], ds_curve[f], _stage_pos / stage_seconds)); break;
-    case env_stage::release:
-      slope_exp = std::log(slope_min + rs_curve[f] * slope_range);
-      out = (1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half)) * _release_level;
-     break;
-    default: 
-      assert(false); 
-      stage_seconds = 0; 
-      break;
+    case env_stage::release: out = s_curve[f] * (1 - make_section_curve(rs_curve[f], rs_curve[f], slope_pos)); break;
+    case env_stage::attack: _release_level = out = make_section_curve(as_curve[f], 1 - as_curve[f], slope_pos); break;
+    case env_stage::decay: _release_level = out = s_curve[f] + (1 - s_curve[f]) * (1 - make_section_curve(ds_curve[f], ds_curve[f], slope_pos)); break;
+    default: assert(false); stage_seconds = 0; break;
     }
+    
     check_unipolar(out);
-    block.state.own_cv[0][0][f] = out;
-
     check_unipolar(_release_level);
+    block.state.own_cv[0][0][f] = out;
     _stage_pos += 1.0 / block.sample_rate;
     if(_stage_pos < stage_seconds) continue;
 
