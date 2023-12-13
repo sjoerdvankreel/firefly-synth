@@ -37,21 +37,22 @@ init_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  // TODO DAHDR
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) return {};
 
+  float delay = state.get_plain_at(module_env, mapping.module_slot, param_delay, 0).real();
   float attack = state.get_plain_at(module_env, mapping.module_slot, param_attack, 0).real();
+  float hold = state.get_plain_at(module_env, mapping.module_slot, param_hold, 0).real();
   float decay = state.get_plain_at(module_env, mapping.module_slot, param_decay, 0).real();
   float release = state.get_plain_at(module_env, mapping.module_slot, param_release, 0).real();
-  float sustain = std::max((attack + decay + release) / 3, 0.01f);
-  float ads = attack + decay + sustain;
-  float adsr = ads + release;
+  float sustain = std::max((delay + attack + hold + decay + release) / 5, 0.01f);
+  float dahds = delay + attack + hold + decay + sustain;
+  float dahdsr = dahds + release;
 
   graph_engine_params params = {};
   params.bpm = 120;
   params.frame_count = 200;
-  params.sample_rate = params.frame_count / adsr;
-  params.voice_release_at = ads / adsr * params.frame_count;
+  params.sample_rate = params.frame_count / dahdsr;
+  params.voice_release_at = dahds / dahdsr * params.frame_count;
 
   graph_engine engine(&state, params);
   auto const* block = engine.process_default(module_env, mapping.module_slot);
