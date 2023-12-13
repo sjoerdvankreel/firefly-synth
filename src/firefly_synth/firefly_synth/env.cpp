@@ -255,15 +255,15 @@ env_engine::process(plugin_block& block)
         break;
       case env_stage::decay:
         slope_bounded = slope_min + decay_slope_curve[f] * slope_range;
-        split_pos = 1.0f - slope_bounded;
-        if (decay_slope_curve[f] < 0.5f)
-          slope_exp = std::log(slope_bounded);
-        else
-          slope_exp = std::log(1.0f - slope_bounded);
+        split_pos = slope_bounded;
+        //if (decay_slope_curve[f] < 0.5f)
+          //slope_exp = std::log(slope_bounded);
+        //else
+          //slope_exp = std::log(1.0f - slope_bounded);
         if (slope_pos < split_pos)
-          out = sustain_curve[f] + (1 - sustain_curve[f]) * (std::pow(1 - slope_pos / split_pos, slope_exp / log_half) * split_pos);
+          out = sustain_curve[f] + (1 - sustain_curve[f]) * (1 - split_pos);// + (1 - (1 - sustain_curve[f]) * (1 - split_pos)) * (1 - slope_pos / split_pos);
         else
-          out = sustain_curve[f] + (1- sustain_curve[f]) * (1 - std::pow((slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos));
+          out = 1;//sustain_curve[f] + (1- sustain_curve[f]) * (1 - std::pow((slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos));
         _release_level = out;
         break;
       case env_stage::release:
@@ -275,6 +275,7 @@ env_engine::process(plugin_block& block)
         stage_seconds = 0; 
         break;
     }
+    check_unipolar(out);
     block.state.own_cv[0][0][f] = out;
 
     check_unipolar(_release_level);
