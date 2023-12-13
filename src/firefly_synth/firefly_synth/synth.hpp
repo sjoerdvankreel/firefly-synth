@@ -63,7 +63,7 @@ get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
   return *static_cast<audio_matrix_mixer*>(context);
 }
 
-// gets the cv mixdown for all modulatable parameters in the currently processing module
+// gets the cv mixdown for all modulatable parameters in all modules for the current stage
 typedef plugin_base::jarray<plugin_base::jarray<float, 1> const*, 4> cv_matrix_mixdown;
 inline cv_matrix_mixdown const&
 get_cv_matrix_mixdown(plugin_base::plugin_block const& block, bool global)

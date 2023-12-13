@@ -25,12 +25,14 @@ class am_matrix_engine:
 public module_engine { 
   am_matrix_modulator _modulator;
   jarray<float, 4>* _own_audio = {};
+  cv_matrix_mixdown const* _cv_modulation = {};
 public:
   am_matrix_engine() : _modulator(this) {}
   PB_PREVENT_ACCIDENTAL_COPY(am_matrix_engine);
 
   void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override;
+  void process(plugin_block& block) override { process(block, nullptr); }
+  void process(plugin_block& block, cv_matrix_mixdown const* cv_modulation);
   jarray<float, 2> const& modulate(plugin_block& block, int slot);
 };
 
@@ -127,12 +129,15 @@ am_matrix_modulator::modulate(plugin_block& block, int slot)
 { return _engine->modulate(block, slot); }
 
 void
-am_matrix_engine::process(plugin_block& block)
+am_matrix_engine::process(plugin_block& block, cv_matrix_mixdown const* cv_modulation)
 {
   // need to capture own audio here because when we start 
   // modulating "own" does not refer to us but to the caller
   *block.state.own_context = &_modulator;
   _own_audio = &block.state.own_audio;
+  _cv_modulation = cv_modulation;
+  if(cv_modulation == nullptr) 
+    _cv_modulation = &get_cv_matrix_mixdown(block, false);    
 }
 
 jarray<float, 2> const& 
@@ -156,8 +161,8 @@ am_matrix_engine::modulate(plugin_block& block, int slot)
     }
 
     // apply modulation
+    auto const& cv_modulation = *_cv_modulation;
     int source_osc = block_auto[param_source][r].step();
-    auto const& cv_modulation = get_cv_matrix_mixdown(block, false);
     auto const& source_audio = block.module_audio(module_osc, source_osc);
     auto const& amt_curve = *cv_modulation[module_am_matrix][0][param_amt][r];
     auto const& ring_curve = *cv_modulation[module_am_matrix][0][param_ring][r];
