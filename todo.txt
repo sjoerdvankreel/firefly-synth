@@ -30,7 +30,11 @@ check all param_automate
 env slope name in tooltip
 make most cv automate/block only? ==> only time-de pendent
 undo/redo stack
-why automate block params at all ?
+why automate block params at all ? ==> choose max flexibility that makes sence ?
+rethink automate/modulate -> maybe only need 3 ? off / block (both step/real) and accurate (real and implies modulate)
+--> or maybe only need 2? off = only ui (real or step), on = full-blown automate-modulate (real only)
+--> no, block/step params may be automatable (e.g. turn on an extra oscillator)
+===>> just make a matrix and see what combos make sense
 
 * get some linux folks to comment (ycollete?)
 * continuing
