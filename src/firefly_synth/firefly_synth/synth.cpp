@@ -188,7 +188,7 @@ synth_topo()
 
   result->gui.min_width = 820;
   result->gui.aspect_ratio_width = 121;
-  result->gui.aspect_ratio_height = 49;
+  result->gui.aspect_ratio_height = 54;
   result->gui.dimension.column_sizes = { 16, 12, 12, 13, 13 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;

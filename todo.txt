@@ -35,6 +35,7 @@ rethink automate/modulate -> maybe only need 3 ? off / block (both step/real) an
 --> or maybe only need 2? off = only ui (real or step), on = full-blown automate-modulate (real only)
 --> no, block/step params may be automatable (e.g. turn on an extra oscillator)
 ===>> just make a matrix and see what combos make sense
+do mseg someday
 
 * get some linux folks to comment (ycollete?)
 * continuing
