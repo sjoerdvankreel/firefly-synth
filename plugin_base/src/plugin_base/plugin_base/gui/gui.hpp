@@ -19,10 +19,14 @@ class plugin_gui;
 class tab_component;
 class grid_component;
 
+// for serialization
 inline std::string const factory_preset_key = "factory_preset";
+std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
 
-std::set<std::string>
-gui_extra_state_keyset(plugin_topo const& topo);
+// helper for vertical sizing
+std::vector<int> 
+gui_vertical_distribution(int total_height, int font_height, 
+  std::vector<int> const& module_vertical_section_count);
 
 // gui events for anyone who needs it
 class gui_listener

@@ -79,6 +79,29 @@ justification_type(gui_label const& label)
   return Justification::centred;
 }
 
+static int
+module_header_height(int font_height)
+{ return font_height + 4; }
+
+std::vector<int>
+gui_vertical_distribution(int total_height, int font_height,
+  std::vector<int> const& module_vertical_section_count)
+{
+  std::vector<float> result;
+  int total_header_height = 0;
+  int total_vsection_count = 0;
+  int header_height = module_header_height(font_height);
+  for (int i = 0; i < module_vertical_section_count.size(); i++)
+  {
+    total_header_height += header_height;
+    total_vsection_count += module_vertical_section_count[i];
+  }
+  int total_remaining_height = total_height - total_header_height;
+  for (int i = 0; i < module_vertical_section_count.size(); i++)
+    result.push_back(header_height + module_vertical_section_count[i] / (float)total_vsection_count * total_remaining_height);
+  return vector_map(result, [](auto const& val) { return (int)(val * 100); });
+}
+
 void
 gui_param_listener::gui_param_changed(int index, plain_value plain)
 {
@@ -380,9 +403,9 @@ plugin_gui::make_tab_component(std::string const& id, std::string const& title, 
   auto const& topo = *_gui_state->desc().plugin;
   auto& result = make_component<tab_component>(_extra_state, id + "/tab", TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
-  result.getTabbedButtonBar().setTitle(title);
-  result.setTabBarDepth(topo.gui.font_height + 4);
   result.setLookAndFeel(module_lnf(module));
+  result.getTabbedButtonBar().setTitle(title);
+  result.setTabBarDepth(module_header_height(topo.gui.font_height));
   return result;
 }
 
