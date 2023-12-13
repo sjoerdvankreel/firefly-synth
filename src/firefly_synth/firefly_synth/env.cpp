@@ -177,8 +177,8 @@ env_engine::current_stage_param() const
 void
 env_engine::process(plugin_block& block)
 {
-  float const slope_min = 0.01;
-  float const slope_max = 0.99;
+  float const slope_min = 0.001;
+  float const slope_max = 0.999;
   float const slope_range = slope_max - slope_min;
   float const log_half = std::log(0.5f);
 
@@ -266,7 +266,7 @@ env_engine::process(plugin_block& block)
           else
           {
             slope_exp = std::log(1.0f - slope_bounded);
-            out = std::pow((slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos) + split_pos;
+            out = (1 - split_pos) - std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos) + split_pos;
           }
         }
         _release_level = out;
