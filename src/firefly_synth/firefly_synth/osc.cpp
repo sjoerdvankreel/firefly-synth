@@ -60,8 +60,6 @@ make_osc_routing_menu_handler(plugin_state* state)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  return {}; // TODO
-#if 0
   graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
   
@@ -76,6 +74,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 
   plugin_block const* block = nullptr;
   graph_engine graph_engine(&state, params);
+  graph_engine.process_default(module_am_matrix, 0);
   for(int i = 0; i <= mapping.module_slot; i++)
     block = graph_engine.process(mapping.module_index, i, [](plugin_block& block) {
       osc_engine engine;
@@ -89,7 +88,6 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   audio[0].push_back(0.0f);
   audio[1].push_back(0.0f);
   return graph_data(audio);
-#endif
 }
 
 module_topo
@@ -184,7 +182,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
 
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
   auto& modulator = get_am_matrix_modulator(block);
-  auto const& modulated = modulator.modulate(block, block.module_slot);
+  auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
   for(int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
       block.state.own_audio[0][0][c][f] = modulated[c][f];

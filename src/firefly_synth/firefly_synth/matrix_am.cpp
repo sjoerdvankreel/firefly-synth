@@ -25,15 +25,13 @@ class am_matrix_engine:
 public module_engine { 
   am_matrix_modulator _modulator;
   jarray<float, 4>* _own_audio = {};
-  cv_matrix_mixdown const* _cv_modulation = {};
 public:
   am_matrix_engine() : _modulator(this) {}
   PB_PREVENT_ACCIDENTAL_COPY(am_matrix_engine);
 
   void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override { process(block, nullptr); }
-  void process(plugin_block& block, cv_matrix_mixdown const* cv_modulation);
-  jarray<float, 2> const& modulate(plugin_block& block, int slot);
+  void process(plugin_block& block) override;
+  jarray<float, 2> const& modulate(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
 };
 
 static graph_data
@@ -125,24 +123,25 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 }
 
 jarray<float, 2> const&
-am_matrix_modulator::modulate(plugin_block& block, int slot)
-{ return _engine->modulate(block, slot); }
+am_matrix_modulator::modulate(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
+{ return _engine->modulate(block, slot, cv_modulation); }
 
 void
-am_matrix_engine::process(plugin_block& block, cv_matrix_mixdown const* cv_modulation)
+am_matrix_engine::process(plugin_block& block)
 {
   // need to capture own audio here because when we start 
   // modulating "own" does not refer to us but to the caller
   *block.state.own_context = &_modulator;
   _own_audio = &block.state.own_audio;
-  _cv_modulation = cv_modulation;
-  if(cv_modulation == nullptr) 
-    _cv_modulation = &get_cv_matrix_mixdown(block, false);    
 }
 
 jarray<float, 2> const& 
-am_matrix_engine::modulate(plugin_block& block, int slot)
+am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
+  // allow custom data for graphs
+  if(cv_modulation == nullptr)
+    cv_modulation = &get_cv_matrix_mixdown(block, false);
+
   // loop through the routes
   // the first match we encounter becomes the modulation result
   jarray<float, 2>* modulated = nullptr;
@@ -161,11 +160,10 @@ am_matrix_engine::modulate(plugin_block& block, int slot)
     }
 
     // apply modulation
-    auto const& cv_modulation = *_cv_modulation;
     int source_osc = block_auto[param_source][r].step();
     auto const& source_audio = block.module_audio(module_osc, source_osc);
-    auto const& amt_curve = *cv_modulation[module_am_matrix][0][param_amt][r];
-    auto const& ring_curve = *cv_modulation[module_am_matrix][0][param_ring][r];
+    auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_amt][r];
+    auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_ring][r];
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
       {

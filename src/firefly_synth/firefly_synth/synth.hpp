@@ -11,6 +11,10 @@
 
 namespace firefly_synth {
 
+// everybody needs this
+typedef plugin_base::jarray<plugin_base::jarray<
+  float, 1> const*, 4> cv_matrix_mixdown;
+
 // shared by midi and cv matrix
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 
@@ -31,7 +35,8 @@ class am_matrix_modulator
 public:
   PB_PREVENT_ACCIDENTAL_COPY(am_matrix_modulator);
   am_matrix_modulator(am_matrix_engine* engine) : _engine(engine) {}
-  plugin_base::jarray<float, 2> const& modulate(plugin_base::plugin_block& block, int slot);
+  plugin_base::jarray<float, 2> const& modulate(
+    plugin_base::plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
 };
 
 inline am_matrix_modulator&
@@ -64,7 +69,6 @@ get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
 }
 
 // gets the cv mixdown for all modulatable parameters in all modules for the current stage
-typedef plugin_base::jarray<plugin_base::jarray<float, 1> const*, 4> cv_matrix_mixdown;
 inline cv_matrix_mixdown const&
 get_cv_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
 {
