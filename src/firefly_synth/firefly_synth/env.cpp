@@ -11,6 +11,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static double const log_half = std::log(0.5);
+
 enum { section_main };
 enum class env_stage { delay, attack, hold, decay, sustain, release, end };
 enum { param_on, param_delay, param_attack, param_attack_slope, param_hold, 
@@ -174,13 +176,28 @@ env_engine::current_stage_param() const
   }
 }
 
+static inline double
+make_section_curve(double slope, double split_pos, double slope_pos)
+{
+  double const slope_min = 0.0001;
+  double const slope_max = 0.9999;
+  double const slope_range = slope_max - slope_min;
+
+  double slope_exp;
+  double slope_bounded = slope_min + slope_range * slope;
+  double split_bounded = slope_min + slope_range * split_pos;
+  if (slope_bounded < 0.5f) slope_exp = std::log(slope_bounded);
+  else slope_exp = std::log(1.0f - slope_bounded);
+  if (slope_pos < split_bounded) return std::pow(slope_pos / split_bounded, slope_exp / log_half) * split_bounded;
+  return 1 - std::pow(1.0f - (slope_pos - split_bounded) / (1.0f - split_bounded), slope_exp / log_half) * (1 - split_bounded);
+}
+
 void
 env_engine::process(plugin_block& block)
 {
   double const slope_min = 0.0001;
   double const slope_max = 0.9999;
   double const slope_range = slope_max - slope_min;
-  double const log_half = std::log(0.5);
 
   bool on = block.state.own_block_automation[param_on][0].step();
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
@@ -234,32 +251,27 @@ env_engine::process(plugin_block& block)
     {
     case env_stage::hold: out = 1; _release_level = 1; break;
     case env_stage::delay: out = 0; _release_level = 0; break;
-      case env_stage::attack:
-        slope_bounded = slope_min + attack_slope_curve[f] * slope_range;
-        split_pos = 1.0f - slope_bounded;
-        if(attack_slope_curve[f] < 0.5f) slope_exp = std::log(slope_bounded);
-        else slope_exp = std::log(1.0f - slope_bounded);
-        if(slope_pos < split_pos) out = std::pow(slope_pos / split_pos, slope_exp / log_half) * split_pos;
-        else out = 1 - std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos);
-        _release_level = out;
-        break;
-      case env_stage::decay:
-        slope_bounded = slope_min + decay_slope_curve[f] * slope_range;
-        split_pos = slope_bounded;
-        if (decay_slope_curve[f] < 0.5f) slope_exp = std::log(slope_bounded);
-        else slope_exp = std::log(1.0f - slope_bounded);
-        if (slope_pos < split_pos) out = 1 - (std::pow(slope_pos / split_pos, slope_exp / log_half) * split_pos);
-        else out = std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos);
-        _release_level = out;
-        break;
-      case env_stage::release:
-        slope_exp = std::log(slope_min + release_slope_curve[f] * slope_range);
-        out = (1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half)) * _release_level;
-        break;
-      default: 
-        assert(false); 
-        stage_seconds = 0; 
-        break;
+    case env_stage::attack:
+      out = make_section_curve(attack_slope_curve[f], 1.0f - attack_slope_curve[f], _stage_pos / stage_seconds);
+      _release_level = out;
+      break;
+    case env_stage::decay:
+      slope_bounded = slope_min + decay_slope_curve[f] * slope_range;
+      split_pos = slope_bounded;
+      if (decay_slope_curve[f] < 0.5f) slope_exp = std::log(slope_bounded);
+      else slope_exp = std::log(1.0f - slope_bounded);
+      if (slope_pos < split_pos) out = 1 - (std::pow(slope_pos / split_pos, slope_exp / log_half) * split_pos);
+      else out = std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos);
+      _release_level = out;
+      break;
+    case env_stage::release:
+      slope_exp = std::log(slope_min + release_slope_curve[f] * slope_range);
+      out = (1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half)) * _release_level;
+     break;
+    default: 
+      assert(false); 
+      stage_seconds = 0; 
+      break;
     }
     check_unipolar(out);
     block.state.own_cv[0][0][f] = out;
