@@ -29,7 +29,7 @@ prevent routing handlers from making invalid gui values
 check all param_automate
 env slope name in tooltip
 make most cv automate/block only? ==> only time-dependent
-undo/redo stack
+why automate block params at all ?
 
 * get some linux folks to comment (ycollete?)
 * continuing
