@@ -26,6 +26,7 @@ make all stuff visible / not tabbed
 do "with audio/cv/all routing"
 double check all routing menu handlers
 prevent routing handlers from making invalid gui values
+check all param_automate
 
 * get some linux folks to comment (ycollete?)
 * continuing
