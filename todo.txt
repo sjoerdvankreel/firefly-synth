@@ -28,6 +28,7 @@ double check all routing menu handlers
 prevent routing handlers from making invalid gui values
 check all param_automate
 env slope name in tooltip
+make most cv automate/block only? ==> only time-dependent
 
 * get some linux folks to comment (ycollete?)
 * continuing

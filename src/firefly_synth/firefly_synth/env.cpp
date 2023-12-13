@@ -180,6 +180,11 @@ env_engine::current_stage_param() const
 void
 env_engine::process(plugin_block& block)
 {
+  float const slope_min = 0.01;
+  float const slope_max = 0.99;
+  float const slope_range = slope_max - slope_min;
+  float const log_half = std::log(0.5f);
+
   bool on = block.state.own_block_automation[param_on][0].step();
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
   {
@@ -188,7 +193,10 @@ env_engine::process(plugin_block& block)
   }
 
   auto const& acc_auto = block.state.own_accurate_automation;
-  auto const& s_curve = acc_auto[param_sustain][0];
+  auto const& sustain_curve = acc_auto[param_sustain][0];
+  auto const& decay_slope_curve = acc_auto[param_decay_slope][0];
+  auto const& attack_slope_curve = acc_auto[param_attack_slope][0];
+  auto const& release_slope_curve = acc_auto[param_release_slope][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -207,8 +215,8 @@ env_engine::process(plugin_block& block)
 
     if (_stage == env_stage::sustain)
     {
-      _release_level = s_curve[f];
-      block.state.own_cv[0][0][f] = s_curve[f];
+      _release_level = sustain_curve[f];
+      block.state.own_cv[0][0][f] = sustain_curve[f];
       continue;
     }
 
@@ -218,6 +226,7 @@ env_engine::process(plugin_block& block)
     _stage_pos = std::min(_stage_pos, stage_seconds);
 
     float out = 0;
+    float slope = 0;
     if (stage_seconds == 0)
       out = _release_level;
     else switch (_stage)
@@ -226,20 +235,23 @@ env_engine::process(plugin_block& block)
         out = 0;
         _release_level = 0;
         break;
-      case env_stage::attack: 
-        out = _stage_pos / stage_seconds; 
-        _release_level = out;
-        break;
       case env_stage::hold:
         out = 1;
         _release_level = 1;
         break;
-      case env_stage::decay:
-        out = 1.0 - _stage_pos / stage_seconds * (1.0 - s_curve[f]); 
+      case env_stage::attack:
+        slope = std::log(slope_min + attack_slope_curve[f] * slope_range);
+        out = std::pow(_stage_pos / stage_seconds, slope / log_half);
         _release_level = out;
         break;
-      case env_stage::release: 
-        out = (1.0 - _stage_pos / stage_seconds) * _release_level; 
+      case env_stage::decay:
+        slope = std::log(slope_min + decay_slope_curve[f] * slope_range);
+        out = 1.0 - std::pow(_stage_pos / stage_seconds, slope / log_half) * (1.0 - sustain_curve[f]);
+        _release_level = out;
+        break;
+      case env_stage::release:
+        slope = std::log(slope_min + release_slope_curve[f] * slope_range);
+        out = (1.0 - std::pow(_stage_pos / stage_seconds, slope / log_half)) * _release_level;
         break;
       default: 
         assert(false); 
