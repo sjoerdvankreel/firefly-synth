@@ -242,7 +242,7 @@ env_engine::process(plugin_block& block)
         break;
       case env_stage::attack:
         slope_bounded = slope_min + attack_slope_curve[f] * slope_range;
-        split_pos = 0.5f;//1.0f - slope_bounded;
+        split_pos = 1.0f - slope_bounded;
         if(attack_slope_curve[f] < 0.5f)
         {
           if(slope_pos < split_pos)
