@@ -87,7 +87,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1, 1, 1, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { 2, 6 })));
   
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
@@ -101,23 +101,23 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 1 }, gui_label_contents::none, 
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 1, 1, 2 }, gui_label_contents::none, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
       
   // todo different labels
   // todo block/acc?
   auto& delay_time = result.params.emplace_back(make_param(
-    make_topo_info("{E9EF839C-235D-4248-A4E1-FAD62089CC78}", "D", param_delay_time, 1),
+    make_topo_info("{E9EF839C-235D-4248-A4E1-FAD62089CC78}", "Dly", param_delay_time, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 1, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_time.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   delay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& delay_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{A016A3B5-8BFC-4DCD-B41F-F69F3A239AFA}", "D", param_delay_tempo, 1),
+    make_topo_info("{A016A3B5-8BFC-4DCD-B41F-F69F3A239AFA}", "Dly", param_delay_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 2 }, gui_label_contents::none,
+    make_param_gui_single(section_main, gui_edit_type::list, { 1, 0 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
   delay_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
@@ -139,21 +139,21 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& attack_slope = result.params.emplace_back(make_param(
     make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "A Slope", param_attack_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 1, 3 }, gui_label_contents::value,
       make_label_none())));
   attack_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& hold_time = result.params.emplace_back(make_param(
-    make_topo_info("{66F6036E-E64A-422A-87E1-34E59BC93650}", "H", param_hold_time, 1),
+    make_topo_info("{66F6036E-E64A-422A-87E1-34E59BC93650}", "Hld", param_hold_time, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 1, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hold_time.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   hold_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& hold_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{97846CDB-7349-4DE9-8BDF-14EAD0586B28}", "H", param_hold_tempo, 1),
+    make_topo_info("{97846CDB-7349-4DE9-8BDF-14EAD0586B28}", "Hld", param_hold_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 5 }, gui_label_contents::none,
+    make_param_gui_single(section_main, gui_edit_type::list, { 1, 1 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hold_tempo.gui.submenu = make_timesig_submenu(hold_tempo.domain.timesigs);
   hold_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
@@ -161,49 +161,49 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& decay_time = result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_decay_time, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 6 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_time.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   decay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& decay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{47253C57-FBCA-4A49-AF88-88AC9F4781D7}", "D", param_decay_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 6 }, gui_label_contents::none,
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 4 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_tempo.gui.submenu = make_timesig_submenu(decay_tempo.domain.timesigs);
   decay_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "D Slope", param_decay_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 7 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 1, 4 }, gui_label_contents::value,
       make_label_none())));
   decay_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& sustain = result.params.emplace_back(make_param(
-    make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_sustain, 1),
+    make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "Stn", param_sustain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 8 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 1, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& release_time = result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_release_time, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 9 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_time.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   release_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& release_tempo = result.params.emplace_back(make_param(
     make_topo_info("{FDC00AA5-8648-4064-BE77-1A9CDB6B53EE}", "R", param_release_tempo, 1),
     make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 9 }, gui_label_contents::none,
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 5 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_tempo.gui.submenu = make_timesig_submenu(release_tempo.domain.timesigs);
   release_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "R Slope", param_release_slope, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 10 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 1, 5 }, gui_label_contents::value,
       make_label_none())));
   release_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
