@@ -13,15 +13,26 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 static double const log_half = std::log(0.5);
+enum class env_stage { delay, attack, hold, decay, sustain, release, end };
 
 enum { section_main };
-enum class env_stage { delay, attack, hold, decay, sustain, release, end };
+enum { type_dahdsr, type_dahdr1, type_dahdr2 };
 enum { scratch_delay, scratch_attack, scratch_hold, scratch_decay, scratch_release, scratch_count };
 enum { 
-  param_on, param_sync, param_delay_time, param_delay_tempo, 
+  param_on, param_sync, param_type, param_delay_time, param_delay_tempo, 
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_decay_slope, param_sustain, param_release_time, param_release_tempo, param_release_slope };
+
+static std::vector<list_item>
+type_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "DAHDSR");
+  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "DAHDR1");
+  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "DAHDR2");
+  return result;
+}
 
 class env_engine: 
 public module_engine {
@@ -101,9 +112,16 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 1, 1, 2 }, gui_label_contents::none, 
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 1 }, gui_label_contents::none, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+
+  auto& type = result.params.emplace_back(make_param(
+    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 }, gui_label_contents::none,
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
       
   // todo different labels
   // todo block/acc?
