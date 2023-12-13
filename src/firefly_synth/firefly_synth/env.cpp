@@ -232,14 +232,8 @@ env_engine::process(plugin_block& block)
       out = _release_level;
     else switch (_stage)
     {
-      case env_stage::delay:
-        out = 0;
-        _release_level = 0;
-        break;
-      case env_stage::hold:
-        out = 1;
-        _release_level = 1;
-        break;
+    case env_stage::hold: out = 1; _release_level = 1; break;
+    case env_stage::delay: out = 0; _release_level = 0; break;
       case env_stage::attack:
         slope_bounded = slope_min + attack_slope_curve[f] * slope_range;
         split_pos = 1.0f - slope_bounded;
