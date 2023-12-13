@@ -13,7 +13,8 @@ namespace firefly_synth {
 
 enum { section_main };
 enum class env_stage { delay, attack, hold, decay, sustain, release, end };
-enum { param_on, param_delay, param_attack, param_hold, param_decay, param_sustain, param_release };
+enum { param_on, param_delay, param_attack, param_attack_slope, param_hold, 
+  param_decay, param_decay_slope, param_sustain, param_release, param_release_slope };
 
 class env_engine: 
 public module_engine {
@@ -77,7 +78,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1, 1, 1, 1 } })));
   
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
@@ -91,44 +92,65 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& delay = result.params.emplace_back(make_param(
     make_topo_info("{E9EF839C-235D-4248-A4E1-FAD62089CC78}", "D", param_delay, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& attack = result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "A", param_attack, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   attack.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+
+  auto& attack_slope = result.params.emplace_back(make_param(
+    make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "A Slope", param_attack_slope, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
+      make_label_none())));
+  attack_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& hold = result.params.emplace_back(make_param(
     make_topo_info("{66F6036E-E64A-422A-87E1-34E59BC93650}", "H", param_hold, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hold.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& decay = result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "D", param_decay, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+
+  auto& decay_slope = result.params.emplace_back(make_param(
+    make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "D Slope", param_decay_slope, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 6 }, gui_label_contents::value,
+      make_label_none())));
+  decay_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& sustain = result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "S", param_sustain, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 5 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 7 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& release = result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "R", param_release, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 6 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 8 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+
+  auto& release_slope = result.params.emplace_back(make_param(
+    make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "R Slope", param_release_slope, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 9 }, gui_label_contents::value,
+      make_label_none())));
+  release_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   return result;
 }
