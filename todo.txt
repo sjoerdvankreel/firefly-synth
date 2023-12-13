@@ -28,7 +28,8 @@ double check all routing menu handlers
 prevent routing handlers from making invalid gui values
 check all param_automate
 env slope name in tooltip
-make most cv automate/block only? ==> only time-dependent
+make most cv automate/block only? ==> only time-de pendent
+undo/redo stack
 why automate block params at all ?
 
 * get some linux folks to comment (ycollete?)
