@@ -29,8 +29,8 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "DAHDSR");
-  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "DAHDR1");
-  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "DAHDR2");
+  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "DAHDR 1");
+  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "DAHDR 2");
   return result;
 }
 
@@ -98,7 +98,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
-    make_param_section_gui({ 0, 0 }, { 1, 3 })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
@@ -140,6 +140,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_dhs, gui_edit_type::list, { 0, 0 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
+  delay_tempo.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   delay_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& hold_time = result.params.emplace_back(make_param(
@@ -155,6 +156,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_dhs, gui_edit_type::list, { 0, 1 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hold_tempo.gui.submenu = make_timesig_submenu(hold_tempo.domain.timesigs);
+  hold_tempo.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   hold_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& sustain = result.params.emplace_back(make_param(
@@ -181,6 +183,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_adr, gui_edit_type::list, { 0, 0 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   attack_tempo.gui.submenu = make_timesig_submenu(attack_tempo.domain.timesigs);
+  attack_tempo.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   attack_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& decay_time = result.params.emplace_back(make_param(
@@ -196,6 +199,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_adr, gui_edit_type::list, { 0, 1 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_tempo.gui.submenu = make_timesig_submenu(decay_tempo.domain.timesigs);
+  decay_tempo.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   decay_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& release_time = result.params.emplace_back(make_param(
@@ -211,6 +215,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_adr, gui_edit_type::list, { 0, 2 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_tempo.gui.submenu = make_timesig_submenu(release_tempo.domain.timesigs);
+  release_tempo.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   release_tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
 
   result.sections.emplace_back(make_param_section(section_slope,

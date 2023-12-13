@@ -37,6 +37,8 @@ rethink automate/modulate -> maybe only need 3 ? off / block (both step/real) an
 ===>> just make a matrix and see what combos make sense
 do mseg someday
 drop domain.default_selector, leave it to init_minimal
+do only simplified timesigs
+dim comboboxes a bit (not full-scale white)
 
 * get some linux folks to comment (ycollete?)
 * continuing
