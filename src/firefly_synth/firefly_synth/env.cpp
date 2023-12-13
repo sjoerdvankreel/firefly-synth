@@ -31,15 +31,12 @@ public:
 
 static void
 init_default(plugin_state& state)
-{
-  state.set_text_at(module_env, 1, param_on, 0, "On");
-}
+{ state.set_text_at(module_env, 1, param_on, 0, "On"); }
 
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) return {};
-
   float delay = state.get_plain_at(module_env, mapping.module_slot, param_delay, 0).real();
   float attack = state.get_plain_at(module_env, mapping.module_slot, param_attack, 0).real();
   float hold = state.get_plain_at(module_env, mapping.module_slot, param_hold, 0).real();
@@ -168,10 +165,10 @@ env_engine::current_stage_param() const
 {
   switch (_stage)
   {
-  case env_stage::delay: return param_delay;
-  case env_stage::attack: return param_attack;
   case env_stage::hold: return param_hold;
+  case env_stage::delay: return param_delay;
   case env_stage::decay: return param_decay;
+  case env_stage::attack: return param_attack;
   case env_stage::release: return param_release;
   default: assert(false); return -1;
   }
@@ -226,7 +223,11 @@ env_engine::process(plugin_block& block)
     _stage_pos = std::min(_stage_pos, stage_seconds);
 
     float out = 0;
-    float slope = 0;
+    float slope_exp = 0;
+    float split_pos = 0;
+    float slope_bounded = 0;
+    float slope_pos = _stage_pos / stage_seconds;
+    
     if (stage_seconds == 0)
       out = _release_level;
     else switch (_stage)
@@ -240,18 +241,28 @@ env_engine::process(plugin_block& block)
         _release_level = 1;
         break;
       case env_stage::attack:
-        slope = std::log(slope_min + attack_slope_curve[f] * slope_range);
-        out = std::pow(_stage_pos / stage_seconds, slope / log_half);
+        slope_bounded = slope_min + attack_slope_curve[f] * slope_range;
+        split_pos = 1.0f - slope_bounded;
+        if(slope_pos < split_pos)
+        {
+          slope_exp = std::log(slope_bounded);
+          out = std::pow(slope_pos / split_pos, slope_exp / log_half);
+        }
+        else
+        {
+          slope_exp = std::log(slope_bounded);
+          out = std::pow((slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half);
+        }
         _release_level = out;
         break;
       case env_stage::decay:
-        slope = std::log(slope_min + decay_slope_curve[f] * slope_range);
-        out = 1.0 - std::pow(_stage_pos / stage_seconds, slope / log_half) * (1.0 - sustain_curve[f]);
+        slope_exp = std::log(slope_min + decay_slope_curve[f] * slope_range);
+        out = 1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half) * (1.0 - sustain_curve[f]);
         _release_level = out;
         break;
       case env_stage::release:
-        slope = std::log(slope_min + release_slope_curve[f] * slope_range);
-        out = (1.0 - std::pow(_stage_pos / stage_seconds, slope / log_half)) * _release_level;
+        slope_exp = std::log(slope_min + release_slope_curve[f] * slope_range);
+        out = (1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half)) * _release_level;
         break;
       default: 
         assert(false); 
@@ -267,18 +278,12 @@ env_engine::process(plugin_block& block)
     _stage_pos = 0;
     switch (_stage)
     {
-    case env_stage::delay: _stage = env_stage::attack; break;
-    case env_stage::attack: _stage = env_stage::hold; break;
     case env_stage::hold: _stage = env_stage::decay; break;
+    case env_stage::attack: _stage = env_stage::hold; break;
+    case env_stage::delay: _stage = env_stage::attack; break;
     case env_stage::decay: _stage = env_stage::sustain; break;
-    case env_stage::release: 
-      _stage = env_stage::end; 
-      if(block.module_slot == 0)
-        block.voice->finished = true; 
-      break;
-    default: 
-      assert(false); 
-      break;
+    case env_stage::release: _stage = env_stage::end; block.voice->finished |= block.module_slot == 0; break;
+    default: assert(false); break;
     }
   }
 }
