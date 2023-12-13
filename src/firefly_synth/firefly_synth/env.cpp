@@ -242,8 +242,8 @@ env_engine::process(plugin_block& block)
     {
     case env_stage::hold: _release_level = out = 1; break;
     case env_stage::delay: _release_level = out = 0; break;
-    case env_stage::release: out = s_curve[f] * (1 - make_section_curve(rs_curve[f], rs_curve[f], slope_pos)); break;
     case env_stage::attack: _release_level = out = make_section_curve(as_curve[f], 1 - as_curve[f], slope_pos); break;
+    case env_stage::release: out = _release_level * (1 - make_section_curve(rs_curve[f], rs_curve[f], slope_pos)); break;
     case env_stage::decay: _release_level = out = s_curve[f] + (1 - s_curve[f]) * (1 - make_section_curve(ds_curve[f], ds_curve[f], slope_pos)); break;
     default: assert(false); stage_seconds = 0; break;
     }
