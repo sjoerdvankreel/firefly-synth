@@ -192,7 +192,7 @@ synth_topo()
   result->gui.dimension.column_sizes = { 16, 12, 12, 13, 13 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
-  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, { 1, 1, 1, 1, 1, 2, 1 });
+  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, { 1, 1, 1, 1, 1, 1, 2 });
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
@@ -212,9 +212,9 @@ synth_topo()
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
     "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_hidden);
   result->gui.module_sections[module_section_v_lfo_fx] = make_module_section_gui(
-    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_v_lfo_fx, { 6, 0, 1, 3 }, { 1, 2 });
+    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_v_lfo_fx, { 5, 0, 1, 3 }, { 1, 2 });
   result->gui.module_sections[module_section_env] = make_module_section_gui(
-    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 5, 0, 1, 3 }, { 1, 1 });
+    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 6, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_osc_voice_out] = make_module_section_gui(
     "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc_voice_out, { 4, 0, 1, 3 }, { { 1 }, { 3, 1 } });
   result->gui.module_sections[module_section_g_lfo_fx] = make_module_section_gui(
