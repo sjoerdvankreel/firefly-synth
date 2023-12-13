@@ -280,7 +280,7 @@ tab_menu_result
 cv_routing_menu_handler::swap(int module, int source_slot, int target_slot)
 {
   // swap source_slot with target_slot for source parameter
-  _state->move_module_to(module, source_slot, target_slot);
+  _state->swap_module_with(module, source_slot, target_slot);
   for (auto const& sources : _matrix_sources)
   {
     auto const& topo = _state->desc().plugin->modules[sources.first];
@@ -430,7 +430,7 @@ tab_menu_result
 audio_routing_menu_handler::swap(int module, int source_slot, int target_slot)
 {
   // swap source_slot with target_slot for both source and target parameter for cv matrix
-  _state->move_module_to(module, source_slot, target_slot);
+  _state->swap_module_with(module, source_slot, target_slot);
   auto const& cv_topo = _state->desc().plugin->modules[_cv_params.matrix_module];
   for (int r = 0; r < cv_topo.params[_cv_params.on_param].info.slot_count; r++)
     if (_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.on_param, r).step() != _cv_params.off_value)
