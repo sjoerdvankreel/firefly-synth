@@ -207,10 +207,10 @@ env_engine::process(plugin_block& block)
   }
 
   auto const& acc_auto = block.state.own_accurate_automation;
-  auto const& sustain_curve = acc_auto[param_sustain][0];
-  auto const& decay_slope_curve = acc_auto[param_decay_slope][0];
-  auto const& attack_slope_curve = acc_auto[param_attack_slope][0];
-  auto const& release_slope_curve = acc_auto[param_release_slope][0];
+  auto const& s_curve = acc_auto[param_sustain][0];
+  auto const& ds_curve = acc_auto[param_decay_slope][0];
+  auto const& as_curve = acc_auto[param_attack_slope][0];
+  auto const& rs_curve = acc_auto[param_release_slope][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -229,8 +229,8 @@ env_engine::process(plugin_block& block)
 
     if (_stage == env_stage::sustain)
     {
-      _release_level = sustain_curve[f];
-      block.state.own_cv[0][0][f] = sustain_curve[f];
+      _release_level = s_curve[f];
+      block.state.own_cv[0][0][f] = s_curve[f];
       continue;
     }
 
@@ -241,31 +241,18 @@ env_engine::process(plugin_block& block)
 
     float out = 0;
     double slope_exp = 0;
-    double split_pos = 0;
-    double slope_bounded = 0;
-    double slope_pos = _stage_pos / stage_seconds;
     
-    if (stage_seconds == 0)
-      out = _release_level;
+    if (stage_seconds == 0) out = _release_level;
     else switch (_stage)
     {
-    case env_stage::hold: out = 1; _release_level = 1; break;
-    case env_stage::delay: out = 0; _release_level = 0; break;
-    case env_stage::attack:
-      out = make_section_curve(attack_slope_curve[f], 1.0f - attack_slope_curve[f], _stage_pos / stage_seconds);
-      _release_level = out;
-      break;
-    case env_stage::decay:
-      slope_bounded = slope_min + decay_slope_curve[f] * slope_range;
-      split_pos = slope_bounded;
-      if (decay_slope_curve[f] < 0.5f) slope_exp = std::log(slope_bounded);
-      else slope_exp = std::log(1.0f - slope_bounded);
-      if (slope_pos < split_pos) out = 1 - (std::pow(slope_pos / split_pos, slope_exp / log_half) * split_pos);
-      else out = std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos);
-      _release_level = out;
-      break;
+    case env_stage::hold: _release_level = out = 1; break;
+    case env_stage::delay: _release_level = out = 0; break;
+    case env_stage::attack: _release_level = out = make_section_curve(
+      as_curve[f], 1.0f - as_curve[f], _stage_pos / stage_seconds); break;
+    case env_stage::decay: _release_level = out = s_curve[f] + (1 - s_curve[f]) * (
+      1 - make_section_curve(ds_curve[f], ds_curve[f], _stage_pos / stage_seconds)); break;
     case env_stage::release:
-      slope_exp = std::log(slope_min + release_slope_curve[f] * slope_range);
+      slope_exp = std::log(slope_min + rs_curve[f] * slope_range);
       out = (1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half)) * _release_level;
      break;
     default: 
