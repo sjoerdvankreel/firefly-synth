@@ -254,8 +254,19 @@ env_engine::process(plugin_block& block)
         _release_level = out;
         break;
       case env_stage::decay:
-        slope_exp = std::log(slope_min + decay_slope_curve[f] * slope_range);
-        out = 1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half) * (1.0 - sustain_curve[f]);
+        slope_bounded = slope_min + decay_slope_curve[f] * slope_range;
+        split_pos = slope_bounded;
+        if (attack_slope_curve[f] < 0.5f)
+          slope_exp = std::log(slope_bounded);
+        else
+          slope_exp = std::log(1.0f - slope_bounded);
+        if (slope_pos < split_pos)
+          out = std::pow(slope_pos / split_pos, slope_exp / log_half) * split_pos;
+        else
+          out = 1 - std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos);
+
+        //slope_exp = std::log(slope_min + decay_slope_curve[f] * slope_range);
+        //out = 1.0 - std::pow(_stage_pos / stage_seconds, slope_exp / log_half) * (1.0 - sustain_curve[f]);
         _release_level = out;
         break;
       case env_stage::release:
