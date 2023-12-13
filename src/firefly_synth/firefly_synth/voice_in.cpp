@@ -166,16 +166,18 @@ voice_in_engine::process(plugin_block& block)
   auto const& pb_curve = *(modulation)[module_voice_in][0][param_pb][0];
   auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
   auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  
+  
+  int note = block.state.own_block_automation[param_note][0].step();
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();  
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
-    float note = 0;
+    float porta_note = 0;
     float pb = block.normalized_to_raw(module_voice_in, param_pb, pb_curve[f]);
     float cent = block.normalized_to_raw(module_voice_in, param_cent, cent_curve[f]);
     float pitch = block.normalized_to_raw(module_voice_in, param_pitch, pitch_curve[f]);
-    if(_position == _porta_samples) note = _to_note;
-    else note = _from_note + (_position++ / (float)_porta_samples * (_to_note - _from_note));
-    block.state.own_cv[output_pitch_offset][0][f] = note + cent + pitch + pb * master_pb_range - midi_middle_c;
+    if(_position == _porta_samples) porta_note = _to_note;
+    else porta_note = _from_note + (_position++ / (float)_porta_samples * (_to_note - _from_note));
+    block.state.own_cv[output_pitch_offset][0][f] = (note + cent - midi_middle_c) + (porta_note - midi_middle_c) + pitch + pb * master_pb_range;
   }
 }
 

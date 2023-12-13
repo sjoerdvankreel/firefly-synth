@@ -13,7 +13,6 @@ fix up the gui (control sizes etc)
 check all infernal functionality, see what needs to be in the base
 document the header files a bit
 negative cv amount
-am matrix
 fully do the cv matrix with offset/spread
 more space for freq slider
 number modules by processing order or by group
@@ -23,9 +22,7 @@ voice arp?
 more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 do 5 am and 5 fm routes
-check if get_cv_matrix_mixdown works on audio/am matrix
 check the AM OSC graph
-voice-in-note not working
 make all stuff visible / not tabbed
 do "with audio/cv/all routing"
 double check all routing menu handlers
