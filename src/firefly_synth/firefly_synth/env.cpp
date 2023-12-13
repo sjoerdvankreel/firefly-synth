@@ -253,7 +253,7 @@ env_engine::process(plugin_block& block)
           else
           {
             slope_exp = std::log(slope_bounded);
-            out = (std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos)) + split_pos;
+            out = (1 - split_pos) - (std::pow(1.0f - (slope_pos - split_pos) / (1.0f - split_pos), slope_exp / log_half) * (1 - split_pos)) + split_pos;
           }
         }
         else
