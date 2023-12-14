@@ -286,7 +286,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
   g.setColour(box.findColour(ComboBox::backgroundColourId));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
-  g.setColour(box.findColour(ComboBox::outlineColourId));
+  g.setColour(box.findColour(ComboBox::outlineColourId).darker());
   g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
