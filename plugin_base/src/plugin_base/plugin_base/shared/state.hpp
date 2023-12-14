@@ -74,6 +74,8 @@ public:
   void set_plain_at_tag(int tag, plain_value value) 
   { set_plain_at_index(desc().param_mappings.tag_to_index.at(tag), value); }
 
+  double get_raw_at(param_topo_mapping m) const
+  { return _desc->plain_to_raw_at(m.module_index, m.param_index, get_plain_at(m)); }
   double get_raw_at(int m, int mi, int p, int pi) const 
   { return _desc->plain_to_raw_at(m, p, get_plain_at(m, mi, p, pi)); }
   void set_raw_at(int m, int mi, int p, int pi, double value)
@@ -87,7 +89,8 @@ public:
   void set_raw_at_index(int index, double value) 
   { set_plain_at_index(index, desc().raw_to_plain_at_index(index, value)); }
 
-  void set_text_at(int m, int mi, int p, int pi, std::string const& value);
+  normalized_value get_normalized_at(param_topo_mapping m) const
+  { return _desc->plain_to_normalized_at(m.module_index, m.param_index, get_plain_at(m)); }
   normalized_value get_normalized_at(int m, int mi, int p, int pi) const 
   { return _desc->plain_to_normalized_at(m, p, get_plain_at(m, mi, p, pi)); }
   void set_normalized_at(int m, int mi, int p, int pi, normalized_value value)
@@ -102,6 +105,7 @@ public:
   { set_plain_at_index(index, desc().normalized_to_plain_at_index(index, value)); }
 
   // parse and format
+  void set_text_at(int m, int mi, int p, int pi, std::string const& value);
   std::string raw_to_text_at_index(bool io, int index, double raw) const
   { return plain_to_text_at_index(io, index, desc().raw_to_plain_at_index(index, raw)); }
   std::string normalized_to_text_at_index(bool io, int index, normalized_value normalized) const
