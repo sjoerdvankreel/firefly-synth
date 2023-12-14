@@ -312,11 +312,11 @@ env_engine::process(plugin_block& block)
     double stage_seconds = 0;
     switch (_stage)
     {
-    case env_stage::hold: stage_seconds = block.state.own_scratch[scratch_hold][f]; break;
-    case env_stage::decay: stage_seconds = block.state.own_scratch[scratch_decay][f]; break;
-    case env_stage::delay: stage_seconds = block.state.own_scratch[scratch_delay][f]; break;
-    case env_stage::attack: stage_seconds = block.state.own_scratch[scratch_attack][f]; break;
-    case env_stage::release: stage_seconds = block.state.own_scratch[scratch_release][f]; break;
+    case env_stage::hold: stage_seconds = hld_curve[f]; break;
+    case env_stage::decay: stage_seconds = dcy_curve[f]; break;
+    case env_stage::delay: stage_seconds = dly_curve[f]; break;
+    case env_stage::attack: stage_seconds = att_curve[f]; break;
+    case env_stage::release: stage_seconds = rls_curve[f]; break;
     default: assert(false); break;
     }
 
