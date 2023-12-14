@@ -42,6 +42,7 @@ class plugin_engine final {
   jarray<void*, 3> _voice_context = {};
   jarray<void*, 2> _global_context = {};
   jarray<plain_value, 4> _output_values = {};
+  jarray<plugin_state, 1> _voice_automation = {};
 
   float _sample_rate = {};
   double _cpu_usage = {};

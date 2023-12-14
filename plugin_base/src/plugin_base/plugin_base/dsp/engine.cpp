@@ -14,8 +14,8 @@ plugin_engine(
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
 _state(desc, false), _block_automation(desc, false),
-_dims(*desc->plugin),
-_host_block(std::make_unique<host_block>()),
+_voice_automation(desc->plugin->polyphony, plugin_state(desc, false)),
+_dims(*desc->plugin), _host_block(std::make_unique<host_block>()),
 _voice_processor(voice_processor),
 _voice_thread_ids(_state.desc().plugin->polyphony, std::thread::id()),
 _voice_processor_context(voice_processor_context)
@@ -80,13 +80,22 @@ plugin_engine::make_plugin_block(
   jarray<float, 4>& audio_out = voice < 0
     ? _global_audio_state[module][slot] 
     : _voice_audio_state[voice][module][slot];
+
+  // fix param_rate::voice values to voice start
+  jarray<plain_value, 2> const& own_block_auto = voice < 0
+    ? _block_automation.state()[module][slot]
+    : _voice_automation[voice].state()[module][slot];
+  jarray<plain_value, 4> const& all_block_auto = voice < 0
+    ? _block_automation.state()
+    : _voice_automation[voice].state();
+
   plugin_block_state state = {
     context_out, cv_out, audio_out, scratch,
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
     _accurate_automation[module][slot], _accurate_automation,
-    _block_automation.state()[module][slot], _block_automation.state()
+    own_block_auto, all_block_auto
   };
   return {
     start_frame, end_frame, slot,
@@ -488,6 +497,18 @@ plugin_engine::process()
     state.stage = voice_stage::active;
     state.time = _stream_time + event.frame;
     assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
+
+    // take a snapshot of current block automation values into once per voice automation
+    for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+    {
+      auto const& module = _state.desc().plugin->modules[m];
+      if(module.dsp.stage != module_stage::output)
+        for (int p = 0; p < module.params.size(); p++)
+          if(module.params[p].dsp.rate != param_rate::accurate)
+            for (int mi = 0; mi < module.info.slot_count; mi++)
+              for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
+                _voice_automation[slot].set_plain_at(m, mi, p, pi, _block_automation.get_plain_at(m, mi, p, pi));
+    }
 
     // allow module engine to do once-per-voice init
     for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
