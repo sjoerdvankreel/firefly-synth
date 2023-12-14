@@ -15,7 +15,7 @@ namespace firefly_synth {
 static double const log_half = std::log(0.5);
 enum class env_stage { delay, attack, hold, decay, sustain, release, end };
 
-enum { type_dahdsr, type_dahdr1, type_dahdr2 };
+enum { type_sustain, type_follow, type_release };
 enum { section_main, section_slope, section_dhadsr };
 enum { scratch_delay, scratch_attack, scratch_hold, scratch_decay, scratch_release, scratch_count };
 enum { 
@@ -29,9 +29,9 @@ static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "DAHDSR");
-  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "DAHDR 1");
-  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "DAHDR 2");
+  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "Sustain");
+  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "Follow");
+  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "Release");
   return result;
 }
 
