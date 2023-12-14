@@ -19,7 +19,7 @@ enum { type_dahdsr, type_dahdr1, type_dahdr2 };
 enum { section_main, section_slope, section_dhadsr };
 enum { scratch_delay, scratch_attack, scratch_hold, scratch_decay, scratch_release, scratch_count };
 enum { 
-  param_on, param_sync, param_multi, param_type, 
+  param_on, param_type, param_sync, param_multi,
   param_attack_slope, param_decay_slope, param_release_slope,
   param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
@@ -99,36 +99,36 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
-  
+
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, gui_label_contents::none, 
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   on.domain.default_selector = [](int s, int) { return s == 0 ? "On" : "Off"; };
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   on.dsp.automate_selector = [](int s) { return s > 0 ? param_automate::automate : param_automate::none; };
+
+  auto& type = result.params.emplace_back(make_param(
+    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, gui_label_contents::name,
+      make_label_none())));
+  type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", "Sync", param_sync, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 1 }, gui_label_contents::none, 
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 }, gui_label_contents::none, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& multi = result.params.emplace_back(make_param(
     make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Multi", param_multi, 1),
     make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 }, gui_label_contents::none,
+    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 3 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   multi.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-
-  auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, gui_label_contents::name,
-      make_label_none())));
-  type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   result.sections.emplace_back(make_param_section(section_slope,
     make_topo_tag("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", "Slope"),
