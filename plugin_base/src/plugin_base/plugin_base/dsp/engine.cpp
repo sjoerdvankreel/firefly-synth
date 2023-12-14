@@ -498,6 +498,7 @@ plugin_engine::process()
     state.time = _stream_time + event.frame;
     assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
+    // TODO snapshot in graphs too
     // take a snapshot of current block automation values into once per voice automation
     for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
     {
