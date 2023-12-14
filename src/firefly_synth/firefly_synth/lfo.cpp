@@ -102,7 +102,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, gui_label_contents::name, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_sync; });

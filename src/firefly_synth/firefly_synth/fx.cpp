@@ -180,7 +180,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& delay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Tempo", param_delay_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, gui_label_contents::name, make_label_none())));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
   delay_tempo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });

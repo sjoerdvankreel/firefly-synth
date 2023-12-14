@@ -95,7 +95,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Time", param_porta_time, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
+    make_param_dsp_block(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
@@ -103,7 +103,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Tempo", param_porta_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(false),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, gui_label_contents::name, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });

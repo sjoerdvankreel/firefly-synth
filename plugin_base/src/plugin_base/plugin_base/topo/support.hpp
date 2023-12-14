@@ -15,10 +15,9 @@ make_midi_note_submenu();
 std::shared_ptr<gui_submenu>
 make_timesig_submenu(std::vector<timesig> const& sigs);
 std::vector<timesig>
+make_default_timesigs(bool with_zero, timesig low, timesig high);
+std::vector<timesig>
 make_timesigs(std::vector<int> const& steps, timesig low, timesig high);
-inline std::vector<timesig>
-make_default_timesigs(timesig low, timesig high)
-{ return make_timesigs({1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64}, low, high); }
 
 gui_label 
 make_label(gui_label_contents contents, gui_label_align align, gui_label_justify justify);
@@ -86,9 +85,8 @@ param_domain
 make_domain_name(std::vector<std::string> const& names, std::string const& default_);
 param_domain
 make_domain_timesig(std::vector<timesig> const& sigs, timesig const& default_);
-inline param_domain
-make_domain_timesig_default()
-{ return make_domain_timesig(make_default_timesigs({ 1, 64, }, { 4, 1}), { 1, 4} ); }
+param_domain
+make_domain_timesig_default(bool with_zero);
 
 param_domain
 make_domain_percentage(double min, double max, double default_, int precision, bool unit);

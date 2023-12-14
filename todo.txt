@@ -32,6 +32,7 @@ do only simplified timesigs
 dim comboboxes a bit (not full-scale white)
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 do "insert fx" menu option
+fix env tempo defaults
 
 * get some linux folks to comment (ycollete?)
 * continuing

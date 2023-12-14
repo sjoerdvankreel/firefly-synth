@@ -10,8 +10,8 @@ namespace plugin_base {
 void
 timesig::validate() const
 {
-  assert(num > 0);
   assert(den > 0);
+  assert(num >= 0);
 }
 
 void

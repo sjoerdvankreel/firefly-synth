@@ -226,6 +226,13 @@ make_domain_step(int min, int max, int default_, int display_offset)
 }
 
 param_domain
+make_domain_timesig_default(bool with_zero)
+{
+  auto defaults = make_default_timesigs(with_zero, { with_zero ? 0 : 1, 128, }, { 4, 1 });
+  return make_domain_timesig(defaults, { 1, 4 });
+}
+
+param_domain
 make_domain_timesig(std::vector<timesig> const& sigs, timesig const& default_)
 {
   param_domain result = {};
@@ -374,21 +381,38 @@ make_timesig_submenu(std::vector<timesig> const& sigs)
 }
 
 std::vector<timesig>
+make_default_timesigs(bool with_zero, timesig low, timesig high)
+{
+  std::vector<int> steps({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64, 128 });
+  if (with_zero) steps.insert(steps.begin(), 0);
+  return make_timesigs(steps, low, high);
+}
+
+std::vector<timesig>
 make_timesigs(std::vector<int> const& steps, timesig low, timesig high)
 {
   assert(low.den > 0);
   assert(high.den > 0);
   assert(steps.size());
 
+  bool with_zero = false;
   std::vector<timesig> result;
   for (int n = 0; n < steps.size(); n++)
-    for (int d = 0; d < steps.size(); d++)
-      result.push_back({ steps[n], steps[d] });
+    if(steps[n] == 0) 
+      with_zero = true;
+    else
+      for (int d = 0; d < steps.size(); d++)
+        if(steps[d] != 0)
+          result.push_back({ steps[n], steps[d] });
+  if(with_zero)
+    result.insert(result.begin(), { 0, 1 });
 
   auto filter_low = [low](auto const& s) { return (float)s.num / s.den >= (float)low.num / low.den; };
   result = vector_filter(result, filter_low);
   auto filter_high = [high](auto const& s) { return (float)s.num / s.den <= (float)high.num / high.den; };
-  return vector_filter(result, filter_high);
+  result = vector_filter(result, filter_high);
+  auto filter_gcd = [](auto const& s) { return s.num == 0 || std::gcd(s.num, s.den) == 1; };
+  return vector_filter(result, filter_gcd);
 }
 
 }

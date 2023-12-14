@@ -167,7 +167,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   delay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& delay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{A016A3B5-8BFC-4DCD-B41F-F69F3A239AFA}", "Delay Tempo", "Dly", true, param_delay_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(true),
     make_param_gui_single(section_dhadsr, gui_edit_type::list, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
@@ -183,7 +183,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   attack_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& attack_tempo = result.params.emplace_back(make_param(
     make_topo_info("{3130A19C-AA2C-40C8-B586-F3A1E96ED8C6}", "Attack Tempo", "A", true, param_attack_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(true),
     make_param_gui_single(section_dhadsr, gui_edit_type::list, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   attack_tempo.gui.submenu = make_timesig_submenu(attack_tempo.domain.timesigs);
@@ -199,7 +199,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   hold_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& hold_tempo = result.params.emplace_back(make_param(
     make_topo_info("{97846CDB-7349-4DE9-8BDF-14EAD0586B28}", "Hold Tempo", "Hld", true, param_hold_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(true),
     make_param_gui_single(section_dhadsr, gui_edit_type::list, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   hold_tempo.gui.submenu = make_timesig_submenu(hold_tempo.domain.timesigs);
@@ -215,7 +215,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   decay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& decay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{47253C57-FBCA-4A49-AF88-88AC9F4781D7}", "Decay Tempo", "D", true, param_decay_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(true),
     make_param_gui_single(section_dhadsr, gui_edit_type::list, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   decay_tempo.gui.submenu = make_timesig_submenu(decay_tempo.domain.timesigs);
@@ -238,7 +238,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   release_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   auto& release_tempo = result.params.emplace_back(make_param(
     make_topo_info("{FDC00AA5-8648-4064-BE77-1A9CDB6B53EE}", "Release Tempo", "R", true, param_release_tempo, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(),
+    make_param_dsp_block(param_automate::automate), make_domain_timesig_default(true),
     make_param_gui_single(section_dhadsr, gui_edit_type::list, { 0, 5 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   release_tempo.gui.submenu = make_timesig_submenu(release_tempo.domain.timesigs);
