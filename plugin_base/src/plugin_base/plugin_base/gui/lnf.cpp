@@ -51,6 +51,8 @@ _desc(desc), _custom_section(custom_section), _module_section(module_section), _
   auto control_text_high = colors().control_text.brighter(_desc->plugin->gui.lighten);
   auto control_bg_high = colors().control_background.brighter(_desc->plugin->gui.lighten);
 
+  setColour(Label::ColourIds::textColourId, colors().label_text);
+
   setColour(ToggleButton::ColourIds::textColourId, colors().control_text);
   setColour(ToggleButton::ColourIds::tickColourId, colors().control_tick);
 
