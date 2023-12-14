@@ -39,6 +39,8 @@ do mseg someday
 drop domain.default_selector, leave it to init_minimal
 do only simplified timesigs
 dim comboboxes a bit (not full-scale white)
+do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
+do "insert fx" menu option
 
 * get some linux folks to comment (ycollete?)
 * continuing

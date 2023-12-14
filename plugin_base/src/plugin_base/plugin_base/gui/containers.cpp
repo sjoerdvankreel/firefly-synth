@@ -100,7 +100,8 @@ grid_component::fixed_width() const
       if(_positions[i].column == c)
         if(_positions[i].row == _autofit_row)
         {
-          auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
+          auto child_ptr = getChildComponent(i);
+          auto& child = dynamic_cast<autofit_component&>(*child_ptr);
           assert(child.fixed_width() > 0);
           result += child.fixed_width();
         }
