@@ -26,17 +26,8 @@ make all stuff visible / not tabbed
 do "with audio/cv/all routing"
 double check all routing menu handlers
 prevent routing handlers from making invalid gui values
-check all param_automate
-env slope name in tooltip
-make most cv automate/block only? ==> only time-de pendent
 undo/redo stack
-why automate block params at all ? ==> choose max flexibility that makes sence ?
-rethink automate/modulate -> maybe only need 3 ? off / block (both step/real) and accurate (real and implies modulate)
---> or maybe only need 2? off = only ui (real or step), on = full-blown automate-modulate (real only)
---> no, block/step params may be automatable (e.g. turn on an extra oscillator)
-===>> just make a matrix and see what combos make sense
 do mseg someday
-drop domain.default_selector, leave it to init_minimal
 do only simplified timesigs
 dim comboboxes a bit (not full-scale white)
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
@@ -44,6 +35,7 @@ do "insert fx" menu option
 
 * get some linux folks to comment (ycollete?)
 * continuing
+- check all param_automate
 - measure performance
 - keep updating the demo stuff
 

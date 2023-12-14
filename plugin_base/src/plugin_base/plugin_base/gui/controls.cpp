@@ -326,6 +326,7 @@ param_component(gui, module, param), Slider()
   case gui_label_contents::none: break;
   case gui_label_contents::name: setTooltip(param->param->info.tag.name); break;
   case gui_label_contents::value: setPopupDisplayEnabled(true, true, nullptr); break;
+  case gui_label_contents::short_name: setTooltip(param->param->info.tag.short_name); break;
   default: assert(false); break;
   }
   
@@ -380,8 +381,10 @@ param_combobox::own_param_changed(plain_value plain)
   if (tooltip == gui_label_contents::none) return;
   std::string value = _param->param->domain.plain_to_text(false, plain);
   std::string name = _param->param->info.tag.name;
+  std::string short_name = _param->param->info.tag.short_name;
   if(tooltip == gui_label_contents::name) setTooltip(name);
   else if(tooltip == gui_label_contents::value) setTooltip(value);
+  else if (tooltip == gui_label_contents::short_name) setTooltip(short_name);
   else setTooltip(name + ": " + value);
 }
 
