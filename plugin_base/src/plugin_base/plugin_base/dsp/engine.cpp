@@ -58,8 +58,8 @@ plugin_engine::make_voice_block(
   _voice_states[v].last_note_key = last_note_key;
   _voice_states[v].last_note_channel = last_note_channel;
   return {
-    false, _voice_results[v], _voice_states[v], _voice_cv_state[v], 
-    _voice_audio_state[v], _voice_context[v], _voice_scratch_state[v]
+    false, _voice_results[v], _voice_states[v], 
+    _voice_cv_state[v], _voice_audio_state[v], _voice_context[v]
   };
 };
 
@@ -82,7 +82,7 @@ plugin_engine::make_plugin_block(
     : _voice_audio_state[voice][module][slot];
   plugin_block_state state = {
     context_out, cv_out, audio_out, scratch,
-    _global_cv_state, _global_audio_state, _global_context, _global_scratch_state, 
+    _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
     _accurate_automation[module][slot], _accurate_automation,

@@ -46,7 +46,6 @@ struct plugin_voice_block final {
   jarray<float, 5> const& all_cv;
   jarray<float, 6> const& all_audio;
   jarray<void*, 2> const& all_context;
-  jarray<float, 4> const& all_scratch;
 };
 
 // state and automation
@@ -58,7 +57,6 @@ struct plugin_block_state final {
   jarray<float, 5> const& all_global_cv;
   jarray<float, 6> const& all_global_audio;
   jarray<void*, 2> const& all_global_context;
-  jarray<float, 4> const& all_global_scratch;
   jarray<float, 2> const& own_midi_automation;
   jarray<float, 4> const& all_midi_automation;
   jarray<int, 1> const& own_midi_active_selection;

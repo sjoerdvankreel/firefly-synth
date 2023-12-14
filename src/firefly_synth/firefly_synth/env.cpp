@@ -308,7 +308,6 @@ env_engine::process(plugin_block& block)
       continue;
     }
 
-    // drop all scratch
     double stage_seconds = 0;
     switch (_stage)
     {
