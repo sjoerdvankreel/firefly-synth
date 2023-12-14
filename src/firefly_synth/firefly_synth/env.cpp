@@ -40,8 +40,7 @@ public module_engine {
   double _stage_pos = 0;
   env_stage _stage = {};
   double _release_level = 0;
-  
-  int current_stage_param() const;
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
   void process(plugin_block& block) override;
@@ -264,35 +263,28 @@ make_section_curve(double slope, double split_pos, double slope_pos)
   return 1 - std::pow(1.0f - (slope_pos - split_bounded) / (1.0f - split_bounded), slope_exp / log_half) * (1 - split_bounded);
 }
 
-int
-env_engine::current_stage_param() const
-{
-  switch (_stage)
-  {
-  case env_stage::hold: return param_hold_time;
-  case env_stage::delay: return param_delay_time;
-  case env_stage::decay: return param_decay_time;
-  case env_stage::attack: return param_attack_time;
-  case env_stage::release: return param_release_time;
-  default: assert(false); return -1;
-  }
-}
-
 void
 env_engine::process(plugin_block& block)
 {
-  bool on = block.state.own_block_automation[param_on][0].step();
+  auto const& block_auto = block.state.own_block_automation;
+  bool on = block_auto[param_on][0].step() != 0;
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     return;
   }
 
+  bool sync = block_auto[param_sync][0].step() != 0;
   auto const& acc_auto = block.state.own_accurate_automation;
   auto const& s_curve = acc_auto[param_sustain][0];
   auto const& ds_curve = acc_auto[param_decay_slope][0];
   auto const& as_curve = acc_auto[param_attack_slope][0];
   auto const& rs_curve = acc_auto[param_release_slope][0];
+  auto const& hld_curve = sync_or_time_into_scratch(block, sync, module_env, param_hold_time, param_hold_tempo, scratch_hold);
+  auto const& dcy_curve = sync_or_time_into_scratch(block, sync, module_env, param_decay_time, param_decay_tempo, scratch_decay);
+  auto const& dly_curve = sync_or_time_into_scratch(block, sync, module_env, param_delay_time, param_delay_tempo, scratch_delay);
+  auto const& att_curve = sync_or_time_into_scratch(block, sync, module_env, param_attack_time, param_attack_tempo, scratch_attack);
+  auto const& rls_curve = sync_or_time_into_scratch(block, sync, module_env, param_release_time, param_release_tempo, scratch_release);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -316,12 +308,20 @@ env_engine::process(plugin_block& block)
       continue;
     }
 
-    int stage_param = current_stage_param();
-    auto const& stage_curve = acc_auto[stage_param][0];
-    double stage_seconds = block.normalized_to_raw(module_env, stage_param, stage_curve[f]);
-    _stage_pos = std::min(_stage_pos, stage_seconds);
+    // drop all scratch
+    double stage_seconds = 0;
+    switch (_stage)
+    {
+    case env_stage::hold: stage_seconds = block.state.own_scratch[scratch_hold][f]; break;
+    case env_stage::decay: stage_seconds = block.state.own_scratch[scratch_decay][f]; break;
+    case env_stage::delay: stage_seconds = block.state.own_scratch[scratch_delay][f]; break;
+    case env_stage::attack: stage_seconds = block.state.own_scratch[scratch_attack][f]; break;
+    case env_stage::release: stage_seconds = block.state.own_scratch[scratch_release][f]; break;
+    default: assert(false); break;
+    }
 
     float out = 0;
+    _stage_pos = std::min(_stage_pos, stage_seconds);
     double slope_pos = _stage_pos / stage_seconds;
     if (stage_seconds == 0) out = _release_level;
     else switch (_stage)
