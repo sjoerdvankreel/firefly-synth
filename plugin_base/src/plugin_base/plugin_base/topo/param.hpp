@@ -16,8 +16,8 @@ struct param_topo;
 struct module_topo;
 struct plugin_topo;
 
-enum class param_rate { accurate, block };
 enum class param_direction { input, output };
+enum class param_rate { block, voice, accurate };
 enum class param_layout { single, horizontal, vertical };
 enum class param_automate { none, midi, automate, modulate, automate_modulate };
 
@@ -71,7 +71,7 @@ struct param_dsp final {
   bool can_automate(int module_slot) const;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_dsp);
-  void validate(plugin_topo const& plugin, int module_slot) const;
+  void validate(plugin_topo const& plugin, module_topo const& module, int module_slot) const;
 };
 
 // parameter in module

@@ -229,7 +229,7 @@ plugin_engine::init_automation_from_state(int frame_count)
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        if (param.dsp.rate == param_rate::block)
+        if (param.dsp.rate != param_rate::accurate)
           for (int pi = 0; pi < param.info.slot_count; pi++)
             _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
         else

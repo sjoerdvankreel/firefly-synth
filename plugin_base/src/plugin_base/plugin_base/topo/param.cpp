@@ -7,7 +7,7 @@
 namespace plugin_base {
 
 void 
-param_dsp::validate(plugin_topo const& plugin, int module_slot) const
+param_dsp::validate(plugin_topo const& plugin, module_topo const& module, int module_slot) const
 {
   param_automate automate = automate_selector(module_slot);
 
@@ -19,6 +19,11 @@ param_dsp::validate(plugin_topo const& plugin, int module_slot) const
     assert(rate == param_rate::block);
     assert(automate == param_automate::none);
   }
+
+  if(rate == param_rate::block)
+    assert(module.dsp.stage != module_stage::voice);
+  if(rate == param_rate::voice)
+    assert(module.dsp.stage == module_stage::voice);
 
   if (rate == param_rate::accurate)
   {
@@ -69,13 +74,13 @@ void
 param_topo::validate(plugin_topo const& plugin, module_topo const& module, int index) const
 {
   info.validate();
-  dsp.validate(plugin, module.info.slot_count);
+  dsp.validate(plugin, module, module.info.slot_count);
   domain.validate(module.info.slot_count, info.slot_count);
   
   assert(info.index == index);
   assert(domain.max >= domain.min);
   assert(!domain.is_real() || domain.max > domain.min);
-  assert(domain.is_real() || dsp.rate == param_rate::block);
+  assert(domain.is_real() || dsp.rate != param_rate::accurate);
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == param_layout::single));
   assert(dsp.direction == param_direction::input || !gui.bindings.enabled.is_bound());

@@ -83,13 +83,13 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
-    make_param_dsp_block(param_automate::automate), make_domain_toggle(false),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, gui_label_contents::none, make_label_none())));
   on.gui.tabular = true;
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", param_source, route_count),
-    make_param_dsp_block(param_automate::none), make_domain_item(am_matrix.items, ""),
+    make_param_dsp_voice(param_automate::none), make_domain_item(am_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, gui_label_contents::value, make_label_none())));
   source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -98,7 +98,7 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", param_target, route_count),
-    make_param_dsp_block(param_automate::none), make_domain_item(am_matrix.items, "Osc 1"),
+    make_param_dsp_voice(param_automate::none), make_domain_item(am_matrix.items, "Osc 1"),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, gui_label_contents::value, make_label_none())));
   target.gui.tabular = true;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });

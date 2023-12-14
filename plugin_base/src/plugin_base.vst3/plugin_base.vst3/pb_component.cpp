@@ -151,14 +151,18 @@ pb_component::process(ProcessData& data)
           // regular parameter
           int param_index = _engine.state().desc().param_mappings.tag_to_index.at(queue->getParameterId());
           auto rate = _engine.state().desc().param_at_index(param_index).param->dsp.rate;
-          if (rate == param_rate::block && queue->getPoint(0, frame_index, value) == kResultTrue)
+          if (rate != param_rate::accurate)
           {
-            block_event event;
-            event.param = param_index;
-            event.normalized = normalized_value(value);
-            block.events.block.push_back(event);
+            if(queue->getPoint(0, frame_index, value) == kResultTrue)
+            {
+              block_event event;
+              event.param = param_index;
+              event.normalized = normalized_value(value);
+              block.events.block.push_back(event);
+            }
           }
-          else if (rate == param_rate::accurate)
+          else
+          {
             for(int p = 0; p < queue->getPointCount(); p++)
               if (queue->getPoint(p, frame_index, value) == kResultTrue)
               {
@@ -168,6 +172,7 @@ pb_component::process(ProcessData& data)
                 event.normalized = normalized_value(value);
                 block.events.accurate.push_back(event);
               }
+          }
         }
       }
   

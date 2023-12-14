@@ -562,7 +562,7 @@ pb_plugin::process(clap_process const* process) noexcept
       int index = getParamIndexForParamId(event->param_id);
       auto const& param = _engine.state().desc().param_at_index(index);
       push_to_gui(index, clap_value(event->value));
-      if (param.param->dsp.rate == param_rate::block)
+      if (param.param->dsp.rate != param_rate::accurate)
       {
         if (_block_automation_seen[index] == 0)
         {
