@@ -57,6 +57,8 @@ public:
 
   void clear_module_all(int index);
   void clear_module(int index, int slot);
+  void insert_module_after(int index, int slot);
+  void insert_module_before(int index, int slot);
   void copy_module_to(int index, int source_slot, int target_slot);
   void move_module_to(int index, int source_slot, int target_slot);
   void swap_module_with(int index, int source_slot, int target_slot);

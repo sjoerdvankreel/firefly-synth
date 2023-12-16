@@ -29,20 +29,22 @@ fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots)
   if (slots > 1)
   {
     menu.addItem(base_id + 100, "Clear All");
+    menu.addItem(base_id + 200, "Insert Before", slot > 0);
+    menu.addItem(base_id + 300, "Insert After", slot < slots - 1);
 
     PopupMenu copy_menu;
     for (int i = 0; i < slots; i++)
-      copy_menu.addItem(base_id + 200 + i, std::to_string(i + 1), i != slot);
+      copy_menu.addItem(base_id + 400 + i, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Copy to", copy_menu);
 
     PopupMenu move_menu;
     for (int i = 0; i < slots; i++)
-      move_menu.addItem(base_id + 300 + i, std::to_string(i + 1), i != slot);
+      move_menu.addItem(base_id + 500 + i, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Move to", move_menu);
 
     PopupMenu swap_menu;
     for (int i = 0; i < slots; i++)
-      swap_menu.addItem(base_id + 400 + i, std::to_string(i + 1), i != slot);
+      swap_menu.addItem(base_id + 600 + i, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Swap with", swap_menu);
   }
 }
@@ -166,9 +168,11 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
     tab_menu_result result = {};
     if(id == 1000) _state->clear_module(_module, _slot);
     else if (id == 1100) _state->clear_module_all(_module);
-    else if (1200 <= id && id < 1300) _state->copy_module_to(_module, _slot, id - 1200);
-    else if(1300 <= id && id < 1400) _state->move_module_to(_module, _slot, id - 1300);
-    else if(1400 <= id && id < 1500) _state->swap_module_with(_module, _slot, id - 1400);
+    else if (id == 1200) _state->insert_module_before(_module, _slot);
+    else if (id == 1300) _state->insert_module_after(_module, _slot);
+    else if (1400 <= id && id < 1500) _state->copy_module_to(_module, _slot, id - 1400);
+    else if(1500 <= id && id < 1600) _state->move_module_to(_module, _slot, id - 1500);
+    else if(1600 <= id && id < 1700) _state->swap_module_with(_module, _slot, id - 1600);
     else if(2000 <= id && id < 10000)
     {
       int target_slot = id % 100;
@@ -176,9 +180,11 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
       int action = (id % 1000) / 100;
       if(action == 0) result = handler->clear(menu, _module, _slot);
       else if (action == 1) result = handler->clear_all(menu, _module);
-      else if(action == 2) result = handler->copy(menu, _module, _slot, target_slot);
-      else if(action == 3) result = handler->move(menu, _module, _slot, target_slot);
-      else if(action == 4) result = handler->swap(menu, _module, _slot, target_slot);
+      else if (action == 2) result = handler->insert_before(menu, _module, _slot);
+      else if (action == 3) result = handler->insert_after(menu, _module, _slot);
+      else if(action == 4) result = handler->copy(menu, _module, _slot, target_slot);
+      else if(action == 5) result = handler->move(menu, _module, _slot, target_slot);
+      else if(action == 6) result = handler->swap(menu, _module, _slot, target_slot);
       else assert(false);
     }
     else if(10000 <= id) result = handler->extra(_module, _slot, id - 10000);

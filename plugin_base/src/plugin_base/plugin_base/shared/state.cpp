@@ -109,6 +109,16 @@ plugin_state::clear_module_all(int index)
     clear_module(index, mi);
 }
 
+void
+plugin_state::insert_module_after(int index, int slot)
+{
+}
+
+void
+plugin_state::insert_module_before(int index, int slot)
+{
+}
+
 void 
 plugin_state::clear_module(int index, int slot)
 {

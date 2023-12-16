@@ -45,6 +45,8 @@ public:
   virtual tab_menu_result extra(int module, int slot, int action) { return {}; };
   virtual tab_menu_result clear_all(int menu, int module) { return {}; };
   virtual tab_menu_result clear(int menu, int module, int slot) { return {}; };
+  virtual tab_menu_result insert_after(int menu, int module, int slot) { return {}; };
+  virtual tab_menu_result insert_before(int menu, int module, int slot) { return {}; };
   virtual tab_menu_result move(int menu, int module, int source_slot, int target_slot) { return {}; };
   virtual tab_menu_result copy(int menu, int module, int source_slot, int target_slot) { return {}; };
   virtual tab_menu_result swap(int menu, int module, int source_slot, int target_slot) { return {}; };
