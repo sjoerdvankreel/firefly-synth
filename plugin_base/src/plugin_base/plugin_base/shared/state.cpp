@@ -112,11 +112,19 @@ plugin_state::clear_module_all(int index)
 void
 plugin_state::insert_module_after(int index, int slot)
 {
+  auto const& topo = desc().plugin->modules[index];
+  assert(0 <= slot && slot < topo.info.slot_count - 1);
+  for(int i = topo.info.slot_count - 1; i > slot + 1; i--)
+    move_module_to(index, i - 1, i);
 }
 
 void
 plugin_state::insert_module_before(int index, int slot)
 {
+  auto const& topo = desc().plugin->modules[index];
+  assert(0 < slot && slot < topo.info.slot_count);
+  for (int i = 0; i < slot - 1; i++)
+    move_module_to(index, i + 1, i);
 }
 
 void 
