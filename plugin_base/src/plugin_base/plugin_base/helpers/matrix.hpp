@@ -93,6 +93,8 @@ public:
 
   tab_menu_result clear_all(int menu, int module) override;
   tab_menu_result clear(int menu, int module, int slot) override;
+  tab_menu_result insert_after(int menu, int module, int slot) override;
+  tab_menu_result insert_before(int menu, int module, int slot) override;
   tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result swap(int menu, int module, int source_slot, int target_slot) override;

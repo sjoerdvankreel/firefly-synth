@@ -297,9 +297,34 @@ cv_routing_menu_handler::swap(int menu, int module, int source_slot, int target_
 tab_menu_result
 cv_routing_menu_handler::clear_all(int menu, int module)
 {
+  // set any route matching any module to all defaults
   auto const& topo = _state->desc().plugin->modules[module];
   for(int i = 0; i < topo.info.slot_count; i++)
     clear(menu, module, i);
+  return {};
+}
+
+tab_menu_result 
+cv_routing_menu_handler::insert_after(int menu, int module, int slot)
+{
+  // move all after slot to the right
+  auto const& topo = *_state->desc().modules[module].module;
+  assert(0 <= slot && slot < topo.info.slot_count - 1);
+  clear(menu, module, topo.info.slot_count - 1);
+  for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
+    move(menu, module, i - 1, i);
+  return {};
+}
+
+tab_menu_result 
+cv_routing_menu_handler::insert_before(int menu, int module, int slot)
+{
+  // move all before slot to the left
+  auto const& topo = *_state->desc().modules[module].module;
+  assert(0 < slot && slot < topo.info.slot_count);
+  clear(menu, module, 0);
+  for (int i = 0; i < slot - 1; i++)
+    move(menu, module, i + 1, i);
   return {};
 }
 
@@ -468,6 +493,7 @@ audio_routing_menu_handler::swap(int menu, int module, int source_slot, int targ
 tab_menu_result
 audio_routing_menu_handler::clear_all(int menu, int module)
 {
+  // set any route matching any module to all defaults
   auto const& topo = _state->desc().plugin->modules[module];
   for (int i = 0; i < topo.info.slot_count; i++)
     clear(menu, module, i);
