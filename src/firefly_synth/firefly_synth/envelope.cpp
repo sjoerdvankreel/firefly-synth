@@ -303,6 +303,7 @@ env_engine::process(plugin_block& block)
     return;
   }
 
+  int type = block_auto[param_type][0].step();
   bool sync = block_auto[param_sync][0].step() != 0;
   float stn = block_auto[param_sustain][0].real();
   float hld = block_auto[param_hold_time][0].real();
@@ -329,13 +330,13 @@ env_engine::process(plugin_block& block)
       continue;
     }
 
-    if (block.voice->state.release_frame == f)
+    if (block.voice->state.release_frame == f && type != type_follow)
     {
       _stage_pos = 0;
       _stage = env_stage::release;
     }
 
-    if (_stage == env_stage::sustain)
+    if (_stage == env_stage::sustain && type == type_sustain)
     {
       _release_level = stn;
       block.state.own_cv[0][0][f] = stn;
@@ -379,7 +380,7 @@ env_engine::process(plugin_block& block)
     case env_stage::hold: _stage = env_stage::decay; break;
     case env_stage::attack: _stage = env_stage::hold; break;
     case env_stage::delay: _stage = env_stage::attack; break;
-    case env_stage::decay: _stage = env_stage::sustain; break;
+    case env_stage::decay: _stage = type == type_sustain? env_stage::sustain: env_stage::release; break;
     case env_stage::release: _stage = env_stage::end; block.voice->finished |= block.module_slot == 0; break;
     default: assert(false); break;
     }
