@@ -43,6 +43,7 @@ public:
 
   // pop up a message box if these return a non-empty text
   virtual tab_menu_result extra(int module, int slot, int action) { return {}; };
+  virtual tab_menu_result clear_all(int menu, int module) { return {}; };
   virtual tab_menu_result clear(int menu, int module, int slot) { return {}; };
   virtual tab_menu_result move(int menu, int module, int source_slot, int target_slot) { return {}; };
   virtual tab_menu_result copy(int menu, int module, int source_slot, int target_slot) { return {}; };

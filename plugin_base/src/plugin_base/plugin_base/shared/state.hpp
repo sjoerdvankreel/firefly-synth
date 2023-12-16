@@ -55,6 +55,7 @@ public:
   void add_listener(int index, state_listener* listener) const;
   void remove_listener(int index, state_listener* listener) const;
 
+  void clear_module_all(int index);
   void clear_module(int index, int slot);
   void copy_module_to(int index, int source_slot, int target_slot);
   void move_module_to(int index, int source_slot, int target_slot);

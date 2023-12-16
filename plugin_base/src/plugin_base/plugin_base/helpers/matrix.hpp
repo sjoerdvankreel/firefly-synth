@@ -91,6 +91,7 @@ public tab_menu_handler {
 public:
   std::vector<std::string> module_menu_names() const override { return { "With CV Routing" }; };
 
+  tab_menu_result clear_all(int menu, int module) override;
   tab_menu_result clear(int menu, int module, int slot) override;
   tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
@@ -124,6 +125,7 @@ public tab_menu_handler {
 public:
   std::vector<std::string> module_menu_names() const override { return { "With CV Routing", "With CV & Audio Routing" }; };
 
+  tab_menu_result clear_all(int menu, int module) override;
   tab_menu_result clear(int menu, int module, int slot) override;
   tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;

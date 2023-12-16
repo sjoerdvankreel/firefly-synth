@@ -101,6 +101,14 @@ plugin_state::move_module_to(int index, int source_slot, int target_slot)
   clear_module(index, source_slot);
 }
 
+void
+plugin_state::clear_module_all(int index)
+{
+  auto const& topo = desc().plugin->modules[index];
+  for (int mi = 0; mi < topo.info.slot_count; mi++)
+    clear_module(index, mi);
+}
+
 void 
 plugin_state::clear_module(int index, int slot)
 {

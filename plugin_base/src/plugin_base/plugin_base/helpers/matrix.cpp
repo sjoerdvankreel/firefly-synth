@@ -295,6 +295,15 @@ cv_routing_menu_handler::swap(int menu, int module, int source_slot, int target_
 }
 
 tab_menu_result
+cv_routing_menu_handler::clear_all(int menu, int module)
+{
+  auto const& topo = _state->desc().plugin->modules[module];
+  for(int i = 0; i < topo.info.slot_count; i++)
+    clear(menu, module, i);
+  return {};
+}
+
+tab_menu_result
 cv_routing_menu_handler::clear(int menu, int module, int slot)
 {
   // set any route matching this module to all defaults
@@ -453,6 +462,15 @@ audio_routing_menu_handler::swap(int menu, int module, int source_slot, int targ
             update_matched_audio_slot(matrix, _audio_params[m].target_param, r, module, target_slot, source_slot, _audio_params[m].targets);
         }
     }
+  return {};
+}
+
+tab_menu_result
+audio_routing_menu_handler::clear_all(int menu, int module)
+{
+  auto const& topo = _state->desc().plugin->modules[module];
+  for (int i = 0; i < topo.info.slot_count; i++)
+    clear(menu, module, i);
   return {};
 }
 
