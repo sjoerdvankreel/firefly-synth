@@ -1,7 +1,6 @@
 (polyphonic) modulation
 handle clap midi notes
 handle clap is_modulatable
-handle automation changes at voice vs block start
 do cakewalk bug report
 
 demo synth:
