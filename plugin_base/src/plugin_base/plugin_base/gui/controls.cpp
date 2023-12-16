@@ -8,7 +8,7 @@ using namespace juce;
 namespace plugin_base {
 
 static void
-fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data)
+fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* data, Colour const& subheader_color)
 {
   menu.clear();
   for (int i = 0; i < data->indices.size(); i++)
@@ -16,11 +16,11 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   for(int i = 0; i < data->children.size(); i++)
   {
     if (data->children[i]->is_subheader)
-      menu.addItem(std::numeric_limits<int>::max(), data->children[i]->name, false);
+      menu.addColouredItem(std::numeric_limits<int>::max(), data->children[i]->name, subheader_color, false, false, nullptr);
     else
     {
       PopupMenu child;
-      fill_popup_menu(domain, child, data->children[i].get());
+      fill_popup_menu(domain, child, data->children[i].get(), subheader_color);
       menu.addSubMenu(data->children[i]->name, child);
     }
   }
@@ -372,7 +372,10 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
       addItem(domain.raw_to_text(false, i), index + 1);
   }
   else
-    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get());
+  {
+    auto const& color = module->module->gui.colors.tab_text;
+    fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get(), color);
+  }
   autofit();
   addListener(this);
   setEditableText(false);
