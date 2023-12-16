@@ -34,17 +34,17 @@ graph_engine::process_default(int module_index, int module_slot)
 {
   module_engine* engine = nullptr;
   auto& slot_map = _activated[module_index];
+  auto const& module = _state->desc().plugin->modules[module_index];
   if (slot_map.find(module_slot) == slot_map.end())
   {
-    auto factory = _state->desc().plugin->modules[module_index].engine_factory;
-    auto module_engine = factory(*_state->desc().plugin, _params.sample_rate, _params.frame_count);
-    module_engine->reset(nullptr);
+    auto module_engine = module.engine_factory(*_state->desc().plugin, _params.sample_rate, _params.frame_count);
     engine = module_engine.get();
     slot_map[module_slot] = std::move(module_engine);
   } else
     engine = slot_map[module_slot].get();
-  return process(module_index, module_slot, [engine](auto& block) { 
-    engine->reset(&block);
+  bool voice = module.dsp.stage == module_stage::voice;
+  return process(module_index, module_slot, [engine, voice](auto& block) { 
+    engine->reset(voice? &block: nullptr);
     engine->process(block); 
   });
 }

@@ -53,8 +53,6 @@ voice_on_note_engine::process(plugin_block& block)
 void 
 voice_on_note_engine::reset(plugin_block const* block)
 {
-  // non-null block indicates start of a new voice
-  if(block == nullptr) return;
   for(int i = 0; i < _global_outputs.size(); i++)
   {
     auto const& o = _global_outputs[i];

@@ -139,8 +139,6 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 void
 voice_in_engine::reset(plugin_block const* block)
 {
-  if(block == nullptr) return;
-
   _position = 0;
   _to_note = block->voice->state.id.key;
   _from_note = block->voice->state.id.key;

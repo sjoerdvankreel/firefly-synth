@@ -108,8 +108,9 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   graph_engine graph_engine(&state, params);
   auto const* block = graph_engine.process(
     mapping.module_index, mapping.module_slot, [mapping, params, &audio_in](plugin_block& block) {
-    fx_engine engine(mapping.module_index == module_gfx, params.sample_rate);
-    engine.reset(nullptr);
+    bool global = mapping.module_index == module_gfx;
+    fx_engine engine(global, params.sample_rate);
+    engine.reset(global? nullptr: &block);
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &audio_in);
   });

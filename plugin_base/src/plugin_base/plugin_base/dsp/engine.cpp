@@ -213,10 +213,7 @@ plugin_engine::activate(bool activate_module_engines, int sample_rate, int max_f
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for (int v = 0; v < _state.desc().plugin->polyphony; v++)
-      {
         _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, max_frame_count);
-        _voice_engines[v][m][mi]->reset(nullptr);
-      }
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
