@@ -31,9 +31,6 @@ undo/redo stack
 do mseg someday
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 do "insert fx" menu option
-check all automate-none
-simplify parameter types/rate/io, drop output+accurate, drop modulate etc
-osc/lfo graph broke again
 
 * get some linux folks to comment (ycollete?)
 * continuing

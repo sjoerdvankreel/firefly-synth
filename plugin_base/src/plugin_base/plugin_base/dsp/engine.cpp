@@ -226,6 +226,22 @@ plugin_engine::activate(bool activate_module_engines, int sample_rate, int max_f
 }
 
 void
+plugin_engine::voice_block_params_snapshot(int v)
+{
+  // take a snapshot of current block automation values into once per voice automation
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    if (module.dsp.stage != module_stage::output)
+      for (int p = 0; p < module.params.size(); p++)
+        if (module.params[p].dsp.rate != param_rate::accurate)
+          for (int mi = 0; mi < module.info.slot_count; mi++)
+            for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
+              _voice_automation[v].set_plain_at(m, mi, p, pi, _block_automation.get_plain_at(m, mi, p, pi));
+  }
+}
+
+void
 plugin_engine::init_automation_from_state(int frame_count)
 {
   // set automation values to state, automation may overwrite
@@ -498,20 +514,8 @@ plugin_engine::process()
     state.time = _stream_time + event.frame;
     assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
-    // TODO snapshot in graphs too
-    // take a snapshot of current block automation values into once per voice automation
-    for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-    {
-      auto const& module = _state.desc().plugin->modules[m];
-      if(module.dsp.stage != module_stage::output)
-        for (int p = 0; p < module.params.size(); p++)
-          if(module.params[p].dsp.rate != param_rate::accurate)
-            for (int mi = 0; mi < module.info.slot_count; mi++)
-              for (int pi = 0; pi < module.params[p].info.slot_count; pi++)
-                _voice_automation[slot].set_plain_at(m, mi, p, pi, _block_automation.get_plain_at(m, mi, p, pi));
-    }
-
     // allow module engine to do once-per-voice init
+    voice_block_params_snapshot(slot);
     for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
       for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       {
