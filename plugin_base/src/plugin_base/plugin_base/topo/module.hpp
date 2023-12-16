@@ -38,16 +38,15 @@ protected:
 
 public:
   virtual ~tab_menu_handler() {}
-  virtual bool has_module_menu() const { return false; }
-  virtual std::string module_menu_name() const { return {}; };
+  virtual std::vector<std::string> module_menu_names() const { return {}; };
   virtual std::vector<std::string> const extra_items() const { return {}; };
 
   // pop up a message box if these return a non-empty text
-  virtual tab_menu_result clear(int module, int slot) { return {}; };
   virtual tab_menu_result extra(int module, int slot, int action) { return {}; };
-  virtual tab_menu_result move(int module, int source_slot, int target_slot) { return {}; };
-  virtual tab_menu_result copy(int module, int source_slot, int target_slot) { return {}; };
-  virtual tab_menu_result swap(int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result clear(int menu, int module, int slot) { return {}; };
+  virtual tab_menu_result move(int menu, int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result copy(int menu, int module, int source_slot, int target_slot) { return {}; };
+  virtual tab_menu_result swap(int menu, int module, int source_slot, int target_slot) { return {}; };
 };
 
 typedef std::function<void(plugin_state& state)>

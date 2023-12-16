@@ -89,13 +89,12 @@ public tab_menu_handler {
     int to_slot, std::vector<module_output_mapping> const& mappings);
 
 public:
-  bool has_module_menu() const override { return true; }
-  std::string module_menu_name() const override { return "With Routing"; };
+  std::vector<std::string> module_menu_names() const override { return { "With CV Routing" }; };
 
-  tab_menu_result clear(int module, int slot) override;
-  tab_menu_result move(int module, int source_slot, int target_slot) override;
-  tab_menu_result copy(int module, int source_slot, int target_slot) override;
-  tab_menu_result swap(int module, int source_slot, int target_slot) override;
+  tab_menu_result clear(int menu, int module, int slot) override;
+  tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
+  tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
+  tab_menu_result swap(int menu, int module, int source_slot, int target_slot) override;
 
   cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, 
     int off_value, std::map<int, std::vector<module_output_mapping>> const& matrix_sources):
@@ -123,13 +122,12 @@ public tab_menu_handler {
     int to_slot, std::vector<module_topo_mapping> const& mappings);
 
 public:
-  bool has_module_menu() const override { return true; }
-  std::string module_menu_name() const override { return "With Routing"; };
+  std::vector<std::string> module_menu_names() const override { return { "With CV Routing", "With CV & Audio Routing" }; };
 
-  tab_menu_result clear(int module, int slot) override;
-  tab_menu_result move(int module, int source_slot, int target_slot) override;
-  tab_menu_result copy(int module, int source_slot, int target_slot) override;
-  tab_menu_result swap(int module, int source_slot, int target_slot) override;
+  tab_menu_result clear(int menu, int module, int slot) override;
+  tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
+  tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
+  tab_menu_result swap(int menu, int module, int source_slot, int target_slot) override;
 
   audio_routing_menu_handler(plugin_state* state, 
     audio_routing_cv_params const& cv_params, std::vector<audio_routing_audio_params> const& audio_params):
