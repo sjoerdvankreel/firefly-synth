@@ -211,6 +211,17 @@ lnf::drawTickBox(
   g.fillPath(tick, tick.getTransformToScaleToFit(tickBounds.reduced(4, 5).toFloat(), true));
 }
 
+void 
+lnf::drawPopupMenuItemWithOptions(
+  Graphics& g, Rectangle<int> const& area, bool highlighted, 
+  PopupMenu::Item const& item, PopupMenu::Options const& options)
+{
+  PopupMenu::Item new_item = item;
+  if(item.itemID == std::numeric_limits<int>::max())
+    new_item.isEnabled = true; // just for painting submenu headers, not actually enabled
+  LookAndFeel_V4::drawPopupMenuItemWithOptions(g, area, highlighted, new_item, options);
+}
+
 void
 lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   bool vertical, int pos, int size, bool over, bool down)

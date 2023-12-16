@@ -49,6 +49,7 @@ public:
   void drawTickBox(juce::Graphics&, juce::Component&, float, float, float, float, bool, bool, bool, bool) override;
   void drawBubble(juce::Graphics&, juce::BubbleComponent&, juce::Point<float> const&, juce::Rectangle<float> const& body) override;
   void drawLinearSlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider::SliderStyle, juce::Slider&) override;
+  void drawPopupMenuItemWithOptions(juce::Graphics&, juce::Rectangle<int> const&, bool, juce::PopupMenu::Item const& item, juce::PopupMenu::Options const&) override;
 };
 
 }
