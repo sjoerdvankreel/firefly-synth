@@ -153,7 +153,7 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
     handler = topo.gui.menu_handler_factory(_state);
     for(int m = 0; m < handler->module_menu_names().size(); m++)
     {
-      menu.addItem(m + 1, handler->module_menu_names()[m], false);
+      menu.addColouredItem(m + 1, handler->module_menu_names()[m], topo.gui.colors.tab_text, true, false, nullptr);
       fill_module_tab_menu(menu, (m + 2) * 1000, _slot, slots);
     }
     auto extra_items = handler->extra_items();
@@ -166,7 +166,8 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
   menu.setLookAndFeel(&_button->getLookAndFeel());
   menu.showMenuAsync(options, [this, handler = handler.release()](int id) {
     tab_menu_result result = {};
-    if(id == 1000) _state->clear_module(_module, _slot);
+    if(1 <= id && id < 1000) return;
+    else if(id == 1000) _state->clear_module(_module, _slot);
     else if (id == 1100) _state->clear_module_all(_module);
     else if (id == 1200) _state->insert_module_before(_module, _slot);
     else if (id == 1300) _state->insert_module_after(_module, _slot);
