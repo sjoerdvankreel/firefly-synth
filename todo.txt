@@ -31,6 +31,7 @@ undo/redo stack
 do mseg someday
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 do "insert fx" menu option
+drop "or time into scratch" & friends?
 
 * get some linux folks to comment (ycollete?)
 * continuing
