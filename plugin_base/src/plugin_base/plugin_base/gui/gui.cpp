@@ -686,6 +686,7 @@ plugin_gui::init_patch()
   NativeMessageBox::showAsync(options, [this](int result) {
     if(result == 0)
     {
+      _extra_state->clear();
       _gui_state->init(state_init_type::default_);
       fire_state_loaded();
     }
@@ -700,6 +701,7 @@ plugin_gui::clear_patch()
   NativeMessageBox::showAsync(options, [this](int result) {
     if (result == 0)
     {
+      _extra_state->clear();
       _gui_state->init(state_init_type::minimal);
       fire_state_loaded();
     }
@@ -728,12 +730,12 @@ plugin_gui::load_patch()
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
     if (path.length() != 0)
-      load_patch(path.toStdString());
+      load_patch(path.toStdString(), false);
   });
 }
 
 void
-plugin_gui::load_patch(std::string const& path)
+plugin_gui::load_patch(std::string const& path, bool preset)
 {
   auto icon = MessageBoxIconType::WarningIcon;
   auto result = plugin_io_load_file_all(path, *_gui_state, *_extra_state);
@@ -744,6 +746,8 @@ plugin_gui::load_patch(std::string const& path)
     return;
   }
 
+  if(preset)
+    _extra_state->clear();
   fire_state_loaded();
   if (result.warnings.size())
   {

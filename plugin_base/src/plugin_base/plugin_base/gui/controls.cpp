@@ -143,7 +143,7 @@ _gui(gui), _presets(gui->gui_state()->desc().presets())
   selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
     _gui->extra_state()->set_text(factory_preset_key, get_items()[index]);
-    _gui->load_patch(_presets[index].path);
+    _gui->load_patch(_presets[index].path, true);
   };
 }
 

@@ -5,6 +5,14 @@ using namespace juce;
 
 namespace plugin_base {
 
+void
+extra_state::clear()
+{
+  _values.clear();
+  for(auto const& k: _keyset)
+    fire_changed(k);
+}
+
 void 
 extra_state::fire_changed(std::string const& key)
 {

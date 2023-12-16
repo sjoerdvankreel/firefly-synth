@@ -28,7 +28,7 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(extra_state);
   extra_state(std::set<std::string> const& keyset) : _keyset(keyset) {}
 
-  void clear() { _values.clear(); }
+  void clear();
   std::set<std::string> const& keyset() const { return _keyset; }
   bool contains_key(std::string const& key) const { return _values.find(key) != _values.end(); }
 

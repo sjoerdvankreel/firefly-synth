@@ -106,7 +106,7 @@ public:
   void clear_patch();
   
   void load_patch();
-  void load_patch(std::string const& path);
+  void load_patch(std::string const& path, bool preset);
 
   Component& make_load_button();
   Component& make_save_button();
