@@ -40,6 +40,12 @@ public:
 };
 
 static void
+init_minimal(plugin_state& state)
+{
+  state.set_text_at(module_osc, 0, param_type, 0, "Sine");
+}
+
+static void
 init_default(plugin_state& state)
 {
   state.set_text_at(module_osc, 0, param_type, 0, "Saw");
@@ -100,6 +106,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_module_gui(section, colors, pos, { { 1 }, { 1 } })));
 
   result.graph_renderer = render_graph;
+  result.minimal_initializer = init_minimal;
   result.default_initializer = init_default;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<osc_engine>(); };
@@ -108,11 +115,10 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
 
-  auto& type = result.params.emplace_back(make_param(
+  result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
-  type.domain.default_selector = [] (int s, int) { return type_items()[s == 0? type_sine: type_off].name; };
 
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
