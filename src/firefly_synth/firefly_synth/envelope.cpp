@@ -12,7 +12,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static double const log_half = std::log(0.5);
 enum class env_stage { delay, attack, hold, decay, sustain, release, end };
 
 enum { type_sustain, type_follow, type_release };
@@ -37,15 +36,30 @@ type_items()
 
 class env_engine: 
 public module_engine {
-  double _stage_pos = 0;
-  env_stage _stage = {};
-  double _release_level = 0;
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
   void process(plugin_block& block) override;
-  void reset(plugin_block const*) override
-  { _stage_pos = 0; _release_level = 0; _stage = env_stage::delay; }
+  void reset(plugin_block const* block) override;
+
+private:
+  double _att_exp = 0;
+  double _dcy_exp = 0;
+  double _rls_exp = 0;
+  double _att_splt_bnd = 0;
+  double _dcy_splt_bnd = 0;
+  double _rls_splt_bnd = 0;
+
+  env_stage _stage = {};
+  double _stage_pos = 0;
+  double _release_level = 0;
+
+  static inline double const slope_min = 0.0001;
+  static inline double const slope_max = 0.9999;
+  static inline double const slope_range = slope_max - slope_min;
+
+  double section_slope(double slope_pos, double splt_bnd, double exp);
+  void init_section(double slope, double split_pos, double& exp, double& splt_bnd);
 };
 
 static void
@@ -246,20 +260,36 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   return result;
 }
 
-static inline double
-make_section_curve(double slope, double split_pos, double slope_pos)
+void 
+env_engine::reset(plugin_block const* block)
 {
-  double const slope_min = 0.0001;
-  double const slope_max = 0.9999;
-  double const slope_range = slope_max - slope_min;
+  _stage_pos = 0; 
+  _release_level = 0; 
+  _stage = env_stage::delay;
+  auto const& block_auto = block->state.own_block_automation;
+  float ds = block_auto[param_decay_slope][0].real();
+  float as = block_auto[param_attack_slope][0].real();
+  float rs = block_auto[param_release_slope][0].real();
+  init_section(ds, ds, _dcy_exp, _dcy_splt_bnd);
+  init_section(rs, rs, _rls_exp, _rls_splt_bnd);
+  init_section(as, 1 - as, _att_exp, _att_splt_bnd);
+}
 
-  double slope_exp;
+void 
+env_engine::init_section(double slope, double split_pos, double& exp, double& splt_bnd)
+{
+  splt_bnd = slope_min + slope_range * split_pos;
   double slope_bounded = slope_min + slope_range * slope;
-  double split_bounded = slope_min + slope_range * split_pos;
-  if (slope_bounded < 0.5f) slope_exp = std::log(slope_bounded);
-  else slope_exp = std::log(1.0f - slope_bounded);
-  if (slope_pos < split_bounded) return std::pow(slope_pos / split_bounded, slope_exp / log_half) * split_bounded;
-  return 1 - std::pow(1.0f - (slope_pos - split_bounded) / (1.0f - split_bounded), slope_exp / log_half) * (1 - split_bounded);
+  if (slope_bounded < 0.5f) exp = std::log(slope_bounded) / std::log(0.5);
+  else exp = std::log(1.0f - slope_bounded) / std::log(0.5);
+}
+
+double 
+env_engine::section_slope(double slope_pos, double splt_bnd, double exp)
+{ 
+  if (slope_pos < splt_bnd)
+    return std::pow(slope_pos / splt_bnd, exp) * splt_bnd;
+  return 1 - std::pow(1 - (slope_pos - splt_bnd) / (1 - splt_bnd), exp) * (1 - splt_bnd);
 }
 
 void
@@ -275,9 +305,6 @@ env_engine::process(plugin_block& block)
 
   bool sync = block_auto[param_sync][0].step() != 0;
   float stn = block_auto[param_sustain][0].real();
-  float ds = block_auto[param_decay_slope][0].real();
-  float as = block_auto[param_attack_slope][0].real();
-  float rs = block_auto[param_release_slope][0].real();
   float hld = block_auto[param_hold_time][0].real();
   float dcy = block_auto[param_decay_time][0].real();
   float dly = block_auto[param_delay_time][0].real();
@@ -334,9 +361,9 @@ env_engine::process(plugin_block& block)
     {
     case env_stage::hold: _release_level = out = 1; break;
     case env_stage::delay: _release_level = out = 0; break;
-    case env_stage::attack: _release_level = out = make_section_curve(as, 1 - as, slope_pos); break;
-    case env_stage::release: out = _release_level * (1 - make_section_curve(rs, rs, slope_pos)); break;
-    case env_stage::decay: _release_level = out = stn + (1 - stn) * (1 - make_section_curve(ds, ds, slope_pos)); break;
+    case env_stage::attack: _release_level = out = section_slope(slope_pos, _att_splt_bnd, _att_exp); break;
+    case env_stage::release: out = _release_level * (1 - section_slope(slope_pos, _rls_splt_bnd, _rls_exp)); break;
+    case env_stage::decay: _release_level = out = stn + (1 - stn) * (1 - section_slope(slope_pos, _dcy_splt_bnd, _dcy_exp)); break;
     default: assert(false); stage_seconds = 0; break;
     }
     
