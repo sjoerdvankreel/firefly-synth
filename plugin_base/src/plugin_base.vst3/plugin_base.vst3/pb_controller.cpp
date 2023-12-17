@@ -66,10 +66,15 @@ pb_controller::setState(IBStream* state)
 tresult PLUGIN_API
 pb_controller::setComponentState(IBStream* state)
 {
+  gui_state().begin_undo_region();
   if (!plugin_io_load_state(load_ibstream(state), gui_state()).ok())
+  {
+    gui_state().discard_undo_region();
     return kResultFalse;
+  }
   for (int p = 0; p < gui_state().desc().param_count; p++)
     gui_param_changed(p, gui_state().get_plain_at_index(p));
+  gui_state().discard_undo_region();
   return kResultOk;
 }
 

@@ -101,6 +101,15 @@ plugin_state::redo()
 }
 
 void
+plugin_state::discard_undo_region()
+{
+  assert(_undo_region > 0);
+  _undo_region = 0;
+  _undo_position = 0;
+  _undo_entries.clear();
+}
+
+void
 plugin_state::begin_undo_region()
 {
   if(_undo_region == 0) _undo_state_before = jarray<plain_value, 4>(_state);

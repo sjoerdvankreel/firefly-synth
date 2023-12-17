@@ -66,6 +66,7 @@ public:
   std::string undo_text();
   std::string redo_text();
   void begin_undo_region();
+  void discard_undo_region();
   void end_undo_region(std::string const& name);
 
   plugin_desc const& desc() const { return *_desc; }
