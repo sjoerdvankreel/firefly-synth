@@ -105,6 +105,7 @@ plugin_state::begin_undo_region()
 {
   if(_undo_region == 0) _undo_state = jarray<plain_value, 4>(_state);
   _undo_region++;
+  assert(_undo_region > 0);
 }
 
 void 
@@ -117,12 +118,9 @@ plugin_state::end_undo_region(std::string const& name)
   entry->name = name;
   entry->state = jarray<plain_value, 4>(_undo_state);
   _undo_entries.push_back(entry);
-  _undo_position++;
   if(_undo_entries.size() > max_undo_size) 
-  {
     _undo_entries.erase(_undo_entries.begin());
-    _undo_position--;
-  }
+  _undo_position = _undo_entries.size();
 }
 
 bool 

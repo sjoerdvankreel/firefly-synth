@@ -152,6 +152,32 @@ gui_hover_listener::mouseEnter(MouseEvent const&)
 }
 
 void 
+gui_undo_listener::mouseUp(MouseEvent const& event)
+{
+  if(!event.mods.isRightButtonDown()) return;
+
+  // no way to suppress event propagation so we need to filter a bit
+  if(dynamic_cast<Label*>(event.originalComponent)) return; // needed for comboboxes
+  if(dynamic_cast<Button*>(event.originalComponent)) return;
+  if(dynamic_cast<TabBarButton*>(event.originalComponent)) return;
+  if(dynamic_cast<param_component*>(event.originalComponent)) return;
+
+  juce::PopupMenu menu;
+  std::string undo_text = _gui->gui_state()->undo_text();
+  std::string redo_text = _gui->gui_state()->redo_text();
+  if(undo_text.empty()) menu.addItem(1, "Undo", false);
+  else menu.addItem(1, "Undo " + undo_text, true);
+  if (redo_text.empty()) menu.addItem(2, "Redo", false);
+  else menu.addItem(2, "Redo " + redo_text, true);
+  menu.setLookAndFeel(&_gui->getLookAndFeel());
+
+  menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
+    if(result == 1) _gui->gui_state()->undo();
+    if(result == 2) _gui->gui_state()->redo();
+  });
+}
+
+void 
 gui_tab_listener::mouseUp(MouseEvent const& event)
 {
   if(!event.mods.isRightButtonDown()) return;
@@ -216,12 +242,20 @@ gui_extra_state_keyset(plugin_topo const& topo)
 }
 
 plugin_gui::
+~plugin_gui() 
+{ 
+  setLookAndFeel(nullptr);
+  removeMouseListener(&_undo_listener);
+}
+
+plugin_gui::
 plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
 _lnf(&gui_state->desc(), -1, -1, -1), _tooltip(this), 
-_gui_state(gui_state), _extra_state(extra_state)
+_gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
   setOpaque(true);
   setLookAndFeel(&_lnf);
+  addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
   
   for(int i = 0; i < gui_state->desc().plugin->gui.custom_sections.size(); i++)

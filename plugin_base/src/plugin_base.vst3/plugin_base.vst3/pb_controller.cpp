@@ -27,7 +27,21 @@ _gui_state(_desc.get(), true),
 _extra_state(gui_extra_state_keyset(*_desc->plugin))
 { _gui_state.add_any_listener(this); }
 
-IPlugView* PLUGIN_API 
+void 
+pb_controller::gui_param_begin_changes(int index) 
+{ 
+  _gui_state.begin_undo_region();
+  beginEdit(gui_state().desc().param_mappings.index_to_tag[index]); 
+}
+
+void
+pb_controller::gui_param_end_changes(int index)
+{
+  endEdit(gui_state().desc().param_mappings.index_to_tag[index]);
+  gui_state().end_undo_region("Change " + gui_state().desc().params[index]->full_name);
+}
+
+IPlugView* PLUGIN_API
 pb_controller::createView(char const* name)
 {
   if (ConstString(name) != ViewType::kEditor) return nullptr;

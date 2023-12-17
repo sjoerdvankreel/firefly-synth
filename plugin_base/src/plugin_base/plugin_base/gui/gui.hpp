@@ -19,6 +19,8 @@ class plugin_gui;
 class tab_component;
 class grid_component;
 
+enum class gui_hover_type { param, module, custom };
+
 // for serialization
 inline std::string const factory_preset_key = "factory_preset";
 std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
@@ -41,9 +43,30 @@ public:
   virtual void custom_mouse_enter(int section) {};
 };
 
-enum class gui_hover_type { param, module, custom };
+// tracking gui parameter changes
+// host binding is expected to update actual gui/controller state
+class gui_param_listener
+{
+public:
+  virtual ~gui_param_listener() {}
+  void gui_param_changed(int index, plain_value plain);
 
-// triggers clear/copy/swap
+  virtual void gui_param_end_changes(int index) = 0;
+  virtual void gui_param_begin_changes(int index) = 0;
+  virtual void gui_param_changing(int index, plain_value plain) = 0;
+};
+
+// triggers undo/redo
+class gui_undo_listener:
+public juce::MouseListener
+{
+  plugin_gui* const _gui;
+public:
+  void mouseUp(juce::MouseEvent const& event);
+  gui_undo_listener(plugin_gui* gui): _gui(gui) {}
+};
+
+// triggers clear/copy/swap/etc
 class gui_tab_listener:
 public juce::MouseListener
 {
@@ -75,36 +98,21 @@ public:
   _gui(gui), _global_index(global_index), _type(type), _component(component) { _component->addMouseListener(this, true); }
 };
 
-// tracking gui parameter changes
-// host binding is expected to update actual gui/controller state
-class gui_param_listener
-{
-public:
-  virtual ~gui_param_listener() {}
-  void gui_param_changed(int index, plain_value plain);
-
-  virtual void gui_param_end_changes(int index) = 0;
-  virtual void gui_param_begin_changes(int index) = 0;
-  virtual void gui_param_changing(int index, plain_value plain) = 0;
-};
-
 class plugin_gui:
 public juce::Component
 {
-  lnf* module_lnf(int index) 
-  { return _module_lnfs[index].get(); }
-  lnf* custom_lnf(int index) 
-  { return _custom_lnfs[index].get(); }
+  lnf* module_lnf(int index) { return _module_lnfs[index].get(); }
+  lnf* custom_lnf(int index) { return _custom_lnfs[index].get(); }
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_gui);
-  ~plugin_gui() { setLookAndFeel(nullptr); }
+  ~plugin_gui();
   plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state);
 
   void save_patch();
   void init_patch();
   void clear_patch();
-  
+
   void load_patch();
   void load_patch(std::string const& path, bool preset);
 
@@ -113,12 +121,6 @@ public:
   Component& make_init_button();
   Component& make_clear_button();
 
-  void reloaded();
-  void param_end_changes(int index);
-  void param_begin_changes(int index);
-  void param_changed(int index, plain_value plain);
-  void param_changing(int index, plain_value plain);
-
   void param_mouse_exit(int param);
   void param_mouse_enter(int param);
   void module_mouse_exit(int module);
@@ -126,10 +128,15 @@ public:
   void custom_mouse_exit(int section);
   void custom_mouse_enter(int section);
 
+  void reloaded();
+  void resized() override;
+  void param_end_changes(int index);
+  void param_begin_changes(int index);
+  void param_changed(int index, plain_value plain);
+  void param_changing(int index, plain_value plain);
+
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state() const { return _extra_state; }
-
-  void resized() override;
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   
   void remove_gui_listener(gui_listener* listener);
@@ -141,6 +148,7 @@ private:
   lnf _lnf;
   juce::TooltipWindow _tooltip;
   plugin_state* const _gui_state;
+  gui_undo_listener _undo_listener;
   plugin_base::extra_state* const _extra_state;
   std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
