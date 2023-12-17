@@ -285,7 +285,7 @@ cv_routing_menu_handler::module_menus() const
   plain_menu.name = "";
   plain_menu.menu_id = 0;
   plain_menu.actions = {
-    tab_menu_handler::copy_to, tab_menu_handler::move_to, tab_menu_handler::swap_with };
+    tab_menu_handler::copy_to, tab_menu_handler::swap_with };
   module_menu routing_menu;
   routing_menu.name = "With CV Routing";
   routing_menu.menu_id = 1;
@@ -304,7 +304,6 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
     switch (action)
     {
     case tab_menu_handler::copy_to: _state->copy_module_to(module, source_slot, target_slot); break;
-    case tab_menu_handler::move_to: _state->move_module_to(module, source_slot, target_slot); break;
     case tab_menu_handler::swap_with: _state->swap_module_with(module, source_slot, target_slot); break;
     default: assert(false); break;
     }
