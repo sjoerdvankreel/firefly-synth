@@ -456,8 +456,7 @@ audio_routing_menu_handler::module_menus() const
   cv_menu.menu_id = 1;
   cv_menu.name = "With CV Routing";
   cv_menu.actions = { 
-    tab_menu_handler::copy_to, tab_menu_handler::swap_with, 
-    tab_menu_handler::move_to, tab_menu_handler::insert_after, tab_menu_handler::insert_before };
+    tab_menu_handler::copy_to, tab_menu_handler::move_to, tab_menu_handler::swap_with };
   module_menu all_menu;
   all_menu.menu_id = 2;
   all_menu.name = "With CV & Audio Routing";
@@ -470,8 +469,64 @@ audio_routing_menu_handler::module_menus() const
 tab_menu_handler::menu_result 
 audio_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
 {
+  assert(menu_id == 0 || menu_id == 1 || menu_id == 2);
+  if(menu_id == 0)
+  {
+    assert(action == tab_menu_handler::copy_to);
+    _state->copy_module_to(module, source_slot, target_slot);
+    return {};
+  }
+
+  if(menu_id == 1)
+    switch (action)
+    {
+    case tab_menu_handler::copy_to: return with_cv_copy_to(module, source_slot, target_slot);
+    case tab_menu_handler::move_to: with_cv_move_to(module, source_slot, target_slot); return {};
+    case tab_menu_handler::swap_with: with_cv_swap_with(module, source_slot, target_slot); return {};
+    default: assert(false); return {};
+    }
+
   return {};
 }
+
+void 
+audio_routing_menu_handler::clear_cv_route(int route)
+{
+  auto const& cv_topo = _state->desc().plugin->modules[_cv_params.matrix_module];
+  for (int p = 0; p < cv_topo.params.size(); p++)
+    _state->set_plain_at(_cv_params.matrix_module, 0, p, route, cv_topo.params[p].domain.default_plain(0, route));
+}
+
+void 
+audio_routing_menu_handler::with_cv_move_to(int module, int source_slot, int target_slot)
+{
+  _state->move_module_to(module, source_slot, target_slot);
+  auto const& cv_topo = _state->desc().plugin->modules[_cv_params.matrix_module];
+  for (int r = 0; r < cv_topo.params[_cv_params.on_param].info.slot_count; r++)
+    if (_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.on_param, r).step() != _cv_params.off_value)
+      if(is_cv_selected(r, module, target_slot, _cv_params.targets))
+        clear_cv_route(r);
+      else
+        update_matched_cv_slot(r, module, source_slot, target_slot);
+}
+
+void 
+audio_routing_menu_handler::with_cv_swap_with(int module, int source_slot, int target_slot)
+{
+  _state->swap_module_with(module, source_slot, target_slot);
+  auto const& cv_topo = _state->desc().plugin->modules[_cv_params.matrix_module];
+  for (int r = 0; r < cv_topo.params[_cv_params.on_param].info.slot_count; r++)
+    if (_state->get_plain_at(_cv_params.matrix_module, 0, _cv_params.on_param, r).step() != _cv_params.off_value)
+      if (!update_matched_cv_slot(r, module, source_slot, target_slot))
+        update_matched_cv_slot(r, module, target_slot, source_slot);
+}
+
+tab_menu_handler::menu_result
+audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int target_slot)
+{
+  return {};
+}
+
 
 
 #if 0
@@ -540,7 +595,7 @@ audio_routing_menu_handler::clear_all(int menu, int module)
     clear(menu, module, i);
   return {};
 }
-
+void clear_cv_route(int slot, int route);
 tab_menu_result
 audio_routing_menu_handler::clear(int menu, int module, int slot)
 {
@@ -573,6 +628,8 @@ audio_routing_menu_handler::clear(int menu, int module, int slot)
     }
   return {};
 }
+
+
 
 tab_menu_result
 audio_routing_menu_handler::copy(int menu, int module, int source_slot, int target_slot)
