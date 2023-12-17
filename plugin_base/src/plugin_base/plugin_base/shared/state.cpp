@@ -144,7 +144,11 @@ plugin_state::copy_module_to(int index, int source_slot, int target_slot)
   auto const& topo = desc().plugin->modules[index];
   for (int p = 0; p < topo.params.size(); p++)
     for (int pi = 0; pi < topo.params[p].info.slot_count; pi++)
-      set_plain_at(index, target_slot, p, pi, get_plain_at(index, source_slot, p, pi));
+    {
+      auto slot_selector = topo.params[p].gui.bindings.enabled.slot_selector;
+      if(slot_selector == nullptr || slot_selector(target_slot))
+        set_plain_at(index, target_slot, p, pi, get_plain_at(index, source_slot, p, pi));
+    }
 }
 
 void 
@@ -154,9 +158,12 @@ plugin_state::swap_module_with(int index, int source_slot, int target_slot)
   for (int p = 0; p < topo.params.size(); p++)
     for (int pi = 0; pi < topo.params[p].info.slot_count; pi++)
     {
+      auto slot_selector = topo.params[p].gui.bindings.enabled.slot_selector;
       plain_value target = get_plain_at(index, target_slot, p, pi);
-      set_plain_at(index, target_slot, p, pi, get_plain_at(index, source_slot, p, pi));
-      set_plain_at(index, source_slot, p, pi, target);
+      if (slot_selector == nullptr || slot_selector(target_slot))
+        set_plain_at(index, target_slot, p, pi, get_plain_at(index, source_slot, p, pi));
+      if (slot_selector == nullptr || slot_selector(source_slot))
+        set_plain_at(index, source_slot, p, pi, target);
     }
 }
 
