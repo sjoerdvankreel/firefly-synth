@@ -39,8 +39,7 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
   return result;
 }
 
-// TODO static
-tab_menu_handler::menu_result
+static tab_menu_handler::menu_result
 make_copy_failed_result(std::string const& matrix_name)
 {
   tab_menu_handler::menu_result result;
@@ -523,6 +522,39 @@ audio_routing_menu_handler::move_audio_to(int module, int source_slot, int targe
   }
 }
 
+void
+audio_routing_menu_handler::with_all_clear_all(int module)
+{
+  auto const& topo = _state->desc().plugin->modules[module];
+  for (int i = 0; i < topo.info.slot_count; i++)
+    with_all_clear(module, i);
+}
+
+void
+audio_routing_menu_handler::with_all_insert_before(int module, int slot)
+{
+  // move all before slot to the left
+  with_all_clear(module, 0);
+  for (int i = 0; i < slot - 1; i++)
+  {
+    with_cv_move_to(module, i + 1, i);
+    move_audio_to(module, i + 1, i);
+  }
+}
+
+void
+audio_routing_menu_handler::with_all_insert_after(int module, int slot)
+{
+  // move all after slot to the right
+  auto const& topo = _state->desc().plugin->modules[module];
+  with_all_clear(module, topo.info.slot_count - 1);
+  for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
+  {
+    with_cv_move_to(module, i - 1, i);
+    move_audio_to(module, i - 1, i);
+  }
+}
+
 void 
 audio_routing_menu_handler::with_cv_move_to(int module, int source_slot, int target_slot)
 {
@@ -579,14 +611,6 @@ audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int tar
 }
 
 void 
-audio_routing_menu_handler::with_all_clear_all(int module)
-{
-  auto const& topo = _state->desc().plugin->modules[module];
-  for (int i = 0; i < topo.info.slot_count; i++)
-    with_all_clear( module, i);
-}
-
-void 
 audio_routing_menu_handler::with_all_clear(int module, int slot)
 { 
   // set any route matching this module to all defaults for cv matrix
@@ -615,24 +639,6 @@ audio_routing_menu_handler::with_all_clear(int module, int slot)
           _state->set_plain_at(matrix, 0, p, r, audio_topo.params[p].domain.default_plain(0, r));
     }
   }
-}
-
-void 
-audio_routing_menu_handler::with_all_insert_after(int module, int slot)
-{
-  // move all after slot to the right
-  auto const& topo = _state->desc().plugin->modules[module];
-  with_all_clear(module, topo.info.slot_count - 1);
-  for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
-  {
-    with_cv_move_to(module, i - 1, i);
-    move_audio_to(module, i - 1, i);
-  }
-}
-
-void 
-audio_routing_menu_handler::with_all_insert_before(int module, int slot)
-{
 }
 
 }

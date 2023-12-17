@@ -23,16 +23,11 @@ more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 do 5 am and 5 fm routes
 make all stuff visible / not tabbed
-do "with audio/cv/all routing"
-double check all routing menu handlers
-prevent routing handlers from making invalid gui values
 undo/redo stack
 do mseg someday
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 do "insert fx" menu option
 drop "or time into scratch" & friends?
-insert after/clear all/insert before
-drop with audio routing that might invalidate stuff
 am clicks
 
 * get some linux folks to comment (ycollete?)
