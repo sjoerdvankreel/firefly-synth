@@ -88,7 +88,7 @@ plugin_state::undo()
   assert(_undo_entries.size() > 0);
   assert(0 < _undo_position && _undo_position <= _undo_entries.size());
   _undo_position--;
-  copy_from(_undo_entries[_undo_position]->state);
+  copy_from(_undo_entries[_undo_position]->state_before);
 }
 
 void 
@@ -96,14 +96,14 @@ plugin_state::redo()
 {
   assert(_undo_entries.size() > 0);
   assert(0 <= _undo_position && _undo_position < _undo_entries.size());
-  copy_from(_undo_entries[_undo_position]->state);
+  copy_from(_undo_entries[_undo_position]->state_after);
   _undo_position++;
 }
 
 void
 plugin_state::begin_undo_region()
 {
-  if(_undo_region == 0) _undo_state = jarray<plain_value, 4>(_state);
+  if(_undo_region == 0) _undo_state_before = jarray<plain_value, 4>(_state);
   _undo_region++;
   assert(_undo_region > 0);
 }
@@ -116,7 +116,8 @@ plugin_state::end_undo_region(std::string const& name)
   if(_undo_region != 0) return;
   auto entry = std::make_shared<undo_entry>();
   entry->name = name;
-  entry->state = jarray<plain_value, 4>(_undo_state);
+  entry->state_after = jarray<plain_value, 4>(_state);
+  entry->state_before = jarray<plain_value, 4>(_undo_state_before);
   _undo_entries.push_back(entry);
   if(_undo_entries.size() > max_undo_size) 
     _undo_entries.erase(_undo_entries.begin());

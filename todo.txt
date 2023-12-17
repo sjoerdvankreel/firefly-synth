@@ -29,6 +29,7 @@ do different ui layout, larges graphs, load/save/preset etc on 1 line below grap
 do "insert fx" menu option
 drop "or time into scratch" & friends?
 am clicks on low freq
+check undo performance (does it copy on automation/output changes?)
 
 * get some linux folks to comment (ycollete?)
 * continuing
