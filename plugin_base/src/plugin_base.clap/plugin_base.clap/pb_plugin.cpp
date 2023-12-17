@@ -70,6 +70,20 @@ _to_audio_events(std::make_unique<event_queue>(default_q_size))
 }
 
 void
+pb_plugin::gui_param_begin_changes(int index)
+{
+  _gui_state.begin_undo_region();
+  push_to_audio(index, sync_event_type::begin_edit);
+}
+
+void
+pb_plugin::gui_param_end_changes(int index) 
+{ 
+  push_to_audio(index, sync_event_type::end_edit); 
+  _gui_state.end_undo_region("Change " + _gui_state.desc().params[index]->full_name);
+}
+
+void
 pb_plugin::param_state_changed(int index, plain_value plain)
 {
   if (_gui_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
