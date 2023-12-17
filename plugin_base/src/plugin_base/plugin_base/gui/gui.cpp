@@ -21,27 +21,33 @@ static int const margin_content = 2;
 static std::string const extra_state_tab_index = "tab";
 static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
+static std::vector<std::string> tab_menu_module_actions = { 
+  "", "Clear", "Clear All", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
 
 static void
 fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots, std::set<int> const& actions)
 {
   if(actions.contains(tab_menu_handler::clear))
-    menu.addItem(base_id + tab_menu_handler::clear * 100, "Clear");
+    menu.addItem(base_id + tab_menu_handler::clear * 100, 
+      tab_menu_module_actions[tab_menu_handler::clear]);
   if (slots > 1)
   {
     if (actions.contains(tab_menu_handler::clear_all))
-      menu.addItem(base_id + tab_menu_handler::clear_all * 100, "Clear All");
+      menu.addItem(base_id + tab_menu_handler::clear_all * 100, 
+        tab_menu_module_actions[tab_menu_handler::clear_all]);
     if (actions.contains(tab_menu_handler::insert_before))
-      menu.addItem(base_id + tab_menu_handler::insert_before * 100, "Insert Before", slot > 0);
+      menu.addItem(base_id + tab_menu_handler::insert_before * 100, 
+        tab_menu_module_actions[tab_menu_handler::insert_before], slot > 0);
     if (actions.contains(tab_menu_handler::insert_after))
-      menu.addItem(base_id + tab_menu_handler::insert_after * 100, "Insert After", slot < slots - 1);
+      menu.addItem(base_id + tab_menu_handler::insert_after * 100, 
+        tab_menu_module_actions[tab_menu_handler::insert_after], slot < slots - 1);
 
     if (actions.contains(tab_menu_handler::copy_to))
     {
       PopupMenu copy_menu;
         for (int i = 0; i < slots; i++)
           copy_menu.addItem(base_id + tab_menu_handler::copy_to * 100 + i, std::to_string(i + 1), i != slot);
-      menu.addSubMenu("Copy to", copy_menu);
+      menu.addSubMenu(tab_menu_module_actions[tab_menu_handler::copy_to], copy_menu);
     }
 
     if (actions.contains(tab_menu_handler::move_to))
@@ -49,7 +55,7 @@ fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots, std::set
       PopupMenu move_menu;
       for (int i = 0; i < slots; i++)
         move_menu.addItem(base_id + tab_menu_handler::move_to * 100 + i, std::to_string(i + 1), i != slot);
-      menu.addSubMenu("Move to", move_menu);
+      menu.addSubMenu(tab_menu_module_actions[tab_menu_handler::move_to], move_menu);
     }
 
     if (actions.contains(tab_menu_handler::swap_with))
@@ -57,7 +63,7 @@ fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots, std::set
       PopupMenu swap_menu;
       for (int i = 0; i < slots; i++)
         swap_menu.addItem(base_id + tab_menu_handler::swap_with * 100 + i, std::to_string(i + 1), i != slot);
-      menu.addSubMenu("Swap with", swap_menu);
+      menu.addSubMenu(tab_menu_module_actions[tab_menu_handler::swap_with], swap_menu);
     }
   }
 }
@@ -214,11 +220,20 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
     auto extra_menus = handler->extra_menus();
     auto module_menus = handler->module_menus();
     if (0 < id && id < 10000)
-      result = handler->execute_module(module_menus[id / 1000].menu_id, (id % 1000) / 100, _module, _slot, id % 100);
+    {
+      int action_id = (id % 1000) / 100;
+      int menu_id = module_menus[id / 1000].menu_id;
+      _state->begin_undo_region();
+      result = handler->execute_module(menu_id, action_id, _module, _slot, id % 100);
+      _state->end_undo_region(tab_menu_module_actions[action_id]);
+    }
     else if(10000 <= id && id < 20000)
     {
       auto const& menu = extra_menus[(id - 10000) / 1000];
-      result = handler->execute_extra(menu.menu_id, menu.entries[((id - 10000) % 1000) / 100].action, _module, _slot);
+      auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
+      _state->begin_undo_region();
+      result = handler->execute_extra(menu.menu_id, action_entry.action, _module, _slot);
+      _state->end_undo_region(action_entry.title);
     }
     delete handler;
     if(!result.show_warning) return;
