@@ -736,8 +736,10 @@ plugin_gui::init_patch()
     if(result == 0)
     {
       _extra_state->clear();
+      _gui_state->begin_undo_region();
       _gui_state->init(state_init_type::default_);
       fire_state_loaded();
+      _gui_state->end_undo_region("Init patch");
     }
   });
 }
@@ -751,8 +753,10 @@ plugin_gui::clear_patch()
     if (result == 0)
     {
       _extra_state->clear();
+      _gui_state->begin_undo_region();
       _gui_state->init(state_init_type::minimal);
       fire_state_loaded();
+      _gui_state->end_undo_region("Clear patch");
     }
   });
 }
@@ -786,6 +790,7 @@ plugin_gui::load_patch()
 void
 plugin_gui::load_patch(std::string const& path, bool preset)
 {
+  _gui_state->begin_undo_region();
   auto icon = MessageBoxIconType::WarningIcon;
   auto result = plugin_io_load_file_all(path, *_gui_state, *_extra_state);
   if (result.error.size())
@@ -795,9 +800,10 @@ plugin_gui::load_patch(std::string const& path, bool preset)
     return;
   }
 
-  if(preset)
-    _extra_state->clear();
+  if(preset) _extra_state->clear();
   fire_state_loaded();
+  _gui_state->end_undo_region(preset? "Load Preset": "Load Patch");
+
   if (result.warnings.size())
   {
     String warnings;
