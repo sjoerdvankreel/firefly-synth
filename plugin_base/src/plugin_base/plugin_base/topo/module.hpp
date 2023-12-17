@@ -23,13 +23,6 @@ class module_engine;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
-struct tab_menu_result
-{
-  bool show_warning;
-  std::string title;
-  std::string content;
-};
-
 // allows to extend right-click menu on tab headers
 class tab_menu_handler {
 protected:
@@ -37,19 +30,19 @@ protected:
   tab_menu_handler(plugin_state* state): _state(state) {}
 
 public:
+  struct extra_menu_entry { int action; std::string title; };
+  struct module_menu { int menu_id; std::string name; std::set<int> actions; };
+  struct extra_menu { int menu_id; std::string name; std::vector<extra_menu_entry> entries; };
+  struct menu_result { bool show_warning; std::string title; std::string content; };
+  enum module_action { clear, clear_all, insert_after, insert_before, copy_to, move_to, swap_with };
+
   virtual ~tab_menu_handler() {}
-  virtual std::vector<std::string> module_menu_names() const { return {}; };
-  virtual std::vector<std::string> const extra_items() const { return {}; };
+  virtual std::vector<module_menu> module_menus() const { return {}; };
+  virtual std::vector<extra_menu> const extra_menus() const { return {}; };
 
   // pop up a message box if these return a non-empty text
-  virtual tab_menu_result extra(int module, int slot, int action) { return {}; };
-  virtual tab_menu_result clear_all(int menu, int module) { return {}; };
-  virtual tab_menu_result clear(int menu, int module, int slot) { return {}; };
-  virtual tab_menu_result insert_after(int menu, int module, int slot) { return {}; };
-  virtual tab_menu_result insert_before(int menu, int module, int slot) { return {}; };
-  virtual tab_menu_result move(int menu, int module, int source_slot, int target_slot) { return {}; };
-  virtual tab_menu_result copy(int menu, int module, int source_slot, int target_slot) { return {}; };
-  virtual tab_menu_result swap(int menu, int module, int source_slot, int target_slot) { return {}; };
+  virtual menu_result execute_extra(int menu_id, int action, int module, int slot) { return {}; };
+  virtual menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) { return {}; };
 };
 
 typedef std::function<void(plugin_state& state)>

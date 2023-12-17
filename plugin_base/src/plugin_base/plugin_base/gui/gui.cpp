@@ -25,26 +25,26 @@ static BorderSize<int> const param_section_border(16, 6, 6, 6);
 static void
 fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots)
 {
-  menu.addItem(base_id, "Clear");
+  menu.addItem(base_id + 100, "Clear");
   if (slots > 1)
   {
-    menu.addItem(base_id + 100, "Clear All");
-    menu.addItem(base_id + 200, "Insert Before", slot > 0);
-    menu.addItem(base_id + 300, "Insert After", slot < slots - 1);
+    menu.addItem(base_id + 200, "Clear All");
+    menu.addItem(base_id + 300, "Insert Before", slot > 0);
+    menu.addItem(base_id + 400, "Insert After", slot < slots - 1);
 
     PopupMenu copy_menu;
     for (int i = 0; i < slots; i++)
-      copy_menu.addItem(base_id + 400 + i, std::to_string(i + 1), i != slot);
+      copy_menu.addItem(base_id + 500 + i, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Copy to", copy_menu);
 
     PopupMenu move_menu;
     for (int i = 0; i < slots; i++)
-      move_menu.addItem(base_id + 500 + i, std::to_string(i + 1), i != slot);
+      move_menu.addItem(base_id + 600 + i, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Move to", move_menu);
 
     PopupMenu swap_menu;
     for (int i = 0; i < slots; i++)
-      swap_menu.addItem(base_id + 600 + i, std::to_string(i + 1), i != slot);
+      swap_menu.addItem(base_id + 700 + i, std::to_string(i + 1), i != slot);
     menu.addSubMenu("Swap with", swap_menu);
   }
 }
@@ -147,49 +147,41 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
 
   PopupMenu menu;
   std::unique_ptr<tab_menu_handler> handler = {};
-  fill_module_tab_menu(menu, 1000, _slot, slots);
   if(topo.gui.menu_handler_factory != nullptr)
   {
     handler = topo.gui.menu_handler_factory(_state);
-    for(int m = 0; m < handler->module_menu_names().size(); m++)
+    auto module_menus = handler->module_menus();
+    for(int m = 0; m < module_menus.size(); m++)
     {
-      menu.addColouredItem(std::numeric_limits<int>::max(), handler->module_menu_names()[m], topo.gui.colors.tab_text, false, false, nullptr);
-      fill_module_tab_menu(menu, (m + 2) * 1000, _slot, slots);
+      if(!module_menus[m].name.empty())
+        menu.addColouredItem(-1, module_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+      fill_module_tab_menu(menu, m * 1000, _slot, slots);
     }
-    auto extra_items = handler->extra_items();
-    for(int i = 0; i < extra_items.size(); i++)
-      menu.addItem(10000 + i, extra_items[i]);
+    auto extra_menus = handler->extra_menus();
+    for(int m = 0; m < extra_menus.size(); m++)
+    {
+      if (!extra_menus[m].name.empty())
+        menu.addColouredItem(-1, extra_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+      for(int e = 0; e < extra_menus[m].entries.size(); e++)
+        menu.addItem(10000 + m * 1000 + e * 100, extra_menus[m].entries[e].title);
+    }
   }
 
   PopupMenu::Options options;
   options = options.withTargetComponent(_button);
   menu.setLookAndFeel(&_button->getLookAndFeel());
   menu.showMenuAsync(options, [this, handler = handler.release()](int id) {
-    tab_menu_result result = {};
-    if(id == 1000) _state->clear_module(_module, _slot);
-    else if (id == 1100) _state->clear_module_all(_module);
-    else if (id == 1200) _state->insert_module_before(_module, _slot);
-    else if (id == 1300) _state->insert_module_after(_module, _slot);
-    else if (1400 <= id && id < 1500) _state->copy_module_to(_module, _slot, id - 1400);
-    else if(1500 <= id && id < 1600) _state->move_module_to(_module, _slot, id - 1500);
-    else if(1600 <= id && id < 1700) _state->swap_module_with(_module, _slot, id - 1600);
-    else if(2000 <= id && id < 10000)
+    tab_menu_handler::menu_result result = {};
+    auto extra_menus = handler->extra_menus();
+    auto module_menus = handler->module_menus();
+    if (0 < id && id < 10000)
+      result = handler->execute_module(module_menus[id / 1000].menu_id, (id % 1000) / 100, _module, _slot, id % 100);
+    else if(10000 <= id && id < 20000)
     {
-      int target_slot = id % 100;
-      int menu = (id - 2000) / 1000;
-      int action = (id % 1000) / 100;
-      if(action == 0) result = handler->clear(menu, _module, _slot);
-      else if (action == 1) result = handler->clear_all(menu, _module);
-      else if (action == 2) result = handler->insert_before(menu, _module, _slot);
-      else if (action == 3) result = handler->insert_after(menu, _module, _slot);
-      else if(action == 4) result = handler->copy(menu, _module, _slot, target_slot);
-      else if(action == 5) result = handler->move(menu, _module, _slot, target_slot);
-      else if(action == 6) result = handler->swap(menu, _module, _slot, target_slot);
-      else assert(false);
+      auto const& menu = extra_menus[(id - 10000) / 1000];
+      result = handler->execute_extra(menu.menu_id, menu.entries[((id - 10000) % 1000) / 100].action, _module, _slot);
     }
-    else if(10000 <= id) result = handler->extra(_module, _slot, id - 10000);
     delete handler;
-
     if(!result.show_warning) return;
     auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::WarningIcon, result.title, result.content);
     NativeMessageBox::showAsync(options, [](int){});

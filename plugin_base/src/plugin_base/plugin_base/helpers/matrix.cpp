@@ -39,10 +39,11 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
   return result;
 }
 
-static tab_menu_result
+// TODO static 
+tab_menu_handler::menu_result
 make_copy_failed_result(std::string const& matrix_name)
 {
-  tab_menu_result result;
+  tab_menu_handler::menu_result result;
   result.show_warning = true;
   result.title = "Copy failed";
   result.content = "No slots available for " + matrix_name + " matrix.";
@@ -197,9 +198,30 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules)
   return result;
 }
 
-tab_menu_result
-tidy_matrix_menu_handler::extra(int module, int slot, int action)
+std::vector<tab_menu_handler::extra_menu> const 
+tidy_matrix_menu_handler::extra_menus() const
 {
+  extra_menu result;
+  result.name = "";
+  result.menu_id = 0;
+  result.entries = { { 0, "Tidy"}, { 1, "Clear"} };
+  return { result };
+}
+
+tab_menu_handler::menu_result 
+tidy_matrix_menu_handler::execute_extra(int menu_id, int action, int module, int slot)
+{
+  assert(menu_id == 0);
+  assert(action == 0 || action == 1);
+
+  // clear
+  if(action == 1)
+  {
+    _state->clear_module(module, slot);
+    return {};
+  }
+
+  // keep track of current values
   auto const& topo = _state->desc().plugin->modules[module];
   std::vector<std::map<int, plain_value>> route_value_maps;
   int route_count = topo.params[_on_param].info.slot_count;
@@ -214,18 +236,15 @@ tidy_matrix_menu_handler::extra(int module, int slot, int action)
   _state->clear_module(module, slot);
 
   // sort
-  if (action == 1)
-    std::sort(route_value_maps.begin(), route_value_maps.end(), [this, &topo](auto const& l, auto const& r) {
-      for (int p = 0; p < _sort_params.size(); p++)
-      {
-        assert(!topo.params[_sort_params[p]].domain.is_real());
-        if(l.at(_sort_params[p]).step() < r.at(_sort_params[p]).step())
-          return true;
-        if (l.at(_sort_params[p]).step() > r.at(_sort_params[p]).step())
-          return false;
-      }
-      return false;
-    });
+  std::sort(route_value_maps.begin(), route_value_maps.end(), [this, &topo](auto const& l, auto const& r) {
+    for (int p = 0; p < _sort_params.size(); p++)
+    {
+      assert(!topo.params[_sort_params[p]].domain.is_real());
+      if(l.at(_sort_params[p]).step() < r.at(_sort_params[p]).step()) return true;
+      if (l.at(_sort_params[p]).step() > r.at(_sort_params[p]).step()) return false;
+    }
+    return false;
+  });
 
   // tidy
   for (int r = 0; r < route_value_maps.size(); r++)
@@ -258,6 +277,8 @@ cv_routing_menu_handler::update_matched_slot(
   _state->set_raw_at(matrix, 0, param, route, (int)(replace_iter - mappings.begin()));
   return true;
 }
+
+#if 0
 
 tab_menu_result
 cv_routing_menu_handler::move(int menu, int module, int source_slot, int target_slot)
@@ -395,6 +416,8 @@ cv_routing_menu_handler::copy(int menu, int module, int source_slot, int target_
   return {};
 }
 
+#endif
+
 bool 
 audio_routing_menu_handler::is_audio_selected(
   int matrix, int param, int route, int module, int slot,
@@ -436,6 +459,8 @@ audio_routing_menu_handler::update_matched_cv_slot(
   _state->set_raw_at(_cv_params.matrix_module, 0, _cv_params.target_param, route, (int)(replace_iter - _cv_params.targets.begin()));
   return true;
 }
+
+#if 0
 
 tab_menu_result
 audio_routing_menu_handler::move(int menu, int module, int source_slot, int target_slot)
@@ -605,5 +630,7 @@ audio_routing_menu_handler::copy(int menu, int module, int source_slot, int targ
 
   return {};
 }
+
+#endif
 
 }

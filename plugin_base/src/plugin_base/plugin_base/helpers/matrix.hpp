@@ -66,9 +66,8 @@ public tab_menu_handler {
   std::vector<int> _sort_params;
 
 public:
-  tab_menu_result extra(int module, int slot, int action) override;
-  std::vector<std::string> const extra_items() const override { return { "Tidy", "Sort" }; };
-
+  std::vector<extra_menu> const extra_menus() const override;
+  menu_result execute_extra(int menu_id, int action, int module, int slot) override;
   tidy_matrix_menu_handler(plugin_state* state, int on_param, int off_value, std::vector<int> const& sort_params) : 
   tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _sort_params(sort_params) {}
 };
@@ -89,6 +88,7 @@ public tab_menu_handler {
     int to_slot, std::vector<module_output_mapping> const& mappings);
 
 public:
+#if 0
   std::vector<std::string> module_menu_names() const override { return { "With CV Routing" }; };
 
   tab_menu_result clear_all(int menu, int module) override;
@@ -98,6 +98,7 @@ public:
   tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result swap(int menu, int module, int source_slot, int target_slot) override;
+#endif
 
   cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, 
     int off_value, std::map<int, std::vector<module_output_mapping>> const& matrix_sources):
@@ -125,6 +126,7 @@ public tab_menu_handler {
     int to_slot, std::vector<module_topo_mapping> const& mappings);
 
 public:
+#if 0
   std::vector<std::string> module_menu_names() const override { return { "With CV Routing", "With CV & Audio Routing" }; };
 
   tab_menu_result clear_all(int menu, int module) override;
@@ -132,6 +134,7 @@ public:
   tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
   tab_menu_result swap(int menu, int module, int source_slot, int target_slot) override;
+#endif
 
   audio_routing_menu_handler(plugin_state* state, 
     audio_routing_cv_params const& cv_params, std::vector<audio_routing_audio_params> const& audio_params):

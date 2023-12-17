@@ -217,7 +217,7 @@ lnf::drawPopupMenuItemWithOptions(
   PopupMenu::Item const& item, PopupMenu::Options const& options)
 {
   PopupMenu::Item new_item = item;
-  if(item.itemID == std::numeric_limits<int>::max())
+  if(item.itemID == -1)
     new_item.isEnabled = true; // just for painting submenu headers, not actually enabled
   LookAndFeel_V4::drawPopupMenuItemWithOptions(g, area, highlighted, new_item, options);
 }

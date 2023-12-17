@@ -16,7 +16,7 @@ fill_popup_menu(param_domain const& domain, PopupMenu& menu, gui_submenu const* 
   for(int i = 0; i < data->children.size(); i++)
   {
     if (data->children[i]->is_subheader)
-      menu.addColouredItem(std::numeric_limits<int>::max(), data->children[i]->name, subheader_color, false, false, nullptr);
+      menu.addColouredItem(-1, data->children[i]->name, subheader_color, false, false, nullptr);
     else
     {
       PopupMenu child;
