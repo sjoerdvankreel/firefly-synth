@@ -445,6 +445,35 @@ audio_routing_menu_handler::update_matched_cv_slot(
   return true;
 }
 
+std::vector<tab_menu_handler::module_menu>
+audio_routing_menu_handler::module_menus() const
+{
+  module_menu plain_menu;
+  plain_menu.menu_id = 0;
+  plain_menu.name = "";
+  plain_menu.actions = { tab_menu_handler::copy_to };
+  module_menu cv_menu;
+  cv_menu.menu_id = 1;
+  cv_menu.name = "With CV Routing";
+  cv_menu.actions = { 
+    tab_menu_handler::copy_to, tab_menu_handler::swap_with, 
+    tab_menu_handler::move_to, tab_menu_handler::insert_after, tab_menu_handler::insert_before };
+  module_menu all_menu;
+  all_menu.menu_id = 2;
+  all_menu.name = "With CV & Audio Routing";
+  all_menu.actions = {
+    tab_menu_handler::clear, tab_menu_handler::clear_all,
+    tab_menu_handler::insert_after, tab_menu_handler::insert_before };
+  return { plain_menu, cv_menu, all_menu };
+}
+
+tab_menu_handler::menu_result 
+audio_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
+{
+  return {};
+}
+
+
 #if 0
 
 tab_menu_result

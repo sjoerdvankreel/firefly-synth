@@ -124,15 +124,8 @@ public tab_menu_handler {
     int to_slot, std::vector<module_topo_mapping> const& mappings);
 
 public:
-#if 0
-  std::vector<std::string> module_menu_names() const override { return { "With CV Routing", "With CV & Audio Routing" }; };
-
-  tab_menu_result clear_all(int menu, int module) override;
-  tab_menu_result clear(int menu, int module, int slot) override;
-  tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
-  tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
-  tab_menu_result swap(int menu, int module, int source_slot, int target_slot) override;
-#endif
+  std::vector<module_menu> module_menus() const override;
+  menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
 
   audio_routing_menu_handler(plugin_state* state, 
     audio_routing_cv_params const& cv_params, std::vector<audio_routing_audio_params> const& audio_params):
