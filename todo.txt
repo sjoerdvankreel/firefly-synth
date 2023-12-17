@@ -30,6 +30,9 @@ do "insert fx" menu option
 drop "or time into scratch" & friends?
 am clicks on low freq
 check undo performance (does it copy on automation/output changes?)
+do CLAP undo
+do menu items undo
+do NOT undo with load state from host
 
 * get some linux folks to comment (ycollete?)
 * continuing
