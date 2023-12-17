@@ -23,29 +23,42 @@ static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 
 static void
-fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots)
+fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots, std::set<int> const& actions)
 {
-  menu.addItem(base_id + 100, "Clear");
+  if(actions.contains(tab_menu_handler::clear))
+    menu.addItem(base_id + tab_menu_handler::clear * 100, "Clear");
   if (slots > 1)
   {
-    menu.addItem(base_id + 200, "Clear All");
-    menu.addItem(base_id + 300, "Insert Before", slot > 0);
-    menu.addItem(base_id + 400, "Insert After", slot < slots - 1);
+    if (actions.contains(tab_menu_handler::clear_all))
+      menu.addItem(base_id + tab_menu_handler::clear_all * 100, "Clear All");
+    if (actions.contains(tab_menu_handler::insert_before))
+      menu.addItem(base_id + tab_menu_handler::insert_before * 100, "Insert Before", slot > 0);
+    if (actions.contains(tab_menu_handler::insert_after))
+      menu.addItem(base_id + tab_menu_handler::insert_after * 100, "Insert After", slot < slots - 1);
 
-    PopupMenu copy_menu;
-    for (int i = 0; i < slots; i++)
-      copy_menu.addItem(base_id + 500 + i, std::to_string(i + 1), i != slot);
-    menu.addSubMenu("Copy to", copy_menu);
+    if (actions.contains(tab_menu_handler::copy_to))
+    {
+      PopupMenu copy_menu;
+        for (int i = 0; i < slots; i++)
+          copy_menu.addItem(base_id + tab_menu_handler::copy_to * 100 + i, std::to_string(i + 1), i != slot);
+      menu.addSubMenu("Copy to", copy_menu);
+    }
 
-    PopupMenu move_menu;
-    for (int i = 0; i < slots; i++)
-      move_menu.addItem(base_id + 600 + i, std::to_string(i + 1), i != slot);
-    menu.addSubMenu("Move to", move_menu);
+    if (actions.contains(tab_menu_handler::move_to))
+    {
+      PopupMenu move_menu;
+      for (int i = 0; i < slots; i++)
+        move_menu.addItem(base_id + tab_menu_handler::move_to * 100 + i, std::to_string(i + 1), i != slot);
+      menu.addSubMenu("Move to", move_menu);
+    }
 
-    PopupMenu swap_menu;
-    for (int i = 0; i < slots; i++)
-      swap_menu.addItem(base_id + 700 + i, std::to_string(i + 1), i != slot);
-    menu.addSubMenu("Swap with", swap_menu);
+    if (actions.contains(tab_menu_handler::swap_with))
+    {
+      PopupMenu swap_menu;
+      for (int i = 0; i < slots; i++)
+        swap_menu.addItem(base_id + tab_menu_handler::swap_with * 100 + i, std::to_string(i + 1), i != slot);
+      menu.addSubMenu("Swap with", swap_menu);
+    }
   }
 }
 
@@ -155,7 +168,7 @@ gui_tab_listener::mouseUp(MouseEvent const& event)
     {
       if(!module_menus[m].name.empty())
         menu.addColouredItem(-1, module_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
-      fill_module_tab_menu(menu, m * 1000, _slot, slots);
+      fill_module_tab_menu(menu, m * 1000, _slot, slots, module_menus[m].actions);
     }
     auto extra_menus = handler->extra_menus();
     for(int m = 0; m < extra_menus.size(); m++)

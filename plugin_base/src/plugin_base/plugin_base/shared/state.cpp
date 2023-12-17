@@ -101,35 +101,6 @@ plugin_state::move_module_to(int index, int source_slot, int target_slot)
   clear_module(index, source_slot);
 }
 
-void
-plugin_state::clear_module_all(int index)
-{
-  auto const& topo = desc().plugin->modules[index];
-  for (int mi = 0; mi < topo.info.slot_count; mi++)
-    clear_module(index, mi);
-}
-
-void
-plugin_state::insert_module_after(int index, int slot)
-{
-  auto const& topo = desc().plugin->modules[index];
-  assert(0 <= slot && slot < topo.info.slot_count - 1);
-  clear_module(index, topo.info.slot_count - 1);
-  for(int i = topo.info.slot_count - 1; i > slot + 1; i--)
-    move_module_to(index, i - 1, i);
-}
-
-void
-plugin_state::insert_module_before(int index, int slot)
-{
-  auto const& topo = desc().plugin->modules[index];
-  (void)topo;
-  assert(0 < slot && slot < topo.info.slot_count);
-  clear_module(index, 0);
-  for (int i = 0; i < slot - 1; i++)
-    move_module_to(index, i + 1, i);
-}
-
 void 
 plugin_state::clear_module(int index, int slot)
 {

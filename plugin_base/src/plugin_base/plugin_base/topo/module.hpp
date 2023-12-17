@@ -34,7 +34,7 @@ public:
   struct module_menu { int menu_id; std::string name; std::set<int> actions; };
   struct extra_menu { int menu_id; std::string name; std::vector<extra_menu_entry> entries; };
   struct menu_result { bool show_warning; std::string title; std::string content; };
-  enum module_action { clear, clear_all, insert_after, insert_before, copy_to, move_to, swap_with };
+  enum module_action { clear = 1, clear_all, insert_before, insert_after, copy_to, move_to, swap_with };
 
   virtual ~tab_menu_handler() {}
   virtual std::vector<module_menu> module_menus() const { return {}; };

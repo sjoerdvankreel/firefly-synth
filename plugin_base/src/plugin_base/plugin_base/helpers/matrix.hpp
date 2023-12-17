@@ -87,18 +87,17 @@ public tab_menu_handler {
     int matrix, int param, int route, int module, int from_slot, 
     int to_slot, std::vector<module_output_mapping> const& mappings);
 
-public:
-#if 0
-  std::vector<std::string> module_menu_names() const override { return { "With CV Routing" }; };
+  void clear_all(int module);
+  void clear(int module, int slot);
+  void insert_after(int module, int slot);
+  void insert_before(int module, int slot);
+  void copy_to(int module, int source_slot, int target_slot);
+  void move_to(int module, int source_slot, int target_slot);
+  void swap_with(int module, int source_slot, int target_slot);
 
-  tab_menu_result clear_all(int menu, int module) override;
-  tab_menu_result clear(int menu, int module, int slot) override;
-  tab_menu_result insert_after(int menu, int module, int slot) override;
-  tab_menu_result insert_before(int menu, int module, int slot) override;
-  tab_menu_result move(int menu, int module, int source_slot, int target_slot) override;
-  tab_menu_result copy(int menu, int module, int source_slot, int target_slot) override;
-  tab_menu_result swap(int menu, int module, int source_slot, int target_slot) override;
-#endif
+public:
+  std::vector<module_menu> module_menus() const override;
+  menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
 
   cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, 
     int off_value, std::map<int, std::vector<module_output_mapping>> const& matrix_sources):
