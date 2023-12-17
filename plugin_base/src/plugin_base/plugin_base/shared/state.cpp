@@ -123,6 +123,7 @@ void
 plugin_state::insert_module_before(int index, int slot)
 {
   auto const& topo = desc().plugin->modules[index];
+  (void)topo;
   assert(0 < slot && slot < topo.info.slot_count);
   clear_module(index, 0);
   for (int i = 0; i < slot - 1; i++)
@@ -133,6 +134,7 @@ void
 plugin_state::clear_module(int index, int slot)
 {
   auto const& topo = desc().plugin->modules[index];
+  (void)topo;
   for(int p = 0; p < topo.params.size(); p++)
     for(int pi = 0; pi < topo.params[p].info.slot_count; pi++)
       set_plain_at(index, slot, p, pi, topo.params[p].domain.default_plain(slot, pi));

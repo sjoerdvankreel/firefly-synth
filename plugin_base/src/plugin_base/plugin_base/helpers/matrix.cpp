@@ -309,6 +309,7 @@ cv_routing_menu_handler::insert_after(int menu, int module, int slot)
 {
   // move all after slot to the right
   auto const& topo = _state->desc().plugin->modules[module];
+  (void)topo;
   assert(0 <= slot && slot < topo.info.slot_count - 1);
   clear(menu, module, topo.info.slot_count - 1);
   for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
@@ -321,6 +322,7 @@ cv_routing_menu_handler::insert_before(int menu, int module, int slot)
 {
   // move all before slot to the left
   auto const& topo = _state->desc().plugin->modules[module];
+  (void)topo;
   assert(0 < slot && slot < topo.info.slot_count);
   clear(menu, module, 0);
   for (int i = 0; i < slot - 1; i++)
