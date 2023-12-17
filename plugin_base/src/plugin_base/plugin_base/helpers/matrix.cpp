@@ -508,6 +508,22 @@ audio_routing_menu_handler::clear_cv_route(int route)
 }
 
 void 
+audio_routing_menu_handler::move_audio_to(int module, int source_slot, int target_slot)
+{
+  for (int m = 0; m < _audio_params.size(); m++)
+  {
+    int matrix = _audio_params[m].matrix_module;
+    auto const& audio_topo = _state->desc().plugin->modules[matrix];
+    for (int r = 0; r < audio_topo.params[_audio_params[m].on_param].info.slot_count; r++)
+      if (_state->get_plain_at(matrix, 0, _audio_params[m].on_param, r).step() != _audio_params[m].off_value)
+      {
+        update_matched_audio_slot(matrix, _audio_params[m].source_param, r, module, source_slot, target_slot, _audio_params[m].sources);
+        update_matched_audio_slot(matrix, _audio_params[m].target_param, r, module, source_slot, target_slot, _audio_params[m].targets);
+      }
+  }
+}
+
+void 
 audio_routing_menu_handler::with_cv_move_to(int module, int source_slot, int target_slot)
 {
   _state->move_module_to(module, source_slot, target_slot);
@@ -604,6 +620,14 @@ audio_routing_menu_handler::with_all_clear(int module, int slot)
 void 
 audio_routing_menu_handler::with_all_insert_after(int module, int slot)
 {
+  // move all after slot to the right
+  auto const& topo = _state->desc().plugin->modules[module];
+  with_all_clear(module, topo.info.slot_count - 1);
+  for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
+  {
+    with_cv_move_to(module, i - 1, i);
+    move_audio_to(module, i - 1, i);
+  }
 }
 
 void 
