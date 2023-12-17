@@ -7,11 +7,18 @@
 #include <plugin_base/shared/utility.hpp>
 
 #include <map>
+#include <memory>
 #include <vector>
 
 namespace plugin_base {
 
 enum class state_init_type { empty, minimal, default_ };
+
+struct undo_entry
+{
+  std::string name;
+  jarray<plain_value, 4> state;
+};
 
 class state_listener
 {
@@ -28,9 +35,15 @@ public:
 };
 
 class plugin_state final {
+  static inline int const max_undo_size = 5;
+
+  int _undo_region = 0;
+  int _undo_position = 0;
   bool const _notify = {};
   jarray<plain_value, 4> _state = {};
   plugin_desc const* const _desc = {};
+  jarray<plain_value, 4> _undo_state = {};
+  std::vector<std::shared_ptr<undo_entry>> _undo_entries = {};
   std::vector<any_state_listener*> mutable _any_listeners = {};
   std::map<int, std::vector<state_listener*>> mutable _listeners = {};
 
@@ -45,7 +58,14 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
 
   void init(state_init_type init_type);
-  void copy_from(plugin_state const* state);
+  void copy_from(jarray<plain_value, 4> const& other);
+  
+  void undo();
+  void redo();
+  std::string undo_text();
+  std::string redo_text();
+  void begin_undo_region();
+  void end_undo_region(std::string const& name);
 
   plugin_desc const& desc() const { return *_desc; }
   jarray<plain_value, 4> const& state() const { return _state; }

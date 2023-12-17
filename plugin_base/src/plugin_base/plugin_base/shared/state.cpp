@@ -66,6 +66,65 @@ plugin_state::remove_listener(int index, state_listener* listener) const
   map_iter->second.erase(vector_iter);
 }
 
+std::string
+plugin_state::undo_text()
+{
+  if (_undo_position == 0) return "";
+  assert(0 < _undo_position && _undo_position <= _undo_entries.size());
+  return _undo_entries[_undo_position - 1]->name;
+}
+
+std::string
+plugin_state::redo_text()
+{
+  if(_undo_position == _undo_entries.size()) return "";
+  assert(0 <= _undo_position && _undo_position < _undo_entries.size());
+  return _undo_entries[_undo_position]->name;
+}
+
+void 
+plugin_state::undo()
+{
+  assert(_undo_entries.size() > 0);
+  assert(0 < _undo_position && _undo_position <= _undo_entries.size());
+  _undo_position--;
+  copy_from(_undo_entries[_undo_position]->state);
+}
+
+void 
+plugin_state::redo()
+{
+  assert(_undo_entries.size() > 0);
+  assert(0 <= _undo_position && _undo_position < _undo_entries.size());
+  copy_from(_undo_entries[_undo_position]->state);
+  _undo_position++;
+}
+
+void
+plugin_state::begin_undo_region()
+{
+  if(_undo_region == 0) _undo_state = jarray<plain_value, 4>(_state);
+  _undo_region++;
+}
+
+void 
+plugin_state::end_undo_region(std::string const& name)
+{
+  assert(_undo_region > 0);
+  _undo_region--;
+  if(_undo_region != 0) return;
+  auto entry = std::make_shared<undo_entry>();
+  entry->name = name;
+  entry->state = jarray<plain_value, 4>(_undo_state);
+  _undo_entries.push_back(entry);
+  _undo_position++;
+  if(_undo_entries.size() > max_undo_size) 
+  {
+    _undo_entries.erase(_undo_entries.begin());
+    _undo_position--;
+  }
+}
+
 bool 
 plugin_state::text_to_normalized_at_index(
   bool io, int index, std::string const& textual, normalized_value& normalized) const
@@ -141,7 +200,7 @@ plugin_state::swap_module_with(int index, int source_slot, int target_slot)
 }
 
 void 
-plugin_state::copy_from(plugin_state const* state)
+plugin_state::copy_from(jarray<plain_value, 4> const& other)
 {
   for (int m = 0; m < desc().plugin->modules.size(); m++)
   {
@@ -151,7 +210,7 @@ plugin_state::copy_from(plugin_state const* state)
       {
         auto const& param = module.params[p];
         for (int pi = 0; pi < param.info.slot_count; pi++)
-          set_plain_at(m, mi, p, pi, state->get_plain_at(m, mi, p, pi));
+          set_plain_at(m, mi, p, pi, other[m][mi][p][pi]);
       }
   }
 }

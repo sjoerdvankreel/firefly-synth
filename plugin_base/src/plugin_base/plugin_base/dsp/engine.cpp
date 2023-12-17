@@ -108,7 +108,7 @@ plugin_engine::make_plugin_block(
 void
 plugin_engine::init_static(plugin_state const* state, int frame_count)
 {
-  _state.copy_from(state);
+  _state.copy_from(state->state());
   init_automation_from_state(frame_count);
 }
 
