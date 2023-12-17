@@ -127,9 +127,15 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
     data.push_back(byte);
   } while(true);
 
-  if (!plugin_io_load_all(data, _gui_state, _extra_state).ok()) return false;
+  _gui_state.begin_undo_region();
+  if (!plugin_io_load_all(data, _gui_state, _extra_state).ok()) 
+  {
+    _gui_state.discard_undo_region();
+    return false;
+  }
   for (int p = 0; p < _engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
+  _gui_state.discard_undo_region();
   return true;
 }
 
