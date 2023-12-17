@@ -80,20 +80,19 @@ public tab_menu_handler {
   int const _source_param;
   std::map<int, std::vector<module_output_mapping>> const _matrix_sources;
 
+  void clear_all(int module);
+  void clear(int module, int slot);
+  void insert_after(int module, int slot);
+  void insert_before(int module, int slot);
+  void move_to(int module, int source_slot, int target_slot);
+  void swap_with(int module, int source_slot, int target_slot);
+
   bool is_selected(
     int matrix, int param, int route, int module, 
     int slot, std::vector<module_output_mapping> const& mappings);
   bool update_matched_slot(
     int matrix, int param, int route, int module, int from_slot, 
     int to_slot, std::vector<module_output_mapping> const& mappings);
-
-  void clear_all(int module);
-  void clear(int module, int slot);
-  void insert_after(int module, int slot);
-  void insert_before(int module, int slot);
-  void copy_to(int module, int source_slot, int target_slot);
-  void move_to(int module, int source_slot, int target_slot);
-  void swap_with(int module, int source_slot, int target_slot);
 
 public:
   std::vector<module_menu> module_menus() const override;

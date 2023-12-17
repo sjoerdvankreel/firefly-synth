@@ -39,7 +39,8 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
   return result;
 }
 
-static tab_menu_handler::menu_result
+// TODO static
+tab_menu_handler::menu_result
 make_copy_failed_result(std::string const& matrix_name)
 {
   tab_menu_handler::menu_result result;
@@ -283,7 +284,10 @@ cv_routing_menu_handler::module_menus() const
   module_menu result;
   result.name = "";
   result.menu_id = 0;
-  result.actions = { clear, clear_all, insert_before, insert_after, copy_to, move_to, swap_with };
+  result.actions = { 
+    tab_menu_handler::clear, tab_menu_handler::clear_all, 
+    tab_menu_handler::insert_before, tab_menu_handler::insert_after,
+    tab_menu_handler::copy_to, tab_menu_handler::move_to, tab_menu_handler::swap_with };
   return { result };
 }
 
@@ -291,6 +295,17 @@ tab_menu_handler::menu_result
 cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
 {
   assert(menu_id == 0);
+  switch (action)
+  {
+  case tab_menu_handler::clear_all: clear_all(module); break;
+  case tab_menu_handler::clear: clear(module, source_slot); break;
+  case tab_menu_handler::insert_after: insert_after(module, source_slot); break;
+  case tab_menu_handler::insert_before: insert_before(module, source_slot); break;
+  case tab_menu_handler::move_to: move_to(module, source_slot, target_slot); break;
+  case tab_menu_handler::swap_with: swap_with(module, source_slot, target_slot); break;
+  case tab_menu_handler::copy_to: _state->copy_module_to(module, source_slot, target_slot); break;
+  }
+  return {};
 }
 
 void 
@@ -302,22 +317,13 @@ cv_routing_menu_handler::clear_all(int module)
     clear(module, i);
 }
 
-void 
-cv_routing_menu_handler::clear(int module, int slot)
+void
+cv_routing_menu_handler::insert_before(int module, int slot)
 {
-  // set any route matching this module to all defaults
-  _state->clear_module(module, slot);
-  for (auto const& sources : _matrix_sources)
-  {
-    auto const& topo = _state->desc().plugin->modules[sources.first];
-    for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
-    {
-      int selected_source = _state->get_plain_at(sources.first, 0, _source_param, r).step();
-      if ((sources.second[selected_source].module_index == module && sources.second[selected_source].module_slot == slot))
-        for (int p = 0; p < topo.params.size(); p++)
-          _state->set_plain_at(sources.first, 0, p, r, topo.params[p].domain.default_plain(0, r));
-    }
-  }
+  // move all before slot to the left
+  clear(module, 0);
+  for (int i = 0; i < slot - 1; i++)
+    move_to(module, i + 1, i);
 }
 
 void 
@@ -325,29 +331,16 @@ cv_routing_menu_handler::insert_after(int module, int slot)
 {
   // move all after slot to the right
   auto const& topo = _state->desc().plugin->modules[module];
-  (void)topo;
-  assert(0 <= slot && slot < topo.info.slot_count - 1);
   clear(module, topo.info.slot_count - 1);
   for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
     move_to(module, i - 1, i);
 }
 
 void 
-cv_routing_menu_handler::insert_before(int module, int slot)
-{
-  // move all before slot to the left
-  auto const& topo = _state->desc().plugin->modules[module];
-  (void)topo;
-  assert(0 < slot && slot < topo.info.slot_count);
-  clear(module, 0);
-  for (int i = 0; i < slot - 1; i++)
-    move_to(module, i + 1, i);
-}
-
-void 
 cv_routing_menu_handler::move_to(int module, int source_slot, int target_slot)
 {
   // overwrite source_slot with target_slot for source parameter
+  clear(module, target_slot);
   _state->move_module_to(module, source_slot, target_slot);
   for (auto const& sources : _matrix_sources)
   {
@@ -377,50 +370,22 @@ cv_routing_menu_handler::swap_with(int module, int source_slot, int target_slot)
   }
 }
 
-tab_menu_handler::menu_result
-cv_routing_menu_handler::copy_to(int module, int source_slot, int target_slot)
+void
+cv_routing_menu_handler::clear(int module, int slot)
 {
-  // copy is a bit annoying since we might run out of slots, so check that first
-  std::map<int, int> slots_available;
-  std::map<int, std::vector<int>> routes_to_copy;
+  // set any route matching this module to all defaults
+  _state->clear_module(module, slot);
   for (auto const& sources : _matrix_sources)
   {
-    int this_slots_available = 0;
-    std::vector<int> this_routes_to_copy;
     auto const& topo = _state->desc().plugin->modules[sources.first];
     for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
     {
-      if (_state->get_plain_at(sources.first, 0, _on_param, r).step() == _off_value) this_slots_available++;
-      else if(is_selected(sources.first, _source_param, r, module, source_slot, sources.second)) this_routes_to_copy.push_back(r);
+      int selected_source = _state->get_plain_at(sources.first, 0, _source_param, r).step();
+      if ((sources.second[selected_source].module_index == module && sources.second[selected_source].module_slot == slot))
+        for (int p = 0; p < topo.params.size(); p++)
+          _state->set_plain_at(sources.first, 0, p, r, topo.params[p].domain.default_plain(0, r));
     }
-    routes_to_copy[sources.first] = this_routes_to_copy;
-    slots_available[sources.first] = this_slots_available;
   }
-
-  for (auto const& sources : _matrix_sources)
-    if(routes_to_copy.at(sources.first).size() > slots_available.at(sources.first))
-    {
-      auto const& topo = _state->desc().plugin->modules[sources.first];
-      return make_copy_failed_result(topo.info.tag.name);
-    }
-
-  // copy each route entirely (all params), only replace source by target
-  _state->copy_module_to(module, source_slot, target_slot);
-  for (auto const& sources : _matrix_sources)
-  {
-    auto const& topo = _state->desc().plugin->modules[sources.first];
-    for (int rc = 0; rc < routes_to_copy.at(sources.first).size(); rc++)
-      for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
-        if (_state->get_plain_at(sources.first, 0, _on_param, r).step() == _off_value)
-        {
-          for (int p = 0; p < topo.params.size(); p++)
-            _state->set_plain_at(sources.first, 0, p, r, _state->get_plain_at(sources.first, 0, p, routes_to_copy.at(sources.first)[rc]));
-          update_matched_slot(sources.first, _source_param, r, module, source_slot, target_slot, sources.second);
-          break;
-        }
-   }
-
-  return {};
 }
 
 bool 
