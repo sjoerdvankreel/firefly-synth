@@ -123,6 +123,11 @@ public tab_menu_handler {
     int matrix, int param, int route, int module, int from_slot,
     int to_slot, std::vector<module_topo_mapping> const& mappings);
 
+  void with_all_clear_all(int module);
+  void with_all_clear(int module, int slot);
+  void with_all_insert_after(int module, int slot);
+  void with_all_insert_before(int module, int slot);
+
   void clear_cv_route(int route);
   void with_cv_move_to(int module, int source_slot, int target_slot);
   void with_cv_swap_with(int module, int source_slot, int target_slot);
