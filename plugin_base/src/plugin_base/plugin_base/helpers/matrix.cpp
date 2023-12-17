@@ -287,7 +287,7 @@ cv_routing_menu_handler::module_menus() const
   plain_menu.actions = {
     tab_menu_handler::copy_to, tab_menu_handler::move_to, tab_menu_handler::swap_with };
   module_menu routing_menu;
-  routing_menu.name = "With Routing";
+  routing_menu.name = "With CV Routing";
   routing_menu.menu_id = 1;
   routing_menu.actions = {
     tab_menu_handler::clear, tab_menu_handler::clear_all,
