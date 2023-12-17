@@ -33,6 +33,7 @@ do "insert fx" menu option
 drop "or time into scratch" & friends?
 insert after/clear all/insert before
 drop with audio routing that might invalidate stuff
+fix release mode env
 
 * get some linux folks to comment (ycollete?)
 * continuing
