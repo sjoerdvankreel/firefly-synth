@@ -73,13 +73,14 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 
   float const bpm = 120;
   bool sync = state.get_plain_at(module_env, mapping.module_slot, param_sync, 0).step() != 0;
+  bool do_sustain = state.get_plain_at(module_env, mapping.module_slot, param_type, 0).step() == type_sustain;
   float hold = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_hold_time, param_hold_tempo);
   float delay = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_delay_time, param_delay_tempo);
   float decay = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_decay_time, param_decay_tempo);
   float attack = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_attack_time, param_attack_tempo);
   float release = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_release_time, param_release_tempo);
 
-  float sustain = std::max((delay + attack + hold + decay + release) / 5, 0.01f);
+  float sustain = !do_sustain ? 0.0f: std::max((delay + attack + hold + decay + release) / 5, 0.01f);
   float dahds = delay + attack + hold + decay + sustain;
   float dahdsr = dahds + release;
 
@@ -330,7 +331,8 @@ env_engine::process(plugin_block& block)
       continue;
     }
 
-    if (block.voice->state.release_frame == f && type != type_follow)
+    if (block.voice->state.release_frame == f && (type == type_sustain || 
+      type == type_release && _stage != env_stage::release))
     {
       _stage_pos = 0;
       _stage = env_stage::release;
