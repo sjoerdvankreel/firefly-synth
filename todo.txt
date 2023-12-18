@@ -29,6 +29,7 @@ drop "or time into scratch" & friends?
 am clicks on low freq
 grayscale module numbers
 separate master/voice/matrix/custom background colors
+drop the scrollbar space
 
 * get some linux folks to comment (ycollete?)
 * continuing
