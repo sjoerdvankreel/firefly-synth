@@ -29,6 +29,8 @@ drop "or time into scratch" & friends?
 am clicks on low freq
 make the matrices smaller -- too much vertical noise now
 revert to 1 graph per module section
+still repaint the graph on module-hover and depending on section on param-hover
+move the matrix graph below the matrices
 
 * get some linux folks to comment (ycollete?)
 * continuing
