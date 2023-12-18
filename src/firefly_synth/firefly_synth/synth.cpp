@@ -57,7 +57,7 @@ make_graph_section(plugin_gui* gui, lnf* lnf, component_store store, bool render
 static Component&
 make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension { { 1 }, { 2, 2, 2, 2, 2, 3, 2 } }, 2);
+  auto& result = store_component<grid_component>(store, gui_dimension { { 1 }, { 8, 8, 8, 8, 8, 20, 6 } }, 2);
   result.add(gui->make_load_button(), {0, 0});
   result.add(gui->make_save_button(), {0, 1});
   result.add(gui->make_init_button(), {0, 2});
