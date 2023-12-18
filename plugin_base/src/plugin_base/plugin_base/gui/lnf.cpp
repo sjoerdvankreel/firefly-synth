@@ -316,9 +316,10 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   int strip_left = radius + 2;
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
-  float lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
-
-  g.setColour(colors().tab_button.brighter(lighten));
+  
+  auto text_color = button.getToggleState() ? colors().tab_text : colors().tab_text_inactive;
+  float button_lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
+  g.setColour(colors().tab_button.brighter(button_lighten));
 
   // no header, evenly distributed, left tab has rounded corners
   // right tab always has rounded corners
@@ -343,7 +344,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
     g.setFont(font());
     auto text_area = button.getTextArea();
     if (is_section) text_area.removeFromLeft(strip_left);
-    g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
+    g.setColour(text_color);
     g.drawText(button.getButtonText(), text_area, justify, false);
     return;
   }
@@ -375,10 +376,10 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   // case tab header and first button
   buttonArea.removeFromLeft(1);
-  g.setColour(colors().tab_button.brighter(lighten));
+  g.setColour(colors().tab_button.brighter(button_lighten));
   g.fillRect(buttonArea);
   if (is_section) buttonArea.removeFromLeft(strip_left);
-  g.setColour(button.findColour(TabbedButtonBar::tabTextColourId).brighter(lighten));
+  g.setColour(text_color);
   g.drawText(button.getButtonText(), buttonArea, justify, false);
 }
 
