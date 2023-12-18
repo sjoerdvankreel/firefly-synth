@@ -17,6 +17,7 @@ enum {
   custom_section_hover_graph,
   custom_section_tweak_graph,
   custom_section_controls,
+  custom_section_last_tweaked,
   custom_section_count };
 
 enum { 
@@ -57,16 +58,21 @@ make_graph_section(plugin_gui* gui, lnf* lnf, component_store store, bool render
 static Component&
 make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension { { 1 }, { 8, 8, 8, 8, 8, 20, 6 } }, 2);
-  result.add(gui->make_load_button(), {0, 0});
-  result.add(gui->make_save_button(), {0, 1});
-  result.add(gui->make_init_button(), {0, 2});
-  result.add(gui->make_clear_button(), {0, 3});
+  auto& result = store_component<grid_component>(store, gui_dimension{ 1, 5 }, 2);
+  result.add(gui->make_load_button(), { 0, 0 });
+  result.add(gui->make_save_button(), { 0, 1 });
+  result.add(gui->make_init_button(), { 0, 2 });
+  result.add(gui->make_clear_button(), { 0, 3 });
   result.add(store_component<preset_button>(store, gui), { 0, 4 });
-  auto& tweak_label = store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak:");
-  tweak_label.setJustificationType(Justification::centredRight);
-  result.add(tweak_label, { 0, 5 });
-  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 0, 6 });
+  return result;
+}
+
+static Component&
+make_last_tweaked_section(plugin_gui* gui, lnf* lnf, component_store store)
+{
+  auto& result = store_component<grid_component>(store, gui_dimension{ { 1 }, { 3, 2 } }, 2);
+  result.add(store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak:"), { 0, 0 });
+  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 0, 1 });
   return result;
 }
 
@@ -204,7 +210,9 @@ synth_topo()
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 1, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 0, 0, 1, 5 }, custom_colors, make_controls_section);
+    custom_section_controls, { 0, 0, 1, 3 }, custom_colors, make_controls_section);
+  result->gui.custom_sections[custom_section_last_tweaked] = make_custom_section_gui(
+    custom_section_last_tweaked, { 0, 3, 1, 2 }, custom_colors, make_last_tweaked_section);
   result->gui.custom_sections[custom_section_hover_graph] = make_custom_section_gui(
     custom_section_hover_graph, { 1, 1, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_graph_section(gui, lnf, store, true); });
