@@ -70,9 +70,9 @@ rounded_container::paint(Graphics& g)
   if (_mode == rounded_container_mode::both)
   {
     if (_vertical) g.setGradientFill(ColourGradient(
-      _color1.darker(), 0, 0, _color2.darker(), 0, getHeight(), false));
+      _color1.darker(1.75), 0, 0, _color2.darker(1.75), 0, getHeight(), false));
     else g.setGradientFill(ColourGradient(
-      _color2.darker(), 0, 0, _color1.darker(), getWidth(), 0, false));
+      _color2.darker(1.75), 0, 0, _color1.darker(1.75), getWidth(), 0, false));
     g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
     if (_vertical) g.setGradientFill(ColourGradient(
       _color1, 0, 0, _color2, 0, getHeight(), false));

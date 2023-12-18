@@ -27,8 +27,6 @@ do mseg someday
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 drop "or time into scratch" & friends?
 am clicks on low freq
-grayscale module numbers
-separate master/voice/matrix/custom background colors
 make the matrices smaller -- too much vertical noise now
 
 * get some linux folks to comment (ycollete?)

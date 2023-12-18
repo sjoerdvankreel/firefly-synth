@@ -464,7 +464,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   };
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, false, rounded_container_mode::stroke, outline1, outline2);
+  auto& content_outline = make_component<rounded_container>(&content, radius, false, rounded_container_mode::both, outline1, outline2);
   auto& result = make_component<rounded_container>(&content_outline, radius, true, rounded_container_mode::fill, background1, background2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
