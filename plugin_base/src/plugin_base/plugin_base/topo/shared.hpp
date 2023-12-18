@@ -124,7 +124,7 @@ struct gui_dimension final {
 // color scheme
 struct gui_colors final {
   juce::Colour tab_text = juce::Colour(0xFFFF8844);
-  juce::Colour tab_text_inactive = juce::Colour(0xFFAAAAAA);
+  juce::Colour tab_text_inactive = juce::Colour(0xFFBBBBBB);
   juce::Colour tab_button = juce::Colour(0xFF333333);
   juce::Colour tab_header = juce::Colour(0xFF222222);
   juce::Colour tab_background1 = juce::Colour(0xFF222222);
