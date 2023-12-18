@@ -194,20 +194,20 @@ synth_topo()
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, 
-    { { true, 1 }, { false, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 2 } });
+    { { false, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 2 } });
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
     return make_title_section(gui, lnf, store, custom_color); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
+    custom_section_title, { 1, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 1, 0, 1, 5 }, custom_colors, make_controls_section);
+    custom_section_controls, { 0, 0, 1, 5 }, custom_colors, make_controls_section);
   result->gui.custom_sections[custom_section_hover_graph] = make_custom_section_gui(
-    custom_section_hover_graph, { 0, 1, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_hover_graph, { 1, 1, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_graph_section(gui, lnf, store, true); });
   result->gui.custom_sections[custom_section_tweak_graph] = make_custom_section_gui(
-    custom_section_tweak_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_tweak_graph, { 1, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_graph_section(gui, lnf, store, false); });
 
   result->gui.module_sections.resize(module_section_count);
@@ -230,7 +230,7 @@ synth_topo()
   result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
     "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 5, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 3, 1, 2 }, { { 1 }, { 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 1, 3, 1, 2 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 2, 3, 8, 2 },
     { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
