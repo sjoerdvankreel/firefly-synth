@@ -746,7 +746,7 @@ void
 plugin_gui::init_patch()
 {
   auto options = MessageBoxOptions::makeOptionsOkCancel(
-    MessageBoxIconType::QuestionIcon, "Init patch", "Are you sure?");
+    MessageBoxIconType::QuestionIcon, "Init Patch", "Are you sure?");
   NativeMessageBox::showAsync(options, [this](int result) {
     if(result == 0)
     {
@@ -754,7 +754,7 @@ plugin_gui::init_patch()
       _gui_state->begin_undo_region();
       _gui_state->init(state_init_type::default_);
       fire_state_loaded();
-      _gui_state->end_undo_region("Init patch");
+      _gui_state->end_undo_region("Init Patch");
     }
   });
 }
@@ -763,7 +763,7 @@ void
 plugin_gui::clear_patch()
 {
   auto options = MessageBoxOptions::makeOptionsOkCancel(
-    MessageBoxIconType::QuestionIcon, "Clear patch", "Are you sure?");
+    MessageBoxIconType::QuestionIcon, "Clear Patch", "Are you sure?");
   NativeMessageBox::showAsync(options, [this](int result) {
     if (result == 0)
     {
@@ -771,7 +771,7 @@ plugin_gui::clear_patch()
       _gui_state->begin_undo_region();
       _gui_state->init(state_init_type::minimal);
       fire_state_loaded();
-      _gui_state->end_undo_region("Clear patch");
+      _gui_state->end_undo_region("Clear Patch");
     }
   });
 }

@@ -25,7 +25,6 @@ do 5 am and 5 fm routes
 make all stuff visible / not tabbed
 do mseg someday
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
-do "insert fx" menu option
 drop "or time into scratch" & friends?
 am clicks on low freq
 
