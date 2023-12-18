@@ -78,8 +78,8 @@ menu_button::clicked()
 }
 
 last_tweaked_label::
-last_tweaked_label(plugin_state const* state, std::string const& prefix):
-_state(state), _prefix(prefix)
+last_tweaked_label(plugin_state const* state):
+_state(state)
 {
   state->add_any_listener(this);
   any_state_changed(0, state->get_plain_at_index(0));
@@ -89,8 +89,7 @@ void
 last_tweaked_label::any_state_changed(int index, plain_value plain)
 {
   if(_state->desc().params[index]->param->dsp.direction == param_direction::output) return;
-  std::string label = _state->desc().params[index]->full_name;
-  setText(String(_prefix + " " + label), dontSendNotification);
+  setText(_state->desc().params[index]->full_name, dontSendNotification);
 }
 
 last_tweaked_editor::

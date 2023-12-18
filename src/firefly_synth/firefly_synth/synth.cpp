@@ -71,7 +71,7 @@ static Component&
 make_last_tweaked_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto& result = store_component<grid_component>(store, gui_dimension{ { 1 }, { 3, 2 } }, 2);
-  result.add(store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak:"), { 0, 0 });
+  result.add(store_component<last_tweaked_label>(store, gui->gui_state()), { 0, 0 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 0, 1 });
   return result;
 }
