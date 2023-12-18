@@ -28,6 +28,7 @@ do different ui layout, larges graphs, load/save/preset etc on 1 line below grap
 drop "or time into scratch" & friends?
 am clicks on low freq
 make the matrices smaller -- too much vertical noise now
+revert to 1 graph per module section
 
 * get some linux folks to comment (ycollete?)
 * continuing
