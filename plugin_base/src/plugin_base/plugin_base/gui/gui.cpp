@@ -108,20 +108,23 @@ module_header_height(int font_height)
 
 std::vector<int>
 gui_vertical_distribution(int total_height, int font_height,
-  std::vector<int> const& module_vertical_section_count)
+  std::vector<gui_vertical_section_size> const& section_sizes)
 {
   std::vector<float> result;
   int total_header_height = 0;
   int total_vsection_count = 0;
   int header_height = module_header_height(font_height);
-  for (int i = 0; i < module_vertical_section_count.size(); i++)
+  for (int i = 0; i < section_sizes.size(); i++)
   {
-    total_header_height += header_height;
-    total_vsection_count += module_vertical_section_count[i];
+    total_vsection_count += section_sizes[i].row_count;
+    total_header_height += section_sizes[i].header? header_height: 0;
   }
   int total_remaining_height = total_height - total_header_height;
-  for (int i = 0; i < module_vertical_section_count.size(); i++)
-    result.push_back(header_height + module_vertical_section_count[i] / (float)total_vsection_count * total_remaining_height);
+  for (int i = 0; i < section_sizes.size(); i++)
+  {
+    float remaining_portion = section_sizes[i].row_count / (float)total_vsection_count * total_remaining_height;
+    result.push_back((section_sizes[i].header ? header_height : 0) + remaining_portion);
+  }
   return vector_map(result, [](auto const& val) { return (int)(val * 100); });
 }
 

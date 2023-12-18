@@ -189,11 +189,12 @@ synth_topo()
 
   result->gui.min_width = 820;
   result->gui.aspect_ratio_width = 121;
-  result->gui.aspect_ratio_height = 68;
+  result->gui.aspect_ratio_height = 72;
   result->gui.dimension.column_sizes = { 16, 12, 12, 13, 13 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
-  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, { 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 });
+  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, 
+    { { true, 1 }, { false, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 2 } });
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
