@@ -317,8 +317,8 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   
-  auto text_color = button.getToggleState() ? colors().tab_text : colors().tab_text_inactive;
-  float button_lighten = button.getToggleState() || isMouseOver? _desc->plugin->gui.lighten: 0;
+  float button_lighten = button.getToggleState() || isMouseOver ? _desc->plugin->gui.lighten : 0;
+  auto text_color = (is_section || button.getToggleState()) ? colors().tab_text : colors().tab_text_inactive;
   g.setColour(colors().tab_button.brighter(button_lighten));
 
   // no header, evenly distributed, left tab has rounded corners
