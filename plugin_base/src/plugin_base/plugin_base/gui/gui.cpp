@@ -464,8 +464,8 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   };
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, false, false, outline1, outline2);
-  auto& result = make_component<rounded_container>(&content_outline, radius, true, true, background1, background2);
+  auto& content_outline = make_component<rounded_container>(&content, radius, false, rounded_container_mode::stroke, outline1, outline2);
+  auto& result = make_component<rounded_container>(&content_outline, radius, true, rounded_container_mode::fill, background1, background2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
@@ -492,7 +492,7 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   int module_index = _gui_state->desc().modules[module].info.topo;
   auto background1 = topo.modules[module_index].gui.colors.tab_background1;
   auto background2 = topo.modules[module_index].gui.colors.tab_background2;
-  auto& corners = make_component<rounded_container>(&child, radius, true, true, background1, background2);
+  auto& corners = make_component<rounded_container>(&child, radius, true, rounded_container_mode::fill, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
@@ -579,12 +579,12 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   auto outline2 = module.module->gui.colors.section_outline2;
   int radius = _gui_state->desc().plugin->gui.section_corner_radius;
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<rounded_container>(&grid, radius, false, false, outline1, outline2);
+    return make_component<rounded_container>(&grid, radius, false, rounded_container_mode::both, outline1, outline2);
   
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
-  return make_component<rounded_container>(&viewer, radius, false, false, outline1, outline2);
+  return make_component<rounded_container>(&viewer, radius, false, rounded_container_mode::both, outline1, outline2);
 }
 
 Component&
