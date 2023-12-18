@@ -26,7 +26,7 @@ inline std::string const factory_preset_key = "factory_preset";
 std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
 
 // helper for vertical sizing
-struct gui_vertical_section_size { bool header; int row_count; };
+struct gui_vertical_section_size { bool header; float size_relative; };
 std::vector<int> 
 gui_vertical_distribution(int total_height, int font_height, 
   std::vector<gui_vertical_section_size> const& section_sizes);

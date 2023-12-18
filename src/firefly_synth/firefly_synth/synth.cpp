@@ -57,13 +57,15 @@ make_graph_section(plugin_gui* gui, lnf* lnf, component_store store, bool render
 static Component&
 make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension { 1, 7 }, 2);
+  auto& result = store_component<grid_component>(store, gui_dimension { { 1 }, { 2, 2, 2, 2, 2, 3, 2 } }, 2);
   result.add(gui->make_load_button(), {0, 0});
   result.add(gui->make_save_button(), {0, 1});
   result.add(gui->make_init_button(), {0, 2});
   result.add(gui->make_clear_button(), {0, 3});
   result.add(store_component<preset_button>(store, gui), { 0, 4 });
-  result.add(store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak:"), { 0, 5 });
+  auto& tweak_label = store_component<last_tweaked_label>(store, gui->gui_state(), "Tweak:");
+  tweak_label.setJustificationType(Justification::centredRight);
+  result.add(tweak_label, { 0, 5 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 0, 6 });
   return result;
 }
@@ -194,7 +196,7 @@ synth_topo()
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, 
-    { { false, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 2 } });
+    { { false, 0.85f }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 2 } });
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
