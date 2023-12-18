@@ -15,7 +15,7 @@ using namespace plugin_base;
 
 namespace firefly_synth { 
 
-static int constexpr route_count = 12; // TODO decrease once we do FM
+static int constexpr route_count = 20; // TODO decrease once we do FM
 
 enum { section_main };
 enum { output_modulated };
