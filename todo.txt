@@ -27,6 +27,7 @@ do mseg someday
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 drop "or time into scratch" & friends?
 am clicks on low freq
+grayscale module numbers
 
 * get some linux folks to comment (ycollete?)
 * continuing
