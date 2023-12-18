@@ -21,8 +21,9 @@ enum {
 
 enum { 
   module_section_hidden, module_section_master_in_out, 
-  module_section_g_lfo_fx, module_section_v_lfo_fx,
-  module_section_osc_voice_out, module_section_voice_in,
+  module_section_glfo, module_section_gfx, 
+  module_section_voice_in, module_section_osc_voice_out,
+  module_section_vlfo, module_section_vfx,
   module_section_env, module_section_monitor, 
   module_section_matrices, module_section_count };
 
@@ -188,11 +189,11 @@ synth_topo()
 
   result->gui.min_width = 820;
   result->gui.aspect_ratio_width = 121;
-  result->gui.aspect_ratio_height = 54;
+  result->gui.aspect_ratio_height = 68;
   result->gui.dimension.column_sizes = { 16, 12, 12, 13, 13 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
-  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, { 1, 1, 1, 1, 1, 1, 2 });
+  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, { 1, 1, 1, 1, 1, 1, 1, 1, 2 });
 
   result->gui.custom_sections.resize(custom_section_count);
   auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
@@ -211,22 +212,26 @@ synth_topo()
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
     "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_hidden);
-  result->gui.module_sections[module_section_v_lfo_fx] = make_module_section_gui(
-    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_v_lfo_fx, { 5, 0, 1, 3 }, { 1, 2 });
+  result->gui.module_sections[module_section_vlfo] = make_module_section_gui(
+    "{0DA0E7C3-8DBB-440E-8830-3B6087F23B81}", module_section_vlfo, { 6, 0, 1, 3 }, { 1, 1 });
+  result->gui.module_sections[module_section_vfx] = make_module_section_gui(
+    "{5BD5F320-3CA9-490B-B69E-36A003F41CEC}", module_section_vfx, { 7, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_env] = make_module_section_gui(
-    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 6, 0, 1, 3 }, { 1, 1 });
+    "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 8, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_osc_voice_out] = make_module_section_gui(
-    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc_voice_out, { 4, 0, 1, 3 }, { { 1 }, { 3, 1 } });
-  result->gui.module_sections[module_section_g_lfo_fx] = make_module_section_gui(
-    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_g_lfo_fx, { 2, 0, 1, 3 }, { 1, 2 });
+    "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc_voice_out, { 5, 0, 1, 3 }, { { 1 }, { 3, 1 } });
+  result->gui.module_sections[module_section_glfo] = make_module_section_gui(
+    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_glfo, { 2, 0, 1, 3 }, { 1, 1 });
+  result->gui.module_sections[module_section_gfx] = make_module_section_gui(
+    "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 3, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_master_in_out] = make_module_section_gui(
     "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in_out, { 1, 0, 1, 3 }, { { 1 }, { 3, 1 } });
   result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
-    "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 3, 0, 1, 3 }, { 1, 1 });
+    "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 4, 0, 1, 3 }, { 1, 1 });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 1, 3, 1, 2 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 2, 3, 5, 2 },
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 2, 3, 7, 2 },
     { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
 
   result->modules.resize(module_count);
@@ -234,11 +239,11 @@ synth_topo()
   result->modules[module_voice_mix] = voice_mix_topo(module_section_hidden);
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
   result->modules[module_env] = env_topo(module_section_env, voice_colors, { 0, 0 });
+  result->modules[module_gfx] = fx_topo(module_section_gfx, global_colors, { 0, 0 }, true);
+  result->modules[module_vfx] = fx_topo(module_section_vfx, voice_colors, { 0, 0 }, false);
+  result->modules[module_glfo] = lfo_topo(module_section_glfo, global_colors, { 0, 0 }, true);
+  result->modules[module_vlfo] = lfo_topo(module_section_vlfo, voice_colors, { 0, 0 }, false);
   result->modules[module_osc] = osc_topo(module_section_osc_voice_out, voice_colors, { 0, 0 });
-  result->modules[module_gfx] = fx_topo(module_section_g_lfo_fx, global_colors, { 0, 1 }, true);
-  result->modules[module_vfx] = fx_topo(module_section_v_lfo_fx, voice_colors, { 0, 1 }, false);
-  result->modules[module_glfo] = lfo_topo(module_section_g_lfo_fx, global_colors, { 0, 0 }, true);
-  result->modules[module_vlfo] = lfo_topo(module_section_v_lfo_fx, voice_colors, { 0, 0 }, false);
   result->modules[module_master_in] = master_in_topo(module_section_master_in_out, global_colors, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, voice_colors, { 0, 0 }); // must be after all cv
