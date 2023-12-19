@@ -14,8 +14,7 @@ namespace firefly_synth {
 
 enum {
   custom_section_title,
-  custom_section_hover_graph,
-  custom_section_tweak_graph,
+  custom_section_main_graph,
   custom_section_controls,
   custom_section_last_tweaked,
   custom_section_gfx_graph,
@@ -54,13 +53,14 @@ make_section_colors(Colour const& c)
 }
 
 static Component&
-make_graph_section(plugin_gui* gui, lnf* lnf, component_store store, bool render_on_hover)
+make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   module_graph_params params;
   params.fps = 10;
   params.module = -1;
-  params.render_on_hover = render_on_hover;
-  params.render_on_tweak = !render_on_hover;
+  params.render_on_hover = true;
+  params.render_on_tweak = true;
+  params.render_on_tab_change = false;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -234,12 +234,9 @@ synth_topo()
     custom_section_controls, { 1, 0, 1, 4 }, custom_colors, make_controls_section);
   result->gui.custom_sections[custom_section_last_tweaked] = make_custom_section_gui(
     custom_section_last_tweaked, { 1, 4, 1, 2 }, custom_colors, make_last_tweaked_section);
-  result->gui.custom_sections[custom_section_hover_graph] = make_custom_section_gui(
-    custom_section_hover_graph, { 0, 1, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_graph_section(gui, lnf, store, true); });
-  result->gui.custom_sections[custom_section_tweak_graph] = make_custom_section_gui(
-    custom_section_tweak_graph, { 0, 2, 1, 2 }, custom_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_graph_section(gui, lnf, store, false); });
+  result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
+    custom_section_main_graph, { 0, 1, 1, 3 }, custom_colors, [](auto* gui, auto* lnf, auto store)
+    -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, { 3, 3, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx); });
