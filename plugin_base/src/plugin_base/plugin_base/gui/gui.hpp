@@ -31,11 +31,11 @@ std::vector<int>
 gui_vertical_distribution(int total_height, int font_height, 
   std::vector<gui_vertical_section_size> const& section_sizes);
 
-// gui events for anyone who needs it
-class gui_listener
+// gui mouse events for anyone who needs it
+class gui_mouse_listener
 {
 public:
-  virtual ~gui_listener() {}
+  virtual ~gui_mouse_listener() {}
   virtual void param_mouse_exit(int param) {};
   virtual void param_mouse_enter(int param) {};
   virtual void module_mouse_exit(int module) {};
@@ -83,7 +83,7 @@ public:
   _state(state), _button(button), _module(module), _slot(slot) { _button->addMouseListener(this, true); }
 };
 
-// triggers gui_listener
+// triggers gui_mouse_listener
 class gui_hover_listener:
 public juce::MouseListener
 {
@@ -140,10 +140,10 @@ public:
   extra_state* extra_state() const { return _extra_state; }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
   
-  void remove_gui_listener(gui_listener* listener);
   void remove_param_listener(gui_param_listener* listener);
-  void add_gui_listener(gui_listener* listener) { _gui_listeners.push_back(listener); }
+  void remove_gui_mouse_listener(gui_mouse_listener* listener);
   void add_param_listener(gui_param_listener* listener) { _param_listeners.push_back(listener); }
+  void add_gui_mouse_listener(gui_mouse_listener* listener) { _gui_mouse_listeners.push_back(listener); }
   
 private:
   lnf _lnf;
@@ -151,10 +151,10 @@ private:
   plugin_state* const _gui_state;
   gui_undo_listener _undo_listener;
   plugin_base::extra_state* const _extra_state;
-  std::vector<gui_listener*> _gui_listeners = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
   std::vector<gui_param_listener*> _param_listeners = {};
+  std::vector<gui_mouse_listener*> _gui_mouse_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
   std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};

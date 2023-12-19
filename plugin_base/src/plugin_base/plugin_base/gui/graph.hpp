@@ -35,7 +35,7 @@ struct module_graph_params
 // taps into module_topo.graph_renderer based on task tweaked/hovered param
 class module_graph:
 public graph,
-public gui_listener,
+public gui_mouse_listener,
 public any_state_listener,
 public juce::Timer,
 public juce::SettableTooltipClient

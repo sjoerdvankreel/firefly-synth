@@ -14,7 +14,7 @@ module_graph::
   if(_params.render_on_tweak)
     _gui->gui_state()->remove_any_listener(this);
   if(_params.render_on_hover)
-    _gui->remove_gui_listener(this);
+    _gui->remove_gui_mouse_listener(this);
 }
 
 module_graph::
@@ -24,7 +24,7 @@ graph(lnf), _gui(gui), _params(params)
   assert(params.fps > 0);
   assert(params.render_on_tweak || params.render_on_hover);
   if(_params.render_on_hover)
-    gui->add_gui_listener(this);
+    gui->add_gui_mouse_listener(this);
   if(_params.render_on_tweak)
     gui->gui_state()->add_any_listener(this);
   startTimerHz(params.fps);

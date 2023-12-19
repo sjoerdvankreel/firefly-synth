@@ -321,10 +321,10 @@ plugin_gui::param_changing(int index, plain_value plain)
 }
 
 void
-plugin_gui::remove_gui_listener(gui_listener* listener)
+plugin_gui::remove_gui_mouse_listener(gui_mouse_listener* listener)
 {
-  auto iter = std::find(_gui_listeners.begin(), _gui_listeners.end(), listener);
-  if (iter != _gui_listeners.end()) _gui_listeners.erase(iter);
+  auto iter = std::find(_gui_mouse_listeners.begin(), _gui_mouse_listeners.end(), listener);
+  if (iter != _gui_mouse_listeners.end()) _gui_mouse_listeners.erase(iter);
 }
 
 void
@@ -344,37 +344,37 @@ plugin_gui::fire_state_loaded()
 void
 plugin_gui::param_mouse_exit(int param)
 {
-  for (int i = 0; i < _gui_listeners.size(); i++)
-    _gui_listeners[i]->param_mouse_exit(param);
+  for (int i = 0; i < _gui_mouse_listeners.size(); i++)
+    _gui_mouse_listeners[i]->param_mouse_exit(param);
 }
 
 void
 plugin_gui::param_mouse_enter(int param)
 {
-  for (int i = 0; i < _gui_listeners.size(); i++)
-    _gui_listeners[i]->param_mouse_enter(param);
+  for (int i = 0; i < _gui_mouse_listeners.size(); i++)
+    _gui_mouse_listeners[i]->param_mouse_enter(param);
 }
 
 void
 plugin_gui::custom_mouse_exit(int section)
 {
-  for (int i = 0; i < _gui_listeners.size(); i++)
-    _gui_listeners[i]->custom_mouse_exit(section);
+  for (int i = 0; i < _gui_mouse_listeners.size(); i++)
+    _gui_mouse_listeners[i]->custom_mouse_exit(section);
 }
 
 void
 plugin_gui::custom_mouse_enter(int section)
 {
   _tooltip.setLookAndFeel(_custom_lnfs[section].get());
-  for (int i = 0; i < _gui_listeners.size(); i++)
-    _gui_listeners[i]->custom_mouse_enter(section);
+  for (int i = 0; i < _gui_mouse_listeners.size(); i++)
+    _gui_mouse_listeners[i]->custom_mouse_enter(section);
 }
 
 void
 plugin_gui::module_mouse_exit(int module)
 {
-  for (int i = 0; i < _gui_listeners.size(); i++)
-    _gui_listeners[i]->module_mouse_exit(module);
+  for (int i = 0; i < _gui_mouse_listeners.size(); i++)
+    _gui_mouse_listeners[i]->module_mouse_exit(module);
 }
 
 void
@@ -382,8 +382,8 @@ plugin_gui::module_mouse_enter(int module)
 {
   int index = gui_state()->desc().modules[module].module->info.index;
   _tooltip.setLookAndFeel(_module_lnfs[index].get());
-  for(int i = 0; i < _gui_listeners.size(); i++)
-    _gui_listeners[i]->module_mouse_enter(module);
+  for(int i = 0; i < _gui_mouse_listeners.size(); i++)
+    _gui_mouse_listeners[i]->module_mouse_enter(module);
 }
 
 void
