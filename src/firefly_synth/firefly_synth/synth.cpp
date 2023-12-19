@@ -231,11 +231,11 @@ synth_topo()
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 0, 4, 1, 2 }, custom_colors, make_controls_section);
+    custom_section_controls, { 1, 0, 1, 4 }, custom_colors, make_controls_section);
   result->gui.custom_sections[custom_section_last_tweaked] = make_custom_section_gui(
-    custom_section_last_tweaked, { 1, 0, 1, 6 }, custom_colors, make_last_tweaked_section);
+    custom_section_last_tweaked, { 1, 4, 1, 2 }, custom_colors, make_last_tweaked_section);
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
-    custom_section_main_graph, { 0, 3, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_main_graph, { 0, 4, 1, 2 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, { 3, 3, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
@@ -280,7 +280,7 @@ synth_topo()
   result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
     "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 5, 3, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 2 }, { { 1 }, { 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 3 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 2, 4, 8, 2 },
     { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
