@@ -67,7 +67,8 @@ static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   graph_engine_params params = {};
-  if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) return {};
+  if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
+    return graph_data(graph_data_type::off);
   
   int note = state.get_plain_at(mapping.module_index, mapping.module_slot, param_note, 0).step();
   float cent = state.get_plain_at(mapping.module_index, mapping.module_slot, param_cent, 0).real();

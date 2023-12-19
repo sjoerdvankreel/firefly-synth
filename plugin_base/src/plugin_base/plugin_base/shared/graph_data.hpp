@@ -5,7 +5,7 @@
 
 namespace plugin_base {
 
-enum class graph_data_type { empty, scalar, series, audio };
+enum class graph_data_type { off, na, scalar, series, audio };
 
 class graph_data {
   bool _bipolar = false;
@@ -31,7 +31,7 @@ public:
   graph_data(graph_data const& rhs) { init(rhs); }
   graph_data& operator=(graph_data const& rhs) { init(rhs); return *this; }
 
-  graph_data(): _type(graph_data_type::empty) {}
+  graph_data(graph_data_type type): _type(type) {}
   explicit graph_data(jarray<float, 2> const& audio) :
   _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
   graph_data(float scalar, bool bipolar): 

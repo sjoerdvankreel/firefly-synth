@@ -150,7 +150,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::
 {
   auto const& map = mapping;
   int op = state.get_plain_at(map.module_index, map.module_slot, param_op, map.param_slot).step();
-  if(op == op_off) return graph_data();
+  if(op == op_off) return graph_data(graph_data_type::off);
 
   graph_engine_params params = {};
   params.bpm = 120;

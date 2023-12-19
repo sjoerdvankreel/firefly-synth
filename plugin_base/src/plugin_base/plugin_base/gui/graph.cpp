@@ -75,7 +75,7 @@ module_graph::module_mouse_exit(int module)
   auto const& desc = _gui->gui_state()->desc().modules[module];
   if (_params.module != -1 && _params.module != desc.module->info.index) return;
   setTooltip(String());
-  render(graph_data()); 
+  render(graph_data(graph_data_type::na)); 
 }
 
 void
@@ -179,11 +179,12 @@ graph::paint(Graphics& g)
     g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
 
   auto foreground = _lnf->colors().graph_foreground;
-  if (_data.type() == graph_data_type::empty)
+  if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
   {
     g.setColour(foreground.withAlpha(0.75f));
+    auto text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
     g.setFont(dynamic_cast<lnf&>(getLookAndFeel()).font().boldened());
-    g.drawText("OFF", getLocalBounds().toFloat(), Justification::centred, false);
+    g.drawText(text, getLocalBounds().toFloat(), Justification::centred, false);
     return;
   }
 

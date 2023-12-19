@@ -90,7 +90,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   auto const& m = mapping;
   int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
-  if(on == 0) return graph_data();
+  if(on == 0) return graph_data(graph_data_type::off);
   float value = state.get_plain_at(mapping).real();
   return graph_data(value, mapping.param_index == param_bal);
 }

@@ -59,7 +59,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     return graph_data(state.get_plain_at(mapping).real(), true);
   if (mapping.param_index == param_porta_time)
     return graph_data(state.get_normalized_at(mapping).value(), false);
-  return graph_data();
+  return graph_data(graph_data_type::na);
 }
 
 module_topo

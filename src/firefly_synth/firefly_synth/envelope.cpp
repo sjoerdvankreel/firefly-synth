@@ -69,7 +69,8 @@ init_default(plugin_state& state)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) return {};
+  if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
+    return graph_data(graph_data_type::off);
 
   float const bpm = 120;
   bool sync = state.get_plain_at(module_env, mapping.module_slot, param_sync, 0).step() != 0;

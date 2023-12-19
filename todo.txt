@@ -32,7 +32,6 @@ revert to 1 graph per module section
 still repaint the graph on module-hover and depending on section on param-hover
 move the matrix graph below the matrices
 drop the graph tooltips
-graph off vs no data
 
 * get some linux folks to comment (ycollete?)
 * continuing

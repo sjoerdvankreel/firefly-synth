@@ -78,7 +78,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   graph_engine_params params = {};
 
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off) return {};
+  if(type == type_off) return graph_data(graph_data_type::off);
 
   params.bpm = 120;
   params.midi_key = midi_middle_c;

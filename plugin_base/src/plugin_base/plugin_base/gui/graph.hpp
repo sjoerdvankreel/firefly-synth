@@ -15,13 +15,13 @@ class graph:
 public juce::Component
 {
   lnf* const _lnf;
-  graph_data _data = {};  
+  graph_data _data;  
   void paint_series(juce::Graphics& g, jarray<float, 1> const& series);
 
 public:
-  graph(lnf* lnf): _lnf(lnf) {}
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;
+  graph(lnf* lnf) : _lnf(lnf), _data(graph_data_type::na) {}
 };
 
 struct module_graph_params
