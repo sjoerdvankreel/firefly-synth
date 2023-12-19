@@ -58,8 +58,20 @@ make_graph_section(plugin_gui* gui, lnf* lnf, component_store store, bool render
 {
   module_graph_params params;
   params.fps = 10;
+  params.module = -1;
   params.render_on_hover = render_on_hover;
   params.render_on_tweak = !render_on_hover;
+  return store_component<module_graph>(store, gui, lnf, params);
+}
+
+static Component&
+make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store, int module)
+{
+  module_graph_params params;
+  params.fps = 10;
+  params.module = module;
+  params.render_on_tweak = true;
+  params.render_on_hover = false;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -244,7 +256,7 @@ synth_topo()
     -> Component& { return make_graph_section(gui, lnf, store, false); });
   result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
     custom_section_env_graph, { 9, 3, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_graph_section(gui, lnf, store, false); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_env); });
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(

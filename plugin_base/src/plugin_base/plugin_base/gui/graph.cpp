@@ -46,8 +46,19 @@ module_graph::timerCallback()
 }
 
 void 
+module_graph::any_state_changed(int param, plain_value plain) 
+{
+  auto const& desc = _gui->gui_state()->desc();
+  auto const& mapping = desc.param_mappings.params[param];
+  if(_params.module == -1 || _params.module == mapping.topo.module_index)
+    request_rerender(param);
+}
+
+void 
 module_graph::module_mouse_exit(int module) 
 { 
+  auto const& desc = _gui->gui_state()->desc().modules[module];
+  if (_params.module != -1 && _params.module != desc.module->info.index) return;
   setTooltip(String());
   render(graph_data()); 
 }
@@ -56,10 +67,11 @@ void
 module_graph::module_mouse_enter(int module)
 {
   // trigger re-render based on first new module param
-  auto const& params = _gui->gui_state()->desc().modules[module].params;
-  if(params.size() == 0) return;
+  auto const& desc = _gui->gui_state()->desc().modules[module];
+  if (_params.module != -1 && _params.module != desc.module->info.index) return;
+  if(desc.params.size() == 0) return;
   if (!_gui->gui_state()->desc().modules[module].module->rerender_on_param_hover)
-    request_rerender(params[0].info.global);
+    request_rerender(desc.params[0].info.global);
 }
 
 void
@@ -67,6 +79,7 @@ module_graph::param_mouse_enter(int param)
 {
   // trigger re-render based on specific param
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
+  if (_params.module != -1 && _params.module != mapping.topo.module_index) return;
   if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].rerender_on_param_hover)
     request_rerender(param);
 }

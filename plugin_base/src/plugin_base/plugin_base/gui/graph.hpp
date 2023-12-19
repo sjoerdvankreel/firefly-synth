@@ -27,6 +27,7 @@ public:
 struct module_graph_params
 {
   int fps = -1;
+  int module = -1;
   bool render_on_tweak = false;
   bool render_on_hover = false;
 };
@@ -54,11 +55,11 @@ public:
 
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
+
   void param_mouse_enter(int param) override;
   void module_mouse_exit(int module) override;
   void module_mouse_enter(int module) override;
-
-  void any_state_changed(int param, plain_value plain) override { request_rerender(param); }
+  void any_state_changed(int param, plain_value plain) override;  
 };
 
 }
