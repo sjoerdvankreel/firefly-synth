@@ -241,19 +241,19 @@ synth_topo()
       -> Component& { return make_graph_section(gui, lnf, store, false); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, { 3, 3, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_graph_section(gui, lnf, store, false); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
     custom_section_glfo_graph, { 4, 3, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_graph_section(gui, lnf, store, false); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo); });
   result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
     custom_section_osc_graph, { 6, 3, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_graph_section(gui, lnf, store, false); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc); });
   result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
     custom_section_vfx_graph, { 7, 3, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_graph_section(gui, lnf, store, false); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx); });
   result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
     custom_section_vlfo_graph, { 8, 3, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_graph_section(gui, lnf, store, false); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo); });
   result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
     custom_section_env_graph, { 9, 3, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_env); });
