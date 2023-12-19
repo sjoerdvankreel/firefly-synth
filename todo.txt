@@ -31,7 +31,6 @@ make the matrices smaller -- too much vertical noise now
 revert to 1 graph per module section
 still repaint the graph on module-hover and depending on section on param-hover
 move the matrix graph below the matrices
-more grid lines in graph
 drop the graph tooltips
 
 * get some linux folks to comment (ycollete?)

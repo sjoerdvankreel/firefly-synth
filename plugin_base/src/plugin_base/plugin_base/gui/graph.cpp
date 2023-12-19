@@ -145,9 +145,6 @@ graph::paint_series(Graphics& g, jarray<float, 1> const& series)
   float count = series.size();
 
   auto foreground = _lnf->colors().graph_foreground;
-  if(_data.type() == graph_data_type::empty)
-    foreground = color_to_grayscale(foreground);
-
   p.startNewSubPath(0, (1 - std::clamp(series[0], 0.0f, 1.0f)) * h);
   for (int i = 1; i < series.size(); i++)
     p.lineTo(i / count * w, (1 - std::clamp(series[i], 0.0f, 1.0f)) * h);
@@ -181,11 +178,17 @@ graph::paint(Graphics& g)
   for (int i = 1; i < col_count; i++)
     g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
 
+  auto data = _data;
+  if(data.type() == graph_data_type::empty)
+    data = graph_data(0.0f, true);
   auto foreground = _lnf->colors().graph_foreground;
-  if (_data.type() == graph_data_type::scalar)
+  if (_data.type() == graph_data_type::empty)
+    foreground = color_to_grayscale(foreground);
+
+  if (data.type() == graph_data_type::scalar)
   {
-    float scalar = _data.scalar();
-    if (_data.bipolar())
+    float scalar = data.scalar();
+    if (data.bipolar())
     {
       scalar = 1.0f - bipolar_to_unipolar(scalar);
       g.setColour(foreground.withAlpha(0.5f));
@@ -218,24 +221,9 @@ graph::paint(Graphics& g)
     return;
   }
 
-  graph_data data;
-  if(_data.type() == graph_data_type::series)
-    data = _data;
-  else
-  {
-    assert(_data.type() == graph_data_type::empty);
-    jarray<float, 1> empty;
-    for (int i = 0; i < 33; i++)
-      empty.push_back(0);
-    for (int i = 0; i < 34; i++)
-      empty.push_back(std::sin((float)i / 33 * 2.0f * pi32));
-    for (int i = 0; i < 33; i++)
-      empty.push_back(0);
-    data = graph_data(empty, true);
-  }
-
-  jarray<float, 1> series(data.series());
-  if(data.bipolar())
+  assert(_data.type() == graph_data_type::series);
+  jarray<float, 1> series(_data.series());
+  if(_data.bipolar())
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
   paint_series(g, series);
