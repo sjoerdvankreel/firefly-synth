@@ -74,7 +74,6 @@ module_graph::module_mouse_exit(int module)
 { 
   auto const& desc = _gui->gui_state()->desc().modules[module];
   if (_params.module != -1 && _params.module != desc.module->info.index) return;
-  setTooltip(String());
   render(graph_data(graph_data_type::na)); 
 }
 
@@ -107,10 +106,6 @@ module_graph::request_rerender(int param)
   int m = mapping.topo.module_index;
   int p = mapping.topo.param_index;
   if (desc.plugin->modules[m].params[p].dsp.direction == param_direction::output) return;
-  if (desc.plugin->modules[mapping.topo.module_index].rerender_on_param_hover)
-    setTooltip(desc.params[param]->full_name);
-  else
-    setTooltip(desc.modules[mapping.module_global].info.name);
   _render_dirty = true;
   _hovered_or_tweaked_param = param;
 }
