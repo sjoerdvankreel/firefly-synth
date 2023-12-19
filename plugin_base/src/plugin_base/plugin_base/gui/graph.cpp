@@ -168,19 +168,18 @@ graph::paint(Graphics& g)
   float h = getHeight();
   g.fillAll(_lnf->colors().graph_background);
 
-  int grid_rows = 5;
-  int grid_cols = 13;
-  if (_data.type() == graph_data_type::audio)
-  {
-    grid_rows = 7;
-    grid_cols = 17;
-  }
-
+  // figure out grid box size such that row count is even and line 
+  // count is uneven because we want a horizontal line in the middle
+  float preferred_box_size = 9;
+  int row_count = std::round(h / preferred_box_size);
+  if(row_count % 2 != 0) row_count++;
+  float box_size = h / row_count;
+  int col_count = std::round(w / box_size);
   g.setColour(_lnf->colors().graph_grid.withAlpha(0.25f));
-  for(int i = 1; i <= grid_rows; i++)
-    g.fillRect(0.0f, i / (float)(grid_rows + 1) * h, w, 1.0f);
-  for (int i = 1; i <= grid_cols; i++)
-    g.fillRect(i / (float)(grid_cols + 1) * w, 0.0f, 1.0f, h);
+  for(int i = 1; i < row_count; i++)
+    g.fillRect(0.0f, i / (float)(row_count) * h, w, 1.0f);
+  for (int i = 1; i < col_count; i++)
+    g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
 
   auto foreground = _lnf->colors().graph_foreground;
   if (_data.type() == graph_data_type::scalar)
