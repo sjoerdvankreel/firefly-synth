@@ -42,10 +42,12 @@ public gui_tab_selection_listener,
 public juce::Timer,
 public juce::SettableTooltipClient
 {
-  bool _done = false;
   plugin_gui* const _gui;
-  bool _render_dirty = true;
   module_graph_params const _params;
+
+  bool _done = false;
+  bool _render_dirty = true;
+  int _activated_module_slot = -1;
   int _hovered_or_tweaked_param = -1;
 
   void render_if_dirty();

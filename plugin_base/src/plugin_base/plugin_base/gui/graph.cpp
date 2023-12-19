@@ -54,6 +54,7 @@ module_graph::module_tab_changed(int module, int slot)
   // trigger re-render based on first new module param
   auto const& desc = _gui->gui_state()->desc();
   if(_params.module != -1 && _params.module != module) return;
+  _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
   request_rerender(desc.modules[index].params[0].info.global);
 }
@@ -64,7 +65,8 @@ module_graph::any_state_changed(int param, plain_value plain)
   auto const& desc = _gui->gui_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
   if(_params.module == -1 || _params.module == mapping.topo.module_index)
-    request_rerender(param);
+    if(_activated_module_slot == mapping.topo.module_slot)
+      request_rerender(param);
 }
 
 void 
