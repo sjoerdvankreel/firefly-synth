@@ -78,11 +78,11 @@ make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store, int 
 static Component&
 make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension{ { 1, 1 } , { 6, 6, 6, 7, 7 } }, 2);
+  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 5 }, 2);
   result.add(gui->make_load_button(), { 0, 0 });
   result.add(gui->make_save_button(), { 0, 1 });
-  result.add(gui->make_clear_button(), { 0, 2 });
-  result.add(gui->make_init_button(), { 0, 3 });
+  result.add(gui->make_init_button(), { 0, 2 });
+  result.add(gui->make_clear_button(), { 0, 3 });
   result.add(store_component<preset_button>(store, gui), { 0, 4 });
   result.add(store_component<last_tweaked_label>(store, gui->gui_state()), { 1, 0, 1, 3 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 3, 1, 2 });
