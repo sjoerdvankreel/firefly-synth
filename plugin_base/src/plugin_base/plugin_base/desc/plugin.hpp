@@ -84,6 +84,7 @@ public:
   plugin_midi_mappings midi_mappings = {};
   plugin_param_mappings param_mappings = {};
   std::vector<param_desc const*> params = {};
+  std::map<int, int> module_topo_to_index = {};
   std::vector<midi_desc const*> midi_sources = {};
   std::map<std::string, int> module_id_to_index = {};
 

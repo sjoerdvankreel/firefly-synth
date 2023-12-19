@@ -11,10 +11,9 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  if(_params.render_on_tweak)
-    _gui->gui_state()->remove_any_listener(this);
-  if(_params.render_on_hover)
-    _gui->remove_gui_mouse_listener(this);
+  if (_params.render_on_hover) _gui->remove_gui_mouse_listener(this);
+  if(_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
+  if(_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
 }
 
 module_graph::
@@ -22,11 +21,15 @@ module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params):
 graph(lnf), _gui(gui), _params(params)
 { 
   assert(params.fps > 0);
-  assert(params.render_on_tweak || params.render_on_hover);
-  if(_params.render_on_hover)
-    gui->add_gui_mouse_listener(this);
-  if(_params.render_on_tweak)
-    gui->gui_state()->add_any_listener(this);
+  assert(params.render_on_tweak || params.render_on_hover || params.render_on_tab_change);
+  if(params.render_on_tab_change) assert(params.module != -1);
+  if(_params.render_on_hover) gui->add_gui_mouse_listener(this);
+  if(_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
+  if (_params.render_on_tab_change) 
+  {
+    gui->add_tab_selection_listener(this);
+    module_tab_changed(params.module, 0);
+  }
   startTimerHz(params.fps);
 }
 
@@ -43,6 +46,16 @@ module_graph::timerCallback()
   if(_done || !_render_dirty) return;
   render_if_dirty();
   repaint();
+}
+
+void 
+module_graph::module_tab_changed(int module, int slot)
+{
+  // trigger re-render based on first new module param
+  auto const& desc = _gui->gui_state()->desc();
+  if(_params.module != -1 && _params.module != module) return;
+  int index = desc.module_topo_to_index.at(module) + slot;
+  request_rerender(desc.modules[index].params[0].info.global);
 }
 
 void 

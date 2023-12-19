@@ -30,13 +30,15 @@ struct module_graph_params
   int module = -1;
   bool render_on_tweak = false;
   bool render_on_hover = false;
+  bool render_on_tab_change = false;
 };
 
 // taps into module_topo.graph_renderer based on task tweaked/hovered param
 class module_graph:
 public graph,
-public gui_mouse_listener,
 public any_state_listener,
+public gui_mouse_listener,
+public gui_tab_selection_listener,
 public juce::Timer,
 public juce::SettableTooltipClient
 {
@@ -59,6 +61,8 @@ public:
   void param_mouse_enter(int param) override;
   void module_mouse_exit(int module) override;
   void module_mouse_enter(int module) override;
+
+  void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
 };
 

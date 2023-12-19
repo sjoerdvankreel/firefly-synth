@@ -335,6 +335,13 @@ plugin_gui::remove_param_listener(gui_param_listener* listener)
 }
 
 void
+plugin_gui::remove_tab_selection_listener(gui_tab_selection_listener* listener)
+{
+  auto iter = std::find(_tab_selection_listeners.begin(), _tab_selection_listeners.end(), listener);
+  if (iter != _tab_selection_listeners.end()) _tab_selection_listeners.erase(iter);
+}
+
+void
 plugin_gui::fire_state_loaded()
 {
   for(int i = 0; i < _gui_state->desc().param_count; i++)
@@ -419,9 +426,18 @@ plugin_gui::resized()
 }
 
 void
-plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id)
+plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, int module_index, int section_index)
 {
-  tab.tab_changed = [this, id](int index) { set_extra_state_num(id, extra_state_tab_index, index); };
+  assert((module_index == -1) != (section_index == -1));
+  tab.tab_changed = [this, id, module_index, section_index](int tab_index) { 
+    set_extra_state_num(id, extra_state_tab_index, tab_index);
+    if(module_index != -1)
+      for(int i = 0; i < _tab_selection_listeners.size(); i++)
+        _tab_selection_listeners[i]->module_tab_changed(module_index, tab_index);
+    if (section_index != -1)
+      for (int i = 0; i < _tab_selection_listeners.size(); i++)
+        _tab_selection_listeners[i]->section_tab_changed(section_index, tab_index);
+  };
   tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_tab_index, 0), 0, tab.getNumTabs() - 1));
   set_extra_state_num(id, extra_state_tab_index, tab.getCurrentTabIndex());
 }
@@ -509,7 +525,7 @@ plugin_gui::make_modules(module_desc const* slots)
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
     add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
   if(slots[0].module->info.slot_count > 1)
-    init_multi_tab_component(result, tag.id);
+    init_multi_tab_component(result, tag.id, index, -1);
   return result;
 }
 
@@ -611,7 +627,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index && section.tab_order[o] == iter->module->info.index)
         add_component_tab(tabs, make_param_sections(*iter), iter->info.global, iter->module->gui.tabbed_name);
-  init_multi_tab_component(tabs, section.id);
+  init_multi_tab_component(tabs, section.id, -1, section.index);
   return tabs;
 }
 

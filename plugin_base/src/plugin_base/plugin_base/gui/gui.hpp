@@ -44,6 +44,15 @@ public:
   virtual void custom_mouse_enter(int section) {};
 };
 
+// triggered on selected tab changed
+class gui_tab_selection_listener
+{
+public:
+  virtual ~gui_tab_selection_listener() {}
+  virtual void module_tab_changed(int module, int slot) {};
+  virtual void section_tab_changed(int module, int slot) {};
+};
+
 // tracking gui parameter changes
 // host binding is expected to update actual gui/controller state
 class gui_param_listener
@@ -142,9 +151,11 @@ public:
   
   void remove_param_listener(gui_param_listener* listener);
   void remove_gui_mouse_listener(gui_mouse_listener* listener);
+  void remove_tab_selection_listener(gui_tab_selection_listener* listener);
   void add_param_listener(gui_param_listener* listener) { _param_listeners.push_back(listener); }
   void add_gui_mouse_listener(gui_mouse_listener* listener) { _gui_mouse_listeners.push_back(listener); }
-  
+  void add_tab_selection_listener(gui_tab_selection_listener* listener) { _tab_selection_listeners.push_back(listener); }
+
 private:
   lnf _lnf;
   juce::TooltipWindow _tooltip;
@@ -155,6 +166,7 @@ private:
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
   std::vector<gui_param_listener*> _param_listeners = {};
   std::vector<gui_mouse_listener*> _gui_mouse_listeners = {};
+  std::vector<gui_tab_selection_listener*> _tab_selection_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
   std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};
@@ -165,15 +177,15 @@ private:
 
   void fire_state_loaded();
   Component& make_content();
-  void init_multi_tab_component(tab_component& tab, std::string const& id);
-  
-  void add_tab_menu_listener(juce::TabBarButton& button, int module, int slot);
-  void add_hover_listener(juce::Component& component, gui_hover_type type, int global_index);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)
   { _extra_state->set_num(id + "/" + part, val); }
   double get_extra_state_num(std::string const& id, std::string const& part, double default_)
   { return _extra_state->get_num(id + "/" + part, default_); }
+
+  void add_tab_menu_listener(juce::TabBarButton& button, int module, int slot);
+  void add_hover_listener(juce::Component& component, gui_hover_type type, int global_index);
+  void init_multi_tab_component(tab_component& tab, std::string const& id, int module_index, int section_index);
 
   Component& make_param_sections(module_desc const& module);
   Component& make_params(module_desc const& module, param_desc const* params);

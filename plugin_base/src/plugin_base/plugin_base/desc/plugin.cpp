@@ -52,6 +52,9 @@ plugin(plugin), config(config)
   for(int m = 0; m < modules.size(); m++)
   {
     auto const& module = modules[m];
+    if(module.info.slot == 0)
+      module_topo_to_index[module.module->info.index] = m;
+
     for (int p = 0; p < module.params.size(); p++)
     {
       auto const& param = module.params[p];

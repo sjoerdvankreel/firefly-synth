@@ -72,6 +72,7 @@ make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store, int 
   params.module = module;
   params.render_on_tweak = true;
   params.render_on_hover = false;
+  params.render_on_tab_change = true;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
