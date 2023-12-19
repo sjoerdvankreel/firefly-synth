@@ -178,14 +178,19 @@ graph::paint(Graphics& g)
   for (int i = 1; i < col_count; i++)
     g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
 
-  auto data = _data;
-  if(data.type() == graph_data_type::empty)
-    data = graph_data(0.0f, true);
   auto foreground = _lnf->colors().graph_foreground;
-  if (data.type() == graph_data_type::scalar)
+  if (_data.type() == graph_data_type::empty)
   {
-    float scalar = data.scalar();
-    if (data.bipolar())
+    g.setColour(foreground.withAlpha(0.75f));
+    g.setFont(dynamic_cast<lnf&>(getLookAndFeel()).font().boldened());
+    g.drawText("OFF", getLocalBounds().toFloat(), Justification::centred, false);
+    return;
+  }
+
+  if (_data.type() == graph_data_type::scalar)
+  {
+    float scalar = _data.scalar();
+    if (_data.bipolar())
     {
       scalar = 1.0f - bipolar_to_unipolar(scalar);
       g.setColour(foreground.withAlpha(0.5f));
