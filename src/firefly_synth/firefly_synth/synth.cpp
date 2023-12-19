@@ -211,7 +211,7 @@ synth_topo()
   result->gui.min_width = 944;
   result->gui.aspect_ratio_width = 69;
   result->gui.aspect_ratio_height = 33;
-  result->gui.dimension.column_sizes = { 16, 12, 12, 10, 26 };
+  result->gui.dimension.column_sizes = { 16, 12, 12, 10, 13, 13 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, 
@@ -223,7 +223,7 @@ synth_topo()
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 0, 4, 1, 1 }, custom_colors, make_controls_section);
+    custom_section_controls, { 0, 4, 1, 2 }, custom_colors, make_controls_section);
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 3, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
@@ -272,7 +272,7 @@ synth_topo()
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 2 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 4, 8, 1 },
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 4, 8, 2 },
     { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
 
   result->modules.resize(module_count);
