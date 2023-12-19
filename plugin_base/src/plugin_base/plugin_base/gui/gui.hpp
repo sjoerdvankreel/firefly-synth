@@ -68,7 +68,7 @@ public:
 };
 
 // triggers clear/copy/swap/etc
-class gui_tab_listener:
+class gui_tab_menu_listener:
 public juce::MouseListener
 {
   int const _slot;
@@ -78,8 +78,8 @@ public juce::MouseListener
 
 public:
   void mouseUp(juce::MouseEvent const& event);
-  ~gui_tab_listener() { _button->removeMouseListener(this); }
-  gui_tab_listener(plugin_state* state, juce::TabBarButton* button, int module, int slot):
+  ~gui_tab_menu_listener() { _button->removeMouseListener(this); }
+  gui_tab_menu_listener(plugin_state* state, juce::TabBarButton* button, int module, int slot):
   _state(state), _button(button), _module(module), _slot(slot) { _button->addMouseListener(this, true); }
 };
 
@@ -157,8 +157,8 @@ private:
   std::vector<gui_param_listener*> _param_listeners = {};
   // must be destructed first, will unregister listeners, mind order
   std::vector<std::unique_ptr<juce::Component>> _components = {};
-  std::vector<std::unique_ptr<gui_tab_listener>> _tab_listeners = {};
   std::vector<std::unique_ptr<gui_hover_listener>> _hover_listeners = {};
+  std::vector<std::unique_ptr<gui_tab_menu_listener>> _tab_menu_listeners = {};
 
   template <class T, class... U>
   T& make_component(U&&... args);
@@ -167,7 +167,7 @@ private:
   Component& make_content();
   void init_multi_tab_component(tab_component& tab, std::string const& id);
   
-  void add_tab_listener(juce::TabBarButton& button, int module, int slot);
+  void add_tab_menu_listener(juce::TabBarButton& button, int module, int slot);
   void add_hover_listener(juce::Component& component, gui_hover_type type, int global_index);
 
   void set_extra_state_num(std::string const& id, std::string const& part, double val)

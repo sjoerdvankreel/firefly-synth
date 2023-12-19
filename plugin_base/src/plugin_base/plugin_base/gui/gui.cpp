@@ -187,7 +187,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
 }
 
 void 
-gui_tab_listener::mouseUp(MouseEvent const& event)
+gui_tab_menu_listener::mouseUp(MouseEvent const& event)
 {
   if(!event.mods.isRightButtonDown()) return;
   auto const& topo = _state->desc().plugin->modules[_module];
@@ -387,10 +387,10 @@ plugin_gui::module_mouse_enter(int module)
 }
 
 void
-plugin_gui::add_tab_listener(juce::TabBarButton& button, int module, int slot)
+plugin_gui::add_tab_menu_listener(juce::TabBarButton& button, int module, int slot)
 {
-  auto listener = std::make_unique<gui_tab_listener>(gui_state(), &button, module, slot);
-  _tab_listeners.push_back(std::move(listener));
+  auto listener = std::make_unique<gui_tab_menu_listener>(gui_state(), &button, module, slot);
+  _tab_menu_listeners.push_back(std::move(listener));
 }
 
 void
@@ -497,7 +497,7 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
   if(topo.modules[module_index].gui.enable_tab_menu)
-    add_tab_listener(*tab_button, module_index, module_slot);
+    add_tab_menu_listener(*tab_button, module_index, module_slot);
 }
 
 Component&
