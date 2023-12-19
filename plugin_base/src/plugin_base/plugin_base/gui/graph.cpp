@@ -182,9 +182,6 @@ graph::paint(Graphics& g)
   if(data.type() == graph_data_type::empty)
     data = graph_data(0.0f, true);
   auto foreground = _lnf->colors().graph_foreground;
-  if (_data.type() == graph_data_type::empty)
-    foreground = color_to_grayscale(foreground);
-
   if (data.type() == graph_data_type::scalar)
   {
     float scalar = data.scalar();
