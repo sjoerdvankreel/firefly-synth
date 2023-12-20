@@ -164,12 +164,15 @@ graph::paint(Graphics& g)
   if (_data.partitions() > 1)
     for (int part = 0; part < _data.partitions(); part++)
     {
-      bool highlight = _data.partitions() % 2 == 0? part % 2 == 1: part % 2 == 0;
-      if(highlight)
+      Rectangle<float> area(part / (float)_data.partitions() * w, 0.0f, w / _data.partitions(), h);
+      if(part % 2 == 1)
       {
         g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
-        g.fillRect(part / (float)_data.partitions() * w, 0.0f, w / _data.partitions(), h);
+        g.fillRect(area);
       }
+      g.setFont(_lnf->font().withHeight(h * 0.5));
+      g.setColour(_lnf->colors().graph_grid.withAlpha(0.5f));
+      g.drawText(std::to_string(part + 1), area, Justification::centred, false);
     }
 
   // figure out grid box size such that row count is even and line 
