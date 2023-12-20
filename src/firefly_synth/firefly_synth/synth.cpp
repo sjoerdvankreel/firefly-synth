@@ -65,14 +65,14 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 }
 
 static Component&
-make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store, int module)
+make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store, int module, bool render_on_hover)
 {
   module_graph_params params;
   params.fps = 10;
   params.module = module;
   params.render_on_tweak = true;
-  params.render_on_hover = false;
   params.render_on_tab_change = true;
+  params.render_on_hover = render_on_hover;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -232,25 +232,25 @@ synth_topo()
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, { 2, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, false); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
     custom_section_glfo_graph, { 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false); });
   result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
     custom_section_osc_graph, { 5, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false); });
   result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
     custom_section_vfx_graph, { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, false); });
   result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
     custom_section_vlfo_graph, { 7, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, false); });
   result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
     custom_section_env_graph, { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_env); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_env, false); });
   result->gui.custom_sections[custom_section_matrix_graphs] = make_custom_section_gui(
     custom_section_matrix_graphs, { 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_am_matrix); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_am_matrix, true); });
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
