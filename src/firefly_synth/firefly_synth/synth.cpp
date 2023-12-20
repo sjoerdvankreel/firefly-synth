@@ -84,7 +84,9 @@ make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(gui->make_init_button(), { 0, 2 });
   result.add(gui->make_clear_button(), { 0, 3 });
   result.add(store_component<preset_button>(store, gui), { 0, 4 });
-  result.add(store_component<last_tweaked_label>(store, gui->gui_state()), { 1, 0, 1, 3 });
+  auto& tweak_label = store_component<last_tweaked_label>(store, gui->gui_state());
+  tweak_label.setJustificationType(Justification::centredRight);
+  result.add(tweak_label, { 1, 0, 1, 3 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 3, 1, 2 });
   return result;
 }
@@ -223,7 +225,7 @@ synth_topo()
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 0, 1, 1, 1 }, custom_colors, make_controls_section);
+    custom_section_controls, { 0, 3, 1, 1 }, custom_colors, make_controls_section);
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
@@ -270,7 +272,7 @@ synth_topo()
   result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
     "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 4, 2, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
-    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 3, 1, 1 }, { { 1 }, { 1 } });
+    "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 3, 8, 1 },
     { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
