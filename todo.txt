@@ -34,6 +34,7 @@ move the matrix graph below the matrices
 bidirectional update osc / am graphs ?
 do matrix insert before/insert after
 do relwithdebinfo
+init needs double init???
 
 * get some linux folks to comment (ycollete?)
 * continuing
