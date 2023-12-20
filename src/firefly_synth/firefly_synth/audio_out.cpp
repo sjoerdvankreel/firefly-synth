@@ -25,9 +25,14 @@ public:
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  bool bipolar = mapping.param_index == param_bal;
-  float value = state.get_plain_at(mapping).real();
-  return graph_data(value, bipolar);
+  jarray<float, 1> result;
+  result.push_back(0);
+  float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();
+  float gain = state.get_plain_at(mapping.module_index, mapping.module_slot, param_gain, 0).real();
+  for(int i = 0; i < 100; i++)
+    result.push_back(stereo_balance(i < 50? 0: 1, bal) * gain);
+  result.push_back(0);
+  return graph_data(result, false);
 }
 
 module_topo
