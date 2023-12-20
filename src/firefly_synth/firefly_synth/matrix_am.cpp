@@ -15,11 +15,13 @@ using namespace plugin_base;
 
 namespace firefly_synth { 
 
-static int const route_count = 20; // TODO decrease once we do FM
-
 enum { section_main };
 enum { output_modulated };
 enum { param_on, param_source, param_target, param_amt, param_ring };
+
+static int const route_count = 20; // TODO decrease once we do FM
+extern plugin_state prepare_osc_state_for_am_graph(plugin_state const& state);
+extern graph_data render_osc_graph(plugin_state const& state, param_topo_mapping const& mapping);
 
 class am_matrix_engine:
 public module_engine { 
@@ -35,13 +37,19 @@ public:
 };
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, param_topo_mapping const&)
 {
-  auto const& m = mapping;
-  int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
-  if (on == 0) return graph_data(graph_data_type::off);
-  float value = state.get_plain_at(mapping).real();
-  return graph_data(value, false);
+  std::vector<float> result;
+  plugin_state am_state(prepare_osc_state_for_am_graph(state));
+  for (int mi = 0; mi < state.desc().plugin->modules[module_osc].info.slot_count; mi++)
+  {
+    param_topo_mapping mapping = {};
+    mapping.module_slot = mi;
+    mapping.module_index = module_osc;
+    auto graph = render_osc_graph(am_state, mapping);
+    result.insert(result.end(), graph.audio()[0].cbegin(), graph.audio()[0].cend());
+  }
+  return graph_data(jarray<float, 1>(result), true);
 }
 
 audio_routing_audio_params

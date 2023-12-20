@@ -63,8 +63,18 @@ make_osc_routing_menu_handler(plugin_state* state)
   return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params, am_params }));
 }
 
-static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+plugin_state
+prepare_osc_state_for_am_graph(plugin_state const& state)
+{
+  // todo disable unison etc
+  plugin_state result(state);
+  for (int o = 0; o < state.desc().plugin->modules[module_osc].info.slot_count; o++)
+    result.set_raw_at(module_osc, o, param_type, 0, type_sine);
+  return result;
+}
+
+graph_data
+render_osc_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
@@ -106,7 +116,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1 } })));
 
-  result.graph_renderer = render_graph;
+  result.graph_renderer = render_osc_graph;
   result.minimal_initializer = init_minimal;
   result.default_initializer = init_default;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
