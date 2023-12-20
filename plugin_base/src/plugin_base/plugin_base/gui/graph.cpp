@@ -160,6 +160,18 @@ graph::paint(Graphics& g)
   float h = getHeight();
   g.fillAll(_lnf->colors().graph_background);
 
+  // draw background partitions
+  if (_data.partitions() > 1)
+    for (int part = 0; part < _data.partitions(); part++)
+    {
+      bool highlight = _data.partitions() % 2 == 0? part % 2 == 1: part % 2 == 0;
+      if(highlight)
+      {
+        g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
+        g.fillRect(part / (float)_data.partitions() * w, 0.0f, w / _data.partitions(), h);
+      }
+    }
+
   // figure out grid box size such that row count is even and line 
   // count is uneven because we want a horizontal line in the middle
   float preferred_box_size = 9;

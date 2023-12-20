@@ -48,7 +48,7 @@ render_graph(plugin_state const& state, param_topo_mapping const&)
   auto graphs(render_osc_graphs(state, max_osc));
   for (int mi = 0; mi <= max_osc; mi++)
     result.insert(result.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
-  return graph_data(jarray<float, 1>(result), true);
+  return graph_data(jarray<float, 1>(result), true, max_osc + 1);
 }
 
 audio_routing_audio_params

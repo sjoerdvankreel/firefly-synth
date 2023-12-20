@@ -7,6 +7,7 @@ graph_data::init(graph_data const& rhs)
 {
   _type = rhs.type();
   _bipolar = rhs.bipolar();
+  _partitions = rhs.partitions();
   switch (rhs.type())
   {
   case graph_data_type::na: break;
