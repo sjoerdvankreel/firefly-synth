@@ -229,11 +229,11 @@ synth_topo()
   auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
     return make_title_section(gui, lnf, store, custom_color); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, { 0, 0, 1, 2 }, custom_colors, make_title_section_ui);
+    custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { 1, 0, 1, 3 }, custom_colors, make_controls_section);
+    custom_section_controls, { 0, 1, 1, 1 }, custom_colors, make_controls_section);
   result->gui.custom_sections[custom_section_last_tweaked] = make_custom_section_gui(
-    custom_section_last_tweaked, { 1, 3, 1, 1 }, custom_colors, make_last_tweaked_section);
+    custom_section_last_tweaked, { 1, 0, 1, 4 }, custom_colors, make_last_tweaked_section);
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
