@@ -43,9 +43,9 @@ render_graph(plugin_state const& state, param_topo_mapping const&)
   std::vector<float> result;
   plugin_state am_state(prepare_osc_state_for_am_graph(state));
   for(int r = 0; r < route_count; r++)
-    if(state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0)
-      max_osc = std::max(max_osc, state.get_plain_at(module_am_matrix, 0, param_target, r).step());
-  auto graphs(render_osc_graphs(state, max_osc));
+    if(am_state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0)
+      max_osc = std::max(max_osc, am_state.get_plain_at(module_am_matrix, 0, param_target, r).step());
+  auto graphs(render_osc_graphs(am_state, max_osc));
   for (int mi = 0; mi <= max_osc; mi++)
     result.insert(result.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
   return graph_data(jarray<float, 1>(result), true, max_osc + 1);

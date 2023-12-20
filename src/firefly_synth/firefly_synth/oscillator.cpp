@@ -67,7 +67,8 @@ plugin_state
 prepare_osc_state_for_am_graph(plugin_state const& state)
 {
   // todo disable unison etc
-  plugin_state result(state);
+  plugin_state result(&state.desc(), false);
+  result.copy_from(state.state());
   for (int o = 0; o < state.desc().plugin->modules[module_osc].info.slot_count; o++)
     result.set_raw_at(module_osc, o, param_type, 0, type_sine);
   return result;

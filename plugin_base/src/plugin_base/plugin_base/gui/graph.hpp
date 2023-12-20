@@ -27,10 +27,12 @@ public:
 struct module_graph_params
 {
   int fps = -1;
-  int module = -1;
+  int module_index = -1;
   bool render_on_tweak = false;
   bool render_on_hover = false;
   bool render_on_tab_change = false;
+  // trigger also on changes in these
+  std::vector<int> dependent_module_indices = {};
 };
 
 // taps into module_topo.graph_renderer based on task tweaked/hovered param

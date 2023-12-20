@@ -31,11 +31,9 @@ make the matrices smaller -- too much vertical noise now
 revert to 1 graph per module section
 still repaint the graph on module-hover and depending on section on param-hover
 move the matrix graph below the matrices
-bidirectional update osc / am graphs ?
 do matrix insert before/insert after
 do relwithdebinfo
-init needs double init???
-simplify am graph when shown in main preview
+undo stack in gui
 
 * get some linux folks to comment (ycollete?)
 * continuing

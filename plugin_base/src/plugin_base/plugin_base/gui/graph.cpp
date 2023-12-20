@@ -22,13 +22,13 @@ graph(lnf), _gui(gui), _params(params)
 { 
   assert(params.fps > 0);
   assert(params.render_on_tweak || params.render_on_hover || params.render_on_tab_change);
-  if(params.render_on_tab_change) assert(params.module != -1);
+  if(params.render_on_tab_change) assert(params.module_index != -1);
   if(_params.render_on_hover) gui->add_gui_mouse_listener(this);
   if(_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
   if (_params.render_on_tab_change) 
   {
     gui->add_tab_selection_listener(this);
-    module_tab_changed(params.module, 0);
+    module_tab_changed(params.module_index, 0);
   }
   startTimerHz(params.fps);
 }
@@ -53,7 +53,7 @@ module_graph::module_tab_changed(int module, int slot)
 {
   // trigger re-render based on first new module param
   auto const& desc = _gui->gui_state()->desc();
-  if(_params.module != -1 && _params.module != module) return;
+  if(_params.module_index != -1 && _params.module_index != module) return;
   _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
   request_rerender(desc.modules[index].params[0].info.global);
@@ -64,16 +64,30 @@ module_graph::any_state_changed(int param, plain_value plain)
 {
   auto const& desc = _gui->gui_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
-  if(_params.module == -1 || _params.module == mapping.topo.module_index)
-    if(_activated_module_slot == mapping.topo.module_slot)
+  if(_params.module_index == -1 || _params.module_index == mapping.topo.module_index)
+  {
+    if (_activated_module_slot == mapping.topo.module_slot)
       request_rerender(param);
+    return;
+  }
+
+  // someone else changed a param and we depend on it
+  // request re-render for first param in own topo
+  if(std::find(
+      _params.dependent_module_indices.begin(), 
+      _params.dependent_module_indices.end(), 
+      mapping.topo.module_index) == _params.dependent_module_indices.end())
+    return;
+
+  int index = desc.module_topo_to_index.at(_params.module_index) + _activated_module_slot;
+  request_rerender(desc.modules[index].params[0].info.global);
 }
 
 void 
 module_graph::module_mouse_exit(int module) 
 { 
   auto const& desc = _gui->gui_state()->desc().modules[module];
-  if (_params.module != -1 && _params.module != desc.module->info.index) return;
+  if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
   render(graph_data(graph_data_type::na)); 
 }
 
@@ -82,7 +96,7 @@ module_graph::module_mouse_enter(int module)
 {
   // trigger re-render based on first new module param
   auto const& desc = _gui->gui_state()->desc().modules[module];
-  if (_params.module != -1 && _params.module != desc.module->info.index) return;
+  if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
   if (!_gui->gui_state()->desc().modules[module].module->rerender_on_param_hover)
     request_rerender(desc.params[0].info.global);
@@ -93,7 +107,7 @@ module_graph::param_mouse_enter(int param)
 {
   // trigger re-render based on specific param
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
-  if (_params.module != -1 && _params.module != mapping.topo.module_index) return;
+  if (_params.module_index != -1 && _params.module_index != mapping.topo.module_index) return;
   if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].rerender_on_param_hover)
     request_rerender(param);
 }
