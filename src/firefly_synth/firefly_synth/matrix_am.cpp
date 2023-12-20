@@ -21,7 +21,7 @@ enum { param_on, param_source, param_target, param_amt, param_ring };
 
 static int const route_count = 20; // TODO decrease once we do FM
 extern plugin_state prepare_osc_state_for_am_graph(plugin_state const& state);
-extern graph_data render_osc_graph(plugin_state const& state, param_topo_mapping const& mapping);
+extern std::vector<graph_data> render_osc_graphs(plugin_state const& state, int slot);
 
 class am_matrix_engine:
 public module_engine { 
@@ -41,14 +41,10 @@ render_graph(plugin_state const& state, param_topo_mapping const&)
 {
   std::vector<float> result;
   plugin_state am_state(prepare_osc_state_for_am_graph(state));
-  for (int mi = 0; mi < state.desc().plugin->modules[module_osc].info.slot_count; mi++)
-  {
-    param_topo_mapping mapping = {};
-    mapping.module_slot = mi;
-    mapping.module_index = module_osc;
-    auto graph = render_osc_graph(am_state, mapping);
-    result.insert(result.end(), graph.audio()[0].cbegin(), graph.audio()[0].cend());
-  }
+  int osc_count = state.desc().plugin->modules[module_osc].info.slot_count;
+  auto graphs(render_osc_graphs(state, osc_count - 1));
+  for (int mi = 0; mi < osc_count; mi++)
+    result.insert(result.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
   return graph_data(jarray<float, 1>(result), true);
 }
 
@@ -78,7 +74,6 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
-  result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.name;
   result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<am_matrix_engine>(); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(

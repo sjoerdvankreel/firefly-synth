@@ -31,6 +31,7 @@ make the matrices smaller -- too much vertical noise now
 revert to 1 graph per module section
 still repaint the graph on module-hover and depending on section on param-hover
 move the matrix graph below the matrices
+bidirectional update osc / am graphs ?
 
 * get some linux folks to comment (ycollete?)
 * continuing
