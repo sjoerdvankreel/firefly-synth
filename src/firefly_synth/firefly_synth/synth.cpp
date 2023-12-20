@@ -93,7 +93,7 @@ static Component&
 make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour const& color)
 {
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
-  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xLeft), { 0, 1 });
+  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xRight), { 0, 1 });
   auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 14);
   label.setColour(Label::ColourIds::textColourId, color);
   grid.add(label, { 0, 0 });
@@ -211,7 +211,7 @@ synth_topo()
   result->gui.min_width = 944;
   result->gui.aspect_ratio_width = 23;
   result->gui.aspect_ratio_height = 11;
-  result->gui.dimension.column_sizes = { 10, 10, 5, 13 };
+  result->gui.dimension.column_sizes = { 8, 12, 5, 13 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, 
