@@ -26,7 +26,7 @@ make all stuff visible / not tabbed
 do mseg someday
 do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 drop "or time into scratch" & friends?
-am clicks on low freq
+am clicks/rumbles on low freq
 make the matrices smaller -- too much vertical noise now
 revert to 1 graph per module section
 still repaint the graph on module-hover and depending on section on param-hover
