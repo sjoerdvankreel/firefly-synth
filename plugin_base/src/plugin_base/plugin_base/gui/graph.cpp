@@ -171,7 +171,7 @@ graph::paint(Graphics& g)
         g.fillRect(area);
       }
       g.setFont(_lnf->font().withHeight(h * 0.5));
-      g.setColour(_lnf->colors().graph_grid.withAlpha(0.5f));
+      g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
       g.drawText(std::to_string(part + 1), area, Justification::centred, false);
     }
 

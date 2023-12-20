@@ -35,6 +35,7 @@ bidirectional update osc / am graphs ?
 do matrix insert before/insert after
 do relwithdebinfo
 init needs double init???
+simplify am graph when shown in main preview
 
 * get some linux folks to comment (ycollete?)
 * continuing
