@@ -34,6 +34,7 @@ move the matrix graph below the matrices
 do matrix insert before/insert after
 do relwithdebinfo
 undo stack in gui
+do different graphs for tweak preview ?
 
 * get some linux folks to comment (ycollete?)
 * continuing
