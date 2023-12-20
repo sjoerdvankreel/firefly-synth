@@ -16,7 +16,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int constexpr route_count = 20;
+static int const route_count = 20;
 
 enum { section_main };
 enum { op_off, op_mul, op_add, op_addbi };
