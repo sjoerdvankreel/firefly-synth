@@ -22,6 +22,7 @@ enum {
   custom_section_vfx_graph,
   custom_section_vlfo_graph,
   custom_section_env_graph,
+  custom_section_matrix_graphs,
   custom_section_count };
 
 enum { 
@@ -247,6 +248,9 @@ synth_topo()
   result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
     custom_section_env_graph, { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_env); });
+  result->gui.custom_sections[custom_section_matrix_graphs] = make_custom_section_gui(
+    custom_section_matrix_graphs, { 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_am_matrix); });
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
@@ -274,7 +278,7 @@ synth_topo()
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 3, 8, 1 },
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 3, 7, 1 },
     { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
 
   result->modules.resize(module_count);
