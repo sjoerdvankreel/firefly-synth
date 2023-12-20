@@ -34,37 +34,14 @@ public:
   jarray<float, 2> const& modulate(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
 };
 
-static inline float
-apply_modulation(float c, float m, float amt, float ring)
-{
-  float rm = m;
-  float am = bipolar_to_unipolar(m);
-  float mod = mix_signal(ring, am, rm);
-  return mix_signal(amt, c, mod * c);
-}
-
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  std::vector<std::vector<float>> result;
-  for(int o = 0; o < state.desc().plugin->modules[module_osc].info.slot_count; o++)
-  {
-    result.emplace_back();
-    for(int f = 0; f < 100; f++)
-      result[o].push_back(std::sin(f / 100.0f * 2.0f * pi32));
-    for (int r = 0; r < route_count; r++)
-    {
-      //float amt = state.get_plain_at(module_am_matrix, 0, param_amt, r).real();
-      //float ring = state.get_plain_at(module_am_matrix, 0, param_ring, r).real();
-      int source = state.get_plain_at(module_am_matrix, 0, param_source, r).step();
-      int target = state.get_plain_at(module_am_matrix, 0, param_target, r).step();
-      bool on = state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0;
-      if(!on || target != o) continue;
-      for (int f = 0; f < 100; f++)
-        result[o][f] *= result[source][f];
-    }
-  }
-  return graph_data(jarray<float, 1>(vector_join(result)), true);
+  auto const& m = mapping;
+  int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
+  if (on == 0) return graph_data(graph_data_type::off);
+  float value = state.get_plain_at(mapping).real();
+  return graph_data(value, false);
 }
 
 audio_routing_audio_params
@@ -188,8 +165,14 @@ am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown cons
     auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_amt][r];
     auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_ring][r];
     for(int c = 0; c < 2; c++)
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        (*modulated)[c][f] = apply_modulation((*modulated)[c][f], source_audio[0][0][c][f], amt_curve[f], ring_curve[f]);
+      for(int f = block.start_frame; f < block.end_frame; f++)
+      {
+        float audio = (*modulated)[c][f];
+        float rm = source_audio[0][0][c][f];
+        float am = bipolar_to_unipolar(rm);
+        float mod = mix_signal(ring_curve[f], am, rm);
+        (*modulated)[c][f] = mix_signal(amt_curve[f], audio, mod * audio);
+      }
   }
 
   // default result is unmodulated (e.g., osc output itself)
