@@ -16,7 +16,6 @@ enum { section_main };
 enum { type_off, type_sine, type_saw };
 enum { param_type, param_note, param_cent };
 
-extern int const osc_param_note = param_note;
 extern int const voice_in_output_pitch_offset;
 
 static std::vector<list_item>

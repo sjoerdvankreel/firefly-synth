@@ -15,8 +15,7 @@ using namespace plugin_base;
 
 namespace firefly_synth { 
 
-extern int const osc_param_note;
-static int const route_count = 20; // TODO decrease once we do FM
+static int constexpr route_count = 20; // TODO decrease once we do FM
 
 enum { section_main };
 enum { output_modulated };
@@ -47,41 +46,23 @@ apply_modulation(float c, float m, float amt, float ring)
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
-  std::vector<float> osc_freqs;
   std::vector<std::vector<float>> result;
-  int osc_count = state.desc().plugin->modules[module_osc].info.slot_count;
-  for (int o = 0; o < osc_count; o++)
+  for(int o = 0; o < state.desc().plugin->modules[module_osc].info.slot_count; o++)
   {
-    int note = state.get_plain_at(module_osc, o, osc_param_note, 0).step();
-    osc_freqs.push_back(pitch_to_freq(note));
-  }
-
-  for(int o = 0; o < osc_count; o++)
-  {
-    // normalize to be 1 cycle at current target
-    std::vector<std::vector<float>> this_sines;
-    std::vector<float> osc_ratios(osc_count, 1.0f);
-    for(int ro = 0; ro <= o; ro++)
-    {
-      int this_note = state.get_plain_at(module_osc, ro, osc_param_note, 0).step();
-      osc_ratios[ro] = pitch_to_freq(this_note) / osc_freqs[o];
-      this_sines.emplace_back();
-      for (int f = 0; f < 100; f++)
-        this_sines[ro].push_back(std::sin(f / 100.0f * osc_ratios[ro] * 2.0f * pi32));
-    }
+    result.emplace_back();
+    for(int f = 0; f < 100; f++)
+      result[o].push_back(std::sin(f / 100.0f * 2.0f * pi32));
     for (int r = 0; r < route_count; r++)
     {
-      float amt = state.get_plain_at(module_am_matrix, 0, param_amt, r).real();
-      float ring = state.get_plain_at(module_am_matrix, 0, param_ring, r).real();
+      //float amt = state.get_plain_at(module_am_matrix, 0, param_amt, r).real();
+      //float ring = state.get_plain_at(module_am_matrix, 0, param_ring, r).real();
       int source = state.get_plain_at(module_am_matrix, 0, param_source, r).step();
       int target = state.get_plain_at(module_am_matrix, 0, param_target, r).step();
       bool on = state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0;
-
-      if(!on || target > o || source > target) continue;
+      if(!on || target != o) continue;
       for (int f = 0; f < 100; f++)
-        this_sines[target][f] = apply_modulation(this_sines[target][f], this_sines[source][f], amt, ring);
+        result[o][f] *= result[source][f];
     }
-    result.push_back(this_sines[o]);
   }
   return graph_data(jarray<float, 1>(vector_join(result)), true);
 }
