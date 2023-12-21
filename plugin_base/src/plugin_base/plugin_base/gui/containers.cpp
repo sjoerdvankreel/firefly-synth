@@ -6,7 +6,7 @@ namespace plugin_base {
 
 tab_component::
 ~tab_component()
-{ _state->remove_listener(_storage_id); }
+{ _state->remove_listener(_storage_id, this); }
 
 tab_component::
 tab_component(extra_state* state, std::string const& storage_id, juce::TabbedButtonBar::Orientation orientation) :

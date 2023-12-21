@@ -18,23 +18,18 @@ extra_state::fire_changed(std::string const& key)
 {
   auto iter = _listeners.find(key);
   if(iter != _listeners.end())
-    iter->second->extra_state_changed();
+    for(int i = 0; i < iter->second.size(); i++)
+      iter->second[i]->extra_state_changed();
 }
 
 void
-extra_state::remove_listener(std::string const& key)
+extra_state::remove_listener(std::string const& key, extra_state_listener* listener)
 {
-  auto iter = _listeners.find(key);
-  assert(iter != _listeners.end());
-  _listeners.erase(iter);
-}
-
-void 
-extra_state::add_listener(std::string const& key, extra_state_listener* listener)
-{
-  auto iter = _listeners.find(key);
-  assert(iter == _listeners.end());
-  _listeners[key] = listener;
+  auto key_iter = _listeners.find(key);
+  assert(key_iter != _listeners.end());
+  auto listener_iter = std::find(key_iter->second.begin(), key_iter->second.end(), listener);
+  assert(listener_iter != key_iter->second.end());
+  key_iter->second.erase(listener_iter);
 }
 
 void 

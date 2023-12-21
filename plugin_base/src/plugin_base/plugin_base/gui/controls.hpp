@@ -144,7 +144,7 @@ public extra_state_listener
 public:
   preset_button(plugin_gui* gui);
   void extra_state_changed() override;
-  ~preset_button() { _gui->extra_state()->remove_listener(factory_preset_key); }
+  ~preset_button() { _gui->extra_state()->remove_listener(factory_preset_key, this); }
 };
 
 // binding_component that is additionally bound to a single parameter value
