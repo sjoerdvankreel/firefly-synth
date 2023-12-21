@@ -32,33 +32,6 @@ public:
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
 };
 
-// displays a child component based on extra state changes
-class extra_state_container:
-public juce::Component,
-public extra_state_listener
-{
-  plugin_gui* const _gui = {};
-  std::string const _state_key = {};
-  std::unique_ptr<juce::Component> _child = {};
-public:
-  virtual ~extra_state_container();
-  extra_state_container(plugin_gui* gui, std::string const& state_key);
-  void extra_state_changed() override;
-protected:
-  virtual std::unique_ptr<juce::Component> create_child(juce::var const& value) = 0;
-};
-
-// displays a child component based on module tab changes
-class tabbed_module_section_container:
-public extra_state_container
-{
-  int const _section_index;
-public:
-  tabbed_module_section_container(plugin_gui* gui, int section_index);
-protected:
-  std::unique_ptr<juce::Component> create_child(juce::var const& value) override;
-};
-
 // tab component with persistent selection and change listener
 class tab_component :
 public juce::TabbedComponent,

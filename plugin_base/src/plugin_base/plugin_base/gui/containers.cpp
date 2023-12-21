@@ -20,37 +20,6 @@ autofit_viewport::resized()
   getViewedComponent()->setSize(getWidth() - _lnf->getDefaultScrollbarWidth() - 2, fit.fixed_height());
 }
 
-extra_state_container::
-~extra_state_container()
-{
-  _child.reset();
-  _gui->extra_state()->remove_listener()
-}
-
-extra_state_container::
-extra_state_container(plugin_gui* gui, std::string const& state_key)
-{
-
-}
-
-void 
-extra_state_container::extra_state_changed()
-{
-
-}
-
-tabbed_module_section_container::
-tabbed_module_section_container(plugin_gui* gui, int section_index)
-{
-
-}
-
-std::unique_ptr<Component> 
-tabbed_module_section_container::create_child(var const& value)
-{
-
-}
-
 void 
 margin_component::resized()
 {
