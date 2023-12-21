@@ -13,7 +13,8 @@ module_graph::
   stopTimer();
   if (_params.render_on_hover) _gui->remove_gui_mouse_listener(this);
   if(_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
-  if(_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
+  if(_params.render_on_module_tab_change || _params.render_on_module_section_tab_change)
+    _gui->remove_tab_selection_listener(this);
 }
 
 module_graph::
@@ -21,14 +22,28 @@ module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params):
 graph(lnf), _gui(gui), _params(params)
 { 
   assert(params.fps > 0);
-  assert(params.render_on_tweak || params.render_on_hover || params.render_on_tab_change);
-  if(params.render_on_tab_change) assert(params.module_index != -1);
+  assert(!params.render_on_module_tab_change || 
+    !params.render_on_module_section_tab_change);
+  assert(params.render_on_tweak || params.render_on_hover || 
+    params.render_on_module_tab_change || params.render_on_module_section_tab_change);
+
   if(_params.render_on_hover) gui->add_gui_mouse_listener(this);
   if(_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
-  if (_params.render_on_tab_change) 
+
+  if (_params.render_on_module_tab_change)
   {
+    assert(params.module_index != -1);
     gui->add_tab_selection_listener(this);
     module_tab_changed(params.module_index, 0);
+  }
+  if (_params.render_on_module_section_tab_change)
+  {
+    assert(params.section_index != -1);
+    assert(gui->gui_state()->desc().plugin->gui.module_sections[params.section_index].tab_order.size() 
+      == params.dependent_module_section_indices.size());
+    gui->add_tab_selection_listener(this);
+    module_section_tab_changed(params.section_index,
+      gui->gui_state()->desc().plugin->gui.module_sections[params.section_index].tab_order[0]);
   }
   startTimerHz(params.fps);
 }
@@ -49,10 +64,23 @@ module_graph::timerCallback()
 }
 
 void 
+module_graph::module_section_tab_changed(int section, int module)
+{
+  // trigger re-render based on first new section module param
+  auto const& desc = _gui->gui_state()->desc();
+  if (!_params.render_on_module_section_tab_change) return;
+  if (_params.section_index != -1 && _params.section_index != section) return;
+  _activated_section_module = module;
+  int index = desc.module_topo_to_index.at(module);
+  request_rerender(desc.modules[index].params[0].info.global);
+}
+
+void 
 module_graph::module_tab_changed(int module, int slot)
 {
-  // trigger re-render based on first new module param
+  // trigger re-render based on first new module slot param
   auto const& desc = _gui->gui_state()->desc();
+  if(!_params.render_on_module_tab_change) return;
   if(_params.module_index != -1 && _params.module_index != module) return;
   _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
