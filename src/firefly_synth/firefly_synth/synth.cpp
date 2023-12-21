@@ -60,38 +60,20 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   params.module_index = -1;
   params.render_on_hover = true;
   params.render_on_tweak = true;
-  params.render_on_module_tab_change = false;
-  params.render_on_module_section_tab_change = false;
+  params.render_on_tab_change = false;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
 static Component&
-make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store,
-  int module, std::vector<int> const& dependent_module_indices)
+make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store, int module, std::vector<int> const& dependent_module_indices)
 {
   module_graph_params params;
   params.fps = 10;
   params.module_index = module;
   params.render_on_tweak = true;
   params.render_on_hover = false;
-  params.render_on_module_tab_change = true;
-  params.render_on_module_section_tab_change = false;
+  params.render_on_tab_change = true;
   params.dependent_module_indices = dependent_module_indices;
-  return store_component<module_graph>(store, gui, lnf, params);
-}
-
-static Component&
-make_module_section_graph_section(plugin_gui* gui, lnf* lnf, component_store store, 
-  int section, std::vector<std::vector<int>> const& dependent_module_section_indices)
-{
-  module_graph_params params;
-  params.fps = 10;
-  params.section_index = section;
-  params.render_on_tweak = true;
-  params.render_on_hover = false;
-  params.render_on_module_tab_change = false;
-  params.render_on_module_section_tab_change = true;
-  params.dependent_module_section_indices = dependent_module_section_indices;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -269,8 +251,7 @@ synth_topo()
     -> Component& { return make_module_graph_section(gui, lnf, store, module_env, {}); });
   result->gui.custom_sections[custom_section_matrix_graphs] = make_custom_section_gui(
     custom_section_matrix_graphs, { 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_section_graph_section(gui, lnf, store, module_section_matrices, { 
-      { module_osc }, {}, {}, {}, {}}); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_am_matrix, { module_osc }); });
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(

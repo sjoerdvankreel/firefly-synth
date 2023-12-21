@@ -436,8 +436,7 @@ plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, 
         _tab_selection_listeners[i]->module_tab_changed(module_index, tab_index);
     if (section_index != -1)
       for (int i = 0; i < _tab_selection_listeners.size(); i++)
-        _tab_selection_listeners[i]->module_section_tab_changed(section_index, 
-          gui_state()->desc().plugin->gui.module_sections[section_index].tab_order[tab_index]);
+        _tab_selection_listeners[i]->section_tab_changed(section_index, tab_index);
   };
   tab.setCurrentTabIndex(std::clamp((int)get_extra_state_num(id, extra_state_tab_index, 0), 0, tab.getNumTabs() - 1));
   set_extra_state_num(id, extra_state_tab_index, tab.getCurrentTabIndex());

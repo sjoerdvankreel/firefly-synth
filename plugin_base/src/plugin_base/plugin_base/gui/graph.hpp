@@ -28,17 +28,14 @@ struct module_graph_params
 {
   int fps = -1;
   int module_index = -1;
-  int section_index = -1;
   bool render_on_tweak = false;
   bool render_on_hover = false;
-  bool render_on_module_tab_change = false;
-  bool render_on_module_section_tab_change = false;
+  bool render_on_tab_change = false;
   // trigger also on changes in these
   std::vector<int> dependent_module_indices = {};
-  std::vector<std::vector<int>> dependent_module_section_indices = {};
 };
 
-// taps into module_topo.graph_renderer based on last tweaked/hovered state
+// taps into module_topo.graph_renderer based on task tweaked/hovered param
 class module_graph:
 public graph,
 public any_state_listener,
@@ -53,7 +50,6 @@ public juce::SettableTooltipClient
   bool _done = false;
   bool _render_dirty = true;
   int _activated_module_slot = 0;
-  int _activated_section_module = 0;
   int _hovered_or_tweaked_param = -1;
 
   void render_if_dirty();
@@ -72,7 +68,6 @@ public:
 
   void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
-  void module_section_tab_changed(int section, int module) override;
 };
 
 }

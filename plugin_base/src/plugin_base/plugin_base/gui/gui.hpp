@@ -49,8 +49,8 @@ class gui_tab_selection_listener
 {
 public:
   virtual ~gui_tab_selection_listener() {}
-  virtual void module_tab_changed(int module, int slot) = 0;
-  virtual void module_section_tab_changed(int section, int module) = 0;
+  virtual void module_tab_changed(int module, int slot) {};
+  virtual void section_tab_changed(int module, int slot) {};
 };
 
 // tracking gui parameter changes
