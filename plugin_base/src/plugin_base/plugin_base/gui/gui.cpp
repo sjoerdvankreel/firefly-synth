@@ -245,6 +245,10 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
   });
 }
 
+std::string 
+module_section_tab_key(plugin_topo const& topo, int section_index)
+{ return topo.gui.module_sections[section_index].id + "/" + extra_state_tab_index; }
+
 std::set<std::string>
 gui_extra_state_keyset(plugin_topo const& topo)
 {
@@ -255,7 +259,7 @@ gui_extra_state_keyset(plugin_topo const& topo)
       result.insert(topo.modules[i].info.tag.id + "/" + extra_state_tab_index);
   for (int i = 0; i < topo.gui.module_sections.size(); i++)
     if (topo.gui.module_sections[i].tabbed)
-      result.insert(topo.gui.module_sections[i].id + "/" + extra_state_tab_index);
+      result.insert(module_section_tab_key(topo, i));
   return result;
 }
 

@@ -21,34 +21,29 @@ autofit_viewport::resized()
 }
 
 extra_state_container::
-~extra_state_container()
-{
-  _child.reset();
-  _gui->extra_state()->remove_listener()
-}
-
-extra_state_container::
-extra_state_container(plugin_gui* gui, std::string const& state_key)
-{
-
-}
+extra_state_container(plugin_gui* gui, std::string const& state_key):
+_gui(gui), _state_key(state_key)
+{ _gui->extra_state()->add_listener(state_key, this); }
 
 void 
 extra_state_container::extra_state_changed()
 {
-
+  if(_child) removeChildComponent(_child.get());
+  _child = create_child(_gui->extra_state()->get_var(_state_key));
+  addChildComponent(_child.get());
 }
 
 tabbed_module_section_container::
-tabbed_module_section_container(plugin_gui* gui, int section_index)
-{
-
-}
+tabbed_module_section_container(plugin_gui* gui, int section_index,
+  std::function<std::unique_ptr<juce::Component>(int module_index)> factory):
+extra_state_container(gui, module_section_tab_key(*gui->gui_state()->desc().plugin, section_index)),
+_section_index(section_index), _factory(factory) {}
 
 std::unique_ptr<Component> 
 tabbed_module_section_container::create_child(var const& value)
 {
-
+  int tab_index = static_cast<int>(value);
+  return _factory(gui()->gui_state()->desc().plugin->gui.module_sections[_section_index].tab_order[tab_index]);
 }
 
 void 

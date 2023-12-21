@@ -52,6 +52,28 @@ make_section_colors(Colour const& c)
   return result;
 }
 
+static module_graph_params
+make_module_graph_params(int module, std::vector<int> const& dependent_module_indices)
+{
+  module_graph_params result;
+  result.fps = 10;
+  result.module_index = module;
+  result.render_on_tweak = true;
+  result.render_on_hover = false;
+  result.render_on_tab_change = true;
+  result.dependent_module_indices = dependent_module_indices;
+  return result;
+}
+
+static Component&
+make_module_graph_section(
+  plugin_gui* gui, lnf* lnf, component_store store,
+  int module, std::vector<int> const& dependent_module_indices)
+{
+  module_graph_params params = make_module_graph_params(module, dependent_module_indices);
+  return store_component<module_graph>(store, gui, lnf, params);
+}
+
 static Component&
 make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
@@ -65,16 +87,20 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 }
 
 static Component&
-make_module_graph_section(plugin_gui* gui, lnf* lnf, component_store store, int module, std::vector<int> const& dependent_module_indices)
+make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  module_graph_params params;
-  params.fps = 10;
-  params.module_index = module;
-  params.render_on_tweak = true;
-  params.render_on_hover = false;
-  params.render_on_tab_change = true;
-  params.dependent_module_indices = dependent_module_indices;
-  return store_component<module_graph>(store, gui, lnf, params);
+  return store_component<tabbed_module_section_container>(store, gui, module_section_matrices, 
+    [gui, lnf](int module_index) -> std::unique_ptr<juce::Component> {
+      switch (module_index)
+      {
+      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { module_osc} ));
+      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { }));
+      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { }));
+      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { }));
+      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { }));
+      default: assert(false); return std::make_unique<Component>();
+      }
+    });
 }
 
 static Component&
@@ -251,7 +277,7 @@ synth_topo()
     -> Component& { return make_module_graph_section(gui, lnf, store, module_env, {}); });
   result->gui.custom_sections[custom_section_matrix_graphs] = make_custom_section_gui(
     custom_section_matrix_graphs, { 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_am_matrix, { module_osc }); });
+    -> Component& { return make_matrix_graphs_section(gui, lnf, store); });
 
   result->gui.module_sections.resize(module_section_count);
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(

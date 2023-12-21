@@ -40,21 +40,26 @@ public extra_state_listener
   plugin_gui* const _gui = {};
   std::string const _state_key = {};
   std::unique_ptr<juce::Component> _child = {};
-public:
-  virtual ~extra_state_container();
-  extra_state_container(plugin_gui* gui, std::string const& state_key);
-  void extra_state_changed() override;
 protected:
+  plugin_gui* const gui() { return _gui; }
   virtual std::unique_ptr<juce::Component> create_child(juce::var const& value) = 0;
+public:
+  void extra_state_changed() override;
+  extra_state_container(plugin_gui* gui, std::string const& state_key);
+  virtual ~extra_state_container() { _gui->extra_state()->remove_listener(_state_key, this); }
 };
 
 // displays a child component based on module tab changes
 class tabbed_module_section_container:
 public extra_state_container
 {
+private:
   int const _section_index;
+  std::function<std::unique_ptr<juce::Component>(int module_index)> _factory;
 public:
-  tabbed_module_section_container(plugin_gui* gui, int section_index);
+  tabbed_module_section_container(
+    plugin_gui* gui, int section_index,
+    std::function<std::unique_ptr<juce::Component>(int module_index)> factory);
 protected:
   std::unique_ptr<juce::Component> create_child(juce::var const& value) override;
 };
