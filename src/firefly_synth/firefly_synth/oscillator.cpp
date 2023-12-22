@@ -127,6 +127,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_module_gui(section, colors, pos, { { 1 }, { 1 } })));
 
   result.graph_renderer = render_osc_graph;
+  result.rerender_on_module_hover = true;
   result.minimal_initializer = init_minimal;
   result.default_initializer = init_default;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
