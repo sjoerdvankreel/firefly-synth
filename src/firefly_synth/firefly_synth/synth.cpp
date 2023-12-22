@@ -98,10 +98,10 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
       switch (module_index)
       {
       case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, false, { module_osc } ));
-      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { }));
-      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { }));
-      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { }));
-      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { module_master_in, module_glfo }));
+      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, { }));
+      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, { }));
+      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, { }));
+      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, { module_master_in, module_glfo }));
       default: assert(false); return std::make_unique<Component>();
       }
     });
