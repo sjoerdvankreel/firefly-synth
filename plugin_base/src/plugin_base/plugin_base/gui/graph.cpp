@@ -185,7 +185,7 @@ graph::paint(Graphics& g)
     }
     g.setFont(_lnf->font().withHeight(h * 0.5));
     g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
-    g.drawText(std::to_string(part + 1), area, Justification::centred, false);
+    g.drawText(_data.partitions()[part], area, Justification::centred, false);
   }
 
   // figure out grid box size such that row count is even and line 
