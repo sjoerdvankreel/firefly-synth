@@ -119,7 +119,6 @@ struct module_topo final {
   midi_active_selector midi_active_selector;
 
   bool rerender_on_param_hover = false;
-  bool rerender_on_module_hover = false;
   module_graph_renderer graph_renderer;
   module_engine_factory engine_factory;
   state_initializer minimal_initializer;

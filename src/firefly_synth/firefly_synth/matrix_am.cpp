@@ -80,7 +80,6 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
-  result.rerender_on_module_hover = true;
   result.gui.tabbed_name = result.info.tag.name;
   result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<am_matrix_engine>(); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(

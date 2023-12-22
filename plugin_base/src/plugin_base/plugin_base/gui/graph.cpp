@@ -103,15 +103,12 @@ module_graph::module_mouse_exit(int module)
 void
 module_graph::module_mouse_enter(int module)
 {
-  // trigger re-render based on first new module param or last hovered
+  // trigger re-render based on first new module param
   auto const& desc = _gui->gui_state()->desc().modules[module];
   if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
-  if (_gui->gui_state()->desc().modules[module].module->rerender_on_module_hover)
-    if (_params.module_index == desc.module->info.index && _hovered_param != -1)
-      request_rerender(_hovered_param);
-    else
-      request_rerender(desc.params[0].info.global);
+  if (!_gui->gui_state()->desc().modules[module].module->rerender_on_param_hover)
+    request_rerender(desc.params[0].info.global);
 }
 
 void
@@ -121,11 +118,7 @@ module_graph::param_mouse_enter(int param)
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
   if (_params.module_index != -1 && _params.module_index != mapping.topo.module_index) return;
   if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].rerender_on_param_hover)
-  {
     request_rerender(param);
-    if(_params.module_index == mapping.topo.module_index && _activated_module_slot == mapping.topo.module_slot)
-      _hovered_param = param;
-  }
 }
 
 void

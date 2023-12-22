@@ -150,14 +150,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, routi
 {
   auto const& map = mapping;
   int op = state.get_plain_at(map.module_index, map.module_slot, param_op, map.param_slot).step();
-  if(op == op_off) 
-  {
-    // try to find first active route so we plot something most of the time
-    for(int r = 0; r < route_count; r++)
-      if(state.get_plain_at(map.module_index, map.module_slot, param_op, r).step() != op_off)
-        return render_graph(state, { map.module_index, map.module_slot, map.param_index, r }, targets);
-    return graph_data(graph_data_type::off, {});
-  }
+  if(op == op_off) return graph_data(graph_data_type::off, {});
 
   graph_engine_params params = {};
   params.bpm = 120;
@@ -212,7 +205,6 @@ cv_matrix_topo(
     make_module_gui(section, colors, pos, { 1, 1 })));
   
   result.rerender_on_param_hover = true;
-  result.rerender_on_module_hover = true;
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.graph_renderer = [tm = target_matrix](
