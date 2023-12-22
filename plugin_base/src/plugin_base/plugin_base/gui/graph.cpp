@@ -67,18 +67,27 @@ module_graph::any_state_changed(int param, plain_value plain)
   if(_params.module_index == -1 || _params.module_index == mapping.topo.module_index)
   {
     if (_activated_module_slot == mapping.topo.module_slot)
+    {
+      if(_params.module_index != -1) 
+        _last_rerender_cause_param = param;
       request_rerender(param);
+    }
     return;
   }
 
   // someone else changed a param and we depend on it
-  // request re-render for first param in own topo
+  // request re-render for first param in own topo or last changed in own topo
   if(std::find(
       _params.dependent_module_indices.begin(), 
       _params.dependent_module_indices.end(), 
       mapping.topo.module_index) == _params.dependent_module_indices.end())
     return;
 
+  if(_last_rerender_cause_param != -1)
+  {
+    request_rerender(_last_rerender_cause_param);
+    return;
+  }  
   int index = desc.module_topo_to_index.at(_params.module_index) + _activated_module_slot;
   request_rerender(desc.modules[index].params[0].info.global);
 }

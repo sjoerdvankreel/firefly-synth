@@ -51,6 +51,7 @@ public juce::SettableTooltipClient
   bool _render_dirty = true;
   int _activated_module_slot = 0;
   int _hovered_or_tweaked_param = -1;
+  int _last_rerender_cause_param = -1;
 
   void render_if_dirty();
   void request_rerender(int param);
