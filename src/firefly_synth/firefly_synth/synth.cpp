@@ -53,24 +53,27 @@ make_section_colors(Colour const& c)
 }
 
 static module_graph_params
-make_module_graph_params(int module, bool render_on_hover, std::vector<int> const& dependent_module_indices)
+make_module_graph_params(int module, bool render_on_module_mouse_enter, 
+  bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices)
 {
   module_graph_params result;
   result.fps = 10;
   result.module_index = module;
   result.render_on_tweak = true;
   result.render_on_tab_change = true;
-  result.render_on_hover = render_on_hover;
   result.dependent_module_indices = dependent_module_indices;
+  result.render_on_param_mouse_enter = render_on_param_mouse_enter;
+  result.render_on_module_mouse_enter = render_on_module_mouse_enter;
   return result;
 }
 
 static Component&
 make_module_graph_section(
-  plugin_gui* gui, lnf* lnf, component_store store,
-  int module, std::vector<int> const& dependent_module_indices)
+  plugin_gui* gui, lnf* lnf, component_store store, int module, bool render_on_module_mouse_enter,
+  bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices)
 {
-  module_graph_params params = make_module_graph_params(module, false, dependent_module_indices);
+  module_graph_params params = make_module_graph_params(module, 
+    render_on_module_mouse_enter, render_on_param_mouse_enter, dependent_module_indices);
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -80,9 +83,10 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_graph_params params;
   params.fps = 10;
   params.module_index = -1;
-  params.render_on_hover = true;
   params.render_on_tweak = true;
   params.render_on_tab_change = false;
+  params.render_on_param_mouse_enter = true;
+  params.render_on_module_mouse_enter = true;
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -93,11 +97,11 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
     [gui, lnf](int module_index) -> std::unique_ptr<juce::Component> {
       switch (module_index)
       {
-      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, { module_osc } ));
-      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { }));
-      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { }));
-      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { }));
-      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { module_master_in, module_glfo }));
+      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, false, { module_osc } ));
+      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { }));
+      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { }));
+      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { }));
+      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, true, { module_master_in, module_glfo }));
       default: assert(false); return std::make_unique<Component>();
       }
     });
@@ -259,22 +263,22 @@ synth_topo()
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
     custom_section_gfx_graph, { 2, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, {}); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, true, false, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
     custom_section_glfo_graph, { 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, {}); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, true, false, {}); });
   result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
     custom_section_osc_graph, { 5, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, { module_am_matrix }); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, true, false, { module_am_matrix }); });
   result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
     custom_section_vfx_graph, { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, {}); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, true, false, {}); });
   result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
     custom_section_vlfo_graph, { 7, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, {}); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, true, false, {}); });
   result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
     custom_section_env_graph, { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_env, {}); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_env, true, false, {}); });
   result->gui.custom_sections[custom_section_matrix_graphs] = make_custom_section_gui(
     custom_section_matrix_graphs, { 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_matrix_graphs_section(gui, lnf, store); });

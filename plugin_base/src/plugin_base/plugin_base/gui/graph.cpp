@@ -11,9 +11,9 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  if (_params.render_on_hover) _gui->remove_gui_mouse_listener(this);
   if(_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
   if(_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
+  if (_params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter) _gui->remove_gui_mouse_listener(this);
 }
 
 module_graph::
@@ -21,10 +21,10 @@ module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params):
 graph(lnf), _gui(gui), _params(params)
 { 
   assert(params.fps > 0);
-  assert(params.render_on_tweak || params.render_on_hover || params.render_on_tab_change);
+  assert(params.render_on_tweak || params.render_on_tab_change || params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter);
   if(params.render_on_tab_change) assert(params.module_index != -1);
-  if(_params.render_on_hover) gui->add_gui_mouse_listener(this);
-  if(_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
+  if (_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
+  if(_params.render_on_module_mouse_enter || params.render_on_param_mouse_enter) gui->add_gui_mouse_listener(this);
   if (_params.render_on_tab_change) 
   {
     gui->add_tab_selection_listener(this);
@@ -92,14 +92,6 @@ module_graph::any_state_changed(int param, plain_value plain)
   request_rerender(desc.modules[index].params[0].info.global);
 }
 
-void 
-module_graph::module_mouse_exit(int module) 
-{ 
-  auto const& desc = _gui->gui_state()->desc().modules[module];
-  if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
-  render(graph_data(graph_data_type::na, {}));
-}
-
 void
 module_graph::module_mouse_enter(int module)
 {
@@ -107,7 +99,7 @@ module_graph::module_mouse_enter(int module)
   auto const& desc = _gui->gui_state()->desc().modules[module];
   if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
-  if (!_gui->gui_state()->desc().modules[module].module->rerender_on_param_hover)
+  if(_params.render_on_module_mouse_enter)
     request_rerender(desc.params[0].info.global);
 }
 
@@ -117,7 +109,7 @@ module_graph::param_mouse_enter(int param)
   // trigger re-render based on specific param
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
   if (_params.module_index != -1 && _params.module_index != mapping.topo.module_index) return;
-  if (_gui->gui_state()->desc().plugin->modules[mapping.topo.module_index].rerender_on_param_hover)
+  if (_params.render_on_param_mouse_enter)
     request_rerender(param);
 }
 

@@ -204,7 +204,6 @@ cv_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   
-  result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.graph_renderer = [tm = target_matrix](

@@ -131,7 +131,6 @@ audio_matrix_topo(
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
-  result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.minimal_initializer = global ? init_global_minimal : init_voice_minimal;

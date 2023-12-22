@@ -29,8 +29,9 @@ struct module_graph_params
   int fps = -1;
   int module_index = -1;
   bool render_on_tweak = false;
-  bool render_on_hover = false;
   bool render_on_tab_change = false;
+  bool render_on_param_mouse_enter = false;
+  bool render_on_module_mouse_enter = false;
   // trigger also on changes in these
   std::vector<int> dependent_module_indices = {};
 };
@@ -64,9 +65,7 @@ public:
   void paint(juce::Graphics& g) override;
 
   void param_mouse_enter(int param) override;
-  void module_mouse_exit(int module) override;
   void module_mouse_enter(int module) override;
-
   void module_tab_changed(int module, int slot) override;
   void any_state_changed(int param, plain_value plain) override;  
 };
