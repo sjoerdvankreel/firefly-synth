@@ -53,14 +53,14 @@ make_section_colors(Colour const& c)
 }
 
 static module_graph_params
-make_module_graph_params(int module, std::vector<int> const& dependent_module_indices)
+make_module_graph_params(int module, bool render_on_hover, std::vector<int> const& dependent_module_indices)
 {
   module_graph_params result;
   result.fps = 10;
   result.module_index = module;
   result.render_on_tweak = true;
-  result.render_on_hover = false;
   result.render_on_tab_change = true;
+  result.render_on_hover = render_on_hover;
   result.dependent_module_indices = dependent_module_indices;
   return result;
 }
@@ -70,7 +70,7 @@ make_module_graph_section(
   plugin_gui* gui, lnf* lnf, component_store store,
   int module, std::vector<int> const& dependent_module_indices)
 {
-  module_graph_params params = make_module_graph_params(module, dependent_module_indices);
+  module_graph_params params = make_module_graph_params(module, false, dependent_module_indices);
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
@@ -93,11 +93,11 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
     [gui, lnf](int module_index) -> std::unique_ptr<juce::Component> {
       switch (module_index)
       {
-      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { module_osc } ));
-      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { }));
-      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { }));
-      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { }));
-      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, { module_master_in, module_glfo }));
+      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, { module_osc } ));
+      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { }));
+      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { }));
+      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { }));
+      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, { module_master_in, module_glfo }));
       default: assert(false); return std::make_unique<Component>();
       }
     });
