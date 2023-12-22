@@ -122,6 +122,7 @@ struct module_topo final {
   module_engine_factory engine_factory;
   state_initializer minimal_initializer;
   state_initializer default_initializer;
+  bool force_rerender_on_param_hover = false;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo);
   void validate(plugin_topo const& plugin, int index) const;
 };

@@ -99,7 +99,7 @@ module_graph::module_mouse_enter(int module)
   auto const& desc = _gui->gui_state()->desc().modules[module];
   if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
-  if(_params.render_on_module_mouse_enter)
+  if(_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
     request_rerender(desc.params[0].info.global);
 }
 
