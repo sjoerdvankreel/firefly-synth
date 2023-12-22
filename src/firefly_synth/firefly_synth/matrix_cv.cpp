@@ -150,7 +150,14 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, routi
 {
   auto const& map = mapping;
   int op = state.get_plain_at(map.module_index, map.module_slot, param_op, map.param_slot).step();
-  if(op == op_off) return graph_data(graph_data_type::off, {});
+  if(op == op_off) 
+  {
+    // try to always paint something
+    for(int r = 0; r < route_count; r++)
+      if(state.get_plain_at(map.module_index, map.module_slot, param_op, r).step() != 0)
+        return render_graph(state, { map.module_index, map.module_slot, map.param_index, r }, targets);
+    return graph_data(graph_data_type::off, {});
+  }
 
   graph_engine_params params = {};
   params.bpm = 120;
