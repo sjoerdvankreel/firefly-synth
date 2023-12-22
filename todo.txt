@@ -24,20 +24,12 @@ hardsync, unison
 do 5 am and 5 fm routes
 make all stuff visible / not tabbed
 do mseg someday
-do different ui layout, larges graphs, load/save/preset etc on 1 line below graphs
 drop "or time into scratch" & friends?
 am clicks/rumbles on low freq
-make the matrices smaller -- too much vertical noise now
-revert to 1 graph per module section
-still repaint the graph on module-hover and depending on section on param-hover
-move the matrix graph below the matrices
 do matrix insert before/insert after
 do relwithdebinfo
 undo stack in gui
-do different graphs for tweak preview ?
 do more sync options (eg 1/20, 3/24 etc)
-do not too much graph repaint
-smaller graph text
 master in not repaint
 
 * get some linux folks to comment (ycollete?)
