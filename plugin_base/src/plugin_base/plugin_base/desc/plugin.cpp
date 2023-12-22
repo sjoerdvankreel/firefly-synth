@@ -1,3 +1,4 @@
+#include <plugin_base/desc/dims.hpp>
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/shared/utility.hpp> 
 #include <set>
@@ -13,6 +14,10 @@ plugin(plugin), config(config)
   int param_global = 0;
   int module_global = 0;
   int midi_source_global = 0;
+
+  plugin_dims dims(*plugin);
+  modules_by_topo.resize(dims.module_slot);
+  params_by_topo.resize(dims.module_slot_param_slot);
 
   for(int m = 0; m < plugin->modules.size(); m++)
   {
@@ -31,18 +36,23 @@ plugin(plugin), config(config)
       midi_mappings.topo_to_index[m].emplace_back();
       param_mappings.topo_to_index[m].emplace_back();
       modules.emplace_back(module_desc(module, m, mi, module_global++, param_global, midi_source_global));
+      modules_by_topo[m][mi] = &modules[modules.size() - 1];
       for (int ms = 0; ms < module.midi_sources.size(); ms++)
       {
         auto const& source = module.midi_sources[ms];
         PB_ASSERT_EXEC(midi_mappings.id_to_index.insert(std::pair(source.id, midi_source_global)).second);
         midi_mappings.topo_to_index[m][mi].push_back(midi_source_global++);
       }
+      int module_param = 0;
       for(int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         param_mappings.topo_to_index[m][mi].emplace_back();
         for(int pi = 0; pi < param.info.slot_count; pi++)
+        {
           param_mappings.topo_to_index[m][mi][p].push_back(param_global++);
+          params_by_topo[m][mi][p][pi] = &modules[modules.size() - 1].params[module_param++];
+        }
       }
     }
   }
