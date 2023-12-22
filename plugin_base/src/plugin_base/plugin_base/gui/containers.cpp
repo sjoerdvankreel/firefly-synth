@@ -29,8 +29,9 @@ void
 extra_state_container::extra_state_changed()
 {
   if(_child) removeChildComponent(_child.get());
-  _child = create_child(_gui->extra_state()->get_var(_state_key));
-  addChildComponent(_child.get());
+  _child = create_child();
+  _child->setBounds(getLocalBounds());
+  add_and_make_visible(*this, *_child.get());
 }
 
 tabbed_module_section_container::
@@ -40,9 +41,9 @@ extra_state_container(gui, module_section_tab_key(*gui->gui_state()->desc().plug
 _section_index(section_index), _factory(factory) {}
 
 std::unique_ptr<Component> 
-tabbed_module_section_container::create_child(var const& value)
+tabbed_module_section_container::create_child()
 {
-  int tab_index = static_cast<int>(value);
+  int tab_index = gui()->extra_state()->get_num(state_key(), 0);
   return _factory(gui()->gui_state()->desc().plugin->gui.module_sections[_section_index].tab_order[tab_index]);
 }
 

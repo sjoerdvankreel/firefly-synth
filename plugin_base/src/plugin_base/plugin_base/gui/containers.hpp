@@ -42,7 +42,8 @@ public extra_state_listener
   std::unique_ptr<juce::Component> _child = {};
 protected:
   plugin_gui* const gui() { return _gui; }
-  virtual std::unique_ptr<juce::Component> create_child(juce::var const& value) = 0;
+  std::string const& state_key() const { return _state_key; }
+  virtual std::unique_ptr<juce::Component> create_child() = 0;
 public:
   void extra_state_changed() override;
   extra_state_container(plugin_gui* gui, std::string const& state_key);
@@ -56,12 +57,12 @@ public extra_state_container
 private:
   int const _section_index;
   std::function<std::unique_ptr<juce::Component>(int module_index)> _factory;
+protected:
+  std::unique_ptr<juce::Component> create_child() override;
 public:
   tabbed_module_section_container(
     plugin_gui* gui, int section_index,
     std::function<std::unique_ptr<juce::Component>(int module_index)> factory);
-protected:
-  std::unique_ptr<juce::Component> create_child(juce::var const& value) override;
 };
 
 // tab component with persistent selection and change listener
