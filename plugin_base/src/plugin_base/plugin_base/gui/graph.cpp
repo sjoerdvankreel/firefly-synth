@@ -88,7 +88,7 @@ module_graph::module_mouse_exit(int module)
 { 
   auto const& desc = _gui->gui_state()->desc().modules[module];
   if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
-  render(graph_data(graph_data_type::na)); 
+  render(graph_data(graph_data_type::na, {}));
 }
 
 void
@@ -175,19 +175,18 @@ graph::paint(Graphics& g)
   g.fillAll(_lnf->colors().graph_background);
 
   // draw background partitions
-  if (_data.partitions() > 1)
-    for (int part = 0; part < _data.partitions(); part++)
+  for (int part = 0; part < _data.partitions().size(); part++)
+  {
+    Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
+    if(part % 2 == 1)
     {
-      Rectangle<float> area(part / (float)_data.partitions() * w, 0.0f, w / _data.partitions(), h);
-      if(part % 2 == 1)
-      {
-        g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
-        g.fillRect(area);
-      }
-      g.setFont(_lnf->font().withHeight(h * 0.5));
-      g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
-      g.drawText(std::to_string(part + 1), area, Justification::centred, false);
+      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
+      g.fillRect(area);
     }
+    g.setFont(_lnf->font().withHeight(h * 0.5));
+    g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
+    g.drawText(std::to_string(part + 1), area, Justification::centred, false);
+  }
 
   // figure out grid box size such that row count is even and line 
   // count is uneven because we want a horizontal line in the middle

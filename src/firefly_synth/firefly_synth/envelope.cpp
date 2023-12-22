@@ -70,7 +70,7 @@ static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
-    return graph_data(graph_data_type::off);
+    return graph_data(graph_data_type::off, {});
 
   float const bpm = 120;
   bool sync = state.get_plain_at(module_env, mapping.module_slot, param_sync, 0).step() != 0;
@@ -95,7 +95,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   auto const* block = engine.process_default(module_env, mapping.module_slot);
   jarray<float, 1> series(block->state.own_cv[0][0]);
   series.push_back(0);
-  return graph_data(series, false);
+  return graph_data(series, false, {});
 }
 
 module_topo

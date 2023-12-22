@@ -21,7 +21,7 @@ public juce::Component
 public:
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;
-  graph(lnf* lnf) : _lnf(lnf), _data(graph_data_type::na) {}
+  graph(lnf* lnf) : _lnf(lnf), _data(graph_data_type::na, {}) {}
 };
 
 struct module_graph_params

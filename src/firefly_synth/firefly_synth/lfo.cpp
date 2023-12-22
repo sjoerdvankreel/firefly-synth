@@ -53,7 +53,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
-    return graph_data(graph_data_type::off);
+    return graph_data(graph_data_type::off, {});
 
   params.bpm = 120;
   params.frame_count = 200;
@@ -63,7 +63,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   auto const* block = engine.process_default(mapping.module_index, mapping.module_slot);
   jarray<float, 1> series(block->state.own_cv[0][0]);
   series.push_back(0.5f);
-  return graph_data(series, false);
+  return graph_data(series, false, {});
 }
 
 module_topo

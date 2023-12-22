@@ -48,7 +48,10 @@ render_graph(plugin_state const& state, param_topo_mapping const&)
   auto graphs(render_osc_graphs(am_state, max_osc));
   for (int mi = 0; mi <= max_osc; mi++)
     result.insert(result.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
-  return graph_data(jarray<float, 1>(result), true, max_osc + 1);
+  std::vector<std::string> partitions;
+  for(int i = 0; i <= max_osc; i++)
+    partitions.push_back(std::to_string(i + 1));
+  return graph_data(jarray<float, 1>(result), true, partitions);
 }
 
 audio_routing_audio_params

@@ -78,7 +78,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   graph_engine_params params = {};
 
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off) return graph_data(graph_data_type::off);
+  if(type == type_off) return graph_data(graph_data_type::off, {});
 
   params.bpm = 120;
   params.midi_key = midi_middle_c;
@@ -116,13 +116,13 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   });
 
   if (type == type_delay)
-    return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true);
+    return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true, {});
 
   // remap over 0.8 just to look pretty
   std::vector<float> response(log_remap_series_x(fft(block->state.own_audio[0][0][0].data()), 0.8f));
   response.push_back(0);
   response.insert(response.begin(), 0);
-  return graph_data(jarray<float, 1>(response), false);
+  return graph_data(jarray<float, 1>(response), false, {});
 }
 
 module_topo

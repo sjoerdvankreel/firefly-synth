@@ -31,10 +31,10 @@ static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   if (mapping.param_index == param_pb_range)
-    return graph_data(graph_data_type::na);
+    return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
-  return graph_data(value, bipolar);
+  return graph_data(value, bipolar, {});
 }
 
 module_topo
