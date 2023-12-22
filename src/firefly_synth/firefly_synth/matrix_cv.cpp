@@ -146,7 +146,7 @@ select_midi_active(
 }
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::vector<param_topo_mapping> const& targets)
+render_graph(plugin_state const& state, param_topo_mapping const& mapping, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
   int op = state.get_plain_at(map.module_index, map.module_slot, param_op, map.param_slot).step();
@@ -169,10 +169,10 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::
   auto* block = graph_engine.process_default(map.module_index, map.module_slot);
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
-  jarray<float, 1> stacked = jarray<float, 1>(*targets[ti].value_at(modulation));
+  jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
   stacked.push_back(0);
   stacked.insert(stacked.begin(), 0);
-  return graph_data(stacked, false, {});
+  return graph_data(stacked, false, { targets.items[ti].name });
 }
 
 module_topo
@@ -207,7 +207,7 @@ cv_matrix_topo(
   result.rerender_on_param_hover = true;
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
-  result.graph_renderer = [tm = target_matrix.mappings](
+  result.graph_renderer = [tm = target_matrix](
     auto const& state, auto const& mapping) {
       return render_graph(state, mapping, tm);
   };
