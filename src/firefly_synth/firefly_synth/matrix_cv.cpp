@@ -172,14 +172,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::
   jarray<float, 1> stacked = jarray<float, 1>(*targets[ti].value_at(modulation));
   stacked.push_back(0);
   stacked.insert(stacked.begin(), 0);
-
-  int m = targets[ti].module_index;
-  int mi = targets[ti].module_slot;
-  int p = targets[ti].param_index;
-  int pi = targets[ti].param_slot;
-  std::string module_name = state.desc().modules_by_topo[m][mi]->info.
-  std::string partition = state.desc().params_by_topo[m][mi][p][pi]->info.;
-  return graph_data(stacked, false, { partition });
+  return graph_data(stacked, false, {});
 }
 
 module_topo
