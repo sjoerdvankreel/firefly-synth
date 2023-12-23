@@ -90,9 +90,28 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   auto const& m = mapping;
   int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
-  if(on == 0) return graph_data(graph_data_type::off, {});
-  float value = state.get_plain_at(mapping).real();
-  return graph_data(value, mapping.param_index == param_bal, {});
+  if (on == 0)
+  {
+    // try to always paint something
+    for (int r = 0; r < route_count; r++)
+      if (state.get_plain_at(m.module_index, m.module_slot, param_on, r).step() != 0)
+        return render_graph(state, { m.module_index, m.module_slot, m.param_index, r });
+    return graph_data(graph_data_type::off, {});
+  }
+  
+  std::vector<std::pair<float, float>> multi_stereo;
+  for(int r = 0; r < route_count; r++)
+    if (state.get_plain_at(m.module_index, m.module_slot, param_on, r).step() != 0)
+      if (state.get_plain_at(m.module_index, m.module_slot, param_target, r).step() ==
+        state.get_plain_at(m.module_index, m.module_slot, param_target, m.param_slot).step())
+      {
+        float bal = state.get_plain_at(m.module_index, m.module_slot, param_bal, r).real();
+        float gain = state.get_plain_at(m.module_index, m.module_slot, param_gain, r).real();
+        float left = stereo_balance(0, bal) * gain;
+        float right = stereo_balance(1, bal) * gain;
+        multi_stereo.push_back({ left, right });
+      }
+  return graph_data(multi_stereo);
 }
 
 audio_routing_audio_params

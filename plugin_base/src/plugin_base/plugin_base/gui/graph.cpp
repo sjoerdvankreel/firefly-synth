@@ -218,7 +218,7 @@ graph::paint(Graphics& g)
     {
       float l = 1 - _data.multi_stereo()[i].first;
       float r = 1 - _data.multi_stereo()[i].second;
-      g.setColour(foreground.withAlpha(0.5f));
+      g.setColour(foreground.withAlpha(0.5f / _data.multi_stereo().size()));
       g.fillRect(0.0f, l * h, w * 0.5f, (1 - l) * h);
       g.fillRect(w * 0.5f, r * h, w * 0.5f, (1 - r) * h);
       g.setColour(foreground);
