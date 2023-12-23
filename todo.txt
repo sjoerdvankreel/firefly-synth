@@ -32,6 +32,8 @@ undo stack in gui
 do more sync options (eg 1/20, 3/24 etc)
 filter repaint is too expensive
 modulate relative to current level ? or relative to param ? ==> mode = plain/param/stack
+group p.add 
+implement p.add
 
 * get some linux folks to comment (ycollete?)
 * continuing
