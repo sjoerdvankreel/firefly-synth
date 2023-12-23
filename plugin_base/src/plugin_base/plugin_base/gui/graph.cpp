@@ -47,8 +47,8 @@ void
 module_graph::timerCallback()
 {
   if(_done || !_render_dirty) return;
-  render_if_dirty();
-  repaint();
+  if(render_if_dirty())
+    repaint();
 }
 
 void 
@@ -131,11 +131,11 @@ module_graph::request_rerender(int param)
   _hovered_or_tweaked_param = param;
 }
 
-void
+bool
 module_graph::render_if_dirty()
 {
-  if (!_render_dirty) return;
-  if (_hovered_or_tweaked_param == -1) return;
+  if (!_render_dirty) return false;
+  if (_hovered_or_tweaked_param == -1) return false;
 
   auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
   param_topo_mapping mapping = mapping = mappings[_hovered_or_tweaked_param].topo;
@@ -143,6 +143,7 @@ module_graph::render_if_dirty()
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(*_gui->gui_state(), mapping));
   _render_dirty = false;
+  return true;
 }
 
 void 
