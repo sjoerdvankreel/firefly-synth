@@ -400,9 +400,12 @@ cv_matrix_engine::process(plugin_block& block)
         modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f];
       break;
     case type_add_rel:
-    case type_add_stk:
       for (int f = block.start_frame; f < block.end_frame; f++)
         modulated_curve[f] += (1 - target_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]);
+      break;
+    case type_add_stk:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] += (1 - modulated_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]);
       break;
     case type_ab_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
