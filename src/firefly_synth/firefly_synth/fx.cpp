@@ -84,9 +84,9 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 
   if (type == type_delay)
   {
-    int count = 100;
-    params.sample_rate = 500;
-    params.frame_count = 2000;
+    int count = 10;
+    params.sample_rate = 50;
+    params.frame_count = 200;
     audio_in.resize(jarray<int, 1>(2, params.frame_count));
     for (int i = 0; i < count; i++)
     {
@@ -241,7 +241,7 @@ fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulatio
   float max_feedback = 0.9f;
   int this_module = _global ? module_gfx : module_vfx;
   float time = get_timesig_time_value(block, this_module, param_delay_tempo);
-  int samples = block.sample_rate * time;
+  int samples = std::min(block.sample_rate * time, (float)_capacity);
   
   auto const& feedback_curve = *modulation[this_module][block.module_slot][param_delay_feedback][0];
   for (int c = 0; c < 2; c++)
