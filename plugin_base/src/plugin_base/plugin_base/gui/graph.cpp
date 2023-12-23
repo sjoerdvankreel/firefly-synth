@@ -1,7 +1,6 @@
 #include <plugin_base/gui/graph.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
-#include <fstream>
 
 using namespace juce;
 
@@ -104,13 +103,7 @@ module_graph::module_mouse_enter(int module)
   if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
   if(_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
-  {
-    std::ofstream ost{ "c:\\temp\\log.txt", std::ios_base::app }; 
-    ost << " render mod mouse enter " << module << std::endl;
-    ost.flush();
-    ost.close();
     request_rerender(desc.params[0].info.global);
-  }
 }
 
 void
