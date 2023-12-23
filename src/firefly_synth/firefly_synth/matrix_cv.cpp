@@ -410,7 +410,7 @@ cv_matrix_engine::process(plugin_block& block)
     case type_val_addbi:
     case type_stack_addbi:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
+        modulated_curve[f] += (1 - std::fabs(0.5f - target_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
       break;
     case type_plain_mul:
       for (int f = block.start_frame; f < block.end_frame; f++)
