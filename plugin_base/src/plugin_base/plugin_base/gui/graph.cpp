@@ -13,7 +13,8 @@ module_graph::
   stopTimer();
   if(_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
   if(_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
-  if (_params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter) _gui->remove_gui_mouse_listener(this);
+  if (_params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter_modules.size()) 
+    _gui->remove_gui_mouse_listener(this);
 }
 
 module_graph::
@@ -21,10 +22,12 @@ module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params):
 graph(lnf), _gui(gui), _params(params)
 { 
   assert(params.fps > 0);
-  assert(params.render_on_tweak || params.render_on_tab_change || params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter);
+  assert(params.render_on_tweak || params.render_on_tab_change || 
+    params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter_modules.size());
   if(params.render_on_tab_change) assert(params.module_index != -1);
   if (_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
-  if(_params.render_on_module_mouse_enter || params.render_on_param_mouse_enter) gui->add_gui_mouse_listener(this);
+  if(_params.render_on_module_mouse_enter || params.render_on_param_mouse_enter_modules.size())
+    gui->add_gui_mouse_listener(this);
   if (_params.render_on_tab_change) 
   {
     gui->add_tab_selection_listener(this);
@@ -109,7 +112,10 @@ module_graph::param_mouse_enter(int param)
   // trigger re-render based on specific param
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
   if (_params.module_index != -1 && _params.module_index != mapping.topo.module_index) return;
-  if (_params.render_on_param_mouse_enter)
+  auto end = _params.render_on_param_mouse_enter_modules.end();
+  auto begin = _params.render_on_param_mouse_enter_modules.begin();
+  if (std::find(begin, end, mapping.topo.module_index) != end ||
+    std::find(begin, end, -1) != end)
     request_rerender(param);
 }
 
