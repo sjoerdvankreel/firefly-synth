@@ -11,8 +11,6 @@ make new test files
 fix up the gui (control sizes etc)
 check all infernal functionality, see what needs to be in the base
 document the header files a bit
-negative cv amount
-fully do the cv matrix with offset/spread
 more space for freq slider
 number modules by processing order or by group
 implement the multi env
@@ -22,7 +20,6 @@ voice arp?
 more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 do 5 am and 5 fm routes
-make all stuff visible / not tabbed
 do mseg someday
 drop "or time into scratch" & friends?
 am clicks/rumbles on low freq
@@ -31,7 +28,6 @@ do relwithdebinfo
 undo stack in gui
 do more sync options (eg 1/20, 3/24 etc)
 filter repaint is too expensive
-modulate relative to current level ? or relative to param ? ==> mode = plain/param/stack
 group p.add 
 implement p.add
 
