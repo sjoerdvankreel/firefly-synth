@@ -47,6 +47,7 @@ protected:
 public:
   void extra_state_changed() override;
   extra_state_container(plugin_gui* gui, std::string const& state_key);
+  void resized() override { if (_child) { _child->setBounds(getLocalBounds()); } }
   virtual ~extra_state_container() { _gui->extra_state()->remove_listener(_state_key, this); }
 };
 
