@@ -162,6 +162,9 @@ private:
   juce::TooltipWindow _tooltip;
   plugin_state* const _gui_state;
   gui_undo_listener _undo_listener;
+  int _last_mouse_enter_param = -1;
+  int _last_mouse_enter_module = -1;
+  int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};

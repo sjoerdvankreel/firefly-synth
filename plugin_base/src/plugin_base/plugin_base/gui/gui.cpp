@@ -355,46 +355,58 @@ plugin_gui::fire_state_loaded()
 void
 plugin_gui::param_mouse_exit(int param)
 {
+  if (_last_mouse_enter_param == param) return;
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->param_mouse_exit(param);
+  _last_mouse_enter_param = -1;
 }
 
 void
 plugin_gui::param_mouse_enter(int param)
 {
+  if(_last_mouse_enter_param == param) return;
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->param_mouse_enter(param);
+  _last_mouse_enter_param = param;
 }
 
 void
 plugin_gui::custom_mouse_exit(int section)
 {
+  if (_last_mouse_enter_custom == section) return;
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->custom_mouse_exit(section);
+  _last_mouse_enter_custom = -1;
 }
 
 void
 plugin_gui::custom_mouse_enter(int section)
 {
+  if(_last_mouse_enter_custom == section) return;
   _tooltip.setLookAndFeel(_custom_lnfs[section].get());
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->custom_mouse_enter(section);
+  _last_mouse_enter_custom = section;
 }
 
 void
 plugin_gui::module_mouse_exit(int module)
 {
+  if (_last_mouse_enter_module == module) return;
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->module_mouse_exit(module);
+  _last_mouse_enter_module = -1;
 }
 
 void
 plugin_gui::module_mouse_enter(int module)
 {
+  if(_last_mouse_enter_module == module) return;
   int index = gui_state()->desc().modules[module].module->info.index;
   _tooltip.setLookAndFeel(_module_lnfs[index].get());
   for(int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->module_mouse_enter(module);
+  _last_mouse_enter_module = module;
 }
 
 void
