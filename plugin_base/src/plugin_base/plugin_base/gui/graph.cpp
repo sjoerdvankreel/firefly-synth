@@ -68,6 +68,10 @@ module_graph::any_state_changed(int param, plain_value plain)
 {
   auto const& desc = _gui->gui_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
+  if(desc.params[param]->param->dsp.direction == param_direction::output) return;
+  
+  _last_rendered_param = -1;
+  _any_state_changed_since_rerender = true;
   if(_params.module_index == -1 || _params.module_index == mapping.topo.module_index)
   {
     if (_activated_module_slot == mapping.topo.module_slot)
@@ -133,7 +137,8 @@ module_graph::request_rerender(int param)
   auto const& mapping = desc.param_mappings.params[param];
   int m = mapping.topo.module_index;
   int p = mapping.topo.param_index;
-  if (desc.plugin->modules[m].params[p].dsp.direction == param_direction::output) return;
+  if (_last_rendered_param == param && !_any_state_changed_since_rerender) return;
+  if (desc.plugin->modules[m].params[p].dsp.direction == param_direction::output) return;  
   _render_dirty = true;
   _hovered_or_tweaked_param = param;
 }
@@ -143,6 +148,7 @@ module_graph::render_if_dirty()
 {
   if (!_render_dirty) return;
   if (_hovered_or_tweaked_param == -1) return;
+  if(_last_rendered_param == _hovered_or_tweaked_param && !_any_state_changed_since_rerender) return;
 
   auto const& mappings = _gui->gui_state()->desc().param_mappings.params;
   param_topo_mapping mapping = mapping = mappings[_hovered_or_tweaked_param].topo;
@@ -150,6 +156,8 @@ module_graph::render_if_dirty()
   if(module.graph_renderer != nullptr)
     render(module.graph_renderer(*_gui->gui_state(), mapping));
   _render_dirty = false;
+  _any_state_changed_since_rerender = false;
+  _last_rendered_param = _hovered_or_tweaked_param;
 }
 
 void 

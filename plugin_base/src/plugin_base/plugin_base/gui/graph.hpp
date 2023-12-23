@@ -48,11 +48,14 @@ public juce::SettableTooltipClient
   plugin_gui* const _gui;
   module_graph_params const _params;
 
-  bool _done = false;
-  bool _render_dirty = true;
   int _activated_module_slot = 0;
+  int _last_rendered_param = -1;
   int _hovered_or_tweaked_param = -1;
   int _last_rerender_cause_param = -1;
+
+  bool _done = false;
+  bool _render_dirty = true;
+  bool _any_state_changed_since_rerender = true;
 
   void render_if_dirty();
   void request_rerender(int param);
