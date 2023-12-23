@@ -27,7 +27,7 @@ do matrix insert before/insert after
 do relwithdebinfo
 undo stack in gui
 do more sync options (eg 1/20, 3/24 etc)
-filter repaint is too expensive
+filter repaint is too expensive -> find a fast fft ?
 group p.add 
 implement p.add
 
