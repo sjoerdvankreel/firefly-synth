@@ -86,7 +86,7 @@ init_global_default(plugin_state& state)
 }
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, param_topo_mapping const& mapping, std::vector<list_item> const& targets)
 {
   auto const& m = mapping;
   int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
@@ -95,15 +95,15 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     // try to always paint something
     for (int r = 0; r < route_count; r++)
       if (state.get_plain_at(m.module_index, m.module_slot, param_on, r).step() != 0)
-        return render_graph(state, { m.module_index, m.module_slot, m.param_index, r });
+        return render_graph(state, { m.module_index, m.module_slot, m.param_index, r }, targets);
     return graph_data(graph_data_type::off, {});
   }
   
+  int ti = state.get_plain_at(m.module_index, m.module_slot, param_target, m.param_slot).step();
   std::vector<std::pair<float, float>> multi_stereo;
   for(int r = 0; r < route_count; r++)
     if (state.get_plain_at(m.module_index, m.module_slot, param_on, r).step() != 0)
-      if (state.get_plain_at(m.module_index, m.module_slot, param_target, r).step() ==
-        state.get_plain_at(m.module_index, m.module_slot, param_target, m.param_slot).step())
+      if (state.get_plain_at(m.module_index, m.module_slot, param_target, r).step() == ti)
       {
         float bal = state.get_plain_at(m.module_index, m.module_slot, param_bal, r).real();
         float gain = state.get_plain_at(m.module_index, m.module_slot, param_gain, r).real();
@@ -111,7 +111,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
         float right = stereo_balance(1, bal) * gain;
         multi_stereo.push_back({ left, right });
       }
-  return graph_data(multi_stereo);
+  return graph_data(multi_stereo, { targets[ti].name });
 }
 
 audio_routing_audio_params
@@ -149,7 +149,9 @@ audio_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
-  result.graph_renderer = render_graph;
+  result.graph_renderer = [tm = target_matrix.items](
+    auto const& state, auto const& mapping) {
+      return render_graph(state, mapping, tm); };
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.minimal_initializer = global ? init_global_minimal : init_voice_minimal;

@@ -38,14 +38,14 @@ public:
 
   graph_data(graph_data_type type, std::vector<std::string> const& partitions):
   _partitions(partitions), _type(type) {}
-  graph_data(std::vector<std::pair<float, float>> const& multi_stereo) :
-  _partitions(), _bipolar(false), _type(graph_data_type::multi_stereo), _multi_stereo(multi_stereo) {}
   graph_data(jarray<float, 2> const& audio, std::vector<std::string> const& partitions) :
   _partitions(partitions), _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
   graph_data(float scalar, bool bipolar, std::vector<std::string> const& partitions):
   _partitions(partitions), _bipolar(bipolar), _type(graph_data_type::scalar), _scalar(scalar) {}
   graph_data(jarray<float, 1> const& series, bool bipolar, std::vector<std::string> const& partitions) :
   _partitions(partitions), _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
+  graph_data(std::vector<std::pair<float, float>> const& multi_stereo, std::vector<std::string> const& partitions) :
+    _partitions(partitions), _bipolar(false), _type(graph_data_type::multi_stereo), _multi_stereo(multi_stereo) {}
 };
 
 }
