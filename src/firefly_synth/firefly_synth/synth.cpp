@@ -62,8 +62,9 @@ make_module_graph_params(int module, bool render_on_module_mouse_enter,
   result.render_on_tweak = true;
   result.render_on_tab_change = true;
   result.dependent_module_indices = dependent_module_indices;
-  result.render_on_param_mouse_enter = render_on_param_mouse_enter;
   result.render_on_module_mouse_enter = render_on_module_mouse_enter;
+  if(render_on_param_mouse_enter)
+    result.render_on_param_mouse_enter_modules = { -1 };
   return result;
 }
 
@@ -85,8 +86,10 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   params.module_index = -1;
   params.render_on_tweak = true;
   params.render_on_tab_change = false;
-  params.render_on_param_mouse_enter = true;
   params.render_on_module_mouse_enter = true;
+  params.render_on_param_mouse_enter_modules = { 
+    module_master_in, module_voice_in, module_am_matrix, module_vaudio_matrix, 
+    module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix };
   return store_component<module_graph>(store, gui, lnf, params);
 }
 
