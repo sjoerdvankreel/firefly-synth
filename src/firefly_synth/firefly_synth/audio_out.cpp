@@ -29,10 +29,9 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   result.push_back(0);
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();
   float gain = state.get_plain_at(mapping.module_index, mapping.module_slot, param_gain, 0).real();
-  for(int i = 0; i < 100; i++)
-    result.push_back(stereo_balance(i < 50? 0: 1, bal) * gain);
-  result.push_back(0);
-  return graph_data(result, false, {});
+  float l = stereo_balance(0, bal) * gain;
+  float r = stereo_balance(1, bal) * gain;
+  return graph_data({ { l, r } });
 }
 
 module_topo
