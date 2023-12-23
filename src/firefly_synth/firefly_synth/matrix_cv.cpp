@@ -357,6 +357,7 @@ cv_matrix_engine::process(plugin_block& block)
     int tpi = _targets[selected_target].param_slot;
     int tm = _targets[selected_target].module_index;
     int tmi = _targets[selected_target].module_slot;
+    auto const& target_curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
 
     // if already modulated, set target curve to own buffer
     int existing_modulation_index = _modulation_indices[tm][tmi][tp][tpi];
@@ -393,20 +394,29 @@ cv_matrix_engine::process(plugin_block& block)
     auto const& max_curve = block.state.own_accurate_automation[param_max][r];
     switch (type)
     {
-    case type_val_add:
     case type_plain_add:
-    case type_stack_add:
       for (int f = block.start_frame; f < block.end_frame; f++)
         modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f];
+        break;
+    case type_val_add:
+    case type_stack_add:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] += (1 - target_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]);
+      break;
+    case type_plain_addbi:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
       break;
     case type_val_addbi:
-    case type_plain_addbi:
     case type_stack_addbi:
       for (int f = block.start_frame; f < block.end_frame; f++)
         modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
       break;
-    case type_val_mul:
     case type_plain_mul:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] = min_curve[f] + (1 - min_curve[f]) * mix_signal(max_curve[f], modulated_curve[f], source_curve[f]) * modulated_curve[f];
+      break;
+    case type_val_mul:
     case type_stack_mul:
       for(int f = block.start_frame; f < block.end_frame; f++)
         modulated_curve[f] = min_curve[f] + (1 - min_curve[f]) * mix_signal(max_curve[f], modulated_curve[f], source_curve[f]) * modulated_curve[f];
