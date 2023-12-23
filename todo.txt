@@ -33,6 +33,7 @@ do more sync options (eg 1/20, 3/24 etc)
 filter repaint is too expensive
 repaint graph on both source and target cv changes
 drop cv amount?
+modulate relative to current level ? or relative to param ? ==> mode = plain/param/stack
 
 * get some linux folks to comment (ycollete?)
 * continuing

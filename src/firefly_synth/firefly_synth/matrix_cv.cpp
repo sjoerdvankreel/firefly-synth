@@ -394,15 +394,15 @@ cv_matrix_engine::process(plugin_block& block)
     {
     case op_add:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) *  source_curve[f] * amount_curve[f];
+        modulated_curve[f] += (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * amount_curve[f];
       break;
     case op_addbi:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += unipolar_to_bipolar(source_curve[f]) * amount_curve[f] * 0.5f;
+        modulated_curve[f] += unipolar_to_bipolar((min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f])) * amount_curve[f] * 0.5f;
       break;
     case op_mul:
       for(int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = mix_signal(amount_curve[f], modulated_curve[f], source_curve[f] * modulated_curve[f]);
+        modulated_curve[f] = mix_signal(amount_curve[f], modulated_curve[f], (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * modulated_curve[f]);
       break;
     default:
       assert(false);
