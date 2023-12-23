@@ -89,11 +89,6 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});
 
-  std::ofstream ost{ "c:\\temp\\log.txt", std::ios_base::app };
-  ost << the_paint_counter++ << " render env " << mapping.module_index << " " << mapping.param_index << std::endl;
-  ost.flush();
-  ost.close();
-
   float dahds;
   float dahdsr;
   env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsr);

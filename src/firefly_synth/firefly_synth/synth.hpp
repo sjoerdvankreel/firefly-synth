@@ -6,13 +6,10 @@
 #include <plugin_base/helpers/matrix.hpp>
 #include <plugin_base/dsp/block/plugin.hpp>
 
-#include <fstream>
 #include <juce_gui_basics/juce_gui_basics.h>
 #include <vector>
 
 namespace firefly_synth {
-
-extern int the_paint_counter;
 
 // everybody needs this
 typedef plugin_base::jarray<plugin_base::jarray<

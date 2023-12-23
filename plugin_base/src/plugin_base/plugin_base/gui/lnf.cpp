@@ -4,7 +4,6 @@
 
 #include <juce_gui_basics/detail/juce_LookAndFeelHelpers.h>
 #include <cassert>
-#include <fstream>
 
 using namespace juce;
 
