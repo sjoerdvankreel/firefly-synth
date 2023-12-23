@@ -22,6 +22,10 @@ enum { section_main };
 enum { op_off, op_mul, op_add, op_addbi };
 enum { param_op, param_source, param_target, param_amt };
 
+extern void
+env_plot_length_seconds(
+  plugin_state const& state, int slot, float& dahds, float& dahdsr);
+
 static std::vector<list_item>
 type_items()
 {
@@ -146,7 +150,9 @@ select_midi_active(
 }
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping, routing_matrix<param_topo_mapping> const& targets)
+render_graph(
+  plugin_state const& state, param_topo_mapping const& mapping, 
+  std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
   int op = state.get_plain_at(map.module_index, map.module_slot, param_op, map.param_slot).step();
@@ -155,15 +161,39 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, routi
     // try to always paint something
     for(int r = 0; r < route_count; r++)
       if(state.get_plain_at(map.module_index, map.module_slot, param_op, r).step() != 0)
-        return render_graph(state, { map.module_index, map.module_slot, map.param_index, r }, targets);
+        return render_graph(state, { map.module_index, map.module_slot, map.param_index, r }, sources, targets);
     return graph_data(graph_data_type::off, {});
   }
 
+  // scale to longest env
+  float dahds = 1.0f;
+  float dahdsr = 1.0f;
+  float max_dahds = 1.0f;
+  float max_dahdsr = 1.0f;
+  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
+  for(int r = 0; r < route_count; r++)
+    if (state.get_plain_at(map.module_index, map.module_slot, param_op, r).step() != 0)
+      if (state.get_plain_at(map.module_index, map.module_slot, param_target, r).step() == ti)
+      {
+        int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
+        if (sources[si].module_index == module_env)
+        {
+          env_plot_length_seconds(state, sources[si].module_slot, dahds, dahdsr);
+          if (dahdsr > max_dahdsr)
+          {
+            max_dahds = dahds;
+            max_dahdsr = dahdsr;
+          }
+        }
+      }
+
   graph_engine_params params = {};
   params.bpm = 120;
-  params.frame_count = 1000;
+  params.frame_count = 400;
   params.midi_key = midi_middle_c;
   params.sample_rate = params.frame_count;
+  params.sample_rate = params.frame_count / dahdsr;
+  params.voice_release_at = dahds / dahdsr * params.frame_count;
 
   graph_engine graph_engine(&state, params);
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
@@ -175,7 +205,6 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping, routi
   
   auto* block = graph_engine.process_default(map.module_index, map.module_slot);
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
-  int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
   stacked.push_back(0);
   stacked.insert(stacked.begin(), 0);
@@ -213,9 +242,9 @@ cv_matrix_topo(
   
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
-  result.graph_renderer = [tm = target_matrix](
+  result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto const& mapping) {
-      return render_graph(state, mapping, tm);
+      return render_graph(state, mapping, sm, tm);
   };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(

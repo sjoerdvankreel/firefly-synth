@@ -66,24 +66,32 @@ static void
 init_default(plugin_state& state)
 { state.set_text_at(module_env, 1, param_on, 0, "On"); }
 
+void
+env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float& dahdsr)
+{
+  float const bpm = 120;
+  bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
+  bool do_sustain = state.get_plain_at(module_env, slot, param_type, 0).step() == type_sustain;
+  float hold = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
+  float delay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
+  float decay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
+  float attack = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
+  float release = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
+
+  float sustain = !do_sustain ? 0.0f : std::max((delay + attack + hold + decay + release) / 5, 0.01f);
+  dahds = delay + attack + hold + decay + sustain;
+  dahdsr = dahds + release;
+}
+
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});
 
-  float const bpm = 120;
-  bool sync = state.get_plain_at(module_env, mapping.module_slot, param_sync, 0).step() != 0;
-  bool do_sustain = state.get_plain_at(module_env, mapping.module_slot, param_type, 0).step() == type_sustain;
-  float hold = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_hold_time, param_hold_tempo);
-  float delay = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_delay_time, param_delay_tempo);
-  float decay = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_decay_time, param_decay_tempo);
-  float attack = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_attack_time, param_attack_tempo);
-  float release = sync_or_time_from_state(state, bpm, sync, module_env, mapping.module_slot, param_release_time, param_release_tempo);
-
-  float sustain = !do_sustain ? 0.0f: std::max((delay + attack + hold + decay + release) / 5, 0.01f);
-  float dahds = delay + attack + hold + decay + sustain;
-  float dahdsr = dahds + release;
+  float dahds;
+  float dahdsr;
+  env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsr);
 
   graph_engine_params params = {};
   params.bpm = 120;
