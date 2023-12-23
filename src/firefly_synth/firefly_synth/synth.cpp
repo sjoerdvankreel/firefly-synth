@@ -107,6 +107,8 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
     });
 }
 
+int the_paint_counter = 0;
+
 static Component&
 make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {

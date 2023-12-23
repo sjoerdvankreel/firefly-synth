@@ -55,6 +55,13 @@ public:
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
+
+  std::ofstream ost{ "c:\\temp\\log.txt", std::ios_base::app };
+  ost << the_paint_counter++ << " render voice in " << mapping.module_index << " " << mapping.param_index << std::endl;
+  ost.flush();
+  ost.close();
+
+
   if (mapping.param_index == param_cent)
     return graph_data(state.get_plain_at(mapping).real(), true, {});
   if (mapping.param_index == param_porta_time)

@@ -32,6 +32,12 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
   if (mapping.param_index == param_pb_range)
     return graph_data(graph_data_type::na, {});
+
+  std::ofstream ost{ "c:\\temp\\log.txt", std::ios_base::app };
+  ost << the_paint_counter++ << " render master in " << mapping.module_index << " " << mapping.param_index << std::endl;
+  ost.flush();
+  ost.close();
+
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
   return graph_data(value, bipolar, {});

@@ -165,6 +165,11 @@ render_graph(
     return graph_data(graph_data_type::off, {});
   }
 
+  std::ofstream ost{ "c:\\temp\\log.txt", std::ios_base::app };
+  ost << the_paint_counter++ << " render cv matrix " << mapping.module_index << " " << mapping.param_index << std::endl;
+  ost.flush();
+  ost.close();
+
   // scale to longest env
   float dahds = 1.0f;
   float dahdsr = 1.0f;

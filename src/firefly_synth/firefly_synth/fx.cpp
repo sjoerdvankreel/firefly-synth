@@ -80,6 +80,12 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
   if(type == type_off) return graph_data(graph_data_type::off, {});
 
+  std::ofstream ost{ "c:\\temp\\log.txt", std::ios_base::app };
+  ost << the_paint_counter++ << " render fx " << mapping.module_index << " " << mapping.param_index << std::endl;
+  ost.flush();
+  ost.close();
+
+
   params.bpm = 120;
   params.midi_key = midi_middle_c;
 

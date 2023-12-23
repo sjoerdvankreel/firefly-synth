@@ -25,6 +25,11 @@ public:
 static graph_data
 render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 {
+  std::ofstream ost{ "c:\\temp\\log.txt", std::ios_base::app};
+  ost << the_paint_counter++ << " render audio_out " << mapping.module_index << " " << mapping.param_index << std::endl;
+  ost.flush();
+  ost.close();
+
   jarray<float, 1> result;
   result.push_back(0);
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();
