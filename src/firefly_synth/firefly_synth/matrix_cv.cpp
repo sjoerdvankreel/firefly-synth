@@ -20,14 +20,14 @@ static int const route_count = 20;
 
 enum { section_main };
 enum { op_off, op_mul, op_add, op_addbi };
-enum { param_op, param_source, param_target, param_min, param_max, param_amt };
+enum { param_op, param_source, param_target, param_min, param_max };
 
 extern void
 env_plot_length_seconds(
   plugin_state const& state, int slot, float& dahds, float& dahdsr);
 
 static std::vector<list_item>
-type_items()
+op_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}", "Off");
@@ -63,7 +63,8 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 0, "V.FX 1 Freq");
   state.set_text_at(module_vcv_matrix, 0, param_op, 1, "AddBi");
-  state.set_text_at(module_vcv_matrix, 0, param_amt, 1, "33");
+  state.set_text_at(module_vcv_matrix, 0, param_min, 1, "35");
+  state.set_text_at(module_vcv_matrix, 0, param_max, 1, "65");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "G.LFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "V.Audio Bal 1");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
@@ -78,7 +79,8 @@ static void
 init_global_default(plugin_state& state)
 {
   state.set_text_at(module_gcv_matrix, 0, param_op, 0, "AddBi");
-  state.set_text_at(module_gcv_matrix, 0, param_amt, 0, "33");
+  state.set_text_at(module_gcv_matrix, 0, param_min, 0, "35");
+  state.set_text_at(module_gcv_matrix, 0, param_max, 0, "65");
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "G.LFO 1");
   state.set_text_at(module_gcv_matrix, 0, param_target, 0, "G.FX 1 Freq");
   state.set_text_at(module_gcv_matrix, 0, param_op, 1, "Add");
@@ -261,12 +263,12 @@ cv_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 6, 7, -35, -35, -35 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 6, 7, -35, -35 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", param_op, route_count),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
+    make_param_dsp_input(!global, param_automate::none), make_domain_item(op_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, gui_label_contents::none, make_label_none())));
   type.gui.tabular = true;
 
@@ -300,13 +302,6 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, gui_label_contents::value, make_label_none())));
   max.gui.tabular = true;
   max.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
-
-  auto& amount = result.params.emplace_back(make_param(
-    make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amt", param_amt, route_count),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, gui_label_contents::value, make_label_none())));
-  amount.gui.tabular = true;
-  amount.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
 
   return result;
 }
@@ -389,20 +384,19 @@ cv_matrix_engine::process(plugin_block& block)
     // apply modulation
     auto const& min_curve = block.state.own_accurate_automation[param_min][r];
     auto const& max_curve = block.state.own_accurate_automation[param_max][r];
-    auto const& amount_curve = block.state.own_accurate_automation[param_amt][r];
     switch (op)
     {
     case op_add:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * amount_curve[f];
+        modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f];
       break;
     case op_addbi:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += unipolar_to_bipolar((min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f])) * amount_curve[f] * 0.5f;
+        modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
       break;
     case op_mul:
       for(int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = mix_signal(amount_curve[f], modulated_curve[f], (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * modulated_curve[f]);
+        modulated_curve[f] = min_curve[f] + (1 - min_curve[f]) * mix_signal(max_curve[f], modulated_curve[f], source_curve[f]) * modulated_curve[f];
       break;
     default:
       assert(false);
