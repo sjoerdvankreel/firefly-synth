@@ -19,21 +19,32 @@ namespace firefly_synth {
 static int const route_count = 20;
 
 enum { section_main };
-enum { op_off, op_mul, op_add, op_addbi };
-enum { param_op, param_source, param_target, param_min, param_max, param_amt };
+enum { op_mul, op_add, op_addbi };
+enum { type_off, type_plain, type_param, type_stack };
+enum { param_type, param_op, param_source, param_target, param_min, param_max, param_amt };
 
 extern void
 env_plot_length_seconds(
   plugin_state const& state, int slot, float& dahds, float& dahdsr);
 
 static std::vector<list_item>
-type_items()
+op_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}", "Off");
   result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul");
   result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add");
   result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "AddBi");
+  return result;
+}
+
+static std::vector<list_item>
+type_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{CA6FB924-8A50-44B4-9400-3847BC32ECB1}", "Off");
+  result.emplace_back("{177F829C-07AD-4EEA-9E25-3191A637DB26}", "Plain");
+  result.emplace_back("{DE24BAFF-A6F7-41D3-81AE-45FF102B5BA4}", "Param");
+  result.emplace_back("{D7A4AB3D-CAFF-4911-866D-026B984E575D}", "Stack");
   return result;
 }
 
@@ -59,16 +70,20 @@ public:
 static void
 init_voice_default(plugin_state& state)
 {
+  state.set_text_at(module_vcv_matrix, 0, param_type, 0, "Plain");
   state.set_text_at(module_vcv_matrix, 0, param_op, 0, "Add");
   state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 0, "V.FX 1 Freq");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 1, "Plain");
   state.set_text_at(module_vcv_matrix, 0, param_op, 1, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_amt, 1, "33");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "G.LFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "V.Audio Bal 1");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 2, "Plain");
   state.set_text_at(module_vcv_matrix, 0, param_op, 2, "AddBi");
   state.set_text_at(module_vcv_matrix, 0, param_source, 2, "M.In PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 2, "V.In PB");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 3, "Plain");
   state.set_text_at(module_vcv_matrix, 0, param_op, 3, "Mul");
   state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Note Velo");
   state.set_text_at(module_vcv_matrix, 0, param_target, 3, "V.Out Gain");
@@ -77,10 +92,12 @@ init_voice_default(plugin_state& state)
 static void
 init_global_default(plugin_state& state)
 {
+  state.set_text_at(module_gcv_matrix, 0, param_type, 0, "Plain");
   state.set_text_at(module_gcv_matrix, 0, param_op, 0, "AddBi");
   state.set_text_at(module_gcv_matrix, 0, param_amt, 0, "33");
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "G.LFO 1");
   state.set_text_at(module_gcv_matrix, 0, param_target, 0, "G.FX 1 Freq");
+  state.set_text_at(module_gcv_matrix, 0, param_type, 1, "Plain");
   state.set_text_at(module_gcv_matrix, 0, param_op, 1, "Add");
   state.set_text_at(module_gcv_matrix, 0, param_source, 1, "M.In Mod");
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "G.FX 1 Freq");
@@ -90,8 +107,8 @@ audio_routing_cv_params
 make_audio_routing_cv_params(plugin_state* state, bool global)
 {
   audio_routing_cv_params result;
-  result.off_value = op_off;
-  result.on_param = param_op;
+  result.off_value = type_off;
+  result.on_param = param_type;
   result.target_param = param_target;
   result.matrix_module = global ? module_gcv_matrix : module_vcv_matrix;
   result.targets = make_cv_target_matrix(make_cv_matrix_targets(state->desc().plugin, global)).mappings;
@@ -104,7 +121,7 @@ make_cv_routing_menu_handler(plugin_state* state)
   std::map<int, std::vector<module_output_mapping>> matrix_sources;
   matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
   matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
-  return std::make_unique<cv_routing_menu_handler>(state, param_source, param_op, op_off, matrix_sources);
+  return std::make_unique<cv_routing_menu_handler>(state, param_source, param_type, type_off, matrix_sources);
 }
 
 void
@@ -119,8 +136,8 @@ select_midi_active(
 
   for (int r = 0; r < route_count; r++)
   {
-    int op = state.get_plain_at(module, 0, param_op, r).step();
-    if (op != op_off)
+    int type = state.get_plain_at(module, 0, param_type, r).step();
+    if (type != type_off)
     {
       int source = state.get_plain_at(module, 0, param_source, r).step();
       auto const& mapping = mappings[source];
@@ -155,12 +172,12 @@ render_graph(
   std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
-  int op = state.get_plain_at(map.module_index, map.module_slot, param_op, map.param_slot).step();
-  if(op == op_off) 
+  int type = state.get_plain_at(map.module_index, map.module_slot, param_type, map.param_slot).step();
+  if(type == type_off)
   {
     // try to always paint something
     for(int r = 0; r < route_count; r++)
-      if(state.get_plain_at(map.module_index, map.module_slot, param_op, r).step() != 0)
+      if(state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != 0)
         return render_graph(state, { map.module_index, map.module_slot, map.param_index, r }, sources, targets);
     return graph_data(graph_data_type::off, {});
   }
@@ -248,7 +265,7 @@ cv_matrix_topo(
   };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
-      state, param_op, op_off, std::vector<int>({ param_target, param_source })); 
+      state, param_type, type_off, std::vector<int>({ param_target, param_source })); 
   };
   result.midi_active_selector = [global, on_note_midi_start, sm = source_matrix.mappings](
     plugin_state const& state, int, jarray<int, 3>& active) { 
@@ -261,52 +278,59 @@ cv_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 6, 7, -35, -35, -35 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 6, 7, -35, -35, -35 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", param_op, route_count),
+    make_topo_info("{B8FE3BF9-CE59-47F2-9EB2-43EDFDE78BE1}", "Type", param_type, route_count),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, gui_label_contents::none, make_label_none())));
   type.gui.tabular = true;
 
+  auto& op = result.params.emplace_back(make_param(
+    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", param_op, route_count),
+    make_param_dsp_input(!global, param_automate::none), make_domain_item(op_items(), ""),
+    make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, gui_label_contents::none, make_label_none())));
+  op.gui.tabular = true;
+  op.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(source_matrix.items, ""),
-    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, gui_label_contents::value, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, gui_label_contents::value, make_label_none())));
   source.gui.tabular = true;
-  source.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
+  source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_matrix.submenu;
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(target_matrix.items, ""),
-    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, gui_label_contents::value, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 3 }, gui_label_contents::value, make_label_none())));
   target.gui.tabular = true;
-  target.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
+  target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
 
   auto& min = result.params.emplace_back(make_param(
     make_topo_info("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", param_min, route_count),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, gui_label_contents::value, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, gui_label_contents::value, make_label_none())));
   min.gui.tabular = true;
-  min.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
+  min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& max = result.params.emplace_back(make_param(
     make_topo_info("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", param_max, route_count),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, gui_label_contents::value, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, gui_label_contents::value, make_label_none())));
   max.gui.tabular = true;
-  max.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
+  max.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{95153B11-6CA7-42EE-8709-9C3359CF23C8}", "Amt", param_amt, route_count),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, gui_label_contents::value, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 6 }, gui_label_contents::value, make_label_none())));
   amount.gui.tabular = true;
-  amount.gui.bindings.enabled.bind_params({ param_op }, [](auto const& vs) { return vs[0] != op_off; });
+  amount.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   return result;
 }
@@ -346,10 +370,11 @@ cv_matrix_engine::process(plugin_block& block)
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
-    int op = own_automation[param_op][r].step();
-    if(op == op_off) continue;
+    int type = own_automation[param_type][r].step();
+    if(type == type_off) continue;
 
     // found out indices of modulation target
+    int op = own_automation[param_op][r].step();
     int selected_target = own_automation[param_target][r].step();
     int tp = _targets[selected_target].param_index;
     int tpi = _targets[selected_target].param_slot;
