@@ -275,6 +275,21 @@ cv_matrix_topo(
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, gui_label_contents::none, make_label_none())));
   type.gui.tabular = true;
+  type.gui.submenu = std::make_shared<gui_submenu>();
+  type.gui.submenu->indices.push_back(type_off);
+  type.gui.submenu->indices.push_back(type_mul);
+  auto add_menu = std::make_shared<gui_submenu>();
+  add_menu->name = "Add";
+  add_menu->indices.push_back(type_add_abs);
+  add_menu->indices.push_back(type_add_rel);
+  add_menu->indices.push_back(type_add_stk);
+  type.gui.submenu->children.push_back(add_menu);
+  auto ab_menu = std::make_shared<gui_submenu>();
+  ab_menu->name = "Add Bipolar";
+  ab_menu->indices.push_back(type_ab_abs);
+  ab_menu->indices.push_back(type_ab_rel);
+  ab_menu->indices.push_back(type_ab_stk);
+  type.gui.submenu->children.push_back(ab_menu);
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
