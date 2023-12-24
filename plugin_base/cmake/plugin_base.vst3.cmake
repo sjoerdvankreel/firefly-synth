@@ -1,6 +1,7 @@
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/lib/vst3/cmake/modules")
 include(SMTG_VST3_SDK)
 smtg_setup_platform_toolset()
+set(CMAKE_CONFIGURATION_TYPES "Debug;Release;RelWithDebInfo")
 
 set(VST_SDK TRUE)
 set(SMTG_ENABLE_VSTGUI_SUPPORT OFF)
