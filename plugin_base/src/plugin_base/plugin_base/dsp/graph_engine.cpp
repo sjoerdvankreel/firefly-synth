@@ -72,7 +72,7 @@ graph_engine::process(int module_index, int module_slot, graph_processor process
     id.key = _params.midi_key;
     _engine.voice_block_params_snapshot(voice);
     _last_voice_block = std::make_unique<plugin_voice_block>(
-      _engine.make_voice_block(voice, _host_block->frame_count, id, -1, -1));
+      _engine.make_voice_block(voice, _voice_release_at, id, -1, -1));
     _last_block->voice = _last_voice_block.get();
     processor(*_last_block.get());
   }
