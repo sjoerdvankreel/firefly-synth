@@ -72,7 +72,7 @@ init_global_default(plugin_state& state)
 }
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engineTODO, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
   if(type == type_off) return graph_data(graph_data_type::off, {});
@@ -86,8 +86,8 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   {
     int count = 10;
     params.sample_rate = 50;
-    params.frame_count = 200;
-    audio_in.resize(jarray<int, 1>(2, params.frame_count));
+    params.max_frame_count = 200;
+    audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
     for (int i = 0; i < count; i++)
     {
       float sample = std::sin(i / (float)count * pi32 * 2.0f) * (1 - i / (float)count);
@@ -98,14 +98,15 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
   else 
   {
     params.sample_rate = 48000;
-    params.frame_count = 48000 / 10;
-    audio_in.resize(jarray<int, 1>(2, params.frame_count));
+    params.max_frame_count = 48000 / 10;
+    audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
   }
 
-  graph_engine graph_engine(&state, params);
-  auto const* block = graph_engine.process(
+  graph_engine engine(&state.desc(), params);
+  engine.process_begin(&state, params.max_frame_count, -1);
+  auto const* block = engine.process(
     mapping.module_index, mapping.module_slot, [mapping, params, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, params.sample_rate);
@@ -113,6 +114,7 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &audio_in);
   });
+  engine.process_end();
 
   if (type == type_delay)
     return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true, {});

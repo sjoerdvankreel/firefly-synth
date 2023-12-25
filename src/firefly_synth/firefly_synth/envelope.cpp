@@ -84,7 +84,7 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float
 }
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engineTODO, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});
@@ -95,12 +95,14 @@ render_graph(plugin_state const& state, param_topo_mapping const& mapping)
 
   graph_engine_params params = {};
   params.bpm = 120;
-  params.frame_count = 200;
-  params.sample_rate = params.frame_count / dahdsr;
-  params.voice_release_at = dahds / dahdsr * params.frame_count;
+  params.max_frame_count = 200;
+  params.sample_rate = params.max_frame_count / dahdsr;
+  int voice_release_at = dahds / dahdsr * params.max_frame_count;
 
-  graph_engine engine(&state, params);
+  graph_engine engine(&state.desc(), params);
+  engine.process_begin(&state, params.max_frame_count, voice_release_at);
   auto const* block = engine.process_default(module_env, mapping.module_slot);
+  engine.process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
   series.push_back(0);
   return graph_data(series, false, {});

@@ -75,7 +75,7 @@ prepare_osc_state_for_am_graph(plugin_state const& state)
 }
 
 std::vector<graph_data>
-render_osc_graphs(plugin_state const& state, int slot)
+render_osc_graphs(plugin_state const& state, graph_engine* engineTODO, int slot)
 {
   std::vector<graph_data> result;
   graph_engine_params params = {};
@@ -84,16 +84,17 @@ render_osc_graphs(plugin_state const& state, int slot)
   float freq = pitch_to_freq(note + cent);
 
   params.bpm = 120;
-  params.frame_count = 1000;
+  params.max_frame_count = 1000;
   params.midi_key = midi_middle_c;
-  params.sample_rate = params.frame_count * freq;
+  params.sample_rate = params.max_frame_count * freq;
 
   plugin_block const* block = nullptr;
-  graph_engine graph_engine(&state, params);
-  graph_engine.process_default(module_am_matrix, 0);
+  graph_engine engine(&state.desc(), params);
+  engine.process_begin(&state, params.max_frame_count, -1);
+  engine.process_default(module_am_matrix, 0);
   for (int i = 0; i <= slot; i++)
   {
-    block = graph_engine.process(module_osc, i, [](plugin_block& block) {
+    block = engine.process(module_osc, i, [](plugin_block& block) {
       osc_engine engine;
       engine.reset(&block);
       jarray<float, 1> env_curve(block.end_frame, 1.0f);
@@ -105,16 +106,17 @@ render_osc_graphs(plugin_state const& state, int slot)
     audio[1].push_back(0.0f);
     result.push_back(graph_data(audio, {}));
   }
+  engine.process_end();
   return result;
 }
 
 static graph_data
-render_osc_graph(plugin_state const& state, param_topo_mapping const& mapping)
+render_osc_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
   graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
-  return render_osc_graphs(state, mapping.module_slot)[mapping.module_slot];
+  return render_osc_graphs(state, engine, mapping.module_slot)[mapping.module_slot];
 }
 
 module_topo

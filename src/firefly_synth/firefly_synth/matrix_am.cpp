@@ -37,7 +37,7 @@ public:
 };
 
 static graph_data
-render_graph(plugin_state const& state, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
   int max_osc = 0;
   std::vector<float> result;

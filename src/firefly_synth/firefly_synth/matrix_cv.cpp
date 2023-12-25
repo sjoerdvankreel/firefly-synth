@@ -157,7 +157,7 @@ select_midi_active(
 
 static graph_data
 render_graph(
-  plugin_state const& state, param_topo_mapping const& mapping, 
+  plugin_state const& state, graph_engine* engineTODO, param_topo_mapping const& mapping, 
   std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
@@ -167,7 +167,7 @@ render_graph(
     // try to always paint something
     for(int r = 0; r < route_count; r++)
       if(state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
-        return render_graph(state, { map.module_index, map.module_slot, map.param_index, r }, sources, targets);
+        return render_graph(state, engine, { map.module_index, map.module_slot, map.param_index, r }, sources, targets);
     return graph_data(graph_data_type::off, {});
   }
 
@@ -195,21 +195,23 @@ render_graph(
 
   graph_engine_params params = {};
   params.bpm = 120;
-  params.frame_count = 400;
+  params.max_frame_count = 400;
   params.midi_key = midi_middle_c;
-  params.sample_rate = params.frame_count;
-  params.sample_rate = params.frame_count / dahdsr;
-  params.voice_release_at = dahds / dahdsr * params.frame_count;
+  params.sample_rate = params.max_frame_count;
+  params.sample_rate = params.max_frame_count / dahdsr;
+  int voice_release_at = dahds / dahdsr * params.max_frame_count;
 
-  graph_engine graph_engine(&state, params);
+  graph_engine engine(&state.desc(), params);
+  engine.process_begin(&state, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
   if(map.module_index == module_vcv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
-      graph_engine.process_default(relevant_modules[m], mi);
-  
-  auto* block = graph_engine.process_default(map.module_index, map.module_slot);
+      engine.process_default(relevant_modules[m], mi);
+  auto* block = engine.process_default(map.module_index, map.module_slot);
+  engine.process_end();
+
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
   stacked.push_back(0);
@@ -249,8 +251,8 @@ cv_matrix_topo(
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
-    auto const& state, auto const& mapping) {
-      return render_graph(state, mapping, sm, tm);
+    auto const& state, auto* engine, auto const& mapping) {
+      return render_graph(state, engine, mapping, sm, tm);
   };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(

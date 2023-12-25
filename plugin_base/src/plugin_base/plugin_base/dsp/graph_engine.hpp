@@ -16,18 +16,18 @@ struct graph_engine_params
 {
   int bpm;
   int sample_rate;
-  int frame_count;
+  int max_frame_count;
   int midi_key = -1;
-  int voice_release_at = -1;
 };
 
 // utility dsp engine based on static state only
 class graph_engine {
   plugin_engine _engine;
+  plugin_desc const* _desc = {};
   jarray<float, 2> _audio_in = {};
   jarray<float, 2> _audio_out = {};
-  plugin_state const* const _state;
   graph_engine_params const _params;
+  int _voice_release_at = -1;
 
   host_block* _host_block = {};
   float* _audio_out_ptrs[2] = {};
@@ -37,9 +37,11 @@ class graph_engine {
   std::map<int, std::map<int, std::unique_ptr<module_engine>>> _activated = {};
 
 public:
-  ~graph_engine();
-  graph_engine(plugin_state const* state, graph_engine_params const& params);
+  ~graph_engine() { _engine.deactivate(); }
+  graph_engine(plugin_desc const* desc, graph_engine_params const& params);
 
+  void process_end();
+  void process_begin(plugin_state const* state, int frame_count, int voice_release_at);
   plugin_block const* process_default(int module_index, int module_slot);
   plugin_block const* process(int module_index, int module_slot, graph_processor processor);
 };

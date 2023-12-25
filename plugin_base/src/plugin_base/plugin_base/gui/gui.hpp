@@ -6,6 +6,7 @@
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/extra_state.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
@@ -145,6 +146,7 @@ public:
   void param_begin_changes(int index);
   void param_changed(int index, plain_value plain);
   void param_changing(int index, plain_value plain);
+  graph_engine* get_module_graph_engine(module_topo const& module);
 
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state() const { return _extra_state; }
@@ -168,6 +170,7 @@ private:
   plugin_base::extra_state* const _extra_state;
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
+  std::map<int, std::unique_ptr<graph_engine>> _module_graph_engines = {};
   std::vector<gui_param_listener*> _param_listeners = {};
   std::vector<gui_mouse_listener*> _gui_mouse_listeners = {};
   std::vector<gui_tab_selection_listener*> _tab_selection_listeners = {};

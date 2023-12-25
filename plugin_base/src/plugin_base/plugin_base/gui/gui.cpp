@@ -441,6 +441,16 @@ plugin_gui::resized()
   user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
 }
 
+graph_engine* 
+plugin_gui::get_module_graph_engine(module_topo const& module)
+{
+  if(module.graph_engine_factory == nullptr) return nullptr;
+  auto iter = _module_graph_engines.find(module.info.index);
+  if(iter != _module_graph_engines.end()) return iter->second.get();
+  _module_graph_engines[module.info.index] = module.graph_engine_factory();
+  return _module_graph_engines[module.info.index].get();
+}
+
 void
 plugin_gui::init_multi_tab_component(tab_component& tab, std::string const& id, int module_index, int section_index)
 {
