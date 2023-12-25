@@ -48,21 +48,33 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_glfo, 1, param_type, 0, "Rate");
 }
 
+static graph_engine_params
+make_graph_engine_params()
+{
+  graph_engine_params result = {};
+  result.bpm = 120;
+  result.max_frame_count = 200;
+  result.sample_rate = result.max_frame_count;
+  return result;
+}
+
+static std::unique_ptr<graph_engine>
+make_graph_engine(plugin_desc const* desc)
+{
+  auto params = make_graph_engine_params();
+  return std::make_unique<graph_engine>(desc, params);
+}
+
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engineTODO, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
 
-  graph_engine_params params = {};
-  params.bpm = 120;
-  params.max_frame_count = 200;
-  params.sample_rate = params.max_frame_count;
-
-  graph_engine engine(&state.desc(), params);
-  engine.process_begin(&state, params.max_frame_count, -1);
-  auto const* block = engine.process_default(mapping.module_index, mapping.module_slot);
-  engine.process_end();
+  auto const params = make_graph_engine_params();
+  engine->process_begin(&state, params.max_frame_count, -1);
+  auto const* block = engine->process_default(mapping.module_index, mapping.module_slot);
+  engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
   series.push_back(0.5f);
   return graph_data(series, false, {});
@@ -82,6 +94,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_module_gui(section, colors, pos, { 1, 1 })));
   
   result.graph_renderer = render_graph;
+  result.graph_engine_factory = make_graph_engine;
   if(global) result.default_initializer = init_global_default;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [global](auto const&, int, int) { return std::make_unique<lfo_engine>(global); };
