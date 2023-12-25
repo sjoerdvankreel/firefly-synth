@@ -42,7 +42,6 @@ _voice_processor_context(voice_processor_context)
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
   _voice_states.resize(_state.desc().plugin->polyphony);
-  _param_was_automated.resize(_dims.module_slot_param_slot);
   _host_block->events.notes.reserve(note_limit_guess);
   _host_block->events.out.reserve(block_events_guess);
   _host_block->events.block.reserve(block_events_guess);
@@ -110,7 +109,6 @@ void
 plugin_engine::init_static(plugin_state const* state, int frame_count)
 {
   _state.copy_from(state->state());
-  mark_all_params_as_automated(true);
   init_automation_from_state(frame_count);
 }
 
@@ -199,20 +197,6 @@ plugin_engine::activate(int max_frame_count)
   _global_audio_state.resize(frame_dims.module_global_audio);
   _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
-
-  // set automation values to current state, events may overwrite
-  mark_all_params_as_automated(true);
-  init_automation_from_state(_max_frame_count);
-}
-
-void
-plugin_engine::mark_all_params_as_automated(bool automated)
-{
-  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
-        for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-          _param_was_automated[m][mi][p][pi] = automated? 1: 0;
 }
 
 void
@@ -274,23 +258,16 @@ plugin_engine::init_automation_from_state(int frame_count)
       {
         auto const& param = module.params[p];
         if (param.dsp.rate != param_rate::accurate)
-        {
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if(_param_was_automated[m][mi][p][pi] != 0)
-              _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
-        }
+            _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
         else
-        {
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if (_param_was_automated[m][mi][p][pi] != 0)
-              std::fill(
-                _accurate_automation[m][mi][p][pi].begin(),
-                _accurate_automation[m][mi][p][pi].begin() + frame_count,
-                (float)_state.get_normalized_at(m, mi, p, pi).value());
-        }
+            std::fill(
+              _accurate_automation[m][mi][p][pi].begin(),
+              _accurate_automation[m][mi][p][pi].begin() + frame_count,
+              (float)_state.get_normalized_at(m, mi, p, pi).value());
       }
   }
-  mark_all_params_as_automated(false);
 }
 
 void 
@@ -357,7 +334,6 @@ plugin_engine::process()
    
   for (int e = 0; e < _host_block->events.block.size(); e++)
   {
-    // we update state right here so no need to mark as automated
     auto const& event = _host_block->events.block[e];
     _state.set_normalized_at_index(event.param, event.normalized);
     _block_automation.set_normalized_at_index(event.param, event.normalized);
@@ -386,9 +362,6 @@ plugin_engine::process()
     // update current state
     _accurate_frames[event.param] = event.frame;
     _state.set_normalized_at_index(event.param, event.normalized);
-
-    // make sure to re-fill the automation buffer on the next round
-    mapping.topo.value_at(_param_was_automated) = 1;
   }
 
   /***************************************************************/

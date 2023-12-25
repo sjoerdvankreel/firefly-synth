@@ -63,7 +63,6 @@ class plugin_engine final {
   jarray<float, 5> _accurate_automation = {};
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};
-  jarray<int, 4> _param_was_automated = {};
   std::vector<int> _midi_was_automated = {};
   std::vector<midi_filter> _midi_filters = {};
   std::vector<voice_state> _voice_states = {};
@@ -81,7 +80,6 @@ class plugin_engine final {
 
   void process_voices_single_threaded();
   void init_automation_from_state(int frame_count);
-  void mark_all_params_as_automated(bool automated);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
