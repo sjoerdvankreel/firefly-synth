@@ -103,7 +103,7 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
     int count = 10;
     sample_rate = 50;
     frame_count = 200;
-    audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
+    audio_in.resize(jarray<int, 1>(2, frame_count));
     for (int i = 0; i < count; i++)
     {
       float sample = std::sin(i / (float)count * pi32 * 2.0f) * (1 - i / (float)count);
@@ -115,7 +115,7 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   {
     frame_count = 4800;
     sample_rate = 48000;
-    audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
+    audio_in.resize(jarray<int, 1>(2, frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
   }
@@ -132,7 +132,10 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   engine->process_end();
 
   if (type == type_delay)
-    return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true, {});
+  {
+    std::vector<float> series(block->state.own_audio[0][0][0].begin(), block->state.own_audio[0][0][0].begin() + frame_count);
+    return graph_data(jarray<float, 1>(series), true, {});
+  }
 
   // remap over 0.8 just to look pretty
   std::vector<float> response(log_remap_series_x(fft(block->state.own_audio[0][0][0].data()), 0.8f));
