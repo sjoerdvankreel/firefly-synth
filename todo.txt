@@ -20,13 +20,11 @@ voice arp?
 more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 do 5 am and 5 fm routes
-do mseg someday
 drop "or time into scratch" & friends?
 am clicks/rumbles on low freq
 do matrix insert before/insert after
 undo stack in gui
 do more sync options (eg 1/20, 3/24 etc)
-group "extern" stuff
 
 * get some linux folks to comment (ycollete?)
 * continuing
