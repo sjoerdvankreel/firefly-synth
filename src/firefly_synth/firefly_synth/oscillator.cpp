@@ -74,27 +74,39 @@ prepare_osc_state_for_am_graph(plugin_state const& state)
   return result;
 }
 
+static graph_engine_params
+make_graph_engine_params()
+{
+  graph_engine_params result = {};
+  result.bpm = 120;
+  result.max_frame_count = 1000;
+  result.midi_key = midi_middle_c;
+  return result;
+}
+
+std::unique_ptr<graph_engine>
+make_osc_graph_engine(plugin_desc const* desc)
+{
+  auto params = make_graph_engine_params();
+  return std::make_unique<graph_engine>(desc, params);
+}
+
 std::vector<graph_data>
-render_osc_graphs(plugin_state const& state, graph_engine* engineTODO, int slot)
+render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
 {
   std::vector<graph_data> result;
-  graph_engine_params params = {};
   int note = state.get_plain_at(module_osc, slot, param_note, 0).step();
   float cent = state.get_plain_at(module_osc, slot, param_cent, 0).real();
   float freq = pitch_to_freq(note + cent);
-
-  params.bpm = 120;
-  params.max_frame_count = 1000;
-  params.midi_key = midi_middle_c;
-  int sample_rate = params.max_frame_count * freq;
-
+  
   plugin_block const* block = nullptr;
-  graph_engine engine(&state.desc(), params);
-  engine.process_begin(&state, sample_rate, params.max_frame_count, -1);
-  engine.process_default(module_am_matrix, 0);
+  auto const params = make_graph_engine_params();
+  int sample_rate = params.max_frame_count * freq;
+  engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
+  engine->process_default(module_am_matrix, 0);
   for (int i = 0; i <= slot; i++)
   {
-    block = engine.process(module_osc, i, [](plugin_block& block) {
+    block = engine->process(module_osc, i, [](plugin_block& block) {
       osc_engine engine;
       engine.reset(&block);
       jarray<float, 1> env_curve(block.end_frame, 1.0f);
@@ -106,7 +118,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engineTODO, int slot)
     audio[1].push_back(0.0f);
     result.push_back(graph_data(audio, {}));
   }
-  engine.process_end();
+  engine->process_end();
   return result;
 }
 
@@ -128,9 +140,10 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { 1 } })));
 
-  result.graph_renderer = render_osc_graph;
   result.minimal_initializer = init_minimal;
   result.default_initializer = init_default;
+  result.graph_renderer = render_osc_graph;
+  result.graph_engine_factory = make_osc_graph_engine;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<osc_engine>(); };
 

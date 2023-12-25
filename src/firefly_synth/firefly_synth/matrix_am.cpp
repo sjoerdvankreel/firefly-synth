@@ -5,6 +5,7 @@
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/shared/utility.hpp>
 #include <plugin_base/helpers/matrix.hpp>
+#include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
 
@@ -20,8 +21,9 @@ enum { output_modulated };
 enum { param_on, param_source, param_target, param_amt, param_ring };
 
 static int const route_count = 20; // TODO decrease once we do FM
-extern plugin_state prepare_osc_state_for_am_graph(plugin_state const& state);
-extern std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot);
+plugin_state prepare_osc_state_for_am_graph(plugin_state const& state);
+std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
+std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot);
 
 class am_matrix_engine:
 public module_engine { 
@@ -80,6 +82,7 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
+  result.graph_engine_factory = make_osc_graph_engine;
   result.gui.tabbed_name = result.info.tag.name;
   result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<am_matrix_engine>(); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
