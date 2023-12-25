@@ -200,30 +200,30 @@ plugin_engine::activate(int max_frame_count)
 }
 
 void
-plugin_engine::activate_modules(int sample_rate)
+plugin_engine::activate_modules()
 {
+  assert(_sample_rate > 0);
   assert(_max_frame_count > 0);
-  _sample_rate = sample_rate;
 
   // smoothing filters are SR dependent
   float smooth_freq = _state.desc().plugin->midi_smoothing_hz;
   for(int ms = 0; ms < _state.desc().midi_count; ms++)
-    _midi_filters.push_back(midi_filter(sample_rate, smooth_freq, _state.desc().midi_sources[ms]->source->default_));
+    _midi_filters.push_back(midi_filter(_sample_rate, smooth_freq, _state.desc().midi_sources[ms]->source->default_));
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, _max_frame_count);
+      _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
       _input_engines[m][mi]->reset(nullptr);
     }
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for (int v = 0; v < _state.desc().plugin->polyphony; v++)
-        _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, _max_frame_count);
+        _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, _max_frame_count);
+      _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
       _output_engines[m][mi]->reset(nullptr);
     }
 }

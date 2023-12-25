@@ -197,12 +197,11 @@ render_graph(
   params.bpm = 120;
   params.max_frame_count = 400;
   params.midi_key = midi_middle_c;
-  params.sample_rate = params.max_frame_count;
-  params.sample_rate = params.max_frame_count / dahdsr;
+  int sample_rate = params.max_frame_count / dahdsr;
   int voice_release_at = dahds / dahdsr * params.max_frame_count;
 
   graph_engine engine2(&state.desc(), params);
-  engine2.process_begin(&state, params.max_frame_count, voice_release_at);
+  engine2.process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
   if(map.module_index == module_vcv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_voice_on_note, module_vlfo, module_env });

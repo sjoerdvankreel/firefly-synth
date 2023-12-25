@@ -29,6 +29,7 @@ graph_engine::process_begin(plugin_state const* state, int sample_rate, int fram
 {
   assert(sample_rate > 0);
   assert(0 < frame_count && frame_count <= _params.max_frame_count);
+  _engine.set_sample_rate(sample_rate);
   _sample_rate = sample_rate;
   _voice_release_at = voice_release_at;
   _host_block = &_engine.prepare_block();
@@ -42,12 +43,14 @@ graph_engine::process_begin(plugin_state const* state, int sample_rate, int fram
 plugin_block const*
 graph_engine::process_default(int module_index, int module_slot)
 {
+  assert(_sample_rate > 0);
+  assert(_host_block != nullptr);
   module_engine* engine = nullptr;
   auto& slot_map = _activated[module_index];
   auto const& module = _desc->plugin->modules[module_index];
   if (slot_map.find(module_slot) == slot_map.end())
   {
-    auto module_engine = module.engine_factory(*_desc->plugin, _params.sample_rate, _host_block->frame_count);
+    auto module_engine = module.engine_factory(*_desc->plugin, _sample_rate, _host_block->frame_count);
     engine = module_engine.get();
     slot_map[module_slot] = std::move(module_engine);
   } else

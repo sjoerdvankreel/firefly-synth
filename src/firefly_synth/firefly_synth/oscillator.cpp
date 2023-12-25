@@ -86,11 +86,11 @@ render_osc_graphs(plugin_state const& state, graph_engine* engineTODO, int slot)
   params.bpm = 120;
   params.max_frame_count = 1000;
   params.midi_key = midi_middle_c;
-  params.sample_rate = params.max_frame_count * freq;
+  int sample_rate = params.max_frame_count * freq;
 
   plugin_block const* block = nullptr;
   graph_engine engine(&state.desc(), params);
-  engine.process_begin(&state, params.max_frame_count, -1);
+  engine.process_begin(&state, sample_rate, params.max_frame_count, -1);
   engine.process_default(module_am_matrix, 0);
   for (int i = 0; i <= slot; i++)
   {

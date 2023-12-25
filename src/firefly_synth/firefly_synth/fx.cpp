@@ -76,9 +76,8 @@ make_graph_engine_params(int type)
 {
   graph_engine_params result;
   result.bpm = 120;
+  result.max_frame_count = 4800;
   result.midi_key = midi_middle_c;
-  result.sample_rate = 48000;
-  result.max_frame_count = 48000 / 10;
   return result;   
 }
 
@@ -93,13 +92,17 @@ static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off || type == type_delay) return graph_data(graph_data_type::off, {});
+  if(type == type_off) return graph_data(graph_data_type::off, {});
 
+  int frame_count = -1;
+  int sample_rate = -1;
   jarray<float, 2> audio_in;
   auto const params = make_graph_engine_params(type);
   if (type == type_delay)
   {
     int count = 10;
+    sample_rate = 50;
+    frame_count = 200;
     audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
     for (int i = 0; i < count; i++)
     {
@@ -110,16 +113,18 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   }
   else 
   {
+    frame_count = 4800;
+    sample_rate = 48000;
     audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
   }
 
-  engine->process_begin(&state, params.max_frame_count, -1);
+  engine->process_begin(&state, sample_rate, frame_count, -1);
   auto const* block = engine->process(
-    mapping.module_index, mapping.module_slot, [mapping, params, &audio_in](plugin_block& block) {
+    mapping.module_index, mapping.module_slot, [mapping, sample_rate, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
-    fx_engine engine(global, params.sample_rate);
+    fx_engine engine(global, sample_rate);
     engine.reset(global? nullptr: &block);
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &audio_in);

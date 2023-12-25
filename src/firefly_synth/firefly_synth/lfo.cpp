@@ -54,7 +54,6 @@ make_graph_engine_params()
   graph_engine_params result = {};
   result.bpm = 120;
   result.max_frame_count = 200;
-  result.sample_rate = result.max_frame_count;
   return result;
 }
 
@@ -72,7 +71,8 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
     return graph_data(graph_data_type::off, {});
 
   auto const params = make_graph_engine_params();
-  engine->process_begin(&state, params.max_frame_count, -1);
+  int sample_rate = params.max_frame_count;
+  engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   auto const* block = engine->process_default(mapping.module_index, mapping.module_slot);
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);

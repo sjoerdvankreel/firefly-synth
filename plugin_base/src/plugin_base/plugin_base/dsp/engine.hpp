@@ -107,9 +107,10 @@ public:
   plugin_state& state() { return _state; }
   plugin_state const& state() const { return _state; }
 
-  // set all state and automation to these values
+  void activate_modules();
   void activate(int max_frame_count);
-  void activate_modules(int sample_rate);
+  void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
+  // set all state and automation to these values
   void init_static(plugin_state const* state, int frame_count);
 };
 

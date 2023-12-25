@@ -96,11 +96,11 @@ render_graph(plugin_state const& state, graph_engine* engineTODO, param_topo_map
   graph_engine_params params = {};
   params.bpm = 120;
   params.max_frame_count = 200;
-  params.sample_rate = params.max_frame_count / dahdsr;
+  int sample_rate = params.max_frame_count / dahdsr;
   int voice_release_at = dahds / dahdsr * params.max_frame_count;
 
   graph_engine engine(&state.desc(), params);
-  engine.process_begin(&state, params.max_frame_count, voice_release_at);
+  engine.process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine.process_default(module_env, mapping.module_slot);
   engine.process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
