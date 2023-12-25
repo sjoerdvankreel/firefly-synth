@@ -155,6 +155,23 @@ select_midi_active(
   }
 }
 
+static graph_engine_params
+make_graph_engine_params()
+{
+  graph_engine_params result = {};
+  result.bpm = 120;
+  result.max_frame_count = 400;
+  result.midi_key = midi_middle_c;
+  return result;
+}
+
+static std::unique_ptr<graph_engine>
+make_graph_engine(plugin_desc const* desc)
+{
+  auto params = make_graph_engine_params();
+  return std::make_unique<graph_engine>(desc, params);
+}
+
 static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping, 
@@ -193,23 +210,18 @@ render_graph(
         }
       }
 
-  graph_engine_params params = {};
-  params.bpm = 120;
-  params.max_frame_count = 400;
-  params.midi_key = midi_middle_c;
+  auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / dahdsr;
   int voice_release_at = dahds / dahdsr * params.max_frame_count;
-
-  graph_engine engine2(&state.desc(), params);
-  engine2.process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
+  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
   if(map.module_index == module_vcv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
-      engine2.process_default(relevant_modules[m], mi);
-  auto* block = engine2.process_default(map.module_index, map.module_slot);
-  engine2.process_end();
+      engine->process_default(relevant_modules[m], mi);
+  auto* block = engine->process_default(map.module_index, map.module_slot);
+  engine->process_end();
 
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
@@ -249,6 +261,7 @@ cv_matrix_topo(
   
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
+  result.graph_engine_factory = make_graph_engine;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto* engine, auto const& mapping) {
       return render_graph(state, engine, mapping, sm, tm);
