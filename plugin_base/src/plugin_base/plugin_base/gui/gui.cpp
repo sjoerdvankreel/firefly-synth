@@ -447,7 +447,7 @@ plugin_gui::get_module_graph_engine(module_topo const& module)
   if(module.graph_engine_factory == nullptr) return nullptr;
   auto iter = _module_graph_engines.find(module.info.index);
   if(iter != _module_graph_engines.end()) return iter->second.get();
-  _module_graph_engines[module.info.index] = module.graph_engine_factory();
+  _module_graph_engines[module.info.index] = module.graph_engine_factory(&_gui_state->desc());
   return _module_graph_engines[module.info.index].get();
 }
 

@@ -71,22 +71,35 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gfx, 1, param_delay_tempo, 0, "3/16");
 }
 
+static graph_engine_params
+make_graph_engine_params(int type)
+{
+  graph_engine_params result;
+  result.bpm = 120;
+  result.midi_key = midi_middle_c;
+  result.sample_rate = 48000;
+  result.max_frame_count = 48000 / 10;
+  return result;   
+}
+
+static std::unique_ptr<graph_engine>
+make_graph_engine(plugin_desc const* desc)
+{
+  auto params = make_graph_engine_params(type_lpf);
+  return std::make_unique<graph_engine>(desc, params);
+}
+
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engineTODO, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off) return graph_data(graph_data_type::off, {});
+  if(type == type_off || type == type_delay) return graph_data(graph_data_type::off, {});
 
   jarray<float, 2> audio_in;
-  graph_engine_params params = {};
-  params.bpm = 120;
-  params.midi_key = midi_middle_c;
-
+  auto const params = make_graph_engine_params(type);
   if (type == type_delay)
   {
     int count = 10;
-    params.sample_rate = 50;
-    params.max_frame_count = 200;
     audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
     for (int i = 0; i < count; i++)
     {
@@ -97,16 +110,13 @@ render_graph(plugin_state const& state, graph_engine* engineTODO, param_topo_map
   }
   else 
   {
-    params.sample_rate = 48000;
-    params.max_frame_count = 48000 / 10;
     audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
   }
 
-  graph_engine engine(&state.desc(), params);
-  engine.process_begin(&state, params.max_frame_count, -1);
-  auto const* block = engine.process(
+  engine->process_begin(&state, params.max_frame_count, -1);
+  auto const* block = engine->process(
     mapping.module_index, mapping.module_slot, [mapping, params, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, params.sample_rate);
@@ -114,7 +124,7 @@ render_graph(plugin_state const& state, graph_engine* engineTODO, param_topo_map
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &audio_in);
   });
-  engine.process_end();
+  engine->process_end();
 
   if (type == type_delay)
     return graph_data(jarray<float, 1>(block->state.own_audio[0][0][0]), true, {});
@@ -140,6 +150,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_module_gui(section, colors, pos, { 1, 1 })));
  
   result.graph_renderer = render_graph;
+  result.graph_engine_factory = make_graph_engine;
   if(global) result.default_initializer = init_global_default;
   if(!global) result.default_initializer = init_voice_default;
   result.gui.menu_handler_factory = [global](plugin_state* state) { return make_audio_routing_menu_handler(state, global); };

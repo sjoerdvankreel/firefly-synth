@@ -17,6 +17,7 @@
 namespace plugin_base {
 
 struct plugin_topo;
+struct plugin_desc;
 
 class plugin_state;
 class graph_engine;
@@ -49,10 +50,10 @@ public:
 
 typedef std::function<void(plugin_state& state)>
 state_initializer;
-typedef std::function<std::unique_ptr<graph_engine>()>
-module_graph_engine_factory;
 typedef std::function<std::unique_ptr<tab_menu_handler>(plugin_state*)>
 tab_menu_handler_factory;
+typedef std::function<std::unique_ptr<graph_engine>(plugin_desc const* desc)>
+module_graph_engine_factory;
 
 typedef std::function<void(
   plugin_state const& state, int slot, jarray<int, 3>& active)>
