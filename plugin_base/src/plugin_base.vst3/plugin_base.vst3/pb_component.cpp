@@ -60,7 +60,8 @@ pb_component::canProcessSampleSize(int32 symbolic_size)
 tresult PLUGIN_API
 pb_component::setupProcessing(ProcessSetup& setup)
 {
-  _engine.activate(true, setup.sampleRate, setup.maxSamplesPerBlock);
+  _engine.activate(setup.maxSamplesPerBlock);
+  _engine.activate_modules(setup.sampleRate);
   return AudioEffect::setupProcessing(setup);
 }
 

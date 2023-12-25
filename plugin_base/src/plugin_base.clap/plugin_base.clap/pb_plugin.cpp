@@ -413,7 +413,8 @@ pb_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_in
 bool
 pb_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
 {
-  _engine.activate(true, sample_rate, max_frame_count);
+  _engine.activate(max_frame_count);
+  _engine.activate_modules(sample_rate);
   return true;
 }
 

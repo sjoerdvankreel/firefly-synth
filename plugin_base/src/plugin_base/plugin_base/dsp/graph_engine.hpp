@@ -15,7 +15,6 @@ typedef std::function<void(plugin_block&)> graph_processor;
 struct graph_engine_params
 {
   int bpm;
-  int sample_rate;
   int max_frame_count;
   int midi_key = -1;
 };
@@ -23,11 +22,13 @@ struct graph_engine_params
 // utility dsp engine based on static state only
 class graph_engine {
   plugin_engine _engine;
+  int _sample_rate = -1;
+  int _voice_release_at = -1;
+
   plugin_desc const* _desc = {};
   jarray<float, 2> _audio_in = {};
   jarray<float, 2> _audio_out = {};
   graph_engine_params const _params;
-  int _voice_release_at = -1;
 
   host_block* _host_block = {};
   float* _audio_out_ptrs[2] = {};
@@ -41,7 +42,7 @@ public:
   graph_engine(plugin_desc const* desc, graph_engine_params const& params);
 
   void process_end();
-  void process_begin(plugin_state const* state, int frame_count, int voice_release_at);
+  void process_begin(plugin_state const* state, int sample_rate, int frame_count, int voice_release_at);
   plugin_block const* process_default(int module_index, int module_slot);
   plugin_block const* process(int module_index, int module_slot, graph_processor processor);
 };

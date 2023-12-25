@@ -144,6 +144,7 @@ plugin_engine::deactivate()
   _cpu_usage = 0;
   _sample_rate = 0;
   _stream_time = 0;
+  _max_frame_count = 0;
   _output_updated_sec = 0;
   _block_start_time_sec = 0;
 
@@ -177,11 +178,11 @@ plugin_engine::deactivate()
 }
 
 void
-plugin_engine::activate(bool activate_module_engines, int sample_rate, int max_frame_count)
+plugin_engine::activate(int max_frame_count)
 {  
   deactivate();
   _stream_time = 0;
-  _sample_rate = sample_rate;
+  _max_frame_count = max_frame_count;
   _output_updated_sec = seconds_since_epoch();
 
   // init frame-count dependent memory
@@ -196,8 +197,13 @@ plugin_engine::activate(bool activate_module_engines, int sample_rate, int max_f
   _global_audio_state.resize(frame_dims.module_global_audio);
   _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
+}
 
-  if(!activate_module_engines) return;
+void
+plugin_engine::activate_modules(int sample_rate)
+{
+  assert(_max_frame_count > 0);
+  _sample_rate = sample_rate;
 
   // smoothing filters are SR dependent
   float smooth_freq = _state.desc().plugin->midi_smoothing_hz;
@@ -207,17 +213,17 @@ plugin_engine::activate(bool activate_module_engines, int sample_rate, int max_f
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, max_frame_count);
+      _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, _max_frame_count);
       _input_engines[m][mi]->reset(nullptr);
     }
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for (int v = 0; v < _state.desc().plugin->polyphony; v++)
-        _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, max_frame_count);
+        _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, _max_frame_count);
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, max_frame_count);
+      _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, sample_rate, _max_frame_count);
       _output_engines[m][mi]->reset(nullptr);
     }
 }

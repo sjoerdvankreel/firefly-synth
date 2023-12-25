@@ -45,6 +45,7 @@ class plugin_engine final {
   jarray<plugin_state, 1> _voice_automation = {};
 
   float _sample_rate = {};
+  int _max_frame_count = {};
   double _cpu_usage = {};
   double _output_updated_sec = {};
   double _block_start_time_sec = {};
@@ -107,8 +108,9 @@ public:
   plugin_state const& state() const { return _state; }
 
   // set all state and automation to these values
+  void activate(int max_frame_count);
+  void activate_modules(int sample_rate);
   void init_static(plugin_state const* state, int frame_count);
-  void activate(bool activate_module_engines, int sample_rate, int max_frame_count);
 };
 
 }

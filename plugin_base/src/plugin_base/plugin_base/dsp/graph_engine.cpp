@@ -6,7 +6,7 @@ graph_engine::
 graph_engine(plugin_desc const* desc, graph_engine_params const& params):
 _engine(desc, nullptr, nullptr), _desc(desc), _params(params)
 { 
-  _engine.activate(false, _params.sample_rate, _params.max_frame_count);
+  _engine.activate(_params.max_frame_count);
   _audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
   _audio_out.resize(jarray<int, 1>(2, params.max_frame_count));
   _audio_in_ptrs[0] = _audio_in[0].data().data();
@@ -20,13 +20,16 @@ graph_engine::process_end()
 {
   _engine.release_block();
   _host_block = nullptr;
+  _sample_rate = -1;
   _voice_release_at = -1;
 }
 
 void 
-graph_engine::process_begin(plugin_state const* state, int frame_count, int voice_release_at)
+graph_engine::process_begin(plugin_state const* state, int sample_rate, int frame_count, int voice_release_at)
 {
+  assert(sample_rate > 0);
   assert(0 < frame_count && frame_count <= _params.max_frame_count);
+  _sample_rate = sample_rate;
   _voice_release_at = voice_release_at;
   _host_block = &_engine.prepare_block();
   _host_block->frame_count = frame_count;
