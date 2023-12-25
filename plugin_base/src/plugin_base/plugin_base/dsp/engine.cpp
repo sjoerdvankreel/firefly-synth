@@ -471,6 +471,7 @@ plugin_engine::process()
         _midi_automation[mt.module_index][mt.module_slot][mt.midi_index].begin() + frame_count,
         _accurate_automation[pt.module_index][pt.module_slot][pt.param_index][pt.param_slot].begin());
       _state.set_normalized_at_index(param_index, normalized_value(last_value));
+      pt.value_at(_param_was_automated) = 1;
 
       // have the host update the gui with the midi value
       // note that we don't handle the other direction (i.e. no midi cc out)
