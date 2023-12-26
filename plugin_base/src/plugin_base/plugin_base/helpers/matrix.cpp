@@ -55,8 +55,8 @@ matrix_param_menu_handler::menus() const
   custom_menu result;
   result.menu_id = 0;
   result.name = "Route";
-  result.entries = { { 0, "Clear" }, { 1, "Insert Before" }, { 2, "Insert After" } };
-  return { result };
+  result.entries = { { 0, "Clear" }, { 1, "Shift Up" }, { 2, "Insert Before" }, { 3, "Insert After" } };
+  return { result }; 
 }
 
 void 
@@ -65,14 +65,26 @@ matrix_param_menu_handler::execute(
   int module_slot, int param_index, int param_slot)
 {
   assert(menu_id == 0);
-  assert(action == 0 || action == 1 || action == 2);
+  assert(action == 0 || action == 1 || action == 2 || action == 3);
 
   auto const& topo = _state->desc().plugin->modules[module_index];
   //int slot_count = topo.params[param_index].info.slot_count;
   if (action == 0)
+  {
     for(int p = 0; p < topo.params.size(); p++)
       _state->set_plain_at(module_index, module_slot, p, param_slot, 
         topo.params[p].domain.default_plain(module_slot, param_slot));
+    return;
+  }
+  if (action == 1)
+  {
+    for(int r = 0; r < param_slot && r < _route_count - 1; r++)
+      for (int p = 0; p < topo.params.size(); p++)
+        _state->set_plain_at(module_index, module_slot, p, r,
+          _state->get_plain_at(module_index, module_slot, p, r + 1));
+    execute(menu_id, 0, module_index, param_index, param_index, param_slot);
+    return;
+  }
 }
 
 routing_matrix<module_topo_mapping>

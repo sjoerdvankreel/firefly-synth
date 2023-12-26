@@ -172,7 +172,7 @@ audio_matrix_topo(
     make_param_dsp_input(!global, param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, gui_label_contents::none, make_label_none())));
   on.gui.tabular = true;
-  on.gui.menu_handler_factory = make_matrix_param_menu_handler;
+  on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count); };
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),

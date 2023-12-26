@@ -98,7 +98,7 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, gui_label_contents::none, make_label_none())));
   on.gui.tabular = true;
-  on.gui.menu_handler_factory = make_matrix_param_menu_handler;
+  on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count); };
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", param_source, route_count),
