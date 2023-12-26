@@ -22,7 +22,6 @@ hardsync, unison
 do 5 am and 5 fm routes
 drop "or time into scratch" & friends?
 am clicks/rumbles especially in fruity
-undo stack in gui
 
 * get some linux folks to comment (ycollete?)
 * continuing

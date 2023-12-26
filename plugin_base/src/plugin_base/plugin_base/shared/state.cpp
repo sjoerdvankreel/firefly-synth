@@ -66,38 +66,44 @@ plugin_state::remove_listener(int index, state_listener* listener) const
   map_iter->second.erase(vector_iter);
 }
 
-std::string
-plugin_state::undo_text()
+std::vector<std::string>
+plugin_state::undo_stack()
 {
-  if (_undo_position == 0) return "";
+  if (_undo_position == 0) return {};
   assert(0 < _undo_position && _undo_position <= _undo_entries.size());
-  return _undo_entries[_undo_position - 1]->name;
+  std::vector<std::string> result;
+  for(int i = _undo_position - 1; i >= 0; i--)
+    result.push_back(_undo_entries[i]->name);
+  return result;
 }
 
-std::string
-plugin_state::redo_text()
+std::vector<std::string>
+plugin_state::redo_stack()
 {
-  if(_undo_position == _undo_entries.size()) return "";
+  if(_undo_position == _undo_entries.size()) return {};
   assert(0 <= _undo_position && _undo_position < _undo_entries.size());
-  return _undo_entries[_undo_position]->name;
+  std::vector<std::string> result;
+  for(int i = _undo_position; i < _undo_entries.size(); i++)
+    result.push_back(_undo_entries[i]->name);
+  return result;
 }
 
 void 
-plugin_state::undo()
+plugin_state::undo(int index)
 {
   assert(_undo_entries.size() > 0);
-  assert(0 < _undo_position && _undo_position <= _undo_entries.size());
-  _undo_position--;
+  assert(0 < _undo_position - index && _undo_position - index <= _undo_entries.size());
+  _undo_position -= index + 1;
   copy_from(_undo_entries[_undo_position]->state_before);
 }
 
 void 
-plugin_state::redo()
+plugin_state::redo(int index)
 {
   assert(_undo_entries.size() > 0);
-  assert(0 <= _undo_position && _undo_position < _undo_entries.size());
-  copy_from(_undo_entries[_undo_position]->state_after);
-  _undo_position++;
+  assert(0 <= _undo_position + index && _undo_position + index < _undo_entries.size());
+  copy_from(_undo_entries[_undo_position + index]->state_after);
+  _undo_position += index + 1;
 }
 
 void

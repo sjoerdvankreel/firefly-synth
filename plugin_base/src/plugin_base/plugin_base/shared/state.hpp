@@ -36,7 +36,7 @@ public:
 };
 
 class plugin_state final {
-  static inline int const max_undo_size = 10;
+  static inline int const max_undo_size = 20;
 
   int _undo_region = 0;
   int _undo_position = 0;
@@ -58,10 +58,11 @@ public:
   plugin_state(plugin_desc const* desc, bool notify);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_state);
   
-  void undo();
-  void redo();
-  std::string undo_text();
-  std::string redo_text();
+  std::vector<std::string> undo_stack();
+  std::vector<std::string> redo_stack();
+
+  void undo(int index);
+  void redo(int index);
   void begin_undo_region();
   void discard_undo_region();
   void end_undo_region(std::string const& name);

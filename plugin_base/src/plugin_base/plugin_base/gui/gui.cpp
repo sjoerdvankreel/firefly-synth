@@ -175,17 +175,25 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
   if(dynamic_cast<param_component*>(event.originalComponent)) return;
 
   juce::PopupMenu menu;
-  std::string undo_text = _gui->gui_state()->undo_text();
-  std::string redo_text = _gui->gui_state()->redo_text();
-  if(undo_text.empty()) menu.addItem(1, "Undo", false);
-  else menu.addItem(1, "Undo " + undo_text, true);
-  if (redo_text.empty()) menu.addItem(2, "Redo", false);
-  else menu.addItem(2, "Redo " + redo_text, true);
   menu.setLookAndFeel(&_gui->getLookAndFeel());
 
+  juce::PopupMenu undo_menu;
+  auto undo_stack = _gui->gui_state()->undo_stack();
+  for(int i = 0; i < undo_stack.size(); i++)
+    undo_menu.addItem(i + 1, undo_stack[i]);
+  menu.addSubMenu("Undo", undo_menu);
+
+  juce::PopupMenu redo_menu;
+  auto redo_stack = _gui->gui_state()->redo_stack();
+  for (int i = 0; i < redo_stack.size(); i++)
+    redo_menu.addItem(i + 1000 + 1, redo_stack[i]);
+  menu.addSubMenu("Redo", redo_menu);
+
   menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
-    if(result == 1) _gui->gui_state()->undo();
-    if(result == 2) _gui->gui_state()->redo();
+    if(1 <= result && result < 1000)
+      _gui->gui_state()->undo(result - 1);
+    else if(1001 <= result && result < 2000)
+      _gui->gui_state()->redo(result - 1001);
   });
 }
 
