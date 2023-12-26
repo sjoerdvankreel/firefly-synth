@@ -22,7 +22,7 @@ static std::string const extra_state_tab_index = "tab";
 static std::string const user_state_width_key = "width";
 static BorderSize<int> const param_section_border(16, 6, 6, 6);
 static std::vector<std::string> tab_menu_module_actions = { 
-  "", "Clear", "Clear All", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
+  "", "Clear", "Clear All", "Shift Left", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
 
 static void
 fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots, std::set<int> const& actions)
@@ -35,9 +35,12 @@ fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots, std::set
     if (actions.contains(module_tab_menu_handler::clear_all))
       menu.addItem(base_id + module_tab_menu_handler::clear_all * 100,
         tab_menu_module_actions[module_tab_menu_handler::clear_all]);
+    if (actions.contains(module_tab_menu_handler::shift_left))
+      menu.addItem(base_id + module_tab_menu_handler::shift_left * 100,
+        tab_menu_module_actions[module_tab_menu_handler::shift_left]);
     if (actions.contains(module_tab_menu_handler::insert_before))
       menu.addItem(base_id + module_tab_menu_handler::insert_before * 100,
-        tab_menu_module_actions[module_tab_menu_handler::insert_before], slot > 0);
+        tab_menu_module_actions[module_tab_menu_handler::insert_before]);
     if (actions.contains(module_tab_menu_handler::insert_after))
       menu.addItem(base_id + module_tab_menu_handler::insert_after * 100,
         tab_menu_module_actions[module_tab_menu_handler::insert_after], slot < slots - 1);

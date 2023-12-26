@@ -55,7 +55,7 @@ matrix_param_menu_handler::menus() const
   custom_menu result;
   result.menu_id = 0;
   result.name = "Route";
-  result.entries = { { 0, "Clear" } };
+  result.entries = { { 0, "Clear" }, { 1, "Insert Before" }, { 2, "Insert After" } };
   return { result };
 }
 
@@ -64,7 +64,15 @@ matrix_param_menu_handler::execute(
   int menu_id, int action, int module_index, 
   int module_slot, int param_index, int param_slot)
 {
+  assert(menu_id == 0);
+  assert(action == 0 || action == 1 || action == 2);
 
+  auto const& topo = _state->desc().plugin->modules[module_index];
+  //int slot_count = topo.params[param_index].info.slot_count;
+  if (action == 0)
+    for(int p = 0; p < topo.params.size(); p++)
+      _state->set_plain_at(module_index, module_slot, p, param_slot, 
+        topo.params[p].domain.default_plain(module_slot, param_slot));
 }
 
 routing_matrix<module_topo_mapping>
@@ -308,8 +316,8 @@ cv_routing_menu_handler::module_menus() const
   routing_menu.menu_id = 1;
   routing_menu.actions = {
     module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
-    module_tab_menu_handler::insert_before, module_tab_menu_handler::insert_after,
-    module_tab_menu_handler::move_to, module_tab_menu_handler::swap_with };
+    module_tab_menu_handler::shift_left, module_tab_menu_handler::insert_before, 
+    module_tab_menu_handler::insert_after, module_tab_menu_handler::move_to, module_tab_menu_handler::swap_with };
   return { plain_menu, routing_menu };
 }
 
@@ -330,6 +338,7 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
     {
     case module_tab_menu_handler::clear_all: clear_all(module); break;
     case module_tab_menu_handler::clear: clear(module, source_slot); break;
+    case module_tab_menu_handler::shift_left: shift_left(module, source_slot); break;
     case module_tab_menu_handler::insert_after: insert_after(module, source_slot); break;
     case module_tab_menu_handler::insert_before: insert_before(module, source_slot); break;
     case module_tab_menu_handler::move_to: move_to(module, source_slot, target_slot); break;
@@ -350,21 +359,21 @@ cv_routing_menu_handler::clear_all(int module)
 }
 
 void
-cv_routing_menu_handler::insert_before(int module, int slot)
+cv_routing_menu_handler::shift_left(int module, int slot)
 {
-  // move all before slot to the left
+  // move all from slot to the left
   clear(module, 0);
-  for (int i = 0; i < slot - 1; i++)
+  for (int i = 0; i < slot; i++)
     move_to(module, i + 1, i);
 }
 
-void 
-cv_routing_menu_handler::insert_after(int module, int slot)
+void
+cv_routing_menu_handler::insert(int module, int slot, bool after)
 {
-  // move all after slot to the right
+  // move all from slot to the right
   auto const& topo = _state->desc().plugin->modules[module];
   clear(module, topo.info.slot_count - 1);
-  for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
+  for (int i = topo.info.slot_count - 1; i > (after? slot + 1: slot); i--)
     move_to(module, i - 1, i);
 }
 
@@ -479,7 +488,8 @@ audio_routing_menu_handler::module_menus() const
   all_menu.name = "With CV & Audio Routing";
   all_menu.actions = {
     module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
-    module_tab_menu_handler::insert_after, module_tab_menu_handler::insert_before };
+    module_tab_menu_handler::shift_left, module_tab_menu_handler::insert_after, 
+    module_tab_menu_handler::insert_before };
   return { plain_menu, cv_menu, all_menu };
 }
 
@@ -508,6 +518,7 @@ audio_routing_menu_handler::execute_module(int menu_id, int action, int module, 
     {
     case module_tab_menu_handler::clear_all: with_all_clear_all(module); break;
     case module_tab_menu_handler::clear: with_all_clear(module, source_slot); break;
+    case module_tab_menu_handler::shift_left: with_all_shift_left(module, source_slot); break;
     case module_tab_menu_handler::insert_after: with_all_insert_after(module, source_slot); break;
     case module_tab_menu_handler::insert_before: with_all_insert_before(module, source_slot); break;
     default: assert(false);
@@ -549,14 +560,27 @@ audio_routing_menu_handler::with_all_clear_all(int module)
 }
 
 void
-audio_routing_menu_handler::with_all_insert_before(int module, int slot)
+audio_routing_menu_handler::with_all_shift_left(int module, int slot)
 {
   // move all before slot to the left
   with_all_clear(module, 0);
-  for (int i = 0; i < slot - 1; i++)
+  for (int i = 0; i < slot; i++)
   {
     with_cv_move_to(module, i + 1, i);
     move_audio_to(module, i + 1, i);
+  }
+}
+
+void
+audio_routing_menu_handler::with_all_insert_before(int module, int slot)
+{
+  // move all from slot to the right
+  auto const& topo = _state->desc().plugin->modules[module];
+  with_all_clear(module, topo.info.slot_count - 1);
+  for (int i = topo.info.slot_count - 1; i > slot; i--)
+  {
+    with_cv_move_to(module, i - 1, i);
+    move_audio_to(module, i - 1, i);
   }
 }
 

@@ -59,16 +59,17 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules);
 // allows to manage matrix routes
 class matrix_param_menu_handler:
 public param_menu_handler {
+  int const _route_count;
 public:
-  matrix_param_menu_handler(plugin_state* state): 
-  param_menu_handler(state) {}
+  matrix_param_menu_handler(plugin_state* state, int route_count): 
+  param_menu_handler(state), _route_count(route_count) {}
   std::vector<custom_menu> const menus() const override;
   void execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) override;
 };
 
 inline std::unique_ptr<matrix_param_menu_handler>
-make_matrix_param_menu_handler(plugin_state* state)
-{ return std::make_unique<matrix_param_menu_handler>(state); }
+make_matrix_param_menu_handler(plugin_state* state, int route_count)
+{ return std::make_unique<matrix_param_menu_handler>(state, route_count); }
 
 // allows to tidy up cv/audio matrix
 class tidy_matrix_menu_handler :
@@ -94,10 +95,12 @@ public module_tab_menu_handler {
 
   void clear_all(int module);
   void clear(int module, int slot);
-  void insert_after(int module, int slot);
-  void insert_before(int module, int slot);
+  void shift_left(int module, int slot);
+  void insert(int module, int slot, bool after);
   void move_to(int module, int source_slot, int target_slot);
   void swap_with(int module, int source_slot, int target_slot);
+  void insert_after(int module, int slot) { insert(module, slot, true); }
+  void insert_before(int module, int slot) { insert(module, slot, false); }
 
   bool is_selected(
     int matrix, int param, int route, int module, 
@@ -140,6 +143,7 @@ public module_tab_menu_handler {
 
   void with_all_clear_all(int module);
   void with_all_clear(int module, int slot);
+  void with_all_shift_left(int module, int slot);
   void with_all_insert_after(int module, int slot);
   void with_all_insert_before(int module, int slot);
 

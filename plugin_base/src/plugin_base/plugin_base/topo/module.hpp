@@ -35,7 +35,7 @@ protected:
 public:
   struct module_menu { int menu_id; std::string name; std::set<int> actions; };
   struct menu_result { bool show_warning; std::string title; std::string content; };
-  enum module_action { clear = 1, clear_all, insert_before, insert_after, copy_to, move_to, swap_with };
+  enum module_action { clear = 1, clear_all, shift_left, insert_before, insert_after, copy_to, move_to, swap_with };
 
   virtual ~module_tab_menu_handler() {}
   virtual std::vector<module_menu> module_menus() const { return {}; };
