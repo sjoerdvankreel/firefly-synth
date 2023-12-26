@@ -175,16 +175,16 @@ am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown cons
     // apply modulation
     int source_osc = block_auto[param_source][r].step();
     auto const& source_audio = block.module_audio(module_osc, source_osc);
-    auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_amt][r];
-    auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_ring][r];
+    //auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_amt][r];
+    //auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_ring][r];
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
       {
         float audio = (*modulated)[c][f];
         float rm = source_audio[0][0][c][f];
         float am = bipolar_to_unipolar(rm);
-        float mod = mix_signal(ring_curve[f], am, rm);
-        (*modulated)[c][f] = mix_signal(amt_curve[f], audio, mod * audio);
+        float mod = mix_signal(1.0f, am, rm);
+        (*modulated)[c][f] = mix_signal(1.0f, audio, mod * audio);
       }
   }
 
