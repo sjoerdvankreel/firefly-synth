@@ -92,9 +92,9 @@ std::vector<plugin_base::module_topo const*>
 make_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 
 // menu handlers to update routing on clear/move/swap/copy
-std::unique_ptr<plugin_base::tab_menu_handler>
+std::unique_ptr<plugin_base::module_tab_menu_handler>
 make_cv_routing_menu_handler(plugin_base::plugin_state* state);
-std::unique_ptr<plugin_base::tab_menu_handler>
+std::unique_ptr<plugin_base::module_tab_menu_handler>
 make_audio_routing_menu_handler(plugin_base::plugin_state* state, bool global);
 plugin_base::audio_routing_audio_params
 make_audio_routing_am_params(plugin_base::plugin_state* state);

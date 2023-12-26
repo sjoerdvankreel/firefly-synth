@@ -27,10 +27,10 @@ enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
 // allows to extend right-click menu on tab headers
-class tab_menu_handler {
+class module_tab_menu_handler {
 protected:
   plugin_state* const _state;
-  tab_menu_handler(plugin_state* state): _state(state) {}
+  module_tab_menu_handler(plugin_state* state): _state(state) {}
 
 public:
   struct extra_menu_entry { int action; std::string title; };
@@ -39,7 +39,7 @@ public:
   struct menu_result { bool show_warning; std::string title; std::string content; };
   enum module_action { clear = 1, clear_all, insert_before, insert_after, copy_to, move_to, swap_with };
 
-  virtual ~tab_menu_handler() {}
+  virtual ~module_tab_menu_handler() {}
   virtual std::vector<module_menu> module_menus() const { return {}; };
   virtual std::vector<extra_menu> const extra_menus() const { return {}; };
 
@@ -50,10 +50,10 @@ public:
 
 typedef std::function<void(plugin_state& state)>
 state_initializer;
-typedef std::function<std::unique_ptr<tab_menu_handler>(plugin_state*)>
-tab_menu_handler_factory;
 typedef std::function<std::unique_ptr<graph_engine>(plugin_desc const* desc)>
 module_graph_engine_factory;
+typedef std::function<std::unique_ptr<module_tab_menu_handler>(plugin_state*)>
+module_tab_menu_handler_factory;
 
 typedef std::function<void(
   plugin_state const& state, int slot, jarray<int, 3>& active)>
@@ -88,7 +88,7 @@ struct module_topo_gui final {
   gui_dimension dimension;
   std::string tabbed_name;
   bool enable_tab_menu = true;
-  tab_menu_handler_factory menu_handler_factory;
+  module_tab_menu_handler_factory menu_handler_factory;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
 };
 

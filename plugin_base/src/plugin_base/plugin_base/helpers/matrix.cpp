@@ -39,10 +39,10 @@ make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int
   return result;
 }
 
-static tab_menu_handler::menu_result
+static module_tab_menu_handler::menu_result
 make_copy_failed_result(std::string const& matrix_name)
 {
-  tab_menu_handler::menu_result result;
+  module_tab_menu_handler::menu_result result;
   result.show_warning = true;
   result.title = "Copy failed";
   result.content = "No slots available for " + matrix_name + " matrix.";
@@ -197,7 +197,7 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules)
   return result;
 }
 
-std::vector<tab_menu_handler::extra_menu> const 
+std::vector<module_tab_menu_handler::extra_menu> const
 tidy_matrix_menu_handler::extra_menus() const
 {
   extra_menu result;
@@ -207,7 +207,7 @@ tidy_matrix_menu_handler::extra_menus() const
   return { result };
 }
 
-tab_menu_handler::menu_result 
+module_tab_menu_handler::menu_result
 tidy_matrix_menu_handler::execute_extra(int menu_id, int action, int module, int slot)
 {
   assert(menu_id == 0);
@@ -277,45 +277,45 @@ cv_routing_menu_handler::update_matched_slot(
   return true;
 }
 
-std::vector<tab_menu_handler::module_menu> 
+std::vector<module_tab_menu_handler::module_menu>
 cv_routing_menu_handler::module_menus() const
 {
   module_menu plain_menu;
   plain_menu.name = "";
   plain_menu.menu_id = 0;
   plain_menu.actions = {
-    tab_menu_handler::copy_to, tab_menu_handler::swap_with };
+    module_tab_menu_handler::copy_to, module_tab_menu_handler::swap_with };
   module_menu routing_menu;
   routing_menu.name = "With CV Routing";
   routing_menu.menu_id = 1;
   routing_menu.actions = {
-    tab_menu_handler::clear, tab_menu_handler::clear_all,
-    tab_menu_handler::insert_before, tab_menu_handler::insert_after,
-    tab_menu_handler::move_to, tab_menu_handler::swap_with };
+    module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
+    module_tab_menu_handler::insert_before, module_tab_menu_handler::insert_after,
+    module_tab_menu_handler::move_to, module_tab_menu_handler::swap_with };
   return { plain_menu, routing_menu };
 }
 
-tab_menu_handler::menu_result
+module_tab_menu_handler::menu_result
 cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
 {
   assert(menu_id == 0 || menu_id == 1);
   if(menu_id == 0)
     switch (action)
     {
-    case tab_menu_handler::copy_to: _state->copy_module_to(module, source_slot, target_slot); break;
-    case tab_menu_handler::swap_with: _state->swap_module_with(module, source_slot, target_slot); break;
+    case module_tab_menu_handler::copy_to: _state->copy_module_to(module, source_slot, target_slot); break;
+    case module_tab_menu_handler::swap_with: _state->swap_module_with(module, source_slot, target_slot); break;
     default: assert(false); break;
     }
 
   if(menu_id == 1)
     switch (action)
     {
-    case tab_menu_handler::clear_all: clear_all(module); break;
-    case tab_menu_handler::clear: clear(module, source_slot); break;
-    case tab_menu_handler::insert_after: insert_after(module, source_slot); break;
-    case tab_menu_handler::insert_before: insert_before(module, source_slot); break;
-    case tab_menu_handler::move_to: move_to(module, source_slot, target_slot); break;
-    case tab_menu_handler::swap_with: swap_with(module, source_slot, target_slot); break;
+    case module_tab_menu_handler::clear_all: clear_all(module); break;
+    case module_tab_menu_handler::clear: clear(module, source_slot); break;
+    case module_tab_menu_handler::insert_after: insert_after(module, source_slot); break;
+    case module_tab_menu_handler::insert_before: insert_before(module, source_slot); break;
+    case module_tab_menu_handler::move_to: move_to(module, source_slot, target_slot); break;
+    case module_tab_menu_handler::swap_with: swap_with(module, source_slot, target_slot); break;
     default: assert(false); break;
     }
   
@@ -444,34 +444,34 @@ audio_routing_menu_handler::update_matched_cv_slot(
   return true;
 }
 
-std::vector<tab_menu_handler::module_menu>
+std::vector<module_tab_menu_handler::module_menu>
 audio_routing_menu_handler::module_menus() const
 {
   module_menu plain_menu;
   plain_menu.menu_id = 0;
   plain_menu.name = "";
-  plain_menu.actions = { tab_menu_handler::copy_to };
+  plain_menu.actions = { module_tab_menu_handler::copy_to };
   module_menu cv_menu;
   cv_menu.menu_id = 1;
   cv_menu.name = "With CV Routing";
   cv_menu.actions = { 
-    tab_menu_handler::copy_to, tab_menu_handler::move_to, tab_menu_handler::swap_with };
+    module_tab_menu_handler::copy_to, module_tab_menu_handler::move_to, module_tab_menu_handler::swap_with };
   module_menu all_menu;
   all_menu.menu_id = 2;
   all_menu.name = "With CV & Audio Routing";
   all_menu.actions = {
-    tab_menu_handler::clear, tab_menu_handler::clear_all,
-    tab_menu_handler::insert_after, tab_menu_handler::insert_before };
+    module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
+    module_tab_menu_handler::insert_after, module_tab_menu_handler::insert_before };
   return { plain_menu, cv_menu, all_menu };
 }
 
-tab_menu_handler::menu_result 
+module_tab_menu_handler::menu_result
 audio_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
 {
   assert(menu_id == 0 || menu_id == 1 || menu_id == 2);
   if(menu_id == 0)
   {
-    assert(action == tab_menu_handler::copy_to);
+    assert(action == module_tab_menu_handler::copy_to);
     _state->copy_module_to(module, source_slot, target_slot);
     return {};
   }
@@ -479,19 +479,19 @@ audio_routing_menu_handler::execute_module(int menu_id, int action, int module, 
   if(menu_id == 1)
     switch (action)
     {
-    case tab_menu_handler::copy_to: return with_cv_copy_to(module, source_slot, target_slot);
-    case tab_menu_handler::move_to: with_cv_move_to(module, source_slot, target_slot); return {};
-    case tab_menu_handler::swap_with: with_cv_swap_with(module, source_slot, target_slot); return {};
+    case module_tab_menu_handler::copy_to: return with_cv_copy_to(module, source_slot, target_slot);
+    case module_tab_menu_handler::move_to: with_cv_move_to(module, source_slot, target_slot); return {};
+    case module_tab_menu_handler::swap_with: with_cv_swap_with(module, source_slot, target_slot); return {};
     default: assert(false); return {};
     }
 
   if(menu_id == 2)
     switch (action)
     {
-    case tab_menu_handler::clear_all: with_all_clear_all(module); break;
-    case tab_menu_handler::clear: with_all_clear(module, source_slot); break;
-    case tab_menu_handler::insert_after: with_all_insert_after(module, source_slot); break;
-    case tab_menu_handler::insert_before: with_all_insert_before(module, source_slot); break;
+    case module_tab_menu_handler::clear_all: with_all_clear_all(module); break;
+    case module_tab_menu_handler::clear: with_all_clear(module, source_slot); break;
+    case module_tab_menu_handler::insert_after: with_all_insert_after(module, source_slot); break;
+    case module_tab_menu_handler::insert_before: with_all_insert_before(module, source_slot); break;
     default: assert(false);
     }
 
@@ -579,7 +579,7 @@ audio_routing_menu_handler::with_cv_swap_with(int module, int source_slot, int t
         update_matched_cv_slot(r, module, target_slot, source_slot);
 }
 
-tab_menu_handler::menu_result
+module_tab_menu_handler::menu_result
 audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int target_slot)
 {
   // check if we have enough slots for cv matrix

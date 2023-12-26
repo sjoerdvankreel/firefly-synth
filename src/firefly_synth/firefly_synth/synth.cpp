@@ -140,7 +140,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour cons
   return grid;
 }
 
-std::unique_ptr<tab_menu_handler>
+std::unique_ptr<module_tab_menu_handler>
 make_audio_routing_menu_handler(plugin_state* state, bool global)
 {
   auto cv_params = make_audio_routing_cv_params(state, global);

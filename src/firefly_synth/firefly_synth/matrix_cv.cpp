@@ -104,7 +104,7 @@ make_audio_routing_cv_params(plugin_state* state, bool global)
   return result;
 }
 
-std::unique_ptr<tab_menu_handler>
+std::unique_ptr<module_tab_menu_handler>
 make_cv_routing_menu_handler(plugin_state* state)
 {
   std::map<int, std::vector<module_output_mapping>> matrix_sources;

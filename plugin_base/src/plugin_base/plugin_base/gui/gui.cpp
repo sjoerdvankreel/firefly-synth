@@ -27,43 +27,43 @@ static std::vector<std::string> tab_menu_module_actions = {
 static void
 fill_module_tab_menu(PopupMenu& menu, int base_id, int slot, int slots, std::set<int> const& actions)
 {
-  if(actions.contains(tab_menu_handler::clear))
-    menu.addItem(base_id + tab_menu_handler::clear * 100, 
-      tab_menu_module_actions[tab_menu_handler::clear]);
+  if(actions.contains(module_tab_menu_handler::clear))
+    menu.addItem(base_id + module_tab_menu_handler::clear * 100,
+      tab_menu_module_actions[module_tab_menu_handler::clear]);
   if (slots > 1)
   {
-    if (actions.contains(tab_menu_handler::clear_all))
-      menu.addItem(base_id + tab_menu_handler::clear_all * 100, 
-        tab_menu_module_actions[tab_menu_handler::clear_all]);
-    if (actions.contains(tab_menu_handler::insert_before))
-      menu.addItem(base_id + tab_menu_handler::insert_before * 100, 
-        tab_menu_module_actions[tab_menu_handler::insert_before], slot > 0);
-    if (actions.contains(tab_menu_handler::insert_after))
-      menu.addItem(base_id + tab_menu_handler::insert_after * 100, 
-        tab_menu_module_actions[tab_menu_handler::insert_after], slot < slots - 1);
+    if (actions.contains(module_tab_menu_handler::clear_all))
+      menu.addItem(base_id + module_tab_menu_handler::clear_all * 100,
+        tab_menu_module_actions[module_tab_menu_handler::clear_all]);
+    if (actions.contains(module_tab_menu_handler::insert_before))
+      menu.addItem(base_id + module_tab_menu_handler::insert_before * 100,
+        tab_menu_module_actions[module_tab_menu_handler::insert_before], slot > 0);
+    if (actions.contains(module_tab_menu_handler::insert_after))
+      menu.addItem(base_id + module_tab_menu_handler::insert_after * 100,
+        tab_menu_module_actions[module_tab_menu_handler::insert_after], slot < slots - 1);
 
-    if (actions.contains(tab_menu_handler::copy_to))
+    if (actions.contains(module_tab_menu_handler::copy_to))
     {
       PopupMenu copy_menu;
         for (int i = 0; i < slots; i++)
-          copy_menu.addItem(base_id + tab_menu_handler::copy_to * 100 + i, std::to_string(i + 1), i != slot);
-      menu.addSubMenu(tab_menu_module_actions[tab_menu_handler::copy_to], copy_menu);
+          copy_menu.addItem(base_id + module_tab_menu_handler::copy_to * 100 + i, std::to_string(i + 1), i != slot);
+      menu.addSubMenu(tab_menu_module_actions[module_tab_menu_handler::copy_to], copy_menu);
     }
 
-    if (actions.contains(tab_menu_handler::move_to))
+    if (actions.contains(module_tab_menu_handler::move_to))
     {
       PopupMenu move_menu;
       for (int i = 0; i < slots; i++)
-        move_menu.addItem(base_id + tab_menu_handler::move_to * 100 + i, std::to_string(i + 1), i != slot);
-      menu.addSubMenu(tab_menu_module_actions[tab_menu_handler::move_to], move_menu);
+        move_menu.addItem(base_id + module_tab_menu_handler::move_to * 100 + i, std::to_string(i + 1), i != slot);
+      menu.addSubMenu(tab_menu_module_actions[module_tab_menu_handler::move_to], move_menu);
     }
 
-    if (actions.contains(tab_menu_handler::swap_with))
+    if (actions.contains(module_tab_menu_handler::swap_with))
     {
       PopupMenu swap_menu;
       for (int i = 0; i < slots; i++)
-        swap_menu.addItem(base_id + tab_menu_handler::swap_with * 100 + i, std::to_string(i + 1), i != slot);
-      menu.addSubMenu(tab_menu_module_actions[tab_menu_handler::swap_with], swap_menu);
+        swap_menu.addItem(base_id + module_tab_menu_handler::swap_with * 100 + i, std::to_string(i + 1), i != slot);
+      menu.addSubMenu(tab_menu_module_actions[module_tab_menu_handler::swap_with], swap_menu);
     }
   }
 }
@@ -194,7 +194,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
   int slots = topo.info.slot_count;
 
   PopupMenu menu;
-  std::unique_ptr<tab_menu_handler> handler = {};
+  std::unique_ptr<module_tab_menu_handler> handler = {};
   if(topo.gui.menu_handler_factory != nullptr)
   {
     handler = topo.gui.menu_handler_factory(_state);
@@ -219,7 +219,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
   options = options.withTargetComponent(_button);
   menu.setLookAndFeel(&_button->getLookAndFeel());
   menu.showMenuAsync(options, [this, handler = handler.release()](int id) {
-    tab_menu_handler::menu_result result = {};
+    module_tab_menu_handler::menu_result result = {};
     auto extra_menus = handler->extra_menus();
     auto module_menus = handler->module_menus();
     if (0 < id && id < 10000)

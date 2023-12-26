@@ -60,7 +60,7 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules);
 
 // allows to tidy up cv/audio matrix
 class tidy_matrix_menu_handler :
-public tab_menu_handler {
+public module_tab_menu_handler {
   int _on_param;
   int _off_value;
   std::vector<int> _sort_params;
@@ -69,12 +69,12 @@ public:
   std::vector<extra_menu> const extra_menus() const override;
   menu_result execute_extra(int menu_id, int action, int module, int slot) override;
   tidy_matrix_menu_handler(plugin_state* state, int on_param, int off_value, std::vector<int> const& sort_params) : 
-  tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _sort_params(sort_params) {}
+    module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _sort_params(sort_params) {}
 };
 
 // allows to clear/swap/copy/move with updating routes
 class cv_routing_menu_handler :
-public tab_menu_handler {
+public module_tab_menu_handler {
   int const _on_param;
   int const _off_value;
   int const _source_param;
@@ -100,13 +100,13 @@ public:
 
   cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, 
     int off_value, std::map<int, std::vector<module_output_mapping>> const& matrix_sources):
-  tab_menu_handler(state), _on_param(on_param), _off_value(off_value), 
+    module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value),
   _source_param(source_param), _matrix_sources(matrix_sources) {}
 };
 
 // allows to clear/swap/copy/move with updating routes
 class audio_routing_menu_handler :
-public tab_menu_handler {
+public module_tab_menu_handler {
   audio_routing_cv_params const _cv_params;
   std::vector<audio_routing_audio_params> const _audio_params;
 
@@ -141,7 +141,7 @@ public:
 
   audio_routing_menu_handler(plugin_state* state, 
     audio_routing_cv_params const& cv_params, std::vector<audio_routing_audio_params> const& audio_params):
-  tab_menu_handler(state), _cv_params(cv_params), _audio_params(audio_params) {}
+  module_tab_menu_handler(state), _cv_params(cv_params), _audio_params(audio_params) {}
 };
 
 }

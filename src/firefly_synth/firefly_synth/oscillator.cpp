@@ -54,7 +54,7 @@ init_default(plugin_state& state)
   state.set_text_at(module_osc, 1, param_cent, 0, "+10");
 }
 
-static std::unique_ptr<tab_menu_handler>
+static std::unique_ptr<module_tab_menu_handler>
 make_osc_routing_menu_handler(plugin_state* state)
 {
   auto am_params = make_audio_routing_am_params(state);
