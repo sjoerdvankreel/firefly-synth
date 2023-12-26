@@ -6,7 +6,7 @@ graph_engine::
 graph_engine(plugin_desc const* desc, graph_engine_params const& params):
 _engine(desc, desc->plugin->graph_polyphony, nullptr, nullptr), _desc(desc), _params(params)
 { 
-  _engine.activate(_params.max_frame_count);
+  _engine.activate(_params.max_frame_count, params.apply_activation_filter, params.activation_filter);
   _audio_in.resize(jarray<int, 1>(2, params.max_frame_count));
   _audio_out.resize(jarray<int, 1>(2, params.max_frame_count));
   _audio_in_ptrs[0] = _audio_in[0].data().data();
