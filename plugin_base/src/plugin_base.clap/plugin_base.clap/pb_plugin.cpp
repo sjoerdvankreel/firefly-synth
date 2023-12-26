@@ -136,6 +136,7 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
   for (int p = 0; p < _engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();
+  _engine.mark_all_params_as_automated(true);
   return true;
 }
 

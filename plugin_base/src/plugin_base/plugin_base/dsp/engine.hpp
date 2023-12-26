@@ -81,7 +81,6 @@ class plugin_engine final {
 
   void process_voices_single_threaded();
   void init_automation_from_state(int frame_count);
-  void mark_all_params_as_automated(bool automated);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
@@ -111,6 +110,7 @@ public:
 
   void activate_modules();
   void activate(int max_frame_count);
+  void mark_all_params_as_automated(bool automated);
   void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
   // set all state and automation to these values
   void init_static(plugin_state const* state, int frame_count);

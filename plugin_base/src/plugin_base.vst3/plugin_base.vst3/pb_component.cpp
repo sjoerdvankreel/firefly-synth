@@ -45,9 +45,10 @@ pb_component::getState(IBStream* state)
 tresult PLUGIN_API
 pb_component::setState(IBStream* state)
 {
-  if (plugin_io_load_state(load_ibstream(state), _engine.state()).ok())
-    return kResultOk;
-  return kResultFalse;
+  if (!plugin_io_load_state(load_ibstream(state), _engine.state()).ok()) 
+    return kResultFalse;
+  _engine.mark_all_params_as_automated(true);
+  return kResultOk;
 }
 
 tresult PLUGIN_API
