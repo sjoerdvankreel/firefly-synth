@@ -201,7 +201,7 @@ private:
   Component& make_single_param(module_desc const& module, param_desc const& param);
   Component& make_param_label_edit(module_desc const& module, param_desc const& param);
   Component& make_param_section(module_desc const& module, param_section const& section);
-  Component& make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents);
+  juce::Label& make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents);
 
   Component& make_modules(module_desc const* slots);
   Component& make_module_section(module_section_gui const& section);

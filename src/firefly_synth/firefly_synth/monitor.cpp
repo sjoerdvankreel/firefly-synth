@@ -11,7 +11,7 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { section_main };
-enum { param_gain, param_voices, param_cpu, param_threads };
+enum { param_gain, param_cpu, param_voices, param_threads };
 
 class monitor_engine: 
 public module_engine {
@@ -35,20 +35,20 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{988E6A84-A012-413C-B33B-80B8B135D203}", "Main"),
-    make_param_section_gui({ 0, 0 }, { 1, 4 })));
+    make_param_section_gui({ 0, 0 }, { { 1 } , { 5, 4, 4, 4 } })));
   result.params.emplace_back(make_param(
     make_topo_info("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Gain", param_gain, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 0 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
-    make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", param_voices, 1),
-    make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
+    make_topo_info("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", param_cpu, 1),
+    make_param_dsp_output(), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 1 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
-    make_topo_info("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", param_cpu, 1),
-    make_param_dsp_output(), make_domain_percentage(0, 1, 0, 0, true),
+    make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", param_voices, 1),
+    make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 2 }, gui_label_contents::none,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(

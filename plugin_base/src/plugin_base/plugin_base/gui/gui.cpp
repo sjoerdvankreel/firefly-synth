@@ -657,7 +657,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
   return tabs;
 }
 
-Component&
+Label&
 plugin_gui::make_param_label(module_desc const& module, param_desc const& param, gui_label_contents contents)
 {
   Label* result = {};
@@ -671,7 +671,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
   case gui_label_contents::both:
   case gui_label_contents::value:
     result = &make_component<param_value_label>(this, &module, &param, 
-      contents == gui_label_contents::both, _module_lnfs[module.module->info.index].get());
+      contents == gui_label_contents::both, _module_lnfs[module.module->info.index].get()); 
     break;
   default:
     assert(false);
@@ -687,6 +687,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   if(param.param->gui.edit_type == gui_edit_type::output)
   {
     auto& result = make_param_label(module, param, gui_label_contents::value);
+    result.setBorderSize(BorderSize<int>(0));
     result.setColour(Label::ColourIds::textColourId, module.module->gui.colors.control_text);
     return result;
   }
