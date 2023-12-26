@@ -107,7 +107,7 @@ plugin_engine::make_plugin_block(
 }
 
 void
-plugin_engine::init_static(plugin_state const* state, int frame_count)
+plugin_engine::init_from_state(plugin_state const* state, int frame_count)
 {
   _state.copy_from(state->state());
   mark_all_params_as_automated(true);
@@ -277,20 +277,25 @@ plugin_engine::init_automation_from_state(int frame_count)
         {
           for (int pi = 0; pi < param.info.slot_count; pi++)
             if(_param_was_automated[m][mi][p][pi] != 0)
+            {
+              _param_was_automated[m][mi][p][pi] = 0;
               _block_automation.set_plain_at(m, mi, p, pi, _state.get_plain_at(m, mi, p, pi));
+            }
         }
         else
         {
           for (int pi = 0; pi < param.info.slot_count; pi++)
             if (_param_was_automated[m][mi][p][pi] != 0)
+            {
+              _param_was_automated[m][mi][p][pi] = 0;
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + frame_count,
                 (float)_state.get_normalized_at(m, mi, p, pi).value());
+            }
         }
       }
   }
-  mark_all_params_as_automated(false);
 }
 
 void 

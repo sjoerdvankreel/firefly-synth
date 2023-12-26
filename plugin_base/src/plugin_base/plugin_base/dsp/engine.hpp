@@ -111,9 +111,10 @@ public:
   void activate_modules();
   void activate(int max_frame_count);
   void mark_all_params_as_automated(bool automated);
+  void init_from_state(plugin_state const* state, int frame_count);
+
   void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
-  // set all state and automation to these values
-  void init_static(plugin_state const* state, int frame_count);
+  void mark_param_as_automated(int m, int mi, int p, int pi) { _param_was_automated[m][mi][p][pi] = 1; }
 };
 
 }

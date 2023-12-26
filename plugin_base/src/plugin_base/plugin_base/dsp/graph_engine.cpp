@@ -37,7 +37,7 @@ graph_engine::process_begin(plugin_state const* state, int sample_rate, int fram
   _host_block->shared.bpm = _params.bpm;
   _host_block->audio_out = _audio_out_ptrs;
   _host_block->shared.audio_in = _audio_in_ptrs;
-  _engine.init_static(state, _params.max_frame_count);
+  _engine.init_from_state(state, _params.max_frame_count);
 }
 
 plugin_block const*

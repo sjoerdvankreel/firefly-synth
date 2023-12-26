@@ -427,6 +427,7 @@ pb_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
   while (_to_audio_events->try_dequeue(e))
   {
     int tag = _engine.state().desc().param_mappings.index_to_tag[e.index];
+    auto m = _engine.state().desc().param_mappings.params[e.index].topo;
     switch(e.type) 
     {
     case sync_event_type::value_changing:
@@ -441,6 +442,7 @@ pb_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
       auto const& topo = *_engine.state().desc().param_at_index(e.index).param;
       event.value = normalized_to_clap(topo, topo.domain.plain_to_normalized(e.plain)).value();
       _engine.state().set_plain_at_index(e.index, e.plain);
+      _engine.mark_param_as_automated(m.module_index, m.module_slot, m.param_index, m.param_slot);
       out->try_push(out, &(event.header));
       break;
     }
