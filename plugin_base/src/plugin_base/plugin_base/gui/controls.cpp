@@ -263,14 +263,6 @@ param_component::mouseUp(MouseEvent const& evt)
   menu.setLookAndFeel(&self.getLookAndFeel());
 
   bool have_menu = false;
-  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
-  if (host_menu && host_menu->root.children.size())
-  {
-    have_menu = true;
-    menu.addColouredItem(-1, "Host", _module->module->gui.colors.tab_text, false, false, nullptr);
-    fill_host_menu(menu, host_menu->root.children);
-  }
-
   std::unique_ptr<param_menu_handler> plugin_handler = {};
   param_menu_handler_factory plugin_handler_factory = _param->param->gui.menu_handler_factory;
   if(plugin_handler_factory)
@@ -286,6 +278,14 @@ param_component::mouseUp(MouseEvent const& evt)
       for (int e = 0; e < plugin_menus[m].entries.size(); e++)
         menu.addItem(10000 + m * 1000 + e * 100, plugin_menus[m].entries[e].title);
     }
+  }
+
+  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
+  if (host_menu && host_menu->root.children.size())
+  {
+    have_menu = true;
+    menu.addColouredItem(-1, "Host", _module->module->gui.colors.tab_text, false, false, nullptr);
+    fill_host_menu(menu, host_menu->root.children);
   }
 
   if(!have_menu) return;
