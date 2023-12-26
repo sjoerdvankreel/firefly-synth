@@ -341,7 +341,7 @@ cv_routing_menu_handler::module_menus() const
   routing_menu.menu_id = 1;
   routing_menu.actions = {
     module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
-    module_tab_menu_handler::shift_left, module_tab_menu_handler::insert_before, 
+    module_tab_menu_handler::delete_, module_tab_menu_handler::insert_before,
     module_tab_menu_handler::insert_after, module_tab_menu_handler::move_to, module_tab_menu_handler::swap_with };
   return { plain_menu, routing_menu };
 }
@@ -363,7 +363,7 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
     {
     case module_tab_menu_handler::clear_all: clear_all(module); break;
     case module_tab_menu_handler::clear: clear(module, source_slot); break;
-    case module_tab_menu_handler::shift_left: shift_left(module, source_slot); break;
+    case module_tab_menu_handler::delete_: delete_(module, source_slot); break;
     case module_tab_menu_handler::insert_after: insert_after(module, source_slot); break;
     case module_tab_menu_handler::insert_before: insert_before(module, source_slot); break;
     case module_tab_menu_handler::move_to: move_to(module, source_slot, target_slot); break;
@@ -384,11 +384,12 @@ cv_routing_menu_handler::clear_all(int module)
 }
 
 void
-cv_routing_menu_handler::shift_left(int module, int slot)
+cv_routing_menu_handler::delete_(int module, int slot)
 {
   // move all from slot to the left
-  clear(module, 0);
-  for (int i = 0; i < slot; i++)
+  auto const& topo = _state->desc().plugin->modules[module];
+  clear(module, topo.info.slot_count - 1);
+  for (int i = slot; i < topo.info.slot_count - 1; i++)
     move_to(module, i + 1, i);
 }
 
@@ -513,7 +514,7 @@ audio_routing_menu_handler::module_menus() const
   all_menu.name = "With CV & Audio Routing";
   all_menu.actions = {
     module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
-    module_tab_menu_handler::shift_left, module_tab_menu_handler::insert_after, 
+    module_tab_menu_handler::delete_, module_tab_menu_handler::insert_after,
     module_tab_menu_handler::insert_before };
   return { plain_menu, cv_menu, all_menu };
 }
@@ -543,7 +544,7 @@ audio_routing_menu_handler::execute_module(int menu_id, int action, int module, 
     {
     case module_tab_menu_handler::clear_all: with_all_clear_all(module); break;
     case module_tab_menu_handler::clear: with_all_clear(module, source_slot); break;
-    case module_tab_menu_handler::shift_left: with_all_shift_left(module, source_slot); break;
+    case module_tab_menu_handler::delete_: with_all_delete(module, source_slot); break;
     case module_tab_menu_handler::insert_after: with_all_insert_after(module, source_slot); break;
     case module_tab_menu_handler::insert_before: with_all_insert_before(module, source_slot); break;
     default: assert(false);
@@ -585,7 +586,7 @@ audio_routing_menu_handler::with_all_clear_all(int module)
 }
 
 void
-audio_routing_menu_handler::with_all_shift_left(int module, int slot)
+audio_routing_menu_handler::with_all_delete(int module, int slot)
 {
   // move all before slot to the left
   with_all_clear(module, 0);

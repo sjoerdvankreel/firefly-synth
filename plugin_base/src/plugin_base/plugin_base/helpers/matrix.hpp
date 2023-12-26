@@ -95,7 +95,7 @@ public module_tab_menu_handler {
 
   void clear_all(int module);
   void clear(int module, int slot);
-  void shift_left(int module, int slot);
+  void delete_(int module, int slot);
   void insert(int module, int slot, bool after);
   void move_to(int module, int source_slot, int target_slot);
   void swap_with(int module, int source_slot, int target_slot);
@@ -143,7 +143,7 @@ public module_tab_menu_handler {
 
   void with_all_clear_all(int module);
   void with_all_clear(int module, int slot);
-  void with_all_shift_left(int module, int slot);
+  void with_all_delete(int module, int slot);
   void with_all_insert(int module, int slot, bool after);
   void with_all_insert_after(int module, int slot) { with_all_insert(module, slot, true); }
   void with_all_insert_before(int module, int slot) { with_all_insert(module, slot, false); }
