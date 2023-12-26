@@ -3,23 +3,26 @@
 namespace plugin_base {
 
 plugin_frame_dims::
-plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
+plugin_frame_dims(
+  plugin_topo const& plugin, int polyphony, int frame_count, 
+  bool apply_filter, plugin_frame_dims_filter const& filter)
 {
-  audio = jarray<int, 1>(2, frame_count);
+  audio = jarray<int, 1>(2, (!apply_filter || filter.activate_global_audio)? frame_count: 0);
   for (int v = 0; v < polyphony; v++)
   {
     module_voice_cv.emplace_back();
     module_voice_audio.emplace_back();
     module_voice_scratch.emplace_back();
-    voices_audio.emplace_back(2, frame_count);
+    voices_audio.emplace_back(2, (!apply_filter || filter.activate_voice_audio) ? frame_count : 0);
     for (int m = 0; m < plugin.modules.size(); m++)
     {
       auto const& module = plugin.modules[m];
+      bool activate_this_module = !apply_filter || filter.activate_modules.contains(m);
       bool is_cv = module.dsp.output == module_output::cv;
       bool is_voice = module.dsp.stage == module_stage::voice;
       bool is_audio = module.dsp.output == module_output::audio;
-      int cv_frames = is_cv && is_voice ? frame_count : 0;
-      int audio_frames = is_audio && is_voice ? frame_count : 0;
+      int cv_frames = is_cv && is_voice && activate_this_module ? frame_count : 0;
+      int audio_frames = is_audio && is_voice && activate_this_module ? frame_count : 0;
       module_voice_cv[v].emplace_back();
       module_voice_audio[v].emplace_back();
       module_voice_scratch[v].emplace_back();
@@ -27,7 +30,7 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
       {
         module_voice_cv[v][m].emplace_back();
         module_voice_audio[v][m].emplace_back();
-        module_voice_scratch[v][m].emplace_back(module.dsp.scratch_count, frame_count);
+        module_voice_scratch[v][m].emplace_back(module.dsp.scratch_count, activate_this_module ? frame_count: 0);
         for (int o = 0; o < module.dsp.outputs.size(); o++)
         {
           module_voice_audio[v][m][mi].emplace_back();
@@ -42,11 +45,12 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
+    bool activate_this_module = !apply_filter || filter.activate_modules.contains(m);
     bool is_cv = module.dsp.output == module_output::cv;
     bool is_global = module.dsp.stage != module_stage::voice;
     bool is_audio = module.dsp.output == module_output::audio;
-    int cv_frames = is_cv && is_global ? frame_count : 0;
-    int audio_frames = is_audio && is_global ? frame_count : 0;
+    int cv_frames = is_cv && is_global && activate_this_module ? frame_count : 0;
+    int audio_frames = is_audio && is_global && activate_this_module ? frame_count : 0;
     midi_automation.emplace_back();
     module_global_cv.emplace_back();
     module_global_audio.emplace_back();
@@ -57,8 +61,8 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
       accurate_automation[m].emplace_back();
       module_global_cv[m].emplace_back();
       module_global_audio[m].emplace_back();
-      midi_automation[m].emplace_back(module.midi_sources.size(), frame_count);
-      module_global_scratch[m].emplace_back(module.dsp.scratch_count, frame_count);
+      midi_automation[m].emplace_back(module.midi_sources.size(), activate_this_module? frame_count: 0);
+      module_global_scratch[m].emplace_back(module.dsp.scratch_count, activate_this_module ? frame_count : 0);
       for (int o = 0; o < module.dsp.outputs.size(); o++)
       {
         module_global_audio[m][mi].emplace_back();
@@ -68,43 +72,48 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
       }
       for (int p = 0; p < module.params.size(); p++)
       {
-        int param_frames = module.params[p].dsp.rate == param_rate::accurate ? frame_count : 0;
+        int param_frames = module.params[p].dsp.rate == param_rate::accurate && activate_this_module ? frame_count : 0;
         accurate_automation[m][mi].emplace_back(module.params[p].info.slot_count, param_frames);
       }
     }
   }
 
-  validate(plugin, polyphony, frame_count);
+  validate(plugin, polyphony, frame_count, apply_filter, filter);
 }
 
 void
-plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_count) const
+plugin_frame_dims::validate(
+  plugin_topo const& plugin, int polyphony, int frame_count,
+  bool apply_filter, plugin_frame_dims_filter const& filter) const
 {
-  assert(audio.size() == 2);
-  assert(audio[0] == frame_count);
-  assert(audio[1] == frame_count);
   assert(voices_audio.size() == polyphony);
   assert(module_voice_cv.size() == polyphony);
   assert(module_voice_audio.size() == polyphony);
   assert(module_voice_scratch.size() == polyphony);
 
+  assert(audio.size() == 2);
+  assert(audio[0] == ((!apply_filter || filter.activate_global_audio) ? frame_count : 0));
+  assert(audio[1] == ((!apply_filter || filter.activate_global_audio) ? frame_count : 0));
+
   for (int v = 0; v < polyphony; v++)
   {
-    assert(voices_audio[v].size() == 2);
-    assert(voices_audio[v][0] == frame_count);
-    assert(voices_audio[v][1] == frame_count);
     assert(module_voice_cv[v].size() == plugin.modules.size());
     assert(module_voice_audio[v].size() == plugin.modules.size());
     assert(module_voice_scratch[v].size() == plugin.modules.size());
 
+    assert(voices_audio[v].size() == 2);
+    assert(voices_audio[v][0] == ((!apply_filter || filter.activate_voice_audio) ? frame_count : 0));
+    assert(voices_audio[v][1] == ((!apply_filter || filter.activate_voice_audio) ? frame_count : 0));
+
     for (int m = 0; m < plugin.modules.size(); m++)
     {
       auto const& module = plugin.modules[m];
+      bool activate_this_module = !apply_filter || filter.activate_modules.contains(m);
       bool is_cv = module.dsp.output == module_output::cv;
       bool is_voice = module.dsp.stage == module_stage::voice;
       bool is_audio = module.dsp.output == module_output::audio;
-      int cv_frames = is_cv && is_voice ? frame_count : 0;
-      int audio_frames = is_audio && is_voice ? frame_count : 0;
+      int cv_frames = is_cv && is_voice && activate_this_module ? frame_count : 0;
+      int audio_frames = is_audio && is_voice && activate_this_module ? frame_count : 0;
       (void)cv_frames;
       (void)audio_frames;
       assert(module_voice_cv[v][m].size() == module.info.slot_count);
@@ -117,7 +126,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
         assert(module_voice_scratch[v][m][mi].size() == module.dsp.scratch_count);
 
         for (int s = 0; s < module.dsp.scratch_count; s++)
-          assert(module_voice_scratch[v][m][mi][s] == frame_count);
+          assert(module_voice_scratch[v][m][mi][s] == (activate_this_module ? frame_count : 0));
         for(int o = 0; o < module.dsp.outputs.size(); o++)
           for(int oi = 0; oi < module.dsp.outputs[o].info.slot_count; oi++)
           {
@@ -138,11 +147,12 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
+    bool activate_this_module = !apply_filter || filter.activate_modules.contains(m);
     bool is_cv = module.dsp.output == module_output::cv;
     bool is_global = module.dsp.stage != module_stage::voice;
     bool is_audio = module.dsp.output == module_output::audio;
-    int cv_frames = is_cv && is_global ? frame_count : 0;
-    int audio_frames = is_audio && is_global ? frame_count : 0;
+    int cv_frames = is_cv && is_global && activate_this_module ? frame_count : 0;
+    int audio_frames = is_audio && is_global && activate_this_module ? frame_count : 0;
     (void)cv_frames;
     (void)audio_frames;
     assert(midi_automation[m].size() == module.info.slot_count);
@@ -158,9 +168,9 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
       assert(module_global_scratch[m][mi].size() == module.dsp.scratch_count);
       assert(midi_automation[m][mi].size() == module.midi_sources.size());
       for (int ms = 0; ms < module.midi_sources.size(); ms++)
-        assert(midi_automation[m][mi][ms] == frame_count);
+        assert(midi_automation[m][mi][ms] == (activate_this_module ? frame_count : 0));
       for (int s = 0; s < module.dsp.scratch_count; s++)
-        assert(module_global_scratch[m][mi][s] == frame_count);
+        assert(module_global_scratch[m][mi][s] == (activate_this_module ? frame_count : 0));
       for (int o = 0; o < module.dsp.outputs.size(); o++)
         for (int oi = 0; oi < module.dsp.outputs[o].info.slot_count; oi++)
         {
@@ -174,7 +184,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
-        int accurate_frames = param.dsp.rate == param_rate::accurate? frame_count: 0;
+        int accurate_frames = param.dsp.rate == param_rate::accurate && activate_this_module ? frame_count: 0;
         (void)accurate_frames;
         assert(accurate_automation[m][mi][p].size() == param.info.slot_count);
         for(int pi = 0; pi < param.info.slot_count; pi++)

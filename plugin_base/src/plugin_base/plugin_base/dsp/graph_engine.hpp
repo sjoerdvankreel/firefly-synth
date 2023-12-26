@@ -15,8 +15,10 @@ typedef std::function<void(plugin_block&)> graph_processor;
 struct graph_engine_params
 {
   int bpm;
-  int max_frame_count;
   int midi_key = -1;
+  int max_frame_count;
+  bool apply_activation_filter = false;
+  plugin_frame_dims_filter activation_filter = {};
 };
 
 // utility dsp engine based on static state only

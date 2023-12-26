@@ -6,6 +6,14 @@
 
 namespace plugin_base {
 
+// allows to trim down on memory usage, useful for graphs
+struct plugin_frame_dims_filter final {
+  bool activate_global_audio = false;
+  bool activate_voice_audio = false;
+  bool activate_midi_automation = false;
+  std::set<int> activate_modules = {};
+};
+
 // runtime plugin dsp dimensions
 struct plugin_frame_dims final {
   jarray<int, 1> audio;
@@ -20,8 +28,13 @@ struct plugin_frame_dims final {
   jarray<int, 3> module_global_scratch;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_frame_dims);
-  plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count);
-  void validate(plugin_topo const& plugin, int polyphony, int frame_count) const;
+  plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count) :
+    plugin_frame_dims(plugin, polyphony, frame_count, false, {}) {}
+
+  plugin_frame_dims(plugin_topo const& plugin, int polyphony,
+    int frame_count, bool apply_filter, plugin_frame_dims_filter const& filter);
+  void validate(plugin_topo const& plugin, int polyphony, int frame_count,
+    bool apply_filter, plugin_frame_dims_filter const& filter) const;
 };
 
 }
