@@ -10,28 +10,34 @@ namespace plugin_base {
 
 plugin_engine::
 plugin_engine(
-  plugin_desc const* desc,
+  plugin_desc const* desc, int polyphony,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
-_state(desc, false), _block_automation(desc, false),
-_voice_automation(desc->plugin->polyphony, plugin_state(desc, false)),
-_dims(*desc->plugin), _host_block(std::make_unique<host_block>()),
+_polyphony(polyphony), 
+_state(desc, false), 
+_block_automation(desc, false),
+_voice_automation(polyphony, plugin_state(desc, false)),
+_dims(*desc->plugin, polyphony), 
+_host_block(std::make_unique<host_block>()),
 _voice_processor(voice_processor),
-_voice_thread_ids(_state.desc().plugin->polyphony, std::thread::id()),
+_voice_thread_ids(polyphony, std::thread::id()),
 _voice_processor_context(voice_processor_context)
 {
+  assert(polyphony >= 0);
+
   // validate here instead of plugin_desc ctor 
   // since that runs on module init so is hard to debug
   desc->validate();
 
   // reserve this much but allocate on the audio thread if necessary
   // still seems better than dropping events
+  int note_limit_guess = _polyphony * 64;
   int block_events_guess = _state.desc().param_count;
   int midi_events_guess = _state.desc().midi_count * 64;
   int accurate_events_guess = _state.desc().param_count * 64;
-  int note_limit_guess = _state.desc().plugin->polyphony * 64;
 
   // init everything that is not frame-count dependent
+  _voice_states.resize(_polyphony);
   _global_context.resize(_dims.module_slot);
   _voice_context.resize(_dims.voice_module_slot);
   _output_values.resize(_dims.module_slot_param_slot);
@@ -41,7 +47,6 @@ _voice_processor_context(voice_processor_context)
   _accurate_frames.resize(_state.desc().param_count);
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
-  _voice_states.resize(_state.desc().plugin->polyphony);
   _param_was_automated.resize(_dims.module_slot_param_slot);
   _host_block->events.notes.reserve(note_limit_guess);
   _host_block->events.out.reserve(block_events_guess);
@@ -172,7 +177,7 @@ plugin_engine::deactivate()
       _input_engines[m][mi].reset();
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for (int v = 0; v < _state.desc().plugin->polyphony; v++)
+      for (int v = 0; v < _polyphony; v++)
         _voice_engines[v][m][mi].reset();
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -188,7 +193,7 @@ plugin_engine::activate(int max_frame_count)
   _output_updated_sec = seconds_since_epoch();
 
   // init frame-count dependent memory
-  plugin_frame_dims frame_dims(*_state.desc().plugin, max_frame_count);
+  plugin_frame_dims frame_dims(*_state.desc().plugin, _polyphony, max_frame_count);
   _voices_mixdown.resize(frame_dims.audio);
   _voice_results.resize(frame_dims.voices_audio);
   _voice_cv_state.resize(frame_dims.module_voice_cv);
@@ -234,7 +239,7 @@ plugin_engine::activate_modules()
     }
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for (int v = 0; v < _state.desc().plugin->polyphony; v++)
+      for (int v = 0; v < _polyphony; v++)
         _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -610,7 +615,7 @@ plugin_engine::process()
     process_voices_single_threaded();
   else
   {
-    for (int v = 0; v < _state.desc().plugin->polyphony; v++)
+    for (int v = 0; v < _polyphony; v++)
       _voice_thread_ids[v] = std::thread::id();
     std::atomic_thread_fence(std::memory_order_release);
     if (!_voice_processor(*this, _voice_processor_context))

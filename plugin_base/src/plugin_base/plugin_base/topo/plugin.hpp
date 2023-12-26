@@ -78,9 +78,10 @@ struct plugin_topo_gui final {
 
 // plugin definition
 struct plugin_topo final {
-  int polyphony;
   int version_major;
   int version_minor;
+  int audio_polyphony;
+  int graph_polyphony;
   float midi_smoothing_hz = 20;
 
   topo_tag tag;

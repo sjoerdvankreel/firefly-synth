@@ -37,7 +37,8 @@ plugin_topo::validate() const
   assert(version_major >= 0);
   assert(version_minor >= 0);
   assert(gui.typeface_file_name.size());
-  assert(polyphony >= 0 && polyphony < topo_max);
+  assert(audio_polyphony >= 0 && audio_polyphony < topo_max);
+  assert(graph_polyphony >= 0 && graph_polyphony < topo_max);
   assert(0 < gui.min_width && gui.min_width <= 16384);
   assert(0 < gui.aspect_ratio_width && gui.aspect_ratio_width <= 1000);
   assert(0 < gui.aspect_ratio_height && gui.aspect_ratio_height <= 1000);

@@ -152,7 +152,7 @@ cv_matrix_mixdown
 make_static_cv_matrix_mixdown(plugin_block& block)
 {
   cv_matrix_mixdown result;
-  plugin_dims dims(block.plugin);
+  plugin_dims dims(block.plugin, block.plugin.audio_polyphony);
   result.resize(dims.module_slot_param_slot);
   for (int m = 0; m < block.plugin.modules.size(); m++)
   {
@@ -239,7 +239,8 @@ synth_topo()
   monitor_colors.control_text = custom_color;
 
   auto result = std::make_unique<plugin_topo>();
-  result->polyphony = 32;
+  result->graph_polyphony = 1;
+  result->audio_polyphony = 32;
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
   result->type = plugin_type::synth;
@@ -333,7 +334,7 @@ synth_topo()
   result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, voice_colors, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(module_section_voice_out, voice_colors, { 0, 0 }, false);
   result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true);
-  result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->polyphony);
+  result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony);
   result->modules[module_am_matrix] = am_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, result.get());
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));

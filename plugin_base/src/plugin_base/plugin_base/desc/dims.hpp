@@ -13,9 +13,9 @@ struct plugin_dims final {
   jarray<int, 2> voice_module_slot;
   jarray<int, 3> module_slot_param_slot;
 
-  plugin_dims(plugin_topo const& plugin);
-  void validate(plugin_topo const& plugin) const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_dims);
+  plugin_dims(plugin_topo const& plugin, int polyphony);
+  void validate(plugin_topo const& plugin, int polyphony) const;
 };
 
 }

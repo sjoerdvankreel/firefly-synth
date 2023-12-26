@@ -347,7 +347,7 @@ cv_matrix_engine(
   std::vector<param_topo_mapping> const& targets):
 _global(global), _sources(sources), _targets(targets)
 {
-  plugin_dims dims(topo);
+  plugin_dims dims(topo, topo.audio_polyphony);
   _mixdown.resize(dims.module_slot_param_slot);
   _modulation_indices.resize(dims.module_slot_param_slot);
 }

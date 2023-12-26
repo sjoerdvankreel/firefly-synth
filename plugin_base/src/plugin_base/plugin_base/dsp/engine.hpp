@@ -36,6 +36,7 @@ thread_pool_voice_processor)(
 // global plugin audio processor
 class plugin_engine final {
 
+  int const _polyphony;
   plugin_dims const _dims;
   plugin_state _state = {};
   plugin_state _block_automation = {};
@@ -85,7 +86,7 @@ class plugin_engine final {
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
   plugin_engine(
-    plugin_desc const* desc,
+    plugin_desc const* desc, int polyphony,
     thread_pool_voice_processor voice_processor,
     void* voice_processor_context);
 

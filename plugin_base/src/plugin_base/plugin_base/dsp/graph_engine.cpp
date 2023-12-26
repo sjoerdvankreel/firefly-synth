@@ -4,7 +4,7 @@ namespace plugin_base {
 
 graph_engine::
 graph_engine(plugin_desc const* desc, graph_engine_params const& params):
-_engine(desc, nullptr, nullptr), _desc(desc), _params(params)
+_engine(desc, desc->plugin->graph_polyphony, nullptr, nullptr), _desc(desc), _params(params)
 { 
   _engine.activate(_params.max_frame_count);
   _audio_in.resize(jarray<int, 1>(2, params.max_frame_count));

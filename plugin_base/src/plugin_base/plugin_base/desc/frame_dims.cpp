@@ -3,10 +3,10 @@
 namespace plugin_base {
 
 plugin_frame_dims::
-plugin_frame_dims(plugin_topo const& plugin, int frame_count)
+plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
 {
   audio = jarray<int, 1>(2, frame_count);
-  for (int v = 0; v < plugin.polyphony; v++)
+  for (int v = 0; v < polyphony; v++)
   {
     module_voice_cv.emplace_back();
     module_voice_audio.emplace_back();
@@ -74,21 +74,21 @@ plugin_frame_dims(plugin_topo const& plugin, int frame_count)
     }
   }
 
-  validate(plugin, frame_count);
+  validate(plugin, polyphony, frame_count);
 }
 
 void
-plugin_frame_dims::validate(plugin_topo const& plugin, int frame_count) const
+plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_count) const
 {
   assert(audio.size() == 2);
   assert(audio[0] == frame_count);
   assert(audio[1] == frame_count);
-  assert(voices_audio.size() == plugin.polyphony);
-  assert(module_voice_cv.size() == plugin.polyphony);
-  assert(module_voice_audio.size() == plugin.polyphony);
-  assert(module_voice_scratch.size() == plugin.polyphony);
+  assert(voices_audio.size() == polyphony);
+  assert(module_voice_cv.size() == polyphony);
+  assert(module_voice_audio.size() == polyphony);
+  assert(module_voice_scratch.size() == polyphony);
 
-  for (int v = 0; v < plugin.polyphony; v++)
+  for (int v = 0; v < polyphony; v++)
   {
     assert(voices_audio[v].size() == 2);
     assert(voices_audio[v][0] == frame_count);

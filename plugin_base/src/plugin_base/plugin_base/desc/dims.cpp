@@ -3,9 +3,9 @@
 namespace plugin_base {
 
 plugin_dims::
-plugin_dims(plugin_topo const& plugin)
+plugin_dims(plugin_topo const& plugin, int polyphony)
 {
-  for (int v = 0; v < plugin.polyphony; v++)
+  for (int v = 0; v < polyphony; v++)
   {
     voice_module_slot.emplace_back();
     for (int m = 0; m < plugin.modules.size(); m++)
@@ -30,14 +30,14 @@ plugin_dims(plugin_topo const& plugin)
     }
   }
 
-  validate(plugin);
+  validate(plugin, polyphony);
 }
 
 void
-plugin_dims::validate(plugin_topo const& plugin) const
+plugin_dims::validate(plugin_topo const& plugin, int polyphony) const
 {
-  assert(voice_module_slot.size() == plugin.polyphony);
-  for (int v = 0; v < plugin.polyphony; v++)
+  assert(voice_module_slot.size() == polyphony);
+  for (int v = 0; v < polyphony; v++)
   {
     assert(voice_module_slot[v].size() == plugin.modules.size());
     for (int m = 0; m < plugin.modules.size(); m++)

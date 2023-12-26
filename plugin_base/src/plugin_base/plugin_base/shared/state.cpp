@@ -7,7 +7,7 @@ plugin_state::
 plugin_state(plugin_desc const* desc, bool notify):
 _desc(desc), _notify(notify)
 {
-  plugin_dims dims(*_desc->plugin);
+  plugin_dims dims(*_desc->plugin, desc->plugin->audio_polyphony);
   _state.resize(dims.module_slot_param_slot);
   init(state_init_type::default_);
 }

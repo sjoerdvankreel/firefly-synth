@@ -69,7 +69,7 @@ public:
   void threadPoolExec(uint32_t task_index) noexcept override 
   { _engine.process_voice(task_index, true); }  
   bool thread_pool_voice_processor(plugin_engine& engine)
-  { return _host.threadPoolRequestExec(engine.state().desc().plugin->polyphony); }
+  { return _host.threadPoolRequestExec(engine.state().desc().plugin->audio_polyphony); }
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;

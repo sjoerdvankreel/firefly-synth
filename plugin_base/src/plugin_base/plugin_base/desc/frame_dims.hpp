@@ -20,8 +20,8 @@ struct plugin_frame_dims final {
   jarray<int, 3> module_global_scratch;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_frame_dims);
-  plugin_frame_dims(plugin_topo const& plugin, int frame_count);
-  void validate(plugin_topo const& plugin, int frame_count) const;
+  plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count);
+  void validate(plugin_topo const& plugin, int polyphony, int frame_count) const;
 };
 
 }
