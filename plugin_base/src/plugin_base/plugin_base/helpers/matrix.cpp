@@ -78,11 +78,11 @@ matrix_param_menu_handler::execute(
   if (action == 1)
   {
     execute(menu_id, 0, module_index, param_index, param_index, param_slot);
-    execute(menu_id, 0, module_index, param_index, param_index, _route_count - 1);
     for(int r = param_slot; r < _route_count - 1; r++)
       for (int p = 0; p < topo.params.size(); p++)
         _state->set_plain_at(module_index, module_slot, p, r,
           _state->get_plain_at(module_index, module_slot, p, r + 1));
+    execute(menu_id, 0, module_index, param_index, param_index, _route_count - 1);
     return;
   }
   if (action == 2 || action == 3)
