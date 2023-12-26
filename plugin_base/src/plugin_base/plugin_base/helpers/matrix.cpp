@@ -197,10 +197,10 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules)
   return result;
 }
 
-std::vector<module_tab_menu_handler::extra_menu> const
-tidy_matrix_menu_handler::extra_menus() const
+std::vector<custom_menu> const
+tidy_matrix_menu_handler::custom_menus() const
 {
-  extra_menu result;
+  custom_menu result;
   result.name = "";
   result.menu_id = 0;
   result.entries = { { 0, "Tidy"}, { 1, "Clear"} };
@@ -208,7 +208,7 @@ tidy_matrix_menu_handler::extra_menus() const
 }
 
 module_tab_menu_handler::menu_result
-tidy_matrix_menu_handler::execute_extra(int menu_id, int action, int module, int slot)
+tidy_matrix_menu_handler::execute_custom(int menu_id, int action, int module, int slot)
 {
   assert(menu_id == 0);
   assert(action == 0 || action == 1);

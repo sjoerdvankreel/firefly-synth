@@ -66,8 +66,8 @@ public module_tab_menu_handler {
   std::vector<int> _sort_params;
 
 public:
-  std::vector<extra_menu> const extra_menus() const override;
-  menu_result execute_extra(int menu_id, int action, int module, int slot) override;
+  std::vector<custom_menu> const custom_menus() const override;
+  menu_result execute_custom(int menu_id, int action, int module, int slot) override;
   tidy_matrix_menu_handler(plugin_state* state, int on_param, int off_value, std::vector<int> const& sort_params) : 
     module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _sort_params(sort_params) {}
 };

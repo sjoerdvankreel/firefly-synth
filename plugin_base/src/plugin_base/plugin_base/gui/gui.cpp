@@ -205,13 +205,13 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
         menu.addColouredItem(-1, module_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
       fill_module_tab_menu(menu, m * 1000, _slot, slots, module_menus[m].actions);
     }
-    auto extra_menus = handler->extra_menus();
-    for(int m = 0; m < extra_menus.size(); m++)
+    auto custom_menus = handler->custom_menus();
+    for(int m = 0; m < custom_menus.size(); m++)
     {
-      if (!extra_menus[m].name.empty())
-        menu.addColouredItem(-1, extra_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
-      for(int e = 0; e < extra_menus[m].entries.size(); e++)
-        menu.addItem(10000 + m * 1000 + e * 100, extra_menus[m].entries[e].title);
+      if (!custom_menus[m].name.empty())
+        menu.addColouredItem(-1, custom_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+      for(int e = 0; e < custom_menus[m].entries.size(); e++)
+        menu.addItem(10000 + m * 1000 + e * 100, custom_menus[m].entries[e].title);
     }
   }
 
@@ -220,7 +220,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
   menu.setLookAndFeel(&_button->getLookAndFeel());
   menu.showMenuAsync(options, [this, handler = handler.release()](int id) {
     module_tab_menu_handler::menu_result result = {};
-    auto extra_menus = handler->extra_menus();
+    auto custom_menus = handler->custom_menus();
     auto module_menus = handler->module_menus();
     if (0 < id && id < 10000)
     {
@@ -232,10 +232,10 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
     }
     else if(10000 <= id && id < 20000)
     {
-      auto const& menu = extra_menus[(id - 10000) / 1000];
+      auto const& menu = custom_menus[(id - 10000) / 1000];
       auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
       _state->begin_undo_region();
-      result = handler->execute_extra(menu.menu_id, action_entry.action, _module, _slot);
+      result = handler->execute_custom(menu.menu_id, action_entry.action, _module, _slot);
       _state->end_undo_region(action_entry.title);
     }
     delete handler;

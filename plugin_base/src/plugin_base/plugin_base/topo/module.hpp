@@ -33,18 +33,16 @@ protected:
   module_tab_menu_handler(plugin_state* state): _state(state) {}
 
 public:
-  struct extra_menu_entry { int action; std::string title; };
   struct module_menu { int menu_id; std::string name; std::set<int> actions; };
-  struct extra_menu { int menu_id; std::string name; std::vector<extra_menu_entry> entries; };
   struct menu_result { bool show_warning; std::string title; std::string content; };
   enum module_action { clear = 1, clear_all, insert_before, insert_after, copy_to, move_to, swap_with };
 
   virtual ~module_tab_menu_handler() {}
   virtual std::vector<module_menu> module_menus() const { return {}; };
-  virtual std::vector<extra_menu> const extra_menus() const { return {}; };
+  virtual std::vector<custom_menu> const custom_menus() const { return {}; };
 
   // pop up a message box if these return a non-empty text
-  virtual menu_result execute_extra(int menu_id, int action, int module, int slot) { return {}; };
+  virtual menu_result execute_custom(int menu_id, int action, int module, int slot) { return {}; };
   virtual menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) { return {}; };
 };
 

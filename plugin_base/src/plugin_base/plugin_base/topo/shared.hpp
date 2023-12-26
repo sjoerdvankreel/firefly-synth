@@ -24,9 +24,12 @@ enum class gui_edit_type { none, output, toggle, list, autofit_list, knob, hslid
 
 typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
-
 typedef std::function<bool(std::vector<int> const& vs)>
 gui_param_binding_selector;
+
+// for custom module/param context menus
+struct custom_menu_entry { int action; std::string title; };
+struct custom_menu { int menu_id; std::string name; std::vector<custom_menu_entry> entries; };
 
 // plugin and section metadata
 struct topo_tag final {
