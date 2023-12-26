@@ -55,7 +55,7 @@ matrix_param_menu_handler::menus() const
   custom_menu result;
   result.menu_id = 0;
   result.name = "Route";
-  result.entries = { { 0, "Clear" }, { 1, "Shift Up" }, { 2, "Insert Before" }, { 3, "Insert After" } };
+  result.entries = { { 0, "Clear" }, { 1, "Delete" }, { 2, "Insert Before" }, { 3, "Insert After" } };
   return { result }; 
 }
 
@@ -77,11 +77,12 @@ matrix_param_menu_handler::execute(
   }
   if (action == 1)
   {
-    for(int r = 0; r < param_slot && r < _route_count - 1; r++)
+    execute(menu_id, 0, module_index, param_index, param_index, param_slot);
+    execute(menu_id, 0, module_index, param_index, param_index, _route_count - 1);
+    for(int r = param_slot; r < _route_count - 1; r++)
       for (int p = 0; p < topo.params.size(); p++)
         _state->set_plain_at(module_index, module_slot, p, r,
           _state->get_plain_at(module_index, module_slot, p, r + 1));
-    execute(menu_id, 0, module_index, param_index, param_index, param_slot);
     return;
   }
   if (action == 2 || action == 3)
