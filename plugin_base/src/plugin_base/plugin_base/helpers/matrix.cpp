@@ -49,6 +49,24 @@ make_copy_failed_result(std::string const& matrix_name)
   return result;
 }
 
+std::vector<custom_menu> const 
+matrix_param_menu_handler::menus() const
+{
+  custom_menu result;
+  result.menu_id = 0;
+  result.name = "Route";
+  result.entries = { { 0, "Clear" } };
+  return { result };
+}
+
+void 
+matrix_param_menu_handler::execute(
+  int menu_id, int action, int module_index, 
+  int module_slot, int param_index, int param_slot)
+{
+
+}
+
 routing_matrix<module_topo_mapping>
 make_audio_matrix(std::vector<module_topo const*> const& modules)
 {

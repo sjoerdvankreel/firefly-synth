@@ -15,16 +15,31 @@ namespace plugin_base {
 struct param_topo;
 struct module_topo;
 struct plugin_topo;
+class plugin_state;
 
 enum class param_direction { input, output };
 enum class param_rate { block, voice, accurate };
 enum class param_layout { single, horizontal, vertical };
 enum class param_automate { none, midi, automate, modulate, automate_modulate };
 
+// allows to extend right-click menu on parameters
+class param_menu_handler {
+protected:
+  plugin_state* const _state;
+  param_menu_handler(plugin_state* state): _state(state) {}
+
+public:
+  virtual ~param_menu_handler() {}
+  virtual std::vector<custom_menu> const menus() const = 0;
+  virtual void execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) = 0;
+};
+
 typedef std::function<param_automate(int module_slot)>
 automate_selector;
 typedef std::function<bool(int that_val, int this_val)>
 gui_item_binding_selector;
+typedef std::function<std::unique_ptr<param_menu_handler>(plugin_state*)>
+param_menu_handler_factory;
 
 // binding to item enabled
 struct gui_item_binding final {
@@ -53,6 +68,7 @@ struct param_topo_gui final {
   gui_label_contents tooltip;
   gui_item_binding item_enabled = {};
   std::shared_ptr<gui_submenu> submenu;
+  param_menu_handler_factory menu_handler_factory;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;

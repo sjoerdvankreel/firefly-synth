@@ -250,26 +250,59 @@ param_component::init()
 }
 
 void 
-param_component::mouseUp(MouseEvent const& e)
+param_component::mouseUp(MouseEvent const& evt)
 {
-  if(!e.mods.isRightButtonDown()) return;
+  if(!evt.mods.isRightButtonDown()) return;
   auto& self = dynamic_cast<Component&>(*this);
   if(!self.isEnabled()) return;
   if(_param->param->dsp.direction == param_direction::output) return;
-
-  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
-  if(!host_menu || host_menu->root.children.size() == 0) return;
-  assert(host_menu->clicked);
 
   PopupMenu menu;
   PopupMenu::Options options;
   options = options.withTargetComponent(self);
   menu.setLookAndFeel(&self.getLookAndFeel());
 
-  fill_host_menu(menu, host_menu->root.children);
-  menu.showMenuAsync(options, [host_menu = host_menu.release()](int tag) {
-    host_menu->clicked(tag - 1);
+  bool have_menu = false;
+  auto host_menu = _gui->gui_state()->desc().config->context_menu(_param->info.id_hash);
+  if (host_menu && host_menu->root.children.size())
+  {
+    have_menu = true;
+    menu.addColouredItem(-1, "Host", _module->module->gui.colors.tab_text, false, false, nullptr);
+    fill_host_menu(menu, host_menu->root.children);
+  }
+
+  std::unique_ptr<param_menu_handler> plugin_handler = {};
+  param_menu_handler_factory plugin_handler_factory = _param->param->gui.menu_handler_factory;
+  if(plugin_handler_factory)
+    plugin_handler = plugin_handler_factory(_gui->gui_state());
+  if (plugin_handler)
+  {
+    auto plugin_menus = plugin_handler->menus();
+    for (int m = 0; m < plugin_menus.size(); m++)
+    {
+      have_menu = true;
+      if (!plugin_menus[m].name.empty())
+        menu.addColouredItem(-1, plugin_menus[m].name, _module->module->gui.colors.tab_text, false, false, nullptr);
+      for (int e = 0; e < plugin_menus[m].entries.size(); e++)
+        menu.addItem(10000 + m * 1000 + e * 100, plugin_menus[m].entries[e].title);
+    }
+  }
+
+  if(!have_menu) return;
+
+  menu.showMenuAsync(options, [this, host_menu = host_menu.release(), plugin_handler = plugin_handler.release()](int id) {
+    if(1 <= id && id < 10000) host_menu->clicked(id - 1);
+    else if(10000 <= id)
+    {
+      auto plugin_menus = plugin_handler->menus();
+      auto const& menu = plugin_menus[(id - 10000) / 1000];
+      auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
+      _gui->gui_state()->begin_undo_region();
+      plugin_handler->execute(menu.menu_id, action_entry.action, _module->info.topo, _module->info.slot, _param->info.topo, _param->info.slot);      
+      _gui->gui_state()->end_undo_region(action_entry.title);
+    }
     delete host_menu;
+    delete plugin_handler;
   });
 }
 

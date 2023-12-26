@@ -49,14 +49,26 @@ struct audio_routing_audio_params
 // any audio module as a source or target
 routing_matrix<module_topo_mapping>
 make_audio_matrix(std::vector<module_topo const*> const& modules);
-
 // sources are any cv outputs in modules
 routing_matrix<module_output_mapping>
 make_cv_source_matrix(std::vector<cv_source_entry> const& entries);
-
 // targets any modulatable parameter in modules
 routing_matrix<param_topo_mapping>
 make_cv_target_matrix(std::vector<module_topo const*> const& modules);
+
+// allows to manage matrix routes
+class matrix_param_menu_handler:
+public param_menu_handler {
+public:
+  matrix_param_menu_handler(plugin_state* state): 
+  param_menu_handler(state) {}
+  std::vector<custom_menu> const menus() const override;
+  void execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) override;
+};
+
+inline std::unique_ptr<matrix_param_menu_handler>
+make_matrix_param_menu_handler(plugin_state* state)
+{ return std::make_unique<matrix_param_menu_handler>(state); }
 
 // allows to tidy up cv/audio matrix
 class tidy_matrix_menu_handler :
