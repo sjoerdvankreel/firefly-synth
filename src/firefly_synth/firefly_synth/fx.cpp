@@ -78,8 +78,6 @@ make_graph_engine_params(int type)
   result.bpm = 120;
   result.max_frame_count = 4800;
   result.midi_key = midi_middle_c;
-  result.apply_activation_filter = true;
-  result.activation_filter.activate_modules = { module_vfx, module_gfx };
   return result;   
 }
 

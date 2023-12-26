@@ -185,7 +185,7 @@ plugin_engine::deactivate()
 }
 
 void
-plugin_engine::activate(int max_frame_count, bool apply_filter, plugin_frame_dims_filter const& filter)
+plugin_engine::activate(int max_frame_count)
 {  
   deactivate();
   _stream_time = 0;
@@ -193,7 +193,7 @@ plugin_engine::activate(int max_frame_count, bool apply_filter, plugin_frame_dim
   _output_updated_sec = seconds_since_epoch();
 
   // init frame-count dependent memory
-  plugin_frame_dims frame_dims(*_state.desc().plugin, _polyphony, max_frame_count, apply_filter, filter);
+  plugin_frame_dims frame_dims(*_state.desc().plugin, _polyphony, max_frame_count);
   _voices_mixdown.resize(frame_dims.audio);
   _voice_results.resize(frame_dims.voices_audio);
   _voice_cv_state.resize(frame_dims.module_voice_cv);
