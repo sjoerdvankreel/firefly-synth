@@ -388,6 +388,7 @@ cv_routing_menu_handler::delete_(int module, int slot)
 {
   // move all from slot to the left
   auto const& topo = _state->desc().plugin->modules[module];
+  clear(module, slot);
   clear(module, topo.info.slot_count - 1);
   for (int i = slot; i < topo.info.slot_count - 1; i++)
     move_to(module, i + 1, i);
@@ -588,9 +589,11 @@ audio_routing_menu_handler::with_all_clear_all(int module)
 void
 audio_routing_menu_handler::with_all_delete(int module, int slot)
 {
-  // move all before slot to the left
-  with_all_clear(module, 0);
-  for (int i = 0; i < slot; i++)
+  // move all from slot to the left
+  auto const& topo = _state->desc().plugin->modules[module];
+  with_all_clear(module, slot);
+  with_all_clear(module, topo.info.slot_count - 1);
+  for (int i = slot; i < topo.info.slot_count - 1; i++)
   {
     with_cv_move_to(module, i + 1, i);
     move_audio_to(module, i + 1, i);
