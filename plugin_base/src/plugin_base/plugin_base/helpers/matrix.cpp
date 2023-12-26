@@ -68,7 +68,6 @@ matrix_param_menu_handler::execute(
   assert(action == 0 || action == 1 || action == 2 || action == 3);
 
   auto const& topo = _state->desc().plugin->modules[module_index];
-  //int slot_count = topo.params[param_index].info.slot_count;
   if (action == 0)
   {
     for(int p = 0; p < topo.params.size(); p++)
@@ -83,6 +82,20 @@ matrix_param_menu_handler::execute(
         _state->set_plain_at(module_index, module_slot, p, r,
           _state->get_plain_at(module_index, module_slot, p, r + 1));
     execute(menu_id, 0, module_index, param_index, param_index, param_slot);
+    return;
+  }
+  if (action == 2 || action == 3)
+  {
+    if (action == 2)
+      execute(menu_id, 0, module_index, param_index, param_index, _route_count - 1);
+    for (int r = _route_count - 1; r > (action == 3? param_slot + 1: param_slot); r--)
+      for (int p = 0; p < topo.params.size(); p++)
+        _state->set_plain_at(module_index, module_slot, p, r,
+          _state->get_plain_at(module_index, module_slot, p, r - 1));
+    if (action == 2)
+      execute(menu_id, 0, module_index, param_index, param_index, param_slot);
+    if (action == 3 && param_slot < _route_count - 1)
+      execute(menu_id, 0, module_index, param_index, param_index, param_slot + 1);
     return;
   }
 }
