@@ -383,7 +383,7 @@ make_timesig_submenu(std::vector<timesig> const& sigs)
 std::vector<timesig>
 make_default_timesigs(bool with_zero, timesig low, timesig high)
 {
-  std::vector<int> steps({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 32, 64, 128 });
+  std::vector<int> steps({ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 20, 24, 32, 48, 64, 96, 128 });
   if (with_zero) steps.insert(steps.begin(), 0);
   return make_timesigs(steps, low, high);
 }
