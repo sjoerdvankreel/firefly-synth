@@ -572,25 +572,12 @@ audio_routing_menu_handler::with_all_shift_left(int module, int slot)
 }
 
 void
-audio_routing_menu_handler::with_all_insert_before(int module, int slot)
+audio_routing_menu_handler::with_all_insert(int module, int slot, bool after)
 {
   // move all from slot to the right
   auto const& topo = _state->desc().plugin->modules[module];
   with_all_clear(module, topo.info.slot_count - 1);
-  for (int i = topo.info.slot_count - 1; i > slot; i--)
-  {
-    with_cv_move_to(module, i - 1, i);
-    move_audio_to(module, i - 1, i);
-  }
-}
-
-void
-audio_routing_menu_handler::with_all_insert_after(int module, int slot)
-{
-  // move all after slot to the right
-  auto const& topo = _state->desc().plugin->modules[module];
-  with_all_clear(module, topo.info.slot_count - 1);
-  for (int i = topo.info.slot_count - 1; i > slot + 1; i--)
+  for (int i = topo.info.slot_count - 1; i > (after? slot + 1: slot); i--)
   {
     with_cv_move_to(module, i - 1, i);
     move_audio_to(module, i - 1, i);

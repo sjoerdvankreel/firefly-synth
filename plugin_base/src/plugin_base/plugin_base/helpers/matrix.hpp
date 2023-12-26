@@ -144,8 +144,9 @@ public module_tab_menu_handler {
   void with_all_clear_all(int module);
   void with_all_clear(int module, int slot);
   void with_all_shift_left(int module, int slot);
-  void with_all_insert_after(int module, int slot);
-  void with_all_insert_before(int module, int slot);
+  void with_all_insert(int module, int slot, bool after);
+  void with_all_insert_after(int module, int slot) { with_all_insert(module, slot, true); }
+  void with_all_insert_before(int module, int slot) { with_all_insert(module, slot, false); }
 
   void with_cv_move_to(int module, int source_slot, int target_slot);
   void with_cv_swap_with(int module, int source_slot, int target_slot);

@@ -24,7 +24,6 @@ drop "or time into scratch" & friends?
 am clicks/rumbles on low freq
 do matrix insert before/insert after
 undo stack in gui
-fix insert before in modules
 
 * get some linux folks to comment (ycollete?)
 * continuing
