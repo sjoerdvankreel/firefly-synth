@@ -134,12 +134,12 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   if (type == type_delay)
   {
     std::vector<float> series(block->state.own_audio[0][0][0].begin(), block->state.own_audio[0][0][0].begin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, {});
+    return graph_data(jarray<float, 1>(series), true, { "IR" });
   }
 
   // remap over 0.8 just to look pretty
   std::vector<float> response(log_remap_series_x(fft(block->state.own_audio[0][0][0].data()), 0.8f));
-  return graph_data(jarray<float, 1>(response), false, {});
+  return graph_data(jarray<float, 1>(response), false, { "FR" });
 }
 
 module_topo
