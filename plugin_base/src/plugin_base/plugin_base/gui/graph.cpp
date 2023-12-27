@@ -199,7 +199,7 @@ graph::paint(Graphics& g)
       g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
       g.fillRect(area);
     }
-    g.setFont(_lnf->font().withHeight(h * 0.33));
+    g.setFont(_lnf->font().withHeight(h * 0.5));
     g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
     g.drawText(_data.partitions()[part], area, Justification::centred, false);
   }
