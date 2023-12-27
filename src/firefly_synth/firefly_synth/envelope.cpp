@@ -7,6 +7,7 @@
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
+#include <sstream>
 
 using namespace plugin_base;
 
@@ -108,6 +109,8 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   float dahds;
   float dahdsr;
   env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsr);
+  std::ostringstream stream;
+  stream << std::fixed << std::setprecision(1) << dahdsr;
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / dahdsr;
@@ -116,7 +119,7 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   auto const* block = engine->process_default(module_env, mapping.module_slot);
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, {});
+  return graph_data(series, false, { stream.str() + " Sec" });
 }
 
 module_topo
