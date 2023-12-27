@@ -142,22 +142,6 @@ plugin_engine::prepare_block()
   _host_block->frame_count = 0;
   _host_block->shared.bpm = 0;
   _host_block->shared.audio_in = nullptr;
-
-  // try to spot missing values
-  // keep in sync with activate
-#ifndef NDEBUG
-  _voices_mixdown.fill(std::numeric_limits<float>::quiet_NaN());
-  _voice_results.fill(std::numeric_limits<float>::quiet_NaN());
-  _voice_cv_state.fill(std::numeric_limits<float>::quiet_NaN());
-  _voice_scratch_state.fill(std::numeric_limits<float>::quiet_NaN());
-  _voice_audio_state.fill(std::numeric_limits<float>::quiet_NaN());
-  _global_cv_state.fill(std::numeric_limits<float>::quiet_NaN());
-  _global_scratch_state.fill(std::numeric_limits<float>::quiet_NaN());
-  _global_audio_state.fill(std::numeric_limits<float>::quiet_NaN());
-#endif
-  // don't NaN these, they survive blocks
-  // _midi_automation.fill(std::numeric_limits<float>::quiet_NaN());
-  // _accurate_automation.fill(std::numeric_limits<float>::quiet_NaN());
   return *_host_block;
 }
 
@@ -209,7 +193,6 @@ plugin_engine::activate(int max_frame_count)
   _output_updated_sec = seconds_since_epoch();
 
   // init frame-count dependent memory
-  // keep in sync swith prepare_block
   plugin_frame_dims frame_dims(*_state.desc().plugin, _polyphony, max_frame_count);
   _voices_mixdown.resize(frame_dims.audio);
   _voice_results.resize(frame_dims.voices_audio);

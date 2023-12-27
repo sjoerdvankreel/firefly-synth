@@ -47,28 +47,9 @@ std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 
 template <class T> inline T check_unipolar(T val)
-{ 
-  // make it debug breakable
-#ifdef NDEBUG
-  return val;
-#else
-  if((T)0 <= val && val <= (T)1) return val;
-  assert((T)0 <= val && val <= (T)1); 
-  return val; 
-#endif
-}
-
+{ assert((T)0 <= val && val <= (T)1); return val; }
 template <class T> inline T check_bipolar(T val)
-{ 
-  // make it debug breakable
-#ifdef NDEBUG
-  return val;
-#else
-  if((T)-1 <= val && val <= (T)1) return val;
-  assert((T)-1 <= val && val <= (T)1); 
-  return val; 
-#endif;
-}
+{ assert((T)-1 <= val && val <= (T)1); return val; }
 
 inline float mix_signal(float mix, float dry, float wet) 
 { return (1.0f - mix) * dry + mix * wet; }
