@@ -21,8 +21,10 @@ more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 do 5 am and 5 fm routes
 drop "or time into scratch" & friends?
+paint prettier - no fake zero / half points
 
 lfo:
+- phase control for non-rand
 - off/rate/sync/rate One/sync One
 - waveform select + rand controls (freerun etc) + filter
 - rate/tempo

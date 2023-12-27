@@ -102,7 +102,8 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   auto const* block = engine->process_default(mapping.module_index, mapping.module_slot);
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  series.push_back(0.5f);
+  series.insert(series.begin(), 0.0f);
+  series.push_back(0.0f);
   return graph_data(series, false, {});
 }
 
@@ -219,12 +220,19 @@ lfo_engine::process(plugin_block& block)
 
   int this_module = _global ? module_glfo : module_vlfo;
   bool sync = mode == mode_sync || mode == mode_sync_one;
-  //int type = block.state.own_block_automation[param_type][0].step();
+  int type = block.state.own_block_automation[param_type][0].step();
   auto const& rate_curve = sync_or_freq_into_scratch(
     block, sync, this_module, param_rate, param_tempo, scratch_time);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * _phase));
+    switch (type)
+    {
+    case type_saw: _end_value = _phase; break;
+    case type_sqr: _end_value = _phase < 0.5f? 0.0f: 1.0f; break;
+    case type_tri: _end_value = 1 - std::fabs(unipolar_to_bipolar(_phase)); break;
+    case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * _phase)); break;
+    } 
+    
     block.state.own_cv[0][0][f] = _end_value;
     if(increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate) && one_shot)
     {
