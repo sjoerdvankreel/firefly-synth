@@ -14,9 +14,9 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { scratch_time, scratch_count };
-enum { type_off, type_sine, type_saw, type_sqr, type_tri };
 enum { mode_rate, mode_sync, mode_rate_one, mode_sync_one };
 enum { param_type, param_x, param_y, param_smooth, param_mode, param_rate, param_tempo };
+enum { type_off, type_sine, type_saw, type_sqr, type_tri, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 static std::vector<list_item>
 type_items()
@@ -27,6 +27,10 @@ type_items()
   result.emplace_back("{01636F45-4734-4762-B475-E4CA15BAE156}", "Saw");
   result.emplace_back("{497E9796-48D2-4C33-B502-0C3AE3FD03D1}", "Sqr");
   result.emplace_back("{0B88AFD3-C8F3-4FA1-93D8-D2D074D5F6A7}", "Tri");
+  result.emplace_back("{83EF2C08-E5A1-4517-AC8C-D45890936A96}", "Rnd.Y");
+  result.emplace_back("{84BFAC67-D748-4499-813F-0B7FCEBF174B}", "Rnd.XY");
+  result.emplace_back("{F6B72990-D053-4D3A-9B8D-391DDB748DC1}", "RndF.Y");
+  result.emplace_back("{7EBDA9FE-11D9-4C09-BA4B-EF3763FB3CF0}", "RndF.XY");
   return result;
 }
 
@@ -34,7 +38,6 @@ static std::vector<list_item>
 mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{6940ADC8-DF91-468A-8FA1-25843B1A5707}", "Off");
   result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate");
   result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
   result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate One");
@@ -115,12 +118,29 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 2, gui_dimension::auto_size, 2 }))));
 
-  result.params.emplace_back(make_param(
+  auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
+  type.gui.submenu = std::make_shared<gui_submenu>();
+  type.gui.submenu->indices.push_back(type_off);
+  auto classic_menu = std::make_shared<gui_submenu>();
+  classic_menu->name = "Classic";
+  classic_menu->indices.push_back(type_sine);
+  classic_menu->indices.push_back(type_saw);
+  classic_menu->indices.push_back(type_sqr);
+  classic_menu->indices.push_back(type_tri);
+  type.gui.submenu->children.push_back(classic_menu);
+  auto random_menu = std::make_shared<gui_submenu>();
+  random_menu->name = "Random";
+  random_menu->indices.push_back(type_rnd_y);
+  random_menu->indices.push_back(type_rnd_xy);
+  random_menu->indices.push_back(type_rnd_y_free);
+  random_menu->indices.push_back(type_rnd_xy_free);
+  type.gui.submenu->children.push_back(random_menu);
+
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
@@ -140,23 +160,24 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
     
-  result.params.emplace_back(make_param(
+  auto& mode = result.params.emplace_back(make_param(
     make_topo_info("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 4 }, gui_label_contents::name, make_label_none())));
+  mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 5 }, gui_label_contents::none,
     make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
-  rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off; });
+  rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_one; });
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_timesig_default(false, {1, 4}),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 5 }, gui_label_contents::name, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
-  tempo.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off; });
+  tempo.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_one; });
 
   return result;
