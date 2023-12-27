@@ -89,6 +89,15 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
     return graph_data(graph_data_type::off, {});
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count;
+  
+  // draw synced 1/4 as full cycle
+  int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
+  if (mode == mode_sync || mode == mode_sync_one)
+  {
+    float one_beat_freq = timesig_to_freq(120, { 1, 4 });
+    sample_rate = one_beat_freq * params.max_frame_count;
+  }
+
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   auto const* block = engine->process_default(mapping.module_index, mapping.module_slot);
   engine->process_end();
