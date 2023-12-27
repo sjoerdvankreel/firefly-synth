@@ -57,7 +57,7 @@ graph_engine::process_default(int module_index, int module_slot)
     engine = slot_map[module_slot].get();
   bool voice = module.dsp.stage == module_stage::voice;
   return process(module_index, module_slot, [engine, voice](auto& block) { 
-    engine->reset(voice? &block: nullptr);
+    engine->reset(&block);
     engine->process(block); 
   });
 }

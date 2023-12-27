@@ -53,9 +53,9 @@ public module_engine {
   bool const _global;
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
-  lfo_engine(bool global) : _global(global) {}
+  void reset(plugin_block const*) override;
   void process(plugin_block& block) override;
-  void reset(plugin_block const*) override { _phase = 0; _end_value = 0; _ended = false; }
+  lfo_engine(bool global) : _global(global) {}
 };
 
 static void
@@ -207,6 +207,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] >= type_rnd_y; });
 
   return result;
+}
+
+void
+lfo_engine::reset(plugin_block const* block) 
+{ 
+  _ended = false;
+  _end_value = 0; 
+  _phase = block->state.own_block_automation[param_phase][0].real();
 }
 
 void

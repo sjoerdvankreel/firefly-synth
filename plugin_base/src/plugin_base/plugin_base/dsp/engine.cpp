@@ -234,8 +234,9 @@ plugin_engine::activate_modules()
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
+      plugin_block block(make_plugin_block(-1, m, mi, 0, 0));
       _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-      _input_engines[m][mi]->reset(nullptr);
+      _input_engines[m][mi]->reset(&block);
     }
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -244,8 +245,9 @@ plugin_engine::activate_modules()
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
+      plugin_block block(make_plugin_block(-1, m, mi, 0, 0));
       _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-      _output_engines[m][mi]->reset(nullptr);
+      _output_engines[m][mi]->reset(&block);
     }
 }
 
