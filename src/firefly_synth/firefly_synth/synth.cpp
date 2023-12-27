@@ -74,7 +74,7 @@ make_module_graph_section(
   bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices)
 {
   graph_params params;
-  params.partition_scale = 0.2f;
+  params.partition_scale = 0.15f;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params = make_module_graph_params(module, 
     render_on_module_mouse_enter, render_on_param_mouse_enter, dependent_module_indices);
@@ -85,7 +85,7 @@ static Component&
 make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   graph_params params;
-  params.partition_scale = 0.2f;
+  params.partition_scale = 0.15f;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params;
   module_params.fps = 10;
@@ -105,7 +105,7 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
   return store_component<tabbed_module_section_container>(store, gui, module_section_matrices, 
     [gui, lnf](int module_index) -> std::unique_ptr<juce::Component> {
       graph_params params;
-      params.partition_scale = 0.5f;
+      params.partition_scale = 0.33f;
       params.scale_type = graph_params::scale_h;
       switch (module_index)
       {
