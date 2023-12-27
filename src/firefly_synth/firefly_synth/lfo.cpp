@@ -15,8 +15,8 @@ namespace firefly_synth {
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
-enum { type_sine, type_saw, type_sqr, type_tri, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_smooth, param_phase, param_seed };
+enum { type_sine, type_saw, type_sqr, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 static std::vector<list_item>
 type_items()
@@ -25,7 +25,8 @@ type_items()
   result.emplace_back("{DE8FF99D-C83F-4723-B8DA-FB1C4877B1F4}", "Sine");
   result.emplace_back("{01636F45-4734-4762-B475-E4CA15BAE156}", "Saw");
   result.emplace_back("{497E9796-48D2-4C33-B502-0C3AE3FD03D1}", "Sqr");
-  result.emplace_back("{0B88AFD3-C8F3-4FA1-93D8-D2D074D5F6A7}", "Tri");
+  result.emplace_back("{0B88AFD3-C8F3-4FA1-93D8-D2D074D5F6A7}", "Tri.1");
+  result.emplace_back("{AFA62204-88AE-48C4-8094-1D154AA30448}", "Tri.2");
   result.emplace_back("{83EF2C08-E5A1-4517-AC8C-D45890936A96}", "Rnd.Y");
   result.emplace_back("{84BFAC67-D748-4499-813F-0B7FCEBF174B}", "Rnd.XY");
   result.emplace_back("{F6B72990-D053-4D3A-9B8D-391DDB748DC1}", "RndF.Y");
@@ -166,7 +167,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   classic_menu->indices.push_back(type_sine);
   classic_menu->indices.push_back(type_saw);
   classic_menu->indices.push_back(type_sqr);
-  classic_menu->indices.push_back(type_tri);
+  classic_menu->indices.push_back(type_tri1);
+  classic_menu->indices.push_back(type_tri2);
   type.gui.submenu->children.push_back(classic_menu);
   auto random_menu = std::make_shared<gui_submenu>();
   random_menu->name = "Random";
@@ -259,9 +261,10 @@ lfo_engine::process(plugin_block& block)
     {
     case type_saw: _end_value = phase_skew; break;
     case type_sqr: _end_value = phase_skew < 0.5f? 0.0f: 1.0f; break;
-    case type_tri: _end_value = 1 - std::fabs(unipolar_to_bipolar(phase_skew)); break;
     case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew)); break;
-    } 
+    case type_tri1: _end_value = 1 - std::fabs(unipolar_to_bipolar(phase_skew)); break;
+    case type_tri2: _end_value = _phase < x_curve[f] ? _phase / x_curve[f] : (_phase - x_curve[f]); break;
+    }
     
     block.state.own_cv[0][0][f] = _end_value;
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
