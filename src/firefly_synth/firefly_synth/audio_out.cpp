@@ -31,11 +31,12 @@ public:
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
+  std::string partition = mapping.module_index == module_master_out? "Master": "Voice";
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();
   float gain = state.get_plain_at(mapping.module_index, mapping.module_slot, param_gain, 0).real();
   float l = stereo_balance(0, bal) * gain;
   float r = stereo_balance(1, bal) * gain;
-  return graph_data({ { l, r } }, {});
+  return graph_data({ { l, r } }, { partition });
 }
 
 module_topo
