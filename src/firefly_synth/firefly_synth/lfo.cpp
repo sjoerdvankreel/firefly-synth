@@ -227,6 +227,9 @@ lfo_engine::reset(plugin_block const* block)
 void
 lfo_engine::process(plugin_block& block)
 {
+  double const skew_min = 0.0001;
+  double const skew_max = 0.9999;
+  double const skew_range = skew_max - skew_min;
   int mode = block.state.own_block_automation[param_mode][0].step();
   if (mode == mode_off)
   {
@@ -245,17 +248,19 @@ lfo_engine::process(plugin_block& block)
   int this_module = _global ? module_glfo : module_vlfo;
   int type = block.state.own_block_automation[param_type][0].step();
   bool sync = mode == mode_sync || mode == mode_sync_wrap || mode == mode_sync_one;
-  auto const& rate_curve = sync_or_freq_into_scratch(
-    block, sync, this_module, param_rate, param_tempo, scratch_time);
+  auto const& x_curve = block.state.own_accurate_automation[param_x][0];
+  auto const& rate_curve = sync_or_freq_into_scratch(block, sync, this_module, param_rate, param_tempo, scratch_time);
 
+  double log_half = std::log(0.5);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    double phase_skew = std::pow((double)_phase, std::log(skew_min + x_curve[f] * skew_range) / log_half);
     switch (type)
     {
-    case type_saw: _end_value = _phase; break;
-    case type_sqr: _end_value = _phase < 0.5f? 0.0f: 1.0f; break;
-    case type_tri: _end_value = 1 - std::fabs(unipolar_to_bipolar(_phase)); break;
-    case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * _phase)); break;
+    case type_saw: _end_value = phase_skew; break;
+    case type_sqr: _end_value = phase_skew < 0.5f? 0.0f: 1.0f; break;
+    case type_tri: _end_value = 1 - std::fabs(unipolar_to_bipolar(phase_skew)); break;
+    case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew)); break;
     } 
     
     block.state.own_cv[0][0][f] = _end_value;
