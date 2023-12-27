@@ -16,7 +16,8 @@ public juce::Component
 {
   lnf* const _lnf;
   graph_data _data;  
-  void paint_series(juce::Graphics& g, jarray<float, 1> const& series);
+  void paint_series(
+    juce::Graphics& g, jarray<float, 1> const& series, bool bipolar);
 
 public:
   void render(graph_data const& data);

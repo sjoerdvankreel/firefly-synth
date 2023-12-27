@@ -102,8 +102,6 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   auto const* block = engine->process_default(mapping.module_index, mapping.module_slot);
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  series.insert(series.begin(), 0.0f);
-  series.push_back(0.0f);
   return graph_data(series, false, {});
 }
 
