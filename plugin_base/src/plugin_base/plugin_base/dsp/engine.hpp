@@ -80,8 +80,8 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
+  void init_automation_from_state();
   void process_voices_single_threaded();
-  void init_automation_from_state(int frame_count);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
@@ -111,8 +111,8 @@ public:
 
   void activate_modules();
   void activate(int max_frame_count);
+  void init_from_state(plugin_state const* state);
   void mark_all_params_as_automated(bool automated);
-  void init_from_state(plugin_state const* state, int frame_count);
 
   void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
   void mark_param_as_automated(int m, int mi, int p, int pi) { _param_was_automated[m][mi][p][pi] = 1; }

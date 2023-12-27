@@ -112,11 +112,11 @@ plugin_engine::make_plugin_block(
 }
 
 void
-plugin_engine::init_from_state(plugin_state const* state, int frame_count)
+plugin_engine::init_from_state(plugin_state const* state)
 {
   _state.copy_from(state->state());
   mark_all_params_as_automated(true);
-  init_automation_from_state(frame_count);
+  init_automation_from_state();
 }
 
 void
@@ -207,7 +207,7 @@ plugin_engine::activate(int max_frame_count)
 
   // set automation values to current state, events may overwrite
   mark_all_params_as_automated(true);
-  init_automation_from_state(_max_frame_count);
+  init_automation_from_state();
 }
 
 void
@@ -266,7 +266,7 @@ plugin_engine::voice_block_params_snapshot(int v)
 }
 
 void
-plugin_engine::init_automation_from_state(int frame_count)
+plugin_engine::init_automation_from_state()
 {
   // set automation values to state, automation may overwrite
   // note that we cannot initialize current midi state since
@@ -293,9 +293,18 @@ plugin_engine::init_automation_from_state(int frame_count)
             if (_param_was_automated[m][mi][p][pi] != 0)
             {
               _param_was_automated[m][mi][p][pi] = 0;
+
+              // NOTE! We *really* need max frame count here, not current block size.
+              // This is because if the parameter is *not* automated in the current
+              // block, and the host comes at us with a larger block size on the next round,
+              // we end up with invalid values between current block size and next round block
+              // size. This happens only on hosts which employ variable block sizes (e.g. FLStudio).
+              // However this is completely within the vst3 spec so we should accomodate it.
+              // Note to self: this was a full day not fun debugging session. Please keep
+              // variable block sizes in mind.
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
-                _accurate_automation[m][mi][p][pi].begin() + frame_count,
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
                 (float)_state.get_normalized_at(m, mi, p, pi).value());
             }
         }
@@ -359,7 +368,7 @@ plugin_engine::process()
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite
-  init_automation_from_state(frame_count);
+  init_automation_from_state();
 
   /***************************************/
   /* STEP 1: Set up per-block automation */
