@@ -15,8 +15,8 @@ namespace firefly_synth {
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_sync, mode_sync_one };
-enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_smooth, param_seed };
 enum { type_sine, type_saw, type_sqr, type_tri, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
+enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_smooth, param_phase, param_seed };
 
 static std::vector<list_item>
 type_items()
@@ -190,13 +190,22 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  auto& phase = result.params.emplace_back(make_param(
+    make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", param_phase, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  phase.gui.submenu = make_midi_note_submenu();
+  phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  phase.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] < type_rnd_y; });
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info("{9F5BE73B-20C0-44C5-B078-CD571497A837}", "Seed", param_seed, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   seed.gui.submenu = make_midi_note_submenu();
-  seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && vs[1] >= type_rnd_y; });
+  seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] >= type_rnd_y; });
 
   return result;
 }
