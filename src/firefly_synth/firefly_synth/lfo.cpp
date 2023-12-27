@@ -99,9 +99,9 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
   if (mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap)
   {
-    partition = "1 Beat";
-    float one_beat_freq = timesig_to_freq(120, { 1, 4 });
-    sample_rate = one_beat_freq * params.max_frame_count;
+    partition = "1 Bar";
+    float one_bar_freq = timesig_to_freq(120, { 1, 1 });
+    sample_rate = one_bar_freq * params.max_frame_count;
   }
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);

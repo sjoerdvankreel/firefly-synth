@@ -1,8 +1,8 @@
 someday:
 mseg
 microtonal support
-do cakewalk bug report
 polyphonic modulation
+do cakewalk bug report
 handle clap is_modulatable
 do temposync in both beats and bars
 dont assume host is on a 4/4 timesig
