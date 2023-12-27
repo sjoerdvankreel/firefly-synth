@@ -74,8 +74,8 @@ make_module_graph_section(
   bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices)
 {
   graph_params params;
-  params.partition_scale = 0.5f;
-  params.scale_type = graph_params::scale_h;
+  params.partition_scale = 0.2f;
+  params.scale_type = graph_params::scale_w;
   module_graph_params module_params = make_module_graph_params(module, 
     render_on_module_mouse_enter, render_on_param_mouse_enter, dependent_module_indices);
   return store_component<module_graph>(store, gui, lnf, params, module_params);
@@ -85,8 +85,8 @@ static Component&
 make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   graph_params params;
-  params.partition_scale = 0.5f;
-  params.scale_type = graph_params::scale_h;
+  params.partition_scale = 0.2f;
+  params.scale_type = graph_params::scale_w;
   module_graph_params module_params;
   module_params.fps = 10;
   module_params.module_index = -1;
