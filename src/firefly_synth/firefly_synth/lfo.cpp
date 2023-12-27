@@ -263,7 +263,7 @@ lfo_engine::process(plugin_block& block)
     case type_sqr: _end_value = phase_skew < 0.5f? 0.0f: 1.0f; break;
     case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew)); break;
     case type_tri1: _end_value = 1 - std::fabs(unipolar_to_bipolar(phase_skew)); break;
-    case type_tri2: _end_value = _phase < x_curve[f] ? _phase / x_curve[f] : (_phase - x_curve[f]); break;
+    case type_tri2: _end_value = _phase < x_curve[f] ? _phase / x_curve[f] : 1 - (_phase - x_curve[f]) / (1 - x_curve[f]) ; break;
     }
     
     block.state.own_cv[0][0][f] = _end_value;
