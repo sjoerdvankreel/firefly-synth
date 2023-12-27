@@ -14,15 +14,14 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { scratch_time, scratch_count };
-enum { mode_rate, mode_sync, mode_rate_one, mode_sync_one };
-enum { param_type, param_x, param_y, param_smooth, param_mode, param_rate, param_tempo };
-enum { type_off, type_sine, type_saw, type_sqr, type_tri, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
+enum { mode_off, mode_rate, mode_sync, mode_rate_one, mode_sync_one };
+enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_smooth };
+enum { type_sine, type_saw, type_sqr, type_tri, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{7766AD35-EC48-4803-9032-0CD827240B95}", "Off");
   result.emplace_back("{DE8FF99D-C83F-4723-B8DA-FB1C4877B1F4}", "Sine");
   result.emplace_back("{01636F45-4734-4762-B475-E4CA15BAE156}", "Saw");
   result.emplace_back("{497E9796-48D2-4C33-B502-0C3AE3FD03D1}", "Sqr");
@@ -38,6 +37,7 @@ static std::vector<list_item>
 mode_items()
 {
   std::vector<list_item> result;
+  result.emplace_back("{E8D04800-17A9-42AB-9CAE-19322A400334}", "Off");
   result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate");
   result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
   result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate One");
@@ -59,10 +59,8 @@ public:
 static void
 init_global_default(plugin_state& state)
 {
-  state.set_text_at(module_glfo, 0, param_type, 0, "Sine");
   state.set_text_at(module_glfo, 0, param_mode, 0, "Sync");
   state.set_text_at(module_glfo, 0, param_tempo, 0, "3/1");
-  state.set_text_at(module_glfo, 1, param_type, 0, "Sine");
   state.set_text_at(module_glfo, 1, param_mode, 0, "Rate");
 }
 
@@ -85,7 +83,7 @@ make_graph_engine(plugin_desc const* desc)
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
-  if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
+  if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, 0).step() == mode_off)
     return graph_data(graph_data_type::off, {});
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count;
@@ -118,14 +116,33 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 2, gui_dimension::auto_size, 2 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 2, gui_dimension::auto_size, 1, 1, 2 }))));
 
+  result.params.emplace_back(make_param(
+    make_topo_info("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_item(mode_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
+  auto& rate = result.params.emplace_back(make_param(
+    make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, gui_label_contents::none,
+      make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
+  rate.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_one; });
+  auto& tempo = result.params.emplace_back(make_param(
+    make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_timesig_default(false, { 1, 4 }),
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, gui_label_contents::name, make_label_none())));
+  tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
+  tempo.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_one; });
+  
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 }, gui_label_contents::name, make_label_none())));
+  type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->indices.push_back(type_off);
   auto classic_menu = std::make_shared<gui_submenu>();
   classic_menu->name = "Classic";
   classic_menu->indices.push_back(type_sine);
@@ -144,41 +161,21 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  x.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  x.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, param_y, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  y.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  y.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smooth", true, param_smooth, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-    
-  auto& mode = result.params.emplace_back(make_param(
-    make_topo_info("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(mode_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 4 }, gui_label_contents::name, make_label_none())));
-  mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  auto& rate = result.params.emplace_back(make_param(
-    make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 5 }, gui_label_contents::none,
-    make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
-  rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_one; });
-  auto& tempo = result.params.emplace_back(make_param(
-    make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_timesig_default(false, {1, 4}),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 5 }, gui_label_contents::name, make_label_none())));
-  tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
-  tempo.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_one; });
+  smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
 
   return result;
 }
@@ -186,8 +183,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 void
 lfo_engine::process(plugin_block& block)
 {
-  int type = block.state.own_block_automation[param_type][0].step();
-  if(type == type_off)
+  int mode = block.state.own_block_automation[param_mode][0].step();
+  if(mode == mode_off)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
     return; 
