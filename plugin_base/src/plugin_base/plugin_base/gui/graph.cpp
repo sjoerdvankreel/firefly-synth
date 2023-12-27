@@ -141,7 +141,7 @@ module_graph::render_if_dirty()
   param_topo_mapping mapping = mapping = mappings[_hovered_or_tweaked_param].topo;
   auto const& module = _gui->gui_state()->desc().plugin->modules[mapping.module_index];
   if(module.graph_renderer != nullptr)
-    render(module.graph_renderer(*_gui->gui_state(), _gui->get_module_graph_engine(module), mapping));
+    render(module.graph_renderer(*_gui->gui_state(), _gui->get_module_graph_engine(module), _hovered_or_tweaked_param, mapping));
   _render_dirty = false;
   return true;
 }

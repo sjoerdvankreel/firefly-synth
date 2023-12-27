@@ -101,7 +101,7 @@ make_graph_engine(plugin_desc const* desc)
 }
 
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   if (state.get_plain_at(module_env, mapping.module_slot, param_on, 0).step() == 0) 
     return graph_data(graph_data_type::off, {});

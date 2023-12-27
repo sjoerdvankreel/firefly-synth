@@ -53,12 +53,12 @@ public:
 };
 
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
-  if (mapping.param_index == param_cent)
-    return graph_data(state.get_plain_at(mapping).real(), true, {});
-  if (mapping.param_index == param_porta_time)
-    return graph_data(state.get_normalized_at(mapping).value(), false, {});
+  bool bipolar = mapping.param_index == param_cent;
+  std::string partition = state.desc().params[param]->info.name;
+  if (mapping.param_index == param_cent || mapping.param_index == param_porta_time)
+    return graph_data(state.get_plain_at(mapping).real(), bipolar, { partition });
   return graph_data(graph_data_type::na, {});
 }
 

@@ -120,7 +120,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
 }
 
 static graph_data
-render_osc_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
+render_osc_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   graph_engine_params params = {};
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 

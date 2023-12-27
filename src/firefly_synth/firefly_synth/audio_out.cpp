@@ -29,7 +29,7 @@ public:
 };
 
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   std::string partition = mapping.module_index == module_master_out? "Master": "Voice";
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();

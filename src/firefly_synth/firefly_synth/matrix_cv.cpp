@@ -174,7 +174,7 @@ make_graph_engine(plugin_desc const* desc)
 
 static graph_data
 render_graph(
-  plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping, 
+  plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping, 
   std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
@@ -184,7 +184,7 @@ render_graph(
     // try to always paint something
     for(int r = 0; r < route_count; r++)
       if(state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
-        return render_graph(state, engine, { map.module_index, map.module_slot, map.param_index, r }, sources, targets);
+        return render_graph(state, engine, -1, { map.module_index, map.module_slot, map.param_index, r }, sources, targets);
     return graph_data(graph_data_type::off, {});
   }
 
@@ -261,8 +261,8 @@ cv_matrix_topo(
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.graph_engine_factory = make_graph_engine;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
-    auto const& state, auto* engine, auto const& mapping) {
-      return render_graph(state, engine, mapping, sm, tm);
+    auto const& state, auto* engine, int param, auto const& mapping) {
+      return render_graph(state, engine, param, mapping, sm, tm);
   };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(

@@ -28,13 +28,13 @@ public:
 };
 
 static graph_data
-render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
+render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   if (mapping.param_index == param_pb_range)
     return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
-  std::string partition = state.desc().param_topo_at(mapping.module_index, mapping.param_index).info.tag.name;
+  std::string partition = state.desc().params[param]->info.name;
   return graph_data(value, bipolar, { partition });
 }
 

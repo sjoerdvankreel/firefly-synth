@@ -88,7 +88,7 @@ init_global_default(plugin_state& state)
 static graph_data
 render_graph(
   plugin_state const& state, graph_engine* engine, 
-  param_topo_mapping const& mapping, std::vector<list_item> const& targets)
+  int param, param_topo_mapping const& mapping, std::vector<list_item> const& targets)
 {
   auto const& m = mapping;
   int on = state.get_plain_at(m.module_index, m.module_slot, param_on, m.param_slot).step();
@@ -97,7 +97,7 @@ render_graph(
     // try to always paint something
     for (int r = 0; r < route_count; r++)
       if (state.get_plain_at(m.module_index, m.module_slot, param_on, r).step() != 0)
-        return render_graph(state, engine, { m.module_index, m.module_slot, m.param_index, r }, targets);
+        return render_graph(state, engine, -1, { m.module_index, m.module_slot, m.param_index, r }, targets);
     return graph_data(graph_data_type::off, {});
   }
   
@@ -152,8 +152,8 @@ audio_matrix_topo(
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = [tm = target_matrix.items](
-    auto const& state, auto* engine, auto const& mapping) {
-      return render_graph(state, engine, mapping, tm); };
+    auto const& state, auto* engine, int param, auto const& mapping) {
+      return render_graph(state, engine, param, mapping, tm); };
   result.gui.tabbed_name = result.info.tag.short_name;
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.minimal_initializer = global ? init_global_minimal : init_voice_minimal;
