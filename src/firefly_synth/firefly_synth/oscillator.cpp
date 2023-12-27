@@ -35,8 +35,8 @@ public module_engine {
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(osc_engine);
   void reset(plugin_block const*) override { _phase = 0; }
-  void process(plugin_block& block) override { process(block, nullptr, nullptr); }
-  void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 1> const* env_curve);
+  void process(plugin_block& block) override { process(block, nullptr); }
+  void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
 static void
@@ -109,9 +109,8 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
     block = engine->process(module_osc, i, [](plugin_block& block) {
       osc_engine engine;
       engine.reset(&block);
-      jarray<float, 1> env_curve(block.end_frame, 1.0f);
       cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
-      engine.process(block, &modulation, &env_curve);
+      engine.process(block, &modulation);
     });
     jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);
     audio[0].push_back(0.0f);
@@ -183,7 +182,7 @@ blep(float phase, float inc)
 }
 
 void
-osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 1> const* env_curve)
+osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -195,8 +194,6 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
   }
   
   // allow custom data for graphs
-  if(env_curve == nullptr)
-    env_curve = &block.voice->all_cv[module_env][0][0][0];
   if(modulation == nullptr)
     modulation = &get_cv_matrix_mixdown(block, false);
 
@@ -216,7 +213,6 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, ja
     default: assert(false); sample = 0; break;
     }
     check_bipolar(sample);
-    sample *= (*env_curve)[f];
     block.state.own_audio[0][0][0][f] = sample;
     block.state.own_audio[0][0][1][f] = sample;
     increment_and_wrap_phase(_phase, inc);

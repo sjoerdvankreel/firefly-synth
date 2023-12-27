@@ -103,13 +103,15 @@ voice_audio_out_engine::process(plugin_block& block)
   auto& mixer = get_audio_matrix_mixer(block, false);
   auto const& audio_in = mixer.mix(block, module_voice_out, 0);
   auto const& modulation = get_cv_matrix_mixdown(block, false);
+  auto const& amp_env = block.voice->all_cv[module_env][0][0][0];
   auto const& bal_curve = *modulation[module_voice_out][0][param_bal][0];
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float bal = block.normalized_to_raw(module_voice_out, param_bal, bal_curve[f]);
     for (int c = 0; c < 2; c++)
-      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
+      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal);
   }
 }
 
