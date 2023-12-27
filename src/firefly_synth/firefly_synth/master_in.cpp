@@ -34,7 +34,8 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
     return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
-  return graph_data(value, bipolar, {});
+  std::string partition = state.desc().param_topo_at(mapping.module_index, mapping.param_index).info.tag.name;
+  return graph_data(value, bipolar, { partition });
 }
 
 module_topo
