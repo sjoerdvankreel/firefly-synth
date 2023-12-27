@@ -256,14 +256,15 @@ lfo_engine::process(plugin_block& block)
   double log_half = std::log(0.5);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    double phase_skew = std::pow((double)_phase, std::log(skew_min + x_curve[f] * skew_range) / log_half);
+    double x_bounded = skew_min + x_curve[f] * skew_range;
+    double phase_skew = std::pow((double)_phase, std::log(x_bounded) / log_half);
     switch (type)
     {
     case type_saw: _end_value = phase_skew; break;
     case type_sqr: _end_value = phase_skew < 0.5f? 0.0f: 1.0f; break;
     case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew)); break;
     case type_tri1: _end_value = 1 - std::fabs(unipolar_to_bipolar(phase_skew)); break;
-    case type_tri2: _end_value = _phase < x_curve[f] ? _phase / x_curve[f] : 1 - (_phase - x_curve[f]) / (1 - x_curve[f]) ; break;
+    case type_tri2: _end_value = _phase < x_bounded ? _phase / x_bounded : 1 - (_phase - x_bounded) / (1 - x_bounded) ; break;
     }
     
     block.state.own_cv[0][0][f] = _end_value;
