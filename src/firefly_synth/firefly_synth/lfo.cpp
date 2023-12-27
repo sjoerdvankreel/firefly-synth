@@ -14,7 +14,7 @@ namespace firefly_synth {
 
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
-enum { mode_off, mode_rate, mode_rate_one, mode_sync, mode_sync_one };
+enum { mode_off, mode_rate, mode_rate_wrap, mode_sync, mode_sync_wrap };
 enum { type_sine, type_saw, type_sqr, type_tri, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_smooth, param_phase, param_seed };
 
@@ -39,9 +39,9 @@ mode_items()
   std::vector<list_item> result;
   result.emplace_back("{E8D04800-17A9-42AB-9CAE-19322A400334}", "Off");
   result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate");
-  result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.One");
+  result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.Wrap");
   result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
-  result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.One");
+  result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.Wrap");
   return result;
 }
 
@@ -92,7 +92,7 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   
   // draw synced 1/4 as full cycle
   int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
-  if (mode == mode_sync || mode == mode_sync_one)
+  if (mode == mode_sync || mode == mode_sync_wrap)
   {
     float one_beat_freq = timesig_to_freq(120, { 1, 4 });
     sample_rate = one_beat_freq * params.max_frame_count;
@@ -137,14 +137,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_mode, gui_edit_type::knob, { 0, 1 }, gui_label_contents::none,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   rate.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_one; });
+  rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_wrap; });
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_timesig_default(false, { 1, 4 }),
     make_param_gui_single(section_mode, gui_edit_type::list, { 0, 1 }, gui_label_contents::name, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_one; });
+  tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_wrap; });
   
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
@@ -227,7 +227,7 @@ lfo_engine::process(plugin_block& block)
     return;
   }
 
-  bool one_shot = mode == mode_rate_one || mode == mode_sync_one;
+  bool one_shot = mode == mode_rate_wrap || mode == mode_sync_wrap;
   if(one_shot && _ended)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _end_value);
@@ -235,7 +235,7 @@ lfo_engine::process(plugin_block& block)
   }
 
   int this_module = _global ? module_glfo : module_vlfo;
-  bool sync = mode == mode_sync || mode == mode_sync_one;
+  bool sync = mode == mode_sync || mode == mode_sync_wrap;
   int type = block.state.own_block_automation[param_type][0].step();
   auto const& rate_curve = sync_or_freq_into_scratch(
     block, sync, this_module, param_rate, param_tempo, scratch_time);
