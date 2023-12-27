@@ -22,6 +22,7 @@ hardsync, unison
 do 5 am and 5 fm routes
 drop "or time into scratch" & friends?
 paint prettier - no fake zero / half points
+do skew by log for lfo's too
 
 lfo:
 - phase control for non-rand
