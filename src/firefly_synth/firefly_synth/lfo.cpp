@@ -15,7 +15,7 @@ namespace firefly_synth {
 enum { section_main };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_sync, mode_rate_one, mode_sync_one };
-enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_smooth };
+enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_smooth, param_seed };
 enum { type_sine, type_saw, type_sqr, type_tri, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 static std::vector<list_item>
@@ -116,7 +116,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 2, gui_dimension::auto_size, 1, 1, 2 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 2, gui_dimension::auto_size, 1, 1, 2, 2 }))));
 
   result.params.emplace_back(make_param(
     make_topo_info("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
@@ -171,11 +171,18 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   y.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& smooth = result.params.emplace_back(make_param(
-    make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smooth", true, param_smooth, 1),
+    make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smth", true, param_smooth, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 5 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  auto& seed = result.params.emplace_back(make_param(
+    make_topo_info("{9F5BE73B-20C0-44C5-B078-CD571497A837}", "Seed", param_seed, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 255, 1, 0),
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 6 }, gui_label_contents::value,
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  seed.gui.submenu = make_midi_note_submenu();
+  seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && vs[1] >= type_rnd_y; });
 
   return result;
 }
