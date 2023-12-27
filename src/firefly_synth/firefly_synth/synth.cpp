@@ -73,24 +73,30 @@ make_module_graph_section(
   plugin_gui* gui, lnf* lnf, component_store store, int module, bool render_on_module_mouse_enter,
   bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices)
 {
-  module_graph_params params = make_module_graph_params(module, 
+  graph_params params;
+  params.partition_scale = 0.5f;
+  params.scale_type = graph_params::scale_h;
+  module_graph_params module_params = make_module_graph_params(module, 
     render_on_module_mouse_enter, render_on_param_mouse_enter, dependent_module_indices);
-  return store_component<module_graph>(store, gui, lnf, params);
+  return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
 
 static Component&
 make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
-  module_graph_params params;
-  params.fps = 10;
-  params.module_index = -1;
-  params.render_on_tweak = true;
-  params.render_on_tab_change = false;
-  params.render_on_module_mouse_enter = true;
-  params.render_on_param_mouse_enter_modules = { 
+  graph_params params;
+  params.partition_scale = 0.5f;
+  params.scale_type = graph_params::scale_h;
+  module_graph_params module_params;
+  module_params.fps = 10;
+  module_params.module_index = -1;
+  module_params.render_on_tweak = true;
+  module_params.render_on_tab_change = false;
+  module_params.render_on_module_mouse_enter = true;
+  module_params.render_on_param_mouse_enter_modules = {
     module_master_in, module_voice_in, module_am_matrix, module_vaudio_matrix, 
     module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix };
-  return store_component<module_graph>(store, gui, lnf, params);
+  return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
 
 static Component&
@@ -98,15 +104,18 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   return store_component<tabbed_module_section_container>(store, gui, module_section_matrices, 
     [gui, lnf](int module_index) -> std::unique_ptr<juce::Component> {
+      graph_params params;
+      params.partition_scale = 0.5f;
+      params.scale_type = graph_params::scale_h;
       switch (module_index)
       {
-      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, true, false, { module_osc } ));
-      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, { }));
-      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, { }));
-      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, 
+      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, { module_osc } ));
+      case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, { }));
+      case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, { }));
+      case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
         { module_master_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
         module_osc, module_am_matrix, module_vfx, module_vlfo, module_vaudio_matrix }));
-      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, make_module_graph_params(module_index, false, true, 
+      case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
         { module_master_in, module_glfo, module_gfx, module_gaudio_matrix, module_master_out }));
       default: assert(false); return std::make_unique<Component>();
       }

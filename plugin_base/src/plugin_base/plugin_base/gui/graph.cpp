@@ -11,29 +11,29 @@ module_graph::
 { 
   _done = true;
   stopTimer();
-  if(_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
-  if(_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
-  if (_params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter_modules.size()) 
+  if(_module_params.render_on_tweak) _gui->gui_state()->remove_any_listener(this);
+  if(_module_params.render_on_tab_change) _gui->remove_tab_selection_listener(this);
+  if (_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     _gui->remove_gui_mouse_listener(this);
 }
 
 module_graph::
-module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params):
-graph(lnf), _gui(gui), _params(params)
+module_graph(plugin_gui* gui, lnf* lnf, graph_params const& params, module_graph_params const& module_params):
+graph(lnf, params), _gui(gui), _module_params(module_params)
 { 
-  assert(params.fps > 0);
-  assert(params.render_on_tweak || params.render_on_tab_change || 
-    params.render_on_module_mouse_enter || _params.render_on_param_mouse_enter_modules.size());
-  if(params.render_on_tab_change) assert(params.module_index != -1);
-  if (_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
-  if(_params.render_on_module_mouse_enter || params.render_on_param_mouse_enter_modules.size())
+  assert(_module_params.fps > 0);
+  assert(_module_params.render_on_tweak || _module_params.render_on_tab_change ||
+    _module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size());
+  if(_module_params.render_on_tab_change) assert(_module_params.module_index != -1);
+  if (_module_params.render_on_tweak) gui->gui_state()->add_any_listener(this);
+  if(_module_params.render_on_module_mouse_enter || _module_params.render_on_param_mouse_enter_modules.size())
     gui->add_gui_mouse_listener(this);
-  if (_params.render_on_tab_change) 
+  if (_module_params.render_on_tab_change)
   {
     gui->add_tab_selection_listener(this);
-    module_tab_changed(params.module_index, 0);
+    module_tab_changed(_module_params.module_index, 0);
   }
-  startTimerHz(params.fps);
+  startTimerHz(_module_params.fps);
 }
 
 void
@@ -56,7 +56,7 @@ module_graph::module_tab_changed(int module, int slot)
 {
   // trigger re-render based on first new module param
   auto const& desc = _gui->gui_state()->desc();
-  if(_params.module_index != -1 && _params.module_index != module) return;
+  if(_module_params.module_index != -1 && _module_params.module_index != module) return;
   _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
   request_rerender(desc.modules[index].params[0].info.global);
@@ -67,11 +67,11 @@ module_graph::any_state_changed(int param, plain_value plain)
 {
   auto const& desc = _gui->gui_state()->desc();
   auto const& mapping = desc.param_mappings.params[param];
-  if(_params.module_index == -1 || _params.module_index == mapping.topo.module_index)
+  if(_module_params.module_index == -1 || _module_params.module_index == mapping.topo.module_index)
   {
     if (_activated_module_slot == mapping.topo.module_slot)
     {
-      if(_params.module_index != -1) 
+      if(_module_params.module_index != -1)
         _last_rerender_cause_param = param;
       request_rerender(param);
     }
@@ -81,9 +81,9 @@ module_graph::any_state_changed(int param, plain_value plain)
   // someone else changed a param and we depend on it
   // request re-render for first param in own topo or last changed in own topo
   if(std::find(
-      _params.dependent_module_indices.begin(), 
-      _params.dependent_module_indices.end(), 
-      mapping.topo.module_index) == _params.dependent_module_indices.end())
+    _module_params.dependent_module_indices.begin(),
+    _module_params.dependent_module_indices.end(),
+    mapping.topo.module_index) == _module_params.dependent_module_indices.end())
     return;
 
   if(_last_rerender_cause_param != -1)
@@ -91,7 +91,7 @@ module_graph::any_state_changed(int param, plain_value plain)
     request_rerender(_last_rerender_cause_param);
     return;
   }  
-  int index = desc.module_topo_to_index.at(_params.module_index) + _activated_module_slot;
+  int index = desc.module_topo_to_index.at(_module_params.module_index) + _activated_module_slot;
   request_rerender(desc.modules[index].params[0].info.global);
 }
 
@@ -100,9 +100,9 @@ module_graph::module_mouse_enter(int module)
 {
   // trigger re-render based on first new module param
   auto const& desc = _gui->gui_state()->desc().modules[module];
-  if (_params.module_index != -1 && _params.module_index != desc.module->info.index) return;
+  if (_module_params.module_index != -1 && _module_params.module_index != desc.module->info.index) return;
   if(desc.params.size() == 0) return;
-  if(_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
+  if(_module_params.render_on_module_mouse_enter && !desc.module->force_rerender_on_param_hover)
     request_rerender(desc.params[0].info.global);
 }
 
@@ -111,9 +111,9 @@ module_graph::param_mouse_enter(int param)
 {
   // trigger re-render based on specific param
   auto const& mapping = _gui->gui_state()->desc().param_mappings.params[param];
-  if (_params.module_index != -1 && _params.module_index != mapping.topo.module_index) return;
-  auto end = _params.render_on_param_mouse_enter_modules.end();
-  auto begin = _params.render_on_param_mouse_enter_modules.begin();
+  if (_module_params.module_index != -1 && _module_params.module_index != mapping.topo.module_index) return;
+  auto end = _module_params.render_on_param_mouse_enter_modules.end();
+  auto begin = _module_params.render_on_param_mouse_enter_modules.begin();
   if (std::find(begin, end, mapping.topo.module_index) != end ||
     std::find(begin, end, -1) != end)
     request_rerender(param);
@@ -199,8 +199,11 @@ graph::paint(Graphics& g)
       g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
       g.fillRect(area);
     }
-    g.setFont(_lnf->font().withHeight(h * 0.5));
     g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
+    if(_params.scale_type == graph_params::scale_h)
+      g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
+    else
+      g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
     g.drawText(_data.partitions()[part], area, Justification::centred, false);
   }
 

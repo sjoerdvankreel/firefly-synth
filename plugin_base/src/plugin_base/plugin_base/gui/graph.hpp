@@ -11,18 +11,27 @@
 
 namespace plugin_base {
 
+struct graph_params
+{
+  enum partition_scale_type { scale_w, scale_h };
+  float partition_scale = {};
+  partition_scale_type scale_type = {};
+};
+
 class graph:
 public juce::Component
 {
   lnf* const _lnf;
   graph_data _data;  
+  graph_params const _params;
   void paint_series(
     juce::Graphics& g, jarray<float, 1> const& series, bool bipolar, float midpoint);
 
 public:
   void render(graph_data const& data);
   void paint(juce::Graphics& g) override;
-  graph(lnf* lnf) : _lnf(lnf), _data(graph_data_type::na, {}) {}
+  graph(lnf* lnf, graph_params const& params) :
+  _lnf(lnf), _data(graph_data_type::na, {}), _params(params) {}
 };
 
 struct module_graph_params
@@ -46,21 +55,23 @@ public gui_tab_selection_listener,
 public juce::Timer,
 public juce::SettableTooltipClient
 {
-  plugin_gui* const _gui;
-  module_graph_params const _params;
-
   bool _done = false;
   bool _render_dirty = true;
   int _activated_module_slot = 0;
   int _hovered_or_tweaked_param = -1;
   int _last_rerender_cause_param = -1;
 
+  plugin_gui* const _gui;
+  module_graph_params const _module_params;
+
   bool render_if_dirty();
   void request_rerender(int param);
 
 public:
   ~module_graph();
-  module_graph(plugin_gui* gui, lnf* lnf, module_graph_params const& params);
+  module_graph(
+    plugin_gui* gui, lnf* lnf, graph_params const& params, 
+    module_graph_params const& module_params);
 
   void timerCallback() override;
   void paint(juce::Graphics& g) override;
