@@ -12,14 +12,20 @@ namespace firefly_synth {
 enum { section_main };
 enum { param_gain, param_bal };
 
-class audio_out_engine :
+class master_audio_out_engine :
 public module_engine {
-  bool const _global;
 public:
-  void process(plugin_block& block) override;
   void reset(plugin_block const*) override {}
-  PB_PREVENT_ACCIDENTAL_COPY(audio_out_engine);
-  audio_out_engine(bool global): _global(global) {}
+  void process(plugin_block& block) override;
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(master_audio_out_engine);
+};
+
+class voice_audio_out_engine :
+public module_engine {
+public:
+  void reset(plugin_block const*) override {}
+  void process(plugin_block& block) override;
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(voice_audio_out_engine);
 };
 
 static graph_data
@@ -47,8 +53,14 @@ audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, b
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
-  result.engine_factory = [global](auto const&, int, int) { return std::make_unique<audio_out_engine>(global); };
-  result.gui.menu_handler_factory = [global](plugin_state* state) { return make_audio_routing_menu_handler(state, global); };
+  result.gui.menu_handler_factory = [global](plugin_state* state) { 
+    return make_audio_routing_menu_handler(state, global); };
+  if(global)
+    result.engine_factory = [](auto const&, int, int) { 
+      return std::make_unique<master_audio_out_engine>(); };
+  else
+    result.engine_factory = [](auto const&, int, int) { 
+      return std::make_unique<voice_audio_out_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),
@@ -70,32 +82,34 @@ audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, b
 }
 
 void
-audio_out_engine::process(plugin_block& block)
+master_audio_out_engine::process(plugin_block& block)
 {
-  float* audio_out[2];
-  int module = _global? module_master_out: module_voice_out;
-  auto& mixer = get_audio_matrix_mixer(block, _global);
-  auto const& audio_in = mixer.mix(block, module, 0);
-  auto const& modulation = get_cv_matrix_mixdown(block, _global);
-  auto const& bal_curve = *modulation[module][0][param_bal][0];
-  auto const& gain_curve = *modulation[module][0][param_gain][0];
-
-  if (_global)
-  {
-    audio_out[0] = block.out->host_audio[0];
-    audio_out[1] = block.out->host_audio[1];
-  }
-  else
-  {
-    audio_out[0] = block.voice->result[0].data().data();
-    audio_out[1] = block.voice->result[1].data().data();
-  }
-
+  auto& mixer = get_audio_matrix_mixer(block, true);
+  auto const& audio_in = mixer.mix(block, module_master_out, 0);
+  auto const& modulation = get_cv_matrix_mixdown(block, true);
+  auto const& bal_curve = *modulation[module_master_out][0][param_bal][0];
+  auto const& gain_curve = *modulation[module_master_out][0][param_gain][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float bal = block.normalized_to_raw(module, param_bal, bal_curve[f]);
+    float bal = block.normalized_to_raw(module_master_out, param_bal, bal_curve[f]);
     for(int c = 0; c < 2; c++)
-      audio_out[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
+      block.out->host_audio[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
+  }
+}
+
+void
+voice_audio_out_engine::process(plugin_block& block)
+{
+  auto& mixer = get_audio_matrix_mixer(block, false);
+  auto const& audio_in = mixer.mix(block, module_voice_out, 0);
+  auto const& modulation = get_cv_matrix_mixdown(block, false);
+  auto const& bal_curve = *modulation[module_voice_out][0][param_bal][0];
+  auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    float bal = block.normalized_to_raw(module_voice_out, param_bal, bal_curve[f]);
+    for (int c = 0; c < 2; c++)
+      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
   }
 }
 
