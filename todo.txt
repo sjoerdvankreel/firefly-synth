@@ -1,5 +1,6 @@
 someday:
 mseg
+microtonal support
 do cakewalk bug report
 polyphonic modulation
 handle clap is_modulatable
