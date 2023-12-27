@@ -47,13 +47,15 @@ mode_items()
 
 class lfo_engine :
 public module_engine {
+  bool _ended;
   float _phase;
+  float _end_value;
   bool const _global;
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   lfo_engine(bool global) : _global(global) {}
   void process(plugin_block& block) override;
-  void reset(plugin_block const*) override { _phase = 0; }
+  void reset(plugin_block const*) override { _phase = 0; _end_value = 0; _ended = false; }
 };
 
 static void
@@ -193,19 +195,34 @@ void
 lfo_engine::process(plugin_block& block)
 {
   int mode = block.state.own_block_automation[param_mode][0].step();
-  if(mode == mode_off)
+  if (mode == mode_off)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
+    return;
+  }
+
+  bool one_shot = mode == mode_rate_one || mode == mode_sync_one;
+  if(one_shot && _ended)
+  {
+    block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _end_value);
     return; 
   }
 
-  int this_module = _global? module_glfo: module_vlfo;
+  int this_module = _global ? module_glfo : module_vlfo;
+  bool sync = mode == mode_sync || mode == mode_sync_one;
+  //int type = block.state.own_block_automation[param_type][0].step();
   auto const& rate_curve = sync_or_freq_into_scratch(
-    block, false, this_module, param_rate, param_tempo, scratch_time);
+    block, sync, this_module, param_rate, param_tempo, scratch_time);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    block.state.own_cv[0][0][f] = bipolar_to_unipolar(phase_to_sine(_phase));
-    increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
+    _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * _phase));
+    block.state.own_cv[0][0][f] = _end_value;
+    if(increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate) && one_shot)
+    {
+      _ended = true;
+      block.state.own_cv[0][0].fill(f + 1, block.end_frame, _end_value);
+      return;
+    }
   }
 }
 

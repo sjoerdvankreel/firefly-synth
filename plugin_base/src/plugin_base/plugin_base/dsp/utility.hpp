@@ -84,17 +84,16 @@ inline float timesig_to_time(float bpm, timesig const& sig)
 
 inline float unipolar_to_bipolar(float v) { return v * 2 - 1; }
 inline float bipolar_to_unipolar(float v) { return (v + 1) * 0.5f; }
-inline float phase_to_sine(float p) { return std::sin(2.0f * pi32 * p); }
 
 inline float 
 phase_increment(float freq, float rate) 
 { return freq / rate; }
-inline void
+inline bool
 increment_and_wrap_phase(float& phase, float inc)
-{ phase += inc; phase -= std::floor(phase); }
-inline void
+{ phase += inc; bool wrapped = phase >= 1.0f; phase -= std::floor(phase); return wrapped; }
+inline bool
 increment_and_wrap_phase(float& phase, float freq, float rate)
-{ increment_and_wrap_phase(phase, phase_increment(freq, rate)); }
+{ return increment_and_wrap_phase(phase, phase_increment(freq, rate)); }
 
 inline float
 mono_pan_sqrt3(int channel, float panning)

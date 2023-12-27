@@ -208,7 +208,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
     float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
     switch (type)
     {
-    case type_sine: sample = phase_to_sine(_phase); break;
+    case type_sine: sample = std::sin(2.0f * pi32 * _phase); break;
     case type_saw: sample = (_phase * 2 - 1) - blep(_phase, inc); break;
     default: assert(false); sample = 0; break;
     }

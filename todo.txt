@@ -23,6 +23,7 @@ do 5 am and 5 fm routes
 drop "or time into scratch" & friends?
 
 lfo:
+- plot synced lfo against 1 beat/bar
 - off/rate/sync/rate One/sync One
 - waveform select + rand controls (freerun etc) + filter
 - rate/tempo
