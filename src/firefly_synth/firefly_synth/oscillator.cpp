@@ -113,8 +113,6 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
       engine.process(block, &modulation);
     });
     jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);
-    audio[0].push_back(0.0f);
-    audio[1].push_back(0.0f);
     result.push_back(graph_data(audio, {}));
   }
   engine->process_end();

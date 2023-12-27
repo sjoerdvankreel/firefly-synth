@@ -225,8 +225,6 @@ render_graph(
 
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
-  stacked.push_back(0);
-  stacked.insert(stacked.begin(), 0);
   return graph_data(stacked, false, { targets.items[ti].name });
 }
 

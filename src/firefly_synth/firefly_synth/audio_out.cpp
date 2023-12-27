@@ -31,8 +31,6 @@ public:
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping const& mapping)
 {
-  jarray<float, 1> result;
-  result.push_back(0);
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();
   float gain = state.get_plain_at(mapping.module_index, mapping.module_slot, param_gain, 0).real();
   float l = stereo_balance(0, bal) * gain;

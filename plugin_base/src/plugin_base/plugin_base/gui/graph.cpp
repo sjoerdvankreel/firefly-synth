@@ -154,7 +154,7 @@ graph::render(graph_data const& data)
 }
 
 void 
-graph::paint_series(Graphics& g, jarray<float, 1> const& series, bool bipolar)
+graph::paint_series(Graphics& g, jarray<float, 1> const& series, bool bipolar, float midpoint)
 {
   Path pFill;
   Path pStroke;
@@ -164,7 +164,7 @@ graph::paint_series(Graphics& g, jarray<float, 1> const& series, bool bipolar)
 
   auto foreground = _lnf->colors().graph_foreground;
   float y0 = (1 - std::clamp(series[0], 0.0f, 1.0f)) * h;
-  pFill.startNewSubPath(0, h);
+  pFill.startNewSubPath(0, bipolar? h * midpoint : h);
   pFill.lineTo(0, y0);
   pStroke.startNewSubPath(0, y0);
   for (int i = 1; i < series.size(); i++)
@@ -173,7 +173,7 @@ graph::paint_series(Graphics& g, jarray<float, 1> const& series, bool bipolar)
     pFill.lineTo(i / count * w, yn);
     pStroke.lineTo(i / count * w, yn);
   }
-  pFill.lineTo(w, h);
+  pFill.lineTo(w, bipolar? h * midpoint : h);
   pFill.closeSubPath();
 
   g.setColour(foreground.withAlpha(0.5f));
@@ -274,8 +274,8 @@ graph::paint(Graphics& g)
     for(int c = 0; c < 2; c++)
       for (int i = 0; i < audio[c].size(); i++)
         audio[c][i] = ((1 - c) + std::clamp(bipolar_to_unipolar(audio[c][i]), 0.0f, 1.0f)) * 0.5f;
-    paint_series(g, audio[0], true);
-    paint_series(g, audio[1], true);
+    paint_series(g, audio[0], true, 0.25f);
+    paint_series(g, audio[1], true, 0.75f);
     return;
   }
 
@@ -284,7 +284,7 @@ graph::paint(Graphics& g)
   if(_data.bipolar())
     for(int i = 0; i < series.size(); i++)
       series[i] = bipolar_to_unipolar(series[i]);
-  paint_series(g, series, _data.bipolar());
+  paint_series(g, series, _data.bipolar(), 0.5f);
 }
 
 }
