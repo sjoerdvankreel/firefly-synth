@@ -90,6 +90,8 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
 {
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, 0).step() == mode_off)
     return graph_data(graph_data_type::off, {});
+  
+  std::string partition = "1 Sec";
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count;
   
@@ -97,6 +99,7 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
   if (mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap)
   {
+    partition = "1 Beat";
     float one_beat_freq = timesig_to_freq(120, { 1, 4 });
     sample_rate = one_beat_freq * params.max_frame_count;
   }
@@ -105,7 +108,7 @@ render_graph(plugin_state const& state, graph_engine* engine, param_topo_mapping
   auto const* block = engine->process_default(mapping.module_index, mapping.module_slot);
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, {});
+  return graph_data(series, false, { partition });
 }
 
 module_topo
