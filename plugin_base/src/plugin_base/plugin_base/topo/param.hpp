@@ -66,6 +66,7 @@ struct param_topo_gui final {
   gui_bindings bindings;
   gui_edit_type edit_type;
   gui_label_contents tooltip;
+  std::string label_reference_text; // autosize to this if not empty
   gui_item_binding item_enabled = {};
   std::shared_ptr<gui_submenu> submenu;
   param_menu_handler_factory menu_handler_factory;

@@ -204,6 +204,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   seed.gui.submenu = make_midi_note_submenu();
+  seed.gui.label_reference_text = phase.info.tag.name;
   seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] >= type_rnd_y; });
 

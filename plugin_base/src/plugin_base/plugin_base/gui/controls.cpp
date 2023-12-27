@@ -77,6 +77,14 @@ menu_button::clicked()
     });
 }
 
+std::string 
+param_name_label::label_ref_text(param_desc const* param, bool short_)
+{
+  auto const& ref_text = param->param->gui.label_reference_text;
+  if (ref_text.size()) return ref_text;
+  return short_ ? param->param->info.tag.short_name : param->info.name;
+}
+
 last_tweaked_label::
 last_tweaked_label(plugin_state const* state):
 _state(state)

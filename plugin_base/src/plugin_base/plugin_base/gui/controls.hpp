@@ -173,12 +173,11 @@ class param_name_label:
 public binding_component,
 public autofit_label
 {
-  static std::string label_text(param_desc const* param, bool short_) 
-  { return short_ ? param->param->info.tag.short_name : param->info.name; }
+  static std::string label_ref_text(param_desc const* param, bool short_);
 public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool short_, lnf* lnf):
-  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label(lnf, label_text(param, short_))
-  { setText(label_text(param, short_), juce::dontSendNotification); init(); }
+  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label(lnf, label_ref_text(param, short_))
+  { setText(short_ ? param->param->info.tag.short_name : param->info.name, juce::dontSendNotification); init(); }
 };
 
 // parameter value or name+value display
