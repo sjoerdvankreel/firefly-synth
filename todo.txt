@@ -1,9 +1,13 @@
-(polyphonic) modulation
-handle clap midi notes
-handle clap is_modulatable
+someday:
+mseg
 do cakewalk bug report
+polyphonic modulation
+handle clap is_modulatable
+do temposync in both beats and bars
+dont assume host is on a 4/4 timesig
 
 demo synth:
+handle clap midi notes
 do clap midi notes
 polymod/mpe/note_exprs
 read all the comments from github and kvr and forums
