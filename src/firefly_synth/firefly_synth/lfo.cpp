@@ -241,7 +241,7 @@ lfo_engine::process(plugin_block& block)
 
   int this_module = _global ? module_glfo : module_vlfo;
   int type = block.state.own_block_automation[param_type][0].step();
-  bool sync = mode == mode_sync || mode == mode_sync_wrap;
+  bool sync = mode == mode_sync || mode == mode_sync_wrap || mode == mode_sync_one;
   auto const& rate_curve = sync_or_freq_into_scratch(
     block, sync, this_module, param_rate, param_tempo, scratch_time);
 
