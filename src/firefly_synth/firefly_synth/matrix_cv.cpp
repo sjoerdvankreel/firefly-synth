@@ -20,7 +20,7 @@ static int const route_count = 20;
 
 enum { section_main };
 enum { param_type, param_source, param_target, param_min, param_max };
-enum { type_off, type_mul, type_add_abs, type_add_rel, type_add_stk, type_ab_abs, type_ab_rel, type_ab_stk };
+enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_add_rel, type_add_stk, type_ab_abs, type_ab_rel, type_ab_stk };
 
 extern void
 env_plot_length_seconds(
@@ -31,13 +31,15 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}", "Off");
-  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul");
-  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add Abs");
-  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add Rel");
-  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add Stk");
-  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "A.B Abs");
-  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "A.B Rel");
-  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "A.B Stk");
+  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul.Abs");
+  result.emplace_back("{51FBF610-2039-448E-96B0-3C5FDED5DC7C}", "Mul.Rel");
+  result.emplace_back("{D9AEAC34-8E75-4EFD-91D3-6F9058226816}", "Mul.Stk");
+  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add.Abs");
+  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add.Rel");
+  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add.Stk");
+  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "AB.Abs");
+  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "AB.Rel");
+  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "AB.Stk");
   return result;
 }
 
@@ -63,18 +65,18 @@ public:
 static void
 init_voice_default(plugin_state& state)
 {
-  state.set_text_at(module_vcv_matrix, 0, param_type, 0, "Add Abs");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 0, "Add.Abs");
   state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 0, "V.FX 1 Freq");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 1, "A.B Abs");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 1, "AB.Abs");
   state.set_text_at(module_vcv_matrix, 0, param_min, 1, "35");
   state.set_text_at(module_vcv_matrix, 0, param_max, 1, "65");
   state.set_text_at(module_vcv_matrix, 0, param_source, 1, "G.LFO 2");
   state.set_text_at(module_vcv_matrix, 0, param_target, 1, "V.Audio Bal 1");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 2, "A.B Abs");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 2, "AB.Abs");
   state.set_text_at(module_vcv_matrix, 0, param_source, 2, "M.In PB");
   state.set_text_at(module_vcv_matrix, 0, param_target, 2, "V.In PB");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 3, "Mul");
+  state.set_text_at(module_vcv_matrix, 0, param_type, 3, "Mul.Abs");
   state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Note Velo");
   state.set_text_at(module_vcv_matrix, 0, param_target, 3, "V.Out Gain");
 }
@@ -82,12 +84,12 @@ init_voice_default(plugin_state& state)
 static void
 init_global_default(plugin_state& state)
 {
-  state.set_text_at(module_gcv_matrix, 0, param_type, 0, "A.B Abs");
+  state.set_text_at(module_gcv_matrix, 0, param_type, 0, "AB.Abs");
   state.set_text_at(module_gcv_matrix, 0, param_min, 0, "35");
   state.set_text_at(module_gcv_matrix, 0, param_max, 0, "65");
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "G.LFO 1");
   state.set_text_at(module_gcv_matrix, 0, param_target, 0, "G.FX 1 Freq");
-  state.set_text_at(module_gcv_matrix, 0, param_type, 1, "Add Abs");
+  state.set_text_at(module_gcv_matrix, 0, param_type, 1, "Add.Abs");
   state.set_text_at(module_gcv_matrix, 0, param_source, 1, "M.In Mod");
   state.set_text_at(module_gcv_matrix, 0, param_target, 1, "G.FX 1 Freq");
 }
@@ -290,7 +292,12 @@ cv_matrix_topo(
   type.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count); };
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
-  type.gui.submenu->indices.push_back(type_mul);
+  auto mul_menu = std::make_shared<gui_submenu>();
+  mul_menu->name = "Mul";
+  mul_menu->indices.push_back(type_mul_abs);
+  mul_menu->indices.push_back(type_mul_rel);
+  mul_menu->indices.push_back(type_mul_stk);
+  type.gui.submenu->children.push_back(mul_menu);
   auto add_menu = std::make_shared<gui_submenu>();
   add_menu->name = "Add";
   add_menu->indices.push_back(type_add_abs);
@@ -419,9 +426,17 @@ cv_matrix_engine::process(plugin_block& block)
     auto const& max_curve = block.state.own_accurate_automation[param_max][r];
     switch (type)
     {
-    case type_mul:
+    case type_mul_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = min_curve[f] + (1 - min_curve[f]) * mix_signal(max_curve[f], modulated_curve[f], source_curve[f]) * modulated_curve[f];
+        modulated_curve[f] *= min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f];
+      break;
+    case type_mul_rel:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] = target_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * (1 - target_curve[f]);
+      break;
+    case type_mul_stk:
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        modulated_curve[f] = modulated_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * (1 - modulated_curve[f]);
       break;
     case type_add_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
