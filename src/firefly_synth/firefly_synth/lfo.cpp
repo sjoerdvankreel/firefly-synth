@@ -278,7 +278,7 @@ lfo_engine::process(plugin_block& block)
 
     double y_bounded = skew_min + y_curve[f] * skew_range;
     if(_end_value < y_bounded)
-      _end_value = std::pow(_end_value / y_bounded, std::log(y_bounded) / log_half) * y_bounded;
+      _end_value = std::pow(_end_value, std::log(y_bounded) / log_half) * y_bounded;
     else
       _end_value = 1 - std::pow(1 - (_end_value - y_bounded) / (1 - y_bounded), std::log(y_bounded) / log_half) * (1 - y_bounded);
     //check_unipolar(_end_value);
