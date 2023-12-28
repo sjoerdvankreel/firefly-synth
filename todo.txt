@@ -28,6 +28,7 @@ do 5 am and 5 fm routes
 drop "or time into scratch" & friends?
 do skew by log for lfo's too
 env synced partition as synced
+do ramped (skew - phase) lfos
 
 lfo:
 - phase control for non-rand
