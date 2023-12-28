@@ -264,7 +264,7 @@ lfo_engine::process(plugin_block& block)
     {
     case type_saw: _end_value = phase_skew; break;
     case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew)); break;
-    case type_sqr1: _end_value = _phase - (_phase + 0.5 - ((int)(_phase + 0.5))); break;
+    case type_sqr1: _end_value = bipolar_to_unipolar(unipolar_to_bipolar(_phase) - unipolar_to_bipolar(_phase + 0.5 - ((int)(_phase + 0.5)))); break;
     case type_sqr2: _end_value = _phase < x_bounded ? 0.0f : 1.0f; break;
     case type_tri1: _end_value = 1 - std::fabs(unipolar_to_bipolar(phase_skew)); break;
     case type_tri2: _end_value = _phase < x_bounded ? _phase / x_bounded : 1 - (_phase - x_bounded) / (1 - x_bounded) ; break;
