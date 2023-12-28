@@ -253,6 +253,7 @@ lfo_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   bool sync = mode == mode_sync || mode == mode_sync_wrap || mode == mode_sync_one;
   auto const& x_curve = block.state.own_accurate_automation[param_x][0];
+  auto const& y_curve = block.state.own_accurate_automation[param_y][0];
   auto const& rate_curve = sync_or_freq_into_scratch(block, sync, this_module, param_rate, param_tempo, scratch_time);
 
   double log_half = std::log(0.5);
@@ -269,8 +270,21 @@ lfo_engine::process(plugin_block& block)
     case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew)); break;
     case type_tri2: _end_value = _phase < x_bounded ? _phase / x_bounded : 1 - (_phase - x_bounded) / (1 - x_bounded) ; break;
     }
-    
-    check_unipolar(_end_value);    
+    check_unipolar(_end_value);
+
+    //if (slope_pos < splt_bnd)
+      //return std::pow(slope_pos / splt_bnd, exp) * splt_bnd;
+    //return 1 - std::pow(1 - (slope_pos - splt_bnd) / (1 - splt_bnd), exp) * (1 - splt_bnd);
+
+    double y_bounded = skew_min + y_curve[f] * skew_range;
+    if(_end_value < y_bounded)
+      _end_value = std::pow(_end_value / y_bounded, std::log(y_bounded) / log_half) * y_bounded;
+    else
+      _end_value = 1 - std::pow(1 - (_end_value - y_bounded) / (1 - y_bounded), std::log(y_bounded) / log_half) * (1 - y_bounded);
+    //check_unipolar(_end_value);
+    //assert(-0.01f <= _end_value && _end_value <= 1.01f);
+    _end_value = std::clamp(_end_value, 0.0f, 1.0f);
+
     block.state.own_cv[0][0][f] = _end_value;
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
