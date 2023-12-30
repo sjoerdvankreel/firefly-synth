@@ -244,9 +244,9 @@ lfo_engine::reset(plugin_block const* block)
 void
 lfo_engine::process(plugin_block& block)
 {
-  //double const skew_min = 0.0001;
-  //double const skew_max = 0.9999;
-  //double const skew_range = skew_max - skew_min;
+  double const skew_min = 0.0001;
+  double const skew_max = 0.9999;
+  double const skew_range = skew_max - skew_min;
 
   int mode = block.state.own_block_automation[param_mode][0].step();
   if (mode == mode_off)
@@ -266,13 +266,13 @@ lfo_engine::process(plugin_block& block)
   int this_module = _global ? module_glfo : module_vlfo;
   int type = block.state.own_block_automation[param_type][0].step();
   bool sync = mode == mode_sync || mode == mode_sync_wrap || mode == mode_sync_one;
-  //auto const& x_curve = block.state.own_accurate_automation[param_x][0];
+  auto const& x_curve = block.state.own_accurate_automation[param_x][0];
   auto const& rate_curve = sync_or_freq_into_scratch(block, sync, this_module, param_rate, param_tempo, scratch_time);
 
   //double log_half = std::log(0.5);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    //double x_bounded = skew_min + x_curve[f] * skew_range;
+    double x_bounded = skew_min + x_curve[f] * skew_range;
     //double phase_skew = std::pow((double)_phase, std::log(x_bounded) / log_half);
     //double phase_skew2 = _phase < x_curve[f]? (_phase * 0.5f / x_curve[f]): 0.5f + 0.5f * (_phase - x_curve[f]) / (1 - x_curve[f]);
     switch (type)
@@ -281,6 +281,9 @@ lfo_engine::process(plugin_block& block)
     case type_sqr_plain: _end_value = _phase < 0.5f ? 0 : 1; break;
     case type_tri_plain: _end_value = 1 - std::fabs(unipolar_to_bipolar(_phase)); break;
     case type_sin_plain: _end_value = bipolar_to_unipolar(std::sin(_phase * 2.0f * pi32)); break;
+    case type_saw_lin: _end_value = _phase < x_bounded ? _phase / x_bounded * 0.5f : 0.5f + (_phase - x_bounded) / (1 - x_bounded) * 0.5f; break;
+    case type_sqr_lin: _end_value = (_phase < x_bounded ? _phase / x_bounded * 0.5f : 0.5f + (_phase - x_bounded) / (1 - x_bounded) * 0.5f) < 0.5f? 0: 1; break;
+    case type_tri_lin: _end_value = 1 - std::fabs(unipolar_to_bipolar(_phase < x_bounded ? _phase / x_bounded * 0.5f : 0.5f + (_phase - x_bounded) / (1 - x_bounded) * 0.5f)); break;
     default: break;
 
     //case type_saw: _end_value = phase_skew2; break;
