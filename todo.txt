@@ -42,7 +42,7 @@ lfo:
 
 * get some linux folks to comment (ycollete?)
 * continuing
-- profile performance
+- profile performance + maybe do cpu efficient versions (non-sloped ramps etc)
 - check all param_automate
 - keep updating the demo stuff
 
