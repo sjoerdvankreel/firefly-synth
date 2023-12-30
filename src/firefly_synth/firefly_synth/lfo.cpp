@@ -23,29 +23,99 @@ enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
 //enum { type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 enum { 
-  type_sin_plain, type_saw_plain, type_sqr_plain, type_tri_plain, 
-  type_sin_lin, type_saw_lin, type_sqr_lin, type_tri_lin, 
-  type_sin_log, type_saw_log, type_sqr_log, type_tri_log };
+  type_sin_x_plain_y_plain, type_sin_x_plain_y_lin, type_sin_x_plain_y_log, 
+  type_sin_x_lin_y_plain, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
+  type_sin_x_log_y_plain, type_sin_x_log_y_lin, type_sin_x_log_y_log,
+  type_saw_x_plain_y_plain, type_saw_x_plain_y_lin, type_saw_x_plain_y_log,
+  type_saw_x_lin_y_plain, type_saw_x_lin_y_lin, type_saw_x_lin_y_log,
+  type_saw_x_log_y_plain, type_saw_x_log_y_lin, type_saw_x_log_y_log,
+  type_sqr_x_plain_y_plain, type_sqr_x_plain_y_lin, type_sqr_x_plain_y_log,
+  type_sqr_x_lin_y_plain, type_sqr_x_lin_y_lin, type_sqr_x_lin_y_log,
+  type_sqr_x_log_y_plain, type_sqr_x_log_y_lin, type_sqr_x_log_y_log,
+  type_tri_x_plain_y_plain, type_tri_x_plain_y_lin, type_tri_x_plain_y_log,
+  type_tri_x_lin_y_plain, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
+  type_tri_x_log_y_plain, type_tri_x_log_y_lin, type_tri_x_log_y_log };
 
-static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
 static bool is_random(int type) { return false; }
+static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
+static bool is_sin(int type) { return type_sin_x_plain_y_plain <= type && type <= type_sin_x_log_y_log; };
+static bool is_saw(int type) { return type_saw_x_plain_y_plain <= type && type <= type_saw_x_log_y_log; };
+static bool is_sqr(int type) { return type_sqr_x_plain_y_plain <= type && type <= type_sqr_x_log_y_log; };
+static bool is_tri(int type) { return type_tri_x_plain_y_plain <= type && type <= type_tri_x_log_y_log; };
+
+static bool is_x_lin(int type) { return
+  type == type_sin_x_lin_y_plain || type == type_sin_x_lin_y_lin || type == type_sin_x_lin_y_log ||
+  type == type_saw_x_lin_y_plain || type == type_saw_x_lin_y_lin || type == type_saw_x_lin_y_log ||
+  type == type_sqr_x_lin_y_plain || type == type_sqr_x_lin_y_lin || type == type_sqr_x_lin_y_log ||
+  type == type_tri_x_lin_y_plain || type == type_tri_x_lin_y_lin || type == type_tri_x_lin_y_log; }
+static bool is_x_log(int type) { return
+  type == type_sin_x_log_y_plain || type == type_sin_x_log_y_lin || type == type_sin_x_log_y_log ||
+  type == type_saw_x_log_y_plain || type == type_saw_x_log_y_lin || type == type_saw_x_log_y_log ||
+  type == type_sqr_x_log_y_plain || type == type_sqr_x_log_y_lin || type == type_sqr_x_log_y_log ||
+  type == type_tri_x_log_y_plain || type == type_tri_x_log_y_lin || type == type_tri_x_log_y_log; }
+static bool is_x_plain(int type) { return
+  type == type_sin_x_plain_y_plain || type == type_sin_x_plain_y_lin || type == type_sin_x_plain_y_log ||
+  type == type_saw_x_plain_y_plain || type == type_saw_x_plain_y_lin || type == type_saw_x_plain_y_log ||
+  type == type_sqr_x_plain_y_plain || type == type_sqr_x_plain_y_lin || type == type_sqr_x_plain_y_log ||
+  type == type_tri_x_plain_y_plain || type == type_tri_x_plain_y_lin || type == type_tri_x_plain_y_log; }
+
+static bool is_y_lin(int type) { return
+  type == type_sin_x_plain_y_lin || type == type_sin_x_lin_y_lin || type == type_sin_x_log_y_lin ||
+  type == type_saw_x_plain_y_lin || type == type_saw_x_lin_y_lin || type == type_saw_x_log_y_lin ||
+  type == type_sqr_x_plain_y_lin || type == type_sqr_x_lin_y_lin || type == type_sqr_x_log_y_lin ||
+  type == type_tri_x_plain_y_lin || type == type_tri_x_lin_y_lin || type == type_tri_x_log_y_lin; }
+static bool is_y_log(int type) { return
+  type == type_sin_x_plain_y_log || type == type_sin_x_lin_y_log || type == type_sin_x_log_y_log ||
+  type == type_saw_x_plain_y_log || type == type_saw_x_lin_y_log || type == type_saw_x_log_y_log ||
+  type == type_sqr_x_plain_y_log || type == type_sqr_x_lin_y_log || type == type_sqr_x_log_y_log ||
+  type == type_tri_x_plain_y_log || type == type_tri_x_lin_y_log || type == type_tri_x_log_y_log; }
+static bool is_y_plain(int type) { return
+  type == type_sin_x_plain_y_plain || type == type_sin_x_lin_y_plain || type == type_sin_x_log_y_plain ||
+  type == type_saw_x_plain_y_plain || type == type_saw_x_lin_y_plain || type == type_saw_x_log_y_plain ||
+  type == type_sqr_x_plain_y_plain || type == type_sqr_x_lin_y_plain || type == type_sqr_x_log_y_plain ||
+  type == type_tri_x_plain_y_plain || type == type_tri_x_lin_y_plain || type == type_tri_x_log_y_plain; }
 
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{DE8FF99D-C83F-4723-B8DA-FB1C4877B1F4}", "Sin.XPln/YLog");
-  result.emplace_back("{01636F45-4734-4762-B475-E4CA15BAE156}", "Saw.Pln");
-  result.emplace_back("{497E9796-48D2-4C33-B502-0C3AE3FD03D1}", "Sqr.Pln");
-  result.emplace_back("{E1F35D2F-CCFF-46F9-A669-BFC4719211AC}", "Tri.Pln");
-  result.emplace_back("{65588A69-520F-4453-850B-A82F6881B7E0}", "Sin.Lin");
-  result.emplace_back("{B587443D-2211-4BB7-8105-AA86F5B3820A}", "Saw.Lin");
-  result.emplace_back("{37E80713-720D-43AA-A582-B164D6B328D4}", "Sqr.Lin");
-  result.emplace_back("{6EEB99FA-0880-49F9-ABE6-5D84C7D8C82B}", "Tri.Lin");
-  result.emplace_back("{68DD813A-A699-4AA8-9FF6-0490D2E37858}", "Sin.Log");
-  result.emplace_back("{E4E8E1F3-0859-49D6-870D-0609C426BA1B}", "Saw.Log");
-  result.emplace_back("{CF0DF88E-0184-436F-9C5B-A1E9AA0DDBD8}", "Sqr.Log");
-  result.emplace_back("{08F0C843-2728-4D92-BB2B-F6BC72CEB020}", "Tri.Log");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XPln/YPln");
+  result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.XPln/YLin");
+  result.emplace_back("{125FB2CC-95EB-499E-97CE-469C72B37D73}", "Sin.XPln/YLog");
+  result.emplace_back("{83416F5F-726A-4DC2-908F-181FEC32665F}", "Sin.XLin/YPln");
+  result.emplace_back("{26C1E305-7CD0-443B-A474-6CFA91620348}", "Sin.XLin/YLin");
+  result.emplace_back("{DB007351-F9D0-4CC9-A6A7-61179CA4B05D}", "Sin.XLin/YLog");
+  result.emplace_back("{97C16D10-0850-4957-BB9A-C69AEEC7EA3C}", "Sin.XLog/YPln");
+  result.emplace_back("{19354C8F-8527-4C5F-A131-9DB2804D0683}", "Sin.XLog/YLin");
+  result.emplace_back("{9B28E73F-BE52-4463-9202-4B569505CE82}", "Sin.XLog/YLog");
+  result.emplace_back("{06B82D77-D78A-4B39-9DB1-C921C36EF4D1}", "Saw.XPln/YPln");
+  result.emplace_back("{A49D1C16-B20F-4E48-99A2-EB874B50B99C}", "Saw.XPln/YLin");
+  result.emplace_back("{361F0904-E6F1-4E4E-B756-9E55B73700CD}", "Saw.XPln/YLog");
+  result.emplace_back("{28C8EE94-20DE-4ECE-AEBD-657C28435BFA}", "Saw.XLin/YPln");
+  result.emplace_back("{D592F9C5-6078-43DA-98BB-FC1ACF43112B}", "Saw.XLin/YLin");
+  result.emplace_back("{EB264A9D-AC76-487C-B62A-5A45BFC4DD26}", "Saw.XLin/YLog");
+  result.emplace_back("{32276066-B2D1-4712-8F99-59B6F91E6E67}", "Saw.XLog/YPln");
+  result.emplace_back("{0489CEF2-1B9B-4C78-AEF3-FEBB3C4EEAC1}", "Saw.XLog/YLin");
+  result.emplace_back("{539C72F6-D497-4947-A91F-84A705496D0F}", "Saw.XLog/YLog");
+  result.emplace_back("{F396D88F-FF8B-4790-9173-7F90A3847072}", "Sqr.XPln/YPln");
+  result.emplace_back("{4B5A2D22-968C-4190-8778-3483E08FA5F1}", "Sqr.XPln/YLin");
+  result.emplace_back("{0AC9078E-4B23-4B2B-951C-9DE47C96F514}", "Sqr.XPln/YLog");
+  result.emplace_back("{EC11B402-6DD8-442A-A5B4-D236E0691F18}", "Sqr.XLin/YPln");
+  result.emplace_back("{9857C44E-E2F7-465E-90DC-5119CAC1C45E}", "Sqr.XLin/YLin");
+  result.emplace_back("{773E9D4D-ABA2-44DF-82AD-166EFADF8463}", "Sqr.XLin/YLog");
+  result.emplace_back("{A77B8F09-FEA2-4488-A96F-299666834987}", "Sqr.XLog/YPln");
+  result.emplace_back("{8E4665F6-8507-4BFB-93CD-02EF577F6FA1}", "Sqr.XLog/YLin");
+  result.emplace_back("{80FE0AEC-5568-4047-8505-27EE6EF1061C}", "Sqr.XLog/YLog");
+  result.emplace_back("{428C8D6A-32D1-40EC-AC85-F0DB18053507}", "Tri.XPln/YPln");
+  result.emplace_back("{DE9C5AB1-2CE9-4566-A0DA-70090FA82AD7}", "Tri.XPln/YLin");
+  result.emplace_back("{C3411319-4B6C-4962-81D6-B20F160F8E03}", "Tri.XPln/YLog");
+  result.emplace_back("{84B08C5F-CB0D-4F21-8EB6-E1D2830A7EC4}", "Tri.XLin/YPln");
+  result.emplace_back("{770364D6-EC0D-4CB3-8736-F8B48B0E070E}", "Tri.XLin/YLin");
+  result.emplace_back("{3AA84041-D517-48D0-9870-48D6C77FB613}", "Tri.XLin/YLog");
+  result.emplace_back("{E89FA20C-81E0-4DBB-93DC-06F0D5BAB0C5}", "Tri.XLog/YPln");
+  result.emplace_back("{9D282F75-6517-4291-AE7F-DE65DC0FB582}", "Tri.XLog/YLin");
+  result.emplace_back("{90C08110-BDD3-4343-9B81-60ADD7FE7D3B}", "Tri.XLog/YLog");
+
   //result.emplace_back("{83EF2C08-E5A1-4517-AC8C-D45890936A96}", "Rnd.Y");
   //result.emplace_back("{84BFAC67-D748-4499-813F-0B7FCEBF174B}", "Rnd.XY");
   //result.emplace_back("{F6B72990-D053-4D3A-9B8D-391DDB748DC1}", "RndF.Y");
@@ -185,9 +255,18 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Plain", {type_sin_plain, type_saw_plain, type_sqr_plain, type_tri_plain });
-  type.gui.submenu->add_submenu("Linear", { type_sin_lin, type_saw_lin, type_sqr_lin, type_tri_lin });
-  type.gui.submenu->add_submenu("Log", { type_sin_log, type_saw_log, type_sqr_log, type_tri_log });
+  type.gui.submenu->add_submenu("Sin", { type_sin_x_plain_y_plain, type_sin_x_plain_y_lin, type_sin_x_plain_y_log,
+    type_sin_x_lin_y_plain, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
+    type_sin_x_log_y_plain, type_sin_x_log_y_lin, type_sin_x_log_y_log });
+  type.gui.submenu->add_submenu("Saw", { type_saw_x_plain_y_plain, type_saw_x_plain_y_lin, type_saw_x_plain_y_log,
+    type_saw_x_lin_y_plain, type_saw_x_lin_y_lin, type_saw_x_lin_y_log,
+    type_saw_x_log_y_plain, type_saw_x_log_y_lin, type_saw_x_log_y_log });
+  type.gui.submenu->add_submenu("Sqr", { type_sqr_x_plain_y_plain, type_sqr_x_plain_y_lin, type_sqr_x_plain_y_log,
+    type_sqr_x_lin_y_plain, type_sqr_x_lin_y_lin, type_sqr_x_lin_y_log,
+    type_sqr_x_log_y_plain, type_sqr_x_log_y_lin, type_sqr_x_log_y_log });
+  type.gui.submenu->add_submenu("Tri", {type_tri_x_plain_y_plain, type_tri_x_plain_y_lin, type_tri_x_plain_y_log,
+    type_tri_x_lin_y_plain, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
+    type_tri_x_log_y_plain, type_tri_x_log_y_lin, type_tri_x_log_y_log });
   // TODO type.gui.submenu->add_submenu("Random", { type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free });
 
   auto& x = result.params.emplace_back(make_param(
@@ -230,21 +309,21 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 }
 
 static float
-skew_x_none(float phase, float x)
-{ return phase; }
+skew_none(float in, float skew)
+{ return in; }
 
 static float
-skew_x_log(float phase, float x)
+skew_log(float in, float skew)
 {
-  float x_bounded = skew_min + x * skew_range;
-  return std::pow(phase, std::log(x_bounded) / log_half);
+  float skew_bounded = skew_min + skew * skew_range;
+  return std::pow(in, std::log(skew_bounded) / log_half);
 }
 
 static float
-skew_x_linear(float phase, float x)
+skew_linear(float in, float skew)
 {
-  float x_bounded = skew_min + x * skew_range;
-  return phase < x_bounded ? phase / x_bounded * 0.5f : 0.5f + (phase - x_bounded) / (1 - x_bounded) * 0.5f;
+  float skew_bounded = skew_min + skew * skew_range;
+  return in < skew_bounded ? in / skew_bounded * 0.5f : 0.5f + (in - skew_bounded) / (1 - skew_bounded) * 0.5f;
 }
 
 void
