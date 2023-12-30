@@ -24,7 +24,7 @@ enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_ad
 
 extern void
 env_plot_length_seconds(
-  plugin_state const& state, int slot, float& dahds, float& dahdsr);
+  plugin_state const& state, int slot, float& dahds, float& dahdsrf);
 
 static std::vector<list_item>
 type_items()
@@ -192,9 +192,9 @@ render_graph(
 
   // scale to longest env
   float dahds = 1.0f;
-  float dahdsr = 1.0f;
+  float dahdsrf = 1.0f;
   float max_dahds = 1.0f;
-  float max_dahdsr = 1.0f;
+  float max_dahdsrf = 1.0f;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
   for(int r = 0; r < route_count; r++)
     if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
@@ -203,18 +203,18 @@ render_graph(
         int si = state.get_plain_at(map.module_index, map.module_slot, param_source, r).step();
         if (sources[si].module_index == module_env)
         {
-          env_plot_length_seconds(state, sources[si].module_slot, dahds, dahdsr);
-          if (dahdsr > max_dahdsr)
+          env_plot_length_seconds(state, sources[si].module_slot, dahds, dahdsrf);
+          if (dahdsrf > max_dahdsrf)
           {
             max_dahds = dahds;
-            max_dahdsr = dahdsr;
+            max_dahdsrf = dahdsrf;
           }
         }
       }
 
   auto const params = make_graph_engine_params();
-  int sample_rate = params.max_frame_count / dahdsr;
-  int voice_release_at = dahds / dahdsr * params.max_frame_count;
+  int sample_rate = params.max_frame_count / dahdsrf;
+  int voice_release_at = dahds / dahdsrf * params.max_frame_count;
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
   if(map.module_index == module_vcv_matrix)

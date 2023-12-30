@@ -13,7 +13,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum class env_stage { delay, attack, hold, decay, sustain, release, end };
+float max_filter_time_ms = 200;
+enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { section_main, section_slope, section_dhadsr };
 enum { scratch_delay, scratch_attack, scratch_hold, scratch_decay, scratch_release, scratch_count };
@@ -78,20 +79,21 @@ init_default(plugin_state& state)
 { state.set_text_at(module_env, 1, param_on, 0, "On"); }
 
 void
-env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float& dahdsr)
+env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float& dahdsrf)
 {
   float const bpm = 120;
   int type = state.get_plain_at(module_env, slot, param_type, 0).step();
   bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
+  float filter = state.get_plain_at(module_env, slot, param_filter, 0).real() / 1000.0f;
   float hold = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
   float delay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
   float decay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
   float attack = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
   float release = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
 
-  float sustain = !is_sustain(type) ? 0.0f : std::max((delay + attack + hold + decay + release) / 5, 0.01f);
+  float sustain = !is_sustain(type) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
   dahds = delay + attack + hold + decay + sustain;
-  dahdsr = dahds + release;
+  dahdsrf = dahds + release + filter;
 }
 
 static graph_engine_params
@@ -117,14 +119,14 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     return graph_data(graph_data_type::off, {});
 
   float dahds;
-  float dahdsr;
-  env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsr);
+  float dahdsrf;
+  env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsrf);
   std::ostringstream stream;
-  stream << std::fixed << std::setprecision(1) << dahdsr;
+  stream << std::fixed << std::setprecision(1) << dahdsrf;
 
   auto const params = make_graph_engine_params();
-  int sample_rate = params.max_frame_count / dahdsr;
-  int voice_release_at = dahds / dahdsr * params.max_frame_count;
+  int sample_rate = params.max_frame_count / dahdsrf;
+  int voice_release_at = dahds / dahdsrf * params.max_frame_count;
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   auto const* block = engine->process_default(module_env, mapping.module_slot);
   engine->process_end();
@@ -189,7 +191,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& filter = result.params.emplace_back(make_param(
     make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Filter", "Flt", true, param_filter, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -327,7 +329,7 @@ env_engine::reset(plugin_block const* block)
 
   auto const& block_auto = block->state.own_block_automation;
   float filter = block_auto[param_filter][0].real();
-  _filter.set(block->sample_rate, filter * 0.1);
+  _filter.set(block->sample_rate, filter / 1000.0f);
 
   if(!is_log(block_auto[param_type][0].step())) return;
   float ds = block_auto[param_decay_slope][0].real();
@@ -393,7 +395,21 @@ env_engine::process_loop(
     if (_stage == env_stage::end)
     {
       _release_level = 0;
-      block.state.own_cv[0][0][f] = _filter.next(0);
+      block.state.own_cv[0][0][f] = 0;
+      continue;
+    }
+
+    // need some time for the filter to fade out otherwise we'll pop on fast releases
+    if (_stage == env_stage::filter)
+    {
+      _release_level = 0;
+      float level = _filter.next(0);
+      block.state.own_cv[0][0][f] = level;
+      if (level < 1e-5)
+      {
+        _stage = env_stage::end;
+        block.voice->finished |= block.module_slot == 0;
+      }
       continue;
     }
 
@@ -448,8 +464,8 @@ env_engine::process_loop(
     case env_stage::hold: _stage = env_stage::decay; break;
     case env_stage::attack: _stage = env_stage::hold; break;
     case env_stage::delay: _stage = env_stage::attack; break;
+    case env_stage::release: _stage = env_stage::filter; break;
     case env_stage::decay: _stage = is_sustain(type) ? env_stage::sustain : env_stage::release; break;
-    case env_stage::release: _stage = env_stage::end; block.voice->finished |= block.module_slot == 0; break;
     default: assert(false); break;
     }
   }
