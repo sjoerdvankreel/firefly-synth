@@ -23,57 +23,61 @@ enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
 //enum { type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 enum { 
-  type_sin_x_plain_y_plain, type_sin_x_plain_y_lin, type_sin_x_plain_y_log, 
-  type_sin_x_lin_y_plain, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
-  type_sin_x_log_y_plain, type_sin_x_log_y_lin, type_sin_x_log_y_log,
-  type_saw_x_plain_y_plain, type_saw_x_plain_y_lin, type_saw_x_plain_y_log,
-  type_saw_x_lin_y_plain, type_saw_x_lin_y_lin, type_saw_x_lin_y_log,
-  type_saw_x_log_y_plain, type_saw_x_log_y_lin, type_saw_x_log_y_log,
-  type_sqr_x_plain_y_plain, type_sqr_x_plain_y_lin, type_sqr_x_plain_y_log,
-  type_sqr_x_lin_y_plain, type_sqr_x_lin_y_lin, type_sqr_x_lin_y_log,
-  type_sqr_x_log_y_plain, type_sqr_x_log_y_lin, type_sqr_x_log_y_log,
-  type_tri_x_plain_y_plain, type_tri_x_plain_y_lin, type_tri_x_plain_y_log,
-  type_tri_x_lin_y_plain, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
-  type_tri_x_log_y_plain, type_tri_x_log_y_lin, type_tri_x_log_y_log };
+  type_sin_x_pln_y_pln, type_sin_x_pln_y_lin, type_sin_x_pln_y_log, 
+  type_sin_x_lin_y_pln, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
+  type_sin_x_log_y_pln, type_sin_x_log_y_lin, type_sin_x_log_y_log,
+  type_saw_x_pln_y_pln, type_saw_x_pln_y_lin, type_saw_x_pln_y_log,
+  type_saw_x_lin_y_pln, type_saw_x_lin_y_lin, type_saw_x_lin_y_log,
+  type_saw_x_log_y_pln, type_saw_x_log_y_lin, type_saw_x_log_y_log,
+  type_sqr_x_pln_y_pln, type_sqr_x_pln_y_lin, type_sqr_x_pln_y_log,
+  type_sqr_x_lin_y_pln, type_sqr_x_lin_y_lin, type_sqr_x_lin_y_log,
+  type_sqr_x_log_y_pln, type_sqr_x_log_y_lin, type_sqr_x_log_y_log,
+  type_tri_x_pln_y_pln, type_tri_x_pln_y_lin, type_tri_x_pln_y_log,
+  type_tri_x_lin_y_pln, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
+  type_tri_x_log_y_pln, type_tri_x_log_y_lin, type_tri_x_log_y_log };
+
+static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
+static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 
 static bool is_random(int type) { return false; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
-static bool is_sin(int type) { return type_sin_x_plain_y_plain <= type && type <= type_sin_x_log_y_log; };
-static bool is_saw(int type) { return type_saw_x_plain_y_plain <= type && type <= type_saw_x_log_y_log; };
-static bool is_sqr(int type) { return type_sqr_x_plain_y_plain <= type && type <= type_sqr_x_log_y_log; };
-static bool is_tri(int type) { return type_tri_x_plain_y_plain <= type && type <= type_tri_x_log_y_log; };
+
+static bool is_sin(int type) { return type_sin_x_pln_y_pln <= type && type <= type_sin_x_log_y_log; };
+static bool is_saw(int type) { return type_saw_x_pln_y_pln <= type && type <= type_saw_x_log_y_log; };
+static bool is_sqr(int type) { return type_sqr_x_pln_y_pln <= type && type <= type_sqr_x_log_y_log; };
+static bool is_tri(int type) { return type_tri_x_pln_y_pln <= type && type <= type_tri_x_log_y_log; };
 
 static bool is_x_lin(int type) { return
-  type == type_sin_x_lin_y_plain || type == type_sin_x_lin_y_lin || type == type_sin_x_lin_y_log ||
-  type == type_saw_x_lin_y_plain || type == type_saw_x_lin_y_lin || type == type_saw_x_lin_y_log ||
-  type == type_sqr_x_lin_y_plain || type == type_sqr_x_lin_y_lin || type == type_sqr_x_lin_y_log ||
-  type == type_tri_x_lin_y_plain || type == type_tri_x_lin_y_lin || type == type_tri_x_lin_y_log; }
+  type == type_sin_x_lin_y_pln || type == type_sin_x_lin_y_lin || type == type_sin_x_lin_y_log ||
+  type == type_saw_x_lin_y_pln || type == type_saw_x_lin_y_lin || type == type_saw_x_lin_y_log ||
+  type == type_sqr_x_lin_y_pln || type == type_sqr_x_lin_y_lin || type == type_sqr_x_lin_y_log ||
+  type == type_tri_x_lin_y_pln || type == type_tri_x_lin_y_lin || type == type_tri_x_lin_y_log; }
 static bool is_x_log(int type) { return
-  type == type_sin_x_log_y_plain || type == type_sin_x_log_y_lin || type == type_sin_x_log_y_log ||
-  type == type_saw_x_log_y_plain || type == type_saw_x_log_y_lin || type == type_saw_x_log_y_log ||
-  type == type_sqr_x_log_y_plain || type == type_sqr_x_log_y_lin || type == type_sqr_x_log_y_log ||
-  type == type_tri_x_log_y_plain || type == type_tri_x_log_y_lin || type == type_tri_x_log_y_log; }
+  type == type_sin_x_log_y_pln || type == type_sin_x_log_y_lin || type == type_sin_x_log_y_log ||
+  type == type_saw_x_log_y_pln || type == type_saw_x_log_y_lin || type == type_saw_x_log_y_log ||
+  type == type_sqr_x_log_y_pln || type == type_sqr_x_log_y_lin || type == type_sqr_x_log_y_log ||
+  type == type_tri_x_log_y_pln || type == type_tri_x_log_y_lin || type == type_tri_x_log_y_log; }
 static bool is_x_plain(int type) { return
-  type == type_sin_x_plain_y_plain || type == type_sin_x_plain_y_lin || type == type_sin_x_plain_y_log ||
-  type == type_saw_x_plain_y_plain || type == type_saw_x_plain_y_lin || type == type_saw_x_plain_y_log ||
-  type == type_sqr_x_plain_y_plain || type == type_sqr_x_plain_y_lin || type == type_sqr_x_plain_y_log ||
-  type == type_tri_x_plain_y_plain || type == type_tri_x_plain_y_lin || type == type_tri_x_plain_y_log; }
+  type == type_sin_x_pln_y_pln || type == type_sin_x_pln_y_lin || type == type_sin_x_pln_y_log ||
+  type == type_saw_x_pln_y_pln || type == type_saw_x_pln_y_lin || type == type_saw_x_pln_y_log ||
+  type == type_sqr_x_pln_y_pln || type == type_sqr_x_pln_y_lin || type == type_sqr_x_pln_y_log ||
+  type == type_tri_x_pln_y_pln || type == type_tri_x_pln_y_lin || type == type_tri_x_pln_y_log; }
 
 static bool is_y_lin(int type) { return
-  type == type_sin_x_plain_y_lin || type == type_sin_x_lin_y_lin || type == type_sin_x_log_y_lin ||
-  type == type_saw_x_plain_y_lin || type == type_saw_x_lin_y_lin || type == type_saw_x_log_y_lin ||
-  type == type_sqr_x_plain_y_lin || type == type_sqr_x_lin_y_lin || type == type_sqr_x_log_y_lin ||
-  type == type_tri_x_plain_y_lin || type == type_tri_x_lin_y_lin || type == type_tri_x_log_y_lin; }
+  type == type_sin_x_pln_y_lin || type == type_sin_x_lin_y_lin || type == type_sin_x_log_y_lin ||
+  type == type_saw_x_pln_y_lin || type == type_saw_x_lin_y_lin || type == type_saw_x_log_y_lin ||
+  type == type_sqr_x_pln_y_lin || type == type_sqr_x_lin_y_lin || type == type_sqr_x_log_y_lin ||
+  type == type_tri_x_pln_y_lin || type == type_tri_x_lin_y_lin || type == type_tri_x_log_y_lin; }
 static bool is_y_log(int type) { return
-  type == type_sin_x_plain_y_log || type == type_sin_x_lin_y_log || type == type_sin_x_log_y_log ||
-  type == type_saw_x_plain_y_log || type == type_saw_x_lin_y_log || type == type_saw_x_log_y_log ||
-  type == type_sqr_x_plain_y_log || type == type_sqr_x_lin_y_log || type == type_sqr_x_log_y_log ||
-  type == type_tri_x_plain_y_log || type == type_tri_x_lin_y_log || type == type_tri_x_log_y_log; }
+  type == type_sin_x_pln_y_log || type == type_sin_x_lin_y_log || type == type_sin_x_log_y_log ||
+  type == type_saw_x_pln_y_log || type == type_saw_x_lin_y_log || type == type_saw_x_log_y_log ||
+  type == type_sqr_x_pln_y_log || type == type_sqr_x_lin_y_log || type == type_sqr_x_log_y_log ||
+  type == type_tri_x_pln_y_log || type == type_tri_x_lin_y_log || type == type_tri_x_log_y_log; }
 static bool is_y_plain(int type) { return
-  type == type_sin_x_plain_y_plain || type == type_sin_x_lin_y_plain || type == type_sin_x_log_y_plain ||
-  type == type_saw_x_plain_y_plain || type == type_saw_x_lin_y_plain || type == type_saw_x_log_y_plain ||
-  type == type_sqr_x_plain_y_plain || type == type_sqr_x_lin_y_plain || type == type_sqr_x_log_y_plain ||
-  type == type_tri_x_plain_y_plain || type == type_tri_x_lin_y_plain || type == type_tri_x_log_y_plain; }
+  type == type_sin_x_pln_y_pln || type == type_sin_x_lin_y_pln || type == type_sin_x_log_y_pln ||
+  type == type_saw_x_pln_y_pln || type == type_saw_x_lin_y_pln || type == type_saw_x_log_y_pln ||
+  type == type_sqr_x_pln_y_pln || type == type_sqr_x_lin_y_pln || type == type_sqr_x_log_y_pln ||
+  type == type_tri_x_pln_y_pln || type == type_tri_x_lin_y_pln || type == type_tri_x_log_y_pln; }
 
 static std::vector<list_item>
 type_items()
@@ -147,8 +151,11 @@ public module_engine {
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void reset(plugin_block const*) override;
-  void process(plugin_block& block) override;
   lfo_engine(bool global) : _global(global) {}
+
+  void process(plugin_block& block) override;
+  template <class Calc, class SkewX, class SkewY>
+  void process_loop(plugin_block& block, Calc calc, SkewX skew_x, SkewY skew_y);
 };
 
 static void
@@ -255,18 +262,18 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Sin", { type_sin_x_plain_y_plain, type_sin_x_plain_y_lin, type_sin_x_plain_y_log,
-    type_sin_x_lin_y_plain, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
-    type_sin_x_log_y_plain, type_sin_x_log_y_lin, type_sin_x_log_y_log });
-  type.gui.submenu->add_submenu("Saw", { type_saw_x_plain_y_plain, type_saw_x_plain_y_lin, type_saw_x_plain_y_log,
-    type_saw_x_lin_y_plain, type_saw_x_lin_y_lin, type_saw_x_lin_y_log,
-    type_saw_x_log_y_plain, type_saw_x_log_y_lin, type_saw_x_log_y_log });
-  type.gui.submenu->add_submenu("Sqr", { type_sqr_x_plain_y_plain, type_sqr_x_plain_y_lin, type_sqr_x_plain_y_log,
-    type_sqr_x_lin_y_plain, type_sqr_x_lin_y_lin, type_sqr_x_lin_y_log,
-    type_sqr_x_log_y_plain, type_sqr_x_log_y_lin, type_sqr_x_log_y_log });
-  type.gui.submenu->add_submenu("Tri", {type_tri_x_plain_y_plain, type_tri_x_plain_y_lin, type_tri_x_plain_y_log,
-    type_tri_x_lin_y_plain, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
-    type_tri_x_log_y_plain, type_tri_x_log_y_lin, type_tri_x_log_y_log });
+  type.gui.submenu->add_submenu("Sin", { type_sin_x_pln_y_pln, type_sin_x_pln_y_lin, type_sin_x_pln_y_log,
+    type_sin_x_lin_y_pln, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
+    type_sin_x_log_y_pln, type_sin_x_log_y_lin, type_sin_x_log_y_log });
+  type.gui.submenu->add_submenu("Saw", { type_saw_x_pln_y_pln, type_saw_x_pln_y_lin, type_saw_x_pln_y_log,
+    type_saw_x_lin_y_pln, type_saw_x_lin_y_lin, type_saw_x_lin_y_log,
+    type_saw_x_log_y_pln, type_saw_x_log_y_lin, type_saw_x_log_y_log });
+  type.gui.submenu->add_submenu("Sqr", { type_sqr_x_pln_y_pln, type_sqr_x_pln_y_lin, type_sqr_x_pln_y_log,
+    type_sqr_x_lin_y_pln, type_sqr_x_lin_y_lin, type_sqr_x_lin_y_log,
+    type_sqr_x_log_y_pln, type_sqr_x_log_y_lin, type_sqr_x_log_y_log });
+  type.gui.submenu->add_submenu("Tri", {type_tri_x_pln_y_pln, type_tri_x_pln_y_lin, type_tri_x_pln_y_log,
+    type_tri_x_lin_y_pln, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
+    type_tri_x_log_y_pln, type_tri_x_log_y_lin, type_tri_x_log_y_log });
   // TODO type.gui.submenu->add_submenu("Random", { type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free });
 
   auto& x = result.params.emplace_back(make_param(
@@ -308,9 +315,16 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   return result;
 }
 
+static float calc_saw(float in) { return in; }
+static float calc_sqr(float in) { return in < 0.5f ? 0 : 1; }
+static float calc_tri(float in) { return 1 - std::fabs(unipolar_to_bipolar(in)); }
+static float calc_sin(float in) { return bipolar_to_unipolar(std::sin(in * 2.0f * pi32)); }
+
 static float
 skew_none(float in, float skew)
-{ return in; }
+{ 
+  return in;
+} 
 
 static float
 skew_log(float in, float skew)
@@ -320,7 +334,7 @@ skew_log(float in, float skew)
 }
 
 static float
-skew_linear(float in, float skew)
+skew_lin(float in, float skew)
 {
   float skew_bounded = skew_min + skew * skew_range;
   return in < skew_bounded ? in / skew_bounded * 0.5f : 0.5f + (in - skew_bounded) / (1 - skew_bounded) * 0.5f;
@@ -345,57 +359,127 @@ lfo_engine::process(plugin_block& block)
     return;
   }
 
-  bool one_shot_full = mode == mode_rate_one || mode == mode_sync_one;
-  bool one_shot_wrapped = mode == mode_rate_wrap || mode == mode_sync_wrap;
-  if((one_shot_full || one_shot_wrapped) && _ended)
+  if((is_one_shot_full(mode) || is_one_shot_wrapped(mode)) && _ended)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _end_value);
     return; 
   }
 
-  int this_module = _global ? module_glfo : module_vlfo;
   int type = block.state.own_block_automation[param_type][0].step();
-  bool sync = mode == mode_sync || mode == mode_sync_wrap || mode == mode_sync_one;
+  if(is_sin(type))
+  {
+    if(is_x_plain(type))
+    {
+      if(is_y_plain(type)) process_loop(block, calc_sin, skew_none, skew_none);
+      else if(is_y_lin(type)) process_loop(block, calc_sin, skew_none, skew_lin);
+      else if(is_y_log(type)) process_loop(block, calc_sin, skew_none, skew_log);
+      else assert(false);
+    }
+    else if (is_x_lin(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_sin, skew_lin, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_sin, skew_lin, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_sin, skew_lin, skew_log);
+      else assert(false);
+    }
+    else if (is_x_log(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_sin, skew_log, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_sin, skew_log, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_sin, skew_log, skew_log);
+      else assert(false);
+    } else assert(false);
+  } else if (is_saw(type))
+  {
+    if (is_x_plain(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_saw, skew_none, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_saw, skew_none, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_saw, skew_none, skew_log);
+      else assert(false);
+    }
+    else if (is_x_lin(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_saw, skew_lin, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_saw, skew_lin, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_saw, skew_lin, skew_log);
+      else assert(false);
+    }
+    else if (is_x_log(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_saw, skew_log, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_saw, skew_log, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_saw, skew_log, skew_log);
+      else assert(false);
+    }
+    else assert(false);
+  } else if (is_sqr(type))
+  {
+    if (is_x_plain(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_sqr, skew_none, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_sqr, skew_none, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_sqr, skew_none, skew_log);
+      else assert(false);
+    }
+    else if (is_x_lin(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_sqr, skew_lin, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_sqr, skew_lin, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_sqr, skew_lin, skew_log);
+      else assert(false);
+    }
+    else if (is_x_log(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_sqr, skew_log, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_sqr, skew_log, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_sqr, skew_log, skew_log);
+      else assert(false);
+    }
+  }
+  else if (is_tri(type))
+  {
+    if (is_x_plain(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_tri, skew_none, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_tri, skew_none, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_tri, skew_none, skew_log);
+      else assert(false);
+    }
+    else if (is_x_lin(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_tri, skew_lin, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_tri, skew_lin, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_tri, skew_lin, skew_log);
+      else assert(false);
+    }
+    else if (is_x_log(type))
+    {
+      if (is_y_plain(type)) process_loop(block, calc_tri, skew_log, skew_none);
+      else if (is_y_lin(type)) process_loop(block, calc_tri, skew_log, skew_lin);
+      else if (is_y_log(type)) process_loop(block, calc_tri, skew_log, skew_log);
+      else assert(false);
+    }
+  } else
+    assert(false);
+}
+
+template <class Calc, class SkewX, class SkewY>
+void lfo_engine::process_loop(plugin_block& block, Calc calc, SkewX skew_x, SkewY skew_y)
+{
+  int this_module = _global ? module_glfo : module_vlfo;
+  int mode = block.state.own_block_automation[param_mode][0].step();
   auto const& x_curve = block.state.own_accurate_automation[param_x][0];
   auto const& y_curve = block.state.own_accurate_automation[param_y][0];
-  auto const& rate_curve = sync_or_freq_into_scratch(block, sync, this_module, param_rate, param_tempo, scratch_time);
+  auto const& rate_curve = sync_or_freq_into_scratch(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
 
-  //double log_half = std::log(0.5);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    //double x_bounded = skew_min + x_curve[f] * skew_range;
-    //double phase_skew = std::pow((double)_phase, std::log(x_bounded) / log_half);
-    //double phase_skew2 = _phase < x_curve[f]? (_phase * 0.5f / x_curve[f]): 0.5f + 0.5f * (_phase - x_curve[f]) / (1 - x_curve[f]);
-    switch (type)
-    {
-    case type_saw_plain: _end_value = skew_x_none(_phase, x_curve[f]); break;
-    case type_sqr_plain: _end_value = skew_x_none(_phase, x_curve[f]) < 0.5f ? 0 : 1; break;
-    case type_tri_plain: _end_value = 1 - std::fabs(unipolar_to_bipolar(skew_x_none(_phase, x_curve[f]))); break;
-    case type_sin_plain: _end_value = bipolar_to_unipolar(std::sin(skew_x_none(_phase, x_curve[f]) * 2.0f * pi32)); break;
-    case type_saw_lin: _end_value = skew_x_linear(_phase, x_curve[f]); break;
-    case type_sqr_lin: _end_value = skew_x_linear(_phase, x_curve[f]) < 0.5f? 0: 1; break;
-    case type_tri_lin: _end_value = 1 - std::fabs(unipolar_to_bipolar(skew_x_linear(_phase, x_curve[f]))); break;
-    case type_sin_lin: _end_value = bipolar_to_unipolar(std::sin(skew_x_linear(_phase, x_curve[f]) * 2.0f * pi32)); break;
-    case type_saw_log: _end_value = skew_x_log(_phase, x_curve[f]); break;
-    case type_sqr_log: _end_value = skew_x_log(_phase, x_curve[f]) < 0.5f ? 0 : 1; break;
-    case type_tri_log: _end_value = 1 - std::fabs(unipolar_to_bipolar(skew_x_log(_phase, x_curve[f]))); break;
-    case type_sin_log: _end_value = bipolar_to_unipolar(std::sin(skew_x_log(_phase, x_curve[f]) * 2.0f * pi32)); break;
-    default: break;
-
-    //case type_saw: _end_value = phase_skew2; break;
-    //case type_skew: _end_value = std::fabs(_phase - phase_skew); break;
-    //case type_sqr: _end_value = _phase < x_bounded ? 0.0f : 1.0f; break;
-    //case type_tri1: _end_value = 1 - std::fabs(unipolar_to_bipolar(phase_skew)); break;
-    //case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew)); break;
-    //case type_sine: _end_value = bipolar_to_unipolar(std::sin(2.0f * pi32 * phase_skew2)); break;
-    //case type_tri2: _end_value = _phase < x_bounded ? _phase / x_bounded : 1 - (_phase - x_bounded) / (1 - x_bounded) ; break;
-    }
-
-    check_unipolar(_end_value);    
-    block.state.own_cv[0][0][f] = skew_x_log(_end_value, y_curve[f]);
+    _end_value = skew_y(calc(skew_x(_phase, x_curve[f])), y_curve[f]);
+    block.state.own_cv[0][0][f] = check_unipolar(_end_value);
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
-    if((phase_wrapped && one_shot_wrapped) || (ref_wrapped && one_shot_full))
+    if((phase_wrapped && is_one_shot_wrapped(mode)) || (ref_wrapped && is_one_shot_full(mode)))
     {
       _ended = true;
       block.state.own_cv[0][0].fill(f + 1, block.end_frame, _end_value);
