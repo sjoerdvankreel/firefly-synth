@@ -12,6 +12,11 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static float const skew_min = 0.0001;
+static float const skew_max = 0.9999;
+static float const skew_range = skew_max - skew_min;
+static float const log_half = std::log(0.5f);
+
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
@@ -237,11 +242,15 @@ skew_x_none(float phase, float x)
 { return phase; }
 
 static inline float
+skew_x_log(float phase, float x)
+{
+  float x_bounded = skew_min + x * skew_range;
+  return std::pow(phase, std::log(x_bounded) / log_half);
+}
+
+static inline float
 skew_x_linear(float phase, float x)
 {
-  float const skew_min = 0.0001;
-  float const skew_max = 0.9999;
-  float const skew_range = skew_max - skew_min;
   float x_bounded = skew_min + x * skew_range;
   return phase < x_bounded ? phase / x_bounded * 0.5f : 0.5f + (phase - x_bounded) / (1 - x_bounded) * 0.5f;
 }
@@ -295,6 +304,10 @@ lfo_engine::process(plugin_block& block)
     case type_sqr_lin: _end_value = skew_x_linear(_phase, x_curve[f]) < 0.5f? 0: 1; break;
     case type_tri_lin: _end_value = 1 - std::fabs(unipolar_to_bipolar(skew_x_linear(_phase, x_curve[f]))); break;
     case type_sin_lin: _end_value = bipolar_to_unipolar(std::sin(skew_x_linear(_phase, x_curve[f]) * 2.0f * pi32)); break;
+    case type_saw_log: _end_value = skew_x_log(_phase, x_curve[f]); break;
+    case type_sqr_log: _end_value = skew_x_log(_phase, x_curve[f]) < 0.5f ? 0 : 1; break;
+    case type_tri_log: _end_value = 1 - std::fabs(unipolar_to_bipolar(skew_x_log(_phase, x_curve[f]))); break;
+    case type_sin_log: _end_value = bipolar_to_unipolar(std::sin(skew_x_log(_phase, x_curve[f]) * 2.0f * pi32)); break;
     default: break;
 
     //case type_saw: _end_value = phase_skew2; break;
