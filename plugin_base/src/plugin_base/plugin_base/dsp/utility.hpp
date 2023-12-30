@@ -73,28 +73,54 @@ cv_filter::set(float sample_rate, float response_time)
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 
-template <class T> 
-inline T check_unipolar(T val)
+inline double 
+check_unipolar(double val)
 {
   // make it debug breakable
 #ifdef NDEBUG
   return val;
 #else
-  if ((T)0 <= val && val <= (T)1) return val;
-  assert((T)0 <= val && val <= (T)1);
+  if (0 <= val && val <= 1) return val;
+  assert(0 <= val && val <= 1);
   return val;
 #endif
 }
 
-template <class T> 
-inline T check_bipolar(T val)
+inline double
+check_bipolar(double val)
 {
   // make it debug breakable
 #ifdef NDEBUG
   return val;
 #else
-  if ((T)-1 <= val && val <= (T)1) return val;
-  assert((T)-1 <= val && val <= (T)1);
+  if (-1 <= val && val <= 1) return val;
+  assert(-1 <= val && val <= 1);
+  return val;
+#endif;
+}
+
+inline float
+check_unipolar(float val)
+{
+  // make it debug breakable
+#ifdef NDEBUG
+  return val;
+#else
+  if (-1e-5 <= val && val <= 1 + 1e-5) return val;
+  assert(-1e-5 <= val && val <= 1 + 1e-5);
+  return val;
+#endif
+}
+
+inline float
+check_bipolar(float val)
+{
+  // make it debug breakable
+#ifdef NDEBUG
+  return val;
+#else
+  if (-1 - 1e-5 <= val && val <= 1 + 1e-5) return val;
+  assert(-1 - 1e-5 <= val && val <= 1 + 1e-5);
   return val;
 #endif;
 }

@@ -35,6 +35,8 @@ do plain/linear/log for env/lfo
 do add_submenu everywhere in the topos
 
 lfo:
+- TODO checkout the automate rate
+- do filter runoff
 - do skew somewhere
 - phase control for non-rand
 - off/rate/sync/rate One/sync One
