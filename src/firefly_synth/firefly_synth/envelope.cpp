@@ -13,7 +13,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-float max_filter_time_ms = 200;
+float max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { section_main, section_slope, section_dhadsr };
