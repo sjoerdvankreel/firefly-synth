@@ -15,23 +15,31 @@ namespace firefly_synth {
 
 enum class env_stage { delay, attack, hold, decay, sustain, release, end };
 
-enum { type_sustain, type_follow, type_release };
 enum { section_main, section_slope, section_dhadsr };
 enum { scratch_delay, scratch_attack, scratch_hold, scratch_decay, scratch_release, scratch_count };
-enum { 
+enum { type_sustain_lin, type_follow_lin, type_release_lin, type_sustain_log, type_follow_log, type_release_log };
+enum {
   param_on, param_type, param_sync, param_multi,
   param_attack_slope, param_decay_slope, param_release_slope,
   param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
+static inline bool is_log(int type) { return type >= type_sustain_log; }
+static inline bool is_follow(int type) { return type == type_follow_lin || type == type_follow_log; }
+static inline bool is_sustain(int type) { return type == type_sustain_lin || type == type_sustain_log; }
+static inline bool is_release(int type) { return type == type_release_lin || type == type_release_log; }
+
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "Sustain");
-  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "Follow");
-  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "Release");
+  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "Sustain.Lin");
+  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "Follow.Lin");
+  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "Release.Lin");
+  result.emplace_back("{A23646C9-047D-485A-9A31-54D78D85570E}", "Sustain.Log");
+  result.emplace_back("{CB268F2B-8A33-49CF-9569-675159ACC0E1}", "Follow.Log");
+  result.emplace_back("{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}", "Release.Log");
   return result;
 }
 
@@ -44,23 +52,24 @@ public:
   void reset(plugin_block const* block) override;
 
 private:
-  double _att_exp = 0;
-  double _dcy_exp = 0;
-  double _rls_exp = 0;
-  double _att_splt_bnd = 0;
-  double _dcy_splt_bnd = 0;
-  double _rls_splt_bnd = 0;
-
   env_stage _stage = {};
   double _stage_pos = 0;
   double _release_level = 0;
+
+  double _log_att_exp = 0;
+  double _log_dcy_exp = 0;
+  double _log_rls_exp = 0;
+  double _log_att_splt_bnd = 0;
+  double _log_dcy_splt_bnd = 0;
+  double _log_rls_splt_bnd = 0;
 
   static inline double const slope_min = 0.0001;
   static inline double const slope_max = 0.9999;
   static inline double const slope_range = slope_max - slope_min;
 
-  double section_slope(double slope_pos, double splt_bnd, double exp);
-  void init_section(double slope, double split_pos, double& exp, double& splt_bnd);
+  void init_log_section(double slope, double split_pos, double& exp, double& splt_bnd);
+  template <class CalcSlope> void process_loop(plugin_block& block,
+    float dly, float att, float hld, float dcy, float stn, float rls, CalcSlope calc_slope);
 };
 
 static void
@@ -71,15 +80,15 @@ void
 env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float& dahdsr)
 {
   float const bpm = 120;
+  int type = state.get_plain_at(module_env, slot, param_type, 0).step();
   bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
-  bool do_sustain = state.get_plain_at(module_env, slot, param_type, 0).step() == type_sustain;
   float hold = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
   float delay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
   float decay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
   float attack = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
   float release = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
 
-  float sustain = !do_sustain ? 0.0f : std::max((delay + attack + hold + decay + release) / 5, 0.01f);
+  float sustain = !is_sustain(type) ? 0.0f : std::max((delay + attack + hold + decay + release) / 5, 0.01f);
   dahds = delay + attack + hold + decay + sustain;
   dahdsr = dahds + release;
 }
@@ -154,6 +163,9 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, gui_label_contents::name,
       make_label_none())));
+  type.gui.submenu = std::make_shared<gui_submenu>();
+  type.gui.submenu->add_submenu("Linear", {type_sustain_lin, type_follow_lin, type_release_lin});
+  type.gui.submenu->add_submenu("Log", { type_sustain_log, type_follow_log, type_release_log });
   type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   
   auto& sync = result.params.emplace_back(make_param(
@@ -164,7 +176,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& multi = result.params.emplace_back(make_param(
-    make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Multi Trigger", "Multi", true, param_multi, 1),
+    make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Multi Trigger", "Mlti", true, param_multi, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 3 }, gui_label_contents::name,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
@@ -179,19 +191,19 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  attack_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_log(vs[1]); });
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "Decay Slope", "D.Slp", true, param_decay_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  decay_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_log(vs[1]); });
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "Release Slope", "R.Slp", true, param_release_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  release_slope.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  release_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_log(vs[1]); });
 
   result.sections.emplace_back(make_param_section(section_dhadsr,
     make_topo_tag("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
@@ -287,36 +299,43 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   return result;
 }
 
+static inline double
+calc_slope_linear(double slope_pos, double splt_bnd, double exp) 
+{ return slope_pos; }
+
+static inline double
+calc_slope_log(double slope_pos, double splt_bnd, double exp)
+{
+  if (slope_pos < splt_bnd)
+    return std::pow(slope_pos / splt_bnd, exp) * splt_bnd;
+  return 1 - std::pow(1 - (slope_pos - splt_bnd) / (1 - splt_bnd), exp) * (1 - splt_bnd);
+}
+
 void 
 env_engine::reset(plugin_block const* block)
 {
   _stage_pos = 0; 
   _release_level = 0; 
   _stage = env_stage::delay;
+
   auto const& block_auto = block->state.own_block_automation;
+  if(!is_log(block_auto[param_type][0].step())) return;
+
   float ds = block_auto[param_decay_slope][0].real();
   float as = block_auto[param_attack_slope][0].real();
   float rs = block_auto[param_release_slope][0].real();
-  init_section(ds, ds, _dcy_exp, _dcy_splt_bnd);
-  init_section(rs, rs, _rls_exp, _rls_splt_bnd);
-  init_section(as, 1 - as, _att_exp, _att_splt_bnd);
+  init_log_section(ds, ds, _log_dcy_exp, _log_dcy_splt_bnd);
+  init_log_section(rs, rs, _log_rls_exp, _log_rls_splt_bnd);
+  init_log_section(as, 1 - as, _log_att_exp, _log_att_splt_bnd);
 }
 
 void 
-env_engine::init_section(double slope, double split_pos, double& exp, double& splt_bnd)
+env_engine::init_log_section(double slope, double split_pos, double& exp, double& splt_bnd)
 {
   splt_bnd = slope_min + slope_range * split_pos;
   double slope_bounded = slope_min + slope_range * slope;
   if (slope_bounded < 0.5f) exp = std::log(slope_bounded) / std::log(0.5);
   else exp = std::log(1.0f - slope_bounded) / std::log(0.5);
-}
-
-double 
-env_engine::section_slope(double slope_pos, double splt_bnd, double exp)
-{ 
-  if (slope_pos < splt_bnd)
-    return std::pow(slope_pos / splt_bnd, exp) * splt_bnd;
-  return 1 - std::pow(1 - (slope_pos - splt_bnd) / (1 - splt_bnd), exp) * (1 - splt_bnd);
 }
 
 void
@@ -330,7 +349,6 @@ env_engine::process(plugin_block& block)
     return;
   }
 
-  int type = block_auto[param_type][0].step();
   bool sync = block_auto[param_sync][0].step() != 0;
   float stn = block_auto[param_sustain][0].real();
   float hld = block_auto[param_hold_time][0].real();
@@ -348,6 +366,19 @@ env_engine::process(plugin_block& block)
     rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
   }
 
+  int type = block_auto[param_type][0].step();
+  if(is_log(type)) process_loop(block, dly, att, hld, dcy, stn, rls, calc_slope_log);
+  else process_loop(block, dly, att, hld, dcy, stn, rls, calc_slope_linear);
+}
+
+template <class CalcSlope> void
+env_engine::process_loop(
+  plugin_block& block, float dly, float att, float hld, 
+  float dcy, float stn, float rls, CalcSlope calc_slope)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if (_stage == env_stage::end)
@@ -357,14 +388,14 @@ env_engine::process(plugin_block& block)
       continue;
     }
 
-    if (block.voice->state.release_frame == f && (type == type_sustain || 
-      type == type_release && _stage != env_stage::release))
+    if (block.voice->state.release_frame == f && 
+      (is_sustain(type) || (is_release(type) && _stage != env_stage::release)))
     {
       _stage_pos = 0;
       _stage = env_stage::release;
     }
 
-    if (_stage == env_stage::sustain && type == type_sustain)
+    if (_stage == env_stage::sustain && is_sustain(type))
     {
       _release_level = stn;
       block.state.own_cv[0][0][f] = stn;
@@ -390,17 +421,17 @@ env_engine::process(plugin_block& block)
     {
     case env_stage::hold: _release_level = out = 1; break;
     case env_stage::delay: _release_level = out = 0; break;
-    case env_stage::attack: _release_level = out = section_slope(slope_pos, _att_splt_bnd, _att_exp); break;
-    case env_stage::release: out = _release_level * (1 - section_slope(slope_pos, _rls_splt_bnd, _rls_exp)); break;
-    case env_stage::decay: _release_level = out = stn + (1 - stn) * (1 - section_slope(slope_pos, _dcy_splt_bnd, _dcy_exp)); break;
+    case env_stage::attack: _release_level = out = calc_slope(slope_pos, _log_att_splt_bnd, _log_att_exp); break;
+    case env_stage::release: out = _release_level * (1 - calc_slope(slope_pos, _log_rls_splt_bnd, _log_rls_exp)); break;
+    case env_stage::decay: _release_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _log_dcy_splt_bnd, _log_dcy_exp)); break;
     default: assert(false); stage_seconds = 0; break;
     }
-    
+
     check_unipolar(out);
     check_unipolar(_release_level);
     block.state.own_cv[0][0][f] = out;
     _stage_pos += 1.0 / block.sample_rate;
-    if(_stage_pos < stage_seconds) continue;
+    if (_stage_pos < stage_seconds) continue;
 
     _stage_pos = 0;
     switch (_stage)
@@ -408,7 +439,7 @@ env_engine::process(plugin_block& block)
     case env_stage::hold: _stage = env_stage::decay; break;
     case env_stage::attack: _stage = env_stage::hold; break;
     case env_stage::delay: _stage = env_stage::attack; break;
-    case env_stage::decay: _stage = type == type_sustain? env_stage::sustain: env_stage::release; break;
+    case env_stage::decay: _stage = is_sustain(type) ? env_stage::sustain : env_stage::release; break;
     case env_stage::release: _stage = env_stage::end; block.voice->finished |= block.module_slot == 0; break;
     default: assert(false); break;
     }

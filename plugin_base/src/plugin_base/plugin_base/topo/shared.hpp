@@ -70,6 +70,7 @@ struct gui_submenu final {
   void validate() const;
   void add_subheader(std::string const& name);
   std::shared_ptr<gui_submenu> add_submenu(std::string const& name);
+  void add_submenu(std::string const& name, std::vector<int> const& indices);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_submenu);
 };
 

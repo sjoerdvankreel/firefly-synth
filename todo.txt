@@ -32,6 +32,7 @@ do skew by log for lfo's too
 env synced partition as synced
 do ramped (skew - phase) lfos
 do plain/linear/log for env/lfo
+do add_submenu everywhere in the topos
 
 lfo:
 - phase control for non-rand

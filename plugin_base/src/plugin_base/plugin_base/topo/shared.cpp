@@ -61,6 +61,14 @@ gui_submenu::add_submenu(std::string const& name_)
   return result;
 }
 
+void 
+gui_submenu::add_submenu(std::string const& name_, std::vector<int> const& indices_)
+{
+  auto submenu = add_submenu(name_);
+  for(int index: indices_)
+    submenu->indices.push_back(index);
+}
+
 void
 gui_binding::bind_slot(gui_slot_binding_selector selector_)
 {
