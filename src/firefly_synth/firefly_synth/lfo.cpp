@@ -287,13 +287,14 @@ lfo_engine::process(plugin_block& block)
     //double phase_skew2 = _phase < x_curve[f]? (_phase * 0.5f / x_curve[f]): 0.5f + 0.5f * (_phase - x_curve[f]) / (1 - x_curve[f]);
     switch (type)
     {
-    case type_saw_plain: _end_value = _phase; break;
-    case type_sqr_plain: _end_value = _phase < 0.5f ? 0 : 1; break;
-    case type_tri_plain: _end_value = 1 - std::fabs(unipolar_to_bipolar(_phase)); break;
-    case type_sin_plain: _end_value = bipolar_to_unipolar(std::sin(_phase * 2.0f * pi32)); break;
+    case type_saw_plain: _end_value = skew_x_none(_phase, x_curve[f]); break;
+    case type_sqr_plain: _end_value = skew_x_none(_phase, x_curve[f]) < 0.5f ? 0 : 1; break;
+    case type_tri_plain: _end_value = 1 - std::fabs(unipolar_to_bipolar(skew_x_none(_phase, x_curve[f]))); break;
+    case type_sin_plain: _end_value = bipolar_to_unipolar(std::sin(skew_x_none(_phase, x_curve[f]) * 2.0f * pi32)); break;
     case type_saw_lin: _end_value = skew_x_linear(_phase, x_curve[f]); break;
     case type_sqr_lin: _end_value = skew_x_linear(_phase, x_curve[f]) < 0.5f? 0: 1; break;
     case type_tri_lin: _end_value = 1 - std::fabs(unipolar_to_bipolar(skew_x_linear(_phase, x_curve[f]))); break;
+    case type_sin_lin: _end_value = bipolar_to_unipolar(std::sin(skew_x_linear(_phase, x_curve[f]) * 2.0f * pi32)); break;
     default: break;
 
     //case type_saw: _end_value = phase_skew2; break;
