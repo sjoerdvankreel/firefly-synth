@@ -35,6 +35,7 @@ do plain/linear/log for env/lfo
 do add_submenu everywhere in the topos
 
 lfo:
+- do skew somewhere
 - phase control for non-rand
 - off/rate/sync/rate One/sync One
 - waveform select + rand controls (freerun etc) + filter

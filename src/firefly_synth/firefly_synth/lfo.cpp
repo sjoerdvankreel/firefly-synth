@@ -135,10 +135,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   result.sections.emplace_back(make_param_section(section_mode,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Mode"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
-  result.params.emplace_back(make_param(
+  auto& mode = result.params.emplace_back(make_param(
     make_topo_info("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_mode, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
+  mode.gui.submenu = std::make_shared<gui_submenu>();
+  mode.gui.submenu->indices.push_back(mode_off);
+  mode.gui.submenu->add_submenu("Rate", { mode_rate, mode_rate_one, mode_rate_wrap });
+  mode.gui.submenu->add_submenu("Sync", { mode_sync, mode_sync_one, mode_sync_wrap });
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
@@ -163,22 +167,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
-  auto basic_menu = std::make_shared<gui_submenu>();
-  basic_menu->name = "Basic";
-  basic_menu->indices.push_back(type_sine);
-  basic_menu->indices.push_back(type_saw);
-  basic_menu->indices.push_back(type_sqr);
-  basic_menu->indices.push_back(type_skew);
-  basic_menu->indices.push_back(type_tri1);
-  basic_menu->indices.push_back(type_tri2);
-  type.gui.submenu->children.push_back(basic_menu);
-  auto random_menu = std::make_shared<gui_submenu>();
-  random_menu->name = "Random";
-  random_menu->indices.push_back(type_rnd_y);
-  random_menu->indices.push_back(type_rnd_xy);
-  random_menu->indices.push_back(type_rnd_y_free);
-  random_menu->indices.push_back(type_rnd_xy_free);
-  type.gui.submenu->children.push_back(random_menu);
+  type.gui.submenu->add_submenu("Basic", {type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2});
+  type.gui.submenu->add_submenu("Random", { type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free });
 
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
