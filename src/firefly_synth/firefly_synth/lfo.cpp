@@ -34,7 +34,7 @@ static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{DE8FF99D-C83F-4723-B8DA-FB1C4877B1F4}", "Sin.Pln");
+  result.emplace_back("{DE8FF99D-C83F-4723-B8DA-FB1C4877B1F4}", "Sin.XPln/YLog");
   result.emplace_back("{01636F45-4734-4762-B475-E4CA15BAE156}", "Saw.Pln");
   result.emplace_back("{497E9796-48D2-4C33-B502-0C3AE3FD03D1}", "Sqr.Pln");
   result.emplace_back("{E1F35D2F-CCFF-46F9-A669-BFC4719211AC}", "Tri.Pln");
@@ -178,7 +178,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 3, 3, 5, 5 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 3, 3, 4, 4 }))));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
@@ -209,10 +209,10 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& phase = result.params.emplace_back(make_param(
-    make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", param_phase, 1),
+    make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", "Phs", true, param_phase, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   phase.gui.submenu = make_midi_note_submenu();
   phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   phase.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_random(vs[0]); });
