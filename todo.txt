@@ -36,6 +36,7 @@ do add_submenu everywhere in the topos
 
 lfo:
 - TODO checkout the automate rate
+- separate log/lin x/y
 - do filter runoff
 - do skew somewhere
 - phase control for non-rand
