@@ -43,6 +43,33 @@ midi_filter::next()
   return std::make_pair(_current, true);
 }
 
+// for smoothing control signals
+// https://www.musicdsp.org/en/latest/Filters/257-1-pole-lpf-for-smooth-parameter-changes.html
+class cv_filter
+{
+  float a = 0;
+  float b = 0;
+  float z = 0;
+public:
+  float next(float in);
+  void set(float sample_rate, float response_time);
+};
+
+inline float
+cv_filter::next(float in)
+{
+  z = (in * b) + (z * a);
+  return z;
+}
+
+inline void
+cv_filter::set(float sample_rate, float response_time)
+{
+  a = std::exp(-2.0f * pi32 / (response_time * sample_rate));
+  b = 1.0f - a;
+  z = 0.0f;
+}
+
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 

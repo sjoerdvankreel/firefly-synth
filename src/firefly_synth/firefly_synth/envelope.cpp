@@ -53,6 +53,7 @@ public:
 
 private:
   env_stage _stage = {};
+  cv_filter _filter = {};
   double _stage_pos = 0;
   double _release_level = 0;
 
@@ -320,13 +321,15 @@ calc_slope_log(double slope_pos, double splt_bnd, double exp)
 void 
 env_engine::reset(plugin_block const* block)
 {
-  _stage_pos = 0; 
+  _stage_pos = 0;
   _release_level = 0; 
   _stage = env_stage::delay;
 
   auto const& block_auto = block->state.own_block_automation;
-  if(!is_log(block_auto[param_type][0].step())) return;
+  float filter = block_auto[param_filter][0].real();
+  _filter.set(block->sample_rate, filter * 0.1);
 
+  if(!is_log(block_auto[param_type][0].step())) return;
   float ds = block_auto[param_decay_slope][0].real();
   float as = block_auto[param_attack_slope][0].real();
   float rs = block_auto[param_release_slope][0].real();
@@ -390,7 +393,7 @@ env_engine::process_loop(
     if (_stage == env_stage::end)
     {
       _release_level = 0;
-      block.state.own_cv[0][0][f] = 0;
+      block.state.own_cv[0][0][f] = _filter.next(0);
       continue;
     }
 
@@ -404,7 +407,7 @@ env_engine::process_loop(
     if (_stage == env_stage::sustain && is_sustain(type))
     {
       _release_level = stn;
-      block.state.own_cv[0][0][f] = stn;
+      block.state.own_cv[0][0][f] = _filter.next(stn);
       continue;
     }
 
@@ -435,7 +438,7 @@ env_engine::process_loop(
 
     check_unipolar(out);
     check_unipolar(_release_level);
-    block.state.own_cv[0][0][f] = out;
+    block.state.own_cv[0][0][f] = _filter.next(out);
     _stage_pos += 1.0 / block.sample_rate;
     if (_stage_pos < stage_seconds) continue;
 
