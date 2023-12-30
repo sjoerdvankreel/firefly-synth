@@ -26,10 +26,9 @@ enum {
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
-static inline bool is_log(int type) { return type >= type_sustain_log; }
-static inline bool is_follow(int type) { return type == type_follow_lin || type == type_follow_log; }
-static inline bool is_sustain(int type) { return type == type_sustain_lin || type == type_sustain_log; }
-static inline bool is_release(int type) { return type == type_release_lin || type == type_release_log; }
+static bool is_log(int type) { return type >= type_sustain_log; }
+static bool is_sustain(int type) { return type == type_sustain_lin || type == type_sustain_log; }
+static bool is_release(int type) { return type == type_release_lin || type == type_release_log; }
 
 static std::vector<list_item>
 type_items()

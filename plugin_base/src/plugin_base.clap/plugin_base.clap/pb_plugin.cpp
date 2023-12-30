@@ -22,7 +22,7 @@ namespace plugin_base::clap {
 
 enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
 
-static inline normalized_value
+static normalized_value
 clap_to_normalized(param_topo const& topo, clap_value clap)
 {
   if(topo.domain.is_real())
@@ -31,7 +31,7 @@ clap_to_normalized(param_topo const& topo, clap_value clap)
     return normalized_value(topo.domain.raw_to_normalized(clap.value()));
 }
 
-static inline clap_value
+static clap_value
 normalized_to_clap(param_topo const& topo, normalized_value normalized)
 {
   if(topo.domain.is_real())

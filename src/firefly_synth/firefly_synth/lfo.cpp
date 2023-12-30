@@ -27,16 +27,8 @@ enum {
   type_sin_lin, type_saw_lin, type_sqr_lin, type_tri_lin, 
   type_sin_log, type_saw_log, type_sqr_log, type_tri_log };
 
-static inline bool is_rate(int mode) { return mode == mode_rate || mode == mode_rate_one || mode == mode_rate_wrap; }
-static inline bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
-static inline bool is_sin(int type) { return type == type_sin_plain || type == type_sin_lin || type == type_sin_log; }
-static inline bool is_saw(int type) { return type == type_saw_plain || type == type_saw_lin || type == type_saw_log; }
-static inline bool is_sqr(int type) { return type == type_sqr_plain || type == type_sqr_lin || type == type_sqr_log; }
-static inline bool is_tri(int type) { return type == type_tri_plain || type == type_tri_lin || type == type_tri_log; }
-static inline bool is_log(int type) { return type == type_sin_log || type == type_saw_log || type == type_sqr_log || type == type_tri_log; }
-static inline bool is_linear(int type) { return type == type_sin_lin || type == type_saw_lin || type == type_sqr_lin || type == type_tri_lin; }
-static inline bool is_plain(int type) { return type == type_sin_plain || type == type_saw_plain || type == type_sqr_plain || type == type_tri_plain; }
-static inline bool is_random(int type) { return false; }
+static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
+static bool is_random(int type) { return false; }
 
 static std::vector<list_item>
 type_items()
@@ -237,18 +229,18 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   return result;
 }
 
-static inline float
+static float
 skew_x_none(float phase, float x)
 { return phase; }
 
-static inline float
+static float
 skew_x_log(float phase, float x)
 {
   float x_bounded = skew_min + x * skew_range;
   return std::pow(phase, std::log(x_bounded) / log_half);
 }
 
-static inline float
+static float
 skew_x_linear(float phase, float x)
 {
   float x_bounded = skew_min + x * skew_range;
