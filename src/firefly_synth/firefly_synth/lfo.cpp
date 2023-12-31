@@ -21,7 +21,10 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
+enum { type_sin, type_sin_skew };
 //enum { type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
+
+#if 0
 enum { 
   type_sin_x_pln_y_pln, type_sin_x_pln_y_lin, type_sin_x_pln_y_log, 
   type_sin_x_lin_y_pln, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
@@ -35,13 +38,15 @@ enum {
   type_tri_x_pln_y_pln, type_tri_x_pln_y_lin, type_tri_x_pln_y_log,
   type_tri_x_lin_y_pln, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
   type_tri_x_log_y_pln, type_tri_x_log_y_lin, type_tri_x_log_y_log };
+#endif
 
-static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
-static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 
 static bool is_random(int type) { return false; }
+static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
+static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
 
+#if 0
 static bool is_sin(int type) { return type_sin_x_pln_y_pln <= type && type <= type_sin_x_log_y_log; };
 static bool is_saw(int type) { return type_saw_x_pln_y_pln <= type && type <= type_saw_x_log_y_log; };
 static bool is_sqr(int type) { return type_sqr_x_pln_y_pln <= type && type <= type_sqr_x_log_y_log; };
@@ -79,11 +84,15 @@ static bool is_y_plain(int type) { return
   type == type_sqr_x_pln_y_pln || type == type_sqr_x_lin_y_pln || type == type_sqr_x_log_y_pln ||
   type == type_tri_x_pln_y_pln || type == type_tri_x_lin_y_pln || type == type_tri_x_log_y_pln; }
 
+#endif
+
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XPln/YPln");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
+  result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.Skew");
+#if 0
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.XPln/YLin");
   result.emplace_back("{125FB2CC-95EB-499E-97CE-469C72B37D73}", "Sin.XPln/YLog");
   result.emplace_back("{83416F5F-726A-4DC2-908F-181FEC32665F}", "Sin.XLin/YPln");
@@ -119,6 +128,7 @@ type_items()
   result.emplace_back("{E89FA20C-81E0-4DBB-93DC-06F0D5BAB0C5}", "Tri.XLog/YPln");
   result.emplace_back("{9D282F75-6517-4291-AE7F-DE65DC0FB582}", "Tri.XLog/YLin");
   result.emplace_back("{90C08110-BDD3-4343-9B81-60ADD7FE7D3B}", "Tri.XLog/YLog");
+#endif
 
   //result.emplace_back("{83EF2C08-E5A1-4517-AC8C-D45890936A96}", "Rnd.Y");
   //result.emplace_back("{84BFAC67-D748-4499-813F-0B7FCEBF174B}", "Rnd.XY");
@@ -154,8 +164,7 @@ public:
   lfo_engine(bool global) : _global(global) {}
 
   void process(plugin_block& block) override;
-  template <class Calc, class SkewX, class SkewY>
-  void process_loop(plugin_block& block, Calc calc, SkewX skew_x, SkewY skew_y);
+  template <class Calc> void process_loop(plugin_block& block, Calc calc);
 };
 
 static void
@@ -261,6 +270,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+#if 0
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->add_submenu("Sin", { type_sin_x_pln_y_pln, type_sin_x_pln_y_lin, type_sin_x_pln_y_log,
     type_sin_x_lin_y_pln, type_sin_x_lin_y_lin, type_sin_x_lin_y_log,
@@ -275,19 +285,20 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     type_tri_x_lin_y_pln, type_tri_x_lin_y_lin, type_tri_x_lin_y_log,
     type_tri_x_log_y_pln, type_tri_x_log_y_lin, type_tri_x_log_y_log });
   // TODO type.gui.submenu->add_submenu("Random", { type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free });
+#endif
 
-  auto& x = result.params.emplace_back(make_param(
+  /*auto& x =*/ result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && !is_x_plain(vs[1]); });
-  auto& y = result.params.emplace_back(make_param(
+  //x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && !is_x_plain(vs[1]); });
+  /*auto& y =*/ result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, param_y, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && !is_y_plain(vs[1]); });
+  //y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && !is_y_plain(vs[1]); });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, param_filter, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
@@ -315,6 +326,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   return result;
 }
 
+#if 0
 static float calc_saw(float in) { return in; }
 static float calc_sqr(float in) { return in < 0.5f ? 0 : 1; }
 static float calc_tri(float in) { return 1 - std::fabs(unipolar_to_bipolar(in)); }
@@ -339,6 +351,17 @@ skew_lin(float in, float skew)
   float skew_bounded = skew_min + skew * skew_range;
   return in < skew_bounded ? in / skew_bounded * 0.5f : 0.5f + (in - skew_bounded) / (1 - skew_bounded) * 0.5f;
 }
+#endif
+
+static float
+skew_log(float in, float skew, float min, float max)
+{ return std::pow(in, std::log(std::clamp(skew, min, max)) / log_half); }
+static float
+calc_sin(float phase, float x, float y)
+{ return bipolar_to_unipolar(std::sin(phase * 2.0f * pi32)); }
+static float
+calc_sin_skew(float phase, float x, float y)
+{ return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x, 0.001, 0.95) * 2.0f * pi32)), y, 0.01, 0.99); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
@@ -366,6 +389,14 @@ lfo_engine::process(plugin_block& block)
   }
 
   int type = block.state.own_block_automation[param_type][0].step();
+  switch (type)
+  {
+  case type_sin: process_loop(block, calc_sin); break;
+  case type_sin_skew: process_loop(block, calc_sin_skew); break;
+  default: assert(false); break;
+  }
+
+#if 0
   if(is_sin(type))
   {
     if(is_x_plain(type))
@@ -462,10 +493,11 @@ lfo_engine::process(plugin_block& block)
     }
   } else
     assert(false);
+#endif
 }
 
-template <class Calc, class SkewX, class SkewY>
-void lfo_engine::process_loop(plugin_block& block, Calc calc, SkewX skew_x, SkewY skew_y)
+template <class Calc>
+void lfo_engine::process_loop(plugin_block& block, Calc calc)
 {
   int this_module = _global ? module_glfo : module_vlfo;
   int mode = block.state.own_block_automation[param_mode][0].step();
@@ -475,7 +507,8 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc, SkewX skew_x, Skew
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    _end_value = skew_y(calc(skew_x(_phase, x_curve[f])), y_curve[f]);
+    //_end_value = skew_y(calc(skew_x(_phase, x_curve[f])), y_curve[f]);
+    _end_value = calc(_phase, x_curve[f], y_curve[f]);
     block.state.own_cv[0][0][f] = check_unipolar(_end_value);
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
