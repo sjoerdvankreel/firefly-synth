@@ -18,7 +18,7 @@ enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end
 
 enum { section_main, section_slope, section_dhadsr };
 enum { scratch_delay, scratch_attack, scratch_hold, scratch_decay, scratch_release, scratch_count };
-enum { type_sustain_lin, type_follow_lin, type_release_lin, type_sustain_log, type_follow_log, type_release_log };
+enum { type_sustain_plain, type_follow_plain, type_release_plain, type_sustain_slope, type_follow_slope, type_release_slope };
 enum {
   param_on, param_type, param_sync, param_multi,
   param_filter, param_attack_slope, param_decay_slope, param_release_slope,
@@ -26,20 +26,20 @@ enum {
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
-static bool is_log(int type) { return type >= type_sustain_log; }
-static bool is_sustain(int type) { return type == type_sustain_lin || type == type_sustain_log; }
-static bool is_release(int type) { return type == type_release_lin || type == type_release_log; }
+static bool is_sloped(int type) { return type >= type_sustain_slope; }
+static bool is_sustain(int type) { return type == type_sustain_plain || type == type_sustain_slope; }
+static bool is_release(int type) { return type == type_release_plain || type == type_release_slope; }
 
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "Sustain.Lin");
-  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "Follow.Lin");
-  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "Release.Lin");
-  result.emplace_back("{A23646C9-047D-485A-9A31-54D78D85570E}", "Sustain.Log");
-  result.emplace_back("{CB268F2B-8A33-49CF-9569-675159ACC0E1}", "Follow.Log");
-  result.emplace_back("{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}", "Release.Log");
+  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "Sustain.Pln");
+  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "Follow.Pln");
+  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "Release.Pln");
+  result.emplace_back("{A23646C9-047D-485A-9A31-54D78D85570E}", "Sustain.Slp");
+  result.emplace_back("{CB268F2B-8A33-49CF-9569-675159ACC0E1}", "Follow.Slp");
+  result.emplace_back("{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}", "Release.Slp");
   return result;
 }
 
@@ -57,18 +57,18 @@ private:
   double _stage_pos = 0;
   double _release_level = 0;
 
-  double _log_att_exp = 0;
-  double _log_dcy_exp = 0;
-  double _log_rls_exp = 0;
-  double _log_att_splt_bnd = 0;
-  double _log_dcy_splt_bnd = 0;
-  double _log_rls_splt_bnd = 0;
+  double _slp_att_exp = 0;
+  double _slp_dcy_exp = 0;
+  double _slp_rls_exp = 0;
+  double _slp_att_splt_bnd = 0;
+  double _slp_dcy_splt_bnd = 0;
+  double _slp_rls_splt_bnd = 0;
 
   static inline double const slope_min = 0.0001;
   static inline double const slope_max = 0.9999;
   static inline double const slope_range = slope_max - slope_min;
 
-  void init_log_section(double slope, double split_pos, double& exp, double& splt_bnd);
+  void init_slope_section(double slope, double split_pos, double& exp, double& splt_bnd);
   template <class CalcSlope> void process_loop(plugin_block& block,
     float dly, float att, float hld, float dcy, float stn, float rls, CalcSlope calc_slope);
 };
@@ -166,8 +166,8 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, gui_label_contents::name,
       make_label_none())));
   type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Linear", {type_sustain_lin, type_follow_lin, type_release_lin});
-  type.gui.submenu->add_submenu("Log", { type_sustain_log, type_follow_log, type_release_log });
+  type.gui.submenu->add_submenu("Plain", {type_sustain_plain, type_follow_plain, type_release_plain});
+  type.gui.submenu->add_submenu("Slope", { type_sustain_slope, type_follow_slope, type_release_slope });
   type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   
   auto& sync = result.params.emplace_back(make_param(
@@ -199,19 +199,19 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_log(vs[1]); });
+  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_sloped(vs[1]); });
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "Decay Slope", "D.S", true, param_decay_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_log(vs[1]); });
+  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_sloped(vs[1]); });
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "Release Slope", "R.S", true, param_release_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  release_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_log(vs[1]); });
+  release_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_sloped(vs[1]); });
 
   result.sections.emplace_back(make_param_section(section_dhadsr,
     make_topo_tag("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
@@ -330,17 +330,17 @@ env_engine::reset(plugin_block const* block)
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 
-  if(!is_log(block_auto[param_type][0].step())) return;
+  if(!is_sloped(block_auto[param_type][0].step())) return;
   float ds = block_auto[param_decay_slope][0].real();
   float as = block_auto[param_attack_slope][0].real();
   float rs = block_auto[param_release_slope][0].real();
-  init_log_section(ds, ds, _log_dcy_exp, _log_dcy_splt_bnd);
-  init_log_section(rs, rs, _log_rls_exp, _log_rls_splt_bnd);
-  init_log_section(as, 1 - as, _log_att_exp, _log_att_splt_bnd);
+  init_slope_section(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
+  init_slope_section(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
+  init_slope_section(as, 1 - as, _slp_att_exp, _slp_att_splt_bnd);
 }
 
 void 
-env_engine::init_log_section(double slope, double split_pos, double& exp, double& splt_bnd)
+env_engine::init_slope_section(double slope, double split_pos, double& exp, double& splt_bnd)
 {
   splt_bnd = slope_min + slope_range * split_pos;
   double slope_bounded = slope_min + slope_range * slope;
@@ -377,7 +377,7 @@ env_engine::process(plugin_block& block)
   }
 
   int type = block_auto[param_type][0].step();
-  if(is_log(type)) process_loop(block, dly, att, hld, dcy, stn, rls, calc_slope_log);
+  if(is_sloped(type)) process_loop(block, dly, att, hld, dcy, stn, rls, calc_slope_log);
   else process_loop(block, dly, att, hld, dcy, stn, rls, calc_slope_linear);
 }
 
@@ -445,9 +445,9 @@ env_engine::process_loop(
     {
     case env_stage::hold: _release_level = out = 1; break;
     case env_stage::delay: _release_level = out = 0; break;
-    case env_stage::attack: _release_level = out = calc_slope(slope_pos, _log_att_splt_bnd, _log_att_exp); break;
-    case env_stage::release: out = _release_level * (1 - calc_slope(slope_pos, _log_rls_splt_bnd, _log_rls_exp)); break;
-    case env_stage::decay: _release_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _log_dcy_splt_bnd, _log_dcy_exp)); break;
+    case env_stage::attack: _release_level = out = calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp); break;
+    case env_stage::release: out = _release_level * (1 - calc_slope(slope_pos, _slp_rls_splt_bnd, _slp_rls_exp)); break;
+    case env_stage::decay: _release_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
     default: assert(false); stage_seconds = 0; break;
     }
 
