@@ -21,7 +21,7 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
-enum { type_sin, type_saw, type_sin_skew };
+enum { type_sin, type_saw, type_sin_skew, type_saw_skew };
 //enum { type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 #if 0
@@ -93,6 +93,7 @@ type_items()
   result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
   result.emplace_back("{2190619A-CB71-47F3-9B93-364BF4DA6BE6}", "Saw");
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.Skew");
+  result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Skew");
 #if 0
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.XPln/YLin");
   result.emplace_back("{125FB2CC-95EB-499E-97CE-469C72B37D73}", "Sin.XPln/YLog");
@@ -366,6 +367,9 @@ calc_sin(float phase, float x, float y)
 static float
 calc_sin_skew(float phase, float x, float y)
 { return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x, 0.001, 0.95) * 2.0f * pi32)), y, 0.01, 0.99); }
+static float
+calc_saw_skew(float phase, float x, float y)
+{ return phase < x? phase / x * 0.5f: 0.5f + 0.5f * (phase - x) / (1 - x); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
@@ -398,6 +402,7 @@ lfo_engine::process(plugin_block& block)
   case type_sin: process_loop(block, calc_sin); break;
   case type_saw: process_loop(block, calc_saw); break;
   case type_sin_skew: process_loop(block, calc_sin_skew); break;
+  case type_saw_skew: process_loop(block, calc_saw_skew); break;
   default: assert(false); break;
   }
 
