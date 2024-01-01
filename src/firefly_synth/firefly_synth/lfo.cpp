@@ -374,10 +374,10 @@ calc_saw_lin(float phase, float x, float y)
 { return phase < x? phase * y / x : y +  (phase - x) / ( 1 - x) * (1 - y); }
 static float
 calc_saw_log_x(float phase, float x, float y)
-{ return skew_log(calc_saw_lin(phase, x, y), x, 0.001, 0.99); }
+{ return skew_log(calc_saw_lin(phase, x, y), x, 0.05, 0.95); }
 static float
 calc_saw_log_y(float phase, float x, float y)
-{ return skew_log(calc_saw_lin(phase, x, y), y, 0.001, 0.99); }
+{ return skew_log(calc_saw_lin(phase, x, y), y, 0.001, 0.95); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
