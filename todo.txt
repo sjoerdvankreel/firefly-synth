@@ -37,16 +37,7 @@ osc: overlay any 2 waves ? (saw+saw==>pulse)
 do ffast-math
 
 lfo:
-- TODO checkout the automate rate
-- separate log/lin x/y
-- do filter runoff
-- do skew somewhere
-- phase control for non-rand
-- off/rate/sync/rate One/sync One
-- waveform select + rand controls (freerun etc) + filter
-- rate/tempo
-- x/y slope controls
-
+- rand + freerun
 
 * get some linux folks to comment (ycollete?)
 * continuing
