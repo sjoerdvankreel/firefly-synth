@@ -76,17 +76,18 @@ class lfo_engine :
 public module_engine {
   float _phase;
   float _ref_phase;
-  float _rand_level;
+  float _static_level;
   float _lfo_end_value;
   float _filter_end_value;
   
   bool const _global;
   lfo_stage _stage = {};
   cv_filter _filter = {};
-  std::uint32_t _rand_state;
+  std::uint32_t _static_state;
 
-  int _rand_step_pos = 0;
-  int _rand_step_samples = 0;
+  int _static_dir = 1;
+  int _static_step_pos = 0;
+  int _static_step_samples = 0;
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
 
@@ -304,18 +305,21 @@ lfo_engine::calc_static(bool add, float y, int seed, int steps)
 float 
 lfo_engine::calc_static_free(bool add, float y, int seed, int steps)
 {
-  float result = _rand_level;
-  _rand_step_pos++;
-  if (_rand_step_pos >= _rand_step_samples)
+  float result = _static_level;
+  _static_step_pos++;
+  if (_static_step_pos >= _static_step_samples)
   {
     if(add)
     {
-      _rand_level = _rand_level + fast_rand_next(_rand_state) * unipolar_to_bipolar(y);
-      if(_rand_level < 0 || _rand_level > 1) 
-        _rand_level -= 2 * (_rand_level - (int)_rand_level);
+      _static_level = _static_level + fast_rand_next(_static_state) * unipolar_to_bipolar(y) * _static_dir;
+      if(_static_level < 0 || _static_level > 1)
+      {
+        _static_dir *= -1;
+        _static_level -= 2 * (_static_level - (int)_static_level);
+      }
     } else
-      _rand_level = fast_rand_next(_rand_state);
-    _rand_step_pos = 0;
+      _static_level = fast_rand_next(_static_state);
+    _static_step_pos = 0;
   }
   return result;
 }
@@ -334,9 +338,10 @@ lfo_engine::reset(plugin_block const* block)
   _phase = block_auto[param_phase][0].real();
   if(is_static(block_auto[param_type][0].step())) _phase = 0;
 
-  _rand_step_pos = 0;
-  _rand_state = std::numeric_limits<uint32_t>::max() / block_auto[param_seed][0].step();
-  _rand_level = fast_rand_next(_rand_state);
+  _static_dir = 1;
+  _static_step_pos = 0;
+  _static_state = std::numeric_limits<uint32_t>::max() / block_auto[param_seed][0].step();
+  _static_level = fast_rand_next(_static_state);
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 }
@@ -411,7 +416,7 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
-    _rand_step_samples = block.sample_rate / (rate_curve[f] * steps);
+    _static_step_samples = block.sample_rate / (rate_curve[f] * steps);
     _lfo_end_value = calc(_phase, x_curve[f], y_curve[f], seed, steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
