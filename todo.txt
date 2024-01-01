@@ -35,6 +35,7 @@ do ffast-math
 lfo:
 - perlin
 - check lfo relative performance
+- 14 / 8
 
 * get some linux folks to comment (ycollete?)
 * continuing

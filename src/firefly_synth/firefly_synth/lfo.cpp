@@ -15,6 +15,7 @@ namespace firefly_synth {
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
+enum class lfo_group { phased, static_ };
 enum class lfo_stage { cycle, filter, end };
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
@@ -104,7 +105,8 @@ public:
   lfo_engine(bool global) : _global(global) {}
 
   void process(plugin_block& block) override;
-  template <class Calc> void process_loop(plugin_block& block, Calc calc);
+  template <lfo_group Group, class Calc> 
+  void process_loop(plugin_block& block, Calc calc);
 };
 
 static void
@@ -376,27 +378,27 @@ lfo_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   switch (type)
   {
-  case type_skew: process_loop(block, calc_skew); break;
-  case type_sin: process_loop(block, calc_sin); break;
-  case type_sin_log: process_loop(block, calc_sin_log); break;
-  case type_tri: process_loop(block, calc_tri); break;
-  case type_tri_log: process_loop(block, calc_tri_log); break;
-  case type_pulse: process_loop(block, calc_pulse); break;
-  case type_pulse_lin: process_loop(block, calc_pulse_lin); break;
-  case type_saw: process_loop(block, calc_saw); break;
-  case type_saw_lin: process_loop(block, calc_saw_lin); break;
-  case type_saw_log: process_loop(block, calc_saw_log); break;
+  case type_skew: process_loop<lfo_group::phased>(block, calc_skew); break;
+  case type_sin: process_loop<lfo_group::phased>(block, calc_sin); break;
+  case type_sin_log: process_loop<lfo_group::phased>(block, calc_sin_log); break;
+  case type_tri: process_loop<lfo_group::phased>(block, calc_tri); break;
+  case type_tri_log: process_loop<lfo_group::phased>(block, calc_tri_log); break;
+  case type_pulse: process_loop<lfo_group::phased>(block, calc_pulse); break;
+  case type_pulse_lin: process_loop<lfo_group::phased>(block, calc_pulse_lin); break;
+  case type_saw: process_loop<lfo_group::phased>(block, calc_saw); break;
+  case type_saw_lin: process_loop<lfo_group::phased>(block, calc_saw_lin); break;
+  case type_saw_log: process_loop<lfo_group::phased>(block, calc_saw_log); break;
   case type_static: 
   case type_static_add:
   case type_static_free:
   case type_static_add_free:
-    process_loop(block, [this, mode, type](float phase, float x, float y, int seed, int steps) {
+    process_loop<lfo_group::static_>(block, [this, mode, type](float phase, float x, float y, int seed, int steps) {
       return calc_static(is_one_shot_full(mode) || is_one_shot_wrapped(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
   default: assert(false); break;
   }
 }
 
-template <class Calc>
+template <lfo_group Group, class Calc>
 void lfo_engine::process_loop(plugin_block& block, Calc calc)
 {
   int this_module = _global ? module_glfo : module_vlfo;
@@ -425,14 +427,25 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
-    _static_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
-    _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
+    if constexpr(Group == lfo_group::static_)
+    {
+      _static_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
+      _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
+    }
+    
     _lfo_end_value = calc(_phase, x_curve[f], y_curve[f], seed, steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
-    bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
+    
+    bool phase_wrapped = false;
+    if constexpr (Group == lfo_group::phased)
+      phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
-    if((phase_wrapped && is_one_shot_wrapped(mode)) || (ref_wrapped && is_one_shot_full(mode)))
+
+    bool ended = ref_wrapped && is_one_shot_full(mode);
+    if constexpr (Group == lfo_group::phased)
+      ended |= phase_wrapped && is_one_shot_wrapped(mode);
+    if (ended)
     {
       _stage = lfo_stage::filter;
       float filter_ms = block_automation[param_filter][0].real();
