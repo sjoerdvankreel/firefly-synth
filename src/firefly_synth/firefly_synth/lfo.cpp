@@ -72,6 +72,7 @@ class lfo_engine :
 public module_engine {
   float _phase;
   float _ref_phase;
+  float _rand_level;
   float _lfo_end_value;
   float _filter_end_value;
   
@@ -79,7 +80,12 @@ public module_engine {
   lfo_stage _stage = {};
   cv_filter _filter = {};
   int _end_filter_pos = 0;
+  std::uint32_t _rand_state;
   int _end_filter_stage_samples = 0;
+
+  float calc_static(float y, int seed, int steps);
+  float calc_static_free(float y, int seed, int steps);
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void reset(plugin_block const*) override;
@@ -248,39 +254,51 @@ skew_log(float in, float skew)
 { return std::pow(in, std::log(0.001 + (skew * 0.999)) / log_half); }
 
 static float
-calc_skew(float phase, float x, float y)
+calc_skew(float phase, float x, float y, int seed, int steps)
 { return skew_log(std::fabs(phase - skew_log(phase, x)), y); }
 
 static float
-calc_sin(float phase, float x, float y)
+calc_sin(float phase, float x, float y, int seed, int steps)
 { return bipolar_to_unipolar(std::sin(phase * 2.0f * pi32)); }
 static float
-calc_sin_log(float phase, float x, float y)
+calc_sin_log(float phase, float x, float y, int seed, int steps)
 { return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x) * 2.0f * pi32)), y); }
 
 static float
-calc_saw(float phase, float x, float y)
+calc_saw(float phase, float x, float y, int seed, int steps)
 { return phase; }
 static float
-calc_saw_lin(float phase, float x, float y)
+calc_saw_lin(float phase, float x, float y, int seed, int steps)
 { return phase < x? phase * y / x : y +  (phase - x) / ( 1 - x) * (1 - y); }
 static float
-calc_saw_log(float phase, float x, float y)
-{ return skew_log(calc_saw(phase, x, y), y); }
+calc_saw_log(float phase, float x, float y, int seed, int steps)
+{ return skew_log(calc_saw(phase, x, y, seed, steps), y); }
 
 static float
-calc_pulse(float phase, float x, float y)
+calc_pulse(float phase, float x, float y, int seed, int steps)
 { return phase < 0.5? 0: 1; }
 static float
-calc_pulse_lin(float phase, float x, float y)
+calc_pulse_lin(float phase, float x, float y, int seed, int steps)
 { return phase < x? 0: y; }
 
 static float
-calc_tri(float phase, float x, float y)
-{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
+calc_tri(float phase, float x, float y, int seed, int steps)
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y, seed, steps))); }
 static float
-calc_tri_log(float phase, float x, float y)
-{ return skew_log(calc_tri(skew_log(phase, x), x, y), y); }
+calc_tri_log(float phase, float x, float y, int seed, int steps)
+{ return skew_log(calc_tri(skew_log(phase, x), x, y, seed, steps), y); }
+
+float 
+lfo_engine::calc_static(float y, int seed, int steps)
+{
+  return _rand_level;
+}
+
+float 
+lfo_engine::calc_static_free(float y, int seed, int steps)
+{
+  return _rand_level;
+}
 
 void
 lfo_engine::reset(plugin_block const* block) 
@@ -291,9 +309,11 @@ lfo_engine::reset(plugin_block const* block)
   _filter_end_value = 0;
   _stage = lfo_stage::cycle;
   _end_filter_stage_samples = 0;
-  _phase = block->state.own_block_automation[param_phase][0].real();
-  
+
   auto const& block_auto = block->state.own_block_automation;
+  _phase = block_auto[param_phase][0].real();
+  _rand_state = std::numeric_limits<uint32_t>::max() / block_auto[param_seed][0].step();
+  _rand_level = fast_rand_next(_rand_state);
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 }
@@ -327,6 +347,10 @@ lfo_engine::process(plugin_block& block)
   case type_saw: process_loop(block, calc_saw); break;
   case type_saw_lin: process_loop(block, calc_saw_lin); break;
   case type_saw_log: process_loop(block, calc_saw_log); break;
+  case type_static: process_loop(block, [this](float phase, float x, float y, int seed, int steps) { 
+    return calc_static(y, seed, steps); }); break;
+  case type_static_free: process_loop(block, [this](float phase, float x, float y, int seed, int steps) { 
+    return calc_static_free(y, seed, steps); }); break;
   default: break;
   //default: assert(false); break;
   }
@@ -338,6 +362,8 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_automation = block.state.own_block_automation;
   int mode = block_automation[param_mode][0].step();
+  int seed = block_automation[param_seed][0].step();
+  int steps = block_automation[param_steps][0].step();
   auto const& x_curve = block.state.own_accurate_automation[param_x][0];
   auto const& y_curve = block.state.own_accurate_automation[param_y][0];
   auto const& rate_curve = sync_or_freq_into_scratch(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
@@ -359,7 +385,7 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
-    _lfo_end_value = calc(_phase, x_curve[f], y_curve[f]);
+    _lfo_end_value = calc(_phase, x_curve[f], y_curve[f], seed, steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);

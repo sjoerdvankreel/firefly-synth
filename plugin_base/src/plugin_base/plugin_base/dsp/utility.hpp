@@ -12,6 +12,9 @@ namespace plugin_base {
 
 int const midi_middle_c = 60;
 
+std::pair<std::uint32_t, std::uint32_t> disable_denormals();
+void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
+
 // for smoothing midi changes
 class midi_filter
 {
@@ -70,8 +73,14 @@ cv_filter::set(float sample_rate, float response_time)
   z = 0.0f;
 }
 
-std::pair<std::uint32_t, std::uint32_t> disable_denormals();
-void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
+// https://en.wikipedia.org/wiki/Lehmer_random_number_generator
+inline float
+fast_rand_next(std::uint32_t& state)
+{
+  float const max_int = static_cast<float>(std::numeric_limits<std::int32_t>::max());
+  state = static_cast<std::uint64_t>(state) * 48271 % 0x7fffffff;
+  return static_cast<float>(state) / max_int;
+}
 
 inline double 
 check_unipolar(double val)
