@@ -21,7 +21,7 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
-enum { type_sin, type_sin_log, type_saw, type_saw_lin, type_saw_log, type_pulse, type_pulse_lin, type_pulse_log };
+enum { type_sin, type_sin_log, type_saw, type_saw_lin, type_saw_log, type_pulse, type_pulse_lin, type_pulse_log, type_tri, type_tri_lin, type_tri_log };
 //enum { type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 #if 0
@@ -45,8 +45,8 @@ static bool is_random(int type) { return false; }
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
-static bool has_x(int type) { return type == type_sin_log || type == type_saw_lin || type == type_pulse_lin || type == type_pulse_log; }
-static bool has_y(int type) { return type == type_sin_log || type == type_saw_lin || type == type_saw_log || type == type_pulse_lin || type == type_pulse_log; }
+static bool has_x(int type) { return type == type_sin_log || type == type_saw_lin || type == type_pulse_lin || type == type_pulse_log || type == type_tri_lin || type == type_tri_log; }
+static bool has_y(int type) { return type == type_sin_log || type == type_saw_lin || type == type_saw_log || type == type_pulse_lin || type == type_pulse_log || type == type_tri_lin || type == type_tri_log; }
 
 #if 0
 static bool is_sin(int type) { return type_sin_x_pln_y_pln <= type && type <= type_sin_x_log_y_log; };
@@ -100,6 +100,9 @@ type_items()
   result.emplace_back("{34480144-5349-49C1-9211-4CED6E6C8203}", "Pulse");
   result.emplace_back("{91CB7634-9759-485A-9DFF-6F5F86966212}", "Pulse.Lin");
   result.emplace_back("{D7C4F77F-E49E-4571-9A44-AD2AAE8F4C3E}", "Pulse.Log");
+  result.emplace_back("{42E1F070-191B-411A-9FFD-D966990B9712}", "Tri");
+  result.emplace_back("{0D23C254-BE4E-4C99-A640-23201CA10C2F}", "Tri.Lin");
+  result.emplace_back("{B6775D3D-D12B-4326-9414-18788BBC4898}", "Tri.Log");
 #if 0
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.XPln/YLin");
   result.emplace_back("{125FB2CC-95EB-499E-97CE-469C72B37D73}", "Sin.XPln/YLog");
@@ -364,21 +367,24 @@ skew_lin(float in, float skew)
 static float
 skew_log(float in, float skew)
 { return std::pow(in, std::log(0.001 + (skew * 0.999)) / log_half); }
-static float
-calc_saw(float phase, float x, float y)
-{ return phase; }
+
 static float
 calc_sin(float phase, float x, float y)
 { return bipolar_to_unipolar(std::sin(phase * 2.0f * pi32)); }
 static float
 calc_sin_log(float phase, float x, float y)
 { return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x) * 2.0f * pi32)), y); }
+
+static float
+calc_saw(float phase, float x, float y)
+{ return phase; }
 static float
 calc_saw_lin(float phase, float x, float y)
 { return phase < x? phase * y / x : y +  (phase - x) / ( 1 - x) * (1 - y); }
 static float
 calc_saw_log(float phase, float x, float y)
 { return skew_log(calc_saw(phase, x, y), y); }
+
 static float
 calc_pulse(float phase, float x, float y)
 { return phase < 0.5? 0: 1; }
@@ -388,6 +394,16 @@ calc_pulse_lin(float phase, float x, float y)
 static float
 calc_pulse_log(float phase, float x, float y)
 { return bipolar_to_unipolar(calc_saw(phase, x, y) - calc_saw_log(phase + x - std::floor(phase + x), x, y)); }
+
+static float
+calc_tri(float phase, float x, float y)
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
+static float
+calc_tri_lin(float phase, float x, float y)
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
+static float
+calc_tri_log(float phase, float x, float y)
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
@@ -425,6 +441,9 @@ lfo_engine::process(plugin_block& block)
   case type_pulse: process_loop(block, calc_pulse); break;
   case type_pulse_lin: process_loop(block, calc_pulse_lin); break;
   case type_pulse_log: process_loop(block, calc_pulse_log); break;
+  case type_tri: process_loop(block, calc_tri); break;
+  case type_tri_lin: process_loop(block, calc_tri_lin); break;
+  case type_tri_log: process_loop(block, calc_tri_log); break;
   default: assert(false); break;
   }
 
