@@ -81,6 +81,8 @@ public module_engine {
   float _ref_phase;
   float _static_level;
   float _lfo_end_value;
+  float _log_skew_x_exp;
+  float _log_skew_y_exp;
   float _filter_end_value;
   
   bool const _global;
@@ -231,14 +233,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   phase.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_static(vs[0]); });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
   x.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_static(vs[0]); });
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, param_y, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
@@ -264,53 +266,43 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 }
 
 static float
-skew_log(float in, float skew)
-{ return std::pow(in, std::log(0.001 + (skew * 0.999)) / log_half); }
+skew_log(float in, float exp)
+{ return std::pow(in, exp); }
 
 static float
-calc_skew(float phase, float x, float y, int seed, int steps)
-{ return skew_log(std::fabs(phase - skew_log(phase, x)), y); }
+calc_skew(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return skew_log(std::fabs(phase - skew_log(phase, x_exp)), y_exp); }
 
 static float
-calc_sin(float phase, float x, float y, int seed, int steps)
+calc_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return bipolar_to_unipolar(std::sin(phase * 2.0f * pi32)); }
 static float
-calc_sin_log(float phase, float x, float y, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x) * 2.0f * pi32)), y); }
+calc_sin_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x_exp) * 2.0f * pi32)), y_exp); }
 
 static float
-calc_saw(float phase, float x, float y, int seed, int steps)
+calc_saw(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase; }
 static float
-calc_saw_lin(float phase, float x, float y, int seed, int steps)
+calc_saw_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase < x? phase * y / x : y +  (phase - x) / ( 1 - x) * (1 - y); }
 static float
-calc_saw_log(float phase, float x, float y, int seed, int steps)
-{ return skew_log(calc_saw(phase, x, y, seed, steps), y); }
+calc_saw_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return skew_log(calc_saw(phase, x, y, x_exp, y_exp, seed, steps), y_exp); }
 
 static float
-calc_pulse(float phase, float x, float y, int seed, int steps)
+calc_pulse(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase < 0.5? 0: 1; }
 static float
-calc_pulse_lin(float phase, float x, float y, int seed, int steps)
+calc_pulse_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase < x? 0: y; }
 
 static float
-calc_tri(float phase, float x, float y, int seed, int steps)
-{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y, seed, steps))); }
+calc_tri(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y, x_exp, y_exp, seed, steps))); }
 static float
-calc_tri_log(float phase, float x, float y, int seed, int steps)
-{ return skew_log(calc_tri(skew_log(phase, x), x, y, seed, steps), y); }
-
-void
-lfo_engine::reset_static(int seed)
-{
-  _static_dir = 1;
-  _static_step_pos = 0;
-  _static_total_pos = 0;
-  _static_state = std::numeric_limits<uint32_t>::max() / seed;
-  _static_level = fast_rand_next(_static_state);
-}
+calc_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return skew_log(calc_tri(skew_log(phase, x_exp), x, y, x_exp, y_exp, seed, steps), y_exp); }
 
 float 
 lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps)
@@ -341,6 +333,16 @@ lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, i
 }
 
 void
+lfo_engine::reset_static(int seed)
+{
+  _static_dir = 1;
+  _static_step_pos = 0;
+  _static_total_pos = 0;
+  _static_state = std::numeric_limits<uint32_t>::max() / seed;
+  _static_level = fast_rand_next(_static_state);
+}
+
+void
 lfo_engine::reset(plugin_block const* block) 
 { 
   _ref_phase = 0;
@@ -351,9 +353,13 @@ lfo_engine::reset(plugin_block const* block)
   _end_filter_stage_samples = 0;
 
   auto const& block_auto = block->state.own_block_automation;
+  float x = block_auto[param_x][0].real();
+  float y = block_auto[param_y][0].real();
+  _log_skew_x_exp = std::log(0.001 + (x * 0.999)) / log_half;
+  _log_skew_y_exp = std::log(0.001 + (y * 0.999)) / log_half;
   _phase = block_auto[param_phase][0].real();
-  if(is_static(block_auto[param_type][0].step())) _phase = 0;
-
+  if (is_static(block_auto[param_type][0].step())) _phase = 0;
+  
   reset_static(block_auto[param_seed][0].step());
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
@@ -392,8 +398,8 @@ lfo_engine::process(plugin_block& block)
   case type_static_add:
   case type_static_free:
   case type_static_add_free:
-    process_loop<lfo_group::static_>(block, [this, mode, type](float phase, float x, float y, int seed, int steps) {
-      return calc_static(is_one_shot_full(mode) || is_one_shot_wrapped(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
+    process_loop<lfo_group::static_>(block, [this, mode, type](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
+      return calc_static(is_one_shot_full(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
   default: assert(false); break;
   }
 }
@@ -403,11 +409,11 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
 {
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_automation = block.state.own_block_automation;
+  float x = block_automation[param_x][0].real();
+  float y = block_automation[param_y][0].real();
   int mode = block_automation[param_mode][0].step();
   int seed = block_automation[param_seed][0].step();
   int steps = block_automation[param_steps][0].step();
-  auto const& x_curve = block.state.own_accurate_automation[param_x][0];
-  auto const& y_curve = block.state.own_accurate_automation[param_y][0];
   auto const& rate_curve = sync_or_freq_into_scratch(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -433,7 +439,7 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
     }
     
-    _lfo_end_value = calc(_phase, x_curve[f], y_curve[f], seed, steps);
+    _lfo_end_value = calc(_phase, x, y, _log_skew_x_exp, _log_skew_y_exp, seed, steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
     
