@@ -397,10 +397,10 @@ calc_tri(float phase, float x, float y)
 { return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
 static float
 calc_tri_lin(float phase, float x, float y)
-{ return skew_lin(calc_tri(skew_lin(phase, x), x, y), y); }
+{ return skew_log(calc_tri(skew_lin(phase, x), x, y), y); }
 static float
 calc_tri_log(float phase, float x, float y)
-{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
+{ return skew_log(calc_tri(skew_log(phase, x), x, y), y); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
