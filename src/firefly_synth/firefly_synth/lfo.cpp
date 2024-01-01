@@ -15,6 +15,7 @@ namespace firefly_synth {
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
+enum class lfo_stage { cycle, filter, end };
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
@@ -61,12 +62,14 @@ mode_items()
 
 class lfo_engine :
 public module_engine {
-  bool _ended;
   float _phase;
   float _ref_phase;
   float _end_value;
   bool const _global;
+  lfo_stage _stage = {};
   cv_filter _filter = {};
+  int _end_filter_pos = 0;
+  int _end_filter_stage_samples = 0;
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -263,9 +266,9 @@ calc_tri_log(float phase, float x, float y)
 void
 lfo_engine::reset(plugin_block const* block) 
 { 
-  _ended = false;
   _end_value = 0; 
   _ref_phase = 0;
+  _stage = lfo_stage::cycle;
   _phase = block->state.own_block_automation[param_phase][0].real();
   
   auto const& block_auto = block->state.own_block_automation;
@@ -283,7 +286,7 @@ lfo_engine::process(plugin_block& block)
     return;
   }
 
-  if((is_one_shot_full(mode) || is_one_shot_wrapped(mode)) && _ended)
+  if((is_one_shot_full(mode) || is_one_shot_wrapped(mode)) && _stage == lfo_stage::end)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _end_value);
     return; 
@@ -309,6 +312,18 @@ lfo_engine::process(plugin_block& block)
 template <class Calc>
 void lfo_engine::process_loop(plugin_block& block, Calc calc)
 {
+  if (_stage == lfo_stage::end)
+  {
+    block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _end_value);
+    return;
+  }
+
+  if (_stage == lfo_stage::filter)
+  {
+    block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, _end_value);
+    return;
+  }
+
   int this_module = _global ? module_glfo : module_vlfo;
   int mode = block.state.own_block_automation[param_mode][0].step();
   auto const& x_curve = block.state.own_accurate_automation[param_x][0];
