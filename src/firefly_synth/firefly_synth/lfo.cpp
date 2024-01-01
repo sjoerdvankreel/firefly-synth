@@ -12,9 +12,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static float const skew_min = 0.0001;
-static float const skew_max = 0.9999;
-static float const skew_range = skew_max - skew_min;
 static float const log_half = std::log(0.5f);
 
 enum { section_mode, section_type };
@@ -356,17 +353,17 @@ skew_log(float in, float skew)
   return std::pow(in, std::log(skew_bounded) / log_half);
 }
 
-static float
-skew_lin(float in, float skew)
-{
-  float skew_bounded = skew_min + skew * skew_range;
-  return in < skew_bounded ? in / skew_bounded * 0.5f : 0.5f + (in - skew_bounded) / (1 - skew_bounded) * 0.5f;
-}
 #endif
 
 static float
 skew_log(float in, float skew)
 { return std::pow(in, std::log(0.001 + (skew * 0.999)) / log_half); }
+static float
+skew_lin(float in, float skew)
+{
+  float skew_bounded = 0.001 + skew * 0.999;
+  return in < skew_bounded ? in / skew_bounded * 0.5f : 0.5f + (in - skew_bounded) / (1 - skew_bounded) * 0.5f;
+}
 
 static float
 calc_sin(float phase, float x, float y)
@@ -400,7 +397,7 @@ calc_tri(float phase, float x, float y)
 { return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
 static float
 calc_tri_lin(float phase, float x, float y)
-{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw_lin(phase, x, y))); }
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw_lin(skew_lin(phase, x), x, y))); }
 static float
 calc_tri_log(float phase, float x, float y)
 { return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
