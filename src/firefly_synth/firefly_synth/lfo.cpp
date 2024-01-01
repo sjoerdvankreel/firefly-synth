@@ -163,7 +163,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_one && vs[0] != mode_sync_wrap; });
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_timesig_default(false, { 1, 4 }),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_timesig_default(false, { 1, 4 }),
     make_param_gui_single(section_mode, gui_edit_type::list, { 0, 1 }, gui_label_contents::name, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
@@ -174,7 +174,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 3, 3, 4, 4 }))));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), "Sin"),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_items(), "Sin"),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
