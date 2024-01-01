@@ -45,6 +45,8 @@ static bool is_random(int type) { return false; }
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
+static bool has_x(int type) { return type == type_sin_log || type == type_saw_lin; }
+static bool has_y(int type) { return type == type_sin_log || type == type_saw_lin || type == type_saw_log; }
 
 #if 0
 static bool is_sin(int type) { return type_sin_x_pln_y_pln <= type && type <= type_sin_x_log_y_log; };
@@ -290,18 +292,18 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   // TODO type.gui.submenu->add_submenu("Random", { type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free });
 #endif
 
-  /*auto& x =*/ result.params.emplace_back(make_param(
+  auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  //x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && !is_x_plain(vs[1]); });
-  /*auto& y =*/ result.params.emplace_back(make_param(
+  x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
+  auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, param_y, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  //y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && !is_y_plain(vs[1]); });
+  y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, param_filter, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
