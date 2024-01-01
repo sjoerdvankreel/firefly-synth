@@ -28,10 +28,6 @@ more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 do 5 am and 5 fm routes
 drop "or time into scratch" & friends?
-do skew by log for lfo's too
-env synced partition as synced
-do ramped (skew - phase) lfos
-do plain/linear/log for env/lfo
 do add_submenu everywhere in the topos
 osc: overlay any 2 waves ? (saw+saw==>pulse)
 do ffast-math
