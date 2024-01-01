@@ -304,7 +304,9 @@ lfo_engine::calc_static_free(float y, int seed, int steps)
   _rand_step_pos++;
   if (_rand_step_pos >= _rand_step_samples)
   {
-    _rand_level = fast_rand_next(_rand_state);
+    _rand_level = _rand_level + fast_rand_next(_rand_state) * unipolar_to_bipolar(y);
+    if(_rand_level < 0 || _rand_level > 1) 
+      _rand_level -= 2 * (_rand_level - (int)_rand_level);
     _rand_step_pos = 0;
   }
   return result;
