@@ -20,9 +20,9 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
-enum { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log };
+enum { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, type_rand };
 
-static bool is_random(int type) { return false; }
+static bool is_random(int type) { return type == type_rand; }
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
@@ -116,7 +116,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count;
   
-  // draw synced 1/4 as full cycle
+  // draw synced 1/1 as full cycle
   if (is_sync(mode))
   {
     partition = "1 Bar";
