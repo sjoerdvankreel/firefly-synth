@@ -79,8 +79,11 @@ public module_engine {
   bool const _global;
   lfo_stage _stage = {};
   cv_filter _filter = {};
-  int _end_filter_pos = 0;
   std::uint32_t _rand_state;
+
+  int _rand_step_pos = 0;
+  int _rand_step_samples = 0;
+  int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
 
   float calc_static(float y, int seed, int steps);
@@ -291,13 +294,20 @@ calc_tri_log(float phase, float x, float y, int seed, int steps)
 float 
 lfo_engine::calc_static(float y, int seed, int steps)
 {
-  return _rand_level;
+  return calc_static_free(y, seed, steps);
 }
 
 float 
 lfo_engine::calc_static_free(float y, int seed, int steps)
 {
-  return _rand_level;
+  float result = _rand_level;
+  _rand_step_pos++;
+  if (_rand_step_pos >= _rand_step_samples)
+  {
+    _rand_level = fast_rand_next(_rand_state);
+    _rand_step_pos = 0;
+  }
+  return result;
 }
 
 void
@@ -312,6 +322,9 @@ lfo_engine::reset(plugin_block const* block)
 
   auto const& block_auto = block->state.own_block_automation;
   _phase = block_auto[param_phase][0].real();
+  if(is_static(block_auto[param_type][0].step())) _phase = 0;
+
+  _rand_step_pos = 0;
   _rand_state = std::numeric_limits<uint32_t>::max() / block_auto[param_seed][0].step();
   _rand_level = fast_rand_next(_rand_state);
   float filter = block_auto[param_filter][0].real();
@@ -351,8 +364,7 @@ lfo_engine::process(plugin_block& block)
     return calc_static(y, seed, steps); }); break;
   case type_static_free: process_loop(block, [this](float phase, float x, float y, int seed, int steps) { 
     return calc_static_free(y, seed, steps); }); break;
-  default: break;
-  //default: assert(false); break;
+  default: assert(false); break;
   }
 }
 
@@ -385,6 +397,7 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
+    _rand_step_samples = block.sample_rate / (rate_curve[f] * steps);
     _lfo_end_value = calc(_phase, x_curve[f], y_curve[f], seed, steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
