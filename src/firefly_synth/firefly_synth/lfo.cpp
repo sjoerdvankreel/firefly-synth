@@ -18,19 +18,20 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
-enum { type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log };
+enum { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log };
 
 static bool is_random(int type) { return false; }
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
-static bool has_x(int type) { return type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
-static bool has_y(int type) { return type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_saw_log || type == type_pulse_lin; }
+static bool has_x(int type) { return type == type_skew || type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
+static bool has_y(int type) { return type == type_skew || type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_saw_log || type == type_pulse_lin; }
 
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
+  result.emplace_back("{3AF5A419-583F-435E-ABF7-BA514FA608C9}", "Skew");
   result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.Log");
   result.emplace_back("{34480144-5349-49C1-9211-4CED6E6C8203}", "Pulse");
@@ -173,7 +174,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 3, 3, 4, 4 }))));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
+    make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), "Sin"),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& x = result.params.emplace_back(make_param(
@@ -218,6 +219,10 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 static float
 skew_log(float in, float skew)
 { return std::pow(in, std::log(0.001 + (skew * 0.999)) / log_half); }
+
+static float
+calc_skew(float phase, float x, float y)
+{ return skew_log(std::fabs(phase - skew_log(phase, x)), y); }
 
 static float
 calc_sin(float phase, float x, float y)
@@ -278,6 +283,7 @@ lfo_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   switch (type)
   {
+  case type_skew: process_loop(block, calc_skew); break;
   case type_sin: process_loop(block, calc_sin); break;
   case type_sin_log: process_loop(block, calc_sin_log); break;
   case type_tri: process_loop(block, calc_tri); break;
