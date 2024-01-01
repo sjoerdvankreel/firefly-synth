@@ -21,7 +21,7 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
-enum { type_sin, type_sin_log, type_saw, type_saw_lin, type_saw_log };
+enum { type_sin, type_sin_log, type_saw, type_saw_lin, type_saw_log_x, type_saw_log_y };
 //enum { type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 #if 0
@@ -94,7 +94,8 @@ type_items()
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.Log");
   result.emplace_back("{2190619A-CB71-47F3-9B93-364BF4DA6BE6}", "Saw");
   result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Lin");
-  result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.Log");
+  result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.LogX");
+  result.emplace_back("{1803ECD3-B293-450F-BD55-6C5B36FCC2AF}", "Saw.LogY");
 #if 0
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.XPln/YLin");
   result.emplace_back("{125FB2CC-95EB-499E-97CE-469C72B37D73}", "Sin.XPln/YLog");
@@ -372,8 +373,11 @@ static float
 calc_saw_lin(float phase, float x, float y)
 { return phase < x? phase * y / x : y +  (phase - x) / ( 1 - x) * (1 - y); }
 static float
-calc_saw_log(float phase, float x, float y)
-{ return skew_log(calc_saw_lin(phase, x, y), y, 0, 1); }
+calc_saw_log_x(float phase, float x, float y)
+{ return skew_log(calc_saw_lin(phase, x, y), x, 0.001, 0.99); }
+static float
+calc_saw_log_y(float phase, float x, float y)
+{ return skew_log(calc_saw_lin(phase, x, y), y, 0.001, 0.99); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
@@ -407,7 +411,8 @@ lfo_engine::process(plugin_block& block)
   case type_sin_log: process_loop(block, calc_sin_log); break;
   case type_saw: process_loop(block, calc_saw); break;
   case type_saw_lin: process_loop(block, calc_saw_lin); break;
-  case type_saw_log: process_loop(block, calc_saw_log); break;
+  case type_saw_log_x: process_loop(block, calc_saw_log_x); break;
+  case type_saw_log_y: process_loop(block, calc_saw_log_y); break;
   default: assert(false); break;
   }
 
