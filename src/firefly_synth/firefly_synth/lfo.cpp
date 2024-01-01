@@ -20,16 +20,18 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps, param_amt };
-enum { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, type_static, type_static_free };
+enum { 
+  type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, 
+  type_static, type_static_add, type_static_free, type_static_add_free };
 
 static bool is_static(int type) { 
-  return type == type_static || type == type_static_free; }
+  return type == type_static || type == type_static_add || type == type_static_free || type == type_static_add_free; }
 static bool has_x(int type) { 
   return type == type_skew || type == type_sin_log || 
   type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
 static bool has_y(int type) { 
   return type == type_skew || type == type_sin_log || type == type_tri_log || type == type_saw_lin ||
-  type == type_saw_log || type == type_pulse_lin || type == type_static || type == type_static_free; }
+  type == type_saw_log || type == type_pulse_lin || type == type_static_add || type == type_static_add_free; }
 
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
@@ -50,7 +52,9 @@ type_items()
   result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Lin");
   result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.Log");
   result.emplace_back("{48D681E8-16C2-42FB-B64F-146C7F689C45}", "Static");
+  result.emplace_back("{6182E4EF-93F2-4CDC-A015-7437C05F7E70}", "Stat.Add");
   result.emplace_back("{5AA8914D-CF39-4435-B374-B4C66002DC8B}", "Stat.Free");
+  result.emplace_back("{4B9E5DE0-9F32-4EB0-949F-1108B2A21DC1}", "St.AddFr");
   return result;
 }
 
@@ -86,8 +90,8 @@ public module_engine {
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
 
-  float calc_static(float y, int seed, int steps);
-  float calc_static_free(float y, int seed, int steps);
+  float calc_static(bool add, float y, int seed, int steps);
+  float calc_static_free(bool add, float y, int seed, int steps);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -203,7 +207,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->add_submenu("Phase", { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
-  type.gui.submenu->add_submenu("Noise", { type_static, type_static_free });
+  type.gui.submenu->add_submenu("Noise", { type_static, type_static_add, type_static_free, type_static_add_free });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, param_filter, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -292,21 +296,25 @@ calc_tri_log(float phase, float x, float y, int seed, int steps)
 { return skew_log(calc_tri(skew_log(phase, x), x, y, seed, steps), y); }
 
 float 
-lfo_engine::calc_static(float y, int seed, int steps)
+lfo_engine::calc_static(bool add, float y, int seed, int steps)
 {
-  return calc_static_free(y, seed, steps);
+  return calc_static_free(add, y, seed, steps);
 }
 
 float 
-lfo_engine::calc_static_free(float y, int seed, int steps)
+lfo_engine::calc_static_free(bool add, float y, int seed, int steps)
 {
   float result = _rand_level;
   _rand_step_pos++;
   if (_rand_step_pos >= _rand_step_samples)
   {
-    _rand_level = _rand_level + fast_rand_next(_rand_state) * unipolar_to_bipolar(y);
-    if(_rand_level < 0 || _rand_level > 1) 
-      _rand_level -= 2 * (_rand_level - (int)_rand_level);
+    if(add)
+    {
+      _rand_level = _rand_level + fast_rand_next(_rand_state) * unipolar_to_bipolar(y);
+      if(_rand_level < 0 || _rand_level > 1) 
+        _rand_level -= 2 * (_rand_level - (int)_rand_level);
+    } else
+      _rand_level = fast_rand_next(_rand_state);
     _rand_step_pos = 0;
   }
   return result;
@@ -362,10 +370,14 @@ lfo_engine::process(plugin_block& block)
   case type_saw: process_loop(block, calc_saw); break;
   case type_saw_lin: process_loop(block, calc_saw_lin); break;
   case type_saw_log: process_loop(block, calc_saw_log); break;
-  case type_static: process_loop(block, [this](float phase, float x, float y, int seed, int steps) { 
-    return calc_static(y, seed, steps); }); break;
-  case type_static_free: process_loop(block, [this](float phase, float x, float y, int seed, int steps) { 
-    return calc_static_free(y, seed, steps); }); break;
+  case type_static: 
+  case type_static_add:
+    process_loop(block, [this, type](float phase, float x, float y, int seed, int steps) { 
+      return calc_static(has_y(type), y, seed, steps); }); break;
+  case type_static_free: 
+  case type_static_add_free:
+    process_loop(block, [this, type](float phase, float x, float y, int seed, int steps) {
+      return calc_static_free(has_y(type), y, seed, steps); }); break;
   default: assert(false); break;
   }
 }
