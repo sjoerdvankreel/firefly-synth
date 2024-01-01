@@ -21,7 +21,7 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
-enum { type_sin, type_sin_log, type_saw, type_saw_lin, type_saw_log };
+enum { type_sin, type_sin_log, type_saw, type_saw_lin, type_saw_log, type_pulse_lin };
 //enum { type_sine, type_saw, type_sqr, type_skew, type_tri1, type_tri2, type_rnd_y, type_rnd_xy, type_rnd_y_free, type_rnd_xy_free };
 
 #if 0
@@ -45,8 +45,8 @@ static bool is_random(int type) { return false; }
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
-static bool has_x(int type) { return type == type_sin_log || type == type_saw_lin; }
-static bool has_y(int type) { return type == type_sin_log || type == type_saw_lin || type == type_saw_log; }
+static bool has_x(int type) { return type == type_sin_log || type == type_saw_lin || type == type_pulse_lin; }
+static bool has_y(int type) { return type == type_sin_log || type == type_saw_lin || type == type_saw_log || type == type_pulse_lin; }
 
 #if 0
 static bool is_sin(int type) { return type_sin_x_pln_y_pln <= type && type <= type_sin_x_log_y_log; };
@@ -97,6 +97,7 @@ type_items()
   result.emplace_back("{2190619A-CB71-47F3-9B93-364BF4DA6BE6}", "Saw");
   result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Lin");
   result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.Log");
+  result.emplace_back("{91CB7634-9759-485A-9DFF-6F5F86966212}", "Pulse.Lin");
 #if 0
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.XPln/YLin");
   result.emplace_back("{125FB2CC-95EB-499E-97CE-469C72B37D73}", "Sin.XPln/YLog");
@@ -376,6 +377,9 @@ calc_saw_lin(float phase, float x, float y)
 static float
 calc_saw_log(float phase, float x, float y)
 { return skew_log(calc_saw(phase, x, y), y); }
+static float
+calc_pulse_lin(float phase, float x, float y)
+{ return phase < x? 0: y; }
 
 void
 lfo_engine::reset(plugin_block const* block) 
@@ -410,6 +414,7 @@ lfo_engine::process(plugin_block& block)
   case type_saw: process_loop(block, calc_saw); break;
   case type_saw_lin: process_loop(block, calc_saw_lin); break;
   case type_saw_log: process_loop(block, calc_saw_log); break;
+  case type_pulse_lin: process_loop(block, calc_pulse_lin); break;
   default: assert(false); break;
   }
 
