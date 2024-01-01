@@ -33,7 +33,7 @@ osc: overlay any 2 waves ? (saw+saw==>pulse)
 do ffast-math
 
 lfo:
-- rand + freerun
+- perlin
 - check lfo relative performance
 
 * get some linux folks to comment (ycollete?)
