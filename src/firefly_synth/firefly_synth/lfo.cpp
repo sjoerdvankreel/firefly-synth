@@ -89,12 +89,14 @@ public module_engine {
 
   int _static_dir = 1;
   int _static_step_pos = 0;
+  int _static_total_pos = 0;
   int _static_step_samples = 0;
+  int _static_total_samples = 0;
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
 
   void reset_static(int seed);
-  float calc_static(bool add, float y, int seed, int steps);
+  float calc_static(bool add, bool free, float y, int seed, int steps);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -303,16 +305,23 @@ lfo_engine::reset_static(int seed)
 {
   _static_dir = 1;
   _static_step_pos = 0;
+  _static_total_pos = 0;
   _static_state = std::numeric_limits<uint32_t>::max() / seed;
   _static_level = fast_rand_next(_static_state);
 }
 
 float 
-lfo_engine::calc_static(bool add, float y, int seed, int steps)
+lfo_engine::calc_static(bool add, bool free, float y, int seed, int steps)
 {
   float result = _static_level;
   _static_step_pos++;
-  if (_static_step_pos >= _static_step_samples)
+  _static_total_pos++;
+  if (_static_total_pos >= _static_total_samples)
+  {
+    _static_total_pos = 0;
+    if(!free) reset_static(seed);
+  }
+  else if (_static_step_pos >= _static_step_samples)
   {
     if(add)
     {
@@ -382,7 +391,7 @@ lfo_engine::process(plugin_block& block)
   case type_static_free:
   case type_static_add_free:
     process_loop(block, [this, type](float phase, float x, float y, int seed, int steps) {
-      return calc_static(is_static_add(type), y, seed, steps); }); break;
+      return calc_static(is_static_add(type), is_static_free(type), y, seed, steps); }); break;
   default: assert(false); break;
   }
 }
@@ -393,7 +402,6 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_automation = block.state.own_block_automation;
   int mode = block_automation[param_mode][0].step();
-  int type = block_automation[param_type][0].step();
   int seed = block_automation[param_seed][0].step();
   int steps = block_automation[param_steps][0].step();
   auto const& x_curve = block.state.own_accurate_automation[param_x][0];
@@ -417,14 +425,13 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
-    _static_step_samples = block.sample_rate / (rate_curve[f] * steps);
+    _static_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
+    _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
     _lfo_end_value = calc(_phase, x_curve[f], y_curve[f], seed, steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
-    if(ref_wrapped && is_static(type) && !is_static_free(type)) 
-      reset_static(seed);
     if((phase_wrapped && is_one_shot_wrapped(mode)) || (ref_wrapped && is_one_shot_full(mode)))
     {
       _stage = lfo_stage::filter;
