@@ -18,14 +18,14 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_filter, param_phase, param_seed };
-enum { type_sin, type_sin_log, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, type_pulse, type_pulse_lin, type_pulse_log };
+enum { type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log };
 
 static bool is_random(int type) { return false; }
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
-static bool has_x(int type) { return type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_pulse_lin || type == type_pulse_log; }
-static bool has_y(int type) { return type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_saw_log || type == type_pulse_lin || type == type_pulse_log; }
+static bool has_x(int type) { return type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
+static bool has_y(int type) { return type == type_sin_log || type == type_tri_log || type == type_saw_lin || type == type_saw_log || type == type_pulse_lin; }
 
 static std::vector<list_item>
 type_items()
@@ -33,14 +33,13 @@ type_items()
   std::vector<list_item> result;
   result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.Log");
+  result.emplace_back("{34480144-5349-49C1-9211-4CED6E6C8203}", "Pulse");
+  result.emplace_back("{91CB7634-9759-485A-9DFF-6F5F86966212}", "Pulse.Lin");
   result.emplace_back("{42E1F070-191B-411A-9FFD-D966990B9712}", "Tri");
   result.emplace_back("{B6775D3D-D12B-4326-9414-18788BBC4898}", "Tri.Log");
   result.emplace_back("{2190619A-CB71-47F3-9B93-364BF4DA6BE6}", "Saw");
   result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Lin");
   result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.Log");
-  result.emplace_back("{34480144-5349-49C1-9211-4CED6E6C8203}", "Pulse");
-  result.emplace_back("{91CB7634-9759-485A-9DFF-6F5F86966212}", "Pulse.Lin");
-  result.emplace_back("{D7C4F77F-E49E-4571-9A44-AD2AAE8F4C3E}", "Pulse.Log");
   return result;
 }
 
@@ -243,9 +242,6 @@ calc_pulse(float phase, float x, float y)
 static float
 calc_pulse_lin(float phase, float x, float y)
 { return phase < x? 0: y; }
-static float
-calc_pulse_log(float phase, float x, float y)
-{ return bipolar_to_unipolar(calc_saw(phase, x, y) - calc_saw_log(phase + x - std::floor(phase + x), x, y)); }
 
 static float
 calc_tri(float phase, float x, float y)
@@ -286,12 +282,11 @@ lfo_engine::process(plugin_block& block)
   case type_sin_log: process_loop(block, calc_sin_log); break;
   case type_tri: process_loop(block, calc_tri); break;
   case type_tri_log: process_loop(block, calc_tri_log); break;
+  case type_pulse: process_loop(block, calc_pulse); break;
+  case type_pulse_lin: process_loop(block, calc_pulse_lin); break;
   case type_saw: process_loop(block, calc_saw); break;
   case type_saw_lin: process_loop(block, calc_saw_lin); break;
   case type_saw_log: process_loop(block, calc_saw_log); break;
-  case type_pulse: process_loop(block, calc_pulse); break;
-  case type_pulse_lin: process_loop(block, calc_pulse_lin); break;
-  case type_pulse_log: process_loop(block, calc_pulse_log); break;
   default: assert(false); break;
   }
 }
