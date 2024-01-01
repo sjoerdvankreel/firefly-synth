@@ -177,6 +177,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), "Sin"),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  type.gui.submenu = std::make_shared<gui_submenu>();
+  type.gui.submenu->add_submenu("Phase", { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
