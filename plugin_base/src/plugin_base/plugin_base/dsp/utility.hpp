@@ -73,6 +73,10 @@ cv_filter::set(float sample_rate, float response_time)
   z = 0.0f;
 }
 
+inline std::uint32_t
+fast_rand_seed(int seed)
+{ return std::numeric_limits<uint32_t>::max() / seed; }
+
 // https://en.wikipedia.org/wiki/Lehmer_random_number_generator
 inline float
 fast_rand_next(std::uint32_t& state)
