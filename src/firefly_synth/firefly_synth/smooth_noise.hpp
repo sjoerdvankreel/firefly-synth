@@ -30,18 +30,18 @@ cosine_remap(float a, float b, float t)
 template <float Remap(float, float, float)>
 class smooth_noise
 {
-  std::vector<float> _r;
+  std::uint32_t _steps;
   std::uint32_t _state = 0;
-  std::uint32_t const _steps;
+  std::vector<float> _r;
 
 public:
   float next(float x);
-  smooth_noise(int seed, std::uint32_t steps);
+  smooth_noise(int seed, int steps);
 };
 
 template <float Remap(float, float, float)>
 inline smooth_noise<Remap>::
-smooth_noise(int seed, std::uint32_t steps):
+smooth_noise(int seed, int steps):
 _steps(steps), _r(steps, 0.0f)
 {
   _state = plugin_base::fast_rand_seed(seed);

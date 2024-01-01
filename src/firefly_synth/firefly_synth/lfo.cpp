@@ -6,6 +6,7 @@
 #include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
+#include <firefly_synth/smooth_noise.hpp>
 #include <cmath>
 
 using namespace plugin_base;
@@ -15,19 +16,20 @@ namespace firefly_synth {
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
-enum class lfo_group { phased, static_ };
+enum class lfo_group { phased, noise };
 enum class lfo_stage { cycle, filter, end };
+
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps, param_amt };
 enum { 
   type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, 
-  type_static, type_static_add, type_static_free, type_static_add_free };
+  type_static, type_static_add, type_static_free, type_static_add_free, type_smooth };
 
 static bool is_static_add(int type) { return type == type_static_add || type == type_static_add_free; }
 static bool is_static_free(int type) { return type == type_static_free || type == type_static_add_free; }
-static bool is_static(int type) { return type == type_static || type == type_static_add || type == type_static_free || type == type_static_add_free; }
+static bool is_noise(int type) { return type == type_static || type == type_static_add || type == type_static_free || type == type_static_add_free || type == type_smooth; }
 
 static bool has_x(int type) { 
   return type == type_skew || type == type_sin_log || 
@@ -58,6 +60,7 @@ type_items()
   result.emplace_back("{6182E4EF-93F2-4CDC-A015-7437C05F7E70}", "Stat.Add");
   result.emplace_back("{5AA8914D-CF39-4435-B374-B4C66002DC8B}", "Stat.Free");
   result.emplace_back("{4B9E5DE0-9F32-4EB0-949F-1108B2A21DC1}", "St.AddFr");
+  result.emplace_back("{4F079460-C774-4B69-BCCA-3065BE26D28F}", "Smooth");
   return result;
 }
 
@@ -89,22 +92,24 @@ public module_engine {
   lfo_stage _stage = {};
   cv_filter _filter = {};
   std::uint32_t _static_state;
+  smooth_noise<cosine_remap> _smooth_cos;
 
   int _static_dir = 1;
   int _static_step_pos = 0;
-  int _static_total_pos = 0;
+  int _noise_total_pos = 0;
   int _static_step_samples = 0;
-  int _static_total_samples = 0;
+  int _noise_total_samples = 0;
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
 
-  void reset_static(int seed);
+  void reset_noise(int seed, int steps);
+  float calc_smooth();
   float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void reset(plugin_block const*) override;
-  lfo_engine(bool global) : _global(global) {}
+  lfo_engine(bool global) : _global(global), _smooth_cos(1, 1) {}
 
   void process(plugin_block& block) override;
   template <lfo_group Group, class Calc> 
@@ -216,7 +221,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->add_submenu("Phase", { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
-  type.gui.submenu->add_submenu("Noise", { type_static, type_static_add, type_static_free, type_static_add_free });
+  type.gui.submenu->add_submenu("Noise", { type_static, type_static_add, type_static_free, type_static_add_free, type_smooth });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, param_filter, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -230,14 +235,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  phase.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_static(vs[0]); });
+  phase.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_noise(vs[0]); });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
-  x.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_static(vs[0]); });
+  x.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_noise(vs[0]); });
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, param_y, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
@@ -251,7 +256,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_static(vs[0]); });
+  seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_noise(vs[0]); });
   seed.gui.label_reference_text = result.params[param_phase].info.tag.short_name;
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "Stp", true, param_steps, 1),
@@ -260,7 +265,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params[param_x].gui.label_reference_text = steps.info.tag.short_name;
   steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  steps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_static(vs[0]); });
+  steps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_noise(vs[0]); });
 
   return result;
 }
@@ -304,16 +309,25 @@ static float
 calc_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return skew_log(calc_tri(skew_log(phase, x_exp), x, y, x_exp, y_exp, seed, steps), y_exp); }
 
+float
+lfo_engine::calc_smooth()
+{
+  float result = _smooth_cos.next(_noise_total_pos);
+  if(_noise_total_pos++ >= _noise_total_samples)
+    _noise_total_pos = 0;
+  return result;
+}
+
 float 
 lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps)
 {
   float result = _static_level;
   _static_step_pos++;
-  _static_total_pos++;
-  if (!one_shot && _static_total_pos >= _static_total_samples)
+  _noise_total_pos++;
+  if (!one_shot && _noise_total_pos >= _noise_total_samples)
   {
-    _static_total_pos = 0;
-    if(!free) reset_static(seed);
+    _noise_total_pos = 0;
+    if(!free) reset_noise(seed, steps);
   }
   else if (_static_step_pos >= _static_step_samples)
   {
@@ -333,13 +347,14 @@ lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, i
 }
 
 void
-lfo_engine::reset_static(int seed)
+lfo_engine::reset_noise(int seed, int steps)
 {
   _static_dir = 1;
   _static_step_pos = 0;
-  _static_total_pos = 0;
-  _static_state = std::numeric_limits<uint32_t>::max() / seed;
+  _noise_total_pos = 0;
+  _static_state = fast_rand_seed(seed);
   _static_level = fast_rand_next(_static_state);
+  _smooth_cos = smooth_noise<cosine_remap>(seed, steps);
 }
 
 void
@@ -358,9 +373,9 @@ lfo_engine::reset(plugin_block const* block)
   _log_skew_x_exp = std::log(0.001 + (x * 0.999)) / log_half;
   _log_skew_y_exp = std::log(0.001 + (y * 0.999)) / log_half;
   _phase = block_auto[param_phase][0].real();
-  if (is_static(block_auto[param_type][0].step())) _phase = 0;
+  if (is_noise(block_auto[param_type][0].step())) _phase = 0;
   
-  reset_static(block_auto[param_seed][0].step());
+  reset_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 }
@@ -394,12 +409,12 @@ lfo_engine::process(plugin_block& block)
   case type_saw: process_loop<lfo_group::phased>(block, calc_saw); break;
   case type_saw_lin: process_loop<lfo_group::phased>(block, calc_saw_lin); break;
   case type_saw_log: process_loop<lfo_group::phased>(block, calc_saw_log); break;
-  case type_static: 
-  case type_static_add:
-  case type_static_free:
-  case type_static_add_free:
-    process_loop<lfo_group::static_>(block, [this, mode, type](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
+  case type_static: case type_static_add: case type_static_free: case type_static_add_free:
+    process_loop<lfo_group::noise>(block, [this, mode, type](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
       return calc_static(is_one_shot_full(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
+  case type_smooth:
+    process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
+      return calc_smooth(); }); break;
   default: assert(false); break;
   }
 }
@@ -433,9 +448,9 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
-    if constexpr(Group == lfo_group::static_)
+    if constexpr(Group == lfo_group::noise)
     {
-      _static_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
+      _noise_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
       _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
     }
     
