@@ -13,6 +13,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static float const log_half = std::log(0.5f); 
 static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
@@ -344,8 +345,8 @@ env_engine::init_slope_section(double slope, double split_pos, double& exp, doub
 {
   splt_bnd = slope_min + slope_range * split_pos;
   double slope_bounded = slope_min + slope_range * slope;
-  if (slope_bounded < 0.5f) exp = std::log(slope_bounded) / std::log(0.5);
-  else exp = std::log(1.0f - slope_bounded) / std::log(0.5);
+  if (slope_bounded < 0.5f) exp = std::log(slope_bounded) / log_half;
+  else exp = std::log(1.0f - slope_bounded) / log_half;
 }
 
 void
