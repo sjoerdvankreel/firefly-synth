@@ -387,7 +387,7 @@ calc_pulse_lin(float phase, float x, float y)
 { return phase < x? 0: y; }
 static float
 calc_pulse_log(float phase, float x, float y)
-{ return bipolar_to_unipolar((calc_saw(phase, x, y) - calc_saw_log(phase + x - std::floor(phase + x), x, y)) * 2.0f); }
+{ return bipolar_to_unipolar(calc_saw(phase, x, y) - calc_saw_log(phase + x - std::floor(phase + x), x, y)); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
