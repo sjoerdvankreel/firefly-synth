@@ -227,11 +227,13 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
+  seed.gui.label_reference_text = result.params[param_phase].info.tag.short_name;
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "Stp", true, param_steps, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 32, 4, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  result.params[param_x].gui.label_reference_text = steps.info.tag.short_name;
   steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   steps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
 
