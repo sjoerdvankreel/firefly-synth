@@ -34,6 +34,7 @@ do ffast-math
 
 lfo:
 - rand + freerun
+- check lfo relative performance
 
 * get some linux folks to comment (ycollete?)
 * continuing
