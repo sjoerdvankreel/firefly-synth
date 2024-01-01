@@ -96,7 +96,7 @@ public module_engine {
   int _end_filter_stage_samples = 0;
 
   void reset_static(int seed);
-  float calc_static(bool add, bool free, float y, int seed, int steps);
+  float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -311,12 +311,12 @@ lfo_engine::reset_static(int seed)
 }
 
 float 
-lfo_engine::calc_static(bool add, bool free, float y, int seed, int steps)
+lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps)
 {
   float result = _static_level;
   _static_step_pos++;
   _static_total_pos++;
-  if (_static_total_pos >= _static_total_samples)
+  if (!one_shot && _static_total_pos >= _static_total_samples)
   {
     _static_total_pos = 0;
     if(!free) reset_static(seed);
@@ -390,8 +390,8 @@ lfo_engine::process(plugin_block& block)
   case type_static_add:
   case type_static_free:
   case type_static_add_free:
-    process_loop(block, [this, type](float phase, float x, float y, int seed, int steps) {
-      return calc_static(is_static_add(type), is_static_free(type), y, seed, steps); }); break;
+    process_loop(block, [this, mode, type](float phase, float x, float y, int seed, int steps) {
+      return calc_static(is_one_shot_full(mode) || is_one_shot_wrapped(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
   default: assert(false); break;
   }
 }
