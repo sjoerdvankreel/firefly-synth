@@ -12,6 +12,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
 enum { section_mode, section_type };
@@ -65,6 +66,8 @@ public module_engine {
   float _ref_phase;
   float _end_value;
   bool const _global;
+  cv_filter _filter = {};
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void reset(plugin_block const*) override;
@@ -193,7 +196,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, param_filter, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
@@ -264,6 +267,10 @@ lfo_engine::reset(plugin_block const* block)
   _end_value = 0; 
   _ref_phase = 0;
   _phase = block->state.own_block_automation[param_phase][0].real();
+  
+  auto const& block_auto = block->state.own_block_automation;
+  float filter = block_auto[param_filter][0].real();
+  _filter.set(block->sample_rate, filter / 1000.0f);
 }
 
 void
@@ -311,7 +318,7 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     _end_value = calc(_phase, x_curve[f], y_curve[f]);
-    block.state.own_cv[0][0][f] = check_unipolar(_end_value);
+    block.state.own_cv[0][0][f] = _filter.next(check_unipolar(_end_value));
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
     if((phase_wrapped && is_one_shot_wrapped(mode)) || (ref_wrapped && is_one_shot_full(mode)))
