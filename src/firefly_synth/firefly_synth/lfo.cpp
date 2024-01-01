@@ -400,7 +400,7 @@ calc_tri(float phase, float x, float y)
 { return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
 static float
 calc_tri_lin(float phase, float x, float y)
-{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw_lin(phase, x, y))); }
 static float
 calc_tri_log(float phase, float x, float y)
 { return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y))); }
