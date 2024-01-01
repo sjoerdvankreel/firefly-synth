@@ -24,8 +24,10 @@ enum {
   type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, 
   type_static, type_static_add, type_static_free, type_static_add_free };
 
-static bool is_static(int type) { 
-  return type == type_static || type == type_static_add || type == type_static_free || type == type_static_add_free; }
+static bool is_static_add(int type) { return type == type_static_add || type == type_static_add_free; }
+static bool is_static_free(int type) { return type == type_static_free || type == type_static_add_free; }
+static bool is_static(int type) { return type == type_static || type == type_static_add || type == type_static_free || type == type_static_add_free; }
+
 static bool has_x(int type) { 
   return type == type_skew || type == type_sin_log || 
   type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
@@ -91,8 +93,8 @@ public module_engine {
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
 
+  void reset_static(int seed);
   float calc_static(bool add, float y, int seed, int steps);
-  float calc_static_free(bool add, float y, int seed, int steps);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -296,14 +298,17 @@ static float
 calc_tri_log(float phase, float x, float y, int seed, int steps)
 { return skew_log(calc_tri(skew_log(phase, x), x, y, seed, steps), y); }
 
-float 
-lfo_engine::calc_static(bool add, float y, int seed, int steps)
+void
+lfo_engine::reset_static(int seed)
 {
-  return calc_static_free(add, y, seed, steps);
+  _static_dir = 1;
+  _static_step_pos = 0;
+  _static_state = std::numeric_limits<uint32_t>::max() / seed;
+  _static_level = fast_rand_next(_static_state);
 }
 
 float 
-lfo_engine::calc_static_free(bool add, float y, int seed, int steps)
+lfo_engine::calc_static(bool add, float y, int seed, int steps)
 {
   float result = _static_level;
   _static_step_pos++;
@@ -338,10 +343,7 @@ lfo_engine::reset(plugin_block const* block)
   _phase = block_auto[param_phase][0].real();
   if(is_static(block_auto[param_type][0].step())) _phase = 0;
 
-  _static_dir = 1;
-  _static_step_pos = 0;
-  _static_state = std::numeric_limits<uint32_t>::max() / block_auto[param_seed][0].step();
-  _static_level = fast_rand_next(_static_state);
+  reset_static(block_auto[param_seed][0].step());
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 }
@@ -377,12 +379,10 @@ lfo_engine::process(plugin_block& block)
   case type_saw_log: process_loop(block, calc_saw_log); break;
   case type_static: 
   case type_static_add:
-    process_loop(block, [this, type](float phase, float x, float y, int seed, int steps) { 
-      return calc_static(has_y(type), y, seed, steps); }); break;
-  case type_static_free: 
+  case type_static_free:
   case type_static_add_free:
     process_loop(block, [this, type](float phase, float x, float y, int seed, int steps) {
-      return calc_static_free(has_y(type), y, seed, steps); }); break;
+      return calc_static(is_static_add(type), y, seed, steps); }); break;
   default: assert(false); break;
   }
 }
@@ -393,6 +393,7 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_automation = block.state.own_block_automation;
   int mode = block_automation[param_mode][0].step();
+  int type = block_automation[param_type][0].step();
   int seed = block_automation[param_seed][0].step();
   int steps = block_automation[param_steps][0].step();
   auto const& x_curve = block.state.own_accurate_automation[param_x][0];
@@ -422,6 +423,8 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
     block.state.own_cv[0][0][f] = _filter_end_value;
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
+    if(ref_wrapped && is_static(type) && !is_static_free(type)) 
+      reset_static(seed);
     if((phase_wrapped && is_one_shot_wrapped(mode)) || (ref_wrapped && is_one_shot_full(mode)))
     {
       _stage = lfo_stage::filter;
