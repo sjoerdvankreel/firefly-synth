@@ -20,14 +20,14 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps, param_amt };
-enum { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, type_rand };
+enum { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, type_static };
 
 static bool has_x(int type) { 
   return type == type_skew || type == type_sin_log || 
   type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
 static bool has_y(int type) { 
   return type == type_skew || type == type_sin_log || type == type_tri_log || 
-  type == type_saw_lin || type == type_saw_log || type == type_pulse_lin || type == type_rand; }
+  type == type_saw_lin || type == type_saw_log || type == type_pulse_lin || type == type_static; }
 
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
@@ -47,6 +47,7 @@ type_items()
   result.emplace_back("{2190619A-CB71-47F3-9B93-364BF4DA6BE6}", "Saw");
   result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Lin");
   result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.Log");
+  result.emplace_back("{48D681E8-16C2-42FB-B64F-146C7F689C45}", "Static");
   return result;
 }
 
@@ -190,6 +191,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->add_submenu("Phase", { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
+  type.gui.submenu->add_submenu("Noise", { type_static });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, param_filter, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -203,14 +205,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  phase.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_rand; });
+  phase.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_static; });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, param_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
-  x.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_rand; });
+  x.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_static; });
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, param_y, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
@@ -224,14 +226,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_rand; });
+  seed.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "Stp", true, param_steps, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 32, 4, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  steps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_rand; });
+  steps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
 
   return result;
 }
