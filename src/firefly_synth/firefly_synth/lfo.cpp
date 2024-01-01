@@ -359,6 +359,10 @@ static float
 skew_log(float in, float skew, float min, float max)
 { return std::pow(in, std::log(std::clamp(skew, min, max)) / log_half); }
 static float
+skew_lin(float in, float skew, float min, float max)
+{ return std::clamp(in < skew ? in / skew * 0.5f : 0.5f + 0.5f * (in - skew) / (1 - skew), min, max); }
+
+static float
 calc_saw(float phase, float x, float y)
 { return phase; }
 static float
@@ -369,7 +373,7 @@ calc_sin_skew(float phase, float x, float y)
 { return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x, 0.001, 0.95) * 2.0f * pi32)), y, 0.01, 0.99); }
 static float
 calc_saw_skew(float phase, float x, float y)
-{ return phase < x? phase / x * 0.5f: 0.5f + 0.5f * (phase - x) / (1 - x); }
+{ return skew_lin(phase, x, 0.01, 0.99); }
 
 void
 lfo_engine::reset(plugin_block const* block) 
