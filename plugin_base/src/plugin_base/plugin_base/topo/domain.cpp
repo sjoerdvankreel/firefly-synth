@@ -82,8 +82,10 @@ param_domain::plain_to_text(bool io, plain_value plain) const
   }
 
   std::ostringstream stream;
-  int mul = display == domain_display::percentage ? 100 : 1;
-  stream << std::fixed << std::setprecision(precision) << (plain.real() * mul);
+  float val = plain.real();
+  if(display == domain_display::percentage) val *= 100;
+  if(display == domain_display::decibel) val = 20.0f * std::log10(val * max);
+  stream << std::fixed << std::setprecision(precision) << val;
   if(unit.size()) stream << " " << unit;
   return prefix + stream.str();
 }
@@ -134,7 +136,8 @@ param_domain::text_to_plain(
 
   float real = std::numeric_limits<float>::max();
   stream >> real;
-  real /= (display == domain_display::normal) ? 1 : 100;
+  if(display == domain_display::percentage) real /= 100;
+  if(display == domain_display::decibel) real = std::exp(std::log(10.0f) * real / 20.0f) / max;
   plain = plain_value::from_real(real);
   return min <= plain.real() && plain.real() <= max;
 }

@@ -12,7 +12,7 @@
 namespace plugin_base {
 
 struct param_topo_mapping;
-enum class domain_display { normal, percentage };
+enum class domain_display { normal, percentage, decibel };
 enum class domain_type { toggle, step, name, item, timesig, linear, log };
 
 typedef std::function<std::string(int module_slot, int param_slot)>

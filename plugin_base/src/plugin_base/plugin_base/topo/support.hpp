@@ -98,6 +98,8 @@ param_domain
 make_domain_timesig_default(bool with_zero, timesig const& default_);
 
 param_domain
+make_domain_decibel(double min, double max, double default_, int precision);
+param_domain
 make_domain_percentage(double min, double max, double default_, int precision, bool unit);
 param_domain
 make_domain_linear(double min, double max, double default_, int precision, std::string const& unit);
