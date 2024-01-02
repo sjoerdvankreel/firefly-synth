@@ -295,6 +295,46 @@ init_svf_hpf(
   m0 = 1; m1 = -k; m2 = -1;
 }
 
+static void
+init_svf_bpf(
+  double w, double res, double& g, double& k,
+  double& a1, double& a2, double& a3,
+  double& m0, double& m1, double& m2)
+{
+  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  m0 = 0; m1 = 1; m2 = 0;
+}
+
+static void
+init_svf_bsf(
+  double w, double res, double& g, double& k,
+  double& a1, double& a2, double& a3,
+  double& m0, double& m1, double& m2)
+{
+  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  m0 = 1; m1 = -k; m2 = 0;
+}
+
+static void
+init_svf_apf(
+  double w, double res, double& g, double& k,
+  double& a1, double& a2, double& a3,
+  double& m0, double& m1, double& m2)
+{
+  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  m0 = 1; m1 = -2 * k; m2 = 0;
+}
+
+static void
+init_svf_peq(
+  double w, double res, double& g, double& k,
+  double& a1, double& a2, double& a3,
+  double& m0, double& m1, double& m2)
+{
+  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  m0 = 1; m1 = -k; m2 = -2;
+}
+
 fx_engine::
 fx_engine(bool global, int sample_rate) :
 _global(global), _capacity(sample_rate * 10)
@@ -335,6 +375,10 @@ fx_engine::process(plugin_block& block,
   case type_delay: process_delay(block, *modulation); break;
   case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
   case type_svf_hpf: process_svf(block, *modulation, init_svf_hpf); break;
+  case type_svf_bpf: process_svf(block, *modulation, init_svf_bpf); break;
+  case type_svf_bsf: process_svf(block, *modulation, init_svf_bsf); break;
+  case type_svf_peq: process_svf(block, *modulation, init_svf_peq); break;
+  case type_svf_apf: process_svf(block, *modulation, init_svf_apf); break;
   }
 }
 
