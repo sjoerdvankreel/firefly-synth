@@ -39,7 +39,7 @@ type_items(bool global)
   result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "SVF.BLL");
   result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "SVF.LSH");
   result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "SVF.HSH");
-  result.emplace_back("{673C872A-F740-431C-8CD3-F577CE984C2D}", "Comb");
+  result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   return result;
 }
@@ -107,7 +107,7 @@ static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off) return graph_data(graph_data_type::off, {});
+  if(type == type_off || type == type_comb) return graph_data(graph_data_type::off, {});
 
   int frame_count = -1;
   int sample_rate = -1;
@@ -191,7 +191,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
-    make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "SVF"),
+    make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1 } })));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || is_svf(vs[0]); });
