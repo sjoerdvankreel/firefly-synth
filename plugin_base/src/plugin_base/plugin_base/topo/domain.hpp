@@ -13,7 +13,7 @@ namespace plugin_base {
 
 struct param_topo_mapping;
 enum class domain_display { normal, percentage };
-enum class domain_type { toggle, step, name, item, timesig, linear, log, decibel };
+enum class domain_type { toggle, step, name, item, timesig, linear, log };
 
 typedef std::function<std::string(int module_slot, int param_slot)>
 default_selector;
@@ -122,7 +122,7 @@ param_domain::plain_to_raw(plain_value plain) const
 { return is_real()? plain.real(): plain.step(); }
 inline bool 
 param_domain::is_real() const 
-{ return type == domain_type::log || type == domain_type::linear || type == domain_type::decibel; }
+{ return type == domain_type::log || type == domain_type::linear; }
 
 inline plain_value 
 param_domain::raw_to_plain(double raw) const
@@ -141,10 +141,7 @@ param_domain::plain_to_normalized(plain_value plain) const
   double plain_real = std::clamp((double)plain.real(), min, max);
   if (type == domain_type::linear)
     return normalized_value((plain_real - min) / range);
-  else if(type == domain_type::log)
-    return normalized_value(std::pow((plain_real - min) * (1 / range), 1 / exp));
-  else // decibel
-    return normalized_value(std::exp(std::log(10.0f) * plain_real / 20.0f) / max);
+  return normalized_value(std::pow((plain_real - min) * (1 / range), 1 / exp));
 }
 
 inline plain_value 
@@ -157,10 +154,7 @@ param_domain::normalized_to_plain(normalized_value normalized) const
   double normalized_real = std::clamp((double)normalized.value(), 0.0, 1.0);
   if (type == domain_type::linear)
     return plain_value::from_real(min + normalized_real * range);
-  else if (type == domain_type::log)
-    return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
-  else // decibel
-    return plain_value::from_real(20.0f * std::log10(normalized_real * max));    
+  return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
 }
 
 }
