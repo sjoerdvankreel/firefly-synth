@@ -210,9 +210,9 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  auto& svf_gain = result.params.emplace_back(make_param( // TODO decibel
+  auto& svf_gain = result.params.emplace_back(make_param(
     make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", "Gain", param_svf_gain, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 2, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-8, 8, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   svf_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf_gain(vs[0]); });
