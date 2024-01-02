@@ -76,18 +76,10 @@ fft(std::vector<float> const& in)
   // scale to 0..1
   std::vector<float> result;
   float max = std::numeric_limits<float>::min();
-  float min = std::numeric_limits<float>::max();
   for (int i = 0; i < inout.size(); i++)
-  {
     max = std::max(max, std::abs(inout[i].real()));
-    min = std::min(min, std::abs(inout[i].real()));
-  }
-  if(max == min)
-    for (int i = 0; i < inout.size(); i++)
-      result.push_back(std::abs(inout[i].real()) / max);
-  else
-    for (int i = 0; i < inout.size(); i++)
-      result.push_back((std::abs(inout[i].real()) - min) / (max - min));
+  for (int i = 0; i < inout.size(); i++)
+    result.push_back(max == 0.0f? 0.0f: std::abs(inout[i].real()) / max);
   return result;
 }
 
