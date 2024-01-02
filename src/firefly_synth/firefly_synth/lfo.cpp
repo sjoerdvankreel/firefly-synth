@@ -62,8 +62,8 @@ type_items()
   result.emplace_back("{6182E4EF-93F2-4CDC-A015-7437C05F7E70}", "Stat.Add");
   result.emplace_back("{5AA8914D-CF39-4435-B374-B4C66002DC8B}", "Stat.Free");
   result.emplace_back("{4B9E5DE0-9F32-4EB0-949F-1108B2A21DC1}", "St.AddFr");
-  result.emplace_back("{4F079460-C774-4B69-BCCA-3065BE26D28F}", "Smth");
-  result.emplace_back("{92856FAE-84EE-42B9-926D-7F4FA7AE21E9}", "Smth.Log");
+  result.emplace_back("{4F079460-C774-4B69-BCCA-3065BE26D28F}", "Smt");
+  result.emplace_back("{92856FAE-84EE-42B9-926D-7F4FA7AE21E9}", "Smt.Log");
   return result;
 }
 
@@ -202,7 +202,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   mode.gui.submenu->add_submenu("Sync", { mode_sync, mode_sync_one, mode_sync_wrap });
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0.1, 20, 1, 2, "Hz"),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
     make_param_gui_single(section_mode, gui_edit_type::knob, { 0, 1 }, gui_label_contents::none,
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   rate.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
@@ -257,7 +257,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", "Sed", true, param_seed, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 999, 1, 0),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
@@ -265,7 +265,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   seed.gui.label_reference_text = result.params[param_phase].info.tag.short_name;
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "Stp", true, param_steps, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 32, 4, 0),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 99, 4, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params[param_x].gui.label_reference_text = steps.info.tag.short_name;
