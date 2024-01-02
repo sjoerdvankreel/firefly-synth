@@ -58,8 +58,9 @@ public module_engine {
   int const _capacity;
   jarray<float, 2> _buffer = {};
 
-  void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
+  template <class Init>
+  void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
@@ -262,6 +263,38 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   return result;
 }
 
+static void
+init_svf_non_shelving(
+  double w, double res, double& g, double& k, 
+  double& a1, double& a2, double& a3)
+{
+  g = std::tan(w);
+  k = 2 - 2 * res;
+  a1 = 1 / (1 + g * (g + k));
+  a2 = g * a1;
+  a3 = g * a2;
+}
+
+static void
+init_svf_lpf(
+  double w, double res, double& g, double& k,
+  double& a1, double& a2, double& a3, 
+  double& m0, double& m1, double& m2)
+{
+  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  m0 = 0; m1 = 0; m2 = 1;
+}
+
+static void
+init_svf_hpf(
+  double w, double res, double& g, double& k,
+  double& a1, double& a2, double& a3, 
+  double& m0, double& m1, double& m2)
+{
+  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  m0 = 1; m1 = -k; m2 = -1;
+}
+
 fx_engine::
 fx_engine(bool global, int sample_rate) :
 _global(global), _capacity(sample_rate * 10)
@@ -296,10 +329,13 @@ fx_engine::process(plugin_block& block,
   if(type == type_off) return;
   if(modulation == nullptr)
     modulation = &get_cv_matrix_mixdown(block, _global);
-  if (type == type_delay)
-    process_delay(block, *modulation);
-  else if (is_svf(type))
-    process_svf(block, *modulation);
+
+  switch (type)
+  {
+  case type_delay: process_delay(block, *modulation); break;
+  case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
+  case type_svf_hpf: process_svf(block, *modulation, init_svf_hpf); break;
+  }
 }
 
 void
@@ -323,23 +359,22 @@ fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulatio
   _pos %= _capacity;
 }
   
-void
-fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation)
+template <class Init> void
+fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init)
 {
+  double a1, a2, a3;
+  double m0, m1, m2;
+  double w, g, k, hz;
+
   int this_module = _global ? module_gfx : module_vfx;
-  int type = block.state.own_block_automation[param_type][0].step();
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
   auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float freq = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
-    double k = 2 - 2 * res_curve[f];
-    double g = std::tan(pi32 * freq / block.sample_rate);
-    double a1 = 1 / (1 + g * (g + k));
-    double a2 = g * a1;
-    double a3 = g * a2;
-
+    hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
+    w = pi64 * hz / block.sample_rate;
+    init(w, res_curve[f], g, k, a1, a2, a3, m0, m1, m2);
     for (int c = 0; c < 2; c++)
     {
       double v0 = block.state.own_audio[0][0][c][f];
@@ -348,8 +383,7 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation)
       double v2 = _ic2eq[c] + a2 * _ic1eq[c] + a3 * v3;
       _ic1eq[c] = 2 * v1 - _ic1eq[c];
       _ic2eq[c] = 2 * v2 - _ic2eq[c];
-      float out = type == type_svf_lpf? v2: v0 - k * v1 - v2;
-      block.state.own_audio[0][0][c][f] = out;
+      block.state.own_audio[0][0][c][f] = m0 * v0 + m1 * v1 + m2 * v2;
     }
   }
 }
