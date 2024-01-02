@@ -25,18 +25,20 @@ enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps, param_amt };
 enum { 
   type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, 
-  type_static, type_static_add, type_static_free, type_static_add_free, type_smooth };
+  type_static, type_static_add, type_static_free, type_static_add_free, type_smooth, type_smooth_log };
 
 static bool is_static_add(int type) { return type == type_static_add || type == type_static_add_free; }
 static bool is_static_free(int type) { return type == type_static_free || type == type_static_add_free; }
-static bool is_noise(int type) { return type == type_static || type == type_static_add || type == type_static_free || type == type_static_add_free || type == type_smooth; }
+static bool is_noise(int type) { 
+  return type == type_static || type == type_static_add || type == type_static_free || 
+  type == type_static_add_free || type == type_smooth || type == type_smooth_log; }
 
 static bool has_x(int type) { 
   return type == type_skew || type == type_sin_log || 
   type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
 static bool has_y(int type) { 
   return type == type_skew || type == type_sin_log || type == type_tri_log || type == type_saw_lin ||
-  type == type_saw_log || type == type_pulse_lin || type == type_static_add || type == type_static_add_free; }
+  type == type_saw_log || type == type_pulse_lin || type == type_static_add || type == type_static_add_free || type == type_smooth_log; }
 
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
@@ -60,7 +62,8 @@ type_items()
   result.emplace_back("{6182E4EF-93F2-4CDC-A015-7437C05F7E70}", "Stat.Add");
   result.emplace_back("{5AA8914D-CF39-4435-B374-B4C66002DC8B}", "Stat.Free");
   result.emplace_back("{4B9E5DE0-9F32-4EB0-949F-1108B2A21DC1}", "St.AddFr");
-  result.emplace_back("{4F079460-C774-4B69-BCCA-3065BE26D28F}", "Smooth");
+  result.emplace_back("{4F079460-C774-4B69-BCCA-3065BE26D28F}", "Smth");
+  result.emplace_back("{92856FAE-84EE-42B9-926D-7F4FA7AE21E9}", "Smth.Log");
   return result;
 }
 
@@ -91,8 +94,8 @@ public module_engine {
   bool const _global;
   lfo_stage _stage = {};
   cv_filter _filter = {};
+  smooth_noise _smooth_noise;
   std::uint32_t _static_state;
-  smooth_noise<cosine_remap> _smooth_cos;
 
   int _static_dir = 1;
   int _static_step_pos = 0;
@@ -104,12 +107,13 @@ public module_engine {
 
   void reset_noise(int seed, int steps);
   float calc_smooth(int steps);
+  float calc_smooth_log(int steps, float y_exp);
   float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void reset(plugin_block const*) override;
-  lfo_engine(bool global) : _global(global), _smooth_cos(1, 1) {}
+  lfo_engine(bool global) : _global(global), _smooth_noise(1, 1) {}
 
   void process(plugin_block& block) override;
   template <lfo_group Group, class Calc> 
@@ -221,7 +225,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->add_submenu("Phase", { type_skew, type_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
-  type.gui.submenu->add_submenu("Noise", { type_static, type_static_add, type_static_free, type_static_add_free, type_smooth });
+  type.gui.submenu->add_submenu("Static", { type_static, type_static_add, type_static_free, type_static_add_free });
+  type.gui.submenu->add_submenu("Smooth", { type_smooth, type_smooth_log });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, param_filter, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -312,11 +317,15 @@ calc_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, 
 float
 lfo_engine::calc_smooth(int steps)
 {
-  float result = _smooth_cos.next((float)_noise_total_pos / (_noise_total_samples + 1) * steps);
+  float result = _smooth_noise.next((float)_noise_total_pos / (_noise_total_samples + 1) * steps);
   if(_noise_total_pos++ >= _noise_total_samples)
     _noise_total_pos = 0;
   return result;
 }
+
+float
+lfo_engine::calc_smooth_log(int steps, float y_exp)
+{ return skew_log(calc_smooth(steps), y_exp); }
 
 float 
 lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps)
@@ -354,7 +363,7 @@ lfo_engine::reset_noise(int seed, int steps)
   _noise_total_pos = 0;
   _static_state = fast_rand_seed(seed);
   _static_level = fast_rand_next(_static_state);
-  _smooth_cos = smooth_noise<cosine_remap>(seed, steps);
+  _smooth_noise = smooth_noise(seed, steps);
 }
 
 void
@@ -415,6 +424,9 @@ lfo_engine::process(plugin_block& block)
   case type_smooth:
     process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
       return calc_smooth(steps); }); break;
+  case type_smooth_log:
+    process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
+      return calc_smooth_log(steps, y_exp); }); break;
   default: assert(false); break;
   }
 }
