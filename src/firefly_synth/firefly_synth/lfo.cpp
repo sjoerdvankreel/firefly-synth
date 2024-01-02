@@ -312,7 +312,7 @@ calc_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, 
 float
 lfo_engine::calc_smooth(int steps)
 {
-  float result = _smooth_cos.next((float)_noise_total_pos / _noise_total_samples * steps);
+  float result = _smooth_cos.next((float)_noise_total_pos / (_noise_total_samples + 1) * steps);
   if(_noise_total_pos++ >= _noise_total_samples)
     _noise_total_pos = 0;
   return result;
