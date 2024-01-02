@@ -167,7 +167,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     else
     {
       sample_rate = params.max_frame_count * freq;
-      partition = float_to_string(1 / freq, 1) + " Sec";
+      partition = float_to_string(1 / freq, 2) + " Sec";
     }
   }
   
@@ -184,7 +184,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     else
     {
       sample_rate = params.max_frame_count * freq;
-      partition = float_to_string(one_bar_freq / freq, 1) + " Bar";
+      partition = float_to_string(one_bar_freq / freq, 2) + " Bar";
     }
   }
 
