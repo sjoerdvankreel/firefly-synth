@@ -354,6 +354,30 @@ init_svf_bll(
   m0 = 1; m1 = k * (a - 1); m2 = 0;
 }
 
+static void
+init_svf_lsh(
+  double w, double res, double db_gain,
+  double& a1, double& a2, double& a3,
+  double& m0, double& m1, double& m2)
+{
+  double k;
+  double a = std::pow(10.0, db_gain / 40.0);
+  init_svf(w, res, std::tan(w) / std::sqrt(a), 1, k, a1, a2, a3);
+  m0 = 1; m1 = k * (a - 1); m2 = a * a - 1;
+}
+
+static void
+init_svf_hsh(
+  double w, double res, double db_gain,
+  double& a1, double& a2, double& a3,
+  double& m0, double& m1, double& m2)
+{
+  double k;
+  double a = std::pow(10.0, db_gain / 40.0);
+  init_svf(w, res, std::tan(w) * std::sqrt(a), 1, k, a1, a2, a3);
+  m0 = a * a; m1 = k * (1 - a) * a; m2 = 1 - a * a;
+}
+
 fx_engine::
 fx_engine(bool global, int sample_rate) :
 _global(global), _capacity(sample_rate * 10)
@@ -399,6 +423,8 @@ fx_engine::process(plugin_block& block,
   case type_svf_peq: process_svf(block, *modulation, init_svf_peq); break;
   case type_svf_apf: process_svf(block, *modulation, init_svf_apf); break;
   case type_svf_bll: process_svf(block, *modulation, init_svf_bll); break;
+  case type_svf_lsh: process_svf(block, *modulation, init_svf_lsh); break;
+  case type_svf_hsh: process_svf(block, *modulation, init_svf_hsh); break;
   }
 }
 
