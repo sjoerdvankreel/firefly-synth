@@ -192,13 +192,13 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 3, 1, 1, 1 } })));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || is_svf(vs[0]); });
   result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_svf_freq, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(20, 20000, 1000, 1000, 0, "Hz"),
-    make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
+    make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "Res", param_svf_res, 1),
