@@ -55,8 +55,8 @@ smooth_noise<Remap>::next(float x)
 {
   int xi = (int)x - (x < 0 && x != (int)x);
   float t = x - xi;
-  int x_min = xi % (_steps - 1);
-  int x_max = (x_min + 1) % (_steps - 1);
+  int x_min = xi % _steps;
+  int x_max = (x_min + 1) % _steps;
   return Remap(_r[x_min], _r[x_max], t);
 }
 
