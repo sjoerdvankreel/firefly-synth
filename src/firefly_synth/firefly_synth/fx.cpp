@@ -454,18 +454,28 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation,
 {
   double a1, a2, a3;
   double m0, m1, m2;
-  double w, hz, gain;
+  double w, hz, gain, kbd, kbd_offset;
 
   double const max_res = 0.99;
   int this_module = _global ? module_gfx : module_vfx;
+
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
+  auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
   auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
 
+  int kbd_pivot = midi_middle_c;
+  int kbd_current = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.id.key;
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    kbd = block.normalized_to_raw(this_module, param_svf_freq, kbd_curve[f]);
     hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
     gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
+    kbd_offset = (kbd_current - kbd_pivot) / 12.0 * kbd;
+    if(kbd >= 0) hz *= kbd_offset;
+    else hz /= kbd_offset;
+
     w = pi64 * hz / block.sample_rate;
     init(w, res_curve[f] * max_res, gain, a1, a2, a3, m0, m1, m2);
     for (int c = 0; c < 2; c++)

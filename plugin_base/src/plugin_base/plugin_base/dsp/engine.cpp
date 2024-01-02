@@ -96,7 +96,7 @@ plugin_engine::make_plugin_block(
     : _voice_automation[voice].state();
 
   plugin_block_state state = {
-    context_out, cv_out, audio_out, scratch,
+    _last_note_key, context_out, cv_out, audio_out, scratch,
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,

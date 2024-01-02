@@ -50,6 +50,7 @@ struct plugin_voice_block final {
 
 // state and automation
 struct plugin_block_state final {
+  int last_midi_note = -1;
   void** own_context = {};
   jarray<float, 3>& own_cv;
   jarray<float, 4>& own_audio;

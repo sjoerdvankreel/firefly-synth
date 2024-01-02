@@ -30,6 +30,7 @@ do 5 am and 5 fm routes
 drop "or time into scratch" & friends?
 do add_submenu everywhere in the topos
 osc: overlay any 2 waves ? (saw+saw==>pulse)
+fix the init patch
 
 * fx
 * stvar - freq, res, gain, kbd
