@@ -410,6 +410,7 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation,
   double m0, m1, m2;
   double w, g, k, hz;
 
+  double const max_res = 0.99;
   int this_module = _global ? module_gfx : module_vfx;
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
   auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
@@ -418,7 +419,7 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation,
   {
     hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
     w = pi64 * hz / block.sample_rate;
-    init(w, res_curve[f], g, k, a1, a2, a3, m0, m1, m2);
+    init(w, res_curve[f] * max_res, g, k, a1, a2, a3, m0, m1, m2);
     for (int c = 0; c < 2; c++)
     {
       double v0 = block.state.own_audio[0][0][c][f];
