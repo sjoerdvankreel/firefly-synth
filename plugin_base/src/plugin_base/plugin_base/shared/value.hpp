@@ -40,7 +40,8 @@ plain_value::from_real(float real)
 {
   assert(real == real);
   assert(real < std::numeric_limits<float>::infinity());
-  assert(real > -std::numeric_limits<float>::infinity());
+  // need >= for decibel scale
+  assert(real >= -std::numeric_limits<float>::infinity());
   plain_value v; 
   v._real = real; 
   return v;
