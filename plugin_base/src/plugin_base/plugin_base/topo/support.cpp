@@ -269,20 +269,6 @@ make_domain_name(std::vector<std::string> const& names, std::string const& defau
 }
 
 param_domain
-make_domain_decibel(double min, double max, double default_, int precision)
-{
-  param_domain result = {};
-  result.min = min;
-  result.max = max;
-  result.unit = "dB";
-  result.precision = precision;
-  result.type = domain_type::linear;
-  result.display = domain_display::decibel;
-  result.default_selector = simple_default("0 dB"); // TODO
-  return result;
-}
-
-param_domain
 make_domain_percentage(double min, double max, double default_, int precision, bool unit)
 {
   param_domain result = {};
