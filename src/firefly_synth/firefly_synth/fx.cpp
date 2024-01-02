@@ -351,7 +351,7 @@ init_svf_bll(
   double k;
   double a = std::pow(10.0, db_gain / 40.0);
   init_svf(w, res, std::tan(w), a, k, a1, a2, a3);
-  m0 = 1; m1 = k * (a - 1); m2 = 0;
+  m0 = 1; m1 = k * (a * a - 1); m2 = 0;
 }
 
 static void
