@@ -110,6 +110,18 @@ public:
   { add_and_make_visible(*this, *child); }
 };
 
+// hosts a number of section params
+class param_section_container:
+public binding_component,
+public rounded_container
+{
+public:
+  param_section_container(plugin_gui* gui, module_desc const* module, param_section const* section, juce::Component* child) :
+  binding_component(gui, module, &section->gui.bindings, 0), 
+  rounded_container(child, gui->gui_state()->desc().plugin->gui.section_corner_radius, false, rounded_container_mode::both, 
+    module->module->gui.colors.section_outline1, module->module->gui.colors.section_outline2) { init(); }
+};
+
 // grid component as opposed to grid layout
 // resizes children on resize
 class grid_component:
@@ -138,16 +150,6 @@ public:
   { setInterceptsMouseClicks(false, true); }
   grid_component(bool vertical, int count, float gap_size, int autofit_row = 0, int autofit_column = 0) :
   grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size, autofit_row, autofit_column) {}
-};
-
-// binding_component that hosts a number of plugin parameters
-class param_section_grid :
-public binding_component,
-public grid_component
-{
-public:
-  param_section_grid(plugin_gui* gui, module_desc const* module, param_section const* section, float gap_size):
-  binding_component(gui, module, &section->gui.bindings, 0), grid_component(section->gui.dimension, gap_size) { init(); }
 };
 
 }

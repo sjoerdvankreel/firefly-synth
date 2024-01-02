@@ -623,21 +623,17 @@ Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section)
 {
   auto const& params = module.params;
-  grid_component& grid = make_component<param_section_grid>(this, &module, &section, margin_param);
+  grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
       grid.add(make_params(module, &(*iter)), iter->param->gui.position);
-  
-  auto outline1 = module.module->gui.colors.section_outline1;
-  auto outline2 = module.module->gui.colors.section_outline2;
-  int radius = _gui_state->desc().plugin->gui.section_corner_radius;
+
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<rounded_container>(&grid, radius, false, rounded_container_mode::both, outline1, outline2);
-  
+    return make_component<param_section_container>(this, &module, &section, &grid);
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
-  return make_component<rounded_container>(&viewer, radius, false, rounded_container_mode::both, outline1, outline2);
+  return make_component<param_section_container>(this, &module, &section, &grid);
 }
 
 Component&
