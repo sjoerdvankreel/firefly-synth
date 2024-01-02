@@ -210,7 +210,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "Kbd", param_svf_kbd, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-4, 4, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   auto& svf_gain = result.params.emplace_back(make_param(
