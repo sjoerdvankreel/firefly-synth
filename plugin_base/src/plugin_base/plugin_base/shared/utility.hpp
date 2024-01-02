@@ -2,6 +2,7 @@
 
 #include <string>
 #include <vector>
+#include <sstream>
 #include <cstring>
 #include <cassert>
 #include <utility>
@@ -38,6 +39,14 @@ std::filesystem::path get_resource_location(format_config const* config);
 
 std::vector<float> fft(std::vector<float> const& in);
 std::vector<float> log_remap_series_x(std::vector<float> const& in, float midpoint);
+
+inline std::string
+float_to_string(float x, int prec)
+{
+  std::ostringstream stream;
+  stream << std::fixed << std::setprecision(prec) << x;
+  return stream.str();
+}
 
 inline std::uint64_t
 next_pow2(std::uint64_t x)

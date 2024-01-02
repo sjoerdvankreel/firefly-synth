@@ -151,9 +151,24 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   if(mode == mode_off)
     return graph_data(graph_data_type::off, {});
   
-  std::string partition = "1 Sec";
+  int sample_rate = -1;
+  std::string partition;
   auto const params = make_graph_engine_params();
-  int sample_rate = params.max_frame_count;
+  float freq = sync_or_freq_from_state(state, 120, is_sync(mode), mapping.module_index, mapping.module_slot, param_rate, param_tempo);
+
+  if (!is_sync(mode))
+  {
+    if (freq >= 1)
+    {
+      partition = "1 Sec";
+      sample_rate = params.max_frame_count;
+    }
+    else
+    {
+      sample_rate = params.max_frame_count * freq;
+      partition = float_to_string(1 / freq, 2) + " Sec";
+    }
+  }
   
   // draw synced 1/1 as full cycle
   if (is_sync(mode))
