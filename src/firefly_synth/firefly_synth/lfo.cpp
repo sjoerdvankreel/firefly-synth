@@ -158,6 +158,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 
   if (!is_sync(mode))
   {
+    // 1 second, or the minimum that shows 1 cycle
     if (freq >= 1)
     {
       partition = "1 Sec";
@@ -173,9 +174,18 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   // draw synced 1/1 as full cycle
   if (is_sync(mode))
   {
-    partition = "1 Bar";
+    // 1 bar, or the minimum that shows 1 cycle
     float one_bar_freq = timesig_to_freq(120, { 1, 1 });
-    sample_rate = one_bar_freq * params.max_frame_count;
+    if(freq >= one_bar_freq)
+    {
+      partition = "1 Bar";
+      sample_rate = one_bar_freq * params.max_frame_count;
+    }
+    else
+    {
+      sample_rate = params.max_frame_count * freq;
+      partition = float_to_string(one_bar_freq / freq, 2) + " Bar";
+    }
   }
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
