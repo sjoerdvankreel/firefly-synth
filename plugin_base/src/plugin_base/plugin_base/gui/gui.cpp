@@ -633,7 +633,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
-  return make_component<param_section_container>(this, &module, &section, &grid);
+  return make_component<param_section_container>(this, &module, &section, &viewer);
 }
 
 Component&
