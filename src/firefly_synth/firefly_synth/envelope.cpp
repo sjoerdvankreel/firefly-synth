@@ -121,6 +121,10 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   float dahds;
   float dahdsrf;
   env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsrf);
+  
+  std::string partition = float_to_string(dahdsrf, 1) + " Sec";
+  bool sync = state.get_plain_at(module_env, mapping.module_slot, param_sync, 0).step() != 0;
+  if(sync) partition = float_to_string(dahdsrf / timesig_to_time(120, { 1, 1 }), 1) + " Bar";
 
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / dahdsrf;
@@ -129,7 +133,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   auto const* block = engine->process_default(module_env, mapping.module_slot);
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, { float_to_string(dahdsrf, 1) + " Sec"});
+  return graph_data(series, false, { partition });
 }
 
 module_topo
