@@ -264,11 +264,10 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 }
 
 static void
-init_svf_non_shelving(
-  double w, double res, double& g, double& k, 
-  double& a1, double& a2, double& a3)
+init_svf(
+  double w, double res, double g, 
+  double& k, double& a1, double& a2, double& a3)
 {
-  g = std::tan(w);
   k = 2 - 2 * res;
   a1 = 1 / (1 + g * (g + k));
   a2 = g * a1;
@@ -277,61 +276,67 @@ init_svf_non_shelving(
 
 static void
 init_svf_lpf(
-  double w, double res, double& g, double& k,
+  double w, double res,
   double& a1, double& a2, double& a3, 
   double& m0, double& m1, double& m2)
 {
-  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  double k;
+  init_svf(w, res, std::tan(w), k, a1, a2, a3);
   m0 = 0; m1 = 0; m2 = 1;
 }
 
 static void
 init_svf_hpf(
-  double w, double res, double& g, double& k,
+  double w, double res,
   double& a1, double& a2, double& a3, 
   double& m0, double& m1, double& m2)
 {
-  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  double k;
+  init_svf(w, res, std::tan(w), k, a1, a2, a3);
   m0 = 1; m1 = -k; m2 = -1;
 }
 
 static void
 init_svf_bpf(
-  double w, double res, double& g, double& k,
+  double w, double res,
   double& a1, double& a2, double& a3,
   double& m0, double& m1, double& m2)
 {
-  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  double k;
+  init_svf(w, res, std::tan(w), k, a1, a2, a3);
   m0 = 0; m1 = 1; m2 = 0;
 }
 
 static void
 init_svf_bsf(
-  double w, double res, double& g, double& k,
+  double w, double res,
   double& a1, double& a2, double& a3,
   double& m0, double& m1, double& m2)
 {
-  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  double k;
+  init_svf(w, res, std::tan(w), k, a1, a2, a3);
   m0 = 1; m1 = -k; m2 = 0;
 }
 
 static void
 init_svf_apf(
-  double w, double res, double& g, double& k,
+  double w, double res,
   double& a1, double& a2, double& a3,
   double& m0, double& m1, double& m2)
 {
-  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  double k;
+  init_svf(w, res, std::tan(w), k, a1, a2, a3);
   m0 = 1; m1 = -2 * k; m2 = 0;
 }
 
 static void
 init_svf_peq(
-  double w, double res, double& g, double& k,
+  double w, double res,
   double& a1, double& a2, double& a3,
   double& m0, double& m1, double& m2)
 {
-  init_svf_non_shelving(w, res, g, k, a1, a2, a3);
+  double k;
+  init_svf(w, res, std::tan(w), k, a1, a2, a3);
   m0 = 1; m1 = -k; m2 = -2;
 }
 
@@ -406,9 +411,9 @@ fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulatio
 template <class Init> void
 fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init)
 {
+  double w, hz;
   double a1, a2, a3;
   double m0, m1, m2;
-  double w, g, k, hz;
 
   double const max_res = 0.99;
   int this_module = _global ? module_gfx : module_vfx;
@@ -419,7 +424,7 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation,
   {
     hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
     w = pi64 * hz / block.sample_rate;
-    init(w, res_curve[f] * max_res, g, k, a1, a2, a3, m0, m1, m2);
+    init(w, res_curve[f] * max_res, a1, a2, a3, m0, m1, m2);
     for (int c = 0; c < 2; c++)
     {
       double v0 = block.state.own_audio[0][0][c][f];
