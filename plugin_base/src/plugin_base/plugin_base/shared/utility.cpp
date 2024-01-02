@@ -82,8 +82,12 @@ fft(std::vector<float> const& in)
     max = std::max(max, std::abs(inout[i].real()));
     min = std::min(min, std::abs(inout[i].real()));
   }
-  for (int i = 0; i < inout.size(); i++)
-    result.push_back((std::abs(inout[i].real()) - min) / (max - min));
+  if(max == min)
+    for (int i = 0; i < inout.size(); i++)
+      result.push_back(std::abs(inout[i].real()) / max);
+  else
+    for (int i = 0; i < inout.size(); i++)
+      result.push_back((std::abs(inout[i].real()) - min) / (max - min));
   return result;
 }
 

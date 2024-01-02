@@ -153,8 +153,10 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   }
 
   // remap over 0.8 just to look pretty
-  std::vector<float> response(log_remap_series_x(fft(block->state.own_audio[0][0][0].data()), 0.8f));
-  return graph_data(jarray<float, 1>(response), false, { "FR" });
+  auto const& audio = block->state.own_audio[0][0][0];
+  auto response = fft(audio.data());
+  std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
+  return graph_data(jarray<float, 1>(response_mapped), false, { "FR" });
 }
 
 module_topo
