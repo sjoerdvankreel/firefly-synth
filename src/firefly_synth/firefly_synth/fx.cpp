@@ -61,10 +61,10 @@ static std::vector<list_item>
 shape_over_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "1X Oversampling");
-  result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "2X Oversampling");
-  result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "4X Oversampling");
-  result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "8X Oversampling");
+  result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "OvrSmp.1X");
+  result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "OvrSmp.2X");
+  result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "OvrSmp.4X");
+  result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "OvrSmp.8X");
   return result;
 }
 
@@ -151,8 +151,8 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     frame_count = 200;
     sample_rate = 200;
     audio_in.resize(jarray<int, 1>(2, frame_count));
-    for(int i = 0; i < 200; i++)
-      audio_in[0][i] = audio_in[1][i] = unipolar_to_bipolar((float)i / 200);
+    for(int i = 0; i <= 199; i++)
+      audio_in[0][i] = audio_in[1][i] = unipolar_to_bipolar((float)i / 199);
   } else if(is_svf(type) || type == type_comb)
   {
     frame_count = 4800;
@@ -298,23 +298,23 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.Over", "Over", true, false, param_shape_over, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(shape_over_items(), "2X Oversampling"),
+    make_param_dsp_input(!global, param_automate::none), make_domain_item(shape_over_items(), "OvrSmp.2X"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::short_name, make_label_none())));
   shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gain", "Gain", true, false, param_shape_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 32, 1, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mix", "Mix", true, false, param_shape_mix, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
 
@@ -526,9 +526,16 @@ fx_engine::process(plugin_block& block,
 void
 fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
+  int this_module = _global ? module_gfx : module_vfx;
+  auto const& mix = *modulation[this_module][block.module_slot][param_shape_mix][0];
+  auto const& gain_curve = *modulation[this_module][block.module_slot][param_shape_gain][0];
   for(int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
-      block.state.own_audio[0][0][c][f] = std::tanh(block.state.own_audio[0][0][c][f]);
+    {
+      float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
+      float in = block.state.own_audio[0][0][c][f];
+      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * std::tanh(in * gain);
+    }
 }
 
 void
