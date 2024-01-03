@@ -166,10 +166,10 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   auto const& audio = block->state.own_audio[0][0][0];
   auto response = fft(audio.data());
   if (type == type_comb)
-    return graph_data(jarray<float, 1>(response), false, { "24KHz" });
+    return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
   // remap over 0.8 just to look pretty
   std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
-  return graph_data(jarray<float, 1>(response_mapped), false, { "24KHz" });
+  return graph_data(jarray<float, 1>(response_mapped), false, { "24 kHz" });
 }
 
 module_topo
