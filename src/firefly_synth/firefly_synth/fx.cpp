@@ -23,15 +23,15 @@ enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
 enum { type_off,
   type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, 
-  type_shp_sin, type_shp_cos, type_shp_tan, type_shp_clp,
+  type_shp_sin, type_shp_cos, type_shp_tan, type_shp_sqr, type_shp_clp, type_shp_pow,
   type_comb, type_delay };
 enum { param_type, 
   param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
   param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
-  param_shape_over, param_shape_gain, param_shape_mix,
+  param_shape_over, param_shape_gain, param_shape_mix, param_shape_pow_exp,
   param_delay_tempo, param_delay_feedback };
 
-static bool is_shape(int type) { return type_shp_sin <= type && type <= type_shp_clp; }
+static bool is_shape(int type) { return type_shp_sin <= type && type <= type_shp_pow; }
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
 static bool is_svf_gain(int type) { return type_svf_bll <= type && type <= type_svf_hsh; }
 
@@ -52,7 +52,9 @@ type_items(bool global)
   result.emplace_back("{E8AB234B-871E-44CB-A903-D99F22532386}", "Shp.Sin");
   result.emplace_back("{84BB1282-F7EF-4F0C-82FA-9F1A27ADA849}", "Shp.Cos");
   result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tan");
+  result.emplace_back("{6EC89A1C-9C72-4251-9F46-D518AA3C62DA}", "Shp.Sqr");
   result.emplace_back("{834AF6C3-DEBD-4B9D-8C84-B885B664EB04}", "Shp.Clip");
+  result.emplace_back("{32837427-F399-48C5-B6FD-8D4276E20822}", "Shp.Pow");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   return result;
@@ -233,7 +235,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_comb);
-  type.gui.submenu->add_submenu("Shape", { type_shp_sin, type_shp_cos, type_shp_tan, type_shp_clp });
+  type.gui.submenu->add_submenu("Shape", { type_shp_sin, type_shp_cos, type_shp_tan, type_shp_sqr, type_shp_clp, type_shp_pow });
   type.gui.submenu->add_submenu("SVF", { type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
@@ -298,7 +300,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 2, 2, 1 } })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.Over", "Over", true, false, param_shape_over, 1),
@@ -317,6 +319,12 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
+  auto& shape_pow_exp = result.params.emplace_back(make_param(
+    make_topo_info("{87DC7F98-8C73-4684-A2FE-8E4ABAD03A80}", "Shp.Exp", "Exp", true, false, param_shape_pow_exp, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-32, 32, 1, 2, ""),
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shape_pow_exp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shp_pow; });
 
   if(!global) return result;
 
@@ -338,10 +346,12 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   return result;
 }
 
-static float shp_tan(float in) { return std::tanh(in); }
-static float shp_sin(float in) { return std::sin(in * pi32); }
-static float shp_cos(float in) { return std::cos(in * pi32); }
-static float shp_clp(float in) { return std::clamp(in, -1.0f, 1.0f); }
+static float shp_tan(float in, float gain, float exp) { return std::tanh(in * gain); }
+static float shp_sin(float in, float gain, float exp) { return std::sin(in * gain * pi32); }
+static float shp_cos(float in, float gain, float exp) { return std::cos(in * gain * pi32); }
+static float shp_clp(float in, float gain, float exp) { return std::clamp(in * gain, -1.0f, 1.0f); }
+static float shp_pow(float in, float gain, float exp) { return unipolar_to_bipolar(std::pow(bipolar_to_unipolar(in), exp)); }
+static float shp_sqr(float in, float gain, float exp) { return unipolar_to_bipolar(std::clamp((in * gain) * (in * gain), 0.0f, 1.0f)); }
 
 static void
 init_svf(
@@ -516,7 +526,9 @@ fx_engine::process(plugin_block& block,
   case type_shp_sin: process_shape(block, *modulation, shp_sin); break;
   case type_shp_cos: process_shape(block, *modulation, shp_cos); break;
   case type_shp_tan: process_shape(block, *modulation, shp_tan); break;
+  case type_shp_sqr: process_shape(block, *modulation, shp_sqr); break;
   case type_shp_clp: process_shape(block, *modulation, shp_clp); break;
+  case type_shp_pow: process_shape(block, *modulation, shp_pow); break;
   case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
   case type_svf_hpf: process_svf(block, *modulation, init_svf_hpf); break;
   case type_svf_bpf: process_svf(block, *modulation, init_svf_bpf); break;
@@ -534,13 +546,15 @@ fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulatio
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& mix = *modulation[this_module][block.module_slot][param_shape_mix][0];
+  auto const& exp_curve = *modulation[this_module][block.module_slot][param_shape_pow_exp][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_shape_gain][0];
   for(int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
-      float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
       float in = block.state.own_audio[0][0][c][f];
-      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shape(in * gain);
+      float exp = block.normalized_to_raw(this_module, param_shape_gain, exp_curve[f]);
+      float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
+      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shape(in, gain, exp);
     }
 }
 
