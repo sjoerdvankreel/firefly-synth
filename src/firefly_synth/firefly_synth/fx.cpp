@@ -23,7 +23,7 @@ enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
 enum { type_off,
   type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, 
-  type_shape_clip, type_shape_tanh, type_shape_sin,
+  type_shp_clp, type_shp_tan, type_shp_sin,
   type_comb, type_delay };
 enum { param_type, 
   param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
@@ -31,7 +31,7 @@ enum { param_type,
   param_shape_over, param_shape_gain, param_shape_mix,
   param_delay_tempo, param_delay_feedback };
 
-static bool is_shape(int type) { return type_shape_clip <= type && type <= type_shape_sin; }
+static bool is_shape(int type) { return type_shp_clp <= type && type <= type_shp_sin; }
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
 static bool is_svf_gain(int type) { return type_svf_bll <= type && type <= type_svf_hsh; }
 
@@ -89,10 +89,9 @@ public module_engine {
   jarray<float, 2> _dly_buffer = {};
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
-  void process_shape(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
-  template <class Init>
-  void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
+  template <class Init> void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
+  template <class Shape> void process_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Shape shape);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
@@ -233,7 +232,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_comb);
-  type.gui.submenu->add_submenu("Shape", { type_shape_clip, type_shape_tanh, type_shape_sin });
+  type.gui.submenu->add_submenu("Shape", { type_shp_clp, type_shp_tan, type_shp_sin });
   type.gui.submenu->add_submenu("SVF", { type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
@@ -337,6 +336,10 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   return result;
 }
+
+static float shp_tan(float in) { return std::tanh(in); }
+static float shp_sin(float in) { return std::sin(in * pi32); }
+static float shp_clp(float in) { return std::clamp(in, -1.0f, 1.0f); }
 
 static void
 init_svf(
@@ -508,9 +511,9 @@ fx_engine::process(plugin_block& block,
   {
   case type_comb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
-  case type_shape_sin: process_shape(block, *modulation); break;
-  case type_shape_clip: process_shape(block, *modulation); break;
-  case type_shape_tanh: process_shape(block, *modulation); break;
+  case type_shp_sin: process_shape(block, *modulation, shp_sin); break;
+  case type_shp_clp: process_shape(block, *modulation, shp_clp); break;
+  case type_shp_tan: process_shape(block, *modulation, shp_tan); break;
   case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
   case type_svf_hpf: process_svf(block, *modulation, init_svf_hpf); break;
   case type_svf_bpf: process_svf(block, *modulation, init_svf_bpf); break;
@@ -523,8 +526,8 @@ fx_engine::process(plugin_block& block,
   }
 }
 
-void
-fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulation)
+template <class Shape> void
+fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Shape shape)
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& mix = *modulation[this_module][block.module_slot][param_shape_mix][0];
@@ -534,7 +537,7 @@ fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulatio
     {
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
       float in = block.state.own_audio[0][0][c][f];
-      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * std::tanh(in * gain);
+      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shape(in * gain);
     }
 }
 
