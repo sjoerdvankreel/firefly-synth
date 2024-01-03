@@ -15,6 +15,7 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 static double const comb_max_ms = 5;
+static double const comb_min_ms = 0.1;
 static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
 
@@ -241,13 +242,13 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Dly+", param_comb_dly_plus, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0, comb_max_ms, 1, 2, "Ms"),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
     make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Dly-", param_comb_dly_min, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0, comb_max_ms, 1, 2, "Ms"),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
@@ -469,6 +470,7 @@ fx_engine::process(plugin_block& block,
 void
 fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
+  float const feedback_factor = 0.98;
   int this_module = _global ? module_gfx : module_vfx;
   auto const& dly_min_curve = *modulation[this_module][block.module_slot][param_comb_dly_min][0];
   auto const& dly_plus_curve = *modulation[this_module][block.module_slot][param_comb_dly_plus][0];
@@ -488,7 +490,7 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
       float min = _comb_out[c][(_comb_pos + _comb_samples - dly_min_samples) % _comb_samples] * gain_min;
       float plus = _comb_in[c][(_comb_pos + _comb_samples - dly_plus_samples) % _comb_samples] * gain_plus;
       _comb_in[c][_comb_pos] = block.state.own_audio[0][0][c][f];
-      _comb_out[c][_comb_pos] = block.state.own_audio[0][0][c][f] + plus + min;
+      _comb_out[c][_comb_pos] = block.state.own_audio[0][0][c][f] + plus + min * feedback_factor;
       block.state.own_audio[0][0][c][f] = _comb_out[c][_comb_pos];
     }
     _comb_pos = (_comb_pos + 1) % _comb_samples;

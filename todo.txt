@@ -31,6 +31,9 @@ drop "or time into scratch" & friends?
 do add_submenu everywhere in the topos
 osc: overlay any 2 waves ? (saw+saw==>pulse)
 fix the init patch
+make matrix section a bit wider
+do "FR" as frequency
+do "IR" as variable length
 
 * fx
 * stvar - freq, res, gain, kbd
