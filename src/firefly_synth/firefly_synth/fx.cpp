@@ -14,7 +14,9 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static float const comb_max_ms = 5;
+static double const comb_max_ms = 5;
+static double const svf_min_freq = 20;
+static double const svf_max_freq = 20000;
 
 enum { section_type, section_svf, section_comb, section_delay };
 enum { type_off, type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, 
@@ -200,7 +202,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || is_svf(vs[0]); });
   result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_svf_freq, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(20, 20000, 1000, 1000, 0, "Hz"),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(svf_min_freq, svf_max_freq, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
@@ -210,7 +212,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "Kbd", param_svf_kbd, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-4, 4, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-2, 2, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   auto& svf_gain = result.params.emplace_back(make_param(
@@ -473,6 +475,7 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation,
     hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
     gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
     hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
+    hz = std::clamp(hz, svf_min_freq, svf_max_freq);
 
     w = pi64 * hz / block.sample_rate;
     init(w, res_curve[f] * max_res, gain, a1, a2, a3, m0, m1, m2);
