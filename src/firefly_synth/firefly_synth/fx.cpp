@@ -55,11 +55,18 @@ public module_engine {
   double _ic1eq[2];
   double _ic2eq[2];
 
-  // delay
-  int _pos;
-  int const _capacity;
-  jarray<float, 2> _buffer = {};
+  // comb
+  int _comb_pos = {};
+  int _comb_samples = {};
+  std::vector<double> _comb_in[2];
+  std::vector<double> _comb_out[2];
 
+  // delay
+  int _dly_pos = {};
+  int const _dly_capacity = {};
+  jarray<float, 2> _dly_buffer = {};
+
+  void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
   template <class Init>
   void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
@@ -110,13 +117,13 @@ static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off || type == type_comb) return graph_data(graph_data_type::off, {});
+  if(type == type_off) return graph_data(graph_data_type::off, {});
 
   int frame_count = -1;
   int sample_rate = -1;
   jarray<float, 2> audio_in;
   auto const params = make_graph_engine_params();
-  if(is_svf(type))
+  if(is_svf(type) || type == type_comb)
   {
     frame_count = 4800;
     sample_rate = 48000;
@@ -142,7 +149,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     mapping.module_index, mapping.module_slot, [mapping, sample_rate, &audio_in](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, sample_rate);
-    engine.reset(global? nullptr: &block);
+    engine.reset(&block);
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process(block, &modulation, &audio_in);
   });
@@ -382,19 +389,37 @@ init_svf_hsh(
 
 fx_engine::
 fx_engine(bool global, int sample_rate) :
-_global(global), _capacity(sample_rate * 10)
-{ if(global) _buffer.resize(jarray<int, 1>(2, _capacity)); }
+_global(global), _dly_capacity(sample_rate * 10)
+{ 
+  _comb_samples = comb_max_ms * sample_rate * 0.001;
+  _comb_in[0] = std::vector<double>(_comb_samples, 0.0);
+  _comb_in[1] = std::vector<double>(_comb_samples, 0.0);
+  _comb_out[0] = std::vector<double>(_comb_samples, 0.0);
+  _comb_out[1] = std::vector<double>(_comb_samples, 0.0);
+  if(global) _dly_buffer.resize(jarray<int, 1>(2, _dly_capacity));
+}
 
 void
-fx_engine::reset(plugin_block const*)
+fx_engine::reset(plugin_block const* block)
 {
-  _pos = 0;
   _ic1eq[0] = 0;
   _ic1eq[1] = 0;
   _ic2eq[0] = 0;
   _ic2eq[1] = 0;
-  if(_global)
-    _buffer.fill(0);
+
+  _dly_pos = 0;
+  _comb_pos = 0;
+
+  int type = block->state.own_block_automation[param_type][0].step();
+  if (_global && type == type_delay) _dly_buffer.fill(0);
+
+  if (type == type_comb)
+  {
+    std::fill(_comb_in[0].begin(), _comb_in[0].end(), 0.0f);
+    std::fill(_comb_in[1].begin(), _comb_in[1].end(), 0.0f);
+    std::fill(_comb_out[0].begin(), _comb_out[0].end(), 0.0f);
+    std::fill(_comb_out[1].begin(), _comb_out[1].end(), 0.0f);
+  }    
 }
 
 void
@@ -417,6 +442,7 @@ fx_engine::process(plugin_block& block,
 
   switch (type)
   {
+  case type_comb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
   case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
   case type_svf_hpf: process_svf(block, *modulation, init_svf_hpf); break;
@@ -431,24 +457,53 @@ fx_engine::process(plugin_block& block,
 }
 
 void
+fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation)
+{
+  int this_module = _global ? module_gfx : module_vfx;
+  auto const& dly_min_curve = *modulation[this_module][block.module_slot][param_comb_dly_min][0];
+  auto const& dly_plus_curve = *modulation[this_module][block.module_slot][param_comb_dly_plus][0];
+  auto const& gain_min_curve = *modulation[this_module][block.module_slot][param_comb_gain_min][0];
+  auto const& gain_plus_curve = *modulation[this_module][block.module_slot][param_comb_gain_plus][0];
+
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    float dly_min = block.normalized_to_raw(this_module, param_comb_dly_min, dly_min_curve[f]);
+    float dly_plus = block.normalized_to_raw(this_module, param_comb_dly_plus, dly_plus_curve[f]);
+    float gain_min = block.normalized_to_raw(this_module, param_comb_gain_min, gain_min_curve[f]);
+    float gain_plus = block.normalized_to_raw(this_module, param_comb_gain_plus, gain_plus_curve[f]);
+    int dly_min_samples = (int)(dly_min * block.sample_rate * 0.001);
+    int dly_plus_samples = (int)(dly_plus * block.sample_rate * 0.001);
+    for(int c = 0; c < 2; c++)
+    {
+      float min = _comb_out[c][(_comb_pos + _comb_samples - dly_min_samples) % _comb_samples] * gain_min;
+      float plus = _comb_in[c][(_comb_pos + _comb_samples - dly_plus_samples) % _comb_samples] * gain_plus;
+      _comb_in[c][_comb_pos] = block.state.own_audio[0][0][c][f];
+      _comb_out[c][_comb_pos] = block.state.own_audio[0][0][c][f] + plus + min;
+      block.state.own_audio[0][0][c][f] = _comb_out[c][_comb_pos];
+      _comb_pos = (_comb_pos + 1) % _comb_samples;
+    }
+  }
+}
+
+void
 fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   float max_feedback = 0.9f;
   int this_module = _global ? module_gfx : module_vfx;
   float time = get_timesig_time_value(block, this_module, param_delay_tempo);
-  int samples = std::min(block.sample_rate * time, (float)_capacity);
+  int samples = std::min(block.sample_rate * time, (float)_dly_capacity);
   
   auto const& feedback_curve = *modulation[this_module][block.module_slot][param_delay_feedback][0];
   for (int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
       float dry = block.state.own_audio[0][0][c][f];
-      float wet = _buffer[c][(_pos + f + _capacity - samples) % _capacity];
+      float wet = _dly_buffer[c][(_dly_pos + f + _dly_capacity - samples) % _dly_capacity];
       block.state.own_audio[0][0][c][f] = dry + wet * feedback_curve[f] * max_feedback;
-      _buffer[c][(_pos + f) % _capacity] = block.state.own_audio[0][0][c][f];
+      _dly_buffer[c][(_dly_pos + f) % _dly_capacity] = block.state.own_audio[0][0][c][f];
     }
-  _pos += block.end_frame - block.start_frame;
-  _pos %= _capacity;
+  _dly_pos += block.end_frame - block.start_frame;
+  _dly_pos %= _dly_capacity;
 }
   
 template <class Init> void
