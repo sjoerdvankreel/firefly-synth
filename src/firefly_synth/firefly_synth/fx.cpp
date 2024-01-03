@@ -22,7 +22,7 @@ enum { section_type, section_svf, section_comb, section_delay };
 enum { type_off, type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, 
   type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, type_comb, type_delay };
 enum { param_type, param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, param_comb_dly_plus, 
-  param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min, param_delay_tempo, param_delay_feedback };
+  param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min, param_delay_tempo, param_delay_feedback };
 
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
 static bool is_svf_gain(int type) { return type_svf_bll <= type && type <= type_svf_hsh; }
@@ -237,7 +237,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 2, 1, 2, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 2, 2, 1, 1 } })));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Dly+", param_comb_dly_plus, 1),
@@ -245,18 +245,18 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
-  auto& comb_gain_plus = result.params.emplace_back(make_param(
-    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Gain+", param_comb_gain_plus, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
-    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
     make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Dly-", param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0, comb_max_ms, 1, 2, "Ms"),
-    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
+    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  auto& comb_gain_plus = result.params.emplace_back(make_param(
+    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Gain+", param_comb_gain_plus, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
+    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Gain-", param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
@@ -490,8 +490,8 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
       _comb_in[c][_comb_pos] = block.state.own_audio[0][0][c][f];
       _comb_out[c][_comb_pos] = block.state.own_audio[0][0][c][f] + plus + min;
       block.state.own_audio[0][0][c][f] = _comb_out[c][_comb_pos];
-      _comb_pos = (_comb_pos + 1) % _comb_samples;
     }
+    _comb_pos = (_comb_pos + 1) % _comb_samples;
   }
 }
 
