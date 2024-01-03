@@ -23,7 +23,7 @@ enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
 enum { type_off,
   type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, 
-  type_shp_sin, type_shp_cos, type_shp_tan, type_shp_sqr, type_shp_clp, type_shp_pow,
+  type_shp_sin, type_shp_cos, type_shp_tan, type_shp_sqr, type_shp_cub, type_shp_clp, type_shp_pow,
   type_comb, type_delay };
 enum { param_type, 
   param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
@@ -53,6 +53,7 @@ type_items(bool global)
   result.emplace_back("{84BB1282-F7EF-4F0C-82FA-9F1A27ADA849}", "Shp.Cos");
   result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tan");
   result.emplace_back("{6EC89A1C-9C72-4251-9F46-D518AA3C62DA}", "Shp.Sqr");
+  result.emplace_back("{5391F340-EA15-4728-ACAF-DC7C5DE9AD9C}", "Shp.Cube");
   result.emplace_back("{834AF6C3-DEBD-4B9D-8C84-B885B664EB04}", "Shp.Clip");
   result.emplace_back("{32837427-F399-48C5-B6FD-8D4276E20822}", "Shp.Pow");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
@@ -235,7 +236,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_comb);
-  type.gui.submenu->add_submenu("Shape", { type_shp_sin, type_shp_cos, type_shp_tan, type_shp_sqr, type_shp_clp, type_shp_pow });
+  type.gui.submenu->add_submenu("Shape", { type_shp_sin, type_shp_cos, type_shp_tan, type_shp_sqr, type_shp_cub, type_shp_clp, type_shp_pow });
   type.gui.submenu->add_submenu("SVF", { type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
@@ -351,6 +352,7 @@ static float shp_sin(float in, float gain, float exp) { return std::sin(in * gai
 static float shp_cos(float in, float gain, float exp) { return std::cos(in * gain * pi32); }
 static float shp_clp(float in, float gain, float exp) { return std::clamp(in * gain, -1.0f, 1.0f); }
 static float shp_pow(float in, float gain, float exp) { return unipolar_to_bipolar(std::pow(bipolar_to_unipolar(in), exp)); }
+static float shp_cub(float in, float gain, float exp) { return std::clamp((in * gain) * (in * gain) * (in * gain), -1.0f, 1.0f); }
 static float shp_sqr(float in, float gain, float exp) { return unipolar_to_bipolar(std::clamp((in * gain) * (in * gain), 0.0f, 1.0f)); }
 
 static void
@@ -527,6 +529,7 @@ fx_engine::process(plugin_block& block,
   case type_shp_cos: process_shape(block, *modulation, shp_cos); break;
   case type_shp_tan: process_shape(block, *modulation, shp_tan); break;
   case type_shp_sqr: process_shape(block, *modulation, shp_sqr); break;
+  case type_shp_cub: process_shape(block, *modulation, shp_cub); break;
   case type_shp_clp: process_shape(block, *modulation, shp_clp); break;
   case type_shp_pow: process_shape(block, *modulation, shp_pow); break;
   case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
