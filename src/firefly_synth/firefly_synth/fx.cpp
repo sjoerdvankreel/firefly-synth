@@ -353,11 +353,11 @@ static float shp_tan(float in, float gain, float exp) { return std::tanh(in * ga
 static float shp_sin(float in, float gain, float exp) { return std::sin(in * gain * pi32); }
 static float shp_cos(float in, float gain, float exp) { return std::cos(in * gain * pi32); }
 static float shp_clp(float in, float gain, float exp) { return std::clamp(in * gain, -1.0f, 1.0f); }
+static float shp_cbrt(float in, float gain, float exp) { return std::clamp(std::cbrt(in * gain), -1.0f, 1.0f); }
 static float shp_pow(float in, float gain, float exp) { return unipolar_to_bipolar(std::pow(bipolar_to_unipolar(in), exp)); }
 static float shp_cub(float in, float gain, float exp) { return std::clamp((in * gain) * (in * gain) * (in * gain), -1.0f, 1.0f); }
 static float shp_sqr(float in, float gain, float exp) { return unipolar_to_bipolar(std::clamp((in * gain) * (in * gain), 0.0f, 1.0f)); }
-static float shp_cbrt(float in, float gain, float exp) { return std::clamp(std::cbrt(in * gain), -1.0f, 1.0f); }
-static float shp_sqrt(float in, float gain, float exp) { return unipolar_to_bipolar(std::clamp(std::sqrt(in * gain), 0.0f, 1.0f)); }
+static float shp_sqrt(float in, float gain, float exp) { return unipolar_to_bipolar(std::clamp(std::sqrt(std::fabs(in * gain)), 0.0f, 1.0f)); }
 
 static void
 init_svf(
