@@ -85,7 +85,7 @@ static Component&
 make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   graph_params params;
-  params.partition_scale = 0.15f;
+  params.partition_scale = 0.125f;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params;
   module_params.fps = 10;
