@@ -161,9 +161,12 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     return graph_data(jarray<float, 1>(series), true, { "IR" });
   }
 
-  // remap over 0.8 just to look pretty
+  // comb / svf
   auto const& audio = block->state.own_audio[0][0][0];
   auto response = fft(audio.data());
+  if (type == type_comb)
+    return graph_data(jarray<float, 1>(response), false, { "FR" });
+  // remap over 0.8 just to look pretty
   std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
   return graph_data(jarray<float, 1>(response_mapped), false, { "FR" });
 }
@@ -207,21 +210,24 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 0, 1 }, { { 1 }, { 4, 1, 1, 1 } })));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || is_svf(vs[0]); });
-  result.params.emplace_back(make_param(
+  auto& svf_freq = result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_svf_freq, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(svf_min_freq, svf_max_freq, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
+  svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
+  auto& svf_res = result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "Res", param_svf_res, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
+  svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
+  auto& svf_kbd = result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "Kbd", param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-2, 2, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   auto& svf_gain = result.params.emplace_back(make_param(
     make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", "Gain", param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
@@ -231,28 +237,32 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 2, 1, 2, 1 } })));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
-  result.params.emplace_back(make_param(
-    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Delay+", param_comb_dly_plus, 1),
+  auto& comb_dly_plus = result.params.emplace_back(make_param(
+    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Dly+", param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0, comb_max_ms, 1, 2, "Ms"),
-    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
+    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
+  comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  auto& comb_gain_plus = result.params.emplace_back(make_param(
     make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Gain+", param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
     make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
-    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Delay-", param_comb_dly_min, 1),
+  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  auto& comb_dly_min = result.params.emplace_back(make_param(
+    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Dly-", param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(0, comb_max_ms, 1, 2, "Ms"),
-    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
+    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
+  comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Gain-", param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
 
   if(!global) return result;
 
