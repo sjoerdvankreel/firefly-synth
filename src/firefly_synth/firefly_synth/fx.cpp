@@ -454,7 +454,7 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation,
 {
   double a1, a2, a3;
   double m0, m1, m2;
-  double w, hz, gain, kbd, kbd_offset;
+  double w, hz, gain, kbd;
 
   double const max_res = 0.99;
   int this_module = _global ? module_gfx : module_vfx;
@@ -469,12 +469,10 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation,
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    kbd = block.normalized_to_raw(this_module, param_svf_freq, kbd_curve[f]);
+    kbd = block.normalized_to_raw(this_module, param_svf_kbd, kbd_curve[f]);
     hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
     gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
-    kbd_offset = (kbd_current - kbd_pivot) / 12.0 * kbd;
-    if(kbd >= 0) hz *= kbd_offset;
-    else hz /= kbd_offset;
+    hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
 
     w = pi64 * hz / block.sample_rate;
     init(w, res_curve[f] * max_res, gain, a1, a2, a3, m0, m1, m2);
