@@ -483,12 +483,22 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
     float dly_plus = block.normalized_to_raw(this_module, param_comb_dly_plus, dly_plus_curve[f]);
     float gain_min = block.normalized_to_raw(this_module, param_comb_gain_min, gain_min_curve[f]);
     float gain_plus = block.normalized_to_raw(this_module, param_comb_gain_plus, gain_plus_curve[f]);
-    int dly_min_samples = (int)(dly_min * block.sample_rate * 0.001);
-    int dly_plus_samples = (int)(dly_plus * block.sample_rate * 0.001);
+    float dly_min_samples_t = dly_min * block.sample_rate * 0.001;
+    float dly_plus_samples_t = dly_plus * block.sample_rate * 0.001;
+    float dly_min_t = dly_min_samples_t - (int)dly_min_samples_t;
+    float dly_plus_t = dly_plus_samples_t - (int)dly_plus_samples_t;
+    int dly_min_samples_0 = (int)dly_min_samples_t;
+    int dly_min_samples_1 = (int)dly_min_samples_t + 1;
+    int dly_plus_samples_0 = (int)dly_plus_samples_t;
+    int dly_plus_samples_1 = (int)dly_plus_samples_t + 1;
     for(int c = 0; c < 2; c++)
     {
-      float min = _comb_out[c][(_comb_pos + _comb_samples - dly_min_samples) % _comb_samples] * gain_min;
-      float plus = _comb_in[c][(_comb_pos + _comb_samples - dly_plus_samples) % _comb_samples] * gain_plus;
+      float min0 = _comb_out[c][(_comb_pos + _comb_samples - dly_min_samples_0) % _comb_samples];
+      float min1 = _comb_out[c][(_comb_pos + _comb_samples - dly_min_samples_1) % _comb_samples];
+      float min = ((1 - dly_min_t) * min0 + dly_min_t * min1) * gain_min;
+      float plus0 = _comb_in[c][(_comb_pos + _comb_samples - dly_plus_samples_0) % _comb_samples];
+      float plus1 = _comb_in[c][(_comb_pos + _comb_samples - dly_plus_samples_1) % _comb_samples];
+      float plus = ((1 - dly_plus_t) * plus0 + dly_plus_t * plus1) * gain_plus;
       _comb_in[c][_comb_pos] = block.state.own_audio[0][0][c][f];
       _comb_out[c][_comb_pos] = block.state.own_audio[0][0][c][f] + plus + min * feedback_factor;
       block.state.own_audio[0][0][c][f] = _comb_out[c][_comb_pos];
