@@ -26,7 +26,10 @@ enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps, param_amt };
 enum { 
   type_skew, 
-  type_sin, type_cos, type_sin_sin, type_sin_sin_sin,
+  type_trig_sin, type_trig_cos, 
+  type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
+  type_trig_sin_sin_sin, type_trig_sin_sin_cos, type_trig_sin_cos_sin, type_trig_sin_cos_cos,
+  type_trig_cos_sin_sin, type_trig_cos_sin_cos, type_trig_cos_cos_sin, type_trig_cos_cos_cos,
   type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log, 
   type_static, type_static_add, type_static_free, type_static_add_free, type_smooth, type_smooth_log };
 
@@ -53,9 +56,19 @@ type_items()
   std::vector<list_item> result;
   result.emplace_back("{3AF5A419-583F-435E-ABF7-BA514FA608C9}", "Skew");
   result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
-  result.emplace_back("{38B92D73-90AC-41B6-856A-1BBFAEC011A0}", "Cos");
-  result.emplace_back("{AA46D965-6D3F-4717-934E-510F4A130839}", "SinSin");
-  result.emplace_back("{E365B866-4B37-413F-9DC1-200FAD30668D}", "SinSinSin");
+  result.emplace_back("{1EAC4007-3122-4064-9B97-AFF28C902400}", "Cos");
+  result.emplace_back("{7A510580-5E85-4B49-A4D2-54269B50FF62}", "SinSin");
+  result.emplace_back("{335FD8C1-3162-4A75-8EFA-6C8240EAEA78}", "SinCos");
+  result.emplace_back("{C01104A8-A299-4D8E-AC94-D81387D66B2A}", "CosSin");
+  result.emplace_back("{FEEEEADE-119C-461D-A6F7-5A29BF0088F6}", "CosCos");
+  result.emplace_back("{11B30ACD-5B04-406A-8B3B-E9B7A9C62AF5}", "SinSinSin");
+  result.emplace_back("{8BF5A3AE-D56C-490B-B6F6-22BDFF1913EB}", "SinSinCos");
+  result.emplace_back("{74E9F12C-91BD-4027-BCA4-842BF6B23367}", "SinCosSin");
+  result.emplace_back("{EE7C1611-D741-46EF-A398-2B5F62749471}", "SinCosCos");
+  result.emplace_back("{4BA55E18-2937-4F21-8BC5-CDDD9DEAEF93}", "CosSinSin");
+  result.emplace_back("{A86309CC-EC83-41A6-8BBB-81A15DF42676}", "CosSinCos");
+  result.emplace_back("{B6A7D580-F6BC-4C4B-B749-E2FCBD10F6F3}", "CosCosSin");
+  result.emplace_back("{B3780540-3B43-43D8-8859-14F69C846055}", "CosCosCos");
   result.emplace_back("{1EFB2A08-9E19-4BDB-B605-FAA7DAF3E154}", "Sin.Log");
   result.emplace_back("{34480144-5349-49C1-9211-4CED6E6C8203}", "Pulse");
   result.emplace_back("{91CB7634-9759-485A-9DFF-6F5F86966212}", "Pulse.Lin");
@@ -255,7 +268,11 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Phase", { type_skew, type_sin, type_cos, type_sin_sin, type_sin_sin_sin, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
+  type.gui.submenu->add_submenu("Trig", { type_trig_sin, type_trig_cos,
+    type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
+    type_trig_sin_sin_sin, type_trig_sin_sin_cos, type_trig_sin_cos_sin, type_trig_sin_cos_cos,
+    type_trig_cos_sin_sin, type_trig_cos_sin_cos, type_trig_cos_cos_sin, type_trig_cos_cos_cos });
+  type.gui.submenu->add_submenu("Basic", { type_skew, type_sin_log, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
   type.gui.submenu->add_submenu("Static", { type_static, type_static_add, type_static_free, type_static_add_free });
   type.gui.submenu->add_submenu("Smooth", { type_smooth, type_smooth_log });
   auto& smooth = result.params.emplace_back(make_param(
@@ -311,21 +328,52 @@ skew_log(float in, float exp)
 { return std::pow(in, exp); }
 
 static float
-calc_skew(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(std::fabs(phase - skew_log(phase, x_exp)), y_exp); }
+calc_trig_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_sin(phase)); }
+static float
+calc_trig_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_cos(phase)); }
+static float
+calc_trig_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_sin_sin(phase)); }
+static float
+calc_trig_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_sin_cos(phase)); }
+static float
+calc_trig_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_cos_sin(phase)); }
+static float
+calc_trig_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_cos_cos(phase)); }
+static float
+calc_trig_sin_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_sin_sin_sin(phase)); }
+static float
+calc_trig_sin_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_sin_sin_cos(phase)); }
+static float
+calc_trig_sin_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_sin_cos_sin(phase)); }
+static float
+calc_trig_sin_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_sin_cos_cos(phase)); }
+static float
+calc_trig_cos_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_cos_sin_sin(phase)); }
+static float
+calc_trig_cos_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_cos_sin_cos(phase)); }
+static float
+calc_trig_cos_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_cos_cos_sin(phase)); }
+static float
+calc_trig_cos_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return bipolar_to_unipolar(ff_cos_cos_cos(phase)); }
+
 
 static float
-calc_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(std::sin(phase * 2.0f * pi32)); }
-static float
-calc_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(std::cos(phase * 2.0f * pi32)); }
-static float
-calc_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_sin(phase)); }
-static float
-calc_sin_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_sin_sin(phase)); }
+calc_skew(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return skew_log(std::fabs(phase - skew_log(phase, x_exp)), y_exp); }
 static float
 calc_sin_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return skew_log(bipolar_to_unipolar(std::sin(skew_log(phase, x_exp) * 2.0f * pi32)), y_exp); }
@@ -448,11 +496,22 @@ lfo_engine::process(plugin_block& block)
   int type = block.state.own_block_automation[param_type][0].step();
   switch (type)
   {
+  case type_trig_sin: process_loop<lfo_group::phased>(block, calc_trig_sin); break;
+  case type_trig_cos: process_loop<lfo_group::phased>(block, calc_trig_cos); break;
+  case type_trig_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_sin); break;
+  case type_trig_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_sin_cos); break;
+  case type_trig_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_cos_sin); break;
+  case type_trig_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_cos_cos); break;
+  case type_trig_sin_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_sin_sin); break;
+  case type_trig_sin_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_sin_sin_cos); break;
+  case type_trig_sin_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_cos_sin); break;
+  case type_trig_sin_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_sin_cos_cos); break;
+  case type_trig_cos_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_cos_sin_sin); break;
+  case type_trig_cos_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_cos_sin_cos); break;
+  case type_trig_cos_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_cos_cos_sin); break;
+  case type_trig_cos_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_cos_cos_cos); break;
+
   case type_skew: process_loop<lfo_group::phased>(block, calc_skew); break;
-  case type_sin: process_loop<lfo_group::phased>(block, calc_sin); break;
-  case type_cos: process_loop<lfo_group::phased>(block, calc_cos); break;
-  case type_sin_sin: process_loop<lfo_group::phased>(block, calc_sin_sin); break;
-  case type_sin_sin_sin: process_loop<lfo_group::phased>(block, calc_sin_sin_sin); break;
   case type_sin_log: process_loop<lfo_group::phased>(block, calc_sin_log); break;
   case type_tri: process_loop<lfo_group::phased>(block, calc_tri); break;
   case type_tri_log: process_loop<lfo_group::phased>(block, calc_tri_log); break;
