@@ -37,6 +37,7 @@ struct topo_tag final {
   std::string name;
   std::string short_name;
   bool name_one_based = true;
+  bool short_name_in_menu = true;
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_tag);

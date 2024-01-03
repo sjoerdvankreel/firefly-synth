@@ -67,7 +67,7 @@ init_voice_default(plugin_state& state)
 {
   state.set_text_at(module_vcv_matrix, 0, param_type, 0, "Add.Abs");
   state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 0, "V.FX 1 Freq");
+  state.set_text_at(module_vcv_matrix, 0, param_target, 0, "V.FX 1 SVF.Frq");
   state.set_text_at(module_vcv_matrix, 0, param_type, 1, "AB.Abs");
   state.set_text_at(module_vcv_matrix, 0, param_min, 1, "35");
   state.set_text_at(module_vcv_matrix, 0, param_max, 1, "65");
@@ -88,10 +88,10 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gcv_matrix, 0, param_min, 0, "35");
   state.set_text_at(module_gcv_matrix, 0, param_max, 0, "65");
   state.set_text_at(module_gcv_matrix, 0, param_source, 0, "G.LFO 1");
-  state.set_text_at(module_gcv_matrix, 0, param_target, 0, "G.FX 1 Freq");
+  state.set_text_at(module_gcv_matrix, 0, param_target, 0, "G.FX 1 SVF.Frq");
   state.set_text_at(module_gcv_matrix, 0, param_type, 1, "Add.Abs");
   state.set_text_at(module_gcv_matrix, 0, param_source, 1, "M.In Mod");
-  state.set_text_at(module_gcv_matrix, 0, param_target, 1, "G.FX 1 Freq");
+  state.set_text_at(module_gcv_matrix, 0, param_target, 1, "G.FX 1 SVF.Frq");
 }
 
 audio_routing_cv_params
@@ -241,8 +241,8 @@ cv_matrix_topo(
   int on_note_midi_start = -1;
   auto source_matrix = make_cv_source_matrix(sources);
   auto target_matrix = make_cv_target_matrix(targets);
-  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, module_vcv_matrix, 1);
-  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, module_gcv_matrix, 1);
+  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_matrix, 1);
+  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_matrix, 1);
   auto const info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
 

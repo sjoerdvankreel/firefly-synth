@@ -76,7 +76,7 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   auto am_matrix = make_audio_matrix({ &plugin->modules[module_osc] });
 
   module_topo result(make_module(
-    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc AM", "AM", true, module_am_matrix, 1),
+    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc AM", "AM", true, true, module_am_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}", "Modulated", output_modulated, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));

@@ -28,10 +28,10 @@ make_label_none()
 topo_tag
 make_topo_tag(std::string const& id, std::string const& name, std::string short_name = "");
 topo_info
-make_topo_info(std::string const& id, std::string const& name, std::string const& short_name, bool name_one_based, int index, int slot_count);
+make_topo_info(std::string const& id, std::string const& name, std::string const& short_name, bool name_one_based, bool short_name_in_menu, int index, int slot_count);
 inline topo_info
 make_topo_info(std::string const& id, std::string const& name, int index, int slot_count)
-{ return make_topo_info(id, name, "", true, index, slot_count); }
+{ return make_topo_info(id, name, "", true, true, index, slot_count); }
 
 param_section
 make_param_section(int index, topo_tag const& tag, param_section_gui const& gui);

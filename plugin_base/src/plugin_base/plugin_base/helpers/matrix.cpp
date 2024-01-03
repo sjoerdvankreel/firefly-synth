@@ -14,7 +14,7 @@ make_id(std::string const& id, int slot)
 static std::string
 make_name(topo_tag const& tag, int slot, int slots)
 {
-  std::string result = tag.short_name.size() ? tag.short_name : tag.name;
+  std::string result = (tag.short_name_in_menu && tag.short_name.size()) ? tag.short_name : tag.name;
   if(slots > 1) result += " " + std::to_string(slot + (tag.name_one_based? 1: 0));
   return result;
 }
@@ -32,9 +32,9 @@ make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
 static std::string
 make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int slot2, int slots2)
 {
-  std::string result = tag1.short_name.size() ? tag1.short_name : tag1.name;
+  std::string result = (tag1.short_name_in_menu && tag1.short_name.size()) ? tag1.short_name : tag1.name;
   if (slots1 > 1) result += " " + std::to_string(slot1 + (tag1.name_one_based ? 1: 0));
-  result += " " + (tag2.short_name.size() ? tag2.short_name : tag2.name);
+  result += " " + ((tag2.short_name_in_menu && tag2.short_name.size()) ? tag2.short_name : tag2.name);
   if (slots2 > 1) result += " " + std::to_string(slot2 + (tag2.name_one_based ? 1 : 0));
   return result;
 }

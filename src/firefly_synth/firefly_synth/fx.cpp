@@ -19,12 +19,19 @@ static double const comb_min_ms = 0.1;
 static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
 
-enum { section_type, section_svf, section_comb, section_delay };
-enum { type_off, type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, 
-  type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, type_comb, type_delay };
-enum { param_type, param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, param_comb_dly_plus, 
-  param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min, param_delay_tempo, param_delay_feedback };
+enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
+enum { section_type, section_svf, section_comb, section_shape, section_delay };
+enum { type_off,
+  type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, 
+  type_shape_clip, type_shape_tanh, type_shape_sin,
+  type_comb, type_delay };
+enum { param_type, 
+  param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
+  param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
+  param_shape_over, param_shape_gain, param_shape_mix,
+  param_delay_tempo, param_delay_feedback };
 
+static bool is_shape(int type) { return type_shape_clip <= type && type <= type_shape_sin; }
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
 static bool is_svf_gain(int type) { return type_svf_bll <= type && type <= type_svf_hsh; }
 
@@ -42,8 +49,22 @@ type_items(bool global)
   result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "SVF.BLL");
   result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "SVF.LSH");
   result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "SVF.HSH");
+  result.emplace_back("{834AF6C3-DEBD-4B9D-8C84-B885B664EB04}", "Shp.Clip");
+  result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tanh");
+  result.emplace_back("{E8AB234B-871E-44CB-A903-D99F22532386}", "Shp.Sin");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
+  return result;
+}
+
+static std::vector<list_item>
+shape_over_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "1X Oversampling");
+  result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "2X Oversampling");
+  result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "4X Oversampling");
+  result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "8X Oversampling");
   return result;
 }
 
@@ -68,6 +89,7 @@ public module_engine {
   jarray<float, 2> _dly_buffer = {};
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_shape(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
   template <class Init>
   void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
@@ -124,7 +146,14 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   int sample_rate = -1;
   jarray<float, 2> audio_in;
   auto const params = make_graph_engine_params();
-  if(is_svf(type) || type == type_comb)
+  if (is_shape(type))
+  {
+    frame_count = 200;
+    sample_rate = 200;
+    audio_in.resize(jarray<int, 1>(2, frame_count));
+    for(int i = 0; i < 200; i++)
+      audio_in[0][i] = audio_in[1][i] = unipolar_to_bipolar((float)i / 200);
+  } else if(is_svf(type) || type == type_comb)
   {
     frame_count = 4800;
     sample_rate = 48000;
@@ -156,14 +185,15 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   });
   engine->process_end();
 
-  if (type == type_delay)
+  auto const& audio = block->state.own_audio[0][0][0];
+  if (type == type_delay || is_shape(type))
   {
-    std::vector<float> series(block->state.own_audio[0][0][0].begin(), block->state.own_audio[0][0][0].begin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, { "IR" });
+    std::string partition = type == type_delay? "IR": "Shape";
+    std::vector<float> series(audio.cbegin(), audio.cbegin() + frame_count);
+    return graph_data(jarray<float, 1>(series), true, { partition });
   }
 
   // comb / svf
-  auto const& audio = block->state.own_audio[0][0][0];
   auto response = fft(audio.data());
   if (type == type_comb)
     return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
@@ -175,8 +205,8 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 module_topo
 fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
-  auto const voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice FX", "V.FX", true, module_vfx, 10);
-  auto const global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", "Global FX", "G.FX", true, module_gfx, 10);
+  auto const voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice FX", "V.FX", true, true, module_vfx, 10);
+  auto const global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", "Global FX", "G.FX", true, true, module_gfx, 10);
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
 
@@ -203,6 +233,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_comb);
+  type.gui.submenu->add_submenu("Shape", { type_shape_clip, type_shape_tanh, type_shape_sin });
   type.gui.submenu->add_submenu("SVF", { type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
@@ -212,28 +243,28 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || is_svf(vs[0]); });
   auto& svf_freq = result.params.emplace_back(make_param(
-    make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "Freq", param_svf_freq, 1),
+    make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "SVF.Frq", "Frq", true, false, param_svf_freq, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(svf_min_freq, svf_max_freq, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   auto& svf_res = result.params.emplace_back(make_param(
-    make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "Res", param_svf_res, 1),
+    make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "SVF.Res", "Res", true, false, param_svf_res, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   auto& svf_kbd = result.params.emplace_back(make_param(
-    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "Kbd", param_svf_kbd, 1),
+    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "SVF.Kbd", "Kbd", true, false, param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-2, 2, 0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf(vs[0]); });
   auto& svf_gain = result.params.emplace_back(make_param(
-    make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", "Gain", param_svf_gain, 1),
+    make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", "SVF.Gain", "Gain", true, false, param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
     make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_svf_gain(vs[0]); });
 
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
@@ -241,29 +272,51 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 0, 1 }, { { 1 }, { 2, 2, 1, 1 } })));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
-    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Dly+", param_comb_dly_plus, 1),
+    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Cmb.Dly+", "Dly+", true, false, param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 0 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
-    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Dly-", param_comb_dly_min, 1),
+    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Cmb.Dly-", "Dly-", true, false, param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_gain_plus = result.params.emplace_back(make_param(
-    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Gain+", param_comb_gain_plus, 1),
+    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Cmb.Gain+", "Gain+", true, false, param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
     make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_gain_min = result.params.emplace_back(make_param(
-    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Gain-", param_comb_gain_min, 1),
+    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Cmb.Gain-", "Gain-", true, false, param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+
+  auto& shape = result.sections.emplace_back(make_param_section(section_shape,
+    make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1 } })));
+  shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
+  auto& shape_over = result.params.emplace_back(make_param(
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.Over", "Over", true, false, param_shape_over, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_item(shape_over_items(), "2X Oversampling"),
+    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::short_name, make_label_none())));
+  shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
+  auto& shape_gain = result.params.emplace_back(make_param(
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gain", "Gain", true, false, param_shape_gain, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 32, 1, 0, true),
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
+  auto& shape_mix = result.params.emplace_back(make_param(
+    make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mix", "Mix", true, false, param_shape_mix, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
 
   if(!global) return result;
 
@@ -272,15 +325,15 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
   delay.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Tempo", param_delay_tempo, 1),
+    make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Dly.Tempo", "Tempo", true, false, param_delay_tempo, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_timesig_default(false, {3, 16}),
-    make_param_gui_single(section_delay, gui_edit_type::list, { 0, 0 }, gui_label_contents::name, make_label_none())));
+    make_param_gui_single(section_delay, gui_edit_type::list, { 0, 0 }, gui_label_contents::short_name, make_label_none())));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
   result.params.emplace_back(make_param(
-    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Fdbk", param_delay_feedback, 1),
+    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.Fdbk", "Fdbk", true, false, param_delay_feedback, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
 
   return result;
 }
@@ -455,6 +508,9 @@ fx_engine::process(plugin_block& block,
   {
   case type_comb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
+  case type_shape_sin: process_shape(block, *modulation); break;
+  case type_shape_clip: process_shape(block, *modulation); break;
+  case type_shape_tanh: process_shape(block, *modulation); break;
   case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
   case type_svf_hpf: process_svf(block, *modulation, init_svf_hpf); break;
   case type_svf_bpf: process_svf(block, *modulation, init_svf_bpf); break;
@@ -465,6 +521,14 @@ fx_engine::process(plugin_block& block,
   case type_svf_lsh: process_svf(block, *modulation, init_svf_lsh); break;
   case type_svf_hsh: process_svf(block, *modulation, init_svf_hsh); break;
   }
+}
+
+void
+fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulation)
+{
+  for(int c = 0; c < 2; c++)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+      block.state.own_audio[0][0][c][f] = std::tanh(block.state.own_audio[0][0][c][f]);
 }
 
 void

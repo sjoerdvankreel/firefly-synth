@@ -42,7 +42,7 @@ module_topo
 master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Master In", "M.In", true, module_master_in, 1),
+    make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Master In", "M.In", true, true, module_master_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
