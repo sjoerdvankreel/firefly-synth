@@ -307,7 +307,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gain", "Gain", true, false, param_shape_gain, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 16, 1, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 32, 1, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
