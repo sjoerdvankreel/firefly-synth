@@ -23,7 +23,7 @@ enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
 enum { type_off,
   type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, 
-  type_shp_clp, type_shp_tan, type_shp_sin,
+  type_shp_sin, type_shp_cos, type_shp_tan, type_shp_clp,
   type_comb, type_delay };
 enum { param_type, 
   param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
@@ -31,7 +31,7 @@ enum { param_type,
   param_shape_over, param_shape_gain, param_shape_mix,
   param_delay_tempo, param_delay_feedback };
 
-static bool is_shape(int type) { return type_shp_clp <= type && type <= type_shp_sin; }
+static bool is_shape(int type) { return type_shp_sin <= type && type <= type_shp_clp; }
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
 static bool is_svf_gain(int type) { return type_svf_bll <= type && type <= type_svf_hsh; }
 
@@ -49,9 +49,10 @@ type_items(bool global)
   result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "SVF.BLL");
   result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "SVF.LSH");
   result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "SVF.HSH");
-  result.emplace_back("{834AF6C3-DEBD-4B9D-8C84-B885B664EB04}", "Shp.Clip");
-  result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tanh");
   result.emplace_back("{E8AB234B-871E-44CB-A903-D99F22532386}", "Shp.Sin");
+  result.emplace_back("{84BB1282-F7EF-4F0C-82FA-9F1A27ADA849}", "Shp.Cos");
+  result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tan");
+  result.emplace_back("{834AF6C3-DEBD-4B9D-8C84-B885B664EB04}", "Shp.Clip");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   return result;
@@ -232,7 +233,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_comb);
-  type.gui.submenu->add_submenu("Shape", { type_shp_clp, type_shp_tan, type_shp_sin });
+  type.gui.submenu->add_submenu("Shape", { type_shp_sin, type_shp_cos, type_shp_tan, type_shp_clp });
   type.gui.submenu->add_submenu("SVF", { type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
@@ -306,7 +307,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gain", "Gain", true, false, param_shape_gain, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 32, 1, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 16, 1, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
@@ -339,6 +340,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
 static float shp_tan(float in) { return std::tanh(in); }
 static float shp_sin(float in) { return std::sin(in * pi32); }
+static float shp_cos(float in) { return std::cos(in * pi32); }
 static float shp_clp(float in) { return std::clamp(in, -1.0f, 1.0f); }
 
 static void
@@ -512,8 +514,9 @@ fx_engine::process(plugin_block& block,
   case type_comb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
   case type_shp_sin: process_shape(block, *modulation, shp_sin); break;
-  case type_shp_clp: process_shape(block, *modulation, shp_clp); break;
+  case type_shp_cos: process_shape(block, *modulation, shp_cos); break;
   case type_shp_tan: process_shape(block, *modulation, shp_tan); break;
+  case type_shp_clp: process_shape(block, *modulation, shp_clp); break;
   case type_svf_lpf: process_svf(block, *modulation, init_svf_lpf); break;
   case type_svf_hpf: process_svf(block, *modulation, init_svf_hpf); break;
   case type_svf_bpf: process_svf(block, *modulation, init_svf_bpf); break;
