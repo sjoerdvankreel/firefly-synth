@@ -194,11 +194,11 @@ render_graph(
   }
 
   // scale to longest env or lfo
-  float dahds = 1.0f;
-  float dahdsrf = 1.0f;
-  float max_total = 1.0f;
-  float max_dahds = 1.0f;
-  float max_dahdsrf = 1.0f;
+  float dahds = 0.1f;
+  float dahdsrf = 0.1f;
+  float max_total = 0.1f;
+  float max_dahds = 0.1f;
+  float max_dahdsrf = 0.1f;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
   for(int r = 0; r < route_count; r++)
     if (state.get_plain_at(map.module_index, map.module_slot, param_type, r).step() != type_off)
