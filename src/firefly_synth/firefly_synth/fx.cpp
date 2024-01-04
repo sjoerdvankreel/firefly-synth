@@ -362,7 +362,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Dly.Tempo", "Tempo", true, false, param_delay_tempo, 1),
-    make_param_dsp_input(!global, param_automate::automate), make_domain_timesig_default(false, {3, 16}),
+    make_param_dsp_input(!global, param_automate::none), make_domain_timesig_default(false, {3, 16}),
     make_param_gui_single(section_delay, gui_edit_type::list, { 0, 0 }, gui_label_contents::short_name, make_label_none())));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
   delay_tempo.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
