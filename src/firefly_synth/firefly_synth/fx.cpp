@@ -39,7 +39,7 @@ enum { param_type,
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
 static bool is_svf_gain(int type) { return type_svf_bll <= type && type <= type_svf_hsh; }
 static bool is_shape(int type) { return type_shp_trig_sin <= type && type <= type_shp_other_pow_tanh; }
-static bool is_shape_exp(int type) { return type_shp_other_pow_clip <= type && type <= type_shp_other_pow_tanh; }
+static bool is_shape_pow(int type) { return type_shp_other_pow_clip <= type && type <= type_shp_other_pow_tanh; }
 
 static std::vector<list_item>
 type_items(bool global)
@@ -357,7 +357,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-32, 32, 1, 2, ""),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_pow_exp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_exp(vs[0]); });
+  shape_pow_exp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_pow(vs[0]); });
 
   if(!global) return result;
 
