@@ -9,6 +9,7 @@
 #include <firefly_synth/synth.hpp>
 
 #include <cmath>
+#include <array>
 #include <algorithm>
 
 using namespace plugin_base;
@@ -19,7 +20,7 @@ static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
 static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
-static int const max_shp_cheby_terms = 32;
+static int const max_shp_cheby_terms = 16;
 
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
@@ -365,7 +366,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_pow_exp.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_shape_cheby(vs[0]); });
   auto& shape_cheby_terms = result.params.emplace_back(make_param(
     make_topo_info("{0F9BF4C1-90BF-48A7-8893-489A5160A55A}", "Shp.Trms", "Trms", true, false, param_shape_cheby_terms, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_step(2, max_shp_cheby_terms, 4, 0),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, max_shp_cheby_terms, 4, 0),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_cheby_terms.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_cheby(vs[0]); });
@@ -433,7 +434,8 @@ shp_other_fold(float in, float gain, float exp, int terms)
 static float
 shp_other_cheby_clip(float in, float gain, float exp, int terms)
 {
-  float t[max_shp_cheby_terms + 1];
+  terms = 1 + 2 * terms;
+  std::array<float, 1 + 2 * max_shp_cheby_terms + 1> t;
   t[0] = 1.0f;
   t[1] = std::clamp(in * gain, -1.0f, 1.0f);
   for (std::int32_t o = 2; o <= terms; o++)
