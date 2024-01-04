@@ -401,18 +401,8 @@ static float shp_other_cbrt_tanh(float in, float gain, float exp) { return std::
 static float shp_other_cbrt_clip(float in, float gain, float exp) { return std::clamp(std::cbrt(in * gain), -1.0f, 1.0f); }
 static float shp_other_cube_tanh(float in, float gain, float exp) { return std::tanh((in * gain) * (in * gain) * (in * gain)); }
 static float shp_other_cube_clip(float in, float gain, float exp) { return std::clamp((in * gain) * (in * gain) * (in * gain), -1.0f, 1.0f); }
-
-static float shp_other_pow_tanh(float in, float gain, float exp) { 
-  float sign = in * gain < 0? -1: 1;
-  float out = sign * std::pow(std::fabs(in * gain), exp);
-  return std::tanh(out);
-}
-
-static float shp_other_pow_clip(float in, float gain, float exp) {
-  float sign = in * gain < 0 ? -1 : 1;
-  float out = sign * std::pow(std::fabs(in * gain), exp);
-  return std::tanh(out);
-}
+static float shp_other_pow_tanh(float in, float gain, float exp) { return std::tanh((in * gain < 0 ? -1 : 1) * std::pow(std::fabs(in * gain), exp)); }
+static float shp_other_pow_clip(float in, float gain, float exp) { return std::clamp((in * gain < 0 ? -1 : 1) * std::pow(std::fabs(in * gain), exp), -1.0f, 1.0f); }
 
 static void
 init_svf(
