@@ -34,6 +34,7 @@ fix the init patch
 do "IR" as variable length
 prettify the matrix section
 logify the shaper gain
+do all trig + clip/tan as waveshapers
 
 * fx
 * stvar - freq, res, gain, kbd
