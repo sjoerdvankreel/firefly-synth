@@ -341,11 +341,13 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_input(!global, param_automate::automate), make_domain_timesig_default(false, {3, 16}),
     make_param_gui_single(section_delay, gui_edit_type::list, { 0, 0 }, gui_label_contents::short_name, make_label_none())));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
-  result.params.emplace_back(make_param(
+  delay_tempo.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  auto& delay_fdbk = result.params.emplace_back(make_param(
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.Fdbk", "Fdbk", true, false, param_delay_feedback, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
 
   return result;
 }
