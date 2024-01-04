@@ -25,8 +25,6 @@ enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps, param_amt };
 enum { 
-  type_skew, 
-
   type_trig_sin, type_trig_cos, 
   type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
   type_trig_sin_sin_sin, type_trig_sin_sin_cos, type_trig_sin_cos_sin, type_trig_sin_cos_cos,
@@ -36,9 +34,10 @@ enum {
   type_trig_log_sin_sin, type_trig_log_sin_cos, type_trig_log_cos_sin, type_trig_log_cos_cos,
   type_trig_log_sin_sin_sin, type_trig_log_sin_sin_cos, type_trig_log_sin_cos_sin, type_trig_log_sin_cos_cos,
   type_trig_log_cos_sin_sin, type_trig_log_cos_sin_cos, type_trig_log_cos_cos_sin, type_trig_log_cos_cos_cos,
-
-  type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log,
-  type_static, type_static_add, type_static_free, type_static_add_free, type_smooth, type_smooth_log };
+  
+  type_other_skew, type_other_pulse, type_other_pulse_lin, type_other_tri, type_other_tri_log, type_other_saw, type_other_saw_lin, type_other_saw_log,
+  type_static, type_static_add, type_static_free, type_static_add_free, 
+  type_smooth, type_smooth_log };
 
 static bool is_static_add(int type) { return type == type_static_add || type == type_static_add_free; }
 static bool is_static_free(int type) { return type == type_static_free || type == type_static_add_free; }
@@ -51,17 +50,17 @@ static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mod
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
 
 static bool is_trig_log(int type) { return type_trig_log_sin <= type && type <= type_trig_log_cos_cos_cos; }
-static bool has_x(int type) { return is_trig_log(type) || type == type_skew || type == type_tri_log || type == type_saw_lin || type == type_pulse_lin; }
+static bool has_x(int type) { 
+  return is_trig_log(type) || type == type_other_skew || 
+  type == type_other_tri_log || type == type_other_saw_lin || type == type_other_pulse_lin; }
 static bool has_y(int type) { 
-  return is_trig_log(type) || type == type_skew || type == type_tri_log || type == type_saw_lin || type == type_saw_log || 
-  type == type_pulse_lin || type == type_static_add || type == type_static_add_free || type == type_smooth_log; }
+  return is_trig_log(type) || type == type_other_skew || type == type_other_tri_log || type == type_other_saw_lin || 
+  type == type_other_saw_log || type == type_other_pulse_lin || type == type_static_add || type == type_static_add_free || type == type_smooth_log; }
 
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{3AF5A419-583F-435E-ABF7-BA514FA608C9}", "Skew");
-  
   result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
   result.emplace_back("{1EAC4007-3122-4064-9B97-AFF28C902400}", "Cos");
   result.emplace_back("{7A510580-5E85-4B49-A4D2-54269B50FF62}", "SinSin");
@@ -92,6 +91,7 @@ type_items()
   result.emplace_back("{49D64771-94C6-4BA1-BACF-80C75F078FE6}", "CCS.Log");
   result.emplace_back("{749AB04D-6902-4C69-85DF-9D7B5A422C4F}", "CCC.Log");
   
+  result.emplace_back("{3AF5A419-583F-435E-ABF7-BA514FA608C9}", "Skew");
   result.emplace_back("{34480144-5349-49C1-9211-4CED6E6C8203}", "Pulse");
   result.emplace_back("{91CB7634-9759-485A-9DFF-6F5F86966212}", "Pulse.Lin");
   result.emplace_back("{42E1F070-191B-411A-9FFD-D966990B9712}", "Tri");
@@ -99,10 +99,12 @@ type_items()
   result.emplace_back("{2190619A-CB71-47F3-9B93-364BF4DA6BE6}", "Saw");
   result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Lin");
   result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.Log");
+
   result.emplace_back("{48D681E8-16C2-42FB-B64F-146C7F689C45}", "Static");
   result.emplace_back("{6182E4EF-93F2-4CDC-A015-7437C05F7E70}", "Stat.Add");
   result.emplace_back("{5AA8914D-CF39-4435-B374-B4C66002DC8B}", "Stat.Free");
   result.emplace_back("{4B9E5DE0-9F32-4EB0-949F-1108B2A21DC1}", "St.AddFr");
+
   result.emplace_back("{4F079460-C774-4B69-BCCA-3065BE26D28F}", "Smt");
   result.emplace_back("{92856FAE-84EE-42B9-926D-7F4FA7AE21E9}", "Smt.Log");
   return result;
@@ -148,7 +150,6 @@ public module_engine {
 
   void reset_noise(int seed, int steps);
   float calc_smooth(int steps);
-  float calc_smooth_log(int steps, float y_exp);
   float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
 public:
@@ -298,9 +299,10 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   type_trig_log_sin_sin, type_trig_log_sin_cos, type_trig_log_cos_sin, type_trig_log_cos_cos,
   type_trig_log_sin_sin_sin, type_trig_log_sin_sin_cos, type_trig_log_sin_cos_sin, type_trig_log_sin_cos_cos,
   type_trig_log_cos_sin_sin, type_trig_log_cos_sin_cos, type_trig_log_cos_cos_sin, type_trig_log_cos_cos_cos });
-  type.gui.submenu->add_submenu("Basic", { type_skew, type_pulse, type_pulse_lin, type_tri, type_tri_log, type_saw, type_saw_lin, type_saw_log });
-  type.gui.submenu->add_submenu("Static", { type_static, type_static_add, type_static_free, type_static_add_free });
   type.gui.submenu->add_submenu("Smooth", { type_smooth, type_smooth_log });
+  type.gui.submenu->add_submenu("Static", { type_static, type_static_add, type_static_free, type_static_add_free });
+  type.gui.submenu->add_submenu("Other", { type_other_skew, type_other_pulse, type_other_pulse_lin, type_other_tri, 
+    type_other_tri_log, type_other_saw, type_other_saw_lin, type_other_saw_log });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smt", true, true, param_filter, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -440,32 +442,29 @@ calc_trig_log_cos_cos_cos(float phase, float x, float y, float x_exp, float y_ex
 { return skew_log(bipolar_to_unipolar(ff_cos_cos_cos(skew_log(phase, x_exp))), y_exp); }
 
 static float
-calc_skew(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+calc_other_skew(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return skew_log(std::fabs(phase - skew_log(phase, x_exp)), y_exp); }
-
 static float
-calc_saw(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+calc_other_saw(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase; }
 static float
-calc_saw_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+calc_other_saw_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase < x? phase * y / x : y +  (phase - x) / ( 1 - x) * (1 - y); }
 static float
-calc_saw_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(calc_saw(phase, x, y, x_exp, y_exp, seed, steps), y_exp); }
-
+calc_other_saw_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return skew_log(calc_other_saw(phase, x, y, x_exp, y_exp, seed, steps), y_exp); }
 static float
-calc_pulse(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+calc_other_pulse(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase < 0.5? 0: 1; }
 static float
-calc_pulse_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+calc_other_pulse_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return phase < x? 0: y; }
-
 static float
-calc_tri(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return 1 - std::fabs(unipolar_to_bipolar(calc_saw(phase, x, y, x_exp, y_exp, seed, steps))); }
+calc_other_tri(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return 1 - std::fabs(unipolar_to_bipolar(calc_other_saw(phase, x, y, x_exp, y_exp, seed, steps))); }
 static float
-calc_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(calc_tri(skew_log(phase, x_exp), x, y, x_exp, y_exp, seed, steps), y_exp); }
+calc_other_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
+{ return skew_log(calc_other_tri(skew_log(phase, x_exp), x, y, x_exp, y_exp, seed, steps), y_exp); }
 
 float
 lfo_engine::calc_smooth(int steps)
@@ -475,10 +474,6 @@ lfo_engine::calc_smooth(int steps)
     _noise_total_pos = 0;
   return result;
 }
-
-float
-lfo_engine::calc_smooth_log(int steps, float y_exp)
-{ return skew_log(calc_smooth(steps), y_exp); }
 
 float 
 lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps)
@@ -591,14 +586,15 @@ lfo_engine::process(plugin_block& block)
   case type_trig_log_cos_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_log_cos_cos_sin); break;
   case type_trig_log_cos_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_log_cos_cos_cos); break;
 
-  case type_skew: process_loop<lfo_group::phased>(block, calc_skew); break;
-  case type_tri: process_loop<lfo_group::phased>(block, calc_tri); break;
-  case type_tri_log: process_loop<lfo_group::phased>(block, calc_tri_log); break;
-  case type_pulse: process_loop<lfo_group::phased>(block, calc_pulse); break;
-  case type_pulse_lin: process_loop<lfo_group::phased>(block, calc_pulse_lin); break;
-  case type_saw: process_loop<lfo_group::phased>(block, calc_saw); break;
-  case type_saw_lin: process_loop<lfo_group::phased>(block, calc_saw_lin); break;
-  case type_saw_log: process_loop<lfo_group::phased>(block, calc_saw_log); break;
+  case type_other_skew: process_loop<lfo_group::phased>(block, calc_other_skew); break;
+  case type_other_tri: process_loop<lfo_group::phased>(block, calc_other_tri); break;
+  case type_other_tri_log: process_loop<lfo_group::phased>(block, calc_other_tri_log); break;
+  case type_other_pulse: process_loop<lfo_group::phased>(block, calc_other_pulse); break;
+  case type_other_pulse_lin: process_loop<lfo_group::phased>(block, calc_other_pulse_lin); break;
+  case type_other_saw: process_loop<lfo_group::phased>(block, calc_other_saw); break;
+  case type_other_saw_lin: process_loop<lfo_group::phased>(block, calc_other_saw_lin); break;
+  case type_other_saw_log: process_loop<lfo_group::phased>(block, calc_other_saw_log); break;
+
   case type_static: case type_static_add: case type_static_free: case type_static_add_free:
     process_loop<lfo_group::noise>(block, [this, mode, type](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
       return calc_static(is_one_shot_full(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
@@ -607,8 +603,7 @@ lfo_engine::process(plugin_block& block)
       return calc_smooth(steps); }); break;
   case type_smooth_log:
     process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
-      return calc_smooth_log(steps, y_exp); }); break;
-  default: assert(false); break;
+      return skew_log(calc_smooth(steps), y_exp); }); break;
   }
 }
 
