@@ -25,6 +25,9 @@ enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_ad
 extern void
 env_plot_length_seconds(
   plugin_state const& state, int slot, float& dahds, float& dahdsrf);
+extern float
+lfo_frequency_from_state(
+  plugin_state const& state, int module_index, int module_slot, int bpm);
 
 static std::vector<list_item>
 type_items()
@@ -190,9 +193,10 @@ render_graph(
     return graph_data(graph_data_type::off, {});
   }
 
-  // scale to longest env
+  // scale to longest env or lfo
   float dahds = 1.0f;
   float dahdsrf = 1.0f;
+  float max_total = 1.0f;
   float max_dahds = 1.0f;
   float max_dahdsrf = 1.0f;
   int ti = state.get_plain_at(map.module_index, map.module_slot, param_target, map.param_slot).step();
@@ -208,13 +212,19 @@ render_graph(
           {
             max_dahds = dahds;
             max_dahdsrf = dahdsrf;
+            max_total = dahdsrf;
           }
+        }
+        else if (sources[si].module_index == module_glfo || sources[si].module_index == module_vlfo)
+        {
+          float freq = lfo_frequency_from_state(state, sources[si].module_index, sources[si].module_slot, 120);
+          max_total = std::max(max_total, 1 / freq);
         }
       }
 
   auto const params = make_graph_engine_params();
-  int sample_rate = params.max_frame_count / dahdsrf;
-  int voice_release_at = dahds / dahdsrf * params.max_frame_count;
+  int sample_rate = params.max_frame_count / max_total;
+  int voice_release_at = max_dahds / max_dahdsrf * params.max_frame_count;
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
   if(map.module_index == module_vcv_matrix)
@@ -225,9 +235,10 @@ render_graph(
   auto* block = engine->process_default(map.module_index, map.module_slot);
   engine->process_end();
 
+  std::string partition = float_to_string(max_total, 1) + " Sec " + targets.items[ti].name;
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
-  return graph_data(stacked, false, { targets.items[ti].name });
+  return graph_data(stacked, false, { partition });
 }
 
 module_topo

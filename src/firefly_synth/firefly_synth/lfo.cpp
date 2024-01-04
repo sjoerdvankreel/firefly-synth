@@ -188,6 +188,13 @@ make_graph_engine(plugin_desc const* desc)
   return std::make_unique<graph_engine>(desc, params);
 }
 
+float
+lfo_frequency_from_state(plugin_state const& state, int module_index, int module_slot, int bpm)
+{
+  int mode = state.get_plain_at(module_index, module_slot, param_mode, 0).step();
+  return sync_or_freq_from_state(state, 120, is_sync(mode), module_index, module_slot, param_rate, param_tempo);
+}
+
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
@@ -198,7 +205,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   int sample_rate = -1;
   std::string partition;
   auto const params = make_graph_engine_params();
-  float freq = sync_or_freq_from_state(state, 120, is_sync(mode), mapping.module_index, mapping.module_slot, param_rate, param_tempo);
+  float freq = lfo_frequency_from_state(state, mapping.module_index, mapping.module_slot, 120);
 
   if (!is_sync(mode))
   {
