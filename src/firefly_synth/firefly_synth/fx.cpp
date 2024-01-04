@@ -27,7 +27,7 @@ enum { type_off,
   type_shp_trig_sin, type_shp_trig_cos, type_shp_trig_sin_sin, type_shp_trig_sin_cos, type_shp_trig_cos_sin, type_shp_trig_cos_cos,
   type_shp_trig_sin_sin_sin, type_shp_trig_sin_sin_cos, type_shp_trig_sin_cos_sin, type_shp_trig_sin_cos_cos,
   type_shp_trig_cos_sin_sin, type_shp_trig_cos_sin_cos, type_shp_trig_cos_cos_sin, type_shp_trig_cos_cos_cos,
-  type_shp_other_tanh, type_shp_other_clip, type_shp_other_cube_tanh, type_shp_other_cbrt_tanh, type_shp_other_cube_clip, type_shp_other_cbrt_clip, type_shp_other_pow,
+  type_shp_other_clip, type_shp_other_tanh, type_shp_other_cbrt_clip, type_shp_other_cube_clip, type_shp_other_cbrt_tanh, type_shp_other_cube_tanh, type_shp_other_pow,
   type_comb, type_delay };
 enum { param_type, 
   param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
@@ -70,12 +70,12 @@ type_items(bool global)
   result.emplace_back("{96553C46-B46D-46FA-9469-F32276F9CC52}", "Shp.CosCosSin");
   result.emplace_back("{3D2123DB-5089-4E4F-A737-83086AE30B0D}", "Shp.CosCosCos");
 
-  result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tanh");
   result.emplace_back("{834AF6C3-DEBD-4B9D-8C84-B885B664EB04}", "Shp.Clip");
-  result.emplace_back("{BCB5086C-3569-4122-84EC-9275FE5E39FC}", "Shp.CubeTanh");
-  result.emplace_back("{B35997A3-9125-48A9-8166-FCE15B57A745}", "Shp.CbrtTanh");
-  result.emplace_back("{0EE65A64-C81E-4E75-893C-9835BB88A705}", "Shp.CubeClip");
+  result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tanh");
   result.emplace_back("{E33475AE-2548-42AF-B2CD-AA51E8E23543}", "Shp.CbrtClip");
+  result.emplace_back("{0EE65A64-C81E-4E75-893C-9835BB88A705}", "Shp.CubeClip");
+  result.emplace_back("{B35997A3-9125-48A9-8166-FCE15B57A745}", "Shp.CbrtTanh");
+  result.emplace_back("{BCB5086C-3569-4122-84EC-9275FE5E39FC}", "Shp.CubeTanh");
   result.emplace_back("{32837427-F399-48C5-B6FD-8D4276E20822}", "Shp.Pow");
 
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
@@ -264,8 +264,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     type_shp_trig_sin_sin_sin, type_shp_trig_sin_sin_cos, type_shp_trig_sin_cos_sin, type_shp_trig_sin_cos_cos,
     type_shp_trig_cos_sin_sin, type_shp_trig_cos_sin_cos, type_shp_trig_cos_cos_sin, type_shp_trig_cos_cos_cos });
   type.gui.submenu->add_submenu("Shape.Other", { 
-    type_shp_other_tanh, type_shp_other_clip, type_shp_other_cube_tanh, 
-    type_shp_other_cbrt_tanh, type_shp_other_cube_clip, type_shp_other_cbrt_clip, type_shp_other_pow });
+    type_shp_other_clip, type_shp_other_tanh, type_shp_other_cbrt_clip, type_shp_other_cube_clip, type_shp_other_cbrt_tanh, type_shp_other_cube_tanh, type_shp_other_pow });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
