@@ -156,8 +156,8 @@ inline float timesig_to_freq(float bpm, timesig const& sig)
 inline float timesig_to_time(float bpm, timesig const& sig) 
 { return 1.0f / timesig_to_freq(bpm, sig); }
 
-inline float unipolar_to_bipolar(float v) { return v * 2 - 1; }
-inline float bipolar_to_unipolar(float v) { return (v + 1) * 0.5f; }
+inline float unipolar_to_bipolar(float v) { return check_unipolar(v) * 2 - 1; }
+inline float bipolar_to_unipolar(float v) { return (check_bipolar(v) + 1) * 0.5f; }
 
 inline float 
 phase_increment(float freq, float rate) 

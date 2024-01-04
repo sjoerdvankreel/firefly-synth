@@ -397,7 +397,12 @@ static float shp_other_cbrt_tanh(float in, float gain, float exp) { return std::
 static float shp_other_cbrt_clip(float in, float gain, float exp) { return std::clamp(std::cbrt(in * gain), -1.0f, 1.0f); }
 static float shp_other_cube_tanh(float in, float gain, float exp) { return std::tanh((in * gain) * (in * gain) * (in * gain)); }
 static float shp_other_cube_clip(float in, float gain, float exp) { return std::clamp((in * gain) * (in * gain) * (in * gain), -1.0f, 1.0f); }
-static float shp_pow(float in, float gain, float exp) { return unipolar_to_bipolar(std::pow(bipolar_to_unipolar(in), exp)); } // TODO
+
+static float shp_other_pow(float in, float gain, float exp) { 
+  float sign = in * gain < 0? -1: 1;
+  float out = sign * std::pow(std::fabs(in * gain), exp);
+  return std::tanh(out);
+}
 
 static void
 init_svf(
@@ -586,7 +591,7 @@ fx_engine::process(plugin_block& block,
   case type_shp_other_cbrt_tanh: process_shape(block, *modulation, shp_other_cbrt_tanh); break;
   case type_shp_other_cube_clip: process_shape(block, *modulation, shp_other_cube_clip); break;
   case type_shp_other_cbrt_clip: process_shape(block, *modulation, shp_other_cbrt_clip); break;
-  case type_shp_other_pow: process_shape(block, *modulation, shp_pow); break;
+  case type_shp_other_pow: process_shape(block, *modulation, shp_other_pow); break;
 
   case type_shp_trig_sin: process_shape(block, *modulation, shp_trig_sin); break;
   case type_shp_trig_cos: process_shape(block, *modulation, shp_trig_cos); break;
