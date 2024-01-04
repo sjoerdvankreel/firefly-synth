@@ -334,7 +334,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 2, 2, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 5, 5, 3 } })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.Over", "Over", true, false, param_shape_over, 1),
@@ -367,6 +367,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_cheby_terms.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shp_other_cheby; });
   shape_cheby_terms.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shp_other_cheby; });
+  result.params[param_shape_pow_exp].gui.label_reference_text = result.params[param_shape_cheby_terms].info.tag.short_name;
 
   if(!global) return result;
 
