@@ -149,7 +149,7 @@ public module_engine {
   int _end_filter_stage_samples = 0;
 
   void reset_noise(int seed, int steps);
-  float calc_smooth(int steps);
+  float calc_smooth(int seed, int steps);
   float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
 public:
@@ -467,11 +467,11 @@ calc_other_tri_log(float phase, float x, float y, float x_exp, float y_exp, int 
 { return skew_log(calc_other_tri(skew_log(phase, x_exp), x, y, x_exp, y_exp, seed, steps), y_exp); }
 
 float
-lfo_engine::calc_smooth(int steps)
+lfo_engine::calc_smooth(int seed, int steps)
 {
   float result = _smooth_noise.next((float)_noise_total_pos / (_noise_total_samples + 1) * steps);
   if(_noise_total_pos++ >= _noise_total_samples)
-    _noise_total_pos = 0;
+    reset_noise(seed, steps);
   return result;
 }
 
@@ -600,10 +600,10 @@ lfo_engine::process(plugin_block& block)
       return calc_static(is_one_shot_full(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
   case type_smooth:
     process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
-      return calc_smooth(steps); }); break;
+      return calc_smooth(seed, steps); }); break;
   case type_smooth_log:
     process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
-      return skew_log(calc_smooth(steps), y_exp); }); break;
+      return skew_log(calc_smooth(seed, steps), y_exp); }); break;
   }
 }
 
