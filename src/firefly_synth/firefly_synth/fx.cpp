@@ -24,7 +24,7 @@ enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
 enum { type_off,
   type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, 
-  type_shp_sin, type_shp_cos, type_shp_sin_sin, type_shp_sin_cos, type_shp_cos_sin, type_shp_cos_cos,
+  type_shp_sin, type_shp_cos, type_shp_sin_sin, type_shp_sin_cos, type_shp_cos_sin, type_shp_cos_cos, type_shp_sin_sin_sin,
   type_shp_tan, type_shp_clp, type_shp_sqr, type_shp_cub, type_shp_sqrt, type_shp_cbrt, type_shp_cub2, type_shp_pow,
   type_comb, type_delay };
 enum { param_type, 
@@ -59,6 +59,7 @@ type_items(bool global)
   result.emplace_back("{E07D7F55-6861-442D-B9A2-7FFFBCCBF6B2}", "Shp.SinCos");
   result.emplace_back("{78DE21F3-7786-4B5D-95D4-971C658E0598}", "Shp.CosSin");
   result.emplace_back("{9E4277B3-8208-4BE2-A728-80C8E1BF4FBF}", "Shp.CosCos");
+  result.emplace_back("{8B231C79-EA39-4BBD-9F88-D5A4B62977BB}", "Shp.SinSinSin");
   
   result.emplace_back("{698E90E1-A422-4A22-970A-36659BD9B4BC}", "Shp.Tan");
   result.emplace_back("{834AF6C3-DEBD-4B9D-8C84-B885B664EB04}", "Shp.Clip");
@@ -249,7 +250,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_comb);
   type.gui.submenu->add_submenu("SVF", { type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh });
-  type.gui.submenu->add_submenu("Shape.Trig", { type_shp_sin, type_shp_cos, type_shp_sin_sin, type_shp_sin_cos, type_shp_cos_sin, type_shp_cos_cos });
+  type.gui.submenu->add_submenu("Shape.Trig", { type_shp_sin, type_shp_cos, type_shp_sin_sin, type_shp_sin_cos, type_shp_cos_sin, type_shp_cos_cos, type_shp_sin_sin_sin });
   type.gui.submenu->add_submenu("Shape.Other", { type_shp_tan, type_shp_clp, type_shp_sqr, type_shp_cub, type_shp_sqrt, type_shp_cbrt, type_shp_cub2, type_shp_pow });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
@@ -368,6 +369,7 @@ static float shp_sin_sin(float in, float gain, float exp) { return std::sin(in *
 static float shp_sin_cos(float in, float gain, float exp) { return std::sin(in * gain * pi32 + std::cos(in * gain * pi32)); }
 static float shp_cos_sin(float in, float gain, float exp) { return std::cos(in * gain * pi32 + std::sin(in * gain * pi32)); }
 static float shp_cos_cos(float in, float gain, float exp) { return std::cos(in * gain * pi32 + std::cos(in * gain * pi32)); }
+static float shp_sin_sin_sin(float in, float gain, float exp) { return std::sin(in * gain * pi32 + std::sin(in * gain * pi32 + std::sin(in * gain * pi32))); }
 
 static float shp_tan(float in, float gain, float exp) { return std::tanh(in * gain); }
 static float shp_clp(float in, float gain, float exp) { return std::clamp(in * gain, -1.0f, 1.0f); }
@@ -555,6 +557,7 @@ fx_engine::process(plugin_block& block,
   case type_shp_sin_cos: process_shape(block, *modulation, shp_sin_cos); break;
   case type_shp_cos_sin: process_shape(block, *modulation, shp_cos_sin); break;
   case type_shp_cos_cos: process_shape(block, *modulation, shp_cos_cos); break;
+  case type_shp_sin_sin_sin: process_shape(block, *modulation, shp_sin_sin_sin); break;
 
   case type_shp_tan: process_shape(block, *modulation, shp_tan); break;
   case type_shp_sqr: process_shape(block, *modulation, shp_sqr); break;
