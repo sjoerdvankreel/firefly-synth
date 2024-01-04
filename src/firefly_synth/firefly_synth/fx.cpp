@@ -435,10 +435,10 @@ shp_other_cheby_clip(float in, float gain, float exp, int terms)
 {
   float t[max_shp_cheby_terms + 1];
   t[0] = 1.0f;
-  t[1] = in * gain;
+  t[1] = std::clamp(in * gain, -1.0f, 1.0f);
   for (std::int32_t o = 2; o <= terms; o++)
     t[o] = 2.0f * t[1] * t[o - 1] - t[o - 2];
-  return std::clamp(t[terms], -1.0f, 1.0f);
+  return t[terms];
 }
 
 static float
