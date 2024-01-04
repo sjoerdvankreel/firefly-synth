@@ -5,8 +5,8 @@
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
+#include <firefly_synth/trig.hpp>
 #include <firefly_synth/synth.hpp>
-#include <firefly_synth/trigo.hpp>
 #include <firefly_synth/smooth_noise.hpp>
 #include <cmath>
 
@@ -376,89 +376,89 @@ skew_log(float in, float exp)
 
 static float
 calc_trig_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_sin(phase)); }
+{ return bipolar_to_unipolar(sin_01(phase)); }
 static float
 calc_trig_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_cos(phase)); }
+{ return bipolar_to_unipolar(cos_01(phase)); }
 static float
 calc_trig_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_sin_sin(phase)); }
+{ return bipolar_to_unipolar(sin_sin_01(phase)); }
 static float
 calc_trig_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_sin_cos(phase)); }
+{ return bipolar_to_unipolar(sin_cos_01(phase)); }
 static float
 calc_trig_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_cos_sin(phase)); }
+{ return bipolar_to_unipolar(cos_sin_01(phase)); }
 static float
 calc_trig_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_cos_cos(phase)); }
+{ return bipolar_to_unipolar(cos_cos_01(phase)); }
 static float
 calc_trig_sin_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_sin_sin_sin(phase)); }
+{ return bipolar_to_unipolar(sin_sin_sin_01(phase)); }
 static float
 calc_trig_sin_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_sin_sin_cos(phase)); }
+{ return bipolar_to_unipolar(sin_sin_cos_01(phase)); }
 static float
 calc_trig_sin_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_sin_cos_sin(phase)); }
+{ return bipolar_to_unipolar(sin_cos_sin_01(phase)); }
 static float
 calc_trig_sin_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_sin_cos_cos(phase)); }
+{ return bipolar_to_unipolar(sin_cos_cos_01(phase)); }
 static float
 calc_trig_cos_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_cos_sin_sin(phase)); }
+{ return bipolar_to_unipolar(cos_sin_sin_01(phase)); }
 static float
 calc_trig_cos_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_cos_sin_cos(phase)); }
+{ return bipolar_to_unipolar(cos_sin_cos_01(phase)); }
 static float
 calc_trig_cos_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_cos_cos_sin(phase)); }
+{ return bipolar_to_unipolar(cos_cos_sin_01(phase)); }
 static float
 calc_trig_cos_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(ff_cos_cos_cos(phase)); }
+{ return bipolar_to_unipolar(cos_cos_cos_01(phase)); }
 
 static float
 calc_trig_log_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_sin(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(sin_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_cos(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(cos_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_sin_sin(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(sin_sin_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_sin_cos(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(sin_cos_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_cos_sin(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(cos_sin_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_cos_cos(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(cos_cos_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_sin_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_sin_sin_sin(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(sin_sin_sin_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_sin_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_sin_sin_cos(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(sin_sin_cos_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_sin_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_sin_cos_sin(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(sin_cos_sin_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_sin_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_sin_cos_cos(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(sin_cos_cos_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_cos_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_cos_sin_sin(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(cos_sin_sin_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_cos_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_cos_sin_cos(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(cos_sin_cos_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_cos_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_cos_cos_sin(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(cos_cos_sin_01(skew_log(phase, x_exp))), y_exp); }
 static float
 calc_trig_log_cos_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(ff_cos_cos_cos(skew_log(phase, x_exp))), y_exp); }
+{ return skew_log(bipolar_to_unipolar(cos_cos_cos_01(skew_log(phase, x_exp))), y_exp); }
 
 static float
 calc_other_skew(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
