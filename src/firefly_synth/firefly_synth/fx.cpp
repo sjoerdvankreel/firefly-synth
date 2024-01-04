@@ -28,17 +28,17 @@ enum { type_off,
   type_shp_trig_sin_sin_sin, type_shp_trig_sin_sin_cos, type_shp_trig_sin_cos_sin, type_shp_trig_sin_cos_cos,
   type_shp_trig_cos_sin_sin, type_shp_trig_cos_sin_cos, type_shp_trig_cos_cos_sin, type_shp_trig_cos_cos_cos,
   type_shp_other_clip, type_shp_other_tanh, type_shp_other_fold, type_shp_other_cbrt_clip, type_shp_other_cbrt_tanh, 
-  type_shp_other_cube_clip, type_shp_other_cube_tanh, type_shp_other_pow_clip, type_shp_other_pow_tanh,
+  type_shp_other_cube_clip, type_shp_other_cube_tanh, type_shp_other_pow_clip, type_shp_other_pow_tanh, type_shp_other_cheby,
   type_comb, type_delay };
 enum { param_type, 
   param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
   param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
-  param_shape_over, param_shape_gain, param_shape_mix, param_shape_pow_exp,
+  param_shape_over, param_shape_gain, param_shape_mix, param_shape_pow_exp, param_shape_cheby_terms,
   param_delay_tempo, param_delay_feedback };
 
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
 static bool is_svf_gain(int type) { return type_svf_bll <= type && type <= type_svf_hsh; }
-static bool is_shape(int type) { return type_shp_trig_sin <= type && type <= type_shp_other_pow_tanh; }
+static bool is_shape(int type) { return type_shp_trig_sin <= type && type <= type_shp_other_cheby; }
 static bool is_shape_pow(int type) { return type_shp_other_pow_clip <= type && type <= type_shp_other_pow_tanh; }
 
 static std::vector<list_item>
@@ -81,6 +81,7 @@ type_items(bool global)
   result.emplace_back("{BCB5086C-3569-4122-84EC-9275FE5E39FC}", "Shp.CubeTanh");
   result.emplace_back("{32837427-F399-48C5-B6FD-8D4276E20822}", "Shp.PowClip");
   result.emplace_back("{C0781E48-31A2-4048-AF78-8EE3E8E98C1B}", "Shp.PowTanh");
+  result.emplace_back("{1D5968AF-15AA-400C-B260-F4EACB9A56C5}", "Shp.Cheby");
 
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
@@ -269,7 +270,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     type_shp_trig_cos_sin_sin, type_shp_trig_cos_sin_cos, type_shp_trig_cos_cos_sin, type_shp_trig_cos_cos_cos });
   type.gui.submenu->add_submenu("Shape.Other", { 
     type_shp_other_clip, type_shp_other_tanh, type_shp_other_fold, type_shp_other_cbrt_clip, type_shp_other_cbrt_tanh, type_shp_other_cube_clip, type_shp_other_cube_tanh,
-    type_shp_other_pow_clip, type_shp_other_pow_tanh });
+    type_shp_other_pow_clip, type_shp_other_pow_tanh, type_shp_other_cheby });
   if(global) type.gui.submenu->indices.push_back(type_delay);
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
@@ -358,6 +359,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_pow_exp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_pow(vs[0]); });
+  shape_pow_exp.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_shp_other_cheby; });
+  auto& shape_cheby_terms = result.params.emplace_back(make_param(
+    make_topo_info("{0F9BF4C1-90BF-48A7-8893-489A5160A55A}", "Shp.Trms", "Trms", true, false, param_shape_cheby_terms, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 32, 4, 0),
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shape_cheby_terms.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shp_other_cheby; });
+  shape_cheby_terms.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shp_other_cheby; });
 
   if(!global) return result;
 
@@ -415,6 +424,12 @@ shp_other_fold(float in, float gain, float exp)
     else return x;
   assert(false);
   return 0.0f;
+}
+
+static float
+shp_other_cheby(float in, float gain, float exp)
+{
+  return -in;
 }
 
 static void
@@ -601,6 +616,7 @@ fx_engine::process(plugin_block& block,
   case type_shp_other_tanh: process_shape(block, *modulation, shp_other_tanh); break;
   case type_shp_other_clip: process_shape(block, *modulation, shp_other_clip); break;
   case type_shp_other_fold: process_shape(block, *modulation, shp_other_fold); break;
+  case type_shp_other_cheby: process_shape(block, *modulation, shp_other_cheby); break;
   case type_shp_other_pow_tanh: process_shape(block, *modulation, shp_other_pow_tanh); break;
   case type_shp_other_pow_clip: process_shape(block, *modulation, shp_other_pow_clip); break;
   case type_shp_other_cube_tanh: process_shape(block, *modulation, shp_other_cube_tanh); break;
