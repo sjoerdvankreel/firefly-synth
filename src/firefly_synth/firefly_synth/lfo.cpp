@@ -149,6 +149,8 @@ public module_engine {
   int _end_filter_stage_samples = 0;
 
   void reset_noise(int seed, int steps);
+  void update_block_params(plugin_block const* block);
+
   float calc_smooth(int seed, int steps);
   float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
@@ -514,6 +516,18 @@ lfo_engine::reset_noise(int seed, int steps)
   _smooth_noise = smooth_noise(seed, steps);
 }
 
+void 
+lfo_engine::update_block_params(plugin_block const* block)
+{
+  auto const& block_auto = block->state.own_block_automation;
+  float x = block_auto[param_x][0].real();
+  float y = block_auto[param_y][0].real();
+  float filter = block_auto[param_filter][0].real();
+  _log_skew_x_exp = std::log(0.001 + (x * 0.999)) / log_half;
+  _log_skew_y_exp = std::log(0.001 + (y * 0.999)) / log_half;
+  _filter.set(block->sample_rate, filter / 1000.0f);
+}
+
 void
 lfo_engine::reset(plugin_block const* block) 
 { 
@@ -523,18 +537,12 @@ lfo_engine::reset(plugin_block const* block)
   _filter_end_value = 0;
   _stage = lfo_stage::cycle;
   _end_filter_stage_samples = 0;
-
-  auto const& block_auto = block->state.own_block_automation;
-  float x = block_auto[param_x][0].real();
-  float y = block_auto[param_y][0].real();
-  _log_skew_x_exp = std::log(0.001 + (x * 0.999)) / log_half;
-  _log_skew_y_exp = std::log(0.001 + (y * 0.999)) / log_half;
-  _phase = block_auto[param_phase][0].real();
-  if (is_noise(block_auto[param_type][0].step())) _phase = 0;
   
+  update_block_params(block);
+  auto const& block_auto = block->state.own_block_automation;
+  _phase = block_auto[param_phase][0].real();
+  if (is_noise(block_auto[param_type][0].step())) _phase = 0;  
   reset_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
-  float filter = block_auto[param_filter][0].real();
-  _filter.set(block->sample_rate, filter / 1000.0f);
 }
 
 void
@@ -553,6 +561,7 @@ lfo_engine::process(plugin_block& block)
     return; 
   }
 
+  if(_global) update_block_params(&block);
   int type = block.state.own_block_automation[param_type][0].step();
   switch (type)
   {

@@ -50,9 +50,11 @@ midi_filter::next()
 // https://www.musicdsp.org/en/latest/Filters/257-1-pole-lpf-for-smooth-parameter-changes.html
 class cv_filter
 {
-  float a = 0;
-  float b = 0;
-  float z = 0;
+  float _a = 0;
+  float _b = 0;
+  float _z = 0;
+  float _sample_rate = 0;
+  float _response_time = 0;
 public:
   float next(float in);
   void set(float sample_rate, float response_time);
@@ -61,16 +63,22 @@ public:
 inline float
 cv_filter::next(float in)
 {
-  z = (in * b) + (z * a);
-  return z;
+  _z = (in * _b) + (_z * _a);
+  return _z;
 }
 
 inline void
 cv_filter::set(float sample_rate, float response_time)
 {
-  a = std::exp(-2.0f * pi32 / (response_time * sample_rate));
-  b = 1.0f - a;
-  z = 0.0f;
+  // no need to throw out the history if we're not updating
+  if(_sample_rate == sample_rate && _response_time == response_time) 
+    return;
+
+  _sample_rate = sample_rate;
+  _response_time = response_time;
+  _a = std::exp(-2.0f * pi32 / (response_time * sample_rate));
+  _b = 1.0f - _a;
+  _z = 0.0f;
 }
 
 inline std::uint32_t

@@ -35,8 +35,7 @@ do "IR" as variable length
 prettify the matrix section
 logify the shaper gain
 do all trig + clip/tan as waveshapers
-update noise seed
-update block params always
+disable glfo phase?
 
 * fx
 * stvar - freq, res, gain, kbd
