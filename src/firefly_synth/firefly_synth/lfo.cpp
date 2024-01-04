@@ -339,16 +339,18 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   auto& phase_section = result.sections.emplace_back(make_param_section(section_phase,
     make_topo_tag("{44716AE2-1869-4FCF-922B-0EA5AA8B0C96}", "Phase"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 1, 1 }))));
+    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { global? 1: 2 }))));
   phase_section.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_noise(vs[0]); });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, true, param_x, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_phase, gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
+    make_param_gui_single(section_phase, global? gui_edit_type::hslider: gui_edit_type::knob, { 0, 0 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
   x.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_noise(vs[0]); });
   result.params[param_x].gui.label_reference_text = result.params[param_seed].info.tag.short_name;
+
+  if(global) return result;
   auto& phase = result.params.emplace_back(make_param(
     make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", "Phs", true, true, param_phase, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_percentage(0, 1, 0, 0, true),
@@ -548,7 +550,7 @@ lfo_engine::reset(plugin_block const* block)
   
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
-  _phase = block_auto[param_phase][0].real();
+  _phase = _global? 0: block_auto[param_phase][0].real();
   if (is_noise(block_auto[param_type][0].step())) _phase = 0;  
   reset_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
 }
