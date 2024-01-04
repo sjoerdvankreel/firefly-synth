@@ -36,6 +36,7 @@ prettify the matrix section
 logify the shaper gain
 do all trig + clip/tan as waveshapers
 update noise seed
+log lfo no workie
 
 * fx
 * stvar - freq, res, gain, kbd
