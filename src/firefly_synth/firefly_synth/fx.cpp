@@ -20,7 +20,7 @@ static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
 static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
-static int const max_shp_cheby_terms = 16;
+static int const max_shp_cheby_chb = 16;
 
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
@@ -35,7 +35,7 @@ enum { type_off,
 enum { param_type, 
   param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
   param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
-  param_shape_over, param_shape_gain, param_shape_mix, param_shape_pow_exp, param_shape_cheby_terms,
+  param_shape_over, param_shape_gain, param_shape_mix, param_shape_pow_exp, param_shape_cheby_chb,
   param_delay_tempo, param_delay_feedback };
 
 static bool is_svf(int type) { return type_svf_lpf <= type && type <= type_svf_hsh; }
@@ -364,14 +364,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_pow_exp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_pow(vs[0]); });
   shape_pow_exp.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return !is_shape_cheby(vs[0]); });
-  auto& shape_cheby_terms = result.params.emplace_back(make_param(
-    make_topo_info("{0F9BF4C1-90BF-48A7-8893-489A5160A55A}", "Shp.Trms", "Trms", true, false, param_shape_cheby_terms, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, max_shp_cheby_terms, 4, 0),
+  auto& shape_cheby_chb = result.params.emplace_back(make_param(
+    make_topo_info("{0F9BF4C1-90BF-48A7-8893-489A5160A55A}", "Shp.Chb", "Chb", true, false, param_shape_cheby_chb, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, max_shp_cheby_chb, 4, 0),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_cheby_terms.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_cheby(vs[0]); });
-  shape_cheby_terms.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_shape_cheby(vs[0]); });
-  result.params[param_shape_pow_exp].gui.label_reference_text = result.params[param_shape_cheby_terms].info.tag.short_name;
+  shape_cheby_chb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_cheby(vs[0]); });
+  shape_cheby_chb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_shape_cheby(vs[0]); });
+  result.params[param_shape_pow_exp].gui.label_reference_text = result.params[param_shape_cheby_chb].info.tag.short_name;
 
   if(!global) return result;
 
@@ -395,32 +395,32 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   return result;
 }
 
-static float shp_trig_sin(float in, float gain, float exp, int terms) { return sin_m11(in * gain); }
-static float shp_trig_cos(float in, float gain, float exp, int terms) { return cos_m11(in * gain); }
-static float shp_trig_sin_sin(float in, float gain, float exp, int terms) { return sin_sin_m11(in * gain); }
-static float shp_trig_sin_cos(float in, float gain, float exp, int terms) { return sin_cos_m11(in * gain); }
-static float shp_trig_cos_sin(float in, float gain, float exp, int terms) { return cos_sin_m11(in * gain); }
-static float shp_trig_cos_cos(float in, float gain, float exp, int terms) { return cos_cos_m11(in * gain); }
-static float shp_trig_sin_sin_sin(float in, float gain, float exp, int terms) { return sin_sin_sin_m11(in * gain); }
-static float shp_trig_sin_sin_cos(float in, float gain, float exp, int terms) { return sin_sin_cos_m11(in * gain); }
-static float shp_trig_sin_cos_sin(float in, float gain, float exp, int terms) { return sin_cos_sin_m11(in * gain); }
-static float shp_trig_sin_cos_cos(float in, float gain, float exp, int terms) { return sin_cos_cos_m11(in * gain); }
-static float shp_trig_cos_sin_sin(float in, float gain, float exp, int terms) { return sin_sin_sin_m11(in * gain); }
-static float shp_trig_cos_sin_cos(float in, float gain, float exp, int terms) { return sin_sin_cos_m11(in * gain); }
-static float shp_trig_cos_cos_sin(float in, float gain, float exp, int terms) { return sin_cos_sin_m11(in * gain); }
-static float shp_trig_cos_cos_cos(float in, float gain, float exp, int terms) { return sin_cos_cos_m11(in * gain); }
+static float shp_trig_sin(float in, float gain, float exp, int chb) { return sin_m11(in * gain); }
+static float shp_trig_cos(float in, float gain, float exp, int chb) { return cos_m11(in * gain); }
+static float shp_trig_sin_sin(float in, float gain, float exp, int chb) { return sin_sin_m11(in * gain); }
+static float shp_trig_sin_cos(float in, float gain, float exp, int chb) { return sin_cos_m11(in * gain); }
+static float shp_trig_cos_sin(float in, float gain, float exp, int chb) { return cos_sin_m11(in * gain); }
+static float shp_trig_cos_cos(float in, float gain, float exp, int chb) { return cos_cos_m11(in * gain); }
+static float shp_trig_sin_sin_sin(float in, float gain, float exp, int chb) { return sin_sin_sin_m11(in * gain); }
+static float shp_trig_sin_sin_cos(float in, float gain, float exp, int chb) { return sin_sin_cos_m11(in * gain); }
+static float shp_trig_sin_cos_sin(float in, float gain, float exp, int chb) { return sin_cos_sin_m11(in * gain); }
+static float shp_trig_sin_cos_cos(float in, float gain, float exp, int chb) { return sin_cos_cos_m11(in * gain); }
+static float shp_trig_cos_sin_sin(float in, float gain, float exp, int chb) { return sin_sin_sin_m11(in * gain); }
+static float shp_trig_cos_sin_cos(float in, float gain, float exp, int chb) { return sin_sin_cos_m11(in * gain); }
+static float shp_trig_cos_cos_sin(float in, float gain, float exp, int chb) { return sin_cos_sin_m11(in * gain); }
+static float shp_trig_cos_cos_cos(float in, float gain, float exp, int chb) { return sin_cos_cos_m11(in * gain); }
 
-static float shp_other_tanh(float in, float gain, float exp, int terms) { return std::tanh(in * gain); }
-static float shp_other_clip(float in, float gain, float exp, int terms) { return std::clamp(in * gain, -1.0f, 1.0f); }
-static float shp_other_cbrt_tanh(float in, float gain, float exp, int terms) { return std::tanh(std::cbrt(in * gain)); }
-static float shp_other_cbrt_clip(float in, float gain, float exp, int terms) { return std::clamp(std::cbrt(in * gain), -1.0f, 1.0f); }
-static float shp_other_cube_tanh(float in, float gain, float exp, int terms) { return std::tanh((in * gain) * (in * gain) * (in * gain)); }
-static float shp_other_cube_clip(float in, float gain, float exp, int terms) { return std::clamp((in * gain) * (in * gain) * (in * gain), -1.0f, 1.0f); }
-static float shp_other_pow_tanh(float in, float gain, float exp, int terms) { return std::tanh((in * gain < 0 ? -1 : 1) * std::pow(std::fabs(in * gain), exp)); }
-static float shp_other_pow_clip(float in, float gain, float exp, int terms) { return std::clamp((in * gain < 0 ? -1 : 1) * std::pow(std::fabs(in * gain), exp), -1.0f, 1.0f); }
+static float shp_other_tanh(float in, float gain, float exp, int chb) { return std::tanh(in * gain); }
+static float shp_other_clip(float in, float gain, float exp, int chb) { return std::clamp(in * gain, -1.0f, 1.0f); }
+static float shp_other_cbrt_tanh(float in, float gain, float exp, int chb) { return std::tanh(std::cbrt(in * gain)); }
+static float shp_other_cbrt_clip(float in, float gain, float exp, int chb) { return std::clamp(std::cbrt(in * gain), -1.0f, 1.0f); }
+static float shp_other_cube_tanh(float in, float gain, float exp, int chb) { return std::tanh((in * gain) * (in * gain) * (in * gain)); }
+static float shp_other_cube_clip(float in, float gain, float exp, int chb) { return std::clamp((in * gain) * (in * gain) * (in * gain), -1.0f, 1.0f); }
+static float shp_other_pow_tanh(float in, float gain, float exp, int chb) { return std::tanh((in * gain < 0 ? -1 : 1) * std::pow(std::fabs(in * gain), exp)); }
+static float shp_other_pow_clip(float in, float gain, float exp, int chb) { return std::clamp((in * gain < 0 ? -1 : 1) * std::pow(std::fabs(in * gain), exp), -1.0f, 1.0f); }
 
 static float 
-shp_other_fold(float in, float gain, float exp, int terms)
+shp_other_fold(float in, float gain, float exp, int chb)
 {
   float x = in * gain;
   while (true)
@@ -432,22 +432,23 @@ shp_other_fold(float in, float gain, float exp, int terms)
 }
 
 static float
-shp_other_cheby_clip(float in, float gain, float exp, int terms)
+shp_other_cheby(float x, int chb)
 {
-  terms = 1 + 2 * terms;
-  std::array<float, 1 + 2 * max_shp_cheby_terms + 1> t;
+  int terms = 1 + 2 * chb;
+  std::array<float, 1 + 2 * max_shp_cheby_chb + 1> t;
   t[0] = 1.0f;
-  t[1] = std::clamp(in * gain, -1.0f, 1.0f);
+  t[1] = x;
   for (std::int32_t o = 2; o <= terms; o++)
     t[o] = 2.0f * t[1] * t[o - 1] - t[o - 2];
   return t[terms];
 }
 
+static float 
+shp_other_cheby_tanh(float in, float gain, float exp, int chb)
+{  return shp_other_cheby(std::tanh(in * gain), chb); }
 static float
-shp_other_cheby_tanh(float in, float gain, float exp, int terms)
-{
-  return -in;
-}
+shp_other_cheby_clip(float in, float gain, float exp, int chb)
+{  return shp_other_cheby(std::clamp(in * gain, -1.0f, 1.0f), chb); }
 
 static void
 init_svf(
@@ -665,7 +666,7 @@ template <class Shape> void
 fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Shape shape)
 {
   int this_module = _global ? module_gfx : module_vfx;
-  int cheby_terms = block.state.own_block_automation[param_shape_cheby_terms][0].step();
+  int cheby_chb = block.state.own_block_automation[param_shape_cheby_chb][0].step();
   auto const& mix = *modulation[this_module][block.module_slot][param_shape_mix][0];
   auto const& exp_curve = *modulation[this_module][block.module_slot][param_shape_pow_exp][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_shape_gain][0];
@@ -675,7 +676,7 @@ fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulatio
       float in = block.state.own_audio[0][0][c][f];
       float exp = block.normalized_to_raw(this_module, param_shape_gain, exp_curve[f]);
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
-      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shape(in, gain, exp, cheby_terms);
+      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shape(in, gain, exp, cheby_chb);
     }
 }
 
