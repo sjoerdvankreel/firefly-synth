@@ -257,7 +257,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 6, 6, 4 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 5, 7, 4 } })));
   
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_graph_engine;
@@ -279,8 +279,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
-    make_param_gui_single(section_mode, gui_edit_type::knob, { 0, 1 }, gui_label_contents::none,
-      make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_mode, gui_edit_type::hslider, { 0, 1 }, gui_label_contents::value, make_label_none())));
   rate.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_one && vs[0] != mode_sync_wrap; });
   auto& tempo = result.params.emplace_back(make_param(
