@@ -116,7 +116,7 @@ gui_vertical_distribution(int total_height, int font_height,
   std::vector<float> result;
   int total_header_height = 0;
   float total_vsection_size = 0;
-  int header_height = module_header_height(font_height);
+  int header_height = module_header_height(font_height) + margin_module;
   for (int i = 0; i < section_sizes.size(); i++)
   {
     total_vsection_size += section_sizes[i].size_relative;
