@@ -38,6 +38,7 @@ do all trig + clip/tan as waveshapers
 foldback + cheby shaper
 waveshaper autodc ==> better autodc using min/max/avg + scale not clip
 "insert route before/after" ==> enable it !
+still find a way to do insert fx here
 
 * fx
 * stvar - freq, res, gain, kbd
