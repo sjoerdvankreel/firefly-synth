@@ -20,6 +20,7 @@ static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
 static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
+static double const shp_pow_default_exp = 1;
 static int const max_shp_cheby_chb = 16;
 
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
@@ -112,6 +113,11 @@ public module_engine {
   double _ic1eq[2];
   double _ic2eq[2];
 
+  // shape
+  float _shp_dc_avg = {};
+  int _shp_prev_chb = -1;
+  int _shp_prev_type = -1;
+
   // comb
   int _comb_pos = {};
   int _comb_samples = {};
@@ -123,6 +129,7 @@ public module_engine {
   int const _dly_capacity = {};
   jarray<float, 2> _dly_buffer = {};
 
+  void update_shape_dc(int type, int chb);
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
   template <class Init> void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
@@ -359,7 +366,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape(vs[0]); });
   auto& shape_pow_exp = result.params.emplace_back(make_param(
     make_topo_info("{87DC7F98-8C73-4684-A2FE-8E4ABAD03A80}", "Shp.Exp", "Exp", true, false, param_shape_pow_exp, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-32, 32, 1, 2, ""),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-32, 32, shp_pow_default_exp, 2, ""),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_pow_exp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_shape_pow(vs[0]); });
@@ -575,6 +582,56 @@ _global(global), _dly_capacity(sample_rate * 10)
   if(global) _dly_buffer.resize(jarray<int, 1>(2, _dly_capacity));
 }
 
+void 
+fx_engine::update_shape_dc(int type, int chb)
+{
+  // try to auto-adjust for dc offset introduced by non symmetric shapers
+  // be sure not to introduce dc offset based on continuous parameters!
+  // right now we calculate offset based on shaper type and chebyshev terms
+
+  assert(is_shape(type));
+  float (*shaper)(float in, float gain, float exp, int chb) = nullptr;
+  switch (type)
+  {
+    case type_shp_other_tanh: shaper = shp_other_tanh; break;
+    case type_shp_other_clip: shaper = shp_other_clip; break;
+    case type_shp_other_fold: shaper = shp_other_fold; break;
+    case type_shp_other_pow_tanh: shaper = shp_other_pow_tanh; break;
+    case type_shp_other_pow_clip: shaper = shp_other_pow_clip; break;
+    case type_shp_other_cube_tanh: shaper = shp_other_cube_tanh; break;
+    case type_shp_other_cube_clip: shaper = shp_other_cube_clip; break;
+    case type_shp_other_cbrt_tanh: shaper = shp_other_cbrt_tanh; break;
+    case type_shp_other_cbrt_clip: shaper = shp_other_cbrt_clip; break;
+    case type_shp_other_cheby_clip: shaper = shp_other_cheby_clip; break;
+    case type_shp_other_cheby_tanh: shaper = shp_other_cheby_tanh; break;
+    case type_shp_trig_sin: shaper = shp_trig_sin; break;
+    case type_shp_trig_cos: shaper = shp_trig_cos; break;
+    case type_shp_trig_sin_sin: shaper = shp_trig_sin_sin; break;
+    case type_shp_trig_sin_cos: shaper = shp_trig_sin_cos; break;
+    case type_shp_trig_cos_sin: shaper = shp_trig_cos_sin; break;
+    case type_shp_trig_cos_cos: shaper = shp_trig_cos_cos; break;
+    case type_shp_trig_sin_sin_sin: shaper = shp_trig_sin_sin_sin; break;
+    case type_shp_trig_sin_sin_cos: shaper = shp_trig_sin_sin_cos; break;
+    case type_shp_trig_sin_cos_sin: shaper = shp_trig_sin_cos_sin; break;
+    case type_shp_trig_sin_cos_cos: shaper = shp_trig_sin_cos_cos; break;
+    case type_shp_trig_cos_sin_sin: shaper = shp_trig_cos_sin_sin; break;
+    case type_shp_trig_cos_sin_cos: shaper = shp_trig_cos_sin_cos; break;
+    case type_shp_trig_cos_cos_sin: shaper = shp_trig_cos_cos_sin; break;
+    case type_shp_trig_cos_cos_cos: shaper = shp_trig_cos_cos_cos; break;
+    default: assert(false); break;
+  }
+
+  // just hope a 100 samples does it
+  _shp_dc_avg = 0;
+  for (int f = 0; f < 100; f++)
+  {
+    float x = unipolar_to_bipolar((float)f / 100);
+    float s = shaper(x, 1, shp_pow_default_exp, chb);
+    _shp_dc_avg += s / 100;
+  }
+  check_bipolar(_shp_dc_avg);
+}
+
 void
 fx_engine::reset(plugin_block const* block)
 {
@@ -586,8 +643,11 @@ fx_engine::reset(plugin_block const* block)
   _dly_pos = 0;
   _comb_pos = 0;
 
-  int type = block->state.own_block_automation[param_type][0].step();
+  auto const& block_auto = block->state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+  int cheby_chb = block_auto[param_shape_cheby_chb][0].step();
   if (_global && type == type_delay) _dly_buffer.fill(0);
+  if(!_global && is_shape(type)) update_shape_dc(type, cheby_chb);
 
   if (type == type_comb)
   {
@@ -611,10 +671,10 @@ fx_engine::process(plugin_block& block,
    
   for (int c = 0; c < 2; c++)
     (*audio_in)[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);  
-  int type = block.state.own_block_automation[param_type][0].step();
+  
+  int type = block.state.own_block_automation[param_type][0].step();  
   if(type == type_off) return;
-  if(modulation == nullptr)
-    modulation = &get_cv_matrix_mixdown(block, _global);
+  if (modulation == nullptr) modulation = &get_cv_matrix_mixdown(block, _global);  
 
   switch (type)
   {
@@ -665,8 +725,17 @@ fx_engine::process(plugin_block& block,
 template <class Shape> void
 fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Shape shape)
 {
+  auto const& block_auto = block.state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+  int cheby_chb = block_auto[param_shape_cheby_chb][0].step();
+  if (_global && (_shp_prev_type != type || _shp_prev_chb != cheby_chb))
+  {
+    _shp_prev_type = type;
+    _shp_prev_chb = cheby_chb;
+    update_shape_dc(type, cheby_chb);
+  }
+
   int this_module = _global ? module_gfx : module_vfx;
-  int cheby_chb = block.state.own_block_automation[param_shape_cheby_chb][0].step();
   auto const& mix = *modulation[this_module][block.module_slot][param_shape_mix][0];
   auto const& exp_curve = *modulation[this_module][block.module_slot][param_shape_pow_exp][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_shape_gain][0];
@@ -676,7 +745,10 @@ fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulatio
       float in = block.state.own_audio[0][0][c][f];
       float exp = block.normalized_to_raw(this_module, param_shape_gain, exp_curve[f]);
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
-      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shape(in, gain, exp, cheby_chb);
+      float shaped = shape(in, gain, exp, cheby_chb);
+      float shaped_offset = shaped - _shp_dc_avg;
+      float shaped_dc_correct = std::clamp(shaped_offset, -1.0f, 1.0f);
+      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shaped_dc_correct;
     }
 }
 
