@@ -746,9 +746,12 @@ fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulatio
       float exp = block.normalized_to_raw(this_module, param_shape_gain, exp_curve[f]);
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
       float shaped = shape(in, gain, exp, cheby_chb);
-      float shaped_offset = shaped - _shp_dc_avg;
-      float shaped_dc_correct = std::clamp(shaped_offset, -1.0f, 1.0f);
-      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shaped_dc_correct;
+      //float shaped_offset = shaped - _shp_dc_avg;
+      //float shaped_dc_correct = std::clamp(shaped_offset, -1.0f, 1.0f);
+      //shaped_dc_correct = shaped;
+      //if(shaped > 0 && _shp_dc_avg > 0) shaped *= (1 - _shp_dc_avg);
+      //else if(shaped < 0 && _shp_dc_avg < 0) shaped *= (1 + _shp_dc_avg);
+      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shaped;
     }
 }
 
