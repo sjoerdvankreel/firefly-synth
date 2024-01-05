@@ -27,7 +27,7 @@ enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
 enum { type_off,
   type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh, 
-  type_shp_trig_sin, type_shp_trig_cos, type_shp_trig_sin_sin, type_shp_trig_sin_cos, type_shp_trig_cos_sin, type_shp_trig_cos_cos,
+  type_shp_trig_sin, type_shp_trig_cos, type_shp_trig_sin_sin, type_shp_trig_sin_cos, type_shp_trig_sin_cos_lin, type_shp_trig_sin_cos_log, type_shp_trig_cos_sin, type_shp_trig_cos_cos,
   type_shp_trig_sin_sin_sin, type_shp_trig_sin_sin_cos, type_shp_trig_sin_cos_sin, type_shp_trig_sin_cos_cos,
   type_shp_trig_cos_sin_sin, type_shp_trig_cos_sin_cos, type_shp_trig_cos_cos_sin, type_shp_trig_cos_cos_cos,
   type_shp_other_clip, type_shp_other_tanh, type_shp_other_fold, type_shp_other_cbrt_clip, type_shp_other_cbrt_tanh, 
@@ -65,6 +65,8 @@ type_items(bool global)
   result.emplace_back("{84BB1282-F7EF-4F0C-82FA-9F1A27ADA849}", "Shp.Cos");
   result.emplace_back("{AA230E02-3391-4B83-A0D2-8AC7955E0554}", "Shp.SinSin");
   result.emplace_back("{E07D7F55-6861-442D-B9A2-7FFFBCCBF6B2}", "Shp.SinCos");
+  result.emplace_back("{51A26A24-452D-42E7-A547-7FA74CEB9506}", "Shp.SinCosLin");
+  result.emplace_back("{FBAF87E7-A287-4DA9-953C-003EFB49F5BD}", "Shp.SinCosLog");
   result.emplace_back("{78DE21F3-7786-4B5D-95D4-971C658E0598}", "Shp.CosSin");
   result.emplace_back("{9E4277B3-8208-4BE2-A728-80C8E1BF4FBF}", "Shp.CosCos");
   result.emplace_back("{8B231C79-EA39-4BBD-9F88-D5A4B62977BB}", "Shp.SinSinSin");
@@ -276,7 +278,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu->indices.push_back(type_comb);
   type.gui.submenu->add_submenu("SVF", { type_svf_lpf, type_svf_hpf, type_svf_bpf, type_svf_bsf, type_svf_apf, type_svf_peq, type_svf_bll, type_svf_lsh, type_svf_hsh });
   type.gui.submenu->add_submenu("Shape.Trig", { 
-    type_shp_trig_sin, type_shp_trig_cos, type_shp_trig_sin_sin, type_shp_trig_sin_cos, type_shp_trig_cos_sin, type_shp_trig_cos_cos,
+    type_shp_trig_sin, type_shp_trig_cos, type_shp_trig_sin_sin, type_shp_trig_sin_cos, type_shp_trig_sin_cos_lin, type_shp_trig_sin_cos_log, type_shp_trig_cos_sin, type_shp_trig_cos_cos,
     type_shp_trig_sin_sin_sin, type_shp_trig_sin_sin_cos, type_shp_trig_sin_cos_sin, type_shp_trig_sin_cos_cos,
     type_shp_trig_cos_sin_sin, type_shp_trig_cos_sin_cos, type_shp_trig_cos_cos_sin, type_shp_trig_cos_cos_cos });
   type.gui.submenu->add_submenu("Shape.Other", { 
@@ -608,6 +610,8 @@ fx_engine::update_shape_dc(int type, int chb)
     case type_shp_trig_cos: shaper = shp_trig_cos; break;
     case type_shp_trig_sin_sin: shaper = shp_trig_sin_sin; break;
     case type_shp_trig_sin_cos: shaper = shp_trig_sin_cos; break;
+    case type_shp_trig_sin_cos_lin: shaper = shp_trig_sin_cos; break;
+    case type_shp_trig_sin_cos_log: shaper = shp_trig_sin_cos; break;
     case type_shp_trig_cos_sin: shaper = shp_trig_cos_sin; break;
     case type_shp_trig_cos_cos: shaper = shp_trig_cos_cos; break;
     case type_shp_trig_sin_sin_sin: shaper = shp_trig_sin_sin_sin; break;
@@ -707,6 +711,8 @@ fx_engine::process(plugin_block& block,
   case type_shp_trig_cos: process_shape(block, *modulation, shp_trig_cos); break;
   case type_shp_trig_sin_sin: process_shape(block, *modulation, shp_trig_sin_sin); break;
   case type_shp_trig_sin_cos: process_shape(block, *modulation, shp_trig_sin_cos); break;
+  case type_shp_trig_sin_cos_lin: process_shape(block, *modulation, shp_trig_sin_cos); break;
+  case type_shp_trig_sin_cos_log: process_shape(block, *modulation, shp_trig_sin_cos); break;
   case type_shp_trig_cos_sin: process_shape(block, *modulation, shp_trig_cos_sin); break;
   case type_shp_trig_cos_cos: process_shape(block, *modulation, shp_trig_cos_cos); break;
   case type_shp_trig_sin_sin_sin: process_shape(block, *modulation, shp_trig_sin_sin_sin); break;
@@ -746,15 +752,23 @@ fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulatio
       float exp = block.normalized_to_raw(this_module, param_shape_gain, exp_curve[f]);
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
       float shaped = shape(in, gain, exp, cheby_chb);
-      //float shaped_offset = shaped - _shp_dc_avg;
-      //float shaped_dc_correct = std::clamp(shaped_offset, -1.0f, 1.0f);
-      //shaped_dc_correct = shaped;
-      //if(shaped > 0 && _shp_dc_avg > 0) shaped *= (1 - _shp_dc_avg);
-      //else if(shaped < 0 && _shp_dc_avg < 0) shaped *= (1 + _shp_dc_avg);
-      float shaped_uni = bipolar_to_unipolar(shaped);
-      float offset_uni = bipolar_to_unipolar(_shp_dc_avg);
-      float shaped_dc_fix = std::pow(shaped_uni, std::log(1 - offset_uni) / std::log(0.5f));
-      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * unipolar_to_bipolar(shaped_dc_fix);
+
+      if(type == type_shp_trig_sin_cos_lin)
+      {
+        float shaped_offset = shaped - _shp_dc_avg;
+        float shaped_dc_correct = std::clamp(shaped_offset, -1.0f, 1.0f);
+        shaped_dc_correct = shaped;
+        if(shaped > 0 && _shp_dc_avg > 0) shaped *= (1 - _shp_dc_avg);
+        else if(shaped < 0 && _shp_dc_avg < 0) shaped *= (1 + _shp_dc_avg);
+      }
+      else if (type == type_shp_trig_sin_cos_log)
+      {
+        float shaped_uni = bipolar_to_unipolar(shaped);
+        float offset_uni = bipolar_to_unipolar(_shp_dc_avg);
+        float shaped_dc_fix = std::pow(shaped_uni, std::log(1 - offset_uni) / std::log(0.5f));
+        shaped = unipolar_to_bipolar(shaped_dc_fix);
+      }
+      block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shaped;
     }
 }
 
