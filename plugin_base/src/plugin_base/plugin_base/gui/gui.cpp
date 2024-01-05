@@ -113,20 +113,24 @@ std::vector<int>
 gui_vertical_distribution(int total_height, int font_height,
   std::vector<gui_vertical_section_size> const& section_sizes)
 {
-  std::vector<float> result;
-  int total_header_height = 0;
   float total_vsection_size = 0;
-  int header_height = module_header_height(font_height) + margin_module;
+  int total_module_fixed_height = 0;
+  int header_height = module_header_height(font_height);
+  std::vector<float> result;
+  std::vector<float> module_fixed_height(section_sizes.size(), 0.0f);
   for (int i = 0; i < section_sizes.size(); i++)
   {
     total_vsection_size += section_sizes[i].size_relative;
-    total_header_height += section_sizes[i].header? header_height: 0;
+    module_fixed_height[i] += margin_module;
+    module_fixed_height[i] += (section_sizes[i].size_relative - 1) * margin_section;
+    module_fixed_height[i] += section_sizes[i].header ? header_height + margin_module : 0;
+    total_module_fixed_height += module_fixed_height[i];
   }
-  int total_remaining_height = total_height - total_header_height;
+  int total_remaining_height = total_height - total_module_fixed_height;
   for (int i = 0; i < section_sizes.size(); i++)
   {
     float remaining_portion = section_sizes[i].size_relative / (float)total_vsection_size * total_remaining_height;
-    result.push_back((section_sizes[i].header ? header_height : 0) + remaining_portion);
+    result.push_back(module_fixed_height[i] + remaining_portion);
   }
   return vector_map(result, [](auto const& val) { return (int)(val * 100); });
 }
