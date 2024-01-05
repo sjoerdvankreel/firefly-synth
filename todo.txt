@@ -36,7 +36,7 @@ prettify the matrix section
 logify the shaper gain
 do all trig + clip/tan as waveshapers
 foldback + cheby shaper
-waveshaper autodc
+waveshaper autodc ==> better autodc using min/max/avg + scale not clip
 
 * fx
 * stvar - freq, res, gain, kbd
