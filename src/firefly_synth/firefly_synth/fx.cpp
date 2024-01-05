@@ -761,11 +761,12 @@ fx_engine::process_shape(plugin_block& block, cv_matrix_mixdown const& modulatio
         if(shaped > 0 && _shp_dc_avg > 0) shaped *= (1 - _shp_dc_avg);
         else if(shaped < 0 && _shp_dc_avg < 0) shaped *= (1 + _shp_dc_avg);
       }
-      else if (type == type_shp_trig_sin_cos_log)
+      else if (type == type_shp_trig_sin_cos_log || type == type_shp_trig_cos_sin)
       {
         float shaped_uni = bipolar_to_unipolar(shaped);
         float offset_uni = bipolar_to_unipolar(_shp_dc_avg);
-        float shaped_dc_fix = std::pow(shaped_uni, std::log(1 - offset_uni) / std::log(0.5f));
+        //float shaped_dc_fix = std::pow(shaped_uni, std::log(1 - offset_uni) / std::log(0.5f));
+        float shaped_dc_fix = std::pow(shaped_uni, std::log(offset_uni) / std::log(0.5f));
         shaped = unipolar_to_bipolar(shaped_dc_fix);
       }
       block.state.own_audio[0][0][c][f] = (1 - mix[f]) * in + mix[f] * shaped;

@@ -40,6 +40,7 @@ waveshaper autodc ==> better autodc using min/max/avg + scale not clip
 "insert route before/after" ==> enable it !
 still find a way to do insert fx here
 oversample the whole thing ?
+do hpf in waveshaper (dc fix)
 
 fix the comb size param
 * fx
