@@ -7,7 +7,9 @@
 
 #include <firefly_synth/trig.hpp>
 #include <firefly_synth/synth.hpp>
+#include <firefly_synth/waves.hpp>
 #include <firefly_synth/smooth_noise.hpp>
+
 #include <cmath>
 
 using namespace plugin_base;
@@ -25,6 +27,16 @@ enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_seed, param_steps, param_x, param_y };
 enum { 
+  type_wave_saw_off_off, type_wave_saw_off_lin, type_wave_saw_off_pow,
+  type_wave_saw_lin_off, type_wave_saw_lin_lin, type_wave_saw_lin_pow,
+  type_wave_saw_pow_off, type_wave_saw_pow_lin, type_wave_saw_pow_pow,
+  type_wave_sqr_off_off, type_wave_sqr_off_lin, type_wave_sqr_off_pow,
+  type_wave_sqr_lin_off, type_wave_sqr_lin_lin, type_wave_sqr_lin_pow,
+  type_wave_sqr_pow_off, type_wave_sqr_pow_lin, type_wave_sqr_pow_pow,
+  type_wave_sin_off_off, type_wave_sin_off_lin, type_wave_sin_off_pow,
+  type_wave_sin_lin_off, type_wave_sin_lin_lin, type_wave_sin_lin_pow,
+  type_wave_sin_pow_off, type_wave_sin_pow_lin, type_wave_sin_pow_pow,
+
   type_trig_sin, type_trig_cos, 
   type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
   type_trig_sin_sin_sin, type_trig_sin_sin_cos, type_trig_sin_cos_sin, type_trig_sin_cos_cos,
@@ -49,6 +61,7 @@ static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode ==
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
 
+/*
 static bool is_trig_log(int type) { return type_trig_log_sin <= type && type <= type_trig_log_cos_cos_cos; }
 static bool has_x(int type) { 
   return is_trig_log(type) || type == type_other_skew || 
@@ -56,11 +69,59 @@ static bool has_x(int type) {
 static bool has_y(int type) { 
   return is_trig_log(type) || type == type_other_skew || type == type_other_tri_log || type == type_other_saw_lin || 
   type == type_other_saw_log || type == type_other_pulse_lin || type == type_static_add || type == type_static_add_free || type == type_smooth_log; }
+*/
 
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_off, wave_skew_type_off), make_wave_name(wave_shape_type_saw, wave_skew_type_off, wave_skew_type_off));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_off, wave_skew_type_lin), make_wave_name(wave_shape_type_saw, wave_skew_type_off, wave_skew_type_lin));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_off, wave_skew_type_pow), make_wave_name(wave_shape_type_saw, wave_skew_type_off, wave_skew_type_pow));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_lin, wave_skew_type_off), make_wave_name(wave_shape_type_saw, wave_skew_type_lin, wave_skew_type_off));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_lin, wave_skew_type_lin), make_wave_name(wave_shape_type_saw, wave_skew_type_lin, wave_skew_type_lin));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_lin, wave_skew_type_pow), make_wave_name(wave_shape_type_saw, wave_skew_type_lin, wave_skew_type_pow));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_pow, wave_skew_type_off), make_wave_name(wave_shape_type_saw, wave_skew_type_pow, wave_skew_type_off));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_pow, wave_skew_type_lin), make_wave_name(wave_shape_type_saw, wave_skew_type_pow, wave_skew_type_lin));
+  result.emplace_back(make_wave_id(wave_shape_type_saw, wave_skew_type_pow, wave_skew_type_pow), make_wave_name(wave_shape_type_saw, wave_skew_type_pow, wave_skew_type_pow));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_off, wave_skew_type_off), make_wave_name(wave_shape_type_sqr, wave_skew_type_off, wave_skew_type_off));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_off, wave_skew_type_lin), make_wave_name(wave_shape_type_sqr, wave_skew_type_off, wave_skew_type_lin));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_off, wave_skew_type_pow), make_wave_name(wave_shape_type_sqr, wave_skew_type_off, wave_skew_type_pow));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_lin, wave_skew_type_off), make_wave_name(wave_shape_type_sqr, wave_skew_type_lin, wave_skew_type_off));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_lin, wave_skew_type_lin), make_wave_name(wave_shape_type_sqr, wave_skew_type_lin, wave_skew_type_lin));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_lin, wave_skew_type_pow), make_wave_name(wave_shape_type_sqr, wave_skew_type_lin, wave_skew_type_pow));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_pow, wave_skew_type_off), make_wave_name(wave_shape_type_sqr, wave_skew_type_pow, wave_skew_type_off));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_pow, wave_skew_type_lin), make_wave_name(wave_shape_type_sqr, wave_skew_type_pow, wave_skew_type_lin));
+  result.emplace_back(make_wave_id(wave_shape_type_sqr, wave_skew_type_pow, wave_skew_type_pow), make_wave_name(wave_shape_type_sqr, wave_skew_type_pow, wave_skew_type_pow));
+
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Saw.XOff/YOff");
+  result.emplace_back("{0AC1D2FB-B823-4887-A2C6-8FE91FF863D3}", "Saw.XOff/YLin");
+  result.emplace_back("{84380649-C00C-4CBF-9C3D-14203EEB7CFC}", "Saw.XOff/YPow");
+  result.emplace_back("{FD39E7C4-6F16-45A5-8ECE-D51388F486F9}", "Saw.XLin/YOff");
+  result.emplace_back("{83E91E30-F8BD-4E4D-A377-5034914FEA3A}", "Saw.XLin/YLin");
+  result.emplace_back("{114EAA02-8150-4601-8346-4B6154F43E7E}", "Saw.XLin/YPow");
+  result.emplace_back("{8E9B29B2-6D74-4C48-84FD-81B9CC1A8D74}", "Saw.XPow/YOff");
+  result.emplace_back("{2403AD07-DEBA-4E75-A248-C4B92D6A564B}", "Saw.XPow/YLin");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Saw.XPow/YPow");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XOff/YOff");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XOff/YLin");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XOff/YPow");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XLin/YOff");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XLin/YLin");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XLin/YPow");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XPow/YOff");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XPow/YLin");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sqr.XPow/YPow");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XOff/YOff");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XOff/YLin");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XOff/YPow");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XLin/YOff");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XLin/YLin");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XLin/YPow");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XPow/YOff");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XPow/YLin");
+  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin.XPow/YPow");
+
   result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
   result.emplace_back("{1EAC4007-3122-4064-9B97-AFF28C902400}", "Cos");
   result.emplace_back("{7A510580-5E85-4B49-A4D2-54269B50FF62}", "SinSin");
@@ -317,37 +378,43 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 1 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  (void)smooth;
+  //smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& phase = result.params.emplace_back(make_param(
     make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", "Ph", true, true, param_phase, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  (void)phase;
+  //phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", "Sd", true, true, param_seed, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  (void)seed;
+  //seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "St", true, true, param_steps, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 99, 4, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, gui_label_contents::value,
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  (void)steps;
+  //steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, true, param_x, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 5 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
+  (void)x;
+  //x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, true, param_y, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 6 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
+  (void)y;
+  //y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
 
   return result;
 }
