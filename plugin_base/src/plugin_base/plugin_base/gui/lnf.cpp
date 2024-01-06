@@ -389,7 +389,11 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float path_size = 3;
   float top_margin = 1;
   int conic_count = 256;
-  float size = std::min(s.getWidth(), s.getHeight()) - path_size - padding;
+
+  // sizing to X messes with long labels, better to just clip
+  //float size = std::min(s.getWidth(), s.getHeight()) - path_size - padding;
+  float size = s.getHeight() - path_size - padding;
+
   float left = (s.getWidth() - size) / 2 + padding / 2;
   float top = (s.getHeight() - size) / 2 - padding / 2 + top_margin;
 
