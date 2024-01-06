@@ -38,6 +38,18 @@ wave_make_name_skew(int skew)
 }
 
 static std::string
+wave_make_header_shape(int shape)
+{
+  switch (shape)
+  {
+  case wave_shape_type_saw: return "Saw";
+  case wave_shape_type_sqr: return "Square";
+  case wave_shape_type_sin: return "Sine";
+  default: assert(false); return {};
+  }
+}
+
+static std::string
 wave_make_name_shape(int shape)
 {
   switch (shape)
@@ -49,23 +61,16 @@ wave_make_name_shape(int shape)
   }
 }
 
-std::string
-wave_make_header_x(int skew_x)
+std::string 
+wave_make_header_shape_x(int shape, int skew_x)
 {
-  auto header_x = wave_make_header_skew(skew_x);
-  return header_x + "X";
+  auto shape_header = wave_make_header_shape(shape);
+  auto x_header = wave_make_header_skew(skew_x);
+  return shape_header + "." + x_header + "X";
 }
 
 std::string 
-wave_make_header_xy(int skew_x, int skew_y)
-{
-  auto header_x = wave_make_header_skew(skew_x);
-  auto header_y = wave_make_header_skew(skew_y);
-  return header_x + "X/" + header_y + "Y"; 
-}
-
-std::string 
-wave_make_name(int skew_x, int skew_y, int shape)
+wave_make_name(int shape, int skew_x, int skew_y)
 {
   auto name_x = wave_make_name_skew(skew_x);
   auto name_y = wave_make_name_skew(skew_y);
@@ -100,8 +105,8 @@ multi_menu
 make_wave_multi_menu()
 {
   return make_multi_menu(
-    wave_skew_type_tags(), wave_skew_type_tags(), wave_shape_type_tags(), 
-    wave_make_header_x, wave_make_header_xy, wave_make_name);
+    wave_shape_type_tags(), wave_skew_type_tags(), wave_skew_type_tags(),
+    wave_make_header_shape, wave_make_header_shape_x, wave_make_name);
 }
 
 }

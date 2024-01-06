@@ -19,9 +19,6 @@ plugin_base::multi_menu make_wave_multi_menu();
 std::vector<plugin_base::topo_tag> wave_skew_type_tags();
 std::vector<plugin_base::topo_tag> wave_shape_type_tags();
 
-std::string wave_make_header(int skew_x, int skew_y);
-std::string wave_make_name(int skew_x, int skew_y, int shape);
-
 enum { wave_shape_type_saw, wave_shape_type_sqr, wave_shape_type_sin };
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };
 
@@ -38,8 +35,8 @@ inline float wave_shape_saw(float in) { return in; }
 inline float wave_shape_sqr(float in) { return in < 0.5f? 0.0f: 1.0f; }
 inline float wave_shape_sin(float in) { return plugin_base::bipolar_to_unipolar(std::sin(in * 2 * pi32)); }
 
-template <class SkewX, class SkewY, class Shape>
-inline float wave_calc_unipolar(float in, float x, float y, SkewX skew_x, SkewY skew_y, Shape shape)
+template <class Shape, class SkewX, class SkewY>
+inline float wave_calc_unipolar(float in, float x, float y, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   using plugin_base::check_unipolar;
   check_unipolar(in);
