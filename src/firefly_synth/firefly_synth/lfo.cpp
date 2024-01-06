@@ -165,7 +165,8 @@ public module_engine {
   void update_block_params(plugin_block const* block);
 
   float calc_smooth(float phase, int seed, int steps);
-  float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
+  float calc_static(float phase, int seed, int steps);
+  //float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
   template <lfo_group Group, class Calc>
   void process_loop(plugin_block& block, Calc calc);
@@ -512,6 +513,46 @@ lfo_engine::calc_smooth(float phase, int seed, int steps)
   return result;
 }
 
+float
+lfo_engine::calc_static(float phase, int seed, int steps)
+{
+  float result = _static_level;
+  _static_step_pos++;
+  _noise_total_pos++;
+  if (_static_step_pos >= _static_step_samples)
+  {
+    _static_level = fast_rand_next(_static_state);
+    _static_step_pos = 0;
+  }
+  if(_noise_total_pos >= _noise_total_samples)
+    reset_noise(seed, steps);
+  return result;
+#if 0
+  if (!one_shot && _noise_total_pos >= _noise_total_samples)
+  {
+    _noise_total_pos = 0;
+    if (!free) reset_noise(seed, steps);
+  }
+  else if (_static_step_pos >= _static_step_samples)
+  {
+    if (add)
+    {
+      _static_level = _static_level + fast_rand_next(_static_state) * unipolar_to_bipolar(y) * _static_dir;
+      if (_static_level < 0 || _static_level > 1)
+      {
+        _static_dir *= -1;
+        _static_level -= 2 * (_static_level - (int)_static_level);
+      }
+    }
+    else
+      _static_level = fast_rand_next(_static_state);
+    _static_step_pos = 0;
+  }
+  return result;
+#endif
+}
+
+#if 0
 float 
 lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps)
 {
@@ -539,6 +580,8 @@ lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, i
   }
   return result;
 }
+
+#endif
 
 void
 lfo_engine::reset_noise(int seed, int steps)
@@ -764,8 +807,11 @@ lfo_engine::process_phased(plugin_block& block)
   case wave_shape_type_cos_cos_sin: process_phased_shape(block, wave_shape_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_phased_shape(block, wave_shape_cos_cos_cos); break;
   case wave_shape_type_smooth: process_phased_shape(block, [this, seed, steps](float in) { 
-    return wave_shape_smooth(in, [this, seed, steps](float in) { 
+    return wave_shape_custom(in, [this, seed, steps](float in) {
       return calc_smooth(in, seed, steps); }); }); break;
+  case wave_shape_type_static: process_phased_shape(block, [this, seed, steps](float in) {
+    return wave_shape_custom(in, [this, seed, steps](float in) {
+      return calc_static(in, seed, steps); }); }); break;
   default: assert(false); break;
   }
 }
