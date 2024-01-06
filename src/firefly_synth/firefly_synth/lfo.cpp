@@ -257,7 +257,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 5, 11 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 5, 12 } })));
   
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_graph_engine;
@@ -292,7 +292,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 4, 4, 4, 4, 3, 3 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 5, 5, 5, 5, 4, 4 }))));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_items(), "Sin"),
