@@ -315,7 +315,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
-    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_menu.items, "Sin.PlnX/PlnY"),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_menu.items, "Sin.OffX/OffY"),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = type_menu.submenu;
@@ -599,24 +599,76 @@ lfo_engine::process(plugin_block& block)
   if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_saw);
   if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sqr);
   if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_scu, wave_shape_saw);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_scu, wave_shape_sqr);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_scu, wave_shape_sin);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_scb, wave_shape_saw);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_scb, wave_shape_sqr);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_scb, wave_shape_sin);
   if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_saw);
   if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_sqr);
   if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_sin);
   if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_saw);
   if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_sqr);
   if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_sin);
+
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_off, wave_shape_saw);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_off, wave_shape_sqr);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_scu, wave_shape_saw);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_scu, wave_shape_sqr);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_scu, wave_shape_sin);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_scb, wave_shape_saw);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_scb, wave_shape_sqr);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_scb, wave_shape_sin);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_lin, wave_shape_saw);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_lin, wave_shape_sqr);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_lin, wave_shape_sin);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_exp, wave_shape_saw);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_exp, wave_shape_sqr);
+  if (sx == wave_skew_type_scu && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_exp, wave_shape_sin);
+
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_off, wave_shape_saw);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_off, wave_shape_sqr);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_scu, wave_shape_saw);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_scu, wave_shape_sqr);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_scu, wave_shape_sin);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_scb, wave_shape_saw);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_scb, wave_shape_sqr);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_scb, wave_shape_sin);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_lin, wave_shape_saw);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_lin, wave_shape_sqr);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_lin, wave_shape_sin);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_exp, wave_shape_saw);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_exp, wave_shape_sqr);
+  if (sx == wave_skew_type_scb && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_exp, wave_shape_sin);
+
   if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_saw);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_sqr);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_scu, wave_shape_saw);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_scu, wave_shape_sqr);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_scu, wave_shape_sin);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_scb, wave_shape_saw);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_scb, wave_shape_sqr);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_scb, wave_shape_sin);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_saw);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_sqr);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_sin);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_saw);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_sqr);
   if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_sin);
+
   if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_saw);
   if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_sqr);
   if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_scu, wave_shape_saw);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_scu, wave_shape_sqr);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_scu, wave_shape_sin);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_scb, wave_shape_saw);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_scb, wave_shape_sqr);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_scb, wave_shape_sin);
   if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_saw);
   if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_sqr);
   if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_sin);
@@ -692,8 +744,8 @@ void lfo_engine::process_phased(plugin_block& block, SkewX skew_x, SkewY skew_y,
   int sy = type_item.index2;
   float x = block_auto[param_x][0].real();
   float y = block_auto[param_y][0].real();
-  float px = sx == wave_skew_type_off ? 0 : sx == wave_skew_type_lin ? x : _log_skew_x_exp;
-  float py = sy == wave_skew_type_off ? 0 : sy == wave_skew_type_lin ? y : _log_skew_y_exp;
+  float px = sx == wave_skew_type_off ? 0 : sx == wave_skew_type_exp ? _log_skew_x_exp: x;
+  float py = sy == wave_skew_type_off ? 0 : sy == wave_skew_type_exp ? _log_skew_y_exp: y;
   process_loop<lfo_group::phased>(block, [px, py, skew_x, skew_y, shape](float in) { 
     return wave_calc_unipolar(in, px, py, skew_x, skew_y, shape); });
 }
