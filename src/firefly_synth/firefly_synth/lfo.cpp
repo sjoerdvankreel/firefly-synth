@@ -169,8 +169,14 @@ public module_engine {
 
   template <lfo_group Group, class Calc>
   void process_loop(plugin_block& block, Calc calc);
+
+  void process_phased(plugin_block& block);
+  template <class SkewX>
+  void process_phased_x(plugin_block& block, SkewX skew_x);
+  template <class SkewX, class SkewY>
+  void process_phased_xy(plugin_block& block, SkewX skew_x, SkewY skew_y);
   template <class SkewX, class SkewY, class Shape>
-  void process_phased(plugin_block& block, SkewX skew_x, SkewY skew_y, Shape shape);
+  void process_phased_xys(plugin_block& block, SkewX skew_x, SkewY skew_y, Shape shape);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -591,11 +597,9 @@ lfo_engine::process(plugin_block& block)
   }
 
   if(_global) update_block_params(&block);
-  int type = block_auto[param_type][0].step();
-  int sx = _type_items[type].index1;
-  int sy = _type_items[type].index2;
-  int shp = _type_items[type].index3;
+  process_phased(block);
 
+#if 0
   if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_saw);
   if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sqr);
   if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sin);
@@ -678,7 +682,7 @@ lfo_engine::process(plugin_block& block)
 
   switch (type)
   {
-#if 0
+
   case type_trig_sin: process_loop<lfo_group::phased>(block, calc_trig_sin); break;
   case type_trig_cos: process_loop<lfo_group::phased>(block, calc_trig_cos); break;
   case type_trig_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_sin); break;
@@ -727,15 +731,54 @@ lfo_engine::process(plugin_block& block)
   case type_smooth_log:
     process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
       return skew_log(calc_smooth(seed, steps), y_exp); }); break;
-#endif
   case 0: break;
   default: break;
   }
+#endif
 }
 
+void 
+lfo_engine::process_phased(plugin_block& block)
+{
+  switch (_type_items[block.state.own_block_automation[param_type][0].step()].index1)
+  {
+  case wave_skew_type_off: process_phased_x(block, wave_skew_off); break;
+  case wave_skew_type_scu: process_phased_x(block, wave_skew_scu); break;
+  case wave_skew_type_scb: process_phased_x(block, wave_skew_scb); break;
+  case wave_skew_type_lin: process_phased_x(block, wave_skew_lin); break;
+  case wave_skew_type_exp: process_phased_x(block, wave_skew_exp); break;
+  default: assert(false); break;
+  }
+}
 
-template <class SkewX, class SkewY, class Shape>
-void lfo_engine::process_phased(plugin_block& block, SkewX skew_x, SkewY skew_y, Shape shape)
+template <class SkewX> void 
+lfo_engine::process_phased_x(plugin_block& block, SkewX skew_x)
+{
+  switch (_type_items[block.state.own_block_automation[param_type][0].step()].index2)
+  {
+  case wave_skew_type_off: process_phased_xy(block, skew_x, wave_skew_off); break;
+  case wave_skew_type_scu: process_phased_xy(block, skew_x, wave_skew_scu); break;
+  case wave_skew_type_scb: process_phased_xy(block, skew_x, wave_skew_scb); break;
+  case wave_skew_type_lin: process_phased_xy(block, skew_x, wave_skew_lin); break;
+  case wave_skew_type_exp: process_phased_xy(block, skew_x, wave_skew_exp); break;
+  default: assert(false); break;
+  }
+}
+
+template <class SkewX, class SkewY> void 
+lfo_engine::process_phased_xy(plugin_block& block, SkewX skew_x, SkewY skew_y)
+{
+  switch (_type_items[block.state.own_block_automation[param_type][0].step()].index3)
+  {
+  case wave_shape_type_saw: process_phased_xys(block, skew_x, skew_y, wave_shape_saw); break;
+  case wave_shape_type_sqr: process_phased_xys(block, skew_x, skew_y, wave_shape_sqr); break;
+  case wave_shape_type_sin: process_phased_xys(block, skew_x, skew_y, wave_shape_sin); break;
+  default: assert(false); break;
+  }
+}
+
+template <class SkewX, class SkewY, class Shape> void 
+lfo_engine::process_phased_xys(plugin_block& block, SkewX skew_x, SkewY skew_y, Shape shape)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
