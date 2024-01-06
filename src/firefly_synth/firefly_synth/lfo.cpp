@@ -743,10 +743,11 @@ lfo_engine::process_phased(plugin_block& block)
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index1)
   {
   case wave_skew_type_off: process_phased_x(block, wave_skew_off); break;
+  case wave_skew_type_lin: process_phased_x(block, wave_skew_lin); break;
   case wave_skew_type_scu: process_phased_x(block, wave_skew_scu); break;
   case wave_skew_type_scb: process_phased_x(block, wave_skew_scb); break;
-  case wave_skew_type_lin: process_phased_x(block, wave_skew_lin); break;
-  case wave_skew_type_exp: process_phased_x(block, wave_skew_exp); break;
+  case wave_skew_type_xpu: process_phased_x(block, wave_skew_xpu); break;
+  case wave_skew_type_xpb: process_phased_x(block, wave_skew_xpb); break;
   default: assert(false); break;
   }
 }
@@ -757,10 +758,11 @@ lfo_engine::process_phased_x(plugin_block& block, SkewX skew_x)
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index2)
   {
   case wave_skew_type_off: process_phased_xy(block, skew_x, wave_skew_off); break;
+  case wave_skew_type_lin: process_phased_xy(block, skew_x, wave_skew_lin); break;
   case wave_skew_type_scu: process_phased_xy(block, skew_x, wave_skew_scu); break;
   case wave_skew_type_scb: process_phased_xy(block, skew_x, wave_skew_scb); break;
-  case wave_skew_type_lin: process_phased_xy(block, skew_x, wave_skew_lin); break;
-  case wave_skew_type_exp: process_phased_xy(block, skew_x, wave_skew_exp); break;
+  case wave_skew_type_xpu: process_phased_xy(block, skew_x, wave_skew_xpu); break;
+  case wave_skew_type_xpb: process_phased_xy(block, skew_x, wave_skew_xpb); break;
   default: assert(false); break;
   }
 }
@@ -787,10 +789,10 @@ lfo_engine::process_phased_xys(plugin_block& block, SkewX skew_x, SkewY skew_y, 
   int sy = type_item.index2;
   float x = block_auto[param_x][0].real();
   float y = block_auto[param_y][0].real();
-  float px = sx == wave_skew_type_off ? 0 : sx == wave_skew_type_exp ? _log_skew_x_exp: x;
-  float py = sy == wave_skew_type_off ? 0 : sy == wave_skew_type_exp ? _log_skew_y_exp: y;
-  process_loop<lfo_group::phased>(block, [px, py, skew_x, skew_y, shape](float in) { 
-    return wave_calc_unipolar(in, px, py, skew_x, skew_y, shape); });
+  float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
+  float py = wave_skew_is_exp(sy) ? _log_skew_y_exp : y;
+  auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_unipolar(in, px, py, skew_x, skew_y, shape); };
+  process_loop<lfo_group::phased>(block, processor);
 }
 
 template <lfo_group Group, class Calc>

@@ -13,10 +13,11 @@ wave_make_header_skew(int skew)
   switch (skew)
   {
   case wave_skew_type_off: return "Off";
+  case wave_skew_type_lin: return "Lin";
   case wave_skew_type_scu: return "Scu";
   case wave_skew_type_scb: return "Scb";
-  case wave_skew_type_lin: return "Lin";
-  case wave_skew_type_exp: return "Exp";
+  case wave_skew_type_xpu: return "Xpu";
+  case wave_skew_type_xpb: return "Xpb";
   default: assert(false); return {};
   }
 }
@@ -27,10 +28,11 @@ wave_make_name_skew(int skew)
   switch (skew)
   {
   case wave_skew_type_off: return "Off";
+  case wave_skew_type_lin: return "Lin";
   case wave_skew_type_scu: return "Scu";
   case wave_skew_type_scb: return "Scb";
-  case wave_skew_type_lin: return "Lin";
-  case wave_skew_type_exp: return "Exp";
+  case wave_skew_type_xpu: return "Xpu";
+  case wave_skew_type_xpb: return "Xpb";
   default: assert(false); return {};
   }
 }
@@ -69,10 +71,11 @@ wave_skew_type_tags()
 {
   std::vector<topo_tag> result;
   result.push_back(make_topo_tag("{B15C7C6E-B1A4-49D3-85EF-12A7DC9EAA83}", wave_make_name_skew(wave_skew_type_off)));
+  result.push_back(make_topo_tag("{431D0E01-096B-4229-9ACE-25EFF7F2D4F0}", wave_make_name_skew(wave_skew_type_lin)));
   result.push_back(make_topo_tag("{106A1510-3B99-4CC8-88D4-6D82C117EC33}", wave_make_name_skew(wave_skew_type_scu)));
   result.push_back(make_topo_tag("{905936B8-3083-4293-A549-89F3979E02B7}", wave_make_name_skew(wave_skew_type_scb)));
-  result.push_back(make_topo_tag("{431D0E01-096B-4229-9ACE-25EFF7F2D4F0}", wave_make_name_skew(wave_skew_type_lin)));
-  result.push_back(make_topo_tag("{606B62CB-1C17-42CA-931B-61FA4C22A9F0}", wave_make_name_skew(wave_skew_type_exp)));
+  result.push_back(make_topo_tag("{606B62CB-1C17-42CA-931B-61FA4C22A9F0}", wave_make_name_skew(wave_skew_type_xpu)));
+  result.push_back(make_topo_tag("{66CE54E3-84A7-4279-BF93-F0367266B389}", wave_make_name_skew(wave_skew_type_xpb)));
   return result;
 }
 
