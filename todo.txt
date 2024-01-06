@@ -42,7 +42,7 @@ still find a way to do insert fx here
 oversample the whole thing ?
 do hpf in waveshaper (dc fix)
 do the param fuzz test
-figure out if we have a decent option set that covers both lfos and shapers
+figure out if we have a decent option set that covers both lfos and shapers (e.g, can we emulate foldback)
 
 fix the comb size param
 * fx
