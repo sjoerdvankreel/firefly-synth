@@ -43,7 +43,7 @@ enum {
   type_smooth, type_smooth_log };
 #endif
 
-static bool is_noise(int type) { return false; }
+//static bool is_noise(int type) { return false; }
 
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
@@ -576,7 +576,7 @@ lfo_engine::reset(plugin_block const* block)
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
   _phase = _global? 0: block_auto[param_phase][0].real();
-  if (is_noise(block_auto[param_type][0].step())) _phase = 0;  
+  //if (is_noise(block_auto[param_type][0].step())) _phase = 0;  
   reset_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
 }
 
