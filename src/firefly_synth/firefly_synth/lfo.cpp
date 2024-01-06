@@ -785,8 +785,8 @@ lfo_engine::process_phased_shape_xy(plugin_block& block, Shape shape, SkewX skew
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
   auto const& type_item = _type_items[type];
-  int sx = type_item.index1;
-  int sy = type_item.index2;
+  int sx = type_item.index2;
+  int sy = type_item.index3;
   float x = block_auto[param_x][0].real();
   float y = block_auto[param_y][0].real();
   float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
