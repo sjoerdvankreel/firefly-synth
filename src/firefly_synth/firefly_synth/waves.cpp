@@ -46,6 +46,19 @@ wave_make_header_shape(int shape)
   case wave_shape_type_sqr: return "Sqr";
   case wave_shape_type_tri: return "Tri";
   case wave_shape_type_sin: return "Sin";
+  case wave_shape_type_cos: return "Cos";
+  case wave_shape_type_sin_sin: return "SinSin";
+  case wave_shape_type_sin_cos: return "SinCos";
+  case wave_shape_type_cos_sin: return "CosSin";
+  case wave_shape_type_cos_cos: return "CosCos";
+  case wave_shape_type_sin_sin_sin: return "SinSinSin";
+  case wave_shape_type_sin_sin_cos: return "SinSinCos";
+  case wave_shape_type_sin_cos_sin: return "SinCosSin";
+  case wave_shape_type_sin_cos_cos: return "SinCosCos";
+  case wave_shape_type_cos_sin_sin: return "CosSinSin";
+  case wave_shape_type_cos_sin_cos: return "CosSinCos";
+  case wave_shape_type_cos_cos_sin: return "CosCosSin";
+  case wave_shape_type_cos_cos_cos: return "CosCosCos";
   default: assert(false); return {};
   }
 }
@@ -59,6 +72,19 @@ wave_make_name_shape(int shape)
   case wave_shape_type_sqr: return "Sqr";
   case wave_shape_type_tri: return "Tri";
   case wave_shape_type_sin: return "Sin";
+  case wave_shape_type_cos: return "Cos";
+  case wave_shape_type_sin_sin: return "SnSn";
+  case wave_shape_type_sin_cos: return "SnCs";
+  case wave_shape_type_cos_sin: return "CsSn";
+  case wave_shape_type_cos_cos: return "CsCs";
+  case wave_shape_type_sin_sin_sin: return "SSS";
+  case wave_shape_type_sin_sin_cos: return "SSC";
+  case wave_shape_type_sin_cos_sin: return "SCS";
+  case wave_shape_type_sin_cos_cos: return "SCC";
+  case wave_shape_type_cos_sin_sin: return "CSS";
+  case wave_shape_type_cos_sin_cos: return "CSC";
+  case wave_shape_type_cos_cos_sin: return "CCS";
+  case wave_shape_type_cos_cos_cos: return "CCC";
   default: assert(false); return {};
   }
 }
@@ -101,6 +127,19 @@ wave_shape_type_tags()
   result.push_back(make_topo_tag("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_sqr)));
   result.push_back(make_topo_tag("{41D6859E-3A16-432A-8851-D4E5D3F39662}", wave_make_name_shape(wave_shape_type_tri)));
   result.push_back(make_topo_tag("{4A873C32-8B89-47ED-8C93-44FE0B6A7DCC}", wave_make_name_shape(wave_shape_type_sin)));
+  result.push_back(make_topo_tag("{102A7369-1994-41B1-9E2E-EC96AB60162E}", wave_make_name_shape(wave_shape_type_cos)));
+  result.push_back(make_topo_tag("{B6B07567-00C8-4076-B60F-D2AC10CE935A}", wave_make_name_shape(wave_shape_type_sin_sin)));
+  result.push_back(make_topo_tag("{B1305EE8-57EF-4BC6-8F3A-7A8BBD2359F2}", wave_make_name_shape(wave_shape_type_sin_cos)));
+  result.push_back(make_topo_tag("{FA227C0D-C604-45B3-B5DF-0E6C46FD9C2F}", wave_make_name_shape(wave_shape_type_cos_sin)));
+  result.push_back(make_topo_tag("{37D39A3C-2058-4DC6-A9AE-DFBB423EB0D2}", wave_make_name_shape(wave_shape_type_cos_cos)));
+  result.push_back(make_topo_tag("{CE36CD8E-5D1F-40F0-85E3-5DAD99AFC53E}", wave_make_name_shape(wave_shape_type_sin_sin_sin)));
+  result.push_back(make_topo_tag("{D921DA52-4D30-4AB7-95F3-CAA65C4F83AA}", wave_make_name_shape(wave_shape_type_sin_sin_cos)));
+  result.push_back(make_topo_tag("{C8D7BA33-6458-4972-8C31-D9BDAE0A3A54}", wave_make_name_shape(wave_shape_type_sin_cos_sin)));
+  result.push_back(make_topo_tag("{F67FB33F-CEDF-4F43-AD23-356775EECED2}", wave_make_name_shape(wave_shape_type_sin_cos_cos)));
+  result.push_back(make_topo_tag("{84E3B508-2AAA-4EBA-AD8C-B5AD1A055342}", wave_make_name_shape(wave_shape_type_cos_sin_sin)));
+  result.push_back(make_topo_tag("{B191D364-1951-449A-ABC7-09AEE9DB9FC4}", wave_make_name_shape(wave_shape_type_cos_sin_cos)));
+  result.push_back(make_topo_tag("{094482D1-5BAC-4F70-80F3-CA3924DDFBE6}", wave_make_name_shape(wave_shape_type_cos_cos_sin)));
+  result.push_back(make_topo_tag("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos)));
   return result;
 }
 

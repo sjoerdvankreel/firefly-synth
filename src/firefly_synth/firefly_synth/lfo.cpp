@@ -746,6 +746,19 @@ lfo_engine::process_phased(plugin_block& block)
   case wave_shape_type_sqr: process_phased_shape(block, wave_shape_sqr); break;
   case wave_shape_type_tri: process_phased_shape(block, wave_shape_tri); break;
   case wave_shape_type_sin: process_phased_shape(block, wave_shape_sin); break;
+  case wave_shape_type_cos: process_phased_shape(block, wave_shape_cos); break;
+  case wave_shape_type_sin_sin: process_phased_shape(block, wave_shape_sin_sin); break;
+  case wave_shape_type_sin_cos: process_phased_shape(block, wave_shape_sin_cos); break;
+  case wave_shape_type_cos_sin: process_phased_shape(block, wave_shape_cos_sin); break;
+  case wave_shape_type_cos_cos: process_phased_shape(block, wave_shape_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_phased_shape(block, wave_shape_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_phased_shape(block, wave_shape_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_phased_shape(block, wave_shape_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_phased_shape(block, wave_shape_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_phased_shape(block, wave_shape_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_phased_shape(block, wave_shape_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_phased_shape(block, wave_shape_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_phased_shape(block, wave_shape_cos_cos_cos); break;
   default: assert(false); break;
   }
 }
