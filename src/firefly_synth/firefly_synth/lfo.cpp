@@ -321,7 +321,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
-    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_menu.items, "Sin.OffX/OffY"),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_menu.items, "Sin.OfX/OfY"),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = type_menu.submenu;

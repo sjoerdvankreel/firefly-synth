@@ -13,11 +13,11 @@ wave_make_header_skew(int skew)
   switch (skew)
   {
   case wave_skew_type_off: return "Off";
-  case wave_skew_type_lin: return "Lin";
-  case wave_skew_type_scu: return "Scu";
-  case wave_skew_type_scb: return "Scb";
-  case wave_skew_type_xpu: return "Xpu";
-  case wave_skew_type_xpb: return "Xpb";
+  case wave_skew_type_lin: return "Linear";
+  case wave_skew_type_scu: return "ScaleUni";
+  case wave_skew_type_scb: return "ScaleBi";
+  case wave_skew_type_xpu: return "ExpUni";
+  case wave_skew_type_xpb: return "ExpBi";
   default: assert(false); return {};
   }
 }
@@ -27,12 +27,12 @@ wave_make_name_skew(int skew)
 {
   switch (skew)
   {
-  case wave_skew_type_off: return "Off";
-  case wave_skew_type_lin: return "Lin";
-  case wave_skew_type_scu: return "Scu";
-  case wave_skew_type_scb: return "Scb";
-  case wave_skew_type_xpu: return "Xpu";
-  case wave_skew_type_xpb: return "Xpb";
+  case wave_skew_type_off: return "Of";
+  case wave_skew_type_lin: return "Ln";
+  case wave_skew_type_scu: return "Su";
+  case wave_skew_type_scb: return "Sb";
+  case wave_skew_type_xpu: return "Xu";
+  case wave_skew_type_xpb: return "Xb";
   default: assert(false); return {};
   }
 }
@@ -49,8 +49,15 @@ wave_make_name_shape(int shape)
   }
 }
 
+std::string
+wave_make_header_x(int skew_x)
+{
+  auto header_x = wave_make_header_skew(skew_x);
+  return header_x + "X";
+}
+
 std::string 
-wave_make_header(int skew_x, int skew_y)
+wave_make_header_xy(int skew_x, int skew_y)
 {
   auto header_x = wave_make_header_skew(skew_x);
   auto header_y = wave_make_header_skew(skew_y);
@@ -93,10 +100,8 @@ multi_menu
 make_wave_multi_menu()
 {
   return make_multi_menu(
-    wave_skew_type_tags(), 
-    wave_skew_type_tags(), 
-    wave_shape_type_tags(), 
-    wave_make_header, wave_make_name);
+    wave_skew_type_tags(), wave_skew_type_tags(), wave_shape_type_tags(), 
+    wave_make_header_x, wave_make_header_xy, wave_make_name);
 }
 
 }
