@@ -59,6 +59,7 @@ wave_make_header_shape(int shape)
   case wave_shape_type_cos_sin_cos: return "CosSinCos";
   case wave_shape_type_cos_cos_sin: return "CosCosSin";
   case wave_shape_type_cos_cos_cos: return "CosCosCos";
+  case wave_shape_type_smooth: return "Smooth";
   default: assert(false); return {};
   }
 }
@@ -85,6 +86,7 @@ wave_make_name_shape(int shape)
   case wave_shape_type_cos_sin_cos: return "CSC";
   case wave_shape_type_cos_cos_sin: return "CCS";
   case wave_shape_type_cos_cos_cos: return "CCC";
+  case wave_shape_type_smooth: return "Smt";
   default: assert(false); return {};
   }
 }
@@ -140,6 +142,7 @@ wave_shape_type_tags()
   result.push_back(make_topo_tag("{B191D364-1951-449A-ABC7-09AEE9DB9FC4}", wave_make_name_shape(wave_shape_type_cos_sin_cos)));
   result.push_back(make_topo_tag("{094482D1-5BAC-4F70-80F3-CA3924DDFBE6}", wave_make_name_shape(wave_shape_type_cos_cos_sin)));
   result.push_back(make_topo_tag("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos)));
+  result.push_back(make_topo_tag("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_smooth)));
   return result;
 }
 

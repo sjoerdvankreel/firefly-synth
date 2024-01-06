@@ -28,7 +28,8 @@ enum {
   wave_shape_type_sin_sin_sin, wave_shape_type_sin_sin_cos,
   wave_shape_type_sin_cos_sin, wave_shape_type_sin_cos_cos,
   wave_shape_type_cos_sin_sin, wave_shape_type_cos_sin_cos,
-  wave_shape_type_cos_cos_sin, wave_shape_type_cos_cos_cos };
+  wave_shape_type_cos_cos_sin, wave_shape_type_cos_cos_cos,
+  wave_shape_type_smooth };
 
 inline bool wave_skew_is_exp(int skew) { return skew == wave_skew_type_xpu || skew == wave_skew_type_xpb; }
 
@@ -56,6 +57,7 @@ inline float wave_shape_cos_sin_sin(float in) { return bipolar_to_unipolar(std::
 inline float wave_shape_cos_sin_cos(float in) { return bipolar_to_unipolar(std::cos(in * 2 * pi32 + std::sin(in * 2 * pi32 + std::cos(in * 2 * pi32)))); }
 inline float wave_shape_cos_cos_sin(float in) { return bipolar_to_unipolar(std::cos(in * 2 * pi32 + std::cos(in * 2 * pi32 + std::sin(in * 2 * pi32)))); }
 inline float wave_shape_cos_cos_cos(float in) { return bipolar_to_unipolar(std::cos(in * 2 * pi32 + std::cos(in * 2 * pi32 + std::cos(in * 2 * pi32)))); }
+template <class Smooth> inline float wave_shape_smooth(float in, Smooth smooth) { return smooth(in); }
 
 template <class Shape, class SkewX, class SkewY>
 inline float wave_calc_unipolar(float in, float x, float y, Shape shape, SkewX skew_x, SkewY skew_y)

@@ -164,7 +164,7 @@ public module_engine {
   void reset_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
 
-  float calc_smooth(int seed, int steps);
+  float calc_smooth(float phase, int seed, int steps);
   float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
   template <lfo_group Group, class Calc>
@@ -503,9 +503,10 @@ calc_other_tri_log(float phase, float x, float y, float x_exp, float y_exp, int 
 #endif
 
 float
-lfo_engine::calc_smooth(int seed, int steps)
+lfo_engine::calc_smooth(float phase, int seed, int steps)
 {
-  float result = _smooth_noise.next((float)_noise_total_pos / (_noise_total_samples + 1) * steps);
+  //float result = _smooth_noise.next((float)_noise_total_pos / (_noise_total_samples + 1) * steps);
+  float result = _smooth_noise.next(phase * steps);
   if(_noise_total_pos++ >= _noise_total_samples)
     reset_noise(seed, steps);
   return result;
@@ -740,6 +741,9 @@ lfo_engine::process(plugin_block& block)
 void 
 lfo_engine::process_phased(plugin_block& block)
 {
+  auto const& block_auto = block.state.own_block_automation;
+  int seed = block_auto[param_seed][0].step();
+  int steps = block_auto[param_steps][0].step();
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index1)
   {
   case wave_shape_type_saw: process_phased_shape(block, wave_shape_saw); break;
@@ -759,6 +763,9 @@ lfo_engine::process_phased(plugin_block& block)
   case wave_shape_type_cos_sin_cos: process_phased_shape(block, wave_shape_cos_sin_cos); break;
   case wave_shape_type_cos_cos_sin: process_phased_shape(block, wave_shape_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_phased_shape(block, wave_shape_cos_cos_cos); break;
+  case wave_shape_type_smooth: process_phased_shape(block, [this, seed, steps](float in) { 
+    return wave_shape_smooth(in, [this, seed, steps](float in) { 
+      return calc_smooth(in, seed, steps); }); }); break;
   default: assert(false); break;
   }
 }
@@ -838,11 +845,11 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
-    if constexpr(Group == lfo_group::noise)
-    {
+    //if constexpr(Group == lfo_group::noise)
+    //{
       _noise_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
       _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
-    }
+    //}
     
     //_lfo_end_value = calc(_phase, x, y, _log_skew_x_exp, _log_skew_y_exp, seed, steps);
     _lfo_end_value = calc(_phase);
@@ -850,12 +857,12 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
     block.state.own_cv[0][0][f] = _filter_end_value;
     
     bool phase_wrapped = false;
-    if constexpr (Group == lfo_group::phased)
+    //if constexpr (Group == lfo_group::phased)
       phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
 
     bool ended = ref_wrapped && is_one_shot_full(mode);
-    if constexpr (Group == lfo_group::phased)
+    //if constexpr (Group == lfo_group::phased)
       ended |= phase_wrapped && is_one_shot_wrapped(mode);
     if (ended)
     {
