@@ -19,7 +19,7 @@ plugin_base::multi_menu make_wave_multi_menu();
 std::vector<plugin_base::topo_tag> wave_skew_type_tags();
 std::vector<plugin_base::topo_tag> wave_shape_type_tags();
 
-enum { wave_shape_type_saw, wave_shape_type_sqr, wave_shape_type_sin };
+enum { wave_shape_type_saw, wave_shape_type_sqr, wave_shape_type_tri, wave_shape_type_sin };
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };
 
 inline bool wave_skew_is_exp(int skew) { return skew == wave_skew_type_xpu || skew == wave_skew_type_xpb; }
@@ -33,6 +33,7 @@ inline float wave_skew_xpb(float in, float p) { float bp = unipolar_to_bipolar(i
 
 inline float wave_shape_saw(float in) { return in; }
 inline float wave_shape_sqr(float in) { return in < 0.5f? 0.0f: 1.0f; }
+inline float wave_shape_tri(float in) { return 1 - std::fabs(unipolar_to_bipolar(in)); }
 inline float wave_shape_sin(float in) { return plugin_base::bipolar_to_unipolar(std::sin(in * 2 * pi32)); }
 
 template <class Shape, class SkewX, class SkewY>

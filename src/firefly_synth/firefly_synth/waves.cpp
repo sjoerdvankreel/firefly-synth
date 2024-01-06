@@ -43,8 +43,9 @@ wave_make_header_shape(int shape)
   switch (shape)
   {
   case wave_shape_type_saw: return "Saw";
-  case wave_shape_type_sqr: return "Square";
-  case wave_shape_type_sin: return "Sine";
+  case wave_shape_type_sqr: return "Sqr";
+  case wave_shape_type_tri: return "Tri";
+  case wave_shape_type_sin: return "Sin";
   default: assert(false); return {};
   }
 }
@@ -56,6 +57,7 @@ wave_make_name_shape(int shape)
   {
   case wave_shape_type_saw: return "Saw";
   case wave_shape_type_sqr: return "Sqr";
+  case wave_shape_type_tri: return "Tri";
   case wave_shape_type_sin: return "Sin";
   default: assert(false); return {};
   }
@@ -97,6 +99,7 @@ wave_shape_type_tags()
   std::vector<topo_tag> result;
   result.push_back(make_topo_tag("{CA30E83B-2A11-4833-8A45-81F666A3A4F5}", wave_make_name_shape(wave_shape_type_saw)));
   result.push_back(make_topo_tag("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_sqr)));
+  result.push_back(make_topo_tag("{41D6859E-3A16-432A-8851-D4E5D3F39662}", wave_make_name_shape(wave_shape_type_tri)));
   result.push_back(make_topo_tag("{4A873C32-8B89-47ED-8C93-44FE0B6A7DCC}", wave_make_name_shape(wave_shape_type_sin)));
   return result;
 }

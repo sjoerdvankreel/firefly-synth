@@ -744,6 +744,7 @@ lfo_engine::process_phased(plugin_block& block)
   {
   case wave_shape_type_saw: process_phased_shape(block, wave_shape_saw); break;
   case wave_shape_type_sqr: process_phased_shape(block, wave_shape_sqr); break;
+  case wave_shape_type_tri: process_phased_shape(block, wave_shape_tri); break;
   case wave_shape_type_sin: process_phased_shape(block, wave_shape_sin); break;
   default: assert(false); break;
   }
