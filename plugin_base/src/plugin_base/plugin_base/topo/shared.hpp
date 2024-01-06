@@ -35,7 +35,7 @@ struct custom_menu { int menu_id; std::string name; std::vector<custom_menu_entr
 struct topo_tag final {
   std::string id;
   std::string name;
-  std::string short_name;
+  std::string short_name = {};
   bool name_one_based = true;
   bool short_name_in_menu = true;
 

@@ -5,9 +5,10 @@
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
-#include <firefly_synth/trig.hpp>
+#include <firefly_synth/waves.hpp>
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/smooth_noise.hpp>
+
 #include <cmath>
 
 using namespace plugin_base;
@@ -24,6 +25,8 @@ enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_seed, param_steps, param_x, param_y };
+
+#if 0
 enum { 
   type_trig_sin, type_trig_cos, 
   type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
@@ -38,16 +41,20 @@ enum {
   type_other_skew, type_other_pulse, type_other_pulse_lin, type_other_tri, type_other_tri_log, type_other_saw, type_other_saw_lin, type_other_saw_log,
   type_static, type_static_add, type_static_free, type_static_add_free, 
   type_smooth, type_smooth_log };
+#endif
 
+static bool is_noise(int type) { return false; }
+
+static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
+static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
+static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
+
+#if 0
 static bool is_static_add(int type) { return type == type_static_add || type == type_static_add_free; }
 static bool is_static_free(int type) { return type == type_static_free || type == type_static_add_free; }
 static bool is_noise(int type) { 
   return type == type_static || type == type_static_add || type == type_static_free || 
   type == type_static_add_free || type == type_smooth || type == type_smooth_log; }
-
-static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
-static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
-static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
 
 static bool is_trig_log(int type) { return type_trig_log_sin <= type && type <= type_trig_log_cos_cos_cos; }
 static bool has_x(int type) { 
@@ -56,7 +63,9 @@ static bool has_x(int type) {
 static bool has_y(int type) { 
   return is_trig_log(type) || type == type_other_skew || type == type_other_tri_log || type == type_other_saw_lin || 
   type == type_other_saw_log || type == type_other_pulse_lin || type == type_static_add || type == type_static_add_free || type == type_smooth_log; }
+#endif
 
+#if 0
 static std::vector<list_item>
 type_items()
 {
@@ -82,6 +91,7 @@ type_items()
   result.emplace_back("{97F4AE1E-AA72-4749-8F8C-FE6F074068BE}", "SC.Log");
   result.emplace_back("{83923F08-D9E3-4E86-AF4A-1C7A57B079B3}", "CS.Log");
   result.emplace_back("{B37645EF-AE72-4D46-9ADE-E8E1A075BCA6}", "CC.Log");
+
   result.emplace_back("{EE47DB48-5FA4-4FBD-A39C-A5263C9B4A44}", "SSS.Log");
   result.emplace_back("{1262E2B1-51F2-4FDF-8ECA-0632DF1AD168}", "SSC.Log");
   result.emplace_back("{0AD50684-D536-458D-935E-FB946DD55CEC}", "SCS.Log");
@@ -109,6 +119,7 @@ type_items()
   result.emplace_back("{92856FAE-84EE-42B9-926D-7F4FA7AE21E9}", "Smt.Log");
   return result;
 }
+#endif
 
 static std::vector<list_item>
 mode_items()
@@ -148,20 +159,26 @@ public module_engine {
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
 
+  std::vector<multi_menu_item> _type_items;
+
   void reset_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
 
   float calc_smooth(int seed, int steps);
   float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
+  template <lfo_group Group, class Calc>
+  void process_loop(plugin_block& block, Calc calc);
+  template <class SkewX, class SkewY, class Shape>
+  void process_phased(plugin_block& block, SkewX skew_x, SkewY skew_y, Shape shape);
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
   void reset(plugin_block const*) override;
-  lfo_engine(bool global) : _global(global), _smooth_noise(1, 1) {}
+  lfo_engine(bool global, std::vector<multi_menu_item> const& type_items) : 
+  _global(global), _smooth_noise(1, 1), _type_items(type_items) {}
 
   void process(plugin_block& block) override;
-  template <lfo_group Group, class Calc> 
-  void process_loop(plugin_block& block, Calc calc);
 };
 
 static void
@@ -249,6 +266,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 module_topo
 lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
+  auto type_menu = make_wave_multi_menu();
   auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", "Voice LFO", "V.LFO", true, true, module_vlfo, 6);
   auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", "G.LFO", true, true, module_glfo, 6);
   module_stage stage = global ? module_stage::input : module_stage::voice;
@@ -263,7 +281,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   result.graph_engine_factory = make_graph_engine;
   if(global) result.default_initializer = init_global_default;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
-  result.engine_factory = [global](auto const&, int, int) { return std::make_unique<lfo_engine>(global); };
+  result.engine_factory = [global, type_items = type_menu.multi_items](auto const&, int, int) {
+    return std::make_unique<lfo_engine>(global, type_items); };
 
   result.sections.emplace_back(make_param_section(section_mode,
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Mode"),
@@ -293,11 +312,15 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 5, 5, 5, 5, 4, 4 }))));
+
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
-    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_items(), "Sin"),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_menu.items, "Sin.PlnX/PlnY"),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, gui_label_contents::name, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  type.gui.submenu = type_menu.submenu;
+
+#if 0
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->add_submenu("Trig", { type_trig_sin, type_trig_cos,
     type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
@@ -311,6 +334,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   type.gui.submenu->add_submenu("Static", { type_static, type_static_add, type_static_free, type_static_add_free });
   type.gui.submenu->add_submenu("Other", { type_other_skew, type_other_pulse, type_other_pulse_lin, type_other_tri, 
     type_other_tri_log, type_other_saw, type_other_saw_lin, type_other_saw_log });
+#endif
 
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Sm", true, true, param_filter, 1),
@@ -341,17 +365,20 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 5 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
+  //x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
+  (void)x;
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, true, param_y, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 6 }, gui_label_contents::value,
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
+  //y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
+  (void)y;
 
   return result;
 }
 
+#if false
 static float
 skew_log(float in, float exp)
 { return std::pow(in, exp); }
@@ -467,6 +494,8 @@ static float
 calc_other_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
 { return skew_log(calc_other_tri(skew_log(phase, x_exp), x, y, x_exp, y_exp, seed, steps), y_exp); }
 
+#endif
+
 float
 lfo_engine::calc_smooth(int seed, int steps)
 {
@@ -547,7 +576,8 @@ lfo_engine::reset(plugin_block const* block)
 void
 lfo_engine::process(plugin_block& block)
 {
-  int mode = block.state.own_block_automation[param_mode][0].step();
+  auto const& block_auto = block.state.own_block_automation;
+  int mode = block_auto[param_mode][0].step();
   if (mode == mode_off)
   {
     block.state.own_cv[0][0].fill(block.start_frame, block.end_frame, 0.0f);
@@ -561,9 +591,42 @@ lfo_engine::process(plugin_block& block)
   }
 
   if(_global) update_block_params(&block);
-  int type = block.state.own_block_automation[param_type][0].step();
+  int type = block_auto[param_type][0].step();
+  int sx = _type_items[type].index1;
+  int sy = _type_items[type].index2;
+  int shp = _type_items[type].index3;
+
+  if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_saw);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sqr);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_saw);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_sqr);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_sin);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_saw);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_sqr);
+  if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_sin);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_saw);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_sqr);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_saw);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_sqr);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_sin);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_saw);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_sqr);
+  if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_sin);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_saw);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_sqr);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_sin);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_saw);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_sqr);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_sin);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_exp, wave_shape_saw);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_exp, wave_shape_sqr);
+  if (sx == wave_skew_type_exp && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_exp, wave_shape_sin);
+
   switch (type)
   {
+#if 0
   case type_trig_sin: process_loop<lfo_group::phased>(block, calc_trig_sin); break;
   case type_trig_cos: process_loop<lfo_group::phased>(block, calc_trig_cos); break;
   case type_trig_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_sin); break;
@@ -612,7 +675,27 @@ lfo_engine::process(plugin_block& block)
   case type_smooth_log:
     process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
       return skew_log(calc_smooth(seed, steps), y_exp); }); break;
+#endif
+  case 0: break;
+  default: break;
   }
+}
+
+
+template <class SkewX, class SkewY, class Shape>
+void lfo_engine::process_phased(plugin_block& block, SkewX skew_x, SkewY skew_y, Shape shape)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+  auto const& type_item = _type_items[type];
+  int sx = type_item.index1;
+  int sy = type_item.index2;
+  float x = block_auto[param_x][0].real();
+  float y = block_auto[param_y][0].real();
+  float px = sx == wave_skew_type_off ? 0 : sx == wave_skew_type_lin ? x : _log_skew_x_exp;
+  float py = sy == wave_skew_type_off ? 0 : sy == wave_skew_type_lin ? y : _log_skew_y_exp;
+  process_loop<lfo_group::phased>(block, [px, py, skew_x, skew_y, shape](float in) { 
+    return wave_calc_unipolar(in, px, py, skew_x, skew_y, shape); });
 }
 
 template <lfo_group Group, class Calc>
@@ -620,10 +703,10 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
 {
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_automation = block.state.own_block_automation;
-  float x = block_automation[param_x][0].real();
-  float y = block_automation[param_y][0].real();
+  //float x = block_automation[param_x][0].real();
+  //float y = block_automation[param_y][0].real();
   int mode = block_automation[param_mode][0].step();
-  int seed = block_automation[param_seed][0].step();
+  //int seed = block_automation[param_seed][0].step();
   int steps = block_automation[param_steps][0].step();
   auto const& rate_curve = sync_or_freq_into_scratch(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
 
@@ -650,7 +733,8 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
     }
     
-    _lfo_end_value = calc(_phase, x, y, _log_skew_x_exp, _log_skew_y_exp, seed, steps);
+    //_lfo_end_value = calc(_phase, x, y, _log_skew_x_exp, _log_skew_y_exp, seed, steps);
+    _lfo_end_value = calc(_phase);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
     
