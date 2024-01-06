@@ -143,7 +143,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Envelope", "Env", true, true, module_env, 6),
     make_module_dsp(module_stage::voice, module_output::cv, scratch_count, { 
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { 7, 6 } })));
+    make_module_gui(section, colors, pos, { { 1, 1 }, { 20, 19 } })));
 
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_graph_engine;
@@ -189,7 +189,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_slope,
     make_topo_tag("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", "Slope"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 9, 8, 8, 8} })));
+    make_param_section_gui({ 0, 1 }, { 1, 4 })));
 
   auto& filter = result.params.emplace_back(make_param(
     make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smt", true, true, param_filter, 1),

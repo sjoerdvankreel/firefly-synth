@@ -35,7 +35,7 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{988E6A84-A012-413C-B33B-80B8B135D203}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 } , { 5, 4, 4, 4 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 } , { 4 } })));
   result.params.emplace_back(make_param(
     make_topo_info("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Gain", param_gain, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, true),
