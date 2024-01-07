@@ -20,6 +20,7 @@ static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
 static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
+static float const log_half = std::log(0.5f);
 
 enum { type_off, type_svf, type_comb, type_shaper, type_delay };
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
@@ -753,6 +754,13 @@ template <class Clip, class Shape, class SkewX, class SkewY> void
 fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   int this_module = _global ? module_gfx : module_vfx;
+
+  auto const& block_auto = block.state.own_block_automation;
+  int shape_type = block_auto[param_shape_type][0].step();
+  auto const& type_item = _shape_type_items[shape_type];
+  int sx = type_item.index2;
+  int sy = type_item.index3;
+
   auto const& x_curve = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve = *modulation[this_module][block.module_slot][param_shape_y][0];
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
@@ -760,9 +768,14 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   for(int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
+      // todo not per sample
+      float px = x_curve[f];
+      float py = y_curve[f];
+      if(wave_skew_is_exp(sx)) px = std::log(0.001 + (px * 0.999)) / log_half;
+      if (wave_skew_is_exp(sy)) py = std::log(0.001 + (py * 0.999)) / log_half;
       float in = block.state.own_audio[0][0][c][f];
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
-      float shaped = clip(wave_calc_bi(in * gain, x_curve[f], y_curve[f], shape, skew_x, skew_y));
+      float shaped = clip(wave_calc_bi(in * gain, px, py, shape, skew_x, skew_y));
       block.state.own_audio[0][0][c][f] = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
     }
 }

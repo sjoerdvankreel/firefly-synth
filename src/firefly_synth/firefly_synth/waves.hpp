@@ -45,7 +45,7 @@ inline float wave_skew_bi_lin(float in, float p) { return in; }
 inline float wave_skew_bi_scu(float in, float p) { return in * p; }
 inline float wave_skew_bi_scb(float in, float p) { return in; }
 inline float wave_skew_bi_xpu(float in, float p) { return in; }
-inline float wave_skew_bi_xpb(float in, float p) { return in; }
+inline float wave_skew_bi_xpb(float in, float p) { return (in < 0 ? -1 : 1) * std::pow(std::fabs(in), p); }
 
 inline float wave_shape_uni_saw(float in) { return in; }
 inline float wave_shape_uni_sqr(float in) { return in < 0.5f? 0.0f: 1.0f; }
