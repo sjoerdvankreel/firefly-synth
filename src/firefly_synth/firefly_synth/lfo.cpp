@@ -377,31 +377,31 @@ lfo_engine::process(plugin_block& block)
 
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index1)
   {
-  case wave_shape_type_saw: process_shape<false>(block, wave_shape_saw); break;
-  case wave_shape_type_sqr: process_shape<false>(block, wave_shape_sqr); break;
-  case wave_shape_type_tri: process_shape<false>(block, wave_shape_tri); break;
-  case wave_shape_type_sin: process_shape<false>(block, wave_shape_sin); break;
-  case wave_shape_type_cos: process_shape<false>(block, wave_shape_cos); break;
-  case wave_shape_type_sin_sin: process_shape<false>(block, wave_shape_sin_sin); break;
-  case wave_shape_type_sin_cos: process_shape<false>(block, wave_shape_sin_cos); break;
-  case wave_shape_type_cos_sin: process_shape<false>(block, wave_shape_cos_sin); break;
-  case wave_shape_type_cos_cos: process_shape<false>(block, wave_shape_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_shape<false>(block, wave_shape_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_shape<false>(block, wave_shape_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_shape<false>(block, wave_shape_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_shape<false>(block, wave_shape_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_shape<false>(block, wave_shape_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_shape<false>(block, wave_shape_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_shape<false>(block, wave_shape_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_shape<false>(block, wave_shape_cos_cos_cos); break;
+  case wave_shape_type_saw: process_shape<false>(block, wave_shape_uni_saw); break;
+  case wave_shape_type_sqr: process_shape<false>(block, wave_shape_uni_sqr); break;
+  case wave_shape_type_tri: process_shape<false>(block, wave_shape_uni_tri); break;
+  case wave_shape_type_sin: process_shape<false>(block, wave_shape_uni_sin); break;
+  case wave_shape_type_cos: process_shape<false>(block, wave_shape_uni_cos); break;
+  case wave_shape_type_sin_sin: process_shape<false>(block, wave_shape_uni_sin_sin); break;
+  case wave_shape_type_sin_cos: process_shape<false>(block, wave_shape_uni_sin_cos); break;
+  case wave_shape_type_cos_sin: process_shape<false>(block, wave_shape_uni_cos_sin); break;
+  case wave_shape_type_cos_cos: process_shape<false>(block, wave_shape_uni_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_shape<false>(block, wave_shape_uni_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_shape<false>(block, wave_shape_uni_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_shape<false>(block, wave_shape_uni_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_shape<false>(block, wave_shape_uni_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_shape<false>(block, wave_shape_uni_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_shape<false>(block, wave_shape_uni_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_shape<false>(block, wave_shape_uni_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_shape<false>(block, wave_shape_uni_cos_cos_cos); break;
   case wave_shape_type_smooth: process_shape<true>(block, [this, seed, steps](float in) {
-    return wave_shape_custom(in, [this, seed, steps](float in) {
+    return wave_shape_uni_custom(in, [this, seed, steps](float in) {
       return calc_smooth(in, seed, steps); }); }); break;
   case wave_shape_type_static: process_shape<true>(block, [this, seed, steps](float in) {
-    return wave_shape_custom(in, [this, seed, steps](float in) {
+    return wave_shape_uni_custom(in, [this, seed, steps](float in) {
       return calc_static<false>(in, seed, steps); }); }); break;
   case wave_shape_type_static_free: process_shape<true>(block, [this, seed, steps](float in) {
-    return wave_shape_custom(in, [this, seed, steps](float in) {
+    return wave_shape_uni_custom(in, [this, seed, steps](float in) {
       return calc_static<true>(in, seed, steps); }); }); break;
   default: assert(false); break;
   }
@@ -449,7 +449,7 @@ lfo_engine::process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, Ske
   float y = block_auto[param_y][0].real();
   float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
   float py = wave_skew_is_exp(sy) ? _log_skew_y_exp : y;
-  auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_unipolar(in, px, py, shape, skew_x, skew_y); };
+  auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_uni(in, px, py, shape, skew_x, skew_y); };
   process_shape_loop<IsNoise>(block, processor);
 }
 
