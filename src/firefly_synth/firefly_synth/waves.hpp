@@ -67,7 +67,7 @@ inline float wave_shape_uni_cos_cos_cos(float in) { return bipolar_to_unipolar(s
 
 inline float wave_shape_bi_saw(float in) { return in; }
 inline float wave_shape_bi_sqr(float in) { return in < 0 ? -1.0f : 1.0f; }
-inline float wave_shape_bi_tri(float in) { return unipolar_to_bipolar(1 - std::fabs(in)); }
+inline float wave_shape_bi_tri(float in) { return in < -1? in: in > 1? in: unipolar_to_bipolar(1 - std::fabs(in)); }
 inline float wave_shape_bi_sin(float in) { return std::sin(in * pi32); }
 inline float wave_shape_bi_cos(float in) { return std::cos(in * pi32); }
 inline float wave_shape_bi_sin_sin(float in) { return std::sin(in * pi32 + std::sin(in * pi32)); }
