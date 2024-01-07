@@ -26,6 +26,14 @@ enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_seed, param_steps, param_x, param_y };
 
+static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
+static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
+static bool is_noise(multi_menu const& menu, int type)
+{ 
+  int t = menu.multi_items[type].index1; 
+  return t == wave_shape_type_smooth || t == wave_shape_type_static || t == wave_shape_type_static_free; 
+}
+
 #if 0
 enum { 
   type_trig_sin, type_trig_cos, 
@@ -42,8 +50,6 @@ enum {
   type_static, type_static_add, type_static_free, type_static_add_free, 
   type_smooth, type_smooth_log };
 #endif
-
-//static bool is_noise(int type) { return false; }
 
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
@@ -164,14 +170,13 @@ public module_engine {
   void reset_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
 
+  void process_phased(plugin_block& block);
   float calc_smooth(float phase, int seed, int steps);
   template <bool Free> float calc_static(float phase, int seed, int steps);
-  //float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
   template <lfo_group Group, class Calc>
   void process_loop(plugin_block& block, Calc calc);
 
-  void process_phased(plugin_block& block);
   template <class Shape>
   void process_phased_shape(plugin_block& block, Shape shape);
   template <class Shape, class SkewX>
@@ -326,23 +331,6 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   type.gui.submenu = type_menu.submenu;
-
-#if 0
-  type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Trig", { type_trig_sin, type_trig_cos,
-    type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
-    type_trig_sin_sin_sin, type_trig_sin_sin_cos, type_trig_sin_cos_sin, type_trig_sin_cos_cos,
-    type_trig_cos_sin_sin, type_trig_cos_sin_cos, type_trig_cos_cos_sin, type_trig_cos_cos_cos });
-  type.gui.submenu->add_submenu("Trig.Log", { type_trig_log_sin, type_trig_log_cos,
-  type_trig_log_sin_sin, type_trig_log_sin_cos, type_trig_log_cos_sin, type_trig_log_cos_cos,
-  type_trig_log_sin_sin_sin, type_trig_log_sin_sin_cos, type_trig_log_sin_cos_sin, type_trig_log_sin_cos_cos,
-  type_trig_log_cos_sin_sin, type_trig_log_cos_sin_cos, type_trig_log_cos_cos_sin, type_trig_log_cos_cos_cos });
-  type.gui.submenu->add_submenu("Smooth", { type_smooth, type_smooth_log });
-  type.gui.submenu->add_submenu("Static", { type_static, type_static_add, type_static_free, type_static_add_free });
-  type.gui.submenu->add_submenu("Other", { type_other_skew, type_other_pulse, type_other_pulse_lin, type_other_tri, 
-    type_other_tri_log, type_other_saw, type_other_saw_lin, type_other_saw_log });
-#endif
-
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Sm", true, true, param_filter, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -360,27 +348,25 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  seed.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "St", true, true, param_steps, 1),
     make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 99, 4, 0),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  steps.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, true, param_x, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  //x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_x(vs[1]); });
-  (void)x;
+  x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_x(type_menu, vs[1]); });
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, true, param_y, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  //y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [](auto const& vs) { return vs[0] != mode_off && has_y(vs[1]); });
-  (void)y;
+  y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_y(type_menu, vs[1]); });
 
   return result;
 }
