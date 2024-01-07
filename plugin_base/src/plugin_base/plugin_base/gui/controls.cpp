@@ -335,6 +335,7 @@ param_toggle_button::own_param_changed(plain_value plain)
 {
   _checked = plain.step() != 0;
   setToggleState(plain.step() != 0, dontSendNotification);
+  setTooltip(_param->param->info.tag.name + ": " + _param->param->domain.plain_to_text(false, plain));
 }
 
 void 
@@ -349,15 +350,9 @@ param_toggle_button::buttonStateChanged(Button*)
 param_toggle_button::
 param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param):
 param_component(gui, module, param), autofit_togglebutton()
-{ 
-  switch (param->param->gui.tooltip)
-  {
-  case gui_label_contents::none: break;
-  case gui_label_contents::name: setTooltip(param->param->info.tag.name); break;
-  case gui_label_contents::short_name: setTooltip(param->param->info.tag.short_name); break;
-  default: assert(false); break;
-  }
+{
   auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
+  setTooltip(_param->param->info.tag.name + ": " + _param->param->domain.plain_to_text(false, value));
   _checked = value.step() != 0;
   addListener(this);
   init();
