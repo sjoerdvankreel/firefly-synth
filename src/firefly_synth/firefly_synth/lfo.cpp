@@ -226,9 +226,12 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   tempo.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_one || vs[0] == mode_sync_wrap; });
 
+  // Don't include the phase param for global lfo.
+  std::vector<int> type_column_sizes = { gui_dimension::auto_size, 18, 17, 22, 20, 22, 21 };
+  if(global) type_column_sizes = { gui_dimension::auto_size, 1, 1, 1, 1, 1 };
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 18, 17, 22, 20, 22, 21 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, type_column_sizes))));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_menu.items, "Sin.OfX/OfY"),
@@ -265,13 +268,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+
+  if(global) return result;
   auto& phase = result.params.emplace_back(make_param(
     make_topo_info("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", "Ph", true, true, param_phase, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-
   return result;
 }
 
