@@ -83,6 +83,9 @@ make_param_dsp_output()
 inline param_dsp
 make_param_dsp_input(bool voice, param_automate automate)
 { return make_param_dsp(param_direction::input, voice? param_rate::voice: param_rate::block, automate); }
+inline param_dsp
+make_param_dsp_automate_if_voice(bool voice)
+{ return make_param_dsp(param_direction::input, voice? param_rate::voice: param_rate::block, voice? param_automate::automate: param_automate::none); }
 
 param_domain
 make_domain_toggle(bool default_);
