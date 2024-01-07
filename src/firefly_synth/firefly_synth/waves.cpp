@@ -76,10 +76,10 @@ wave_make_name_shape(int shape)
   case wave_shape_type_tri: return "Tri";
   case wave_shape_type_sin: return "Sin";
   case wave_shape_type_cos: return "Cos";
-  case wave_shape_type_sin_sin: return "SnSn";
-  case wave_shape_type_sin_cos: return "SnCs";
-  case wave_shape_type_cos_sin: return "CsSn";
-  case wave_shape_type_cos_cos: return "CsCs";
+  case wave_shape_type_sin_sin: return "SS";
+  case wave_shape_type_sin_cos: return "SC";
+  case wave_shape_type_cos_sin: return "CS";
+  case wave_shape_type_cos_cos: return "CC";
   case wave_shape_type_sin_sin_sin: return "SSS";
   case wave_shape_type_sin_sin_cos: return "SSC";
   case wave_shape_type_sin_cos_sin: return "SCS";
