@@ -340,13 +340,12 @@ make_param_gui_none()
 }
 
 param_topo_gui
-make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label_contents tooltip, gui_label label)
+make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label label)
 {
   param_topo_gui result = {};
   result.visible = true;
   result.layout = layout;
   result.section = section;
-  result.tooltip = tooltip;
   result.position = position;
   result.edit_type = edit_type;
   result.label = gui_label(label);

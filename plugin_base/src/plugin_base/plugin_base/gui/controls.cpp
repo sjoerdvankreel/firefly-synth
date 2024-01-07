@@ -362,16 +362,7 @@ param_slider::
 param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param) :
 param_component(gui, module, param), Slider()
 {
-  auto tooltip = param->param->gui.tooltip;
-  switch (tooltip)
-  {
-  case gui_label_contents::none: break;
-  case gui_label_contents::name: setTooltip(param->param->info.tag.name); break;
-  case gui_label_contents::value: setPopupDisplayEnabled(true, true, nullptr); break;
-  case gui_label_contents::short_name: setTooltip(param->param->info.tag.short_name); break;
-  default: assert(false); break;
-  }
-  
+  setPopupDisplayEnabled(true, true, nullptr);  
   switch (param->param->gui.edit_type)
   {
   case gui_edit_type::knob: setSliderStyle(Slider::RotaryVerticalDrag); break;

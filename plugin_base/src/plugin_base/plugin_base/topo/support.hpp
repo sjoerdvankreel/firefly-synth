@@ -107,11 +107,11 @@ make_domain_log(double min, double max, double default_, double midpoint, int pr
 param_topo_gui
 make_param_gui_none();
 param_topo_gui
-make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label_contents tooltip, gui_label label);
+make_param_gui(int section, gui_edit_type edit_type, param_layout layout, gui_position position, gui_label label);
 param_topo
 make_param(topo_info const& info, param_dsp const& dsp, param_domain const& domain, param_topo_gui const& gui);
 inline param_topo_gui
-make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label_contents tooltip, gui_label label)
-{ return make_param_gui(section, edit_type, param_layout::single, position, tooltip, gui_label(label)); }
+make_param_gui_single(int section, gui_edit_type edit_type, gui_position position, gui_label label)
+{ return make_param_gui(section, edit_type, param_layout::single, position, gui_label(label)); }
 
 }
