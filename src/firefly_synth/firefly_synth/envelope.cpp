@@ -70,8 +70,8 @@ private:
   static inline double const slope_range = slope_max - slope_min;
 
   void init_slope_section(double slope, double split_pos, double& exp, double& splt_bnd);
-  template <class CalcSlope> void process_loop(plugin_block& block,
-    float dly, float att, float hld, float dcy, float stn, float rls, CalcSlope calc_slope);
+  template <class CalcSlope> 
+  void process_slope(plugin_block& block, float dly, float att, float hld, float dcy, float stn, float rls, CalcSlope calc_slope);
 };
 
 static void
@@ -380,12 +380,12 @@ env_engine::process(plugin_block& block)
   }
 
   int type = block_auto[param_type][0].step();
-  if(is_sloped(type)) process_loop(block, dly, att, hld, dcy, stn, rls, calc_slope_log);
-  else process_loop(block, dly, att, hld, dcy, stn, rls, calc_slope_linear);
+  if(is_sloped(type)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_log);
+  else process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_linear);
 }
 
 template <class CalcSlope> void
-env_engine::process_loop(
+env_engine::process_slope(
   plugin_block& block, float dly, float att, float hld, 
   float dcy, float stn, float rls, CalcSlope calc_slope)
 {

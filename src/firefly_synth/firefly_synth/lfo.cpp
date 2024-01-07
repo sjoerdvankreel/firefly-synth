@@ -81,7 +81,7 @@ public module_engine {
   template <bool Free> float calc_static(float phase, int seed, int steps);
 
   template <bool IsNoise, class Calc>
-  void process_loop(plugin_block& block, Calc calc);
+  void process_shape_loop(plugin_block& block, Calc calc);
   template <bool IsNoise, class Shape>
   void process_shape(plugin_block& block, Shape shape);
   template <bool IsNoise, class Shape, class SkewX>
@@ -450,11 +450,11 @@ lfo_engine::process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, Ske
   float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
   float py = wave_skew_is_exp(sy) ? _log_skew_y_exp : y;
   auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_unipolar(in, px, py, shape, skew_x, skew_y); };
-  process_loop<IsNoise>(block, processor);
+  process_shape_loop<IsNoise>(block, processor);
 }
 
 template <bool IsNoise, class Calc>
-void lfo_engine::process_loop(plugin_block& block, Calc calc)
+void lfo_engine::process_shape_loop(plugin_block& block, Calc calc)
 {
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_auto = block.state.own_block_automation;
