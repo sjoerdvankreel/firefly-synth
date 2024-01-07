@@ -46,7 +46,7 @@ inline float wave_skew_bi_lin(float in, float p) {
   return (in < -1 || in > 1 || in == bp)? in: in < bp ? -1 + (in - -1) / (bp - -1): (in - bp) / (1 - bp); }
 inline float wave_skew_bi_scu(float in, float p) { return in * p; }
 inline float wave_skew_bi_scb(float in, float p) { return in * unipolar_to_bipolar(p); }
-inline float wave_skew_bi_xpu(float in, float p) { return in; }
+inline float wave_skew_bi_xpu(float in, float p) { return (in < -1 || in > 1)? in: unipolar_to_bipolar(std::pow(bipolar_to_unipolar(in), p)); }
 inline float wave_skew_bi_xpb(float in, float p) { return (in < 0 ? -1 : 1) * std::pow(std::fabs(in), p); }
 
 inline float wave_shape_uni_saw(float in) { return in; }
