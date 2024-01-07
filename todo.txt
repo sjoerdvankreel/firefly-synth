@@ -40,6 +40,7 @@ figure out if we have a decent option set that covers both lfos and shapers (e.g
 do 4 auxs
 drop trig header
 at least block-automate all voice parameters see also modmatrices
+do shaper clip mode clamp/tanh
 
 fix the comb size param
 * fx
