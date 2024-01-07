@@ -24,7 +24,7 @@ enum class lfo_stage { cycle, filter, end };
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
-enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_seed, param_steps, param_x, param_y };
+enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps };
 
 static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
 static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
@@ -323,7 +323,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 11, 11, 11, 10, 9, 9 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 11, 11, 9, 9, 11, 10 }))));
 
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
@@ -343,30 +343,30 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  auto& seed = result.params.emplace_back(make_param(
-    make_topo_info("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", "Sd", true, true, param_seed, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 255, 1, 0),
-    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 }, 
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
-  auto& steps = result.params.emplace_back(make_param(
-    make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "St", true, true, param_steps, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 99, 4, 0),
-    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 }, 
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  steps.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "X", "X", true, true, param_x, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 5 },
+    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_x(type_menu, vs[1]); });
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "Y", "Y", true, true, param_y, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 6 },
+    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_y(type_menu, vs[1]); });
+  auto& seed = result.params.emplace_back(make_param(
+    make_topo_info("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", "Sd", true, true, param_seed, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(1, 255, 1, 0),
+    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 5 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
+  auto& steps = result.params.emplace_back(make_param(
+    make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "St", true, true, param_steps, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_step(2, 99, 4, 0),
+    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 6 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  steps.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
 
   return result;
 }
