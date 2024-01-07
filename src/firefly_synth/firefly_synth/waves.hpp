@@ -91,6 +91,8 @@ inline float wave_shape_uni_custom(float in, Custom custom) { return custom(in);
 inline float
 wave_shape_bi_fold(float in)
 {
+  // expo shapers can spiral in out of control
+  in = std::clamp(in, -32.0f, 32.0f);
   while (true)
     if (in > 1.0f) in -= 2.0f * (in - 1.0f);
     else if (in < -1.0f) in += 2.0f * (-in - 1.0f);

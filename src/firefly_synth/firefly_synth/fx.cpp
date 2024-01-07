@@ -772,8 +772,8 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       // todo not per sample
       float px = x_curve[f];
       float py = y_curve[f];
-      if(wave_skew_is_exp(sx)) px = std::log(0.001 + (px * 0.999)) / log_half;
-      if (wave_skew_is_exp(sy)) py = std::log(0.001 + (py * 0.999)) / log_half;
+      if(wave_skew_is_exp(sx)) px = std::log(0.001 + (px * 0.98)) / log_half;
+      if (wave_skew_is_exp(sy)) py = std::log(0.001 + (py * 0.98)) / log_half;
       float in = block.state.own_audio[0][0][c][f];
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
       float shaped = clip(wave_calc_bi(in * gain, px, py, shape, skew_x, skew_y));
