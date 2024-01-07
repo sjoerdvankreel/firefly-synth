@@ -18,114 +18,22 @@ namespace firefly_synth {
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
-enum class lfo_group { phased, noise };
 enum class lfo_stage { cycle, filter, end };
-
 enum { section_mode, section_type };
 enum { scratch_time, scratch_count };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
 enum { param_mode, param_rate, param_tempo, param_type, param_filter, param_phase, param_x, param_y, param_seed, param_steps };
 
-static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
-static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
-static bool is_noise(multi_menu const& menu, int type)
-{ 
-  int t = menu.multi_items[type].index1; 
-  return t == wave_shape_type_smooth || t == wave_shape_type_static || t == wave_shape_type_static_free; 
-}
-
-#if 0
-enum { 
-  type_trig_sin, type_trig_cos, 
-  type_trig_sin_sin, type_trig_sin_cos, type_trig_cos_sin, type_trig_cos_cos,
-  type_trig_sin_sin_sin, type_trig_sin_sin_cos, type_trig_sin_cos_sin, type_trig_sin_cos_cos,
-  type_trig_cos_sin_sin, type_trig_cos_sin_cos, type_trig_cos_cos_sin, type_trig_cos_cos_cos,
-
-  type_trig_log_sin, type_trig_log_cos,
-  type_trig_log_sin_sin, type_trig_log_sin_cos, type_trig_log_cos_sin, type_trig_log_cos_cos,
-  type_trig_log_sin_sin_sin, type_trig_log_sin_sin_cos, type_trig_log_sin_cos_sin, type_trig_log_sin_cos_cos,
-  type_trig_log_cos_sin_sin, type_trig_log_cos_sin_cos, type_trig_log_cos_cos_sin, type_trig_log_cos_cos_cos,
-  
-  type_other_skew, type_other_pulse, type_other_pulse_lin, type_other_tri, type_other_tri_log, type_other_saw, type_other_saw_lin, type_other_saw_log,
-  type_static, type_static_add, type_static_free, type_static_add_free, 
-  type_smooth, type_smooth_log };
-#endif
-
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
 static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
 static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
 
-#if 0
-static bool is_static_add(int type) { return type == type_static_add || type == type_static_add_free; }
-static bool is_static_free(int type) { return type == type_static_free || type == type_static_add_free; }
-static bool is_noise(int type) { 
-  return type == type_static || type == type_static_add || type == type_static_free || 
-  type == type_static_add_free || type == type_smooth || type == type_smooth_log; }
-
-static bool is_trig_log(int type) { return type_trig_log_sin <= type && type <= type_trig_log_cos_cos_cos; }
-static bool has_x(int type) { 
-  return is_trig_log(type) || type == type_other_skew || 
-  type == type_other_tri_log || type == type_other_saw_lin || type == type_other_pulse_lin; }
-static bool has_y(int type) { 
-  return is_trig_log(type) || type == type_other_skew || type == type_other_tri_log || type == type_other_saw_lin || 
-  type == type_other_saw_log || type == type_other_pulse_lin || type == type_static_add || type == type_static_add_free || type == type_smooth_log; }
-#endif
-
-#if 0
-static std::vector<list_item>
-type_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{3B223DEC-1085-4D44-9C16-05B7FAA22006}", "Sin");
-  result.emplace_back("{1EAC4007-3122-4064-9B97-AFF28C902400}", "Cos");
-  result.emplace_back("{7A510580-5E85-4B49-A4D2-54269B50FF62}", "SinSin");
-  result.emplace_back("{335FD8C1-3162-4A75-8EFA-6C8240EAEA78}", "SinCos");
-  result.emplace_back("{C01104A8-A299-4D8E-AC94-D81387D66B2A}", "CosSin");
-  result.emplace_back("{FEEEEADE-119C-461D-A6F7-5A29BF0088F6}", "CosCos");
-  result.emplace_back("{11B30ACD-5B04-406A-8B3B-E9B7A9C62AF5}", "SSS");
-  result.emplace_back("{8BF5A3AE-D56C-490B-B6F6-22BDFF1913EB}", "SSC");
-  result.emplace_back("{74E9F12C-91BD-4027-BCA4-842BF6B23367}", "SCS");
-  result.emplace_back("{EE7C1611-D741-46EF-A398-2B5F62749471}", "SCC");
-  result.emplace_back("{4BA55E18-2937-4F21-8BC5-CDDD9DEAEF93}", "CSS");
-  result.emplace_back("{A86309CC-EC83-41A6-8BBB-81A15DF42676}", "CSC");
-  result.emplace_back("{B6A7D580-F6BC-4C4B-B749-E2FCBD10F6F3}", "CCS");
-  result.emplace_back("{B3780540-3B43-43D8-8859-14F69C846055}", "CCC");
-
-  result.emplace_back("{95A5E2C4-06E5-445B-A612-ED1AC091546B}", "Sin.Log");
-  result.emplace_back("{F867923B-EAAF-45B5-B54F-E60D06601952}", "Cos.Log");
-  result.emplace_back("{E0495ACF-3393-4BD5-BB30-91D68B02813E}", "SS.Log");
-  result.emplace_back("{97F4AE1E-AA72-4749-8F8C-FE6F074068BE}", "SC.Log");
-  result.emplace_back("{83923F08-D9E3-4E86-AF4A-1C7A57B079B3}", "CS.Log");
-  result.emplace_back("{B37645EF-AE72-4D46-9ADE-E8E1A075BCA6}", "CC.Log");
-
-  result.emplace_back("{EE47DB48-5FA4-4FBD-A39C-A5263C9B4A44}", "SSS.Log");
-  result.emplace_back("{1262E2B1-51F2-4FDF-8ECA-0632DF1AD168}", "SSC.Log");
-  result.emplace_back("{0AD50684-D536-458D-935E-FB946DD55CEC}", "SCS.Log");
-  result.emplace_back("{226BFA21-906F-4948-B0F3-AED0C474DE5A}", "SCC.Log");
-  result.emplace_back("{EC830EE3-67CE-43EE-BA5D-E08FAF950C04}", "CSS.Log");
-  result.emplace_back("{B7F41A67-511E-4DF8-84F5-E2A3495610A0}", "CSC.Log");
-  result.emplace_back("{49D64771-94C6-4BA1-BACF-80C75F078FE6}", "CCS.Log");
-  result.emplace_back("{749AB04D-6902-4C69-85DF-9D7B5A422C4F}", "CCC.Log");
-  
-  result.emplace_back("{3AF5A419-583F-435E-ABF7-BA514FA608C9}", "Skew");
-  result.emplace_back("{34480144-5349-49C1-9211-4CED6E6C8203}", "Pulse");
-  result.emplace_back("{91CB7634-9759-485A-9DFF-6F5F86966212}", "Pulse.Lin");
-  result.emplace_back("{42E1F070-191B-411A-9FFD-D966990B9712}", "Tri");
-  result.emplace_back("{B6775D3D-D12B-4326-9414-18788BBC4898}", "Tri.Log");
-  result.emplace_back("{2190619A-CB71-47F3-9B93-364BF4DA6BE6}", "Saw");
-  result.emplace_back("{C304D3F4-3D77-437D-BFBD-4BBDA2FC90A5}", "Saw.Lin");
-  result.emplace_back("{C91E269F-E83D-41A6-8C64-C34DBF9144C1}", "Saw.Log");
-
-  result.emplace_back("{48D681E8-16C2-42FB-B64F-146C7F689C45}", "Static");
-  result.emplace_back("{6182E4EF-93F2-4CDC-A015-7437C05F7E70}", "Stat.Add");
-  result.emplace_back("{5AA8914D-CF39-4435-B374-B4C66002DC8B}", "Stat.Free");
-  result.emplace_back("{4B9E5DE0-9F32-4EB0-949F-1108B2A21DC1}", "St.AddFr");
-
-  result.emplace_back("{4F079460-C774-4B69-BCCA-3065BE26D28F}", "Smt");
-  result.emplace_back("{92856FAE-84EE-42B9-926D-7F4FA7AE21E9}", "Smt.Log");
-  return result;
+static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
+static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
+static bool is_noise(multi_menu const& menu, int type) { 
+  int t = menu.multi_items[type].index1; 
+  return t == wave_shape_type_smooth || t == wave_shape_type_static || t == wave_shape_type_static_free; 
 }
-#endif
 
 static std::vector<list_item>
 mode_items()
@@ -164,25 +72,21 @@ public module_engine {
   int _noise_total_samples = 0;
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
-
   std::vector<multi_menu_item> _type_items;
 
   void reset_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
-
-  void process_phased(plugin_block& block);
   float calc_smooth(float phase, int seed, int steps);
   template <bool Free> float calc_static(float phase, int seed, int steps);
 
-  template <lfo_group Group, class Calc>
+  template <bool IsNoise, class Calc>
   void process_loop(plugin_block& block, Calc calc);
-
-  template <class Shape>
-  void process_phased_shape(plugin_block& block, Shape shape);
-  template <class Shape, class SkewX>
-  void process_phased_shape_x(plugin_block& block, Shape shape, SkewX skew_x);
-  template <class Shape, class SkewX, class SkewY>
-  void process_phased_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y);
+  template <bool IsNoise, class Shape>
+  void process_shape(plugin_block& block, Shape shape);
+  template <bool IsNoise, class Shape, class SkewX>
+  void process_shape_x(plugin_block& block, Shape shape, SkewX skew_x);
+  template <bool IsNoise, class Shape, class SkewX, class SkewY>
+  void process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -324,7 +228,6 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 11, 11, 9, 9, 11, 10 }))));
-
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_menu.items, "Sin.OfX/OfY"),
@@ -371,128 +274,9 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   return result;
 }
 
-#if false
-static float
-skew_log(float in, float exp)
-{ return std::pow(in, exp); }
-
-static float
-calc_trig_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_01(phase)); }
-static float
-calc_trig_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(cos_01(phase)); }
-static float
-calc_trig_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_sin_01(phase)); }
-static float
-calc_trig_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_cos_01(phase)); }
-static float
-calc_trig_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(cos_sin_01(phase)); }
-static float
-calc_trig_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(cos_cos_01(phase)); }
-static float
-calc_trig_sin_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_sin_sin_01(phase)); }
-static float
-calc_trig_sin_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_sin_cos_01(phase)); }
-static float
-calc_trig_sin_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_cos_sin_01(phase)); }
-static float
-calc_trig_sin_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(sin_cos_cos_01(phase)); }
-static float
-calc_trig_cos_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(cos_sin_sin_01(phase)); }
-static float
-calc_trig_cos_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(cos_sin_cos_01(phase)); }
-static float
-calc_trig_cos_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(cos_cos_sin_01(phase)); }
-static float
-calc_trig_cos_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return bipolar_to_unipolar(cos_cos_cos_01(phase)); }
-
-static float
-calc_trig_log_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(sin_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(cos_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(sin_sin_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(sin_cos_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(cos_sin_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(cos_cos_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_sin_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(sin_sin_sin_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_sin_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(sin_sin_cos_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_sin_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(sin_cos_sin_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_sin_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(sin_cos_cos_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_cos_sin_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(cos_sin_sin_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_cos_sin_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(cos_sin_cos_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_cos_cos_sin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(cos_cos_sin_01(skew_log(phase, x_exp))), y_exp); }
-static float
-calc_trig_log_cos_cos_cos(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(bipolar_to_unipolar(cos_cos_cos_01(skew_log(phase, x_exp))), y_exp); }
-
-static float
-calc_other_skew(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(std::fabs(phase - skew_log(phase, x_exp)), y_exp); }
-static float
-calc_other_saw(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return phase; }
-static float
-calc_other_saw_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return phase < x? phase * y / x : y +  (phase - x) / ( 1 - x) * (1 - y); }
-static float
-calc_other_saw_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(calc_other_saw(phase, x, y, x_exp, y_exp, seed, steps), y_exp); }
-static float
-calc_other_pulse(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return phase < 0.5? 0: 1; }
-static float
-calc_other_pulse_lin(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return phase < x? 0: y; }
-static float
-calc_other_tri(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return 1 - std::fabs(unipolar_to_bipolar(calc_other_saw(phase, x, y, x_exp, y_exp, seed, steps))); }
-static float
-calc_other_tri_log(float phase, float x, float y, float x_exp, float y_exp, int seed, int steps)
-{ return skew_log(calc_other_tri(skew_log(phase, x_exp), x, y, x_exp, y_exp, seed, steps), y_exp); }
-
-#endif
-
 float
 lfo_engine::calc_smooth(float phase, int seed, int steps)
 {
-  //float result = _smooth_noise.next((float)_noise_total_pos / (_noise_total_samples + 1) * steps);
   float result = _smooth_noise.next(phase * steps);
   if(_noise_total_pos++ >= _noise_total_samples)
     reset_noise(seed, steps);
@@ -507,8 +291,8 @@ lfo_engine::calc_static(float phase, int seed, int steps)
   _noise_total_pos++;
   if (_static_step_pos >= _static_step_samples)
   {
+    // just do something with the phase param so we don't need to filter out the X options
     _static_level = fast_rand_next(_static_state);
-    // just do something with the x param so we don't need to filter out options
     _static_level = bipolar_to_unipolar(unipolar_to_bipolar(_static_level) * phase);
     _static_step_pos = 0;
   }
@@ -516,61 +300,7 @@ lfo_engine::calc_static(float phase, int seed, int steps)
     if(_noise_total_pos >= _noise_total_samples)
       reset_noise(seed, steps);
   return result;
-#if 0
-  if (!one_shot && _noise_total_pos >= _noise_total_samples)
-  {
-    _noise_total_pos = 0;
-    if (!free) reset_noise(seed, steps);
-  }
-  else if (_static_step_pos >= _static_step_samples)
-  {
-    if (add)
-    {
-      _static_level = _static_level + fast_rand_next(_static_state) * unipolar_to_bipolar(y) * _static_dir;
-      if (_static_level < 0 || _static_level > 1)
-      {
-        _static_dir *= -1;
-        _static_level -= 2 * (_static_level - (int)_static_level);
-      }
-    }
-    else
-      _static_level = fast_rand_next(_static_state);
-    _static_step_pos = 0;
-  }
-  return result;
-#endif
 }
-
-#if 0
-float 
-lfo_engine::calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps)
-{
-  float result = _static_level;
-  _static_step_pos++;
-  _noise_total_pos++;
-  if (!one_shot && _noise_total_pos >= _noise_total_samples)
-  {
-    _noise_total_pos = 0;
-    if(!free) reset_noise(seed, steps);
-  }
-  else if (_static_step_pos >= _static_step_samples)
-  {
-    if(add)
-    {
-      _static_level = _static_level + fast_rand_next(_static_state) * unipolar_to_bipolar(y) * _static_dir;
-      if(_static_level < 0 || _static_level > 1)
-      {
-        _static_dir *= -1;
-        _static_level -= 2 * (_static_level - (int)_static_level);
-      }
-    } else
-      _static_level = fast_rand_next(_static_state);
-    _static_step_pos = 0;
-  }
-  return result;
-}
-
-#endif
 
 void
 lfo_engine::reset_noise(int seed, int steps)
@@ -608,7 +338,6 @@ lfo_engine::reset(plugin_block const* block)
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
   _phase = _global? 0: block_auto[param_phase][0].real();
-  //if (is_noise(block_auto[param_type][0].step())) _phase = 0;  
   reset_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
 }
 
@@ -630,216 +359,73 @@ lfo_engine::process(plugin_block& block)
   }
 
   if(_global) update_block_params(&block);
-  process_phased(block);
 
-#if 0
-  if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_saw);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sqr);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_off, wave_shape_sin);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_scu, wave_shape_saw);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_scu, wave_shape_sqr);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_scu, wave_shape_sin);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_scb, wave_shape_saw);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_scb, wave_shape_sqr);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_scb, wave_shape_sin);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_saw);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_sqr);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_lin, wave_shape_sin);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_saw);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_sqr);
-  if (sx == wave_skew_type_off && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_off, wave_skew_exp, wave_shape_sin);
-
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_off, wave_shape_saw);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_off, wave_shape_sqr);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_off, wave_shape_sin);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_scu, wave_shape_saw);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_scu, wave_shape_sqr);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_scu, wave_shape_sin);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_scb, wave_shape_saw);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_scb, wave_shape_sqr);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_scb, wave_shape_sin);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_lin, wave_shape_saw);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_lin, wave_shape_sqr);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_lin, wave_shape_sin);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_scu, wave_skew_exp, wave_shape_saw);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scu, wave_skew_exp, wave_shape_sqr);
-  if (sx == wave_skew_type_scu && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_scu, wave_skew_exp, wave_shape_sin);
-
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_off, wave_shape_saw);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_off, wave_shape_sqr);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_off, wave_shape_sin);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_scu, wave_shape_saw);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_scu, wave_shape_sqr);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_scu, wave_shape_sin);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_scb, wave_shape_saw);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_scb, wave_shape_sqr);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_scb, wave_shape_sin);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_lin, wave_shape_saw);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_lin, wave_shape_sqr);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_lin, wave_shape_sin);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_scb, wave_skew_exp, wave_shape_saw);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_scb, wave_skew_exp, wave_shape_sqr);
-  if (sx == wave_skew_type_scb && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_scb, wave_skew_exp, wave_shape_sin);
-
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_saw);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_sqr);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_off, wave_shape_sin);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_scu, wave_shape_saw);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_scu, wave_shape_sqr);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_scu, wave_shape_sin);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_scb, wave_shape_saw);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_scb, wave_shape_sqr);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_scb, wave_shape_sin);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_saw);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_sqr);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_lin, wave_shape_sin);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_saw);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_sqr);
-  if (sx == wave_skew_type_lin && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_lin, wave_skew_exp, wave_shape_sin);
-
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_saw);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_sqr);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_off && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_off, wave_shape_sin);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_scu && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_scu, wave_shape_saw);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_scu && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_scu, wave_shape_sqr);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_scu && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_scu, wave_shape_sin);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_scb && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_scb, wave_shape_saw);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_scb && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_scb, wave_shape_sqr);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_scb && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_scb, wave_shape_sin);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_saw);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_sqr);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_lin && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_lin, wave_shape_sin);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_exp && shp == wave_shape_type_saw) process_phased(block, wave_skew_exp, wave_skew_exp, wave_shape_saw);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_exp && shp == wave_shape_type_sqr) process_phased(block, wave_skew_exp, wave_skew_exp, wave_shape_sqr);
-  if (sx == wave_skew_type_exp && sy == wave_skew_type_exp && shp == wave_shape_type_sin) process_phased(block, wave_skew_exp, wave_skew_exp, wave_shape_sin);
-
-  switch (type)
-  {
-
-  case type_trig_sin: process_loop<lfo_group::phased>(block, calc_trig_sin); break;
-  case type_trig_cos: process_loop<lfo_group::phased>(block, calc_trig_cos); break;
-  case type_trig_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_sin); break;
-  case type_trig_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_sin_cos); break;
-  case type_trig_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_cos_sin); break;
-  case type_trig_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_cos_cos); break;
-  case type_trig_sin_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_sin_sin); break;
-  case type_trig_sin_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_sin_sin_cos); break;
-  case type_trig_sin_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_sin_cos_sin); break;
-  case type_trig_sin_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_sin_cos_cos); break;
-  case type_trig_cos_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_cos_sin_sin); break;
-  case type_trig_cos_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_cos_sin_cos); break;
-  case type_trig_cos_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_cos_cos_sin); break;
-  case type_trig_cos_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_cos_cos_cos); break;
-
-  case type_trig_log_sin: process_loop<lfo_group::phased>(block, calc_trig_log_sin); break;
-  case type_trig_log_cos: process_loop<lfo_group::phased>(block, calc_trig_log_cos); break;
-  case type_trig_log_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_log_sin_sin); break;
-  case type_trig_log_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_log_sin_cos); break;
-  case type_trig_log_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_log_cos_sin); break;
-  case type_trig_log_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_log_cos_cos); break;
-  case type_trig_log_sin_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_log_sin_sin_sin); break;
-  case type_trig_log_sin_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_log_sin_sin_cos); break;
-  case type_trig_log_sin_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_log_sin_cos_sin); break;
-  case type_trig_log_sin_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_log_sin_cos_cos); break;
-  case type_trig_log_cos_sin_sin: process_loop<lfo_group::phased>(block, calc_trig_log_cos_sin_sin); break;
-  case type_trig_log_cos_sin_cos: process_loop<lfo_group::phased>(block, calc_trig_log_cos_sin_cos); break;
-  case type_trig_log_cos_cos_sin: process_loop<lfo_group::phased>(block, calc_trig_log_cos_cos_sin); break;
-  case type_trig_log_cos_cos_cos: process_loop<lfo_group::phased>(block, calc_trig_log_cos_cos_cos); break;
-
-  case type_other_skew: process_loop<lfo_group::phased>(block, calc_other_skew); break;
-  case type_other_tri: process_loop<lfo_group::phased>(block, calc_other_tri); break;
-  case type_other_tri_log: process_loop<lfo_group::phased>(block, calc_other_tri_log); break;
-  case type_other_pulse: process_loop<lfo_group::phased>(block, calc_other_pulse); break;
-  case type_other_pulse_lin: process_loop<lfo_group::phased>(block, calc_other_pulse_lin); break;
-  case type_other_saw: process_loop<lfo_group::phased>(block, calc_other_saw); break;
-  case type_other_saw_lin: process_loop<lfo_group::phased>(block, calc_other_saw_lin); break;
-  case type_other_saw_log: process_loop<lfo_group::phased>(block, calc_other_saw_log); break;
-
-  case type_static: case type_static_add: case type_static_free: case type_static_add_free:
-    process_loop<lfo_group::noise>(block, [this, mode, type](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
-      return calc_static(is_one_shot_full(mode), is_static_add(type), is_static_free(type), y, seed, steps); }); break;
-  case type_smooth:
-    process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
-      return calc_smooth(seed, steps); }); break;
-  case type_smooth_log:
-    process_loop<lfo_group::noise>(block, [this](float phase, float x, float y, float x_exp, float y_exp, int seed, int steps) {
-      return skew_log(calc_smooth(seed, steps), y_exp); }); break;
-  case 0: break;
-  default: break;
-  }
-#endif
-}
-
-void 
-lfo_engine::process_phased(plugin_block& block)
-{
-  auto const& block_auto = block.state.own_block_automation;
   int seed = block_auto[param_seed][0].step();
   int steps = block_auto[param_steps][0].step();
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index1)
   {
-  case wave_shape_type_saw: process_phased_shape(block, wave_shape_saw); break;
-  case wave_shape_type_sqr: process_phased_shape(block, wave_shape_sqr); break;
-  case wave_shape_type_tri: process_phased_shape(block, wave_shape_tri); break;
-  case wave_shape_type_sin: process_phased_shape(block, wave_shape_sin); break;
-  case wave_shape_type_cos: process_phased_shape(block, wave_shape_cos); break;
-  case wave_shape_type_sin_sin: process_phased_shape(block, wave_shape_sin_sin); break;
-  case wave_shape_type_sin_cos: process_phased_shape(block, wave_shape_sin_cos); break;
-  case wave_shape_type_cos_sin: process_phased_shape(block, wave_shape_cos_sin); break;
-  case wave_shape_type_cos_cos: process_phased_shape(block, wave_shape_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_phased_shape(block, wave_shape_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_phased_shape(block, wave_shape_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_phased_shape(block, wave_shape_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_phased_shape(block, wave_shape_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_phased_shape(block, wave_shape_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_phased_shape(block, wave_shape_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_phased_shape(block, wave_shape_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_phased_shape(block, wave_shape_cos_cos_cos); break;
-  case wave_shape_type_smooth: process_phased_shape(block, [this, seed, steps](float in) { 
+  case wave_shape_type_saw: process_shape<false>(block, wave_shape_saw); break;
+  case wave_shape_type_sqr: process_shape<false>(block, wave_shape_sqr); break;
+  case wave_shape_type_tri: process_shape<false>(block, wave_shape_tri); break;
+  case wave_shape_type_sin: process_shape<false>(block, wave_shape_sin); break;
+  case wave_shape_type_cos: process_shape<false>(block, wave_shape_cos); break;
+  case wave_shape_type_sin_sin: process_shape<false>(block, wave_shape_sin_sin); break;
+  case wave_shape_type_sin_cos: process_shape<false>(block, wave_shape_sin_cos); break;
+  case wave_shape_type_cos_sin: process_shape<false>(block, wave_shape_cos_sin); break;
+  case wave_shape_type_cos_cos: process_shape<false>(block, wave_shape_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_shape<false>(block, wave_shape_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_shape<false>(block, wave_shape_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_shape<false>(block, wave_shape_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_shape<false>(block, wave_shape_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_shape<false>(block, wave_shape_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_shape<false>(block, wave_shape_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_shape<false>(block, wave_shape_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_shape<false>(block, wave_shape_cos_cos_cos); break;
+  case wave_shape_type_smooth: process_shape<true>(block, [this, seed, steps](float in) {
     return wave_shape_custom(in, [this, seed, steps](float in) {
       return calc_smooth(in, seed, steps); }); }); break;
-  case wave_shape_type_static: process_phased_shape(block, [this, seed, steps](float in) {
+  case wave_shape_type_static: process_shape<true>(block, [this, seed, steps](float in) {
     return wave_shape_custom(in, [this, seed, steps](float in) {
       return calc_static<false>(in, seed, steps); }); }); break;
-  case wave_shape_type_static_free: process_phased_shape(block, [this, seed, steps](float in) {
+  case wave_shape_type_static_free: process_shape<true>(block, [this, seed, steps](float in) {
     return wave_shape_custom(in, [this, seed, steps](float in) {
       return calc_static<true>(in, seed, steps); }); }); break;
   default: assert(false); break;
   }
 }
 
-template <class Shape> void 
-lfo_engine::process_phased_shape(plugin_block& block, Shape shape)
+template <bool IsNoise, class Shape> void
+lfo_engine::process_shape(plugin_block& block, Shape shape)
 {
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index2)
   {
-  case wave_skew_type_off: process_phased_shape_x(block, shape, wave_skew_off); break;
-  case wave_skew_type_lin: process_phased_shape_x(block, shape, wave_skew_lin); break;
-  case wave_skew_type_scu: process_phased_shape_x(block, shape, wave_skew_scu); break;
-  case wave_skew_type_scb: process_phased_shape_x(block, shape, wave_skew_scb); break;
-  case wave_skew_type_xpu: process_phased_shape_x(block, shape, wave_skew_xpu); break;
-  case wave_skew_type_xpb: process_phased_shape_x(block, shape, wave_skew_xpb); break;
+  case wave_skew_type_off: process_shape_x<IsNoise>(block, shape, wave_skew_off); break;
+  case wave_skew_type_lin: process_shape_x<IsNoise>(block, shape, wave_skew_lin); break;
+  case wave_skew_type_scu: process_shape_x<IsNoise>(block, shape, wave_skew_scu); break;
+  case wave_skew_type_scb: process_shape_x<IsNoise>(block, shape, wave_skew_scb); break;
+  case wave_skew_type_xpu: process_shape_x<IsNoise>(block, shape, wave_skew_xpu); break;
+  case wave_skew_type_xpb: process_shape_x<IsNoise>(block, shape, wave_skew_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <class Shape, class SkewX> void 
-lfo_engine::process_phased_shape_x(plugin_block& block, Shape shape, SkewX skew_x)
+template <bool IsNoise, class Shape, class SkewX> void
+lfo_engine::process_shape_x(plugin_block& block, Shape shape, SkewX skew_x)
 {
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index3)
   {
-  case wave_skew_type_off: process_phased_shape_xy(block, shape, skew_x, wave_skew_off); break;
-  case wave_skew_type_lin: process_phased_shape_xy(block, shape, skew_x, wave_skew_lin); break;
-  case wave_skew_type_scu: process_phased_shape_xy(block, shape, skew_x, wave_skew_scu); break;
-  case wave_skew_type_scb: process_phased_shape_xy(block, shape, skew_x, wave_skew_scb); break;
-  case wave_skew_type_xpu: process_phased_shape_xy(block, shape, skew_x, wave_skew_xpu); break;
-  case wave_skew_type_xpb: process_phased_shape_xy(block, shape, skew_x, wave_skew_xpb); break;
+  case wave_skew_type_off: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_off); break;
+  case wave_skew_type_lin: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_lin); break;
+  case wave_skew_type_scu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_scu); break;
+  case wave_skew_type_scb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_scb); break;
+  case wave_skew_type_xpu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_xpu); break;
+  case wave_skew_type_xpb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <class Shape, class SkewX, class SkewY> void
-lfo_engine::process_phased_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y)
+template <bool IsNoise, class Shape, class SkewX, class SkewY> void
+lfo_engine::process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -851,19 +437,16 @@ lfo_engine::process_phased_shape_xy(plugin_block& block, Shape shape, SkewX skew
   float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
   float py = wave_skew_is_exp(sy) ? _log_skew_y_exp : y;
   auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_unipolar(in, px, py, shape, skew_x, skew_y); };
-  process_loop<lfo_group::phased>(block, processor);
+  process_loop<IsNoise>(block, processor);
 }
 
-template <lfo_group Group, class Calc>
+template <bool IsNoise, class Calc>
 void lfo_engine::process_loop(plugin_block& block, Calc calc)
 {
   int this_module = _global ? module_glfo : module_vlfo;
-  auto const& block_automation = block.state.own_block_automation;
-  //float x = block_automation[param_x][0].real();
-  //float y = block_automation[param_y][0].real();
-  int mode = block_automation[param_mode][0].step();
-  //int seed = block_automation[param_seed][0].step();
-  int steps = block_automation[param_steps][0].step();
+  auto const& block_auto = block.state.own_block_automation;
+  int mode = block_auto[param_mode][0].step();
+  int steps = block_auto[param_steps][0].step();
   auto const& rate_curve = sync_or_freq_into_scratch(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -883,29 +466,23 @@ void lfo_engine::process_loop(plugin_block& block, Calc calc)
       continue;
     }
 
-    //if constexpr(Group == lfo_group::noise)
-    //{
+    if constexpr(IsNoise)
+    {
       _noise_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
       _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
-    //}
-    
-    //_lfo_end_value = calc(_phase, x, y, _log_skew_x_exp, _log_skew_y_exp, seed, steps);
+    }
+
     _lfo_end_value = calc(_phase);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
-    
-    bool phase_wrapped = false;
-    //if constexpr (Group == lfo_group::phased)
-      phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
-    bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
 
-    bool ended = ref_wrapped && is_one_shot_full(mode);
-    //if constexpr (Group == lfo_group::phased)
-      ended |= phase_wrapped && is_one_shot_wrapped(mode);
+    bool  phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
+    bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
+    bool ended = ref_wrapped && is_one_shot_full(mode) || phase_wrapped && is_one_shot_wrapped(mode);
     if (ended)
     {
       _stage = lfo_stage::filter;
-      float filter_ms = block_automation[param_filter][0].real();
+      float filter_ms = block_auto[param_filter][0].real();
       _end_filter_stage_samples = block.sample_rate * filter_ms * 0.001;
     }
   }
