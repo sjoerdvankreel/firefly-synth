@@ -15,9 +15,9 @@ using plugin_base::unipolar_to_bipolar;
 using plugin_base::bipolar_to_unipolar;
 inline float const pi32 = plugin_base::pi32;
 
-plugin_base::multi_menu make_wave_multi_menu();
 std::vector<plugin_base::topo_tag> wave_skew_type_tags();
-std::vector<plugin_base::topo_tag> wave_shape_type_tags();
+std::vector<plugin_base::topo_tag> wave_shape_type_tags(bool with_random);
+plugin_base::multi_menu make_wave_multi_menu(bool with_random);
 
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };
 enum { 

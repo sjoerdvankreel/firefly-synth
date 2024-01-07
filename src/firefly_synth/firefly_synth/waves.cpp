@@ -126,7 +126,7 @@ wave_skew_type_tags()
 }
 
 std::vector<topo_tag> 
-wave_shape_type_tags()
+wave_shape_type_tags(bool with_random)
 {
   std::vector<topo_tag> result;
   result.push_back(make_topo_tag("{CA30E83B-2A11-4833-8A45-81F666A3A4F5}", wave_make_name_shape(wave_shape_type_saw)));
@@ -146,6 +146,8 @@ wave_shape_type_tags()
   result.push_back(make_topo_tag("{B191D364-1951-449A-ABC7-09AEE9DB9FC4}", wave_make_name_shape(wave_shape_type_cos_sin_cos)));
   result.push_back(make_topo_tag("{094482D1-5BAC-4F70-80F3-CA3924DDFBE6}", wave_make_name_shape(wave_shape_type_cos_cos_sin)));
   result.push_back(make_topo_tag("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos)));
+
+  if(!with_random) return result;
   result.push_back(make_topo_tag("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_smooth)));
   result.push_back(make_topo_tag("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static)));
   result.push_back(make_topo_tag("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free)));
@@ -153,10 +155,10 @@ wave_shape_type_tags()
 }
 
 multi_menu 
-make_wave_multi_menu()
+make_wave_multi_menu(bool with_random)
 {
   return make_multi_menu(
-    wave_shape_type_tags(), wave_skew_type_tags(), wave_skew_type_tags(),
+    wave_shape_type_tags(with_random), wave_skew_type_tags(), wave_skew_type_tags(),
     wave_make_header_shape, wave_make_header_shape_x, wave_make_name);
 }
 
