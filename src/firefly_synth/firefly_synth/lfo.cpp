@@ -128,10 +128,10 @@ mode_items()
   result.emplace_back("{E8D04800-17A9-42AB-9CAE-19322A400334}", "Off");
   result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate");
   result.emplace_back("{0A5F479F-9180-4498-9464-DBEA0595C86B}", "Rate.One");
-  result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.Wrap");
+  result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.Wrp");
   result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
   result.emplace_back("{85B1AC0B-FA06-4E23-A7EF-3EBF6F620948}", "Sync.One");
-  result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.Wrap");
+  result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.Wrp");
   return result;
 }
 
@@ -282,7 +282,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 5, 13 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 5, 14 } })));
   
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_graph_engine;
@@ -318,7 +318,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 11, 10, 10, 10, 8, 8 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 11, 11, 11, 10, 9, 9 }))));
 
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
