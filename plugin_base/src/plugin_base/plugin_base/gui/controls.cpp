@@ -335,7 +335,7 @@ param_toggle_button::own_param_changed(plain_value plain)
 {
   _checked = plain.step() != 0;
   setToggleState(plain.step() != 0, dontSendNotification);
-  setTooltip(_param->param->info.tag.name + ": " + _param->param->domain.plain_to_text(false, plain));
+  setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, plain));
 }
 
 void 
@@ -352,7 +352,7 @@ param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const
 param_component(gui, module, param), autofit_togglebutton()
 {
   auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
-  setTooltip(_param->param->info.tag.name + ": " + _param->param->domain.plain_to_text(false, value));
+  setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, value));
   _checked = value.step() != 0;
   addListener(this);
   init();
@@ -413,8 +413,7 @@ param_combobox::own_param_changed(plain_value plain)
 {
   setSelectedId(plain.step() + 1 - _param->param->domain.min, dontSendNotification);
   std::string value = _param->param->domain.plain_to_text(false, plain);
-  std::string name = _param->param->info.tag.name;
-  setTooltip(name + ": " + value);
+  setTooltip(_param->info.name + ": " + value);
 }
 
 void 

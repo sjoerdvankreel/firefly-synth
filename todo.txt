@@ -6,8 +6,6 @@ microtonal support
 polyphonic modulation
 do cakewalk bug report
 handle clap is_modulatable
-do temposync in both beats and bars
-dont assume host is on a 4/4 timesig
 
 demo synth:
 handle clap midi notes
@@ -18,16 +16,12 @@ make new test files
 fix up the gui (control sizes etc)
 check all infernal functionality, see what needs to be in the base
 document the header files a bit
-more space for freq slider
-number modules by processing order or by group
 implement the multi env
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
-do incdecbuttons on cent?
 voice arp?
 more flexibility in plugin_base -> "give me a voice"
 hardsync, unison
 do 5 am and 5 fm routes 
-drop "or time into scratch" & friends?
 do add_submenu everywhere in the topos
 osc: overlay any 2 waves ? (saw+saw==>pulse)
 fix the init patch
@@ -43,8 +37,6 @@ oversample the whole thing ?
 do hpf in waveshaper (dc fix)
 do the param fuzz test
 figure out if we have a decent option set that covers both lfos and shapers (e.g, can we emulate foldback)
-re-check all the label+tooltip combos
-do the full tooltip thing
 do 4 auxs
 
 fix the comb size param
