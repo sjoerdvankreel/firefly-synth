@@ -224,7 +224,7 @@ public:
   void startedDragging() override { _gui->param_begin_changes(_param->info.global); }
   void valueChanged() override { _gui->param_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); }
   juce::String getTextFromValue(double value) override 
-  { return juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage? 100 : 1)); }
+  { return juce::String(_param->info.name + ": ") + juce::Slider::getTextFromValue(value * (_param->param->domain.display == domain_display::percentage ? 100 : 1)); }
 };
 
 // dropdown bound to single parameter
