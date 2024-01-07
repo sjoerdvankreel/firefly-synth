@@ -61,6 +61,7 @@ wave_make_header_shape(int shape)
   case wave_shape_type_cos_cos_cos: return "CosCosCos";
   case wave_shape_type_smooth: return "Smooth";
   case wave_shape_type_static: return "Static";
+  case wave_shape_type_static_free: return "Static/Free";
   default: assert(false); return {};
   }
 }
@@ -89,6 +90,7 @@ wave_make_name_shape(int shape)
   case wave_shape_type_cos_cos_cos: return "CCC";
   case wave_shape_type_smooth: return "Smt";
   case wave_shape_type_static: return "Stc";
+  case wave_shape_type_static_free: return "S/F";
   default: assert(false); return {};
   }
 }
@@ -146,6 +148,7 @@ wave_shape_type_tags()
   result.push_back(make_topo_tag("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos)));
   result.push_back(make_topo_tag("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_smooth)));
   result.push_back(make_topo_tag("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static)));
+  result.push_back(make_topo_tag("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free)));
   return result;
 }
 

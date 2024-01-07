@@ -165,7 +165,7 @@ public module_engine {
   void update_block_params(plugin_block const* block);
 
   float calc_smooth(float phase, int seed, int steps);
-  float calc_static(float phase, int seed, int steps);
+  template <bool Free> float calc_static(float phase, int seed, int steps);
   //float calc_static(bool one_shot, bool add, bool free, float y, int seed, int steps);
 
   template <lfo_group Group, class Calc>
@@ -513,7 +513,7 @@ lfo_engine::calc_smooth(float phase, int seed, int steps)
   return result;
 }
 
-float
+template <bool Free> float
 lfo_engine::calc_static(float phase, int seed, int steps)
 {
   float result = _static_level;
@@ -526,8 +526,9 @@ lfo_engine::calc_static(float phase, int seed, int steps)
     _static_level = bipolar_to_unipolar(unipolar_to_bipolar(_static_level) * phase);
     _static_step_pos = 0;
   }
-  if(_noise_total_pos >= _noise_total_samples)
-    reset_noise(seed, steps);
+  if constexpr(!Free)
+    if(_noise_total_pos >= _noise_total_samples)
+      reset_noise(seed, steps);
   return result;
 #if 0
   if (!one_shot && _noise_total_pos >= _noise_total_samples)
@@ -813,7 +814,10 @@ lfo_engine::process_phased(plugin_block& block)
       return calc_smooth(in, seed, steps); }); }); break;
   case wave_shape_type_static: process_phased_shape(block, [this, seed, steps](float in) {
     return wave_shape_custom(in, [this, seed, steps](float in) {
-      return calc_static(in, seed, steps); }); }); break;
+      return calc_static<false>(in, seed, steps); }); }); break;
+  case wave_shape_type_static_free: process_phased_shape(block, [this, seed, steps](float in) {
+    return wave_shape_custom(in, [this, seed, steps](float in) {
+      return calc_static<true>(in, seed, steps); }); }); break;
   default: assert(false); break;
   }
 }
