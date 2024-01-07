@@ -799,11 +799,12 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
     int dly_plus_samples_1 = (int)dly_plus_samples_t + 1;
     for(int c = 0; c < 2; c++)
     {
-      float min0 = _comb_out[c][(_comb_pos + _comb_samples - dly_min_samples_0) % _comb_samples];
-      float min1 = _comb_out[c][(_comb_pos + _comb_samples - dly_min_samples_1) % _comb_samples];
+      // + 2*samples in case dly_samples > comb_samples
+      float min0 = _comb_out[c][(_comb_pos + 2 * _comb_samples - dly_min_samples_0) % _comb_samples];
+      float min1 = _comb_out[c][(_comb_pos + 2 * _comb_samples - dly_min_samples_1) % _comb_samples];
       float min = ((1 - dly_min_t) * min0 + dly_min_t * min1) * gain_min;
-      float plus0 = _comb_in[c][(_comb_pos + _comb_samples - dly_plus_samples_0) % _comb_samples];
-      float plus1 = _comb_in[c][(_comb_pos + _comb_samples - dly_plus_samples_1) % _comb_samples];
+      float plus0 = _comb_in[c][(_comb_pos + 2 * _comb_samples - dly_plus_samples_0) % _comb_samples];
+      float plus1 = _comb_in[c][(_comb_pos + 2 * _comb_samples - dly_plus_samples_1) % _comb_samples];
       float plus = ((1 - dly_plus_t) * plus0 + dly_plus_t * plus1) * gain_plus;
       _comb_in[c][_comb_pos] = block.state.own_audio[0][0][c][f];
       _comb_out[c][_comb_pos] = block.state.own_audio[0][0][c][f] + plus + min * feedback_factor;
