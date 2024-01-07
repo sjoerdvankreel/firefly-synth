@@ -33,12 +33,19 @@ enum {
 
 inline bool wave_skew_is_exp(int skew) { return skew == wave_skew_type_xpu || skew == wave_skew_type_xpb; }
 
-inline float wave_skew_off(float in, float p) { return in; }
-inline float wave_skew_lin(float in, float p) { return in == p ? in : in < p ? in / p * 0.5f : 0.5f + (in - p) / (1 - p) * 0.5f; }
-inline float wave_skew_scu(float in, float p) { return in * p; }
-inline float wave_skew_scb(float in, float p) { return bipolar_to_unipolar(unipolar_to_bipolar(in) * p); }
-inline float wave_skew_xpu(float in, float p) { return std::pow(in, p); }
-inline float wave_skew_xpb(float in, float p) { float bp = unipolar_to_bipolar(in); return bipolar_to_unipolar((bp < 0? -1: 1) * std::pow(std::fabs(bp), p)); }
+inline float wave_skew_uni_off(float in, float p) { return in; }
+inline float wave_skew_uni_lin(float in, float p) { return in == p ? in : in < p ? in / p * 0.5f : 0.5f + (in - p) / (1 - p) * 0.5f; }
+inline float wave_skew_uni_scu(float in, float p) { return in * p; }
+inline float wave_skew_uni_scb(float in, float p) { return bipolar_to_unipolar(unipolar_to_bipolar(in) * p); }
+inline float wave_skew_uni_xpu(float in, float p) { return std::pow(in, p); }
+inline float wave_skew_uni_xpb(float in, float p) { float bp = unipolar_to_bipolar(in); return bipolar_to_unipolar((bp < 0? -1: 1) * std::pow(std::fabs(bp), p)); }
+
+inline float wave_skew_bi_off(float in, float p) { return in; }
+inline float wave_skew_bi_lin(float in, float p) { return in; }
+inline float wave_skew_bi_scu(float in, float p) { return in * p; }
+inline float wave_skew_bi_scb(float in, float p) { return in; }
+inline float wave_skew_bi_xpu(float in, float p) { return in; }
+inline float wave_skew_bi_xpb(float in, float p) { return in; }
 
 inline float wave_shape_uni_saw(float in) { return in; }
 inline float wave_shape_uni_sqr(float in) { return in < 0.5f? 0.0f: 1.0f; }

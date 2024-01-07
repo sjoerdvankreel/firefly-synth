@@ -724,12 +724,12 @@ fx_engine::process_shaper_clip_shape(plugin_block& block, cv_matrix_mixdown cons
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index2)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_xpb); break;
+  case wave_skew_type_off: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
@@ -739,12 +739,12 @@ fx_engine::process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown co
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index3)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_xpb); break;
+  case wave_skew_type_off: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }

@@ -412,12 +412,12 @@ lfo_engine::process_shape(plugin_block& block, Shape shape)
 {
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index2)
   {
-  case wave_skew_type_off: process_shape_x<IsNoise>(block, shape, wave_skew_off); break;
-  case wave_skew_type_lin: process_shape_x<IsNoise>(block, shape, wave_skew_lin); break;
-  case wave_skew_type_scu: process_shape_x<IsNoise>(block, shape, wave_skew_scu); break;
-  case wave_skew_type_scb: process_shape_x<IsNoise>(block, shape, wave_skew_scb); break;
-  case wave_skew_type_xpu: process_shape_x<IsNoise>(block, shape, wave_skew_xpu); break;
-  case wave_skew_type_xpb: process_shape_x<IsNoise>(block, shape, wave_skew_xpb); break;
+  case wave_skew_type_off: process_shape_x<IsNoise>(block, shape, wave_skew_uni_off); break;
+  case wave_skew_type_lin: process_shape_x<IsNoise>(block, shape, wave_skew_uni_lin); break;
+  case wave_skew_type_scu: process_shape_x<IsNoise>(block, shape, wave_skew_uni_scu); break;
+  case wave_skew_type_scb: process_shape_x<IsNoise>(block, shape, wave_skew_uni_scb); break;
+  case wave_skew_type_xpu: process_shape_x<IsNoise>(block, shape, wave_skew_uni_xpu); break;
+  case wave_skew_type_xpb: process_shape_x<IsNoise>(block, shape, wave_skew_uni_xpb); break;
   default: assert(false); break;
   }
 }
@@ -427,12 +427,12 @@ lfo_engine::process_shape_x(plugin_block& block, Shape shape, SkewX skew_x)
 {
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index3)
   {
-  case wave_skew_type_off: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_off); break;
-  case wave_skew_type_lin: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_lin); break;
-  case wave_skew_type_scu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_scu); break;
-  case wave_skew_type_scb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_scb); break;
-  case wave_skew_type_xpu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_xpu); break;
-  case wave_skew_type_xpb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_xpb); break;
+  case wave_skew_type_off: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_off); break;
+  case wave_skew_type_lin: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_lin); break;
+  case wave_skew_type_scu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_scu); break;
+  case wave_skew_type_scb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_scb); break;
+  case wave_skew_type_xpu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_xpu); break;
+  case wave_skew_type_xpb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_xpb); break;
   default: assert(false); break;
   }
 }
