@@ -32,7 +32,7 @@ static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_ite
 static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
 static bool is_noise(multi_menu const& menu, int type) { 
   int t = menu.multi_items[type].index1; 
-  return t == wave_shape_type_smooth || t == wave_shape_type_static || t == wave_shape_type_static_free; 
+  return t == wave_shape_type_smooth_or_fold || t == wave_shape_type_static || t == wave_shape_type_static_free; 
 }
 
 static std::vector<list_item>
@@ -183,7 +183,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 module_topo
 lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
-  auto type_menu = make_wave_multi_menu(true);
+  auto type_menu = make_wave_multi_menu(false);
   auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", "Voice LFO", "V.LFO", true, true, module_vlfo, 6);
   auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", "G.LFO", true, true, module_glfo, 6);
   module_stage stage = global ? module_stage::input : module_stage::voice;
@@ -394,7 +394,7 @@ lfo_engine::process(plugin_block& block)
   case wave_shape_type_cos_sin_cos: process_shape<false>(block, wave_shape_uni_cos_sin_cos); break;
   case wave_shape_type_cos_cos_sin: process_shape<false>(block, wave_shape_uni_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_shape<false>(block, wave_shape_uni_cos_cos_cos); break;
-  case wave_shape_type_smooth: process_shape<true>(block, [this, seed, steps](float in) {
+  case wave_shape_type_smooth_or_fold: process_shape<true>(block, [this, seed, steps](float in) {
     return wave_shape_uni_custom(in, [this, seed, steps](float in) {
       return calc_smooth(in, seed, steps); }); }); break;
   case wave_shape_type_static: process_shape<true>(block, [this, seed, steps](float in) {

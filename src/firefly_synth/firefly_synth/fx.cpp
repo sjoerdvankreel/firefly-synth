@@ -229,7 +229,7 @@ render_graph(
 module_topo
 fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
-  auto shaper_type_menu = make_wave_multi_menu(false);
+  auto shaper_type_menu = make_wave_multi_menu(true);
   auto const voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice FX", "V.FX", true, true, module_vfx, 10);
   auto const global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", "Global FX", "G.FX", true, true, module_gfx, 10);
   module_stage stage = global ? module_stage::output : module_stage::voice;
@@ -716,6 +716,7 @@ fx_engine::process_shaper_clip(plugin_block& block, cv_matrix_mixdown const& mod
   case wave_shape_type_cos_sin_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
   case wave_shape_type_cos_cos_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
+  case wave_shape_type_smooth_or_fold: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
 }

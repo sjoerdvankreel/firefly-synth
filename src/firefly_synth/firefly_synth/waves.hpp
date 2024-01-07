@@ -15,9 +15,7 @@ using plugin_base::unipolar_to_bipolar;
 using plugin_base::bipolar_to_unipolar;
 inline float const pi32 = plugin_base::pi32;
 
-std::vector<plugin_base::topo_tag> wave_skew_type_tags();
-std::vector<plugin_base::topo_tag> wave_shape_type_tags(bool with_random);
-plugin_base::multi_menu make_wave_multi_menu(bool with_random);
+plugin_base::multi_menu make_wave_multi_menu(bool for_shaper);
 
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };
 enum { 
@@ -29,7 +27,7 @@ enum {
   wave_shape_type_sin_cos_sin, wave_shape_type_sin_cos_cos,
   wave_shape_type_cos_sin_sin, wave_shape_type_cos_sin_cos,
   wave_shape_type_cos_cos_sin, wave_shape_type_cos_cos_cos,
-  wave_shape_type_smooth, wave_shape_type_static, wave_shape_type_static_free };
+  wave_shape_type_smooth_or_fold, wave_shape_type_static, wave_shape_type_static_free };
 
 inline bool wave_skew_is_exp(int skew) { return skew == wave_skew_type_xpu || skew == wave_skew_type_xpb; }
 
@@ -85,6 +83,17 @@ inline float wave_shape_bi_cos_cos_cos(float in) { return std::cos(in * pi32 + s
 
 template <class Custom>
 inline float wave_shape_uni_custom(float in, Custom custom) { return custom(in); }
+
+inline float
+wave_shape_bi_fold(float in)
+{
+  while (true)
+    if (in > 1.0f) in -= 2.0f * (in - 1.0f);
+    else if (in < -1.0f) in += 2.0f * (-in - 1.0f);
+    else return in;
+  assert(false);
+  return 0.0f;
+}
 
 template <class Shape, class SkewX, class SkewY>
 inline float wave_calc_uni(float in, float x, float y, Shape shape, SkewX skew_x, SkewY skew_y)
