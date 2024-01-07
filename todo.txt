@@ -42,6 +42,7 @@ drop trig header
 at least block-automate all voice parameters see also modmatrices
 do shaper clip mode clamp/tanh
 do shaper x/y per block/voice?
+do shaper hpf
 
 fix the comb size param
 * fx
