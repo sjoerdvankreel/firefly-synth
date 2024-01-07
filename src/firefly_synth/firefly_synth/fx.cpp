@@ -28,7 +28,7 @@ enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
-  param_shape_type, param_shape_over, param_shape_gain, param_shape_mix,
+  param_shape_over, param_shape_type, param_shape_clip, param_shape_gain, param_shape_mix,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
@@ -304,28 +304,34 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  auto& shape_over = result.params.emplace_back(make_param(
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.Over", "Over", true, false, param_shape_over, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "OvrSmp.2X"),
+    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_type = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Shp.Type", param_shape_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(shaper_type_menu.items, "Sin.OfX/OfY"),
-    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
-  auto& shape_over = result.params.emplace_back(make_param(
-    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.Over", "Over", true, false, param_shape_over, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(shape_over_items(), "OvrSmp.2X"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
-  shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  auto& shape_clip = result.params.emplace_back(make_param(
+    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Shp.Clip", "Clip", true, false, param_shape_clip, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
+    make_param_gui_single(section_shape, gui_edit_type::toggle, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shape_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gain", "Gain", true, false, param_shape_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
-    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 2 }, 
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 3 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mix", "Mix", true, false, param_shape_mix, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 3 }, 
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 4 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; }); 
 
