@@ -45,6 +45,7 @@ do the param fuzz test
 figure out if we have a decent option set that covers both lfos and shapers (e.g, can we emulate foldback)
 re-check all the label+tooltip combos
 do the full tooltip thing
+do 4 auxs
 
 fix the comb size param
 * fx
