@@ -30,10 +30,12 @@ enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
-  param_shape_over, param_shape_type, param_shape_clip, param_shape_x, param_shape_y, param_shape_gain, param_shape_mix,
+  param_shape_over, param_shape_type, param_shape_clip, param_shape_x, param_shape_y, param_shape_drive, param_shape_mix, param_shape_hpf,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
+static bool shp_has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
+static bool shp_has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
 
 static std::vector<list_item>
 type_items(bool global)
@@ -42,7 +44,7 @@ type_items(bool global)
   result.emplace_back("{F37A19CE-166A-45BF-9F75-237324221C39}", "Off");
   result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SVF");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
-  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Shaper");
+  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Shape");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   return result;
 }
@@ -67,11 +69,11 @@ static std::vector<list_item>
 shape_over_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "OvrSmp.1X");
-  result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "OvrSmp.2X");
-  result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "OvrSmp.4X");
-  result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "OvrSmp.8X");
-  result.emplace_back("{CE3CBAC6-4E7F-418E-90F5-19FEF6DF399D}", "OvrSmp.16X");
+  result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "1X");
+  result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "2X");
+  result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "4X");
+  result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "8X");
+  result.emplace_back("{CE3CBAC6-4E7F-418E-90F5-19FEF6DF399D}", "16X");
   return result;
 }
 
@@ -325,11 +327,11 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 2, 2, 3, 3 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 2, 2, 3, 3, 3 } })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_over = result.params.emplace_back(make_param(
-    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.Over", "Over", true, false, param_shape_over, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "OvrSmp.2X"),
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.OverSmp", "Shp.OverSmp", true, false, param_shape_over, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "2X"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_type = result.params.emplace_back(make_param(
@@ -340,7 +342,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Shp.Clip", "Clip", true, false, param_shape_clip, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
+    make_param_dsp_automate_if_voice(!global), make_domain_toggle(true),
     make_param_gui_single(section_shape, gui_edit_type::toggle, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
@@ -349,25 +351,33 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_x.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_x.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
+    return vs[0] == type_shaper && shp_has_skew_x(shaper_type_menu, vs[1]); });
   auto& shape_y = result.params.emplace_back(make_param(
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Shp.Y", "Y", true, false, param_shape_y, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_y.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
-  auto& shape_gain = result.params.emplace_back(make_param(
-    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gain", "Gain", true, false, param_shape_gain, 1),
+  shape_y.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
+    return vs[0] == type_shaper && shp_has_skew_y(shaper_type_menu, vs[1]); });
+  auto& shape_drive = result.params.emplace_back(make_param(
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Drv", "Drv", true, false, param_shape_drive, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_drive.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mix", "Mix", true, false, param_shape_mix, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; }); 
+  auto& shape_hpf = result.params.emplace_back(make_param(
+    make_topo_info("{66D4C961-B58D-4E4D-9643-0188CC5C2A5D}", "Shp.HPF", "HPF", true, false, param_shape_hpf, 1),
+    make_param_dsp_input(!global, param_automate::none), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 7 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shape_hpf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
@@ -766,7 +776,7 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
-  auto const& gain_curve = *modulation[this_module][block.module_slot][param_shape_gain][0];
+  auto const& drive_curve = *modulation[this_module][block.module_slot][param_shape_drive][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(sx))
@@ -790,8 +800,8 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
       float in = block.state.own_audio[0][0][c][f];
-      float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
-      float shaped = clip(wave_calc_bi(in * gain, (*x_curve)[f], (*y_curve)[f], shape, skew_x, skew_y));
+      float drive = block.normalized_to_raw(this_module, param_shape_drive, drive_curve[f]);
+      float shaped = clip(wave_calc_bi(in * drive, (*x_curve)[f], (*y_curve)[f], shape, skew_x, skew_y));
       block.state.own_audio[0][0][c][f] = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
     }
 }

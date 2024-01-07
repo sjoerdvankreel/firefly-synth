@@ -43,6 +43,7 @@ at least block-automate all voice parameters see also modmatrices
 do shaper clip mode clamp/tanh
 do shaper x/y per block/voice?
 do shaper hpf
+re-profile the kbdtest demo
 
 fix the comb size param
 * fx
