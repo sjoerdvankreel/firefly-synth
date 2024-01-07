@@ -65,6 +65,7 @@ public module_engine {
   smooth_noise _smooth_noise;
   std::uint32_t _static_state;
 
+  int _prev_seed = -1;
   int _static_dir = 1;
   int _static_step_pos = 0;
   int _noise_total_pos = 0;
@@ -358,10 +359,18 @@ lfo_engine::process(plugin_block& block)
     return; 
   }
 
-  if(_global) update_block_params(&block);
-
   int seed = block_auto[param_seed][0].step();
   int steps = block_auto[param_steps][0].step();
+  if(_global)
+  {
+    update_block_params(&block);
+    if (seed != _prev_seed)
+    {
+      _prev_seed = seed;
+      reset_noise(seed, steps);
+    }
+  }
+
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index1)
   {
   case wave_shape_type_saw: process_shape<false>(block, wave_shape_saw); break;
