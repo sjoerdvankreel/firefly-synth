@@ -18,7 +18,6 @@ static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { section_main, section_slope, section_dhadsr };
-enum { scratch_delay, scratch_attack, scratch_hold, scratch_decay, scratch_release, scratch_count };
 enum { type_sustain_plain, type_follow_plain, type_release_plain, type_sustain_slope, type_follow_slope, type_release_slope };
 enum {
   param_on, param_type, param_sync, param_multi,
@@ -141,7 +140,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", "Envelope", "Env", true, true, module_env, 6),
-    make_module_dsp(module_stage::voice, module_output::cv, scratch_count, { 
+    make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1, 1 }, { 1, 1 } })));
 

@@ -22,6 +22,7 @@ static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
 static float const log_half = std::log(0.5f);
 
+enum { scratch_shape_x, scratch_shape_y, scratch_count };
 enum { type_off, type_svf, type_comb, type_shaper, type_delay };
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
@@ -236,7 +237,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto const info = topo_info(global ? global_info : voice_info);
 
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::audio, 0, {
+    make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, 1 } })));
  
@@ -762,21 +763,35 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   int sx = type_item.index2;
   int sy = type_item.index3;
 
-  auto const& x_curve = *modulation[this_module][block.module_slot][param_shape_x][0];
-  auto const& y_curve = *modulation[this_module][block.module_slot][param_shape_y][0];
+  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
+  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_shape_gain][0];
+
+  jarray<float, 1> const* x_curve = &x_curve_plain;
+  if(wave_skew_is_exp(sx))
+  {
+    auto& x_scratch = block.state.own_scratch[scratch_shape_x];
+    for (int f = block.start_frame; f < block.end_frame; f++)
+      x_scratch[f] = std::log(0.001 + (x_curve_plain[f] * 0.98)) / log_half;
+    x_curve = &x_scratch;
+  }
+
+  jarray<float, 1> const* y_curve = &y_curve_plain;
+  if (wave_skew_is_exp(sy))
+  {
+    auto& y_scratch = block.state.own_scratch[scratch_shape_y];
+    for (int f = block.start_frame; f < block.end_frame; f++)
+      y_scratch[f] = std::log(0.001 + (y_curve_plain[f] * 0.98)) / log_half;
+    y_curve = &y_scratch;
+  }
+
   for(int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
-      // todo not per sample
-      float px = x_curve[f];
-      float py = y_curve[f];
-      if(wave_skew_is_exp(sx)) px = std::log(0.001 + (px * 0.98)) / log_half;
-      if (wave_skew_is_exp(sy)) py = std::log(0.001 + (py * 0.98)) / log_half;
       float in = block.state.own_audio[0][0][c][f];
       float gain = block.normalized_to_raw(this_module, param_shape_gain, gain_curve[f]);
-      float shaped = clip(wave_calc_bi(in * gain, px, py, shape, skew_x, skew_y));
+      float shaped = clip(wave_calc_bi(in * gain, (*x_curve)[f], (*y_curve)[f], shape, skew_x, skew_y));
       block.state.own_audio[0][0][c][f] = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
     }
 }
