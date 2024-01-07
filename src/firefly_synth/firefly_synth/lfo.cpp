@@ -522,6 +522,8 @@ lfo_engine::calc_static(float phase, int seed, int steps)
   if (_static_step_pos >= _static_step_samples)
   {
     _static_level = fast_rand_next(_static_state);
+    // just do something with the x param so we don't need to filter out options
+    _static_level = bipolar_to_unipolar(unipolar_to_bipolar(_static_level) * phase);
     _static_step_pos = 0;
   }
   if(_noise_total_pos >= _noise_total_samples)
