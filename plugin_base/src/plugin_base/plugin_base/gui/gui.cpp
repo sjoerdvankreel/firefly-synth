@@ -757,7 +757,7 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
     return *((Component*)nullptr);
   }
 
-  auto& result = make_component<grid_component>(dimension, margin_param);
+  auto& result = make_component<grid_component>(dimension, 0);
   result.add(make_param_label(module, param, param.param->gui.label.contents), label_position);
   result.add(make_param_editor(module, param), edit_position);
   return result;
