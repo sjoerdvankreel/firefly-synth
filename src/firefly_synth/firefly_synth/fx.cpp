@@ -336,7 +336,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_type = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Shp.Type", param_shape_type, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(shaper_type_menu.items, "Sin.OfX/OfY"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(shaper_type_menu.items, "Sin.Off/Off"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
   shape_type.gui.submenu = shaper_type_menu.submenu;
   shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });

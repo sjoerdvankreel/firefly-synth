@@ -27,12 +27,12 @@ wave_make_name_skew(int skew)
 {
   switch (skew)
   {
-  case wave_skew_type_off: return "Of";
-  case wave_skew_type_lin: return "Ln";
-  case wave_skew_type_scu: return "Su";
-  case wave_skew_type_scb: return "Sb";
-  case wave_skew_type_xpu: return "Xu";
-  case wave_skew_type_xpb: return "Xb";
+  case wave_skew_type_off: return "Off";
+  case wave_skew_type_lin: return "Lin";
+  case wave_skew_type_scu: return "Scu";
+  case wave_skew_type_scb: return "Scb";
+  case wave_skew_type_xpu: return "Xpu";
+  case wave_skew_type_xpb: return "Xpb";
   default: assert(false); return {};
   }
 }
@@ -100,7 +100,7 @@ wave_make_header_shape_x(int shape, int skew_x, bool for_shaper)
 {
   auto shape_header = wave_make_header_shape(shape, for_shaper);
   auto x_header = wave_make_header_skew(skew_x);
-  return shape_header + "." + x_header + "X";
+  return shape_header + ".X" + x_header;
 }
 
 static std::string
@@ -109,7 +109,7 @@ wave_make_name(int shape, int skew_x, int skew_y, bool for_shaper)
   auto name_x = wave_make_name_skew(skew_x);
   auto name_y = wave_make_name_skew(skew_y);
   auto name_shape = wave_make_name_shape(shape, for_shaper);
-  return name_shape + "." + name_x + "X/" + name_y + "Y";
+  return name_shape + "." + name_x + "/" + name_y;
 }
 
 static std::vector<topo_tag>
