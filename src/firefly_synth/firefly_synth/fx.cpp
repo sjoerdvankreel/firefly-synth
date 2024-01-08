@@ -30,7 +30,7 @@ enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
-  param_shape_over, param_shape_type, param_shape_clip, param_shape_x, param_shape_y, param_shape_drive, param_shape_mix, param_shape_hpf,
+  param_shape_over, param_shape_type, param_shape_clip, param_shape_x, param_shape_y, param_shape_mix, param_shape_drive,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
@@ -97,10 +97,11 @@ public module_engine {
   int const _dly_capacity = {};
   jarray<float, 2> _dly_buffer = {};
 
-  // shaper
-  // dc filter https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
-  double _shp_flt_x0 = 0;
-  double _shp_flt_y0 = 0;
+  // shaper with fixed dc filter @20hz
+  // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
+  double _shp_dc_flt_r = 0;
+  double _shp_dc_flt_x0 = 0;
+  double _shp_dc_flt_y0 = 0;
   std::vector<multi_menu_item> _shape_type_items;
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
@@ -331,7 +332,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 2, 2, 3, 3, 3 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 2, 2, 3, 6 } })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.OverSmp", "Shp.OverSmp", true, false, param_shape_over, 1),
@@ -364,24 +365,18 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_y.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
     return vs[0] == type_shaper && shp_has_skew_y(shaper_type_menu, vs[1]); });
-  auto& shape_drive = result.params.emplace_back(make_param(
-    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Drv", "Drv", true, false, param_shape_drive, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 5 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_drive.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mix", "Mix", true, false, param_shape_mix, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 }, 
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 5 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; }); 
-  auto& shape_hpf = result.params.emplace_back(make_param(
-    make_topo_info("{66D4C961-B58D-4E4D-9643-0188CC5C2A5D}", "Shp.HPF", "HPF", true, false, param_shape_hpf, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 7 },
+  auto& shape_drive = result.params.emplace_back(make_param(
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Drv", "Drv", true, false, param_shape_drive, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
+    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_hpf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_drive.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
@@ -538,8 +533,9 @@ fx_engine::reset(plugin_block const* block)
   _ic1eq[1] = 0;
   _ic2eq[0] = 0;
   _ic2eq[1] = 0;
-  _shp_flt_x0 = 0;
-  _shp_flt_y0 = 0;
+  _shp_dc_flt_x0 = 0;
+  _shp_dc_flt_y0 = 0;
+  _shp_dc_flt_r = 1 - (pi32 * 2 * 20 / block->sample_rate);
 
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -779,9 +775,6 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   int sx = type_item.index2;
   int sy = type_item.index3;
 
-  float hpf = block_auto[param_shape_hpf][0].real();
-  float dc_filter_r = 1 - (pi32 * 2 * hpf * 20 / block.sample_rate);
-
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
@@ -812,9 +805,9 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       float drive = block.normalized_to_raw(this_module, param_shape_drive, drive_curve[f]);
       float shaped = clip(wave_calc_bi(in * drive, (*x_curve)[f], (*y_curve)[f], shape, skew_x, skew_y));
       float mixed = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
-      float filtered = mixed - _shp_flt_x0 + dc_filter_r * _shp_flt_y0;
-      _shp_flt_x0 = mixed;
-      _shp_flt_y0 = filtered;
+      float filtered = mixed - _shp_dc_flt_x0 + _shp_dc_flt_r * _shp_dc_flt_y0;
+      _shp_dc_flt_x0 = mixed;
+      _shp_dc_flt_y0 = filtered;
       block.state.own_audio[0][0][c][f] = filtered;
     }
 }
