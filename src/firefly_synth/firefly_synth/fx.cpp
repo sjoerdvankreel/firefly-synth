@@ -3,6 +3,7 @@
 #include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/dsp/oversampler.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
@@ -102,6 +103,7 @@ public module_engine {
   double _shp_dc_flt_r = 0;
   double _shp_dc_flt_x0 = 0;
   double _shp_dc_flt_y0 = 0;
+  oversampler _shp_oversampler;
   std::vector<multi_menu_item> _shape_type_items;
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
@@ -124,13 +126,13 @@ public module_engine {
   void process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
 
 public:
-  PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
-  fx_engine(bool global, int sample_rate, std::vector<multi_menu_item> const& shape_type_items);
-  
   void reset(plugin_block const*) override;
   void process(plugin_block& block) override { process<false>(block, nullptr, nullptr); }
   template<bool Graph> 
   void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
+
+  PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
+  fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items);
 };
 
 static void
@@ -210,9 +212,9 @@ render_graph(
 
   engine->process_begin(&state, sample_rate, frame_count, -1);
   auto const* block = engine->process(
-    mapping.module_index, mapping.module_slot, [mapping, sample_rate, &audio_in, &shape_type_items](plugin_block& block) {
+    mapping.module_index, mapping.module_slot, [mapping, sample_rate, frame_count, &audio_in, &shape_type_items](plugin_block& block) {
     bool global = mapping.module_index == module_gfx;
-    fx_engine engine(global, sample_rate, shape_type_items);
+    fx_engine engine(global, sample_rate, frame_count, shape_type_items);
     engine.reset(&block);
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process<true>(block, &modulation, &audio_in);
@@ -255,8 +257,8 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   if (!global) result.default_initializer = init_voice_default;
   result.gui.menu_handler_factory = [global](plugin_state* state) {
     return make_audio_routing_menu_handler(state, global); };
-  result.engine_factory = [global, shape_type_items = shaper_type_menu.multi_items](auto const&, int sample_rate, int) {
-    return std::make_unique<fx_engine>(global, sample_rate, shape_type_items); };
+  result.engine_factory = [global, shape_type_items = shaper_type_menu.multi_items](auto const&, int sample_rate, int max_frame_count) {
+    return std::make_unique<fx_engine>(global, sample_rate, max_frame_count, shape_type_items); };
   result.graph_renderer = [shape_type_items = shaper_type_menu.multi_items](auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, shape_type_items); };
 
@@ -515,8 +517,10 @@ init_svf_hsh(
 }
 
 fx_engine::
-fx_engine(bool global, int sample_rate, std::vector<multi_menu_item> const& shape_type_items) :
-_global(global), _dly_capacity(sample_rate * 10), _shape_type_items(shape_type_items)
+fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items) :
+_global(global), _dly_capacity(sample_rate * 10), 
+_shp_oversampler(max_frame_count, false, false, false),
+_shape_type_items(shape_type_items)
 { 
   _comb_samples = comb_max_ms * sample_rate * 0.001;
   _comb_in[0] = std::vector<double>(_comb_samples, 0.0);
@@ -800,6 +804,8 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
     y_curve = &y_scratch;
   }
 
+  #if 0
+  _shp_oversampler.process(0, 0, 0, 0, [](float){ return 0; });
   for(int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
@@ -819,6 +825,11 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
         block.state.own_audio[0][0][c][f] = filtered;
       }
     }
+  #endif
+
+  (void)mix_curve;
+  (void)drive_curve;
+  _shp_oversampler.process(0, block.state.own_audio[0][0], block.start_frame, block.end_frame, [](float in) { return std::tanh(in); });
 }
 
 }

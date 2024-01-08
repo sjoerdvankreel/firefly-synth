@@ -55,7 +55,7 @@ fix the comb size param
 * get some linux folks to comment (ycollete?)
 * continuing
 - do parameter table with function descriptions and automation/modulation/per-voice etc
-- profile performance + maybe do cpu efficient versions (non-sloped ramps etc)
+- profile performance + memory +  maybe do cpu efficient versions (non-sloped ramps etc)
 - check all param_automate
 - keep updating the demo stuff
 
