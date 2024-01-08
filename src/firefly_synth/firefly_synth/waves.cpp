@@ -59,9 +59,9 @@ wave_make_header_shape(int shape, bool for_shaper)
   case wave_shape_type_cos_sin_cos: return "CosSinCos";
   case wave_shape_type_cos_cos_sin: return "CosCosSin";
   case wave_shape_type_cos_cos_cos: return "CosCosCos";
-  case wave_shape_type_smooth_or_fold: return for_shaper? "Foldback": "Smooth";
+  case wave_shape_type_smooth_or_fold: return for_shaper? "Fold": "Smooth";
   case wave_shape_type_static: return "Static";
-  case wave_shape_type_static_free: return "Static/Free";
+  case wave_shape_type_static_free: return "Free";
   default: assert(false); return {};
   }
 }
@@ -90,7 +90,7 @@ wave_make_name_shape(int shape, bool for_shaper)
   case wave_shape_type_cos_cos_cos: return "CCC";
   case wave_shape_type_smooth_or_fold: return for_shaper? "Fld": "Smt";
   case wave_shape_type_static: return "Stc";
-  case wave_shape_type_static_free: return "S/F";
+  case wave_shape_type_static_free: return "Fre";
   default: assert(false); return {};
   }
 }
