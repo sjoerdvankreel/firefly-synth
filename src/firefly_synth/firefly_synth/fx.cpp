@@ -101,8 +101,8 @@ public module_engine {
   // shaper with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
   double _shp_dc_flt_r = 0;
-  double _shp_dc_flt_x0 = 0;
-  double _shp_dc_flt_y0 = 0;
+  double _shp_dc_flt_x0[2];
+  double _shp_dc_flt_y0[2];
   oversampler _shp_oversampler;
   std::vector<multi_menu_item> _shape_type_items;
 
@@ -539,8 +539,10 @@ fx_engine::reset(plugin_block const* block)
   _ic1eq[1] = 0;
   _ic2eq[0] = 0;
   _ic2eq[1] = 0;
-  _shp_dc_flt_x0 = 0;
-  _shp_dc_flt_y0 = 0;
+  _shp_dc_flt_x0[0] = 0;
+  _shp_dc_flt_x0[1] = 0;
+  _shp_dc_flt_y0[0] = 0;
+  _shp_dc_flt_y0[1] = 0;
   _shp_dc_flt_r = 1 - (pi32 * 2 * 20 / block->sample_rate);
 
   auto const& block_auto = block->state.own_block_automation;
@@ -809,37 +811,26 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   auto& drive_curve = block.state.own_scratch[scratch_shape_y];
   normalized_to_raw_into(block, this_module, param_shape_drive, drive_curve_plain, drive_curve);
 
-  #if 0
-  _shp_oversampler.process(0, 0, 0, 0, [](float){ return 0; });
-  for(int c = 0; c < 2; c++)
-    for (int f = block.start_frame; f < block.end_frame; f++)
-    {
-      float in = block.state.own_audio[0][0][c][f];
-      float drive = block.normalized_to_raw(this_module, param_shape_drive, drive_curve[f]);
-      float shaped = clip(wave_calc_bi(in * drive, (*x_curve)[f], (*y_curve)[f], shape, skew_x, skew_y));
-      float mixed = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
-
-      // get rid of the dc filter fade-in time when plotting graph
-      if constexpr(Graph)
-        block.state.own_audio[0][0][c][f] = mixed;
-      else
-      {
-        float filtered = mixed - _shp_dc_flt_x0 + _shp_dc_flt_r * _shp_dc_flt_y0;
-        _shp_dc_flt_x0 = mixed;
-        _shp_dc_flt_y0 = filtered;
-        block.state.own_audio[0][0][c][f] = filtered;
-      }
-    }
-  #endif
-
-  (void)mix_curve;
-  (void)drive_curve;
+  // dont oversample for graphs
+  if constexpr(Graph) oversmp_stages = 0;
   _shp_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
     [&block, &x_curve, &y_curve, &mix_curve, &drive_curve, this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float in) {
       int mod_index = f / oversmp_factor;
       float shaped = clip(wave_calc_bi(in * drive_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
       return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * shaped;
     });
+  
+  // dont dc filter for graphs
+  if constexpr (!Graph) 
+    for(int c = 0; c < 2; c++)
+      for(int f = block.start_frame; f < block.end_frame; f++)
+      {
+        float mixed = block.state.own_audio[0][0][c][f];
+        float filtered = mixed - _shp_dc_flt_x0[c] + _shp_dc_flt_y0[c] * _shp_dc_flt_r;
+        _shp_dc_flt_x0[c] = mixed;
+        _shp_dc_flt_y0[c] = filtered;
+        block.state.own_audio[0][0][c][f] = filtered;
+      }
 }
 
 }
