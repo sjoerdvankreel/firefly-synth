@@ -23,10 +23,10 @@ static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
 static float const log_half = std::log(0.5f);
 
-enum { scratch_shape_x, scratch_shape_y, scratch_count };
 enum { type_off, type_svf, type_comb, type_shaper, type_delay };
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
+enum { scratch_shape_x, scratch_shape_y, scratch_shape_drive_raw, scratch_count };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
@@ -774,17 +774,19 @@ template <bool Graph, class Clip, class Shape, class SkewX, class SkewY> void
 fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   int this_module = _global ? module_gfx : module_vfx;
-
   auto const& block_auto = block.state.own_block_automation;
   int shape_type = block_auto[param_shape_type][0].step();
+  int oversmp_stages = block_auto[param_shape_over][0].step();
+  int oversmp_factor = 1 << oversmp_stages;
+
   auto const& type_item = _shape_type_items[shape_type];
   int sx = type_item.index2;
   int sy = type_item.index3;
 
+  auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
-  auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
-  auto const& drive_curve = *modulation[this_module][block.module_slot][param_shape_drive][0];
+  auto const& drive_curve_plain = *modulation[this_module][block.module_slot][param_shape_drive][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(sx))
@@ -803,6 +805,9 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       y_scratch[f] = std::log(0.001 + (y_curve_plain[f] * 0.98)) / log_half;
     y_curve = &y_scratch;
   }
+
+  auto& drive_curve = block.state.own_scratch[scratch_shape_y];
+  normalized_to_raw_into(block, this_module, param_shape_drive, drive_curve_plain, drive_curve);
 
   #if 0
   _shp_oversampler.process(0, 0, 0, 0, [](float){ return 0; });
@@ -829,7 +834,12 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
 
   (void)mix_curve;
   (void)drive_curve;
-  _shp_oversampler.process(0, block.state.own_audio[0][0], block.start_frame, block.end_frame, [](float in) { return std::tanh(in); });
+  _shp_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
+    [&block, &x_curve, &y_curve, &mix_curve, &drive_curve, this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float in) {
+      int mod_index = f / oversmp_factor;
+      float shaped = clip(wave_calc_bi(in * drive_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
+      return (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
+    });
 }
 
 }

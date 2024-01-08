@@ -38,7 +38,7 @@ oversampler::process(int stages, jarray<float, 2>& inout, int start_frame, int e
     {
       float* p = up_block.getChannelPointer(c);
       for(int f = 0; f < block_size * factor; f++)
-        p[f] = non_linear(p[f]);
+        p[f] = non_linear(f, p[f]);
     }
     _1x.processSamplesDown(inout_block);
   }
