@@ -112,14 +112,15 @@ public module_engine {
   template <class Init> 
   void process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
   
+  template <bool Graph>
   void process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation);
-  template <class Clip>
+  template <bool Graph, class Clip>
   void process_shaper_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip);
-  template <class Clip, class Shape>
+  template <bool Graph, class Clip, class Shape>
   void process_shaper_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape);
-  template <class Clip, class Shape, class SkewX>
+  template <bool Graph, class Clip, class Shape, class SkewX>
   void process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
-  template <class Clip, class Shape, class SkewX, class SkewY>
+  template <bool Graph, class Clip, class Shape, class SkewX, class SkewY>
   void process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
 
 public:
@@ -127,7 +128,8 @@ public:
   fx_engine(bool global, int sample_rate, std::vector<multi_menu_item> const& shape_type_items);
   
   void reset(plugin_block const*) override;
-  void process(plugin_block& block) override { process(block, nullptr, nullptr); }
+  void process(plugin_block& block) override { process<false>(block, nullptr, nullptr); }
+  template<bool Graph> 
   void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
 };
 
@@ -213,7 +215,7 @@ render_graph(
     fx_engine engine(global, sample_rate, shape_type_items);
     engine.reset(&block);
     cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
-    engine.process(block, &modulation, &audio_in);
+    engine.process<true>(block, &modulation, &audio_in);
   });
   engine->process_end();
 
@@ -549,7 +551,7 @@ fx_engine::reset(plugin_block const* block)
   }    
 }
 
-void
+template <bool Graph> void
 fx_engine::process(plugin_block& block, 
   cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in)
 { 
@@ -572,7 +574,7 @@ fx_engine::process(plugin_block& block,
   case type_svf: process_svf(block, *modulation); break;
   case type_comb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
-  case type_shaper: process_shaper(block, *modulation); break;
+  case type_shaper: process_shaper<Graph>(block, *modulation); break;
   default: assert(false); break;
   }
 }
@@ -698,73 +700,73 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
   }
 }
 
-void 
+template <bool Graph> void
 fx_engine::process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool clip = block_auto[param_shape_clip][0].step() != 0;
-  if(clip) process_shaper_clip(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); });
-  else process_shaper_clip(block, modulation, [](float in) { return std::tanh(in); });
+  if(clip) process_shaper_clip<Graph>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); });
+  else process_shaper_clip<Graph>(block, modulation, [](float in) { return std::tanh(in); });
 }
 
-template <class Clip> void 
+template <bool Graph, class Clip> void
 fx_engine::process_shaper_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip)
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index1)
   {
-  case wave_shape_type_saw: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_saw); break;
-  case wave_shape_type_sqr: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sqr); break;
-  case wave_shape_type_tri: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_tri); break;
-  case wave_shape_type_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sin); break;
-  case wave_shape_type_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos); break;
-  case wave_shape_type_sin_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sin_sin); break;
-  case wave_shape_type_sin_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sin_cos); break;
-  case wave_shape_type_cos_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_sin); break;
-  case wave_shape_type_cos_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
-  case wave_shape_type_smooth_or_fold: process_shaper_clip_shape(block, modulation, clip, wave_shape_bi_fold); break;
+  case wave_shape_type_saw: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_saw); break;
+  case wave_shape_type_sqr: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sqr); break;
+  case wave_shape_type_tri: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_tri); break;
+  case wave_shape_type_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin); break;
+  case wave_shape_type_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos); break;
+  case wave_shape_type_sin_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_sin); break;
+  case wave_shape_type_sin_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_cos); break;
+  case wave_shape_type_cos_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_sin); break;
+  case wave_shape_type_cos_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
+  case wave_shape_type_smooth_or_fold: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
 }
 
-template <class Clip, class Shape> void 
+template <bool Graph, class Clip, class Shape> void
 fx_engine::process_shaper_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape)
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index2)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_x(block, modulation, clip, shape, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <class Clip, class Shape, class SkewX> void 
+template <bool Graph, class Clip, class Shape, class SkewX> void
 fx_engine::process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index3)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_xy(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <class Clip, class Shape, class SkewX, class SkewY> void 
+template <bool Graph, class Clip, class Shape, class SkewX, class SkewY> void 
 fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   int this_module = _global ? module_gfx : module_vfx;
@@ -805,10 +807,17 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       float drive = block.normalized_to_raw(this_module, param_shape_drive, drive_curve[f]);
       float shaped = clip(wave_calc_bi(in * drive, (*x_curve)[f], (*y_curve)[f], shape, skew_x, skew_y));
       float mixed = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
-      float filtered = mixed - _shp_dc_flt_x0 + _shp_dc_flt_r * _shp_dc_flt_y0;
-      _shp_dc_flt_x0 = mixed;
-      _shp_dc_flt_y0 = filtered;
-      block.state.own_audio[0][0][c][f] = filtered;
+
+      // get rid of the dc filter fade-in time when plotting graph
+      if constexpr(Graph)
+        block.state.own_audio[0][0][c][f] = mixed;
+      else
+      {
+        float filtered = mixed - _shp_dc_flt_x0 + _shp_dc_flt_r * _shp_dc_flt_y0;
+        _shp_dc_flt_x0 = mixed;
+        _shp_dc_flt_y0 = filtered;
+        block.state.own_audio[0][0][c][f] = filtered;
+      }
     }
 }
 
