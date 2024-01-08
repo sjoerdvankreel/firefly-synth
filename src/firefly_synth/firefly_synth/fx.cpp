@@ -838,7 +838,7 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
     [&block, &x_curve, &y_curve, &mix_curve, &drive_curve, this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float in) {
       int mod_index = f / oversmp_factor;
       float shaped = clip(wave_calc_bi(in * drive_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
-      return (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
+      return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * shaped;
     });
 }
 
