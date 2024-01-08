@@ -8,6 +8,7 @@ do cakewalk bug report
 handle clap is_modulatable
 
 demo synth:
+do fx version
 handle clap midi notes
 do clap midi notes
 polymod/mpe/note_exprs
@@ -34,6 +35,7 @@ do 4 auxs
 at least block-automate all voice parameters see also modmatrices
 re-profile the kbdtest demo
 do controllable shaper lpf after shape(skew_x) and hpf after skew_y
+do global "clear unused" context menu entry ?
 
 fix the comb size param
 * fx
