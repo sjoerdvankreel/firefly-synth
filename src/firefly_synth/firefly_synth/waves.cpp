@@ -8,21 +8,6 @@ namespace firefly_synth
 {
 
 static std::string
-wave_make_header_skew(int skew)
-{
-  switch (skew)
-  {
-  case wave_skew_type_off: return "Off";
-  case wave_skew_type_lin: return "Linear";
-  case wave_skew_type_scu: return "ScaleUni";
-  case wave_skew_type_scb: return "ScaleBi";
-  case wave_skew_type_xpu: return "ExpUni";
-  case wave_skew_type_xpb: return "ExpBi";
-  default: assert(false); return {};
-  }
-}
-
-static std::string
 wave_make_name_skew(int skew)
 {
   switch (skew)
@@ -95,23 +80,6 @@ wave_make_name_shape(int shape, bool for_shaper)
   }
 }
 
-static std::string 
-wave_make_header_shape_x(int shape, int skew_x, bool for_shaper)
-{
-  auto shape_header = wave_make_header_shape(shape, for_shaper);
-  auto x_header = wave_make_header_skew(skew_x);
-  return shape_header + ".X" + x_header;
-}
-
-static std::string
-wave_make_name(int shape, int skew_x, int skew_y, bool for_shaper)
-{
-  auto name_x = wave_make_name_skew(skew_x);
-  auto name_y = wave_make_name_skew(skew_y);
-  auto name_shape = wave_make_name_shape(shape, for_shaper);
-  return name_shape + "." + name_x + "/" + name_y;
-}
-
 static std::vector<topo_tag>
 wave_skew_type_tags()
 {
@@ -149,9 +117,18 @@ wave_shape_type_tags(bool for_shaper)
   result.push_back(make_topo_tag("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_smooth_or_fold, for_shaper)));
 
   if(for_shaper) return result;
- result.push_back(make_topo_tag("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static, for_shaper)));
+  result.push_back(make_topo_tag("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static, for_shaper)));
   result.push_back(make_topo_tag("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free, for_shaper)));
   return result;
+}
+
+static std::string
+wave_make_name(int shape, int skew_x, int skew_y, bool for_shaper)
+{
+  auto name_x = wave_make_name_skew(skew_x);
+  auto name_y = wave_make_name_skew(skew_y);
+  auto name_shape = wave_make_name_shape(shape, for_shaper);
+  return name_shape + "." + name_x + "/" + name_y;
 }
 
 multi_menu 
@@ -160,7 +137,6 @@ make_wave_multi_menu(bool for_shaper)
   return make_multi_menu(
     wave_shape_type_tags(for_shaper), wave_skew_type_tags(), wave_skew_type_tags(),
     [=](int s) { return wave_make_header_shape(s, for_shaper); },
-    [=](int s, int x) { return wave_make_header_shape_x(s, x, for_shaper); }, 
     [=](int s, int x, int y) { return wave_make_name(s, x, y, for_shaper); });
 }
 

@@ -25,8 +25,7 @@ make_multi_menu(
   std::vector<topo_tag> const& tags1, 
   std::vector<topo_tag> const& tags2, 
   std::vector<topo_tag> const& tags3,
-  std::function<std::string(int)> make_header_1,
-  std::function<std::string(int, int)> make_header_12,
+  std::function<std::string(int)> make_header,
   std::function<std::string(int, int, int)> make_name);
 
 }
