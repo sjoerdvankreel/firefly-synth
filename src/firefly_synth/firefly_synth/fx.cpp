@@ -98,11 +98,15 @@ public module_engine {
   jarray<float, 2> _dly_buffer = {};
 
   // shaper
+  // dc filter https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
+  double _shp_flt_x0 = 0;
+  double _shp_flt_y0 = 0;
   std::vector<multi_menu_item> _shape_type_items;
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
  
+  // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
   void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation);
   template <class Init> 
   void process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
@@ -534,6 +538,8 @@ fx_engine::reset(plugin_block const* block)
   _ic1eq[1] = 0;
   _ic2eq[0] = 0;
   _ic2eq[1] = 0;
+  _shp_flt_x0 = 0;
+  _shp_flt_y0 = 0;
 
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -773,6 +779,9 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   int sx = type_item.index2;
   int sy = type_item.index3;
 
+  float hpf = block_auto[param_shape_hpf][0].real();
+  float dc_filter_r = 1 - (pi32 * 2 * hpf * 20 / block.sample_rate);
+
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
@@ -802,7 +811,11 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       float in = block.state.own_audio[0][0][c][f];
       float drive = block.normalized_to_raw(this_module, param_shape_drive, drive_curve[f]);
       float shaped = clip(wave_calc_bi(in * drive, (*x_curve)[f], (*y_curve)[f], shape, skew_x, skew_y));
-      block.state.own_audio[0][0][c][f] = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
+      float mixed = (1 - mix_curve[f]) * in + mix_curve[f] * shaped;
+      float filtered = mixed - _shp_flt_x0 + dc_filter_r * _shp_flt_y0;
+      _shp_flt_x0 = mixed;
+      _shp_flt_y0 = filtered;
+      block.state.own_audio[0][0][c][f] = filtered;
     }
 }
 
