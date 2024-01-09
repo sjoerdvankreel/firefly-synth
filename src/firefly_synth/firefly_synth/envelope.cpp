@@ -93,8 +93,6 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float
   float sustain = !is_sustain(type) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
   dahds = delay + attack + hold + decay + sustain;
   dahdsrf = dahds + release + filter;
-  assert(dahds > 0);
-  assert(dahdsrf >= dahds);
 }
 
 static graph_engine_params
@@ -122,6 +120,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   float dahds;
   float dahdsrf;
   env_plot_length_seconds(state, mapping.module_slot, dahds, dahdsrf);
+  if(dahdsrf < 1e-5) return graph_data({}, false, {"0 Sec"});
   
   std::string partition = float_to_string(dahdsrf, 2) + " Sec";
   bool sync = state.get_plain_at(module_env, mapping.module_slot, param_sync, 0).step() != 0;
