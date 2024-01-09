@@ -14,8 +14,8 @@ class autofit_component
 {
 public:
   virtual ~autofit_component() {}
-  virtual int fixed_width() const = 0;
-  virtual int fixed_height() const = 0;
+  virtual int fixed_width(int parent_w, int parent_h) const = 0;
+  virtual int fixed_height(int parent_w, int parent_h) const = 0;
 };
 
 // base class for anything that should react to gui_bindings

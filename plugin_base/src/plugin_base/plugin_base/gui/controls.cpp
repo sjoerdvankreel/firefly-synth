@@ -384,6 +384,13 @@ param_component(gui, module, param), Slider()
   param_component::init();
 }
 
+int 
+param_slider::fixed_width(int parent_w, int parent_h) const
+{
+  if(_param->param->gui.edit_type != gui_edit_type::knob) return -1;
+  return parent_h;
+}
+
 param_combobox::
 param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 

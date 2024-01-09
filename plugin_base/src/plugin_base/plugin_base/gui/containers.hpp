@@ -97,11 +97,10 @@ public autofit_component
   juce::Colour const _color2;
   rounded_container_mode const _mode;
 public:
-  int fixed_width() const override;
-  int fixed_height() const override;
-
   void resized() override;
   void paint(juce::Graphics& g) override;
+  int fixed_width(int parent_w, int parent_h) const override;
+  int fixed_height(int parent_w, int parent_h) const override;
 
   rounded_container(
     juce::Component* child, int radius, bool vertical, rounded_container_mode mode,
@@ -136,8 +135,8 @@ public autofit_component
 
 public:
   void resized() override;
-  int fixed_width() const override;
-  int fixed_height() const override;
+  int fixed_width(int parent_w, int parent_h) const override;
+  int fixed_height(int parent_w, int parent_h) const override;
 
   void add(Component& child, gui_position const& position);
   void add(Component& child, bool vertical, int position) 

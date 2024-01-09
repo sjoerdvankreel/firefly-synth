@@ -44,8 +44,8 @@ public autofit_component
 {
 public:
   autofit_button(lnf* lnf, std::string const& text);
-  int fixed_width() const override { return getWidth(); }
-  int fixed_height() const override { return getHeight(); }
+  int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
+  int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
 };
 
 // fixed size checkbox
@@ -55,8 +55,8 @@ public autofit_component
 {
 public:
   autofit_togglebutton() { setSize(21, 20); } // empirically determined
-  int fixed_width() const override { return getWidth(); }
-  int fixed_height() const override { return getHeight(); }
+  int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
+  int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
 };
 
 // label that resizes to text content
@@ -69,8 +69,8 @@ class autofit_label :
 public:
   bool bold() const { return _bold; }
   int font_height() const { return _font_height; }
-  int fixed_width() const override { return getWidth(); }
-  int fixed_height() const override { return getHeight(); }
+  int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
+  int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
   autofit_label(lnf* lnf, std::string const& reference_text, bool bold = false, int font_height = -1);
 };
 
@@ -84,9 +84,9 @@ public autofit_component
   float max_text_width(juce::PopupMenu const& menu);
 public:
   void autofit();
-  int fixed_width() const override { return getWidth(); }
-  int fixed_height() const override { return _lnf->combo_height(); }
   autofit_combobox(lnf* lnf, bool autofit) : _lnf(lnf), _autofit(autofit) {}
+  int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
+  int fixed_height(int parent_w, int parent_h) const override { return _lnf->combo_height(); }
 };
 
 // button that opens a popupmenu
@@ -210,9 +210,11 @@ public:
 };
 
 // slider bound to single parameter
+// only horizontally autofits knobs not sliders!
 class param_slider:
 public param_component,
-public juce::Slider
+public juce::Slider,
+public autofit_component
 {
 protected:
   void own_param_changed(plain_value plain) override final
@@ -220,6 +222,9 @@ protected:
 
 public: 
   param_slider(plugin_gui* gui, module_desc const* module, param_desc const* param);
+
+  int fixed_width(int parent_w, int parent_h) const override;
+  int fixed_height(int parent_w, int parent_h) const override { return -1; }
   void stoppedDragging() override { _gui->param_end_changes(_param->info.global); }
   void startedDragging() override { _gui->param_begin_changes(_param->info.global); }
   void valueChanged() override { _gui->param_changing(_param->info.global, _param->param->domain.raw_to_plain(getValue())); }

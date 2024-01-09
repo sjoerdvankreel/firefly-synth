@@ -17,7 +17,7 @@ void
 autofit_viewport::resized()
 {
   auto& fit = dynamic_cast<autofit_component&>(*getViewedComponent());
-  getViewedComponent()->setSize(getWidth() - _lnf->getDefaultScrollbarWidth() - 2, fit.fixed_height());
+  getViewedComponent()->setSize(getWidth() - _lnf->getDefaultScrollbarWidth() - 2, fit.fixed_height(getWidth(), getHeight()));
 }
 
 extra_state_container::
@@ -61,21 +61,21 @@ margin_component::resized()
 }
 
 int 
-rounded_container::fixed_width() const
+rounded_container::fixed_width(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
   auto& fit = dynamic_cast<autofit_component&>(*child);
-  assert(fit.fixed_width() > 0);
-  return fit.fixed_width() + _radius;
+  assert(fit.fixed_width(parent_w, parent_h) > 0);
+  return fit.fixed_width(parent_w, parent_h) + _radius;
 }
 
 int 
-rounded_container::fixed_height() const
+rounded_container::fixed_height(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
   auto& fit = dynamic_cast<autofit_component&>(*child);
-  assert(fit.fixed_height() > 0);
-  return fit.fixed_height() + _radius;
+  assert(fit.fixed_height(parent_w, parent_h) > 0);
+  return fit.fixed_height(parent_w, parent_h) + _radius;
 }
 
 void
@@ -138,7 +138,7 @@ grid_component::add(Component& child, gui_position const& position)
 }
 
 int 
-grid_component::fixed_width() const
+grid_component::fixed_width(int parent_w, int parent_h) const
 {
   // ignore span
   int result = 0;
@@ -150,14 +150,14 @@ grid_component::fixed_width() const
           auto child_ptr = getChildComponent(i);
           assert(dynamic_cast<autofit_component*>(child_ptr));
           auto& child = dynamic_cast<autofit_component&>(*child_ptr);
-          assert(child.fixed_width() > 0);
-          result += child.fixed_width();
+          assert(child.fixed_width(parent_w, parent_h) > 0);
+          result += child.fixed_width(parent_w, parent_h);
         }
   return result + (_dimension.column_sizes.size() - 1) * _gap_size;
 }
 
 int 
-grid_component::fixed_height() const
+grid_component::fixed_height(int parent_w, int parent_h) const
 {
   // ignore span
   int result = 0;
@@ -167,8 +167,8 @@ grid_component::fixed_height() const
         if (_positions[i].column == _autofit_column)
         {
           auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
-          assert(child.fixed_height() > 0);
-          result += child.fixed_height();
+          assert(child.fixed_height(parent_w, parent_h) > 0);
+          result += child.fixed_height(parent_w, parent_h);
         }
   return result + (_dimension.row_sizes.size() - 1) * _gap_size;
 }
@@ -193,8 +193,8 @@ grid_component::resized()
         if(_positions[p].column == _autofit_column && _positions[p].row == i)
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-          assert(autofit_child && autofit_child->fixed_height() > 0);
-          max_col_height = std::max(max_col_height, autofit_child->fixed_height());
+          assert(autofit_child && autofit_child->fixed_height(getWidth(), getHeight()) > 0);
+          max_col_height = std::max(max_col_height, autofit_child->fixed_height(getWidth(), getHeight()));
         }
       grid.templateRows.add(Grid::Px(max_col_height));
     }
@@ -212,8 +212,8 @@ grid_component::resized()
         if (_positions[p].row == _autofit_row && _positions[p].column == i)
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-          assert(autofit_child && autofit_child->fixed_width() > 0);
-          max_row_width = std::max(max_row_width, autofit_child->fixed_width());
+          assert(autofit_child && autofit_child->fixed_width(getWidth(), getHeight()) > 0);
+          max_row_width = std::max(max_row_width, autofit_child->fixed_width(getWidth(), getHeight()));
         }
       grid.templateColumns.add(Grid::Px(max_row_width));
     }

@@ -189,7 +189,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_slope,
     make_topo_tag("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", "Slope"),
-    make_param_section_gui({ 0, 1 }, { 1, 4 })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, gui_dimension::auto_size } })));
 
   auto& filter = result.params.emplace_back(make_param(
     make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smt", true, true, param_filter, 1),
