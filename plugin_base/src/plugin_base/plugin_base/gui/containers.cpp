@@ -180,6 +180,10 @@ grid_component::resized()
   grid.rowGap = Grid::Px(_gap_size);
   grid.columnGap = Grid::Px(_gap_size);
 
+  // Note: this doesnt take into account autosizing interaction (i.e. multiple rows or cols being autosize target).
+  float row_height_even_distrib = (getHeight() - _gap_size * _dimension.row_sizes.size()) / (float)_dimension.row_sizes.size();
+  float col_width_even_distrib = (getWidth() - _gap_size * _dimension.column_sizes.size()) / (float)_dimension.column_sizes.size();
+
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
     if(_dimension.row_sizes[i] > 0)
       grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
@@ -194,9 +198,7 @@ grid_component::resized()
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
           assert(autofit_child);
-          auto fixed_height = autofit_child->fixed_height(
-            getWidth() / (float)_dimension.column_sizes.size(), 
-            getHeight() / (float)_dimension.row_sizes.size());
+          auto fixed_height = autofit_child->fixed_height(col_width_even_distrib, row_height_even_distrib);
           assert(fixed_height > 0);
           max_col_height = std::max(max_col_height, fixed_height);
         }
@@ -217,9 +219,7 @@ grid_component::resized()
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
           assert(autofit_child);
-          auto fixed_width = autofit_child->fixed_width(
-            getWidth() / (float)_dimension.column_sizes.size(),
-            getHeight() / (float)_dimension.row_sizes.size());
+          auto fixed_width = autofit_child->fixed_width(col_width_even_distrib, row_height_even_distrib);
           assert(fixed_width > 0);
           max_row_width = std::max(max_row_width, fixed_width);
         }
