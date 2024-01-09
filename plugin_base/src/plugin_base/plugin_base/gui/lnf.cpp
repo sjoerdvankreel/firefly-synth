@@ -11,7 +11,7 @@ namespace plugin_base {
 
 static int const knob_thumb_width = 6;
 static int const knob_thumb_height = 7;
-static int const slider_thumb_width = 8;
+static int const slider_thumb_width = 9;
 static int const slider_thumb_height = 6;
 
 static void 
@@ -439,7 +439,7 @@ void
 lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, float, Slider::SliderStyle style, Slider& s)
 {
   float pos = (p - x) / w;
-  int const fixedHeight = 4;
+  int const fixedHeight = 5;
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
   float left = slider_thumb_width / 2;
