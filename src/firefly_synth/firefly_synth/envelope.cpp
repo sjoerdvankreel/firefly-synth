@@ -181,7 +181,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& multi = result.params.emplace_back(make_param(
-    make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Multi Trigger", "Mlti", true, true, param_multi, 1),
+    make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Multi Trigger", "Multi", true, true, param_multi, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 3 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
