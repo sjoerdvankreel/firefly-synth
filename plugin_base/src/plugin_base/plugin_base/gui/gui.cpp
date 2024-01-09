@@ -574,7 +574,7 @@ Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  auto& result = make_component<grid_component>(topo.gui.dimension, margin_section);
+  auto& result = make_component<grid_component>(topo.gui.dimension, margin_section, topo.gui.autofit_row, topo.gui.autofit_column);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
   add_hover_listener(result, gui_hover_type::module, module.info.global);

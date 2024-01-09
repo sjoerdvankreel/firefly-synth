@@ -85,6 +85,8 @@ struct module_topo_gui final {
   gui_position position;
   gui_dimension dimension;
   std::string tabbed_name;
+  int autofit_row = 0;
+  int autofit_column = 0;
   bool enable_tab_menu = true;
   module_tab_menu_handler_factory menu_handler_factory;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_topo_gui);
