@@ -177,7 +177,7 @@ autofit_label::
 autofit_label(lnf* lnf, std::string const& reference_text, bool bold, int height):
 _bold(bold), _font_height(height)
 {
-  setBorderSize({ 1, 2, 1, 2});
+  setBorderSize({ 1, 2, 1, 4 });
   auto label_font = lnf->getLabelFont(*this);
   if(bold) label_font = label_font.boldened();
   if(height != -1) label_font = label_font.withHeight(height);
