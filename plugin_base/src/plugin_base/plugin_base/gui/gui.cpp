@@ -107,7 +107,7 @@ justification_type(gui_label const& label)
 
 static int
 module_header_height(int font_height)
-{ return font_height + 4; }
+{ return font_height + 6; }
 
 std::vector<int>
 gui_vertical_distribution(int total_height, int font_height,
