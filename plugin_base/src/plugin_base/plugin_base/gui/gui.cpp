@@ -710,7 +710,7 @@ plugin_gui::make_param_editor(module_desc const& module, param_desc const& param
   case gui_edit_type::vslider:
     result = &make_component<param_slider>(this, &module, &param); break;
   case gui_edit_type::toggle:
-    result = &make_component<param_toggle_button>(this, &module, &param); break;
+    result = &make_component<param_toggle_button>(this, &module, &param, _module_lnfs[module.module->info.index].get()); break;
   case gui_edit_type::list:
   case gui_edit_type::autofit_list:
     result = &make_component<param_combobox>(this, &module, &param, _module_lnfs[module.module->info.index].get()); break;

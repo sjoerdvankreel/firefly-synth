@@ -54,9 +54,9 @@ public toggle_button,
 public autofit_component
 {
 public:
-  autofit_togglebutton() { setSize(21, 20); } // empirically determined
   int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
   int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
+  autofit_togglebutton(lnf* lnf) { setSize(lnf->combo_height(), lnf->combo_height()); } // empirically determined
 };
 
 // label that resizes to text content
@@ -206,7 +206,7 @@ public:
   void buttonClicked(Button*) override {}
   void buttonStateChanged(Button*) override;
   ~param_toggle_button() { removeListener(this); }
-  param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param);
+  param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
 // slider bound to single parameter

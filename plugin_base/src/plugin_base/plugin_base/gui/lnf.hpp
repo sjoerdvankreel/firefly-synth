@@ -19,7 +19,7 @@ public juce::LookAndFeel_V4 {
 public:
   juce::Font font() const;
   gui_colors const& colors() const;
-  int combo_height() const { return _desc->plugin->gui.font_height + 6; }
+  int combo_height() const { return _desc->plugin->gui.font_height + 8; }
   lnf(plugin_desc const* desc, int custom_section, int module_section, int module);
 
   int getDefaultScrollbarWidth() override { return 8; }

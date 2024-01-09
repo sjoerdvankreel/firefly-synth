@@ -348,8 +348,8 @@ param_toggle_button::buttonStateChanged(Button*)
 }
 
 param_toggle_button::
-param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param):
-param_component(gui, module, param), autofit_togglebutton()
+param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
+param_component(gui, module, param), autofit_togglebutton(lnf)
 {
   auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
   setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, value));
