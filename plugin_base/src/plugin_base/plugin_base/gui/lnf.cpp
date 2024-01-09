@@ -392,7 +392,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   int conic_count = 256;
 
   float size = s.getHeight() - padding - stroke / 2;
-  float left = (s.getWidth() - size) / 2;
+  float left = s.getWidth() - size - padding;
   float top = (s.getHeight() - size) / 2 - padding / 2 + top_margin;
 
   bool bipolar = s.getMinimum() < 0;
