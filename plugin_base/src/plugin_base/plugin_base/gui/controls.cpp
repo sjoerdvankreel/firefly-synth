@@ -177,14 +177,14 @@ autofit_label::
 autofit_label(lnf* lnf, std::string const& reference_text, bool bold, int height):
 _bold(bold), _font_height(height)
 {
-  auto border_size = getBorderSize();
+  setBorderSize({ 1, 2, 1, 2});
   auto label_font = lnf->getLabelFont(*this);
   if(bold) label_font = label_font.boldened();
   if(height != -1) label_font = label_font.withHeight(height);
   float th = label_font.getHeight();
   float tw = label_font.getStringWidthFloat(reference_text);
-  float nw = std::ceil(tw) + border_size.getLeftAndRight();
-  setSize(nw, std::ceil(th) + border_size.getTopAndBottom());
+  float nw = std::ceil(tw) + getBorderSize().getLeftAndRight();
+  setSize(nw, std::ceil(th) + getBorderSize().getTopAndBottom());
   setText(reference_text, dontSendNotification);
 }
 
