@@ -21,7 +21,7 @@ enum { section_main, section_slope, section_dhadsr };
 enum { type_sustain_plain, type_follow_plain, type_release_plain, type_sustain_slope, type_follow_slope, type_release_slope };
 enum {
   param_on, param_type, param_sync, param_multi,
-  param_filter, param_attack_slope, param_decay_slope, param_release_slope,
+  param_attack_slope, param_decay_slope, param_release_slope, param_filter,
   param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
@@ -189,32 +189,32 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_slope,
     make_topo_tag("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", "Slope"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, gui_dimension::auto_size } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
 
-  auto& filter = result.params.emplace_back(make_param(
-    make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smt", true, true, param_filter, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, 
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   auto& attack_slope = result.params.emplace_back(make_param(
     make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "Attack Slope", "A.S", true, true, param_attack_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, 
+    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   attack_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_sloped(vs[1]); });
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "Decay Slope", "D.S", true, true, param_decay_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 }, 
+    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   decay_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_sloped(vs[1]); });
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "Release Slope", "R.S", true, true, param_release_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 3 },
+    make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   release_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_sloped(vs[1]); });
+  auto& filter = result.params.emplace_back(make_param(
+    make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smt", true, true, param_filter, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
+    make_param_gui_single(section_slope, gui_edit_type::hslider, { 0, 3 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   result.sections.emplace_back(make_param_section(section_dhadsr,
     make_topo_tag("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
