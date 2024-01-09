@@ -203,10 +203,10 @@ lnf::drawTickBox(
   bool ticked, bool isEnabled, bool highlighted, bool down)
 {
   Rectangle<float> tickBounds(x, y, w, h);
-  g.setColour(c.findColour(ToggleButton::tickDisabledColourId));
+  g.setColour(colors().control_outline);
   g.drawRoundedRectangle(tickBounds, 4.0f, 1.0f);
   if (!ticked) return;
-  auto tick = getTickShape(0.75f);
+  auto tick = getTickShape(0.67f);
   if(c.isEnabled()) g.setColour(c.findColour(ToggleButton::tickColourId));
   g.fillPath(tick, tick.getTransformToScaleToFit(tickBounds.reduced(4, 5).toFloat(), true));
 }
@@ -313,8 +313,9 @@ void
 lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down)
 {
   float size = std::min(tb.getWidth(), tb.getHeight());
-  float x = size < tb.getWidth()? (tb.getWidth() - size) / 2.0f: 0;
-  float y = size < tb.getHeight() ? (tb.getHeight() - size) / 2.0f: 0;
+  float x = (int)(size < tb.getWidth()? (tb.getWidth() - size) / 2.0f: 0);
+  float y = (int)(size < tb.getHeight() ? (tb.getHeight() - size) / 2.0f: 0);
+  size = (int)size;
 
   drawTickBox(g, tb, x, y, size, size, tb.getToggleState(), tb.isEnabled(), highlighted, down);
   //LookAndFeel_V4::drawToggleButton(g, tb, highlighted, down);
