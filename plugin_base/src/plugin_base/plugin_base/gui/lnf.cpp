@@ -312,34 +312,20 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 void 
 lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down)
 {
-  float size = std::min(tb.getWidth(), tb.getHeight());
-  float x = (int)(size < tb.getWidth()? (tb.getWidth() - size) / 2.0f: 0);
-  float y = (int)(size < tb.getHeight() ? (tb.getHeight() - size) / 2.0f: 0);
-  size = (int)size;
-
-  drawTickBox(g, tb, x, y, size, size, tb.getToggleState(), tb.isEnabled(), highlighted, down);
-  //LookAndFeel_V4::drawToggleButton(g, tb, highlighted, down);
-  /*
-  auto fontSize = jmin(15.0f, (float)button.getHeight() * 0.75f);
-  auto tickWidth = fontSize * 1.1f;
-
-  drawTickBox(g, button, 4.0f, ((float)button.getHeight() - tickWidth) * 0.5f,
-    tickWidth, tickWidth,
-    button.getToggleState(),
-    button.isEnabled(),
-    shouldDrawButtonAsHighlighted,
-    shouldDrawButtonAsDown);
-
-  g.setColour(button.findColour(ToggleButton::textColourId));
-  g.setFont(fontSize);
-
-  if (!button.isEnabled())
-    g.setOpacity(0.5f);
-
-  g.drawFittedText(button.getButtonText(),
-    button.getLocalBounds().withTrimmedLeft(roundToInt(tickWidth) + 10)
-    .withTrimmedRight(2),
-    Justification::centredLeft, 10);*/
+  auto cornerSize = 3.0f;
+  int height = tb.getHeight();
+  auto tick = getTickShape(0.5f);
+  int const fixedHeight = combo_height();
+  int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
+  Rectangle<int> boxBounds(0, toggleTop, fixedHeight, fixedHeight);
+  g.setColour(findColour(ComboBox::backgroundColourId));
+  g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+  g.setColour(findColour(ComboBox::outlineColourId).darker());
+  g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
+  if(!tb.getToggleState()) return;
+  if (tb.isEnabled()) g.setColour(tb.findColour(ToggleButton::tickColourId));
+  else g.setColour(tb.findColour(ToggleButton::tickDisabledColourId));
+  g.fillPath(tick, tick.getTransformToScaleToFit(boxBounds.reduced(6, 6).toFloat(), true));
 }
 
 void 
