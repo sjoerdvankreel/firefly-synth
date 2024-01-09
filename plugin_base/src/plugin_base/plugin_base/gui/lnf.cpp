@@ -17,7 +17,8 @@ static int const slider_thumb_height = 6;
 static void 
 draw_conic_arc(
   Graphics&g, float left, float top, float size, float start_angle, 
-  float end_angle, Colour color1, Colour color2, int segment_count, float min, float max)
+  float end_angle, Colour color1, Colour color2, int segment_count, 
+  float min, float max, float stroke)
 {
   float overlap = 0.01;
   float angle_range = end_angle - start_angle;
@@ -30,7 +31,7 @@ draw_conic_arc(
     float this_end_angle = start_angle + (float)(i + 1) / segment_count * angle_range;
     if (i < segment_count - 1) this_end_angle += overlap;
     path.addArc(left, top, size, size, this_start_angle, this_end_angle, true);
-    g.strokePath(path, PathStrokeType(4));
+    g.strokePath(path, PathStrokeType(stroke));
   }
 }
 
@@ -385,16 +386,13 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 void 
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
-  float padding = 2;
-  float path_size = 3;
-  float top_margin = 1;
+  float stroke = 5;
+  float padding = 3;
+  float top_margin = 2;
   int conic_count = 256;
 
-  // sizing to X messes with long labels, better to just clip
-  //float size = std::min(s.getWidth(), s.getHeight()) - path_size - padding;
-  float size = s.getHeight() - path_size - padding;
-
-  float left = (s.getWidth() - size) / 2 + padding / 2;
+  float size = s.getHeight() - padding - stroke / 2;
+  float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2 - padding / 2 + top_margin;
 
   bool bipolar = s.getMinimum() < 0;
@@ -407,17 +405,15 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   auto background2 = colors().knob_background2;
   if(!bipolar)
   {
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 0, 1.0f);
-    draw_conic_arc(g, left, top, size, start_angle, end_angle, track1, track2, conic_count, 0, pos);
+    draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 0, 1.0f, stroke);
+    draw_conic_arc(g, left, top, size, start_angle, end_angle, track1, track2, conic_count, 0, pos, stroke);
   }
   else
   {
-    draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, background2, background1, conic_count / 2, 0, 1.0f);
-    draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, background1, background2, conic_count / 2, 0, 1.0f);
-    if (pos >= 0.5f)
-      draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, track1, track2, conic_count / 2, 0, (pos - 0.5f) * 2);
-    else
-      draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, track2, track1, conic_count / 2, pos * 2, 1);
+    draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, background2, background1, conic_count / 2, 0, 1.0f, stroke);
+    draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, background1, background2, conic_count / 2, 0, 1.0f, stroke);
+    if (pos >= 0.5f) draw_conic_arc(g, left, top, size, start_angle + angle_range / 2, end_angle, track1, track2, conic_count / 2, 0, (pos - 0.5f) * 2, stroke);
+    else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, track2, track1, conic_count / 2, pos * 2, 1, stroke);
   }
 
   Path thumb;

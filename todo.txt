@@ -36,6 +36,14 @@ at least block-automate all voice parameters see also modmatrices
 re-profile the kbdtest demo
 do controllable shaper lpf after shape(skew_x) and hpf after skew_y
 do global "clear unused" context menu entry ?
+10 lfos/envs
+auto-generate the manual (param list)
+bigger knobs & sliders ( so, larger screen space ) but same font size
+more padding between knobs / top / bottom of section
+visual routing indicators ?
+long names "SkewX" etc in tooltips
+drive => gain ?
+monitor highest usage
 
 fix the comb size param
 * fx
