@@ -422,6 +422,15 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   auto track2 = colors().knob_track2;
   auto background1 = colors().knob_background1;
   auto background2 = colors().knob_background2;
+
+  if (!s.isEnabled())
+  {
+    track1 = color_to_grayscale(track1);
+    track2 = color_to_grayscale(track2);
+    background1 = color_to_grayscale(background1);
+    background2 = color_to_grayscale(background2);
+  }
+
   if(!bipolar)
   {
     draw_conic_arc(g, left, top, size, start_angle, end_angle, background1, background2, conic_count, 0, 1.0f, stroke);
