@@ -93,6 +93,8 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float
   float sustain = !is_sustain(type) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
   dahds = delay + attack + hold + decay + sustain;
   dahdsrf = dahds + release + filter;
+  assert(dahds > 0);
+  assert(dahdsrf >= dahds);
 }
 
 static graph_engine_params
