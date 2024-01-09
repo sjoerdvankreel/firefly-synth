@@ -310,6 +310,38 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 }
 
 void 
+lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down)
+{
+  float size = std::min(tb.getWidth(), tb.getHeight());
+  float x = size < tb.getWidth()? (tb.getWidth() - size) / 2.0f: 0;
+  float y = size < tb.getHeight() ? (tb.getHeight() - size) / 2.0f: 0;
+
+  drawTickBox(g, tb, x, y, size, size, tb.getToggleState(), tb.isEnabled(), highlighted, down);
+  //LookAndFeel_V4::drawToggleButton(g, tb, highlighted, down);
+  /*
+  auto fontSize = jmin(15.0f, (float)button.getHeight() * 0.75f);
+  auto tickWidth = fontSize * 1.1f;
+
+  drawTickBox(g, button, 4.0f, ((float)button.getHeight() - tickWidth) * 0.5f,
+    tickWidth, tickWidth,
+    button.getToggleState(),
+    button.isEnabled(),
+    shouldDrawButtonAsHighlighted,
+    shouldDrawButtonAsDown);
+
+  g.setColour(button.findColour(ToggleButton::textColourId));
+  g.setFont(fontSize);
+
+  if (!button.isEnabled())
+    g.setOpacity(0.5f);
+
+  g.drawFittedText(button.getButtonText(),
+    button.getLocalBounds().withTrimmedLeft(roundToInt(tickWidth) + 10)
+    .withTrimmedRight(2),
+    Justification::centredLeft, 10);*/
+}
+
+void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
   int radius = _desc->plugin->gui.module_corner_radius;

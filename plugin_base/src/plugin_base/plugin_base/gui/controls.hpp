@@ -56,7 +56,7 @@ public autofit_component
 public:
   int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
   int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
-  autofit_togglebutton(lnf* lnf) { setSize(lnf->combo_height(), lnf->combo_height()); } // empirically determined
+  autofit_togglebutton(lnf* lnf) { setSize(lnf->combo_height() - 2, lnf->combo_height() - 4); }
 };
 
 // label that resizes to text content
