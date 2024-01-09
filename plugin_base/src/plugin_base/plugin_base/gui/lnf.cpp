@@ -10,7 +10,7 @@ using namespace juce;
 namespace plugin_base {
 
 static int const knob_thumb_width = 6;
-static int const knob_thumb_height = 6;
+static int const knob_thumb_height = 7;
 static int const slider_thumb_width = 8;
 static int const slider_thumb_height = 6;
 
