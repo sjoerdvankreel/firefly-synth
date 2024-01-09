@@ -44,6 +44,7 @@ visual routing indicators ?
 long names "SkewX" etc in tooltips
 drive => gain ?
 monitor highest usage
+increase title size
 
 fix the comb size param
 * fx
