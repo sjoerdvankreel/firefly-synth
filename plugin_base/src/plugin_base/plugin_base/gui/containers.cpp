@@ -193,8 +193,12 @@ grid_component::resized()
         if(_positions[p].column == _autofit_column && _positions[p].row == i)
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-          assert(autofit_child && autofit_child->fixed_height(getWidth(), getHeight()) > 0);
-          max_col_height = std::max(max_col_height, autofit_child->fixed_height(getWidth(), getHeight()));
+          assert(autofit_child);
+          auto fixed_height = autofit_child->fixed_height(
+            getWidth() / (float)_dimension.column_sizes.size(), 
+            getHeight() / (float)_dimension.row_sizes.size());
+          assert(fixed_height > 0);
+          max_col_height = std::max(max_col_height, fixed_height);
         }
       grid.templateRows.add(Grid::Px(max_col_height));
     }
@@ -212,8 +216,12 @@ grid_component::resized()
         if (_positions[p].row == _autofit_row && _positions[p].column == i)
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
-          assert(autofit_child && autofit_child->fixed_width(getWidth(), getHeight()) > 0);
-          max_row_width = std::max(max_row_width, autofit_child->fixed_width(getWidth(), getHeight()));
+          assert(autofit_child);
+          auto fixed_width = autofit_child->fixed_width(
+            getWidth() / (float)_dimension.column_sizes.size(),
+            getHeight() / (float)_dimension.row_sizes.size());
+          assert(fixed_width > 0);
+          max_row_width = std::max(max_row_width, fixed_width);
         }
       grid.templateColumns.add(Grid::Px(max_row_width));
     }
