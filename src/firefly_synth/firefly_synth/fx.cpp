@@ -23,6 +23,7 @@ static double const svf_min_freq = 20;
 static double const svf_max_freq = 20000;
 static float const log_half = std::log(0.5f);
 
+enum { shape_clip_clip, shape_clip_tanh };
 enum { type_off, type_svf, type_comb, type_shaper, type_delay };
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
@@ -63,6 +64,15 @@ svf_type_items()
   result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "BLL");
   result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "LSH");
   result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "HSH");
+  return result;
+}
+
+static std::vector<list_item>
+shape_clip_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{FAE2F1EB-248D-4BA2-A008-07C2CD56EB71}", "Clip");
+  result.emplace_back("{E40AE5EA-2E84-436F-960E-2D8733F0AA42}", "Tanh");
   return result;
 }
 
@@ -336,7 +346,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 2, 2, 3, 6 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 2, 3, 6 } })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.OverSmp", "Shp.OverSmp", true, false, param_shape_over, 1),
@@ -351,8 +361,8 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Shp.Clip", "Clip", true, false, param_shape_clip, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_toggle(true),
-    make_param_gui_single(section_shape, gui_edit_type::toggle, { 0, 2 },
+    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_clip_items(), "Clip"),
+    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_x = result.params.emplace_back(make_param(
@@ -710,9 +720,12 @@ template <bool Graph> void
 fx_engine::process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  bool clip = block_auto[param_shape_clip][0].step() != 0;
-  if(clip) process_shaper_clip<Graph>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); });
-  else process_shaper_clip<Graph>(block, modulation, [](float in) { return std::tanh(in); });
+  switch (block_auto[param_shape_clip][0].step())
+  {
+  case shape_clip_clip: process_shaper_clip<Graph>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
+  case shape_clip_tanh: process_shaper_clip<Graph>(block, modulation, [](float in) { return std::tanh(in); }); break;
+  default: assert(false); break;
+  }
 }
 
 template <bool Graph, class Clip> void
