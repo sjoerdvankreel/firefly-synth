@@ -272,7 +272,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, gui_dimension::auto_size, gui_dimension::auto_size } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1 } })));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_type = result.params.emplace_back(make_param(
@@ -295,19 +295,19 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& svf_gain = result.params.emplace_back(make_param(
     make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", "SVF.Gain", "Gain", true, false, param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
-    make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 3 }, 
+    make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_type }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
   auto& svf_kbd = result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "SVF.Kbd", "Kbd", true, false, param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-2, 2, 0, 0, true),
-    make_param_gui_single(section_svf, gui_edit_type::knob, { 0, 4 },
+    make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
 
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, gui_dimension::auto_size, 1, gui_dimension::auto_size } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1 } })));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Cmb.Dly+", "Dly+", true, false, param_comb_dly_plus, 1),
@@ -318,7 +318,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& comb_gain_plus = result.params.emplace_back(make_param(
     make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Cmb.Gain+", "Gain+", true, false, param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
-    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 1 },
+    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
@@ -330,7 +330,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Cmb.Gain-", "Gain-", true, false, param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 3 },
+    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
 
