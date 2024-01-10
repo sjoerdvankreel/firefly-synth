@@ -234,7 +234,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Controls"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, controls_column_sizes))));
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
+    make_topo_info("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type.SkewX/SkewY", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_menu.items, "Sin.Off/Off"),
     make_param_gui_single(section_controls, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
