@@ -44,6 +44,7 @@ visual routing indicators ?
 long names "SkewX" etc in tooltips
 drive => gain ?
 monitor highest usage
+5 osc? check am graph 
 
 fix the comb size param
 * fx
