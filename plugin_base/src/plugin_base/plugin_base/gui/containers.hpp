@@ -15,9 +15,12 @@ class autofit_viewport:
 public juce::Viewport
 {
   lnf* const _lnf;
+  int const _scroll_size;
+  int const _scroll_count;
 public:
   void resized() override;
-  autofit_viewport(lnf* lnf) : _lnf(lnf) {}
+  autofit_viewport(lnf* lnf, int scroll_size) : 
+  _lnf(lnf), _scroll_size(scroll_size) {}
 };
 
 // adds some margin around another component

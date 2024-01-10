@@ -16,8 +16,7 @@ juce::TabbedComponent(orientation), _state(state), _storage_id(storage_id)
 void 
 autofit_viewport::resized()
 {
-  auto& fit = dynamic_cast<autofit_component&>(*getViewedComponent());
-  getViewedComponent()->setSize(getWidth() - _lnf->getDefaultScrollbarWidth() - 2, fit.fixed_height(getWidth(), getHeight()));
+  getViewedComponent()->setSize(getWidth() - _lnf->getDefaultScrollbarWidth() - 2, 24*20);// fit.fixed_height(getWidth(), getHeight()));
 }
 
 extra_state_container::

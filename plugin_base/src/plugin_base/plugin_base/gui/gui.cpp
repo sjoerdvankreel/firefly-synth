@@ -634,7 +634,8 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
     return make_component<param_section_container>(this, &module, &section, &grid);
-  auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
+  assert(section.gui.scroll_size > 0);
+  auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index), section.gui.scroll_size);
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
   return make_component<param_section_container>(this, &module, &section, &viewer);
