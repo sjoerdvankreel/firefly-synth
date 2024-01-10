@@ -239,13 +239,13 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Controls"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, controls_column_sizes))));
   auto& x = result.params.emplace_back(make_param(
-    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "SkewX", "SX", true, true, param_x, 1),
+    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "SkewX", "X", true, true, param_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_x(type_menu, vs[1]); });
   auto& y = result.params.emplace_back(make_param(
-    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "SkewY", "SY", true, true, param_y, 1),
+    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "SkewY", "Y", true, true, param_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
