@@ -181,8 +181,8 @@ grid_component::resized()
   grid.columnGap = Grid::Px(_gap_size);
 
   // Note: this doesnt take into account autosizing interaction (i.e. multiple rows or cols being autosize target).
-  float row_height_even_distrib = (getHeight() - _gap_size * _dimension.row_sizes.size()) / (float)_dimension.row_sizes.size();
-  float col_width_even_distrib = (getWidth() - _gap_size * _dimension.column_sizes.size()) / (float)_dimension.column_sizes.size();
+  float row_height_even_distrib = (getHeight() - _gap_size * (_dimension.row_sizes.size() - 1)) / (float)_dimension.row_sizes.size();
+  float col_width_even_distrib = (getWidth() - _gap_size * (_dimension.column_sizes.size() - 1)) / (float)_dimension.column_sizes.size();
 
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
     if(_dimension.row_sizes[i] > 0)
