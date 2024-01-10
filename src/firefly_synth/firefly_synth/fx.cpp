@@ -272,7 +272,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 5, 5, 2, 2 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, gui_dimension::auto_size, gui_dimension::auto_size } })));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_type = result.params.emplace_back(make_param(
