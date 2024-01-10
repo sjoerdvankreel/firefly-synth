@@ -192,7 +192,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_slope,
     make_topo_tag("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", "Slope"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1 } })));
   auto& attack_slope = result.params.emplace_back(make_param(
     make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "Attack Slope", "A.Slp", true, true, param_attack_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
