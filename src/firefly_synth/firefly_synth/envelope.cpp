@@ -163,7 +163,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   on.domain.default_selector = [](int s, int) { return s == 0 ? "On" : "Off"; };
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
+    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type/Slope", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
       make_label_none())));
