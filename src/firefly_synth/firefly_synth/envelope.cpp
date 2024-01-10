@@ -18,17 +18,17 @@ static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { section_main, section_slope, section_dhadsr };
-enum { mode_slope_sustain_lin, mode_slope_follow_lin, mode_slope_release_lin, mode_slope_sustain_exp, mode_slope_follow_exp, mode_slope_release_exp };
+enum { mode_sustain_lin, mode_follow_lin, mode_release_lin, mode_sustain_exp, mode_follow_exp, mode_release_exp };
 enum {
-  param_on, param_mode_slope, param_sync, param_multi, param_filter,
+  param_on, param_mode, param_sync, param_multi, param_filter,
   param_attack_slope, param_decay_slope, param_release_slope,
   param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
-static bool is_exp_slope(int mode_slope) { return mode_slope >= mode_slope_sustain_exp; }
-static bool is_sustain(int mode_slope) { return mode_slope == mode_slope_sustain_lin || mode_slope == mode_slope_sustain_exp; }
-static bool is_release(int mode_slope) { return mode_slope == mode_slope_release_lin || mode_slope == mode_slope_release_exp; }
+static bool is_exp_slope(int mode) { return mode >= mode_sustain_exp; }
+static bool is_sustain(int mode) { return mode == mode_sustain_lin || mode == mode_sustain_exp; }
+static bool is_release(int mode) { return mode == mode_release_lin || mode == mode_release_exp; }
 
 static std::vector<list_item>
 type_items()
@@ -82,14 +82,14 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float
 {
   float const bpm = 120;
   bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
-  int mode_slope = state.get_plain_at(module_env, slot, param_mode_slope, 0).step();
+  int mode = state.get_plain_at(module_env, slot, param_mode, 0).step();
   float filter = state.get_plain_at(module_env, slot, param_filter, 0).real() / 1000.0f;
   float hold = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
   float delay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
   float decay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
   float attack = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
   float release = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
-  float sustain = !is_sustain(mode_slope) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
+  float sustain = !is_sustain(mode) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
   dahds = delay + attack + hold + decay + sustain;
   dahdsrf = dahds + release + filter;
 }
@@ -162,13 +162,13 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   on.domain.default_selector = [](int s, int) { return s == 0 ? "On" : "Off"; };
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Mode/Slope", param_mode_slope, 1),
+    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Mode.Slope", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
       make_label_none())));
   type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Linear", { mode_slope_sustain_lin, mode_slope_follow_lin, mode_slope_release_lin });
-  type.gui.submenu->add_submenu("Exponential", { mode_slope_sustain_exp, mode_slope_follow_exp, mode_slope_release_exp });
+  type.gui.submenu->add_submenu("Linear", { mode_sustain_lin, mode_follow_lin, mode_release_lin });
+  type.gui.submenu->add_submenu("Exponential", { mode_sustain_exp, mode_follow_exp, mode_release_exp });
   type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });  
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", "Tempo Sync", "Sync", true, true, param_sync, 1),
@@ -197,19 +197,19 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_mode_slope }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
+  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "Decay Slope", "D.Slp", true, true, param_decay_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode_slope }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
+  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "Release Slope", "R.Slp", true, true, param_release_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode_slope }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
+  release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
 
   result.sections.emplace_back(make_param_section(section_dhadsr,
     make_topo_tag("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
@@ -328,7 +328,7 @@ env_engine::reset(plugin_block const* block)
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 
-  if(!is_exp_slope(block_auto[param_mode_slope][0].step())) return;
+  if(!is_exp_slope(block_auto[param_mode][0].step())) return;
   float ds = block_auto[param_decay_slope][0].real();
   float as = block_auto[param_attack_slope][0].real();
   float rs = block_auto[param_release_slope][0].real();
@@ -374,8 +374,8 @@ env_engine::process(plugin_block& block)
     rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
   }
 
-  int mode_slope = block_auto[param_mode_slope][0].step();
-  if(is_exp_slope(mode_slope)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp);
+  int mode = block_auto[param_mode][0].step();
+  if(is_exp_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp);
   else process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_lin);
 }
 
@@ -385,7 +385,7 @@ env_engine::process_slope(
   float dcy, float stn, float rls, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int mode_slope = block_auto[param_mode_slope][0].step();
+  int mode = block_auto[param_mode][0].step();
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -411,13 +411,13 @@ env_engine::process_slope(
     }
 
     if (block.voice->state.release_frame == f && 
-      (is_sustain(mode_slope) || (is_release(mode_slope) && _stage != env_stage::release)))
+      (is_sustain(mode) || (is_release(mode) && _stage != env_stage::release)))
     {
       _stage_pos = 0;
       _stage = env_stage::release;
     }
 
-    if (_stage == env_stage::sustain && is_sustain(mode_slope))
+    if (_stage == env_stage::sustain && is_sustain(mode))
     {
       _release_level = stn;
       block.state.own_cv[0][0][f] = _filter.next(stn);
@@ -462,7 +462,7 @@ env_engine::process_slope(
     case env_stage::attack: _stage = env_stage::hold; break;
     case env_stage::delay: _stage = env_stage::attack; break;
     case env_stage::release: _stage = env_stage::filter; break;
-    case env_stage::decay: _stage = is_sustain(mode_slope) ? env_stage::sustain : env_stage::release; break;
+    case env_stage::decay: _stage = is_sustain(mode) ? env_stage::sustain : env_stage::release; break;
     default: assert(false); break;
     }
   }
