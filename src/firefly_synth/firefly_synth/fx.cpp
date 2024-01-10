@@ -808,7 +808,7 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
     y_curve = &y_scratch;
   }
 
-  auto& drive_curve = block.state.own_scratch[scratch_shape_y];
+  auto& drive_curve = block.state.own_scratch[scratch_shape_drive_raw];
   normalized_to_raw_into(block, this_module, param_shape_drive, drive_curve_plain, drive_curve);
 
   // dont oversample for graphs
