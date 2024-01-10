@@ -166,7 +166,6 @@ audio_matrix_topo(
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, -35, -35 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
-  main.gui.scroll_size = 24;
   
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),

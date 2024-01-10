@@ -92,7 +92,6 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
     make_topo_tag("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "Main"), 
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, -35, -35 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
-  main.gui.scroll_size = 24;
   
   auto& on = result.params.emplace_back(make_param(
     make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
