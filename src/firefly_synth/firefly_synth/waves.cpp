@@ -14,10 +14,10 @@ wave_make_name_skew(int skew)
   {
   case wave_skew_type_off: return "Off";
   case wave_skew_type_lin: return "Lin";
-  case wave_skew_type_scu: return "SclU";
-  case wave_skew_type_scb: return "SclB";
-  case wave_skew_type_xpu: return "ExpU";
-  case wave_skew_type_xpb: return "ExpB";
+  case wave_skew_type_scu: return "ScU";
+  case wave_skew_type_scb: return "ScB";
+  case wave_skew_type_xpu: return "XpU";
+  case wave_skew_type_xpb: return "XpB";
   default: assert(false); return {};
   }
 }

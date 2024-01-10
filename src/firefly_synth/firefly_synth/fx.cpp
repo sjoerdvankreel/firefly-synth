@@ -27,12 +27,12 @@ enum { shape_clip_clip, shape_clip_tanh };
 enum { type_off, type_svf, type_comb, type_shaper, type_delay };
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
-enum { scratch_shape_x, scratch_shape_y, scratch_shape_drive_raw, scratch_count };
+enum { scratch_shape_x, scratch_shape_y, scratch_shape_gain_raw, scratch_count };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_shape_over, param_shape_clip, param_shape_type, param_shape_x, param_shape_y, param_shape_mix, param_shape_drive, param_shape_lpf, param_shape_hpf,
+  param_shape_over, param_shape_clip, param_shape_type, param_shape_x, param_shape_y, param_shape_mix, param_shape_gain, param_shape_lpf, param_shape_hpf,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
@@ -45,9 +45,9 @@ type_items(bool global)
   std::vector<list_item> result;
   result.emplace_back("{F37A19CE-166A-45BF-9F75-237324221C39}", "Off");
   result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SVF");
-  result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
-  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Shape");
-  if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
+  result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Cmb");
+  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Shp");
+  if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Dly");
   return result;
 }
 
@@ -159,7 +159,7 @@ init_global_default(plugin_state& state)
 {
   state.set_text_at(module_gfx, 0, param_type, 0, "SVF");
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
-  state.set_text_at(module_gfx, 1, param_type, 0, "Delay");
+  state.set_text_at(module_gfx, 1, param_type, 0, "Dly");
   state.set_text_at(module_gfx, 1, param_delay_tempo, 0, "3/16");
 }
 
@@ -385,12 +385,12 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 5 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; }); 
-  auto& shape_drive = result.params.emplace_back(make_param(
-    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Drv", "Drv", true, false, param_shape_drive, 1),
+  auto& shape_gain = result.params.emplace_back(make_param(
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Drv", "Drv", true, false, param_shape_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_drive.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shp_lpf = result.params.emplace_back(make_param(
     make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Shp.LP", "LP", true, false, param_shape_lpf, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
@@ -813,7 +813,7 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
-  auto const& drive_curve_plain = *modulation[this_module][block.module_slot][param_shape_drive][0];
+  auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_shape_gain][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(sx))
@@ -833,15 +833,15 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
     y_curve = &y_scratch;
   }
 
-  auto& drive_curve = block.state.own_scratch[scratch_shape_drive_raw];
-  normalized_to_raw_into(block, this_module, param_shape_drive, drive_curve_plain, drive_curve);
+  auto& gain_curve = block.state.own_scratch[scratch_shape_gain_raw];
+  normalized_to_raw_into(block, this_module, param_shape_gain, gain_curve_plain, gain_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) oversmp_stages = 0;
   _shp_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
-    [&block, &x_curve, &y_curve, &mix_curve, &drive_curve, this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float in) {
+    [&block, &x_curve, &y_curve, &mix_curve, &gain_curve, this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float in) {
       int mod_index = f / oversmp_factor;
-      float shaped = clip(wave_calc_bi(in * drive_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
+      float shaped = clip(wave_calc_bi(in * gain_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
       return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * shaped;
     });
   
