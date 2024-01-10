@@ -153,7 +153,9 @@ grid_component::fixed_width(int parent_w, int parent_h) const
           assert(child.fixed_width(parent_w, parent_h) > 0);
           result += child.fixed_width(parent_w, parent_h);
         }
-  return result + (_dimension.column_sizes.size() - 1) * _gap_size;
+  result += (_dimension.column_sizes.size() - 1) * _gap_size;
+  // correct for rounding errors
+  return result + (int)std::ceil(_dimension.column_sizes.size() * 0.5f);
 }
 
 int 
@@ -170,7 +172,9 @@ grid_component::fixed_height(int parent_w, int parent_h) const
           assert(child.fixed_height(parent_w, parent_h) > 0);
           result += child.fixed_height(parent_w, parent_h);
         }
-  return result + (_dimension.row_sizes.size() - 1) * _gap_size;
+  result += (_dimension.row_sizes.size() - 1) * _gap_size + _dimension.row_sizes.size();
+  // correct for rounding errors
+  return result + (int)std::ceil(_dimension.row_sizes.size() * 0.5f);
 }
 
 void 
