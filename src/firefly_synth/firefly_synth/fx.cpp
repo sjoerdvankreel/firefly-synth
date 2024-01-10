@@ -19,8 +19,8 @@ namespace firefly_synth {
 
 static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
-static double const svf_min_freq = 20;
-static double const svf_max_freq = 20000;
+static double const flt_min_freq = 20;
+static double const flt_max_freq = 20000;
 static float const log_half = std::log(0.5f);
 
 enum { shape_clip_clip, shape_clip_tanh };
@@ -32,7 +32,7 @@ enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_shape_over, param_shape_clip, param_shape_type, param_shape_x, param_shape_y, param_shape_mix, param_shape_drive,
+  param_shape_over, param_shape_clip, param_shape_type, param_shape_x, param_shape_y, param_shape_mix, param_shape_drive, param_shape_lpf, param_shape_hpf,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
@@ -292,7 +292,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "SVF.Frq", "Frq", true, false, param_svf_freq, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(svf_min_freq, svf_max_freq, 1000, 1000, 0, "Hz"),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
@@ -344,9 +344,10 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
 
+  std::vector<int> shaper_col_distrib(9, gui_dimension::auto_size);
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, shaper_col_distrib })));
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.OverSmp", "Shp.OverSmp", true, false, param_shape_over, 1),
@@ -387,9 +388,21 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& shape_drive = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Drv", "Drv", true, false, param_shape_drive, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
-    make_param_gui_single(section_shape, gui_edit_type::hslider, { 0, 6 },
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_drive.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  auto& shp_lpf = result.params.emplace_back(make_param(
+    make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Shp.LP", "LP", true, false, param_shape_lpf, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 7 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shp_lpf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  auto& shp_hpf = result.params.emplace_back(make_param(
+    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Shp.HP", "HP", true, false, param_shape_hpf, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_min_freq, 1000, 0, "Hz"),
+    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 8 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  shp_hpf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
@@ -698,7 +711,7 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
     hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
     gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
     hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
-    hz = std::clamp(hz, svf_min_freq, svf_max_freq);
+    hz = std::clamp(hz, flt_min_freq, flt_max_freq);
 
     w = pi64 * hz / block.sample_rate;
     init(w, res_curve[f] * max_res, gain, a1, a2, a3, m0, m1, m2);
