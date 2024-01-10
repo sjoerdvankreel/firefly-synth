@@ -388,7 +388,7 @@ int
 param_slider::fixed_width(int parent_w, int parent_h) const
 {
   if(_param->param->gui.edit_type != gui_edit_type::knob) return -1;
-  return parent_h + 2;
+  return parent_h;
 }
 
 param_combobox::
