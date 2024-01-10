@@ -192,7 +192,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 5, 14 } })));
+    make_module_gui(section, colors, pos, { { 1 }, { 1, gui_dimension::auto_size } })));
   
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_graph_engine;
@@ -227,8 +227,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_one || vs[0] == mode_sync_wrap; });
 
   // Don't include the phase param for global lfo.
-  std::vector<int> type_column_sizes = { gui_dimension::auto_size, 18, 17, 22, 20, 22, 21 };
-  if(global) type_column_sizes = { gui_dimension::auto_size, 1, 1, 1, 1, 1 };
+  std::vector<int> type_column_sizes(6, gui_dimension::auto_size);
+  if(!global) type_column_sizes.push_back(gui_dimension::auto_size);
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Type"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, type_column_sizes))));
