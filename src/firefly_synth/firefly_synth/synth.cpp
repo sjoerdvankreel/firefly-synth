@@ -143,7 +143,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour cons
 {
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
   grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xRight), { 0, 1 });
-  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 16);
+  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 15);
   label.setColour(Label::ColourIds::textColourId, color);
   grid.add(label, { 0, 0 });
   return grid;
