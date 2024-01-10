@@ -65,8 +65,8 @@ rounded_container::fixed_width(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
   auto& fit = dynamic_cast<autofit_component&>(*child);
-  assert(fit.fixed_width(parent_w, parent_h) > 0);
-  return fit.fixed_width(parent_w, parent_h) + _radius;
+  assert(fit.fixed_width(parent_w - _radius, parent_h - _radius) > 0);
+  return fit.fixed_width(parent_w - _radius, parent_h - _radius) + _radius;
 }
 
 int 
@@ -74,8 +74,8 @@ rounded_container::fixed_height(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
   auto& fit = dynamic_cast<autofit_component&>(*child);
-  assert(fit.fixed_height(parent_w, parent_h) > 0);
-  return fit.fixed_height(parent_w, parent_h) + _radius;
+  assert(fit.fixed_height(parent_w - _radius, parent_h - _radius) > 0);
+  return fit.fixed_height(parent_w - _radius, parent_h - _radius) + _radius;
 }
 
 void
