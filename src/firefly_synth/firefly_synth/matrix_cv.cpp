@@ -16,7 +16,9 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int const route_count = 20;
+static int constexpr voice_route_count = 30;
+static int constexpr global_route_count = 20;
+static int constexpr max_route_count = std::max(voice_route_count, global_route_count);
 
 enum { section_main };
 enum { param_type, param_source, param_target, param_min, param_max };
@@ -128,6 +130,7 @@ select_midi_active(
   active[module_midi][0][midi_source_pb] = 1;
   active[module_midi][0][midi_source_cc + 1] = 1;
 
+  int route_count = global? global_route_count: voice_route_count;
   for (int r = 0; r < route_count; r++)
   {
     int type = state.get_plain_at(module, 0, param_type, r).step();
@@ -183,6 +186,8 @@ render_graph(
   std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
+  bool global = map.module_index == module_gcv_matrix;
+  int route_count = global ? global_route_count : voice_route_count;
   int type = state.get_plain_at(map.module_index, map.module_slot, param_type, map.param_slot).step();
   if(type == type_off) 
   {
@@ -265,6 +270,7 @@ cv_matrix_topo(
     assert(on_note_midi_start != -1);
   }
 
+  int route_count = global ? global_route_count : voice_route_count;
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
@@ -300,7 +306,7 @@ cv_matrix_topo(
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
   type.gui.tabular = true;
-  type.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count); };
+  type.gui.menu_handler_factory = [route_count](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count); };
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   auto mul_menu = std::make_shared<gui_submenu>();
@@ -387,7 +393,8 @@ cv_matrix_engine::process(plugin_block& block)
   // apply modulation routing
   int modulation_index = 0;
   auto const& own_automation = block.state.own_block_automation;
-  jarray<float, 1>* modulated_curve_ptrs[route_count] = { nullptr };
+  int route_count = _global ? global_route_count : voice_route_count;
+  jarray<float, 1>* modulated_curve_ptrs[max_route_count] = { nullptr };
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
