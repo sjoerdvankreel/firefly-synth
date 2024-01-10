@@ -30,7 +30,7 @@ enum { scratch_shape_x, scratch_shape_y, scratch_shape_drive_raw, scratch_count 
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
-  param_comb_dly_plus, param_comb_dly_min, param_comb_gain_plus, param_comb_gain_min,
+  param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
   param_shape_over, param_shape_type, param_shape_clip, param_shape_x, param_shape_y, param_shape_mix, param_shape_drive,
   param_delay_tempo, param_delay_feedback };
 
@@ -307,7 +307,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 2, 2, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, gui_dimension::auto_size, 1, gui_dimension::auto_size } })));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Cmb.Dly+", "Dly+", true, false, param_comb_dly_plus, 1),
@@ -315,18 +315,18 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
-  auto& comb_dly_min = result.params.emplace_back(make_param(
-    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Cmb.Dly-", "Dly-", true, false, param_comb_dly_min, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
-    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_gain_plus = result.params.emplace_back(make_param(
     make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Cmb.Gain+", "Gain+", true, false, param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
-    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 2 }, 
+    make_param_gui_single(section_comb, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  auto& comb_dly_min = result.params.emplace_back(make_param(
+    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Cmb.Dly-", "Dly-", true, false, param_comb_dly_min, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
+    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
   auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Cmb.Gain-", "Gain-", true, false, param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
