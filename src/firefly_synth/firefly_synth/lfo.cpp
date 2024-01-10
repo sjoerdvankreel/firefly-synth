@@ -40,10 +40,10 @@ mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{E8D04800-17A9-42AB-9CAE-19322A400334}", "Off");
-  result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate");
+  result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate.Rep");
   result.emplace_back("{0A5F479F-9180-4498-9464-DBEA0595C86B}", "Rate.One");
   result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.Wrp");
-  result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync");
+  result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync.Rep");
   result.emplace_back("{85B1AC0B-FA06-4E23-A7EF-3EBF6F620948}", "Sync.One");
   result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.Wrp");
   return result;
@@ -101,9 +101,9 @@ public:
 static void
 init_global_default(plugin_state& state)
 {
-  state.set_text_at(module_glfo, 0, param_mode, 0, "Sync");
+  state.set_text_at(module_glfo, 0, param_mode, 0, "Sync.Rep");
   state.set_text_at(module_glfo, 0, param_tempo, 0, "3/1");
-  state.set_text_at(module_glfo, 1, param_mode, 0, "Rate");
+  state.set_text_at(module_glfo, 1, param_mode, 0, "Rate.Rep");
 }
 
 static graph_engine_params
@@ -205,7 +205,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_topo_tag("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Mode"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size }))));
   auto& mode = result.params.emplace_back(make_param(
-    make_topo_info("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
+    make_topo_info("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode.Repeat", param_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   mode.gui.submenu = std::make_shared<gui_submenu>();
