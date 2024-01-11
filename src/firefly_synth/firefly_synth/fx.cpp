@@ -6,6 +6,7 @@
 #include <plugin_base/dsp/oversampler.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
+#include <firefly_synth/svf.hpp>
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/waves.hpp>
 
@@ -94,9 +95,7 @@ public module_engine {
   bool const _global;
 
   // svf
-  // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
-  double _svf_ic1eq[2];
-  double _svf_ic2eq[2];
+  state_var_filter _svf;
 
   // comb
   int _comb_pos = {};
@@ -451,110 +450,6 @@ init_svf_lpf(
   m0 = 0; m1 = 0; m2 = 1;
 }
 
-static void
-init_svf_hpf(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3, 
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  init_svf(w, res, std::tan(w), 1, k, a1, a2, a3);
-  m0 = 1; m1 = -k; m2 = -1;
-}
-
-static void
-init_svf_bpf(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3,
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  init_svf(w, res, std::tan(w), 1, k, a1, a2, a3);
-  m0 = 0; m1 = 1; m2 = 0;
-}
-
-static void
-init_svf_bsf(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3,
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  init_svf(w, res, std::tan(w), 1, k, a1, a2, a3);
-  m0 = 1; m1 = -k; m2 = 0;
-}
-
-static void
-init_svf_apf(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3,
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  init_svf(w, res, std::tan(w), 1, k, a1, a2, a3);
-  m0 = 1; m1 = -2 * k; m2 = 0;
-}
-
-static void
-init_svf_peq(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3,
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  init_svf(w, res, std::tan(w), 1, k, a1, a2, a3);
-  m0 = 1; m1 = -k; m2 = -2;
-}
-
-static void
-init_svf_bll(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3,
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  double a = std::pow(10.0, db_gain / 40.0);
-  init_svf(w, res, std::tan(w), a, k, a1, a2, a3);
-  m0 = 1; m1 = k * (a * a - 1); m2 = 0;
-}
-
-static void
-init_svf_lsh(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3,
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  double a = std::pow(10.0, db_gain / 40.0);
-  init_svf(w, res, std::tan(w) / std::sqrt(a), 1, k, a1, a2, a3);
-  m0 = 1; m1 = k * (a - 1); m2 = a * a - 1;
-}
-
-static void
-init_svf_hsh(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3,
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  double a = std::pow(10.0, db_gain / 40.0);
-  init_svf(w, res, std::tan(w) * std::sqrt(a), 1, k, a1, a2, a3);
-  m0 = a * a; m1 = k * (1 - a) * a; m2 = 1 - a * a;
-}
-
-// slightly simpler then svf_ version because we dont need to deal with the gain param
-/* TODO static */ void
-init_shp_lp(
-  double w, double res,
-  double& a1, double& a2, double& a3)
-{
-  double g = std::tan(w);
-  double k = 2 - 2 * res;
-  a1 = 1 / (1 + g * (g + k));
-  a2 = g * a1;
-  a3 = g * a2;
-}
-
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items) :
 _global(global), _dly_capacity(sample_rate * 10), 
@@ -572,12 +467,10 @@ _shape_type_items(shape_type_items)
 void
 fx_engine::reset(plugin_block const* block)
 {
+  _svf.clear();
   _dly_pos = 0;
   _comb_pos = 0;
-  _svf_ic1eq[0] = 0;
-  _svf_ic1eq[1] = 0;
-  _svf_ic2eq[0] = 0;
-  _svf_ic2eq[1] = 0;
+
   _shp_lp_ic1eq[0] = 0;
   _shp_lp_ic1eq[1] = 0;
   _shp_lp_ic2eq[0] = 0;
@@ -697,15 +590,15 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation)
   int svf_type = block_auto[param_svf_type][0].step();
   switch (svf_type)
   {
-  case svf_type_lpf: process_svf_type(block, modulation, init_svf_lpf); break;
-  case svf_type_hpf: process_svf_type(block, modulation, init_svf_hpf); break;
-  case svf_type_bpf: process_svf_type(block, modulation, init_svf_bpf); break;
-  case svf_type_bsf: process_svf_type(block, modulation, init_svf_bsf); break;
-  case svf_type_apf: process_svf_type(block, modulation, init_svf_apf); break;
-  case svf_type_peq: process_svf_type(block, modulation, init_svf_peq); break;
-  case svf_type_bll: process_svf_type(block, modulation, init_svf_bll); break;
-  case svf_type_lsh: process_svf_type(block, modulation, init_svf_lsh); break;
-  case svf_type_hsh: process_svf_type(block, modulation, init_svf_hsh); break;
+  case svf_type_lpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
+  case svf_type_hpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
+  case svf_type_bpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
+  case svf_type_bsf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
+  case svf_type_apf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
+  case svf_type_peq: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
+  case svf_type_bll: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
+  case svf_type_lsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
+  case svf_type_hsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
   default: assert(false); break;
   }
 }
@@ -713,19 +606,17 @@ fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation)
 template <class Init> void
 fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init)
 {
-  double a1, a2, a3;
-  double m0, m1, m2;
   double w, hz, gain, kbd;
-
   double const max_res = 0.99;
+  int const kbd_pivot = midi_middle_c;
   int this_module = _global ? module_gfx : module_vfx;
+
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
   auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
   auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
-
-  int kbd_pivot = midi_middle_c;
   int kbd_current = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.id.key;
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     kbd = block.normalized_to_raw(this_module, param_svf_kbd, kbd_curve[f]);
@@ -733,19 +624,10 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
     gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
     hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
     hz = std::clamp(hz, flt_min_freq, flt_max_freq);
-
     w = pi64 * hz / block.sample_rate;
-    init(w, res_curve[f] * max_res, gain, a1, a2, a3, m0, m1, m2);
+    init(w, res_curve[f] * max_res, gain);
     for (int c = 0; c < 2; c++)
-    {
-      double v0 = block.state.own_audio[0][0][c][f];
-      double v3 = v0 - _svf_ic2eq[c];
-      double v1 = a1 * _svf_ic1eq[c] + a2 * v3;
-      double v2 = _svf_ic2eq[c] + a2 * _svf_ic1eq[c] + a3 * v3;
-      _svf_ic1eq[c] = 2 * v1 - _svf_ic1eq[c];
-      _svf_ic2eq[c] = 2 * v2 - _svf_ic2eq[c];
-      block.state.own_audio[0][0][c][f] = m0 * v0 + m1 * v1 + m2 * v2;
-    }
+      block.state.own_audio[0][0][c][f] = _svf.next(c, block.state.own_audio[0][0][c][f]);
   }
 }
 
