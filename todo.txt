@@ -39,8 +39,8 @@ auto-generate the manual (param list)
 visual routing indicators ?
 drive => gain ?
 monitor highest usage
+shaper filter position / off
 
-fix the comb size param
 * fx
 * stvar - freq, res, gain, kbd
 * comb - g+ d+ g- d-
