@@ -33,14 +33,10 @@ still find a way to do insert fx here
 do the param fuzz test
 at least block-automate all voice parameters see also modmatrices
 re-profile the kbdtest demo
-do controllable shaper lpf after shape(skew_x) and hpf after skew_y
 do global "clear unused" context menu entry ?
 auto-generate the manual (param list)
 visual routing indicators ?
-drive => gain ?
 monitor highest usage
-shaper filter position / off
-what ticks in the shaper ?
 
 * fx
 * stvar - freq, res, gain, kbd
