@@ -37,6 +37,8 @@ _voice_processor_context(voice_processor_context)
   int accurate_events_guess = _state.desc().param_count * 64;
 
   // init everything that is not frame-count dependent
+  _global_module_process_duration_sec.resize(_dims.module_slot);
+  _voice_module_process_duration_sec.resize(_dims.voice_module_slot);
   _voice_states.resize(_polyphony);
   _global_context.resize(_dims.module_slot);
   _voice_context.resize(_dims.voice_module_slot);
@@ -126,6 +128,27 @@ plugin_engine::release_block()
   double process_time_sec = now - _block_start_time_sec;
   double block_time_sec = _host_block->frame_count / _sample_rate;
   _cpu_usage = process_time_sec / block_time_sec;
+
+  double max_module_duration = 0;
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+    {
+      int this_module_duration = 0;
+      if(module.dsp.stage != module_stage::voice)
+        this_module_duration = _global_module_process_duration_sec[m][mi];
+      else
+        for(int v = 0; v < _polyphony; v++)
+          this_module_duration += _voice_module_process_duration_sec[v][m][mi];
+      if (this_module_duration > max_module_duration)
+      {
+        _high_module_cpu_topo = m;
+        _high_module_cpu_slot = mi;
+        _high_module_cpu_usage = this_module_duration / process_time_sec;
+      }
+    }
+  }
 }
 
 host_block&
@@ -154,6 +177,20 @@ plugin_engine::deactivate()
   _max_frame_count = 0;
   _output_updated_sec = 0;
   _block_start_time_sec = 0;
+
+  _high_module_cpu_topo = 0;
+  _high_module_cpu_slot = 0;
+  _high_module_cpu_usage = 0;
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      if(module.dsp.stage != module_stage::voice)
+        _global_module_process_duration_sec[m][mi] = 0;
+      else
+        for(int v = 0; v < _polyphony; v++)
+          _voice_module_process_duration_sec[v][m][mi] = 0;
+  }
 
   // drop frame-count dependent memory
   _voice_results = {};
@@ -341,7 +378,11 @@ plugin_engine::process_voice(int v, bool threaded)
         _voice_states[v].id, _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
+
+      double start_time = seconds_since_epoch();
+      _voice_module_process_duration_sec[v][m][mi] = start_time;
       _voice_engines[v][m][mi]->process(block);
+      _voice_module_process_duration_sec[v][m][mi] = seconds_since_epoch() - start_time;
 
       // plugin completed its envelope
       if (block.voice->finished)
@@ -512,7 +553,10 @@ plugin_engine::process()
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
+      double start_time = seconds_since_epoch();
+      _global_module_process_duration_sec[m][mi] = start_time;
       _input_engines[m][mi]->process(block);
+      _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
     }
 
   /********************************************************/
@@ -665,7 +709,10 @@ plugin_engine::process()
       };
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
       block.out = &out_block;
+      double start_time = seconds_since_epoch();
+      _global_module_process_duration_sec[m][mi] = start_time;
       _output_engines[m][mi]->process(block);
+      _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
 
       // copy back output parameter values
       for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)

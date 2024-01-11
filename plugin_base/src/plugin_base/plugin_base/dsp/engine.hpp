@@ -51,6 +51,11 @@ class plugin_engine final {
   double _output_updated_sec = {};
   double _block_start_time_sec = {};
   std::int64_t _stream_time = {};
+  int _high_module_cpu_topo = {};
+  int _high_module_cpu_slot = {};
+  double _high_module_cpu_usage = {};
+  jarray<double, 3> _voice_module_process_duration_sec = {};
+  jarray<double, 2> _global_module_process_duration_sec = {};
 
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
