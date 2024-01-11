@@ -755,8 +755,12 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(!Graph && Type == type_shp_b)
         shp_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
-      left = clip(skew_y(shape(left), (*y_curve)[mod_index]));
-      right = clip(skew_y(shape(right), (*y_curve)[mod_index]));
+      left = shape(left);
+      right = shape(right);
+      if constexpr (!Graph && Type == type_shp_c)
+        shp_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+      left = clip(skew_y(left, (*y_curve)[mod_index]));
+      right = clip(skew_y(right, (*y_curve)[mod_index]));
       left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
       right = (1 - mix_curve[mod_index]) * right_in + mix_curve[mod_index] * right;
     });
