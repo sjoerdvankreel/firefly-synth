@@ -140,6 +140,7 @@ public module_engine {
   void process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
   template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY>
   void process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
+  void shp_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
 
 public:
   void reset(plugin_block const*) override;
@@ -617,6 +618,20 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
   }
 }
 
+void  
+fx_engine::shp_svf_next(
+  plugin_block const& block, int oversmp_factor, 
+  double freq_plain, double res, float& left, float& right)
+{
+  double const max_res = 0.99;
+  int this_module = _global ? module_gfx : module_vfx;
+  double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_plain);
+  double w = pi64 * hz / (block.sample_rate * oversmp_factor);
+  _shp_svf.init_lpf(w, res * max_res);
+  left = _shp_svf.next(0, left);
+  right = _shp_svf.next(1, right);
+}
+
 template <bool Graph, int Type> void
 fx_engine::process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
@@ -689,7 +704,6 @@ fx_engine::process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown co
 template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY> void 
 fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
-  double const max_res = 0.99;
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
   int shape_type = block_auto[param_shape_type][0].step();
@@ -739,14 +753,8 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       int mod_index = f / oversmp_factor;
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
-      if constexpr(!Graph)
-      {
-        double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[mod_index]);
-        double w = pi64 * hz / (block.sample_rate * oversmp_factor);
-        _shp_svf.init_lpf(w, res_curve[mod_index] * max_res);
-        left = _shp_svf.next(0, left);
-        right = _shp_svf.next(1, right);
-      }
+      if constexpr(!Graph && Type == type_shp_b)
+        shp_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
       left = clip(skew_y(shape(left), (*y_curve)[mod_index]));
       right = clip(skew_y(shape(right), (*y_curve)[mod_index]));
       left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
