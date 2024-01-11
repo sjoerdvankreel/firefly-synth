@@ -25,10 +25,10 @@ static double const flt_max_freq = 20000;
 static float const log_half = std::log(0.5f);
 
 enum { shape_clip_clip, shape_clip_tanh };
-enum { type_off, type_svf, type_comb, type_shaper, type_delay };
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
 enum { scratch_shape_x, scratch_shape_y, scratch_shape_gain_raw, scratch_count };
+enum { type_off, type_svf, type_cmb, type_shp_a, type_shp_b, type_shp_c, type_delay };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
@@ -37,6 +37,8 @@ enum { param_type,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
+static bool shp_has_lpf(int type) { return type_shp_b <= type && type <= type_shp_c; }
+static bool type_is_shp(int type) { return type_shp_a <= type && type <= type_shp_c; }
 static bool shp_has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
 static bool shp_has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
 
@@ -47,7 +49,9 @@ type_items(bool global)
   result.emplace_back("{F37A19CE-166A-45BF-9F75-237324221C39}", "Off");
   result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SVF");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Cmb");
-  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Shp");
+  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "ShpA");
+  result.emplace_back("{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}", "ShpB");
+  result.emplace_back("{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}", "ShpC");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Dly");
   return result;
 }
@@ -126,15 +130,15 @@ public module_engine {
   template <class Init> 
   void process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
   
-  template <bool Graph>
+  template <bool Graph, int Type>
   void process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation);
-  template <bool Graph, class Clip>
+  template <bool Graph, int Type, class Clip>
   void process_shaper_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip);
-  template <bool Graph, class Clip, class Shape>
+  template <bool Graph, int Type, class Clip, class Shape>
   void process_shaper_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape);
-  template <bool Graph, class Clip, class Shape, class SkewX>
+  template <bool Graph, int Type, class Clip, class Shape, class SkewX>
   void process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
-  template <bool Graph, class Clip, class Shape, class SkewX, class SkewY>
+  template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY>
   void process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
 
 public:
@@ -194,14 +198,14 @@ render_graph(
   int sample_rate = -1;
   jarray<float, 2> audio_in;
   auto const params = make_graph_engine_params();
-  if (type == type_shaper)
+  if (type_is_shp(type))
   {
     frame_count = 200;
     sample_rate = 200;
     audio_in.resize(jarray<int, 1>(2, frame_count));
     for(int i = 0; i <= 199; i++)
       audio_in[0][i] = audio_in[1][i] = unipolar_to_bipolar((float)i / 199);
-  } else if(type == type_svf || type == type_comb)
+  } else if(type == type_svf || type == type_cmb)
   {
     frame_count = 4800;
     sample_rate = 48000;
@@ -234,7 +238,7 @@ render_graph(
   engine->process_end();
 
   auto const& audio = block->state.own_audio[0][0][0];
-  if (type == type_delay || type == type_shaper)
+  if (type == type_delay || type_is_shp(type))
   {
     std::string partition = type == type_delay? "IR": "Shape";
     std::vector<float> series(audio.cbegin(), audio.cbegin() + frame_count);
@@ -243,7 +247,7 @@ render_graph(
 
   // comb / svf
   auto response = fft(audio.data());
-  if (type == type_comb)
+  if (type == type_cmb)
     return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
   // remap over 0.8 just to look pretty
   std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
@@ -277,10 +281,16 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
     make_param_section_gui({ 0, 0 }, { 1, 1 })));
-  result.params.emplace_back(make_param(
+  auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(global), ""),
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  type.gui.submenu = std::make_shared<gui_submenu>();
+  type.gui.submenu->indices.push_back(type_off);
+  type.gui.submenu->indices.push_back(type_svf);
+  type.gui.submenu->indices.push_back(type_cmb);
+  type.gui.submenu->add_submenu("Shape", { type_shp_a, type_shp_b, type_shp_c });
+  if (global) type.gui.submenu->indices.push_back(type_delay);
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
@@ -320,91 +330,91 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1 } })));
-  comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Cmb.Dly+", "Dly+", true, false, param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_gain_plus = result.params.emplace_back(make_param(
     make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Cmb.Gain+", "Gain+", true, false, param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
     make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Cmb.Dly-", "Dly-", true, false, param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Cmb.Gain-", "Gain-", true, false, param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_comb; });
+  comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
 
   std::vector<int> shaper_col_distrib(9, gui_dimension::auto_size);
   auto& shape = result.sections.emplace_back(make_param_section(section_shape,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
     make_param_section_gui({ 0, 1 }, { { 1 }, shaper_col_distrib })));
-  shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.OverSmp", "Shp.OverSmp", true, false, param_shape_over, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "1X"), // TODO 2x
+    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "2X"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
   auto& shape_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Shp.Clip", "Clip", true, false, param_shape_clip, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(shape_clip_items(), "Clip"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
-  shape_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
   auto& shape_type = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Shp.Type.SkewX/SkewY", param_shape_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(shaper_type_menu.items, "Sin.Off/Off"),
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
   shape_type.gui.submenu = shaper_type_menu.submenu;
-  shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
   auto& shape_x = result.params.emplace_back(make_param(
     make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Shp.X", "X", true, false, param_shape_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_x.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
-    return vs[0] == type_shaper && shp_has_skew_x(shaper_type_menu, vs[1]); });
+    return type_is_shp(vs[0]) && shp_has_skew_x(shaper_type_menu, vs[1]); });
   auto& shape_y = result.params.emplace_back(make_param(
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Shp.Y", "Y", true, false, param_shape_y, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_y.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
-    return vs[0] == type_shaper && shp_has_skew_y(shaper_type_menu, vs[1]); });
+    return type_is_shp(vs[0]) && shp_has_skew_y(shaper_type_menu, vs[1]); });
   auto& shape_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gn", "Gn", true, false, param_shape_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
   auto& shape_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mx", "Mx", true, false, param_shape_mix, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
   auto& shp_lp = result.params.emplace_back(make_param(
     make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Shp.LP", "LP", true, false, param_shape_lp_frq, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shp_lp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shp_lp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]) && shp_has_lpf(vs[0]); });
   auto& shp_res = result.params.emplace_back(make_param(
-    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Shp.Res", "Res", true, false, param_shape_lp_res, 1),
+    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Shp.Rz", "Rz", true, false, param_shape_lp_res, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shp_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shp_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]) && shp_has_lpf(vs[0]); });
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
@@ -458,7 +468,7 @@ fx_engine::reset(plugin_block const* block)
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
   if (_global && type == type_delay) _dly_buffer.fill(0);
-  if (type == type_comb)
+  if (type == type_cmb)
   {
     std::fill(_comb_in[0].begin(), _comb_in[0].end(), 0.0f);
     std::fill(_comb_in[1].begin(), _comb_in[1].end(), 0.0f);
@@ -488,9 +498,11 @@ fx_engine::process(plugin_block& block,
   switch (type)
   {
   case type_svf: process_svf(block, *modulation); break;
-  case type_comb: process_comb(block, *modulation); break;
+  case type_cmb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
-  case type_shaper: process_shaper<Graph>(block, *modulation); break;
+  case type_shp_a: process_shaper<Graph, type_shp_a>(block, *modulation); break;
+  case type_shp_b: process_shaper<Graph, type_shp_b>(block, *modulation); break;
+  case type_shp_c: process_shaper<Graph, type_shp_c>(block, *modulation); break;
   default: assert(false); break;
   }
 }
@@ -605,76 +617,76 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
   }
 }
 
-template <bool Graph> void
+template <bool Graph, int Type> void
 fx_engine::process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   switch (block_auto[param_shape_clip][0].step())
   {
-  case shape_clip_clip: process_shaper_clip<Graph>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
-  case shape_clip_tanh: process_shaper_clip<Graph>(block, modulation, [](float in) { return std::tanh(in); }); break;
+  case shape_clip_clip: process_shaper_clip<Graph, Type>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
+  case shape_clip_tanh: process_shaper_clip<Graph, Type>(block, modulation, [](float in) { return std::tanh(in); }); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, class Clip> void
+template <bool Graph, int Type, class Clip> void
 fx_engine::process_shaper_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip)
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index1)
   {
-  case wave_shape_type_saw: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_saw); break;
-  case wave_shape_type_sqr: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sqr); break;
-  case wave_shape_type_tri: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_tri); break;
-  case wave_shape_type_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin); break;
-  case wave_shape_type_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos); break;
-  case wave_shape_type_sin_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_sin); break;
-  case wave_shape_type_sin_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_cos); break;
-  case wave_shape_type_cos_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_sin); break;
-  case wave_shape_type_cos_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
-  case wave_shape_type_smooth_or_fold: process_shaper_clip_shape<Graph>(block, modulation, clip, wave_shape_bi_fold); break;
+  case wave_shape_type_saw: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_saw); break;
+  case wave_shape_type_sqr: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sqr); break;
+  case wave_shape_type_tri: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_tri); break;
+  case wave_shape_type_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin); break;
+  case wave_shape_type_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos); break;
+  case wave_shape_type_sin_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin); break;
+  case wave_shape_type_sin_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos); break;
+  case wave_shape_type_cos_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin); break;
+  case wave_shape_type_cos_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
+  case wave_shape_type_smooth_or_fold: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, class Clip, class Shape> void
+template <bool Graph, int Type, class Clip, class Shape> void
 fx_engine::process_shaper_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape)
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index2)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_x<Graph>(block, modulation, clip, shape, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, class Clip, class Shape, class SkewX> void
+template <bool Graph, int Type, class Clip, class Shape, class SkewX> void
 fx_engine::process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
 {
   switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index3)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_xy<Graph>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, class Clip, class Shape, class SkewX, class SkewY> void 
+template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY> void 
 fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   double const max_res = 0.99;
