@@ -41,7 +41,7 @@ oversampler::process(
   {
     float* p = up_block.getChannelPointer(c);
     for (int f = 0; f < block_size * Factor; f++)
-      p[f] = non_linear(f, p[f]);
+      p[f] = non_linear(c, f, p[f]);
   }
   oversampling.processSamplesDown(inout_block);
 }

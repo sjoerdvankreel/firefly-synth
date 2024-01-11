@@ -32,7 +32,7 @@ enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_shape_over, param_shape_clip, param_shape_type, param_shape_x, param_shape_y, param_shape_gain, param_shape_mix, param_shape_lpf, param_shape_hpf,
+  param_shape_over, param_shape_clip, param_shape_type, param_shape_x, param_shape_y, param_shape_gain, param_shape_mix, param_shape_lp_frq, param_shape_lp_res,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
@@ -94,8 +94,9 @@ public module_engine {
   bool const _global;
 
   // svf
-  double _ic1eq[2];
-  double _ic2eq[2];
+  // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
+  double _svf_ic1eq[2];
+  double _svf_ic2eq[2];
 
   // comb
   int _comb_pos = {};
@@ -110,9 +111,12 @@ public module_engine {
 
   // shaper with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
-  double _shp_dc_flt_r = 0;
+  // and resonant lp filter in the oversampling stage
+  double _shp_lp_ic1eq[2];
+  double _shp_lp_ic2eq[2];
   double _shp_dc_flt_x0[2];
   double _shp_dc_flt_y0[2];
+  double _shp_dc_flt_r = 0;
   oversampler _shp_oversampler;
   std::vector<multi_menu_item> _shape_type_items;
 
@@ -351,7 +355,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.OverSmp", "Shp.OverSmp", true, false, param_shape_over, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "2X"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "1X"), // TODO 2x
     make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_clip = result.params.emplace_back(make_param(
@@ -391,18 +395,18 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
-  auto& shp_lpf = result.params.emplace_back(make_param(
-    make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Shp.LP", "LP", true, false, param_shape_lpf, 1),
+  auto& shp_lp = result.params.emplace_back(make_param(
+    make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Shp.LP", "LP", true, false, param_shape_lp_frq, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shp_lpf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
-  auto& shp_hpf = result.params.emplace_back(make_param(
-    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Shp.HP", "HP", true, false, param_shape_hpf, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_min_freq, 1000, 0, "Hz"),
+  shp_lp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  auto& shp_res = result.params.emplace_back(make_param(
+    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Shp.Res", "Res", true, false, param_shape_lp_res, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shp_hpf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
+  shp_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
@@ -538,6 +542,19 @@ init_svf_hsh(
   m0 = a * a; m1 = k * (1 - a) * a; m2 = 1 - a * a;
 }
 
+// slightly simpler then svf_ version because we dont need to deal with the gain param
+/* TODO static */ void
+init_shp_lp(
+  double w, double res,
+  double& a1, double& a2, double& a3)
+{
+  double g = std::tan(w);
+  double k = 2 - 2 * res;
+  a1 = 1 / (1 + g * (g + k));
+  a2 = g * a1;
+  a3 = g * a2;
+}
+
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items) :
 _global(global), _dly_capacity(sample_rate * 10), 
@@ -557,10 +574,14 @@ fx_engine::reset(plugin_block const* block)
 {
   _dly_pos = 0;
   _comb_pos = 0;
-  _ic1eq[0] = 0;
-  _ic1eq[1] = 0;
-  _ic2eq[0] = 0;
-  _ic2eq[1] = 0;
+  _svf_ic1eq[0] = 0;
+  _svf_ic1eq[1] = 0;
+  _svf_ic2eq[0] = 0;
+  _svf_ic2eq[1] = 0;
+  _shp_lp_ic1eq[0] = 0;
+  _shp_lp_ic1eq[1] = 0;
+  _shp_lp_ic2eq[0] = 0;
+  _shp_lp_ic2eq[1] = 0;
   _shp_dc_flt_x0[0] = 0;
   _shp_dc_flt_x0[1] = 0;
   _shp_dc_flt_y0[0] = 0;
@@ -718,11 +739,11 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
     for (int c = 0; c < 2; c++)
     {
       double v0 = block.state.own_audio[0][0][c][f];
-      double v3 = v0 - _ic2eq[c];
-      double v1 = a1 * _ic1eq[c] + a2 * v3;
-      double v2 = _ic2eq[c] + a2 * _ic1eq[c] + a3 * v3;
-      _ic1eq[c] = 2 * v1 - _ic1eq[c];
-      _ic2eq[c] = 2 * v2 - _ic2eq[c];
+      double v3 = v0 - _svf_ic2eq[c];
+      double v1 = a1 * _svf_ic1eq[c] + a2 * v3;
+      double v2 = _svf_ic2eq[c] + a2 * _svf_ic1eq[c] + a3 * v3;
+      _svf_ic1eq[c] = 2 * v1 - _svf_ic1eq[c];
+      _svf_ic2eq[c] = 2 * v2 - _svf_ic2eq[c];
       block.state.own_audio[0][0][c][f] = m0 * v0 + m1 * v1 + m2 * v2;
     }
   }
@@ -800,6 +821,7 @@ fx_engine::process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown co
 template <bool Graph, class Clip, class Shape, class SkewX, class SkewY> void 
 fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
+  double const max_res = 0.99;
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
   int shape_type = block_auto[param_shape_type][0].step();
@@ -811,9 +833,11 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   int sy = type_item.index3;
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
+  auto const& res_curve = *modulation[this_module][block.module_slot][param_shape_lp_res][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
   auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_shape_gain][0];
+  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_shape_lp_frq][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(sx))
@@ -839,10 +863,67 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   // dont oversample for graphs
   if constexpr(Graph) oversmp_stages = 0;
   _shp_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
-    [&block, &x_curve, &y_curve, &mix_curve, &gain_curve, this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float in) {
+    [this, &block, &x_curve, &y_curve, &mix_curve, &gain_curve, &freq_curve_plain, &res_curve, 
+      this_module, clip, shape, skew_x, skew_y, oversmp_factor](int c, int f, float in) 
+    { 
+      double a1, a2, a3;
+      double m0, m1, m2;
+      (void)a1;
+      (void)a2;
+      (void)a3;
+      (void)m0;
+      (void)m1;
+      (void)m2;
       int mod_index = f / oversmp_factor;
-      float shaped = clip(wave_calc_bi(in * gain_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
-      return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * shaped;
+     // assert(oversmp_factor == 1); // todo
+      
+      float skewed_in = skew_x(in * gain_curve[mod_index], (*x_curve)[mod_index]);
+      double filterd = skewed_in;
+
+      if constexpr(!Graph)
+      {
+      double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[f]);
+      double w = pi64 * hz / block.sample_rate;
+      //init_shp_lp(w, res_curve[mod_index] * max_res, a1, a2, a3); // todo not for each channel
+      init_svf_lpf(w, res_curve[mod_index] * max_res, 0, a1, a2, a3, m0, m1, m2);
+
+      double v0 = skewed_in;
+     // v0 = in;
+      double v3 = v0 - _shp_lp_ic2eq[c];
+      double v1 = a1 * _shp_lp_ic1eq[c] + a2 * v3;
+      double v2 = _shp_lp_ic2eq[c] + a2 * _shp_lp_ic1eq[c] + a3 * v3;
+      _shp_lp_ic1eq[c] = 2 * v1 - _shp_lp_ic1eq[c];
+      _shp_lp_ic2eq[c] = 2 * v2 - _shp_lp_ic2eq[c];
+      double lpf_out = m0 * v0 + m1 * v1 + m2 * v2;
+      filterd = lpf_out;
+      }
+      //block.state.own_audio[0][0][c][f] = m0 * v0 + m1 * v1 + m2 * v2;
+
+      /*
+      double v0 = skewed_in;
+      double v3 = v0 - _shp_lp_ic2eq[c];
+      double v1 = a1 * _shp_lp_ic1eq[c] + a2 * v3;
+      double v2 = _shp_lp_ic2eq[c] + a2 * _shp_lp_ic1eq[c] + a3 * v3;
+      _shp_lp_ic1eq[c] = 2 * v1 - _shp_lp_ic1eq[c];
+      _shp_lp_ic2eq[c] = 2 * v2 - _shp_lp_ic2eq[c];
+      */
+
+      //double lpf_out = v2;
+      //assert(lpf_out == lpf_out);
+      //(void)lpf_out;
+
+
+
+      //float shaped_in = shape(skewed_in);
+      assert(!std::isnan(filterd));
+      float shaped_in = shape(filterd);
+      assert(!std::isnan(shaped_in));
+      float shaped_out = skew_y(shaped_in, (*y_curve)[mod_index]);
+      assert(!std::isnan(shaped_out));
+      float clipped = clip(shaped_out);
+      assert(!std::isnan(clipped));
+      //float shaped = clip(wave_calc_bi(in * gain_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
+      return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * clipped;
     });
   
   // dont dc filter for graphs
