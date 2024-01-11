@@ -111,10 +111,11 @@ public module_engine {
   // shaper with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
   // and resonant lp filter in the oversampling stage
+  double _shp_lp_ic1eq[2];
+  double _shp_lp_ic2eq[2];
   double _shp_dc_flt_x0[2];
   double _shp_dc_flt_y0[2];
   double _shp_dc_flt_r = 0;
-  state_var_filter _shp_svf;
   oversampler _shp_oversampler;
   std::vector<multi_menu_item> _shape_type_items;
 
@@ -427,6 +428,28 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   return result;
 }
 
+static void
+init_svf(
+  double w, double res, double g, double a,
+  double& k, double& a1, double& a2, double& a3)
+{
+  k = (2 - 2 * res) / a;
+  a1 = 1 / (1 + g * (g + k));
+  a2 = g * a1;
+  a3 = g * a2;
+}
+
+static void
+init_svf_lpf(
+  double w, double res, double db_gain,
+  double& a1, double& a2, double& a3, 
+  double& m0, double& m1, double& m2)
+{
+  double k;
+  init_svf(w, res, std::tan(w), 1, k, a1, a2, a3);
+  m0 = 0; m1 = 0; m2 = 1;
+}
+
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items) :
 _global(global), _dly_capacity(sample_rate * 10), 
@@ -447,8 +470,11 @@ fx_engine::reset(plugin_block const* block)
   _svf.clear();
   _dly_pos = 0;
   _comb_pos = 0;
-  
-  _shp_svf.clear();
+
+  _shp_lp_ic1eq[0] = 0;
+  _shp_lp_ic1eq[1] = 0;
+  _shp_lp_ic2eq[0] = 0;
+  _shp_lp_ic2eq[1] = 0;
   _shp_dc_flt_x0[0] = 0;
   _shp_dc_flt_x0[1] = 0;
   _shp_dc_flt_y0[0] = 0;
@@ -722,27 +748,64 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
     [this, &block, &x_curve, &y_curve, &mix_curve, &gain_curve, &freq_curve_plain, &res_curve, 
       this_module, clip, shape, skew_x, skew_y, oversmp_factor](int c, int f, float in) 
     { 
+      double a1, a2, a3;
+      double m0, m1, m2;
+      (void)a1;
+      (void)a2;
+      (void)a3;
+      (void)m0;
+      (void)m1;
+      (void)m2;
       int mod_index = f / oversmp_factor;
      // assert(oversmp_factor == 1); // todo
-      float after_skew_x = skew_x(in * gain_curve[mod_index], (*x_curve)[mod_index]);
-      assert(!std::isnan(after_skew_x));
-      float after_filter = after_skew_x;
+      
+      float skewed_in = skew_x(in * gain_curve[mod_index], (*x_curve)[mod_index]);
+      double filterd = skewed_in;
+
       if constexpr(!Graph)
       {
-        // todo not init twice
-        double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[f]);
-        double w = pi64 * hz / block.sample_rate;
-        _shp_svf.init_lpf(w, res_curve[mod_index] * max_res);
-        after_filter = _svf.next(c, after_filter);
-        assert(!std::isnan(after_filter));
+      double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[f]);
+      double w = pi64 * hz / block.sample_rate;
+      //init_shp_lp(w, res_curve[mod_index] * max_res, a1, a2, a3); // todo not for each channel
+      init_svf_lpf(w, res_curve[mod_index] * max_res, 0, a1, a2, a3, m0, m1, m2);
+
+      double v0 = skewed_in;
+     // v0 = in;
+      double v3 = v0 - _shp_lp_ic2eq[c];
+      double v1 = a1 * _shp_lp_ic1eq[c] + a2 * v3;
+      double v2 = _shp_lp_ic2eq[c] + a2 * _shp_lp_ic1eq[c] + a3 * v3;
+      _shp_lp_ic1eq[c] = 2 * v1 - _shp_lp_ic1eq[c];
+      _shp_lp_ic2eq[c] = 2 * v2 - _shp_lp_ic2eq[c];
+      double lpf_out = m0 * v0 + m1 * v1 + m2 * v2;
+      filterd = lpf_out;
       }
-      float after_shape = shape(after_filter);
-      assert(!std::isnan(after_shape));
-      float after_skew_y = skew_y(after_shape, (*y_curve)[mod_index]);
-      assert(!std::isnan(after_skew_y));
-      float after_clip = clip(after_skew_y);
-      assert(!std::isnan(check_bipolar(after_clip)));
-      return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * after_clip;
+      //block.state.own_audio[0][0][c][f] = m0 * v0 + m1 * v1 + m2 * v2;
+
+      /*
+      double v0 = skewed_in;
+      double v3 = v0 - _shp_lp_ic2eq[c];
+      double v1 = a1 * _shp_lp_ic1eq[c] + a2 * v3;
+      double v2 = _shp_lp_ic2eq[c] + a2 * _shp_lp_ic1eq[c] + a3 * v3;
+      _shp_lp_ic1eq[c] = 2 * v1 - _shp_lp_ic1eq[c];
+      _shp_lp_ic2eq[c] = 2 * v2 - _shp_lp_ic2eq[c];
+      */
+
+      //double lpf_out = v2;
+      //assert(lpf_out == lpf_out);
+      //(void)lpf_out;
+
+
+
+      //float shaped_in = shape(skewed_in);
+      assert(!std::isnan(filterd));
+      float shaped_in = shape(filterd);
+      assert(!std::isnan(shaped_in));
+      float shaped_out = skew_y(shaped_in, (*y_curve)[mod_index]);
+      assert(!std::isnan(shaped_out));
+      float clipped = clip(shaped_out);
+      assert(!std::isnan(clipped));
+      //float shaped = clip(wave_calc_bi(in * gain_curve[mod_index], (*x_curve)[mod_index], (*y_curve)[mod_index], shape, skew_x, skew_y));
+      return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * clipped;
     });
   
   // dont dc filter for graphs
