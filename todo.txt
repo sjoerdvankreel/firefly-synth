@@ -40,6 +40,7 @@ visual routing indicators ?
 drive => gain ?
 monitor highest usage
 shaper filter position / off
+what ticks in the shaper ?
 
 * fx
 * stvar - freq, res, gain, kbd
