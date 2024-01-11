@@ -720,27 +720,25 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   if constexpr(Graph) oversmp_stages = 0;
   _shp_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
     [this, &block, &x_curve, &y_curve, &mix_curve, &gain_curve, &freq_curve_plain, &res_curve, 
-      this_module, clip, shape, skew_x, skew_y, oversmp_factor](int c, int f, float in) 
+      this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float& left, float& right) 
     { 
+      float left_in = left;
+      float right_in = right;
       int mod_index = f / oversmp_factor;
-      float after_skew_x = skew_x(in * gain_curve[mod_index], (*x_curve)[mod_index]);
-      float after_filter = after_skew_x;
+      left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
+      right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(!Graph)
       {
-        // todo not on each channel
         double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[mod_index]);
         double w = pi64 * hz / (block.sample_rate * oversmp_factor);
         _shp_svf.init_lpf(w, res_curve[mod_index] * max_res);
-        after_filter = _shp_svf.next(c, after_skew_x);
+        left = _shp_svf.next(0, left);
+        right = _shp_svf.next(1, right);
       }
-      assert(!std::isnan(after_filter));
-      float after_shape = shape(after_filter);
-      assert(!std::isnan(after_shape));
-      float after_skew_y = skew_y(after_shape, (*y_curve)[mod_index]);
-      assert(!std::isnan(after_skew_y));
-      float after_clip = clip(after_skew_y);
-      assert(!std::isnan(check_bipolar(after_clip)));
-      return (1 - mix_curve[mod_index]) * in + mix_curve[mod_index] * after_clip;
+      left = clip(skew_y(shape(left), (*y_curve)[mod_index]));
+      right = clip(skew_y(shape(right), (*y_curve)[mod_index]));
+      left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
+      right = (1 - mix_curve[mod_index]) * right_in + mix_curve[mod_index] * right;
     });
   
   // dont dc filter for graphs

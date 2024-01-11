@@ -37,12 +37,10 @@ oversampler::process(
   data[1] = inout[1].data().data();
   AudioBlock<float> inout_block(data, 2, start_frame, block_size);
   auto up_block = oversampling.processSamplesUp(inout_block);
-  for (int c = 0; c < 2; c++)
-  {
-    float* p = up_block.getChannelPointer(c);
-    for (int f = 0; f < block_size * Factor; f++)
-      p[f] = non_linear(c, f, p[f]);
-  }
+  float* l = up_block.getChannelPointer(0);
+  float* r = up_block.getChannelPointer(1);
+  for (int f = 0; f < block_size * Factor; f++)
+    non_linear(f, l[f], r[f]);
   oversampling.processSamplesDown(inout_block);
 }
 
