@@ -135,7 +135,7 @@ plugin_engine::release_block()
     auto const& module = _state.desc().plugin->modules[m];
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
-      int this_module_duration = 0;
+      double this_module_duration = 0;
       if(module.dsp.stage != module_stage::voice)
         this_module_duration = _global_module_process_duration_sec[m][mi];
       else
@@ -146,6 +146,7 @@ plugin_engine::release_block()
         _high_module_cpu_topo = m;
         _high_module_cpu_slot = mi;
         _high_module_cpu_usage = this_module_duration / process_time_sec;
+        max_module_duration = this_module_duration;
       }
     }
   }
@@ -704,8 +705,8 @@ plugin_engine::process()
       // output params are written to intermediate buffer first
       plugin_output_block out_block = {
         voice_count, thread_count,
-        _cpu_usage, _host_block->audio_out,
-        _output_values[m][mi], _voices_mixdown
+        _cpu_usage, _high_module_cpu_topo, _high_module_cpu_slot, _high_module_cpu_usage,
+        _host_block->audio_out, _output_values[m][mi], _voices_mixdown
       };
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
       block.out = &out_block;
