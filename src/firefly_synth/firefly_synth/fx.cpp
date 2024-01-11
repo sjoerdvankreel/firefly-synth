@@ -27,7 +27,7 @@ enum { shape_clip_clip, shape_clip_tanh };
 enum { type_off, type_svf, type_comb, type_shaper, type_delay };
 enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
 enum { section_type, section_svf, section_comb, section_shape, section_delay };
-enum { scratch_shape_x, scratch_shape_y, scratch_shape_gain_raw, scratch_shape_hpf, scratch_count };
+enum { scratch_shape_x, scratch_shape_y, scratch_shape_gain_raw, scratch_count };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
@@ -108,10 +108,11 @@ public module_engine {
   int const _dly_capacity = {};
   jarray<float, 2> _dly_buffer = {};
 
-  // shaper, hp = dc block
+  // shaper with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
-  double _shp_hp_flt_x0[2];
-  double _shp_hp_flt_y0[2];
+  double _shp_dc_flt_r = 0;
+  double _shp_dc_flt_x0[2];
+  double _shp_dc_flt_y0[2];
   oversampler _shp_oversampler;
   std::vector<multi_menu_item> _shape_type_items;
 
@@ -560,10 +561,11 @@ fx_engine::reset(plugin_block const* block)
   _ic1eq[1] = 0;
   _ic2eq[0] = 0;
   _ic2eq[1] = 0;
-  _shp_hp_flt_x0[0] = 0;
-  _shp_hp_flt_x0[1] = 0;
-  _shp_hp_flt_y0[0] = 0;
-  _shp_hp_flt_y0[1] = 0;
+  _shp_dc_flt_x0[0] = 0;
+  _shp_dc_flt_x0[1] = 0;
+  _shp_dc_flt_y0[0] = 0;
+  _shp_dc_flt_y0[1] = 0;
+  _shp_dc_flt_r = 1 - (pi32 * 2 * 20 / block->sample_rate);
 
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -811,7 +813,6 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
-  auto const& hpf_curve_plain = *modulation[this_module][block.module_slot][param_shape_hpf][0];
   auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_shape_gain][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
@@ -846,20 +847,15 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   
   // dont dc filter for graphs
   if constexpr (!Graph) 
-  {
-    auto& hpf_curve = block.state.own_scratch[scratch_shape_hpf];
-    normalized_to_raw_into(block, this_module, param_shape_hpf, hpf_curve_plain, hpf_curve);
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
       {
         float mixed = block.state.own_audio[0][0][c][f];
-        float hpf_r = 1 - (pi32 * 2 * hpf_curve[f] / block.sample_rate);
-        float filtered = mixed - _shp_hp_flt_x0[c] + _shp_hp_flt_y0[c] * hpf_r;
-        _shp_hp_flt_x0[c] = mixed;
-        _shp_hp_flt_y0[c] = filtered;
+        float filtered = mixed - _shp_dc_flt_x0[c] + _shp_dc_flt_y0[c] * _shp_dc_flt_r;
+        _shp_dc_flt_x0[c] = mixed;
+        _shp_dc_flt_y0[c] = filtered;
         block.state.own_audio[0][0][c][f] = filtered;
       }
-  }
 }
 
 }
