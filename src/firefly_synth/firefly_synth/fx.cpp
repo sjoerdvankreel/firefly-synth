@@ -382,13 +382,13 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   shape_y.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
     return vs[0] == type_shaper && shp_has_skew_y(shaper_type_menu, vs[1]); });
   auto& shape_gain = result.params.emplace_back(make_param(
-    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Drv", "Drv", true, false, param_shape_gain, 1),
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gn", "Gn", true, false, param_shape_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_shaper; });
   auto& shape_mix = result.params.emplace_back(make_param(
-    make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mix", "Mix", true, false, param_shape_mix, 1),
+    make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mx", "Mx", true, false, param_shape_mix, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
