@@ -723,13 +723,13 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       this_module, clip, shape, skew_x, skew_y, oversmp_factor](int c, int f, float in) 
     { 
       int mod_index = f / oversmp_factor;
-       // assert(oversmp_factor == 1); // todo      
       float after_skew_x = skew_x(in * gain_curve[mod_index], (*x_curve)[mod_index]);
       float after_filter = after_skew_x;
       if constexpr(!Graph)
       {
-        double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[f]);
-        double w = pi64 * hz / block.sample_rate;
+        // todo not on each channel
+        double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[mod_index]);
+        double w = pi64 * hz / (block.sample_rate * oversmp_factor);
         _shp_svf.init_lpf(w, res_curve[mod_index] * max_res);
         after_filter = _shp_svf.next(c, after_skew_x);
       }
