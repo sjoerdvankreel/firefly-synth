@@ -111,11 +111,10 @@ public module_engine {
   // shaper with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
   // and resonant lp filter in the oversampling stage
-  double _shp_lp_ic1eq[2];
-  double _shp_lp_ic2eq[2];
   double _shp_dc_flt_x0[2];
   double _shp_dc_flt_y0[2];
   double _shp_dc_flt_r = 0;
+  state_var_filter _shp_svf;
   oversampler _shp_oversampler;
   std::vector<multi_menu_item> _shape_type_items;
 
@@ -428,28 +427,6 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   return result;
 }
 
-static void
-init_svf(
-  double w, double res, double g, double a,
-  double& k, double& a1, double& a2, double& a3)
-{
-  k = (2 - 2 * res) / a;
-  a1 = 1 / (1 + g * (g + k));
-  a2 = g * a1;
-  a3 = g * a2;
-}
-
-static void
-init_svf_lpf(
-  double w, double res, double db_gain,
-  double& a1, double& a2, double& a3, 
-  double& m0, double& m1, double& m2)
-{
-  double k;
-  init_svf(w, res, std::tan(w), 1, k, a1, a2, a3);
-  m0 = 0; m1 = 0; m2 = 1;
-}
-
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items) :
 _global(global), _dly_capacity(sample_rate * 10), 
@@ -471,10 +448,7 @@ fx_engine::reset(plugin_block const* block)
   _dly_pos = 0;
   _comb_pos = 0;
 
-  _shp_lp_ic1eq[0] = 0;
-  _shp_lp_ic1eq[1] = 0;
-  _shp_lp_ic2eq[0] = 0;
-  _shp_lp_ic2eq[1] = 0;
+  _shp_svf.clear();
   _shp_dc_flt_x0[0] = 0;
   _shp_dc_flt_x0[1] = 0;
   _shp_dc_flt_y0[0] = 0;
@@ -767,17 +741,9 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve_plain[f]);
       double w = pi64 * hz / block.sample_rate;
       //init_shp_lp(w, res_curve[mod_index] * max_res, a1, a2, a3); // todo not for each channel
-      init_svf_lpf(w, res_curve[mod_index] * max_res, 0, a1, a2, a3, m0, m1, m2);
-
-      double v0 = skewed_in;
-     // v0 = in;
-      double v3 = v0 - _shp_lp_ic2eq[c];
-      double v1 = a1 * _shp_lp_ic1eq[c] + a2 * v3;
-      double v2 = _shp_lp_ic2eq[c] + a2 * _shp_lp_ic1eq[c] + a3 * v3;
-      _shp_lp_ic1eq[c] = 2 * v1 - _shp_lp_ic1eq[c];
-      _shp_lp_ic2eq[c] = 2 * v2 - _shp_lp_ic2eq[c];
-      double lpf_out = m0 * v0 + m1 * v1 + m2 * v2;
-      filterd = lpf_out;
+      _shp_svf.init_lpf(w, res_curve[mod_index] * max_res);
+      //init_svf_lpf(w, res_curve[mod_index] * max_res, 0, a1, a2, a3, m0, m1, m2);
+      filterd = _shp_svf.next(c, filterd);
       }
       //block.state.own_audio[0][0][c][f] = m0 * v0 + m1 * v1 + m2 * v2;
 
