@@ -316,17 +316,31 @@ param_component::mouseUp(MouseEvent const& evt)
 
 // Just guess max value is representative of the longest text.
 param_value_label::
-param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf) :
+param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
 autofit_label(lnf, _gui->gui_state()->plain_to_text_at_index(false, 
-  _param->info.global, param->param->domain.raw_to_plain(param->param->domain.max))), _both(both)
+  _param->info.global, param->param->domain.raw_to_plain(param->param->domain.max)))
 { init(); }
 
 void
 param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
-  if(_both) text = _param->info.name + " " + text;
+  setText(text, dontSendNotification); 
+}
+
+module_name_label::
+module_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
+param_component(gui, module, param), 
+autofit_label(lnf, param->param->gui.label_reference_text)
+{ init(); }
+
+void
+module_name_label::own_param_changed(plain_value plain)
+{ 
+  auto const& desc = _gui->gui_state()->desc().modules[plain.step()];
+  std::string text = desc.module->info.tag.short_name;
+  if(desc.module->info.slot_count > 1) text += " " + std::to_string(desc.info.slot + 1);
   setText(text, dontSendNotification); 
 }
 

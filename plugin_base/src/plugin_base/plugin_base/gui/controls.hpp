@@ -169,7 +169,7 @@ protected:
   param_component(plugin_gui* gui, module_desc const* module, param_desc const* param);
 };
 
-// parameter name display
+// static parameter name display
 class param_name_label:
 public binding_component,
 public autofit_label
@@ -181,16 +181,26 @@ public:
   { setText(short_ ? param->param->info.tag.short_name : param->info.name, juce::dontSendNotification); init(); }
 };
 
-// parameter value or name+value display
+// dynamic parameter value display
 class param_value_label:
 public param_component, 
 public autofit_label
 {
-  bool const _both;
 protected:
   void own_param_changed(plain_value plain) override final;
 public:
-  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool both, lnf* lnf);
+  param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
+};
+
+// dynamic module name display
+class module_name_label :
+public param_component,
+public autofit_label
+{
+protected:
+  void own_param_changed(plain_value plain) override final;
+public:
+  module_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
 // checkbox bound to single parameter
