@@ -129,7 +129,9 @@ plugin_engine::release_block()
   double block_time_sec = _host_block->frame_count / _sample_rate;
   _cpu_usage = process_time_sec / block_time_sec;
 
+  // total can exceed processing time when using clap threadpool
   double max_module_duration = 0;
+  double total_module_duration = 0;
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
     auto const& module = _state.desc().plugin->modules[m];
@@ -141,14 +143,15 @@ plugin_engine::release_block()
       else
         for(int v = 0; v < _polyphony; v++)
           this_module_duration += _voice_module_process_duration_sec[v][m][mi];
+      total_module_duration += this_module_duration;
       if (this_module_duration > max_module_duration)
       {
         _high_cpu_module = _state.desc().module_topo_to_index.at(m) + mi;
-        _high_cpu_module_usage = this_module_duration / process_time_sec;
         max_module_duration = this_module_duration;
       }
     }
   }
+  _high_cpu_module_usage = max_module_duration / total_module_duration;
 }
 
 host_block&
