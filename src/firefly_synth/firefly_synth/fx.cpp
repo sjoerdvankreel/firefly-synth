@@ -198,16 +198,23 @@ render_graph(
   int frame_count = -1;
   int sample_rate = -1;
   jarray<float, 2> audio_in;
+  int const shp_cycle_count = 5;
+  int const shp_cycle_length = 200;
+
   auto const params = make_graph_engine_params();
   if (type_is_shp(type))
   {
-    frame_count = 200;
-    sample_rate = 200;
+    // need many samples for filters to stabilize
+    sample_rate = 48000;
+    frame_count = shp_cycle_length * shp_cycle_count;
     audio_in.resize(jarray<int, 1>(2, frame_count));
-    for(int i = 0; i <= 199; i++)
-      audio_in[0][i] = audio_in[1][i] = unipolar_to_bipolar((float)i / 199);
+    for(int i = 0; i < shp_cycle_count; i++)
+      for (int j = 0; j < shp_cycle_length; j++)
+        audio_in[0][i * shp_cycle_length + j] = audio_in[1][i * shp_cycle_length + j] 
+          = unipolar_to_bipolar((float)j / (shp_cycle_length - 1));
   } else if(type == type_svf || type == type_cmb)
   {
+    // need many samples for fft to work
     frame_count = 4800;
     sample_rate = 48000;
     audio_in.resize(jarray<int, 1>(2, frame_count));
@@ -239,18 +246,27 @@ render_graph(
   engine->process_end();
 
   auto const& audio = block->state.own_audio[0][0][0];
-  if (type == type_delay || type_is_shp(type))
+
+  // delay
+  if (type == type_delay)
   {
-    std::string partition = type == type_delay? "IR": "Shape";
     std::vector<float> series(audio.cbegin(), audio.cbegin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, { partition });
+    return graph_data(jarray<float, 1>(series), true, { "IR" });
+  }
+  
+  // shaper - pick result of the last cycle (after filters kick in)
+  if (type_is_shp(type))
+  {
+    std::vector<float> series(audio.cbegin() + (shp_cycle_count - 1) * shp_cycle_length, audio.cbegin() + frame_count);
+    return graph_data(jarray<float, 1>(series), true, { "Shape" });
   }
 
-  // comb / svf
+  // comb / svf plot FR
   auto response = fft(audio.data());
   if (type == type_cmb)
     return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
-  // remap over 0.8 just to look pretty
+
+  // SVF remaps over 0.8 just to look pretty
   std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
   return graph_data(jarray<float, 1>(response_mapped), false, { "24 kHz" });
 }
@@ -753,11 +769,11 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       int mod_index = f / oversmp_factor;
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
-      if constexpr(!Graph && Type == type_shp_b)
+      if constexpr(Type == type_shp_b)
         shp_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
       left = shape(left);
       right = shape(right);
-      if constexpr (!Graph && Type == type_shp_c)
+      if constexpr (Type == type_shp_c)
         shp_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
       left = clip(skew_y(left, (*y_curve)[mod_index]));
       right = clip(skew_y(right, (*y_curve)[mod_index]));
@@ -766,6 +782,7 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
     });
   
   // dont dc filter for graphs
+  // since this falls outside of the clip function it may produce stuff outside [-1, 1] 
   if constexpr (!Graph) 
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
