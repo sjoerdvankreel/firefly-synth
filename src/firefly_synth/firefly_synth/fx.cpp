@@ -529,18 +529,20 @@ fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulatio
 {
   float max_feedback = 0.9f;
   int this_module = _global ? module_gfx : module_vfx;
-  float time = get_timesig_time_value(block, this_module, param_delay_tempo);
-  int samples = std::min(block.sample_rate * time, (float)_dly_capacity);
-
   auto const& feedback_curve = *modulation[this_module][block.module_slot][param_delay_feedback][0];
-  for (int c = 0; c < 2; c++)
-    for (int f = block.start_frame; f < block.end_frame; f++)
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    float smooth_bpm = block.state.smooth_bpm[f];
+    float time = get_timesig_time_value(block, smooth_bpm, this_module, param_delay_tempo);
+    int samples = std::min(block.sample_rate * time, (float)_dly_capacity);
+    for (int c = 0; c < 2; c++)
     {
       float dry = block.state.own_audio[0][0][c][f];
       float wet = _dly_buffer[c][(_dly_pos + f + _dly_capacity - samples) % _dly_capacity];
       block.state.own_audio[0][0][c][f] = dry + wet * feedback_curve[f] * max_feedback;
       _dly_buffer[c][(_dly_pos + f) % _dly_capacity] = block.state.own_audio[0][0][c][f];
     }
+  }
   _dly_pos += block.end_frame - block.start_frame;
   _dly_pos %= _dly_capacity;
 }

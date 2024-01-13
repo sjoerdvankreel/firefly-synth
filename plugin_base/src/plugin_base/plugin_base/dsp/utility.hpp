@@ -15,8 +15,8 @@ int const midi_middle_c = 60;
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 
-// for smoothing midi changes
-class midi_filter
+// for smoothing midi or block value changes
+class block_filter
 {
   int _length;
   int _pos = 0;
@@ -26,12 +26,13 @@ class midi_filter
 public:
   void set(float val);
   std::pair<float, bool> next();
-  midi_filter(float rate, float freq, float default_):
+  block_filter(): _length(0) {}
+  block_filter(float rate, float freq, float default_):
   _length(rate / freq), _to(default_) {}
 };
 
 inline void
-midi_filter::set(float val)
+block_filter::set(float val)
 {
   _pos = 0;
   _to = val;
@@ -39,7 +40,7 @@ midi_filter::set(float val)
 }
 
 inline std::pair<float, bool>
-midi_filter::next()
+block_filter::next()
 {
   if(_pos == _length) return std::make_pair(_to, false);
   _current = _from + (_to - _from) * (_pos++ / (float)_length);

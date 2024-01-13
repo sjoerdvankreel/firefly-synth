@@ -38,11 +38,6 @@ auto-generate the manual (param list)
 visual routing indicators ?
 bpm smoothing like midi
 
-* fx
-* stvar - freq, res, gain, kbd
-* comb - g+ d+ g- d-
-* shape - over, gain, mix, terms/decay ?
-
 document new invisible stuff (bpm/midi smooth, comb lin interpol) 
 
 * get some linux folks to comment (ycollete?)
