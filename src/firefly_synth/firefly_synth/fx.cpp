@@ -48,7 +48,7 @@ type_items(bool global)
   std::vector<list_item> result;
   result.emplace_back("{F37A19CE-166A-45BF-9F75-237324221C39}", "Off");
   result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SVF");
-  result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Cmb");
+  result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
   result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "ShpA");
   result.emplace_back("{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}", "ShpB");
   result.emplace_back("{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}", "ShpC");
