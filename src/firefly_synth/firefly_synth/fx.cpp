@@ -475,7 +475,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_type.gui.submenu->add_submenu("Multi Tap", { dly_type_multi_time, dly_type_multi_sync });
   auto& delay_hold_time = result.params.emplace_back(make_param(
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.HoldTime", "Hld", true, false, param_dly_hold_time, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 0, 3, "Sec"),
+    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
