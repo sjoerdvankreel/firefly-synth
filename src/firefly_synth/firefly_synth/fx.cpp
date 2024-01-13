@@ -24,23 +24,23 @@ static double const flt_min_freq = 20;
 static double const flt_max_freq = 20000;
 static float const log_half = std::log(0.5f);
 
-enum { shape_clip_clip, shape_clip_tanh };
-enum { shape_over_1, shape_over_2, shape_over_4, shape_over_8, shape_over_16 };
-enum { section_type, section_svf, section_comb, section_shape, section_delay };
-enum { scratch_shape_x, scratch_shape_y, scratch_shape_gain_raw, scratch_count };
-enum { type_off, type_svf, type_cmb, type_shp_a, type_shp_b, type_shp_c, type_delay };
+enum { dist_clip_clip, dist_clip_tanh };
+enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8, dist_over_16 };
+enum { section_type, section_svf, section_comb, section_dist, section_delay };
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_count };
+enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_shape_over, param_shape_clip, param_shape_type, param_shape_x, param_shape_y, param_shape_gain, param_shape_mix, param_shape_lp_frq, param_shape_lp_res,
+  param_dist_over, param_dist_clip, param_dist_shape, param_dist_x, param_dist_y, param_dist_gain, param_dist_mix, param_dist_lp_frq, param_dist_lp_res,
   param_delay_tempo, param_delay_feedback };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
-static bool shp_has_lpf(int type) { return type_shp_b <= type && type <= type_shp_c; }
-static bool type_is_shp(int type) { return type_shp_a <= type && type <= type_shp_c; }
-static bool shp_has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
-static bool shp_has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
+static bool dist_has_lpf(int type) { return type_dst_b <= type && type <= type_dst_c; }
+static bool type_is_dist(int type) { return type_dst_a <= type && type <= type_dst_c; }
+static bool dst_has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
+static bool dst_has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
 
 static std::vector<list_item>
 type_items(bool global)
@@ -49,9 +49,9 @@ type_items(bool global)
   result.emplace_back("{F37A19CE-166A-45BF-9F75-237324221C39}", "Off");
   result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SVF");
   result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
-  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "ShpA");
-  result.emplace_back("{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}", "ShpB");
-  result.emplace_back("{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}", "ShpC");
+  result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "DstA");
+  result.emplace_back("{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}", "DstB");
+  result.emplace_back("{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}", "DstC");
   if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Dly");
   return result;
 }
@@ -73,7 +73,7 @@ svf_type_items()
 }
 
 static std::vector<list_item>
-shape_clip_items()
+dist_clip_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{FAE2F1EB-248D-4BA2-A008-07C2CD56EB71}", "Clip");
@@ -82,7 +82,7 @@ shape_clip_items()
 }
 
 static std::vector<list_item>
-shape_over_items()
+dist_over_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "1X");
@@ -112,15 +112,15 @@ public module_engine {
   int const _dly_capacity = {};
   jarray<float, 2> _dly_buffer = {};
 
-  // shaper with fixed dc filter @20hz
+  // distortion with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
   // and resonant lp filter in the oversampling stage
-  double _shp_dc_flt_x0[2];
-  double _shp_dc_flt_y0[2];
-  double _shp_dc_flt_r = 0;
-  state_var_filter _shp_svf;
-  oversampler _shp_oversampler;
-  std::vector<multi_menu_item> _shape_type_items;
+  double _dst_dc_flt_x0[2];
+  double _dst_dc_flt_y0[2];
+  double _dst_dc_flt_r = 0;
+  state_var_filter _dst_svf;
+  oversampler _dst_oversampler;
+  std::vector<multi_menu_item> _dst_shape_items;
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
@@ -131,16 +131,16 @@ public module_engine {
   void process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
   
   template <bool Graph, int Type>
-  void process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_dist(plugin_block& block, cv_matrix_mixdown const& modulation);
   template <bool Graph, int Type, class Clip>
-  void process_shaper_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip);
+  void process_dist_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip);
   template <bool Graph, int Type, class Clip, class Shape>
-  void process_shaper_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape);
+  void process_dist_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape);
   template <bool Graph, int Type, class Clip, class Shape, class SkewX>
-  void process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
+  void process_dist_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
   template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY>
-  void process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
-  void shp_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
+  void process_dist_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
+  void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
 
 public:
   void reset(plugin_block const*) override;
@@ -202,7 +202,7 @@ render_graph(
   int const shp_cycle_length = 200;
 
   auto const params = make_graph_engine_params();
-  if (type_is_shp(type))
+  if (type_is_dist(type))
   {
     // need many samples for filters to stabilize
     sample_rate = 48000;
@@ -254,11 +254,11 @@ render_graph(
     return graph_data(jarray<float, 1>(series), true, { "IR" });
   }
   
-  // shaper - pick result of the last cycle (after filters kick in)
-  if (type_is_shp(type))
+  // distortion - pick result of the last cycle (after filters kick in)
+  if (type_is_dist(type))
   {
     std::vector<float> series(audio.cbegin() + (shp_cycle_count - 1) * shp_cycle_length, audio.cbegin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, { "Shape" });
+    return graph_data(jarray<float, 1>(series), true, { "Distortion" });
   }
 
   // comb / svf plot FR
@@ -274,7 +274,7 @@ render_graph(
 module_topo
 fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
 {
-  auto shaper_type_menu = make_wave_multi_menu(true);
+  auto dist_shape_menu = make_wave_multi_menu(true);
   auto const voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice FX", "V.FX", true, true, module_vfx, 10);
   auto const global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", "Global FX", "G.FX", true, true, module_gfx, 10);
   module_stage stage = global ? module_stage::output : module_stage::voice;
@@ -290,9 +290,9 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   if (!global) result.default_initializer = init_voice_default;
   result.gui.menu_handler_factory = [global](plugin_state* state) {
     return make_audio_routing_menu_handler(state, global); };
-  result.engine_factory = [global, shape_type_items = shaper_type_menu.multi_items](auto const&, int sample_rate, int max_frame_count) {
+  result.engine_factory = [global, shape_type_items = dist_shape_menu.multi_items](auto const&, int sample_rate, int max_frame_count) {
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count, shape_type_items); };
-  result.graph_renderer = [shape_type_items = shaper_type_menu.multi_items](auto const& state, auto* engine, int param, auto const& mapping) {
+  result.graph_renderer = [shape_type_items = dist_shape_menu.multi_items](auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, shape_type_items); };
 
   result.sections.emplace_back(make_param_section(section_type,
@@ -306,7 +306,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_svf);
   type.gui.submenu->indices.push_back(type_cmb);
-  type.gui.submenu->add_submenu("Shape", { type_shp_a, type_shp_b, type_shp_c });
+  type.gui.submenu->add_submenu("Distortion", { type_dst_a, type_dst_b, type_dst_c });
   if (global) type.gui.submenu->indices.push_back(type_delay);
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
@@ -373,65 +373,65 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
 
-  std::vector<int> shaper_col_distrib(9, gui_dimension::auto_size);
-  auto& shape = result.sections.emplace_back(make_param_section(section_shape,
-    make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Shape"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, shaper_col_distrib })));
-  shape.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
-  auto& shape_over = result.params.emplace_back(make_param(
-    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Shp.OverSmp", "Shp.OverSmp", true, false, param_shape_over, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_over_items(), "2X"),
-    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  shape_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
-  auto& shape_clip = result.params.emplace_back(make_param(
-    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Shp.Clip", "Clip", true, false, param_shape_clip, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(shape_clip_items(), "Clip"),
-    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
-  shape_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
-  auto& shape_type = result.params.emplace_back(make_param(
-    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Shp.Type.SkewX/SkewY", param_shape_type, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(shaper_type_menu.items, "Sin.Off/Off"),
-    make_param_gui_single(section_shape, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
-  shape_type.gui.submenu = shaper_type_menu.submenu;
-  shape_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
-  auto& shape_x = result.params.emplace_back(make_param(
-    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Shp.X", "X", true, false, param_shape_x, 1),
+  std::vector<int> dist_col_distrib(9, gui_dimension::auto_size);
+  auto& distortion = result.sections.emplace_back(make_param_section(section_dist,
+    make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Dist"),
+    make_param_section_gui({ 0, 1 }, { { 1 }, dist_col_distrib })));
+  distortion.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  auto& dist_over = result.params.emplace_back(make_param(
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Dst.OverSmp", "Dst.OverSmp", true, false, param_dist_over, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), "2X"),
+    make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  auto& dist_clip = result.params.emplace_back(make_param(
+    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Dst.Clip", "Clip", true, false, param_dist_clip, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Clip"),
+    make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
+  dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  auto& dist_shape = result.params.emplace_back(make_param(
+    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Dst.Shape.SkewX/SkewY", param_dist_shape, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_shape_menu.items, "Sin.Off/Off"),
+    make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
+  dist_shape.gui.submenu = dist_shape_menu.submenu;
+  dist_shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  auto& dist_x = result.params.emplace_back(make_param(
+    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Dst.X", "X", true, false, param_dist_x, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 3 },
+    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_x.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
-    return type_is_shp(vs[0]) && shp_has_skew_x(shaper_type_menu, vs[1]); });
-  auto& shape_y = result.params.emplace_back(make_param(
-    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Shp.Y", "Y", true, false, param_shape_y, 1),
+  dist_x.gui.bindings.enabled.bind_params({ param_type, param_dist_shape }, [dist_shape_menu](auto const& vs) {
+    return type_is_dist(vs[0]) && dst_has_skew_x(dist_shape_menu, vs[1]); });
+  auto& dist_y = result.params.emplace_back(make_param(
+    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Dst.Y", "Y", true, false, param_dist_y, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 4 },
+    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_y.gui.bindings.enabled.bind_params({ param_type, param_shape_type }, [shaper_type_menu](auto const& vs) { 
-    return type_is_shp(vs[0]) && shp_has_skew_y(shaper_type_menu, vs[1]); });
-  auto& shape_gain = result.params.emplace_back(make_param(
-    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Shp.Gn", "Gn", true, false, param_shape_gain, 1),
+  dist_y.gui.bindings.enabled.bind_params({ param_type, param_dist_shape }, [dist_shape_menu](auto const& vs) {
+    return type_is_dist(vs[0]) && dst_has_skew_y(dist_shape_menu, vs[1]); });
+  auto& dist_gain = result.params.emplace_back(make_param(
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Dst.Gn", "Gn", true, false, param_dist_gain, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 5 },
+    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
-  auto& shape_mix = result.params.emplace_back(make_param(
-    make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Shp.Mx", "Mx", true, false, param_shape_mix, 1),
+  dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  auto& dist_mix = result.params.emplace_back(make_param(
+    make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Dst.Mx", "Mx", true, false, param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 6 },
+    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shape_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]); });
-  auto& shp_lp = result.params.emplace_back(make_param(
-    make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Shp.LP", "LP", true, false, param_shape_lp_frq, 1),
+  dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  auto& dist_lp = result.params.emplace_back(make_param(
+    make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Dst.LP", "LP", true, false, param_dist_lp_frq, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 7 },
+    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shp_lp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]) && shp_has_lpf(vs[0]); });
-  auto& shp_res = result.params.emplace_back(make_param(
-    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Shp.Rz", "Rz", true, false, param_shape_lp_res, 1),
+  dist_lp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]) && dist_has_lpf(vs[0]); });
+  auto& dist_res = result.params.emplace_back(make_param(
+    make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Dst.Rz", "Rz", true, false, param_dist_lp_res, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_shape, gui_edit_type::knob, { 0, 8 },
+    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  shp_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_shp(vs[0]) && shp_has_lpf(vs[0]); });
+  dist_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]) && dist_has_lpf(vs[0]); });
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
@@ -455,10 +455,10 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 }
 
 fx_engine::
-fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items) :
+fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& dst_shape_items) :
 _global(global), _dly_capacity(sample_rate * 10), 
-_shp_oversampler(max_frame_count, false, false, false),
-_shape_type_items(shape_type_items)
+_dst_oversampler(max_frame_count, false, false, false),
+_dst_shape_items(dst_shape_items)
 { 
   _comb_samples = comb_max_ms * sample_rate * 0.001;
   _comb_in[0] = std::vector<double>(_comb_samples, 0.0);
@@ -475,12 +475,12 @@ fx_engine::reset(plugin_block const* block)
   _dly_pos = 0;
   _comb_pos = 0;
 
-  _shp_svf.clear();
-  _shp_dc_flt_x0[0] = 0;
-  _shp_dc_flt_x0[1] = 0;
-  _shp_dc_flt_y0[0] = 0;
-  _shp_dc_flt_y0[1] = 0;
-  _shp_dc_flt_r = 1 - (pi32 * 2 * 20 / block->sample_rate);
+  _dst_svf.clear();
+  _dst_dc_flt_x0[0] = 0;
+  _dst_dc_flt_x0[1] = 0;
+  _dst_dc_flt_y0[0] = 0;
+  _dst_dc_flt_y0[1] = 0;
+  _dst_dc_flt_r = 1 - (pi32 * 2 * 20 / block->sample_rate);
 
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -517,9 +517,9 @@ fx_engine::process(plugin_block& block,
   case type_svf: process_svf(block, *modulation); break;
   case type_cmb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
-  case type_shp_a: process_shaper<Graph, type_shp_a>(block, *modulation); break;
-  case type_shp_b: process_shaper<Graph, type_shp_b>(block, *modulation); break;
-  case type_shp_c: process_shaper<Graph, type_shp_c>(block, *modulation); break;
+  case type_dst_a: process_dist<Graph, type_dst_a>(block, *modulation); break;
+  case type_dst_b: process_dist<Graph, type_dst_b>(block, *modulation); break;
+  case type_dst_c: process_dist<Graph, type_dst_c>(block, *modulation); break;
   default: assert(false); break;
   }
 }
@@ -635,7 +635,7 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
 }
 
 void  
-fx_engine::shp_svf_next(
+fx_engine::dist_svf_next(
   plugin_block const& block, int oversmp_factor, 
   double freq_plain, double res, float& left, float& right)
 {
@@ -643,104 +643,104 @@ fx_engine::shp_svf_next(
   int this_module = _global ? module_gfx : module_vfx;
   double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_plain);
   double w = pi64 * hz / (block.sample_rate * oversmp_factor);
-  _shp_svf.init_lpf(w, res * max_res);
-  left = _shp_svf.next(0, left);
-  right = _shp_svf.next(1, right);
+  _dst_svf.init_lpf(w, res * max_res);
+  left = _dst_svf.next(0, left);
+  right = _dst_svf.next(1, right);
 }
 
 template <bool Graph, int Type> void
-fx_engine::process_shaper(plugin_block& block, cv_matrix_mixdown const& modulation)
+fx_engine::process_dist(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  switch (block_auto[param_shape_clip][0].step())
+  switch (block_auto[param_dist_clip][0].step())
   {
-  case shape_clip_clip: process_shaper_clip<Graph, Type>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
-  case shape_clip_tanh: process_shaper_clip<Graph, Type>(block, modulation, [](float in) { return std::tanh(in); }); break;
+  case dist_clip_clip: process_dist_clip<Graph, Type>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
+  case dist_clip_tanh: process_dist_clip<Graph, Type>(block, modulation, [](float in) { return std::tanh(in); }); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip> void
-fx_engine::process_shaper_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip)
+fx_engine::process_dist_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip)
 {
-  switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index1)
+  switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index1)
   {
-  case wave_shape_type_saw: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_saw); break;
-  case wave_shape_type_sqr: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sqr); break;
-  case wave_shape_type_tri: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_tri); break;
-  case wave_shape_type_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin); break;
-  case wave_shape_type_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos); break;
-  case wave_shape_type_sin_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin); break;
-  case wave_shape_type_sin_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos); break;
-  case wave_shape_type_cos_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin); break;
-  case wave_shape_type_cos_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
-  case wave_shape_type_smooth_or_fold: process_shaper_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_fold); break;
+  case wave_shape_type_saw: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_saw); break;
+  case wave_shape_type_sqr: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sqr); break;
+  case wave_shape_type_tri: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_tri); break;
+  case wave_shape_type_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin); break;
+  case wave_shape_type_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos); break;
+  case wave_shape_type_sin_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin); break;
+  case wave_shape_type_sin_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos); break;
+  case wave_shape_type_cos_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin); break;
+  case wave_shape_type_cos_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
+  case wave_shape_type_smooth_or_fold: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip, class Shape> void
-fx_engine::process_shaper_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape)
+fx_engine::process_dist_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape)
 {
-  switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index2)
+  switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index2)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip, class Shape, class SkewX> void
-fx_engine::process_shaper_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
+fx_engine::process_dist_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
 {
-  switch (_shape_type_items[block.state.own_block_automation[param_shape_type][0].step()].index3)
+  switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index3)
   {
-  case wave_skew_type_off: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_shaper_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY> void 
-fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
+fx_engine::process_dist_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
-  int shape_type = block_auto[param_shape_type][0].step();
-  int oversmp_stages = block_auto[param_shape_over][0].step();
+  int dist_shape = block_auto[param_dist_shape][0].step();
+  int oversmp_stages = block_auto[param_dist_over][0].step();
   int oversmp_factor = 1 << oversmp_stages;
 
-  auto const& type_item = _shape_type_items[shape_type];
+  auto const& type_item = _dst_shape_items[dist_shape];
   int sx = type_item.index2;
   int sy = type_item.index3;
 
-  auto const& mix_curve = *modulation[this_module][block.module_slot][param_shape_mix][0];
-  auto const& res_curve = *modulation[this_module][block.module_slot][param_shape_lp_res][0];
-  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_shape_x][0];
-  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_shape_y][0];
-  auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_shape_gain][0];
-  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_shape_lp_frq][0];
+  auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
+  auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
+  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_x][0];
+  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_y][0];
+  auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
+  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(sx))
   {
-    auto& x_scratch = block.state.own_scratch[scratch_shape_x];
+    auto& x_scratch = block.state.own_scratch[scratch_dist_x];
     for (int f = block.start_frame; f < block.end_frame; f++)
       x_scratch[f] = std::log(0.001 + (x_curve_plain[f] * 0.98)) / log_half;
     x_curve = &x_scratch;
@@ -749,18 +749,18 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
   jarray<float, 1> const* y_curve = &y_curve_plain;
   if (wave_skew_is_exp(sy))
   {
-    auto& y_scratch = block.state.own_scratch[scratch_shape_y];
+    auto& y_scratch = block.state.own_scratch[scratch_dist_y];
     for (int f = block.start_frame; f < block.end_frame; f++)
       y_scratch[f] = std::log(0.001 + (y_curve_plain[f] * 0.98)) / log_half;
     y_curve = &y_scratch;
   }
 
-  auto& gain_curve = block.state.own_scratch[scratch_shape_gain_raw];
-  normalized_to_raw_into(block, this_module, param_shape_gain, gain_curve_plain, gain_curve);
+  auto& gain_curve = block.state.own_scratch[scratch_dist_gain_raw];
+  normalized_to_raw_into(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) oversmp_stages = 0;
-  _shp_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
+  _dst_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
     [this, &block, &x_curve, &y_curve, &mix_curve, &gain_curve, &freq_curve_plain, &res_curve, 
       this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float& left, float& right) 
     { 
@@ -769,12 +769,12 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       int mod_index = f / oversmp_factor;
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
-      if constexpr(Type == type_shp_b)
-        shp_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+      if constexpr(Type == type_dst_b)
+        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
       left = shape(left);
       right = shape(right);
-      if constexpr (Type == type_shp_c)
-        shp_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+      if constexpr (Type == type_dst_c)
+        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
       left = clip(skew_y(left, (*y_curve)[mod_index]));
       right = clip(skew_y(right, (*y_curve)[mod_index]));
       left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
@@ -788,9 +788,9 @@ fx_engine::process_shaper_clip_shape_xy(plugin_block& block, cv_matrix_mixdown c
       for(int f = block.start_frame; f < block.end_frame; f++)
       {
         float mixed = block.state.own_audio[0][0][c][f];
-        float filtered = mixed - _shp_dc_flt_x0[c] + _shp_dc_flt_y0[c] * _shp_dc_flt_r;
-        _shp_dc_flt_x0[c] = mixed;
-        _shp_dc_flt_y0[c] = filtered;
+        float filtered = mixed - _dst_dc_flt_x0[c] + _dst_dc_flt_y0[c] * _dst_dc_flt_r;
+        _dst_dc_flt_x0[c] = mixed;
+        _dst_dc_flt_y0[c] = filtered;
         block.state.own_audio[0][0][c][f] = filtered;
       }
 }
