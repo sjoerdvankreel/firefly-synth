@@ -84,8 +84,7 @@ struct plugin_topo final {
   int graph_polyphony;
 
   // smooths midi and bpm changes
-  float bpm_smoothing_hz = 5;
-  float midi_smoothing_hz = 20;
+  float block_smoothing_hz = 20;
 
   topo_tag tag;
   plugin_type type;

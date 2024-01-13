@@ -37,7 +37,6 @@ do global "clear unused" context menu entry ?
 auto-generate the manual (param list)
 visual routing indicators ?
 bpm smoothing like midi
-make smoothing params instelbaar
 
 document new invisible stuff (bpm/midi smooth, comb lin interpol) 
 

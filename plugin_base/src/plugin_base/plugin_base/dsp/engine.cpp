@@ -269,11 +269,10 @@ plugin_engine::activate_modules()
   assert(_max_frame_count > 0);
 
   // smoothing filters are SR dependent
-  float bpm_smooth_freq = _state.desc().plugin->bpm_smoothing_hz;
-  _bpm_filter = block_filter(_sample_rate, bpm_smooth_freq, 120);
-  float midi_smooth_freq = _state.desc().plugin->midi_smoothing_hz;
+  float smooth_freq = _state.desc().plugin->block_smoothing_hz;
+  _bpm_filter = block_filter(_sample_rate, smooth_freq, 120);
   for(int ms = 0; ms < _state.desc().midi_count; ms++)
-    _midi_filters.push_back(block_filter(_sample_rate, midi_smooth_freq, _state.desc().midi_sources[ms]->source->default_));
+    _midi_filters.push_back(block_filter(_sample_rate, smooth_freq, _state.desc().midi_sources[ms]->source->default_));
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
