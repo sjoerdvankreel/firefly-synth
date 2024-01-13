@@ -21,12 +21,12 @@ static float const log_half = std::log(0.5f);
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_time, scratch_count };
 enum { section_main, section_controls };
-enum { mode_off, mode_rate, mode_rate_one, mode_rate_wrap, mode_sync, mode_sync_one, mode_sync_wrap };
+enum { mode_off, mode_rate, mode_rate_one, mode_rate_phs, mode_sync, mode_sync_one, mode_sync_phs };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_seed, param_steps, param_filter, param_phase };
 
 static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
-static bool is_one_shot_wrapped(int mode) { return mode == mode_rate_wrap || mode == mode_sync_wrap; }
-static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_wrap; }
+static bool is_one_shot_phase(int mode) { return mode == mode_rate_phs || mode == mode_sync_phs; }
+static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_phs; }
 
 static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
 static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
@@ -42,10 +42,10 @@ mode_items()
   result.emplace_back("{E8D04800-17A9-42AB-9CAE-19322A400334}", "Off");
   result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate.Rep");
   result.emplace_back("{0A5F479F-9180-4498-9464-DBEA0595C86B}", "Rate.One");
-  result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.Wrp");
+  result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.Phs");
   result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync.Rep");
   result.emplace_back("{85B1AC0B-FA06-4E23-A7EF-3EBF6F620948}", "Sync.One");
-  result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.Wrp");
+  result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.Phs");
   return result;
 }
 
@@ -210,22 +210,23 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   mode.gui.submenu = std::make_shared<gui_submenu>();
   mode.gui.submenu->indices.push_back(mode_off);
-  mode.gui.submenu->add_submenu("Rate", { mode_rate, mode_rate_one, mode_rate_wrap });
-  mode.gui.submenu->add_submenu("Sync", { mode_sync, mode_sync_one, mode_sync_wrap });
+  mode.gui.submenu->add_submenu("Repeat", { mode_rate, mode_sync });
+  mode.gui.submenu->add_submenu("One Shot", { mode_rate_one, mode_sync_one });
+  mode.gui.submenu->add_submenu("Phase One Shot", { mode_rate_phs, mode_sync_phs });
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", "Rate", true, false, param_rate, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
     make_param_gui_single(section_main, global? gui_edit_type::hslider: gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   rate.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_sync && vs[0] != mode_sync_one && vs[0] != mode_sync_wrap; });
+  rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return !is_sync(vs[0]); });
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_timesig_default(false, { 1, 4 }),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return vs[0] == mode_sync || vs[0] == mode_sync_one || vs[0] == mode_sync_wrap; });
+  tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return is_sync(vs[0]); });
 
   // Don't include the phase param for global lfo.
   std::vector<int> controls_column_sizes(6, gui_dimension::auto_size);
@@ -490,9 +491,9 @@ void lfo_engine::process_shape_loop(plugin_block& block, Calc calc)
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
 
-    bool  phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
+    bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
-    bool ended = ref_wrapped && is_one_shot_full(mode) || phase_wrapped && is_one_shot_wrapped(mode);
+    bool ended = ref_wrapped && is_one_shot_full(mode) || phase_wrapped && is_one_shot_phase(mode);
     if (ended)
     {
       _stage = lfo_stage::filter;
