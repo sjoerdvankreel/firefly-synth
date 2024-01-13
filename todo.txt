@@ -38,6 +38,7 @@ auto-generate the manual (param list)
 visual routing indicators ?
 do time smoothing for delay + lin interpol
 more horizontal space for longer labels
+fix the dly graph
 
 * fx
 * stvar - freq, res, gain, kbd

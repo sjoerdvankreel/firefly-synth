@@ -46,6 +46,7 @@ static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
 static bool dist_has_lpf(int type) { return type_dst_b <= type && type <= type_dst_c; }
 static bool type_is_dist(int type) { return type_dst_a <= type && type <= type_dst_c; }
 static bool dly_is_sync(int dly_type) { return dly_type == dly_type_fdbk_sync || dly_type == dly_type_multi_sync; }
+static bool dly_is_multi(int dly_type) { return dly_type == dly_type_multi_time || dly_type == dly_type_multi_sync; }
 static bool dst_has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
 static bool dst_has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
 
@@ -519,32 +520,54 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  delay_fdbk_time_l.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]); });
-  delay_fdbk_time_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]); });
+  delay_fdbk_time_l.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]) && !dly_is_multi(vs[0]); });
+  delay_fdbk_time_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   auto& delay_fdbk_tempo_l = result.params.emplace_back(make_param(
     make_topo_info("{33BCF50C-C7DE-4630-A835-44D50DA3B8BB}", "Dly.TempoL", "L", true, false, param_dly_fdbk_tempo_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 3, 16 }),
     make_param_gui_single(section_delay, gui_edit_type::list, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_tempo_l.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_l.domain.timesigs);
-  delay_fdbk_tempo_l.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[0]); });
-  delay_fdbk_tempo_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]); });
+  delay_fdbk_tempo_l.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[0]) && !dly_is_multi(vs[0]); });
+  delay_fdbk_tempo_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   auto& delay_fdbk_time_r = result.params.emplace_back(make_param(
     make_topo_info("{5561243C-838F-4C33-BD46-3E934E854969}", "Dly.TimeR", "R", true, false, param_dly_fdbk_time_r, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  delay_fdbk_time_r.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]); });
-  delay_fdbk_time_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]); });
+  delay_fdbk_time_r.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]) && !dly_is_multi(vs[0]); });
+  delay_fdbk_time_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   auto& delay_fdbk_tempo_r = result.params.emplace_back(make_param(
     make_topo_info("{4FA78F9E-AC3A-45D7-A8A3-E0E2C7C264D7}", "Dly.TempoR", "R", true, false, param_dly_fdbk_tempo_r, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 3, 16 }),
     make_param_gui_single(section_delay, gui_edit_type::list, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_tempo_r.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_r.domain.timesigs);
-  delay_fdbk_tempo_r.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[0]); });
-  delay_fdbk_tempo_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]); });
+  delay_fdbk_tempo_r.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[0]) && !dly_is_multi(vs[0]); });
+  delay_fdbk_tempo_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
 
+  auto& delay_multi_time = result.params.emplace_back(make_param(
+    make_topo_info("{8D1A0D44-3291-488F-AC86-9B2B608F9562}", "Dly.MultiTime", "Time", true, false, param_dly_multi_time, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
+    make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 6 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_multi_time.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]) && dly_is_multi(vs[0]); });
+  delay_multi_time.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
+  auto& delay_multi_tempo = result.params.emplace_back(make_param(
+    make_topo_info("{8DAED046-7F5F-4E76-A6BF-099510564500}", "Dly.MultiTempo", "Tempo", true, false, param_dly_multi_tempo, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 3, 16 }),
+    make_param_gui_single(section_delay, gui_edit_type::list, { 0, 6 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_multi_tempo.gui.submenu = make_timesig_submenu(delay_multi_tempo.domain.timesigs);
+  delay_multi_tempo.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[0]) && dly_is_multi(vs[0]); });
+  delay_multi_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
+  auto& delay_multi_steps = result.params.emplace_back(make_param(
+    make_topo_info("{27572912-0A8E-4A97-9A54-379829E8E794}", "Dly.Taps", "Taps", true, false, param_dly_multi_taps, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_step(1, 8, 4, 0),
+    make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 7 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_multi_steps.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_multi(vs[0]); });
+  delay_multi_steps.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
   // TODO
   /*
   param_dly_fdbk_time_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_l, param_dly_fdbk_tempo_r,
