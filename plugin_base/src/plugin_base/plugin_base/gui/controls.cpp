@@ -348,6 +348,12 @@ void
 module_name_label::own_param_changed(plain_value plain)
 { 
   auto const& desc = _gui->gui_state()->desc().modules[plain.step()];
+  if (!desc.module->gui.visible)
+  {
+    setTooltip("");
+    setText("", dontSendNotification);
+    return;
+  }
   std::string name = desc.module->info.tag.name;
   std::string short_name = desc.module->info.tag.short_name;
   if(desc.module->info.slot_count > 1)

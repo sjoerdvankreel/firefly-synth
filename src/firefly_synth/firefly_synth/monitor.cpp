@@ -39,12 +39,12 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
       gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } } })));
   result.params.emplace_back(make_param(
-    make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", "Vcs", true, false, param_voices, 1),
+    make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", "Vs", true, false, param_voices, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 0 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
-    make_topo_info("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", "Thr", true, false, param_threads, 1),
+    make_topo_info("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", "Th", true, false, param_threads, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
