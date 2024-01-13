@@ -335,6 +335,7 @@ param_value_label::own_param_changed(plain_value plain)
 { 
   std::string text = _gui->gui_state()->plain_to_text_at_index(false, _param->info.global, plain);
   setText(text, dontSendNotification); 
+  setTooltip(_param->info.name + ": " + text);
 }
 
 module_name_label::
