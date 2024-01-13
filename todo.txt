@@ -42,11 +42,6 @@ fix the dly graph
 reswap master mod/aux
 document all the context menus
 
-* fx
-* stvar - freq, res, gain, kbd
-* comb - g+ d+ g- d-
-* shape - over, gain, mix, terms/decay ?
-
 document new invisible stuff (bpm/midi smooth, comb lin interpol) 
 
 * get some linux folks to comment (ycollete?)
