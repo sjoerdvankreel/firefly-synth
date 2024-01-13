@@ -465,12 +465,12 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   */
   auto& delay = result.sections.emplace_back(make_param_section(section_delay,
     make_topo_tag("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   delay.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_type = result.params.emplace_back(make_param(
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Dly.Type", "Type", true, false, param_dly_type, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(dly_type_items(), ""),
-    make_param_gui_single(section_delay, gui_edit_type::list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_delay, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   delay_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_type.gui.submenu = std::make_shared<gui_submenu>();
   delay_type.gui.submenu->add_submenu("Feedback", { dly_type_fdbk_time, dly_type_fdbk_sync });
