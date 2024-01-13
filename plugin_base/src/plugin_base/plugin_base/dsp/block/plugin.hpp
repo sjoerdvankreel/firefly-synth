@@ -57,7 +57,6 @@ struct plugin_block_state final {
   jarray<float, 3>& own_cv;
   jarray<float, 4>& own_audio;
   jarray<float, 2>& own_scratch;
-  jarray<float, 1> const& smooth_bpm;
   jarray<float, 5> const& all_global_cv;
   jarray<float, 6> const& all_global_audio;
   jarray<void*, 2> const& all_global_context;

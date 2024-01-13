@@ -98,7 +98,7 @@ plugin_engine::make_plugin_block(
     : _voice_automation[voice].state();
 
   plugin_block_state state = {
-    _last_note_key, context_out, cv_out, audio_out, scratch, _bpm_automation,
+    _last_note_key, context_out, cv_out, audio_out, scratch,
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
@@ -203,8 +203,6 @@ plugin_engine::deactivate()
   _global_audio_state = {};
   _midi_automation = {};
   _midi_filters = {};
-  _bpm_automation = {};
-  _bpm_filter = {};
   _accurate_automation = {};
   _voice_scratch_state = {};
   _global_scratch_state = {};
@@ -245,7 +243,6 @@ plugin_engine::activate(int max_frame_count)
   _global_audio_state.resize(frame_dims.module_global_audio);
   _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
-  _bpm_automation.resize(max_frame_count);
 
   // set automation values to current state, events may overwrite
   mark_all_params_as_automated(true);
@@ -269,10 +266,9 @@ plugin_engine::activate_modules()
   assert(_max_frame_count > 0);
 
   // smoothing filters are SR dependent
-  float smooth_freq = _state.desc().plugin->block_smoothing_hz;
-  _bpm_filter = block_filter(_sample_rate, smooth_freq, 120);
+  float smooth_freq = _state.desc().plugin->midi_smoothing_hz;
   for(int ms = 0; ms < _state.desc().midi_count; ms++)
-    _midi_filters.push_back(block_filter(_sample_rate, smooth_freq, _state.desc().midi_sources[ms]->source->default_));
+    _midi_filters.push_back(midi_filter(_sample_rate, smooth_freq, _state.desc().midi_sources[ms]->source->default_));
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -422,13 +418,7 @@ plugin_engine::process()
   /***************************************/
   /* STEP 1: Set up per-block automation */
   /***************************************/
-
-  // smoothing per-block bpm values
-  _bpm_filter.set(_host_block->shared.bpm);
-  for(int f = 0; f < frame_count; f++)
-    _bpm_automation[f] = _bpm_filter.next().first;
    
-  // host automation
   for (int e = 0; e < _host_block->events.block.size(); e++)
   {
     // we update state right here so no need to mark as automated

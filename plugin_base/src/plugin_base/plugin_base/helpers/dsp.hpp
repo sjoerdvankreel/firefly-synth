@@ -15,10 +15,10 @@ get_timesig_param_value(plugin_block const& block, int module, int timesig_p)
 }
 
 inline float 
-get_timesig_time_value(plugin_block const& block, float bpm, int module, int timesig_p)
+get_timesig_time_value(plugin_block const& block, int module, int timesig_p)
 {
   timesig sig = get_timesig_param_value(block, module, timesig_p);
-  return timesig_to_time(bpm, sig);
+  return timesig_to_time(block.host.bpm, sig);
 }
 
 inline float

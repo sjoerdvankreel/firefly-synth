@@ -148,7 +148,7 @@ voice_in_engine::reset(plugin_block const* block)
   int porta_mode = block->state.own_block_automation[param_porta][0].step();
   bool porta_sync = block->state.own_block_automation[param_porta_sync][0].step() != 0;
   float porta_time_time = block->state.own_block_automation[param_porta_time][0].real();
-  float porta_time_tempo = get_timesig_time_value(*block, block->host.bpm, module_voice_in, param_porta_tempo);
+  float porta_time_tempo = get_timesig_time_value(*block, module_voice_in, param_porta_tempo);
   float porta_time = porta_sync? porta_time_tempo: porta_time_time;
   switch (porta_mode)
   {
