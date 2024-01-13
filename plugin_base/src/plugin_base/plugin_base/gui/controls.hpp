@@ -186,6 +186,7 @@ class param_value_label:
 public param_component, 
 public autofit_label
 {
+  static std::string value_ref_text(plugin_gui* gui, param_desc const* param);
 protected:
   void own_param_changed(plain_value plain) override final;
 public:

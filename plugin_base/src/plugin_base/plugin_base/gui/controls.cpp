@@ -314,12 +314,20 @@ param_component::mouseUp(MouseEvent const& evt)
   });
 }
 
+std::string
+param_value_label::value_ref_text(plugin_gui* gui, param_desc const* param)
+{
+  auto const& ref_text = param->param->gui.value_reference_text;
+  if (ref_text.size()) return ref_text;
+  auto plain = param->param->domain.raw_to_plain(param->param->domain.max);
+  return gui->gui_state()->plain_to_text_at_index(false, param->info.global, plain);
+}
+
 // Just guess max value is representative of the longest text.
 param_value_label::
 param_value_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
-autofit_label(lnf, _gui->gui_state()->plain_to_text_at_index(false, 
-  _param->info.global, param->param->domain.raw_to_plain(param->param->domain.max)))
+autofit_label(lnf, value_ref_text(gui, param))
 { init(); }
 
 void
