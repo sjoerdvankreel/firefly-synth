@@ -18,6 +18,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static int const dly_max_sec = 10;
+static float const dly_max_filter_time_ms = 500;
 static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
 static double const flt_min_freq = 20;
@@ -29,16 +31,21 @@ enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8, dist_over_16 };
 enum { section_type, section_svf, section_comb, section_dist, section_delay };
 enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_count };
 enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay };
+enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { param_type, 
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
   param_dist_over, param_dist_clip, param_dist_shape, param_dist_x, param_dist_y, param_dist_gain, param_dist_mix, param_dist_lp_frq, param_dist_lp_res,
-  param_delay_tempo, param_delay_feedback };
+  param_dly_type, param_dly_hold_time, param_dly_hold_tempo, param_dly_amt, param_dly_sprd, param_dly_mix, param_dly_smooth,
+  param_dly_fdbk_time_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_l, param_dly_fdbk_tempo_r,
+  param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps
+};
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
 static bool dist_has_lpf(int type) { return type_dst_b <= type && type <= type_dst_c; }
 static bool type_is_dist(int type) { return type_dst_a <= type && type <= type_dst_c; }
+static bool dly_is_sync(int dly_type) { return dly_type == dly_type_fdbk_sync || dly_type == dly_type_multi_sync; }
 static bool dst_has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
 static bool dst_has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
 
@@ -69,6 +76,17 @@ svf_type_items()
   result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "BLL");
   result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "LSH");
   result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "HSH");
+  return result;
+}
+
+static std::vector<list_item>
+dly_type_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{A1481F0B-D6FD-4375-BDF9-C01D2F5C5B79}", "Fdbk.Time");
+  result.emplace_back("{7CEC3D1C-6854-4591-9AD7-BDBA9509EA87}", "Fdbk.Sync");
+  result.emplace_back("{871622C7-EC8A-4E3B-A76C-CFDE3467A998}", "Multi.Time");
+  result.emplace_back("{62EB5BA9-889A-4C46-8534-12881A4F02D1}", "Multi.Sync");
   return result;
 }
 
@@ -167,7 +185,9 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gfx, 0, param_type, 0, "SVF");
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
   state.set_text_at(module_gfx, 1, param_type, 0, "Dly");
-  state.set_text_at(module_gfx, 1, param_delay_tempo, 0, "3/16");
+  // TODO
+  //state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_l, 0, "3/16");
+  //state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_r, 0, "3/16");
 }
 
 static graph_engine_params
@@ -435,28 +455,68 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
+
+  /*
+  param_dly_type, param_dly_hold_time, param_dly_hold_tempo, param_dly_amt, param_dly_mix, param_dly_sprd, param_dly_smooth,
+  param_dly_fdbk_time_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_l, param_dly_fdbk_tempo_r,
+  param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps
+  */
   auto& delay = result.sections.emplace_back(make_param_section(section_delay,
     make_topo_tag("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1, 1, 1 } })));
   delay.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-  auto& delay_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Dly.Tempo", "Tempo", true, false, param_delay_tempo, 1),
-    make_param_dsp_input(!global, param_automate::none), make_domain_timesig_default(false, {3, 16}),
+  auto& delay_type = result.params.emplace_back(make_param(
+    make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Dly.Type", "Type", true, false, param_dly_type, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_item(dly_type_items(), ""),
     make_param_gui_single(section_delay, gui_edit_type::list, { 0, 0 }, make_label_none())));
-  delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
-  delay_tempo.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-  auto& delay_fdbk = result.params.emplace_back(make_param(
-    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.Fdbk", "Fdbk", true, false, param_delay_feedback, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 1 }, 
+  delay_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  delay_type.gui.submenu = std::make_shared<gui_submenu>();
+  delay_type.gui.submenu->add_submenu("Feedback", { dly_type_fdbk_time, dly_type_fdbk_sync });
+  delay_type.gui.submenu->add_submenu("Multi Tap", { dly_type_multi_time, dly_type_multi_sync });
+  auto& delay_hold_time = result.params.emplace_back(make_param(
+    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.HoldTime", "Hld", true, false, param_dly_hold_time, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 0, 3, "Sec"),
+    make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  delay_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  delay_hold_time.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  delay_hold_time.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]); });
+  auto& delay_hold_tempo = result.params.emplace_back(make_param(
+    make_topo_info("{AED0D3A5-AB02-441F-A42D-7E2AEE88DF24}", "Dly.HoldTempo", "Hld", true, false, param_dly_hold_tempo, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 3, 16 }),
+    make_param_gui_single(section_delay, gui_edit_type::list, { 0, 1 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_hold_tempo.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  delay_hold_tempo.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[0]); });
+  auto& delay_amt = result.params.emplace_back(make_param(
+    make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", "Dly.Amt", "Amt", true, false, param_dly_amt, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  auto& delay_sprd = result.params.emplace_back(make_param(
+    make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", "Dly.Spr", "Spr", true, false, param_dly_sprd, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 3 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  auto& delay_mix = result.params.emplace_back(make_param(
+    make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", "Dly.Mix", "Mix", true, false, param_dly_mix, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 4 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
+  auto& delay_smth = result.params.emplace_back(make_param(
+    make_topo_info("{5ED9F189-A27A-4CE8-A129-6D25A37C4DB3}", "Dly.Smt", "Smt", true, false, param_dly_smooth, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(0, dly_max_filter_time_ms, 0, 0, "Ms"),
+    make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 5 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  delay_smth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   return result;
 }
 
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& dst_shape_items) :
-_global(global), _dly_capacity(sample_rate * 10), 
+_global(global), _dly_capacity(sample_rate * dly_max_sec), 
 _dst_oversampler(max_frame_count, false, false, false),
 _dst_shape_items(dst_shape_items)
 { 
@@ -527,6 +587,7 @@ fx_engine::process(plugin_block& block,
 void
 fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
+/*
   float max_feedback = 0.9f;
   int this_module = _global ? module_gfx : module_vfx;
   float time = get_timesig_time_value(block, this_module, param_delay_tempo);
@@ -543,6 +604,7 @@ fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulatio
     }
   _dly_pos += block.end_frame - block.start_frame;
   _dly_pos %= _dly_capacity;
+*/
 }
 
 void
