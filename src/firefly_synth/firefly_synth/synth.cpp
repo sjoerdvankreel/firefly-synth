@@ -258,10 +258,10 @@ synth_topo()
   result->version_minor = FF_SYNTH_VERSION_MINOR;
   result->version_major = FF_SYNTH_VERSION_MAJOR;
 
-  result->gui.min_width = 1020;
-  result->gui.aspect_ratio_width = 100;
-  result->gui.aspect_ratio_height = 48;
-  result->gui.dimension.column_sizes = { 8, 13, 5, 15 };
+  result->gui.min_width = 1070;
+  result->gui.aspect_ratio_width = 35;
+  result->gui.aspect_ratio_height = 16;
+  result->gui.dimension.column_sizes = { 8, 15, 5, 15 };
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, 
