@@ -37,7 +37,6 @@ do global "clear unused" context menu entry ?
 auto-generate the manual (param list)
 visual routing indicators ?
 monitor highest usage relative to total module b/c multithread
-not "rte"
 
 * fx
 * stvar - freq, res, gain, kbd

@@ -213,7 +213,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   mode.gui.submenu->add_submenu("Rate", { mode_rate, mode_rate_one, mode_rate_wrap });
   mode.gui.submenu->add_submenu("Sync", { mode_sync, mode_sync_one, mode_sync_wrap });
   auto& rate = result.params.emplace_back(make_param(
-    make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", global? "Rate": "Rte", true, false, param_rate, 1),
+    make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", "Rate", true, false, param_rate, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
     make_param_gui_single(section_main, global? gui_edit_type::hslider: gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
