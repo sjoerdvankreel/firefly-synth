@@ -36,6 +36,7 @@ re-profile the kbdtest demo
 do global "clear unused" context menu entry ?
 auto-generate the manual (param list)
 visual routing indicators ?
+bpm smoothing like midi
 
 * fx
 * stvar - freq, res, gain, kbd
