@@ -143,9 +143,8 @@ plugin_engine::release_block()
           this_module_duration += _voice_module_process_duration_sec[v][m][mi];
       if (this_module_duration > max_module_duration)
       {
-        _high_module_cpu_topo = m;
-        _high_module_cpu_slot = mi;
-        _high_module_cpu_usage = this_module_duration / process_time_sec;
+        _high_cpu_module = _state.desc().module_topo_to_index.at(m) + mi;
+        _high_cpu_module_usage = this_module_duration / process_time_sec;
         max_module_duration = this_module_duration;
       }
     }
@@ -179,9 +178,8 @@ plugin_engine::deactivate()
   _output_updated_sec = 0;
   _block_start_time_sec = 0;
 
-  _high_module_cpu_topo = 0;
-  _high_module_cpu_slot = 0;
-  _high_module_cpu_usage = 0;
+  _high_cpu_module = 0;
+  _high_cpu_module_usage = 0;
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
     auto const& module = _state.desc().plugin->modules[m];
@@ -705,7 +703,7 @@ plugin_engine::process()
       // output params are written to intermediate buffer first
       plugin_output_block out_block = {
         voice_count, thread_count,
-        _cpu_usage, _high_module_cpu_topo, _high_module_cpu_slot, _high_module_cpu_usage,
+        _cpu_usage, _high_cpu_module, _high_cpu_module_usage,
         _host_block->audio_out, _output_values[m][mi], _voices_mixdown
       };
       plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));

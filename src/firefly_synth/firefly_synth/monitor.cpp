@@ -11,7 +11,7 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { section_main };
-enum { param_voices, param_threads, param_gain, param_cpu, param_hi_mod_cpu };
+enum { param_voices, param_threads, param_gain, param_cpu, param_hi_mod, param_hi_mod_cpu };
 
 class monitor_engine: 
 public module_engine {
@@ -35,7 +35,7 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{988E6A84-A012-413C-B33B-80B8B135D203}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 } , { 5 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 } , { 6 } })));
   result.params.emplace_back(make_param(
     make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", param_voices, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
@@ -57,9 +57,14 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
-    make_topo_info("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "Hi", param_hi_mod_cpu, 1),
-    make_param_dsp_output(), make_domain_percentage(0, 1, 0, 0, true),
+    make_topo_info("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "Hi", param_hi_mod, 1),
+    make_param_dsp_output(), make_domain_step(0, 999, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  result.params.emplace_back(make_param(
+    make_topo_info("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "HiCpu", param_hi_mod_cpu, 1),
+    make_param_dsp_output(), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_gui_single(section_main, gui_edit_type::output, { 0, 5 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   return result;
@@ -74,8 +79,9 @@ monitor_engine::process(plugin_block& block)
       max_out = std::max(max_out, block.out->host_audio[c][f]);
   block.set_out_param(param_voices, 0, block.out->voice_count);
   block.set_out_param(param_threads, 0, block.out->thread_count);
+  block.set_out_param(param_hi_mod, 0, block.out->high_cpu_module);
   block.set_out_param(param_cpu, 0, std::clamp(block.out->cpu_usage, 0.0, 1.0));
-  block.set_out_param(param_hi_mod_cpu, 0, std::clamp(block.out->high_module_cpu_usage, 0.0, 1.0));
+  block.set_out_param(param_hi_mod_cpu, 0, std::clamp(block.out->high_cpu_module_usage, 0.0, 1.0));
   block.set_out_param(param_gain, 0, std::clamp(max_out, 0.0f, (float)block.plugin.modules[module_monitor].params[param_gain].domain.max));
 }
 

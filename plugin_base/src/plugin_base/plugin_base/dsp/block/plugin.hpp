@@ -33,9 +33,8 @@ struct plugin_output_block final {
   int voice_count;
   int thread_count;
   double cpu_usage;
-  int high_module_cpu_topo;
-  int high_module_cpu_slot;
-  double high_module_cpu_usage;
+  int high_cpu_module;
+  double high_cpu_module_usage;
   float* const* host_audio;
   jarray<plain_value, 2>& params;
   jarray<float, 2> const& voice_mixdown;
