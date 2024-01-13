@@ -37,6 +37,7 @@ do global "clear unused" context menu entry ?
 auto-generate the manual (param list)
 visual routing indicators ?
 do time smoothing for delay + lin interpol
+more horizontal space for longer labels
 
 * fx
 * stvar - freq, res, gain, kbd
