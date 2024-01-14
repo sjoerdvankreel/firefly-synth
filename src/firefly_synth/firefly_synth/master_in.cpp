@@ -66,7 +66,7 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", "BPM Smoothing", "BPM.Smt", true, false, param_tempo_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, 1000, 50, 0, "Ms"),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, 1000, 200, 0, "Ms"),
     make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
 
@@ -81,16 +81,16 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 1, 1, gui_dimension::auto_size }))));
+    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod", param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage(0, 1, 0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::hslider, { 0, 0 },
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", "PB", param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 1 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", "Range", param_pb_range, 1),
