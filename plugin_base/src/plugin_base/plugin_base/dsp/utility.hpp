@@ -30,7 +30,7 @@ public:
   
   block_filter(): _length(0) {}
   block_filter(float rate, float duration, float default_):
-  _length(duration * rate), _to(default_) {}
+  _length(duration * rate), _from(default_), _to(default_), _current(default_) {}
 };
 
 inline void

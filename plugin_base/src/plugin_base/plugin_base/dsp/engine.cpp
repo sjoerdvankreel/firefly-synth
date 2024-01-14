@@ -8,6 +8,9 @@
 
 namespace plugin_base {
 
+static float const default_bpm_filter_millis = 200;
+static float const default_midi_filter_millis = 50;
+
 plugin_engine::
 plugin_engine(
   plugin_desc const* desc, int polyphony,
@@ -269,9 +272,9 @@ plugin_engine::activate_modules()
   assert(_max_frame_count > 0);
 
   // smoothing filters are SR dependent
-  _bpm_filter = block_filter(_sample_rate, 0.2, 120);
+  _bpm_filter = block_filter(_sample_rate, default_bpm_filter_millis * 0.001, 120);
   for(int ms = 0; ms < _state.desc().midi_count; ms++)
-    _midi_filters.push_back(block_filter(_sample_rate, 0.05, _state.desc().midi_sources[ms]->source->default_));
+    _midi_filters.push_back(block_filter(_sample_rate, default_midi_filter_millis * 0.001, _state.desc().midi_sources[ms]->source->default_));
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -501,6 +504,11 @@ plugin_engine::process()
   std::sort(_host_block->events.midi.begin(), _host_block->events.midi.end(), frame_comp);
   std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);
 
+  // midi smoothing control
+  float midi_filter_millis = default_midi_filter_millis;
+  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
+    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
+
   // note: midi_source * frame_count loop rather than frame_count * midi_source loop for performance
   for (int ms = 0; ms < _midi_filters.size(); ms++)
   {
@@ -520,7 +528,10 @@ plugin_engine::process()
         if (iter == id_mapping.end()) continue;
         int midi_index = iter->second;
         if(midi_index == ms)
+        {
           _midi_filters[midi_index].set(event.normalized.value());
+          _midi_filters[midi_index].init(_sample_rate, midi_filter_millis * 0.001);
+        }
       }
 
       auto filter_result = _midi_filters[ms].next();
