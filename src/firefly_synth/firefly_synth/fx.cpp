@@ -504,7 +504,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_sprd = result.params.emplace_back(make_param(
     make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", "Dly.Spr", "Spr", true, false, param_dly_sprd, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true), 
     make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
@@ -771,6 +771,8 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
     float wet_r_base = ((1 - r_time_t) * wet_r0 + r_time_t * wet_r1) * amt_curve[f] * max_feedback;
     _dly_buffer[0][_dly_pos] = dry_l + wet_l_base;
     _dly_buffer[1][_dly_pos] = dry_r + wet_r_base;
+
+    // note: treat spread as unipolar for feedback
     float wet_l = wet_l_base + (1.0f - spread_curve[f]) * wet_r_base;
     float wet_r = wet_r_base + (1.0f - spread_curve[f]) * wet_l_base;
     block.state.own_audio[0][0][0][f] = (1.0f - mix_curve[f]) * dry_l + mix_curve[f] * wet_l;
@@ -812,6 +814,8 @@ fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modul
   {
     float time_samples_t = time_curve[f] * block.sample_rate;
     float hold_samples_t = hold_curve[f] * block.sample_rate;
+    float spread = block.normalized_to_raw(module_gfx, param_dly_sprd, spread_curve[f]);
+
     for (int c = 0; c < 2; c++)
     {
       float wet = 0.0f;
@@ -819,7 +823,7 @@ fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modul
       for (int t = 0; t < tap_count; t++)
       {
         int lr = (t + c) % 2;
-        float tap_bal = stereo_balance(lr, spread_curve[f]);
+        float tap_bal = stereo_balance(lr, spread);
         float tap_samples_t = (t + 1) * time_samples_t + hold_samples_t;
         float tap_t = tap_samples_t - (int)tap_samples_t;
         int tap_samples_0 = (int)tap_samples_t % _dly_capacity;
