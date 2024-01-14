@@ -276,7 +276,7 @@ graph::paint(Graphics& g)
     jarray<float, 2> audio(_data.audio());
     for(int c = 0; c < 2; c++)
       for (int i = 0; i < audio[c].size(); i++)
-        audio[c][i] = ((1 - c) + std::clamp(bipolar_to_unipolar(audio[c][i]), 0.0f, 1.0f)) * 0.5f;
+        audio[c][i] = ((1 - c) + bipolar_to_unipolar(std::clamp(audio[c][i], -1.0f, 1.0f))) * 0.5f;
     paint_series(g, audio[0], true, 0.25f);
     paint_series(g, audio[1], true, 0.75f);
     return;

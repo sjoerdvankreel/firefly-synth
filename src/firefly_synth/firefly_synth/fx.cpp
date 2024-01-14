@@ -269,24 +269,23 @@ render_graph(
   });
   engine->process_end();
 
-  auto const& audio = block->state.own_audio[0][0][0];
+  auto const& audio = block->state.own_audio[0][0];
 
   // delay
   if (type == type_delay)
   {
-    std::vector<float> series(audio.cbegin(), audio.cbegin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, { "IR" });
+    return graph_data(audio, { "IR" });
   }
   
   // distortion - pick result of the last cycle (after filters kick in)
   if (type_is_dist(type))
   {
-    std::vector<float> series(audio.cbegin() + (shp_cycle_count - 1) * shp_cycle_length, audio.cbegin() + frame_count);
+    std::vector<float> series(audio[0].cbegin() + (shp_cycle_count - 1) * shp_cycle_length, audio[0].cbegin() + frame_count);
     return graph_data(jarray<float, 1>(series), true, { "Distortion" });
   }
 
   // comb / svf plot FR
-  auto response = fft(audio.data());
+  auto response = fft(audio[0].data());
   if (type == type_cmb)
     return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
 
