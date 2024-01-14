@@ -715,28 +715,35 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
 
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
-  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
-  auto& hold_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_hold_time, param_dly_hold_tempo, scratch_dly_hold);
+  //auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
+  //auto& hold_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_hold_time, param_dly_hold_tempo, scratch_dly_hold);
   auto& l_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, scratch_dly_fdbk_l);
   auto& r_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r, scratch_dly_fdbk_r);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    // TODO lerp
-    int l_samples = (l_time_curve[f] + hold_time_curve[f]) * block.sample_rate;
-    int r_samples = (r_time_curve[f] + hold_time_curve[f]) * block.sample_rate;
-    while (l_samples >= _dly_capacity) l_samples -= _dly_capacity;
-    while (r_samples >= _dly_capacity) r_samples -= _dly_capacity;
-    float buffer_l = _dly_buffer[0][(_dly_pos + f + _dly_capacity - l_samples) % _dly_capacity];
-    float buffer_r = _dly_buffer[1][(_dly_pos + f + _dly_capacity - r_samples) % _dly_capacity];
-    float wet_l_base = amt_curve[f] * max_feedback * buffer_l;
-    float wet_r_base = amt_curve[f] * max_feedback * buffer_r;
-    float wet_l = wet_l_base + (1.0f - spread_curve[f]) * wet_r_base;
-    float wet_r = wet_r_base + (1.0f - spread_curve[f]) * wet_l_base;
-    _dly_buffer[0][f] = block.state.own_audio[0][0][0][f] + wet_l_base;
-    _dly_buffer[1][f] = block.state.own_audio[0][0][1][f] + wet_r_base;
-    block.state.own_audio[0][0][0][f] = (1.0f - mix_curve[f]) * block.state.own_audio[0][0][0][f] + mix_curve[f] * wet_l;
-    block.state.own_audio[0][0][1][f] = (1.0f - mix_curve[f]) * block.state.own_audio[0][0][1][f] + mix_curve[f] * wet_r;
+    float l_time_samples_t = l_time_curve[f] * block.sample_rate;
+    float r_time_samples_t = r_time_curve[f] * block.sample_rate;
+    float l_time_t = l_time_samples_t - (int)l_time_samples_t;
+    float r_time_t = r_time_samples_t - (int)r_time_samples_t;
+    int l_time_samples_0 = (int)l_time_samples_t;
+    int l_time_samples_1 = (int)l_time_samples_t + 1;
+    int r_time_samples_0 = (int)r_time_samples_t;
+    int r_time_samples_1 = (int)r_time_samples_t + 1;
+
+    // + 2*samples in case samples > capacity
+    float dry_l = block.state.own_audio[0][0][0][f];
+    float dry_r = block.state.own_audio[0][0][1][f];
+    float wet_l0 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_0) % _dly_capacity];
+    float wet_l1 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_1) % _dly_capacity];
+    float wet_l = ((1 - l_time_t) * wet_l0 + l_time_t * wet_l1) * amt_curve[f] * max_feedback;
+    float wet_r0 = _dly_buffer[1][(_dly_pos + 2 * _dly_capacity - r_time_samples_0) % _dly_capacity];
+    float wet_r1 = _dly_buffer[1][(_dly_pos + 2 * _dly_capacity - r_time_samples_1) % _dly_capacity];
+    float wet_r = ((1 - r_time_t) * wet_r0 + r_time_t * wet_r1) * amt_curve[f] * max_feedback;
+    _dly_buffer[0][_dly_pos] = dry_l + wet_l;
+    _dly_buffer[1][_dly_pos] = dry_r + wet_r;
+    block.state.own_audio[0][0][0][f] = (1.0f - mix_curve[f]) * dry_l + mix_curve[f] * wet_l;
+    block.state.own_audio[0][0][1][f] = (1.0f - mix_curve[f]) * dry_r + mix_curve[f] * wet_r;
     _dly_pos = (_dly_pos + 1) % _dly_capacity;
   }
 }
