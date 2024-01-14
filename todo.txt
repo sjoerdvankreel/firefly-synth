@@ -37,6 +37,7 @@ auto-generate the manual (param list)
 visual routing indicators ?
 document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
+smooth random as osc
 
 * get some linux folks to comment (ycollete?)
 * continuing

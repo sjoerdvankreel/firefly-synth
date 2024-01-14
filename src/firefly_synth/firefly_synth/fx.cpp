@@ -28,9 +28,9 @@ static float const log_half = std::log(0.5f);
 
 enum { dist_clip_clip, dist_clip_tanh };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8, dist_over_16 };
-enum { section_type, section_svf, section_comb, section_dist, section_delay };
-enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay };
 enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync };
+enum { section_type, section_svf, section_comb, section_dist, section_delay, section_reverb };
+enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay, type_reverb };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
 enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_multi_hold, scratch_dly_multi_time, scratch_count };
 
@@ -41,7 +41,8 @@ enum { param_type,
   param_dly_type, param_dly_amt, param_dly_sprd, param_dly_mix,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
   param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps,  
-  param_dly_hold_time, param_dly_hold_tempo
+  param_dly_hold_time, param_dly_hold_tempo,
+  param_reverb_size, param_reverb_damp, param_reverb_spread, param_reverb_apf, param_reverb_mix
 };
 
 static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
@@ -62,7 +63,9 @@ type_items(bool global)
   result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "DstA");
   result.emplace_back("{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}", "DstB");
   result.emplace_back("{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}", "DstC");
-  if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
+  if(!global) return result;
+  result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
+  result.emplace_back("{7BB990E6-9A61-4C9F-BDAC-77D1CC260017}", "Reverb");
   return result;
 }
 
@@ -133,6 +136,9 @@ public module_engine {
   int const _dly_capacity = {};
   jarray<float, 2> _dly_buffer = {};
 
+  // reverb
+  // https://github.com/sinshu/freeverb
+
   // distortion with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
   // and resonant lp filter in the oversampling stage
@@ -145,6 +151,7 @@ public module_engine {
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_reverb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modulation);
  
@@ -218,7 +225,8 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<multi_menu_item> const& shape_type_items)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  if(type == type_off) return graph_data(graph_data_type::off, {});
+  // TODO
+  if(type == type_off || type == type_reverb) return graph_data(graph_data_type::off, {});
 
   int frame_count = -1;
   int sample_rate = -1;
@@ -278,6 +286,13 @@ render_graph(
     int last_cycle_start = (shp_cycle_count - 1) * shp_cycle_length;
     std::vector<float> series(audio[0].cbegin() + last_cycle_start, audio[0].cbegin() + frame_count);
     return graph_data(jarray<float, 1>(series), true, { "Distortion" });
+  }
+
+  // reverb
+  if (type == type_reverb)
+  {
+    // TODO
+    return graph_data(graph_data_type::off, {});
   }
 
   // delay - do some autosizing so it looks pretty
@@ -355,6 +370,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu->indices.push_back(type_cmb);
   type.gui.submenu->add_submenu("Distortion", { type_dst_a, type_dst_b, type_dst_c });
   if (global) type.gui.submenu->indices.push_back(type_delay);
+  if (global) type.gui.submenu->indices.push_back(type_reverb);
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
@@ -586,6 +602,41 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_hold_tempo.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[0]); });
   delay_hold_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
 
+  auto& reverb = result.sections.emplace_back(make_param_section(section_reverb,
+    make_topo_tag("{92EFDFE7-41C5-4E9D-9BE6-DC56965C1C0D}", "Reverb"),
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1, 1 } })));
+  reverb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
+  auto& reverb_size = result.params.emplace_back(make_param(
+    make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", "Rev.Size", "Size", true, false, param_reverb_size, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  reverb_size.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
+  auto& reverb_damp = result.params.emplace_back(make_param(
+    make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", "Rev.Damp", "Damp", true, false, param_reverb_damp, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  reverb_damp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
+  auto& reverb_spread = result.params.emplace_back(make_param(
+    make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", "Rev.Sprd", "Sprd", true, false, param_reverb_spread, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  reverb_spread.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
+  auto& reverb_apf = result.params.emplace_back(make_param(
+    make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", "Rev.APF", "APF", true, false, param_reverb_apf, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 3 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  reverb_apf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
+  auto& reverb_mix = result.params.emplace_back(make_param(
+    make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", "Rev.Mix", "Mix", true, false, param_reverb_mix, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 4 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  reverb_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
+
   return result;
 }
 
@@ -652,11 +703,18 @@ fx_engine::process(plugin_block& block,
   case type_svf: process_svf(block, *modulation); break;
   case type_cmb: process_comb(block, *modulation); break;
   case type_delay: process_delay(block, *modulation); break;
+  case type_reverb: process_reverb(block, *modulation); break;
   case type_dst_a: process_dist<Graph, type_dst_a>(block, *modulation); break;
   case type_dst_b: process_dist<Graph, type_dst_b>(block, *modulation); break;
   case type_dst_c: process_dist<Graph, type_dst_c>(block, *modulation); break;
   default: assert(false); break;
   }
+}
+
+void
+fx_engine::process_reverb(plugin_block& block, cv_matrix_mixdown const& modulation)
+{
+
 }
 
 void
@@ -697,6 +755,54 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
       block.state.own_audio[0][0][c][f] = _comb_out[c][_comb_pos];
     }
     _comb_pos = (_comb_pos + 1) % _comb_samples;
+  }
+}
+
+void
+fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  int svf_type = block_auto[param_svf_type][0].step();
+  switch (svf_type)
+  {
+  case svf_type_lpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
+  case svf_type_hpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
+  case svf_type_bpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
+  case svf_type_bsf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
+  case svf_type_apf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
+  case svf_type_peq: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
+  case svf_type_bll: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
+  case svf_type_lsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
+  case svf_type_hsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
+  default: assert(false); break;
+  }
+}
+
+template <class Init> void
+fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init)
+{
+  double w, hz, gain, kbd;
+  double const max_res = 0.99;
+  int const kbd_pivot = midi_middle_c;
+  int this_module = _global ? module_gfx : module_vfx;
+
+  auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
+  auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
+  auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
+  auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
+  int kbd_current = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.id.key;
+
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    kbd = block.normalized_to_raw(this_module, param_svf_kbd, kbd_curve[f]);
+    hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
+    gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
+    hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
+    hz = std::clamp(hz, flt_min_freq, flt_max_freq);
+    w = pi64 * hz / block.sample_rate;
+    init(w, res_curve[f] * max_res, gain);
+    for (int c = 0; c < 2; c++)
+      block.state.own_audio[0][0][c][f] = _svf.next(c, block.state.own_audio[0][0][c][f]);
   }
 }
 
@@ -840,54 +946,6 @@ fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modul
       block.state.own_audio[0][0][c][f] = (1.0f - mix_curve[f]) * dry + (mix_curve[f] * wet);
     }
     _dly_pos = (_dly_pos + 1) % _dly_capacity;
-  }
-}
-
-void
-fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation)
-{
-  auto const& block_auto = block.state.own_block_automation;
-  int svf_type = block_auto[param_svf_type][0].step();
-  switch (svf_type)
-  {
-  case svf_type_lpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
-  case svf_type_hpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
-  case svf_type_bpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
-  case svf_type_bsf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
-  case svf_type_apf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
-  case svf_type_peq: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
-  case svf_type_bll: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
-  case svf_type_lsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
-  case svf_type_hsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
-  default: assert(false); break;
-  }
-}
-
-template <class Init> void
-fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init)
-{
-  double w, hz, gain, kbd;
-  double const max_res = 0.99;
-  int const kbd_pivot = midi_middle_c;
-  int this_module = _global ? module_gfx : module_vfx;
-
-  auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
-  auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
-  auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
-  auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
-  int kbd_current = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.id.key;
-
-  for (int f = block.start_frame; f < block.end_frame; f++)
-  {
-    kbd = block.normalized_to_raw(this_module, param_svf_kbd, kbd_curve[f]);
-    hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
-    gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
-    hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
-    hz = std::clamp(hz, flt_min_freq, flt_max_freq);
-    w = pi64 * hz / block.sample_rate;
-    init(w, res_curve[f] * max_res, gain);
-    for (int c = 0; c < 2; c++)
-      block.state.own_audio[0][0][c][f] = _svf.next(c, block.state.own_audio[0][0][c][f]);
   }
 }
 
