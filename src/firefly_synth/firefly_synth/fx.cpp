@@ -246,9 +246,9 @@ render_graph(
     audio_in[1][0] = 1;
   } else if (type == type_delay)
   {
-    int count = 10;
-    sample_rate = 50;
-    frame_count = sample_rate * dly_max_sec; // TODO dynamic
+    int count = 50;
+    sample_rate = 200;
+    frame_count = 2000;//sample_rate * dly_max_sec; // TODO dynamic
     audio_in.resize(jarray<int, 1>(2, frame_count));
     for (int i = 0; i < count; i++)
     {
