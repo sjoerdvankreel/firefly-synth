@@ -29,11 +29,12 @@ static float const log_half = std::log(0.5f);
 enum { dist_clip_clip, dist_clip_tanh };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8, dist_over_16 };
 enum { section_type, section_svf, section_comb, section_dist, section_delay };
-enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_count };
 enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay };
 enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
-enum { param_type, 
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dly_hold, scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_count };
+
+enum { param_type,
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
   param_dist_over, param_dist_clip, param_dist_shape, param_dist_x, param_dist_y, param_dist_lp_frq, param_dist_lp_res, param_dist_mix, param_dist_gain,
@@ -144,6 +145,8 @@ public module_engine {
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modulation);
  
   // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
   void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation);
@@ -472,8 +475,8 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_type.gui.submenu->add_submenu("Feedback", { dly_type_fdbk_time, dly_type_fdbk_sync });
   delay_type.gui.submenu->add_submenu("Multi Tap", { dly_type_multi_time, dly_type_multi_sync });
   auto& delay_hold_time = result.params.emplace_back(make_param(
-    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.HoldTime", "Hld", true, false, param_dly_hold_time, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
+    make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.Hld", "Hld", true, false, param_dly_hold_time, 1),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
@@ -640,29 +643,6 @@ fx_engine::process(plugin_block& block,
 }
 
 void
-fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulation)
-{
-/*
-  float max_feedback = 0.9f;
-  int this_module = _global ? module_gfx : module_vfx;
-  float time = get_timesig_time_value(block, this_module, param_delay_tempo);
-  int samples = std::min(block.sample_rate * time, (float)_dly_capacity);
-
-  auto const& feedback_curve = *modulation[this_module][block.module_slot][param_delay_feedback][0];
-  for (int c = 0; c < 2; c++)
-    for (int f = block.start_frame; f < block.end_frame; f++)
-    {
-      float dry = block.state.own_audio[0][0][c][f];
-      float wet = _dly_buffer[c][(_dly_pos + f + _dly_capacity - samples) % _dly_capacity];
-      block.state.own_audio[0][0][c][f] = dry + wet * feedback_curve[f] * max_feedback;
-      _dly_buffer[c][(_dly_pos + f) % _dly_capacity] = block.state.own_audio[0][0][c][f];
-    }
-  _dly_pos += block.end_frame - block.start_frame;
-  _dly_pos %= _dly_capacity;
-*/
-}
-
-void
 fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
   float const feedback_factor = 0.98;
@@ -701,6 +681,69 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
     }
     _comb_pos = (_comb_pos + 1) % _comb_samples;
   }
+}
+
+void
+fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulation)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  int dly_type = block_auto[param_dly_type][0].step();
+  switch (dly_type)
+  {
+  case dly_type_fdbk_sync:
+  case dly_type_fdbk_time:
+    process_dly_fdbk(block, modulation);
+    break;
+  case dly_type_multi_sync:
+  case dly_type_multi_time:
+    process_dly_multi(block, modulation);
+    break;
+  default:
+    assert(false); 
+    break;
+  }
+}
+
+void
+fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modulation)
+{
+  float const max_feedback = 0.99f;
+  auto const& block_auto = block.state.own_block_automation;
+  int dly_type = block_auto[param_dly_type][0].step();
+  float smooth = block_auto[param_dly_smooth][0].real();
+  (void) smooth; // TODO
+  bool sync = dly_is_sync(dly_type);
+
+  auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
+  auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
+  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
+  auto& hold_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_hold_time, param_dly_hold_tempo, scratch_dly_hold);
+  auto& l_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, scratch_dly_fdbk_l);
+  auto& r_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r, scratch_dly_fdbk_r);
+
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    // TODO lerp
+    int l_samples = (l_time_curve[f] + hold_time_curve[f]) * block.sample_rate;
+    int r_samples = (r_time_curve[f] + hold_time_curve[f]) * block.sample_rate;
+    while (l_samples >= _dly_capacity) l_samples -= _dly_capacity;
+    while (r_samples >= _dly_capacity) r_samples -= _dly_capacity;
+    float buffer_l = _dly_buffer[0][(_dly_pos + f + _dly_capacity - l_samples) % _dly_capacity];
+    float buffer_r = _dly_buffer[1][(_dly_pos + f + _dly_capacity - r_samples) % _dly_capacity];
+    float wet_l_base = amt_curve[f] * max_feedback * buffer_l;
+    float wet_r_base = amt_curve[f] * max_feedback * buffer_r;
+    float wet_l = wet_l_base + (1.0f - spread_curve[f]) * wet_r_base;
+    float wet_r = wet_r_base + (1.0f - spread_curve[f]) * wet_l_base;
+    _dly_buffer[0][f] = block.state.own_audio[0][0][0][f] + wet_l_base;
+    _dly_buffer[1][f] = block.state.own_audio[0][0][1][f] + wet_r_base;
+    block.state.own_audio[0][0][0][f] = (1.0f - mix_curve[f]) * block.state.own_audio[0][0][0][f] + mix_curve[f] * wet_l;
+    block.state.own_audio[0][0][1][f] = (1.0f - mix_curve[f]) * block.state.own_audio[0][0][1][f] + mix_curve[f] * wet_r;
+  }
+}
+
+void
+fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modulation)
+{
 }
 
 void
