@@ -578,7 +578,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
   auto& delay_hold_tempo = result.params.emplace_back(make_param(
     make_topo_info("{AED0D3A5-AB02-441F-A42D-7E2AEE88DF24}", "Dly.HoldTempo", "Hld", true, false, param_dly_hold_tempo, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 3, 16 }),
+    make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(true, { 0, 1 }),
     make_param_gui_single(section_delay, gui_edit_type::list, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_tempo.gui.submenu = make_timesig_submenu(delay_hold_tempo.domain.timesigs);
