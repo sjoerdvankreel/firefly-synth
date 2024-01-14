@@ -812,11 +812,6 @@ fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modul
   {
     float time_samples_t = time_curve[f] * block.sample_rate;
     float hold_samples_t = hold_curve[f] * block.sample_rate;
-    float total_samples_t = time_samples_t + hold_samples_t;
-    float total_t = total_samples_t - (int)total_samples_t;
-    int total_samples_0 = (int)total_samples_t;
-    int total_samples_1 = (int)total_samples_t + 1;
-
     for (int c = 0; c < 2; c++)
     {
       float wet = 0.0f;
@@ -825,11 +820,13 @@ fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modul
       {
         int lr = (t + c) % 2;
         float tap_bal = stereo_balance(lr, spread_curve[f]);
-        int tap_length_0 = std::clamp((t + 1) * total_samples_0, 0, _dly_capacity);
-        int tap_length_1 = std::clamp((t + 1) * total_samples_1, 0, _dly_capacity);
-        float buffer_sample_0 = _dly_buffer[c][(_dly_pos + 2 * _dly_capacity - tap_length_0) % _dly_capacity];
-        float buffer_sample_1 = _dly_buffer[c][(_dly_pos + 2 * _dly_capacity - tap_length_1) % _dly_capacity];
-        float buffer_sample = ((1 - total_t) * buffer_sample_0 + total_t * buffer_sample_1);
+        float tap_samples_t = (t + 1) * time_samples_t + hold_samples_t;
+        float tap_t = tap_samples_t - (int)tap_samples_t;
+        int tap_samples_0 = (int)tap_samples_t % _dly_capacity;
+        int tap_samples_1 = ((int)tap_samples_t + 1) % _dly_capacity;
+        float buffer_sample_0 = _dly_buffer[c][(_dly_pos + 2 * _dly_capacity - tap_samples_0) % _dly_capacity];
+        float buffer_sample_1 = _dly_buffer[c][(_dly_pos + 2 * _dly_capacity - tap_samples_1) % _dly_capacity];
+        float buffer_sample = ((1 - tap_t) * buffer_sample_0 + tap_t * buffer_sample_1);
         wet += tap_bal * tap_amt * buffer_sample;
         tap_amt *= tap_amt;
       }
