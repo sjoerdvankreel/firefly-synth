@@ -478,7 +478,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_type.gui.submenu->add_submenu("Multi Tap", { dly_type_multi_time, dly_type_multi_sync });
   auto& delay_hold_time = result.params.emplace_back(make_param(
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.Hld", "Hld", true, false, param_dly_hold_time, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
+    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
@@ -714,19 +714,22 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
   int dly_type = block_auto[param_dly_type][0].step();
   float smooth = block_auto[param_dly_smooth][0].real();
   (void) smooth; // TODO
+
   bool sync = dly_is_sync(dly_type);
+  float hold_time_time = block_auto[param_dly_hold_time][0].real();
+  float hold_time_tempo = get_timesig_time_value(block, module_gfx, param_dly_hold_tempo);
+  float hold_time = sync ? hold_time_tempo : hold_time_time;
 
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
-  //auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
-  //auto& hold_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_hold_time, param_dly_hold_tempo, scratch_dly_hold);
+  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
   auto& l_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, scratch_dly_fdbk_l);
   auto& r_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r, scratch_dly_fdbk_r);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float l_time_samples_t = l_time_curve[f] * block.sample_rate;
-    float r_time_samples_t = r_time_curve[f] * block.sample_rate;
+    float l_time_samples_t = (l_time_curve[f] + hold_time) * block.sample_rate;
+    float r_time_samples_t = (r_time_curve[f] + hold_time) * block.sample_rate;
     float l_time_t = l_time_samples_t - (int)l_time_samples_t;
     float r_time_t = r_time_samples_t - (int)r_time_samples_t;
     int l_time_samples_0 = (int)l_time_samples_t;
@@ -739,12 +742,14 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
     float dry_r = block.state.own_audio[0][0][1][f];
     float wet_l0 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_0) % _dly_capacity];
     float wet_l1 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_1) % _dly_capacity];
-    float wet_l = ((1 - l_time_t) * wet_l0 + l_time_t * wet_l1) * amt_curve[f] * max_feedback;
+    float wet_l_base = ((1 - l_time_t) * wet_l0 + l_time_t * wet_l1) * amt_curve[f] * max_feedback;
     float wet_r0 = _dly_buffer[1][(_dly_pos + 2 * _dly_capacity - r_time_samples_0) % _dly_capacity];
     float wet_r1 = _dly_buffer[1][(_dly_pos + 2 * _dly_capacity - r_time_samples_1) % _dly_capacity];
-    float wet_r = ((1 - r_time_t) * wet_r0 + r_time_t * wet_r1) * amt_curve[f] * max_feedback;
-    _dly_buffer[0][_dly_pos] = dry_l + wet_l;
-    _dly_buffer[1][_dly_pos] = dry_r + wet_r;
+    float wet_r_base = ((1 - r_time_t) * wet_r0 + r_time_t * wet_r1) * amt_curve[f] * max_feedback;
+    _dly_buffer[0][_dly_pos] = dry_l + wet_l_base;
+    _dly_buffer[1][_dly_pos] = dry_r + wet_r_base;
+    float wet_l = wet_l_base + (1.0f - spread_curve[f]) * wet_r_base;
+    float wet_r = wet_r_base + (1.0f - spread_curve[f]) * wet_l_base;
     block.state.own_audio[0][0][0][f] = (1.0f - mix_curve[f]) * dry_l + mix_curve[f] * wet_l;
     block.state.own_audio[0][0][1][f] = (1.0f - mix_curve[f]) * dry_r + mix_curve[f] * wet_r;
     _dly_pos = (_dly_pos + 1) % _dly_capacity;
