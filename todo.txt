@@ -39,6 +39,7 @@ visual routing indicators ?
 do time smoothing for delay + lin interpol
 more horizontal space for longer labels
 fix the dly graph
+reswap master mod/aux
 
 * fx
 * stvar - freq, res, gain, kbd
