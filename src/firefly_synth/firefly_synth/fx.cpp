@@ -275,7 +275,7 @@ render_graph(
   if (type == type_delay)
   {
     std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + frame_count);
-    std::vector<float> right(audio[0].cbegin(), audio[0].cbegin() + frame_count);
+    std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + frame_count);
     return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), {"IR"});
   }
   
