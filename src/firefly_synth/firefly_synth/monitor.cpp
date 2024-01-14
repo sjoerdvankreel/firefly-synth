@@ -39,17 +39,17 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
       gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } } })));
   result.params.emplace_back(make_param(
-    make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", "Vs", true, false, param_voices, 1),
+    make_topo_info("{2827FB67-CF08-4785-ACB2-F9200D6B03FA}", "Voices", "Voices", true, false, param_voices, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 0 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
-    make_topo_info("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", "Th", true, false, param_threads, 1),
+    make_topo_info("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", "Thrds", true, false, param_threads, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
-    make_topo_info("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Gain", "Gn", true, false, param_gain, 1),
+    make_topo_info("{6AB939E0-62D0-4BA3-8692-7FD7B740ED74}", "Gain", "Gain", true, false, param_gain, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
@@ -59,7 +59,7 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
-    make_topo_info("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "High Cpu", "Hi", true, false, param_hi_mod_cpu, 1),
+    make_topo_info("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "High Cpu", "High", true, false, param_hi_mod_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 0.99, 0, 0, false),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
