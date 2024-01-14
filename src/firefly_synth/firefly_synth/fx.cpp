@@ -32,7 +32,7 @@ enum { section_type, section_svf, section_comb, section_dist, section_delay };
 enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay };
 enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
-enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dly_hold, scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_count };
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_multi_hold, scratch_dly_multi_time, scratch_count };
 
 enum { param_type,
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
@@ -782,6 +782,63 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
 void
 fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
+  auto const& block_auto = block.state.own_block_automation;
+  int dly_type = block_auto[param_dly_type][0].step();
+  int tap_count = block_auto[param_dly_multi_taps][0].step();
+  bool sync = dly_is_sync(dly_type);
+
+  auto& time_curve = block.state.own_scratch[scratch_dly_multi_time];
+  auto& hold_curve = block.state.own_scratch[scratch_dly_multi_hold];
+  auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
+  auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
+  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
+  if (sync)
+  {
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      hold_curve[f] = get_timesig_time_value(block, block.state.smooth_bpm[f], module_gfx, param_dly_hold_tempo);
+      time_curve[f] = get_timesig_time_value(block, block.state.smooth_bpm[f], module_gfx, param_dly_multi_tempo);
+    }
+  }
+  else
+  {
+    float hold = block_auto[param_dly_hold_time][0].real();
+    float time = block_auto[param_dly_multi_time][0].real();
+    std::fill(hold_curve.begin() + block.start_frame, hold_curve.begin() + block.end_frame, hold);
+    std::fill(time_curve.begin() + block.start_frame, time_curve.begin() + block.end_frame, time);
+  }
+
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    float time_samples_t = time_curve[f] * block.sample_rate;
+    float hold_samples_t = hold_curve[f] * block.sample_rate;
+    float total_samples_t = time_samples_t + hold_samples_t;
+    float total_t = total_samples_t - (int)total_samples_t;
+    int total_samples_0 = (int)total_samples_t;
+    int total_samples_1 = (int)total_samples_t + 1;
+
+    for (int c = 0; c < 2; c++)
+    {
+      float wet = 0.0f;
+      float tap_amt = 1.0f - (1.0f - amt_curve[f]) * (1.0f - amt_curve[f]);
+      for (int t = 0; t < tap_count; t++)
+      {
+        int lr = (t + c) % 2;
+        float tap_bal = stereo_balance(lr, spread_curve[f]);
+        int tap_length_0 = std::clamp((t + 1) * total_samples_0, 0, _dly_capacity);
+        int tap_length_1 = std::clamp((t + 1) * total_samples_1, 0, _dly_capacity);
+        float buffer_sample_0 = _dly_buffer[c][(_dly_pos + 2 * _dly_capacity - tap_length_0) % _dly_capacity];
+        float buffer_sample_1 = _dly_buffer[c][(_dly_pos + 2 * _dly_capacity - tap_length_1) % _dly_capacity];
+        float buffer_sample = ((1 - total_t) * buffer_sample_0 + total_t * buffer_sample_1);
+        wet += tap_bal * tap_amt * buffer_sample;
+        tap_amt *= tap_amt;
+      }
+      float dry = block.state.own_audio[0][0][c][f];
+      _dly_buffer[c][_dly_pos] = dry;
+      block.state.own_audio[0][0][c][f] = (1.0f - mix_curve[f]) * dry + (mix_curve[f] * wet);
+    }
+    _dly_pos = (_dly_pos + 1) % _dly_capacity;
+  }
 }
 
 void
