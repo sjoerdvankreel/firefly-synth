@@ -248,7 +248,7 @@ render_graph(
   {
     int count = 50;
     sample_rate = 200;
-    frame_count = 2000;//sample_rate * dly_max_sec; // TODO dynamic
+    frame_count = sample_rate * dly_max_sec;
     audio_in.resize(jarray<int, 1>(2, frame_count));
     for (int i = 0; i < count; i++)
     {
@@ -271,20 +271,40 @@ render_graph(
 
   auto const& audio = block->state.own_audio[0][0];
 
-  // delay
-  if (type == type_delay)
-  {
-    std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + frame_count);
-    std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + frame_count);
-    return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), {"IR"});
-  }
-  
   // distortion - pick result of the last cycle (after filters kick in)
   if (type_is_dist(type))
   {
     int last_cycle_start = (shp_cycle_count - 1) * shp_cycle_length;
     std::vector<float> series(audio[0].cbegin() + last_cycle_start, audio[0].cbegin() + frame_count);
     return graph_data(jarray<float, 1>(series), true, { "Distortion" });
+  }
+
+  // delay - do some autosizing so it looks pretty
+  if (type == type_delay)
+  {
+    float max_amp = 0.0f;
+    int last_significant_frame = 0;
+    for (int f = 0; f < frame_count; f++)
+    {
+      float amp_l = std::fabs(audio[0][f]);
+      float amp_r = std::fabs(audio[1][f]);
+      max_amp = std::max(max_amp, amp_l);
+      max_amp = std::max(max_amp, amp_r);
+      if(amp_l >= 1e-2) last_significant_frame = f;
+      if(amp_r >= 1e-2) last_significant_frame = f;
+    }
+    if(max_amp == 0.0f) max_amp = 1.0f;
+    if(last_significant_frame < frame_count / dly_max_sec) last_significant_frame = frame_count / dly_max_sec;
+    std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + last_significant_frame + 1);
+    std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + last_significant_frame + 1);
+    for (int f = 0; f <= last_significant_frame; f++)
+    {
+      left[f] /= max_amp;
+      right[f] /= max_amp;
+    }
+    float length = (last_significant_frame + 1.0f) / frame_count * dly_max_sec;
+    std::string partition = float_to_string(length, 2) + " Sec";
+    return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
   }
 
   // comb / svf plot FR
