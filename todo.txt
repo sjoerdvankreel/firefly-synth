@@ -26,7 +26,6 @@ do 5 am and 5 fm routes
 do add_submenu everywhere in the topos
 osc: overlay any 2 waves ? (saw+saw==>pulse)
 fix the init patch
-do "IR" as variable length
 prettify the matrix section
 "insert route before/after" ==> enable it !
 still find a way to do insert fx here
@@ -36,11 +35,7 @@ re-profile the kbdtest demo
 do global "clear unused" context menu entry ?
 auto-generate the manual (param list)
 visual routing indicators ?
-do time smoothing for delay + lin interpol
-more horizontal space for longer labels
-fix the dly graph
 document all the context menus
-
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 
 * get some linux folks to comment (ycollete?)
