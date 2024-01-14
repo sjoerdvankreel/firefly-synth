@@ -716,9 +716,11 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
   (void) smooth; // TODO
 
   bool sync = dly_is_sync(dly_type);
+  /*
   float hold_time_time = block_auto[param_dly_hold_time][0].real();
   float hold_time_tempo = get_timesig_time_value(block, module_gfx, param_dly_hold_tempo);
   float hold_time = sync ? hold_time_tempo : hold_time_time;
+  */
 
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
@@ -728,8 +730,8 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float l_time_samples_t = (l_time_curve[f] + hold_time) * block.sample_rate;
-    float r_time_samples_t = (r_time_curve[f] + hold_time) * block.sample_rate;
+    float l_time_samples_t = l_time_curve[f] * block.sample_rate;
+    float r_time_samples_t = r_time_curve[f] * block.sample_rate;
     float l_time_t = l_time_samples_t - (int)l_time_samples_t;
     float r_time_t = r_time_samples_t - (int)r_time_samples_t;
     int l_time_samples_0 = (int)l_time_samples_t;
