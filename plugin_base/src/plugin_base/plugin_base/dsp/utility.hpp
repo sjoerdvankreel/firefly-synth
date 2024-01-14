@@ -26,9 +26,11 @@ class block_filter
 public:
   void set(float val);
   std::pair<float, bool> next();
+  void init(float rate, float duration);
+  
   block_filter(): _length(0) {}
-  block_filter(float rate, float freq, float default_):
-  _length(rate / freq), _to(default_) {}
+  block_filter(float rate, float duration, float default_):
+  _length(duration * rate), _to(default_) {}
 };
 
 inline void
@@ -39,10 +41,19 @@ block_filter::set(float val)
   _from = _current;
 }
 
+inline void 
+block_filter::init(float rate, float duration)
+{
+  int new_length = duration * rate;
+  if(new_length == _length) return;
+  _pos = 0;
+  _length = new_length;
+}
+
 inline std::pair<float, bool>
 block_filter::next()
 {
-  if(_pos == _length) return std::make_pair(_to, false);
+  if(_pos >= _length) return std::make_pair(_to, false);
   _current = _from + (_to - _from) * (_pos++ / (float)_length);
   return std::make_pair(_current, true);
 }

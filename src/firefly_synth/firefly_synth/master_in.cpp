@@ -14,10 +14,12 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 int aux_count = 3;
-enum { section_aux, section_linked };
 enum { output_aux, output_mod, output_pb };
-enum { param_aux, param_mod, param_pb, param_pb_range, param_count };
+enum { section_smooth, section_aux, section_linked };
+enum { param_midi_smooth, param_tempo_smooth, param_aux, param_mod, param_pb, param_pb_range, param_count };
 extern int const master_in_param_pb_range = param_pb_range;
+extern int const master_in_param_midi_smooth = param_midi_smooth;
+extern int const master_in_param_tempo_smooth = param_tempo_smooth;
 
 class master_in_engine :
 public module_engine {
@@ -47,16 +49,30 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)) }),
-      make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, 1 } } )));
+      make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
 
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
+  result.sections.emplace_back(make_param_section(section_smooth,
+    make_topo_tag("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
+  result.params.emplace_back(make_param(
+    make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", "MIDI Smoothing", "MIDI.Smt", true, false, param_midi_smooth, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, 1000, 50, 0, "Ms"),
+    make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  result.params.emplace_back(make_param(
+    make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", "BPM Smoothing", "BPM.Smt", true, false, param_tempo_smooth, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, 1000, 50, 0, "Ms"),
+    make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 1 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1 }))));
   result.params.emplace_back(make_param(
     make_topo_info("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
@@ -65,7 +81,7 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1, 1, gui_dimension::auto_size }))));
+    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 1, 1, gui_dimension::auto_size }))));
   result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod", param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage(0, 1, 0, 0, true),

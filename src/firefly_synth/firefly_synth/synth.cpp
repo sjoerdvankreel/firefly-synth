@@ -12,6 +12,9 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+extern int const master_in_param_midi_smooth;
+extern int const master_in_param_tempo_smooth;
+
 enum {
   custom_section_title,
   custom_section_main_graph,
@@ -257,6 +260,10 @@ synth_topo()
   result->tag.name = FF_SYNTH_NAME;
   result->version_minor = FF_SYNTH_VERSION_MINOR;
   result->version_major = FF_SYNTH_VERSION_MAJOR;
+  result->bpm_smooth_module = module_master_in;
+  result->bpm_smooth_param = master_in_param_tempo_smooth;
+  result->midi_smooth_module = module_master_in;
+  result->midi_smooth_param = master_in_param_midi_smooth;
 
   result->gui.min_width = 1070;
   result->gui.aspect_ratio_width = 35;

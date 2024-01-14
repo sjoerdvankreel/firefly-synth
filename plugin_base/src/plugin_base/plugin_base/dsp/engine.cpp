@@ -269,11 +269,9 @@ plugin_engine::activate_modules()
   assert(_max_frame_count > 0);
 
   // smoothing filters are SR dependent
-  float bpm_smooth_freq = _state.desc().plugin->bpm_smoothing_hz;
-  _bpm_filter = block_filter(_sample_rate, bpm_smooth_freq, 120);
-  float midi_smooth_freq = _state.desc().plugin->midi_smoothing_hz;
+  _bpm_filter = block_filter(_sample_rate, 0.2, 120);
   for(int ms = 0; ms < _state.desc().midi_count; ms++)
-    _midi_filters.push_back(block_filter(_sample_rate, midi_smooth_freq, _state.desc().midi_sources[ms]->source->default_));
+    _midi_filters.push_back(block_filter(_sample_rate, 0.05, _state.desc().midi_sources[ms]->source->default_));
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -433,6 +431,9 @@ plugin_engine::process()
 
   // smoothing per-block bpm values
   _bpm_filter.set(_host_block->shared.bpm);
+  auto const& topo = *_state.desc().plugin;
+  if(topo.bpm_smooth_module >= 0 && topo.bpm_smooth_param >= 0)
+    _bpm_filter.init(_sample_rate, _state.get_plain_at(topo.bpm_smooth_module, 0, topo.bpm_smooth_param, 0).real() * 0.001);
   for(int f = 0; f < frame_count; f++)
     _bpm_automation[f] = _bpm_filter.next().first;
    

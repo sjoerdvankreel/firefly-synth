@@ -83,16 +83,19 @@ struct plugin_topo final {
   int audio_polyphony;
   int graph_polyphony;
 
-  // smooths midi and bpm changes
-  float bpm_smoothing_hz = 5;
-  float midi_smoothing_hz = 20;
-
   topo_tag tag;
   plugin_type type;
   std::string vendor;
   plugin_topo_gui gui;
   std::string extension;
   std::vector<module_topo> modules;
+
+  // smooths midi and bpm changes, use -1 for defaults,
+  // must resolve to real parameter indicating nr of milliseconds to smooth
+  int bpm_smooth_param = -1;
+  int bpm_smooth_module = -1;
+  int midi_smooth_param = -1;
+  int midi_smooth_module = -1;
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
