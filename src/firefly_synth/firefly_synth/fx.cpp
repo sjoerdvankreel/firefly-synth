@@ -725,8 +725,22 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
   auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
-  auto& l_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, scratch_dly_fdbk_l);
-  auto& r_time_curve = sync_or_time_into_scratch(block, sync, module_gfx, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r, scratch_dly_fdbk_r);
+  auto const& l_time_curve_plain = *modulation[module_gfx][block.module_slot][param_dly_fdbk_time_l][0];
+  auto const& r_time_curve_plain = *modulation[module_gfx][block.module_slot][param_dly_fdbk_time_r][0];
+  auto& l_time_curve = block.state.own_scratch[scratch_dly_fdbk_l];
+  auto& r_time_curve = block.state.own_scratch[scratch_dly_fdbk_r];
+  if (sync)
+  {
+    float l_time_tempo = get_timesig_time_value(block, module_gfx, param_dly_fdbk_tempo_l);
+    float r_time_tempo = get_timesig_time_value(block, module_gfx, param_dly_fdbk_tempo_r);
+    std::fill(l_time_curve.begin() + block.start_frame, l_time_curve.begin() + block.end_frame, l_time_tempo);
+    std::fill(r_time_curve.begin() + block.start_frame, r_time_curve.begin() + block.end_frame, r_time_tempo);
+  }
+  else
+  {
+    normalized_to_raw_into(block, module_gfx, param_dly_fdbk_time_l, l_time_curve_plain, l_time_curve);
+    normalized_to_raw_into(block, module_gfx, param_dly_fdbk_time_r, r_time_curve_plain, r_time_curve);
+  }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
