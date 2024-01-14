@@ -18,13 +18,30 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int const dly_max_sec = 10;
-static float const dly_max_filter_time_ms = 500;
+static float const log_half = std::log(0.5f);
+
 static double const comb_max_ms = 5;
 static double const comb_min_ms = 0.1;
 static double const flt_min_freq = 20;
 static double const flt_max_freq = 20000;
-static float const log_half = std::log(0.5f);
+static double const dly_max_sec = 10;
+static double const dly_max_filter_time_ms = 500;
+
+static float const reverb_gain = 0.015f;
+static float const reverb_dry_scale = 2.0f;
+static float const reverb_wet_scale = 3.0f;
+static float const reverb_damp_scale = 0.4f;
+static float const reverb_room_scale = 0.28f;
+static float const reverb_room_offset = 0.7f;
+static float const reverb_spread = 23.0f / 44100.0f;
+
+static int const reverb_comb_count = 8;
+static int const reverb_allpass_count = 4;
+static float const reverb_allpass_length[reverb_allpass_count] = {
+  556.0f / 44100.0f, 441.0f / 44100.0f, 341.0f / 44100.0f, 225.0f / 44100.0f };
+static float const reverb_comb_length[reverb_comb_count] = {
+  1116.0f / 44100.0f, 1188.0f / 44100.0f, 1277.0f / 44100.0f, 1356.0f / 44100.0f,
+  1422.0f / 44100.0f, 1491.0f / 44100.0f, 1557.0f / 44100.0f, 1617.0f / 44100.0f };
 
 enum { dist_clip_clip, dist_clip_tanh };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8, dist_over_16 };
@@ -136,9 +153,6 @@ public module_engine {
   int const _dly_capacity = {};
   jarray<float, 2> _dly_buffer = {};
 
-  // reverb
-  // https://github.com/sinshu/freeverb
-
   // distortion with fixed dc filter @20hz
   // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
   // and resonant lp filter in the oversampling stage
@@ -148,6 +162,14 @@ public module_engine {
   state_var_filter _dst_svf;
   oversampler _dst_oversampler;
   std::vector<multi_menu_item> _dst_shape_items;
+
+  // reverb
+  // https://github.com/sinshu/freeverb
+  std::array<std::array<float, reverb_comb_count>, 2> _rev_comb_filter = {};
+  std::array<std::array<std::int32_t, reverb_comb_count>, 2> _rev_comb_pos = {};
+  std::array<std::array<std::vector<float>, reverb_comb_count>, 2> _rev_comb = {};
+  std::array<std::array<std::int32_t, reverb_allpass_count>, 2> _rev_allpass_pos = {};
+  std::array<std::array<std::vector<float>, reverb_allpass_count>, 2> _rev_allpass = {};
 
   void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
@@ -225,8 +247,7 @@ render_graph(
   param_topo_mapping const& mapping, std::vector<multi_menu_item> const& shape_type_items)
 {
   int type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step();
-  // TODO
-  if(type == type_off || type == type_reverb) return graph_data(graph_data_type::off, {});
+  if(type == type_off) return graph_data(graph_data_type::off, {});
 
   int frame_count = -1;
   int sample_rate = -1;
@@ -253,11 +274,11 @@ render_graph(
     audio_in.resize(jarray<int, 1>(2, frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
-  } else if (type == type_delay)
+  } else if (type == type_delay || type == type_reverb)
   {
     int count = 50;
     sample_rate = 200;
-    frame_count = sample_rate * dly_max_sec;
+    frame_count = sample_rate * (type == type_reverb ? 3: dly_max_sec);
     audio_in.resize(jarray<int, 1>(2, frame_count));
     for (int i = 0; i < count; i++)
     {
@@ -291,8 +312,10 @@ render_graph(
   // reverb
   if (type == type_reverb)
   {
-    // TODO
-    return graph_data(graph_data_type::off, {});
+    std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + frame_count);
+    std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + frame_count);
+    std::string partition = "3 Sec";
+    return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
   }
 
   // delay - do some autosizing so it looks pretty
@@ -618,12 +641,12 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   reverb_damp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
-  auto& reverb_spread = result.params.emplace_back(make_param(
+  auto& reverb_sprd = result.params.emplace_back(make_param(
     make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", "Rev.Sprd", "Sprd", true, false, param_reverb_spread, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  reverb_spread.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
+  reverb_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_apf = result.params.emplace_back(make_param(
     make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", "Rev.APF", "APF", true, false, param_reverb_apf, 1),
     make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0.5, 0, true),
@@ -651,7 +674,23 @@ _dst_shape_items(dst_shape_items)
   _comb_in[1] = std::vector<double>(_comb_samples, 0.0);
   _comb_out[0] = std::vector<double>(_comb_samples, 0.0);
   _comb_out[1] = std::vector<double>(_comb_samples, 0.0);
-  if(global) _dly_buffer.resize(jarray<int, 1>(2, _dly_capacity));
+  
+  if(!global) return;
+  _dly_buffer.resize(jarray<int, 1>(2, _dly_capacity));
+  for (int i = 0; i < reverb_comb_count; i++)
+  {
+    float comb_length_l = reverb_comb_length[i] * sample_rate;
+    float comb_length_r = (reverb_comb_length[i] + reverb_spread) * sample_rate;
+    _rev_comb[0][i] = std::vector<float>((int)comb_length_l);
+    _rev_comb[1][i] = std::vector<float>((int)comb_length_r);
+  }
+  for (int i = 0; i < reverb_allpass_count; i++)
+  {
+    float apf_length_l = reverb_allpass_length[i] * sample_rate;
+    float apf_length_r = (reverb_allpass_length[i] + reverb_spread) * sample_rate;
+    _rev_allpass[0][i] = std::vector<float>((int)apf_length_l);
+    _rev_allpass[1][i] = std::vector<float>((int)apf_length_r);
+  }
 }
 
 void
@@ -670,7 +709,6 @@ fx_engine::reset(plugin_block const* block)
 
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
-  if (_global && type == type_delay) _dly_buffer.fill(0);
   if (type == type_cmb)
   {
     std::fill(_comb_in[0].begin(), _comb_in[0].end(), 0.0f);
@@ -678,6 +716,28 @@ fx_engine::reset(plugin_block const* block)
     std::fill(_comb_out[0].begin(), _comb_out[0].end(), 0.0f);
     std::fill(_comb_out[1].begin(), _comb_out[1].end(), 0.0f);
   }    
+
+  if(!_global) return;
+  if (type == type_delay) 
+  {
+    _dly_buffer[0].fill(0);
+    _dly_buffer[1].fill(0);
+  }
+  if (type == type_reverb)
+    for(int c = 0; c < 2; c++)
+    {
+      for (int i = 0; i < reverb_comb_count; i++)
+      {
+        _rev_comb_pos[c][i] = 0;
+        _rev_comb_filter[c][i] = 0.0f;
+        std::fill(_rev_comb[c][i].begin(), _rev_comb[c][i].end(), 0.0f);
+      }
+      for (int i = 0; i < reverb_allpass_count; i++)
+      {
+        _rev_allpass_pos[c][i] = 0;
+        std::fill(_rev_allpass[c][i].begin(), _rev_allpass[c][i].end(), 0.0f);
+      }
+    }
 }
 
 template <bool Graph> void
@@ -714,7 +774,54 @@ fx_engine::process(plugin_block& block,
 void
 fx_engine::process_reverb(plugin_block& block, cv_matrix_mixdown const& modulation)
 {
+  float out[2];
+  auto const& apf_curve = *modulation[module_gfx][block.module_slot][param_reverb_apf][0];
+  auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_reverb_mix][0];
+  auto const& size_curve = *modulation[module_gfx][block.module_slot][param_reverb_size][0];
+  auto const& damp_curve = *modulation[module_gfx][block.module_slot][param_reverb_damp][0];
+  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_reverb_spread][0];
 
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    float in_l = block.state.own_audio[0][0][0][f];
+    float in_r = block.state.own_audio[0][0][1][f];
+    float damp = (1.0f - damp_curve[f]) * reverb_damp_scale;
+    float size = (size_curve[f] * reverb_room_scale) + reverb_room_offset;
+    float mono_in = (in_l + in_r) * reverb_gain;
+
+    for (int c = 0; c < 2; c++)
+    {
+      out[c] = 0.0f;
+      for (int i = 0; i < reverb_comb_count; i++)
+      {
+        int pos = _rev_comb_pos[c][i];
+        float comb = _rev_comb[c][i][pos];
+        _rev_comb_filter[c][i] = (comb * (1.0f - damp)) + (_rev_comb_filter[c][i] * damp);
+        _rev_comb[c][i][pos] = mono_in + (_rev_comb_filter[c][i] * size);
+        _rev_comb_pos[c][i] = (pos + 1) % _rev_comb[c][i].size();
+        out[c] += comb;
+      }
+
+      for (int i = 0; i < reverb_allpass_count; i++)
+      {
+        float output = out[c];
+        int pos = _rev_allpass_pos[c][i];
+        float allpass = _rev_allpass[c][i][pos];
+        out[c] = -out[c] + allpass;
+        _rev_allpass[c][i][pos] = output + (allpass * apf_curve[f] * 0.5f);
+        _rev_allpass_pos[c][i] = (pos + 1) % _rev_allpass[c][i].size();
+      }
+    }
+
+    float wet = mix_curve[f] * reverb_wet_scale;
+    float dry = (1.0f - mix_curve[f]) * reverb_dry_scale;
+    float wet1 = wet * (spread_curve[f] / 2.0f + 0.5f);
+    float wet2 = wet * ((1.0f - spread_curve[f]) / 2.0f);
+    float out_l = out[0] * wet1 + out[1] * wet2;
+    float out_r = out[1] * wet1 + out[0] * wet2;
+    block.state.own_audio[0][0][0][f] = out_l + in_l * dry;
+    block.state.own_audio[0][0][1][f] = out_r + in_r * dry;
+  }
 }
 
 void
