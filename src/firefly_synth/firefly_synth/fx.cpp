@@ -62,7 +62,7 @@ type_items(bool global)
   result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "DstA");
   result.emplace_back("{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}", "DstB");
   result.emplace_back("{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}", "DstC");
-  if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Dly");
+  if(global) result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   return result;
 }
 
@@ -189,7 +189,7 @@ init_global_default(plugin_state& state)
 {
   state.set_text_at(module_gfx, 0, param_type, 0, "SVF");
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
-  state.set_text_at(module_gfx, 1, param_type, 0, "Dly");
+  state.set_text_at(module_gfx, 1, param_type, 0, "Delay");
   state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_l, 0, "3/16");
   state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_r, 0, "3/16");
 }
