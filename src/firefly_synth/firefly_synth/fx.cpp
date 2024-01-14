@@ -731,10 +731,13 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
   auto& r_time_curve = block.state.own_scratch[scratch_dly_fdbk_r];
   if (sync)
   {
-    float l_time_tempo = get_timesig_time_value(block, module_gfx, param_dly_fdbk_tempo_l);
-    float r_time_tempo = get_timesig_time_value(block, module_gfx, param_dly_fdbk_tempo_r);
-    std::fill(l_time_curve.begin() + block.start_frame, l_time_curve.begin() + block.end_frame, l_time_tempo);
-    std::fill(r_time_curve.begin() + block.start_frame, r_time_curve.begin() + block.end_frame, r_time_tempo);
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      float l_time_tempo = get_timesig_time_value(block, block.state.smooth_bpm[f], module_gfx, param_dly_fdbk_tempo_l);
+      float r_time_tempo = get_timesig_time_value(block, block.state.smooth_bpm[f], module_gfx, param_dly_fdbk_tempo_r);
+      std::fill(l_time_curve.begin() + block.start_frame, l_time_curve.begin() + block.end_frame, l_time_tempo);
+      std::fill(r_time_curve.begin() + block.start_frame, r_time_curve.begin() + block.end_frame, r_time_tempo);
+    }
   }
   else
   {

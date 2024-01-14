@@ -39,10 +39,9 @@ visual routing indicators ?
 do time smoothing for delay + lin interpol
 more horizontal space for longer labels
 fix the dly graph
-reswap master mod/aux
 document all the context menus
 
-document new invisible stuff (bpm/midi smooth, comb lin interpol) 
+document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 
 * get some linux folks to comment (ycollete?)
 * continuing
