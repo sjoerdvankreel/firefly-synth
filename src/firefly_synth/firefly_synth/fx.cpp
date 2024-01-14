@@ -274,13 +274,16 @@ render_graph(
   // delay
   if (type == type_delay)
   {
-    return graph_data(audio, { "IR" });
+    std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + frame_count);
+    std::vector<float> right(audio[0].cbegin(), audio[0].cbegin() + frame_count);
+    return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), {"IR"});
   }
   
   // distortion - pick result of the last cycle (after filters kick in)
   if (type_is_dist(type))
   {
-    std::vector<float> series(audio[0].cbegin() + (shp_cycle_count - 1) * shp_cycle_length, audio[0].cbegin() + frame_count);
+    int last_cycle_start = (shp_cycle_count - 1) * shp_cycle_length;
+    std::vector<float> series(audio[0].cbegin() + last_cycle_start, audio[0].cbegin() + frame_count);
     return graph_data(jarray<float, 1>(series), true, { "Distortion" });
   }
 
