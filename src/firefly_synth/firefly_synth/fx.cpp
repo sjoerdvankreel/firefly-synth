@@ -737,6 +737,7 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
     _dly_buffer[1][f] = block.state.own_audio[0][0][1][f] + wet_r_base;
     block.state.own_audio[0][0][0][f] = (1.0f - mix_curve[f]) * block.state.own_audio[0][0][0][f] + mix_curve[f] * wet_l;
     block.state.own_audio[0][0][1][f] = (1.0f - mix_curve[f]) * block.state.own_audio[0][0][1][f] + mix_curve[f] * wet_r;
+    _dly_pos = (_dly_pos + 1) % _dly_capacity;
   }
 }
 
