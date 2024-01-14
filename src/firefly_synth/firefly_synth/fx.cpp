@@ -190,8 +190,9 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gfx, 0, param_type, 0, "SVF");
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
   state.set_text_at(module_gfx, 1, param_type, 0, "Delay");
+  state.set_text_at(module_gfx, 1, param_dly_type, 0, "Fdbk.Sync");
   state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_l, 0, "3/16");
-  state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_r, 0, "3/16");
+  state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_r, 0, "5/16");
 }
 
 static graph_engine_params
