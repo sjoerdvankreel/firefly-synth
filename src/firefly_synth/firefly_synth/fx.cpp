@@ -497,7 +497,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& delay_fdbk_time_l = result.params.emplace_back(make_param(
     make_topo_info("{E32F17BC-03D2-4F2D-8292-2B4C3AB24E8D}", "Dly.TimeL", "L", true, false, param_dly_fdbk_time_l, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
+    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_time_l.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]) && !dly_is_multi(vs[0]); });
@@ -512,7 +512,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_fdbk_tempo_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   auto& delay_fdbk_time_r = result.params.emplace_back(make_param(
     make_topo_info("{5561243C-838F-4C33-BD46-3E934E854969}", "Dly.TimeR", "R", true, false, param_dly_fdbk_time_r, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
+    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_time_r.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]) && !dly_is_multi(vs[0]); });
@@ -528,7 +528,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& delay_multi_time = result.params.emplace_back(make_param(
     make_topo_info("{8D1A0D44-3291-488F-AC86-9B2B608F9562}", "Dly.Time", "Time", true, false, param_dly_multi_time, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
+    make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_multi_time.gui.bindings.visible.bind_params({ param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[0]) && dly_is_multi(vs[0]); });
@@ -708,14 +708,11 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
   int dly_type = block_auto[param_dly_type][0].step();
   bool sync = dly_is_sync(dly_type);
 
-  // TODO not modulate times (block-based)
+  auto& l_time_curve = block.state.own_scratch[scratch_dly_fdbk_l];
+  auto& r_time_curve = block.state.own_scratch[scratch_dly_fdbk_r];
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
   auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
-  auto const& l_time_curve_plain = *modulation[module_gfx][block.module_slot][param_dly_fdbk_time_l][0];
-  auto const& r_time_curve_plain = *modulation[module_gfx][block.module_slot][param_dly_fdbk_time_r][0];
-  auto& l_time_curve = block.state.own_scratch[scratch_dly_fdbk_l];
-  auto& r_time_curve = block.state.own_scratch[scratch_dly_fdbk_r];
   if (sync)
   {
     for (int f = block.start_frame; f < block.end_frame; f++)
@@ -726,8 +723,10 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
   }
   else
   {
-    normalized_to_raw_into(block, module_gfx, param_dly_fdbk_time_l, l_time_curve_plain, l_time_curve);
-    normalized_to_raw_into(block, module_gfx, param_dly_fdbk_time_r, r_time_curve_plain, r_time_curve);
+    float l_time = block_auto[param_dly_fdbk_time_l][0].real();
+    float r_time = block_auto[param_dly_fdbk_time_r][0].real();
+    std::fill(l_time_curve.begin() + block.start_frame, l_time_curve.begin() + block.end_frame, l_time);
+    std::fill(r_time_curve.begin() + block.start_frame, r_time_curve.begin() + block.end_frame, r_time);
   }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
