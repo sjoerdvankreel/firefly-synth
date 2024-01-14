@@ -187,9 +187,8 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gfx, 0, param_type, 0, "SVF");
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
   state.set_text_at(module_gfx, 1, param_type, 0, "Dly");
-  // TODO
-  //state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_l, 0, "3/16");
-  //state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_r, 0, "3/16");
+  state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_l, 0, "3/16");
+  state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_r, 0, "3/16");
 }
 
 static graph_engine_params
@@ -460,12 +459,6 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
 
-  // TODO
-  /*
-  param_dly_type, param_dly_hold_time, param_dly_hold_tempo, param_dly_amt, param_dly_mix, param_dly_sprd, param_dly_smooth,
-  param_dly_fdbk_time_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_l, param_dly_fdbk_tempo_r,
-  param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps
-  */
   auto& delay = result.sections.emplace_back(make_param_section(section_delay,
     make_topo_tag("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
@@ -572,13 +565,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_delay, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_smth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-
-  // TODO
-  /*
-  param_dly_fdbk_time_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_l, param_dly_fdbk_tempo_r,
-    param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps
-  */
-
+    
   return result;
 }
 

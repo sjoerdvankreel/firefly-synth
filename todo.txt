@@ -40,6 +40,7 @@ do time smoothing for delay + lin interpol
 more horizontal space for longer labels
 fix the dly graph
 reswap master mod/aux
+document all the context menus
 
 * fx
 * stvar - freq, res, gain, kbd
