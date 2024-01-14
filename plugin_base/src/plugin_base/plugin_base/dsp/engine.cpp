@@ -296,6 +296,13 @@ plugin_engine::activate_modules()
 }
 
 void
+plugin_engine::init_bpm_automation(float bpm)
+{
+  for(int f = 0; f < _max_frame_count; f++)
+    _bpm_automation[f] = bpm;
+}
+
+void
 plugin_engine::voice_block_params_snapshot(int v)
 {
   // take a snapshot of current block automation values into once per voice automation

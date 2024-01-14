@@ -109,6 +109,7 @@ public:
   host_block& prepare_block();
 
   void process();
+  void init_bpm_automation(float bpm);
   void voice_block_params_snapshot(int v);
   void process_voice(int v, bool threaded);
 
