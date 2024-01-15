@@ -243,7 +243,7 @@ render_graph(
   std::string partition = float_to_string(max_total, 1) + " Sec " + targets.items[ti].name;
   auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
-  return graph_data(stacked, false, true, { partition });
+  return graph_data(stacked, false, 1.0f, { partition });
 }
 
 module_topo

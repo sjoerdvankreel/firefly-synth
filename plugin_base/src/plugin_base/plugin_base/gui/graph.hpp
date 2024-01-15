@@ -26,7 +26,7 @@ public juce::Component
   graph_params const _params;
   void paint_series(
     juce::Graphics& g, jarray<float, 1> const& series, 
-    bool bipolar, bool stroke, float midpoint);
+    bool bipolar, float stroke_thickness, float midpoint);
 
 public:
   void render(graph_data const& data);

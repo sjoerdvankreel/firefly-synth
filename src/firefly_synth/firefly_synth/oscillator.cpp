@@ -113,7 +113,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
       engine.process(block, &modulation);
     });
     jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);
-    result.push_back(graph_data(audio, true, {}));
+    result.push_back(graph_data(audio, 1.0f, {}));
   }
   engine->process_end();
   return result;
@@ -126,7 +126,7 @@ render_osc_graph(plugin_state const& state, graph_engine* engine, int param, par
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
   auto data = render_osc_graphs(state, engine, mapping.module_slot)[mapping.module_slot];
-  return graph_data(data.audio(), true, { "1 Cycle" });
+  return graph_data(data.audio(), 1.0f, { "1 Cycle" });
 }
 
 module_topo

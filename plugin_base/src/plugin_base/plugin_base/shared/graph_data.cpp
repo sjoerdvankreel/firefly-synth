@@ -6,9 +6,9 @@ void
 graph_data::init(graph_data const& rhs)
 {
   _type = rhs.type();
-  _stroke = rhs.stroke();
   _bipolar = rhs.bipolar();
   _partitions = rhs.partitions();
+  _stroke_thickness = rhs.stroke_thickness();
   switch (rhs.type())
   {
   case graph_data_type::na: break;

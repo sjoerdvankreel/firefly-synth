@@ -8,8 +8,8 @@ namespace plugin_base {
 enum class graph_data_type { off, na, scalar, series, audio, multi_stereo };
 
 class graph_data {
-  bool _stroke = true;
   bool _bipolar = false;
+  float _stroke_thickness = 1.0f;
   graph_data_type _type = {};
   std::vector<std::string> _partitions = {};
 
@@ -30,9 +30,9 @@ public:
   std::vector<std::pair<float, float>> const& multi_stereo() const 
   { assert(_type == graph_data_type::multi_stereo); return _multi_stereo; }
 
-  bool stroke() const { return _stroke; }
   bool bipolar() const { return _bipolar; }
   graph_data_type type() const { return _type; }
+  float stroke_thickness() const { return _stroke_thickness; }
   std::vector<std::string> const& partitions() const { return _partitions; }
 
   graph_data(graph_data const& rhs) { init(rhs); }
@@ -40,12 +40,12 @@ public:
 
   graph_data(graph_data_type type, std::vector<std::string> const& partitions):
   _partitions(partitions), _type(type) {}
-  graph_data(jarray<float, 2> const& audio, bool stroke, std::vector<std::string> const& partitions) :
-  _partitions(partitions), _stroke(stroke), _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
+  graph_data(jarray<float, 2> const& audio, float stroke_thickness, std::vector<std::string> const& partitions) :
+  _partitions(partitions), _stroke_thickness(stroke_thickness), _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
   graph_data(float scalar, bool bipolar, std::vector<std::string> const& partitions):
   _partitions(partitions), _bipolar(bipolar), _type(graph_data_type::scalar), _scalar(scalar) {}
-  graph_data(jarray<float, 1> const& series, bool bipolar, bool stroke, std::vector<std::string> const& partitions) :
-  _partitions(partitions), _stroke(stroke), _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
+  graph_data(jarray<float, 1> const& series, bool bipolar, float stroke_thickness, std::vector<std::string> const& partitions) :
+  _partitions(partitions), _stroke_thickness(stroke_thickness), _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
   graph_data(std::vector<std::pair<float, float>> const& multi_stereo, std::vector<std::string> const& partitions) :
     _partitions(partitions), _bipolar(false), _type(graph_data_type::multi_stereo), _multi_stereo(multi_stereo) {}
 };
