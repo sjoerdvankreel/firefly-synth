@@ -404,8 +404,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
-  type.gui.submenu->indices.push_back(type_svf);
-  type.gui.submenu->indices.push_back(type_cmb);
+  type.gui.submenu->add_submenu("Filter", { type_svf, type_cmb });
   type.gui.submenu->add_submenu("Distortion", { type_dst_a, type_dst_b, type_dst_c });
   if (global) type.gui.submenu->indices.push_back(type_delay);
   if (global) type.gui.submenu->indices.push_back(type_reverb);
