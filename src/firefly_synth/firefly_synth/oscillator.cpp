@@ -13,9 +13,8 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { section_main };
-enum { type_off, type_sine, type_saw };
 enum { param_type, param_note, param_cent };
-
+enum { type_off, type_sin, type_cos, type_saw };
 extern int const voice_in_output_pitch_offset;
 
 static std::vector<list_item>
@@ -23,14 +22,19 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
-  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sine");
+  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Sin");
+  result.emplace_back("{99BAC663-24E0-45AE-ADC8-665A656D2B09}", "Cos");
   result.emplace_back("{E41F2F4B-7E80-4791-8E9C-CCE72A949DB6}", "Saw");
   return result;
 }
 
 class osc_engine:
 public module_engine {
+
   float _phase;
+
+  template <class Generator>
+  void process(plugin_block& block, cv_matrix_mixdown const* modulation, Generator generator);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(osc_engine);
@@ -42,7 +46,7 @@ public:
 static void
 init_minimal(plugin_state& state)
 {
-  state.set_text_at(module_osc, 0, param_type, 0, "Sine");
+  state.set_text_at(module_osc, 0, param_type, 0, "Sin");
 }
 
 static void
@@ -70,7 +74,7 @@ prepare_osc_state_for_am_graph(plugin_state const& state)
   plugin_state result(&state.desc(), false);
   result.copy_from(state.state());
   for (int o = 0; o < state.desc().plugin->modules[module_osc].info.slot_count; o++)
-    result.set_raw_at(module_osc, o, param_type, 0, type_sine);
+    result.set_raw_at(module_osc, o, param_type, 0, type_sin);
   return result;
 }
 
@@ -172,7 +176,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 }
 
 static float
-blep(float phase, float inc)
+generate_blep(float phase, float inc)
 {
   float b;
   if (phase < inc) return b = phase / inc, (2.0f - b) * b - 1.0f;
@@ -180,9 +184,20 @@ blep(float phase, float inc)
   return 0.0f;
 }
 
+static float 
+generate_saw(float phase, float inc)
+{
+  float saw = phase * 2 - 1;
+  return saw - generate_blep(phase, inc);
+}
+
 void
 osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
+  // allow custom data for graphs
+  if (modulation == nullptr)
+    modulation = &get_cv_matrix_mixdown(block, false);
+
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
   if (type == type_off)
@@ -191,12 +206,20 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
     block.state.own_audio[0][0][1].fill(block.start_frame, block.end_frame, 0.0f);
     return;
   }
-  
-  // allow custom data for graphs
-  if(modulation == nullptr)
-    modulation = &get_cv_matrix_mixdown(block, false);
 
-  float sample;
+  switch (type)
+  {
+  case type_saw: process(block, modulation, [](float ph, float inc) { return generate_saw(ph, inc); }); break;
+  case type_sin: process(block, modulation, [](float ph, float inc) { return std::sin(2.0f * pi32 * ph); }); break;
+  case type_cos: process(block, modulation, [](float ph, float inc) { return std::cos(2.0f * pi32 * ph); }); break;
+  default: assert(false); break;
+  }
+}
+
+template <class Generator> void
+osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation, Generator generator)
+{
+  auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
@@ -205,12 +228,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
     float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
-    switch (type)
-    {
-    case type_sine: sample = std::sin(2.0f * pi32 * _phase); break;
-    case type_saw: sample = (_phase * 2 - 1) - blep(_phase, inc); break;
-    default: assert(false); sample = 0; break;
-    }
+    float sample = generator(_phase, inc);
     check_bipolar(sample);
     block.state.own_audio[0][0][0][f] = sample;
     block.state.own_audio[0][0][1][f] = sample;
