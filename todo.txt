@@ -43,6 +43,7 @@ do phase modulation & freq modulation
 lerped hardsync
 do the offset osc generator ! only integer multiples of bandlimited signal
 scale down the osc dual factor to nyquist
+check all the automated names in the host
 
 * get some linux folks to comment (ycollete?)
 * continuing

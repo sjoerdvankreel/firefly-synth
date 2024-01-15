@@ -12,12 +12,12 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { type_off, type_dual };
-enum { section_main, section_dual };
-enum { dual_type_off, dual_type_sin, dual_type_saw, dual_type_tri };
+enum { type_off, type_basic };
+enum { section_main, section_basic };
 enum { 
   param_type, param_note, param_cent, 
-  param_dual_type_1, param_dual_type_2, param_dual_factor, param_dual_phase, param_dual_mix };
+  param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
+  param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm };
 extern int const voice_in_output_pitch_offset;
 
 static std::vector<list_item>
@@ -25,29 +25,7 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
-  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Dual");
-  return result;
-}
-
-static std::vector<list_item>
-dual_type_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{02BC0674-625C-45ED-93CC-953AEC893AE7}", "Off");
-  result.emplace_back("{E4248269-63F1-45E3-B6C7-87201486D72E}", "Sin");
-  result.emplace_back("{913CD63D-C824-4489-B6C7-8BDF24C01381}", "Saw");
-  result.emplace_back("{0F8AF9D8-4363-47E7-ADBD-5A2166418B64}", "Tri");
-  return result;
-}
-
-static std::vector<list_item>
-dual_factor_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{02BC0674-625C-45ED-93CC-953AEC893AE7}", "1X");
-  result.emplace_back("{91A59DD0-1BE9-4C74-BA78-17815497ACF8}", "2X");
-  result.emplace_back("{059EC6B4-6975-4A1F-939B-B8E9BA1F84C3}", "4X");
-  result.emplace_back("{41C80642-5EC8-47A9-89A3-B166CD2A262B}", "8X");
+  result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
   return result;
 }
 
@@ -63,11 +41,7 @@ public:
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 
 private:
-  void process_dual(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <class Generator1>
-  void process_dual_1(plugin_block& block, cv_matrix_mixdown const* modulation, Generator1 gen1);
-  template <class Generator1, class Generator2>
-  void process_dual_1_2(plugin_block& block, cv_matrix_mixdown const* modulation, Generator1 gen1, Generator2 gen2);
+  void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
 static void
@@ -200,44 +174,73 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  auto& dual = result.sections.emplace_back(make_param_section(section_dual,
-    make_topo_tag("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Dual"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
-  dual.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
-  dual.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_dual; });
-  auto& dual_type_1 = result.params.emplace_back(make_param(
-    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", "Dual.Type1", "Type1", true, false, param_dual_type_1, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(dual_type_items(), "Sin"),
-    make_param_gui_single(section_dual, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  dual_type_1.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
-  auto& dual_type_2 = result.params.emplace_back(make_param(
-    make_topo_info("{FB5741F8-7AAB-43D3-AB2B-BCC1EFF838AF}", "Dual.Type2", "Type2", true, false, param_dual_type_2, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(dual_type_items(), ""),
-    make_param_gui_single(section_dual, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
-  dual_type_2.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
-  auto& dual_factor = result.params.emplace_back(make_param(
-    make_topo_info("{E102608A-1E0D-4DF2-A903-908141289F4B}", "Dual.Factor", "Factor", true, false, param_dual_factor, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(dual_factor_items(), ""),
-    make_param_gui_single(section_dual, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
-  dual_factor.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
-  auto& dual_phase = result.params.emplace_back(make_param(
-    make_topo_info("{52979739-1542-4B0C-BF3D-34CECC77F82F}", "Dual.Phase", "Phase", true, false, param_dual_phase, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_dual, gui_edit_type::hslider, { 0, 3 }, 
+  //
+//  param_basic_sin_on, param_basic_sin_amt, param_basic_saw_on, param_basic_saw_amt,
+  //  param_basic_tri_on, param_basic_tri_amt, param_basic_sqr_on, param_basic_sqr_amt, param_basic_sqr_pwm
+
+  auto& basic = result.sections.emplace_back(make_param_section(section_basic,
+    make_topo_tag("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
+      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
+      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+  basic.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  basic.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic; });
+  auto& basic_sin_on = result.params.emplace_back(make_param(
+    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", "Basic.Sin.On", "Sin", true, false, param_basic_sin_on, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 0 },
+    make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  basic_sin_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_sin_mix = result.params.emplace_back(make_param(
+    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", "Basic.Sin.Mix", "Mix", true, false, param_basic_sin_mix, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 1 }, make_label_none())));
+  basic_sin_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_saw_on = result.params.emplace_back(make_param(
+    make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", "Basic.Saw.On", "Saw", true, false, param_basic_saw_on, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  dual_phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
-  auto& dual_mix = result.params.emplace_back(make_param(
-    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", "Dual.Mix", "Mix", true, false, param_dual_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
-    make_param_gui_single(section_dual, gui_edit_type::hslider, { 0, 4 },
+  basic_saw_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_saw_mix = result.params.emplace_back(make_param(
+    make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", "Basic.Saw.Mix", "Mix", true, false, param_basic_saw_mix, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 3 }, make_label_none())));
+  basic_saw_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_tri_on = result.params.emplace_back(make_param(
+    make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", "Basic.Tri.On", "Tri", true, false, param_basic_tri_on, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  dual_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
+  basic_tri_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_tri_mix = result.params.emplace_back(make_param(
+    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", "Basic.Tri.Mix", "Mix", true, false, param_basic_tri_mix, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 5 }, make_label_none())));
+  basic_tri_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_sqr_on = result.params.emplace_back(make_param(
+    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", "Basic.Sqr.On", "Sqr", true, false, param_basic_sqr_on, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 6 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  basic_sqr_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_sqr_mix = result.params.emplace_back(make_param(
+    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", "Basic.Sqr.Mix", "Mix", true, false, param_basic_sqr_mix, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 7 }, make_label_none())));
+  basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  auto& basic_sqr_pwm = result.params.emplace_back(make_param(
+    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", "Basic.Sqr.PWM", "PWM", true, false, param_basic_sqr_pwm, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 8 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  basic_sqr_pwm.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
 
   return result;
 }
 
 // https://www.kvraudio.com/forum/viewtopic.php?t=375517
-static float
+static /*todo */ inline float
 generate_blep(float phase, float inc)
 {
   float b;
@@ -246,7 +249,7 @@ generate_blep(float phase, float inc)
   return 0.0f;
 }
 
-static float 
+static /*todo */ inline float
 generate_saw(float phase, float inc)
 {
   float saw = phase * 2 - 1;
@@ -254,7 +257,7 @@ generate_saw(float phase, float inc)
 }
 
 // https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
-static float
+static /*todo */ inline float
 generate_blamp(float phase, float increment)
 {
   float y = 0.0f;
@@ -272,7 +275,7 @@ generate_blamp(float phase, float increment)
   return y * increment / 15;
 }
 
-static float
+static /*todo */ inline float
 generate_triangle(float phase, float increment)
 {
   float const triangle_scale = 0.9f;
@@ -306,14 +309,15 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 
   switch (type)
   {
-  case type_dual: process_dual(block, modulation); break;
+  case type_basic: process_basic(block, modulation); break;
   default: assert(false); break;
   }
 }
 
 void
-osc_engine::process_dual(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
+#if 0
   auto const& block_auto = block.state.own_block_automation;
   int dual_type_1 = block_auto[param_dual_type_1][0].step();
   switch (dual_type_1)
@@ -323,7 +327,10 @@ osc_engine::process_dual(plugin_block& block, cv_matrix_mixdown const* modulatio
   case dual_type_tri: process_dual_1(block, modulation, [](float ph, float inc) { return generate_triangle(ph, inc); }); break;
   case dual_type_sin: process_dual_1(block, modulation, [](float ph, float inc) { return std::sin(2.0f * pi32 * ph); }); break;
   }
+#endif
 }
+
+#if 0
 
 template <class Generator1> void
 osc_engine::process_dual_1(plugin_block& block, cv_matrix_mixdown const* modulation, Generator1 gen1)
@@ -380,5 +387,7 @@ osc_engine::process_dual_1_2(plugin_block& block, cv_matrix_mixdown const* modul
     for (int f = block.start_frame; f < block.end_frame; f++)
       block.state.own_audio[0][0][c][f] = modulated[c][f];
 }
+
+#endif
 
 }
