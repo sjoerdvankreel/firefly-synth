@@ -47,7 +47,7 @@ private:
 static void
 init_minimal(plugin_state& state)
 {
-  state.set_text_at(module_osc, 0, param_type, 0, "Dual");
+  state.set_text_at(module_osc, 0, param_type, 0, "Basic");
 }
 
 static void
@@ -174,10 +174,6 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
-  //
-//  param_basic_sin_on, param_basic_sin_amt, param_basic_saw_on, param_basic_saw_amt,
-  //  param_basic_tri_on, param_basic_tri_amt, param_basic_sqr_on, param_basic_sqr_amt, param_basic_sqr_pwm
-
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
@@ -195,10 +191,10 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  basic_sin_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  basic_sin_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sin_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   auto& basic_saw_on = result.params.emplace_back(make_param(
     make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", "Saw.On", "On", true, false, param_basic_saw_on, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 2 }, make_label_none())));
   basic_saw_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   auto& basic_saw_mix = result.params.emplace_back(make_param(
@@ -206,10 +202,10 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  basic_saw_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  basic_saw_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_saw_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   auto& basic_tri_on = result.params.emplace_back(make_param(
     make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", "Tri.On", "On", true, false, param_basic_tri_on, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 4 }, make_label_none())));
   basic_tri_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   auto& basic_tri_mix = result.params.emplace_back(make_param(
@@ -217,10 +213,10 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  basic_tri_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  basic_tri_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_tri_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   auto& basic_sqr_on = result.params.emplace_back(make_param(
     make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", "Sqr.On", "On", true, false, param_basic_sqr_on, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 6 }, make_label_none())));
   basic_sqr_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   auto& basic_sqr_mix = result.params.emplace_back(make_param(
@@ -228,7 +224,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
+  basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   auto& basic_sqr_pwm = result.params.emplace_back(make_param(
     make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", "Sqr.PWM", "PWM", true, false, param_basic_sqr_pwm, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
