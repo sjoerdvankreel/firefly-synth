@@ -177,7 +177,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   auto const* block = engine->process_default(mapping.module_index, mapping.module_slot);
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, { partition });
+  return graph_data(series, false, true, { partition });
 }
 
 module_topo

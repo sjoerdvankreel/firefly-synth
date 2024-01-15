@@ -341,11 +341,11 @@ render_graph(
   {
     auto response = fft(audio[0].data());
     if (type == type_cmb)
-      return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
+      return graph_data(jarray<float, 1>(response), false, true, { "24 kHz" });
 
     // SVF remaps over 0.8 just to look pretty
     std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
-    return graph_data(jarray<float, 1>(response_mapped), false, { "24 kHz" });
+    return graph_data(jarray<float, 1>(response_mapped), false, true, { "24 kHz" });
   }
   
   // distortion - pick result of the last cycle (after filters kick in)
@@ -353,7 +353,7 @@ render_graph(
   {
     int last_cycle_start = (shp_cycle_count - 1) * shp_cycle_length;
     std::vector<float> series(audio[0].cbegin() + last_cycle_start, audio[0].cbegin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, { "Distortion" });
+    return graph_data(jarray<float, 1>(series), true, true, { "Distortion" });
   }
 
   // delay or reverb - do some autosizing so it looks pretty
@@ -389,7 +389,10 @@ render_graph(
     float one_bar_length = timesig_to_time(120, { 1, 1 });
     partition = float_to_string(length / one_bar_length, 2) + " Bar";
   }
-  return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
+  bool stroke = type == type_delay;
+  return graph_data(jarray<float, 2>(
+    std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), 
+    stroke, { partition });
 }
 
 module_topo
