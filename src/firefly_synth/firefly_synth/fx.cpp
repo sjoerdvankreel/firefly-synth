@@ -846,7 +846,6 @@ void
 fx_engine::process_reverb(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
 {
-#if 0
   auto& scratch_in = block.state.own_scratch[scratch_reverb_in];
   auto& scratch_size = block.state.own_scratch[scratch_reverb_size];
   auto& scratch_damp = block.state.own_scratch[scratch_reverb_damp];
@@ -865,48 +864,46 @@ fx_engine::process_reverb(plugin_block& block,
     scratch_in[f] = (audio_in[0][f] + audio_in[1][f]) * reverb_gain;
   }
 
-
   // Apply reverb per channel.
   for (int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
-      out[c][s] = 0.0f; // Needed for graph.
-      for (std::int32_t i = 0; i < effect_reverb_comb_count; i++)
+      block.state.own_audio[0][0][c][f] = 0.0f;
+      for (int i = 0; i < reverb_comb_count; i++)
       {
-        std::int32_t pos = _state->reverb_comb_pos[c][i];
-        float comb = _state->reverb_comb[c][i][pos];
-        std::int32_t length = static_cast<std::int32_t>(_state->reverb_comb[c][i].size());
-        _state->reverb_comb_filter[c][i] = (comb * (1.0f - damp[s])) + (_state->reverb_comb_filter[c][i] * damp[s]);
-        _state->reverb_comb[c][i][pos] = scratch_in[s] + (_state->reverb_comb_filter[c][i] * size[s]);
-        _state->reverb_comb_pos[c][i] = (pos + 1) % length;
-        out[c][s] += comb;
+        int pos = _rev_comb_pos[c][i];
+        float comb = _rev_comb[c][i][pos];
+        int length = _rev_comb[c][i].size();
+        _rev_comb_filter[c][i] = (comb * (1.0f - damp_curve[f])) + (_rev_comb_filter[c][i] * damp_curve[f]);
+        _rev_comb[c][i][pos] = scratch_in[f] + (_rev_comb_filter[c][i] * size_curve[f]);
+        _rev_comb_pos[c][i] = (pos + 1) % length;
+        block.state.own_audio[0][0][c][f] += comb;
       }
 
-      for (std::int32_t i = 0; i < effect_reverb_allpass_count; i++)
+      for (int i = 0; i < reverb_allpass_count; i++)
       {
-        float output = out[c][s];
-        std::int32_t pos = _state->reverb_allpass_pos[c][i];
-        float allpass = _state->reverb_allpass[c][i][pos];
-        std::int32_t length = static_cast<std::int32_t>(_state->reverb_allpass[c][i].size());
-        out[c][s] = -out[c][s] + allpass;
-        _state->reverb_allpass[c][i][pos] = output + (allpass * apf[s] * 0.5f);
-        _state->reverb_allpass_pos[c][i] = (pos + 1) % length;
+        float output = block.state.own_audio[0][0][c][f];
+        int pos = _rev_allpass_pos[c][i];
+        float allpass = _rev_allpass[c][i][pos];
+        int length = _rev_allpass[c][i].size();
+        block.state.own_audio[0][0][c][f] = -block.state.own_audio[0][0][c][f] + allpass;
+        _rev_allpass[c][i][pos] = output + (allpass * apf_curve[f] * 0.5f);
+        _rev_allpass_pos[c][i] = (pos + 1) % length;
       }
     }
 
   // Final output depends on L/R both.
-  for (std::int32_t s = 0; s < input.sample_count; s++)
+  for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float wet = mix[s] * effect_reverb_wet_scale;
-    float dry = (1.0f - mix[s]) * effect_reverb_dry_scale;
-    float wet1 = wet * (spread[s] / 2.0f + 0.5f);
-    float wet2 = wet * ((1.0f - spread[s]) / 2.0f);
-    float out_l = out[0][s] * wet1 + out[1][s] * wet2;
-    float out_r = out[1][s] * wet1 + out[0][s] * wet2;
-    out[0][s] = out_l + input.audio_in[0][s] * dry;
-    out[1][s] = out_r + input.audio_in[1][s] * dry;
+    float wet = mix_curve[f] * reverb_wet_scale;
+    float dry = (1.0f - mix_curve[f]) * reverb_dry_scale;
+    float wet1 = wet * (spread_curve[f] / 2.0f + 0.5f);
+    float wet2 = wet * ((1.0f - spread_curve[f]) / 2.0f);
+    float out_l = block.state.own_audio[0][0][0][f] * wet1 + block.state.own_audio[0][0][1][f] * wet2;
+    float out_r = block.state.own_audio[0][0][1][f] * wet1 + block.state.own_audio[0][0][0][f] * wet2;
+    block.state.own_audio[0][0][0][f] = out_l + audio_in[0][f] * dry;
+    block.state.own_audio[0][0][1][f] = out_r + audio_in[1][f] * dry;
   }
-#endif
 }
 
 void
