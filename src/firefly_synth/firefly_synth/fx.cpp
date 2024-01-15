@@ -35,6 +35,8 @@ static float const reverb_room_scale = 0.28f;
 static float const reverb_room_offset = 0.7f;
 static float const reverb_spread = 23.0f / 44100.0f;
 
+// TODO dynamic allocate the reverb state
+
 static int const reverb_comb_count = 8;
 static int const reverb_allpass_count = 4;
 static float const reverb_allpass_length[reverb_allpass_count] = {
@@ -49,7 +51,11 @@ enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_mul
 enum { section_type, section_svf, section_comb, section_dist, section_delay, section_reverb };
 enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay, type_reverb };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
-enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_multi_hold, scratch_dly_multi_time, scratch_count };
+
+enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
+enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_count };
+static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count });
 
 enum { param_type,
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
