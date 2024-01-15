@@ -301,6 +301,18 @@ render_graph(
 
   auto const& audio = block->state.own_audio[0][0];
 
+  // comb / svf plot FR
+  if (type == type_cmb || type == type_svf)
+  {
+    auto response = fft(audio[0].data());
+    if (type == type_cmb)
+      return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
+
+    // SVF remaps over 0.8 just to look pretty
+    std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
+    return graph_data(jarray<float, 1>(response_mapped), false, { "24 kHz" });
+  }
+  
   // distortion - pick result of the last cycle (after filters kick in)
   if (type_is_dist(type))
   {
@@ -316,18 +328,6 @@ render_graph(
     std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + frame_count);
     std::string partition = "3 Sec";
     return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
-  }
-
-  // comb / svf plot FR
-  if(type == type_cmb || type == type_svf)
-  {
-    auto response = fft(audio[0].data());
-    if (type == type_cmb)
-      return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
-
-    // SVF remaps over 0.8 just to look pretty
-    std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
-    return graph_data(jarray<float, 1>(response_mapped), false, { "24 kHz" });
   }
 
   // delay - do some autosizing so it looks pretty
