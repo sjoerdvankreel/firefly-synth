@@ -356,17 +356,9 @@ render_graph(
     return graph_data(jarray<float, 1>(series), true, { "Distortion" });
   }
 
-  // reverb
-  if (type == type_reverb)
-  {
-    std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + frame_count);
-    std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + frame_count);
-    std::string partition = "3 Sec";
-    return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
-  }
-
-  // delay - do some autosizing so it looks pretty
-  assert(type == type_delay);
+  // delay or reverb - do some autosizing so it looks pretty
+  // note: we re-use dly_max_sec as max plotting time for the reverb
+  assert(type == type_delay || type == type_reverb);
   float max_amp = 0.0f;
   int last_significant_frame = 0;
   for (int f = 0; f < frame_count; f++)
@@ -392,7 +384,7 @@ render_graph(
   float length = (last_significant_frame + 1.0f) / frame_count * dly_max_sec;
   std::string partition = float_to_string(length, 2) + " Sec";
   int dly_type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_dly_type, 0).step();
-  if (dly_is_sync(dly_type))
+  if (type == type_delay && dly_is_sync(dly_type))
   {
     float one_bar_length = timesig_to_time(120, { 1, 1 });
     partition = float_to_string(length / one_bar_length, 2) + " Bar";
