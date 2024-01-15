@@ -318,42 +318,51 @@ render_graph(
     return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
   }
 
-  // delay - do some autosizing so it looks pretty
-  if (type == type_delay)
+  // comb / svf plot FR
+  if(type == type_cmb || type == type_svf)
   {
-    float max_amp = 0.0f;
-    int last_significant_frame = 0;
-    for (int f = 0; f < frame_count; f++)
-    {
-      float amp_l = std::fabs(audio[0][f]);
-      float amp_r = std::fabs(audio[1][f]);
-      max_amp = std::max(max_amp, amp_l);
-      max_amp = std::max(max_amp, amp_r);
-      if(amp_l >= 1e-2) last_significant_frame = f;
-      if(amp_r >= 1e-2) last_significant_frame = f;
-    }
-    if(max_amp == 0.0f) max_amp = 1.0f;
-    if(last_significant_frame < frame_count / dly_max_sec) last_significant_frame = frame_count / dly_max_sec;
-    std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + last_significant_frame + 1);
-    std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + last_significant_frame + 1);
-    for (int f = 0; f <= last_significant_frame; f++)
-    {
-      left[f] /= max_amp;
-      right[f] /= max_amp;
-    }
-    float length = (last_significant_frame + 1.0f) / frame_count * dly_max_sec;
-    std::string partition = float_to_string(length, 2) + " Sec";
-    return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
+    auto response = fft(audio[0].data());
+    if (type == type_cmb)
+      return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
+
+    // SVF remaps over 0.8 just to look pretty
+    std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
+    return graph_data(jarray<float, 1>(response_mapped), false, { "24 kHz" });
   }
 
-  // comb / svf plot FR
-  auto response = fft(audio[0].data());
-  if (type == type_cmb)
-    return graph_data(jarray<float, 1>(response), false, { "24 kHz" });
+  // delay - do some autosizing so it looks pretty
+  assert(type == type_delay);
+  float max_amp = 0.0f;
+  int last_significant_frame = 0;
+  for (int f = 0; f < frame_count; f++)
+  {
+    float amp_l = std::fabs(audio[0][f]);
+    float amp_r = std::fabs(audio[1][f]);
+    max_amp = std::max(max_amp, amp_l);
+    max_amp = std::max(max_amp, amp_r);
+    if(amp_l >= 1e-2) last_significant_frame = f;
+    if(amp_r >= 1e-2) last_significant_frame = f;
+  }
 
-  // SVF remaps over 0.8 just to look pretty
-  std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
-  return graph_data(jarray<float, 1>(response_mapped), false, { "24 kHz" });
+  if(max_amp == 0.0f) max_amp = 1.0f;
+  if(last_significant_frame < frame_count / dly_max_sec) last_significant_frame = frame_count / dly_max_sec;
+  std::vector<float> left(audio[0].cbegin(), audio[0].cbegin() + last_significant_frame + 1);
+  std::vector<float> right(audio[1].cbegin(), audio[1].cbegin() + last_significant_frame + 1);
+  for (int f = 0; f <= last_significant_frame; f++)
+  {
+    left[f] /= max_amp;
+    right[f] /= max_amp;
+  }
+
+  float length = (last_significant_frame + 1.0f) / frame_count * dly_max_sec;
+  std::string partition = float_to_string(length, 2) + " Sec";
+  int dly_type = state.get_plain_at(mapping.module_index, mapping.module_slot, param_dly_type, 0).step();
+  if (dly_is_sync(dly_type))
+  {
+    float one_bar_length = timesig_to_time(120, { 1, 1 });
+    partition = float_to_string(length / one_bar_length, 2) + " Bar";
+  }
+  return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), { partition });
 }
 
 module_topo
