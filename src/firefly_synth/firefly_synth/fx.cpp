@@ -300,7 +300,7 @@ render_graph(
     audio_in.resize(jarray<int, 1>(2, frame_count));
     for (int i = 0; i < count; i++)
     {
-      float sample = std::sin(i / (float)count * pi32 * 2.0f) * (1 - i / (float)count);
+      float sample = std::sin(i / (float)count * pi32 * 2.0f);
       audio_in[0][i] = sample;
       audio_in[1][i] = sample;
     }
