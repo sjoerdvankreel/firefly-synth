@@ -291,15 +291,33 @@ render_graph(
     audio_in.resize(jarray<int, 1>(2, frame_count));
     audio_in[0][0] = 1;
     audio_in[1][0] = 1;
-  } else if (type == type_delay || type == type_reverb)
+  } else if (type == type_delay)
   {
+    // input is single sycle sine
     int count = 50;
     sample_rate = 200;
-    frame_count = sample_rate * (type == type_reverb ? 3: dly_max_sec);
+    frame_count = sample_rate * dly_max_sec;
     audio_in.resize(jarray<int, 1>(2, frame_count));
     for (int i = 0; i < count; i++)
     {
       float sample = std::sin(i / (float)count * pi32 * 2.0f) * (1 - i / (float)count);
+      audio_in[0][i] = sample;
+      audio_in[1][i] = sample;
+    }
+  }
+  else
+  {
+    // need some more input than delay for reverb to have visual effect
+    assert(type == type_reverb);
+    int length = 450;
+    sample_rate = 300;
+    frame_count = 3000;
+    float phase = 0.0f;
+    audio_in.resize(jarray<int, 1>(2, frame_count));
+    for (int i = 0; i < length; i++)
+    {
+      float sample = std::sin(phase * 2.0f * pi32) * (length - i) / length;
+      phase += 60.0f / sample_rate;
       audio_in[0][i] = sample;
       audio_in[1][i] = sample;
     }
