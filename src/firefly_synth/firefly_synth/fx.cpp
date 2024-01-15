@@ -35,8 +35,6 @@ static float const reverb_room_scale = 0.28f;
 static float const reverb_room_offset = 0.7f;
 static float const reverb_spread = 23.0f / 44100.0f;
 
-// TODO dynamic allocate the reverb state
-
 static int const reverb_comb_count = 8;
 static int const reverb_allpass_count = 4;
 static float const reverb_allpass_length[reverb_allpass_count] = {
