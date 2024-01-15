@@ -228,7 +228,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   dual_phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
   auto& dual_mix = result.params.emplace_back(make_param(
     make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", "Dual.Mix", "Mix", true, false, param_dual_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_dual, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dual_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dual; });
@@ -308,18 +308,33 @@ osc_engine::process_dual_1_2(plugin_block& block, cv_matrix_mixdown const* modul
 {
   auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
+  int factor = 1 << block_auto[param_dual_factor][0].step();
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& mix_curve = *(*modulation)[module_osc][block.module_slot][param_dual_mix][0];
+  auto const& phase_curve = *(*modulation)[module_osc][block.module_slot][param_dual_phase][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
-    float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
-    float sample = gen1(_phase, inc);
+    //float freq2 = freq1 * factor;
+    // todo this not work for saw
+    float inc1 = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
+    float inc2 = std::clamp(freq * factor, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
+    //float inc2 = inc1 * factor;
+    float phase2 = (_phase + phase_curve[f]) * factor;
+    phase2 -= std::floor(phase2);
+    float sample1 = gen1(_phase, inc1);
+    float sample2 = gen2(phase2, inc2);
+    float sample = (1 - mix_curve[f]) * sample1 + (mix_curve[f]) * sample2;
+    sample = sample1 - sample2;
+    sample*=0.5;
+    sample = sample1; // not doing anything interesting anyway except for saw=>pulse pwm
     check_bipolar(sample);
     block.state.own_audio[0][0][0][f] = sample;
     block.state.own_audio[0][0][1][f] = sample;
-    increment_and_wrap_phase(_phase, inc);
+    increment_and_wrap_phase(_phase, inc1);
   }
 
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
