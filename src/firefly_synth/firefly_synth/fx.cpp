@@ -53,7 +53,8 @@ enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
 enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_count };
-static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count });
+enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
+static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, (int)scratch_reverb_count });
 
 enum { param_type,
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
@@ -175,27 +176,39 @@ public module_engine {
   std::array<std::array<std::int32_t, reverb_allpass_count>, 2> _rev_allpass_pos = {};
   std::array<std::array<std::vector<float>, reverb_allpass_count>, 2> _rev_allpass = {};
 
-  void process_comb(plugin_block& block, cv_matrix_mixdown const& modulation);
-  void process_delay(plugin_block& block, cv_matrix_mixdown const& modulation);
-  void process_reverb(plugin_block& block, cv_matrix_mixdown const& modulation);
-  void process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modulation);
-  void process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_comb(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+  void process_delay(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+  void process_reverb(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+  void process_dly_fdbk(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+  void process_dly_multi(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
  
   // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
-  void process_svf(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_svf(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
   template <class Init> 
-  void process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init);
+  void process_svf_type(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Init init);
   
   template <bool Graph, int Type>
-  void process_dist(plugin_block& block, cv_matrix_mixdown const& modulation);
+  void process_dist(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
   template <bool Graph, int Type, class Clip>
-  void process_dist_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip);
+  void process_dist_clip(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip);
   template <bool Graph, int Type, class Clip, class Shape>
-  void process_dist_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape);
+  void process_dist_clip_shape(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape);
   template <bool Graph, int Type, class Clip, class Shape, class SkewX>
-  void process_dist_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
+  void process_dist_clip_shape_x(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
   template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY>
-  void process_dist_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
+  void process_dist_clip_shape_xy(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
   void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
 
 public:
@@ -763,89 +776,33 @@ fx_engine::process(plugin_block& block,
     audio_in = &mixer.mix(block, this_module, block.module_slot);
   }
    
-  for (int c = 0; c < 2; c++)
-    (*audio_in)[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);  
-  
   int type = block.state.own_block_automation[param_type][0].step();  
-  if(type == type_off) return;
-  if (modulation == nullptr) modulation = &get_cv_matrix_mixdown(block, _global);  
+  if(type == type_off)
+  {
+    for (int c = 0; c < 2; c++)
+      (*audio_in)[c].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][c]);
+    return;
+  }
+
+  if (modulation == nullptr) 
+    modulation = &get_cv_matrix_mixdown(block, _global);  
 
   switch (type)
   {
-  case type_svf: process_svf(block, *modulation); break;
-  case type_cmb: process_comb(block, *modulation); break;
-  case type_delay: process_delay(block, *modulation); break;
-  case type_reverb: process_reverb(block, *modulation); break;
-  case type_dst_a: process_dist<Graph, type_dst_a>(block, *modulation); break;
-  case type_dst_b: process_dist<Graph, type_dst_b>(block, *modulation); break;
-  case type_dst_c: process_dist<Graph, type_dst_c>(block, *modulation); break;
+  case type_svf: process_svf(block, *audio_in, *modulation); break;
+  case type_cmb: process_comb(block, *audio_in, *modulation); break;
+  case type_delay: process_delay(block, *audio_in, *modulation); break;
+  case type_reverb: process_reverb(block, *audio_in, *modulation); break;
+  case type_dst_a: process_dist<Graph, type_dst_a>(block, *audio_in, *modulation); break;
+  case type_dst_b: process_dist<Graph, type_dst_b>(block, *audio_in, *modulation); break;
+  case type_dst_c: process_dist<Graph, type_dst_c>(block, *audio_in, *modulation); break;
   default: assert(false); break;
   }
 }
 
 void
-fx_engine::process_reverb(plugin_block& block, cv_matrix_mixdown const& modulation)
-{
-  auto const& apf_curve = *modulation[module_gfx][block.module_slot][param_reverb_apf][0];
-  auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_reverb_mix][0];
-  auto const& size_curve = *modulation[module_gfx][block.module_slot][param_reverb_size][0];
-  auto const& damp_curve = *modulation[module_gfx][block.module_slot][param_reverb_damp][0];
-  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_reverb_spread][0];
-
-  // Precompute channel independent stuff.
- // for (std::int32_t s = 0; s < input.sample_count; s++)
-//  {
-  //  damp[s] = (1.0f - damp_param[s]) * effect_reverb_damp_scale;
-    //size[s] = (size_param[s] * effect_reverb_room_scale) + effect_reverb_room_offset;
-//    scratch_in[s] = (input.audio_in[0][s] + input.audio_in[1][s]) * effect_reverb_gain;
-//  }
-
-  // Apply reverb per channel.
-  for (std::int32_t s = block.start_frame; s < block.end_frame; s++)
-  {
-    float dry_l = block.state.own_audio[0][0][0][s];
-    float dry_r = block.state.own_audio[0][0][1][s];
-    for (std::int32_t c = 0; c < 2; c++)
-    {
-      float damp = (1.0f - damp_curve[s]) * reverb_damp_scale;
-      float size = (size_curve[s] * reverb_room_scale) + reverb_room_offset;
-      float scratch_in = (block.state.own_audio[0][0][0][s] + block.state.own_audio[0][0][1][s]) * reverb_gain;
-      block.state.own_audio[0][0][c][s] = 0.0f; // Needed for graph.
-      for (std::int32_t i = 0; i < reverb_comb_count; i++)
-      {
-        std::int32_t pos = _rev_comb_pos[c][i];
-        float comb = _rev_comb[c][i][pos];
-        std::int32_t length = static_cast<std::int32_t>(_rev_comb[c][i].size());
-        _rev_comb_filter[c][i] = (comb * (1.0f - damp)) + (_rev_comb_filter[c][i] * damp);
-        _rev_comb[c][i][pos] = scratch_in + (_rev_comb_filter[c][i] * size);
-        _rev_comb_pos[c][i] = (pos + 1) % length;
-        block.state.own_audio[0][0][c][s] += comb;
-      }
-
-      for (std::int32_t i = 0; i < reverb_allpass_count; i++)
-      {
-        float output = block.state.own_audio[0][0][c][s];
-        std::int32_t pos = _rev_allpass_pos[c][i];
-        float allpass = _rev_allpass[c][i][pos];
-        std::int32_t length = static_cast<std::int32_t>(_rev_allpass[c][i].size());
-        block.state.own_audio[0][0][c][s] = -block.state.own_audio[0][0][c][s] + allpass;
-        _rev_allpass[c][i][pos] = output + (allpass * apf_curve[s] * 0.5f);
-        _rev_allpass_pos[c][i] = (pos + 1) % length;
-      }
-    }
-    float wet = mix_curve[s] * reverb_wet_scale;
-    float dry = (1.0f - mix_curve[s]) * reverb_dry_scale;
-    float wet1 = wet * (spread_curve[s] / 2.0f + 0.5f);
-    float wet2 = wet * ((1.0f - spread_curve[s]) / 2.0f);
-    float out_l = block.state.own_audio[0][0][0][s] * wet1 + block.state.own_audio[0][0][1][s] * wet2;
-    float out_r = block.state.own_audio[0][0][1][s] * wet1 + block.state.own_audio[0][0][0][s] * wet2;
-    block.state.own_audio[0][0][0][s] = out_l + dry_l * dry;
-    block.state.own_audio[0][0][1][s] = out_r + dry_r * dry;
-  }
-}
-
-void
-fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation)
+fx_engine::process_comb(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
 {
   float const feedback_factor = 0.98;
   int this_module = _global ? module_gfx : module_vfx;
@@ -877,8 +834,8 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
       float plus0 = _comb_in[c][(_comb_pos + 2 * _comb_samples - dly_plus_samples_0) % _comb_samples];
       float plus1 = _comb_in[c][(_comb_pos + 2 * _comb_samples - dly_plus_samples_1) % _comb_samples];
       float plus = ((1 - dly_plus_t) * plus0 + dly_plus_t * plus1) * gain_plus;
-      _comb_in[c][_comb_pos] = block.state.own_audio[0][0][c][f];
-      _comb_out[c][_comb_pos] = block.state.own_audio[0][0][c][f] + plus + min * feedback_factor;
+      _comb_in[c][_comb_pos] = audio_in[c][f];
+      _comb_out[c][_comb_pos] = audio_in[c][f] + plus + min * feedback_factor;
       block.state.own_audio[0][0][c][f] = _comb_out[c][_comb_pos];
     }
     _comb_pos = (_comb_pos + 1) % _comb_samples;
@@ -886,27 +843,96 @@ fx_engine::process_comb(plugin_block& block, cv_matrix_mixdown const& modulation
 }
 
 void
-fx_engine::process_svf(plugin_block& block, cv_matrix_mixdown const& modulation)
+fx_engine::process_reverb(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+{
+#if 0
+  auto& scratch_in = block.state.own_scratch[scratch_reverb_in];
+  auto& scratch_size = block.state.own_scratch[scratch_reverb_size];
+  auto& scratch_damp = block.state.own_scratch[scratch_reverb_damp];
+
+  auto const& apf_curve = *modulation[module_gfx][block.module_slot][param_reverb_apf][0];
+  auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_reverb_mix][0];
+  auto const& size_curve = *modulation[module_gfx][block.module_slot][param_reverb_size][0];
+  auto const& damp_curve = *modulation[module_gfx][block.module_slot][param_reverb_damp][0];
+  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_reverb_spread][0];
+
+  // Precompute channel independent stuff.
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    scratch_damp[f] = (1.0f - damp_curve[f]) * reverb_damp_scale;
+    scratch_size[f] = (size_curve[f] * reverb_room_scale) + reverb_room_offset;
+    scratch_in[f] = (audio_in[0][f] + audio_in[1][f]) * reverb_gain;
+  }
+
+
+  // Apply reverb per channel.
+  for (int c = 0; c < 2; c++)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      out[c][s] = 0.0f; // Needed for graph.
+      for (std::int32_t i = 0; i < effect_reverb_comb_count; i++)
+      {
+        std::int32_t pos = _state->reverb_comb_pos[c][i];
+        float comb = _state->reverb_comb[c][i][pos];
+        std::int32_t length = static_cast<std::int32_t>(_state->reverb_comb[c][i].size());
+        _state->reverb_comb_filter[c][i] = (comb * (1.0f - damp[s])) + (_state->reverb_comb_filter[c][i] * damp[s]);
+        _state->reverb_comb[c][i][pos] = scratch_in[s] + (_state->reverb_comb_filter[c][i] * size[s]);
+        _state->reverb_comb_pos[c][i] = (pos + 1) % length;
+        out[c][s] += comb;
+      }
+
+      for (std::int32_t i = 0; i < effect_reverb_allpass_count; i++)
+      {
+        float output = out[c][s];
+        std::int32_t pos = _state->reverb_allpass_pos[c][i];
+        float allpass = _state->reverb_allpass[c][i][pos];
+        std::int32_t length = static_cast<std::int32_t>(_state->reverb_allpass[c][i].size());
+        out[c][s] = -out[c][s] + allpass;
+        _state->reverb_allpass[c][i][pos] = output + (allpass * apf[s] * 0.5f);
+        _state->reverb_allpass_pos[c][i] = (pos + 1) % length;
+      }
+    }
+
+  // Final output depends on L/R both.
+  for (std::int32_t s = 0; s < input.sample_count; s++)
+  {
+    float wet = mix[s] * effect_reverb_wet_scale;
+    float dry = (1.0f - mix[s]) * effect_reverb_dry_scale;
+    float wet1 = wet * (spread[s] / 2.0f + 0.5f);
+    float wet2 = wet * ((1.0f - spread[s]) / 2.0f);
+    float out_l = out[0][s] * wet1 + out[1][s] * wet2;
+    float out_r = out[1][s] * wet1 + out[0][s] * wet2;
+    out[0][s] = out_l + input.audio_in[0][s] * dry;
+    out[1][s] = out_r + input.audio_in[1][s] * dry;
+  }
+#endif
+}
+
+void
+fx_engine::process_svf(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int svf_type = block_auto[param_svf_type][0].step();
   switch (svf_type)
   {
-  case svf_type_lpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
-  case svf_type_hpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
-  case svf_type_bpf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
-  case svf_type_bsf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
-  case svf_type_apf: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
-  case svf_type_peq: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
-  case svf_type_bll: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
-  case svf_type_lsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
-  case svf_type_hsh: process_svf_type(block, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
+  case svf_type_lpf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
+  case svf_type_hpf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
+  case svf_type_bpf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
+  case svf_type_bsf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
+  case svf_type_apf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
+  case svf_type_peq: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
+  case svf_type_bll: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
+  case svf_type_lsh: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
+  case svf_type_hsh: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
   default: assert(false); break;
   }
 }
 
 template <class Init> void
-fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modulation, Init init)
+fx_engine::process_svf_type(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Init init)
 {
   double w, hz, gain, kbd;
   double const max_res = 0.99;
@@ -929,12 +955,13 @@ fx_engine::process_svf_type(plugin_block& block, cv_matrix_mixdown const& modula
     w = pi64 * hz / block.sample_rate;
     init(w, res_curve[f] * max_res, gain);
     for (int c = 0; c < 2; c++)
-      block.state.own_audio[0][0][c][f] = _svf.next(c, block.state.own_audio[0][0][c][f]);
+      block.state.own_audio[0][0][c][f] = _svf.next(c, audio_in[c][f]);
   }
 }
 
 void
-fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulation)
+fx_engine::process_delay(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int dly_type = block_auto[param_dly_type][0].step();
@@ -942,11 +969,11 @@ fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulatio
   {
   case dly_type_fdbk_sync:
   case dly_type_fdbk_time:
-    process_dly_fdbk(block, modulation);
+    process_dly_fdbk(block, audio_in, modulation);
     break;
   case dly_type_multi_sync:
   case dly_type_multi_time:
-    process_dly_multi(block, modulation);
+    process_dly_multi(block, audio_in, modulation);
     break;
   default:
     assert(false); 
@@ -955,7 +982,8 @@ fx_engine::process_delay(plugin_block& block, cv_matrix_mixdown const& modulatio
 }
 
 void
-fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modulation)
+fx_engine::process_dly_fdbk(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
 {
   float const max_feedback = 0.99f;
   auto const& block_auto = block.state.own_block_automation;
@@ -995,8 +1023,8 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
     int r_time_samples_1 = (int)r_time_samples_t + 1;
 
     // + 2*samples in case samples > capacity
-    float dry_l = block.state.own_audio[0][0][0][f];
-    float dry_r = block.state.own_audio[0][0][1][f];
+    float dry_l = audio_in[0][f];
+    float dry_r = audio_in[1][f];
     float wet_l0 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_0) % _dly_capacity];
     float wet_l1 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_1) % _dly_capacity];
     float wet_l_base = ((1 - l_time_t) * wet_l0 + l_time_t * wet_l1) * amt_curve[f] * max_feedback;
@@ -1016,7 +1044,8 @@ fx_engine::process_dly_fdbk(plugin_block& block, cv_matrix_mixdown const& modula
 }
 
 void
-fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modulation)
+fx_engine::process_dly_multi(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int dly_type = block_auto[param_dly_type][0].step();
@@ -1068,7 +1097,7 @@ fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modul
         wet += tap_bal * tap_amt * buffer_sample;
         tap_amt *= tap_amt;
       }
-      float dry = block.state.own_audio[0][0][c][f];
+      float dry = audio_in[c][f];
       _dly_buffer[c][_dly_pos] = dry;
       block.state.own_audio[0][0][c][f] = (1.0f - mix_curve[f]) * dry + (mix_curve[f] * wet);
     }
@@ -1077,8 +1106,7 @@ fx_engine::process_dly_multi(plugin_block& block, cv_matrix_mixdown const& modul
 }
 
 void  
-fx_engine::dist_svf_next(
-  plugin_block const& block, int oversmp_factor, 
+fx_engine::dist_svf_next(plugin_block const& block, int oversmp_factor,
   double freq_plain, double res, float& left, float& right)
 {
   double const max_res = 0.99;
@@ -1091,76 +1119,81 @@ fx_engine::dist_svf_next(
 }
 
 template <bool Graph, int Type> void
-fx_engine::process_dist(plugin_block& block, cv_matrix_mixdown const& modulation)
+fx_engine::process_dist(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   switch (block_auto[param_dist_clip][0].step())
   {
-  case dist_clip_clip: process_dist_clip<Graph, Type>(block, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
-  case dist_clip_tanh: process_dist_clip<Graph, Type>(block, modulation, [](float in) { return std::tanh(in); }); break;
+  case dist_clip_clip: process_dist_clip<Graph, Type>(block, audio_in, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
+  case dist_clip_tanh: process_dist_clip<Graph, Type>(block, audio_in, modulation, [](float in) { return std::tanh(in); }); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip> void
-fx_engine::process_dist_clip(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip)
+fx_engine::process_dist_clip(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip)
 {
   switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index1)
   {
-  case wave_shape_type_saw: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_saw); break;
-  case wave_shape_type_sqr: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sqr); break;
-  case wave_shape_type_tri: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_tri); break;
-  case wave_shape_type_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin); break;
-  case wave_shape_type_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos); break;
-  case wave_shape_type_sin_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin); break;
-  case wave_shape_type_sin_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos); break;
-  case wave_shape_type_cos_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin); break;
-  case wave_shape_type_cos_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_cos_cos_cos); break;
-  case wave_shape_type_smooth_or_fold: process_dist_clip_shape<Graph, Type>(block, modulation, clip, wave_shape_bi_fold); break;
+  case wave_shape_type_saw: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_saw); break;
+  case wave_shape_type_sqr: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sqr); break;
+  case wave_shape_type_tri: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_tri); break;
+  case wave_shape_type_sin: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sin); break;
+  case wave_shape_type_cos: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_cos); break;
+  case wave_shape_type_sin_sin: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sin_sin); break;
+  case wave_shape_type_sin_cos: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sin_cos); break;
+  case wave_shape_type_cos_sin: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_cos_sin); break;
+  case wave_shape_type_cos_cos: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos_cos); break;
+  case wave_shape_type_smooth_or_fold: process_dist_clip_shape<Graph, Type>(block, audio_in, modulation, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip, class Shape> void
-fx_engine::process_dist_clip_shape(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape)
+fx_engine::process_dist_clip_shape(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape)
 {
   switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index2)
   {
-  case wave_skew_type_off: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_clip_shape_x<Graph, Type>(block, modulation, clip, shape, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_clip_shape_x<Graph, Type>(block, audio_in, modulation, clip, shape, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_clip_shape_x<Graph, Type>(block, audio_in, modulation, clip, shape, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_clip_shape_x<Graph, Type>(block, audio_in, modulation, clip, shape, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_clip_shape_x<Graph, Type>(block, audio_in, modulation, clip, shape, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_clip_shape_x<Graph, Type>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_clip_shape_x<Graph, Type>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip, class Shape, class SkewX> void
-fx_engine::process_dist_clip_shape_x(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
+fx_engine::process_dist_clip_shape_x(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
 {
   switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index3)
   {
-  case wave_skew_type_off: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_clip_shape_xy<Graph, Type>(block, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_clip_shape_xy<Graph, Type>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_clip_shape_xy<Graph, Type>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_clip_shape_xy<Graph, Type>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_clip_shape_xy<Graph, Type>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_clip_shape_xy<Graph, Type>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_clip_shape_xy<Graph, Type>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
 template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY> void 
-fx_engine::process_dist_clip_shape_xy(plugin_block& block, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
+fx_engine::process_dist_clip_shape_xy(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
@@ -1202,6 +1235,10 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block, cv_matrix_mixdown con
 
   // dont oversample for graphs
   if constexpr(Graph) oversmp_stages = 0;
+  // oversampling is destructive
+  audio_in[0].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][0]);
+  audio_in[1].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][1]);
+
   _dst_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
     [this, &block, &x_curve, &y_curve, &mix_curve, &gain_curve, &freq_curve_plain, &res_curve, 
       this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float& left, float& right) 
