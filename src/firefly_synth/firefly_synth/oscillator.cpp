@@ -14,7 +14,7 @@ namespace firefly_synth {
 
 enum { type_off, type_dual };
 enum { section_main, section_dual };
-enum { dual_type_off, dual_type_sin, dual_type_cos, dual_type_saw };
+enum { dual_type_off, dual_type_sin, dual_type_saw, dual_type_tri };
 enum { 
   param_type, param_note, param_cent, 
   param_dual_type_1, param_dual_type_2, param_dual_factor, param_dual_phase, param_dual_mix };
@@ -35,8 +35,8 @@ dual_type_items()
   std::vector<list_item> result;
   result.emplace_back("{02BC0674-625C-45ED-93CC-953AEC893AE7}", "Off");
   result.emplace_back("{E4248269-63F1-45E3-B6C7-87201486D72E}", "Sin");
-  result.emplace_back("{A853F7FC-609D-4BEC-8DEA-C261B5344311}", "Cos");
   result.emplace_back("{913CD63D-C824-4489-B6C7-8BDF24C01381}", "Saw");
+  result.emplace_back("{0F8AF9D8-4363-47E7-ADBD-5A2166418B64}", "Tri");
   return result;
 }
 
@@ -236,6 +236,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   return result;
 }
 
+// https://www.kvraudio.com/forum/viewtopic.php?t=375517
 static float
 generate_blep(float phase, float inc)
 {
@@ -250,6 +251,41 @@ generate_saw(float phase, float inc)
 {
   float saw = phase * 2 - 1;
   return saw - generate_blep(phase, inc);
+}
+
+// https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
+static float
+generate_blamp(float phase, float increment)
+{
+  float y = 0.0f;
+  if (!(0.0f <= phase && phase < 2.0f * increment))
+    return y * increment / 15;
+  float x = phase / increment;
+  float u = 2.0f - x;
+  u *= u * u * u * u;
+  y -= u;
+  if (phase >= increment)
+    return y * increment / 15;
+  float v = 1.0f - x;
+  v *= v * v * v * v;
+  y += 4 * v;
+  return y * increment / 15;
+}
+
+static float
+generate_triangle(float phase, float increment)
+{
+  float const triangle_scale = 0.9f;
+  phase = phase + 0.75f;
+  phase -= std::floor(phase);
+  float result = 2.0f * std::abs(2.0f * phase - 1.0f) - 1.0f;
+  result += generate_blamp(phase, increment);
+  result += generate_blamp(1.0f - phase, increment);
+  phase += 0.5f;
+  phase -= std::floor(phase);
+  result += generate_blamp(phase, increment);
+  result += generate_blamp(1.0f - phase, increment);
+  return result * triangle_scale;
 }
 
 void
@@ -284,8 +320,8 @@ osc_engine::process_dual(plugin_block& block, cv_matrix_mixdown const* modulatio
   {
   case dual_type_off: process_dual_1(block, modulation, [](float ph, float inc) { return 0.0f; }); break;
   case dual_type_saw: process_dual_1(block, modulation, [](float ph, float inc) { return generate_saw(ph, inc); }); break;
+  case dual_type_tri: process_dual_1(block, modulation, [](float ph, float inc) { return generate_triangle(ph, inc); }); break;
   case dual_type_sin: process_dual_1(block, modulation, [](float ph, float inc) { return std::sin(2.0f * pi32 * ph); }); break;
-  case dual_type_cos: process_dual_1(block, modulation, [](float ph, float inc) { return std::cos(2.0f * pi32 * ph); }); break;
   }
 }
 
@@ -299,7 +335,7 @@ osc_engine::process_dual_1(plugin_block& block, cv_matrix_mixdown const* modulat
   case dual_type_off: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return 0.0f; }); break;
   case dual_type_saw: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return generate_saw(ph, inc); }); break;
   case dual_type_sin: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return std::sin(2.0f * pi32 * ph); }); break;
-  case dual_type_cos: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return std::cos(2.0f * pi32 * ph); }); break;
+  case dual_type_tri: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return generate_triangle(ph, inc); }); break;
   }
 }
 
