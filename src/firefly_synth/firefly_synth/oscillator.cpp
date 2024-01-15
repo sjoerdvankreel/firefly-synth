@@ -207,7 +207,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_saw_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   auto& basic_saw_mix = result.params.emplace_back(make_param(
     make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", "Saw.Mix", "Saw", true, false, param_basic_saw_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_saw_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_saw_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
@@ -218,7 +218,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_tri_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   auto& basic_tri_mix = result.params.emplace_back(make_param(
     make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", "Tri.Mix", "Tri", true, false, param_basic_tri_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_tri_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_tri_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
@@ -229,13 +229,13 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_sqr_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   auto& basic_sqr_mix = result.params.emplace_back(make_param(
     make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", "Sqr.Mix", "Sqr", true, false, param_basic_sqr_mix, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   auto& basic_sqr_pwm = result.params.emplace_back(make_param(
     make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", "Sqr.PWM", "PWM", true, false, param_basic_sqr_pwm, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_sqr_pwm.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
@@ -244,7 +244,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 }
 
 // https://www.kvraudio.com/forum/viewtopic.php?t=375517
-static /*todo */ inline float
+static inline float
 generate_blep(float phase, float inc)
 {
   float b;
@@ -253,7 +253,7 @@ generate_blep(float phase, float inc)
   return 0.0f;
 }
 
-static /*todo */ inline float
+static inline float
 generate_saw(float phase, float inc)
 {
   float saw = phase * 2 - 1;
@@ -261,7 +261,7 @@ generate_saw(float phase, float inc)
 }
 
 // https://dsp.stackexchange.com/questions/54790/polyblamp-anti-aliasing-in-c
-static /*todo */ inline float
+static float
 generate_blamp(float phase, float increment)
 {
   float y = 0.0f;
@@ -279,7 +279,7 @@ generate_blamp(float phase, float increment)
   return y * increment / 15;
 }
 
-static /*todo */ inline float
+static float
 generate_triangle(float phase, float increment)
 {
   float const triangle_scale = 0.9f;
@@ -293,6 +293,16 @@ generate_triangle(float phase, float increment)
   result += generate_blamp(phase, increment);
   result += generate_blamp(1.0f - phase, increment);
   return result * triangle_scale;
+}
+
+static float
+generate_sqr(float phase, float increment, float pwm)
+{
+  float const min_pw = 0.05f;
+  float pw = (min_pw + (1.0f - min_pw) * pwm) * 0.5f;
+  float saw1 = generate_saw(phase, increment);
+  float saw2 = generate_saw(phase + pw - std::floor(phase + pw), increment);
+  return (saw1 - saw2) * 0.5f;
 }
 
 void
@@ -377,8 +387,8 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
   auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
   auto const& tri_curve = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
-  //auto const& sqr_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
-  //auto const& pwm_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pwm][0];
+  auto const& sqr_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
+  auto const& pwm_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pwm][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -388,9 +398,10 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
     float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
     float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
     
+    if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase) * block.normalized_to_raw(module_osc, param_basic_sin_mix, sin_curve[f]);
     if constexpr (Saw) sample += generate_saw(_phase, inc) * block.normalized_to_raw(module_osc, param_basic_saw_mix, saw_curve[f]);
     if constexpr (Tri) sample += generate_triangle(_phase, inc) * block.normalized_to_raw(module_osc, param_basic_tri_mix, tri_curve[f]);
-    if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase) * block.normalized_to_raw(module_osc, param_basic_sin_mix, sin_curve[f]);
+    if constexpr (Sqr) sample += generate_sqr(_phase, inc, pwm_curve[f]) * block.normalized_to_raw(module_osc, param_basic_sqr_mix, sqr_curve[f]);
 
     check_bipolar(sample / count);
     block.state.own_audio[0][0][0][f] = sample / count;
