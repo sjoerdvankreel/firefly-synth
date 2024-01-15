@@ -42,6 +42,14 @@ public:
 
 private:
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin> void 
+  process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin, bool Saw> 
+  void process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin, bool Saw, bool Tri> 
+  void process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin, bool Saw, bool Tri, bool Sqr> 
+  void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
 static void
@@ -313,67 +321,81 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 void
 osc_engine::process_basic(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
-#if 0
   auto const& block_auto = block.state.own_block_automation;
-  int dual_type_1 = block_auto[param_dual_type_1][0].step();
-  switch (dual_type_1)
-  {
-  case dual_type_off: process_dual_1(block, modulation, [](float ph, float inc) { return 0.0f; }); break;
-  case dual_type_saw: process_dual_1(block, modulation, [](float ph, float inc) { return generate_saw(ph, inc); }); break;
-  case dual_type_tri: process_dual_1(block, modulation, [](float ph, float inc) { return generate_triangle(ph, inc); }); break;
-  case dual_type_sin: process_dual_1(block, modulation, [](float ph, float inc) { return std::sin(2.0f * pi32 * ph); }); break;
-  }
-#endif
+  bool sin = block_auto[param_basic_sin_on][0].step();
+  if(sin) process_basic_sin<true>(block, modulation);
+  else process_basic_sin<false>(block, modulation);
 }
 
-#if 0
-
-template <class Generator1> void
-osc_engine::process_dual_1(plugin_block& block, cv_matrix_mixdown const* modulation, Generator1 gen1)
+template <bool Sin> void
+osc_engine::process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int dual_type_2 = block_auto[param_dual_type_2][0].step();
-  switch (dual_type_2)
-  {
-  case dual_type_off: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return 0.0f; }); break;
-  case dual_type_saw: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return generate_saw(ph, inc); }); break;
-  case dual_type_sin: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return std::sin(2.0f * pi32 * ph); }); break;
-  case dual_type_tri: process_dual_1_2(block, modulation, gen1, [](float ph, float inc) { return generate_triangle(ph, inc); }); break;
-  }
+  bool saw = block_auto[param_basic_saw_on][0].step();
+  if (saw) process_basic_sin_saw<Sin, true>(block, modulation);
+  else process_basic_sin_saw<Sin, false>(block, modulation);
 }
 
-template <class Generator1, class Generator2> void
-osc_engine::process_dual_1_2(plugin_block& block, cv_matrix_mixdown const* modulation, Generator1 gen1, Generator2 gen2)
+template <bool Sin, bool Saw> void
+osc_engine::process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
+  auto const& block_auto = block.state.own_block_automation;
+  bool tri = block_auto[param_basic_tri_on][0].step();
+  if (tri) process_basic_sin_saw_tri<Sin, Saw, true>(block, modulation);
+  else process_basic_sin_saw_tri<Sin, Saw, false>(block, modulation);
+}
+
+template <bool Sin, bool Saw, bool Tri> void
+osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  bool sqr = block_auto[param_basic_sqr_on][0].step();
+  if (sqr) process_basic_sin_saw_tri_sqr<Sin, Saw, Tri, true>(block, modulation);
+  else process_basic_sin_saw_tri_sqr<Sin, Saw, Tri, false>(block, modulation);
+}
+
+template <bool Sin, bool Saw, bool Tri, bool Sqr> void
+osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
+  int count = 0;
+  if constexpr (Sin) count++;
+  if constexpr (Saw) count++;
+  if constexpr (Tri) count++;
+  if constexpr (Sqr) count++;
+
+  if (count == 0)
+  {
+    block.state.own_audio[0][0][0].fill(block.start_frame, block.end_frame, 0.0f);
+    block.state.own_audio[0][0][1].fill(block.start_frame, block.end_frame, 0.0f);
+    return;
+  }
+
   auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
-  int factor = 1 << block_auto[param_dual_factor][0].step();
+
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
-  auto const& mix_curve = *(*modulation)[module_osc][block.module_slot][param_dual_mix][0];
-  auto const& phase_curve = *(*modulation)[module_osc][block.module_slot][param_dual_phase][0];
+  auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
+  auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
+  auto const& tri_curve = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
+  //auto const& sqr_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
+  //auto const& pwm_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pwm][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    float sample = 0;
     float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
     float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
-    //float freq2 = freq1 * factor;
-    // todo this not work for saw
-    float inc1 = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
-    float inc2 = std::clamp(freq * factor, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
-    //float inc2 = inc1 * factor;
-    float phase2 = (_phase + phase_curve[f]) * factor;
-    phase2 -= std::floor(phase2);
-    float sample1 = gen1(_phase, inc1);
-    float sample2 = gen2(phase2, inc2);
-    float sample = (1 - mix_curve[f]) * sample1 + (mix_curve[f]) * sample2;
-    sample = sample1 - sample2;
-    sample*=0.5;
-    sample = sample1; // not doing anything interesting anyway except for saw=>pulse pwm
-    check_bipolar(sample);
-    block.state.own_audio[0][0][0][f] = sample;
-    block.state.own_audio[0][0][1][f] = sample;
-    increment_and_wrap_phase(_phase, inc1);
+    float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
+    
+    if constexpr (Saw) sample += generate_saw(_phase, inc) * block.normalized_to_raw(module_osc, param_basic_saw_mix, saw_curve[f]);
+    if constexpr (Tri) sample += generate_triangle(_phase, inc) * block.normalized_to_raw(module_osc, param_basic_tri_mix, tri_curve[f]);
+    if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase) * block.normalized_to_raw(module_osc, param_basic_sin_mix, sin_curve[f]);
+
+    check_bipolar(sample / count);
+    block.state.own_audio[0][0][0][f] = sample / count;
+    block.state.own_audio[0][0][1][f] = sample / count;
+    increment_and_wrap_phase(_phase, inc);
   }
 
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
@@ -383,7 +405,5 @@ osc_engine::process_dual_1_2(plugin_block& block, cv_matrix_mixdown const* modul
     for (int f = block.start_frame; f < block.end_frame; f++)
       block.state.own_audio[0][0][c][f] = modulated[c][f];
 }
-
-#endif
 
 }
