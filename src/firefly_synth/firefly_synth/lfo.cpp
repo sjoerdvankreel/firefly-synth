@@ -262,7 +262,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_automate_if_voice(!global), make_domain_step(2, 99, 4, 0),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  steps.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
+  steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smth", true, true, param_filter, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -278,6 +278,13 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   return result;
+}
+
+static float 
+lfo_quantize(float in, int steps)
+{ 
+  float out = (int)(in * steps) / (float)(steps); 
+  return check_unipolar(out);
 }
 
 float
@@ -486,7 +493,7 @@ void lfo_engine::process_shape_loop(plugin_block& block, Calc calc)
       _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
     }
 
-    _lfo_end_value = calc(_phase);
+    _lfo_end_value = lfo_quantize(calc(_phase), steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
 
