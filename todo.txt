@@ -38,13 +38,11 @@ auto-generate the manual (param list)
 visual routing indicators ?
 document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
-smooth random as osc? probably not
 lightweight theming (per user config file only)
 do phase modulation & freq modulation
 lerped hardsync
 check all the automated names in the host
 not oscillator/envelope=>osc/env, it is annoying in host browser, expose short param names
-drop automate_modulate, makes no sense
 do osc pm/fm
 do osc oversampling
 

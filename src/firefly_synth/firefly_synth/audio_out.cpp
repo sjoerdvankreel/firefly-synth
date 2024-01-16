@@ -68,12 +68,12 @@ audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, b
   double default_ = global? 0.5: 1.0;
   result.params.emplace_back(make_param(
     make_topo_info("{2156DEE6-A147-4B93-AEF3-ABE69F53DBF9}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage_identity(default_, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(default_, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 0 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{7CCD4A32-FD84-402E-B099-BB94AAAD3C9E}", "Bal", param_bal, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 

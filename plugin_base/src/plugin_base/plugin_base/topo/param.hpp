@@ -20,7 +20,7 @@ class plugin_state;
 enum class param_direction { input, output };
 enum class param_rate { block, voice, accurate };
 enum class param_layout { single, horizontal, vertical };
-enum class param_automate { none, midi, automate, modulate, automate_modulate };
+enum class param_automate { none, midi, automate, modulate };
 
 // allows to extend right-click menu on parameters
 class param_menu_handler {
@@ -114,14 +114,14 @@ inline bool
 param_dsp::can_modulate(int module_slot) const
 {
   auto mode = automate_selector(module_slot);
-  return mode == param_automate::automate_modulate || mode == param_automate::modulate;
+  return mode == param_automate::modulate;
 }
 
 inline bool
 param_dsp::can_automate(int module_slot) const
 {
   auto mode = automate_selector(module_slot);
-  return mode == param_automate::automate_modulate || mode == param_automate::automate;
+  return mode == param_automate::automate || mode == param_automate::modulate;
 }
 
 inline bool
