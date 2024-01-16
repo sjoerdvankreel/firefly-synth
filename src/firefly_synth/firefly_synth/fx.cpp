@@ -826,10 +826,10 @@ fx_engine::process_comb(plugin_block& block,
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float dly_min = block.normalized_to_raw(this_module, param_comb_dly_min, dly_min_curve[f]);
-    float dly_plus = block.normalized_to_raw(this_module, param_comb_dly_plus, dly_plus_curve[f]);
-    float gain_min = block.normalized_to_raw(this_module, param_comb_gain_min, gain_min_curve[f]);
-    float gain_plus = block.normalized_to_raw(this_module, param_comb_gain_plus, gain_plus_curve[f]);
+    float dly_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_min, dly_min_curve[f]);
+    float dly_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_plus, dly_plus_curve[f]);
+    float gain_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_min, gain_min_curve[f]);
+    float gain_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_plus, gain_plus_curve[f]);
     float dly_min_samples_t = dly_min * block.sample_rate * 0.001;
     float dly_plus_samples_t = dly_plus * block.sample_rate * 0.001;
     float dly_min_t = dly_min_samples_t - (int)dly_min_samples_t;
@@ -957,9 +957,9 @@ fx_engine::process_svf_type(plugin_block& block,
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    kbd = block.normalized_to_raw(this_module, param_svf_kbd, kbd_curve[f]);
-    hz = block.normalized_to_raw(this_module, param_svf_freq, freq_curve[f]);
-    gain = block.normalized_to_raw(this_module, param_svf_gain, gain_curve[f]);
+    hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_curve[f]);
+    kbd = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_kbd, kbd_curve[f]);
+    gain = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_gain, gain_curve[f]);
     hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
     hz = std::clamp(hz, flt_min_freq, flt_max_freq);
     w = pi64 * hz / block.sample_rate;
@@ -1087,7 +1087,7 @@ fx_engine::process_dly_multi(plugin_block& block,
   {
     float time_samples_t = time_curve[f] * block.sample_rate;
     float hold_samples_t = hold_curve[f] * block.sample_rate;
-    float spread = block.normalized_to_raw(module_gfx, param_dly_sprd, spread_curve[f]);
+    float spread = block.normalized_to_raw_fast<domain_type::linear>(module_gfx, param_dly_sprd, spread_curve[f]);
 
     for (int c = 0; c < 2; c++)
     {
@@ -1121,7 +1121,7 @@ fx_engine::dist_svf_next(plugin_block const& block, int oversmp_factor,
 {
   double const max_res = 0.99;
   int this_module = _global ? module_gfx : module_vfx;
-  double hz = block.normalized_to_raw(this_module, param_svf_freq, freq_plain);
+  double hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_plain);
   double w = pi64 * hz / (block.sample_rate * oversmp_factor);
   _dst_svf.init_lpf(w, res * max_res);
   left = _dst_svf.next(0, left);
