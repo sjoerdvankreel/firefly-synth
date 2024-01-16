@@ -91,9 +91,8 @@ master_audio_out_engine::process(plugin_block& block)
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_master_out, param_bal, bal_curve[f]);
-    float gain = block.normalized_to_raw_fast<domain_type::identity>(module_master_out, param_gain, gain_curve[f]);
     for(int c = 0; c < 2; c++)
-      block.out->host_audio[c][f] = audio_in[c][f] * gain * stereo_balance(c, bal);
+      block.out->host_audio[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
   }
 }
 
@@ -110,9 +109,8 @@ voice_audio_out_engine::process(plugin_block& block)
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_voice_out, param_bal, bal_curve[f]);
-    float gain = block.normalized_to_raw_fast<domain_type::identity>(module_voice_out, param_gain, gain_curve[f]);
     for (int c = 0; c < 2; c++)
-      block.voice->result[c][f] = audio_in[c][f] * gain * amp_env[f] * stereo_balance(c, bal);
+      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal);
   }
 }
 

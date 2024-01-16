@@ -394,14 +394,14 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float sample = 0;
-    float cent = block.normalized_to_raw(module_osc, param_cent, cent_curve[f]);
+    float cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[f]);
     float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
     float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
     
-    if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase) * block.normalized_to_raw(module_osc, param_basic_sin_mix, sin_curve[f]);
-    if constexpr (Saw) sample += generate_saw(_phase, inc) * block.normalized_to_raw(module_osc, param_basic_saw_mix, saw_curve[f]);
-    if constexpr (Tri) sample += generate_triangle(_phase, inc) * block.normalized_to_raw(module_osc, param_basic_tri_mix, tri_curve[f]);
-    if constexpr (Sqr) sample += generate_sqr(_phase, inc, pwm_curve[f]) * block.normalized_to_raw(module_osc, param_basic_sqr_mix, sqr_curve[f]);
+    if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
+    if constexpr (Saw) sample += generate_saw(_phase, inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[f]);
+    if constexpr (Tri) sample += generate_triangle(_phase, inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
+    if constexpr (Sqr) sample += generate_sqr(_phase, inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
 
     check_bipolar(sample / count);
     block.state.own_audio[0][0][0][f] = sample / count;
