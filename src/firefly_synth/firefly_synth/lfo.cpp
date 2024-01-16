@@ -261,7 +261,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu.multi_items, vs[1]); });
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "Stp", true, true, param_steps, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_step(2, 99, 4, 0),
+    make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
@@ -454,7 +454,7 @@ lfo_engine::process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, Ske
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
   int step = block_auto[param_steps][0].step();
-  bool quantize = !is_noise(_type_items, type) && step != 0;
+  bool quantize = !is_noise(_type_items, type) && step != 1;
   if(quantize) process_shape_xy_quantize<IsNoise>(block, shape, skew_x, skew_y, lfo_quantize);
   else process_shape_xy_quantize<IsNoise>(block, shape, skew_x, skew_y, [](float in, int st) { return in; });
 }
