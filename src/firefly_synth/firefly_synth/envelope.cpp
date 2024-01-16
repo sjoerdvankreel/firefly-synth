@@ -18,7 +18,11 @@ static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { section_main, section_slope, section_dhadsr };
-enum { mode_sustain_lin, mode_follow_lin, mode_release_lin, mode_sustain_exp, mode_follow_exp, mode_release_exp };
+enum { 
+  mode_sustain_lin, mode_follow_lin, mode_release_lin, 
+  mode_sustain_exp_pln, mode_follow_exp_pln, mode_release_exp_pln,
+  mode_sustain_exp_half, mode_follow_exp_half, mode_release_exp_half,
+  mode_sustain_exp_splt, mode_follow_exp_splt, mode_release_exp_splt };
 enum {
   param_on, param_mode, param_sync, param_multi, param_filter,
   param_attack_slope, param_decay_slope, param_release_slope,
@@ -26,9 +30,12 @@ enum {
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
-static bool is_exp_slope(int mode) { return mode >= mode_sustain_exp; }
-static bool is_sustain(int mode) { return mode == mode_sustain_lin || mode == mode_sustain_exp; }
-static bool is_release(int mode) { return mode == mode_release_lin || mode == mode_release_exp; }
+static bool is_exp_pln_slope(int mode) { return mode_sustain_exp_pln <= mode && mode <= mode_release_exp_pln; }
+static bool is_exp_half_slope(int mode) { return mode_sustain_exp_half <= mode && mode <= mode_release_exp_half; }
+static bool is_exp_splt_slope(int mode) { return mode_sustain_exp_splt <= mode && mode <= mode_release_exp_splt; }
+static bool is_expo_slope(int mode) { return is_exp_pln_slope(mode) || is_exp_half_slope(mode) || is_exp_splt_slope(mode); }
+static bool is_sustain(int mode) { return mode == mode_sustain_lin || mode == mode_sustain_exp_pln || mode == mode_sustain_exp_half || mode == mode_sustain_exp_splt; }
+static bool is_release(int mode) { return mode == mode_release_lin || mode == mode_release_exp_pln || mode == mode_release_exp_half || mode == mode_release_exp_splt; }
 
 static std::vector<list_item>
 type_items()
@@ -37,9 +44,15 @@ type_items()
   result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "Sustain.Lin");
   result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "Follow.Lin");
   result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "Release.Lin");
-  result.emplace_back("{A23646C9-047D-485A-9A31-54D78D85570E}", "Sustain.Exp");
-  result.emplace_back("{CB268F2B-8A33-49CF-9569-675159ACC0E1}", "Follow.Exp");
-  result.emplace_back("{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}", "Release.Exp");
+  result.emplace_back("{A23646C9-047D-485A-9A31-54D78D85570E}", "Sustain.ExpPln");
+  result.emplace_back("{CB268F2B-8A33-49CF-9569-675159ACC0E1}", "Follow.ExpPln");
+  result.emplace_back("{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}", "Release.ExpPln");
+  result.emplace_back("{CB4C4B41-8165-4303-BDAC-29142DF871DC}", "Sustain.ExpHalf");
+  result.emplace_back("{221089F7-A516-4BCE-AE9A-D0D4F80A6BC5}", "Follow.ExpHalf");
+  result.emplace_back("{5FBDD433-C4E2-47E4-B471-F7B19485B31E}", "Release.ExpHalf");
+  result.emplace_back("{DB38D81F-A6DC-4774-BA10-6714EA43938F}", "Sustain.ExpSplt");
+  result.emplace_back("{93473324-66FB-422F-9160-72B175A81207}", "Follow.ExpSplt");
+  result.emplace_back("{1ECF13C0-EE16-4226-98D3-570040E6DA9D}", "Release.ExpSplt");
   return result;
 }
 
@@ -68,7 +81,10 @@ private:
   static inline double const slope_max = 0.9999;
   static inline double const slope_range = slope_max - slope_min;
 
-  void init_slope_section(double slope, double split_pos, double& exp, double& splt_bnd);
+  void init_slope_exp_pln(double slope, double& exp);
+  void init_slope_exp_half(double slope, double split_pos, double& exp, double& splt_bnd);
+  void init_slope_exp_splt(double slope, double split_pos, double& exp, double& splt_bnd);
+
   template <class CalcSlope> 
   void process_slope(plugin_block& block, float dly, float att, float hld, float dcy, float stn, float rls, CalcSlope calc_slope);
 };
@@ -168,7 +184,9 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label_none())));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->add_submenu("Linear", { mode_sustain_lin, mode_follow_lin, mode_release_lin });
-  type.gui.submenu->add_submenu("Exponential", { mode_sustain_exp, mode_follow_exp, mode_release_exp });
+  type.gui.submenu->add_submenu("Exp.Plain", { mode_sustain_exp_pln, mode_follow_exp_pln, mode_release_exp_pln });
+  type.gui.submenu->add_submenu("Exp.Half", { mode_sustain_exp_half, mode_follow_exp_half, mode_release_exp_half });
+  type.gui.submenu->add_submenu("Exp.Split", { mode_sustain_exp_splt, mode_follow_exp_splt, mode_release_exp_splt });
   type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });  
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", "Tempo Sync", "Sync", true, true, param_sync, 1),
@@ -197,19 +215,19 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
+  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "Decay Slope", "D.Slp", true, true, param_decay_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
+  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "Release Slope", "R.Slp", true, true, param_release_slope, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage(0, 1, 0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
+  release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
 
   result.sections.emplace_back(make_param_section(section_dhadsr,
     make_topo_tag("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
@@ -308,16 +326,22 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 static inline double
 calc_slope_lin(double slope_pos, double splt_bnd, double exp) 
 { return slope_pos; }
+static inline double
+calc_slope_exp_pln(double slope_pos, double splt_bnd, double exp)
+{ return std::pow(slope_pos, exp); }
+static inline double
+calc_slope_exp_half(double slope_pos, double splt_bnd, double exp)
+{ return std::pow(slope_pos, exp); }
 
 static inline double
-calc_slope_exp(double slope_pos, double splt_bnd, double exp)
+calc_slope_exp_splt(double slope_pos, double splt_bnd, double exp)
 {
   if (slope_pos < splt_bnd)
     return std::pow(slope_pos / splt_bnd, exp) * splt_bnd;
   return 1 - std::pow(1 - (slope_pos - splt_bnd) / (1 - splt_bnd), exp) * (1 - splt_bnd);
 }
 
-void 
+void
 env_engine::reset(plugin_block const* block)
 {
   _stage_pos = 0;
@@ -328,17 +352,51 @@ env_engine::reset(plugin_block const* block)
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 
-  if(!is_exp_slope(block_auto[param_mode][0].step())) return;
+  int mode = block_auto[param_mode][0].step();
+  if(!is_expo_slope(mode)) return;
+
   float ds = block_auto[param_decay_slope][0].real();
   float as = block_auto[param_attack_slope][0].real();
   float rs = block_auto[param_release_slope][0].real();
-  init_slope_section(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
-  init_slope_section(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
-  init_slope_section(as, 1 - as, _slp_att_exp, _slp_att_splt_bnd);
+
+  if(is_exp_pln_slope(mode))
+  {
+    init_slope_exp_pln(ds, _slp_dcy_exp);
+    init_slope_exp_pln(rs, _slp_rls_exp);
+    init_slope_exp_pln(as, _slp_att_exp);
+  }
+  else if (is_exp_half_slope(mode))
+  {
+    init_slope_exp_half(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
+    init_slope_exp_half(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
+    init_slope_exp_half(as, 1 - as, _slp_att_exp, _slp_att_splt_bnd);
+  }
+  else if (is_exp_splt_slope(mode))
+  {
+    init_slope_exp_splt(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
+    init_slope_exp_splt(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
+    init_slope_exp_splt(as, 1 - as, _slp_att_exp, _slp_att_splt_bnd);
+  } else assert(false);
+}
+
+void
+env_engine::init_slope_exp_pln(double slope, double& exp)
+{
+  double slope_bounded = slope_min + slope_range * slope;
+  exp = std::log(slope_bounded) / log_half;
+}
+
+void
+env_engine::init_slope_exp_half(double slope, double split_pos, double& exp, double& splt_bnd)
+{
+  splt_bnd = slope_min + slope_range * split_pos;
+  double slope_bounded = slope_min + slope_range * slope;
+  if (slope_bounded < 0.5f) exp = std::log(slope_bounded) / log_half;
+  else exp = std::log(1.0f - slope_bounded) / log_half;
 }
 
 void 
-env_engine::init_slope_section(double slope, double split_pos, double& exp, double& splt_bnd)
+env_engine::init_slope_exp_splt(double slope, double split_pos, double& exp, double& splt_bnd)
 {
   splt_bnd = slope_min + slope_range * split_pos;
   double slope_bounded = slope_min + slope_range * slope;
@@ -375,7 +433,9 @@ env_engine::process(plugin_block& block)
   }
 
   int mode = block_auto[param_mode][0].step();
-  if(is_exp_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp);
+  if(is_exp_pln_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_pln);
+  else if(is_exp_half_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_half);
+  else if (is_exp_splt_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_splt);
   else process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_lin);
 }
 
