@@ -347,14 +347,14 @@ cv_matrix_topo(
 
   auto& min = result.params.emplace_back(make_param(
     make_topo_info("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", param_min, route_count),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   min.gui.tabular = true;
   min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& max = result.params.emplace_back(make_param(
     make_topo_info("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", param_max, route_count),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   max.gui.tabular = true;
   max.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });

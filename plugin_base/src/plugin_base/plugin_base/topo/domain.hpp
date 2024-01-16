@@ -13,7 +13,7 @@ namespace plugin_base {
 
 struct param_topo_mapping;
 enum class domain_display { normal, percentage };
-enum class domain_type { toggle, step, name, item, timesig, linear, log };
+enum class domain_type { toggle, step, name, item, timesig, linear, log, identity };
 
 typedef std::function<std::string(int module_slot, int param_slot)>
 default_selector;
@@ -122,7 +122,7 @@ param_domain::plain_to_raw(plain_value plain) const
 { return is_real()? plain.real(): plain.step(); }
 inline bool 
 param_domain::is_real() const 
-{ return type == domain_type::log || type == domain_type::linear; }
+{ return type == domain_type::log || type == domain_type::linear || type == domain_type::identity; }
 
 inline plain_value 
 param_domain::raw_to_plain(double raw) const
@@ -137,10 +137,14 @@ param_domain::plain_to_normalized(plain_value plain) const
   double range = max - min;
   if (!is_real())
     return normalized_value((plain.step() - min) / (range == 0? 1: range));
-  // correct for rounding errors
-  double plain_real = std::clamp((double)plain.real(), min, max);
+  if(type == domain_type::identity)
+    return normalized_value(plain.real());
   if (type == domain_type::linear)
-    return normalized_value((plain_real - min) / range);
+    return normalized_value((plain.real() - min) / range);
+
+  // correct for rounding errors
+  assert(type == domain_type::log);
+  double plain_real = std::clamp((double)plain.real(), min, max);
   return normalized_value(std::pow((plain_real - min) * (1 / range), 1 / exp));
 }
 
@@ -150,10 +154,14 @@ param_domain::normalized_to_plain(normalized_value normalized) const
   double range = max - min;
   if (!is_real())
     return plain_value::from_step(min + std::floor(std::min(range, normalized.value() * (range + 1))));
-  // correct for rounding errors
-  double normalized_real = std::clamp((double)normalized.value(), 0.0, 1.0);
+  if(type == domain_type::identity)
+    return plain_value::from_real(normalized.value());
   if (type == domain_type::linear)
-    return plain_value::from_real(min + normalized_real * range);
+    return plain_value::from_real(min + normalized.value() * range);
+
+  // correct for rounding errors
+  assert(type == domain_type::log);
+  double normalized_real = std::clamp((double)normalized.value(), 0.0, 1.0);
   return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
 }
 

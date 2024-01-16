@@ -145,9 +145,9 @@ param_domain::validate(int module_slot_count, int param_slot_count) const
   assert(max >= min);
   assert((type == domain_type::log) == (exp != 0));
   assert((type == domain_type::step) || (display_offset == 0));
-  assert(display == domain_display::normal || type == domain_type::linear);
+  assert(display == domain_display::normal || type == domain_type::linear || type == domain_type::identity);
 
-  if (type == domain_type::toggle)
+  if (type == domain_type::toggle || type == domain_type::identity)
   {
     assert(min == 0);
     assert(max == 1);

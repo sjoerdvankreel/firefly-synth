@@ -75,7 +75,7 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1 }))));
   result.params.emplace_back(make_param(
     make_topo_info("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
@@ -84,7 +84,7 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod", param_mod, 1),
-    make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(

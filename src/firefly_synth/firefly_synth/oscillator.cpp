@@ -235,7 +235,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   auto& basic_sqr_pwm = result.params.emplace_back(make_param(
     make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", "Sqr.PWM", "PWM", true, false, param_basic_sqr_pwm, 1),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_sqr_pwm.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });

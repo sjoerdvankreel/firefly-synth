@@ -120,14 +120,14 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "Amt", param_amt, route_count),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 1, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& ring = result.params.emplace_back(make_param(
     make_topo_info("{3DF51ADC-9882-4F95-AF4E-5208EB14E645}", "Ring", param_ring, route_count),
-    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage(0, 1, 0, 0, true),
+    make_param_dsp_accurate(param_automate::automate_modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   ring.gui.tabular = true;
   ring.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });

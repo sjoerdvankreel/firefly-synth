@@ -270,6 +270,14 @@ make_domain_name(std::vector<std::string> const& names, std::string const& defau
 }
 
 param_domain
+make_domain_percentage_identity(double default_, int precision, bool unit)
+{
+  auto result = make_domain_percentage(0, 1, default_, precision, unit);
+  result.type = domain_type::identity;
+  return result;
+}
+
+param_domain
 make_domain_percentage(double min, double max, double default_, int precision, bool unit)
 {
   param_domain result = {};
