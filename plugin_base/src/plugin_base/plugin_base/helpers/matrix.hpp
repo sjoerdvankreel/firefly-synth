@@ -60,16 +60,17 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules);
 class matrix_param_menu_handler:
 public param_menu_handler {
   int const _route_count;
+  int const _default_on_value;
 public:
-  matrix_param_menu_handler(plugin_state* state, int route_count): 
-  param_menu_handler(state), _route_count(route_count) {}
+  matrix_param_menu_handler(plugin_state* state, int route_count, int default_on_value):
+  param_menu_handler(state), _route_count(route_count), _default_on_value(default_on_value) {}
   std::vector<custom_menu> const menus() const override;
   void execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) override;
 };
 
 inline std::unique_ptr<matrix_param_menu_handler>
-make_matrix_param_menu_handler(plugin_state* state, int route_count)
-{ return std::make_unique<matrix_param_menu_handler>(state, route_count); }
+make_matrix_param_menu_handler(plugin_state* state, int route_count, int default_on_value)
+{ return std::make_unique<matrix_param_menu_handler>(state, route_count, default_on_value); }
 
 // allows to tidy up cv/audio matrix
 class tidy_matrix_menu_handler :

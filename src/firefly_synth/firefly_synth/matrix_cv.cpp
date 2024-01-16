@@ -306,7 +306,8 @@ cv_matrix_topo(
     make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
   type.gui.tabular = true;
-  type.gui.menu_handler_factory = [route_count](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count); };
+  type.gui.menu_handler_factory = [route_count](plugin_state* state) { 
+    return make_matrix_param_menu_handler(state, route_count, type_mul_abs); };
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   auto mul_menu = std::make_shared<gui_submenu>();

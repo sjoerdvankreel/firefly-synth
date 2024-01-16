@@ -35,6 +35,7 @@ document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 lerped hardsync
 do osc oversampling
+go over all the matrix topos again and clean up
 
 * get some linux folks to comment (ycollete?)
 * continuing
