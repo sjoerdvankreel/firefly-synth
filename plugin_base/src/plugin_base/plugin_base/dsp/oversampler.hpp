@@ -30,18 +30,25 @@ oversampler::process(
   juce::dsp::Oversampling<float>& oversampling, jarray<float, 2>& inout, 
   int start_frame, int end_frame, NonLinear non_linear)
 {
-  using juce::dsp::AudioBlock;
-  int block_size = end_frame - start_frame;
-  float* data[2];
-  data[0] = inout[0].data().data();
-  data[1] = inout[1].data().data();
-  AudioBlock<float> inout_block(data, 2, start_frame, block_size);
-  auto up_block = oversampling.processSamplesUp(inout_block);
-  float* l = up_block.getChannelPointer(0);
-  float* r = up_block.getChannelPointer(1);
-  for (int f = 0; f < block_size * Factor; f++)
-    non_linear(f, l[f], r[f]);
-  oversampling.processSamplesDown(inout_block);
+  if constexpr (Factor == 1)
+  {
+    for (int f = start_frame; f < end_frame; f++)
+      non_linear(f, inout[0][f], inout[1][f]);
+  } else
+  {
+    using juce::dsp::AudioBlock;
+    int block_size = end_frame - start_frame;
+    float* data[2];
+    data[0] = inout[0].data().data();
+    data[1] = inout[1].data().data();
+    AudioBlock<float> inout_block(data, 2, start_frame, block_size);
+    auto up_block = oversampling.processSamplesUp(inout_block);
+    float* l = up_block.getChannelPointer(0);
+    float* r = up_block.getChannelPointer(1);
+    for (int f = 0; f < block_size * Factor; f++)
+      non_linear(f, l[f], r[f]);
+    oversampling.processSamplesDown(inout_block);
+  }
 }
 
 template <class NonLinear> void
