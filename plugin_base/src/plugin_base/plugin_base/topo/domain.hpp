@@ -18,6 +18,10 @@ enum class domain_type { toggle, step, name, item, timesig, linear, log, identit
 typedef std::function<std::string(int module_slot, int param_slot)>
 default_selector;
 
+inline constexpr bool
+domain_is_real(domain_type type)
+{ return type == domain_type::log || type == domain_type::linear || type == domain_type::identity; }
+
 // tempo relative to bpm
 struct timesig
 {
@@ -72,7 +76,7 @@ struct param_domain final {
   default_selector default_selector;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
-  bool is_real() const;
+  bool is_real() const { return domain_is_real(type); }
   void validate(int module_slot_count, int param_slot_count) const;
 
   // representation conversion
@@ -94,6 +98,14 @@ struct param_domain final {
   std::string normalized_to_text(bool io, normalized_value normalized) const;
   bool text_to_plain(bool io, std::string const& textual, plain_value& plain) const;
   bool text_to_normalized(bool io, std::string const& textual, normalized_value& normalized) const;
+
+  // for time critical stuff, caller has to specify domain
+  template <domain_type DomainType>
+  double plain_to_raw_fast(plain_value plain) const;
+  template <domain_type DomainType>
+  double normalized_to_raw_fast(normalized_value normalized) const;
+  template <domain_type DomainType>
+  plain_value normalized_to_plain_fast(normalized_value normalized) const;
 };
 
 inline list_item::
@@ -120,9 +132,6 @@ param_domain::normalized_to_raw(normalized_value normalized) const
 inline double
 param_domain::plain_to_raw(plain_value plain) const
 { return is_real()? plain.real(): plain.step(); }
-inline bool 
-param_domain::is_real() const 
-{ return type == domain_type::log || type == domain_type::linear || type == domain_type::identity; }
 
 inline plain_value 
 param_domain::raw_to_plain(double raw) const
@@ -151,18 +160,59 @@ param_domain::plain_to_normalized(plain_value plain) const
 inline plain_value 
 param_domain::normalized_to_plain(normalized_value normalized) const
 {
-  double range = max - min;
-  if (!is_real())
-    return plain_value::from_step(min + std::floor(std::min(range, normalized.value() * (range + 1))));
-  if(type == domain_type::identity)
-    return plain_value::from_real(normalized.value());
-  if (type == domain_type::linear)
-    return plain_value::from_real(min + normalized.value() * range);
+  switch (type)
+  {
+  case domain_type::log: return normalized_to_plain_fast<domain_type::log>(normalized);
+  case domain_type::step: return normalized_to_plain_fast<domain_type::step>(normalized);
+  case domain_type::name: return normalized_to_plain_fast<domain_type::name>(normalized);
+  case domain_type::item: return normalized_to_plain_fast<domain_type::item>(normalized);
+  case domain_type::linear: return normalized_to_plain_fast<domain_type::linear>(normalized);
+  case domain_type::toggle: return normalized_to_plain_fast<domain_type::toggle>(normalized);
+  case domain_type::timesig: return normalized_to_plain_fast<domain_type::timesig>(normalized);
+  case domain_type::identity: return normalized_to_plain_fast<domain_type::identity>(normalized);
+  default: assert(false); return {};
+  }
+}
 
-  // correct for rounding errors
-  assert(type == domain_type::log);
-  double normalized_real = std::clamp((double)normalized.value(), 0.0, 1.0);
-  return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
+// dsp versions
+
+template <domain_type DomainType> inline double
+param_domain::normalized_to_raw_fast(normalized_value normalized) const
+{
+  assert(type == DomainType);
+  auto plain = normalized_to_plain_fast<DomainType>(normalized);
+  return plain_to_raw_fast<DomainType>(plain);
+}
+
+template <domain_type DomainType> inline double
+param_domain::plain_to_raw_fast(plain_value plain) const
+{
+  assert(type == DomainType);
+  if constexpr(domain_is_real(DomainType)) return plain.real();
+  else return plain.step();
+}
+
+// Well, c++ continues to inspire.
+template <class> 
+inline constexpr bool detail_always_false_v = false;
+
+template <domain_type DomainType> inline plain_value
+param_domain::normalized_to_plain_fast(normalized_value normalized) const
+{
+  double range = max - min;
+  if constexpr (!domain_is_real(DomainType))
+    return plain_value::from_step(min + std::floor(std::min(range, normalized.value() * (range + 1))));
+  else if constexpr(DomainType == domain_type::identity)
+    return plain_value::from_real(normalized.value());
+  else if constexpr(DomainType == domain_type::linear)
+    return plain_value::from_real(min + normalized.value() * range);
+  else if constexpr(DomainType == domain_type::log)
+  {
+    double normalized_real = std::clamp((double)normalized.value(), 0.0, 1.0);
+    return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
+  }
+  else
+    static_assert(detail_always_false_v);
 }
 
 }
