@@ -29,14 +29,11 @@ prettify the matrix section
 "insert route before/after" ==> enable it !
 do the param fuzz test
 at least block-automate all voice parameters see also modmatrices
-re-profile the kbdtest demo
 auto-generate the manual (param list)
 visual routing indicators ?
 document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 lerped hardsync
-check all the automated names in the host
-not oscillator/envelope=>osc/env, it is annoying in host browser, expose short param names
 do osc oversampling
 
 * get some linux folks to comment (ycollete?)
