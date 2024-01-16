@@ -37,15 +37,18 @@ auto-generate the manual (param list)
 visual routing indicators ?
 document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
-smooth random as osc
+smooth random as osc? probably not
 lightweight theming (per user config file only)
 do phase modulation & freq modulation
 lerped hardsync
-do the offset osc generator ! only integer multiples of bandlimited signal
-scale down the osc dual factor to nyquist
 check all the automated names in the host
 not oscillator/envelope=>osc/env, it is annoying in host browser
 drop automate_modulate, makes no sense
+do osc pm/fm
+do osc oversampling
+do staircase lfo with steps parameter
+do expsharp/expsmooth envelope
+special case 0x oversampling
 
 * get some linux folks to comment (ycollete?)
 * continuing
