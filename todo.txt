@@ -44,6 +44,8 @@ lerped hardsync
 do the offset osc generator ! only integer multiples of bandlimited signal
 scale down the osc dual factor to nyquist
 check all the automated names in the host
+not oscillator/envelope=>osc/env, it is annoying in host browser
+drop automate_modulate, makes no sense
 
 * get some linux folks to comment (ycollete?)
 * continuing
