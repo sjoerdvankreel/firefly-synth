@@ -99,6 +99,8 @@ matrix_param_menu_handler::execute(
       execute(menu_id, 0, module_index, param_index, param_index, param_slot + 1);
     if(action == 2)
       _state->set_raw_at(module_index, module_slot, param_index, param_slot, _default_on_value);
+    if (action == 3 && param_slot < _route_count - 1)
+      _state->set_raw_at(module_index, module_slot, param_index, param_slot + 1, _default_on_value);
     return;
   }
 }

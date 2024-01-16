@@ -26,7 +26,6 @@ do 5 am and 5 fm routes
 do add_submenu everywhere in the topos
 fix the init patch
 prettify the matrix section
-"insert route before/after" ==> enable it !
 do the param fuzz test
 at least block-automate all voice parameters see also modmatrices
 auto-generate the manual (param list)
