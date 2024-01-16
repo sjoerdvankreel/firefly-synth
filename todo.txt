@@ -50,6 +50,7 @@ do osc oversampling
 special case 0x oversampling
 template the domain type conversion
 reverb size exponential
+do everything normalized_to_raw, dont rely on normalized values being identity
 
 * get some linux folks to comment (ycollete?)
 * continuing

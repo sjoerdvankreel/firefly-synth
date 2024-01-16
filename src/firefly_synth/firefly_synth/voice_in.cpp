@@ -172,9 +172,9 @@ voice_in_engine::process(plugin_block& block)
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
     float porta_note = 0;
-    float pb = block.normalized_to_raw(module_voice_in, param_pb, pb_curve[f]);
-    float cent = block.normalized_to_raw(module_voice_in, param_cent, cent_curve[f]);
-    float pitch = block.normalized_to_raw(module_voice_in, param_pitch, pitch_curve[f]);
+    float pb = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pb, pb_curve[f]);
+    float cent = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_cent, cent_curve[f]);
+    float pitch = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pitch, pitch_curve[f]);
     if(_position == _porta_samples) porta_note = _to_note;
     else porta_note = _from_note + (_position++ / (float)_porta_samples * (_to_note - _from_note));
     block.state.own_cv[output_pitch_offset][0][f] = (note + cent - midi_middle_c) + (porta_note - midi_middle_c) + pitch + pb * master_pb_range;
