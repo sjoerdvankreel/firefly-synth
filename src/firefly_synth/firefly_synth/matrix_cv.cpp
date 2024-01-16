@@ -126,6 +126,7 @@ select_midi_active(
   std::vector<module_output_mapping> const& mappings, jarray<int, 3>& active)
 {
   int module = global ? module_gcv_matrix : module_vcv_matrix;
+
   // PB and mod wheel are linked so must be always on
   active[module_midi][0][midi_source_pb] = 1;
   active[module_midi][0][midi_source_cc + 1] = 1;
@@ -310,24 +311,9 @@ cv_matrix_topo(
     return make_matrix_param_menu_handler(state, route_count, type_mul_abs); };
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
-  auto mul_menu = std::make_shared<gui_submenu>();
-  mul_menu->name = "Mul";
-  mul_menu->indices.push_back(type_mul_abs);
-  mul_menu->indices.push_back(type_mul_rel);
-  mul_menu->indices.push_back(type_mul_stk);
-  type.gui.submenu->children.push_back(mul_menu);
-  auto add_menu = std::make_shared<gui_submenu>();
-  add_menu->name = "Add";
-  add_menu->indices.push_back(type_add_abs);
-  add_menu->indices.push_back(type_add_rel);
-  add_menu->indices.push_back(type_add_stk);
-  type.gui.submenu->children.push_back(add_menu);
-  auto ab_menu = std::make_shared<gui_submenu>();
-  ab_menu->name = "Add Bipolar";
-  ab_menu->indices.push_back(type_ab_abs);
-  ab_menu->indices.push_back(type_ab_rel);
-  ab_menu->indices.push_back(type_ab_stk);
-  type.gui.submenu->children.push_back(ab_menu);
+  type.gui.submenu->add_submenu("Mul", { type_mul_abs, type_mul_rel, type_mul_stk });
+  type.gui.submenu->add_submenu("Add", { type_add_abs, type_add_rel, type_add_stk });
+  type.gui.submenu->add_submenu("Add Bipolar", { type_ab_abs, type_ab_rel, type_ab_stk });
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),

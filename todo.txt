@@ -34,10 +34,10 @@ document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 lerped hardsync
 do osc oversampling
-go over all the matrix topos again and clean up
 
 * get some linux folks to comment (ycollete?)
 * continuing
+- check the todos
 - do parameter table with function descriptions and automation/modulation/per-voice etc
 - profile performance + memory +  maybe do cpu efficient versions (non-sloped ramps etc)
 - check all param_automate
