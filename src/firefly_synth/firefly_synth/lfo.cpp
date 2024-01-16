@@ -283,7 +283,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 static float 
 lfo_quantize(float in, int steps)
 { 
-  float out = (int)(in * steps) / (float)(steps); 
+  // input must be [0, 1)
+  float out = (int)(std::clamp(in, 0.0f, 0.9999f) * steps) / (float)(steps - 1);
   return check_unipolar(out);
 }
 
