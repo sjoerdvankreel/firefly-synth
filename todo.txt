@@ -48,7 +48,6 @@ drop automate_modulate, makes no sense
 do osc pm/fm
 do osc oversampling
 do staircase lfo with steps parameter? or=>stair-step anything with 0 = smooth
-do expsharp/expsmooth envelope
 special case 0x oversampling
 template the domain type conversion
 reverb size exponential
