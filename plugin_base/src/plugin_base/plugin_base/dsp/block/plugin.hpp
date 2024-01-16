@@ -90,7 +90,6 @@ struct plugin_block final {
   jarray<float, 4> const& module_audio(int mod, int slot) const;
 
   void set_out_param(int param, int slot, double raw) const;
-  float normalized_to_raw(int module_, int param_, float normalized) const;
   template <domain_type DomainType>
   float normalized_to_raw_fast(int module_, int param_, float normalized) const;
 };
@@ -127,15 +126,6 @@ plugin_block::set_out_param(int param, int slot, double raw) const
 {
   assert(module.params[param].dsp.direction == param_direction::output);
   out->params[param][slot] = module.params[param].domain.raw_to_plain(raw);
-}
-
-// TODO delete
-inline float
-plugin_block::normalized_to_raw(int module_, int param_, float normalized) const
-{
-  check_unipolar(normalized);
-  auto const& param_topo = plugin.modules[module_].params[param_];
-  return param_topo.domain.normalized_to_raw(normalized_value(normalized));
 }
 
 template <domain_type DomainType> inline float

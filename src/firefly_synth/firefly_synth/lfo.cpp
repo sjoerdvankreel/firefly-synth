@@ -482,7 +482,7 @@ void lfo_engine::process_shape_loop(plugin_block& block, Calc calc, Quantize qua
   auto const& block_auto = block.state.own_block_automation;
   int mode = block_auto[param_mode][0].step();
   int steps = block_auto[param_steps][0].step();
-  auto const& rate_curve = sync_or_freq_into_scratch(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
+  auto const& rate_curve = sync_or_freq_into_scratch_fast<domain_type::log>(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
