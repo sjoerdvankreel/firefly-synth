@@ -47,7 +47,6 @@ not oscillator/envelope=>osc/env, it is annoying in host browser, expose short p
 drop automate_modulate, makes no sense
 do osc pm/fm
 do osc oversampling
-reverb size exponential
 
 * get some linux folks to comment (ycollete?)
 * continuing

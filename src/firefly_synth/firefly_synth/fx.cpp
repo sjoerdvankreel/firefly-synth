@@ -887,8 +887,8 @@ fx_engine::process_reverb(plugin_block& block,
         int pos = _rev_comb_pos[c][i];
         float comb = _rev_comb[c][i][pos];
         int length = _rev_comb[c][i].size();
-        _rev_comb_filter[c][i] = (comb * (1.0f - damp_curve[f])) + (_rev_comb_filter[c][i] * damp_curve[f]);
-        _rev_comb[c][i][pos] = scratch_in[f] + (_rev_comb_filter[c][i] * size_curve[f]);
+        _rev_comb_filter[c][i] = (comb * (1.0f - scratch_damp[f])) + (_rev_comb_filter[c][i] * scratch_damp[f]);
+        _rev_comb[c][i][pos] = scratch_in[f] + (_rev_comb_filter[c][i] * scratch_size[f]);
         _rev_comb_pos[c][i] = (pos + 1) % length;
         block.state.own_audio[0][0][c][f] += comb;
       }
