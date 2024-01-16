@@ -43,7 +43,6 @@ do phase modulation & freq modulation
 lerped hardsync
 check all the automated names in the host
 not oscillator/envelope=>osc/env, it is annoying in host browser, expose short param names
-do osc pm/fm
 do osc oversampling
 
 * get some linux folks to comment (ycollete?)
