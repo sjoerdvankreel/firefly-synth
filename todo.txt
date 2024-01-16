@@ -5,7 +5,8 @@ mseg
 microtonal support
 polyphonic modulation
 do cakewalk bug report
-handle clap is_modulatable
+handle clap is_modulatable (not yet per note)
+make sure everything accurate can modulate
 
 demo synth:
 do fx version
@@ -49,6 +50,7 @@ do osc oversampling
 do staircase lfo with steps parameter
 do expsharp/expsmooth envelope
 special case 0x oversampling
+template the domain type conversion
 
 * get some linux folks to comment (ycollete?)
 * continuing
