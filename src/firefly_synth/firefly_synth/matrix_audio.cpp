@@ -276,8 +276,9 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     for(int c = 0; c < 2; c++)
       for(int f = block.start_frame; f < block.end_frame; f++)
       {
-        float bal = block.normalized_to_raw(this_module, param_bal, bal_curve[f]);
-        mix[c][f] += gain_curve[f] * stereo_balance(c, bal) * source_audio[0][0][c][f];
+        float bal = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_bal, bal_curve[f]);
+        float gain = block.normalized_to_raw_fast<domain_type::identity>(this_module, param_gain, gain_curve[f]);
+        mix[c][f] += gain * stereo_balance(c, bal) * source_audio[0][0][c][f];
       }
   }
 
