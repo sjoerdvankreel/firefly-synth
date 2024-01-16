@@ -30,8 +30,8 @@ static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_on
 
 static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
 static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
-static bool is_noise(multi_menu const& menu, int type) { 
-  int t = menu.multi_items[type].index1; 
+static bool is_noise(std::vector<multi_menu_item> const& menu, int type) { 
+  int t = menu[type].index1; 
   return t == wave_shape_type_smooth_or_fold || t == wave_shape_type_static || t == wave_shape_type_static_free; 
 }
 
@@ -80,14 +80,16 @@ public module_engine {
   float calc_smooth(float phase, int seed, int steps);
   template <bool Free> float calc_static(float phase, int seed, int steps);
 
-  template <bool IsNoise, class Calc>
-  void process_shape_loop(plugin_block& block, Calc calc);
   template <bool IsNoise, class Shape>
   void process_shape(plugin_block& block, Shape shape);
   template <bool IsNoise, class Shape, class SkewX>
   void process_shape_x(plugin_block& block, Shape shape, SkewX skew_x);
   template <bool IsNoise, class Shape, class SkewX, class SkewY>
   void process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y);
+  template <bool IsNoise, class Shape, class SkewX, class SkewY, class Quantize>
+  void process_shape_xy_quantize(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize);
+  template <bool IsNoise, class Calc, class Quantize>
+  void process_shape_loop(plugin_block& block, Calc calc, Quantize quantize);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(lfo_engine);
@@ -256,7 +258,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu, vs[1]); });
+  seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu.multi_items, vs[1]); });
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "Stp", true, true, param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(2, 99, 4, 0),
@@ -451,6 +453,17 @@ lfo_engine::process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, Ske
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
+  int step = block_auto[param_steps][0].step();
+  bool quantize = !is_noise(_type_items, type) && step != 0;
+  if(quantize) process_shape_xy_quantize<IsNoise>(block, shape, skew_x, skew_y, lfo_quantize);
+  else process_shape_xy_quantize<IsNoise>(block, shape, skew_x, skew_y, [](float in, int st) { return in; });
+}
+
+template <bool IsNoise, class Shape, class SkewX, class SkewY, class Quantize> void
+lfo_engine::process_shape_xy_quantize(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  int type = block_auto[param_type][0].step();
   auto const& type_item = _type_items[type];
   int sx = type_item.index2;
   int sy = type_item.index3;
@@ -459,11 +472,11 @@ lfo_engine::process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, Ske
   float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
   float py = wave_skew_is_exp(sy) ? _log_skew_y_exp : y;
   auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_uni(in, px, py, shape, skew_x, skew_y); };
-  process_shape_loop<IsNoise>(block, processor);
+  process_shape_loop<IsNoise>(block, processor, quantize);
 }
 
-template <bool IsNoise, class Calc>
-void lfo_engine::process_shape_loop(plugin_block& block, Calc calc)
+template <bool IsNoise, class Calc, class Quantize>
+void lfo_engine::process_shape_loop(plugin_block& block, Calc calc, Quantize quantize)
 {
   int this_module = _global ? module_glfo : module_vlfo;
   auto const& block_auto = block.state.own_block_automation;
@@ -494,7 +507,7 @@ void lfo_engine::process_shape_loop(plugin_block& block, Calc calc)
       _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
     }
 
-    _lfo_end_value = lfo_quantize(calc(_phase), steps);
+    _lfo_end_value = quantize(calc(_phase), steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
 
