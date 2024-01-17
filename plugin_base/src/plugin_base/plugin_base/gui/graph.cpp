@@ -59,7 +59,8 @@ module_graph::module_tab_changed(int module, int slot)
   if(_module_params.module_index != -1 && _module_params.module_index != module) return;
   _activated_module_slot = slot;
   int index = desc.module_topo_to_index.at(module) + slot;
-  request_rerender(desc.modules[index].params[0].info.global);
+  _last_rerender_cause_param = desc.modules[index].params[0].info.global;
+  request_rerender(_last_rerender_cause_param);
 }
 
 void 

@@ -558,7 +558,8 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
 
     // This means we can exceed [-1, 1] but just dividing 
     // by gen_count * uni_voices gets quiet real quick.
-    float attn = std::sqrt(generator_count * uni_voices);
+    // TODO this dont fly with AM
+    float attn = generator_count * uni_voices;//std::sqrt(generator_count * uni_voices);
     block.state.own_audio[0][0][0][f] = unison_sample_l / attn;
     block.state.own_audio[0][0][1][f] = unison_sample_r / attn;
   }

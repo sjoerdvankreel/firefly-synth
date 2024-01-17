@@ -36,6 +36,7 @@ document new invisible stuff (bpm/midi smooth, comb/delay lin interpol)
 lerped hardsync
 do osc oversampling
 do osc 2 unison modes
+limit unison phase 
 
 * get some linux folks to comment (ycollete?)
 * continuing
