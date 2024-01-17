@@ -35,6 +35,7 @@ document new invisible stuff (bpm/midi smooth, comb/delay lin interpol)
 lerped hardsync
 do osc oversampling
 do voice level unison
+stereo AM graph
 
 * get some linux folks to comment (ycollete?)
 * continuing
