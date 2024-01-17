@@ -112,7 +112,7 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
       params.scale_type = graph_params::scale_h;
       switch (module_index)
       {
-      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, { module_osc } ));
+      case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, { module_osc, module_voice_in } ));
       case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, { }));
       case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, { }));
       case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
@@ -292,7 +292,7 @@ synth_topo()
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
   result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
     custom_section_osc_graph, { 5, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false, false, { module_am_matrix }); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false, false, { module_am_matrix, module_voice_in }); });
   result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
     custom_section_vfx_graph, { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, false, false, {}); });

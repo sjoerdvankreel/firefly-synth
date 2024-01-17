@@ -23,6 +23,7 @@ enum {
 
 extern int const voice_in_osc_mod_unsn;
 extern int const voice_in_param_osc_mod_mode;
+extern int const voice_in_param_param_osc_mod_uni_voices;
 extern int const voice_in_output_pitch_offset;
 
 static bool is_phase_gen(int type)
@@ -50,6 +51,7 @@ public:
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 
 private:
+  void get_vin_osc_mod_mode(plugin_block const& block, int& osc_mod, int& uni_voices);
 
   // https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -398,11 +400,24 @@ generate_dsf(float phase, float increment, float sr, float freq, int parts, floa
 }
 
 void 
+osc_engine::get_vin_osc_mod_mode(plugin_block const& block, int& osc_mod, int& uni_voices)
+{
+  auto const& own_block_auto = block.state.own_block_automation;
+  auto const& vin_block_auto = block.state.all_block_automation[module_voice_in][0];
+  int own_uni_voices = own_block_auto[param_uni_voices][0].step();
+  int vin_uni_voices = vin_block_auto[voice_in_param_param_osc_mod_uni_voices][0].step();
+  osc_mod = vin_block_auto[voice_in_param_osc_mod_mode][0].step();
+  uni_voices = osc_mod == voice_in_osc_mod_unsn? vin_uni_voices: own_uni_voices;
+}
+
+void 
 osc_engine::reset(plugin_block const* block)
 {
-  auto const& block_auto = block->state.own_block_automation;
-  int uni_voices = block_auto[param_uni_voices][0].step();
-  float uni_phase = block_auto[param_uni_phase][0].real();
+  int uni_voices = -1;
+  int vin_mod_mode = -1;
+  get_vin_osc_mod_mode(*block, vin_mod_mode, uni_voices);
+  auto const& own_block_auto = block->state.own_block_automation;
+  float uni_phase = own_block_auto[param_uni_phase][0].real();
   for (int v = 0; v < uni_voices; v++)
     _phase[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
 }
@@ -484,9 +499,12 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
     return;
   }
 
+  int uni_voices = -1;
+  int vin_mod_mode = -1;
+  get_vin_osc_mod_mode(block, vin_mod_mode, uni_voices);
+
   auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
-  int uni_voices = block_auto[param_uni_voices][0].step();
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
 
   float dsf_dist = block_auto[param_dsf_dist][0].real();

@@ -26,6 +26,7 @@ enum {
 extern int const master_in_param_pb_range;
 extern int const voice_in_osc_mod_unsn = osc_mod_unsn;
 extern int const voice_in_param_osc_mod_mode = param_osc_mod_mode;
+extern int const voice_in_param_param_osc_mod_uni_voices = param_osc_mod_uni_voices;
 extern int const voice_in_output_pitch_offset = output_pitch_offset;
 
 static std::vector<list_item>
