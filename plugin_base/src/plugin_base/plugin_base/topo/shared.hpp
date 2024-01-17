@@ -103,7 +103,7 @@ struct gui_binding final {
 };
 
 // binding another module to enabled/visible
-// module is assumed to be single slot count
+// module/param is assumed to be single slot count
 struct gui_global_binding final {
   int param = -1;
   int module = -1;
@@ -111,7 +111,7 @@ struct gui_global_binding final {
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_global_binding);
   bool is_bound() const { return selector != nullptr; }
-  void validate(plugin_topo const& plugin, int slot_count) const;
+  void validate(plugin_topo const& plugin) const;
   void bind_param(int module, int param, gui_global_param_binding_selector selector_);
 };
 

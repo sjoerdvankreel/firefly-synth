@@ -103,10 +103,10 @@ gui_global_binding::bind_param(int module_, int param_, gui_global_param_binding
 void
 gui_bindings::validate(plugin_topo const& plugin, module_topo const& module, int slot_count) const
 {
+  global_enabled.validate(plugin);
+  global_enabled.validate(plugin);
   enabled.validate(module, slot_count);
   visible.validate(module, slot_count);
-  global_enabled.validate(plugin, slot_count);
-  global_enabled.validate(plugin, slot_count);
 }
 
 void
@@ -134,7 +134,7 @@ gui_binding::validate(module_topo const& module, int slot_count) const
 }
 
 void
-gui_global_binding::validate(plugin_topo const& plugin, int slot_count) const
+gui_global_binding::validate(plugin_topo const& plugin) const
 { 
   assert((param == -1) == (selector == nullptr));
   assert((module == -1) == (selector == nullptr));
@@ -143,7 +143,7 @@ gui_global_binding::validate(plugin_topo const& plugin, int slot_count) const
   (void)bound;
   assert(plugin.modules[module].info.slot_count == 1);
   assert(!bound.domain.is_real());
-  assert(bound.info.slot_count == 1 || bound.info.slot_count == slot_count);
+  assert(bound.info.slot_count == 1);
 }
 
 void

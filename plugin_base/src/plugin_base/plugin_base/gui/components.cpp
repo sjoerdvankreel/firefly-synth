@@ -10,8 +10,8 @@ binding_component(
   gui_bindings const* bindings, int own_slot_index):
 _gui(gui), _own_slot_index(own_slot_index), _bindings(bindings), _module(module)
 {
-  setup_param_bindings(bindings->enabled.params, _enabled_params);
-  setup_param_bindings(bindings->visible.params, _visibility_params);
+  setup_param_bindings(bindings->global_enabled, bindings->enabled.params, _enabled_params);
+  setup_param_bindings(bindings->global_visible, bindings->visible.params, _visibility_params);
 }
 
 binding_component::
@@ -21,6 +21,20 @@ binding_component::
     _gui->gui_state()->remove_listener(_visibility_params[i], this);
   for (int i = 0; i < _enabled_params.size(); i++)
     _gui->gui_state()->remove_listener(_enabled_params[i], this);
+
+  auto const& param_topo_to_index = _gui->gui_state()->desc().param_mappings.topo_to_index;
+  auto const& global_enabled = _bindings->global_enabled;
+  if (global_enabled.is_bound())
+  {
+    int global_index = param_topo_to_index[global_enabled.module][0][global_enabled.param][0];
+    _gui->gui_state()->remove_listener(global_index, this);
+  }
+  auto const& global_visible = _bindings->global_visible;
+  if (global_visible.is_bound())
+  {
+    int global_index = param_topo_to_index[global_visible.module][0][global_visible.param][0];
+    _gui->gui_state()->remove_listener(global_index, this);
+  }
 }
 
 bool 
@@ -53,16 +67,22 @@ binding_component::init()
 
 void
 binding_component::setup_param_bindings(
+  gui_global_binding const& global_binding,
   std::vector<int> const& topo_params, std::vector<int>& params)
 {
+  auto const& param_topo_to_index = _gui->gui_state()->desc().param_mappings.topo_to_index;
   for (int i = 0; i < topo_params.size(); i++)
   {
-    auto const& param_topo_to_index = _gui->gui_state()->desc().param_mappings.topo_to_index;
     auto const& slots = param_topo_to_index[_module->info.topo][_module->info.slot][topo_params[i]];
     bool single_slot = _module->module->params[topo_params[i]].info.slot_count == 1;
     int state_index = single_slot ? slots[0] : slots[_own_slot_index];
     params.push_back(state_index);
     _gui->gui_state()->add_listener(state_index, this);
+  }
+  if (global_binding.is_bound())
+  {
+    int global_index = param_topo_to_index[global_binding.module][0][global_binding.param][0];
+    _gui->gui_state()->add_listener(global_index, this);
   }
 }
 
@@ -78,7 +98,7 @@ binding_component::state_changed(int index, plain_value plain)
     auto const& global_binding = _bindings->global_enabled;
     if(global_binding.is_bound())
     {
-      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, _own_slot_index).step();
+      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, 0).step();
       global_enabled = global_binding.selector(global_value);
     }
     if(!global_enabled)
@@ -99,7 +119,7 @@ binding_component::state_changed(int index, plain_value plain)
     auto const& global_binding = _bindings->global_visible;
     if(global_binding.is_bound())
     {
-      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, _own_slot_index).step();
+      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, 0).step();
       global_visible = global_binding.selector(global_value);
     }
     if (!global_visible)

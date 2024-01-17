@@ -44,7 +44,9 @@ private:
   std::vector<int> _visibility_values = {};
   std::vector<int> _visibility_params = {};
 
-  void setup_param_bindings(std::vector<int> const& topo_params, std::vector<int>& params);
+  void setup_param_bindings(
+    gui_global_binding const& global_binding,
+    std::vector<int> const& topo_params, std::vector<int>& params);
   bool bind_param(gui_binding const& binding, std::vector<int> const& params, std::vector<int>& values);
 };
 
