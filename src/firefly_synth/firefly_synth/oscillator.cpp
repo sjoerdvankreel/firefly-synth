@@ -84,20 +84,6 @@ make_osc_routing_menu_handler(plugin_state* state)
   return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params, am_params }));
 }
 
-plugin_state
-prepare_osc_state_for_am_graph(plugin_state const& state)
-{
-  // todo disable unison etc
-  plugin_state result(&state.desc(), false);
-  result.copy_from(state.state());
-  for (int o = 0; o < state.desc().plugin->modules[module_osc].info.slot_count; o++)
-  {
-    // TODO or use any (phased) generator ?
-    //result.set_raw_at(module_osc, o, param_type, 0, type_sin);
-  }
-  return result;
-}
-
 static graph_engine_params
 make_graph_engine_params()
 {

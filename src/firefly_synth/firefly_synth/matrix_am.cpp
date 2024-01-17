@@ -21,7 +21,6 @@ enum { output_modulated };
 enum { param_on, param_source, param_target, param_amt, param_ring };
 
 static int const route_count = 20; // TODO decrease once we do FM
-plugin_state prepare_osc_state_for_am_graph(plugin_state const& state);
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot);
 
@@ -43,11 +42,10 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 {
   int max_osc = 0;
   std::vector<float> result;
-  plugin_state am_state(prepare_osc_state_for_am_graph(state));
   for(int r = 0; r < route_count; r++)
-    if(am_state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0)
-      max_osc = std::max(max_osc, am_state.get_plain_at(module_am_matrix, 0, param_target, r).step());
-  auto graphs(render_osc_graphs(am_state, engine, max_osc));
+    if(state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0)
+      max_osc = std::max(max_osc, state.get_plain_at(module_am_matrix, 0, param_target, r).step());
+  auto graphs(render_osc_graphs(state, engine, max_osc));
   for (int mi = 0; mi <= max_osc; mi++)
     result.insert(result.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
   std::vector<std::string> partitions;
