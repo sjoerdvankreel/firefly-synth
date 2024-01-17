@@ -362,6 +362,53 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 void
 osc_engine::process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
+  auto const& block_auto = block.state.own_block_automation;
+  int note = block_auto[param_note][0].step();
+  int parts = block_auto[param_dsf_parts][0].step();
+
+  auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
+  auto const& dist_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dist][0];
+  auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
+
+  // TODO uncopy this stuff
+  for (int f = block.start_frame; f < block.end_frame; f++)
+  {
+    float cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[f]);
+    float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
+    float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
+
+    // -1: Fundamental is implicit. 
+    int ps = parts - 1;
+    float const scale_factor = 0.975f;
+    float const decay_range = 0.99f;
+    float decay = block.normalized_to_raw_fast<domain_type::identity>(module_osc, param_dsf_dcy, dcy_curve[f]);
+    float dist = freq * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_dsf_dist, dist_curve[f]);
+    float max_parts = (block.sample_rate * 0.5f - freq) / dist;
+    ps = std::min(ps, (int)max_parts);
+
+    float n = static_cast<float>(ps);
+    float w = decay * decay_range;
+    float w_pow_np1 = std::pow(w, n + 1);
+    float u = 2.0f * pi32 * _phase;
+    float v = 2.0f * pi32 * dist * _phase / freq;
+    float a = w * std::sin(u + n * v) - std::sin(u + (n + 1) * v);
+    float x = (w * std::sin(v - u) + std::sin(u)) + w_pow_np1 * a;
+    float y = 1 + w * w - 2 * w * std::cos(v);
+    float scale = (1.0f - w_pow_np1) / (1.0f - w);
+    float sample = check_bipolar(x * scale_factor / (y * scale));
+    block.state.own_audio[0][0][0][f] = sample;
+    block.state.own_audio[0][0][1][f] = sample;
+    increment_and_wrap_phase(_phase, inc);
+  }
+
+  // TODO this must apply to dsf also
+  // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
+  auto& modulator = get_am_matrix_modulator(block);
+  auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
+  for (int c = 0; c < 2; c++)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+      block.state.own_audio[0][0][c][f] = modulated[c][f];
 }
 
 void
@@ -445,6 +492,7 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
     increment_and_wrap_phase(_phase, inc);
   }
 
+  // TODO this must apply to dsf also
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
   auto& modulator = get_am_matrix_modulator(block);
   auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
