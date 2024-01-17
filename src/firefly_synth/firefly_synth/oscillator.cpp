@@ -20,6 +20,9 @@ enum {
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
+
+extern int const voice_in_osc_mod_unsn;
+extern int const voice_in_param_osc_mod_mode;
 extern int const voice_in_output_pitch_offset;
 
 static bool is_phase_gen(int type)
@@ -285,6 +288,8 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
+  uni_voices.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_osc_mod_mode, [](int v) { return v == voice_in_osc_mod_unsn; });
+  
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),

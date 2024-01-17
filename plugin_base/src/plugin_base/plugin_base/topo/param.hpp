@@ -74,7 +74,7 @@ struct param_topo_gui final {
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_topo_gui);
   bool is_list() const;
-  void validate(module_topo const& module, param_topo const& param) const;
+  void validate(plugin_topo const& plugin, module_topo const& module, param_topo const& param) const;
 };
 
 // parameter dsp

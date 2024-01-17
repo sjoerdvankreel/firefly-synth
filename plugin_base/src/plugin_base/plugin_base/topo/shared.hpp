@@ -11,6 +11,7 @@
 namespace plugin_base {
 
 struct module_topo;
+struct plugin_topo;
 struct gui_dimension;
 
 // just a guess for validation, increase if needed
@@ -26,6 +27,8 @@ typedef std::function<bool(int module_slot)>
 gui_slot_binding_selector;
 typedef std::function<bool(std::vector<int> const& vs)>
 gui_param_binding_selector;
+typedef std::function<bool(int)>
+gui_global_param_binding_selector;
 
 // for custom module/param context menus
 struct custom_menu_entry { int action; std::string title; };
@@ -99,13 +102,28 @@ struct gui_binding final {
   bool is_bound() const { return slot_selector != nullptr || param_selector != nullptr; }
 };
 
+// binding another module to enabled/visible
+// module is assumed to be single slot count
+struct gui_global_binding final {
+  int param = -1;
+  int module = -1;
+  gui_global_param_binding_selector selector = {};
+
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_global_binding);
+  bool is_bound() const { return selector != nullptr; }
+  void validate(plugin_topo const& plugin, int slot_count) const;
+  void bind_param(int module, int param, gui_global_param_binding_selector selector_);
+};
+
 // binding to enabled/visible
 struct gui_bindings final {
   gui_binding enabled;
   gui_binding visible;
+  gui_global_binding global_enabled;
+  gui_global_binding global_visible;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_bindings);
-  void validate(module_topo const& module, int slot_count) const;
+  void validate(plugin_topo const& plugin, module_topo const& module, int slot_count) const;
 };
 
 // dimensions of own grid (relative distribution)

@@ -31,7 +31,7 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   for (int p = 0; p < params.size(); p++)
     params[p].validate(plugin, *this, p);
   for (int s = 0; s < sections.size(); s++)
-    sections[s].validate(*this, s);
+    sections[s].validate(plugin, *this, s);
   for (int ms = 0; ms < midi_sources.size(); ms++)
     midi_sources[ms].validate();
 

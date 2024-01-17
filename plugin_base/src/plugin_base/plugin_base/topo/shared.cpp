@@ -1,6 +1,7 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/topo/shared.hpp>
 #include <plugin_base/topo/module.hpp>
+#include <plugin_base/topo/plugin.hpp>
 
 #include <set>
 #include <cmath>
@@ -87,11 +88,24 @@ gui_binding::bind_params(std::vector<int> const& params_, gui_param_binding_sele
   param_selector = selector_;
 }
 
+void 
+gui_global_binding::bind_param(int module_, int param_, gui_global_param_binding_selector selector_)
+{
+  assert(param_ >= 0);
+  assert(module_ >= 0);
+  assert(selector_ != nullptr);
+  assert(selector == nullptr);
+  param = param_;
+  module = module_;
+}
+
 void
-gui_bindings::validate(module_topo const& module, int slot_count) const
+gui_bindings::validate(plugin_topo const& plugin, module_topo const& module, int slot_count) const
 {
   enabled.validate(module, slot_count);
   visible.validate(module, slot_count);
+  global_enabled.validate(plugin, slot_count);
+  global_enabled.validate(plugin, slot_count);
 }
 
 void
@@ -116,6 +130,17 @@ gui_binding::validate(module_topo const& module, int slot_count) const
     assert(!bound.domain.is_real());
     assert(bound.info.slot_count == 1 || bound.info.slot_count == slot_count);
   }
+}
+
+void
+gui_global_binding::validate(plugin_topo const& plugin, int slot_count) const
+{ 
+  assert((param == -1) == (selector == nullptr));
+  assert((module == -1) == (selector == nullptr));
+  auto const& bound = plugin.modules[module].params[param];
+  (void)bound;
+  assert(!bound.domain.is_real());
+  assert(bound.info.slot_count == 1 || bound.info.slot_count == slot_count);
 }
 
 void

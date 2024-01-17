@@ -55,10 +55,10 @@ gui_item_binding::bind_param(param_topo_mapping param_, gui_item_binding_selecto
 }
 
 void
-param_topo_gui::validate(module_topo const& module, param_topo const& param) const
+param_topo_gui::validate(plugin_topo const& plugin, module_topo const& module, param_topo const& param) const
 {
   assert(!item_enabled.is_bound() || is_list());
-  bindings.validate(module, param.info.slot_count);
+  bindings.validate(plugin, module, param.info.slot_count);
   position.validate(module.sections[section].gui.dimension);
   assert((param.gui.edit_type == gui_edit_type::output) == (param.dsp.direction == param_direction::output));
 

@@ -26,7 +26,7 @@ struct param_section final {
   param_section_gui gui;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section);
-  void validate(module_topo const& module, int index_) const;
+  void validate(plugin_topo const& plugin, module_topo const& module, int index_) const;
 };
 
 }

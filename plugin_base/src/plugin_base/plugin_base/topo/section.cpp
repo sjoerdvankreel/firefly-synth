@@ -5,10 +5,10 @@
 namespace plugin_base {
 
 void 
-param_section::validate(module_topo const& module, int index_) const
+param_section::validate(plugin_topo const& plugin, module_topo const& module, int index_) const
 {
   tag.validate();
-  gui.bindings.validate(module, 1);
+  gui.bindings.validate(plugin, module, 1);
   gui.position.validate(module.gui.dimension);
 
   assert(this->index == index_);
