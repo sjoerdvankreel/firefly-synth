@@ -110,16 +110,16 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.item_enabled.bind_param({ module_am_matrix, 0, param_target, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) { return am[self].slot <= am[other].slot; });
+    [am = am_matrix.mappings](int other, int self) { return am[self].slot < am[other].slot; });
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", param_target, route_count),
-    make_param_dsp_voice(param_automate::none), make_domain_item(am_matrix.items, "Osc 1"),
+    make_param_dsp_voice(param_automate::none), make_domain_item(am_matrix.items, "Osc 2"),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.item_enabled.bind_param({ module_am_matrix, 0, param_source, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) { return am[other].slot <= am[self].slot; });
+    [am = am_matrix.mappings](int other, int self) { return am[other].slot < am[self].slot; });
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "Amt", param_amt, route_count),

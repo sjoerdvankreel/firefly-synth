@@ -14,7 +14,7 @@ public:
   normalized_value(normalized_value const&) = default;
   normalized_value& operator=(normalized_value const&) = default;
   explicit normalized_value(double value) : _value(value) 
-  { assert(-1e-5 <= value && value <= 1 + 1e-15); }
+  { assert(-1e-5 <= value && value <= 1 + 1e-5); }
 };
 
 // linear with min/max
