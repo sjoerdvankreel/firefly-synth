@@ -156,7 +156,7 @@ render_osc_graph(plugin_state const& state, graph_engine* engine, int param, par
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
   auto data = render_osc_graphs(state, engine, mapping.module_slot)[mapping.module_slot];
-  return graph_data(data.audio(), 1.0f, { "1 Cycle" });
+  return graph_data(data.audio(), 1.0f, { "First Cycle" });
 }
 
 module_topo
