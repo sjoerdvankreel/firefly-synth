@@ -65,11 +65,14 @@ init_minimal(plugin_state& state)
 static void
 init_default(plugin_state& state)
 {
-  // TODO
-  //state.set_text_at(module_osc, 0, param_type, 0, "Saw");
-  //state.set_text_at(module_osc, 0, param_cent, 0, "-10");
-  //state.set_text_at(module_osc, 1, param_type, 0, "Saw");
-  //state.set_text_at(module_osc, 1, param_cent, 0, "+10");
+  state.set_text_at(module_osc, 0, param_cent, 0, "-10");
+  state.set_text_at(module_osc, 0, param_type, 0, "Basic");
+  state.set_text_at(module_osc, 0, param_basic_sin_on, 0, "Off");
+  state.set_text_at(module_osc, 0, param_basic_saw_on, 0, "On");
+  state.set_text_at(module_osc, 1, param_cent, 0, "+10");
+  state.set_text_at(module_osc, 1, param_type, 0, "Basic");
+  state.set_text_at(module_osc, 1, param_basic_sin_on, 0, "Off");
+  state.set_text_at(module_osc, 1, param_basic_saw_on, 0, "On");
 }
 
 static std::unique_ptr<module_tab_menu_handler>
