@@ -34,7 +34,6 @@ document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 lerped hardsync
 do osc oversampling
-check modulating the osc params
 
 * get some linux folks to comment (ycollete?)
 * continuing

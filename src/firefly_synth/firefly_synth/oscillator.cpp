@@ -13,13 +13,17 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { type_off, type_basic, type_dsf };
-enum { section_main, section_basic, section_dsf };
+enum { section_main, section_basic, section_dsf, section_uni };
 enum {
   param_type, param_note, param_cent, 
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
-  param_dsf_parts, param_dsf_dist, param_dsf_dcy };
+  param_dsf_parts, param_dsf_dist, param_dsf_dcy,
+  param_uni_voices, param_uni_dtn, param_uni_sprd, param_uni_phase };
 extern int const voice_in_output_pitch_offset;
+
+static bool is_phase_gen(int type)
+{ return type == type_basic || type == type_dsf; }
 
 static std::vector<list_item>
 type_items()
@@ -146,7 +150,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Oscillator", "Osc", true, true, module_osc, 4),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, 1 } })));
+    make_module_gui(section, colors, pos, { { 1, 1 }, { gui_dimension::auto_size, 1 } })));
 
   result.minimal_initializer = init_minimal;
   result.default_initializer = init_default;
@@ -256,6 +260,35 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+
+  auto& unison = result.sections.emplace_back(make_param_section(section_uni,
+    make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
+    make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
+  unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
+  auto& uni_voices = result.params.emplace_back(make_param(
+    make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_step(1, 8, 1, 0),
+    make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
+  auto& uni_dtn = result.params.emplace_back(make_param(
+    make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.1, 0, true),
+    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  uni_dtn.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
+  auto& uni_spread = result.params.emplace_back(make_param(
+    make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", "Uni.Sprd", "Sprd", true, false, param_uni_sprd, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  uni_spread.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
+  auto& uni_phase = result.params.emplace_back(make_param(
+    make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  uni_phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
 
   return result;
 }
