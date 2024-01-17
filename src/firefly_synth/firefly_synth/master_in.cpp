@@ -13,7 +13,9 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-int aux_count = 3;
+int const aux_count = 3;
+int const max_ext_smoothing_ms = 1000;
+
 enum { output_aux, output_mod, output_pb };
 enum { section_smooth, section_aux, section_linked };
 enum { param_midi_smooth, param_tempo_smooth, param_aux, param_mod, param_pb, param_pb_range, param_count };
@@ -36,6 +38,8 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
+  if(param == param_midi_smooth || param == param_tempo_smooth)
+    value /= max_ext_smoothing_ms;
   std::string partition = state.desc().params[param]->info.name;
   return graph_data(value, bipolar, { partition });
 }
@@ -61,12 +65,12 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
   result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", "MIDI Smoothing", "MIDI.Smt", true, false, param_midi_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, 1000, 50, 0, "Ms"),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
     make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", "BPM Smoothing", "BPM.Smt", true, false, param_tempo_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, 1000, 200, 0, "Ms"),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 200, 0, "Ms"),
     make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
 
