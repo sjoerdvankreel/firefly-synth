@@ -669,13 +669,13 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   reverb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_size = result.params.emplace_back(make_param(
     make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", "Rev.Size", "Size", true, false, param_reverb_size, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   reverb_size.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_damp = result.params.emplace_back(make_param(
     make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", "Rev.Damp", "Damp", true, false, param_reverb_damp, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   reverb_damp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
@@ -687,7 +687,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   reverb_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_apf = result.params.emplace_back(make_param(
     make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", "Rev.APF", "APF", true, false, param_reverb_apf, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
     make_param_gui_single(section_reverb, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   reverb_apf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
