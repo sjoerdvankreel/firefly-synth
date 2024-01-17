@@ -872,9 +872,12 @@ fx_engine::process_reverb(plugin_block& block,
   // Precompute channel independent stuff.
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    // Size doesnt respond linear.
+    // By just testing by listening 80% is about the midpoint.
+    // Do cube root so that 0.5 ~= 0.79.
     scratch_damp[f] = (1.0f - damp_curve[f]) * reverb_damp_scale;
-    scratch_size[f] = (size_curve[f] * reverb_room_scale) + reverb_room_offset;
     scratch_in[f] = (audio_in[0][f] + audio_in[1][f]) * reverb_gain;
+    scratch_size[f] = (std::cbrt(size_curve[f]) * reverb_room_scale) + reverb_room_offset;
   }
 
   // Apply reverb per channel.
