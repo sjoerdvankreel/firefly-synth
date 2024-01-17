@@ -59,8 +59,11 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules);
 // allows to manage matrix routes
 class matrix_param_menu_handler:
 public param_menu_handler {
+
   int const _route_count;
   int const _default_on_value;
+  enum { clear, delete_, duplicate, insert_before, insert_after, action_count  };
+
 public:
   matrix_param_menu_handler(plugin_state* state, int route_count, int default_on_value):
   param_menu_handler(state), _route_count(route_count), _default_on_value(default_on_value) {}

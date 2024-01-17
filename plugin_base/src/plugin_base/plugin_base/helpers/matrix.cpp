@@ -51,11 +51,16 @@ make_copy_failed_result(std::string const& matrix_name)
 
 std::vector<custom_menu> const 
 matrix_param_menu_handler::menus() const
-{
+{ 
   custom_menu result;
   result.menu_id = 0;
   result.name = "Route";
-  result.entries = { { 0, "Clear" }, { 1, "Delete" }, { 2, "Insert Before" }, { 3, "Insert After" } };
+  result.entries = { 
+    { clear, "Clear" }, 
+    { delete_, "Delete" },
+    { duplicate, "Duplicate" }, 
+    { insert_before, "Insert Before" }, 
+    { insert_after, "Insert After" } };
   return { result }; 
 }
 
@@ -65,17 +70,17 @@ matrix_param_menu_handler::execute(
   int module_slot, int param_index, int param_slot)
 {
   assert(menu_id == 0);
-  assert(action == 0 || action == 1 || action == 2 || action == 3);
+  assert(0 <= action && action < action_count);
 
   auto const& topo = _state->desc().plugin->modules[module_index];
-  if (action == 0)
+  if (action == clear)
   {
     for(int p = 0; p < topo.params.size(); p++)
       _state->set_plain_at(module_index, module_slot, p, param_slot, 
         topo.params[p].domain.default_plain(module_slot, param_slot));
     return;
   }
-  if (action == 1)
+  if (action == delete_)
   {
     execute(menu_id, 0, module_index, param_index, param_index, param_slot);
     for(int r = param_slot; r < _route_count - 1; r++)
@@ -85,24 +90,25 @@ matrix_param_menu_handler::execute(
     execute(menu_id, 0, module_index, param_index, param_index, _route_count - 1);
     return;
   }
-  if (action == 2 || action == 3)
-  {
-    if (action == 2)
-      execute(menu_id, 0, module_index, param_index, param_index, _route_count - 1);
-    for (int r = _route_count - 1; r > (action == 3? param_slot + 1: param_slot); r--)
-      for (int p = 0; p < topo.params.size(); p++)
-        _state->set_plain_at(module_index, module_slot, p, r,
-          _state->get_plain_at(module_index, module_slot, p, r - 1));
-    if (action == 2)
-      execute(menu_id, 0, module_index, param_index, param_index, param_slot);
-    if (action == 3 && param_slot < _route_count - 1)
-      execute(menu_id, 0, module_index, param_index, param_index, param_slot + 1);
-    if(action == 2)
-      _state->set_raw_at(module_index, module_slot, param_index, param_slot, _default_on_value);
-    if (action == 3 && param_slot < _route_count - 1)
-      _state->set_raw_at(module_index, module_slot, param_index, param_slot + 1, _default_on_value);
-    return;
-  }
+  if (action == insert_before)
+    execute(menu_id, clear, module_index, param_index, param_index, _route_count - 1);
+  for (int r = _route_count - 1; r > (action == insert_after? param_slot + 1: param_slot); r--)
+    for (int p = 0; p < topo.params.size(); p++)
+      _state->set_plain_at(module_index, module_slot, p, r,
+        _state->get_plain_at(module_index, module_slot, p, r - 1));
+  if (action == insert_before)
+    execute(menu_id, clear, module_index, param_index, param_index, param_slot);
+  if ((action == insert_after || action == duplicate) && param_slot < _route_count - 1)
+    execute(menu_id, clear, module_index, param_index, param_index, param_slot + 1);
+  if(action == insert_before)
+    _state->set_raw_at(module_index, module_slot, param_index, param_slot, _default_on_value);
+  if (action == insert_after && param_slot < _route_count - 1)
+    _state->set_raw_at(module_index, module_slot, param_index, param_slot + 1, _default_on_value);
+  if (action == duplicate && param_slot < _route_count - 1)
+    for (int p = 0; p < topo.params.size(); p++)
+      _state->set_plain_at(module_index, module_slot, p, param_slot + 1,
+        _state->get_plain_at(module_index, module_slot, p, param_slot));
+  return;
 }
 
 routing_matrix<module_topo_mapping>
