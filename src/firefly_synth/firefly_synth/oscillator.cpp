@@ -132,6 +132,20 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
     result.push_back(graph_data(audio, 1.0f, {}));
   }
   engine->process_end();
+
+  // scale to 1
+  float max = 0;
+  for(int o = 0; o < result.size(); o++)
+    for(int c = 0; c < 2; c++)
+      for(int f = 0; f < params.max_frame_count; f++)
+        max = std::max(max, std::fabs(result[o].audio()[c][f]));
+  
+  if(max == 0) max = 1;
+  for (int o = 0; o < result.size(); o++)
+    for (int c = 0; c < 2; c++)
+      for (int f = 0; f < params.max_frame_count; f++)
+        result[o].audio()[c][f] /= max;
+
   return result;
 }
 
@@ -521,8 +535,11 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
       increment_and_wrap_phase(_phase[v], inc);
     }
 
-    block.state.own_audio[0][0][0][f] = unison_sample_l / (generator_count * uni_voices);
-    block.state.own_audio[0][0][1][f] = unison_sample_r / (generator_count * uni_voices);
+    // This means we can exceed [-1, 1] but just dividing 
+    // by gen_count * uni_voices gets quiet real quick.
+    float attn = std::sqrt(generator_count * uni_voices);
+    block.state.own_audio[0][0][0][f] = unison_sample_l / attn;
+    block.state.own_audio[0][0][1][f] = unison_sample_r / attn;
   }
 
   // todo the alternative AM+unison version

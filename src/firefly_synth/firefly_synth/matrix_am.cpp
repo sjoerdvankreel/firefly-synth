@@ -41,17 +41,22 @@ static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int max_osc = 0;
-  std::vector<float> result;
+  std::vector<float> result_l;
+  std::vector<float> result_r;
   for(int r = 0; r < route_count; r++)
     if(state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0)
       max_osc = std::max(max_osc, state.get_plain_at(module_am_matrix, 0, param_target, r).step());
   auto graphs(render_osc_graphs(state, engine, max_osc));
   for (int mi = 0; mi <= max_osc; mi++)
-    result.insert(result.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
+  {
+    result_l.insert(result_l.end(), graphs[mi].audio()[0].cbegin(), graphs[mi].audio()[0].cend());
+    result_r.insert(result_r.end(), graphs[mi].audio()[1].cbegin(), graphs[mi].audio()[1].cend());
+  }
   std::vector<std::string> partitions;
   for(int i = 0; i <= max_osc; i++)
     partitions.push_back(std::to_string(i + 1));
-  return graph_data(jarray<float, 1>(result), true, 1.0f, partitions);
+  return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>> { 
+    jarray<float, 1>(result_l), jarray<float, 1>(result_r) }), 1.0f, partitions);
 }
 
 audio_routing_audio_params

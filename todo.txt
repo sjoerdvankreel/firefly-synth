@@ -3,6 +3,7 @@ make a .com website
 someday:
 mseg
 microtonal support
+do voice level unison
 polyphonic modulation
 do cakewalk bug report
 handle clap is_modulatable (not yet per note)
@@ -34,8 +35,6 @@ document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 lerped hardsync
 do osc oversampling
-do voice level unison
-stereo AM graph
 
 * get some linux folks to comment (ycollete?)
 * continuing

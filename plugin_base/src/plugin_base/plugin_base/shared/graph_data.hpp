@@ -23,11 +23,20 @@ class graph_data {
 public:
   float scalar() const 
   { assert(_type == graph_data_type::scalar); return _scalar; }
-  jarray<float, 2> const& audio() const 
+  
+  jarray<float, 2>& audio() 
   { assert(_type == graph_data_type::audio); return _audio; }
-  jarray<float, 1> const& series() const 
+  jarray<float, 2> const& audio() const
+  { assert(_type == graph_data_type::audio); return _audio; }
+  
+  jarray<float, 1>& series() 
   { assert(_type == graph_data_type::series); return _series; }
-  std::vector<std::pair<float, float>> const& multi_stereo() const 
+  jarray<float, 1> const& series() const
+  { assert(_type == graph_data_type::series); return _series; }
+  
+  std::vector<std::pair<float, float>>& multi_stereo() 
+  { assert(_type == graph_data_type::multi_stereo); return _multi_stereo; }
+  std::vector<std::pair<float, float>> const& multi_stereo() const
   { assert(_type == graph_data_type::multi_stereo); return _multi_stereo; }
 
   bool bipolar() const { return _bipolar; }
