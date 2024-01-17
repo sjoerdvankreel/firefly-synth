@@ -11,6 +11,9 @@
 
 namespace firefly_synth {
 
+// for osc and voice in
+inline int const max_unison_voices = 8;
+
 // everybody needs this
 typedef plugin_base::jarray<plugin_base::jarray<
   float, 1> const*, 4> cv_matrix_mixdown;

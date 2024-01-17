@@ -12,8 +12,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int const max_unison = 8;
-
 enum { type_off, type_basic, type_dsf };
 enum { section_main, section_basic, section_dsf, section_uni };
 enum {
@@ -40,7 +38,7 @@ type_items()
 class osc_engine:
 public module_engine {
 
-  float _phase[max_unison];
+  float _phase[max_unison_voices];
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(osc_engine);
@@ -283,7 +281,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison, 1, 0),
+    make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
