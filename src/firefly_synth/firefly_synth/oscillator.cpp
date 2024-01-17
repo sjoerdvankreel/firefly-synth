@@ -12,12 +12,13 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { type_off, type_basic };
-enum { section_main, section_basic };
-enum { 
+enum { type_off, type_basic, type_dsf };
+enum { section_main, section_basic, section_dsf };
+enum {
   param_type, param_note, param_cent, 
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
-  param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm };
+  param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
+  param_dsf_parts, param_dsf_dist, param_dsf_dcy };
 extern int const voice_in_output_pitch_offset;
 
 static std::vector<list_item>
@@ -26,6 +27,7 @@ type_items()
   std::vector<list_item> result;
   result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
+  result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF");
   return result;
 }
 
@@ -41,6 +43,10 @@ public:
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 
 private:
+
+  // https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
+  void process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
+
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin> void 
   process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -85,7 +91,7 @@ prepare_osc_state_for_am_graph(plugin_state const& state)
   result.copy_from(state.state());
   for (int o = 0; o < state.desc().plugin->modules[module_osc].info.slot_count; o++)
   {
-    // TODO
+    // TODO or use any (phased) generator ?
     //result.set_raw_at(module_osc, o, param_type, 0, type_sin);
   }
   return result;
@@ -240,6 +246,30 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_sqr_pwm.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
 
+  auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
+    make_topo_tag("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1 }))));
+  dsf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+  dsf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+  auto& dsf_partials = result.params.emplace_back(make_param(
+    make_topo_info("{21BC6524-9FDB-4551-9D3D-B180AB93B5CE}", "DSF.Parts", "Parts", true, false, param_dsf_parts, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_step(1, 99, 2, 0),
+    make_param_gui_single(section_dsf, gui_edit_type::knob, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+  auto& dsf_dist = result.params.emplace_back(make_param(
+    make_topo_info("{E5E66BBD-DCC9-4A7E-AB09-2D7107548090}", "DSF.Dist", "Dist", true, false, param_dsf_dist, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.05, 20, 1, 2, ""),
+    make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+  auto& dsf_dcy = result.params.emplace_back(make_param(
+    make_topo_info("{2D07A6F2-F4D3-4094-B1C0-453FDF434CC8}", "DSF.Dcy", "Decay", true, false, param_dsf_dcy, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+
   return result;
 }
 
@@ -323,9 +353,15 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 
   switch (type)
   {
+  case type_dsf: process_dsf(block, modulation); break;
   case type_basic: process_basic(block, modulation); break;
   default: assert(false); break;
   }
+}
+
+void
+osc_engine::process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
 }
 
 void
