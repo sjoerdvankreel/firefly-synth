@@ -45,17 +45,15 @@ public:
 private:
 
   // https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
-  void process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
-
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin> void 
-  process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
+  process_phased_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw> 
-  void process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_phased_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri> 
-  void process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr> 
-  void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF>
+  void process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
 static void
@@ -253,13 +251,13 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   dsf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   auto& dsf_partials = result.params.emplace_back(make_param(
     make_topo_info("{21BC6524-9FDB-4551-9D3D-B180AB93B5CE}", "DSF.Parts", "Parts", true, false, param_dsf_parts, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_step(1, 99, 2, 0),
+    make_param_dsp_voice(param_automate::automate), make_domain_log(1, 1000, 20, 20, 0, ""),
     make_param_gui_single(section_dsf, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   auto& dsf_dist = result.params.emplace_back(make_param(
     make_topo_info("{E5E66BBD-DCC9-4A7E-AB09-2D7107548090}", "DSF.Dist", "Dist", true, false, param_dsf_dist, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.05, 20, 1, 2, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0.05, 20, 1, 2, ""),
     make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
@@ -335,6 +333,29 @@ generate_sqr(float phase, float increment, float pwm)
   return (saw1 - saw2) * 0.5f;
 }
 
+static float 
+generate_dsf(float phase, float increment, float sr, float freq, int parts, float dist_parts, float decay)
+{
+  // -1: Fundamental is implicit. 
+  int ps = parts - 1;
+  float const decay_range = 0.99f;
+  float const scale_factor = 0.975f;
+  float dist_freq = freq * dist_parts;
+  float max_parts = (sr * 0.5f - freq) / dist_freq;
+  ps = std::min(ps, (int)max_parts);
+
+  float n = static_cast<float>(ps);
+  float w = decay * decay_range;
+  float w_pow_np1 = std::pow(w, n + 1);
+  float u = 2.0f * pi32 * phase;
+  float v = 2.0f * pi32 * dist_freq * phase / freq;
+  float a = w * std::sin(u + n * v) - std::sin(u + (n + 1) * v);
+  float x = (w * std::sin(v - u) + std::sin(u)) + w_pow_np1 * a;
+  float y = 1 + w * w - 2 * w * std::cos(v);
+  float scale = (1.0f - w_pow_np1) / (1.0f - w);
+  return check_bipolar(x * scale_factor / (y * scale));
+}
+
 void
 osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
@@ -353,62 +374,10 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 
   switch (type)
   {
-  case type_dsf: process_dsf(block, modulation); break;
   case type_basic: process_basic(block, modulation); break;
+  case type_dsf: process_phased_sin_saw_tri_sqr_dsf<false, false, false, false, true>(block, modulation); break;
   default: assert(false); break;
   }
-}
-
-void
-osc_engine::process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
-{
-  auto const& block_auto = block.state.own_block_automation;
-  int note = block_auto[param_note][0].step();
-  int parts = block_auto[param_dsf_parts][0].step();
-
-  auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
-  auto const& dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
-  auto const& dist_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dist][0];
-  auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
-
-  // TODO uncopy this stuff
-  for (int f = block.start_frame; f < block.end_frame; f++)
-  {
-    float cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[f]);
-    float freq = pitch_to_freq(note + cent + voice_pitch_offset_curve[f]);
-    float inc = std::clamp(freq, 0.0f, block.sample_rate * 0.5f) / block.sample_rate;
-
-    // -1: Fundamental is implicit. 
-    int ps = parts - 1;
-    float const scale_factor = 0.975f;
-    float const decay_range = 0.99f;
-    float decay = block.normalized_to_raw_fast<domain_type::identity>(module_osc, param_dsf_dcy, dcy_curve[f]);
-    float dist = freq * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_dsf_dist, dist_curve[f]);
-    float max_parts = (block.sample_rate * 0.5f - freq) / dist;
-    ps = std::min(ps, (int)max_parts);
-
-    float n = static_cast<float>(ps);
-    float w = decay * decay_range;
-    float w_pow_np1 = std::pow(w, n + 1);
-    float u = 2.0f * pi32 * _phase;
-    float v = 2.0f * pi32 * dist * _phase / freq;
-    float a = w * std::sin(u + n * v) - std::sin(u + (n + 1) * v);
-    float x = (w * std::sin(v - u) + std::sin(u)) + w_pow_np1 * a;
-    float y = 1 + w * w - 2 * w * std::cos(v);
-    float scale = (1.0f - w_pow_np1) / (1.0f - w);
-    float sample = check_bipolar(x * scale_factor / (y * scale));
-    block.state.own_audio[0][0][0][f] = sample;
-    block.state.own_audio[0][0][1][f] = sample;
-    increment_and_wrap_phase(_phase, inc);
-  }
-
-  // TODO this must apply to dsf also
-  // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
-  auto& modulator = get_am_matrix_modulator(block);
-  auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
-  for (int c = 0; c < 2; c++)
-    for (int f = block.start_frame; f < block.end_frame; f++)
-      block.state.own_audio[0][0][c][f] = modulated[c][f];
 }
 
 void
@@ -416,45 +385,46 @@ osc_engine::process_basic(plugin_block& block, cv_matrix_mixdown const* modulati
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sin = block_auto[param_basic_sin_on][0].step();
-  if(sin) process_basic_sin<true>(block, modulation);
-  else process_basic_sin<false>(block, modulation);
+  if(sin) process_phased_sin<true>(block, modulation);
+  else process_phased_sin<false>(block, modulation);
 }
 
 template <bool Sin> void
-osc_engine::process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_phased_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool saw = block_auto[param_basic_saw_on][0].step();
-  if (saw) process_basic_sin_saw<Sin, true>(block, modulation);
-  else process_basic_sin_saw<Sin, false>(block, modulation);
+  if (saw) process_phased_sin_saw<Sin, true>(block, modulation);
+  else process_phased_sin_saw<Sin, false>(block, modulation);
 }
 
 template <bool Sin, bool Saw> void
-osc_engine::process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_phased_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool tri = block_auto[param_basic_tri_on][0].step();
-  if (tri) process_basic_sin_saw_tri<Sin, Saw, true>(block, modulation);
-  else process_basic_sin_saw_tri<Sin, Saw, false>(block, modulation);
+  if (tri) process_phased_sin_saw_tri<Sin, Saw, true>(block, modulation);
+  else process_phased_sin_saw_tri<Sin, Saw, false>(block, modulation);
 }
 
 template <bool Sin, bool Saw, bool Tri> void
-osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_basic_sin_saw_tri_sqr<Sin, Saw, Tri, true>(block, modulation);
-  else process_basic_sin_saw_tri_sqr<Sin, Saw, Tri, false>(block, modulation);
+  if (sqr) process_phased_sin_saw_tri_sqr_dsf<Sin, Saw, Tri, true, false>(block, modulation);
+  else process_phased_sin_saw_tri_sqr_dsf<Sin, Saw, Tri, false, false>(block, modulation);
 }
 
-template <bool Sin, bool Saw, bool Tri, bool Sqr> void
-osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation)
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF> void
+osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   int count = 0;
   if constexpr (Sin) count++;
   if constexpr (Saw) count++;
   if constexpr (Tri) count++;
   if constexpr (Sqr) count++;
+  if constexpr (DSF) count++;
 
   if (count == 0)
   {
@@ -465,8 +435,11 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
 
   auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
+  float dist = block_auto[param_dsf_dist][0].real();
+  int parts = (int)std::round(block_auto[param_dsf_parts][0].real());
 
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
   auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
   auto const& tri_curve = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
@@ -485,6 +458,7 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
     if constexpr (Saw) sample += generate_saw(_phase, inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[f]);
     if constexpr (Tri) sample += generate_triangle(_phase, inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
     if constexpr (Sqr) sample += generate_sqr(_phase, inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
+    if constexpr (DSF) sample = generate_dsf(_phase, inc, block.sample_rate, freq, parts, dist, dcy_curve[f]);
 
     check_bipolar(sample / count);
     block.state.own_audio[0][0][0][f] = sample / count;
@@ -492,7 +466,6 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
     increment_and_wrap_phase(_phase, inc);
   }
 
-  // TODO this must apply to dsf also
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
   auto& modulator = get_am_matrix_modulator(block);
   auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
