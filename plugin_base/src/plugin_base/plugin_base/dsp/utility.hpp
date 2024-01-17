@@ -191,6 +191,14 @@ mono_pan_sqrt3(int channel, float panning)
 }
 
 inline float
+mono_pan_sqrt(int channel, float panning)
+{
+  assert(channel == 0 || channel == 1);
+  if (channel == 1) return std::sqrt(panning);
+  return std::sqrt(1.0f - panning);
+}
+
+inline float
 stereo_balance(int channel, float balance)
 {
   assert(channel == 0 || channel == 1);
