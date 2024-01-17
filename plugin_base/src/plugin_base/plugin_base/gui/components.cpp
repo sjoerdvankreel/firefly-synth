@@ -74,21 +74,48 @@ binding_component::state_changed(int index, plain_value plain)
     self.setEnabled(false);
   else 
   {
-    auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
-    if (enabled_iter != _enabled_params.end())
-      self.setEnabled(bind_param(_bindings->enabled, _enabled_params, _enabled_values));
+    bool global_enabled = true;
+    auto const& global_binding = _bindings->global_enabled;
+    if(global_binding.is_bound())
+    {
+      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, _own_slot_index).step();
+      global_enabled = global_binding.selector(global_value);
+    }
+    if(!global_enabled)
+      self.setEnabled(false);
+    else
+    {
+      auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
+      if (enabled_iter != _enabled_params.end())
+        self.setEnabled(bind_param(_bindings->enabled, _enabled_params, _enabled_values));
+    }
   }
 
   if(_bindings->visible.slot_selector != nullptr && !_bindings->visible.slot_selector(_module->info.slot))
     self.setVisible(false);
   else
   {
-    auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
-    if (visibility_iter != _visibility_params.end())
+    bool global_visible = true;
+    auto const& global_binding = _bindings->global_visible;
+    if(global_binding.is_bound())
     {
-      bool visible = bind_param(_bindings->visible, _visibility_params, _visibility_values);
-      self.setVisible(visible);
-      self.setInterceptsMouseClicks(visible, visible);
+      int global_value = _gui->gui_state()->get_plain_at(global_binding.module, 0, global_binding.param, _own_slot_index).step();
+      global_visible = global_binding.selector(global_value);
+    }
+    if (!global_visible)
+    {
+      self.setVisible(false);
+      self.setInterceptsMouseClicks(false, false);
+    }
+    else
+    {
+      auto visibility_iter = std::find(_visibility_params.begin(), _visibility_params.end(), index);
+      if (visibility_iter != _visibility_params.end())
+      {
+        bool visible = bind_param(_bindings->visible, _visibility_params, _visibility_values);
+        self.setVisible(visible);
+        self.setInterceptsMouseClicks(visible, visible);
+      }
     }
   }
 }

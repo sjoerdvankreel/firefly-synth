@@ -97,6 +97,7 @@ gui_global_binding::bind_param(int module_, int param_, gui_global_param_binding
   assert(selector == nullptr);
   param = param_;
   module = module_;
+  selector = selector_;
 }
 
 void
@@ -137,8 +138,10 @@ gui_global_binding::validate(plugin_topo const& plugin, int slot_count) const
 { 
   assert((param == -1) == (selector == nullptr));
   assert((module == -1) == (selector == nullptr));
+  if(module == -1) return;
   auto const& bound = plugin.modules[module].params[param];
   (void)bound;
+  assert(plugin.modules[module].info.slot_count == 1);
   assert(!bound.domain.is_real());
   assert(bound.info.slot_count == 1 || bound.info.slot_count == slot_count);
 }

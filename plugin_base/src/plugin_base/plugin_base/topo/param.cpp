@@ -84,6 +84,7 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   assert(0 <= gui.section && gui.section < module.sections.size());
   assert((info.slot_count == 1) == (gui.layout == param_layout::single));
   assert(dsp.direction == param_direction::input || !gui.bindings.enabled.is_bound());
+  assert(dsp.direction == param_direction::input || !gui.bindings.global_enabled.is_bound());
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
 }

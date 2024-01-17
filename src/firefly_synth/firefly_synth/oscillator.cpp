@@ -288,7 +288,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
-  uni_voices.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_osc_mod_mode, [](int v) { return v == voice_in_osc_mod_unsn; });
+  uni_voices.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_osc_mod_mode, [](int v) { return v != voice_in_osc_mod_unsn; });
   
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),

@@ -155,7 +155,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_osc_mod, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   auto& osc_mod_uni_voices = result.params.emplace_back(make_param(
-    make_topo_info("{BD1CA670-9410-4103-AF32-E07164AC35FA}", "Voices", param_osc_mod_uni_voices, 1),
+    make_topo_info("{BD1CA670-9410-4103-AF32-E07164AC35FA}", "Unison", param_osc_mod_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
     make_param_gui_single(section_osc_mod, gui_edit_type::autofit_list, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
