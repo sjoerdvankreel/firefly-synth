@@ -249,13 +249,13 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
     make_topo_tag("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
   dsf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   auto& dsf_partials = result.params.emplace_back(make_param(
     make_topo_info("{21BC6524-9FDB-4551-9D3D-B180AB93B5CE}", "DSF.Parts", "Parts", true, false, param_dsf_parts, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(1, 1000, 20, 20, 0, ""),
-    make_param_gui_single(section_dsf, gui_edit_type::knob, { 0, 0 },
+    make_param_dsp_voice(param_automate::automate), make_domain_log(1, 1000, 2, 20, 0, ""),
+    make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   auto& dsf_dist = result.params.emplace_back(make_param(
