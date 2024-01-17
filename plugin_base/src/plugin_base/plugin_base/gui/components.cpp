@@ -108,6 +108,8 @@ binding_component::state_changed(int index, plain_value plain)
       auto enabled_iter = std::find(_enabled_params.begin(), _enabled_params.end(), index);
       if (enabled_iter != _enabled_params.end())
         self.setEnabled(bind_param(_bindings->enabled, _enabled_params, _enabled_values));
+      else
+        self.setEnabled(true);
     }
   }
 
@@ -135,6 +137,11 @@ binding_component::state_changed(int index, plain_value plain)
         bool visible = bind_param(_bindings->visible, _visibility_params, _visibility_values);
         self.setVisible(visible);
         self.setInterceptsMouseClicks(visible, visible);
+      }
+      else
+      {
+        self.setVisible(true);
+        self.setInterceptsMouseClicks(true, true);
       }
     }
   }
