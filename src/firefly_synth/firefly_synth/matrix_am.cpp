@@ -187,8 +187,10 @@ am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown cons
       for(int f = block.start_frame; f < block.end_frame; f++)
       {
         float audio = (*modulated)[c][f];
-        float rm = check_bipolar(source_audio[0][0][c][f]);
-        float am = bipolar_to_unipolar(rm);
+        // do not assume [-1, 1] here as oscillator can go beyond that
+        float rm = source_audio[0][0][c][f];
+        // "bipolar to unipolar" for [-inf, +inf]
+        float am = (rm * 0.5f) + 0.5f;
         float mod = mix_signal(ring_curve[f], am, rm);
         (*modulated)[c][f] = mix_signal(amt_curve[f], audio, mod * audio);
       }
