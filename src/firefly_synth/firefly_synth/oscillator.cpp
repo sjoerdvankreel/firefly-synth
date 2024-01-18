@@ -176,7 +176,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", "Oscillator", "Osc", true, true, module_osc, 4),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
-      make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1)) }),
+      make_module_dsp_output(false, make_topo_info("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_unison_voices)) }),
     make_module_gui(section, colors, pos, { { 1, 1 }, { gui_dimension::auto_size, 1 } })));
 
   result.minimal_initializer = init_minimal;
@@ -517,6 +517,13 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_m
   {
     block.state.own_audio[0][0][0].fill(block.start_frame, block.end_frame, 0.0f);
     block.state.own_audio[0][0][1].fill(block.start_frame, block.end_frame, 0.0f);
+
+    if constexpr (UniMod == uni_mod_voice)
+      for (int v = 0; v < max_unison_voices; v++)
+      {
+        block.state.own_audio[0][1 + v][0].fill(block.start_frame, block.end_frame, 0.0f);
+        block.state.own_audio[0][1 + v][1].fill(block.start_frame, block.end_frame, 0.0f);
+      }
     return;
   }
 
@@ -589,10 +596,10 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_m
   // todo the alternative AM+unison version
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
   auto& modulator = get_am_matrix_modulator(block);
-  auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
+  auto const& modulated = modulator.modulate(block, block.module_slot, modulation, false, 1);
   for(int c = 0; c < 2; c++)
     for (int f = block.start_frame; f < block.end_frame; f++)
-      block.state.own_audio[0][0][c][f] = modulated[c][f];
+      block.state.own_audio[0][0][c][f] = modulated[0][c][f];
 }
 
 }

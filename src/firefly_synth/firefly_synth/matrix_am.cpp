@@ -17,7 +17,6 @@ using namespace plugin_base;
 namespace firefly_synth { 
 
 enum { section_main };
-enum { output_modulated };
 enum { param_on, param_source, param_target, param_amt, param_ring };
 
 static int const route_count = 20; // TODO decrease once we do FM
@@ -34,7 +33,10 @@ public:
 
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
-  jarray<float, 2> const& modulate(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
+  jarray<float, 3> const& modulate(
+    plugin_block& block, int slot, 
+    cv_matrix_mixdown const* cv_modulation, 
+    bool per_uni_voice, int uni_voice_count);
 };
 
 static graph_data
@@ -79,10 +81,13 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   auto am_source_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
   auto am_target_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 1);
 
+  std::vector<module_dsp_output> outputs;
+  for(int r = 0; r < route_count; r++)
+    outputs.push_back(make_module_dsp_output(false, make_topo_info(
+      "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "Modulated", r, max_unison_voices + 1)));
   module_topo result(make_module(
     make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc AM", "AM", true, true, module_am_matrix, 1),
-    make_module_dsp(module_stage::voice, module_output::audio, 0, {
-      make_module_dsp_output(false, make_topo_info("{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}", "Modulated", output_modulated, route_count)) }),
+    make_module_dsp(module_stage::voice, module_output::audio, 0, outputs),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
@@ -141,9 +146,12 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   return result;
 }
 
-jarray<float, 2> const&
-am_matrix_modulator::modulate(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
-{ return _engine->modulate(block, slot, cv_modulation); }
+jarray<float, 3> const&
+am_matrix_modulator::modulate(
+  plugin_block& block, int slot, 
+  cv_matrix_mixdown const* cv_modulation, 
+  bool per_uni_voice, int uni_voice_count)
+{ return _engine->modulate(block, slot, cv_modulation, per_uni_voice, uni_voice_count); }
 
 void
 am_matrix_engine::process(plugin_block& block)
@@ -154,8 +162,10 @@ am_matrix_engine::process(plugin_block& block)
   _own_audio = &block.state.own_audio;
 }
 
-jarray<float, 2> const& 
-am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
+jarray<float, 3> const& 
+am_matrix_engine::modulate(
+  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation, 
+  bool per_uni_voice, int uni_voice_count)
 {
   // allow custom data for graphs
   if(cv_modulation == nullptr)
@@ -163,9 +173,10 @@ am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown cons
 
   // loop through the routes
   // the first match we encounter becomes the modulation result
-  jarray<float, 2>* modulated = nullptr;
-  jarray<float, 2> const& target_audio = block.voice->all_audio[module_osc][slot][0][0];
+  jarray<float, 3>* modulated = nullptr;
+  jarray<float, 3> const& target_audio = block.voice->all_audio[module_osc][slot][0];
   auto const& block_auto = block.state.all_block_automation[module_am_matrix][0];
+
   for (int r = 0; r < route_count; r++)
   {
     if(block_auto[param_on][r].step() == 0) continue;
@@ -173,9 +184,20 @@ am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown cons
     if(target_osc != slot) continue;
     if (modulated == nullptr)
     {
-      modulated = &(*_own_audio)[output_modulated][r];
-      target_audio[0].copy_to(block.start_frame, block.end_frame, (*modulated)[0]);
-      target_audio[1].copy_to(block.start_frame, block.end_frame, (*modulated)[1]);
+      modulated = &(*_own_audio)[r];
+      if(!per_uni_voice)
+      {
+        target_audio[0][0].copy_to(block.start_frame, block.end_frame, (*modulated)[0][0]);
+        target_audio[0][1].copy_to(block.start_frame, block.end_frame, (*modulated)[0][1]);
+      }
+      else
+      {
+        for (int v = 0; v < uni_voice_count; v++)
+        {
+          target_audio[v + 1][0].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][0]);
+          target_audio[v + 1][1].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][1]);
+        }
+      }
     }
 
     // apply modulation
@@ -183,22 +205,27 @@ am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown cons
     auto const& source_audio = block.module_audio(module_osc, source_osc);
     auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_amt][r];
     auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_ring][r];
-    for(int c = 0; c < 2; c++)
-      for(int f = block.start_frame; f < block.end_frame; f++)
-      {
-        float audio = (*modulated)[c][f];
-        // do not assume [-1, 1] here as oscillator can go beyond that
-        float rm = source_audio[0][0][c][f];
-        // "bipolar to unipolar" for [-inf, +inf]
-        float am = (rm * 0.5f) + 0.5f;
-        float mod = mix_signal(ring_curve[f], am, rm);
-        (*modulated)[c][f] = mix_signal(amt_curve[f], audio, mod * audio);
-      }
+
+    int min_uni_voice = per_uni_voice? 1: 0;
+    int max_uni_voice = per_uni_voice? 1 + uni_voice_count: 1;
+
+    for(int v = min_uni_voice; v < max_uni_voice; v++)
+      for(int c = 0; c < 2; c++)
+        for(int f = block.start_frame; f < block.end_frame; f++)
+        {
+          float audio = (*modulated)[v][c][f];
+          // do not assume [-1, 1] here as oscillator can go beyond that
+          float rm = source_audio[0][v][c][f];
+          // "bipolar to unipolar" for [-inf, +inf]
+          float am = (rm * 0.5f) + 0.5f;
+          float mod = mix_signal(ring_curve[f], am, rm);
+          (*modulated)[v][c][f] = mix_signal(amt_curve[f], audio, mod * audio);
+        }
   }
 
   // default result is unmodulated (e.g., osc output itself)
   if(modulated != nullptr) return *modulated;
-  return block.voice->all_audio[module_osc][slot][0][0];
+  return block.voice->all_audio[module_osc][slot][0];
 }
 
 }
