@@ -59,6 +59,8 @@ public:
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 
 private:
+  void sum_uni_voices_into_total(plugin_block& block, int uni_voices, float attn);
+
   // https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin> void 
@@ -69,8 +71,6 @@ private:
   void process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF>
   void process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, int UniMod>
-  void process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
 static void
@@ -432,6 +432,19 @@ osc_engine::reset(plugin_block const* block)
 }
 
 void
+osc_engine::sum_uni_voices_into_total(plugin_block& block, int uni_voices, float attn)
+{
+  for (int c = 0; c < 2; c++)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      float uni_total = 0;
+      for (int v = 0; v < uni_voices; v++)
+        uni_total += block.state.own_audio[0][v + 1][c][f];
+      block.state.own_audio[0][0][c][f] = uni_total * attn;
+    }
+}
+
+void
 osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   // allow custom data for graphs
@@ -494,18 +507,6 @@ osc_engine::process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown co
 template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF> void
 osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
-  auto const& block_auto = block.state.own_block_automation;
-  switch (block_auto[param_uni_mod][0].step())
-  {
-  case uni_mod_osc: process_phased_sin_saw_tri_sqr_dsf_uni_mod<Sin, Saw, Tri, Sqr, DSF, uni_mod_osc>(block, modulation); break;
-  case uni_mod_voice: process_phased_sin_saw_tri_sqr_dsf_uni_mod<Sin, Saw, Tri, Sqr, DSF, uni_mod_voice>(block, modulation); break;
-  default: assert(false); break;
-  }
-}
-
-template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, int UniMod> void
-osc_engine::process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_matrix_mixdown const* modulation)
-{
   int generator_count = 0;
   if constexpr (Sin) generator_count++;
   if constexpr (Saw) generator_count++;
@@ -513,22 +514,19 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_m
   if constexpr (Sqr) generator_count++;
   if constexpr (DSF) generator_count++;
 
-  if (generator_count == 0)
+  // need to clear *all* outputs because we don't know
+  // if we are a modulation source and/or the target osc's unison voice count
+  for (int v = 0; v < max_unison_voices + 1; v++)
   {
-    block.state.own_audio[0][0][0].fill(block.start_frame, block.end_frame, 0.0f);
-    block.state.own_audio[0][0][1].fill(block.start_frame, block.end_frame, 0.0f);
-
-    if constexpr (UniMod == uni_mod_voice)
-      for (int v = 0; v < max_unison_voices; v++)
-      {
-        block.state.own_audio[0][1 + v][0].fill(block.start_frame, block.end_frame, 0.0f);
-        block.state.own_audio[0][1 + v][1].fill(block.start_frame, block.end_frame, 0.0f);
-      }
-    return;
+    block.state.own_audio[0][v][0].fill(block.start_frame, block.end_frame, 0.0f);
+    block.state.own_audio[0][v][1].fill(block.start_frame, block.end_frame, 0.0f);
   }
+
+  if (generator_count == 0) return;
 
   auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
+  int uni_mod = block_auto[param_uni_mod][0].step();
   int uni_voices = block_auto[param_uni_voices][0].step();
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
@@ -563,9 +561,7 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_m
     float max_pan = 0.5f + spread_apply;
     float min_pitch = base_pitch - detune_apply;
     float max_pitch = base_pitch + detune_apply;
-    
-    float unison_sample_l = 0;
-    float unison_sample_r = 0;
+
     for (int v = 0; v < uni_voices; v++)
     {
       float sample = 0;
@@ -581,25 +577,41 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_m
       if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
         
       check_bipolar(sample / generator_count);
-      unison_sample_l += mono_pan_sqrt(0, pan) * sample;
-      unison_sample_r += mono_pan_sqrt(1, pan) * sample;
       increment_and_wrap_phase(_phase[v], inc);
+      block.state.own_audio[0][v + 1][0][f] = mono_pan_sqrt(0, pan) * sample;
+      block.state.own_audio[0][v + 1][1][f] = mono_pan_sqrt(1, pan) * sample;
     }
-
-    // This means we can exceed [-1, 1] but just dividing 
-    // by gen_count * uni_voices gets quiet real quick.
-    float attn = std::sqrt(generator_count * uni_voices);
-    block.state.own_audio[0][0][0][f] = unison_sample_l / attn;
-    block.state.own_audio[0][0][1][f] = unison_sample_r / attn;
   }
 
-  // todo the alternative AM+unison version
+  // This means we can exceed [-1, 1] but just dividing
+  // by gen_count * uni_voices gets quiet real quick.
+  float attn = std::sqrt(generator_count * uni_voices);
+
+  // now we have all the individual unison voice outputs, start modulating:
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
   auto& modulator = get_am_matrix_modulator(block);
-  auto const& modulated = modulator.modulate(block, block.module_slot, modulation, false, 1);
-  for(int c = 0; c < 2; c++)
-    for (int f = block.start_frame; f < block.end_frame; f++)
-      block.state.own_audio[0][0][c][f] = modulated[0][c][f];
+  if(uni_mod == uni_mod_osc)
+  {
+    // modulate on total osc level: 
+    // first sum the uni voices, then modulate by source total output
+    sum_uni_voices_into_total(block, uni_voices, attn);
+    auto const& modulated = modulator.modulate(block, block.module_slot, modulation, false, 1);
+    for (int c = 0; c < 2; c++)
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        block.state.own_audio[0][0][c][f] = modulated[0][c][f];
+  }
+  else
+  {
+    // modulate on uni voice level:
+    // first modulate individual voices by matched voices
+    // from other osc, then sum output into total
+    auto const& modulated = modulator.modulate(block, block.module_slot, modulation, true, uni_voices);
+    for(int v = 0; v < uni_voices; v++)
+      for (int c = 0; c < 2; c++)
+        for (int f = block.start_frame; f < block.end_frame; f++)
+          block.state.own_audio[0][v + 1][c][f] = modulated[v + 1][c][f];
+    sum_uni_voices_into_total(block, uni_voices, attn);
+  }
 }
 
 }

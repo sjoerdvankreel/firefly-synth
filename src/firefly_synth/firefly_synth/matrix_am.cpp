@@ -206,9 +206,9 @@ am_matrix_engine::modulate(
     auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_amt][r];
     auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_ring][r];
 
+    // 0 = osc total, > 0 is per osc unison voice
     int min_uni_voice = per_uni_voice? 1: 0;
     int max_uni_voice = per_uni_voice? 1 + uni_voice_count: 1;
-
     for(int v = min_uni_voice; v < max_uni_voice; v++)
       for(int c = 0; c < 2; c++)
         for(int f = block.start_frame; f < block.end_frame; f++)
