@@ -112,11 +112,12 @@ matrix_param_menu_handler::execute(
 }
 
 routing_matrix<module_topo_mapping>
-make_audio_matrix(std::vector<module_topo const*> const& modules)
+make_audio_matrix(std::vector<module_topo const*> const& modules, int start_slot)
 {
   int index = 0;
   routing_matrix<module_topo_mapping> result;
   result.submenu = std::make_shared<gui_submenu>();
+  assert(start_slot == 0 || modules.size() == 1);
   for (int m = 0; m < modules.size(); m++)
   {
     auto const& tag = modules[m]->info.tag;
@@ -129,7 +130,7 @@ make_audio_matrix(std::vector<module_topo const*> const& modules)
     } else
     {
       auto module_submenu = result.submenu->add_submenu(tag.name);
-      for (int mi = 0; mi < slots; mi++)
+      for (int mi = start_slot; mi < slots; mi++)
       {
         module_submenu->indices.push_back(index++);
         result.mappings.push_back({ modules[m]->info.index, mi });

@@ -46,15 +46,15 @@ struct audio_routing_audio_params
   std::vector<module_topo_mapping> targets;
 };
 
-// any audio module as a source or target
-routing_matrix<module_topo_mapping>
-make_audio_matrix(std::vector<module_topo const*> const& modules);
 // sources are any cv outputs in modules
 routing_matrix<module_output_mapping>
 make_cv_source_matrix(std::vector<cv_source_entry> const& entries);
 // targets any modulatable parameter in modules
 routing_matrix<param_topo_mapping>
 make_cv_target_matrix(std::vector<module_topo const*> const& modules);
+// any audio module as a source or target
+routing_matrix<module_topo_mapping>
+make_audio_matrix(std::vector<module_topo const*> const& modules, int start_slot);
 
 // allows to manage matrix routes
 class matrix_param_menu_handler:

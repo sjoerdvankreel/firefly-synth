@@ -38,7 +38,6 @@ do osc oversampling
 do osc 2 unison modes
 limit unison phase 
 explicit min/max bars on synced stuff
-start at osc 2 for mod
 
 * get some linux folks to comment (ycollete?)
 * continuing

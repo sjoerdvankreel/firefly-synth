@@ -45,7 +45,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   std::vector<float> result_r;
   for(int r = 0; r < route_count; r++)
     if(state.get_plain_at(module_am_matrix, 0, param_on, r).step() != 0)
-      max_osc = std::max(max_osc, state.get_plain_at(module_am_matrix, 0, param_target, r).step());
+      max_osc = std::max(max_osc, state.get_plain_at(module_am_matrix, 0, param_target, r).step() + 1);
   auto graphs(render_osc_graphs(state, engine, max_osc));
   for (int mi = 0; mi <= max_osc; mi++)
   {
@@ -68,15 +68,16 @@ make_audio_routing_am_params(plugin_state* state)
   result.source_param = param_source;
   result.target_param = param_target;
   result.matrix_module = module_am_matrix;
-  result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }).mappings;
-  result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }).mappings;
+  result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
+  result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 1).mappings;
   return result;
 }
 
 module_topo 
 am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
 {
-  auto am_matrix = make_audio_matrix({ &plugin->modules[module_osc] });
+  auto am_source_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
+  auto am_target_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 1);
 
   module_topo result(make_module(
     make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc AM", "AM", true, true, module_am_matrix, 1),
@@ -105,21 +106,23 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", param_source, route_count),
-    make_param_dsp_voice(param_automate::none), make_domain_item(am_matrix.items, ""),
+    make_param_dsp_voice(param_automate::none), make_domain_item(am_source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   source.gui.item_enabled.bind_param({ module_am_matrix, 0, param_target, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) { return am[self].slot < am[other].slot; });
+    [am_source = am_source_matrix.mappings, am_target = am_target_matrix.mappings](int other, int self) { 
+      return am_source[self].slot < am_target[other].slot; });
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", param_target, route_count),
-    make_param_dsp_voice(param_automate::none), make_domain_item(am_matrix.items, "Osc 2"),
+    make_param_dsp_voice(param_automate::none), make_domain_item(am_target_matrix.items, "Osc 2"),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   target.gui.item_enabled.bind_param({ module_am_matrix, 0, param_source, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) { return am[other].slot < am[self].slot; });
+    [am_source = am_source_matrix.mappings, am_target = am_target_matrix.mappings](int other, int self) { 
+      return am_source[other].slot < am_target[self].slot; });
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "Amt", param_amt, route_count),
@@ -166,7 +169,7 @@ am_matrix_engine::modulate(plugin_block& block, int slot, cv_matrix_mixdown cons
   for (int r = 0; r < route_count; r++)
   {
     if(block_auto[param_on][r].step() == 0) continue;
-    int target_osc = block_auto[param_target][r].step();
+    int target_osc = block_auto[param_target][r].step() + 1;
     if(target_osc != slot) continue;
     if (modulated == nullptr)
     {
