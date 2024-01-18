@@ -2,27 +2,24 @@ make a .com website
 
 someday:
 mseg
+voice arp
 microtonal support
 do voice level unison
-polyphonic modulation
+polymod/mpe/note_exprs
 do cakewalk bug report
-handle clap is_modulatable (not yet per note)
-make sure everything accurate can modulate
+visual routing indicators
+document the header files a bit
 
 demo synth:
+make sure everything accurate can modulate
+handle clap is_modulatable (not yet per note)
 do fx version
 handle clap midi notes
-do clap midi notes
-polymod/mpe/note_exprs
 read all the comments from github and kvr and forums
-make new test files
 check all infernal functionality, see what needs to be in the base
-document the header files a bit
 implement the multi env
 poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
-voice arp?
 more flexibility in plugin_base -> "give me a voice"
-hardsync, unison
 do 5 am and 5 fm routes 
 do add_submenu everywhere in the topos
 fix the init patch
@@ -30,7 +27,6 @@ prettify the matrix section
 do the param fuzz test
 at least block-automate all voice parameters see also modmatrices
 auto-generate the manual (param list)
-visual routing indicators ?
 document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 lerped hardsync
