@@ -14,19 +14,13 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { output_pitch_offset };
-enum { osc_mod_osc, osc_mod_unsn };
+enum { section_main, section_pitch };
 enum { porta_off, porta_on, porta_auto };
-enum { section_main, section_pitch, section_osc_mod };
 enum {
   param_mode, param_porta, param_porta_sync, param_porta_time, param_porta_tempo, 
-  param_note, param_cent, param_pitch, param_pb,
-  param_osc_mod_mode, param_osc_mod_uni_voices,
-  param_count };
+  param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const master_in_param_pb_range;
-extern int const voice_in_osc_mod_unsn = osc_mod_unsn;
-extern int const voice_in_param_osc_mod_mode = param_osc_mod_mode;
-extern int const voice_in_param_param_osc_mod_uni_voices = param_osc_mod_uni_voices;
 extern int const voice_in_output_pitch_offset = output_pitch_offset;
 
 static std::vector<list_item>
@@ -35,15 +29,6 @@ mode_items()
   std::vector<list_item> result;
   result.emplace_back("{88F746C4-1A70-4A64-A11D-584D87D3059C}", "Poly");
   result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Mono");
-  return result;
-}
-
-static std::vector<list_item>
-osc_mod_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{C42DC794-AB46-444D-BFE1-795F79F9476B}", "Osc");
-  result.emplace_back("{AF713237-EA08-4297-B641-C799746BC967}", "Unsn");
   return result;
 }
 
@@ -86,7 +71,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", "V.In", true, true, module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 1, gui_dimension::auto_size, gui_dimension::auto_size } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 6, 7 } } )));
   
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
@@ -95,7 +80,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
@@ -113,21 +98,21 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Time", param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
-  time.gui.bindings.visible.bind_params({ param_porta_sync }, [](auto const& vs) { return vs[0] == 0; });
+  time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {1, 16}),
-    make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
-  tempo.gui.bindings.visible.bind_params({ param_porta_sync }, [](auto const& vs) { return vs[0] == 1; });
+  tempo.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 1; });
 
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{CB6D7BC8-5DE6-4A84-97C9-4E405A96E0C8}", "Note", param_note, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
@@ -136,7 +121,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.params.emplace_back(make_param(
     make_topo_info("{57A908CD-ED0A-4FCD-BA5F-92257175A9DE}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_pitch, gui_edit_type::knob, { 0, 1 }, 
+    make_param_gui_single(section_pitch, gui_edit_type::hslider, { 0, 1 }, 
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   result.params.emplace_back(make_param(
     make_topo_info("{034AE513-9AB6-46EE-8246-F6ECCC11CAE0}", "Pitch", param_pitch, 1),
@@ -146,21 +131,6 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{BF20BA77-A162-401B-9F32-92AE34841AB2}", "PB", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
-
-  result.sections.emplace_back(make_param_section(section_osc_mod,
-    make_topo_tag("{D813F5EA-3630-4AFF-B472-074310FFA622}", "Mod"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size }))));
-  result.params.emplace_back(make_param(
-    make_topo_info("{83BC437C-2BAC-4D7D-8D5D-EB82D002624A}", "Mod", param_osc_mod_mode, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_mod_items(), ""),
-    make_param_gui_single(section_osc_mod, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  auto& osc_mod_uni_voices = result.params.emplace_back(make_param(
-    make_topo_info("{BD1CA670-9410-4103-AF32-E07164AC35FA}", "Unison", param_osc_mod_uni_voices, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
-    make_param_gui_single(section_osc_mod, gui_edit_type::autofit_list, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  osc_mod_uni_voices.gui.bindings.enabled.bind_params({ param_osc_mod_mode }, [](auto const& vs) { return vs[0] == osc_mod_unsn; });
 
   return result;
 }
