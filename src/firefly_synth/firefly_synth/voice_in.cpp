@@ -86,24 +86,24 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   result.params.emplace_back(make_param(
-    make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Porta", param_porta, 1),
+    make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Portamento", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
   auto& sync = result.params.emplace_back(make_param(
-    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", "Sync", param_porta_sync, 1),
+    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", "Portamento Tempo Sync", "Sync", true, false, param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 },  
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   auto& time = result.params.emplace_back(make_param(
-    make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Time", param_porta_time, 1),
+    make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Portamento Time", "Time", true, false, param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   auto& tempo = result.params.emplace_back(make_param(
-    make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Tempo", param_porta_tempo, 1),
+    make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Portamento Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {1, 16}),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
