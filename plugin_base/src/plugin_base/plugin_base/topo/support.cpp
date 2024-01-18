@@ -227,9 +227,9 @@ make_domain_step(int min, int max, int default_, int display_offset)
 }
 
 param_domain
-make_domain_timesig_default(bool with_zero, timesig const& default_)
+make_domain_timesig_default(bool with_zero, timesig const& max, timesig const& default_)
 {
-  auto defaults = make_default_timesigs(with_zero, { with_zero ? 0 : 1, 128, }, { 4, 1 });
+  auto defaults = make_default_timesigs(with_zero, { with_zero ? 0 : 1, 128, }, max);
   return make_domain_timesig(defaults, default_);
 }
 

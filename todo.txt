@@ -37,7 +37,6 @@ lerped hardsync
 do osc oversampling
 do osc 2 unison modes
 limit unison phase 
-explicit min/max bars on synced stuff
 
 * get some linux folks to comment (ycollete?)
 * continuing

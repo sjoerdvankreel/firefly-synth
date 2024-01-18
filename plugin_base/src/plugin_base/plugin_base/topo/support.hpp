@@ -98,7 +98,7 @@ make_domain_name(std::vector<std::string> const& names, std::string const& defau
 param_domain
 make_domain_timesig(std::vector<timesig> const& sigs, timesig const& default_);
 param_domain
-make_domain_timesig_default(bool with_zero, timesig const& default_);
+make_domain_timesig_default(bool with_zero, timesig const& max, timesig const& default_);
 
 param_domain
 make_domain_percentage_identity(double default_, int precision, bool unit);

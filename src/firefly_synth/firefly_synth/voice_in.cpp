@@ -104,7 +104,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Portamento Tempo", param_porta_tempo, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {1, 16}),
+    make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
