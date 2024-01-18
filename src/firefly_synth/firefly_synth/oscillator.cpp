@@ -141,17 +141,17 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
   engine->process_end();
 
   // scale to 1
-  float max = 0;
   for(int o = 0; o < result.size(); o++)
+  {
+    float max = 0;
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < params.max_frame_count; f++)
         max = std::max(max, std::fabs(result[o].audio()[c][f]));
-  
-  if(max == 0) max = 1;
-  for (int o = 0; o < result.size(); o++)
+    if(max == 0) max = 1;
     for (int c = 0; c < 2; c++)
       for (int f = 0; f < params.max_frame_count; f++)
         result[o].audio()[c][f] /= max;
+  }
 
   return result;
 }
