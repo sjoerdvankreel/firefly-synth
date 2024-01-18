@@ -3,6 +3,7 @@ make a .com website
 someday:
 mseg
 voice arp
+lerped hardsync
 microtonal support
 do voice level unison
 polymod/mpe/note_exprs
@@ -29,9 +30,10 @@ at least block-automate all voice parameters see also modmatrices
 auto-generate the manual (param list)
 document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
-lerped hardsync
 do osc oversampling
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc)
+write the infernal<>firefly comparison
+do unison for kps (multiple lines)
 
 * get some linux folks to comment (ycollete?)
 * continuing

@@ -13,13 +13,14 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { uni_mod_osc, uni_mod_voice };
-enum { type_off, type_basic, type_dsf };
-enum { section_main, section_basic, section_dsf, section_uni };
+enum { type_off, type_basic, type_dsf, type_kps };
+enum { section_main, section_basic, section_dsf, section_kps, section_uni };
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
+  param_kps_filter, param_kps_fdbk, param_kps_stretch,
   param_uni_voices, param_uni_mod, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -35,6 +36,7 @@ type_items()
   result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
   result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF");
+  result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S");
   return result;
 }
 
@@ -60,6 +62,10 @@ public:
 
 private:
   void sum_uni_voices_into_total(plugin_block& block, int uni_voices, float attn);
+
+  // https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm/
+  // https://github.com/marcociccone/EKS-string-generator/blob/master/Extended%20Karplus%20Strong%20Algorithm.ipynb
+  void process_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
 
   // https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -298,6 +304,30 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
 
+  auto& kps = result.sections.emplace_back(make_param_section(section_kps,
+    make_topo_tag("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "K+S"),
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
+  kps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  auto& kps_filter = result.params.emplace_back(make_param(
+    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Smth", "Smth", true, false, param_kps_filter, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
+    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  kps_filter.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  auto& kps_fdbk = result.params.emplace_back(make_param(
+    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fdbk", true, false, param_kps_fdbk, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
+    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  auto& kps_stretch = result.params.emplace_back(make_param(
+    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", "KPS.Stretch", "Stretch", true, false, param_kps_stretch, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
+    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+
   auto& unison = result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
     make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
@@ -462,10 +492,17 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 
   switch (type)
   {
+  case type_kps: process_kps(block, modulation); break;
   case type_basic: process_basic(block, modulation); break;
   case type_dsf: process_phased_sin_saw_tri_sqr_dsf<false, false, false, false, true>(block, modulation); break;
   default: assert(false); break;
   }
+}
+
+void 
+osc_engine::process_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
+
 }
 
 void
