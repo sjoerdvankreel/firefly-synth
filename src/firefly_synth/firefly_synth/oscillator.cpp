@@ -440,7 +440,7 @@ osc_engine::sum_uni_voices_into_total(plugin_block& block, int uni_voices, float
       float uni_total = 0;
       for (int v = 0; v < uni_voices; v++)
         uni_total += block.state.own_audio[0][v + 1][c][f];
-      block.state.own_audio[0][0][c][f] = uni_total * attn;
+      block.state.own_audio[0][0][c][f] = uni_total / attn;
     }
 }
 
