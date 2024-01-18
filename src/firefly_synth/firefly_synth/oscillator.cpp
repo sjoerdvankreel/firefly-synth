@@ -12,15 +12,17 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+enum { uni_mod_osc, uni_mod_voice };
 enum { type_off, type_basic, type_dsf };
 enum { section_main, section_basic, section_dsf, section_uni };
 enum {
-  param_type, param_note, param_cent, 
+  param_type, param_note, param_cent, param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_uni_voices, param_uni_mod, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
+extern int const master_in_param_pb_range;
 extern int const voice_in_output_pitch_offset;
 
 static bool is_phase_gen(int type)
@@ -67,6 +69,8 @@ private:
   void process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF>
   void process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, int UniMod>
+  void process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
 static void
@@ -201,6 +205,16 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  auto& pitch = result.params.emplace_back(make_param(
+    make_topo_info("{6E9030AF-EC7A-4473-B194-5DA200E7F90C}", "Pitch", param_pitch, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-128, 128, 0, 0, ""),
+    make_param_gui_none()));
+  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  auto& pb = result.params.emplace_back(make_param(
+    make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", "PB", param_pb, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_none()));
+  pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
@@ -480,6 +494,18 @@ osc_engine::process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown co
 template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF> void
 osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
+  auto const& block_auto = block.state.own_block_automation;
+  switch (block_auto[param_uni_mod][0].step())
+  {
+  case uni_mod_osc: process_phased_sin_saw_tri_sqr_dsf_uni_mod<Sin, Saw, Tri, Sqr, DSF, uni_mod_osc>(block, modulation); break;
+  case uni_mod_voice: process_phased_sin_saw_tri_sqr_dsf_uni_mod<Sin, Saw, Tri, Sqr, DSF, uni_mod_voice>(block, modulation); break;
+  default: assert(false); break;
+  }
+}
+
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, int UniMod> void
+osc_engine::process_phased_sin_saw_tri_sqr_dsf_uni_mod(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
   int generator_count = 0;
   if constexpr (Sin) generator_count++;
   if constexpr (Saw) generator_count++;
@@ -498,12 +524,15 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
   int note = block_auto[param_note][0].step();
   int uni_voices = block_auto[param_uni_voices][0].step();
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
+  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
 
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
   float uni_voice_range = uni_voices == 1 ? 1.0f : static_cast<float>(uni_voices - 1);
 
+  auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
   auto const& dsf_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
   auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
@@ -516,9 +545,11 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[f]);
     float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[f]);
-    float base_pitch = note + base_cent + voice_pitch_offset_curve[f];
-    
+    float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[f]);
+    float base_pitch = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[f];
+
     float detune_apply = uni_dtn_curve[f] * uni_voice_apply * 0.5f;
     float spread_apply = uni_sprd_curve[f] * uni_voice_apply * 0.5f;
     float min_pan = 0.5f - spread_apply;
