@@ -34,6 +34,8 @@ do osc oversampling
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc)
 write the infernal<>firefly comparison
 do unison for kps (multiple lines)
+do lerped unison + drop osc/voice mode
+do lerped hardsync against reference osc + upward semitones
 
 * get some linux folks to comment (ycollete?)
 * continuing
