@@ -6,6 +6,7 @@
 namespace firefly_synth
 {
 
+// targeted to stereo use
 class state_var_filter
 {
   double _k;
@@ -118,7 +119,7 @@ state_var_filter::init_hsh(double w, double res, double db_gain)
   _m0 = a * a; _m1 = _k * (1 - a) * a; _m2 = 1 - a * a;
 }
 
-double
+inline double
 state_var_filter::next(int ch, double in)
 {
   double v0 = in;

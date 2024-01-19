@@ -5,6 +5,7 @@
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
+#include <firefly_synth/svf.hpp>
 #include <firefly_synth/synth.hpp>
 #include <cmath>
 
@@ -19,7 +20,7 @@ enum {
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
-  param_kps_filter, param_kps_fdbk, param_kps_stretch,
+  param_kps_freq, param_kps_fdbk, param_kps_stretch,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -27,8 +28,8 @@ extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
 extern int const osc_param_uni_voices = param_uni_voices;
 
-static bool is_phase_gen(int type)
-{ return type == type_basic || type == type_dsf; }
+static bool can_unison(int type)
+{ return type == type_basic || type == type_dsf || type == type_kps; }
 
 static std::vector<list_item>
 type_items()
@@ -44,10 +45,17 @@ type_items()
 class osc_engine:
 public module_engine {
 
+  // basic and dsf
   float _phase[max_unison_voices];
 
+  // kps
+  int _kps_max_length = {};
+  std::array<int, max_unison_voices> _kps_positions = {};
+  std::array<std::vector<float>, max_unison_voices> _kps_lines = {};
+
 public:
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(osc_engine);
+  osc_engine(float sample_rate);
+  PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
   void reset(plugin_block const*) override;
   void process(plugin_block& block) override { process(block, nullptr); }
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -129,8 +137,8 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
   engine->process_default(module_am_matrix, 0);
   for (int i = 0; i <= slot; i++)
   {
-    block = engine->process(module_osc, i, [](plugin_block& block) {
-      osc_engine engine;
+    block = engine->process(module_osc, i, [sample_rate](plugin_block& block) {
+      osc_engine engine(sample_rate);
       engine.reset(&block);
       cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process(block, &modulation);
@@ -180,7 +188,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.graph_renderer = render_osc_graph;
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
-  result.engine_factory = [](auto const&, int, int) { return std::make_unique<osc_engine>(); };
+  result.engine_factory = [](auto const&, int sr, int) { return std::make_unique<osc_engine>(sr); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
@@ -299,12 +307,12 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
   kps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   kps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
-  auto& kps_filter = result.params.emplace_back(make_param(
-    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Smth", "Smth", true, false, param_kps_filter, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
+  auto& kps_freq = result.params.emplace_back(make_param(
+    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Freq", "Freq", true, false, param_kps_freq, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_filter.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_fdbk = result.params.emplace_back(make_param(
     make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fdbk", true, false, param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
@@ -321,31 +329,31 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& unison = result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
     make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
-  unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
+  unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_unison(vs[0]); });
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });  
+  uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_unison(vs[0]); });
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return is_phase_gen(vs[0]) && vs[1] > 1; });
+  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_unison(vs[0]) && vs[1] > 1; });
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return is_phase_gen(vs[0]) && vs[1] > 1; });
+  uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_unison(vs[0]) && vs[1] > 1; });
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", "Uni.Sprd", "Sprd", true, false, param_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return is_phase_gen(vs[0]) && vs[1] > 1; });
+  uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_unison(vs[0]) && vs[1] > 1; });
 
   return result;
 }
@@ -435,14 +443,44 @@ generate_dsf(float phase, float increment, float sr, float freq, int parts, floa
   return check_bipolar(x * scale_factor / (y * scale));
 }
 
+osc_engine::
+osc_engine(float sample_rate)
+{
+  float const kps_min_freq = 20.0f;
+  _kps_max_length = (int)(std::ceil(sample_rate / kps_min_freq));
+  for (int v = 0; v < max_unison_voices; v++)
+    _kps_lines[v] = std::vector<float>(_kps_max_length);
+}
+
 void 
 osc_engine::reset(plugin_block const* block)
 {
-  auto const& own_block_auto = block->state.own_block_automation;
-  float uni_phase = own_block_auto[param_uni_phase][0].real();
-  int uni_voices = own_block_auto[param_uni_voices][0].step();
+  auto const& block_auto = block->state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+  float uni_phase = block_auto[param_uni_phase][0].real();
+  int uni_voices = block_auto[param_uni_voices][0].step();
   for (int v = 0; v < uni_voices; v++)
     _phase[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
+
+  if(type != type_kps) return;
+
+  // Filter amount is not a continuous parameter,
+  // but we do it this way so it can participate in modulation.
+  // Seems like a nice mod target for velocity.
+  float kps_freq_normalized = block->state.own_accurate_automation[param_kps_freq][0][0];
+  float kps_freq = block->normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_freq, kps_freq_normalized);
+
+  // Initial white noise + filter amount.
+  state_var_filter filter = {};
+  std::uint32_t rand_state = 1;
+  // TODO see if different filter modes do something nice
+  filter.init_lpf(block->sample_rate, kps_freq);
+  for (int i = 0; i < _kps_max_length; i++)
+  {
+    float sample = filter.next(0, fast_rand_next(rand_state));
+    for (int v = 0; v < max_unison_voices; v++)
+      _kps_lines[v][i] = sample * 2.0f - 1.0f;
+  }
 }
 
 void
