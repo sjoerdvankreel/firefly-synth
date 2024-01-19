@@ -93,6 +93,16 @@ wave_skew_type_tags()
   return result;
 }
 
+std::vector<list_item> 
+wave_skew_type_items()
+{
+  std::vector<list_item> result;
+  auto tags = wave_skew_type_tags();
+  for(int i = 0; i < tags.size(); i++)
+    result.push_back({ tags[i].id, tags[i].name });
+  return result;
+}
+
 static std::vector<topo_tag>
 wave_shape_type_tags(bool for_shaper)
 {
