@@ -42,6 +42,9 @@ type_items()
   return result;
 }
 
+// https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
+// https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm/
+// https://github.com/marcociccone/EKS-string-generator/blob/master/Extended%20Karplus%20Strong%20Algorithm.ipynb
 class osc_engine:
 public module_engine {
 
@@ -61,20 +64,17 @@ public:
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 
 private:
-  // https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm/
-  // https://github.com/marcociccone/EKS-string-generator/blob/master/Extended%20Karplus%20Strong%20Algorithm.ipynb
-  void process_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
-
-  // https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
+  float generate_kps(int voice, float sr, float freq, float fdbk, float stretch);
+  
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin> void 
-  process_phased_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
+  process_unison_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw> 
-  void process_phased_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri> 
-  void process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF>
-  void process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS>
+  void process_unison(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
 static void
@@ -477,10 +477,31 @@ osc_engine::reset(plugin_block const* block)
   filter.init_lpf(block->sample_rate, kps_freq);
   for (int i = 0; i < _kps_max_length; i++)
   {
-    float sample = filter.next(0, fast_rand_next(rand_state));
+    float unfiltered = fast_rand_next(rand_state);
+    check_unipolar(unfiltered);
+    float filtered = filter.next(0, unfiltered);
+    check_bipolar(filtered);
     for (int v = 0; v < max_unison_voices; v++)
-      _kps_lines[v][i] = sample * 2.0f - 1.0f;
+      _kps_lines[v][i] = unfiltered;
   }
+}
+
+float
+osc_engine::generate_kps(int voice, float sr, float freq, float fdbk, float stretch)
+{
+  float const min_feedback = 0.9f;
+  stretch *= 0.5f;
+
+  int this_kps_length = (int)(sr / freq);
+  this_kps_length = std::min(this_kps_length, _kps_max_length);
+  int this_index = _kps_positions[voice];
+  int next_index = (_kps_positions[voice] + 1) % this_kps_length;
+  float result = _kps_lines[voice][this_index];
+  _kps_lines[voice][this_index] = (0.5f + stretch) * _kps_lines[voice][this_index];
+  _kps_lines[voice][this_index] += (0.5f - stretch) * _kps_lines[voice][next_index];
+  _kps_lines[voice][this_index] *= min_feedback + fdbk * (1.0f - min_feedback);
+  if (++_kps_positions[voice] >= this_kps_length) _kps_positions[voice] = 0;
+  return check_bipolar(result);
 }
 
 void
@@ -501,17 +522,11 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 
   switch (type)
   {
-  case type_kps: process_kps(block, modulation); break;
   case type_basic: process_basic(block, modulation); break;
-  case type_dsf: process_phased_sin_saw_tri_sqr_dsf<false, false, false, false, true>(block, modulation); break;
+  case type_dsf: process_unison<false, false, false, false, true, false>(block, modulation); break;
+  case type_kps: process_unison<false, false, false, false, false, true>(block, modulation); break;
   default: assert(false); break;
   }
-}
-
-void 
-osc_engine::process_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
-{
-
 }
 
 void
@@ -519,39 +534,39 @@ osc_engine::process_basic(plugin_block& block, cv_matrix_mixdown const* modulati
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sin = block_auto[param_basic_sin_on][0].step();
-  if(sin) process_phased_sin<true>(block, modulation);
-  else process_phased_sin<false>(block, modulation);
+  if(sin) process_unison_sin<true>(block, modulation);
+  else process_unison_sin<false>(block, modulation);
 }
 
 template <bool Sin> void
-osc_engine::process_phased_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_unison_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool saw = block_auto[param_basic_saw_on][0].step();
-  if (saw) process_phased_sin_saw<Sin, true>(block, modulation);
-  else process_phased_sin_saw<Sin, false>(block, modulation);
+  if (saw) process_unison_sin_saw<Sin, true>(block, modulation);
+  else process_unison_sin_saw<Sin, false>(block, modulation);
 }
 
 template <bool Sin, bool Saw> void
-osc_engine::process_phased_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool tri = block_auto[param_basic_tri_on][0].step();
-  if (tri) process_phased_sin_saw_tri<Sin, Saw, true>(block, modulation);
-  else process_phased_sin_saw_tri<Sin, Saw, false>(block, modulation);
+  if (tri) process_unison_sin_saw_tri<Sin, Saw, true>(block, modulation);
+  else process_unison_sin_saw_tri<Sin, Saw, false>(block, modulation);
 }
 
 template <bool Sin, bool Saw, bool Tri> void
-osc_engine::process_phased_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_phased_sin_saw_tri_sqr_dsf<Sin, Saw, Tri, true, false>(block, modulation);
-  else process_phased_sin_saw_tri_sqr_dsf<Sin, Saw, Tri, false, false>(block, modulation);
+  if (sqr) process_unison<Sin, Saw, Tri, true, false, false>(block, modulation);
+  else process_unison<Sin, Saw, Tri, false, false, false>(block, modulation);
 }
 
-template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF> void
-osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS> void
+osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
   if constexpr (Sin) generator_count++;
@@ -559,6 +574,7 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
   if constexpr (Tri) generator_count++;
   if constexpr (Sqr) generator_count++;
   if constexpr (DSF) generator_count++;
+  if constexpr (KPS) generator_count++;
 
   // need to clear all active outputs because we 
   // don't know if we are a modulation source
@@ -584,12 +600,17 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
   auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
+
   auto const& dsf_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
+  auto const& kps_fdbk_curve = *(*modulation)[module_osc][block.module_slot][param_kps_fdbk][0];
+  auto const& kps_stretch_curve = *(*modulation)[module_osc][block.module_slot][param_kps_stretch][0];
+
   auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
   auto const& tri_curve = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
   auto const& sqr_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
   auto const& pwm_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pwm][0];
+
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
@@ -616,11 +637,12 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
       float inc = freq / block.sample_rate;
       float pan = min_pan + (max_pan - min_pan) * v / uni_voice_range;
 
-      if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
+      if constexpr (KPS) sample = generate_kps(v, block.sample_rate, freq, kps_fdbk_curve[f], kps_stretch_curve[f]);
+      if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
       if constexpr (Saw) sample += generate_saw(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[f]);
+      if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
       if constexpr (Tri) sample += generate_triangle(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
       if constexpr (Sqr) sample += generate_sqr(_phase[v], inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
-      if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
         
       check_bipolar(sample / generator_count);
       increment_and_wrap_phase(_phase[v], inc);
@@ -628,7 +650,6 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
       block.state.own_audio[0][v + 1][1][f] = mono_pan_sqrt(1, pan) * sample;
     }
   }
-
 
   // now we have all the individual unison voice outputs, start modulating
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
