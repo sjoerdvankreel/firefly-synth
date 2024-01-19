@@ -7,7 +7,9 @@
 
 #include <firefly_synth/waves.hpp>
 #include <firefly_synth/synth.hpp>
+
 #include <firefly_synth/noise_smooth.hpp>
+#include <firefly_synth/noise_static.hpp>
 
 #include <cmath>
 
@@ -53,7 +55,6 @@ class lfo_engine :
 public module_engine {
   float _phase;
   float _ref_phase;
-  float _static_level;
   float _lfo_end_value;
   float _log_skew_x_exp;
   float _log_skew_y_exp;
@@ -63,32 +64,28 @@ public module_engine {
   lfo_stage _stage = {};
   cv_filter _filter = {};
   smooth_noise _smooth_noise;
-  std::uint32_t _static_state;
+  static_noise _static_noise;
 
   int _prev_seed = -1;
-  int _static_dir = 1;
-  int _static_step_pos = 0;
-  int _noise_total_pos = 0;
-  int _static_step_samples = 0;
-  int _noise_total_samples = 0;
   int _end_filter_pos = 0;
   int _end_filter_stage_samples = 0;
+  int _smooth_noise_total_pos = 0;
+  int _smooth_noise_total_samples = 0;
   std::vector<multi_menu_item> _type_items;
 
-  void reset_noise(int seed, int steps);
+  void reset_smooth_noise(int seed, int steps);
   void update_block_params(plugin_block const* block);
   float calc_smooth(float phase, int seed, int steps);
-  template <bool Free> float calc_static(float phase, int seed, int steps);
 
-  template <bool IsNoise, class Shape>
+  template <bool IsSmoothNoise, bool IsStaticNoise, class Shape>
   void process_shape(plugin_block& block, Shape shape);
-  template <bool IsNoise, class Shape, class SkewX>
+  template <bool IsSmoothNoise, bool IsStaticNoise, class Shape, class SkewX>
   void process_shape_x(plugin_block& block, Shape shape, SkewX skew_x);
-  template <bool IsNoise, class Shape, class SkewX, class SkewY>
+  template <bool IsSmoothNoise, bool IsStaticNoise, class Shape, class SkewX, class SkewY>
   void process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y);
-  template <bool IsNoise, class Shape, class SkewX, class SkewY, class Quantize>
+  template <bool IsSmoothNoise, bool IsStaticNoise, class Shape, class SkewX, class SkewY, class Quantize>
   void process_shape_xy_quantize(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize);
-  template <bool IsNoise, class Calc, class Quantize>
+  template <bool IsSmoothNoise, bool IsStaticNoise, class Calc, class Quantize>
   void process_shape_loop(plugin_block& block, Calc calc, Quantize quantize);
 
 public:
@@ -294,38 +291,15 @@ float
 lfo_engine::calc_smooth(float phase, int seed, int steps)
 {
   float result = _smooth_noise.next(phase * steps);
-  if(_noise_total_pos++ >= _noise_total_samples)
-    reset_noise(seed, steps);
-  return result;
-}
-
-template <bool Free> float
-lfo_engine::calc_static(float phase, int seed, int steps)
-{
-  float result = _static_level;
-  _static_step_pos++;
-  _noise_total_pos++;
-  if (_static_step_pos >= _static_step_samples)
-  {
-    // just do something with the phase param so we don't need to filter out the X options
-    _static_level = fast_rand_next(_static_state);
-    _static_level = bipolar_to_unipolar(unipolar_to_bipolar(_static_level) * phase);
-    _static_step_pos = 0;
-  }
-  if constexpr(!Free)
-    if(_noise_total_pos >= _noise_total_samples)
-      reset_noise(seed, steps);
+  if(_smooth_noise_total_pos++ >= _smooth_noise_total_samples)
+    reset_smooth_noise(seed, steps);
   return result;
 }
 
 void
-lfo_engine::reset_noise(int seed, int steps)
+lfo_engine::reset_smooth_noise(int seed, int steps)
 {
-  _static_dir = 1;
-  _static_step_pos = 0;
-  _noise_total_pos = 0;
-  _static_state = fast_rand_seed(seed);
-  _static_level = fast_rand_next(_static_state);
+  _smooth_noise_total_pos = 0;
   _smooth_noise = smooth_noise(seed, steps);
 }
 
@@ -354,7 +328,8 @@ lfo_engine::reset(plugin_block const* block)
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
   _phase = _global? 0: block_auto[param_phase][0].real();
-  reset_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
+  _static_noise.reset(block_auto[param_seed][0].step());
+  reset_smooth_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
 }
 
 void
@@ -382,84 +357,85 @@ lfo_engine::process(plugin_block& block)
     if (seed != _prev_seed)
     {
       _prev_seed = seed;
-      reset_noise(seed, steps);
+      _static_noise.reset(seed);
+      reset_smooth_noise(seed, steps);
     }
   }
 
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index1)
   {
-  case wave_shape_type_saw: process_shape<false>(block, wave_shape_uni_saw); break;
-  case wave_shape_type_sqr: process_shape<false>(block, wave_shape_uni_sqr); break;
-  case wave_shape_type_tri: process_shape<false>(block, wave_shape_uni_tri); break;
-  case wave_shape_type_sin: process_shape<false>(block, wave_shape_uni_sin); break;
-  case wave_shape_type_cos: process_shape<false>(block, wave_shape_uni_cos); break;
-  case wave_shape_type_sin_sin: process_shape<false>(block, wave_shape_uni_sin_sin); break;
-  case wave_shape_type_sin_cos: process_shape<false>(block, wave_shape_uni_sin_cos); break;
-  case wave_shape_type_cos_sin: process_shape<false>(block, wave_shape_uni_cos_sin); break;
-  case wave_shape_type_cos_cos: process_shape<false>(block, wave_shape_uni_cos_cos); break;
-  case wave_shape_type_sin_sin_sin: process_shape<false>(block, wave_shape_uni_sin_sin_sin); break;
-  case wave_shape_type_sin_sin_cos: process_shape<false>(block, wave_shape_uni_sin_sin_cos); break;
-  case wave_shape_type_sin_cos_sin: process_shape<false>(block, wave_shape_uni_sin_cos_sin); break;
-  case wave_shape_type_sin_cos_cos: process_shape<false>(block, wave_shape_uni_sin_cos_cos); break;
-  case wave_shape_type_cos_sin_sin: process_shape<false>(block, wave_shape_uni_cos_sin_sin); break;
-  case wave_shape_type_cos_sin_cos: process_shape<false>(block, wave_shape_uni_cos_sin_cos); break;
-  case wave_shape_type_cos_cos_sin: process_shape<false>(block, wave_shape_uni_cos_cos_sin); break;
-  case wave_shape_type_cos_cos_cos: process_shape<false>(block, wave_shape_uni_cos_cos_cos); break;
-  case wave_shape_type_smooth_or_fold: process_shape<true>(block, [this, seed, steps](float in) {
+  case wave_shape_type_saw: process_shape<false, false>(block, wave_shape_uni_saw); break;
+  case wave_shape_type_sqr: process_shape<false, false>(block, wave_shape_uni_sqr); break;
+  case wave_shape_type_tri: process_shape<false, false>(block, wave_shape_uni_tri); break;
+  case wave_shape_type_sin: process_shape<false, false>(block, wave_shape_uni_sin); break;
+  case wave_shape_type_cos: process_shape<false, false>(block, wave_shape_uni_cos); break;
+  case wave_shape_type_sin_sin: process_shape<false, false>(block, wave_shape_uni_sin_sin); break;
+  case wave_shape_type_sin_cos: process_shape<false, false>(block, wave_shape_uni_sin_cos); break;
+  case wave_shape_type_cos_sin: process_shape<false, false>(block, wave_shape_uni_cos_sin); break;
+  case wave_shape_type_cos_cos: process_shape<false, false>(block, wave_shape_uni_cos_cos); break;
+  case wave_shape_type_sin_sin_sin: process_shape<false, false>(block, wave_shape_uni_sin_sin_sin); break;
+  case wave_shape_type_sin_sin_cos: process_shape<false, false>(block, wave_shape_uni_sin_sin_cos); break;
+  case wave_shape_type_sin_cos_sin: process_shape<false, false>(block, wave_shape_uni_sin_cos_sin); break;
+  case wave_shape_type_sin_cos_cos: process_shape<false, false>(block, wave_shape_uni_sin_cos_cos); break;
+  case wave_shape_type_cos_sin_sin: process_shape<false, false>(block, wave_shape_uni_cos_sin_sin); break;
+  case wave_shape_type_cos_sin_cos: process_shape<false, false>(block, wave_shape_uni_cos_sin_cos); break;
+  case wave_shape_type_cos_cos_sin: process_shape<false, false>(block, wave_shape_uni_cos_cos_sin); break;
+  case wave_shape_type_cos_cos_cos: process_shape<false, false>(block, wave_shape_uni_cos_cos_cos); break;
+  case wave_shape_type_smooth_or_fold: process_shape<true, false>(block, [this, seed, steps](float in) {
     return wave_shape_uni_custom(in, [this, seed, steps](float in) {
       return calc_smooth(in, seed, steps); }); }); break;
-  case wave_shape_type_static: process_shape<true>(block, [this, seed, steps](float in) {
-    return wave_shape_uni_custom(in, [this, seed, steps](float in) {
-      return calc_static<false>(in, seed, steps); }); }); break;
-  case wave_shape_type_static_free: process_shape<true>(block, [this, seed, steps](float in) {
-    return wave_shape_uni_custom(in, [this, seed, steps](float in) {
-      return calc_static<true>(in, seed, steps); }); }); break;
+  case wave_shape_type_static: process_shape<false, true>(block, [this, seed](float in) {
+    return wave_shape_uni_custom(in, [this, seed](float in) {
+      return _static_noise.next<false>(in, seed); }); }); break;
+  case wave_shape_type_static_free: process_shape<false, true>(block, [this, seed](float in) {
+    return wave_shape_uni_custom(in, [this, seed](float in) {
+      return _static_noise.next<true>(in, seed); }); }); break;
   default: assert(false); break;
   }
 }
 
-template <bool IsNoise, class Shape> void
+template <bool IsSmoothNoise, bool IsStaticNoise, class Shape> void
 lfo_engine::process_shape(plugin_block& block, Shape shape)
 {
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index2)
   {
-  case wave_skew_type_off: process_shape_x<IsNoise>(block, shape, wave_skew_uni_off); break;
-  case wave_skew_type_lin: process_shape_x<IsNoise>(block, shape, wave_skew_uni_lin); break;
-  case wave_skew_type_scu: process_shape_x<IsNoise>(block, shape, wave_skew_uni_scu); break;
-  case wave_skew_type_scb: process_shape_x<IsNoise>(block, shape, wave_skew_uni_scb); break;
-  case wave_skew_type_xpu: process_shape_x<IsNoise>(block, shape, wave_skew_uni_xpu); break;
-  case wave_skew_type_xpb: process_shape_x<IsNoise>(block, shape, wave_skew_uni_xpb); break;
+  case wave_skew_type_off: process_shape_x<IsSmoothNoise, IsStaticNoise>(block, shape, wave_skew_uni_off); break;
+  case wave_skew_type_lin: process_shape_x<IsSmoothNoise, IsStaticNoise>(block, shape, wave_skew_uni_lin); break;
+  case wave_skew_type_scu: process_shape_x<IsSmoothNoise, IsStaticNoise>(block, shape, wave_skew_uni_scu); break;
+  case wave_skew_type_scb: process_shape_x<IsSmoothNoise, IsStaticNoise>(block, shape, wave_skew_uni_scb); break;
+  case wave_skew_type_xpu: process_shape_x<IsSmoothNoise, IsStaticNoise>(block, shape, wave_skew_uni_xpu); break;
+  case wave_skew_type_xpb: process_shape_x<IsSmoothNoise, IsStaticNoise>(block, shape, wave_skew_uni_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool IsNoise, class Shape, class SkewX> void
+template <bool IsSmoothNoise, bool IsStaticNoise, class Shape, class SkewX> void
 lfo_engine::process_shape_x(plugin_block& block, Shape shape, SkewX skew_x)
 {
   switch (_type_items[block.state.own_block_automation[param_type][0].step()].index3)
   {
-  case wave_skew_type_off: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_off); break;
-  case wave_skew_type_lin: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_lin); break;
-  case wave_skew_type_scu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_scu); break;
-  case wave_skew_type_scb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_scb); break;
-  case wave_skew_type_xpu: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_xpu); break;
-  case wave_skew_type_xpb: process_shape_xy<IsNoise>(block, shape, skew_x, wave_skew_uni_xpb); break;
+  case wave_skew_type_off: process_shape_xy<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, wave_skew_uni_off); break;
+  case wave_skew_type_lin: process_shape_xy<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, wave_skew_uni_lin); break;
+  case wave_skew_type_scu: process_shape_xy<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, wave_skew_uni_scu); break;
+  case wave_skew_type_scb: process_shape_xy<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, wave_skew_uni_scb); break;
+  case wave_skew_type_xpu: process_shape_xy<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, wave_skew_uni_xpu); break;
+  case wave_skew_type_xpb: process_shape_xy<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, wave_skew_uni_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool IsNoise, class Shape, class SkewX, class SkewY> void
+template <bool IsSmoothNoise, bool IsStaticNoise, class Shape, class SkewX, class SkewY> void
 lfo_engine::process_shape_xy(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
   int step = block_auto[param_steps][0].step();
   bool quantize = !is_noise(_type_items, type) && step != 1;
-  if(quantize) process_shape_xy_quantize<IsNoise>(block, shape, skew_x, skew_y, lfo_quantize);
-  else process_shape_xy_quantize<IsNoise>(block, shape, skew_x, skew_y, [](float in, int st) { return in; });
+  if(quantize) process_shape_xy_quantize<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, skew_y, lfo_quantize);
+  else process_shape_xy_quantize<IsSmoothNoise, IsStaticNoise>(block, shape, skew_x, skew_y, [](float in, int st) { return in; });
 }
 
-template <bool IsNoise, class Shape, class SkewX, class SkewY, class Quantize> void
+template <bool IsSmoothNoise, bool IsStaticNoise, class Shape, class SkewX, class SkewY, class Quantize> void
 lfo_engine::process_shape_xy_quantize(plugin_block& block, Shape shape, SkewX skew_x, SkewY skew_y, Quantize quantize)
 {
   auto const& block_auto = block.state.own_block_automation;
@@ -472,10 +448,10 @@ lfo_engine::process_shape_xy_quantize(plugin_block& block, Shape shape, SkewX sk
   float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
   float py = wave_skew_is_exp(sy) ? _log_skew_y_exp : y;
   auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_uni(in, px, py, shape, skew_x, skew_y); };
-  process_shape_loop<IsNoise>(block, processor, quantize);
+  process_shape_loop<IsSmoothNoise, IsStaticNoise>(block, processor, quantize);
 }
 
-template <bool IsNoise, class Calc, class Quantize>
+template <bool IsSmoothNoise, bool IsStaticNoise, class Calc, class Quantize>
 void lfo_engine::process_shape_loop(plugin_block& block, Calc calc, Quantize quantize)
 {
   int this_module = _global ? module_glfo : module_vlfo;
@@ -501,11 +477,12 @@ void lfo_engine::process_shape_loop(plugin_block& block, Calc calc, Quantize qua
       continue;
     }
 
-    if constexpr(IsNoise)
-    {
-      _noise_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
-      _static_step_samples = std::ceil(block.sample_rate / (rate_curve[f] * steps));
-    }
+    // todo differentiate
+    static_assert(!IsStaticNoise || !IsSmoothNoise);
+    if constexpr(IsStaticNoise)
+      _static_noise.update(block.sample_rate, rate_curve[f], steps);
+    if constexpr(IsSmoothNoise)
+      _smooth_noise_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
 
     _lfo_end_value = quantize(calc(_phase), steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
