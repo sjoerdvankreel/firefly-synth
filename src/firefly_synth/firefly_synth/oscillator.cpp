@@ -473,7 +473,9 @@ osc_engine::reset(plugin_block const* block)
   // Initial white noise + filter amount.
   state_var_filter filter = {};
   std::uint32_t rand_state = 1;
-  // TODO see if different filter modes/reso do something nice
+  // TODO play with the initial filter
+  // TODO play with the follow-up filter
+  // TODO play with the excitation random gen
   double w = pi64 * kps_freq / block->sample_rate;
   filter.init_lpf(w, 0);
   for (int i = 0; i < _kps_max_length; i++)
