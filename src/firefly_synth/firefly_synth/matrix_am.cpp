@@ -18,6 +18,7 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { param_on, param_source, param_target, param_amt, param_ring };
+extern int const osc_param_uni_voices;
 
 static int const route_count = 20; // TODO decrease once we do FM
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
@@ -35,8 +36,7 @@ public:
   void process(plugin_block& block) override;
   jarray<float, 3> const& modulate(
     plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation, 
-    bool per_uni_voice, int uni_voice_count);
+    cv_matrix_mixdown const* cv_modulation);
 };
 
 static graph_data
@@ -148,9 +148,8 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 jarray<float, 3> const&
 am_matrix_modulator::modulate(
   plugin_block& block, int slot, 
-  cv_matrix_mixdown const* cv_modulation, 
-  bool per_uni_voice, int uni_voice_count)
-{ return _engine->modulate(block, slot, cv_modulation, per_uni_voice, uni_voice_count); }
+  cv_matrix_mixdown const* cv_modulation)
+{ return _engine->modulate(block, slot, cv_modulation); }
 
 void
 am_matrix_engine::process(plugin_block& block)
@@ -163,8 +162,7 @@ am_matrix_engine::process(plugin_block& block)
 
 jarray<float, 3> const& 
 am_matrix_engine::modulate(
-  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation, 
-  bool per_uni_voice, int uni_voice_count)
+  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
   if(cv_modulation == nullptr)
@@ -181,45 +179,51 @@ am_matrix_engine::modulate(
     if(block_auto[param_on][r].step() == 0) continue;
     int target_osc = block_auto[param_target][r].step();
     if(target_osc != slot) continue;
+
+    int target_uni_voices = block.state.all_block_automation[module_osc][target_osc][osc_param_uni_voices][0].step();
     if (modulated == nullptr)
     {
       modulated = &(*_own_audio)[r];
-      if(!per_uni_voice)
+      for (int v = 0; v < target_uni_voices; v++)
       {
-        target_audio[0][0].copy_to(block.start_frame, block.end_frame, (*modulated)[0][0]);
-        target_audio[0][1].copy_to(block.start_frame, block.end_frame, (*modulated)[0][1]);
-      }
-      else
-      {
-        for (int v = 0; v < uni_voice_count; v++)
-        {
-          target_audio[v + 1][0].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][0]);
-          target_audio[v + 1][1].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][1]);
-        }
+        target_audio[v + 1][0].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][0]);
+        target_audio[v + 1][1].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][1]);
       }
     }
 
-    // apply modulation
+    // apply modulation on per unison voice level
+    // mapping both source count and target count to [0, 1]
+    // then linear interpolate. this allows modulation
+    // between oscillators with unequal unison voice count
     int source_osc = block_auto[param_source][r].step();
     auto const& source_audio = block.module_audio(module_osc, source_osc);
     auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_amt][r];
     auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_ring][r];
+    int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
 
-    // 0 = osc total, > 0 is per osc unison voice
-    int min_uni_voice = per_uni_voice? 1: 0;
-    int max_uni_voice = per_uni_voice? 1 + uni_voice_count: 1;
-    for(int v = min_uni_voice; v < max_uni_voice; v++)
+    for(int v = 0; v < target_uni_voices; v++)
+    {
+      float target_voice_pos = target_uni_voices == 1? 0.5f: v / (target_uni_voices - 1.0f);
+      float source_voice = target_voice_pos * (source_uni_voices - 1);
+      int source_voice_0 = (int)source_voice;
+      int source_voice_1 = source_voice_0 + 1;
+      float source_voice_pos = source_voice - (int)source_voice;
+      if(source_voice_1 == source_uni_voices) source_voice_1--;
+
       for(int c = 0; c < 2; c++)
         for(int f = block.start_frame; f < block.end_frame; f++)
         {
-          float audio = (*modulated)[v][c][f];
+          float audio = (*modulated)[v + 1][c][f];
           // do not assume [-1, 1] here as oscillator can go beyond that
-          float rm = source_audio[0][v][c][f];
+          float rm0 = source_audio[0][source_voice_0 + 1][c][f];
+          float rm1 = source_audio[0][source_voice_1 + 1][c][f];
+          float rm = (1 - source_voice_pos) * rm0 + source_voice_pos * rm1;
           // "bipolar to unipolar" for [-inf, +inf]
           float am = (rm * 0.5f) + 0.5f;
           float mod = mix_signal(ring_curve[f], am, rm);
-          (*modulated)[v][c][f] = mix_signal(amt_curve[f], audio, mod * audio);
+          (*modulated)[v + 1][c][f] = mix_signal(amt_curve[f], audio, mod * audio);
         }
+    }
   }
 
   // default result is unmodulated (e.g., osc output itself)

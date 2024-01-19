@@ -40,7 +40,7 @@ public:
   am_matrix_modulator(am_matrix_engine* engine) : _engine(engine) {}
   plugin_base::jarray<float, 3> const& modulate(
     plugin_base::plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation, bool per_uni_voice, int uni_voice_count);
+    cv_matrix_mixdown const* cv_modulation);
 };
 
 inline am_matrix_modulator&

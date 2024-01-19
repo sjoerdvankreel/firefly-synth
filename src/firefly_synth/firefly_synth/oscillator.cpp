@@ -12,7 +12,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { uni_mod_osc, uni_mod_voice };
 enum { type_off, type_basic, type_dsf, type_kps };
 enum { section_main, section_basic, section_dsf, section_kps, section_uni };
 enum {
@@ -21,10 +20,12 @@ enum {
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_kps_filter, param_kps_fdbk, param_kps_stretch,
-  param_uni_voices, param_uni_mod, param_uni_phase, param_uni_dtn, param_uni_sprd };
+  param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
 extern int const voice_in_output_pitch_offset;
+// mod matrix needs this
+extern int const osc_param_uni_voices = param_uni_voices;
 
 static bool is_phase_gen(int type)
 { return type == type_basic || type == type_dsf; }
@@ -40,15 +41,6 @@ type_items()
   return result;
 }
 
-static std::vector<list_item>
-uni_mod_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{172F3604-3628-4A76-9E76-FFBEC15FE23A}", "Osc");
-  result.emplace_back("{2CAEC4EE-F7F4-464D-A69C-3915AF265722}", "Voice");
-  return result;
-}
-
 class osc_engine:
 public module_engine {
 
@@ -61,8 +53,6 @@ public:
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 
 private:
-  void sum_uni_voices_into_total(plugin_block& block, int uni_voices, float attn);
-
   // https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm/
   // https://github.com/marcociccone/EKS-string-generator/blob/master/Extended%20Karplus%20Strong%20Algorithm.ipynb
   void process_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -330,7 +320,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& unison = result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
-    make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
+    make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
   unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
@@ -338,28 +328,22 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_phase_gen(vs[0]); });  
-  auto& uni_mod = result.params.emplace_back(make_param(
-    make_topo_info("{6EF23100-C4D5-42C5-A159-EF36581FAF5B}", "Uni.Mod", "Mod", true, false, param_uni_mod, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(uni_mod_items(), ""),
-    make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_mod.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return is_phase_gen(vs[0]) && vs[1] > 1; });
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return is_phase_gen(vs[0]) && vs[1] > 1; });
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return is_phase_gen(vs[0]) && vs[1] > 1; });
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", "Uni.Sprd", "Sprd", true, false, param_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return is_phase_gen(vs[0]) && vs[1] > 1; });
 
@@ -462,19 +446,6 @@ osc_engine::reset(plugin_block const* block)
 }
 
 void
-osc_engine::sum_uni_voices_into_total(plugin_block& block, int uni_voices, float attn)
-{
-  for (int c = 0; c < 2; c++)
-    for (int f = block.start_frame; f < block.end_frame; f++)
-    {
-      float uni_total = 0;
-      for (int v = 0; v < uni_voices; v++)
-        uni_total += block.state.own_audio[0][v + 1][c][f];
-      block.state.own_audio[0][0][c][f] = uni_total / attn;
-    }
-}
-
-void
 osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   // allow custom data for graphs
@@ -551,9 +522,12 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
   if constexpr (Sqr) generator_count++;
   if constexpr (DSF) generator_count++;
 
-  // need to clear *all* outputs because we don't know
-  // if we are a modulation source and/or the target osc's unison voice count
-  for (int v = 0; v < max_unison_voices + 1; v++)
+  // need to clear all active outputs because we 
+  // don't know if we are a modulation source
+  // voice 0 is total
+  auto const& block_auto = block.state.own_block_automation;
+  int uni_voices = block_auto[param_uni_voices][0].step();
+  for (int v = 0; v < uni_voices + 1; v++)
   {
     block.state.own_audio[0][v][0].fill(block.start_frame, block.end_frame, 0.0f);
     block.state.own_audio[0][v][1].fill(block.start_frame, block.end_frame, 0.0f);
@@ -561,10 +535,7 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
 
   if (generator_count == 0) return;
 
-  auto const& block_auto = block.state.own_block_automation;
   int note = block_auto[param_note][0].step();
-  int uni_mod = block_auto[param_uni_mod][0].step();
-  int uni_voices = block_auto[param_uni_voices][0].step();
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
 
@@ -620,35 +591,27 @@ osc_engine::process_phased_sin_saw_tri_sqr_dsf(plugin_block& block, cv_matrix_mi
     }
   }
 
+
+  // now we have all the individual unison voice outputs, start modulating
+  // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
+  auto& modulator = get_am_matrix_modulator(block);
+  auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
+  for(int v = 0; v < uni_voices; v++)
+    for (int c = 0; c < 2; c++)
+      for (int f = block.start_frame; f < block.end_frame; f++)
+        block.state.own_audio[0][v + 1][c][f] = modulated[v + 1][c][f];
+  
   // This means we can exceed [-1, 1] but just dividing
   // by gen_count * uni_voices gets quiet real quick.
   float attn = std::sqrt(generator_count * uni_voices);
-
-  // now we have all the individual unison voice outputs, start modulating:
-  // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
-  auto& modulator = get_am_matrix_modulator(block);
-  if(uni_mod == uni_mod_osc)
-  {
-    // modulate on total osc level: 
-    // first sum the uni voices, then modulate by source total output
-    sum_uni_voices_into_total(block, uni_voices, attn);
-    auto const& modulated = modulator.modulate(block, block.module_slot, modulation, false, 1);
-    for (int c = 0; c < 2; c++)
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        block.state.own_audio[0][0][c][f] = modulated[0][c][f];
-  }
-  else
-  {
-    // modulate on uni voice level:
-    // first modulate individual voices by matched voices
-    // from other osc, then sum output into total
-    auto const& modulated = modulator.modulate(block, block.module_slot, modulation, true, uni_voices);
-    for(int v = 0; v < uni_voices; v++)
-      for (int c = 0; c < 2; c++)
-        for (int f = block.start_frame; f < block.end_frame; f++)
-          block.state.own_audio[0][v + 1][c][f] = modulated[v + 1][c][f];
-    sum_uni_voices_into_total(block, uni_voices, attn);
-  }
+  for (int c = 0; c < 2; c++)
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      float uni_total = 0;
+      for (int v = 0; v < uni_voices; v++)
+        uni_total += block.state.own_audio[0][v + 1][c][f];
+      block.state.own_audio[0][0][c][f] = uni_total / attn;
+    }
 }
 
 }
