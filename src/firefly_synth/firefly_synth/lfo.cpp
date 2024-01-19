@@ -7,7 +7,7 @@
 
 #include <firefly_synth/waves.hpp>
 #include <firefly_synth/synth.hpp>
-#include <firefly_synth/smooth_noise.hpp>
+#include <firefly_synth/noise_smooth.hpp>
 
 #include <cmath>
 
