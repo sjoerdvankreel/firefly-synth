@@ -471,21 +471,14 @@ osc_engine::reset(plugin_block const* block)
   float kps_freq = block->normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_freq, kps_freq_normalized);
 
   // Initial white noise + filter amount.
-  float const kps_attn = 0.9f;
   state_var_filter filter = {};
   std::uint32_t rand_state = 1;
   // TODO see if different filter modes/reso do something nice
   double w = pi64 * kps_freq / block->sample_rate;
   filter.init_lpf(w, 0);
   for (int i = 0; i < _kps_max_length; i++)
-  {
-    float unfiltered = fast_rand_next(rand_state);
-    //check_unipolar(unfiltered);
-    float filtered = filter.next(0, unfiltered);
-    //check_bipolar(filtered);
     for (int v = 0; v < max_unison_voices; v++)
-      _kps_lines[v][i] = (filtered * 2.0f - 1.0f) * kps_attn;
-  }
+      _kps_lines[v][i] = filter.next(0, unipolar_to_bipolar(fast_rand_next(rand_state)));
 }
 
 float
@@ -645,8 +638,11 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
       if constexpr (Tri) sample += generate_triangle(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
       if constexpr (Sqr) sample += generate_sqr(_phase[v], inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
-        
-      //check_bipolar(sample / generator_count);
+      
+      // kps goes a bit out of bounds
+      if constexpr(!KPS)
+        check_bipolar(sample / generator_count);
+
       increment_and_wrap_phase(_phase[v], inc);
       block.state.own_audio[0][v + 1][0][f] = mono_pan_sqrt(0, pan) * sample;
       block.state.own_audio[0][v + 1][1][f] = mono_pan_sqrt(1, pan) * sample;
