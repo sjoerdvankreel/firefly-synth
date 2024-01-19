@@ -8,6 +8,7 @@
 #include <firefly_synth/svf.hpp>
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/waves.hpp>
+#include <firefly_synth/noise_static.hpp>
 
 #include <cmath>
 
@@ -491,20 +492,32 @@ osc_engine::reset(plugin_block const* block)
   // Filter amount is not a continuous parameter,
   // but we do it this way so it can participate in modulation.
   // Seems like a nice mod target for velocity.
+  float kps_x_amt = block->state.own_block_automation[param_kps_x_skew_amt][0].real();
+  float kps_y_amt = block->state.own_block_automation[param_kps_y_skew_amt][0].real();
   float kps_freq_normalized = block->state.own_accurate_automation[param_kps_freq][0][0];
   float kps_freq = block->normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_freq, kps_freq_normalized);
 
   // Initial white noise + filter amount.
   state_var_filter filter = {};
-  std::uint32_t rand_state = 1;
+  static_noise static_noise_ =  {};
+
   // TODO play with the initial filter
   // TODO play with the follow-up filter
   // TODO play with the excitation random gen
+  static_noise_.reset(1);
+  static_noise_.update(block->sample_rate, block->sample_rate, 1);
   double w = pi64 * kps_freq / block->sample_rate;
   filter.init_lpf(w, 0);
-  for (int i = 0; i < _kps_max_length; i++)
+  for (int f = 0; f < _kps_max_length; f++)
+  {
+    float phase = f / (float)_kps_max_length;
     for (int v = 0; v < max_unison_voices; v++)
-      _kps_lines[v][i] = filter.next(0, unipolar_to_bipolar(fast_rand_next(rand_state)));
+    {
+      float phase_skew_x = wave_skew_uni_lin(phase, kps_x_amt);
+      float noise = wave_skew_uni_lin(static_noise_.next<true>(phase_skew_x, 1), kps_y_amt);
+      _kps_lines[v][f] = filter.next(0, unipolar_to_bipolar(noise));
+    }
+  }
 }
 
 float
