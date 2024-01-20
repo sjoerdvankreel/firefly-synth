@@ -35,6 +35,8 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 do unison for kps (multiple lines)
 do lerped hardsync against reference osc + upward semitones
+clarify modulatable/accurate params in the gui
+still do the routing indicators
 
 * get some linux folks to comment (ycollete?)
 * continuing
