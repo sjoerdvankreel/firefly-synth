@@ -73,6 +73,7 @@ public module_engine {
   // kps
   int _kps_max_length = {};
   plugin_base::dc_filter _kps_dc = {};
+  std::array<int, max_unison_voices> _kps_lengths = {};
   std::array<int, max_unison_voices> _kps_positions = {};
   std::array<std::vector<float>, max_unison_voices> _kps_lines = {};
 
@@ -519,7 +520,11 @@ osc_engine(float sample_rate)
   float const kps_min_freq = 20.0f;
   _kps_max_length = (int)(std::ceil(sample_rate / kps_min_freq));
   for (int v = 0; v < max_unison_voices; v++)
+  {
+    _kps_lengths[v] = -1;
+    _kps_positions[v] = 0;
     _kps_lines[v] = std::vector<float>(_kps_max_length);
+  }
 }
 
 void 
@@ -562,12 +567,17 @@ osc_engine::reset(plugin_block const* block)
   case kps_svf_peq: filter.init_peq(w, kps_res * kps_max_res); break;
   default: assert(false); break;
   }
-  for (int f = 0; f < _kps_max_length; f++)
-    for (int v = 0; v < max_unison_voices; v++)
+  for (int v = 0; v < max_unison_voices; v++)
+  {
+    // we fix length at first call to generate_kps
+    _kps_lengths[v] = -1;
+    _kps_positions[v] = 0;
+    for (int f = 0; f < _kps_max_length; f++)
     {
       float noise = static_noise_.next<true>(1, kps_seed);
       _kps_lines[v][f] = filter.next(0, unipolar_to_bipolar(noise));
     }
+  }
 }
 
 float
@@ -576,15 +586,19 @@ osc_engine::generate_kps(int voice, float sr, float freq, float fdbk, float stre
   float const min_feedback = 0.9f;
   stretch *= 0.5f;
 
-  int this_kps_length = (int)(sr / freq);
-  this_kps_length = std::min(this_kps_length, _kps_max_length);
+  // fix value at voice start
+  // kps is not suitable for pitch modulation
+  // but we still allow it so user can do on-note mod
+  if(_kps_lengths[voice] == -1) 
+    _kps_lengths[voice] = std::min((int)(sr / freq), _kps_max_length);
+
   int this_index = _kps_positions[voice];
-  int next_index = (_kps_positions[voice] + 1) % this_kps_length;
+  int next_index = (_kps_positions[voice] + 1) % _kps_lengths[voice];
   float result = _kps_lines[voice][this_index];
   _kps_lines[voice][this_index] = (0.5f + stretch) * _kps_lines[voice][this_index];
   _kps_lines[voice][this_index] += (0.5f - stretch) * _kps_lines[voice][next_index];
   _kps_lines[voice][this_index] *= min_feedback + fdbk * (1.0f - min_feedback);
-  if (++_kps_positions[voice] >= this_kps_length) _kps_positions[voice] = 0;
+  if (++_kps_positions[voice] >= _kps_lengths[voice]) _kps_positions[voice] = 0;
   return _kps_dc.next(0, result);
 }
 
