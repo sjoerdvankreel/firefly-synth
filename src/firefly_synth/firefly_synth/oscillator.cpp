@@ -16,15 +16,16 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { type_off, type_basic, type_dsf, type_kps };
 enum { kps_svf_lpf, kps_svf_hpf, kps_svf_bpf, kps_svf_peq };
-enum { section_main, section_basic, section_dsf, section_kps, section_uni };
+enum { type_off, type_basic, type_dsf, type_kps, type_static };
+enum { section_main, section_basic, section_dsf, section_kps, section_static, section_uni };
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_kps_svf, param_kps_freq, param_kps_res, param_kps_seed, param_kps_rate, param_kps_fdbk, param_kps_stretch,
+  param_static_seed, param_static_rate,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -45,6 +46,7 @@ type_items()
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
   result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF");
   result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S");
+  result.emplace_back("{8B81D211-2A23-4D5D-89B0-24DA3B7D7E2C}", "Static");
   return result;
 }
 
@@ -376,6 +378,24 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
 
+  auto& static_ = result.sections.emplace_back(make_param_section(section_static,
+    make_topo_tag("{E5580A1D-4D8E-4A62-86AE-970CDD47875F}", "Static"),
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1, 1 }))));
+  static_.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
+  static_.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
+  auto& static_seed = result.params.emplace_back(make_param(
+    make_topo_info("{D9DBCDC9-D377-4689-A64A-FE507BABF8FC}", "Static.Seed", "Seed", true, false, param_static_seed, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_step(1, 255, 1, 0),
+    make_param_gui_single(section_static, gui_edit_type::hslider, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  static_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
+  auto& static_rate = result.params.emplace_back(make_param(
+    make_topo_info("{39664422-9E0D-4EE2-818A-2F0DFB77E9EC}", "Static.Rate", "Rate", true, false, param_static_rate, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 100, 10, 10, 1, "%"),
+    make_param_gui_single(section_static, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  static_rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
+  
   auto& unison = result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
     make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
@@ -589,6 +609,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
   case type_basic: process_basic(block, modulation); break;
   case type_dsf: process_unison<false, false, false, false, true, false>(block, modulation); break;
   case type_kps: process_unison<false, false, false, false, false, true>(block, modulation); break;
+  case type_static: break;
   default: assert(false); break;
   }
 }
