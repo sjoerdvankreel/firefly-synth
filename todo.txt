@@ -37,7 +37,6 @@ do lerped hardsync against reference osc + upward semitones
 clarify modulatable/accurate params in the gui
 still do the routing indicators
 credit the image
-kps mid as pitch in note count
 
 * get some linux folks to comment (ycollete?)
 * continuing

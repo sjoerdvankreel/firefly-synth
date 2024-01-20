@@ -386,8 +386,8 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_mid = result.params.emplace_back(make_param(
-    make_topo_info("{C0ADE90C-C59A-44CA-A45C-DB3FAD0A7D84}", "KPS.Mid", "Md", true, false, param_kps_mid, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(20, 20000, 261, 1000, 0, "Hz"),
+    make_topo_info("{AE914D18-C5AB-4ABB-A43B-C80E24868F78}", "KPS.Mid", "Md", true, false, param_kps_mid, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_step(1, 127, midi_middle_c, 0),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_mid.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps2; });
@@ -720,7 +720,9 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
 
-  float kps_mid = block_auto[param_kps_mid][0].real();
+  int kps_mid_note = block_auto[param_kps_mid][0].step();
+  float kps_mid_freq = pitch_to_freq(kps_mid_note);
+
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
   float uni_voice_range = uni_voices == 1 ? 1.0f : static_cast<float>(uni_voices - 1);
@@ -787,7 +789,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         {
           // todo use first frequency 
           feedback = 1 - feedback;
-          float base = freq <= kps_mid? freq / kps_mid * 0.5f: 0.5f + (1 - kps_mid / freq) * 0.5f;
+          float base = freq <= kps_mid_freq ? freq / kps_mid_freq * 0.5f: 0.5f + (1 - kps_mid_freq / freq) * 0.5f;
           feedback = std::pow(std::clamp(base, 0.0f, 1.0f), feedback);
         }
         check_unipolar(feedback);
