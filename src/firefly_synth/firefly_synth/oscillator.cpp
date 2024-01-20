@@ -24,7 +24,7 @@ enum {
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
-  param_kps_svf, param_kps_freq, param_kps_res, param_kps_seed, param_kps_steps, param_kps_fdbk, param_kps_stretch,
+  param_kps_svf, param_kps_freq, param_kps_res, param_kps_seed, param_kps_rate, param_kps_fdbk, param_kps_stretch,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -350,8 +350,8 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_step = result.params.emplace_back(make_param(
-    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", "KPS.Steps", "Stp", true, false, param_kps_steps, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_step(1, 99, 1, 0),
+    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", "KPS.Rate", "Rate", true, false, param_kps_rate, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
@@ -510,21 +510,18 @@ osc_engine::reset(plugin_block const* block)
   double const kps_max_res = 0.99;
   int kps_svf = block_auto[param_kps_svf][0].step();
   int kps_seed = block_auto[param_kps_seed][0].step();
-  int kps_steps = block_auto[param_kps_steps][0].step();
   float kps_res = block_auto[param_kps_res][0].real();
   float kps_freq = block_auto[param_kps_freq][0].real();
+  float kps_rate = block_auto[param_kps_rate][0].real();
 
   // Initial white noise + filter amount.
   state_var_filter filter = {};
   static_noise static_noise_ =  {};
 
-  // TODO play with the initial filter
   // TODO play with the follow-up filter
-  // TODO play with the excitation random gen
-  int note = block_auto[param_note][0].step();
-  float freq = pitch_to_freq(note);
+  float rate = 20 + kps_rate * (block->sample_rate * 0.5f - 20);
   static_noise_.reset(kps_seed);
-  static_noise_.update(block->sample_rate, freq, kps_steps);
+  static_noise_.update(block->sample_rate, rate, 1);
   double w = pi64 * kps_freq / block->sample_rate;
   switch (kps_svf)
   {
