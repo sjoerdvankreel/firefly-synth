@@ -37,7 +37,6 @@ do unison for kps (multiple lines)
 do lerped hardsync against reference osc + upward semitones
 clarify modulatable/accurate params in the gui
 still do the routing indicators
-kps dcblock
 kps lerp
 kps do something with strtch & fdbk
 do clear module without affect route + rethink the whole thing again

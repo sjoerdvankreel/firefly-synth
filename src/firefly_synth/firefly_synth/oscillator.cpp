@@ -70,6 +70,7 @@ public module_engine {
 
   // kps
   int _kps_max_length = {};
+  plugin_base::dc_filter _kps_dc = {};
   std::array<int, max_unison_voices> _kps_positions = {};
   std::array<std::vector<float>, max_unison_voices> _kps_lines = {};
 
@@ -521,11 +522,13 @@ osc_engine::reset(plugin_block const* block)
   float kps_freq = block_auto[param_kps_freq][0].real();
   float kps_rate = block_auto[param_kps_rate][0].real();
 
+  // Block below 20hz, certain param combinations generate very low frequency content
+  _kps_dc.init(block->sample_rate, 20);
+
   // Initial white noise + filter amount.
   state_var_filter filter = {};
   static_noise static_noise_ =  {};
 
-  // TODO play with the follow-up filter
   // below 50 hz gives barely any results
   float rate = 50 + (kps_rate * 0.01) * (block->sample_rate * 0.5f - 50);
   static_noise_.reset(kps_seed);
@@ -562,7 +565,7 @@ osc_engine::generate_kps(int voice, float sr, float freq, float fdbk, float stre
   _kps_lines[voice][this_index] += (0.5f - stretch) * _kps_lines[voice][next_index];
   _kps_lines[voice][this_index] *= min_feedback + fdbk * (1.0f - min_feedback);
   if (++_kps_positions[voice] >= this_kps_length) _kps_positions[voice] = 0;
-  return result;
+  return _kps_dc.next(0, result);
 }
 
 void
