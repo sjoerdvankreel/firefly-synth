@@ -32,8 +32,6 @@ extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
 extern int const osc_param_uni_voices = param_uni_voices;
 
-static bool can_do_phase(int type)
-{ return type == type_basic || type == type_dsf; }
 static bool can_do_unison(int type)
 { return type == type_basic || type == type_dsf || type == type_kps; }
 
@@ -140,7 +138,7 @@ make_osc_graph_engine(plugin_desc const* desc)
 }
 
 std::vector<graph_data>
-render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
+render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_am_matrix)
 {
   std::vector<graph_data> result;
   int note = state.get_plain_at(module_osc, slot, param_note, 0).step();
@@ -150,8 +148,11 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
   
   plugin_block const* block = nullptr;
   auto params = make_graph_engine_params();
-  if(!can_do_phase(type)) params.max_frame_count *= 1;
   int sample_rate = params.max_frame_count * freq;
+
+  // show some of the decay
+  if (type == type_kps && !for_am_matrix) sample_rate /= 5;
+
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   engine->process_default(module_am_matrix, 0);
   for (int i = 0; i <= slot; i++)
@@ -187,10 +188,12 @@ static graph_data
 render_osc_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   graph_engine_params params = {};
+  int type = state.get_plain_at(module_osc, mapping.module_slot, param_type, 0).step();
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
-  auto data = render_osc_graphs(state, engine, mapping.module_slot)[mapping.module_slot];
-  return graph_data(data.audio(), 1.0f, { "First Cycle" });
+  auto data = render_osc_graphs(state, engine, mapping.module_slot, false)[mapping.module_slot];
+  std::string partition = type == type_kps? "5 Cycles": "First Cycle";
+  return graph_data(data.audio(), 1.0f, { partition });
 }
 
 module_topo
@@ -385,7 +388,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] > 1; });
+  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison(vs[0]) && vs[1] > 1; });
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
