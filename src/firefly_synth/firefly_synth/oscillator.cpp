@@ -576,22 +576,15 @@ osc_engine::generate_kps(int voice, float sr, float freq, float fdbk, float stre
   float const min_feedback = 0.9f;
   stretch *= 0.5f;
 
-  // do lerp trick to allow for basic pitch modulation
-  float this_length_samples = sr / freq;
-  int this_length_0 = (int)this_length_samples;
-  int this_length_1 = this_length_0 + 1;
-  float this_length = this_length_samples - (int)this_length_samples;
-  this_length_0 = std::min(this_length_0, _kps_max_length);
-  this_length_1 = std::min(this_length_1, _kps_max_length);
+  int this_kps_length = (int)(sr / freq);
+  this_kps_length = std::min(this_kps_length, _kps_max_length);
   int this_index = _kps_positions[voice];
-  int next_index_0 = (_kps_positions[voice] + 1) % this_length_0;
-  int next_index_1 = (_kps_positions[voice] + 1) % this_length_1;
+  int next_index = (_kps_positions[voice] + 1) % this_kps_length;
   float result = _kps_lines[voice][this_index];
   _kps_lines[voice][this_index] = (0.5f + stretch) * _kps_lines[voice][this_index];
-  _kps_lines[voice][this_index] += (0.5f - stretch) * (1 - this_length) * _kps_lines[voice][next_index_0];
-  _kps_lines[voice][this_index] += (0.5f - stretch) * this_length * _kps_lines[voice][next_index_1];
+  _kps_lines[voice][this_index] += (0.5f - stretch) * _kps_lines[voice][next_index];
   _kps_lines[voice][this_index] *= min_feedback + fdbk * (1.0f - min_feedback);
-  if (++_kps_positions[voice] >= this_length_1) _kps_positions[voice] = 0;
+  if (++_kps_positions[voice] >= this_kps_length) _kps_positions[voice] = 0;
   return _kps_dc.next(0, result);
 }
 
