@@ -100,7 +100,7 @@ private:
   void process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri> 
   void process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS>
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk>
   void process_unison(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
@@ -638,9 +638,9 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
   switch (type)
   {
   case type_basic: process_basic(block, modulation); break;
-  case type_dsf: process_unison<false, false, false, false, true, false>(block, modulation); break;
-  case type_kps1: process_unison<false, false, false, false, false, true>(block, modulation); break;
-  case type_kps2: process_unison<false, false, false, false, false, true>(block, modulation); break;
+  case type_dsf: process_unison<false, false, false, false, true, false, false>(block, modulation); break;
+  case type_kps1: process_unison<false, false, false, false, false, true, false>(block, modulation); break;
+  case type_kps2: process_unison<false, false, false, false, false, true, true>(block, modulation); break;
   case type_static: break;
   default: assert(false); break;
   }
@@ -678,11 +678,11 @@ osc_engine::process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown co
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_unison<Sin, Saw, Tri, true, false, false>(block, modulation);
-  else process_unison<Sin, Saw, Tri, false, false, false>(block, modulation);
+  if (sqr) process_unison<Sin, Saw, Tri, true, false, false, false>(block, modulation);
+  else process_unison<Sin, Saw, Tri, false, false, false, false>(block, modulation);
 }
 
-template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS> void
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk> void
 osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
@@ -692,6 +692,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   if constexpr (Sqr) generator_count++;
   if constexpr (DSF) generator_count++;
   if constexpr (KPS) generator_count++;
+
+  static_assert(!KPSAutoFdbk || KPS);
 
   // need to clear all active outputs because we 
   // don't know if we are a modulation source
@@ -762,13 +764,21 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       float inc = freq / block.sample_rate;
       float pan = min_pan + (max_pan - min_pan) * v / uni_voice_range;
 
-      if constexpr (KPS) sample = generate_kps(v, block.sample_rate, freq, kps_fdbk_curve[f], kps_stretch_curve[f]);
-      if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
       if constexpr (Saw) sample += generate_saw(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[f]);
       if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
       if constexpr (Tri) sample += generate_triangle(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
       if constexpr (Sqr) sample += generate_sqr(_phase[v], inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
       
+      if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
+
+      if constexpr (KPS) 
+      {
+        float feedback = kps_fdbk_curve[f];
+        if constexpr(KPSAutoFdbk)
+          feedback = std::clamp((freq - 65) / (523 - 65), 0.0f, 1.0f);
+        sample = generate_kps(v, block.sample_rate, freq, feedback, kps_stretch_curve[f]);
+      }
+
       // kps goes a bit out of bounds
       if constexpr(!KPS)
         check_bipolar(sample / generator_count);
