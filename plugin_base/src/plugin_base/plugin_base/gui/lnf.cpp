@@ -525,11 +525,24 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     g.strokePath(pr, PathStrokeType(1.0f));
   }
 
+  auto thumb_color = colors().slider_thumb;
+  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
+
+  // modulatable indicator
+  if (auto ps = dynamic_cast<param_slider*>(&s))
+  {
+    if (ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
+    {
+      auto indicator = outline1.interpolatedWith(outline2, 0.33);
+      if (!s.isEnabled()) indicator = indicator.darker();
+      g.setColour(thumb_color);
+      g.fillEllipse(left + width / 2 - height / 2 + 1, top + 1, height - 2, height - 2);
+    }
+  }
+
   Path thumb;
   float thumb_left = width * pos;
   float thumb_top = s.getHeight() / 2;
-  auto thumb_color = colors().slider_thumb;
-  if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
   g.setColour(thumb_color);
   thumb.startNewSubPath(thumb_left, thumb_top + slider_thumb_height);
   thumb.lineTo(thumb_left + slider_thumb_width / 2, thumb_top);

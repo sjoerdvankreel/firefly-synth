@@ -35,7 +35,6 @@ do osc oversampling
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc)
 write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
-clarify modulatable/accurate params in the gui
 credit the image
 
 * get some linux folks to comment (ycollete?)
