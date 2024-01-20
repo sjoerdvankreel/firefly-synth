@@ -41,6 +41,7 @@ kps dcblock
 kps lerp
 kps smooth excite
 kps rate log 0->0.1->1
+kps do min rate 1%
 kps do something with strtch & fdbk
 
 * get some linux folks to comment (ycollete?)
