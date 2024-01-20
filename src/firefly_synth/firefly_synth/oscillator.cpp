@@ -775,7 +775,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         float feedback = kps_fdbk_curve[f];
         if constexpr(KPSAutoFdbk)
-          feedback = std::clamp((freq - 0) / (1 + 5000 * feedback - 0), 0.0f, 1.0f);
+          feedback = std::pow(std::clamp(freq / 587, 0.0f, 1.0f), feedback);
+        check_unipolar(feedback);
         sample = generate_kps(v, block.sample_rate, freq, feedback, kps_stretch_curve[f]);
       }
 
