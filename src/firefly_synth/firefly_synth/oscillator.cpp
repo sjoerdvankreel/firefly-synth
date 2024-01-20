@@ -794,7 +794,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         float feedback = kps_fdbk_curve[f];
         if constexpr(KPSAutoFdbk)
         {
-          // todo use first frequency 
           feedback = 1 - feedback;
           float base = kps_freq <= kps_mid_freq ? kps_freq / kps_mid_freq * 0.5f: 0.5f + (1 - kps_mid_freq / kps_freq) * 0.5f;
           feedback = std::pow(std::clamp(base, 0.0f, 1.0f), feedback);
