@@ -18,12 +18,13 @@ namespace firefly_synth {
 
 enum { type_off, type_basic, type_dsf, type_kps };
 enum { section_main, section_basic, section_dsf, section_kps, section_uni };
+enum { kps_svf_lpf, kps_svf_hpf, kps_svf_bpf, kps_svf_bsf, kps_svf_apf, kps_svf_peq };
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
-  param_kps_x_skew_mode, param_kps_x_skew_amt, param_kps_y_skew_mode, param_kps_y_skew_amt, param_kps_freq, param_kps_res, param_kps_fdbk, param_kps_stretch,
+  param_kps_svf, param_kps_freq, param_kps_res, param_kps_fdbk, param_kps_stretch,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -42,6 +43,19 @@ type_items()
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
   result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF");
   result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S");
+  return result;
+}
+
+static std::vector<list_item>
+kps_svf_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{E4193E9C-3305-42AE-90D4-A9A5554E43EA}", "LPF");
+  result.emplace_back("{D51180AF-5D49-4BB6-BE73-73EF753A15A8}", "HPF");
+  result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF");
+  result.emplace_back("{714E78CA-05A4-4834-823E-43EAC27D764C}", "BSF");
+  result.emplace_back("{4ECF33E8-79A9-42BE-BC66-DFD9A78FCA5A}", "APF");
+  result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ");
   return result;
 }
 
@@ -307,53 +321,36 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& kps = result.sections.emplace_back(make_param_section(section_kps,
     make_topo_tag("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "K+S"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
   kps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   kps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
-  auto& kps_skew_x_mode = result.params.emplace_back(make_param(
-    make_topo_info("{7E47ACD4-88AC-4D3B-86B1-05CCDFB4BC7D}", "KPS.X", "X", true, false, param_kps_x_skew_mode, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(wave_skew_type_items(), ""),
-    make_param_gui_single(section_kps, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_skew_x_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
-  auto& kps_skew_x_amt = result.params.emplace_back(make_param(
-    make_topo_info("{FC1F7A69-6B0B-4B72-8FE3-77A3E4C90F8D}", "KPS.X.Amt", "X.Amt", true, false, param_kps_x_skew_amt, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 1 }, make_label_none())));
-  kps_skew_x_amt.gui.bindings.enabled.bind_params({ param_type, param_kps_x_skew_mode }, [](auto const& vs) { return vs[0] == type_kps && vs[1] != wave_skew_type_off; });
-  auto& kps_skew_y_mode = result.params.emplace_back(make_param(
-    make_topo_info("{E29C2987-A583-4612-A01B-AC9322A80C56}", "KPS.Y", "Y", true, false, param_kps_y_skew_mode, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(wave_skew_type_items(), ""),
-    make_param_gui_single(section_kps, gui_edit_type::autofit_list, { 0, 2 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_skew_y_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
-  auto& kps_skew_y_amt = result.params.emplace_back(make_param(
-    make_topo_info("{EE154575-72A5-45EE-8797-59612DCD1C35}", "KPS.Y.Amt", "Y.Amt", true, false, param_kps_y_skew_amt, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 3 }, make_label_none())));
-  kps_skew_y_amt.gui.bindings.enabled.bind_params({ param_type, param_kps_y_skew_mode }, [](auto const& vs) { return vs[0] == type_kps && vs[1] != wave_skew_type_off; });
+  auto& kps_svf = result.params.emplace_back(make_param(
+    make_topo_info("{7E47ACD4-88AC-4D3B-86B1-05CCDFB4BC7D}", "KPS.SVF", "SVF", true, false, param_kps_svf, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(kps_svf_items(), ""),
+    make_param_gui_single(section_kps, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  kps_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_freq = result.params.emplace_back(make_param(
     make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Freq", "Freq", true, false, param_kps_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
-    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 4 },
+    make_param_dsp_voice(param_automate::automate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
+    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_res = result.params.emplace_back(make_param(
     make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", "KPS.Res", "Res", true, false, param_kps_res, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 5 },
+    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0, 0, true),
+    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_fdbk = result.params.emplace_back(make_param(
     make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fdbk", true, false, param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 6 },
+    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_stretch = result.params.emplace_back(make_param(
     make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", "KPS.Stretch", "Stretch", true, false, param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 7 },
+    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
 
@@ -495,15 +492,11 @@ osc_engine::reset(plugin_block const* block)
 
   if(type != type_kps) return;
 
-  // Filter amount is not a continuous parameter,
-  // but we do it this way so it can participate in modulation.
-  // Seems like a nice mod target for velocity.
+  // Initial kps excite using static noise + res svf filter.
   double const kps_max_res = 0.99;
-  float kps_x_amt = block->state.own_block_automation[param_kps_x_skew_amt][0].real();
-  float kps_y_amt = block->state.own_block_automation[param_kps_y_skew_amt][0].real();
-  float kps_freq_normalized = block->state.own_accurate_automation[param_kps_freq][0][0];
-  float kps_freq = block->normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_freq, kps_freq_normalized);
-  float kps_res = block->state.own_accurate_automation[param_kps_res][0][0];
+  int kps_svf = block_auto[param_kps_svf][0].step();
+  float kps_res = block_auto[param_kps_res][0].real();
+  float kps_freq = block_auto[param_kps_freq][0].real();
 
   // Initial white noise + filter amount.
   state_var_filter filter = {};
@@ -515,17 +508,22 @@ osc_engine::reset(plugin_block const* block)
   static_noise_.reset(1);
   static_noise_.update(block->sample_rate, block->sample_rate, 1);
   double w = pi64 * kps_freq / block->sample_rate;
-  filter.init_hpf(w, kps_res * kps_max_res);
-  for (int f = 0; f < _kps_max_length; f++)
+  switch (kps_svf)
   {
-    float phase = f / (float)_kps_max_length;
+  case kps_svf_lpf: filter.init_lpf(w, kps_res * kps_max_res); break;
+  case kps_svf_hpf: filter.init_hpf(w, kps_res * kps_max_res); break;
+  case kps_svf_bpf: filter.init_bpf(w, kps_res * kps_max_res); break;
+  case kps_svf_bsf: filter.init_bsf(w, kps_res * kps_max_res); break;
+  case kps_svf_apf: filter.init_apf(w, kps_res * kps_max_res); break;
+  case kps_svf_peq: filter.init_peq(w, kps_res * kps_max_res); break;
+  default: assert(false); break;
+  }
+  for (int f = 0; f < _kps_max_length; f++)
     for (int v = 0; v < max_unison_voices; v++)
     {
-      float phase_skew_x = wave_skew_uni_lin(phase, kps_x_amt);
-      float noise = wave_skew_uni_lin(static_noise_.next<true>(phase_skew_x, 1), kps_y_amt);
+      float noise = static_noise_.next<true>(1, 1);
       _kps_lines[v][f] = filter.next(0, unipolar_to_bipolar(noise));
     }
-  }
 }
 
 float
