@@ -17,7 +17,7 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { kps_svf_lpf, kps_svf_hpf, kps_svf_bpf, kps_svf_peq };
-enum { type_off, type_basic, type_dsf, type_kps, type_static };
+enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { section_main, section_basic, section_dsf, section_kps, section_static, section_uni };
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
@@ -33,10 +33,12 @@ extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
 extern int const osc_param_uni_voices = param_uni_voices;
 
+static bool constexpr is_kps(int type) 
+{ return type == type_kps1 || type == type_kps2; }
 static bool can_do_unison_phase(int type)
 { return type == type_basic || type == type_dsf; }
 static bool can_do_unison(int type)
-{ return type == type_basic || type == type_dsf || type == type_kps; }
+{ return type == type_basic || type == type_dsf || is_kps(type); }
 
 static std::vector<list_item>
 type_items()
@@ -45,7 +47,8 @@ type_items()
   result.emplace_back("{9C9FFCAD-09A5-49E6-A083-482C8A3CF20B}", "Off");
   result.emplace_back("{9185A6F4-F9EF-4A33-8462-1B02A25FDF29}", "Basic");
   result.emplace_back("{5DDB5617-85CC-4BE7-8295-63184BA56191}", "DSF");
-  result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S");
+  result.emplace_back("{E6814747-6CEE-47DA-9878-890D0A5DC5C7}", "K+S1");
+  result.emplace_back("{43DC7825-E437-4792-88D5-6E76241493A1}", "K+S2");
   result.emplace_back("{8B81D211-2A23-4D5D-89B0-24DA3B7D7E2C}", "Static");
   return result;
 }
@@ -160,7 +163,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int sample_rate = params.max_frame_count * freq;
 
   // show some of the decay
-  if (type == type_kps && !for_am_matrix) sample_rate /= 5;
+  if (is_kps(type) && !for_am_matrix) sample_rate /= 5;
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   engine->process_default(module_am_matrix, 0);
@@ -201,7 +204,7 @@ render_osc_graph(plugin_state const& state, graph_engine* engine, int param, par
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
   auto data = render_osc_graphs(state, engine, mapping.module_slot, false)[mapping.module_slot];
-  std::string partition = type == type_kps? "5 Cycles": "First Cycle";
+  std::string partition = is_kps(type)? "5 Cycles": "First Cycle";
   return graph_data(data.audio(), 1.0f, { partition });
 }
 
@@ -338,49 +341,49 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
-  kps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
-  kps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
+  kps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_svf = result.params.emplace_back(make_param(
     make_topo_info("{7E47ACD4-88AC-4D3B-86B1-05CCDFB4BC7D}", "KPS.SVF", "SVF", true, false, param_kps_svf, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(kps_svf_items(), ""),
     make_param_gui_single(section_kps, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  kps_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_freq = result.params.emplace_back(make_param(
     make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Freq", "Freq", true, false, param_kps_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_res = result.params.emplace_back(make_param(
     make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", "KPS.Res", "Res", true, false, param_kps_res, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_seed = result.params.emplace_back(make_param(
     make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", "KPS.Seed", "Seed", true, false, param_kps_seed, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_step = result.params.emplace_back(make_param(
     make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", "KPS.Rate", "Rate", true, false, param_kps_rate, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_fdbk = result.params.emplace_back(make_param(
     make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fdbk", true, false, param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_stretch = result.params.emplace_back(make_param(
     make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", "KPS.Str", "Str", true, false, param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
 
   auto& static_ = result.sections.emplace_back(make_param_section(section_static,
     make_topo_tag("{E5580A1D-4D8E-4A62-86AE-970CDD47875F}", "Static"),
@@ -636,7 +639,8 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
   {
   case type_basic: process_basic(block, modulation); break;
   case type_dsf: process_unison<false, false, false, false, true, false>(block, modulation); break;
-  case type_kps: process_unison<false, false, false, false, false, true>(block, modulation); break;
+  case type_kps1: process_unison<false, false, false, false, false, true>(block, modulation); break;
+  case type_kps2: process_unison<false, false, false, false, false, true>(block, modulation); break;
   case type_static: break;
   default: assert(false); break;
   }
