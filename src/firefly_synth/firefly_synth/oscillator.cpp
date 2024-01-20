@@ -24,7 +24,7 @@ enum {
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
-  param_kps_svf, param_kps_freq, param_kps_res, param_kps_seed, param_kps_rate, param_kps_fdbk, param_kps_stretch,
+  param_kps_svf, param_kps_freq, param_kps_res, param_kps_seed, param_kps_rate, param_kps_fdbk, param_kps_stretch, param_kps_mid,
   param_static_seed, param_static_rate,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
@@ -340,7 +340,8 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_tag("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "K+S"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
+      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
+      gui_dimension::auto_size, 1 }))));
   kps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   kps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_svf = result.params.emplace_back(make_param(
@@ -349,7 +350,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_kps, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   kps_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_freq = result.params.emplace_back(make_param(
-    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Freq", "Freq", true, false, param_kps_freq, 1),
+    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Freq", "Frq", true, false, param_kps_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
@@ -361,29 +362,35 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_seed = result.params.emplace_back(make_param(
-    make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", "KPS.Seed", "Seed", true, false, param_kps_seed, 1),
+    make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", "KPS.Seed", "Sd", true, false, param_kps_seed, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_step = result.params.emplace_back(make_param(
-    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", "KPS.Rate", "Rate", true, false, param_kps_rate, 1),
+    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", "KPS.Rate", "Rt", true, false, param_kps_rate, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_fdbk = result.params.emplace_back(make_param(
-    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fdbk", true, false, param_kps_fdbk, 1),
+    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fd", true, false, param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_stretch = result.params.emplace_back(make_param(
-    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", "KPS.Str", "Str", true, false, param_kps_stretch, 1),
+    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", "KPS.Str", "St", true, false, param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
+  auto& kps_mid = result.params.emplace_back(make_param(
+    make_topo_info("{C0ADE90C-C59A-44CA-A45C-DB3FAD0A7D84}", "KPS.Mid", "Md", true, false, param_kps_mid, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_log(20, 20000, 261, 1000, 0, "Hz"),
+    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 7 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  kps_mid.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps2; });
 
   auto& static_ = result.sections.emplace_back(make_param_section(section_static,
     make_topo_tag("{E5580A1D-4D8E-4A62-86AE-970CDD47875F}", "Static"),
@@ -712,6 +719,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
 
+  float kps_mid = block_auto[param_kps_mid][0].real();
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
   float uni_voice_range = uni_voices == 1 ? 1.0f : static_cast<float>(uni_voices - 1);
@@ -775,7 +783,11 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         float feedback = kps_fdbk_curve[f];
         if constexpr(KPSAutoFdbk)
-          feedback = std::pow(std::clamp(freq / 587, 0.0f, 1.0f), feedback);
+        {
+          // todo use first frequency
+          float base = freq <= kps_mid? freq / kps_mid * 0.5f: 0.5f + (1 - kps_mid / freq) * 0.5f;
+          feedback = 1 - std::pow(std::clamp(base, 0.0f, 1.0f), feedback);
+        }
         check_unipolar(feedback);
         sample = generate_kps(v, block.sample_rate, freq, feedback, kps_stretch_curve[f]);
       }
