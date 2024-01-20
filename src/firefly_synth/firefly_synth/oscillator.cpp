@@ -77,6 +77,7 @@ public module_engine {
   int _kps_max_length = {};
   bool _kps_initialized = false;
   plugin_base::dc_filter _kps_dc = {};
+  std::array<int, max_unison_voices> _kps_freqs = {};
   std::array<int, max_unison_voices> _kps_lengths = {};
   std::array<int, max_unison_voices> _kps_positions = {};
   std::array<std::vector<float>, max_unison_voices> _kps_lines = {};
@@ -534,6 +535,7 @@ osc_engine(float sample_rate)
   _kps_max_length = (int)(std::ceil(sample_rate / kps_min_freq));
   for (int v = 0; v < max_unison_voices; v++)
   {
+    _kps_freqs[v] = 0;
     _kps_lengths[v] = -1;
     _kps_positions[v] = 0;
     _kps_lines[v] = std::vector<float>(_kps_max_length);
@@ -595,6 +597,7 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
   for (int v = 0; v < max_unison_voices; v++)
   {
     // we fix length at first call to generate_kps
+    _kps_freqs[v] = 0;
     _kps_lengths[v] = -1;
     _kps_positions[v] = 0;
     for (int f = 0; f < _kps_max_length; f++)
@@ -784,12 +787,16 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
       if constexpr (KPS) 
       {
+        if (_kps_lengths[v] == -1)
+          _kps_freqs[v] = freq;
+        float kps_freq = _kps_freqs[v];
+
         float feedback = kps_fdbk_curve[f];
         if constexpr(KPSAutoFdbk)
         {
           // todo use first frequency 
           feedback = 1 - feedback;
-          float base = freq <= kps_mid_freq ? freq / kps_mid_freq * 0.5f: 0.5f + (1 - kps_mid_freq / freq) * 0.5f;
+          float base = kps_freq <= kps_mid_freq ? kps_freq / kps_mid_freq * 0.5f: 0.5f + (1 - kps_mid_freq / kps_freq) * 0.5f;
           feedback = std::pow(std::clamp(base, 0.0f, 1.0f), feedback);
         }
         check_unipolar(feedback);
