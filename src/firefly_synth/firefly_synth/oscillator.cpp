@@ -17,8 +17,8 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { type_off, type_basic, type_dsf, type_kps };
+enum { kps_svf_lpf, kps_svf_hpf, kps_svf_bpf, kps_svf_peq };
 enum { section_main, section_basic, section_dsf, section_kps, section_uni };
-enum { kps_svf_lpf, kps_svf_hpf, kps_svf_bpf, kps_svf_bsf, kps_svf_apf, kps_svf_peq };
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
@@ -32,7 +32,9 @@ extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
 extern int const osc_param_uni_voices = param_uni_voices;
 
-static bool can_unison(int type)
+static bool can_do_phase(int type)
+{ return type == type_basic || type == type_dsf; }
+static bool can_do_unison(int type)
 { return type == type_basic || type == type_dsf || type == type_kps; }
 
 static std::vector<list_item>
@@ -53,8 +55,6 @@ kps_svf_items()
   result.emplace_back("{E4193E9C-3305-42AE-90D4-A9A5554E43EA}", "LPF");
   result.emplace_back("{D51180AF-5D49-4BB6-BE73-73EF753A15A8}", "HPF");
   result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF");
-  result.emplace_back("{714E78CA-05A4-4834-823E-43EAC27D764C}", "BSF");
-  result.emplace_back("{4ECF33E8-79A9-42BE-BC66-DFD9A78FCA5A}", "APF");
   result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ");
   return result;
 }
@@ -144,11 +144,13 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot)
 {
   std::vector<graph_data> result;
   int note = state.get_plain_at(module_osc, slot, param_note, 0).step();
+  int type = state.get_plain_at(module_osc, slot, param_type, 0).step();
   float cent = state.get_plain_at(module_osc, slot, param_cent, 0).real();
   float freq = pitch_to_freq(note + cent);
   
   plugin_block const* block = nullptr;
-  auto const params = make_graph_engine_params();
+  auto params = make_graph_engine_params();
+  if(!can_do_phase(type)) params.max_frame_count *= 1;
   int sample_rate = params.max_frame_count * freq;
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   engine->process_default(module_am_matrix, 0);
@@ -351,7 +353,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   kps_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_step = result.params.emplace_back(make_param(
     make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", "KPS.Rate", "Rate", true, false, param_kps_rate, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(1, 0, true),
+    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
@@ -371,31 +373,31 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& unison = result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
     make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
-  unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_unison(vs[0]); });
+  unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_unison(vs[0]); });
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_unison(vs[0]); });
+  uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_unison(vs[0]); });
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_unison(vs[0]) && vs[1] > 1; });
+  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] > 1; });
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_unison(vs[0]) && vs[1] > 1; });
+  uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison(vs[0]) && vs[1] > 1; });
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", "Uni.Sprd", "Sprd", true, false, param_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_unison(vs[0]) && vs[1] > 1; });
+  uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison(vs[0]) && vs[1] > 1; });
 
   return result;
 }
@@ -519,7 +521,8 @@ osc_engine::reset(plugin_block const* block)
   static_noise static_noise_ =  {};
 
   // TODO play with the follow-up filter
-  float rate = 20 + kps_rate * (block->sample_rate * 0.5f - 20);
+  // below 50 hz gives barely any results
+  float rate = 50 + (kps_rate * 0.01) * (block->sample_rate * 0.5f - 50);
   static_noise_.reset(kps_seed);
   static_noise_.update(block->sample_rate, rate, 1);
   double w = pi64 * kps_freq / block->sample_rate;
@@ -528,8 +531,6 @@ osc_engine::reset(plugin_block const* block)
   case kps_svf_lpf: filter.init_lpf(w, kps_res * kps_max_res); break;
   case kps_svf_hpf: filter.init_hpf(w, kps_res * kps_max_res); break;
   case kps_svf_bpf: filter.init_bpf(w, kps_res * kps_max_res); break;
-  case kps_svf_bsf: filter.init_bsf(w, kps_res * kps_max_res); break;
-  case kps_svf_apf: filter.init_apf(w, kps_res * kps_max_res); break;
   case kps_svf_peq: filter.init_peq(w, kps_res * kps_max_res); break;
   default: assert(false); break;
   }
