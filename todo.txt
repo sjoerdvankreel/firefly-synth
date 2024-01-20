@@ -33,13 +33,9 @@ document new invisible stuff (bpm/midi smooth, comb/delay lin interpol)
 do osc oversampling
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc)
 write the infernal<>firefly comparison
-do unison for kps (multiple lines)
 do lerped hardsync against reference osc + upward semitones
 clarify modulatable/accurate params in the gui
 still do the routing indicators
-kps lerp
-kps do something with strtch & fdbk
-do clear module without affect route + rethink the whole thing again
 credit the image
 
 * get some linux folks to comment (ycollete?)
