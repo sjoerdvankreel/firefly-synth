@@ -515,7 +515,7 @@ osc_engine::reset(plugin_block const* block)
   static_noise_.reset(1);
   static_noise_.update(block->sample_rate, block->sample_rate, 1);
   double w = pi64 * kps_freq / block->sample_rate;
-  filter.init_lpf(w, kps_res * kps_max_res);
+  filter.init_hpf(w, kps_res * kps_max_res);
   for (int f = 0; f < _kps_max_length; f++)
   {
     float phase = f / (float)_kps_max_length;
