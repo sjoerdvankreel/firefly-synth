@@ -159,6 +159,7 @@ protected:
   param_desc const* const _param;
 
 public:
+  param_desc const* param() const { return _param; }
   void mouseUp(juce::MouseEvent const& e) override;
   void state_changed(int index, plain_value plain) override;
   virtual ~param_component() { _gui->gui_state()->remove_listener(_param->info.global, this); }

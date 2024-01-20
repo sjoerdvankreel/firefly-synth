@@ -444,6 +444,18 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     else draw_conic_arc(g, left, top, size, start_angle, start_angle + angle_range / 2, track2, track1, conic_count / 2, pos * 2, 1, stroke);
   }
 
+  // modulatable indicator
+  if(auto ps = dynamic_cast<param_slider*>(&s))
+  {
+    if(ps->param()->param->dsp.can_modulate(ps->param()->info.slot))
+    {
+      auto indicator = background1.interpolatedWith(background2, 0.33);
+      if(!s.isEnabled()) indicator = indicator.darker();
+      g.setColour(indicator);
+      g.fillEllipse(left + size / 4, top + size / 4, size / 2, size / 2);
+    }
+  }
+
   Path thumb;
   float thumb_end_angle = 340 * pi32 / 180;
   float thumb_start_angle = 20 * pi32 / 180;
