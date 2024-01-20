@@ -93,6 +93,36 @@ cv_filter::set(float sample_rate, float response_time)
   _z = 0.0f;
 }
 
+// https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
+class dc_filter
+{
+  double _x0[2];
+  double _y0[2];
+  double _r = 0;
+public:
+  float next(int ch, float in);
+  void init(float sr, float freq_hz);
+};
+
+inline void 
+dc_filter::init(float sr, float freq_hz)
+{
+  _x0[0] = 0;
+  _x0[1] = 0;
+  _y0[0] = 0;
+  _y0[1] = 0;
+  _r = 1 - (pi32 * 2 * freq_hz / sr);
+}
+
+inline float 
+dc_filter::next(int ch, float in)
+{
+  float out = in - _x0[ch] + _y0[ch] * _r;
+  _x0[ch] = in;
+  _y0[ch] = out;
+  return out;
+}
+
 inline std::uint32_t
 fast_rand_seed(int seed)
 { return std::numeric_limits<uint32_t>::max() / seed; }

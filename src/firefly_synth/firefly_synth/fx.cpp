@@ -159,13 +159,10 @@ public module_engine {
   jarray<float, 2> _dly_buffer = {};
 
   // distortion with fixed dc filter @20hz
-  // https://www.dsprelated.com/freebooks/filters/DC_Blocker.html
   // and resonant lp filter in the oversampling stage
-  double _dst_dc_flt_x0[2];
-  double _dst_dc_flt_y0[2];
-  double _dst_dc_flt_r = 0;
   state_var_filter _dst_svf;
   oversampler _dst_oversampler;
+  plugin_base::dc_filter _dst_dc;
   std::vector<multi_menu_item> _dst_shape_items;
 
   // reverb
@@ -739,12 +736,8 @@ fx_engine::reset(plugin_block const* block)
   _comb_pos = 0;
 
   _dst_svf.clear();
-  _dst_dc_flt_x0[0] = 0;
-  _dst_dc_flt_x0[1] = 0;
-  _dst_dc_flt_y0[0] = 0;
-  _dst_dc_flt_y0[1] = 0;
-  _dst_dc_flt_r = 1 - (pi32 * 2 * 20 / block->sample_rate);
-
+  _dst_dc.init(block->sample_rate, 20);
+  
   auto const& block_auto = block->state.own_block_automation;
   int type = block_auto[param_type][0].step();
   if (type == type_cmb)
@@ -1280,10 +1273,7 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
       for(int f = block.start_frame; f < block.end_frame; f++)
       {
         float mixed = block.state.own_audio[0][0][c][f];
-        float filtered = mixed - _dst_dc_flt_x0[c] + _dst_dc_flt_y0[c] * _dst_dc_flt_r;
-        _dst_dc_flt_x0[c] = mixed;
-        _dst_dc_flt_y0[c] = filtered;
-        block.state.own_audio[0][0][c][f] = filtered;
+        block.state.own_audio[0][0][c][f] = _dst_dc.next(c, mixed);
       }
 }
 
