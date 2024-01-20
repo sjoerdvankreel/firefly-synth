@@ -43,6 +43,7 @@ kps smooth excite
 kps rate log 0->0.1->1
 kps do min rate 1%
 kps do something with strtch & fdbk
+kps plot 5/10 cycles
 do clear module without affect route + rethink the whole thing again
 
 * get some linux folks to comment (ycollete?)
