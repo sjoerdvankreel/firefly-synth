@@ -33,7 +33,7 @@ extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
 extern int const osc_param_uni_voices = param_uni_voices;
 
-static bool can_do_phase(int type)
+static bool can_do_unison_phase(int type)
 { return type == type_basic || type == type_dsf; }
 static bool can_do_unison(int type)
 { return type == type_basic || type == type_dsf || type == type_kps; }
@@ -70,9 +70,8 @@ public module_engine {
   // basic and dsf
   float _phase[max_unison_voices];
 
-  // kps, cant do pitchmod
+  // kps
   int _kps_max_length = {};
-  float _kps_voice_start_cent = {};
   plugin_base::dc_filter _kps_dc = {};
   std::array<int, max_unison_voices> _kps_positions = {};
   std::array<std::vector<float>, max_unison_voices> _kps_lines = {};
@@ -241,12 +240,12 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{6E9030AF-EC7A-4473-B194-5DA200E7F90C}", "Pitch", param_pitch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-128, 128, 0, 0, ""),
     make_param_gui_none()));
-  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off && can_do_phase(vs[0]); });
+  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   auto& pb = result.params.emplace_back(make_param(
     make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", "PB", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
-  pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off && can_do_phase(vs[0]); });
+  pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
@@ -412,7 +411,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison(vs[0]) && can_do_phase(vs[0]) && vs[1] > 1; });
+  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison_phase(vs[0]) && vs[1] > 1; });
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
@@ -545,10 +544,6 @@ osc_engine::reset(plugin_block const* block)
 
   // Block below 20hz, certain param combinations generate very low frequency content
   _kps_dc.init(block->sample_rate, 20);
-
-  // Dont want pitchmod, k+s algo is not made for it.
-  float kps_voice_start_cent_normalized = block->state.own_accurate_automation[param_cent][0][0];
-  _kps_voice_start_cent = block->normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, kps_voice_start_cent_normalized);
 
   // Initial white noise + filter amount.
   state_var_filter filter = {};
@@ -705,22 +700,12 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
-  float base_pitch = 0;
-  if constexpr (KPS)
-  {
-    // dont want pitchmod on a running voice
-    base_pitch = note + _kps_voice_start_cent;
-  }
-
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    if constexpr(!KPS)
-    {
-      float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[f]);
-      float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[f]);
-      float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[f]);
-      base_pitch = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[f];
-    }
+    float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[f]);
+    float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[f]);
+    float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[f]);
+    float base_pitch = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[f];
 
     float detune_apply = uni_dtn_curve[f] * uni_voice_apply * 0.5f;
     float spread_apply = uni_sprd_curve[f] * uni_voice_apply * 0.5f;
