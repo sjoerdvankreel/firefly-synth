@@ -32,6 +32,8 @@ extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
 extern int const osc_param_uni_voices = param_uni_voices;
 
+static bool can_do_unison_phase(int type)
+{ return type == type_basic || type == type_dsf; }
 static bool can_do_unison(int type)
 { return type == type_basic || type == type_dsf || type == type_kps; }
 
@@ -388,7 +390,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison(vs[0]) && vs[1] > 1; });
+  uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison_phase(vs[0]) && vs[1] > 1; });
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
