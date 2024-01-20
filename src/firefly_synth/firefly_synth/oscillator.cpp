@@ -23,7 +23,7 @@ enum {
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
-  param_kps_x_skew_mode, param_kps_x_skew_amt, param_kps_y_skew_mode, param_kps_y_skew_amt, param_kps_freq, param_kps_fdbk, param_kps_stretch,
+  param_kps_x_skew_mode, param_kps_x_skew_amt, param_kps_y_skew_mode, param_kps_y_skew_amt, param_kps_freq, param_kps_res, param_kps_fdbk, param_kps_stretch,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -307,7 +307,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& kps = result.sections.emplace_back(make_param_section(section_kps,
     make_topo_tag("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "K+S"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,  1, 1, 1 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
   kps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   kps.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_skew_x_mode = result.params.emplace_back(make_param(
@@ -335,19 +335,25 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& kps_freq = result.params.emplace_back(make_param(
     make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Freq", "Freq", true, false, param_kps_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
-    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
+  auto& kps_res = result.params.emplace_back(make_param(
+    make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", "KPS.Res", "Res", true, false, param_kps_res, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
+    make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 5 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  kps_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_fdbk = result.params.emplace_back(make_param(
     make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fdbk", true, false, param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 5 },
+    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_stretch = result.params.emplace_back(make_param(
     make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", "KPS.Stretch", "Stretch", true, false, param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 6 },
+    make_param_gui_single(section_kps, gui_edit_type::hslider, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
 
@@ -492,10 +498,12 @@ osc_engine::reset(plugin_block const* block)
   // Filter amount is not a continuous parameter,
   // but we do it this way so it can participate in modulation.
   // Seems like a nice mod target for velocity.
+  double const kps_max_res = 0.99;
   float kps_x_amt = block->state.own_block_automation[param_kps_x_skew_amt][0].real();
   float kps_y_amt = block->state.own_block_automation[param_kps_y_skew_amt][0].real();
   float kps_freq_normalized = block->state.own_accurate_automation[param_kps_freq][0][0];
   float kps_freq = block->normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_freq, kps_freq_normalized);
+  float kps_res = block->state.own_accurate_automation[param_kps_res][0][0];
 
   // Initial white noise + filter amount.
   state_var_filter filter = {};
@@ -507,7 +515,7 @@ osc_engine::reset(plugin_block const* block)
   static_noise_.reset(1);
   static_noise_.update(block->sample_rate, block->sample_rate, 1);
   double w = pi64 * kps_freq / block->sample_rate;
-  filter.init_lpf(w, 0);
+  filter.init_lpf(w, kps_res * kps_max_res);
   for (int f = 0; f < _kps_max_length; f++)
   {
     float phase = f / (float)_kps_max_length;
