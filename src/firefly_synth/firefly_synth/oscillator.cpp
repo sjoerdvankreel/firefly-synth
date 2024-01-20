@@ -228,10 +228,16 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-  result.params.emplace_back(make_param(
+  auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  type.gui.submenu = std::make_shared<gui_submenu>();
+  type.gui.submenu->indices.push_back(type_off);
+  type.gui.submenu->indices.push_back(type_basic);
+  type.gui.submenu->indices.push_back(type_dsf);
+  type.gui.submenu->indices.push_back(type_static);
+  type.gui.submenu->add_submenu("Karplus-Strong", { type_kps1, type_kps2 });
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
     make_param_dsp_voice(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),

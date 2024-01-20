@@ -10,6 +10,7 @@ polymod/mpe/note_exprs
 do cakewalk bug report
 visual routing indicators
 document the header files a bit
+do the routing indicators
 
 demo synth:
 make sure everything accurate can modulate
@@ -35,7 +36,6 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
 clarify modulatable/accurate params in the gui
-still do the routing indicators
 credit the image
 
 * get some linux folks to comment (ycollete?)
