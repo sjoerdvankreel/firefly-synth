@@ -37,7 +37,9 @@ do lerped hardsync against reference osc + upward semitones
 clarify modulatable/accurate params in the gui
 still do the routing indicators
 credit the image
-do kps modulation
+kps disable pitchmod (all)
+kps enable modulate frequency
+kps 2 modes ( 1 for auto select feedback / stretch )
 
 * get some linux folks to comment (ycollete?)
 * continuing
