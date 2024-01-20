@@ -369,7 +369,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   kps_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   auto& kps_step = result.params.emplace_back(make_param(
     make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", "KPS.Rate", "Rt", true, false, param_kps_rate, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 100, 10, 10, 1, "%"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(2, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
@@ -564,12 +564,13 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
   int kps_svf = block_auto[param_kps_svf][0].step();
   int kps_seed = block_auto[param_kps_seed][0].step();
   float kps_res = block_auto[param_kps_res][0].real();
-  float kps_rate = block_auto[param_kps_rate][0].real();
 
-  // Frequency is not a continuous param but we fake it this way so it can participate
-  // in modulation. In particular velocity seems like a good mod source for it.
+  // Frequency and rate are not continuous params but we fake it this way so they can 
+  // participate in modulation. In particular velocity seems like a good mod source for freq.
   float kps_freq_normalized = (*(*modulation)[module_osc][block.module_slot][param_kps_freq][0])[0];
   float kps_freq = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_freq, kps_freq_normalized);
+  float kps_rate_normalized = (*(*modulation)[module_osc][block.module_slot][param_kps_rate][0])[0];
+  float kps_rate = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_rate, kps_rate_normalized);
 
   // Block below 20hz, certain param combinations generate very low frequency content
   _kps_dc.init(block.sample_rate, 20);
