@@ -72,6 +72,7 @@ public module_engine {
 
   // kps
   int _kps_max_length = {};
+  bool _kps_initialized = false;
   plugin_base::dc_filter _kps_dc = {};
   std::array<int, max_unison_voices> _kps_lengths = {};
   std::array<int, max_unison_voices> _kps_positions = {};
@@ -85,6 +86,8 @@ public:
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
 
 private:
+
+  void init_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch);
   
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -344,7 +347,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   kps_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
   auto& kps_freq = result.params.emplace_back(make_param(
     make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", "KPS.Freq", "Freq", true, false, param_kps_freq, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_kps, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps; });
@@ -527,38 +530,49 @@ osc_engine(float sample_rate)
   }
 }
 
-void 
+void
 osc_engine::reset(plugin_block const* block)
 {
+  _kps_initialized = false;
   auto const& block_auto = block->state.own_block_automation;
-  int type = block_auto[param_type][0].step();
   float uni_phase = block_auto[param_uni_phase][0].real();
   int uni_voices = block_auto[param_uni_voices][0].step();
   for (int v = 0; v < uni_voices; v++)
     _phase[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
+}
 
-  if(type != type_kps) return;
+// Cant be in the reset call because we need access to modulation.
+void
+osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
+  assert(!_kps_initialized);
+
+  auto const& block_auto = block.state.own_block_automation;
 
   // Initial kps excite using static noise + res svf filter.
   double const kps_max_res = 0.99;
   int kps_svf = block_auto[param_kps_svf][0].step();
   int kps_seed = block_auto[param_kps_seed][0].step();
   float kps_res = block_auto[param_kps_res][0].real();
-  float kps_freq = block_auto[param_kps_freq][0].real();
   float kps_rate = block_auto[param_kps_rate][0].real();
 
+  // Frequency is not a continuous param but we fake it this way so it can participate
+  // in modulation. In particular velocity seems like a good mod source for it.
+  float kps_freq_normalized = (*(*modulation)[module_osc][block.module_slot][param_kps_freq][0])[0];
+  float kps_freq = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_kps_freq, kps_freq_normalized);
+
   // Block below 20hz, certain param combinations generate very low frequency content
-  _kps_dc.init(block->sample_rate, 20);
+  _kps_dc.init(block.sample_rate, 20);
 
   // Initial white noise + filter amount.
   state_var_filter filter = {};
-  static_noise static_noise_ =  {};
+  static_noise static_noise_ = {};
 
   // below 50 hz gives barely any results
-  float rate = 50 + (kps_rate * 0.01) * (block->sample_rate * 0.5f - 50);
+  float rate = 50 + (kps_rate * 0.01) * (block.sample_rate * 0.5f - 50);
   static_noise_.reset(kps_seed);
-  static_noise_.update(block->sample_rate, rate, 1);
-  double w = pi64 * kps_freq / block->sample_rate;
+  static_noise_.update(block.sample_rate, rate, 1);
+  double w = pi64 * kps_freq / block.sample_rate;
   switch (kps_svf)
   {
   case kps_svf_lpf: filter.init_lpf(w, kps_res * kps_max_res); break;
@@ -713,6 +727,14 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
+
+  // Fill the initial buffers.
+  if constexpr (KPS)
+    if (!_kps_initialized)
+    {
+      init_kps(block, modulation);
+      _kps_initialized = true;
+    }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
