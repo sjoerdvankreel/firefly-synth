@@ -477,7 +477,6 @@ void lfo_engine::process_shape_loop(plugin_block& block, Calc calc, Quantize qua
       continue;
     }
 
-    // todo differentiate
     static_assert(!IsStaticNoise || !IsSmoothNoise);
     if constexpr(IsStaticNoise)
       _static_noise.update(block.sample_rate, rate_curve[f], steps);
