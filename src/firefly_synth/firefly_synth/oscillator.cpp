@@ -103,6 +103,7 @@ public:
 private:
 
   void init_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
   void process_static(plugin_block& block, cv_matrix_mixdown const* modulation);
   
@@ -112,12 +113,15 @@ private:
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch, float mid_freq);
 
   template <bool Sin> void 
-  process_unison_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
+  process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw> 
-  void process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri> 
-  void process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
+  void process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
+  template <bool Sin, bool Saw, bool Tri, bool Sqr>
+  void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation);
+
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_unison(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
@@ -710,13 +714,22 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 
   switch (type)
   {
+  case type_dsf: process_dsf(block, modulation); break;
   case type_basic: process_basic(block, modulation); break;
   case type_static: process_static(block, modulation); break;
-  case type_dsf: process_unison<false, false, false, false, true, false, false, false, -1>(block, modulation); break;
-  case type_kps1: process_unison<false, false, false, false, false, true, false, false, -1>(block, modulation); break;
-  case type_kps2: process_unison<false, false, false, false, false, true, true, false, -1>(block, modulation); break;
+  case type_kps1: process_unison<false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
+  case type_kps2: process_unison<false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
   default: assert(false); break;
   }
+}
+
+void
+osc_engine::process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
+  if(block.state.own_block_automation[param_hard_sync][0].step())
+    process_unison<false, false, false, false, true, true, false, false, false, -1>(block, modulation);
+  else
+    process_unison<false, false, false, false, true, false, false, false, false, -1>(block, modulation);
 }
 
 void
@@ -726,11 +739,11 @@ osc_engine::process_static(plugin_block& block, cv_matrix_mixdown const* modulat
   int svf_type = block_auto[param_rand_svf][0].step();
   switch (svf_type)
   {
-  case rand_svf_lpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
-  case rand_svf_hpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
-  case rand_svf_bpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
-  case rand_svf_bsf: process_unison<false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
-  case rand_svf_peq: process_unison<false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
+  case rand_svf_lpf: process_unison<false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
+  case rand_svf_hpf: process_unison<false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
+  case rand_svf_bpf: process_unison<false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
+  case rand_svf_bsf: process_unison<false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
+  case rand_svf_peq: process_unison<false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -740,38 +753,47 @@ osc_engine::process_basic(plugin_block& block, cv_matrix_mixdown const* modulati
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sin = block_auto[param_basic_sin_on][0].step();
-  if(sin) process_unison_sin<true>(block, modulation);
-  else process_unison_sin<false>(block, modulation);
+  if(sin) process_basic_sin<true>(block, modulation);
+  else process_basic_sin<false>(block, modulation);
 }
 
 template <bool Sin> void
-osc_engine::process_unison_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool saw = block_auto[param_basic_saw_on][0].step();
-  if (saw) process_unison_sin_saw<Sin, true>(block, modulation);
-  else process_unison_sin_saw<Sin, false>(block, modulation);
+  if (saw) process_basic_sin_saw<Sin, true>(block, modulation);
+  else process_basic_sin_saw<Sin, false>(block, modulation);
 }
 
 template <bool Sin, bool Saw> void
-osc_engine::process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool tri = block_auto[param_basic_tri_on][0].step();
-  if (tri) process_unison_sin_saw_tri<Sin, Saw, true>(block, modulation);
-  else process_unison_sin_saw_tri<Sin, Saw, false>(block, modulation);
+  if (tri) process_basic_sin_saw_tri<Sin, Saw, true>(block, modulation);
+  else process_basic_sin_saw_tri<Sin, Saw, false>(block, modulation);
 }
 
 template <bool Sin, bool Saw, bool Tri> void
-osc_engine::process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_unison<Sin, Saw, Tri, true, false, false, false, false, -1>(block, modulation);
-  else process_unison<Sin, Saw, Tri, false, false, false, false, false, -1>(block, modulation);
+  if (sqr) process_basic_sin_saw_tri_sqr<Sin, Saw, Tri, true>(block, modulation);
+  else process_basic_sin_saw_tri_sqr<Sin, Saw, Tri, false>(block, modulation);
 }
 
-template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> void
+template <bool Sin, bool Saw, bool Tri, bool Sqr> void
+osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  bool sync = block_auto[param_hard_sync][0].step() != 0;
+  if (sync) process_unison<Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
+  else process_unison<Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
+}
+
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> void
 osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
