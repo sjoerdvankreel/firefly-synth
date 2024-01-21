@@ -503,7 +503,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   distortion.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Dst.OverSmp", "Dst.OverSmp", true, false, param_dist_over, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), "2X"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
     make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
   auto& dist_clip = result.params.emplace_back(make_param(
