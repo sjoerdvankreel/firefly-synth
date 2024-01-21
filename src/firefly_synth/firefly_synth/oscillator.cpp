@@ -117,7 +117,7 @@ private:
   void process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri> 
   void process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int SVFType>
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_unison(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
@@ -771,7 +771,7 @@ osc_engine::process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown co
   else process_unison<Sin, Saw, Tri, false, false, false, false, false, -1>(block, modulation);
 }
 
-template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int SVFType> void
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> void
 osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
@@ -784,7 +784,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   if constexpr (Static) generator_count++;
 
   static_assert(!KPSAutoFdbk || KPS);
-  static_assert(SVFType == -1 || Static);
+  static_assert(StaticSVFType == -1 || Static);
 
   // need to clear all active outputs because we 
   // don't know if we are a modulation source
@@ -875,7 +875,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         float rand_freq_hz = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, stc_freq_curve[f]);
         float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[f]);
         float rand_rate_hz = rand_rate_pct * 0.01 * block.sample_rate * 0.5;
-        sample = generate_static<SVFType>(v, block.sample_rate, rand_freq_hz, stc_res_curve[f], rand_seed, rand_rate_hz);
+        sample = generate_static<StaticSVFType>(v, block.sample_rate, rand_freq_hz, stc_res_curve[f], rand_seed, rand_rate_hz);
       }
 
       // random with reso might go out of bounds
