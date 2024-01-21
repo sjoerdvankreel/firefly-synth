@@ -17,12 +17,10 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int const hard_sync_xover_samples = 16;
-
 enum { over_1, over_2, over_4, over_8, over_16 };
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_main, section_basic, section_dsf, section_rand, section_over_sync, section_uni };
+enum { section_main, section_basic, section_dsf, section_rand, section_sync, section_uni };
 
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
@@ -31,7 +29,7 @@ enum {
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_freq, param_rand_res, param_rand_seed, param_rand_rate, // shared k+s/noise
   param_kps_fdbk, param_kps_stretch, param_kps_mid,
-  param_oversmp, param_hard_sync, param_hard_sync_notes,
+  /* todo param_oversmp */ param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -53,7 +51,7 @@ get_oversmp_info(plugin_block const& block, int& stages, int& factor)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
-  stages = block_auto[param_oversmp][0].step();
+  stages = 0;// todo block_auto[param_oversmp][0].step();
   factor = 1 << stages;
   if (!can_do_phase(type))
   {
@@ -87,7 +85,7 @@ random_svf_items()
   return result;
 }
 
-static std::vector<list_item>
+/* TODO static */ std::vector<list_item>
 over_items()
 {
   std::vector<list_item> result;
@@ -455,26 +453,26 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_mid.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps2; });
   
-  result.sections.emplace_back(make_param_section(section_over_sync,
-    make_topo_tag("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "OverSmp/Sync"),
+  result.sections.emplace_back(make_param_section(section_sync,
+    make_topo_tag("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync"),
     make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-  auto& oversmp = result.params.emplace_back(make_param(
-    make_topo_info("{22B05C94-712A-42C7-B130-D48BB036C108}", "OverSmp", "OverSmp", true, false, param_oversmp, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), "1X"),
-    make_param_gui_single(section_over_sync, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  oversmp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   auto& sync_on = result.params.emplace_back(make_param(
     make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", "Sync.On", "Sync", true, false, param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_over_sync, gui_edit_type::toggle, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 }, make_label_none())));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
-  auto& sync_notes = result.params.emplace_back(make_param(
-    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", "Sync.Notes", "Notes", true, false, param_hard_sync_notes, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Notes"),
-    make_param_gui_single(section_over_sync, gui_edit_type::knob, { 0, 2 },
+  auto& sync_semi = result.params.emplace_back(make_param(
+    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", "Sync.Semi", "Sync", true, false, param_hard_sync_semis, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
+    make_param_gui_single(section_sync, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  sync_notes.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
+  sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
+  auto& sync_xover = result.params.emplace_back(make_param(
+    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", "Sync.CrossOver", "XOver", true, false, param_hard_sync_xover, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
+    make_param_gui_single(section_sync, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
 
   result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
@@ -885,6 +883,9 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
   float uni_voice_range = uni_voices == 1 ? 1.0f : (float)(uni_voices - 1);
 
+  float sync_xover_ms = block_auto[param_hard_sync_xover][0].real();
+  int sync_over_samples = (int)(sync_xover_ms * 0.001 * block.sample_rate);
+
   auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
@@ -904,7 +905,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
-  auto const& sync_notes_curve = *(*modulation)[module_osc][block.module_slot][param_hard_sync_notes][0];
+  auto const& sync_semis_curve = *(*modulation)[module_osc][block.module_slot][param_hard_sync_semis][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
   // Fill the initial buffers.
@@ -936,7 +937,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
     if constexpr (Sync)
     {
-      base_pitch_sync += block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_hard_sync_notes, sync_notes_curve[mod_index]);
+      base_pitch_sync += block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve[mod_index]);
     }
 
     float detune_apply = uni_dtn_curve[mod_index] * uni_voice_apply * 0.5f;
@@ -1013,7 +1014,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
           if constexpr (DSF) unsynced_sample = generate_dsf(_unsync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
-          float unsynced_weight = _unsync_samples[v]-- / (hard_sync_xover_samples + 1.0f);
+          float unsynced_weight = _unsync_samples[v]-- / (sync_over_samples + 1.0f);
           synced_sample = unsynced_weight * unsynced_sample + (1.0f - unsynced_weight) * synced_sample;
         }
       }
@@ -1040,7 +1041,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         if(increment_and_wrap_phase(_ref_phases[v], inc_ref))
         {
           _unsync_phases[v] = _sync_phases[v];
-          _unsync_samples[v] = hard_sync_xover_samples;
+          _unsync_samples[v] = sync_over_samples;
           _sync_phases[v] = _ref_phases[v] * inc_sync / inc_ref;
         }
       }
