@@ -938,7 +938,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         // todo subsample overshoot thingy and interpolate old/new a bit
         if(increment_and_wrap_phase(_ref_phases[v], inc_ref))
-          _sync_phases[v] = 0;
+          _sync_phases[v] = _ref_phases[v] * inc_sync / inc_ref;
       }
 
       block.state.own_audio[0][v + 1][0][f] = mono_pan_sqrt(0, pan) * sample;
