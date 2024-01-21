@@ -20,7 +20,11 @@ using namespace plugin_base;
 
 namespace plugin_base::clap {
 
-enum midi_message { midi_msg_cc = 176, midi_msg_cp = 208, midi_msg_pb = 224 };
+static int const midi_msg_cc = 176;
+static int const midi_msg_cp = 208;
+static int const midi_msg_pb = 224;
+static int const midi_note_on = 0x90;
+static int const midi_note_off = 0x80;
 
 static normalized_value
 clap_to_normalized(param_topo const& topo, clap_value clap)
@@ -386,8 +390,8 @@ pb_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info
 {
   if (!is_input || index != 0) return false;
   info->id = 0;
-  info->preferred_dialect = CLAP_NOTE_DIALECT_CLAP;
-  info->supported_dialects = CLAP_NOTE_DIALECT_CLAP | CLAP_NOTE_DIALECT_MIDI;
+  info->preferred_dialect = CLAP_NOTE_DIALECT_MIDI;
+  info->supported_dialects = CLAP_NOTE_DIALECT_MIDI;
   return true;
 }
 
@@ -558,12 +562,10 @@ pb_plugin::process(clap_process const* process) noexcept
   for (std::uint32_t i = 0; i < process->in_events->size(process->in_events); i++)
   {
     float midi_pb_value = 0;
-    bool publish_midi = true;
     auto header = process->in_events->get(process->in_events, i);
     if(header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     switch (header->type)
     {
-    // TODO handle midi note events
     case CLAP_EVENT_NOTE_ON:
     case CLAP_EVENT_NOTE_OFF:
     case CLAP_EVENT_NOTE_CHOKE:
@@ -618,22 +620,34 @@ pb_plugin::process(clap_process const* process) noexcept
       case midi_msg_cp: 
         midi_event.id = midi_source_cp;
         midi_event.normalized = normalized_value(event->data[1] / 127.0);
+        block.events.midi.push_back(midi_event);
         break;
       case midi_msg_cc:
         midi_event.id = event->data[1];
         midi_event.normalized = normalized_value(event->data[2] / 127.0);
+        block.events.midi.push_back(midi_event);
         break;
       case midi_msg_pb:
         midi_event.id = midi_source_pb;
         midi_pb_value = ((event->data[2] << 7) | event->data[1]) / static_cast<double>(1U << 14);
         midi_event.normalized = normalized_value(midi_pb_value);
+        block.events.midi.push_back(midi_event);
         break;
-      default:
-        publish_midi = false;
+      // map these to note events
+      case midi_note_on:
+      case midi_note_off:
+      {
+        note_event note = {};
+        note.frame = header->time;
+        note.id.key = event->data[1];
+        note.velocity = event->data[2] / 127.0f;
+        note.type = message == midi_note_on ? note_event_type::on : note_event_type::off;
+        block.events.notes.push_back(note);
         break;
       }
-      if(publish_midi) 
-        block.events.midi.push_back(midi_event);
+      default:
+        break;
+      }
       break;
     }
     default: 
