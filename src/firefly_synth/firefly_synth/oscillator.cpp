@@ -917,6 +917,11 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   assert(can_do_phase(type) || oversmp_stages == 0);
 
+  // todo
+  int varken = 100;//oversmp_factor;
+  oversmp_stages = 0;
+  oversmp_factor = 1;
+
   // todo no oversamp for graph ?
   std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;
   for(int v = 0; v < uni_voices + 1; v++)
@@ -1013,7 +1018,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
           if constexpr (DSF) unsynced_sample = generate_dsf(_unsync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
-          float unsynced_weight = _unsync_samples[v]-- / (hard_sync_xover_samples + 1.0f);
+          float unsynced_weight = _unsync_samples[v]-- / (varken + 1.0f);
           synced_sample = unsynced_weight * unsynced_sample + (1.0f - unsynced_weight) * synced_sample;
         }
       }
@@ -1039,8 +1044,9 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         if(increment_and_wrap_phase(_ref_phases[v], inc_ref))
         {
+          assert(_unsync_samples[v] == 0);
           _unsync_phases[v] = _sync_phases[v];
-          _unsync_samples[v] = hard_sync_xover_samples;
+          _unsync_samples[v] = varken;
           _sync_phases[v] = _ref_phases[v] * inc_sync / inc_ref;
         }
       }
