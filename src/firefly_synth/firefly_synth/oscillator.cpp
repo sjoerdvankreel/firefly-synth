@@ -177,7 +177,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int sample_rate = params.max_frame_count * freq;
 
   // show some of the decay
-  if (is_kps(type) && !for_am_matrix) sample_rate /= 5;
+  if (is_random(type) && !for_am_matrix) sample_rate /= 5;
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   engine->process_default(module_am_matrix, 0);
@@ -218,7 +218,7 @@ render_osc_graph(plugin_state const& state, graph_engine* engine, int param, par
   if(state.get_plain_at(mapping.module_index, mapping.module_slot, param_type, 0).step() == type_off) 
     return graph_data(graph_data_type::off, {});
   auto data = render_osc_graphs(state, engine, mapping.module_slot, false)[mapping.module_slot];
-  std::string partition = is_kps(type)? "5 Cycles": "First Cycle";
+  std::string partition = is_random(type)? "5 Cycles": "First Cycle";
   return graph_data(data.audio(), 1.0f, { partition });
 }
 
