@@ -31,6 +31,7 @@ do osc oversampling
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
+do sync step parameter (1-16 samples)
 
 credit the image
 drop 16x oversampling
