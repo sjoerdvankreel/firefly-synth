@@ -36,6 +36,8 @@ fix unison to 1 for static
 static disable the note oct etc
 static fix graph
 do the unperiodic sine?
+do noise feedback param
+disable note/cent
 
 * get some linux folks to comment (ycollete?)
 * continuing

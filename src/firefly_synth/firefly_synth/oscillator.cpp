@@ -787,7 +787,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[f]);
         float rand_rate_hz = rand_rate_pct * 0.01 * block.sample_rate * 0.5;
-        _static_noise.update(block.sample_rate, rand_rate_hz, 2);
+        _static_noise.update(block.sample_rate, rand_rate_hz, 1);
         sample = unipolar_to_bipolar(_static_noise.next<true>(1, rand_seed));
       }
 
