@@ -16,9 +16,10 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+enum { over_1, over_2, over_4, over_8, over_16 };
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_main, section_basic, section_dsf, section_rand, section_hard_sync, section_uni };
+enum { section_main, section_basic, section_dsf, section_rand, section_over_sync, section_uni };
 
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
@@ -27,7 +28,7 @@ enum {
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_freq, param_rand_res, param_rand_seed, param_rand_rate, // shared k+s/noise
   param_kps_fdbk, param_kps_stretch, param_kps_mid,
-  param_hard_sync, param_hard_sync_notes,
+  param_oversmp, param_hard_sync, param_hard_sync_notes,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -66,6 +67,18 @@ random_svf_items()
   result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF");
   result.emplace_back("{CC4012D9-272E-4E33-96EB-AF1ADBF0E879}", "BSF");
   result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ");
+  return result;
+}
+
+static std::vector<list_item>
+over_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{F9C54B64-3635-417F-86A9-69B439548F3C}", "1X");
+  result.emplace_back("{937686E8-AC03-420B-A3FF-0ECE1FF9B23E}", "2X");
+  result.emplace_back("{64F2A767-DE91-41DF-B2F1-003FCC846384}", "4X");
+  result.emplace_back("{9C6E560D-4999-40D9-85E4-C02468296206}", "8X");
+  result.emplace_back("{66E06139-A004-47F4-9938-909D6C8B43C6}", "16X");
   return result;
 }
 
@@ -420,19 +433,24 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_mid.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps2; });
   
-  result.sections.emplace_back(make_param_section(section_hard_sync,
-    make_topo_tag("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync"),
-    make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
+  result.sections.emplace_back(make_param_section(section_over_sync,
+    make_topo_tag("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "OverSmp/Sync"),
+    make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+  auto& oversmp = result.params.emplace_back(make_param(
+    make_topo_info("{22B05C94-712A-42C7-B130-D48BB036C108}", "OverSmp", "OverSmp", true, false, param_oversmp, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), "1X"),
+    make_param_gui_single(section_over_sync, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  oversmp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   auto& sync_on = result.params.emplace_back(make_param(
     make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", "Sync.On", "Sync", true, false, param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_hard_sync, gui_edit_type::toggle, { 0, 0 },
+    make_param_gui_single(section_over_sync, gui_edit_type::toggle, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   auto& sync_notes = result.params.emplace_back(make_param(
     make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", "Sync.Notes", "Notes", true, false, param_hard_sync_notes, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Notes"),
-    make_param_gui_single(section_hard_sync, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_over_sync, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync_notes.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
 
