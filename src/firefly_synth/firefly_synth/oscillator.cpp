@@ -73,6 +73,9 @@ public module_engine {
   // basic and dsf
   float _phase[max_unison_voices];
 
+  // static
+  static_noise _static_noise = {};
+
   // kps
   int _kps_max_length = {};
   bool _kps_initialized = false;
@@ -93,15 +96,16 @@ private:
 
   void init_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch);
-  
+
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
+
   template <bool Sin> void 
   process_unison_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw> 
   void process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri> 
   void process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk>
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static>
   void process_unison(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
@@ -412,7 +416,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   static_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
   auto& static_rate = result.params.emplace_back(make_param(
     make_topo_info("{39664422-9E0D-4EE2-818A-2F0DFB77E9EC}", "Static.Rate", "Rate", true, false, param_static_rate, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 100, 10, 10, 1, "%"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(1, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_static, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   static_rate.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_static; });
@@ -553,6 +557,7 @@ osc_engine::reset(plugin_block const* block)
 {
   _kps_initialized = false;
   auto const& block_auto = block->state.own_block_automation;
+  _static_noise.reset(block_auto[param_static_seed][0].step());
   float uni_phase = block_auto[param_uni_phase][0].real();
   int uni_voices = block_auto[param_uni_voices][0].step();
   for (int v = 0; v < uni_voices; v++)
@@ -655,10 +660,10 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
   switch (type)
   {
   case type_basic: process_basic(block, modulation); break;
-  case type_dsf: process_unison<false, false, false, false, true, false, false>(block, modulation); break;
-  case type_kps1: process_unison<false, false, false, false, false, true, false>(block, modulation); break;
-  case type_kps2: process_unison<false, false, false, false, false, true, true>(block, modulation); break;
-  case type_static: break;
+  case type_static: process_unison<false, false, false, false, false, false, false, true>(block, modulation); break;
+  case type_dsf: process_unison<false, false, false, false, true, false, false, false>(block, modulation); break;
+  case type_kps1: process_unison<false, false, false, false, false, true, false, false>(block, modulation); break;
+  case type_kps2: process_unison<false, false, false, false, false, true, true, false>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -695,11 +700,11 @@ osc_engine::process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown co
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_unison<Sin, Saw, Tri, true, false, false, false>(block, modulation);
-  else process_unison<Sin, Saw, Tri, false, false, false, false>(block, modulation);
+  if (sqr) process_unison<Sin, Saw, Tri, true, false, false, false, false>(block, modulation);
+  else process_unison<Sin, Saw, Tri, false, false, false, false, false>(block, modulation);
 }
 
-template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk> void
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static> void
 osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
@@ -709,6 +714,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   if constexpr (Sqr) generator_count++;
   if constexpr (DSF) generator_count++;
   if constexpr (KPS) generator_count++;
+  if constexpr (Static) generator_count++;
 
   static_assert(!KPSAutoFdbk || KPS);
 
@@ -731,6 +737,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   int kps_mid_note = block_auto[param_kps_mid][0].step();
   float kps_mid_freq = pitch_to_freq(kps_mid_note);
+  int static_seed = block_auto[param_static_seed][0].step();
 
   float dsf_dist = block_auto[param_dsf_dist][0].real();
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
@@ -743,6 +750,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   auto const& dsf_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
   auto const& kps_fdbk_curve = *(*modulation)[module_osc][block.module_slot][param_kps_fdbk][0];
   auto const& kps_stretch_curve = *(*modulation)[module_osc][block.module_slot][param_kps_stretch][0];
+  auto const& static_rate_curve = *(*modulation)[module_osc][block.module_slot][param_static_rate][0];
 
   auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
@@ -790,6 +798,14 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       if constexpr (Sqr) sample += generate_sqr(_phase[v], inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
       
       if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
+
+      if constexpr (Static)
+      {
+        float static_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_static_rate, static_rate_curve[f]);
+        float static_rate_hz = static_rate_pct * 0.01 * block.sample_rate * 0.5;
+        _static_noise.update(block.sample_rate, static_rate_hz, 2);
+        sample = unipolar_to_bipolar(_static_noise.next<true>(1, static_seed));
+      }
 
       if constexpr (KPS) 
       {
