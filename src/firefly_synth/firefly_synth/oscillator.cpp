@@ -17,7 +17,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { over_1, over_2, over_4, over_8 };
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
 enum { section_main, section_basic, section_dsf, section_rand, section_sync, section_uni };
@@ -29,7 +28,7 @@ enum {
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_freq, param_rand_res, param_rand_seed, param_rand_rate, // shared k+s/noise
   param_kps_fdbk, param_kps_stretch, param_kps_mid,
-  /* todo param_oversmp */ param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
+  param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const master_in_param_pb_range;
@@ -82,17 +81,6 @@ random_svf_items()
   result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF");
   result.emplace_back("{CC4012D9-272E-4E33-96EB-AF1ADBF0E879}", "BSF");
   result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ");
-  return result;
-}
-
-/* TODO static */ std::vector<list_item>
-over_items()
-{
-  std::vector<list_item> result;
-  result.emplace_back("{F9C54B64-3635-417F-86A9-69B439548F3C}", "1X");
-  result.emplace_back("{937686E8-AC03-420B-A3FF-0ECE1FF9B23E}", "2X");
-  result.emplace_back("{64F2A767-DE91-41DF-B2F1-003FCC846384}", "4X");
-  result.emplace_back("{9C6E560D-4999-40D9-85E4-C02468296206}", "8X");
   return result;
 }
 
