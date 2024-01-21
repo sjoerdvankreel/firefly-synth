@@ -33,6 +33,9 @@ write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
 credit the image
 fix unison to 1 for static
+static disable the note oct etc
+static fix graph
+do the unperiodic sine?
 
 * get some linux folks to comment (ycollete?)
 * continuing
