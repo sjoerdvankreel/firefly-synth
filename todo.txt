@@ -32,6 +32,7 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
 credit the image
+fix unison to 1 for static
 
 * get some linux folks to comment (ycollete?)
 * continuing
