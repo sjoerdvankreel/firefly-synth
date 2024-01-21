@@ -28,7 +28,7 @@ auto-generate the manual (param list)
 document all the context menus
 document new invisible stuff (bpm/midi smooth, comb/delay lin interpol) 
 do osc oversampling
-make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc)
+make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
 credit the image
@@ -38,7 +38,6 @@ do the unperiodic sine?
 do noise feedback param
 disable note/cent
 drop 16x oversampling
-always unison
 
 * get some linux folks to comment (ycollete?)
 * continuing

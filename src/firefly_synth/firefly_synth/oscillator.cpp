@@ -39,7 +39,7 @@ static bool constexpr is_random(int type)
 { return type == type_static || is_kps(type); }
 static bool can_do_unison_phase(int type)
 { return type == type_basic || type == type_dsf; }
-static bool can_do_unison(int type)
+static bool can_do_unison_detune(int type)
 { return type == type_basic || type == type_dsf || is_kps(type); }
 
 static std::vector<list_item>
@@ -412,16 +412,14 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   kps_mid.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps2; });
   
-  auto& unison = result.sections.emplace_back(make_param_section(section_uni,
+  result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
     make_param_section_gui({ 1, 0, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
-  unison.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_unison(vs[0]); });
-  auto& uni_voices = result.params.emplace_back(make_param(
+  result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_voices.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_unison(vs[0]); });
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
@@ -433,13 +431,13 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison(vs[0]) && vs[1] > 1; });
+  uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison_detune(vs[0]) && vs[1] > 1; });
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", "Uni.Sprd", "Sprd", true, false, param_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_unison(vs[0]) && vs[1] > 1; });
+  uni_spread.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
 
   return result;
 }
@@ -553,7 +551,8 @@ osc_engine::reset(plugin_block const* block)
   for (int v = 0; v < uni_voices; v++)
   {
     _static_svfs[v].clear();
-    _static_noises[v].reset(block_auto[param_rand_seed][0].step());
+    // Unison over static noise doesnt do detune, but it can stereo spread.
+    _static_noises[v].reset(block_auto[param_rand_seed][0].step() + v);
     // Block below 20hz, certain param combinations generate very low frequency content
     _random_dcs[v].init(block->sample_rate, 20);
     _phase[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
