@@ -31,9 +31,9 @@ do osc oversampling
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
+
 credit the image
 static disable the note oct etc
-static fix graph
 do the unperiodic sine?
 do noise feedback param
 disable note/cent
