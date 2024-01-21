@@ -32,14 +32,12 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
 credit the image
-fix unison to 1 for static
 static disable the note oct etc
 static fix graph
 do the unperiodic sine?
 do noise feedback param
 disable note/cent
 drop 16x oversampling
-dc filter for static
 always unison
 
 * get some linux folks to comment (ycollete?)
