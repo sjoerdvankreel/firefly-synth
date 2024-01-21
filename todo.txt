@@ -3,7 +3,6 @@ make a .com website
 someday:
 mseg
 voice arp
-lerped hardsync
 microtonal support
 do voice level unison
 polymod/mpe/note_exprs
