@@ -34,6 +34,7 @@ do lerped hardsync against reference osc + upward semitones
 //do sync step parameter (1-16 samples)
 tryout the other oversmp filter mode
 drop 16x over?
+check all the sample rates where needs oversmp
 
 credit the image
 drop 16x oversampling

@@ -3,6 +3,7 @@
 #include <plugin_base/helpers/matrix.hpp>
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/dsp/oversampler.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/svf.hpp>
@@ -44,6 +45,20 @@ static bool can_do_phase(int type)
 { return type == type_basic || type == type_dsf; }
 static bool can_do_pitch(int type)
 { return type == type_basic || type == type_dsf || is_kps(type); }
+
+static void 
+get_oversmp_info(plugin_block const& block, int& stages, int& factor)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  int type = block_auto[param_type][0].step();
+  stages = block_auto[param_oversmp][0].step();
+  factor = 1 << stages;
+  if (!can_do_phase(type))
+  {
+    stages = 0;
+    factor = 1;
+  }
+}
 
 static std::vector<list_item>
 type_items()
@@ -89,6 +104,7 @@ class osc_engine:
 public module_engine {
 
   // basic and dsf
+  oversampler _oversampler;
   float _ref_phases[max_unison_voices];
   float _sync_phases[max_unison_voices];
 
@@ -108,8 +124,9 @@ public module_engine {
   std::array<std::vector<float>, max_unison_voices> _kps_lines = {};
 
 public:
-  osc_engine(float sample_rate);
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
+  osc_engine(int max_frame_count, float sample_rate);
+
   void reset(plugin_block const*) override;
   void process(plugin_block& block) override { process(block, nullptr); }
   void process(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -204,8 +221,8 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   engine->process_default(module_am_matrix, 0);
   for (int i = 0; i <= slot; i++)
   {
-    block = engine->process(module_osc, i, [sample_rate](plugin_block& block) {
-      osc_engine engine(sample_rate);
+    block = engine->process(module_osc, i, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
+      osc_engine engine(max_frame_count, sample_rate);
       engine.reset(&block);
       cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process(block, &modulation);
@@ -257,7 +274,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.graph_renderer = render_osc_graph;
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
-  result.engine_factory = [](auto const&, int sr, int) { return std::make_unique<osc_engine>(sr); };
+  result.engine_factory = [](auto const&, int sr, int max_frame_count) { return std::make_unique<osc_engine>(max_frame_count, sr); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
@@ -571,7 +588,8 @@ generate_dsf(float phase, float increment, float sr, float freq, int parts, floa
 }
 
 osc_engine::
-osc_engine(float sample_rate)
+osc_engine(int max_frame_count, float sample_rate):
+_oversampler(max_frame_count, false, false, false)
 {
   float const kps_min_freq = 20.0f;
   _kps_max_length = (int)(std::ceil(sample_rate / kps_min_freq));
@@ -840,6 +858,10 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   }
 
   if (generator_count == 0) return;
+
+  int oversmp_stages;
+  int oversmp_factor;
+  get_oversmp_info(block, oversmp_stages, oversmp_factor);
 
   int note = block_auto[param_note][0].step();
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
