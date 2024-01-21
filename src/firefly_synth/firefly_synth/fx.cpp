@@ -1240,7 +1240,12 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
   normalized_to_raw_into_fast<domain_type::log>(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
 
   // dont oversample for graphs
-  if constexpr(Graph) oversmp_stages = 0;
+  if constexpr(Graph) 
+  {
+    oversmp_stages = 0;
+    oversmp_factor = 1;
+  }
+
   // oversampling is destructive
   audio_in[0].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][0]);
   audio_in[1].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][1]);
