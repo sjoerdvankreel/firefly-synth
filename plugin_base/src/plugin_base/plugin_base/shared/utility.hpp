@@ -27,6 +27,9 @@
 
 namespace plugin_base {
 
+template <class>
+inline constexpr bool dependent_always_false_v = false;
+
 struct format_config;
 inline char constexpr resource_folder_ui[] = "ui";
 inline char constexpr resource_folder_presets[] = "presets";

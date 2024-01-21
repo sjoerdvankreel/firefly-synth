@@ -16,7 +16,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { kps_svf_lpf, kps_svf_hpf, kps_svf_bpf, kps_svf_peq };
+enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_peq };
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { section_main, section_basic, section_dsf, section_rand, section_uni };
 enum {
@@ -77,6 +77,7 @@ public module_engine {
 
   // static
   static_noise _static_noise = {};
+  state_var_filter _static_svf = {};
 
   // kps
   int _kps_max_length = {};
@@ -97,9 +98,11 @@ public:
 private:
 
   void init_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
-  float generate_kps(int voice, float sr, float freq, float fdbk, float stretch);
-
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_static(plugin_block& block, cv_matrix_mixdown const* modulation);
+  
+  template <bool AutoFdbk> 
+  float generate_kps(int voice, float sr, float freq, float fdbk, float stretch, float mid_freq);
 
   template <bool Sin> void 
   process_unison_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
@@ -107,7 +110,7 @@ private:
   void process_unison_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
   template <bool Sin, bool Saw, bool Tri> 
   void process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static>
+  template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int SVFType>
   void process_unison(plugin_block& block, cv_matrix_mixdown const* modulation);
 };
 
@@ -370,7 +373,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   auto& random_res = result.params.emplace_back(make_param(
     make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", "Rnd.Res", "Res", true, false, param_rand_res, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   random_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
@@ -539,6 +542,7 @@ osc_engine(float sample_rate)
 void
 osc_engine::reset(plugin_block const* block)
 {
+  _static_svf.clear();
   _kps_initialized = false;
   auto const& block_auto = block->state.own_block_automation;
   _static_noise.reset(block_auto[param_rand_seed][0].step());
@@ -560,10 +564,10 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
   double const kps_max_res = 0.99;
   int kps_svf = block_auto[param_rand_svf][0].step();
   int kps_seed = block_auto[param_rand_seed][0].step();
-  float kps_res = block_auto[param_rand_res][0].real();
 
   // Frequency and rate are not continuous params but we fake it this way so they can 
   // participate in modulation. In particular velocity seems like a good mod source for freq.
+  float kps_res = (*(*modulation)[module_osc][block.module_slot][param_rand_res][0])[0];
   float kps_freq_normalized = (*(*modulation)[module_osc][block.module_slot][param_rand_freq][0])[0];
   float kps_freq = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, kps_freq_normalized);
   float kps_rate_normalized = (*(*modulation)[module_osc][block.module_slot][param_rand_rate][0])[0];
@@ -583,10 +587,10 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
   double w = pi64 * kps_freq / block.sample_rate;
   switch (kps_svf)
   {
-  case kps_svf_lpf: filter.init_lpf(w, kps_res * kps_max_res); break;
-  case kps_svf_hpf: filter.init_hpf(w, kps_res * kps_max_res); break;
-  case kps_svf_bpf: filter.init_bpf(w, kps_res * kps_max_res); break;
-  case kps_svf_peq: filter.init_peq(w, kps_res * kps_max_res); break;
+  case rand_svf_lpf: filter.init_lpf(w, kps_res * kps_max_res); break;
+  case rand_svf_hpf: filter.init_hpf(w, kps_res * kps_max_res); break;
+  case rand_svf_bpf: filter.init_bpf(w, kps_res * kps_max_res); break;
+  case rand_svf_peq: filter.init_peq(w, kps_res * kps_max_res); break;
   default: assert(false); break;
   }
   for (int v = 0; v < max_unison_voices; v++)
@@ -603,24 +607,36 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
   }
 }
 
-float
-osc_engine::generate_kps(int voice, float sr, float freq, float fdbk, float stretch)
+template <bool AutoFdbk> float
+osc_engine::generate_kps(int voice, float sr, float freq0, float fdbk0, float stretch, float mid_freq)
 {
-  float const min_feedback = 0.9f;
-  stretch *= 0.5f;
-
   // fix value at voice start
   // kps is not suitable for pitch modulation
   // but we still allow it so user can do on-note mod
-  if(_kps_lengths[voice] == -1) 
-    _kps_lengths[voice] = std::min((int)(sr / freq), _kps_max_length);
+  if (_kps_lengths[voice] == -1)
+  {
+    _kps_freqs[voice] = freq0;
+    _kps_lengths[voice] = std::min((int)(sr / freq0), _kps_max_length);
+  }
 
+  // in this case feedback is affected by pitch
+  float feedback = fdbk0;
+  if constexpr (AutoFdbk)
+  {
+    feedback = 1 - feedback;
+    float base = _kps_freqs[voice] <= mid_freq ? _kps_freqs[voice] / mid_freq * 0.5f : 0.5f + (1 - mid_freq / _kps_freqs[voice]) * 0.5f;
+    feedback = std::pow(std::clamp(base, 0.0f, 1.0f), feedback);
+  }
+  check_unipolar(feedback);
+
+  stretch *= 0.5f;
+  float const min_feedback = 0.9f;
   int this_index = _kps_positions[voice];
   int next_index = (_kps_positions[voice] + 1) % _kps_lengths[voice];
   float result = _kps_lines[voice][this_index];
   _kps_lines[voice][this_index] = (0.5f + stretch) * _kps_lines[voice][this_index];
   _kps_lines[voice][this_index] += (0.5f - stretch) * _kps_lines[voice][next_index];
-  _kps_lines[voice][this_index] *= min_feedback + fdbk * (1.0f - min_feedback);
+  _kps_lines[voice][this_index] *= min_feedback + feedback * (1.0f - min_feedback);
   if (++_kps_positions[voice] >= _kps_lengths[voice]) _kps_positions[voice] = 0;
   return _kps_dc.next(0, result);
 }
@@ -644,10 +660,26 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
   switch (type)
   {
   case type_basic: process_basic(block, modulation); break;
-  case type_static: process_unison<false, false, false, false, false, false, false, true>(block, modulation); break;
-  case type_dsf: process_unison<false, false, false, false, true, false, false, false>(block, modulation); break;
-  case type_kps1: process_unison<false, false, false, false, false, true, false, false>(block, modulation); break;
-  case type_kps2: process_unison<false, false, false, false, false, true, true, false>(block, modulation); break;
+  case type_static: process_static(block, modulation); break;
+  case type_dsf: process_unison<false, false, false, false, true, false, false, false, -1>(block, modulation); break;
+  case type_kps1: process_unison<false, false, false, false, false, true, false, false, -1>(block, modulation); break;
+  case type_kps2: process_unison<false, false, false, false, false, true, true, false, -1>(block, modulation); break;
+  default: assert(false); break;
+  }
+}
+
+void
+osc_engine::process_static(plugin_block& block, cv_matrix_mixdown const* modulation)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  int svf_type = block_auto[param_rand_svf][0].step();
+  switch (svf_type)
+  {
+    // TODO allpass + vwhite noise ?
+  case rand_svf_lpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
+  case rand_svf_hpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
+  case rand_svf_bpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
+  case rand_svf_peq: process_unison<false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
   default: assert(false); break;
   }
 }
@@ -684,11 +716,11 @@ osc_engine::process_unison_sin_saw_tri(plugin_block& block, cv_matrix_mixdown co
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_unison<Sin, Saw, Tri, true, false, false, false, false>(block, modulation);
-  else process_unison<Sin, Saw, Tri, false, false, false, false, false>(block, modulation);
+  if (sqr) process_unison<Sin, Saw, Tri, true, false, false, false, false, -1>(block, modulation);
+  else process_unison<Sin, Saw, Tri, false, false, false, false, false, -1>(block, modulation);
 }
 
-template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static> void
+template <bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool KPS, bool KPSAutoFdbk, bool Static, int SVFType> void
 osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
@@ -701,6 +733,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   if constexpr (Static) generator_count++;
 
   static_assert(!KPSAutoFdbk || KPS);
+  static_assert(SVFType == -1 || Static);
 
   // need to clear all active outputs because we 
   // don't know if we are a modulation source
@@ -715,6 +748,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   if (generator_count == 0) return;
 
+  float const max_res = 0.99f;
   int note = block_auto[param_note][0].step();
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
@@ -735,6 +769,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   auto const& kps_fdbk_curve = *(*modulation)[module_osc][block.module_slot][param_kps_fdbk][0];
   auto const& rand_rate_curve = *(*modulation)[module_osc][block.module_slot][param_rand_rate][0];
   auto const& kps_stretch_curve = *(*modulation)[module_osc][block.module_slot][param_kps_stretch][0];
+  auto const& stc_res_curve = *(*modulation)[module_osc][block.module_slot][param_rand_res][0];
+  auto const& stc_freq_curve = *(*modulation)[module_osc][block.module_slot][param_rand_freq][0];
 
   auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
@@ -776,40 +812,37 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       float inc = freq / block.sample_rate;
       float pan = min_pan + (max_pan - min_pan) * v / uni_voice_range;
 
+      if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
+      if constexpr (KPS) sample = generate_kps<KPSAutoFdbk>(v, block.sample_rate, freq, kps_fdbk_curve[f], kps_stretch_curve[f], kps_mid_freq);
+
       if constexpr (Saw) sample += generate_saw(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[f]);
       if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
       if constexpr (Tri) sample += generate_triangle(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
       if constexpr (Sqr) sample += generate_sqr(_phase[v], inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
-      
-      if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
 
       if constexpr (Static)
       {
+        float rand_freq_hz = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, stc_freq_curve[f]);
         float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[f]);
         float rand_rate_hz = rand_rate_pct * 0.01 * block.sample_rate * 0.5;
         _static_noise.update(block.sample_rate, rand_rate_hz, 1);
         sample = unipolar_to_bipolar(_static_noise.next<true>(1, rand_seed));
+        double w = pi64 * rand_freq_hz / block.sample_rate;
+        if constexpr(SVFType == rand_svf_lpf)
+          _static_svf.init_lpf(w, stc_res_curve[f] * max_res);
+        else if constexpr(SVFType == rand_svf_bpf)
+          _static_svf.init_bpf(w, stc_res_curve[f] * max_res);
+        else if constexpr(SVFType == rand_svf_hpf)
+          _static_svf.init_hpf(w, stc_res_curve[f] * max_res);
+        else if constexpr(SVFType == rand_svf_peq)
+          _static_svf.init_peq(w, stc_res_curve[f] * max_res);
+        else
+          static_assert(dependent_always_false_v);
+        sample = _static_svf.next(0, sample);
       }
 
-      if constexpr (KPS) 
-      {
-        if (_kps_lengths[v] == -1)
-          _kps_freqs[v] = freq;
-        float kps_freq = _kps_freqs[v];
-
-        float feedback = kps_fdbk_curve[f];
-        if constexpr(KPSAutoFdbk)
-        {
-          feedback = 1 - feedback;
-          float base = kps_freq <= kps_mid_freq ? kps_freq / kps_mid_freq * 0.5f: 0.5f + (1 - kps_mid_freq / kps_freq) * 0.5f;
-          feedback = std::pow(std::clamp(base, 0.0f, 1.0f), feedback);
-        }
-        check_unipolar(feedback);
-        sample = generate_kps(v, block.sample_rate, freq, feedback, kps_stretch_curve[f]);
-      }
-
-      // kps goes a bit out of bounds
-      if constexpr(!KPS)
+      // random with reso might go out of bounds
+      if constexpr(!KPS && !Static)
         check_bipolar(sample / generator_count);
 
       increment_and_wrap_phase(_phase[v], inc);

@@ -38,6 +38,9 @@ static fix graph
 do the unperiodic sine?
 do noise feedback param
 disable note/cent
+drop 16x oversampling
+dc filter for static
+always unison
 
 * get some linux folks to comment (ycollete?)
 * continuing

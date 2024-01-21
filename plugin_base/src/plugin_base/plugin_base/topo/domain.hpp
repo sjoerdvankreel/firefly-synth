@@ -192,10 +192,6 @@ param_domain::plain_to_raw_fast(plain_value plain) const
   else return plain.step();
 }
 
-// Well, c++ continues to inspire.
-template <class> 
-inline constexpr bool detail_always_false_v = false;
-
 template <domain_type DomainType> inline plain_value
 param_domain::normalized_to_plain_fast(normalized_value normalized) const
 {
@@ -212,7 +208,7 @@ param_domain::normalized_to_plain_fast(normalized_value normalized) const
     return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
   }
   else
-    static_assert(detail_always_false_v);
+    static_assert(dependent_always_false_v);
 }
 
 }
