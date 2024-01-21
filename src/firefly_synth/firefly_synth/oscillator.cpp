@@ -104,9 +104,9 @@ class osc_engine:
 public module_engine {
 
   // basic and dsf
-  oversampler _oversampler;
   float _ref_phases[max_unison_voices];
   float _sync_phases[max_unison_voices];
+  oversampler<max_unison_voices + 1> _oversampler;
 
   // random (static and k+s)
   std::array<dc_filter, max_unison_voices> _random_dcs = {};

@@ -160,9 +160,9 @@ public module_engine {
 
   // distortion with fixed dc filter @20hz
   // and resonant lp filter in the oversampling stage
+  dc_filter _dst_dc;
   state_var_filter _dst_svf;
-  oversampler _dst_oversampler;
-  plugin_base::dc_filter _dst_dc;
+  oversampler<1> _dst_oversampler;
   std::vector<multi_menu_item> _dst_shape_items;
 
   // reverb
@@ -1245,13 +1245,18 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
   audio_in[0].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][0]);
   audio_in[1].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][1]);
 
-  _dst_oversampler.process(oversmp_stages, block.state.own_audio[0][0], block.start_frame, block.end_frame, 
+  std::array<jarray<float, 2>*, 1> lanes;
+  lanes[0] = &block.state.own_audio[0][0];
+  _dst_oversampler.process(oversmp_stages, lanes, 1, block.start_frame, block.end_frame,
     [this, &block, &x_curve, &y_curve, &mix_curve, &gain_curve, &freq_curve_plain, &res_curve, 
-      this_module, clip, shape, skew_x, skew_y, oversmp_factor](int f, float& left, float& right) 
+      this_module, clip, shape, skew_x, skew_y, oversmp_factor](float** lanes_channels, int frame) 
     { 
-      float left_in = left;
-      float right_in = right;
-      int mod_index = f / oversmp_factor;
+      float left_in = lanes_channels[0][frame];
+      float right_in = lanes_channels[1][frame];
+      float& left = lanes_channels[0][frame];
+      float& right = lanes_channels[1][frame];
+
+      int mod_index = frame / oversmp_factor;
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Type == type_dst_b)
