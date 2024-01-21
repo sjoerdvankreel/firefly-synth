@@ -74,7 +74,7 @@ wave_make_name_shape(int shape, bool for_shaper)
   case wave_shape_type_cos_cos_sin: return "CCS";
   case wave_shape_type_cos_cos_cos: return "CCC";
   case wave_shape_type_smooth_or_fold: return for_shaper? "Fld": "Smt";
-  case wave_shape_type_static: return "Stt";
+  case wave_shape_type_static: return "Stc";
   case wave_shape_type_static_free: return "S/F";
   default: assert(false); return {};
   }
