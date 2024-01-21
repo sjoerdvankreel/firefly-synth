@@ -76,7 +76,8 @@ class osc_engine:
 public module_engine {
 
   // basic and dsf
-  float _phase[max_unison_voices];
+  float _ref_phases[max_unison_voices];
+  float _sync_phases[max_unison_voices];
 
   // random (static and k+s)
   std::array<dc_filter, max_unison_voices> _random_dcs = {};
@@ -430,7 +431,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   auto& sync_notes = result.params.emplace_back(make_param(
     make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", "Sync.Notes", "Notes", true, false, param_hard_sync_notes, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_linear(1, 48, 1, 2, "Notes"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Notes"),
     make_param_gui_single(section_hard_sync, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync_notes.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
@@ -579,7 +580,8 @@ osc_engine::reset(plugin_block const* block)
     _static_noises[v].reset(block_auto[param_rand_seed][0].step() + v);
     // Block below 20hz, certain param combinations generate very low frequency content
     _random_dcs[v].init(block->sample_rate, 20);
-    _phase[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
+    _ref_phases[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
+    _sync_phases[v] = _ref_phases[v];
   }
 }
 
@@ -852,6 +854,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
+  auto const& sync_notes_curve = *(*modulation)[module_osc][block.module_slot][param_hard_sync_notes][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
   // Fill the initial buffers.
@@ -867,30 +870,55 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
     float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[f]);
     float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[f]);
     float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[f]);
-    float base_pitch = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[f];
+    float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[f];
+    float base_pitch_sync = base_pitch_ref;
+
+    if constexpr (Sync)
+    {
+      base_pitch_sync += block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_hard_sync_notes, sync_notes_curve[f]);
+    }
 
     float detune_apply = uni_dtn_curve[f] * uni_voice_apply * 0.5f;
     float spread_apply = uni_sprd_curve[f] * uni_voice_apply * 0.5f;
     float min_pan = 0.5f - spread_apply;
     float max_pan = 0.5f + spread_apply;
-    float min_pitch = base_pitch - detune_apply;
-    float max_pitch = base_pitch + detune_apply;
+    float min_pitch_ref = base_pitch_ref - detune_apply;
+    float max_pitch_ref = base_pitch_ref + detune_apply;
+    float min_pitch_sync = min_pitch_ref;
+    float max_pitch_sync = max_pitch_ref;
+
+    if constexpr (Sync)
+    {
+      min_pitch_sync = base_pitch_sync - detune_apply;
+      max_pitch_sync = base_pitch_sync + detune_apply;
+    }
 
     for (int v = 0; v < uni_voices; v++)
     {
       float sample = 0;
-      float pitch = min_pitch + (max_pitch - min_pitch) * v / uni_voice_range;
-      float freq = std::clamp(pitch_to_freq(pitch), 10.0f, block.sample_rate * 0.5f);
-      float inc = freq / block.sample_rate;
+      float pitch_ref = min_pitch_ref + (max_pitch_ref - min_pitch_ref) * v / uni_voice_range;
+      float freq_ref = std::clamp(pitch_to_freq(pitch_ref), 10.0f, block.sample_rate * 0.5f);
+      float inc_ref = freq_ref / block.sample_rate;
+      float pitch_sync = pitch_ref;
+      float freq_sync = freq_ref;
+      float inc_sync = inc_ref;
+
+      if constexpr (Sync)
+      {
+        pitch_sync = min_pitch_sync + (max_pitch_sync - min_pitch_sync) * v / uni_voice_range;
+        freq_sync = std::clamp(pitch_to_freq(pitch_sync), 10.0f, block.sample_rate * 0.5f);
+        inc_sync = freq_sync / block.sample_rate;
+      }
+
       float pan = min_pan + (max_pan - min_pan) * v / uni_voice_range;
 
-      if constexpr (DSF) sample = generate_dsf(_phase[v], inc, block.sample_rate, freq, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
-      if constexpr (KPS) sample = generate_kps<KPSAutoFdbk>(v, block.sample_rate, freq, kps_fdbk_curve[f], kps_stretch_curve[f], kps_mid_freq);
+      if constexpr (DSF) sample = generate_dsf(_sync_phases[v], inc_sync, block.sample_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[f]);
+      if constexpr (KPS) sample = generate_kps<KPSAutoFdbk>(v, block.sample_rate, freq_sync, kps_fdbk_curve[f], kps_stretch_curve[f], kps_mid_freq);
 
-      if constexpr (Saw) sample += generate_saw(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[f]);
-      if constexpr (Sin) sample += std::sin(2.0f * pi32 * _phase[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
-      if constexpr (Tri) sample += generate_triangle(_phase[v], inc) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
-      if constexpr (Sqr) sample += generate_sqr(_phase[v], inc, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
+      if constexpr (Saw) sample += generate_saw(_sync_phases[v], inc_sync) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[f]);
+      if constexpr (Sin) sample += std::sin(2.0f * pi32 * _sync_phases[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[f]);
+      if constexpr (Tri) sample += generate_triangle(_sync_phases[v], inc_sync) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[f]);
+      if constexpr (Sqr) sample += generate_sqr(_sync_phases[v], inc_sync, pwm_curve[f]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[f]);
 
       if constexpr (Static)
       {
@@ -904,7 +932,15 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       if constexpr(!KPS && !Static)
         check_bipolar(sample / generator_count);
 
-      increment_and_wrap_phase(_phase[v], inc);
+      increment_and_wrap_phase(_sync_phases[v], inc_sync);
+
+      if constexpr (Sync)
+      {
+        // todo subsample overshoot thingy and interpolate old/new a bit
+        if(increment_and_wrap_phase(_ref_phases[v], inc_ref))
+          _sync_phases[v] = 0;
+      }
+
       block.state.own_audio[0][v + 1][0][f] = mono_pan_sqrt(0, pan) * sample;
       block.state.own_audio[0][v + 1][1][f] = mono_pan_sqrt(1, pan) * sample;
     }
