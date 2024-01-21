@@ -37,7 +37,6 @@ ref-capture in fx too
 access the oversampled buffer for AM through context ptr
 fix oversampling + am (move into over stage)
 move oversmp to voice in, seems undoable to modulate mixed-oversmp-factor oscs
-default delay r 5/16
 
 credit the image
 drop 16x oversampling

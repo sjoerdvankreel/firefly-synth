@@ -234,8 +234,6 @@ init_global_default(plugin_state& state)
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
   state.set_text_at(module_gfx, 1, param_type, 0, "Delay");
   state.set_text_at(module_gfx, 1, param_dly_type, 0, "Fdbk.Sync");
-  state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_l, 0, "3/16");
-  state.set_text_at(module_gfx, 1, param_dly_fdbk_tempo_r, 0, "5/16");
 }
 
 static graph_engine_params
@@ -614,7 +612,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_fdbk_time_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   auto& delay_fdbk_tempo_r = result.params.emplace_back(make_param(
     make_topo_info("{4FA78F9E-AC3A-45D7-A8A3-E0E2C7C264D7}", "Dly.TempoR", "R", true, false, param_dly_fdbk_tempo_r, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
+    make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 5, 16 }),
     make_param_gui_single(section_delay, gui_edit_type::list, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_tempo_r.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_r.domain.timesigs);
