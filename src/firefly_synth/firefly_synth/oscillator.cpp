@@ -79,7 +79,7 @@ public module_engine {
   std::array<dc_filter, max_unison_voices> _random_dcs = {};
 
   // static
-  static_noise _static_noise = {};
+  std::array<static_noise, max_unison_voices> _static_noises = {};
   std::array<state_var_filter, max_unison_voices> _static_svfs = {};
 
   // kps
@@ -103,7 +103,9 @@ private:
   void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
   void process_static(plugin_block& block, cv_matrix_mixdown const* modulation);
   
-  template <bool AutoFdbk> 
+  template <int SVFType>
+  float generate_static(int voice, float sr, float freq_hz, float res, int seed, float rate_hz);
+  template <bool AutoFdbk>
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch, float mid_freq);
 
   template <bool Sin> void 
@@ -546,12 +548,12 @@ osc_engine::reset(plugin_block const* block)
 {
   _kps_initialized = false;
   auto const& block_auto = block->state.own_block_automation;
-  _static_noise.reset(block_auto[param_rand_seed][0].step());
   float uni_phase = block_auto[param_uni_phase][0].real();
   int uni_voices = block_auto[param_uni_voices][0].step();
   for (int v = 0; v < uni_voices; v++)
   {
     _static_svfs[v].clear();
+    _static_noises[v].reset(block_auto[param_rand_seed][0].step());
     // Block below 20hz, certain param combinations generate very low frequency content
     _random_dcs[v].init(block->sample_rate, 20);
     _phase[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
@@ -608,6 +610,30 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
       _kps_lines[v][f] = filter.next(0, unipolar_to_bipolar(noise));
     }
   }
+}
+
+template <int SVFType>
+float osc_engine::generate_static(int voice, float sr, float freq_hz, float res, int seed, float rate_hz)
+{
+  _static_noises[voice].update(sr, rate_hz, 1);
+  float result = unipolar_to_bipolar(_static_noises[voice].next<true>(1, seed));
+
+  float const max_res = 0.99f;
+  double w = pi64 * freq_hz / sr;
+  if constexpr (SVFType == rand_svf_lpf)
+    _static_svfs[voice].init_lpf(w, res * max_res);
+  else if constexpr (SVFType == rand_svf_bpf)
+    _static_svfs[voice].init_bpf(w, res * max_res);
+  else if constexpr (SVFType == rand_svf_hpf)
+    _static_svfs[voice].init_hpf(w, res * max_res);
+  else if constexpr (SVFType == rand_svf_peq)
+    _static_svfs[voice].init_peq(w, res * max_res);
+  else
+    static_assert(dependent_always_false_v);
+
+  result = _static_svfs[voice].next(0, result);
+  result = _random_dcs[voice].next(0, result);
+  return result;
 }
 
 template <bool AutoFdbk> float
@@ -751,7 +777,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   if (generator_count == 0) return;
 
-  float const max_res = 0.99f;
   int note = block_auto[param_note][0].step();
   int dsf_parts = (int)std::round(block_auto[param_dsf_parts][0].real());
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
@@ -828,21 +853,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         float rand_freq_hz = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, stc_freq_curve[f]);
         float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[f]);
         float rand_rate_hz = rand_rate_pct * 0.01 * block.sample_rate * 0.5;
-        _static_noise.update(block.sample_rate, rand_rate_hz, 1);
-        sample = unipolar_to_bipolar(_static_noise.next<true>(1, rand_seed));
-        double w = pi64 * rand_freq_hz / block.sample_rate;
-        if constexpr(SVFType == rand_svf_lpf)
-          _static_svfs[v].init_lpf(w, stc_res_curve[f] * max_res);
-        else if constexpr(SVFType == rand_svf_bpf)
-          _static_svfs[v].init_bpf(w, stc_res_curve[f] * max_res);
-        else if constexpr(SVFType == rand_svf_hpf)
-          _static_svfs[v].init_hpf(w, stc_res_curve[f] * max_res);
-        else if constexpr(SVFType == rand_svf_peq)
-          _static_svfs[v].init_peq(w, stc_res_curve[f] * max_res);
-        else
-          static_assert(dependent_always_false_v);
-        sample = _static_svfs[v].next(0, sample);
-        sample = _random_dcs[v].next(0, sample);
+        sample = generate_static<SVFType>(v, block.sample_rate, rand_freq_hz, stc_res_curve[f], rand_seed, rand_rate_hz);
       }
 
       // random with reso might go out of bounds
