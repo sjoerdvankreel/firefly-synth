@@ -17,6 +17,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+static int const hard_sync_xover_samples = 16;
+
 enum { over_1, over_2, over_4, over_8, over_16 };
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
@@ -106,6 +108,9 @@ public module_engine {
   // basic and dsf
   float _ref_phases[max_unison_voices];
   float _sync_phases[max_unison_voices];
+  // for lerp hardsync
+  int _unsync_samples[max_unison_voices];
+  float _unsync_phases[max_unison_voices];
   oversampler<max_unison_voices + 1> _oversampler;
 
   // random (static and k+s)
@@ -618,6 +623,8 @@ osc_engine::reset(plugin_block const* block)
     _random_dcs[v].init(block->sample_rate, 20);
     _ref_phases[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
     _sync_phases[v] = _ref_phases[v];
+    _unsync_phases[v] = 0;
+    _unsync_samples[v] = 0;
   }
 }
 
@@ -941,6 +948,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
     float min_pitch_sync = min_pitch_ref;
     float max_pitch_sync = max_pitch_ref;
 
+    // All the casts to void are here for (at least) MSVC.
+    // Inlining all the constexpr stuff into the oversampler generates warnings, which it doesnt do by its own.
     (void)min_pitch_sync;
     (void)max_pitch_sync;
 
@@ -952,7 +961,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
     for (int v = 0; v < uni_voices; v++)
     {
-      float sample = 0;
+      float synced_sample = 0;
       float pitch_ref = min_pitch_ref + (max_pitch_ref - min_pitch_ref) * v / uni_voice_range;
       float freq_ref = std::clamp(pitch_to_freq(pitch_ref), 10.0f, oversampled_rate * 0.5f);
       float inc_ref = freq_ref / oversampled_rate;
@@ -973,37 +982,71 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
       float pan = min_pan + (max_pan - min_pan) * v / uni_voice_range;
 
-      if constexpr (DSF) sample = generate_dsf(_sync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
-      if constexpr (KPS) sample = generate_kps<KPSAutoFdbk>(v, oversampled_rate, freq_sync, kps_fdbk_curve[mod_index], kps_stretch_curve[mod_index], kps_mid_freq);
+      // generated the synced sample
+      float saw_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[mod_index]);
+      float sin_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[mod_index]);
+      float tri_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[mod_index]);
+      float sqr_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[mod_index]);
 
-      if constexpr (Saw) sample += generate_saw(_sync_phases[v], inc_sync) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[mod_index]);
-      if constexpr (Sin) sample += std::sin(2.0f * pi32 * _sync_phases[v]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[mod_index]);
-      if constexpr (Tri) sample += generate_triangle(_sync_phases[v], inc_sync) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[mod_index]);
-      if constexpr (Sqr) sample += generate_sqr(_sync_phases[v], inc_sync, pwm_curve[mod_index]) * block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[mod_index]);
+      (void)saw_mix;
+      (void)sin_mix;
+      (void)tri_mix;
+      (void)sqr_mix;
+
+      if constexpr (Saw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * saw_mix;
+      if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix;
+      if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix;
+      if constexpr (Sqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, pwm_curve[mod_index]) * sqr_mix;
+      if constexpr (DSF) synced_sample = generate_dsf(_sync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
+
+      // generate the unsynced sample and crossover
+      float unsynced_sample = 0;
+      (void)unsynced_sample;
+      if constexpr (Sync)
+      {
+        if (_unsync_samples[v] > 0)
+        {
+          if constexpr (Saw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * saw_mix;
+          if constexpr (Sin) unsynced_sample += std::sin(2.0f * pi32 * _unsync_phases[v]) * sin_mix;
+          if constexpr (Tri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * tri_mix;
+          if constexpr (Sqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, pwm_curve[mod_index]) * sqr_mix;
+          if constexpr (DSF) unsynced_sample = generate_dsf(_unsync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
+
+          increment_and_wrap_phase(_unsync_phases[v], inc_sync);
+          float unsynced_weight = _unsync_samples[v]-- / (hard_sync_xover_samples + 1.0f);
+          synced_sample = unsynced_weight * unsynced_sample + (1.0f - unsynced_weight) * synced_sample;
+        }
+      }
+
+      if constexpr (KPS) synced_sample = generate_kps<KPSAutoFdbk>(v, oversampled_rate, freq_sync, kps_fdbk_curve[mod_index], kps_stretch_curve[mod_index], kps_mid_freq);
 
       if constexpr (Static)
       {
         float rand_freq_hz = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, stc_freq_curve[mod_index]);
         float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[mod_index]);
         float rand_rate_hz = rand_rate_pct * 0.01 * oversampled_rate * 0.5;
-        sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_hz, stc_res_curve[mod_index], rand_seed, rand_rate_hz);
+        synced_sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_hz, stc_res_curve[mod_index], rand_seed, rand_rate_hz);
       }
 
       // random with reso might go out of bounds
       if constexpr(!KPS && !Static)
-        check_bipolar(sample / generator_count);
+        check_bipolar(synced_sample / generator_count);
 
       increment_and_wrap_phase(_sync_phases[v], inc_sync);
 
+      // reset to ref phase
       if constexpr (Sync)
       {
-        // todo subsample overshoot thingy and interpolate old/new a bit
         if(increment_and_wrap_phase(_ref_phases[v], inc_ref))
+        {
+          _unsync_phases[v] = _sync_phases[v];
+          _unsync_samples[v] = hard_sync_xover_samples;
           _sync_phases[v] = _ref_phases[v] * inc_sync / inc_ref;
+        }
       }
 
-      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt(0, pan) * sample;
-      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt(1, pan) * sample;
+      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt(0, pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt(1, pan) * synced_sample;
     }
   });
   
