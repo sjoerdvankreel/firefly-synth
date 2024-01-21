@@ -75,14 +75,16 @@ public module_engine {
   // basic and dsf
   float _phase[max_unison_voices];
 
+  // random (static and k+s)
+  std::array<dc_filter, max_unison_voices> _random_dcs = {};
+
   // static
   static_noise _static_noise = {};
-  state_var_filter _static_svf = {};
+  std::array<state_var_filter, max_unison_voices> _static_svfs = {};
 
   // kps
   int _kps_max_length = {};
   bool _kps_initialized = false;
-  plugin_base::dc_filter _kps_dc = {};
   std::array<int, max_unison_voices> _kps_freqs = {};
   std::array<int, max_unison_voices> _kps_lengths = {};
   std::array<int, max_unison_voices> _kps_positions = {};
@@ -542,14 +544,18 @@ osc_engine(float sample_rate)
 void
 osc_engine::reset(plugin_block const* block)
 {
-  _static_svf.clear();
   _kps_initialized = false;
   auto const& block_auto = block->state.own_block_automation;
   _static_noise.reset(block_auto[param_rand_seed][0].step());
   float uni_phase = block_auto[param_uni_phase][0].real();
   int uni_voices = block_auto[param_uni_voices][0].step();
   for (int v = 0; v < uni_voices; v++)
+  {
+    _static_svfs[v].clear();
+    // Block below 20hz, certain param combinations generate very low frequency content
+    _random_dcs[v].init(block->sample_rate, 20);
     _phase[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
+  }
 }
 
 // Cant be in the reset call because we need access to modulation.
@@ -572,9 +578,6 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
   float kps_freq = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, kps_freq_normalized);
   float kps_rate_normalized = (*(*modulation)[module_osc][block.module_slot][param_rand_rate][0])[0];
   float kps_rate = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, kps_rate_normalized);
-
-  // Block below 20hz, certain param combinations generate very low frequency content
-  _kps_dc.init(block.sample_rate, 20);
 
   // Initial white noise + filter amount.
   state_var_filter filter = {};
@@ -638,7 +641,7 @@ osc_engine::generate_kps(int voice, float sr, float freq0, float fdbk0, float st
   _kps_lines[voice][this_index] += (0.5f - stretch) * _kps_lines[voice][next_index];
   _kps_lines[voice][this_index] *= min_feedback + feedback * (1.0f - min_feedback);
   if (++_kps_positions[voice] >= _kps_lengths[voice]) _kps_positions[voice] = 0;
-  return _kps_dc.next(0, result);
+  return _random_dcs[voice].next(0, result);
 }
 
 void
@@ -829,16 +832,17 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         sample = unipolar_to_bipolar(_static_noise.next<true>(1, rand_seed));
         double w = pi64 * rand_freq_hz / block.sample_rate;
         if constexpr(SVFType == rand_svf_lpf)
-          _static_svf.init_lpf(w, stc_res_curve[f] * max_res);
+          _static_svfs[v].init_lpf(w, stc_res_curve[f] * max_res);
         else if constexpr(SVFType == rand_svf_bpf)
-          _static_svf.init_bpf(w, stc_res_curve[f] * max_res);
+          _static_svfs[v].init_bpf(w, stc_res_curve[f] * max_res);
         else if constexpr(SVFType == rand_svf_hpf)
-          _static_svf.init_hpf(w, stc_res_curve[f] * max_res);
+          _static_svfs[v].init_hpf(w, stc_res_curve[f] * max_res);
         else if constexpr(SVFType == rand_svf_peq)
-          _static_svf.init_peq(w, stc_res_curve[f] * max_res);
+          _static_svfs[v].init_peq(w, stc_res_curve[f] * max_res);
         else
           static_assert(dependent_always_false_v);
-        sample = _static_svf.next(0, sample);
+        sample = _static_svfs[v].next(0, sample);
+        sample = _random_dcs[v].next(0, sample);
       }
 
       // random with reso might go out of bounds
