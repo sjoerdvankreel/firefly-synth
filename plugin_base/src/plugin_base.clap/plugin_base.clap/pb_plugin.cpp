@@ -390,8 +390,8 @@ pb_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info
 {
   if (!is_input || index != 0) return false;
   info->id = 0;
-  info->preferred_dialect = CLAP_NOTE_DIALECT_MIDI;
-  info->supported_dialects = CLAP_NOTE_DIALECT_MIDI;
+  info->preferred_dialect = CLAP_NOTE_DIALECT_CLAP;
+  info->supported_dialects = CLAP_NOTE_DIALECT_CLAP | CLAP_NOTE_DIALECT_MIDI;
   return true;
 }
 
