@@ -33,10 +33,7 @@ write the infernal<>firefly comparison
 do lerped hardsync against reference osc + upward semitones
 
 credit the image
-static disable the note oct etc
-do the unperiodic sine?
 do noise feedback param
-disable note/cent
 drop 16x oversampling
 
 * get some linux folks to comment (ycollete?)
