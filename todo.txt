@@ -30,22 +30,18 @@ document new invisible stuff (bpm/midi smooth, comb/delay lin interpol)
 do osc oversampling
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 write the infernal<>firefly comparison
-do lerped hardsync against reference osc + upward semitones
-//do sync step parameter (1-16 samples)
 tryout the other oversmp filter mode
 drop 16x over?
 check all the sample rates where needs oversmp
 ref-capture in fx too
 access the oversampled buffer for AM through context ptr
 fix oversampling + am (move into over stage)
-fix oversampling + hardsync
-hardsync fix the lerp
-notes=> semi
 move oversmp to voice in, seems undoable to modulate mixed-oversmp-factor oscs
 default delay r 5/16
 
 credit the image
 drop 16x oversampling
+make sync parms visibility dependent on the type (fix bug sync delay vis)
 
 * get some linux folks to comment (ycollete?)
 * continuing
