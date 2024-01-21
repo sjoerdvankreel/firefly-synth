@@ -1249,9 +1249,7 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
 
   std::array<jarray<float, 2>*, 1> lanes;
   lanes[0] = &block.state.own_audio[0][0];
-  _dst_oversampler.process(oversmp_stages, lanes, 1, block.start_frame, block.end_frame,
-    [this, &block, &x_curve, &y_curve, &mix_curve, &gain_curve, &freq_curve_plain, &res_curve, 
-      this_module, clip, shape, skew_x, skew_y, oversmp_factor](float** lanes_channels, int frame) 
+  _dst_oversampler.process(oversmp_stages, lanes, 1, block.start_frame, block.end_frame, [&](float** lanes_channels, int frame)
     { 
       float left_in = lanes_channels[0][frame];
       float right_in = lanes_channels[1][frame];
