@@ -15,7 +15,6 @@ class oversampler {
   juce::dsp::Oversampling<float> _2x;
   juce::dsp::Oversampling<float> _4x;
   juce::dsp::Oversampling<float> _8x;
-  juce::dsp::Oversampling<float> _16x;
 
   template <class NonLinear>
   void process_off(
@@ -54,13 +53,11 @@ oversampler(int max_frame_count, bool iir, bool max_quality, bool integer_latenc
   _max_frame_count(max_frame_count),
   _2x(MaxLanes * 2, 1, filter_type(iir), max_quality, integer_latency),
   _4x(MaxLanes * 2, 2, filter_type(iir), max_quality, integer_latency),
-  _8x(MaxLanes * 2, 3, filter_type(iir), max_quality, integer_latency),
-  _16x(MaxLanes * 2, 4, filter_type(iir), max_quality, integer_latency)
+  _8x(MaxLanes * 2, 3, filter_type(iir), max_quality, integer_latency)
 {
   _2x.initProcessing(max_frame_count);
   _4x.initProcessing(max_frame_count);
   _8x.initProcessing(max_frame_count);
-  _16x.initProcessing(max_frame_count);
 }
 
 template <int MaxLanes>
@@ -86,6 +83,7 @@ oversampler<MaxLanes>::process(
   std::array<jarray<float, 2>*, MaxLanes> const& inout,
   int active_lanes, int start_frame, int end_frame, NonLinear non_linear)
 {
+  static_assert(Factor == 1 || Factor == 2 || Factor == 4 || Factor == 8);
   using juce::dsp::AudioBlock;
   int block_size = end_frame - start_frame;
   float* data[MaxLanes * 2] = { nullptr };
@@ -114,14 +112,13 @@ oversampler<MaxLanes>::process(
   int active_lanes, int start_frame, int end_frame, NonLinear non_linear)
 {
   using juce::dsp::AudioBlock;
-  assert(0 <= stages && stages <= 4);
+  assert(0 <= stages && stages <= 3);
   switch (stages)
   {
   case 0: process_off(inout, active_lanes, start_frame, end_frame, non_linear); break;
   case 1: process<2>(_2x, inout, active_lanes, start_frame, end_frame, non_linear); break;
   case 2: process<4>(_4x, inout, active_lanes, start_frame, end_frame, non_linear); break;
   case 3: process<8>(_8x, inout, active_lanes, start_frame, end_frame, non_linear); break;
-  case 4: process<16>(_16x, inout, active_lanes, start_frame, end_frame, non_linear); break;
   default: assert(false); break;
   }
 }

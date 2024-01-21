@@ -17,7 +17,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { over_1, over_2, over_4, over_8, over_16 };
+enum { over_1, over_2, over_4, over_8 };
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
 enum { section_main, section_basic, section_dsf, section_rand, section_sync, section_uni };
@@ -93,7 +93,6 @@ over_items()
   result.emplace_back("{937686E8-AC03-420B-A3FF-0ECE1FF9B23E}", "2X");
   result.emplace_back("{64F2A767-DE91-41DF-B2F1-003FCC846384}", "4X");
   result.emplace_back("{9C6E560D-4999-40D9-85E4-C02468296206}", "8X");
-  result.emplace_back("{66E06139-A004-47F4-9938-909D6C8B43C6}", "16X");
   return result;
 }
 

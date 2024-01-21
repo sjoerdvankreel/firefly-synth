@@ -44,7 +44,7 @@ static float const reverb_comb_length[reverb_comb_count] = {
   1422.0f / 44100.0f, 1491.0f / 44100.0f, 1557.0f / 44100.0f, 1617.0f / 44100.0f };
 
 enum { dist_clip_clip, dist_clip_tanh };
-enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8, dist_over_16 };
+enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
 enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync };
 enum { section_type, section_svf, section_comb, section_dist, section_delay, section_reverb };
 enum { type_off, type_svf, type_cmb, type_dst_a, type_dst_b, type_dst_c, type_delay, type_reverb };
@@ -135,7 +135,6 @@ dist_over_items()
   result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "2X");
   result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "4X");
   result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "8X");
-  result.emplace_back("{CE3CBAC6-4E7F-418E-90F5-19FEF6DF399D}", "16X");
   return result;
 }
 
