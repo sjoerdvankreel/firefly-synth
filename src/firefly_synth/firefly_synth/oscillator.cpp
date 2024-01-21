@@ -16,9 +16,10 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_peq };
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { section_main, section_basic, section_dsf, section_rand, section_uni };
+enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
+
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
@@ -62,6 +63,7 @@ random_svf_items()
   result.emplace_back("{E4193E9C-3305-42AE-90D4-A9A5554E43EA}", "LPF");
   result.emplace_back("{D51180AF-5D49-4BB6-BE73-73EF753A15A8}", "HPF");
   result.emplace_back("{F2DCD276-E111-4A63-8701-6751438A1FAA}", "BPF");
+  result.emplace_back("{CC4012D9-272E-4E33-96EB-AF1ADBF0E879}", "BSF");
   result.emplace_back("{C4025CB0-5B1A-4B5D-A293-CAD380F264FA}", "PEQ");
   return result;
 }
@@ -594,6 +596,7 @@ osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
   case rand_svf_lpf: filter.init_lpf(w, kps_res * kps_max_res); break;
   case rand_svf_hpf: filter.init_hpf(w, kps_res * kps_max_res); break;
   case rand_svf_bpf: filter.init_bpf(w, kps_res * kps_max_res); break;
+  case rand_svf_bsf: filter.init_bsf(w, kps_res * kps_max_res); break;
   case rand_svf_peq: filter.init_peq(w, kps_res * kps_max_res); break;
   default: assert(false); break;
   }
@@ -621,10 +624,12 @@ float osc_engine::generate_static(int voice, float sr, float freq_hz, float res,
   double w = pi64 * freq_hz / sr;
   if constexpr (SVFType == rand_svf_lpf)
     _static_svfs[voice].init_lpf(w, res * max_res);
-  else if constexpr (SVFType == rand_svf_bpf)
-    _static_svfs[voice].init_bpf(w, res * max_res);
   else if constexpr (SVFType == rand_svf_hpf)
     _static_svfs[voice].init_hpf(w, res * max_res);
+  else if constexpr (SVFType == rand_svf_bpf)
+    _static_svfs[voice].init_bpf(w, res * max_res);
+  else if constexpr (SVFType == rand_svf_bsf)
+    _static_svfs[voice].init_bsf(w, res * max_res);
   else if constexpr (SVFType == rand_svf_peq)
     _static_svfs[voice].init_peq(w, res * max_res);
   else
@@ -703,10 +708,10 @@ osc_engine::process_static(plugin_block& block, cv_matrix_mixdown const* modulat
   int svf_type = block_auto[param_rand_svf][0].step();
   switch (svf_type)
   {
-    // TODO allpass + vwhite noise ?
   case rand_svf_lpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
   case rand_svf_hpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
   case rand_svf_bpf: process_unison<false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
+  case rand_svf_bsf: process_unison<false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
   case rand_svf_peq: process_unison<false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
   default: assert(false); break;
   }
