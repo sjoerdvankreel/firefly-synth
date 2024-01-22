@@ -915,7 +915,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
     oversmp_factor = 1;
   }
 
-  // todo no oversamp for graph ?
   std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;
   for(int v = 0; v < uni_voices + 1; v++)
     lanes[v] = &block.state.own_audio[0][v];
