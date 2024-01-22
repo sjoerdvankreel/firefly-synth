@@ -91,12 +91,12 @@ class osc_engine:
 public module_engine {
 
   // basic and dsf
+  oversampler _oversampler;
   float _ref_phases[max_unison_voices];
   float _sync_phases[max_unison_voices];
   // for lerp hardsync
   int _unsync_samples[max_unison_voices];
   float _unsync_phases[max_unison_voices];
-  oversampler<max_unison_voices + 1> _oversampler;
 
   // random (static and k+s)
   std::array<dc_filter, max_unison_voices> _random_dcs = {};
@@ -579,7 +579,7 @@ generate_dsf(float phase, float increment, float sr, float freq, int parts, floa
 
 osc_engine::
 osc_engine(int max_frame_count, float sample_rate):
-_oversampler(max_frame_count, false, false, false)
+_oversampler(max_unison_voices + 1, max_frame_count, false, false, false)
 {
   float const kps_min_freq = 20.0f;
   _kps_max_length = (int)(std::ceil(sample_rate / kps_min_freq));
@@ -906,11 +906,9 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   assert(can_do_phase(type) || oversmp_stages == 0);
 
   // todo no oversamp for graph ?
-  std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;
-  for(int v = 0; v < uni_voices + 1; v++)
-    lanes[v] = &block.state.own_audio[0][v];
-
-  _oversampler.process(oversmp_stages, lanes, uni_voices + 1, block.start_frame, block.end_frame, [&](float** lanes_channels, int frame)
+  // not really upsampled, just returns the internal buffers
+  float*** upsampled = _oversampler.upsample(oversmp_stages, uni_voices + 1, block.start_frame, block.end_frame, nullptr, false);
+  for(int frame = 0; frame < (block.end_frame - block.start_frame) * oversmp_factor; frame++)
   {
     int mod_index = frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
@@ -936,11 +934,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
     float min_pitch_sync = min_pitch_ref;
     float max_pitch_sync = max_pitch_ref;
 
-    // All the casts to void are here for (at least) MSVC.
-    // Inlining all the constexpr stuff into the oversampler generates warnings, which it doesnt do by its own.
-    (void)min_pitch_sync;
-    (void)max_pitch_sync;
-
     if constexpr (Sync)
     {
       min_pitch_sync = base_pitch_sync - detune_apply;
@@ -956,10 +949,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       float pitch_sync = pitch_ref;
       float freq_sync = freq_ref;
       float inc_sync = inc_ref;
-      
-      (void)pitch_sync;
-      (void)freq_sync;
-      (void)inc_sync;
 
       if constexpr (Sync)
       {
@@ -975,12 +964,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       float sin_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[mod_index]);
       float tri_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[mod_index]);
       float sqr_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[mod_index]);
-
-      (void)saw_mix;
-      (void)sin_mix;
-      (void)tri_mix;
-      (void)sqr_mix;
-
       if constexpr (Saw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * saw_mix;
       if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix;
       if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix;
@@ -989,7 +972,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
       // generate the unsynced sample and crossover
       float unsynced_sample = 0;
-      (void)unsynced_sample;
       if constexpr (Sync)
       {
         if (_unsync_samples[v] > 0)
@@ -1033,10 +1015,21 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         }
       }
 
-      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt(0, pan) * synced_sample;
-      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt(1, pan) * synced_sample;
+      upsampled[v + 1][0][frame] = mono_pan_sqrt(0, pan) * synced_sample;
+      upsampled[v + 1][1][frame] = mono_pan_sqrt(1, pan) * synced_sample;
     }
-  });
+  }
+
+  // TODO only downsample the final output, no need to downsample per-unison-voice
+  float** oversmp_lanes[max_unison_voices + 1];
+  float* oversmp_channels[max_unison_voices + 1][2];
+  for (int v = 0; v < uni_voices + 1; v++)
+  {
+    for (int ch = 0; ch < 2; ch++)
+      oversmp_channels[v][ch] = block.state.own_audio[0][v][ch].data().data();
+    oversmp_lanes[v] = &oversmp_channels[v][0];
+  }
+  _oversampler.downsample(oversmp_stages, uni_voices + 1, block.start_frame, block.end_frame, oversmp_lanes);
   
   // TODO move AM into the oversmp stage
 

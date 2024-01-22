@@ -161,7 +161,7 @@ public module_engine {
   // and resonant lp filter in the oversampling stage
   dc_filter _dst_dc;
   state_var_filter _dst_svf;
-  oversampler<1> _dst_oversampler;
+  oversampler _dst_oversampler;
   std::vector<multi_menu_item> _dst_shape_items;
 
   // reverb
@@ -698,7 +698,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& dst_shape_items) :
 _global(global), _dly_capacity(sample_rate * dly_max_sec), 
-_dst_oversampler(max_frame_count, false, false, false),
+_dst_oversampler(1, max_frame_count, false, false, false),
 _dst_shape_items(dst_shape_items)
 { 
   _comb_samples = comb_max_ms * sample_rate * 0.001;
@@ -1243,33 +1243,40 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
     oversmp_factor = 1;
   }
 
-  // oversampling is destructive
-  audio_in[0].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][0]);
-  audio_in[1].copy_to(block.start_frame, block.end_frame, block.state.own_audio[0][0][1]);
+  float const* oversmp_in_channels[1][2];  
+  oversmp_in_channels[0][0] = audio_in[0].data().data();
+  oversmp_in_channels[0][1] = audio_in[1].data().data();
+  float const** oversmp_in_lanes[1];
+  oversmp_in_lanes[0] = oversmp_in_channels[0];
+  float*** upsampled = _dst_oversampler.upsample(oversmp_stages, 1, block.start_frame, block.end_frame, oversmp_in_lanes, true);
+  for(int frame = 0; frame < (block.end_frame - block.start_frame) * oversmp_factor; frame++)
+  { 
+    float left_in = upsampled[0][0][frame];
+    float right_in = upsampled[0][1][frame];
+    float& left = upsampled[0][0][frame];
+    float& right = upsampled[0][1][frame];
 
-  std::array<jarray<float, 2>*, 1> lanes;
-  lanes[0] = &block.state.own_audio[0][0];
-  _dst_oversampler.process(oversmp_stages, lanes, 1, block.start_frame, block.end_frame, [&](float** lanes_channels, int frame)
-    { 
-      float left_in = lanes_channels[0][frame];
-      float right_in = lanes_channels[1][frame];
-      float& left = lanes_channels[0][frame];
-      float& right = lanes_channels[1][frame];
+    int mod_index = frame / oversmp_factor;
+    left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
+    right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
+    if constexpr(Type == type_dst_b)
+      dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+    left = shape(left);
+    right = shape(right);
+    if constexpr (Type == type_dst_c)
+      dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+    left = clip(skew_y(left, (*y_curve)[mod_index]));
+    right = clip(skew_y(right, (*y_curve)[mod_index]));
+    left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
+    right = (1 - mix_curve[mod_index]) * right_in + mix_curve[mod_index] * right;
+  }
 
-      int mod_index = frame / oversmp_factor;
-      left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
-      right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
-      if constexpr(Type == type_dst_b)
-        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
-      left = shape(left);
-      right = shape(right);
-      if constexpr (Type == type_dst_c)
-        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
-      left = clip(skew_y(left, (*y_curve)[mod_index]));
-      right = clip(skew_y(right, (*y_curve)[mod_index]));
-      left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
-      right = (1 - mix_curve[mod_index]) * right_in + mix_curve[mod_index] * right;
-    });
+  float* oversmp_out_channels[1][2];
+  oversmp_out_channels[0][0] = block.state.own_audio[0][0][0].data().data();
+  oversmp_out_channels[0][1] = block.state.own_audio[0][0][1].data().data();
+  float** oversmp_out_lanes[1];
+  oversmp_out_lanes[0] = oversmp_out_channels[0];
+  _dst_oversampler.downsample(oversmp_stages, 1, block.start_frame, block.end_frame, oversmp_out_lanes);
   
   // dont dc filter for graphs
   // since this falls outside of the clip function it may produce stuff outside [-1, 1] 
