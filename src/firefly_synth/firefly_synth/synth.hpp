@@ -7,7 +7,6 @@
 #include <plugin_base/dsp/block/plugin.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
-#include <juce_dsp/juce_dsp.h>
 #include <vector>
 
 namespace firefly_synth {
@@ -31,7 +30,7 @@ enum {
   module_voice_mix, module_gaudio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
 // used by the oscillator at the end of it's process call to apply amp/ring mod
-// modulation is done per-oversampled-unison-voice
+// (e.g. osc 2 is modulated by both osc 1 and osc 2 itself)
 class am_matrix_engine;
 class am_matrix_modulator
 {
@@ -41,8 +40,7 @@ public:
   am_matrix_modulator(am_matrix_engine* engine) : _engine(engine) {}
   plugin_base::jarray<float, 3> const& modulate(
     plugin_base::plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation, 
-    juce::dsp::AudioBlock<float> oversmp_block, int oversmp_factor);
+    cv_matrix_mixdown const* cv_modulation);
 };
 
 inline am_matrix_modulator&

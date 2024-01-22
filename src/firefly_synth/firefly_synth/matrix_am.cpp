@@ -36,8 +36,7 @@ public:
   void process(plugin_block& block) override;
   jarray<float, 3> const& modulate(
     plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation, 
-    juce::dsp::AudioBlock<float> oversmp_block, int oversmp_factor);
+    cv_matrix_mixdown const* cv_modulation);
 };
 
 static graph_data
@@ -150,9 +149,8 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 jarray<float, 3> const&
 am_matrix_modulator::modulate(
   plugin_block& block, int slot, 
-  cv_matrix_mixdown const* cv_modulation, 
-  juce::dsp::AudioBlock<float> oversmp_block, int oversmp_factor)
-{ return _engine->modulate(block, slot, cv_modulation, oversmp_block, oversmp_factor); }
+  cv_matrix_mixdown const* cv_modulation)
+{ return _engine->modulate(block, slot, cv_modulation); }
 
 void
 am_matrix_engine::process(plugin_block& block)
@@ -165,8 +163,7 @@ am_matrix_engine::process(plugin_block& block)
 
 jarray<float, 3> const& 
 am_matrix_engine::modulate(
-  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation, 
-  juce::dsp::AudioBlock<float> oversmp_block, int oversmp_factor)
+  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
   if(cv_modulation == nullptr)

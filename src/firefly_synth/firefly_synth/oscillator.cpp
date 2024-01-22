@@ -13,7 +13,6 @@
 
 #include <cmath>
 
-using namespace juce::dsp;
 using namespace plugin_base;
 
 namespace firefly_synth {
@@ -95,12 +94,9 @@ public module_engine {
   // basic and dsf
   float _ref_phases[max_unison_voices];
   float _sync_phases[max_unison_voices];
-  // store per-unison voice oversampled signals
-  AudioBlock<float> _oversampled_block;
   // for lerp hardsync
   int _unsync_samples[max_unison_voices];
   float _unsync_phases[max_unison_voices];
-  // for am/fm/hardsync, cv signals are *not* oversampled
   oversampler<max_unison_voices + 1> _oversampler;
 
   // random (static and k+s)
@@ -923,7 +919,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   for(int v = 0; v < uni_voices + 1; v++)
     lanes[v] = &block.state.own_audio[0][v];
 
-  _oversampled_block = _oversampler.process(oversmp_stages, lanes, uni_voices + 1, block.start_frame, block.end_frame, [&](float** lanes_channels, int frame)
+  _oversampler.process(oversmp_stages, lanes, uni_voices + 1, block.start_frame, block.end_frame, [&](float** lanes_channels, int frame)
   {
     int mod_index = frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
@@ -1050,9 +1046,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt(1, pan) * synced_sample;
     }
   });
-
-  // store the oversampled block into context so it can be used by the mod matrices
-  *block.state.own_context = &_oversampled_block;
   
   // TODO move AM into the oversmp stage
 
