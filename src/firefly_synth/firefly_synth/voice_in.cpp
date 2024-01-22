@@ -23,6 +23,7 @@ enum {
   param_oversmp, param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const master_in_param_pb_range;
+extern int const voice_in_param_oversmp = param_oversmp;
 extern int const voice_in_output_pitch_offset = output_pitch_offset;
 
 static std::vector<list_item>

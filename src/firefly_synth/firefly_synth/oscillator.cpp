@@ -31,6 +31,7 @@ enum {
   param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
+extern int const voice_in_param_oversmp;
 extern int const master_in_param_pb_range;
 extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
@@ -50,7 +51,7 @@ get_oversmp_info(plugin_block const& block, int& stages, int& factor)
 {
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
-  stages = 0;// todo block_auto[param_oversmp][0].step();
+  stages = block.state.all_block_automation[module_voice_in][0][voice_in_param_oversmp][0].step();
   factor = 1 << stages;
   if (!can_do_phase(type))
   {
