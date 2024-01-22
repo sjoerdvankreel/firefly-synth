@@ -1047,8 +1047,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
     }
   });
   
-  // TODO move AM into the oversmp stage
-
+  // note AM is *NOT* oversampled like FM
   // now we have all the individual unison voice outputs, start modulating
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
   auto& modulator = get_am_matrix_modulator(block);
