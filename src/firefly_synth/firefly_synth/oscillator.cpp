@@ -873,9 +873,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
   float uni_voice_range = uni_voices == 1 ? 1.0f : (float)(uni_voices - 1);
 
-  float sync_xover_ms = block_auto[param_hard_sync_xover][0].real();
-  int sync_over_samples = (int)(sync_xover_ms * 0.001 * block.sample_rate);
-
   auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
@@ -914,6 +911,10 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
     oversmp_stages = 0;
     oversmp_factor = 1;
   }
+
+  // note this must react to oversmp
+  float sync_xover_ms = block_auto[param_hard_sync_xover][0].real();
+  int sync_over_samples = (int)(sync_xover_ms * 0.001 * block.sample_rate * oversmp_factor);
 
   std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;
   for(int v = 0; v < uni_voices + 1; v++)
