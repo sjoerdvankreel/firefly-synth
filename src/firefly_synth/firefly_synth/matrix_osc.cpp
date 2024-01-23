@@ -96,7 +96,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     outputs.push_back(make_module_dsp_output(false, make_topo_info(
       "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "Modulated", r, max_unison_voices + 1)));
   module_topo result(make_module(
-    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc", "Osc", true, true, module_osc_matrix, 1),
+    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc Mod", true, true, module_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, 0, outputs),
     make_module_gui(section, colors, pos, { 2, 1 })));
 
