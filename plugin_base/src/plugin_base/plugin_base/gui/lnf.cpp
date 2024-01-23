@@ -301,6 +301,10 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
 void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
+  if (auto ps = dynamic_cast<param_combobox*>(&box))
+    if (ps->param()->param->gui.tabular)
+      draw_tabular_cell_bg(g, &box);
+
   Path path;
   int arrowPad = 4;
   int arrowWidth = 6;
