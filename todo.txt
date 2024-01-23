@@ -36,7 +36,6 @@ fix oversampling + am (move into over stage)
 move oversmp to voice in, seems undoable to modulate mixed-oversmp-factor oscs
 credit the image
 clap automation envelopes not working
-check all automate::none
 
 * get some linux folks to comment (ycollete?)
 * continuing

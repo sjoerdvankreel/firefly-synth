@@ -20,7 +20,7 @@ enum { section_main };
 enum { param_on, param_source, param_target, param_amt, param_ring };
 extern int const osc_param_uni_voices;
 
-static int const route_count = 10;
+static int const route_count = 20; // TODO decrease once we do FM
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_am_matrix);
 
