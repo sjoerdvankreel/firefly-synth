@@ -175,10 +175,13 @@ class param_name_label:
 public binding_component,
 public autofit_label
 {
+  param_desc const* const _param;
   static std::string label_ref_text(param_desc const* param, bool short_);
 public:
+  param_desc const* param() const { return _param; }
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool short_, lnf* lnf):
-  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), autofit_label(lnf, label_ref_text(param, short_))
+  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), 
+  autofit_label(lnf, label_ref_text(param, short_)), _param(param)
   { setText(short_ ? param->param->info.tag.short_name : param->info.name, juce::dontSendNotification); init(); }
 };
 

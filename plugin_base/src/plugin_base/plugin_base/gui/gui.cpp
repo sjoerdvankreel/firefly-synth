@@ -613,8 +613,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   if (param->gui.tabular)
   {
     std::string name = param->info.tag.name;
-    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), name);
-    header.setText(name, dontSendNotification);
+    auto& header = make_component<param_name_label>(this, &module, &slots[0], true, module_lnf(module.module->info.index));
     header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
     result.add(header, vertical, 0);
   }

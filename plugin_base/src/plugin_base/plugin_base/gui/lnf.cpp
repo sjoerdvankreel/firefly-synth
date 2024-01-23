@@ -14,6 +14,13 @@ static int const knob_thumb_height = 7;
 static int const slider_thumb_width = 9;
 static int const slider_thumb_height = 6;
 
+static void
+draw_tabular_cell_bg(Graphics& g, Component* c)
+{
+  g.setColour(Colours::white.withAlpha(0.05f));
+  g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), 3);
+}
+
 static void 
 draw_conic_arc(
   Graphics&g, float left, float top, float size, float start_angle, 
@@ -241,6 +248,11 @@ void
 lnf::drawLabel(Graphics& g, Label& label)
 {
   g.fillAll(label.findColour(Label::backgroundColourId));
+
+  if (auto pl = dynamic_cast<param_name_label*>(&label))
+    if (pl->param()->param->gui.tabular)
+      draw_tabular_cell_bg(g, &label);
+
   if (!label.isBeingEdited())
   {
     auto alpha = label.isEnabled() ? 1.0f : 0.5f;
@@ -490,9 +502,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     if(ps->param()->param->gui.tabular)
     {
       padh = 2;
-      // cell bg
-      g.setColour(Colours::white.withAlpha(0.05f));
-      g.fillRoundedRectangle(s.getLocalBounds().reduced(1).toFloat(), 3);
+      draw_tabular_cell_bg(g, &s);
     }
   }
 
