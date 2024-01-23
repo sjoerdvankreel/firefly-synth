@@ -15,9 +15,9 @@ static int const slider_thumb_width = 9;
 static int const slider_thumb_height = 6;
 
 static void
-draw_tabular_cell_bg(Graphics& g, Component* c)
+draw_tabular_cell_bg(Graphics& g, Component* c, float alpha)
 {
-  g.setColour(Colours::white.withAlpha(0.05f));
+  g.setColour(Colours::white.withAlpha(alpha));
   g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), 3);
 }
 
@@ -251,7 +251,7 @@ lnf::drawLabel(Graphics& g, Label& label)
 
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label);
+      draw_tabular_cell_bg(g, &label, 0.1f);
 
   if (!label.isBeingEdited())
   {
@@ -303,7 +303,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 {
   if (auto ps = dynamic_cast<param_combobox*>(&box))
     if (ps->param()->param->gui.tabular)
-      draw_tabular_cell_bg(g, &box);
+      draw_tabular_cell_bg(g, &box, 0.05f);
 
   Path path;
   int arrowPad = 4;
@@ -333,7 +333,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &tb);
+    draw_tabular_cell_bg(g, &tb, 0.05f);
 
   int left = 0;
   if(tabular) 
@@ -442,7 +442,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &s);
+    draw_tabular_cell_bg(g, &s, 0.05f);
 
   float size = s.getHeight() - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
@@ -525,7 +525,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     if(ps->param()->param->gui.tabular)
     {
       padh = 2;
-      draw_tabular_cell_bg(g, &s);
+      draw_tabular_cell_bg(g, &s, 0.05f);
     }
   }
 
