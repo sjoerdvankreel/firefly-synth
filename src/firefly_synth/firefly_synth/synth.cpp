@@ -97,8 +97,8 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_tab_change = false;
   module_params.render_on_module_mouse_enter = true;
   module_params.render_on_param_mouse_enter_modules = {
-    module_master_in, module_voice_in, module_am_matrix, module_vaudio_matrix, 
-    module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix };
+    module_master_in, module_voice_in, module_am_matrix, module_fm_matrix,
+    module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix };
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
 
@@ -112,12 +112,14 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
       params.scale_type = graph_params::scale_h;
       switch (module_index)
       {
+      // todo do we need to re-render am based on fm and vice versa ?
       case module_am_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, true, false, { module_osc, module_voice_in } ));
+      case module_fm_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_am_matrix /*TODO*/, true, false, {module_osc, module_voice_in}));
       case module_vaudio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, { }));
       case module_gaudio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, { }));
       case module_vcv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
         { module_master_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
-        module_osc, module_am_matrix, module_vfx, module_vlfo, module_vaudio_matrix }));
+        module_osc, module_am_matrix, module_fm_matrix, module_vfx, module_vlfo, module_vaudio_matrix }));
       case module_gcv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
         { module_master_in, module_glfo, module_gfx, module_gaudio_matrix, module_master_out }));
       default: assert(false); return std::make_unique<Component>();
@@ -212,6 +214,7 @@ make_cv_matrix_targets(plugin_topo const* topo, bool global)
       &topo->modules[module_voice_in],
       &topo->modules[module_osc], 
       &topo->modules[module_am_matrix],
+      &topo->modules[module_fm_matrix],
       &topo->modules[module_vfx],
       &topo->modules[module_vaudio_matrix], 
       &topo->modules[module_voice_out] };
@@ -292,7 +295,7 @@ synth_topo()
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
   result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
     custom_section_osc_graph, { 5, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false, false, { module_am_matrix, module_voice_in }); });
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false, false, { module_am_matrix, module_fm_matrix, module_voice_in }); });
   result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
     custom_section_vfx_graph, { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, false, false, {}); });
@@ -333,7 +336,7 @@ synth_topo()
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 3, 7, 1 },
-    { module_am_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
+    { module_am_matrix, module_fm_matrix, module_vaudio_matrix, module_gaudio_matrix, module_vcv_matrix, module_gcv_matrix });
 
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
@@ -352,6 +355,7 @@ synth_topo()
   result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony);
   result->modules[module_am_matrix] = am_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, result.get());
+  result->modules[module_fm_matrix] = fm_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, result.get());
   result->modules[module_gaudio_matrix] = audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true,
     make_audio_matrix_sources(result.get(), true), make_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_matrix] = audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false,

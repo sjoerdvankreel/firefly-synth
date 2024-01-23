@@ -26,7 +26,7 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 enum {
   module_midi, module_master_in, module_glfo, module_gcv_matrix, module_voice_note, 
   module_voice_on_note, module_vlfo, module_env, module_vcv_matrix, module_voice_in, 
-  module_vaudio_matrix, module_am_matrix, module_osc, module_vfx, module_voice_out,
+  module_vaudio_matrix, module_am_matrix, module_fm_matrix, module_osc, module_vfx, module_voice_out,
   module_voice_mix, module_gaudio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
 // used by the oscillator at the end of it's process call to apply amp/ring mod
@@ -121,6 +121,7 @@ plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& co
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony);
 plugin_base::module_topo am_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
+plugin_base::module_topo fm_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
 plugin_base::module_topo audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
