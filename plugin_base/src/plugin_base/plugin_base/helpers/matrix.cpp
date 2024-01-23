@@ -64,48 +64,62 @@ matrix_param_menu_handler::menus() const
   return { result }; 
 }
 
+void
+matrix_param_menu_handler::execute(
+  int menu_id, int action, int module_index,
+  int module_slot, int param_index, int param_slot)
+{
+  auto const& topo = _state->desc().plugin->modules[module_index];
+  int section_index = param_index / (topo.params.size() / _section_count);
+  int section_param_index = param_index % (topo.params.size() / _section_count);
+  execute(menu_id, action, module_index, module_slot, section_index, section_param_index, param_slot);
+}
+
 void 
 matrix_param_menu_handler::execute(
   int menu_id, int action, int module_index, 
-  int module_slot, int param_index, int param_slot)
+  int module_slot, int section_index, int section_param_index, int param_slot)
 {
   assert(menu_id == 0);
   assert(0 <= action && action < action_count);
 
   auto const& topo = _state->desc().plugin->modules[module_index];
+  int section_param_count = topo.params.size() / _section_count;
+
   if (action == clear)
   {
-    for(int p = 0; p < topo.params.size(); p++)
+    for (int p = section_index * section_param_count; p < (section_index + 1) * section_param_count; p++)
       _state->set_plain_at(module_index, module_slot, p, param_slot, 
         topo.params[p].domain.default_plain(module_slot, param_slot));
     return;
   }
+
   if (action == delete_)
   {
-    execute(menu_id, 0, module_index, param_index, param_index, param_slot);
+    execute(menu_id, clear, module_index, module_slot, section_index, section_param_index, param_slot);
     for(int r = param_slot; r < _route_count - 1; r++)
-      for (int p = 0; p < topo.params.size(); p++)
+      for (int p = section_index * section_param_count; p < (section_index + 1) * section_param_count; p++)
         _state->set_plain_at(module_index, module_slot, p, r,
           _state->get_plain_at(module_index, module_slot, p, r + 1));
-    execute(menu_id, 0, module_index, param_index, param_index, _route_count - 1);
+    execute(menu_id, clear, module_index, module_slot, section_index, section_param_index, _route_count - 1);
     return;
   }
   if (action == insert_before)
-    execute(menu_id, clear, module_index, param_index, param_index, _route_count - 1);
+    execute(menu_id, clear, module_index, module_slot, section_index, section_param_index, _route_count - 1);
   for (int r = _route_count - 1; r > (action == insert_after? param_slot + 1: param_slot); r--)
-    for (int p = 0; p < topo.params.size(); p++)
+    for (int p = section_index * section_param_count; p < (section_index + 1) * section_param_count; p++)
       _state->set_plain_at(module_index, module_slot, p, r,
         _state->get_plain_at(module_index, module_slot, p, r - 1));
   if (action == insert_before)
-    execute(menu_id, clear, module_index, param_index, param_index, param_slot);
+    execute(menu_id, clear, module_index, module_slot, section_index, section_param_index, param_slot);
   if ((action == insert_after || action == duplicate) && param_slot < _route_count - 1)
-    execute(menu_id, clear, module_index, param_index, param_index, param_slot + 1);
+    execute(menu_id, clear, module_index, module_slot, section_index, section_param_index, param_slot + 1);
   if(action == insert_before)
-    _state->set_raw_at(module_index, module_slot, param_index, param_slot, _default_on_value);
+    _state->set_raw_at(module_index, module_slot, (section_index * section_param_count) + section_param_index, param_slot, _default_on_value);
   if (action == insert_after && param_slot < _route_count - 1)
-    _state->set_raw_at(module_index, module_slot, param_index, param_slot + 1, _default_on_value);
+    _state->set_raw_at(module_index, module_slot, (section_index * section_param_count) + section_param_index, param_slot + 1, _default_on_value);
   if (action == duplicate && param_slot < _route_count - 1)
-    for (int p = 0; p < topo.params.size(); p++)
+    for (int p = section_index * section_param_count; p < (section_index + 1) * section_param_count; p++)
       _state->set_plain_at(module_index, module_slot, p, param_slot + 1,
         _state->get_plain_at(module_index, module_slot, p, param_slot));
   return;

@@ -67,6 +67,8 @@ public param_menu_handler {
   int const _default_on_value;
   enum { clear, delete_, duplicate, insert_before, insert_after, action_count  };
 
+  void execute(int menu_id, int action, int module_index, int module_slot, int section_index, int section_param_index, int param_slot);
+
 public:
   matrix_param_menu_handler(plugin_state* state, int section_count, int this_section, int route_count, int default_on_value):
   param_menu_handler(state), _this_section(this_section), _section_count(section_count), _route_count(route_count), _default_on_value(default_on_value) {}
