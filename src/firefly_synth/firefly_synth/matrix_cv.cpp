@@ -304,7 +304,7 @@ cv_matrix_topo(
   
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", param_type, route_count),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(type_items(), ""),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
   type.gui.tabular = true;
   type.gui.menu_handler_factory = [route_count](plugin_state* state) { 
@@ -317,7 +317,7 @@ cv_matrix_topo(
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(source_matrix.items, ""),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
@@ -325,7 +325,7 @@ cv_matrix_topo(
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
-    make_param_dsp_input(!global, param_automate::none), make_domain_item(target_matrix.items, ""),
+    make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
