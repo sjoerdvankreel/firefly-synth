@@ -422,6 +422,10 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float top_margin = 2;
   int conic_count = 256;
 
+  if (auto ps = dynamic_cast<param_slider*>(&s))
+    if (ps->param()->param->gui.tabular)
+      draw_tabular_cell_bg(g, &s);
+
   float size = s.getHeight() - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
   float top = (s.getHeight() - size) / 2 - padding / 2 + top_margin;
