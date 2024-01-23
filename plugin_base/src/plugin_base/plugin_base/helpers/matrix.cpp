@@ -285,36 +285,44 @@ tidy_matrix_menu_handler::execute_custom(int menu_id, int action, int module, in
 
   // keep track of current values
   auto const& topo = _state->desc().plugin->modules[module];
-  std::vector<std::map<int, plain_value>> route_value_maps;
   int route_count = topo.params[_on_param].info.slot_count;
-  for (int r = 0; r < route_count; r++)
-    if (_state->get_plain_at(module, slot, _on_param, r).step() != _off_value)
-    {
-      std::map<int, plain_value> route_value_map;
-      for(int p = 0; p < topo.params.size(); p++)
-        route_value_map[p] = _state->get_plain_at(module, slot, p, r);
-      route_value_maps.push_back(route_value_map);
-    }
+  int section_param_count = topo.params.size() / _section_count;
+  std::vector<std::vector<std::map<int, plain_value>>> route_value_maps;
+
+  for(int s = 0; s < _section_count; s++)
+  {
+    route_value_maps.emplace_back();
+    for (int r = 0; r < route_count; r++)
+      if (_state->get_plain_at(module, slot, _on_param + s * section_param_count, r).step() != _off_value)
+      {
+        std::map<int, plain_value> route_value_map;
+        for(int p = s * section_param_count; p < (s + 1) * section_param_count; p++)
+          route_value_map[p] = _state->get_plain_at(module, slot, p, r);
+        route_value_maps[s].push_back(route_value_map);
+      }
+  }
   _state->clear_module(module, slot);
 
   // sort
-  std::sort(route_value_maps.begin(), route_value_maps.end(), [this, &topo](auto const& l, auto const& r) {
-    for (int p = 0; p < _sort_params.size(); p++)
-    {
-      assert(!topo.params[_sort_params[p]].domain.is_real());
-      if(l.at(_sort_params[p]).step() < r.at(_sort_params[p]).step()) return true;
-      if (l.at(_sort_params[p]).step() > r.at(_sort_params[p]).step()) return false;
-    }
-    return false;
-  });
+  for(int s = 0; s < _section_count; s++)
+    std::sort(route_value_maps[s].begin(), route_value_maps[s].end(), [this, &topo, s](auto const& l, auto const& r) {
+      for (int p = 0; p < _sort_params.size(); p++)
+      {
+        assert(!topo.params[_sort_params[s][p]].domain.is_real());
+        if(l.at(_sort_params[s][p]).step() < r.at(_sort_params[s][p]).step()) return true;
+        if (l.at(_sort_params[s][p]).step() > r.at(_sort_params[s][p]).step()) return false;
+      }
+      return false;
+    });
 
   // tidy
-  for (int r = 0; r < route_value_maps.size(); r++)
-  {
-    auto const& map = route_value_maps[r];
-    for(int p = 0; p < topo.params.size(); p++)
-      _state->set_plain_at(module, slot, p, r, map.at(p));
-  }
+  for(int s = 0; s < _section_count; s++)
+    for (int r = 0; r < route_value_maps[s].size(); r++)
+    {
+      auto const& map = route_value_maps[s][r];
+      for (int p = s * section_param_count; p < (s + 1) * section_param_count; p++)
+        _state->set_plain_at(module, slot, p, r, map.at(p));
+    }
 
   return {};
 }

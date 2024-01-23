@@ -286,7 +286,7 @@ cv_matrix_topo(
   };
   result.gui.menu_handler_factory = [](plugin_state* state) {
     return std::make_unique<tidy_matrix_menu_handler>(
-      state, param_type, type_off, std::vector<int>({ param_target, param_source })); 
+      state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 
   };
   result.midi_active_selector = [global, on_note_midi_start, sm = source_matrix.mappings](
     plugin_state const& state, int, jarray<int, 3>& active) { 

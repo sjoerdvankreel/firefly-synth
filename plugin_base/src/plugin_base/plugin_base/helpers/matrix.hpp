@@ -80,13 +80,17 @@ class tidy_matrix_menu_handler :
 public module_tab_menu_handler {
   int _on_param;
   int _off_value;
-  std::vector<int> _sort_params;
+
+  // for multi-section matrix (am/fm), assumes equal route count and equal param count per section
+  // sort params are per-section
+  int _section_count;
+  std::vector<std::vector<int>> _sort_params;
 
 public:
   std::vector<custom_menu> const custom_menus() const override;
   menu_result execute_custom(int menu_id, int action, int module, int slot) override;
-  tidy_matrix_menu_handler(plugin_state* state, int on_param, int off_value, std::vector<int> const& sort_params) : 
-    module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _sort_params(sort_params) {}
+  tidy_matrix_menu_handler(plugin_state* state, int section_count, int on_param, int off_value, std::vector<std::vector<int>> const& sort_params) :
+    module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _section_count(section_count), _sort_params(sort_params) {}
 };
 
 // allows to clear/swap/copy/move with updating routes

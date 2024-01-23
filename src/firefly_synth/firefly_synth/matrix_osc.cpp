@@ -106,7 +106,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<osc_matrix_engine>(); };
   // todo this wont fly
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
-    state, param_am_on, 0, std::vector<int>({ param_am_target, param_am_source })); };
+    state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };
 
   auto& am = result.sections.emplace_back(make_param_section(section_am,
     make_topo_tag("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "AM"), 
