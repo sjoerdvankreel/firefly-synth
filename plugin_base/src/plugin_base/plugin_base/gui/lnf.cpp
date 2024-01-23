@@ -482,9 +482,16 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   int const fixedHeight = 5;
   assert(style == Slider::SliderStyle::LinearHorizontal);
 
-  float left = slider_thumb_width / 2;
+  // in table mode dont align right against the next one
+  // normally thats not a point because theres labels in between
+  int padh = 0;
+  if(auto ps = dynamic_cast<param_slider*>(&s))
+    if(ps->param()->param->gui.tabular)
+      padh = 2;
+
+  float left = slider_thumb_width / 2 + padh / 2;
   float top = (s.getHeight() - fixedHeight) / 2;
-  float width = s.getWidth() - slider_thumb_width;
+  float width = s.getWidth() - slider_thumb_width - padh;
   float centerx = left + width / 2;
   float height = fixedHeight;
 
