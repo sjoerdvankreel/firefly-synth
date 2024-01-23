@@ -486,8 +486,15 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
   // normally thats not a point because theres labels in between
   int padh = 0;
   if(auto ps = dynamic_cast<param_slider*>(&s))
+  {
     if(ps->param()->param->gui.tabular)
+    {
       padh = 2;
+      // cell bg
+      g.setColour(Colours::white.withAlpha(0.05f));
+      g.fillRoundedRectangle(s.getLocalBounds().reduced(1).toFloat(), 3);
+    }
+  }
 
   float left = slider_thumb_width / 2 + padh / 2;
   float top = (s.getHeight() - fixedHeight) / 2;
