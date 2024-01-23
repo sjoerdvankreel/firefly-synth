@@ -328,12 +328,23 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
 void 
 lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down)
 {
+  bool tabular = false;
+  if (auto ps = dynamic_cast<param_toggle_button*>(&tb))
+    if (ps->param()->param->gui.tabular)
+      tabular = true;
+  if(tabular)
+    draw_tabular_cell_bg(g, &tb);
+
+  int left = 0;
+  if(tabular) 
+    left = tb.getWidth() / 2 - combo_height() / 2;
+
   auto cornerSize = 3.0f;
   int height = tb.getHeight();
   auto tick = getTickShape(0.5f);
   int const fixedHeight = combo_height();
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
-  Rectangle<int> boxBounds(0, toggleTop, fixedHeight, fixedHeight);
+  Rectangle<int> boxBounds(left, toggleTop, fixedHeight, fixedHeight);
   g.setColour(findColour(ComboBox::backgroundColourId));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
   g.setColour(findColour(ComboBox::outlineColourId).darker());
