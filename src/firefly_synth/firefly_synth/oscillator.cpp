@@ -195,7 +195,7 @@ make_osc_graph_engine(plugin_desc const* desc)
 }
 
 std::vector<graph_data>
-render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_am_matrix)
+render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_matrix)
 {
   std::vector<graph_data> result;
   int note = state.get_plain_at(module_osc, slot, param_note, 0).step();
@@ -208,10 +208,10 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int sample_rate = params.max_frame_count * freq;
 
   // show some of the decay
-  if (is_random(type) && !for_am_matrix) sample_rate /= 5;
+  if (is_random(type) && !for_osc_matrix) sample_rate /= 5;
 
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
-  engine->process_default(module_am_matrix, 0);
+  engine->process_default(module_osc_matrix, 0);
   for (int i = 0; i <= slot; i++)
   {
     block = engine->process(module_osc, i, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
@@ -1051,8 +1051,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   // note AM is *NOT* oversampled like FM
   // now we have all the individual unison voice outputs, start modulating
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
-  auto& modulator = get_am_matrix_modulator(block);
-  auto const& modulated = modulator.modulate(block, block.module_slot, modulation);
+  auto& modulator = get_osc_matrix_am_modulator(block);
+  auto const& modulated = modulator.modulate_am(block, block.module_slot, modulation);
   for(int v = 0; v < uni_voices; v++)
     for (int c = 0; c < 2; c++)
       for (int f = block.start_frame; f < block.end_frame; f++)

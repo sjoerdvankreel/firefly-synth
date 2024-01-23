@@ -26,19 +26,19 @@ static int const route_count = 8;
 extern int const osc_param_uni_voices;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
-std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_am_matrix);
+std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_matrix);
 
-class am_matrix_engine:
+class osc_matrix_engine:
 public module_engine { 
-  am_matrix_modulator _modulator;
-  jarray<float, 4>* _own_audio = {};
+  jarray<float, 4>* _own_am_audio = {};
+  osc_matrix_am_modulator _am_modulator;
 public:
-  am_matrix_engine() : _modulator(this) {}
-  PB_PREVENT_ACCIDENTAL_COPY(am_matrix_engine);
+  osc_matrix_engine() : _am_modulator(this) {}
+  PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_engine);
 
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
-  jarray<float, 3> const& modulate(
+  jarray<float, 3> const& modulate_am(
     plugin_block& block, int slot, 
     cv_matrix_mixdown const* cv_modulation);
 };
@@ -51,8 +51,11 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   std::vector<float> result_l;
   std::vector<float> result_r;
   for(int r = 0; r < route_count; r++)
-    if(state.get_plain_at(module_am_matrix, 0, param_am_on, r).step() != 0)
-      max_osc = std::max(max_osc, state.get_plain_at(module_am_matrix, 0, param_am_target, r).step());
+    if(state.get_plain_at(module_osc_matrix, 0, param_am_on, r).step() != 0)
+      max_osc = std::max(max_osc, state.get_plain_at(module_osc_matrix, 0, param_am_target, r).step());
+  for (int r = 0; r < route_count; r++)
+    if (state.get_plain_at(module_osc_matrix, 0, param_fm_on, r).step() != 0)
+      max_osc = std::max(max_osc, state.get_plain_at(module_osc_matrix, 0, param_fm_target, r).step());
   auto graphs(render_osc_graphs(state, engine, max_osc, true));
   for (int mi = 0; mi <= max_osc; mi++)
   {
@@ -69,35 +72,38 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 audio_routing_audio_params
 make_audio_routing_am_params(plugin_state* state)
 {
+  // TODO not fly
   audio_routing_audio_params result;
   result.off_value = 0;
   result.on_param = param_am_on;
   result.source_param = param_am_source;
   result.target_param = param_am_target;
-  result.matrix_module = module_am_matrix;
+  result.matrix_module = module_osc_matrix;
+  // TODO needs sections
   result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
   result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
   return result;
 }
 
 module_topo 
-am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
+osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
 {
-  auto am_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
+  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
 
   std::vector<module_dsp_output> outputs;
+  // todo fm outputs ??
   for(int r = 0; r < route_count; r++)
     outputs.push_back(make_module_dsp_output(false, make_topo_info(
       "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "Modulated", r, max_unison_voices + 1)));
   module_topo result(make_module(
-    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc AM", "AM", true, true, module_am_matrix, 1),
+    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc", "Osc", true, true, module_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, 0, outputs),
     make_module_gui(section, colors, pos, { 2, 1 })));
 
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.tabbed_name = result.info.tag.name;
-  result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<am_matrix_engine>(); };
+  result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<osc_matrix_engine>(); };
   // todo this wont fly
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, param_am_on, 0, std::vector<int>({ param_am_target, param_am_source })); };
@@ -114,22 +120,22 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   am_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count, 1); };
   auto& am_source = result.params.emplace_back(make_param(
     make_topo_info("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", param_am_source, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(am_matrix.items, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
   am_source.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
-  am_source.gui.item_enabled.bind_param({ module_am_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) {
-      return am[self].slot <= am[other].slot; });
+  am_source.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
+    [osc = osc_matrix.mappings](int other, int self) {
+      return osc[self].slot <= osc[other].slot; });
   auto& am_target = result.params.emplace_back(make_param(
     make_topo_info("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", param_am_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(am_matrix.items, "Osc 2"),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
     make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
   am_target.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
-  am_target.gui.item_enabled.bind_param({ module_am_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) { 
-      return am[other].slot <= am[self].slot; });
+  am_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
+    [osc = osc_matrix.mappings](int other, int self) { 
+      return osc[other].slot <= osc[self].slot; });
   auto& am_amount = result.params.emplace_back(make_param(
     make_topo_info("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "Amt", param_am_amt, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
@@ -155,22 +161,22 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
   fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count, 1); }; // todo this wont fly
   auto& fm_source = result.params.emplace_back(make_param(
     make_topo_info("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Source", param_fm_source, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(am_matrix.items, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
-  fm_source.gui.item_enabled.bind_param({ module_am_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) {
-      return am[self].slot <= am[other].slot; });
+  fm_source.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
+    [osc = osc_matrix.mappings](int other, int self) {
+      return osc[self].slot <= osc[other].slot; });
   auto& fm_target = result.params.emplace_back(make_param(
     make_topo_info("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Target", param_fm_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(am_matrix.items, "Osc 2"),
-    make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none()))); // todo am_matrix
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
+    make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
-  fm_target.gui.item_enabled.bind_param({ module_am_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
-    [am = am_matrix.mappings](int other, int self) {
-      return am[other].slot <= am[self].slot; });
+  fm_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
+    [osc = osc_matrix.mappings](int other, int self) {
+      return osc[other].slot <= osc[self].slot; });
   auto& fm_amount = result.params.emplace_back(make_param(
     make_topo_info("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "Idx", param_fm_idx, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 16, 1, 2, ""), // todo default/max
@@ -188,22 +194,22 @@ am_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, p
 }
 
 jarray<float, 3> const&
-am_matrix_modulator::modulate(
+osc_matrix_am_modulator::modulate_am(
   plugin_block& block, int slot, 
   cv_matrix_mixdown const* cv_modulation)
-{ return _engine->modulate(block, slot, cv_modulation); }
+{ return _engine->modulate_am(block, slot, cv_modulation); }
 
 void
-am_matrix_engine::process(plugin_block& block)
+osc_matrix_engine::process(plugin_block& block)
 {
   // need to capture own audio here because when we start 
   // modulating "own" does not refer to us but to the caller
-  *block.state.own_context = &_modulator;
-  _own_audio = &block.state.own_audio;
+  *block.state.own_context = &_am_modulator;
+  _own_am_audio = &block.state.own_audio;
 }
 
 jarray<float, 3> const& 
-am_matrix_engine::modulate(
+osc_matrix_engine::modulate_am(
   plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
@@ -214,7 +220,7 @@ am_matrix_engine::modulate(
   // the first match we encounter becomes the modulation result
   jarray<float, 3>* modulated = nullptr;
   jarray<float, 3> const& target_audio = block.voice->all_audio[module_osc][slot][0];
-  auto const& block_auto = block.state.all_block_automation[module_am_matrix][0];
+  auto const& block_auto = block.state.all_block_automation[module_osc_matrix][0];
 
   for (int r = 0; r < route_count; r++)
   {
@@ -225,7 +231,7 @@ am_matrix_engine::modulate(
     int target_uni_voices = block.state.all_block_automation[module_osc][target_osc][osc_param_uni_voices][0].step();
     if (modulated == nullptr)
     {
-      modulated = &(*_own_audio)[r];
+      modulated = &(*_own_am_audio)[r];
       for (int v = 0; v < target_uni_voices; v++)
       {
         target_audio[v + 1][0].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][0]);
@@ -239,8 +245,8 @@ am_matrix_engine::modulate(
     // between oscillators with unequal unison voice count
     int source_osc = block_auto[param_am_source][r].step();
     auto const& source_audio = block.module_audio(module_osc, source_osc);
-    auto const& amt_curve = *(*cv_modulation)[module_am_matrix][0][param_am_amt][r];
-    auto const& ring_curve = *(*cv_modulation)[module_am_matrix][0][param_am_ring][r];
+    auto const& amt_curve = *(*cv_modulation)[module_osc_matrix][0][param_am_amt][r];
+    auto const& ring_curve = *(*cv_modulation)[module_osc_matrix][0][param_am_ring][r];
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
 
     for(int v = 0; v < target_uni_voices; v++)
