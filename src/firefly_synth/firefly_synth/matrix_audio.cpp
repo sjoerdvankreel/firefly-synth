@@ -168,14 +168,14 @@ audio_matrix_topo(
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& on = result.params.emplace_back(make_param(
-    make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
+    make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", "On", true, true, param_on, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   on.gui.tabular = true;
   on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count, 1); };
 
   auto& source = result.params.emplace_back(make_param(
-    make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
+    make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", "Source", true, true, param_source, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
@@ -191,7 +191,7 @@ audio_matrix_topo(
 
   auto default_target = global? "M.Out": "V.Out";
   auto& target = result.params.emplace_back(make_param(
-    make_topo_info("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
+    make_topo_info("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", "Target", true, true, param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, default_target),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
@@ -206,14 +206,14 @@ audio_matrix_topo(
     });
 
   auto& amount = result.params.emplace_back(make_param(
-    make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),
+    make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", "Gain", true, true, param_gain, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
 
   auto& bal = result.params.emplace_back(make_param(
-    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", "Bal", param_bal, route_count),
+    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", "Bal", "Bal", true, true, param_bal, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
   bal.gui.tabular = true;

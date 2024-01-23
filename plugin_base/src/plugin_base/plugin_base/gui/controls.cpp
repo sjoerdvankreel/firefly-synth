@@ -174,8 +174,8 @@ image_component(
 }
 
 autofit_label::
-autofit_label(lnf* lnf, std::string const& reference_text, bool bold, int height):
-_bold(bold), _font_height(height)
+autofit_label(lnf* lnf, std::string const& reference_text, bool bold, int height, bool tabular):
+_bold(bold), _tabular(tabular), _font_height(height)
 {
   setBorderSize({ 1, 2, 1, 4 });
   auto label_font = lnf->getLabelFont(*this);

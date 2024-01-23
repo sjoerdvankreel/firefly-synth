@@ -249,8 +249,8 @@ lnf::drawLabel(Graphics& g, Label& label)
 {
   g.fillAll(label.findColour(Label::backgroundColourId));
 
-  if (auto pl = dynamic_cast<param_name_label*>(&label))
-    if (pl->param()->param->gui.tabular)
+  if (auto afl = dynamic_cast<autofit_label*>(&label))
+    if (afl->tabular())
       draw_tabular_cell_bg(g, &label);
 
   if (!label.isBeingEdited())

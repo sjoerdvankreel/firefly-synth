@@ -303,7 +303,7 @@ cv_matrix_topo(
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", param_type, route_count),
+    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", "Op", true, true, param_type, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
   type.gui.tabular = true;
@@ -316,7 +316,7 @@ cv_matrix_topo(
   type.gui.submenu->add_submenu("Add Bipolar", { type_ab_abs, type_ab_rel, type_ab_stk });
 
   auto& source = result.params.emplace_back(make_param(
-    make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
+    make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", "Source", true, true, param_source, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
@@ -324,7 +324,7 @@ cv_matrix_topo(
   source.gui.submenu = source_matrix.submenu;
 
   auto& target = result.params.emplace_back(make_param(
-    make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
+    make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", "Target", true, true, param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
@@ -333,14 +333,14 @@ cv_matrix_topo(
   target.gui.item_enabled.auto_bind = true;
 
   auto& min = result.params.emplace_back(make_param(
-    make_topo_info("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", param_min, route_count),
+    make_topo_info("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", "Min", true, true, param_min, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   min.gui.tabular = true;
   min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
 
   auto& max = result.params.emplace_back(make_param(
-    make_topo_info("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", param_max, route_count),
+    make_topo_info("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", "Max", true, true, param_max, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   max.gui.tabular = true;

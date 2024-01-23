@@ -66,13 +66,15 @@ class autofit_label :
   public autofit_component
 {
   bool const _bold;
+  bool const _tabular;
   int const _font_height;
 public:
   bool bold() const { return _bold; }
+  bool tabular() const { return _tabular; }
   int font_height() const { return _font_height; }
   int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
   int fixed_height(int parent_w, int parent_h) const override { return getHeight(); }
-  autofit_label(lnf* lnf, std::string const& reference_text, bool bold = false, int font_height = -1);
+  autofit_label(lnf* lnf, std::string const& reference_text, bool bold = false, int font_height = -1, bool tabular = false);
 };
 
 // dropdown that resizes to largest item
