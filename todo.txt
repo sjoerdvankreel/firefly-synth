@@ -25,6 +25,7 @@ document new invisible stuff (bpm/midi smooth, comb/delay lin interpol)
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 write the infernal<>firefly comparison
 credit the image
+FIX THE ROUTING HANDLERS
 
 * get some linux folks to comment (ycollete?)
 * continuing

@@ -117,7 +117,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_am, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   am_on.gui.tabular = true;
-  am_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count, 1); };
+  am_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 0, route_count, 1); };
   auto& am_source = result.params.emplace_back(make_param(
     make_topo_info("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", "Source", true, true, param_am_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
@@ -158,7 +158,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_fm, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   fm_on.gui.tabular = true;
-  fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, route_count, 1); }; // todo this wont fly
+  fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 1, route_count, 1); }; // todo this wont fly
   auto& fm_source = result.params.emplace_back(make_param(
     make_topo_info("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Source", "Source", true, true, param_fm_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),

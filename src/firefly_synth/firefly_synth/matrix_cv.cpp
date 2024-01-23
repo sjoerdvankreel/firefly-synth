@@ -308,7 +308,7 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
   type.gui.tabular = true;
   type.gui.menu_handler_factory = [route_count](plugin_state* state) { 
-    return make_matrix_param_menu_handler(state, route_count, type_mul_abs); };
+    return make_matrix_param_menu_handler(state, 1, 0, route_count, type_mul_abs); };
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->add_submenu("Mul", { type_mul_abs, type_mul_rel, type_mul_stk });

@@ -60,20 +60,23 @@ make_audio_matrix(std::vector<module_topo const*> const& modules, int start_slot
 class matrix_param_menu_handler:
 public param_menu_handler {
 
+  // sections assume equal param and route count
   int const _route_count;
+  int const _this_section;
+  int const _section_count;
   int const _default_on_value;
   enum { clear, delete_, duplicate, insert_before, insert_after, action_count  };
 
 public:
-  matrix_param_menu_handler(plugin_state* state, int route_count, int default_on_value):
-  param_menu_handler(state), _route_count(route_count), _default_on_value(default_on_value) {}
+  matrix_param_menu_handler(plugin_state* state, int section_count, int this_section, int route_count, int default_on_value):
+  param_menu_handler(state), _this_section(this_section), _section_count(section_count), _route_count(route_count), _default_on_value(default_on_value) {}
   std::vector<custom_menu> const menus() const override;
   void execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) override;
 };
 
 inline std::unique_ptr<matrix_param_menu_handler>
-make_matrix_param_menu_handler(plugin_state* state, int route_count, int default_on_value)
-{ return std::make_unique<matrix_param_menu_handler>(state, route_count, default_on_value); }
+make_matrix_param_menu_handler(plugin_state* state, int section_count, int this_section, int route_count, int default_on_value)
+{ return std::make_unique<matrix_param_menu_handler>(state, section_count, this_section, route_count, default_on_value); }
 
 // allows to tidy up cv/audio matrix
 class tidy_matrix_menu_handler :
