@@ -27,13 +27,15 @@ enum {
 
 static int const route_count = 8;
 extern int const osc_param_uni_voices;
+extern int const voice_in_param_oversmp;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_matrix);
 
 class osc_matrix_engine:
 public module_engine { 
-  jarray<float, 3> _no_fm = {};
+  jarray<float, 2> _no_fm = {};
+  jarray<float, 3> _fm_modsig = {};
   osc_matrix_context _context = {};
   jarray<float, 4>* _own_audio = {};
   jarray<float, 2>* _own_scratch = {};
@@ -49,9 +51,9 @@ public:
   jarray<float, 3> const& modulate_am(
     plugin_block& block, int slot, 
     cv_matrix_mixdown const* cv_modulation);
-  jarray<float, 3> const& modulate_fm(
+  jarray<float, 2> const& modulate_fm(
     plugin_block& block, int slot,
-    cv_matrix_mixdown const* cv_modulation);
+    cv_matrix_mixdown const* cv_modulation, bool graph);
 };
 
 static graph_data
@@ -97,15 +99,17 @@ make_audio_routing_osc_mod_params(plugin_state* state)
 module_topo 
 osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
 {
+  // todo not selfmod fm ?
   auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
 
   std::vector<module_dsp_output> outputs;
+
+  // scratch state for AM
+  // for FM we use oversampled mono series
   for(int r = 0; r < route_count; r++)
     outputs.push_back(make_module_dsp_output(false, make_topo_info(
       "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "AM", r, max_unison_voices + 1)));
-  for (int r = 0; r < route_count; r++)
-    outputs.push_back(make_module_dsp_output(false, make_topo_info(
-      "{69C52C17-747D-4093-8194-43CB9527A0DE}-" + std::to_string(r), "FM", route_count + r, max_unison_voices + 1)));
+
   module_topo result(make_module(
     make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc Mod", true, true, module_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, outputs),
@@ -213,20 +217,23 @@ _am_modulator(this), _fm_modulator(this)
   // for am we can return the unmodulated signal itself
   // but fm needs to return something that oscillator uses to adjust the phase
   // so in case no routes point to target Osc N we return a bunch of zeros
-  _no_fm.resize(jarray<int, 2>(max_unison_voices + 1, jarray<int, 1>(2, max_frame_count)));
+  _no_fm.resize(jarray<int, 1>(max_unison_voices + 1, max_frame_count * (1 << max_oversampler_stages)));
+  _fm_modsig.resize(jarray<int, 2>(route_count, jarray<int, 1>(max_unison_voices + 1, max_frame_count * (1 << max_oversampler_stages))));
 }
 
+// unison-channel-frame
 jarray<float, 3> const&
 osc_matrix_am_modulator::modulate_am(
   plugin_block& block, int slot, 
   cv_matrix_mixdown const* cv_modulation)
 { return _engine->modulate_am(block, slot, cv_modulation); }
 
-jarray<float, 3> const&
+// unison-(frame*oversmp)
+jarray<float, 2> const&
 osc_matrix_fm_modulator::modulate_fm(
   plugin_block& block, int slot, 
-  cv_matrix_mixdown const* cv_modulation)
-{ return _engine->modulate_fm(block, slot, cv_modulation); }
+  cv_matrix_mixdown const* cv_modulation, bool graph)
+{ return _engine->modulate_fm(block, slot, cv_modulation, graph); }
 
 void
 osc_matrix_engine::process(plugin_block& block)
@@ -284,6 +291,7 @@ osc_matrix_engine::modulate_am(
 
     for(int v = 0; v < target_uni_voices; v++)
     {
+      // lerp unison voices
       float target_voice_pos = target_uni_voices == 1? 0.5f: v / (target_uni_voices - 1.0f);
       float source_voice = target_voice_pos * (source_uni_voices - 1);
       int source_voice_0 = (int)source_voice;
@@ -314,12 +322,11 @@ osc_matrix_engine::modulate_am(
 
 // This returns stacked modulators but doesnt touch the carrier.
 // Oscillator process() applies stacked modulation to the phase.
-// TODO use the oversampled signal
 // TODO do self-mod
 // TODO use the feedback param
-jarray<float, 3> const&
+jarray<float, 2> const&
 osc_matrix_engine::modulate_fm(
-  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
+  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation, bool graph)
 {
   // allow custom data for graphs
   if (cv_modulation == nullptr)
@@ -327,7 +334,7 @@ osc_matrix_engine::modulate_fm(
 
   // loop through the routes
   // the first match we encounter becomes the modulator result
-  jarray<float, 3>* modulator = nullptr;
+  jarray<float, 2>* modulator = nullptr;
   auto const& block_auto = block.state.all_block_automation[module_osc_matrix][0];
 
   for (int r = 0; r < route_count; r++)
@@ -339,16 +346,14 @@ osc_matrix_engine::modulate_fm(
     int target_uni_voices = block.state.all_block_automation[module_osc][target_osc][osc_param_uni_voices][0].step();
     if (modulator == nullptr)
     {
-      // todo THIS WONT FLY
-      // dont use own_audio for this
-      // instead use a monochannel signal with the oversmp factor
-      modulator = &(*_own_audio)[r + route_count];
+      // modulator = uni voices times oversmp factor
+      // no channel dimension here
+      modulator = &_fm_modsig[r];
       for (int v = 0; v < target_uni_voices; v++)
       {
         // base value is zero (eg no phase modulation)
         // then keep adding modulators
-        (*modulator)[v + 1][0].fill(0.0f);
-        (*modulator)[v + 1][1].fill(0.0f);
+        (*modulator)[v + 1].fill(0.0f);
       }
     }
 
@@ -357,14 +362,28 @@ osc_matrix_engine::modulate_fm(
     // then linear interpolate. this allows modulation
     // between oscillators with unequal unison voice count
     int source_osc = block_auto[param_fm_source][r].step();
-    auto const& source_audio = block.module_audio(module_osc, source_osc);
     auto const& idx_curve_plain = *(*cv_modulation)[module_osc_matrix][0][param_fm_idx][r];
     auto& idx_curve = (*_own_scratch)[scratch_fm_idx];
     normalized_to_raw_into_fast<domain_type::log>(block, module_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
+    int oversmp_stages = block.state.all_block_automation[module_voice_in][0][voice_in_param_oversmp][0].step();
+    int oversmp_factor = 1 << oversmp_stages;
+    
+    // Oscs are NOT oversampled in this case.
+    if (graph) 
+    {
+      oversmp_factor = 1;
+      oversmp_stages = 0;
+    }
+
+    // oscillator provides us with the upsampled buffers to we can do oversampled FM
+    void* source_context_ptr = block.module_context(module_osc, source_osc);
+    auto source_context = static_cast<oscillator_context*>(source_context_ptr);
+    auto source_audio = source_context->oversampled_lanes_channels_ptrs[oversmp_stages];
 
     for (int v = 0; v < target_uni_voices; v++)
     {
+      // lerp unison voices
       float target_voice_pos = target_uni_voices == 1 ? 0.5f : v / (target_uni_voices - 1.0f);
       float source_voice = target_voice_pos * (source_uni_voices - 1);
       int source_voice_0 = (int)source_voice;
@@ -372,15 +391,36 @@ osc_matrix_engine::modulate_fm(
       float source_voice_pos = source_voice - (int)source_voice;
       if (source_voice_1 == source_uni_voices) source_voice_1--;
 
-      for (int c = 0; c < 2; c++)
-        for (int f = block.start_frame; f < block.end_frame; f++)
-        {
-          // do not assume [-1, 1] here as oscillator can go beyond that
-          float mod0 = source_audio[0][source_voice_0 + 1][c][f];
-          float mod1 = source_audio[0][source_voice_1 + 1][c][f];
-          float mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
-          (*modulator)[v + 1][c][f] += idx_curve[f] * mod;
-        }
+      // note we work on the oversmp data from 0 to (end_frame - start_frame) * oversmp_factor
+      for (int f = 0; f < (block.end_frame - block.start_frame) * oversmp_factor; f++)
+      {
+        // do not assume [-1, 1] here as oscillator can go beyond that
+        // what to do with the stereo signal ? 
+        // the oscs output a 2 channel signal but we only
+        // need one. just take the average for now.
+        // another option would be to have the osc output
+        // an additional mono signal but i doubt its worth the bookkeeping
+        
+        // also the bookkeeping is already complicated here:
+        // source_audio[(unison_voice + 1) * stero_channels + stereo_channel)
+        // where + 1 is because voice 0 is the mixdown of all unison voices
+        float mod0_l = source_audio[(source_voice_0 + 1) * 2 + 0][f];
+        float mod0_r = source_audio[(source_voice_0 + 1) * 2 + 1][f];
+        float mod1_l = source_audio[(source_voice_1 + 1) * 2 + 0][f];
+        float mod1_r = source_audio[(source_voice_1 + 1) * 2 + 1][f];
+        float mod0 = (mod0_l + mod0_r) * 0.5f;
+        float mod1 = (mod1_l + mod1_r) * 0.5f;
+        float mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
+
+        // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
+        // all the not-oversampled stuff requires from start_frame to end_frame
+        // so mind the bookkeeping
+        int mod_index = block.start_frame + f / oversmp_factor;
+
+        // fm modulation is oversampled so "f"
+        // automation is NOT oversampled so "mod_index"
+        (*modulator)[v + 1][f] += idx_curve[mod_index] * mod;
+      }
     }
   }
 

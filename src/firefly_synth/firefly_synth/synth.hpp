@@ -62,16 +62,15 @@ public:
 };
 
 // used by the oscillator during it's process call to apply fm
-// self-modulate is possible if the signal is delayed (eg feedback fm)
 class osc_matrix_fm_modulator
 {
   osc_matrix_engine* _engine;
 public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_fm_modulator);
   osc_matrix_fm_modulator(osc_matrix_engine* engine) : _engine(engine) {}
-  plugin_base::jarray<float, 3> const& modulate_fm(
+  plugin_base::jarray<float, 2> const& modulate_fm(
     plugin_base::plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation);
+    cv_matrix_mixdown const* cv_modulation, bool graph);
 };
 
 inline osc_matrix_am_modulator&

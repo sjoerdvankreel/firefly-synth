@@ -924,11 +924,11 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   // need an osc that uses phase to do FM
   osc_matrix_fm_modulator* fm_modulator = nullptr;
-  jarray<float, 3> const* fm_modulator_sig = nullptr;
+  jarray<float, 2> const* fm_modulator_sig = nullptr;
   if constexpr(!KPS && !Static)
   {
     fm_modulator = &get_osc_matrix_fm_modulator(block);
-    fm_modulator_sig = &fm_modulator->modulate_fm(block, block.module_slot, modulation);
+    fm_modulator_sig = &fm_modulator->modulate_fm(block, block.module_slot, modulation, Graph);
   }
 
   std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;
@@ -938,6 +938,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   _oversampler.process(oversmp_stages, lanes, uni_voices + 1, block.start_frame, block.end_frame, false, [&](float** lanes_channels, int frame)
   {
     // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
+    // all the not-oversampled stuff requires from start_frame to end_frame
+    // so mind the bookkeeping
     int mod_index = block.start_frame + frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
 
@@ -1009,9 +1011,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
       if constexpr (!KPS && !Static)
       {
-        // TODO use the oversampled signal
-        // TODO what about stereo ?
-        float phase_fm = (*fm_modulator_sig)[v + 1][0][mod_index];
+        // FM is oversampled, so frame, not mod_imdex!
+        float phase_fm = (*fm_modulator_sig)[v + 1][frame];
         _sync_phases[v] += phase_fm;
         if (_sync_phases[v] < 0 || _sync_phases[v] >= 1) _sync_phases[v] -= std::floor(_sync_phases[v]);
         assert(0 <= _sync_phases[v] && _sync_phases[v] < 1);
@@ -1030,9 +1031,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         if (_unsync_samples[v] > 0)
         {
-          // TODO use the oversampled signal
-          // TODO what about stereo ?
-          float phase_fm = (*fm_modulator_sig)[v + 1][0][mod_index];
+          // FM is oversampled, so frame, not mod_imdex!
+          float phase_fm = (*fm_modulator_sig)[v + 1][frame];
           _unsync_phases[v] += phase_fm;
           if (_unsync_phases[v] < 0 || _unsync_phases[v] >= 1) _unsync_phases[v] -= std::floor(_unsync_phases[v]);
           assert(0 <= _unsync_phases[v] && _unsync_phases[v] < 1);
