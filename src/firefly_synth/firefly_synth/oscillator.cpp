@@ -1024,9 +1024,9 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
       if constexpr (!KPS && !Static)
       {
-        // FM is oversampled, so frame, not mod_imdex!
+        // FM is oversampled, so frame, not mod_index!
         float phase_fm = (*fm_modulator_sig)[v + 1][frame];
-        _sync_phases[v] += phase_fm;
+        _sync_phases[v] += phase_fm / oversmp_factor;
         if (_sync_phases[v] < 0 || _sync_phases[v] >= 1) _sync_phases[v] -= std::floor(_sync_phases[v]);
         assert(0 <= _sync_phases[v] && _sync_phases[v] < 1);
       }
@@ -1044,9 +1044,9 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         if (_unsync_samples[v] > 0)
         {
-          // FM is oversampled, so frame, not mod_imdex!
+          // FM is oversampled, so frame, not mod_index!
           float phase_fm = (*fm_modulator_sig)[v + 1][frame];
-          _unsync_phases[v] += phase_fm;
+          _unsync_phases[v] += phase_fm / oversmp_factor;
           if (_unsync_phases[v] < 0 || _unsync_phases[v] >= 1) _unsync_phases[v] -= std::floor(_unsync_phases[v]);
           assert(0 <= _unsync_phases[v] && _unsync_phases[v] < 1);
 
