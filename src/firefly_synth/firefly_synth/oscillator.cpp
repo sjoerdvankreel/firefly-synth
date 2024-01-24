@@ -213,6 +213,12 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   // show some of the decay
   if (is_random(type) && !for_osc_matrix) sample_rate /= 5;
 
+  // note: it proves tricky to reset() the oscillators
+  // before the process_default call to the osc_matrix
+  // therefore the oversampler pointers are *not* published
+  // to the block in case of processing for graphs and
+  // we use an alternate means to access the modulation
+  // signal inside matrix_osc::modulate_fm
   engine->process_begin(&state, sample_rate, params.max_frame_count, -1);
   engine->process_default(module_osc_matrix, 0);
   for (int i = 0; i <= slot; i++)
@@ -935,7 +941,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   if constexpr(!KPS && !Static)
   {
     fm_modulator = &get_osc_matrix_fm_modulator(block);
-    fm_modulator_sig = &fm_modulator->modulate_fm(block, block.module_slot, modulation, Graph);
+    fm_modulator_sig = &fm_modulator->modulate_fm<Graph>(block, block.module_slot, modulation);
   }
 
   std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;

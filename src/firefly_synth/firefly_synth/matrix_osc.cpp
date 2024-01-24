@@ -51,9 +51,11 @@ public:
   jarray<float, 3> const& modulate_am(
     plugin_block& block, int slot, 
     cv_matrix_mixdown const* cv_modulation);
+
+  template <bool Graph>
   jarray<float, 2> const& modulate_fm(
     plugin_block& block, int slot,
-    cv_matrix_mixdown const* cv_modulation, bool graph);
+    cv_matrix_mixdown const* cv_modulation);
 };
 
 static graph_data
@@ -229,11 +231,20 @@ osc_matrix_am_modulator::modulate_am(
 { return _engine->modulate_am(block, slot, cv_modulation); }
 
 // unison-(frame*oversmp)
+template <bool Graph>
 jarray<float, 2> const&
 osc_matrix_fm_modulator::modulate_fm(
   plugin_block& block, int slot, 
-  cv_matrix_mixdown const* cv_modulation, bool graph)
-{ return _engine->modulate_fm(block, slot, cv_modulation, graph); }
+  cv_matrix_mixdown const* cv_modulation)
+{ return _engine->modulate_fm<Graph>(block, slot, cv_modulation); }
+
+// need explicit instantiation here
+template
+jarray<float, 2> const&
+osc_matrix_fm_modulator::modulate_fm<false>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
+template
+jarray<float, 2> const&
+osc_matrix_fm_modulator::modulate_fm<true>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
 
 void
 osc_matrix_engine::process(plugin_block& block)
@@ -324,9 +335,10 @@ osc_matrix_engine::modulate_am(
 // Oscillator process() applies stacked modulation to the phase.
 // TODO do self-mod
 // TODO use the feedback param
+template <bool Graph>
 jarray<float, 2> const&
 osc_matrix_engine::modulate_fm(
-  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation, bool graph)
+  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
   if (cv_modulation == nullptr)
@@ -370,7 +382,7 @@ osc_matrix_engine::modulate_fm(
     int oversmp_factor = 1 << oversmp_stages;
     
     // Oscs are NOT oversampled in this case.
-    if (graph) 
+    if (Graph) 
     {
       oversmp_factor = 1;
       oversmp_stages = 0;
@@ -411,6 +423,18 @@ osc_matrix_engine::modulate_fm(
         float mod0 = (mod0_l + mod0_r) * 0.5f;
         float mod1 = (mod1_l + mod1_r) * 0.5f;
         float mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
+
+        // in this case the oversampled pointers are not published
+        // yet by the oscillators. since we dont oversample anyway
+        // for graphs, just reach back into the original osc-provided
+        // audio buffers
+        if constexpr (Graph)
+        {
+          mod0 = block.module_audio(module_osc, source_osc)[0][source_voice_0 + 1][0][f];
+          mod1 = block.module_audio(module_osc, source_osc)[0][source_voice_1 + 1][0][f];
+          mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
+          (*modulator)[v + 1][f] += idx_curve[f] * mod;
+        }
 
         // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
         // all the not-oversampled stuff requires from start_frame to end_frame

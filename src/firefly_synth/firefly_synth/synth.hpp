@@ -68,9 +68,11 @@ class osc_matrix_fm_modulator
 public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_fm_modulator);
   osc_matrix_fm_modulator(osc_matrix_engine* engine) : _engine(engine) {}
+
+  template <bool Graph>
   plugin_base::jarray<float, 2> const& modulate_fm(
     plugin_base::plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation, bool graph);
+    cv_matrix_mixdown const* cv_modulation);
 };
 
 inline osc_matrix_am_modulator&
