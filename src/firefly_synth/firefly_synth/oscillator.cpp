@@ -929,7 +929,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   for(int v = 0; v < uni_voices + 1; v++)
     lanes[v] = &block.state.own_audio[0][v];
 
-  _oversampler.process(oversmp_stages, lanes, uni_voices + 1, block.start_frame, block.end_frame, [&](float** lanes_channels, int frame)
+  _oversampler.process(oversmp_stages, lanes, uni_voices + 1, block.start_frame, block.end_frame, false, [&](float** lanes_channels, int frame)
   {
     int mod_index = frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;

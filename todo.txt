@@ -31,6 +31,8 @@ test fm + unison
 oversample fm
 make fm mono signal
 do fm feedback delay
+not do self-fm? makes it a bit easier
+find another param besides fm delay ?
 
 * get some linux folks to comment (ycollete?)
 * continuing
