@@ -27,6 +27,10 @@ write the infernal<>firefly comparison
 credit the image
 make another repo for renderings
 disable stuff that cannot do FM
+test fm + unison
+oversample fm
+make fm mono signal
+do fm feedback delay
 
 * get some linux folks to comment (ycollete?)
 * continuing

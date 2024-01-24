@@ -4,6 +4,7 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/helpers/matrix.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
@@ -17,6 +18,8 @@ using namespace plugin_base;
 namespace firefly_synth { 
 
 enum { section_am, section_fm };
+enum { scratch_fm_idx, scratch_count };
+
 enum { 
   param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring,
   param_fm_on, param_fm_source, param_fm_target, param_fm_idx, param_fm_dly
@@ -33,6 +36,7 @@ public module_engine {
   jarray<float, 3> _no_fm = {};
   osc_matrix_context _context = {};
   jarray<float, 4>* _own_audio = {};
+  jarray<float, 2>* _own_scratch = {};
   osc_matrix_am_modulator _am_modulator;
   osc_matrix_fm_modulator _fm_modulator;
 public:
@@ -104,7 +108,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
       "{69C52C17-747D-4093-8194-43CB9527A0DE}-" + std::to_string(r), "FM", route_count + r, max_unison_voices + 1)));
   module_topo result(make_module(
     make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc Mod", true, true, module_osc_matrix, 1),
-    make_module_dsp(module_stage::voice, module_output::audio, 0, outputs),
+    make_module_dsp(module_stage::voice, module_output::audio, scratch_count, outputs),
     make_module_gui(section, colors, pos, { 2, 1 })));
 
   result.graph_renderer = render_graph;
@@ -185,7 +189,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
       return osc[other].slot <= osc[self].slot; });
   auto& fm_amount = result.params.emplace_back(make_param(
     make_topo_info("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "Idx", "Idx", true, true, param_fm_idx, route_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 16, 1, 2, ""), // todo default/max
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 3, ""),
     make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
   fm_amount.gui.tabular = true;
   fm_amount.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -227,10 +231,11 @@ osc_matrix_fm_modulator::modulate_fm(
 void
 osc_matrix_engine::process(plugin_block& block)
 {
-  // need to capture own audio here because when we start 
+  // need to capture stuff here because when we start 
   // modulating "own" does not refer to us but to the caller
   *block.state.own_context = &_context;
   _own_audio = &block.state.own_audio;
+  _own_scratch = &block.state.own_scratch;
 }
 
 // This returns the final output signal i.e. all modulators applied to carrier.
@@ -350,7 +355,9 @@ osc_matrix_engine::modulate_fm(
     // between oscillators with unequal unison voice count
     int source_osc = block_auto[param_fm_source][r].step();
     auto const& source_audio = block.module_audio(module_osc, source_osc);
-    auto const& idx_curve = *(*cv_modulation)[module_osc_matrix][0][param_fm_idx][r];
+    auto const& idx_curve_plain = *(*cv_modulation)[module_osc_matrix][0][param_fm_idx][r];
+    auto& idx_curve = (*_own_scratch)[scratch_fm_idx];
+    normalized_to_raw_into_fast<domain_type::log>(block, module_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
 
     for (int v = 0; v < target_uni_voices; v++)
