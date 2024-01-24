@@ -916,6 +916,15 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   float sync_xover_ms = block_auto[param_hard_sync_xover][0].real();
   int sync_over_samples = (int)(sync_xover_ms * 0.001 * block.sample_rate * oversmp_factor);
 
+  // need an osc that uses phase to do FM
+  osc_matrix_fm_modulator* fm_modulator = nullptr;
+  jarray<float, 3> const* fm_modulator_sig = nullptr;
+  if constexpr(!KPS && !Static)
+  {
+    fm_modulator = &get_osc_matrix_fm_modulator(block);
+    fm_modulator_sig = &fm_modulator->modulate_fm(block, block.module_slot, modulation);
+  }
+
   std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;
   for(int v = 0; v < uni_voices + 1; v++)
     lanes[v] = &block.state.own_audio[0][v];
@@ -991,6 +1000,16 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       (void)tri_mix;
       (void)sqr_mix;
 
+      if constexpr (!KPS && !Static)
+      {
+        // TODO use the oversampled signal
+        // TODO what about stereo ?
+        float phase_fm = (*fm_modulator_sig)[v + 1][0][mod_index];
+        _sync_phases[v] += phase_fm;
+        if (_sync_phases[v] < 0 || _sync_phases[v] >= 1) _sync_phases[v] -= std::floor(_sync_phases[v]);
+        assert(0 <= _sync_phases[v] && _sync_phases[v] < 1);
+      }
+
       if constexpr (Saw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * saw_mix;
       if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix;
       if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix;
@@ -1004,6 +1023,13 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         if (_unsync_samples[v] > 0)
         {
+          // TODO use the oversampled signal
+          // TODO what about stereo ?
+          float phase_fm = (*fm_modulator_sig)[v + 1][0][mod_index];
+          _unsync_phases[v] += phase_fm;
+          if (_unsync_phases[v] < 0 || _unsync_phases[v] >= 1) _unsync_phases[v] -= std::floor(_unsync_phases[v]);
+          assert(0 <= _unsync_phases[v] && _unsync_phases[v] < 1);
+
           if constexpr (Saw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * saw_mix;
           if constexpr (Sin) unsynced_sample += std::sin(2.0f * pi32 * _unsync_phases[v]) * sin_mix;
           if constexpr (Tri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * tri_mix;
@@ -1051,12 +1077,12 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   // note AM is *NOT* oversampled like FM
   // now we have all the individual unison voice outputs, start modulating
   // apply AM/RM afterwards (since we can self-modulate, so modulator takes *our* own_audio into account)
-  auto& modulator = get_osc_matrix_am_modulator(block);
-  auto const& modulated = modulator.modulate_am(block, block.module_slot, modulation);
+  auto& am_modulator = get_osc_matrix_am_modulator(block);
+  auto const& am_modulated = am_modulator.modulate_am(block, block.module_slot, modulation);
   for(int v = 0; v < uni_voices; v++)
     for (int c = 0; c < 2; c++)
       for (int f = block.start_frame; f < block.end_frame; f++)
-        block.state.own_audio[0][v + 1][c][f] = modulated[v + 1][c][f];
+        block.state.own_audio[0][v + 1][c][f] = am_modulated[v + 1][c][f];
   
   // This means we can exceed [-1, 1] but just dividing
   // by gen_count * uni_voices gets quiet real quick.

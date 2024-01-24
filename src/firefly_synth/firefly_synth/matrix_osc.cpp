@@ -30,12 +30,13 @@ std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engin
 
 class osc_matrix_engine:
 public module_engine { 
+  jarray<float, 3> _no_fm = {};
   osc_matrix_context _context = {};
   jarray<float, 4>* _own_audio = {};
   osc_matrix_am_modulator _am_modulator;
   osc_matrix_fm_modulator _fm_modulator;
 public:
-  osc_matrix_engine();
+  osc_matrix_engine(int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_engine);
 
   void reset(plugin_block const*) override {}
@@ -109,7 +110,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.tabbed_name = result.info.tag.name;
-  result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<osc_matrix_engine>(); };
+  result.engine_factory = [](auto const& topo, int sr, int max_frame_count) { return std::make_unique<osc_matrix_engine>(max_frame_count); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };
 
@@ -199,11 +200,16 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
 }
 
 osc_matrix_engine::
-osc_matrix_engine() : 
+osc_matrix_engine(int max_frame_count) : 
 _am_modulator(this), _fm_modulator(this) 
 {
   _context.am_modulator = &_am_modulator;
   _context.fm_modulator = &_fm_modulator;
+
+  // for am we can return the unmodulated signal itself
+  // but fm needs to return something that oscillator uses to adjust the phase
+  // so in case no routes point to target Osc N we return a bunch of zeros
+  _no_fm.resize(jarray<int, 2>(max_unison_voices + 1, jarray<int, 1>(2, max_frame_count)));
 }
 
 jarray<float, 3> const&
@@ -254,6 +260,8 @@ osc_matrix_engine::modulate_am(
       modulated = &(*_own_audio)[r];
       for (int v = 0; v < target_uni_voices; v++)
       {
+        // base value is the unmodulated target (carrier)
+        // then keep multiplying by modulators
         target_audio[v + 1][0].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][0]);
         target_audio[v + 1][1].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][1]);
       }
@@ -301,11 +309,74 @@ osc_matrix_engine::modulate_am(
 
 // This returns stacked modulators but doesnt touch the carrier.
 // Oscillator process() applies stacked modulation to the phase.
+// TODO use the oversampled signal
+// TODO do self-mod
+// TODO use the feedback param
 jarray<float, 3> const&
 osc_matrix_engine::modulate_fm(
   plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
-  return block.voice->all_audio[module_osc][slot][0];
+  // allow custom data for graphs
+  if (cv_modulation == nullptr)
+    cv_modulation = &get_cv_matrix_mixdown(block, false);
+
+  // loop through the routes
+  // the first match we encounter becomes the modulator result
+  jarray<float, 3>* modulator = nullptr;
+  auto const& block_auto = block.state.all_block_automation[module_osc_matrix][0];
+
+  for (int r = 0; r < route_count; r++)
+  {
+    if (block_auto[param_fm_on][r].step() == 0) continue;
+    int target_osc = block_auto[param_fm_target][r].step();
+    if (target_osc != slot) continue;
+
+    int target_uni_voices = block.state.all_block_automation[module_osc][target_osc][osc_param_uni_voices][0].step();
+    if (modulator == nullptr)
+    {
+      modulator = &(*_own_audio)[r + route_count];
+      for (int v = 0; v < target_uni_voices; v++)
+      {
+        // base value is zero (eg no phase modulation)
+        // then keep adding modulators
+        (*modulator)[v + 1][0].fill(0.0f);
+        (*modulator)[v + 1][1].fill(0.0f);
+      }
+    }
+
+    // apply modulation on per unison voice level
+    // mapping both source count and target count to [0, 1]
+    // then linear interpolate. this allows modulation
+    // between oscillators with unequal unison voice count
+    int source_osc = block_auto[param_fm_source][r].step();
+    auto const& source_audio = block.module_audio(module_osc, source_osc);
+    auto const& idx_curve = *(*cv_modulation)[module_osc_matrix][0][param_fm_idx][r];
+    int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
+
+    for (int v = 0; v < target_uni_voices; v++)
+    {
+      float target_voice_pos = target_uni_voices == 1 ? 0.5f : v / (target_uni_voices - 1.0f);
+      float source_voice = target_voice_pos * (source_uni_voices - 1);
+      int source_voice_0 = (int)source_voice;
+      int source_voice_1 = source_voice_0 + 1;
+      float source_voice_pos = source_voice - (int)source_voice;
+      if (source_voice_1 == source_uni_voices) source_voice_1--;
+
+      for (int c = 0; c < 2; c++)
+        for (int f = block.start_frame; f < block.end_frame; f++)
+        {
+          // do not assume [-1, 1] here as oscillator can go beyond that
+          float mod0 = source_audio[0][source_voice_0 + 1][c][f];
+          float mod1 = source_audio[0][source_voice_1 + 1][c][f];
+          float mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
+          (*modulator)[v + 1][c][f] += idx_curve[f] * mod;
+        }
+    }
+  }
+
+  // default result is unmodulated (e.g., zero)
+  if (modulator != nullptr) return *modulator;
+  return _no_fm;
 }
 
 }
