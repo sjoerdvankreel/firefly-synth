@@ -8,6 +8,8 @@
 
 namespace plugin_base {
 
+inline int constexpr max_oversampler_stages = 3;
+
 template <int MaxLanes>
 class oversampler {
   

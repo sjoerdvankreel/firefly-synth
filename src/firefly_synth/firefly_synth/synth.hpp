@@ -4,6 +4,7 @@
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/shared/jarray.hpp>
 #include <plugin_base/helpers/matrix.hpp>
+#include <plugin_base/dsp/oversampler.hpp>
 #include <plugin_base/dsp/block/plugin.hpp>
 
 #include <juce_gui_basics/juce_gui_basics.h>
@@ -20,6 +21,13 @@ struct osc_matrix_context
 {
   osc_matrix_am_modulator* am_modulator;
   osc_matrix_fm_modulator* fm_modulator;
+};
+
+// these are needed by the osc matrix
+struct oscillator_context
+{
+  // dimensions are [oversmp stage][lanes * channels][frames]
+  std::array<float**, plugin_base::max_oversampler_stages + 1> oversampled_lanes_channels_ptrs;
 };
 
 // for osc and voice in

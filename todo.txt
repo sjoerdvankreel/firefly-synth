@@ -33,6 +33,7 @@ make fm mono signal
 do fm feedback delay
 not do self-fm? makes it a bit easier
 find another param besides fm delay ?
+test fruity & its variable blocksize
 
 * get some linux folks to comment (ycollete?)
 * continuing

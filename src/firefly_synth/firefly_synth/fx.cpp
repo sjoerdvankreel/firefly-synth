@@ -1256,7 +1256,8 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
       float& left = lanes_channels[0][frame];
       float& right = lanes_channels[1][frame];
 
-      int mod_index = frame / oversmp_factor;
+      // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
+      int mod_index = block.start_frame / oversmp_factor;
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Type == type_dst_b)

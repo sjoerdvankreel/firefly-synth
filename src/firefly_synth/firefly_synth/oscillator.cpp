@@ -97,6 +97,9 @@ public module_engine {
   // for lerp hardsync
   int _unsync_samples[max_unison_voices];
   float _unsync_phases[max_unison_voices];
+
+  // oversampler and pointers into upsampled buffers
+  oscillator_context _context = {};
   oversampler<max_unison_voices + 1> _oversampler;
 
   // random (static and k+s)
@@ -593,6 +596,9 @@ _oversampler(max_frame_count, false, false, false)
     _kps_positions[v] = 0;
     _kps_lines[v] = std::vector<float>(_kps_max_length);
   }
+
+  for (int s = 0; s <= max_oversampler_stages; s++)
+    _context.oversampled_lanes_channels_ptrs[s] = _oversampler.get_upsampled_lanes_channels_ptrs(1 << s);
 }
 
 void
@@ -931,7 +937,8 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   _oversampler.process(oversmp_stages, lanes, uni_voices + 1, block.start_frame, block.end_frame, false, [&](float** lanes_channels, int frame)
   {
-    int mod_index = frame / oversmp_factor;
+    // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
+    int mod_index = block.start_frame + frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
 
     float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[mod_index]);
@@ -1095,6 +1102,9 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         uni_total += block.state.own_audio[0][v + 1][c][f];
       block.state.own_audio[0][0][c][f] = uni_total / attn;
     }
+
+  // publish the oversampler ptrs
+  *block.state.own_context = &_context;
 }
 
 }
