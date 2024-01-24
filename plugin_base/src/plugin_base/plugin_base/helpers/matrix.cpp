@@ -68,7 +68,7 @@ matrix_param_menu_handler::execute(
   int section_param_index = param_index % (topo.params.size() / _section_count);
   int route_index = param_slot % _section_count;
   execute(menu_id, action, module_index, module_slot, section_index, section_param_index, param_slot);
-  return topo.sections[section_index].tag.short_name + " " + std::to_string(route_index + 1);
+  return topo.sections[section_index].tag.name + " " + std::to_string(route_index + 1);
 }
 
 void 
@@ -292,7 +292,7 @@ tidy_matrix_menu_handler::execute_custom(int menu_id, int action, int module, in
   if(action == 1)
   {
     _state->clear_module(module, slot);
-    return module_tab_menu_result(topo.info.tag.short_name, false, "", "");
+    return module_tab_menu_result(topo.info.tag.name, false, "", "");
   }
 
   // keep track of current values
@@ -335,7 +335,7 @@ tidy_matrix_menu_handler::execute_custom(int menu_id, int action, int module, in
         _state->set_plain_at(module, slot, p, r, map.at(p));
     }
 
-  return module_tab_menu_result(topo.info.tag.short_name, false, "", "");
+  return module_tab_menu_result(topo.info.tag.name, false, "", "");
 }
 
 bool
@@ -382,9 +382,13 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
 {
   assert(menu_id == menu_plain || menu_id == menu_with_cv);
 
-  std::string base_item = _state->desc().plugin->modules[module].info.tag.short_name;
-  std::string source_item = base_item + " " + std::to_string(source_slot + 1);
-  std::string target_item = base_item + " " + std::to_string(target_slot + 1);
+  int slot_count = _state->desc().plugin->modules[module].info.slot_count;
+  std::string base_item = _state->desc().plugin->modules[module].info.tag.name;
+  std::string source_item = base_item;
+  std::string target_item = base_item;
+  if(slot_count > 1) source_item += " " + std::to_string(source_slot + 1);
+  if (slot_count > 1) target_item += " " + std::to_string(target_slot + 1);
+
   assert(base_item.size());
 
   if(menu_id == menu_plain)
@@ -574,9 +578,13 @@ audio_routing_menu_handler::module_menus() const
 module_tab_menu_result
 audio_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
 {
-  std::string base_item = _state->desc().plugin->modules[module].info.tag.short_name;
-  std::string source_item = base_item + " " + std::to_string(source_slot + 1);
-  std::string target_item = base_item + " " + std::to_string(target_slot + 1);
+  int slot_count = _state->desc().plugin->modules[module].info.slot_count;
+  std::string base_item = _state->desc().plugin->modules[module].info.tag.name;
+  std::string source_item = base_item;
+  std::string target_item = base_item;
+  if (slot_count > 1) source_item += " " + std::to_string(source_slot + 1);
+  if (slot_count > 1) target_item += " " + std::to_string(target_slot + 1);
+
   assert(base_item.size());
 
   assert(menu_id == menu_plain || menu_id == menu_with_cv || menu_id == menu_with_all);
@@ -736,8 +744,10 @@ audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int tar
         break;
       }
 
-  std::string base_item = _state->desc().plugin->modules[module].info.tag.short_name;
-  std::string target_item = base_item + " " + std::to_string(target_slot + 1);
+  int slot_count = _state->desc().plugin->modules[module].info.slot_count;
+  std::string base_item = _state->desc().plugin->modules[module].info.tag.name;
+  std::string target_item = base_item;
+  if (slot_count > 1) target_item += " " + std::to_string(target_slot + 1);
   return module_tab_menu_result(target_item, false, "", "");
 }
 
