@@ -251,7 +251,7 @@ lnf::drawLabel(Graphics& g, Label& label)
 
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label, 0.1f);
+      draw_tabular_cell_bg(g, &label, 0.075f);
 
   if (!label.isBeingEdited())
   {
