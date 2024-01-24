@@ -402,7 +402,9 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
   {
     switch (action)
     {
-    case module_tab_menu_handler::clear_all: clear_all(module); break;
+    case module_tab_menu_handler::clear_all: 
+      clear_all(module); 
+      return module_tab_menu_result(base_item, false, "", "");
     case module_tab_menu_handler::clear: clear(module, source_slot); break;
     case module_tab_menu_handler::delete_: delete_(module, source_slot); break;
     case module_tab_menu_handler::insert_after: insert_after(module, source_slot); break;
@@ -597,7 +599,9 @@ audio_routing_menu_handler::execute_module(int menu_id, int action, int module, 
   if(menu_id == 2)
     switch (action)
     {
-    case module_tab_menu_handler::clear_all: with_all_clear_all(module); break;
+    case module_tab_menu_handler::clear_all: 
+      with_all_clear_all(module);
+      return module_tab_menu_result(base_item, false, "", "");
     case module_tab_menu_handler::clear: with_all_clear(module, source_slot); break;
     case module_tab_menu_handler::delete_: with_all_delete(module, source_slot); break;
     case module_tab_menu_handler::insert_after: with_all_insert_after(module, source_slot); break;

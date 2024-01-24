@@ -216,9 +216,14 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
     auto module_menus = handler->module_menus();
     for(int m = 0; m < module_menus.size(); m++)
     {
-      if(!module_menus[m].name.empty())
-        menu.addColouredItem(-1, module_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
-      fill_module_tab_menu(menu, m * 1000, _slot, slots, module_menus[m].actions);
+      PopupMenu dummy_menu;
+      fill_module_tab_menu(dummy_menu, m * 1000, _slot, slots, module_menus[m].actions);
+      if(dummy_menu.getNumItems() > 0)
+      {
+        if(!module_menus[m].name.empty())
+          menu.addColouredItem(-1, module_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+        fill_module_tab_menu(menu, m * 1000, _slot, slots, module_menus[m].actions);
+      }
     }
     auto custom_menus = handler->custom_menus();
     for(int m = 0; m < custom_menus.size(); m++)
