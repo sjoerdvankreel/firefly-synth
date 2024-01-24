@@ -339,6 +339,9 @@ osc_matrix_engine::modulate_fm(
     int target_uni_voices = block.state.all_block_automation[module_osc][target_osc][osc_param_uni_voices][0].step();
     if (modulator == nullptr)
     {
+      // todo THIS WONT FLY
+      // dont use own_audio for this
+      // instead use a monochannel signal with the oversmp factor
       modulator = &(*_own_audio)[r + route_count];
       for (int v = 0; v < target_uni_voices; v++)
       {
