@@ -30,6 +30,7 @@ delete deletes the next osc???
 "undo clear all glfo2"
 "move to 3" -> undo says move to 2
 kps osc rumbles at start
+osc matrix is too bright
 
 * get some linux folks to comment (ycollete?)
 * continuing
