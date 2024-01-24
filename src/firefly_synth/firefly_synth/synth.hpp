@@ -11,6 +11,17 @@
 
 namespace firefly_synth {
 
+class osc_matrix_engine;
+class osc_matrix_am_modulator;
+class osc_matrix_fm_modulator;
+
+// these are needed by the osc
+struct osc_matrix_context
+{
+  osc_matrix_am_modulator* am_modulator;
+  osc_matrix_fm_modulator* fm_modulator;
+};
+
 // for osc and voice in
 inline int const max_unison_voices = 8;
 
@@ -31,7 +42,6 @@ enum {
 
 // used by the oscillator at the end of it's process call to apply amp/ring mod
 // (e.g. osc 2 is modulated by both osc 1 and osc 2 itself)
-class osc_matrix_engine;
 class osc_matrix_am_modulator
 {
   osc_matrix_engine* _engine;
@@ -43,12 +53,33 @@ public:
     cv_matrix_mixdown const* cv_modulation);
 };
 
+// used by the oscillator during it's process call to apply fm
+// self-modulate is possible if the signal is delayed (eg feedback fm)
+class osc_matrix_fm_modulator
+{
+  osc_matrix_engine* _engine;
+public:
+  PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_fm_modulator);
+  osc_matrix_fm_modulator(osc_matrix_engine* engine) : _engine(engine) {}
+  plugin_base::jarray<float, 3> const& modulate_fm(
+    plugin_base::plugin_block& block, int slot, 
+    cv_matrix_mixdown const* cv_modulation);
+};
+
 inline osc_matrix_am_modulator&
 get_osc_matrix_am_modulator(plugin_base::plugin_block& block)
 {
   void* context = block.module_context(module_osc_matrix, 0);
   assert(context != nullptr);
-  return *static_cast<osc_matrix_am_modulator*>(context);
+  return *static_cast<osc_matrix_context*>(context)->am_modulator;
+}
+
+inline osc_matrix_fm_modulator&
+get_osc_matrix_fm_modulator(plugin_base::plugin_block& block)
+{
+  void* context = block.module_context(module_osc_matrix, 0);
+  assert(context != nullptr);
+  return *static_cast<osc_matrix_context*>(context)->fm_modulator;
 }
 
 // gets the audio mixdown to be used as input at the beginning of an audio module 

@@ -30,23 +30,28 @@ std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engin
 
 class osc_matrix_engine:
 public module_engine { 
-  jarray<float, 4>* _own_am_audio = {};
+  osc_matrix_context _context = {};
+  jarray<float, 4>* _own_audio = {};
   osc_matrix_am_modulator _am_modulator;
+  osc_matrix_fm_modulator _fm_modulator;
 public:
-  osc_matrix_engine() : _am_modulator(this) {}
+  osc_matrix_engine();
   PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_engine);
 
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
+
   jarray<float, 3> const& modulate_am(
     plugin_block& block, int slot, 
+    cv_matrix_mixdown const* cv_modulation);
+  jarray<float, 3> const& modulate_fm(
+    plugin_block& block, int slot,
     cv_matrix_mixdown const* cv_modulation);
 };
 
 static graph_data
 render_graph(plugin_state const& state, graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
-  // todo
   int max_osc = 0;
   std::vector<float> result_l;
   std::vector<float> result_r;
@@ -90,10 +95,12 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
 
   std::vector<module_dsp_output> outputs;
-  // todo fm outputs ??
   for(int r = 0; r < route_count; r++)
     outputs.push_back(make_module_dsp_output(false, make_topo_info(
-      "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "Modulated", r, max_unison_voices + 1)));
+      "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "AM", r, max_unison_voices + 1)));
+  for (int r = 0; r < route_count; r++)
+    outputs.push_back(make_module_dsp_output(false, make_topo_info(
+      "{69C52C17-747D-4093-8194-43CB9527A0DE}-" + std::to_string(r), "FM", route_count + r, max_unison_voices + 1)));
   module_topo result(make_module(
     make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc Mod", true, true, module_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, 0, outputs),
@@ -191,21 +198,36 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   return result;
 }
 
+osc_matrix_engine::
+osc_matrix_engine() : 
+_am_modulator(this), _fm_modulator(this) 
+{
+  _context.am_modulator = &_am_modulator;
+  _context.fm_modulator = &_fm_modulator;
+}
+
 jarray<float, 3> const&
 osc_matrix_am_modulator::modulate_am(
   plugin_block& block, int slot, 
   cv_matrix_mixdown const* cv_modulation)
 { return _engine->modulate_am(block, slot, cv_modulation); }
 
+jarray<float, 3> const&
+osc_matrix_fm_modulator::modulate_fm(
+  plugin_block& block, int slot, 
+  cv_matrix_mixdown const* cv_modulation)
+{ return _engine->modulate_fm(block, slot, cv_modulation); }
+
 void
 osc_matrix_engine::process(plugin_block& block)
 {
   // need to capture own audio here because when we start 
   // modulating "own" does not refer to us but to the caller
-  *block.state.own_context = &_am_modulator;
-  _own_am_audio = &block.state.own_audio;
+  *block.state.own_context = &_context;
+  _own_audio = &block.state.own_audio;
 }
 
+// This returns the final output signal i.e. all modulators applied to carrier.
 jarray<float, 3> const& 
 osc_matrix_engine::modulate_am(
   plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
@@ -229,7 +251,7 @@ osc_matrix_engine::modulate_am(
     int target_uni_voices = block.state.all_block_automation[module_osc][target_osc][osc_param_uni_voices][0].step();
     if (modulated == nullptr)
     {
-      modulated = &(*_own_am_audio)[r];
+      modulated = &(*_own_audio)[r];
       for (int v = 0; v < target_uni_voices; v++)
       {
         target_audio[v + 1][0].copy_to(block.start_frame, block.end_frame, (*modulated)[v + 1][0]);
@@ -274,6 +296,15 @@ osc_matrix_engine::modulate_am(
 
   // default result is unmodulated (e.g., osc output itself)
   if(modulated != nullptr) return *modulated;
+  return block.voice->all_audio[module_osc][slot][0];
+}
+
+// This returns stacked modulators but doesnt touch the carrier.
+// Oscillator process() applies stacked modulation to the phase.
+jarray<float, 3> const&
+osc_matrix_engine::modulate_fm(
+  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
+{
   return block.voice->all_audio[module_osc][slot][0];
 }
 
