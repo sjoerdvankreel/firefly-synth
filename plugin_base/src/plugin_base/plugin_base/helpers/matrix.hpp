@@ -103,6 +103,9 @@ public:
 // allows to clear/swap/copy/move with updating routes
 class cv_routing_menu_handler :
 public module_tab_menu_handler {
+
+  enum { menu_plain, menu_with_cv };
+
   int const _on_param;
   int const _off_value;
   int const _source_param;

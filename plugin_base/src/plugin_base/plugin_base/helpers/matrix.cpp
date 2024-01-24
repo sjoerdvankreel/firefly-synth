@@ -364,12 +364,12 @@ cv_routing_menu_handler::module_menus() const
 {
   module_menu plain_menu;
   plain_menu.name = "";
-  plain_menu.menu_id = 0;
+  plain_menu.menu_id = menu_plain;
   plain_menu.actions = {
-    module_tab_menu_handler::copy_to, module_tab_menu_handler::swap_with };
+    module_tab_menu_handler::clear, module_tab_menu_handler::copy_to, module_tab_menu_handler::swap_with };
   module_menu routing_menu;
   routing_menu.name = "With CV Routing";
-  routing_menu.menu_id = 1;
+  routing_menu.menu_id = menu_with_cv;
   routing_menu.actions = {
     module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
     module_tab_menu_handler::delete_, module_tab_menu_handler::insert_before,
@@ -380,17 +380,18 @@ cv_routing_menu_handler::module_menus() const
 module_tab_menu_result
 cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
 {
-  assert(menu_id == 0 || menu_id == 1);
+  assert(menu_id == menu_plain || menu_id == menu_with_cv);
 
   std::string base_item = _state->desc().plugin->modules[module].info.tag.short_name;
   std::string source_item = base_item + " " + std::to_string(source_slot + 1);
   std::string target_item = base_item + " " + std::to_string(target_slot + 1);
   assert(base_item.size());
 
-  if(menu_id == 0)
+  if(menu_id == menu_plain)
   {
     switch (action)
     {
+    case module_tab_menu_handler::clear: _state->clear_module(module, source_slot); break;
     case module_tab_menu_handler::copy_to: _state->copy_module_to(module, source_slot, target_slot); break;
     case module_tab_menu_handler::swap_with: _state->swap_module_with(module, source_slot, target_slot); break;
     default: assert(false); break;
@@ -398,7 +399,7 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
     return module_tab_menu_result(target_item, false, "", "");
   }
 
-  if(menu_id == 1)
+  if(menu_id == menu_with_cv)
   {
     switch (action)
     {
@@ -554,7 +555,7 @@ audio_routing_menu_handler::module_menus() const
   module_menu plain_menu;
   plain_menu.menu_id = menu_plain;
   plain_menu.name = "";
-  plain_menu.actions = { module_tab_menu_handler::copy_to };
+  plain_menu.actions = { module_tab_menu_handler::clear, module_tab_menu_handler::copy_to };
   module_menu cv_menu;
   cv_menu.menu_id = menu_with_cv;
   cv_menu.name = "With CV Routing";
@@ -578,11 +579,15 @@ audio_routing_menu_handler::execute_module(int menu_id, int action, int module, 
   std::string target_item = base_item + " " + std::to_string(target_slot + 1);
   assert(base_item.size());
 
-  assert(menu_id == 0 || menu_id == 1 || menu_id == 2);
+  assert(menu_id == menu_plain || menu_id == menu_with_cv || menu_id == menu_with_all);
   if(menu_id == menu_plain)
   {
-    assert(action == module_tab_menu_handler::copy_to);
-    _state->copy_module_to(module, source_slot, target_slot);
+    if (action == module_tab_menu_handler::clear)
+      _state->clear_module(module, source_slot);
+    else if(action == module_tab_menu_handler::copy_to)
+      _state->copy_module_to(module, source_slot, target_slot);
+    else
+      assert(false);
     return module_tab_menu_result(target_item, false, "", "");
   }
 
