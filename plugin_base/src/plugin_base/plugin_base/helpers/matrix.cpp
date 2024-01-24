@@ -405,12 +405,16 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
     case module_tab_menu_handler::clear_all: 
       clear_all(module); 
       return module_tab_menu_result(base_item, false, "", "");
+    case module_tab_menu_handler::move_to: 
+      move_to(module, source_slot, target_slot);
+      return module_tab_menu_result(target_item, false, "", "");
+    case module_tab_menu_handler::swap_with: 
+      swap_with(module, source_slot, target_slot);
+      return module_tab_menu_result(target_item, false, "", "");
     case module_tab_menu_handler::clear: clear(module, source_slot); break;
     case module_tab_menu_handler::delete_: delete_(module, source_slot); break;
     case module_tab_menu_handler::insert_after: insert_after(module, source_slot); break;
     case module_tab_menu_handler::insert_before: insert_before(module, source_slot); break;
-    case module_tab_menu_handler::move_to: move_to(module, source_slot, target_slot); break;
-    case module_tab_menu_handler::swap_with: swap_with(module, source_slot, target_slot); break;
     default: assert(false); break;
     }
     return module_tab_menu_result(source_item, false, "", "");
