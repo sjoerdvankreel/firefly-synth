@@ -122,6 +122,7 @@ make_audio_routing_audio_params(plugin_state* state, bool global)
   audio_routing_audio_params result;
   result.off_value = 0;
   result.on_param = param_on;
+  result.matrix_section_count = 1;
   result.source_param = param_source;
   result.target_param = param_target;
   result.matrix_module = global ? module_gaudio_matrix : module_vaudio_matrix;

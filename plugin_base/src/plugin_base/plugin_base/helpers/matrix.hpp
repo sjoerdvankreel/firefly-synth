@@ -42,6 +42,8 @@ struct audio_routing_audio_params
   int source_param;
   int target_param;
   int matrix_module;
+  // sections must have equal param & route count
+  int matrix_section_count; 
   std::vector<module_topo_mapping> sources;
   std::vector<module_topo_mapping> targets;
 };

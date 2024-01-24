@@ -70,16 +70,15 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 }
 
 audio_routing_audio_params
-make_audio_routing_am_params(plugin_state* state)
+make_audio_routing_osc_mod_params(plugin_state* state)
 {
-  // TODO not fly
   audio_routing_audio_params result;
   result.off_value = 0;
   result.on_param = param_am_on;
+  result.matrix_section_count = 2;
   result.source_param = param_am_source;
   result.target_param = param_am_target;
   result.matrix_module = module_osc_matrix;
-  // TODO needs sections
   result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
   result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
   return result;
@@ -104,7 +103,6 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.tabbed_name = result.info.tag.name;
   result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<osc_matrix_engine>(); };
-  // todo this wont fly
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };
 
@@ -158,7 +156,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_fm, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   fm_on.gui.tabular = true;
-  fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 1, route_count, 1); }; // todo this wont fly
+  fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 1, route_count, 1); };
   auto& fm_source = result.params.emplace_back(make_param(
     make_topo_info("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Source", "Source", true, true, param_fm_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),

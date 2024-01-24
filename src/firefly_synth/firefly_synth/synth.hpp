@@ -101,7 +101,7 @@ make_cv_routing_menu_handler(plugin_base::plugin_state* state);
 std::unique_ptr<plugin_base::module_tab_menu_handler>
 make_audio_routing_menu_handler(plugin_base::plugin_state* state, bool global);
 plugin_base::audio_routing_audio_params
-make_audio_routing_am_params(plugin_base::plugin_state* state);
+make_audio_routing_osc_mod_params(plugin_base::plugin_state* state);
 plugin_base::audio_routing_cv_params
 make_audio_routing_cv_params(plugin_base::plugin_state* state, bool global);
 plugin_base::audio_routing_audio_params

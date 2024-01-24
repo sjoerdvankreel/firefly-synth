@@ -171,10 +171,10 @@ init_default(plugin_state& state)
 static std::unique_ptr<module_tab_menu_handler>
 make_osc_routing_menu_handler(plugin_state* state)
 {
-  auto am_params = make_audio_routing_am_params(state);
   auto cv_params = make_audio_routing_cv_params(state, false);
+  auto osc_mod_params = make_audio_routing_osc_mod_params(state);
   auto audio_params = make_audio_routing_audio_params(state, false);
-  return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params, am_params }));
+  return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params, osc_mod_params }));
 }
 
 static graph_engine_params
