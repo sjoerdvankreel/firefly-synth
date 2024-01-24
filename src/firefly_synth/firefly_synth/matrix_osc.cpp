@@ -74,11 +74,11 @@ make_audio_routing_osc_mod_params(plugin_state* state)
 {
   audio_routing_audio_params result;
   result.off_value = 0;
-  result.on_param = param_am_on;
   result.matrix_section_count = 2;
-  result.source_param = param_am_source;
-  result.target_param = param_am_target;
   result.matrix_module = module_osc_matrix;
+  result.matrix_on_params = { param_am_on, param_fm_on };
+  result.matrix_source_params = { param_am_source, param_fm_source };
+  result.matrix_target_params = { param_am_target, param_fm_target };
   result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
   result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
   return result;

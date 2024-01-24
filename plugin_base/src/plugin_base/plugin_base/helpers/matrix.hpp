@@ -37,13 +37,13 @@ struct audio_routing_cv_params
 // for audio_routing_menu_handler
 struct audio_routing_audio_params
 {
-  int on_param;
   int off_value;
-  int source_param;
-  int target_param;
   int matrix_module;
   // sections must have equal param & route count
   int matrix_section_count; 
+  std::vector<int> matrix_on_params;
+  std::vector<int> matrix_source_params;
+  std::vector<int> matrix_target_params;
   std::vector<module_topo_mapping> sources;
   std::vector<module_topo_mapping> targets;
 };
