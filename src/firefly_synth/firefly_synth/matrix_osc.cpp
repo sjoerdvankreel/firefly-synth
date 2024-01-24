@@ -412,11 +412,6 @@ osc_matrix_engine::modulate_fm(
         float mod1 = (mod1_l + mod1_r) * 0.5f;
         float mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
 
-        mod0 = block.module_audio(module_osc, source_osc)[0][source_voice_0 + 1][0][f];
-        mod1 = block.module_audio(module_osc, source_osc)[0][source_voice_1 + 1][0][f];
-        mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
-        (*modulator)[v + 1][f] += idx_curve[f] * mod;
-
         // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
         // all the not-oversampled stuff requires from start_frame to end_frame
         // so mind the bookkeeping
