@@ -66,9 +66,8 @@ matrix_param_menu_handler::execute(
   auto const& topo = _state->desc().plugin->modules[module_index];
   int section_index = param_index / (topo.params.size() / _section_count);
   int section_param_index = param_index % (topo.params.size() / _section_count);
-  int route_index = param_slot % _section_count;
   execute(menu_id, action, module_index, module_slot, section_index, section_param_index, param_slot);
-  return topo.sections[section_index].tag.name + " " + std::to_string(route_index + 1);
+  return topo.info.tag.name + " Route " + std::to_string(param_slot + 1);
 }
 
 void 
