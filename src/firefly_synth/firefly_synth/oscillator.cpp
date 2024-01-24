@@ -620,6 +620,13 @@ osc_engine::reset(plugin_block const* block)
     _unsync_phases[v] = 0;
     _unsync_samples[v] = 0;
   }
+
+  // publish the oversampler ptrs
+  // note: it is important to do this during reset() rather than process()
+  // because we have a circular dependency osc<>osc_fm
+  // and the call order is reset_osc, reset_osc_fm, process_osc, process_osc_fm
+  // luckily the fm matrix only needs the oversampler ptrs in the process() call
+  *block->state.own_context = &_context;
 }
 
 // Cant be in the reset call because we need access to modulation.
@@ -1102,9 +1109,6 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         uni_total += block.state.own_audio[0][v + 1][c][f];
       block.state.own_audio[0][0][c][f] = uni_total / attn;
     }
-
-  // publish the oversampler ptrs
-  *block.state.own_context = &_context;
 }
 
 }
