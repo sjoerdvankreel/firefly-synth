@@ -548,16 +548,16 @@ std::vector<module_tab_menu_handler::module_menu>
 audio_routing_menu_handler::module_menus() const
 {
   module_menu plain_menu;
-  plain_menu.menu_id = 0;
+  plain_menu.menu_id = menu_plain;
   plain_menu.name = "";
   plain_menu.actions = { module_tab_menu_handler::copy_to };
   module_menu cv_menu;
-  cv_menu.menu_id = 1;
+  cv_menu.menu_id = menu_with_cv;
   cv_menu.name = "With CV Routing";
   cv_menu.actions = { 
     module_tab_menu_handler::copy_to, module_tab_menu_handler::move_to, module_tab_menu_handler::swap_with };
   module_menu all_menu;
-  all_menu.menu_id = 2;
+  all_menu.menu_id = menu_with_all;
   all_menu.name = "With CV & Audio Routing";
   all_menu.actions = {
     module_tab_menu_handler::clear, module_tab_menu_handler::clear_all,
@@ -575,14 +575,14 @@ audio_routing_menu_handler::execute_module(int menu_id, int action, int module, 
   assert(base_item.size());
 
   assert(menu_id == 0 || menu_id == 1 || menu_id == 2);
-  if(menu_id == 0)
+  if(menu_id == menu_plain)
   {
     assert(action == module_tab_menu_handler::copy_to);
     _state->copy_module_to(module, source_slot, target_slot);
     return module_tab_menu_result(target_item, false, "", "");
   }
 
-  if(menu_id == 1)
+  if(menu_id == menu_with_cv)
     switch (action)
     {
     case module_tab_menu_handler::copy_to: 
@@ -596,7 +596,7 @@ audio_routing_menu_handler::execute_module(int menu_id, int action, int module, 
     default: assert(false); return module_tab_menu_result("", false, "", "");
     }
 
-  if(menu_id == 2)
+  if(menu_id == menu_with_all)
     switch (action)
     {
     case module_tab_menu_handler::clear_all: 
@@ -712,6 +712,7 @@ audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int tar
     return make_copy_failed_result(cv_topo.info.tag.name);
 
   // copy module and update cv routing
+  with_cv_clear(module, target_slot);
   _state->copy_module_to(module, source_slot, target_slot);
   for (int rc = 0; rc < cv_routes_to_copy.size(); rc++)
     for (int r = 0; r < cv_topo.params[_cv_params.on_param].info.slot_count; r++)
@@ -728,9 +729,9 @@ audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int tar
   return module_tab_menu_result(target_item, false, "", "");
 }
 
-void 
-audio_routing_menu_handler::with_all_clear(int module, int slot)
-{ 
+void
+audio_routing_menu_handler::with_cv_clear(int module, int slot)
+{
   // set any route matching this module to all defaults for cv matrix
   _state->clear_module(module, slot);
   auto const& cv_topo = _state->desc().plugin->modules[_cv_params.matrix_module];
@@ -741,6 +742,12 @@ audio_routing_menu_handler::with_all_clear(int module, int slot)
       for (int p = 0; p < cv_topo.params.size(); p++)
         _state->set_plain_at(_cv_params.matrix_module, 0, p, r, cv_topo.params[p].domain.default_plain(0, r));
   }
+}
+
+void 
+audio_routing_menu_handler::with_all_clear(int module, int slot)
+{ 
+  with_cv_clear(module, slot);
 
   // set any route matching this module to all defaults for all audio matrices
   for (int m = 0; m < _audio_params.size(); m++)

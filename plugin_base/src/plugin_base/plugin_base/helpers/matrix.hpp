@@ -135,6 +135,9 @@ public:
 // allows to clear/swap/copy/move with updating routes
 class audio_routing_menu_handler :
 public module_tab_menu_handler {
+
+  enum { menu_plain, menu_with_cv, menu_with_all };
+
   audio_routing_cv_params const _cv_params;
   std::vector<audio_routing_audio_params> const _audio_params;
 
@@ -152,6 +155,7 @@ public module_tab_menu_handler {
     int to_slot, std::vector<module_topo_mapping> const& mappings);
 
   void clear_cv_route(int route);
+  void with_cv_clear(int module, int slot);
   void move_audio_to(int module, int source_slot, int target_slot);
 
   void with_all_clear_all(int module);
