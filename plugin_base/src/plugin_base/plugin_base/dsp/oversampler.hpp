@@ -52,14 +52,6 @@ public:
     int active_lanes, int start_frame, int end_frame, bool upsample, NonLinear non_linear);
 };
 
-template <int MaxLanes>
-juce::dsp::Oversampling<float>::FilterType
-oversampler<MaxLanes>::filter_type(bool iir)
-{
-  if (iir) return juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR;
-  return juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple;
-}
-
 // Note: use the IIR filter rather than the FIR filter to minimize delay.
 // Without delay compensation the delay is actually noticable in the 
 // osc oversampling particularly when using oscillator FM. 
