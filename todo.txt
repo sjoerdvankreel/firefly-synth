@@ -26,6 +26,9 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 credit the image
 name of the action in the undo stack
+delete deletes the next osc???
+"undo clear all glfo2"
+"move to 3" -> undo says move to 2
 
 * get some linux folks to comment (ycollete?)
 * continuing

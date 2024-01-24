@@ -16,7 +16,8 @@ enum class state_init_type { empty, minimal, default_ };
 
 struct undo_entry
 {
-  std::string name;
+  std::string item;
+  std::string action;
   jarray<plain_value, 4> state_after;
   jarray<plain_value, 4> state_before;
 };
@@ -65,7 +66,7 @@ public:
   void redo(int index);
   void begin_undo_region();
   void discard_undo_region();
-  void end_undo_region(std::string const& name);
+  void end_undo_region(std::string const& action, std::string const& item);
 
   void init(state_init_type init_type);
   void copy_from(jarray<plain_value, 4> const& other);

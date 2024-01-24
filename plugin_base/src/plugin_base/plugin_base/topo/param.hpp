@@ -31,7 +31,9 @@ protected:
 public:
   virtual ~param_menu_handler() {}
   virtual std::vector<custom_menu> const menus() const = 0;
-  virtual void execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) = 0;
+
+  // must return the item that action was executed upon
+  virtual std::string execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) = 0;
 };
 
 typedef std::function<param_automate(int module_slot)>

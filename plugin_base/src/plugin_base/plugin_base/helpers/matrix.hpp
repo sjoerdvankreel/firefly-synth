@@ -73,7 +73,7 @@ public:
   matrix_param_menu_handler(plugin_state* state, int section_count, int this_section, int route_count, int default_on_value):
   param_menu_handler(state), _this_section(this_section), _section_count(section_count), _route_count(route_count), _default_on_value(default_on_value) {}
   std::vector<custom_menu> const menus() const override;
-  void execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) override;
+  std::string execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) override;
 };
 
 inline std::unique_ptr<matrix_param_menu_handler>
@@ -93,7 +93,7 @@ public module_tab_menu_handler {
 
 public:
   std::vector<custom_menu> const custom_menus() const override;
-  menu_result execute_custom(int menu_id, int action, int module, int slot) override;
+  plugin_base::module_tab_menu_result execute_custom(int menu_id, int action, int module, int slot) override;
   tidy_matrix_menu_handler(plugin_state* state, int section_count, int on_param, int off_value, std::vector<std::vector<int>> const& sort_params) :
     module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value), _section_count(section_count), _sort_params(sort_params) {}
 };
@@ -124,7 +124,7 @@ public module_tab_menu_handler {
 
 public:
   std::vector<module_menu> module_menus() const override;
-  menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
+  plugin_base::module_tab_menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
 
   cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, 
     int off_value, std::map<int, std::vector<module_output_mapping>> const& matrix_sources):
@@ -163,11 +163,11 @@ public module_tab_menu_handler {
 
   void with_cv_move_to(int module, int source_slot, int target_slot);
   void with_cv_swap_with(int module, int source_slot, int target_slot);
-  menu_result with_cv_copy_to(int module, int source_slot, int target_slot);
+  module_tab_menu_result with_cv_copy_to(int module, int source_slot, int target_slot);
 
 public:
   std::vector<module_menu> module_menus() const override;
-  menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
+  plugin_base::module_tab_menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
 
   audio_routing_menu_handler(plugin_state* state, 
     audio_routing_cv_params const& cv_params, std::vector<audio_routing_audio_params> const& audio_params):

@@ -38,7 +38,7 @@ void
 pb_controller::gui_param_end_changes(int index)
 {
   endEdit(gui_state().desc().param_mappings.index_to_tag[index]);
-  gui_state().end_undo_region("Change " + gui_state().desc().params[index]->full_name);
+  gui_state().end_undo_region("Change", gui_state().desc().params[index]->full_name);
 }
 
 IPlugView* PLUGIN_API

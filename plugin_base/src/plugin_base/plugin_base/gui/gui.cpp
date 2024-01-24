@@ -234,7 +234,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
   options = options.withTargetComponent(_button);
   menu.setLookAndFeel(&_button->getLookAndFeel());
   menu.showMenuAsync(options, [this, handler = handler.release()](int id) {
-    module_tab_menu_handler::menu_result result = {};
+    module_tab_menu_result result("", false, "", "");
     auto custom_menus = handler->custom_menus();
     auto module_menus = handler->module_menus();
     if (0 < id && id < 10000)
@@ -243,7 +243,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
       int menu_id = module_menus[id / 1000].menu_id;
       _state->begin_undo_region();
       result = handler->execute_module(menu_id, action_id, _module, _slot, id % 100);
-      _state->end_undo_region(tab_menu_module_actions[action_id]);
+      _state->end_undo_region(tab_menu_module_actions[action_id], result.item());
     }
     else if(10000 <= id && id < 20000)
     {
@@ -251,11 +251,11 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
       auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
       _state->begin_undo_region();
       result = handler->execute_custom(menu.menu_id, action_entry.action, _module, _slot);
-      _state->end_undo_region(action_entry.title);
+      _state->end_undo_region(action_entry.title, result.item());
     }
     delete handler;
-    if(!result.show_warning) return;
-    auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::WarningIcon, result.title, result.content);
+    if(!result.show_warning()) return;
+    auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::WarningIcon, result.title(), result.content());
     NativeMessageBox::showAsync(options, [](int){});
   });
 }
@@ -815,7 +815,7 @@ plugin_gui::init_patch()
       _gui_state->begin_undo_region();
       _gui_state->init(state_init_type::default_);
       fire_state_loaded();
-      _gui_state->end_undo_region("Init Patch");
+      _gui_state->end_undo_region("Init", "Patch");
     }
   });
 }
@@ -832,7 +832,7 @@ plugin_gui::clear_patch()
       _gui_state->begin_undo_region();
       _gui_state->init(state_init_type::minimal);
       fire_state_loaded();
-      _gui_state->end_undo_region("Clear Patch");
+      _gui_state->end_undo_region("Clear", "Patch");
     }
   });
 }
@@ -878,7 +878,7 @@ plugin_gui::load_patch(std::string const& path, bool preset)
 
   if(preset) _extra_state->clear();
   fire_state_loaded();
-  _gui_state->end_undo_region(preset? "Load Preset": "Load Patch");
+  _gui_state->end_undo_region("Load", preset ? "Preset" : "Patch");
 
   if (result.warnings.size())
   {

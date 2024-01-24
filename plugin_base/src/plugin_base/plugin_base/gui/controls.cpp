@@ -306,8 +306,8 @@ param_component::mouseUp(MouseEvent const& evt)
       auto const& menu = plugin_menus[(id - 10000) / 1000];
       auto const& action_entry = menu.entries[((id - 10000) % 1000) / 100];
       _gui->gui_state()->begin_undo_region();
-      plugin_handler->execute(menu.menu_id, action_entry.action, _module->info.topo, _module->info.slot, _param->info.topo, _param->info.slot);      
-      _gui->gui_state()->end_undo_region(action_entry.title);
+      std::string item = plugin_handler->execute(menu.menu_id, action_entry.action, _module->info.topo, _module->info.slot, _param->info.topo, _param->info.slot);      
+      _gui->gui_state()->end_undo_region(action_entry.title, item);
     }
     delete host_menu;
     delete plugin_handler;

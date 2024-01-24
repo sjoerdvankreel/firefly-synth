@@ -84,7 +84,7 @@ void
 pb_plugin::gui_param_end_changes(int index) 
 { 
   push_to_audio(index, sync_event_type::end_edit); 
-  _gui_state.end_undo_region("Change " + _gui_state.desc().params[index]->full_name);
+  _gui_state.end_undo_region("Change", _gui_state.desc().params[index]->full_name);
 }
 
 void

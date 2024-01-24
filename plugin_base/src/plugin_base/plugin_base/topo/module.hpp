@@ -26,6 +26,23 @@ class module_engine;
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
 
+class module_tab_menu_result {
+  bool _show_warning = false;
+  std::string _item = "";
+  std::string _title = "";
+  std::string _content = "";
+
+public:
+  bool show_warning() const { return _show_warning; }
+  std::string const& item() const { return _item; }
+  std::string const& title() const { return _title; }
+  std::string const& content() const { return _content; }
+
+  module_tab_menu_result(module_tab_menu_result const&) = default;
+  module_tab_menu_result(std::string const& item, bool show_warning, std::string const& title, std::string const& content):
+  _item(item), _show_warning(show_warning), _title(title), _content(content) {}
+};
+
 // allows to extend right-click menu on tab headers
 class module_tab_menu_handler {
 protected:
@@ -34,16 +51,17 @@ protected:
 
 public:
   struct module_menu { int menu_id; std::string name; std::set<int> actions; };
-  struct menu_result { bool show_warning; std::string title; std::string content; };
   enum module_action { clear = 1, clear_all, delete_, insert_before, insert_after, copy_to, move_to, swap_with };
 
   virtual ~module_tab_menu_handler() {}
   virtual std::vector<module_menu> module_menus() const { return {}; };
   virtual std::vector<custom_menu> const custom_menus() const { return {}; };
 
-  // pop up a message box if these return a non-empty text
-  virtual menu_result execute_custom(int menu_id, int action, int module, int slot) { return {}; };
-  virtual menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) { return {}; };
+  // pop up a message box if these return a warning text
+  virtual module_tab_menu_result execute_custom(int menu_id, int action, int module, int slot)
+  { return module_tab_menu_result("", false, "", ""); }
+  virtual module_tab_menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) 
+  { return module_tab_menu_result("", false, "", ""); }
 };
 
 typedef std::function<void(plugin_state& state)>
