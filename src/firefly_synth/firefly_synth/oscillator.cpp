@@ -591,7 +591,7 @@ generate_dsf(float phase, float increment, float sr, float freq, int parts, floa
 
 osc_engine::
 osc_engine(int max_frame_count, float sample_rate):
-_oversampler(max_frame_count, false, false, false)
+_oversampler(max_frame_count)
 {
   float const kps_min_freq = 20.0f;
   _kps_max_length = (int)(std::ceil(sample_rate / kps_min_freq));

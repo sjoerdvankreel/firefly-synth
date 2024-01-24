@@ -41,7 +41,7 @@ class oversampler {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(oversampler);
-  oversampler(int max_frame_count, bool iir, bool max_quality, bool integer_latency);
+  oversampler(int max_frame_count);
   
   float** get_upsampled_lanes_channels_ptrs(int factor);
 
@@ -60,14 +60,18 @@ oversampler<MaxLanes>::filter_type(bool iir)
   return juce::dsp::Oversampling<float>::filterHalfBandFIREquiripple;
 }
 
+// Note: use the IIR filter rather than the FIR filter to minimize delay.
+// Without delay compensation the delay is actually noticable in the 
+// osc oversampling particularly when using oscillator FM. 
+// And I don't want to write the delay compensation code.
 template <int MaxLanes>
 oversampler<MaxLanes>::
-oversampler(int max_frame_count, bool iir, bool max_quality, bool integer_latency) :
+oversampler(int max_frame_count) :
   _max_frame_count(max_frame_count),
   _1x(MaxLanes * 2, jarray<float, 1>(max_frame_count, 0.0f)),
-  _2x(MaxLanes * 2, 1, filter_type(iir), max_quality, integer_latency),
-  _4x(MaxLanes * 2, 2, filter_type(iir), max_quality, integer_latency),
-  _8x(MaxLanes * 2, 3, filter_type(iir), max_quality, integer_latency)
+  _2x(MaxLanes * 2, 1, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, false),
+  _4x(MaxLanes * 2, 2, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, false),
+  _8x(MaxLanes * 2, 3, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, false)
 {
   _2x.initProcessing(max_frame_count);
   _4x.initProcessing(max_frame_count);

@@ -698,7 +698,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 fx_engine::
 fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& dst_shape_items) :
 _global(global), _dly_capacity(sample_rate * dly_max_sec), 
-_dst_oversampler(max_frame_count, false, false, false),
+_dst_oversampler(max_frame_count),
 _dst_shape_items(dst_shape_items)
 { 
   _comb_samples = comb_max_ms * sample_rate * 0.001;
