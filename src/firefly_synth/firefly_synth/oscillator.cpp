@@ -1029,6 +1029,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
         float phase_fm = (*fm_modulator_sig)[v + 1][frame];
         _sync_phases[v] += phase_fm / oversmp_factor;
         if (_sync_phases[v] < 0 || _sync_phases[v] >= 1) _sync_phases[v] -= std::floor(_sync_phases[v]);
+        if (_sync_phases[v] == 1) _sync_phases[v] = 0; // this could be more efficient?
         assert(0 <= _sync_phases[v] && _sync_phases[v] < 1);
       }
 
@@ -1049,6 +1050,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
           float phase_fm = (*fm_modulator_sig)[v + 1][frame];
           _unsync_phases[v] += phase_fm / oversmp_factor;
           if (_unsync_phases[v] < 0 || _unsync_phases[v] >= 1) _unsync_phases[v] -= std::floor(_unsync_phases[v]);
+          if (_unsync_phases[v] == 1) _unsync_phases[v] = 0; // this could be more efficient?
           assert(0 <= _unsync_phases[v] && _unsync_phases[v] < 1);
 
           if constexpr (Saw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * saw_mix;
