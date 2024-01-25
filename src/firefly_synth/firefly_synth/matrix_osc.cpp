@@ -20,9 +20,16 @@ namespace firefly_synth {
 enum { section_am, section_fm };
 enum { scratch_fm_idx, scratch_count };
 
+// it appears the "magical" through zero mode is really just about 
+// modulation by an unipolar vs bipolar (e.g. through-zero) signal?
+// bipolar mod has the nice property that the carrier's phase can
+// travel "backwards" so produces a distinct sound from unipolar mod
+// https://ristoid.net/modular/fm_variants.html
+enum { fm_mode_through_zero, fm_mode_unipolar };
+
 enum { 
   param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring,
-  param_fm_on, param_fm_source, param_fm_target, param_fm_idx, param_fm_dly
+  param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx
 };
 
 static int const route_count = 8;
@@ -31,6 +38,15 @@ extern int const voice_in_param_oversmp;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_matrix);
+
+static std::vector<list_item>
+fm_mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}", "Bipolar"); // thru-zero
+  result.emplace_back("{0E688960-E59A-4E78-8812-6BADDAF881B8}", "Unipolar");
+  return result;
+}
 
 class osc_matrix_engine:
 public module_engine { 
@@ -193,18 +209,18 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   fm_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
       return osc[other].slot <= osc[self].slot; });
+  auto& fm_mode = result.params.emplace_back(make_param(
+    make_topo_info("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "Mode", "Mode", true, true, param_fm_mode, route_count),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(fm_mode_items(), ""),
+    make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 3 }, make_label_none())));
+  fm_mode.gui.tabular = true;
+  fm_mode.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   auto& fm_amount = result.params.emplace_back(make_param(
-    make_topo_info("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "Idx", "Idx", true, true, param_fm_idx, route_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 3, ""),
-    make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_topo_info("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "Index", "Index", true, true, param_fm_idx, route_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 4, ""),
+    make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
   fm_amount.gui.tabular = true;
   fm_amount.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
-  auto& fm_dly = result.params.emplace_back(make_param(
-    make_topo_info("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "Dly", "Dly", true, true, param_fm_dly, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 0, 2, "Ms"), // todo default/max
-    make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
-  fm_dly.gui.tabular = true;
-  fm_dly.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
 
   return result;
 }
