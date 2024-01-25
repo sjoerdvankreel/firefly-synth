@@ -26,14 +26,11 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 credit the image
 make another repo for renderings
+
 disable stuff that cannot do FM
-test fm + unison
-oversample fm
-make fm mono signal
-do fm feedback delay
 not do self-fm? makes it a bit easier
-find another param besides fm delay ?
 test fruity & its variable blocksize
+async fm see https://www.csounds.com/journal/issue11/distortionSynthesis.html
 
 * get some linux folks to comment (ycollete?)
 * continuing

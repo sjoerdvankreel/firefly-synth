@@ -36,9 +36,6 @@ class oversampler {
     juce::dsp::Oversampling<float>& oversampling, 
     std::array<jarray<float, 2>*, MaxLanes> const& inout,
     int active_lanes, int start_frame, int end_frame, bool upsample, NonLinear non_linear);
-
-  static juce::dsp::Oversampling<float>::FilterType filter_type(bool iir);
-
 public:
   PB_PREVENT_ACCIDENTAL_COPY(oversampler);
   oversampler(int max_frame_count);
