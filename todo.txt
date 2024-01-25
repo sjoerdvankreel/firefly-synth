@@ -30,7 +30,7 @@ make another repo for renderings
 disable stuff that cannot do FM
 not do self-fm? makes it a bit easier
 test fruity & its variable blocksize
-todo is apf mode useful?
+async fm see https://www.csounds.com/journal/issue11/distortionSynthesis.html
 
 * get some linux folks to comment (ycollete?)
 * continuing
