@@ -25,7 +25,7 @@ enum { scratch_fm_idx, scratch_count };
 // bipolar mod has the nice property that the carrier's phase can
 // travel "backwards" so produces a distinct sound from unipolar mod
 // https://ristoid.net/modular/fm_variants.html
-enum { fm_mode_through_zero, fm_mode_unipolar };
+enum { fm_mode_bipolar, fm_mode_unipolar };
 
 enum { 
   param_am_on, param_am_source, param_am_target, param_am_amt, param_am_ring,
@@ -385,6 +385,22 @@ osc_matrix_engine::modulate_fm(
       }
     }
 
+    // through zero stuff
+    int route_mode = block_auto[param_fm_mode][r].step();
+    assert(route_mode == fm_mode_bipolar || route_mode == fm_mode_unipolar);
+    float mode_add;
+    float mode_mul;
+    if (route_mode == fm_mode_bipolar)
+    {
+      mode_add = 0;
+      mode_mul = 1;
+    }
+    else
+    {
+      mode_add = 0.5f;
+      mode_mul = 0.5f;
+    }
+
     // apply modulation on per unison voice level
     // mapping both source count and target count to [0, 1]
     // then linear interpolate. this allows modulation
@@ -449,8 +465,10 @@ osc_matrix_engine::modulate_fm(
           mod0 = block.module_audio(module_osc, source_osc)[0][source_voice_0 + 1][0][f];
           mod1 = block.module_audio(module_osc, source_osc)[0][source_voice_1 + 1][0][f];
           mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
-          (*modulator)[v + 1][f] += idx_curve[f] * mod;
         }
+
+        // through zero
+        mod = (mode_mul * mod) + mode_add;
 
         // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
         // all the not-oversampled stuff requires from start_frame to end_frame
