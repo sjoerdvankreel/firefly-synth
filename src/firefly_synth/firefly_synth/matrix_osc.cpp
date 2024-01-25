@@ -117,10 +117,8 @@ make_audio_routing_osc_mod_params(plugin_state* state)
 module_topo 
 osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
 {
-  // todo not selfmod fm ?
-  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
-
   std::vector<module_dsp_output> outputs;
+  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
 
   // scratch state for AM
   // for FM we use oversampled mono series
@@ -199,7 +197,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[self].slot <= osc[other].slot; });
+      return osc[self].slot < osc[other].slot; });
   auto& fm_target = result.params.emplace_back(make_param(
     make_topo_info("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Target", "Target", true, true, param_fm_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
@@ -208,7 +206,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
-      return osc[other].slot <= osc[self].slot; });
+      return osc[other].slot < osc[self].slot; });
   auto& fm_mode = result.params.emplace_back(make_param(
     make_topo_info("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "Mode", "Mode", true, true, param_fm_mode, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(fm_mode_items(), ""),
@@ -349,8 +347,6 @@ osc_matrix_engine::modulate_am(
 
 // This returns stacked modulators but doesnt touch the carrier.
 // Oscillator process() applies stacked modulation to the phase.
-// TODO do self-mod
-// TODO use the feedback param
 template <bool Graph>
 jarray<float, 2> const&
 osc_matrix_engine::modulate_fm(
