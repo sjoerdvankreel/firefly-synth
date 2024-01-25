@@ -26,11 +26,8 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 credit the image
 make another repo for renderings
-
-disable stuff that cannot do FM
-not do self-fm? makes it a bit easier
 test fruity & its variable blocksize
-async fm see https://www.csounds.com/journal/issue11/distortionSynthesis.html
+todo is apf mode useful?
 
 * get some linux folks to comment (ycollete?)
 * continuing
