@@ -8,7 +8,6 @@
 #include <plugin_base/helpers/matrix.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
-#include <firefly_synth/svf.hpp>
 #include <firefly_synth/synth.hpp>
 
 #include <cmath>
@@ -19,7 +18,7 @@ using namespace plugin_base;
 namespace firefly_synth { 
 
 enum { section_am, section_fm };
-enum { scratch_fm_idx, scratch_fm_freq, scratch_count };
+enum { scratch_fm_idx, scratch_count };
 enum { fm_mode_off, fm_mode_lpf, fm_mode_hpf, fm_mode_bpf, fm_mode_bsf, fm_mode_peq };
 
 enum { 
@@ -56,15 +55,11 @@ public module_engine {
   jarray<float, 2>* _own_scratch = {};
   osc_matrix_am_modulator _am_modulator;
   osc_matrix_fm_modulator _fm_modulator;
-
-  // for the filter fm gimmick
-  std::array<std::array<state_var_filter, max_unison_voices + 1>, route_count> _fm_filters;
-
 public:
   osc_matrix_engine(int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_engine);
 
-  void reset(plugin_block const*) override;
+  void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
 
   jarray<float, 3> const& modulate_am(
@@ -275,14 +270,6 @@ osc_matrix_engine::process(plugin_block& block)
   _own_scratch = &block.state.own_scratch;
 }
 
-void 
-osc_matrix_engine::reset(plugin_block const*)
-{
-  for(int r = 0; r < route_count; r++)
-    for(int v = 0; v < max_unison_voices + 1; v++)
-      _fm_filters[r][v].clear();
-}
-
 // This returns the final output signal i.e. all modulators applied to carrier.
 jarray<float, 3> const& 
 osc_matrix_engine::modulate_am(
@@ -402,11 +389,8 @@ osc_matrix_engine::modulate_fm(
     // between oscillators with unequal unison voice count
     int source_osc = block_auto[param_fm_source][r].step();
     auto const& idx_curve_plain = *(*cv_modulation)[module_osc_matrix][0][param_fm_idx][r];
-    auto const& frq_curve_plain = *(*cv_modulation)[module_osc_matrix][0][param_fm_freq][r];
     auto& idx_curve = (*_own_scratch)[scratch_fm_idx];
-    auto& frq_curve = (*_own_scratch)[scratch_fm_freq];
     normalized_to_raw_into_fast<domain_type::log>(block, module_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
-    normalized_to_raw_into_fast<domain_type::log>(block, module_osc_matrix, param_fm_freq, frq_curve_plain, frq_curve);
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
     int oversmp_stages = block.state.all_block_automation[module_voice_in][0][voice_in_param_oversmp][0].step();
     int oversmp_factor = 1 << oversmp_stages;
@@ -423,9 +407,6 @@ osc_matrix_engine::modulate_fm(
     auto source_context = static_cast<oscillator_context*>(source_context_ptr);
     auto source_audio = source_context->oversampled_lanes_channels_ptrs[oversmp_stages];
 
-    // this is the filter mode
-    int fm_mode = block_auto[param_fm_mode][r].step();
-
     for (int v = 0; v < target_uni_voices; v++)
     {
       // lerp unison voices
@@ -439,11 +420,6 @@ osc_matrix_engine::modulate_fm(
       // note we work on the oversmp data from 0 to (end_frame - start_frame) * oversmp_factor
       for (int f = 0; f < (block.end_frame - block.start_frame) * oversmp_factor; f++)
       {
-        // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
-        // all the not-oversampled stuff requires from start_frame to end_frame
-        // so mind the bookkeeping
-        int mod_index = block.start_frame + f / oversmp_factor;
-
         // do not assume [-1, 1] here as oscillator can go beyond that
         // what to do with the stereo signal ? 
         // the oscs output a 2 channel signal but we only
@@ -471,21 +447,13 @@ osc_matrix_engine::modulate_fm(
           mod0 = block.module_audio(module_osc, source_osc)[0][source_voice_0 + 1][0][f];
           mod1 = block.module_audio(module_osc, source_osc)[0][source_voice_1 + 1][0][f];
           mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
+          (*modulator)[v + 1][f] += idx_curve[f] * mod;
         }
 
-        // todo: disable filters for graph?
-        // todo: get the switch outside of the loop into a template
-        double hz = frq_curve[mod_index];
-        double w = pi64 * hz / (block.sample_rate * oversmp_factor);
-        switch (fm_mode)
-        {
-        case fm_mode_lpf: _fm_filters[r][v + 1].init_lpf(w, 0); break;
-        case fm_mode_hpf: _fm_filters[r][v + 1].init_hpf(w, 0); break;
-        case fm_mode_bpf: _fm_filters[r][v + 1].init_bpf(w, 0); break;
-        case fm_mode_bsf: _fm_filters[r][v + 1].init_bsf(w, 0); break;
-        case fm_mode_peq: _fm_filters[r][v + 1].init_peq(w, 0); break;
-        }
-        mod = _fm_filters[r][v + 1].next(0, mod);
+        // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
+        // all the not-oversampled stuff requires from start_frame to end_frame
+        // so mind the bookkeeping
+        int mod_index = block.start_frame + f / oversmp_factor;
 
         // fm modulation is oversampled so "f"
         // automation is NOT oversampled so "mod_index"
