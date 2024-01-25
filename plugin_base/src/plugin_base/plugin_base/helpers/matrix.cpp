@@ -649,8 +649,8 @@ audio_routing_menu_handler::move_audio_to(int module, int source_slot, int targe
       for (int r = 0; r < route_count; r++)
         if (_state->get_plain_at(matrix, 0, _audio_params[m].matrix_on_params[s], r).step() != _audio_params[m].off_value)
         {
-          update_matched_audio_slot(matrix, _audio_params[m].matrix_source_params[s], r, module, source_slot, target_slot, _audio_params[m].sources);
-          update_matched_audio_slot(matrix, _audio_params[m].matrix_target_params[s], r, module, source_slot, target_slot, _audio_params[m].targets);
+          update_matched_audio_slot(matrix, _audio_params[m].matrix_source_params[s], r, module, source_slot, target_slot, _audio_params[m].matrix_sources[s]);
+          update_matched_audio_slot(matrix, _audio_params[m].matrix_target_params[s], r, module, source_slot, target_slot, _audio_params[m].matrix_targets[s]);
         }
   }
 }
@@ -779,6 +779,8 @@ audio_routing_menu_handler::with_all_clear(int module, int slot)
     int section_param_count = matrix_topo.params.size() / section_count;
     int route_count = matrix_topo.params[_audio_params[m].matrix_on_params[0]].info.slot_count;
     assert(_audio_params[m].matrix_section_count == _audio_params[m].matrix_on_params.size());
+    assert(_audio_params[m].matrix_section_count == _audio_params[m].matrix_sources.size());
+    assert(_audio_params[m].matrix_section_count == _audio_params[m].matrix_targets.size());
     assert(_audio_params[m].matrix_section_count == _audio_params[m].matrix_source_params.size());
     assert(_audio_params[m].matrix_section_count == _audio_params[m].matrix_target_params.size());
     for(int s = 0; s < section_count; s++)
@@ -786,8 +788,8 @@ audio_routing_menu_handler::with_all_clear(int module, int slot)
       {
         int selected_audio_source = _state->get_plain_at(matrix, 0, _audio_params[m].matrix_source_params[s], r).step();
         int selected_audio_target = _state->get_plain_at(matrix, 0, _audio_params[m].matrix_target_params[s], r).step();
-        if ((_audio_params[m].sources[selected_audio_source].index == module && _audio_params[m].sources[selected_audio_source].slot == slot) ||
-          (_audio_params[m].targets[selected_audio_target].index == module && _audio_params[m].targets[selected_audio_target].slot == slot))
+        if ((_audio_params[m].matrix_sources[s][selected_audio_source].index == module && _audio_params[m].matrix_sources[s][selected_audio_source].slot == slot) ||
+          (_audio_params[m].matrix_targets[s][selected_audio_target].index == module && _audio_params[m].matrix_targets[s][selected_audio_target].slot == slot))
           for (int p = s * section_param_count; p < (s + 1) * section_param_count; p++)
             _state->set_plain_at(matrix, 0, p, r, matrix_topo.params[p].domain.default_plain(0, r));
       }

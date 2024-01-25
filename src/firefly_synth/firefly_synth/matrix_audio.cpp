@@ -126,8 +126,8 @@ make_audio_routing_audio_params(plugin_state* state, bool global)
   result.matrix_source_params = { param_source };
   result.matrix_target_params = { param_target };
   result.matrix_module = global ? module_gaudio_matrix : module_vaudio_matrix;
-  result.sources = make_audio_matrix(make_audio_matrix_sources(state->desc().plugin, global), 0).mappings;
-  result.targets = make_audio_matrix(make_audio_matrix_targets(state->desc().plugin, global), 0).mappings;
+  result.matrix_sources = { make_audio_matrix(make_audio_matrix_sources(state->desc().plugin, global), 0).mappings };
+  result.matrix_targets = { make_audio_matrix(make_audio_matrix_targets(state->desc().plugin, global), 0).mappings };
   return result;
 }
 
