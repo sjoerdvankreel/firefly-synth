@@ -85,7 +85,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
       max_osc = std::max(max_osc, state.get_plain_at(module_osc_matrix, 0, param_am_target, r).step());
   for (int r = 0; r < route_count; r++)
     if (state.get_plain_at(module_osc_matrix, 0, param_fm_on, r).step() != 0)
-      max_osc = std::max(max_osc, state.get_plain_at(module_osc_matrix, 0, param_fm_target, r).step() + 1);
+      max_osc = std::max(max_osc, state.get_plain_at(module_osc_matrix, 0, param_fm_target, r).step());
   auto graphs(render_osc_graphs(state, engine, max_osc, true));
   for (int mi = 0; mi <= max_osc; mi++)
   {
@@ -109,18 +109,16 @@ make_audio_routing_osc_mod_params(plugin_state* state)
   result.matrix_on_params = { param_am_on, param_fm_on };
   result.matrix_source_params = { param_am_source, param_fm_source };
   result.matrix_target_params = { param_am_target, param_fm_target };
-  auto all_oscs = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
-  auto fm_target_oscs = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 1).mappings;
-  result.matrix_sources = { all_oscs, all_oscs };
-  result.matrix_targets = { all_oscs, fm_target_oscs };
+  result.sources = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
+  result.targets = make_audio_matrix({ &state->desc().plugin->modules[module_osc] }, 0).mappings;
   return result;
 }
 
 module_topo 
 osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
 {
-  auto all_osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
-  auto fm_target_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 1);
+  // todo not selfmod fm ?
+  auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
 
   std::vector<module_dsp_output> outputs;
 
@@ -154,21 +152,21 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   am_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 0, route_count, 1); };
   auto& am_source = result.params.emplace_back(make_param(
     make_topo_info("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", "Source", true, true, param_am_source, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(all_osc_matrix.items, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
   am_source.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_source.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
-    [osc = all_osc_matrix.mappings](int other, int self) {
+    [osc = osc_matrix.mappings](int other, int self) {
       return osc[self].slot <= osc[other].slot; });
   auto& am_target = result.params.emplace_back(make_param(
     make_topo_info("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", "Target", true, true, param_am_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(all_osc_matrix.items, "Osc 2"),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
     make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
   am_target.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
-    [osc = all_osc_matrix.mappings](int other, int self) {
+    [osc = osc_matrix.mappings](int other, int self) { 
       return osc[other].slot <= osc[self].slot; });
   auto& am_amount = result.params.emplace_back(make_param(
     make_topo_info("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "Amt", "Amt", true, true, param_am_amt, route_count),
@@ -195,22 +193,22 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   fm_on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 2, 1, route_count, 1); };
   auto& fm_source = result.params.emplace_back(make_param(
     make_topo_info("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Source", "Source", true, true, param_fm_source, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(all_osc_matrix.items, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
     make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
-    [osc_source = all_osc_matrix.mappings, osc_target = fm_target_matrix.mappings](int other, int self) {
-      return osc_source[self].slot < osc_target[other].slot; });
+    [osc = osc_matrix.mappings](int other, int self) {
+      return osc[self].slot <= osc[other].slot; });
   auto& fm_target = result.params.emplace_back(make_param(
     make_topo_info("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Target", "Target", true, true, param_fm_target, route_count),
-    make_param_dsp_voice(param_automate::automate), make_domain_item(fm_target_matrix.items, ""),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
     make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
-    [osc_source = all_osc_matrix.mappings, osc_target = fm_target_matrix.mappings](int other, int self) {
-      return osc_source[other].slot < osc_target[self].slot; });
+    [osc = osc_matrix.mappings](int other, int self) {
+      return osc[other].slot <= osc[self].slot; });
   auto& fm_mode = result.params.emplace_back(make_param(
     make_topo_info("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "Mode", "Mode", true, true, param_fm_mode, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(fm_mode_items(), ""),
@@ -370,7 +368,7 @@ osc_matrix_engine::modulate_fm(
   for (int r = 0; r < route_count; r++)
   {
     if (block_auto[param_fm_on][r].step() == 0) continue;
-    int target_osc = block_auto[param_fm_target][r].step() + 1;
+    int target_osc = block_auto[param_fm_target][r].step();
     if (target_osc != slot) continue;
 
     int target_uni_voices = block.state.all_block_automation[module_osc][target_osc][osc_param_uni_voices][0].step();

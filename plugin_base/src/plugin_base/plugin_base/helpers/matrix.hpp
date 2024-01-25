@@ -44,8 +44,8 @@ struct audio_routing_audio_params
   std::vector<int> matrix_on_params;
   std::vector<int> matrix_source_params;
   std::vector<int> matrix_target_params;
-  std::vector<std::vector<module_topo_mapping>> matrix_sources;
-  std::vector<std::vector<module_topo_mapping>> matrix_targets;
+  std::vector<module_topo_mapping> sources;
+  std::vector<module_topo_mapping> targets;
 };
 
 // sources are any cv outputs in modules
