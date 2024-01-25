@@ -85,6 +85,7 @@ random_svf_items()
   return result;
 }
 
+// https://ristoid.net/modular/fm_variants.html
 // https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html
 // https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm/
 // https://github.com/marcociccone/EKS-string-generator/blob/master/Extended%20Karplus%20Strong%20Algorithm.ipynb
