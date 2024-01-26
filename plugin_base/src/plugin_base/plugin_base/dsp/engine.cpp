@@ -614,7 +614,7 @@ plugin_engine::process()
       state = voice_state();
   }
 
-  // todo this needs adjusting for fx-only version
+  // todo this needs adjusting for fx-only version 
   int voice_mode = -1;
   assert(topo.voice_mode_module >= 0);
   assert(topo.voice_mode_param >= 0);
