@@ -32,6 +32,7 @@ test win/lin clap/vst reaper/fruity/bitwig
 write infernal comparison
 document that fm only works for phase generators
 place the vst3 compatible logo somewhere
+put the plug format in the header (vst/clap)
 
 * get some linux folks to comment (ycollete?)
 * continuing
