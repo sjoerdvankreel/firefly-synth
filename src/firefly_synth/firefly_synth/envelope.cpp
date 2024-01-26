@@ -26,7 +26,7 @@ enum {
   mode_sustain_exp_bi, mode_follow_exp_bi, mode_release_exp_bi,
   mode_sustain_exp_splt, mode_follow_exp_splt, mode_release_exp_splt };
 enum {
-  param_on, param_mode, param_sync, param_multi, param_filter,
+  param_on, param_mode, param_sync, param_trigger, param_filter,
   param_attack_slope, param_decay_slope, param_release_slope,
   param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
@@ -38,6 +38,16 @@ static bool is_exp_splt_slope(int mode) { return mode_sustain_exp_splt <= mode &
 static bool is_expo_slope(int mode) { return is_exp_uni_slope(mode) || is_exp_bi_slope(mode) || is_exp_splt_slope(mode); }
 static bool is_sustain(int mode) { return mode == mode_sustain_lin || mode == mode_sustain_exp_uni || mode == mode_sustain_exp_bi || mode == mode_sustain_exp_splt; }
 static bool is_release(int mode) { return mode == mode_release_lin || mode == mode_release_exp_uni || mode == mode_release_exp_bi || mode == mode_release_exp_splt; }
+
+static std::vector<list_item>
+trigger_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{5600C9FE-6122-47B3-A625-9E059E56D949}", "Legato");
+  result.emplace_back("{0EAFA1E3-4707-4E8C-B16D-5E16955F8962}", "Retrig");
+  result.emplace_back("{A49D48D7-D664-4A52-BD82-07A488BDB4C8}", "Multi");
+  return result;
+}
 
 static std::vector<list_item>
 type_items()
@@ -194,12 +204,11 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  auto& multi = result.params.emplace_back(make_param(
-    make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Multi Trigger", "Multi", true, true, param_multi, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 3 }, 
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  multi.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  auto& trigger = result.params.emplace_back(make_param(
+    make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", "Trigger", true, true, param_trigger, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
+  trigger.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   auto& filter = result.params.emplace_back(make_param(
     make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smooth", true, true, param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
