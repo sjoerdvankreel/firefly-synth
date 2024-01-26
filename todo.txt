@@ -5,10 +5,10 @@ mseg
 voice arp
 microtonal support
 do voice level unison
-clap mod + polymod + mpe + note_exprs
 do cakewalk bug report
 visual routing indicators
 document the header files a bit
+clap mod + polymod + mpe + note_exprs
 
 demo synth:
 do fx version
