@@ -292,7 +292,7 @@ plugin_gui::
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
-_lnf(&gui_state->desc(), -1, -1, -1), _tooltip(this), 
+_lnf(&gui_state->desc(), -1, -1, -1), _tooltip(), 
 _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
   setOpaque(true);
@@ -310,6 +310,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
   getChildComponent(0)->setSize(topo.gui.min_width, topo.gui.min_width * ratio);
   float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
   setSize(w, topo.gui.min_width * ratio);
+  _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
 }
 
 void
@@ -403,7 +404,7 @@ void
 plugin_gui::custom_mouse_enter(int section)
 {
   if(_last_mouse_enter_custom == section) return;
-  _tooltip.setLookAndFeel(_custom_lnfs[section].get());
+  _tooltip->setLookAndFeel(_custom_lnfs[section].get());
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->custom_mouse_enter(section);
   _last_mouse_enter_custom = section;
@@ -423,7 +424,7 @@ plugin_gui::module_mouse_enter(int module)
 {
   if(_last_mouse_enter_module == module) return;
   int index = gui_state()->desc().modules[module].module->info.index;
-  _tooltip.setLookAndFeel(_module_lnfs[index].get());
+  _tooltip->setLookAndFeel(_module_lnfs[index].get());
   for(int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->module_mouse_enter(module);
   _last_mouse_enter_module = module;

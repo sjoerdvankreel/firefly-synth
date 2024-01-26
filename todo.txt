@@ -27,8 +27,6 @@ write the infernal<>firefly comparison
 credit the image
 make another repo for renderings
 test fruity & its variable blocksize
-todo is apf mode useful?
-resize the tooltips too
 disable fn m if possible
 do legato/retrig/multi + conditional visible ?
 test win/lin clap/vst reaper/fruity/bitwig
