@@ -23,6 +23,7 @@ enum {
   param_oversmp, param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const master_in_param_pb_range;
+extern int const voice_in_param_mode = param_mode;
 extern int const voice_in_param_oversmp = param_oversmp;
 extern int const voice_in_output_pitch_offset = output_pitch_offset;
 
@@ -32,6 +33,7 @@ mode_items()
   std::vector<list_item> result;
   result.emplace_back("{88F746C4-1A70-4A64-A11D-584D87D3059C}", "Poly");
   result.emplace_back("{6ABA8E48-F284-40A4-A0E2-C263B536D493}", "Mono");
+  result.emplace_back("{519341B0-4F79-4433-9449-1386F927E88B}", "Release");
   return result;
 }
 
@@ -85,7 +87,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", "V.In", true, true, module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 12, 7, 7 } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 25, 14, 13 } } )));
   
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;

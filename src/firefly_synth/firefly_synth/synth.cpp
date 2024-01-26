@@ -12,6 +12,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+extern int const voice_in_param_mode;
 extern int const master_in_param_midi_smooth;
 extern int const master_in_param_tempo_smooth;
 
@@ -264,6 +265,8 @@ synth_topo()
   result->bpm_smooth_param = master_in_param_tempo_smooth;
   result->midi_smooth_module = module_master_in;
   result->midi_smooth_param = master_in_param_midi_smooth;
+  result->voice_mode_module = module_voice_in;
+  result->voice_mode_param = voice_in_param_mode;
 
   result->gui.min_width = 1070;
   result->gui.aspect_ratio_width = 2;

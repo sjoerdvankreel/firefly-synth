@@ -97,6 +97,10 @@ struct plugin_topo final {
   int midi_smooth_param = -1;
   int midi_smooth_module = -1;
 
+  // voice management is done by plugin_base so we need some cooperation
+  int voice_mode_param = -1;
+  int voice_mode_module = -1;
+
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);
 };
