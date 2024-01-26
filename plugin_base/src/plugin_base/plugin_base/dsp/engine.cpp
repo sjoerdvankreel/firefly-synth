@@ -614,6 +614,13 @@ plugin_engine::process()
       state = voice_state();
   }
 
+  // todo this needs adjusting for fx-only version
+  int voice_mode = -1;
+  assert(topo.voice_mode_module >= 0);
+  assert(topo.voice_mode_param >= 0);
+  voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
+  assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
+
   // steal voices for incoming notes by age
   for (int e = 0; e < _host_block->events.notes.size(); e++)
   {
