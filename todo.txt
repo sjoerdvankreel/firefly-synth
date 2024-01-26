@@ -33,6 +33,8 @@ write infernal comparison
 document that fm only works for phase generators
 place the vst3 compatible logo somewhere
 put the plug format in the header (vst/clap)
+make a screenshot
+bitwig clap and vst3 shows the wrong automation lane, but it plays the correct one
 
 * get some linux folks to comment (ycollete?)
 * continuing
