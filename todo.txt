@@ -27,10 +27,10 @@ write the infernal<>firefly comparison
 credit the image
 make another repo for renderings
 test fruity & its variable blocksize
-disable fn m if possible
 do legato/retrig/multi + conditional visible ?
 test win/lin clap/vst reaper/fruity/bitwig
 write infernal comparison
+document that fm only works for phase generators
 
 * get some linux folks to comment (ycollete?)
 * continuing
