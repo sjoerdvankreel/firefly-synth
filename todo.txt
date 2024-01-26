@@ -28,6 +28,10 @@ credit the image
 make another repo for renderings
 test fruity & its variable blocksize
 todo is apf mode useful?
+fm source off is effed
+resize the tooltips too
+disable fn m if possible
+do legato/retrig/multi + conditional visible ?
 
 * get some linux folks to comment (ycollete?)
 * continuing
