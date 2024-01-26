@@ -35,6 +35,7 @@ extern int const voice_in_param_oversmp;
 extern int const master_in_param_pb_range;
 extern int const voice_in_output_pitch_offset;
 // mod matrix needs this
+extern int const osc_param_type = param_type;
 extern int const osc_param_uni_voices = param_uni_voices;
 
 static bool constexpr is_kps(int type) 
@@ -760,8 +761,8 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
   int type = block_auto[param_type][0].step();
   if (type == type_off)
   {
-    block.state.own_audio[0][0][0].fill(block.start_frame, block.end_frame, 0.0f);
-    block.state.own_audio[0][0][1].fill(block.start_frame, block.end_frame, 0.0f);
+    // still need to process to clear out the buffer in case we are mod source
+    process_unison<Graph, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
     return;
   }
 
@@ -865,14 +866,16 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
   // don't know if we are a modulation source
   // voice 0 is total
   auto const& block_auto = block.state.own_block_automation;
+  bool on = block_auto[param_type][0].step() != type_off;
   int uni_voices = block_auto[param_uni_voices][0].step();
   for (int v = 0; v < uni_voices + 1; v++)
   {
     block.state.own_audio[0][v][0].fill(block.start_frame, block.end_frame, 0.0f);
     block.state.own_audio[0][v][1].fill(block.start_frame, block.end_frame, 0.0f);
   }
-
-  if (generator_count == 0) return;
+  
+  assert(generator_count >= 0);
+  if (!on) return;
 
   int oversmp_stages;
   int oversmp_factor;

@@ -33,6 +33,7 @@ enum {
 };
 
 static int const route_count = 8;
+extern int const osc_param_type;
 extern int const osc_param_uni_voices;
 extern int const voice_in_param_oversmp;
 
@@ -421,6 +422,13 @@ osc_matrix_engine::modulate_fm(
     auto source_context = static_cast<oscillator_context*>(source_context_ptr);
     auto source_audio = source_context->oversampled_lanes_channels_ptrs[oversmp_stages];
 
+    // in case the source osc is off, the oversampled signal is *not* generated
+    // and it will contain garbage from the last time the osc was active
+    // so account for that (really it's just weird config by the user, but still
+    // should not produce garbage audio)
+    bool source_off = block.state.all_block_automation[module_osc][source_osc][osc_param_type][0].step() == 0;
+    float source_multiplier = source_off? 0: 1;
+
     for (int v = 0; v < target_uni_voices; v++)
     {
       // lerp unison voices
@@ -463,8 +471,8 @@ osc_matrix_engine::modulate_fm(
           mod = (1 - source_voice_pos) * mod0 + source_voice_pos * mod1;
         }
 
-        // through zero
-        mod = (mode_mul * mod) + mode_add;
+        // through zero + account for inactive source osc
+        mod = ((mode_mul * mod) + mode_add) * source_multiplier;
 
         // oversampler is from 0 to (end_frame - start_frame) * oversmp_factor
         // all the not-oversampled stuff requires from start_frame to end_frame
