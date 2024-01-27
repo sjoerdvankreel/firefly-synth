@@ -9,7 +9,7 @@ VST is a trademark of Steinberg Media Technologies GmbH,
 registered in Europe and other countries.
 <br clear="left"/>
 
-# System requirements & supported environments
+# System requirements and supported environments
 - 64-bit cpu with AVX support.
 - Linux: tested on Ubuntu 22 only. Linux support is highly experimental.<br/>That being said, and unlike InfernalSynth, it actually seems to work.
 - Windows: tested on Windows 10. 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
@@ -17,3 +17,14 @@ registered in Europe and other countries.
 - Explicitly NOT supported hosts:<br/>Waveform (too many problems), Renoise (bug), Cakewalk (same bug as renoise, probably).
 - Renoise support waits for this:<br/>https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684.
 - All other hosts, you'll just have to try and see.
+
+# Download and install
+- Windows VST3: [https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1_windows_vst3.zip)
+- Windows CLAP: [https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1_windows_clap.zip)
+
+
+# todo linux note
+# todo project status
+
+# Download and install
+- Binary releases can be found here:
