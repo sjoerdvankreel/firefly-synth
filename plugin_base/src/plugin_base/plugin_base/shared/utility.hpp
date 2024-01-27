@@ -27,7 +27,7 @@
 
 namespace plugin_base {
 
-template <class>
+template <int>
 inline constexpr bool dependent_always_false_v = false;
 
 struct format_config;

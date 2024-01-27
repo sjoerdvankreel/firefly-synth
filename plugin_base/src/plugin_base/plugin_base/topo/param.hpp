@@ -84,7 +84,7 @@ struct param_dsp final {
   param_rate rate;
   param_direction direction;
   midi_topo_mapping midi_source;
-  automate_selector automate_selector;
+  automate_selector automate_selector_;
 
   bool is_midi(int module_slot) const;
   bool can_modulate(int module_slot) const;
@@ -108,21 +108,21 @@ struct param_topo final {
 inline bool
 param_dsp::is_midi(int module_slot) const
 {
-  auto mode = automate_selector(module_slot);
+  auto mode = automate_selector_(module_slot);
   return mode == param_automate::midi;
 }
 
 inline bool 
 param_dsp::can_modulate(int module_slot) const
 {
-  auto mode = automate_selector(module_slot);
+  auto mode = automate_selector_(module_slot);
   return mode == param_automate::modulate;
 }
 
 inline bool
 param_dsp::can_automate(int module_slot) const
 {
-  auto mode = automate_selector(module_slot);
+  auto mode = automate_selector_(module_slot);
   return mode == param_automate::automate || mode == param_automate::modulate;
 }
 

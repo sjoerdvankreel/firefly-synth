@@ -43,7 +43,7 @@ _section_index(section_index), _factory(factory) {}
 std::unique_ptr<Component> 
 tabbed_module_section_container::create_child()
 {
-  int tab_index = gui()->extra_state()->get_num(state_key(), 0);
+  int tab_index = gui()->extra_state_()->get_num(state_key(), 0);
   return _factory(gui()->gui_state()->desc().plugin->gui.module_sections[_section_index].tab_order[tab_index]);
 }
 

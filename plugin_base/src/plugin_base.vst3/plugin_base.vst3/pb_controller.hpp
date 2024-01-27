@@ -42,7 +42,7 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_controller);
 
   plugin_state& gui_state() { return _gui_state; }
-  extra_state& extra_state() { return _extra_state; }
+  extra_state& extra_state_() { return _extra_state; }
   void editorDestroyed(Steinberg::Vst::EditorView*) override { _editor = nullptr; }
 
   void gui_param_end_changes(int index) override;

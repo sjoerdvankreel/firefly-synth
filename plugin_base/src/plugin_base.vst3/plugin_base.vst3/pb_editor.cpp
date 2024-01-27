@@ -11,7 +11,7 @@ namespace plugin_base::vst3 {
 pb_editor::
 pb_editor(pb_controller* controller) :
 EditorView(controller), _controller(controller),
-_gui(std::make_unique<plugin_gui>(&controller->gui_state(), &controller->extra_state())) {}
+_gui(std::make_unique<plugin_gui>(&controller->gui_state(), &controller->extra_state_())) {}
 
 tresult PLUGIN_API
 pb_editor::getSize(ViewRect* new_size)

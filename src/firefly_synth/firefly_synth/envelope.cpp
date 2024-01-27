@@ -185,7 +185,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  on.domain.default_selector = [](int s, int) { return s == 0 ? "On" : "Off"; };
+  on.domain.default_selector_ = [](int s, int) { return s == 0 ? "On" : "Off"; };
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Mode.Slope", param_mode, 1),

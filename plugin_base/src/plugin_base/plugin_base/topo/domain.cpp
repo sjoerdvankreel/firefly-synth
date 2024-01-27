@@ -32,7 +32,7 @@ plain_value
 param_domain::default_plain(int module_slot, int param_slot) const
 {
   plain_value result;
-  std::string default_ = default_selector(module_slot, param_slot);
+  std::string default_ = default_selector_(module_slot, param_slot);
   PB_ASSERT_EXEC(text_to_plain(false, default_, result));
   return result;
 }
@@ -199,7 +199,7 @@ param_domain::validate(int module_slot_count, int param_slot_count) const
 
   for(int mi = 0; mi < module_slot_count; mi++)
     for(int pi = 0; pi < param_slot_count; pi++)
-      assert(default_selector(mi, pi).size());
+      assert(default_selector_(mi, pi).size());
 
   if (!is_real())
   {

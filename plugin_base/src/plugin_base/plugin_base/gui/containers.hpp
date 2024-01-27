@@ -48,7 +48,7 @@ public:
   void extra_state_changed() override;
   extra_state_container(plugin_gui* gui, std::string const& state_key);
   void resized() override { if (_child) { _child->setBounds(getLocalBounds()); } }
-  virtual ~extra_state_container() { _gui->extra_state()->remove_listener(_state_key, this); }
+  virtual ~extra_state_container() { _gui->extra_state_()->remove_listener(_state_key, this); }
 };
 
 // displays a child component based on module tab changes
@@ -80,7 +80,7 @@ public:
 
   void extra_state_changed() override
   { setCurrentTabIndex(std::clamp(_state->get_num(_storage_id, 0), 0, getNumTabs())); }
-  void currentTabChanged(int index, juce::String const& name) 
+  void currentTabChanged(int index, juce::String const& name) override
   { if (tab_changed != nullptr) tab_changed(index); }
 };
 

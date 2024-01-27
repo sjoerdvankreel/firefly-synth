@@ -490,8 +490,8 @@ plugin_engine::process()
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
       std::fill(_midi_active_selection[m][mi].begin(), _midi_active_selection[m][mi].end(), 0);
-      if (module.midi_active_selector != nullptr)
-        module.midi_active_selector(_state, mi, _midi_active_selection);
+      if (module.midi_active_selector_ != nullptr)
+        module.midi_active_selector_(_state, mi, _midi_active_selection);
     }
   }
 

@@ -146,10 +146,10 @@ _gui(gui), _presets(gui->gui_state()->desc().presets())
   set_items(vector_map(_presets, [](auto const& p) { return p.name; }));
   extra_state_changed();
   setButtonText("Preset");
-  _gui->extra_state()->add_listener(factory_preset_key, this);
+  _gui->extra_state_()->add_listener(factory_preset_key, this);
   selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
-    _gui->extra_state()->set_text(factory_preset_key, get_items()[index]);
+    _gui->extra_state_()->set_text(factory_preset_key, get_items()[index]);
     _gui->load_patch(_presets[index].path, true);
   };
 }
@@ -157,7 +157,7 @@ _gui(gui), _presets(gui->gui_state()->desc().presets())
 void 
 preset_button::extra_state_changed()
 {
-  std::string selected_preset = _gui->extra_state()->get_text(factory_preset_key, "");
+  std::string selected_preset = _gui->extra_state_()->get_text(factory_preset_key, "");
   auto iter = std::find(get_items().begin(), get_items().end(), selected_preset);
   if (iter != get_items().end())
     set_selected_index((int)(iter - get_items().begin()));

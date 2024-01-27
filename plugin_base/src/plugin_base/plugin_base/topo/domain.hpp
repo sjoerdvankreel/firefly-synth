@@ -73,7 +73,7 @@ struct param_domain final {
   std::vector<list_item> items;
   std::vector<timesig> timesigs;
   std::vector<std::string> names;
-  default_selector default_selector;
+  default_selector default_selector_;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_domain);
 
   bool is_real() const { return domain_is_real(type); }
@@ -208,7 +208,7 @@ param_domain::normalized_to_plain_fast(normalized_value normalized) const
     return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
   }
   else
-    static_assert(dependent_always_false_v);
+    static_assert(dependent_always_false_v<0>);
 }
 
 }

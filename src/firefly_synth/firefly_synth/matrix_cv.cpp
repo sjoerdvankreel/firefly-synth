@@ -288,7 +288,7 @@ cv_matrix_topo(
     return std::make_unique<tidy_matrix_menu_handler>(
       state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 
   };
-  result.midi_active_selector = [global, on_note_midi_start, sm = source_matrix.mappings](
+  result.midi_active_selector_ = [global, on_note_midi_start, sm = source_matrix.mappings](
     plugin_state const& state, int, jarray<int, 3>& active) { 
       select_midi_active(state, global, on_note_midi_start, sm, active); 
   };

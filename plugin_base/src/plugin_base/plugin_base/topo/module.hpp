@@ -136,7 +136,7 @@ struct module_topo final {
   std::vector<param_topo> params;
   std::vector<param_section> sections;
   std::vector<midi_source> midi_sources;
-  midi_active_selector midi_active_selector;
+  midi_active_selector midi_active_selector_;
 
   module_graph_renderer graph_renderer;
   module_engine_factory engine_factory;
