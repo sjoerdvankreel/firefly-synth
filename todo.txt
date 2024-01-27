@@ -26,7 +26,6 @@ make example presets for all functionality (staircase osc, per-uni-voice AM, dis
 write the infernal<>firefly comparison
 credit the image
 make another repo for renderings
-test fruity & its variable blocksize
 do legato/retrig/multi + conditional visible ?
 test win/lin clap/vst reaper/fruity/bitwig
 write infernal comparison
