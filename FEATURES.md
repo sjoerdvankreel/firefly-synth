@@ -53,6 +53,7 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Second Karplus-Strong mode which auto-adjusts the feedback according to a user-defined pitch ("midpoint") parameter
 - All generators can do unison with stereo spread parameter
 - All generators can be source or target in the Osc Mod AM matrix, and source in the Osc Mod FM matrix
+- Karplus-Strong can do unison with detune parameter
 - Phased generators can be target in the Osc Mod FM matrix
 - Phased generators can do unison with detune and phase offset parameter
 - Phased generators can hard-sync with adjustable cross-over time from unsynced to synced
