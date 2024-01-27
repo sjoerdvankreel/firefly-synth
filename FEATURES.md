@@ -62,4 +62,17 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Don't turn everything to the max.<br/>With 8X oversampling + 8X unison plus 4X oscillator you will run 256 unison-voices *per synth voice* and grind the cpu to a halt.
 - In fact better to design your sound so it doesn't need oversampling.<br/>It's there for those *very* rare corner cases where it's both needed *and* makes a positive difference.
 
+# 10 Per-voice and 10 global FX modules
+Only global:
+- Reverb (Freeverb) with room size, damping, stereo spread, dry/wet and controllable allpass filter
+- Time or tempo-synced feedback delay with feedback amount, stereo-spread and dry/wet control and per-channel delay length
+- Time or tempo-synced multitap delay with tap amount, stereo-spread and dry/wet control, tap-count and initial hold parameter
+
+Per-voice and global:
+- Comb filter with modulatable input and output gain and delay
+- State variable filter with various modes and frequency, resonance, keyboard-tracking and shelving gain control
+- Distortion module:
+
+
+
 TODO document interaction
