@@ -18,37 +18,14 @@ implement envelope retriggering
 demo synth:
 do the param fuzz test
 auto-generate the manual (param list)
-document all the context menus
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
-credit the image
 test lin+bitwig
 document that fm only works for phase generators
 linux build is NOT avx, document that
 make a overview manual with all sections, interaction, ui context menus, modulatable params etc
 
 * get some linux folks to comment (ycollete?)
-* continuing
-- check the todos
-- do parameter table with function descriptions and automation/modulation/per-voice etc
-- profile performance + memory +  maybe do cpu efficient versions (non-sloped ramps etc)
-- check all param_automate
-- keep updating the demo stuff
 
 * host bugs:
 - waveform: lots, not supported
 - cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)
-
-testing:
-v test: reaper vst3 win
-v test: reaper vst3 lin
-v test: reaper clap win
-v test: reaper clap lin
-v test: bitwig vst3 win
-v test: bitwig vst3 lin
-v test: bitwig clap win
-v test: bitwig clap lin
-v test: renoise vst3 win
-v test: renoise vst3 lin
-v test: cakewalk vst3 win
-v test: flstudio vst3 win
-
