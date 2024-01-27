@@ -10,6 +10,7 @@ That means, if you change your DPI settings, you'll have to resize manually. Jus
 
 # MIDI
 Supports Channel Pressure, Pitch Bend and all 128 CC parameters. You can access the MIDI signals through the routing matrices.
+MIDI note number and velocity are also available as modulation sources in the per-voice CV matrix.
 
 # Master module
 - MIDI and BPM smoothing parameters. BPM smoothing affects tempo-synced delay lines.
