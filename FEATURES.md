@@ -41,6 +41,7 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Optional tempo sync
 - Smoothing parameter
 - Regular repeating or one-shot mode
+- Stair-stepping any periodic waveform
 - Optional 5 horizontal and vertical skewing modes + corresponding control parameters
 - Various periodic waveforms + smooth noise, static noise and free-running static noise
 
