@@ -71,7 +71,7 @@ Only global:
 Per-voice and global:
 - Comb filter with modulatable input and output gain and delay
 - State variable filter with various modes and frequency, resonance, keyboard-tracking and shelving gain control
-- Distortion module with 3 modes:
+- Distortion module with 3 modes
     - Dry/wet and gain controls
     - Hard clip or "tanh" (soft clip)
     - Built-in resonant lowpass filter
