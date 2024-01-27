@@ -1,6 +1,6 @@
 # About
 A semi-modular software synthesizer plugin. 
-It's basically [https://github.com/sjoerdvankreel/infernal-synth](InfernalSynth)'s big brother.
+It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
 
 ![Screenshot](static/screenshot.png)
 
