@@ -47,8 +47,8 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Various periodic waveforms + smooth noise, static noise and free-running static noise
 
 # 4 Oscillators
-- Phased: DSF generator
-- Phased: Basic generator with combined sine/saw/triangle/square+pwm
+- Phased: anti-aliased DSF generator
+- Phased: anti-aliased basic generator with combined sine/saw/triangle/square+pwm
 - Random noise with seed and rate control (less = static, more = white noise) and built-in resonant filter
 - Extended Karplus-Strong with seed/rate/resonant filter for the initial excite stage and feedback and stretch parameters
 - Second Karplus-Strong mode which auto-adjusts the feedback according to a user-defined pitch ("midpoint") parameter
@@ -85,7 +85,7 @@ Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape
 Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.<br/>
 
 Like with the Osc section, don't turn everything up to the max. It will totally screw up the sound.
-Cool-but-not-noisy results can be had with a periodic shaper like sine-cosine-sine, a tanh clipper
+Cool-but-not-noisy results can be had with a "smooth" shaper like sine-cosine-sine, a tanh clipper
 and playing around with the filter.
 
 
