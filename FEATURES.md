@@ -12,6 +12,7 @@ That means, if you change your DPI settings, you'll have to resize manually. Jus
 # GUI
 - Right-click empty space for the undo/redo menu.
 - Right-click module number, matrix header, or first matrix column pop-up various context menus to ease editing a bit.
+- Hover a parameter to see a more detailed description popup.
 
 A knob with a circle in it or a slider with a small dot in it means it can be modulated.
 Nearly everything can be automated. Discrete valued parameters are automated per-block (global)
