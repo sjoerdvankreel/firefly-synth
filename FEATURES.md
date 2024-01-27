@@ -43,7 +43,7 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Smoothing parameter
 - Regular repeating or one-shot mode
 - Stair-stepping any periodic waveform
-- Optional 5 horizontal and vertical skewing modes + corresponding control parameters
+- Optional 5 horizontal and 5 vertical skewing modes + corresponding control parameters
 - Various periodic waveforms + smooth noise, static noise and free-running static noise
 
 # 4 Oscillators
@@ -71,8 +71,13 @@ Only global:
 Per-voice and global:
 - Comb filter with modulatable input and output gain and delay
 - State variable filter with various modes and frequency, resonance, keyboard-tracking and shelving gain control
-- Distortion module:
-
+- Distortion module with 3 modes:
+    - Dry/wet and gain controls
+    - Hard clip or "tanh" (soft clip)
+    - Built-in resonant lowpass filter
+    - Various periodic waveshaper functions + foldback distortion
+    - Oversampling factor (here you might really need it if you go crazy)
+    - Optional 5 before-shape (X) and 5 after-shape (Y) skewing modes + corresponding control parameters
 
 
 TODO document interaction
