@@ -2,7 +2,8 @@
 - VST3: supports sample-accurate automation, but no note expressions.
 - CLAP: supports sample-accurate automation, supports threadpool, but no modulation (not regular and not polyphonic).
 
-As you might have guessed from the above, it also doesn't do MIDI MPE.
+As you might have guessed from the above, it also doesn't do MIDI MPE.<br/>
+Preset files (.ffpreset) are shareable between CLAP and VST3.
 
 # Resizing
 It's fully resizable by scaling (by dragging the bottom right corner), but it does not react to OS DPI settings.
