@@ -6,6 +6,12 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - Detailed parameter reference: [Also TODO.]
 - Feature list: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/FEATURES.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/FEATURES.md)
 
+Since there's no manual yet, I'll just write it down here:
+- Right-click some empty space pops up the undo/redo menu.
+- Right-click a matrix header pops up a context menu with clear and tidy options.
+- Right-click the first column in a matrix pops up a context menu with matrix manipulation options.
+- Right-click a module header number pops up a context menu with copy/clear/swap etc, including matrix-routing-preserving options.
+
 ![Screenshot](static/screenshot.png)
 
 <img align="left" alt="VST logo" src="static/vst_logo.png">
