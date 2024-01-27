@@ -17,3 +17,8 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - 3 Auxilliary parameters to be used through the CV routing matrices and automation.
 - MIDI-linked modwheel and pitchbend (+ pitchbend range) parameters.<br/>These react to external MIDI sources, have the UI updated etc. This also means they cannot be automated.
 
+# 10 Per-voice DAHDSR envelopes
+- Optional tempo sync
+- Smoothing parameter
+- 3 envelope modes and 4 slope modes (linear and 3 exponential types)
+
