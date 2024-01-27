@@ -23,6 +23,8 @@ Pretty much like InfernalSynth. I reused most of the algorithms, although some o
 the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play 
 around with, and last-but-not-least, it can do actual (Chowning-style) FM synthesis.
 
+- AM Demo: [https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3)
+
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
 - Linux: tested on Ubuntu 22 only. Linux support is highly experimental.<br/>But, unlike InfernalSynth, it actually seems to work.
@@ -43,3 +45,5 @@ but they are built without AVX support, and also I have no idea how well they be
 but as I only built on Ubuntu 22, there's bound to be compiler errors on very different toolchains. Just report them to me and I'll fix it. Of course,
 even if it compiles on Fedora or Debian or (your favorite distro here), there's still no guarantee that it will actually work. Linux "support" ATM means
 I hope for some interaction with the community ;)
+
+TODO Credits & thank paul
