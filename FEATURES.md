@@ -89,10 +89,12 @@ Cool-but-not-noisy results can be had with a "smooth" shaper like sine-cosine-si
 and playing around with the filter.
 
 # Osc Mod module
+AM section:
 - AM (amplitude-modulate) stacking any oscillator
 - Ring control mixing AM/RM
 - Dry/wet (Amt) control mixing unmodulated/modulated
 
+FM section:
 - FM (frequency-modulate) stacking any oscillator as source and basic/DSF oscillator as target
 - Modulation Index as defined in Chowning-style FM
 - Bipolar/unipolar mode (apparently bipolar is called "through-zero" sometimes)
