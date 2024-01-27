@@ -88,6 +88,16 @@ Like with the Osc section, don't turn everything up to the max. It will totally 
 Cool-but-not-noisy results can be had with a "smooth" shaper like sine-cosine-sine, a tanh clipper
 and playing around with the filter.
 
+# Osc Mod module
+- AM (amplitude-modulate) stacking any oscillator
+- Ring control mixing AM/RM
+- Dry/wet (amt) control mixing unmodulated/modulated
+- FM (frequency-modulate) stacking any oscillator as source and basic/DSF oscillator as target
+- Modulation Index as defined in Chowning-style FM
+- Bipolar/unipolar mode (apparently bipolar is called "through-zero" sometimes)
+- In any case, bipolar may cause the target osc phase to travel "backwards", gives a nice distinct sound
+- Also see Osc section for interaction with oversampling and unison
+
 
 
 
