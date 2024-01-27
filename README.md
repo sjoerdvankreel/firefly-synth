@@ -23,8 +23,8 @@ Pretty much like InfernalSynth. I reused most of the algorithms, although some o
 the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play 
 around with, and last-but-not-least, it can do actual (Chowning-style) FM synthesis.
 
-- AM demo: [https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3)
-- Karplus-Strong demo: [https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/karplus_strong_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/karplus_strong_reaper_clap.mp3)
+- AM demo:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3)
+- Karplus-Strong demo:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/karplus_strong_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/karplus_strong_reaper_clap.mp3)
 
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
