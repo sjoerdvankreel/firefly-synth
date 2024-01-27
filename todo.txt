@@ -1,23 +1,23 @@
-make a .com website 
-
 someday:
 mseg
-voice arp
-microtonal support
-do voice level unison
-do cakewalk bug report
+.com website 
+microtonal
+voice level unison
+cakewalk bug report
 visual routing indicators
+midi mpe
+vst3 note expressions
+clap (poly) modulation
 document the header files a bit
-clap mod + polymod + mpe + note_exprs
+
+v1.1:
+fx-only version
+implement monophonic mode
+implement envelope retriggering
 
 demo synth:
-do fx version
 read all the comments from github and kvr and forums
 check all infernal functionality, see what needs to be in the base
-implement the multi env
-poly/poly port sync/poly port time/mono port sync/mono port time (fake mono only)
-more flexibility in plugin_base -> "give me a voice"
-fix the init patch
 do the param fuzz test
 auto-generate the manual (param list)
 document all the context menus
@@ -25,15 +25,11 @@ document new invisible stuff (bpm/midi smooth, comb/delay lin interpol)
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 write the infernal<>firefly comparison
 credit the image
-make another repo for renderings
-do legato/retrig/multi + conditional visible ?
 test win/lin clap/vst reaper/fruity/bitwig
-write infernal comparison
 document that fm only works for phase generators
 place the vst3 compatible logo somewhere
 put the plug format in the header (vst/clap)
 make a screenshot
-bitwig clap and vst3 shows the wrong automation lane, but it plays the correct one
 
 * get some linux folks to comment (ycollete?)
 * continuing
