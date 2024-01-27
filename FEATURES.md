@@ -112,5 +112,5 @@ FM section:
 - Voice sources: All global sources, plus: envelope, Voice LFO, Note-key, Note-velocity, and On-Note all global sources
 - Targets: lots!. Any continuous parameter of the Oscs, Fx's, Voice-In/Out sections, and global/voice Audio Matrices.
 - Min/Max: controls the modulation amount.
-- Op(erator): Multiply, Add, Add-Bipolar with subtypes absolute, relative (to modulation target) and stacked (relative to all previous operators).
-- To keep it simple, if you don't want the modulation signal to clip, only use the "stacked" versions.
+- Op(erator): Multiply, Add, Add-Bipolar.<br/>Subtypes absolute, relative (to modulation target) and stacked (relative to all previous operators).
+- If you don't want the modulation signal to clip, only use the "stacked" versions.
