@@ -16,7 +16,6 @@ implement monophonic mode
 implement envelope retriggering
 
 demo synth:
-do the param fuzz test
 auto-generate the manual (param list)
 make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 test lin+bitwig

@@ -830,12 +830,12 @@ fx_engine::process_comb(plugin_block& block,
     int dly_plus_samples_1 = (int)dly_plus_samples_t + 1;
     for (int c = 0; c < 2; c++)
     {
-      // + 2*samples in case dly_samples > comb_samples
-      float min0 = _comb_out[c][(_comb_pos + 2 * _comb_samples - dly_min_samples_0) % _comb_samples];
-      float min1 = _comb_out[c][(_comb_pos + 2 * _comb_samples - dly_min_samples_1) % _comb_samples];
+      // double mod is needed to not go negative
+      float min0 = _comb_out[c][(((_comb_pos - dly_min_samples_0) % _comb_samples) + _comb_samples) % _comb_samples];
+      float min1 = _comb_out[c][(((_comb_pos - dly_min_samples_1) % _comb_samples) + _comb_samples) % _comb_samples];
       float min = ((1 - dly_min_t) * min0 + dly_min_t * min1) * gain_min;
-      float plus0 = _comb_in[c][(_comb_pos + 2 * _comb_samples - dly_plus_samples_0) % _comb_samples];
-      float plus1 = _comb_in[c][(_comb_pos + 2 * _comb_samples - dly_plus_samples_1) % _comb_samples];
+      float plus0 = _comb_in[c][(((_comb_pos - dly_plus_samples_0) % _comb_samples) + _comb_samples) % _comb_samples];
+      float plus1 = _comb_in[c][(((_comb_pos - dly_plus_samples_1) % _comb_samples) + _comb_samples) % _comb_samples];
       float plus = ((1 - dly_plus_t) * plus0 + dly_plus_t * plus1) * gain_plus;
       _comb_in[c][_comb_pos] = audio_in[c][f];
       _comb_out[c][_comb_pos] = audio_in[c][f] + plus + min * feedback_factor;
@@ -1025,14 +1025,14 @@ fx_engine::process_dly_fdbk(plugin_block& block,
     int r_time_samples_0 = (int)r_time_samples_t;
     int r_time_samples_1 = (int)r_time_samples_t + 1;
 
-    // + 2*samples in case samples > capacity
+    // double mod is needed to not go negative
     float dry_l = audio_in[0][f];
     float dry_r = audio_in[1][f];
-    float wet_l0 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_0) % _dly_capacity];
-    float wet_l1 = _dly_buffer[0][(_dly_pos + 2 * _dly_capacity - l_time_samples_1) % _dly_capacity];
+    float wet_l0 = _dly_buffer[0][(((_dly_pos - l_time_samples_0) % _dly_capacity) + _dly_capacity) % _dly_capacity];
+    float wet_l1 = _dly_buffer[0][(((_dly_pos - l_time_samples_1) % _dly_capacity) + _dly_capacity) % _dly_capacity];
     float wet_l_base = ((1 - l_time_t) * wet_l0 + l_time_t * wet_l1) * amt_curve[f] * max_feedback;
-    float wet_r0 = _dly_buffer[1][(_dly_pos + 2 * _dly_capacity - r_time_samples_0) % _dly_capacity];
-    float wet_r1 = _dly_buffer[1][(_dly_pos + 2 * _dly_capacity - r_time_samples_1) % _dly_capacity];
+    float wet_r0 = _dly_buffer[1][(((_dly_pos - r_time_samples_0) % _dly_capacity) + _dly_capacity) % _dly_capacity];
+    float wet_r1 = _dly_buffer[1][(((_dly_pos - r_time_samples_1) % _dly_capacity) + _dly_capacity) % _dly_capacity];
     float wet_r_base = ((1 - r_time_t) * wet_r0 + r_time_t * wet_r1) * amt_curve[f] * max_feedback;
     _dly_buffer[0][_dly_pos] = dry_l + wet_l_base;
     _dly_buffer[1][_dly_pos] = dry_r + wet_r_base;

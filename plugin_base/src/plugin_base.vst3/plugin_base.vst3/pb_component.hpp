@@ -17,6 +17,12 @@ public Steinberg::Vst::AudioEffect {
   plugin_engine _engine;
   std::map<int, int> _param_to_midi_id = {};
 
+  // when we get passed a null buffer ptr
+  std::vector<float> _scratch_in_l;
+  std::vector<float> _scratch_in_r;
+  std::vector<float> _scratch_out_l;
+  std::vector<float> _scratch_out_r;
+
 public:
   PB_PREVENT_ACCIDENTAL_COPY(pb_component);
   pb_component(plugin_topo const* topo, Steinberg::FUID const& controller_id);

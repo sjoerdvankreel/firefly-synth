@@ -61,6 +61,10 @@ pb_component::canProcessSampleSize(int32 symbolic_size)
 tresult PLUGIN_API
 pb_component::setupProcessing(ProcessSetup& setup)
 {
+  _scratch_in_l.resize(setup.maxSamplesPerBlock);
+  _scratch_in_r.resize(setup.maxSamplesPerBlock);
+  _scratch_out_l.resize(setup.maxSamplesPerBlock);
+  _scratch_out_r.resize(setup.maxSamplesPerBlock);
   _engine.activate(setup.maxSamplesPerBlock);
   _engine.set_sample_rate(setup.sampleRate);
   _engine.activate_modules();
@@ -93,9 +97,25 @@ pb_component::process(ProcessData& data)
 {
   host_block& block = _engine.prepare_block();
   block.frame_count = data.numSamples;
-  block.audio_out = data.outputs[0].channelBuffers32;
   block.shared.bpm = data.processContext ? data.processContext->tempo : 0;
-  block.shared.audio_in = _engine.state().desc().plugin->type == plugin_type::fx? data.inputs[0].channelBuffers32: nullptr;
+
+  if(data.outputs && data.outputs[0].channelBuffers32)
+    block.audio_out = data.outputs[0].channelBuffers32;
+  else
+  {
+    float* scratch_out[2] = { _scratch_out_l.data(), _scratch_out_r.data() };
+    block.audio_out = scratch_out;
+  }
+
+  block.shared.audio_in = nullptr;
+  if(_engine.state().desc().plugin->type == plugin_type::fx)
+    if(data.inputs && data.inputs[0].channelBuffers32)
+      block.shared.audio_in = data.inputs[0].channelBuffers32;
+    else
+    {
+      float* scratch_in[2] = { _scratch_in_l.data(), _scratch_in_r.data() };
+      block.shared.audio_in = scratch_in;
+    }
 
   Event vst_event;
   if (data.inputEvents)
