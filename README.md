@@ -19,7 +19,7 @@ This is a very bare-bones release, just to get something out there. In particula
 
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
-- Linux: tested on Ubuntu 22 only. Linux support is highly experimental.<br/>That being said, and unlike InfernalSynth, it actually seems to work.
+- Linux: tested on Ubuntu 22 only. Linux support is highly experimental.<br/>But, unlike InfernalSynth, it actually seems to work.
 - Windows: tested on Windows 10. 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Explicitly supported hosts: Reaper, Bitwig, FLStudio. Please use a recent version.
 - Explicitly NOT supported hosts:<br/>Waveform (too many problems), Renoise (bug), Cakewalk (same bug as renoise, probably).
