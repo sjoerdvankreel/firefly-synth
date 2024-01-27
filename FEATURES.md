@@ -11,5 +11,5 @@ That means, if you change your DPI settings, you'll have to resize manually. Jus
 # Master module
 - MIDI and BPM smoothing parameters. BPM smoothing affects tempo-synced delay lines.
 - 3 Auxilliary parameters to be used through the CV routing matrices and automation.
-- MIDI-linked modwheel and pitchbend (+ pitchbend range) parameters. These react to external MIDI sources, have the UI updated etc. This also means they cannot be automated.
+- MIDI-linked modwheel and pitchbend (+ pitchbend range) parameters.<br/>These react to external MIDI sources, have the UI updated etc. This also means they cannot be automated.
 
