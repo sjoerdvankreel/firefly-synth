@@ -12,8 +12,8 @@ registered in Europe and other countries.
 # Project status
 This is a very bare-bones release, just to get something out there. In particular:
 - There is no manual.
-- There are NO presets. None.
 - There is no fx-only version.
+- There are NO presets. None.
 - There is no monophonic mode yet.<br/>The option to switch poly/mono is grayed out in the UI,<br/>as are the envelope trigger modes (legato, retrigger, multitrigger).
 - That being said, apart from mono-mode the thing is fully functional.
 
