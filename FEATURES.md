@@ -78,11 +78,13 @@ Per-voice and global:
     - Various periodic waveshaper functions + foldback distortion
     - Oversampling factor (here you might really need it if you go crazy)
     - Optional 5 before-shape (X) and 5 after-shape (Y) skewing modes + corresponding control parameters
-    
+
 The distortion modes affect where the filter is placed.<br/>
 Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>
 Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>
 Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.<br/>
+
+
 
 
 TODO document interaction
