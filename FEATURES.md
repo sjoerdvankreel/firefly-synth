@@ -19,7 +19,7 @@ Nearly everything can be automated. Discrete valued parameters are automated per
 or at-voice-start. Continuous-valued parameters are mostly sample-accurate.
 
 # MIDI
-Supports Channel Pressure, Pitch Bend and all 128 CC parameters. You can access the MIDI signals through the routing matrices.
+Supports Channel Pressure, Pitch Bend and all 128 CC parameters. You can access the MIDI signals through the CV routing matrices.
 MIDI note number and velocity are also available as modulation sources in the per-voice CV matrix.
 
 # Master module
