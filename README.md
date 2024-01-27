@@ -28,7 +28,7 @@ There are also Linux binaries over here: [https://github.com/sjoerdvankreel/fire
 but they are built without AVX support, and also I have no idea how well they behave on non-Ubuntu like distro's. It's probably better to build from source,
 but as I only built on Ubuntu 22, there's bound to be compiler errors on very different toolchains. Just report them to me and I'll fix it. Of course,
 even if it compiles on Fedora or Debian or (your favorite distro here), there's still no guarantee that it will actually work. Linux "support" ATM means
-I hope on some interaction with the community ;)
+I hope for some interaction with the community ;)
 
 # todo
 # todo linux note
