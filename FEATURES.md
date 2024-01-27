@@ -13,7 +13,7 @@ That means, if you change your DPI settings, you'll have to resize manually. Jus
 - Right-click empty space for the undo/redo menu.
 - Right-click module number, matrix header, or first matrix column pop-up various context menus to ease editing a bit.
 
-A Knob with a circle in it or a slider with a small dot in it means it can be modulated.
+A knob with a circle in it or a slider with a small dot in it means it can be modulated.
 Nearly everything can be automated. Discrete valued parameters are automated per-block (global)
 or at-voice-start. Continuous-valued parameters are mostly sample-accurate.
 
@@ -43,3 +43,12 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Regular repeating or one-shot mode
 - Optional 5 horizontal and vertical skewing modes + corresponding control parameters
 - Various periodic waveforms + smooth noise, static noise and free-running static noise
+
+# 4 Oscillators
+- Phased: DSF generator
+- Phased: Basic generator with combined sine/saw/triangle/square+pwm
+- Random noise with seed and rate control (less = static, more = white noise) and built-in resonant filter
+- Extended Karplus-Strong with seed/rate/resonant filter for the initial excite stage and feedback and stretch parameters
+- Second Karplus-Strong mode which auto-adjusts the feedback according to a user-defined pitch ("midpoint") parameter
+
+TODO document interaction
