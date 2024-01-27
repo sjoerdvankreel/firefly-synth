@@ -16,8 +16,9 @@ implement monophonic mode
 implement envelope retriggering
 
 demo synth:
+re-build and re-test
 auto-generate the manual (param list)
-make example presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
+make some  "tutorial" presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 test lin+bitwig
 document that fm only works for phase generators
 linux build is NOT avx, document that

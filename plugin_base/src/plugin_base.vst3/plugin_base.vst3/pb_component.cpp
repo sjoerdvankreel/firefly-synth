@@ -172,29 +172,33 @@ pb_component::process(ProcessData& data)
         else
         {
           // regular parameter
-          int param_index = _engine.state().desc().param_mappings.tag_to_index.at(queue->getParameterId());
-          auto rate = _engine.state().desc().param_at_index(param_index).param->dsp.rate;
-          if (rate != param_rate::accurate)
+          // vst3 validator hands us bogus sometimes
+          auto param_id_iter = _engine.state().desc().param_mappings.tag_to_index.find(queue->getParameterId());
+          if(param_id_iter != _engine.state().desc().param_mappings.tag_to_index.end())
           {
-            if(queue->getPoint(0, frame_index, value) == kResultTrue)
+            auto rate = _engine.state().desc().param_at_index(param_id_iter->second).param->dsp.rate;
+            if (rate != param_rate::accurate)
             {
-              block_event event;
-              event.param = param_index;
-              event.normalized = normalized_value(value);
-              block.events.block.push_back(event);
-            }
-          }
-          else
-          {
-            for(int p = 0; p < queue->getPointCount(); p++)
-              if (queue->getPoint(p, frame_index, value) == kResultTrue)
+              if(queue->getPoint(0, frame_index, value) == kResultTrue)
               {
-                accurate_event event;
-                event.frame = frame_index;
-                event.param = param_index;
+                block_event event;
+                event.param = param_id_iter->second;
                 event.normalized = normalized_value(value);
-                block.events.accurate.push_back(event);
+                block.events.block.push_back(event);
               }
+            }
+            else
+            {
+              for(int p = 0; p < queue->getPointCount(); p++)
+                if (queue->getPoint(p, frame_index, value) == kResultTrue)
+                {
+                  accurate_event event;
+                  event.frame = frame_index;
+                  event.param = param_id_iter->second;
+                  event.normalized = normalized_value(value);
+                  block.events.accurate.push_back(event);
+                }
+            }
           }
         }
       }
