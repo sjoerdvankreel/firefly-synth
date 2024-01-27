@@ -84,6 +84,10 @@ Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY =
 Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>
 Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.<br/>
 
+Like with the Osc section, don't turn everything up to the max. It will totally screw up the sound.
+Cool-but-not-noisy results can be had with a periodic shaper like sine-cosine-sine, a tanh clipper
+and playing around with the filter.
+
 
 
 
