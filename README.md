@@ -53,4 +53,18 @@ but as I only built on Ubuntu 22, there's bound to be compiler errors on very di
 even if it compiles on Fedora or Debian or (your favorite distro here), there's still no guarantee that it will actually work. Linux "support" ATM means
 I hope for some interaction with the community ;)
 
-TODO Credits & thank paul
+TODO build from source
+
+# Dependencies
+- CLAP SDK: [https://github.com/free-audio/clap](https://github.com/free-audio/clap)
+- JUCE: [https://github.com/juce-framework/JUCE](https://github.com/juce-framework/JUCE)
+- Steinberg VST3 SDK: [https://github.com/steinbergmedia/vst3sdk](https://github.com/steinbergmedia/vst3sdk)
+- Readerwriterqueue: [https://github.com/cameron314/readerwriterqueue](https://github.com/cameron314/readerwriterqueue)
+
+# Credits
+- Special thanks to host vendors who have set me up with an NFR license.
+- Special thanks to [BaconPaul](https://baconpaul.org/) for helping me out with CLAP support.
+- Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).
+- Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
+- Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
+- Contains a verbatim implementation of [Moorer's DSF algorithm as described by Burkhard Reike](https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html).

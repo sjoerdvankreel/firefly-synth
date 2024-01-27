@@ -17,18 +17,14 @@ implement envelope retriggering
 
 demo synth:
 tag the v1.0 release
-social preview
 feature list
+must have a manual
+
 re-build and re-test
 auto-generate the manual (param list)
 make some  "tutorial" presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
 test lin+bitwig
 document that fm only works for phase generators
-linux build is NOT avx, document that
 make a overview manual with all sections, interaction, ui context menus, modulatable params etc
 
 * get some linux folks to comment (ycollete?)
-
-* host bugs:
-- waveform: lots, not supported
-- cakewalk, renoise: ui interaction gets lost (does not end up as inputParameterChanges) (also for load state from ui)
