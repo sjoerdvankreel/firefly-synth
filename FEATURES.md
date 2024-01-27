@@ -56,7 +56,7 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Phased generators can do unison with detune and phase offset parameter
 - Phased generators can hard-sync with adjustable cross-over time from unsynced to synced
 - AM, FM and hard sync are per-unison-voice.<br/>If you modulate AM/FM, better to have equal unison voices between oscs.<br/>Although it will work with unequal voice counts by remapping the voices.
-- Don't turn everything to the max. With 8X oversampling + 8X unison plus 4X oscillator you will run 256 voices and grind the cpu to a halt.
+- Don't turn everything to the max.<br/>With 8X oversampling + 8X unison plus 4X oscillator you will run 256 voices and grind the cpu to a halt.
 - In fact better to design your sound so it doesn't need oversampling.<br/>It's there for those *very* rare corner cases where it's both needed *and* makes a positive difference.
 
 TODO document interaction
