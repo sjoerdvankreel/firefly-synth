@@ -16,6 +16,9 @@ implement monophonic mode
 implement envelope retriggering
 
 demo synth:
+tag the v1.0 release
+social preview
+feature list
 re-build and re-test
 auto-generate the manual (param list)
 make some  "tutorial" presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
