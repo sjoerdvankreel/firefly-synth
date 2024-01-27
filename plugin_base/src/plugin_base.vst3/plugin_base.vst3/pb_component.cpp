@@ -181,13 +181,14 @@ pb_component::process(ProcessData& data)
   
   _engine.process();
   int unused_index = 0;
-  for (int e = 0; e < block.events.out.size(); e++)
-  {
-    auto const& event = block.events.out[e];
-    int tag = _engine.state().desc().param_mappings.index_to_tag[event.param];
-    queue = data.outputParameterChanges->addParameterData(tag, unused_index);
-    queue->addPoint(0, event.normalized.value(), unused_index);
-  }
+  if(data.outputParameterChanges)
+    for (int e = 0; e < block.events.out.size(); e++)
+    {
+      auto const& event = block.events.out[e];
+      int tag = _engine.state().desc().param_mappings.index_to_tag[event.param];
+      queue = data.outputParameterChanges->addParameterData(tag, unused_index);
+      queue->addPoint(0, event.normalized.value(), unused_index);
+    }
 
   _engine.release_block();
   return kResultOk;
