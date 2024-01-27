@@ -24,8 +24,8 @@ MIDI note number and velocity are also available as modulation sources in the pe
 
 # 10 Per-voice and 10 global LFOs
 - Phase adjustment
-- Smoothing parameter
 - Optional tempo sync
+- Smoothing parameter
 - Regular repeating or one-shot mode
 - Optional 5 horizontal and vertical skewing modes + corresponding control parameters
 - Various periodic waveforms + smooth noise, static noise and free-running static noise
