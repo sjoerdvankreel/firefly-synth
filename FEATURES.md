@@ -50,5 +50,13 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Random noise with seed and rate control (less = static, more = white noise) and built-in resonant filter
 - Extended Karplus-Strong with seed/rate/resonant filter for the initial excite stage and feedback and stretch parameters
 - Second Karplus-Strong mode which auto-adjusts the feedback according to a user-defined pitch ("midpoint") parameter
+- All generators can do unison with stereo spread parameter
+- All generators can be source or target in the Osc Mod AM matrix, and source in the Osc Mod FM matrix
+- Phased generators can be target in the Osc Mod FM matrix
+- Phased generators can do unison with detune and phase offset parameter
+- Phased generators can hard-sync with adjustable cross-over time from unsynced to synced
+- AM, FM and hard sync are per-unison-voice (so if you modulate AM/FM, better to have equal unison voices between oscs, although it will work with unequal voice counts by remapping the voices)
+- Don't turn everything to the max. With 8X oversampling + 8X unison plus 4X oscillator you will run 256 voices and grind the cpu to a halt.
+- In fact better to design your sound so it doesn't need oversampling. It's there for those *very* rare corner cases where it's both needed *and* makes a positive difference.
 
 TODO document interaction
