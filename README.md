@@ -15,7 +15,7 @@ registered in Europe and other countries.
 - Windows: tested on Windows 10. 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Explicitly supported hosts: Reaper, Bitwig, FLStudio. Please use a recent version.
 - Explicitly NOT supported hosts: 
--- Waveform, I have too many problems with it.
--- Renoise, untill this is fixed: https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684.
--- Cakewalk, I suspect it has the same problem as Renoise.
+    - Waveform, I have too many problems with it.
+    - Renoise, untill this is fixed: https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684.
+    - Cakewalk, I suspect it has the same problem as Renoise.
 - All other hosts, you'll just have to try and see.
