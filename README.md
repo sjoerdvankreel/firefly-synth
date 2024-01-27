@@ -58,8 +58,8 @@ I hope for some interaction with the community ;)
 - Linux: scripts/build.sh [Debug|RelWithDebInfo|Release]
 - Windows: scripts/build.bat [Debug|RelWithDebInfo|Release]
 
-You'll need CMake and a very recent c++ compiler,<br/>
-plus maybe on Linux a couple dependencies that I forgot about.<br/>
+You'll need CMake and a very recent c++ compiler,
+plus maybe on Linux a couple dependencies that I forgot about.
 The final output ends up in the /dist folder.
 
 Like noted above, the default Linux build does *not* enable AVX.
