@@ -101,6 +101,11 @@ FM section:
 - In any case, bipolar may cause the target osc phase to travel "backwards", gives a nice distinct sound
 - Also see Osc section for interaction with oversampling and unison
 
+# Voice and Global Audio Matrix
+- Routing from Oscs to FXs to voice mixdown / final mixdown
+- Modulatable gain and stereo balancing
+- Note: you can only route FXs "upwards" e.g. 1->2 but not 2->1
+
 
 
 
