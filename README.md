@@ -53,7 +53,17 @@ but as I only built on Ubuntu 22, there's bound to be compiler errors on very di
 even if it compiles on Fedora or Debian or (your favorite distro here), there's still no guarantee that it will actually work. Linux "support" ATM means
 I hope for some interaction with the community ;)
 
-TODO build from source
+# Build from source
+- git clone --recursive [this-project]
+- Linux: scripts/build.sh [Debug|RelWithDebInfo|Release]
+- Windows: scripts/build.bat [Debug|RelWithDebInfo|Release]
+
+You'll need CMake and a very recent c++ compiler,<br/>
+plus maybe on Linux a couple dependencies that I forgot about.<br/>
+The final output ends up in the /dist folder.
+
+Like noted above, the default Linux build does *not* enable AVX.
+To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synth/blob/main/plugin_base/cmake/plugin_base.config.cmake](https://github.com/sjoerdvankreel/firefly-synth/blob/main/plugin_base/cmake/plugin_base.config.cmake).
 
 # Dependencies
 - CLAP SDK: [https://github.com/free-audio/clap](https://github.com/free-audio/clap)
