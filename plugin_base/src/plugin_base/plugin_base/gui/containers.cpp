@@ -23,7 +23,7 @@ autofit_viewport::resized()
 extra_state_container::
 extra_state_container(plugin_gui* gui, std::string const& state_key):
 _gui(gui), _state_key(state_key)
-{ _gui->extra_state()->add_listener(state_key, this); }
+{ _gui->extra_state_()->add_listener(state_key, this); }
 
 void 
 extra_state_container::extra_state_changed()
