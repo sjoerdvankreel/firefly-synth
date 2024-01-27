@@ -17,16 +17,20 @@ This is a very bare-bones release, just to get something out there. In particula
 - There is no monophonic mode yet.<br/>The option to switch poly/mono is grayed out in the UI,<br/>as are the envelope trigger modes (legato, retrigger, multitrigger).
 - That being said, apart from mono-mode the thing is fully functional.
 
+Just to get a feeling for what all the knobs do, you can checkout the host demo files in
+[https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos).
+
 # What does it sound like?
 
 Pretty much like InfernalSynth. I reused most of the algorithms, although some of them got upgraded. In particular,
-the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play 
+the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play
 around with, and last-but-not-least, it can do actual (Chowning-style) FM synthesis. ATM I don't have demo's for
 kicks and percussion and such, but it comes with a noise generator and pitch envelopes, so those things are fully possible.
 
 - AM demo:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/am_bells_reaper_clap.mp3)
 - Karplus-Strong demo:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/karplus_strong_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/karplus_strong_reaper_clap.mp3)
 - Distortion demo:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_reaper_clap.mp3)
+- Noise generator demo:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/stereo_noise_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/stereo_noise_reaper_clap.mp3)
 
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
