@@ -11,20 +11,13 @@ clap (poly) modulation
 document the header files a bit
 
 v1.1:
+make a manual
+do some presets
 fx-only version
 implement monophonic mode
+auto-generate the param list
 implement envelope retriggering
 
 demo synth:
-tag the v1.0 release
 feature list
-must have a manual
-
-re-build and re-test
-auto-generate the manual (param list)
-make some  "tutorial" presets for all functionality (staircase osc, per-uni-voice AM, distortion etc etc, stereo-noise)
-test lin+bitwig
-document that fm only works for phase generators
-make a overview manual with all sections, interaction, ui context menus, modulatable params etc
-
-* get some linux folks to comment (ycollete?)
+tag the v1.0 release
