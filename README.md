@@ -9,6 +9,13 @@ VST is a trademark of Steinberg Media Technologies GmbH,
 registered in Europe and other countries.
 <br clear="left"/>
 
+# Project status
+This is a very bare-bones release, just to get something out there. In particular:
+- There is no manual.
+- There are NO presets. None.
+- There is no fx-only version.
+- There is no monophonic mode yet.<br/>The option to switch poly/mono is grayed out in the UI,<br/>as are the envelope trigger modes (legato, retrigger, multitrigger).
+
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
 - Linux: tested on Ubuntu 22 only. Linux support is highly experimental.<br/>That being said, and unlike InfernalSynth, it actually seems to work.
