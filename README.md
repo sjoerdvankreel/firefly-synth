@@ -2,6 +2,10 @@
 A semi-modular software synthesizer plugin.
 It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
 
+- Manual: [TODO there is no manual yet.]
+- Detailed parameter reference: [Also TODO.]
+- Feature list: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/FEATURES.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/FEATURES.md)
+
 ![Screenshot](static/screenshot.png)
 
 <img align="left" alt="VST logo" src="static/vst_logo.png">
