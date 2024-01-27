@@ -29,7 +29,8 @@ test win/lin clap/vst reaper/fruity/bitwig
 document that fm only works for phase generators
 place the vst3 compatible logo somewhere
 put the plug format in the header (vst/clap)
-make a screenshot
+linux release buildfiles end up in the debug folder? the binary is release mode still
+linux build is NOT avx, document that
 
 * get some linux folks to comment (ycollete?)
 * continuing

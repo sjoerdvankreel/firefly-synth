@@ -268,6 +268,11 @@ synth_topo()
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 
+  // The same font takes more size on linux ?
+#if (defined __linux__) || (defined  __FreeBSD__)
+  result->gui.font_height = 11;
+#endif
+
   result->gui.min_width = 1070;
   result->gui.aspect_ratio_width = 2;
   result->gui.aspect_ratio_height = 1;
