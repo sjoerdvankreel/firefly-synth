@@ -208,7 +208,11 @@ param_domain::normalized_to_plain_fast(normalized_value normalized) const
     return plain_value::from_real(std::pow(normalized_real, exp) * range + min);
   }
   else
-    static_assert(dependent_always_false_v<0>);
+  {
+    // cannot got a static_assert here that works on both msvc and gcc
+    assert(false);
+    return {};
+  }
 }
 
 }

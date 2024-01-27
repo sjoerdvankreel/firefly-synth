@@ -9,7 +9,7 @@ namespace plugin_base {
 void 
 param_dsp::validate(plugin_topo const& plugin, module_topo const& module, int module_slot) const
 {
-  param_automate automate = automate_selector(module_slot);
+  param_automate automate = automate_selector_(module_slot);
 
   if (automate != param_automate::none)
     assert(direction == param_direction::input);

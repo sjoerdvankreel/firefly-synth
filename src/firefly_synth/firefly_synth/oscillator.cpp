@@ -709,7 +709,11 @@ float osc_engine::generate_static(int voice, float sr, float freq_hz, float res,
   else if constexpr (SVFType == rand_svf_peq)
     _static_svfs[voice].init_peq(w, res * max_res);
   else
-    static_assert(dependent_always_false_v<0>);
+  {
+    // cannot got a static_assert here that works on both msvc and gcc
+    assert(false);
+    return {};
+  }
 
   result = _static_svfs[voice].next(0, result);
   result = _random_dcs[voice].next(0, result);
