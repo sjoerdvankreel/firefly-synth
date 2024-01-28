@@ -52,6 +52,9 @@ struct topo_info final {
   int slot_count;
   topo_tag tag;
 
+  // for reference generator
+  std::string description;
+
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_info);
 };

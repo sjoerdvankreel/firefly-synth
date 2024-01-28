@@ -21,3 +21,5 @@ implement envelope retriggering
 demo synth:
 feature list
 tag the v1.0 release
+
+param_ref=>reference_generator

@@ -170,6 +170,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1, 1 }, { 1, gui_dimension::auto_size } })));
   result.gui.autofit_column = 1;
+  result.info.description = "DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.";
 
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_graph_engine;
