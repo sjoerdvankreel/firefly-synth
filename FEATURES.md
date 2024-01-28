@@ -11,7 +11,7 @@ That means, if you change your DPI settings, you'll have to resize manually. Jus
 
 # GUI
 - Right-click empty space for the undo/redo menu.
-- Right-click module number, matrix header, or first matrix column pop-up various context menus to ease editing a bit.
+- Right-click module number, matrix header, or first matrix column pops up various context menus to ease editing a bit.
 - Hover a parameter to see a more detailed description popup.
 
 A knob with a circle in it or a slider with a small dot in it means it can be modulated.
@@ -129,4 +129,4 @@ Skew modes:
 - Off: does nothing. Very CPU efficient. So, use it instead of one of the other ones with skew factor set so it does nothing.
 - Lin: Linear skewing. Works well on saw/sqr/tri waves.
 - ScU/ScB: Scale Bi/Unipolar.
-- XpU/XpB: Exponential unipolar/bipolar skew. Works well with sine/cosine/sin-cos/cos-sin etc. 
+- XpU/XpB: Exponential unipolar/bipolar skew. Works well with sine/cosine/sin-cos/cos-sin etc.
