@@ -8,8 +8,8 @@
 #if (defined WIN32)
 #include <Windows.h>
 #elif (defined __linux__) || (defined __FreeBSD__)
-#else
 #include <dlfcn.h>
+#else
 #error
 #endif
 
