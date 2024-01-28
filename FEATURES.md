@@ -45,6 +45,7 @@ MIDI note number and velocity are also available as modulation sources in the pe
 - Stair-stepping any periodic waveform
 - Optional 5 horizontal and 5 vertical skewing modes + corresponding control parameters
 - Various periodic waveforms + smooth noise, static noise and free-running static noise
+- See bottom of this document for shape and skew modes
 
 # 4 Oscillators
 - Phased: anti-aliased DSF generator
@@ -78,6 +79,7 @@ Per-voice and global:
     - Various periodic waveshaper functions + foldback distortion
     - Oversampling factor (here you might really need it if you go crazy)
     - Optional 5 before-shape (X) and 5 after-shape (Y) skewing modes + corresponding control parameters
+    - See bottom of this document for shape and skew modes
 
 The distortion modes affect where the filter is placed.<br/>
 Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>
@@ -114,3 +116,17 @@ FM section:
 - Min/Max: controls the modulation amount.
 - Op(erator): Multiply, Add, Add-Bipolar.<br/>Subtypes absolute, relative (to modulation target) and stacked (relative to all previous operators).
 - If you don't want the modulation signal to clip, only use the "stacked" versions.
+
+# Shape and skew for distortion and LFO's
+Shape modes:
+- Saw/sqr/tri/sin - I hope these are obvious.
+- SS, SC, CS, CC, SSS, SSC, ... etc => sine-sine, sine-cosine, cosine-sine, cosine-cosine, sine-sine-sine... etc
+- Fold (Distortion) => foldback shaper
+- Smooth (LFO) => this a periodic smooth noise generator. Being periodic it can be phase-adjusted etc. It's a bit like Perlin noise.
+- Static, Static free-running: random forms with seed and step-count. Free-running will (for all practical purposes) never repeat.
+
+Skew modes:
+- Off: does nothing. Very CPU efficient. So, use it instead of one of the other ones with skew factor set so it does nothing.
+- Lin: Linear skewing. Works well on saw/sqr/tri waves.
+- ScU/ScB: Scale Bi/Unipolar.
+- XpU/XpB: Exponential unipolar/bipolar skew. Works well with sine/cosine/sin-cos/cos-sin etc.
