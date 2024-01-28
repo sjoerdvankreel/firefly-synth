@@ -14,7 +14,8 @@ That means, if you change your DPI settings, you'll have to resize manually. Jus
 - Right-click module number, matrix header, or first matrix column pops up various context menus to ease editing a bit.
 - Hover a parameter to see a more detailed description popup.
 
-A knob with a circle in it or a slider with a small dot in it means it can be modulated.
+A knob with a circle in it or a slider with a small dot in it means it can be modulated by the CV matrices.
+These are exactly the parameters that should eventually (not supported yet) react to CLAP modulation.
 Nearly everything can be automated. Discrete valued parameters are automated per-block (global)
 or at-voice-start. Continuous-valued parameters are mostly sample-accurate.
 
