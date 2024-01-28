@@ -70,7 +70,7 @@ main(int argc, char** argv)
     goto end; }
 
   if ((topo_destroy = library_get_address(library, "pb_plugin_topo_destroy")) == nullptr) {
-    err = "Library does not export pb_plugin_topo_create.";
+    err = "Library does not export pb_plugin_topo_destroy.";
     goto end; }
 
   if ((topo = ((pb_plugin_topo_create)(topo_create))()) == nullptr) {
