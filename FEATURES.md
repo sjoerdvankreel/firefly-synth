@@ -123,7 +123,7 @@ Shape modes:
 - SS, SC, CS, CC, SSS, SSC, ... etc => sine-sine, sine-cosine, cosine-sine, cosine-cosine, sine-sine-sine... etc
 - Fold (Distortion) => foldback shaper
 - Smooth (LFO) => this a periodic smooth noise generator. Being periodic it can be phase-adjusted etc. It's a bit like Perlin noise.
-- Static, Static free-running: random forms with seed and step-count. Free-running will (for all practical purposes) never repeat.
+- Static, Static free-running (LFO): random forms with seed and step-count. Free-running will (for all practical purposes) never repeat.
 
 Skew modes:
 - Off: does nothing. Very CPU efficient. So, use it instead of one of the other ones with skew factor set so it does nothing.
