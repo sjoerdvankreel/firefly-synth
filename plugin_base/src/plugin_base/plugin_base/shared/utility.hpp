@@ -20,6 +20,14 @@
   PB_PREVENT_ACCIDENTAL_COPY(x); \
   x() = default
 
+#if (WIN32)
+#define PB_EXPORT __declspec(dllexport)
+#elif (defined __linux__) || (defined __FreeBSD__)
+#define PB_EXPORT __attribute__((visibility("default")))
+#else
+#error
+#endif
+
 #define PB_STR_(x) #x
 #define PB_STR(x) PB_STR_(x)
 #define PB_VERSION_TEXT(major, minor) PB_STR(major.minor)

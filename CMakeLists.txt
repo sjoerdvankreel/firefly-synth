@@ -13,7 +13,7 @@ include(plugin_base.config)
 include(plugin_base.utility)
 
 add_subdirectory(plugin_base)
-declare_local_target(STATIC firefly_synth firefly_synth)
+declare_local_target(FALSE STATIC firefly_synth firefly_synth)
 target_include_directories(firefly_synth PRIVATE plugin_base/src/plugin_base)
 
 declare_vst3_target(${PLUGIN_NAME} firefly_synth.vst3 firefly_synth 0)

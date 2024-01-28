@@ -50,6 +50,12 @@ component_factory(void*)
   return static_cast<IAudioProcessor*>(result);
 }
 
+// for param list generator
+extern "C" PB_EXPORT plugin_topo const* 
+pb_plugin_topo_create() { return synth_topo().release(); }
+extern "C" PB_EXPORT void
+pb_plugin_topo_destroy(plugin_topo const* topo) { delete topo; }
+
 BEGIN_FACTORY_DEF(FF_SYNTH_VENDOR_NAME, FF_SYNTH_VENDOR_URL, FF_SYNTH_VENDOR_MAIL)
   DEF_CLASS2(
     INLINE_UID_FROM_FUID(fuid_from_text(FF_SYNTH_ID)), PClassInfo::kManyInstances,

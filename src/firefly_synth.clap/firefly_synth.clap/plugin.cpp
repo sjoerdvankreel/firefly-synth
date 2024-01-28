@@ -67,3 +67,9 @@ clap_plugin_entry_t const clap_entry =
   .deinit = deinit,
   .get_factory = get_plugin_factory
 };
+
+// for param list generator
+extern "C" PB_EXPORT plugin_topo const*
+pb_plugin_topo_create() { return synth_topo().release(); }
+extern "C" PB_EXPORT void
+pb_plugin_topo_destroy(plugin_topo const* topo) { delete topo; }
