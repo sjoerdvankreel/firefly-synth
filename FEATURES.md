@@ -129,4 +129,4 @@ Skew modes:
 - Off: does nothing. Very CPU efficient. So, use it instead of one of the other ones with skew factor set so it does nothing.
 - Lin: Linear skewing. Works well on saw/sqr/tri waves.
 - ScU/ScB: Scale Bi/Unipolar.
-- XpU/XpB: Exponential unipolar/bipolar skew. Works well with sine/cosine/sin-cos/cos-sin etc.
+- XpU/XpB: Exponential unipolar/bipolar skew. Works well with sine/cosine/sin-cos/cos-sin etc. 
