@@ -5,7 +5,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - Detailed parameter reference: [TODO.]
 - Manual: [TODO there is no manual yet.] The feature list doubles as a manual for now.
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
-- Feature list: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/FEATURES.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/FEATURES.md)
+- Feature list: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature_list.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature_list.md)
 
 Since there's no manual yet, I'll just write it down here:
 - Right-click some empty space pops up the undo/redo menu.
