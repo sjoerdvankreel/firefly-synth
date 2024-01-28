@@ -44,7 +44,6 @@ kicks and percussion and such, but it comes with a noise generator and pitch env
 
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
-- Mac: still no, sorry.
 - Linux: tested on Ubuntu 22 only. Linux support is highly experimental.<br/>But, unlike InfernalSynth, it actually seems to work.
 - Windows: tested on Windows 10. Windows 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Explicitly supported hosts: Reaper, Bitwig, FLStudio. Please use a recent version.
