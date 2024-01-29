@@ -215,6 +215,9 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   mode.gui.submenu->add_submenu("Repeat", { mode_rate, mode_sync });
   mode.gui.submenu->add_submenu("One Shot", { mode_rate_one, mode_sync_one });
   mode.gui.submenu->add_submenu("Phase One Shot", { mode_rate_phs, mode_sync_phs });
+  mode.info.description = std::string("Selects time or tempo-synced and repeating or one-shot mode. ") + 
+    "In regular one-shot mode, the LFO stays at it's end value after exactly 1 cycle. " + 
+    "In phase one-shot mode, the end value takes the phase offset parameter into account.";
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", "Rate", true, false, param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
