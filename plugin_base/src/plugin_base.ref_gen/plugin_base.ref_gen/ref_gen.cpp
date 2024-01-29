@@ -14,6 +14,8 @@
 #error
 #endif
 
+// autogenerates module and parameter reference based on topology
+
 using namespace plugin_base;
 typedef plugin_topo const*(*pb_plugin_topo_create)();
 typedef void(*pb_plugin_topo_destroy)(plugin_topo const*);
@@ -58,7 +60,7 @@ main(int argc, char** argv)
   plugin_topo const* topo = nullptr;
 
   if(argc != 3) {
-    err = "Usage: param_ref_gen path_to_library path_to_output.html."; 
+    err = "Usage: ref_gen path_to_library path_to_output.html."; 
     goto end; }
   
   if(!std::filesystem::exists(argv[1])) {
@@ -105,11 +107,26 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   std::string name_and_version = topo.tag.name + " " + 
     std::to_string(topo.version_major) + "." + 
     std::to_string(topo.version_minor);
+  
   std::string title = name_and_version + " Reference";
+  std::string foreground = "#" + topo.gui.colors.control_text.toDisplayString(false).toStdString();
+  std::string background = "#" + topo.gui.colors.control_background.toDisplayString(false).toStdString();
+  std::string color1 = "#" + topo.gui.reference_colors.color1.toDisplayString(false).toStdString();
+  std::string color2 = "#" + topo.gui.reference_colors.color2.toDisplayString(false).toStdString();
+
+  std::string css = "th, td { padding: 3px; }";
+  css += "h1 { color: " + color1 + "; }";
+  css += "th { color: " + color2 + "; }";
+  css += "html { position: relative; width: 1024px; margin: auto; }";
+  css += "table, th, td { border: 1px solid gray; border-collapse: collapse; text-align: left; }";
+  css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
+  css += "tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }";
+  css += "body { font-family: Verdana; background: " + background + "; color: " + foreground + "; }";
+
   out << "<html>\n";
   out << "<head>\n";
   out << "<title>" << title << "</title>\n";
-  out << "<style>html { position: relative; width: 1024px; margin: auto; } body { font-family: Verdana; } table, th, td { border: 1px solid gray; border-collapse: collapse; text-align: left; } th, td { padding: 3px; }</style>\n";
+  out << "<style>" + css + "</style>\n";
   out << "</head>\n";
   out << "<body>\n";
   generate_modules_ref(topo, out);

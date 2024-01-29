@@ -243,10 +243,11 @@ std::unique_ptr<plugin_topo>
 synth_topo()
 {
   Colour custom_color(0xFFFF4488);
+  Colour global_color(0xFF4488FF);
   gui_colors custom_colors(make_section_colors(custom_color));
   gui_colors monitor_colors(make_section_colors(custom_color));
   gui_colors voice_colors(make_section_colors(Colour(0xFFFF8844)));
-  gui_colors global_colors(make_section_colors(Colour(0xFF4488FF)));
+  gui_colors global_colors(make_section_colors(global_color));
   gui_colors matrix_colors(make_section_colors(Colour(0xFF8888FF)));
   custom_colors.edit_text = custom_color;
   monitor_colors.control_text = custom_color;
@@ -267,6 +268,8 @@ synth_topo()
   result->midi_smooth_param = master_in_param_midi_smooth;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
+  result->gui.reference_colors.color1 = custom_color;
+  result->gui.reference_colors.color2 = global_color;
 
   // The same font takes more size on linux ?
 #if (defined __linux__) || (defined  __FreeBSD__)
