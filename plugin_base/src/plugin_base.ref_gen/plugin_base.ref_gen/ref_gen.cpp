@@ -149,11 +149,11 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
   out << "<h2>Module Overview</h2>\n";
   out << "<table>\n";
   out << "<tr>\n";
-  out << "<th>Order</th>\n";
+  out << "<th>#</th>\n";
   out << "<th>Name</th>\n";
-  out << "<th>Short name</th>\n";
+  out << "<th>Short</th>\n";
   out << "<th>Stage</th>\n";
-  out << "<th>Count</th>\n";
+  out << "<th>Num</th>\n";
   out << "<th>Description</th>\n";
   out << "</tr>\n";
 
@@ -192,10 +192,10 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<table>\n";
       out << "<tr>\n";
       out << "<th>Name</th>\n";
-      out << "<th>Short name</th>\n";
+      out << "<th>Short</th>\n";
       out << "<th>Section</th>\n";
-      out << "<th>Count</th>\n";
-      out << "<th>Direction</th>\n";
+      out << "<th>Num</th>\n";
+      out << "<th>Dir</th>\n";
       out << "<th>Rate</th>\n";
       out << "<th>Automate</th>\n";
       out << "<th>Min</th>\n";
