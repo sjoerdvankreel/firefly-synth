@@ -118,11 +118,11 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   std::string color3 = "#" + topo.gui.reference_colors.color3.toDisplayString(false).toStdString();
 
   std::string css = "th, td { padding: 3px; }";
-  css += "h2 { color: " + color1 + "; }";
-  css += "h3 { color: " + color3 + "; }";
+  css += "h2 { font-size: 17px; color: " + color1 + "; }";
+  css += "h3 { font-size: 15px; color: " + color3 + "; }";
   css += "th { color: " + color2 + "; }";
   css += "html { position: relative; width: 1024px; margin: auto; }";
-  css += "table, th, td { border: 1px solid gray; border-collapse: collapse; text-align: left; }";
+  css += "table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }";
   css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
   css += "tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }";
   css += "body { font-family: Verdana; background: " + background + "; color: " + foreground + "; }";
