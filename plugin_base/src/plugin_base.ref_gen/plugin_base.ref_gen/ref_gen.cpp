@@ -191,6 +191,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<th>Short name</th>\n";
       out << "<th>Section</th>\n";
       out << "<th>Count</th>\n";
+      out << "<th>Direction</th>\n";
       out << "<th>Rate</th>\n";
       out << "<th>Automate</th>\n";
       out << "<th>Description</th>\n";
@@ -201,6 +202,14 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       {
         auto const& param = module.params[p];
         auto const& short_name = param.info.tag.short_name.size()? param.info.tag.short_name: param.info.tag.name;
+
+        std::string direction = "";
+        switch (param.dsp.direction)
+        {
+        case param_direction::input: direction = "Input"; break;
+        case param_direction::output: direction = "Output"; break;
+        default: assert(false); break;
+        }
 
         std::string rate = "";
         switch (param.dsp.rate)
@@ -227,6 +236,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         out << "<td>" << short_name << "</td>\n";
         out << "<td>" << module.sections[param.gui.section].tag.name << "</td>\n";
         out << "<td>" << param.info.slot_count << "</td>\n";
+        out << "<td>" << direction << "</td>\n";
         out << "<td>" << rate << "</td>\n";
         out << "<td>" << automate << "</td>\n";
         out << "<td>" << param.info.description << "</td>\n";
