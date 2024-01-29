@@ -54,7 +54,7 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)) }),
       make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
-  result.info.description = "Master CV section with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
+  result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
