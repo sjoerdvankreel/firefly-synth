@@ -138,10 +138,13 @@ audio_matrix_topo(
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto const voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "Voice Audio", "V.Audio", true, true, module_vaudio_matrix, 1);
-  auto const global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "Global Audio", "G.Audio", true, true, module_gaudio_matrix, 1);
+  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "Voice Audio", "V.Audio", true, true, module_vaudio_matrix, 1);
+  voice_info.description = "Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.";
+  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "Global Audio", "G.Audio", true, true, module_gaudio_matrix, 1);
+  global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
+
   int this_module = global? module_gaudio_matrix: module_vaudio_matrix;
   auto source_matrix = make_audio_matrix(sources, 0);
   auto target_matrix = make_audio_matrix(targets, 0);
