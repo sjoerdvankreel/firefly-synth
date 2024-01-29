@@ -119,8 +119,8 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
 
   std::string css = "th, td { padding: 3px; }";
   css += "h2 { color: " + color1 + "; }";
-  css += "h3 { color: " + color2 + "; }";
-  css += "th { color: " + color3 + "; }";
+  css += "h3 { color: " + color3 + "; }";
+  css += "th { color: " + color2 + "; }";
   css += "html { position: relative; width: 1024px; margin: auto; }";
   css += "table, th, td { border: 1px solid gray; border-collapse: collapse; text-align: left; }";
   css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
