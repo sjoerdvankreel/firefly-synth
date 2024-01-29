@@ -155,19 +155,22 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
 
   int order = 1;
   for(int m = 0; m < topo.modules.size(); m++)
-    if(topo.modules[m].gui.visible)
+  {
+    auto const& module = topo.modules[m];
+    if(module.gui.visible)
     {
       out << "<tr>\n";
       out << "<td>" << std::to_string(order++) << "</td>\n";
-      out << "<td>" << topo.modules[m].info.tag.name << "</td>\n";
-      out << "<td>" << topo.modules[m].info.tag.short_name << "</td>\n";
-      out << "<td>" << (topo.modules[m].dsp.stage == module_stage::voice
-        ? "Voice" : topo.modules[m].dsp.stage == module_stage::input
+      out << "<td>" << module.info.tag.name << "</td>\n";
+      out << "<td>" << module.info.tag.short_name << "</td>\n";
+      out << "<td>" << (module.dsp.stage == module_stage::voice
+        ? "Voice" : module.dsp.stage == module_stage::input
         ? "Global before voice": "Global after voice") << "</td>\n";
-      out << "<td>" << topo.modules[m].info.slot_count << "</td>\n";
-      out << "<td>" << topo.modules[m].info.description << "</td>\n";
+      out << "<td>" << module.info.slot_count << "</td>\n";
+      out << "<td>" << module.info.description << "</td>\n";
       out << "</tr>\n";
     }
+  }
 
   out << "</table>\n";
 }
@@ -177,9 +180,11 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
 {
   out << "<h2>Parameter overview</h2>\n";
   for(int m = 0; m < topo.modules.size(); m++)
-    if (topo.modules[m].gui.visible)
+  {
+    auto const& module = topo.modules[m];
+    if (module.gui.visible)
     {
-      out << "<h3>" << topo.modules[m].info.tag.name << "</h3>\n";
+      out << "<h3>" << module.info.tag.name << "</h3>\n";
       out << "<table>\n";
       out << "<tr>\n";
       out << "<th>Name</th>\n";
@@ -187,15 +192,18 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<th>Count</th>\n";
       out << "<th>Description</th>\n";
       out << "</tr>\n";
-      for (int p = 0; p < topo.modules[m].params.size(); p++)
+      for (int p = 0; p < module.params.size(); p++)
       {
+        auto const& param = module.params[p];
+        auto const& short_name = param.info.tag.short_name.size()? param.info.tag.short_name: param.info.tag.name;
         out << "<tr>\n";
-        out << "<td>" << topo.modules[m].params[p].info.tag.name << "</td>\n";
-        out << "<td>" << topo.modules[m].params[p].info.tag.short_name << "</td>\n";
-        out << "<td>" << topo.modules[m].params[p].info.slot_count << "</td>\n";
-        out << "<td>" << topo.modules[m].params[p].info.description << "</td>\n";
+        out << "<td>" << param.info.tag.name << "</td>\n";
+        out << "<td>" << short_name << "</td>\n";
+        out << "<td>" << param.info.slot_count << "</td>\n";
+        out << "<td>" << param.info.description << "</td>\n";
         out << "</tr>\n";
       }
       out << "</table>\n";
     }
+  }
 }
