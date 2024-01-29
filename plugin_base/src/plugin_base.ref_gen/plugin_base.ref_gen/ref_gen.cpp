@@ -118,16 +118,17 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   std::string color3 = "#" + topo.gui.reference_colors.color3.toDisplayString(false).toStdString();
   std::string color4 = "#" + topo.gui.reference_colors.color4.toDisplayString(false).toStdString();
 
-  std::string css = "th, td { padding: 3px; }";
-  css += "h1 { font-size: 19px; color: " + color1 + "; }";
-  css += "h2 { font-size: 17px; color: " + color3 + "; }";
-  css += "h3 { font-size: 15px; color: " + color2 + "; }";
+  std::string css = "";
+  css += "th, td { padding: 3px; }";
   css += "th { color: " + color4 + "; }";
+  css += "h1 { font-size: 19px; color: " + color1 + "; }";
+  css += "h2 { font-size: 17px; color: " + color2 + "; }";
+  css += "h3 { font-size: 15px; color: " + color3 + "; }";
   css += "html { position: relative; width: 1024px; margin: auto; }";
-  css += "table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }";
-  css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
-  css += "tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }";
   css += "body { font-family: Verdana; background: " + background + "; color: " + foreground + "; }";
+  css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
+  css += "table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }";
+  css += "tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }";
 
   out << "<html>\n";
   out << "<head>\n";
@@ -145,7 +146,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
 static void
 generate_modules_ref(plugin_topo const& topo, std::ostream& out)
 {
-  out << "<h2>Module overview</h2>\n";
+  out << "<h2>Module Overview</h2>\n";
   out << "<table>\n";
   out << "<tr>\n";
   out << "<th>Order</th>\n";
@@ -181,7 +182,7 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
 static void
 generate_params_ref(plugin_topo const& topo, std::ostream& out)
 {
-  out << "<h2>Parameter overview</h2>\n";
+  out << "<h2>Parameter Overview</h2>\n";
   for(int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
