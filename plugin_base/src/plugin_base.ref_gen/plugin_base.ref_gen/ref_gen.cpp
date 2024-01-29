@@ -180,5 +180,22 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
     if (topo.modules[m].gui.visible)
     {
       out << "<h3>" << topo.modules[m].info.tag.name << "</h3>\n";
+      out << "<table>\n";
+      out << "<tr>\n";
+      out << "<th>Name</th>\n";
+      out << "<th>Short name</th>\n";
+      out << "<th>Count</th>\n";
+      out << "<th>Description</th>\n";
+      out << "</tr>\n";
+      for (int p = 0; p < topo.modules[m].params.size(); p++)
+      {
+        out << "<tr>\n";
+        out << "<td>" << topo.modules[m].params[p].info.tag.name << "</td>\n";
+        out << "<td>" << topo.modules[m].params[p].info.tag.short_name << "</td>\n";
+        out << "<td>" << topo.modules[m].params[p].info.slot_count << "</td>\n";
+        out << "<td>" << topo.modules[m].params[p].info.description << "</td>\n";
+        out << "</tr>\n";
+      }
+      out << "</table>\n";
     }
 }
