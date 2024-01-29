@@ -47,6 +47,8 @@ library_get_address(void* handle, char const* sym)
 static void 
 generate_plugin_ref(plugin_topo const& topo, std::ostream& out);
 static void
+generate_params_ref(plugin_topo const& topo, std::ostream& out);
+static void
 generate_modules_ref(plugin_topo const& topo, std::ostream& out);
 
 int 
@@ -113,10 +115,12 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   std::string background = "#" + topo.gui.colors.control_background.toDisplayString(false).toStdString();
   std::string color1 = "#" + topo.gui.reference_colors.color1.toDisplayString(false).toStdString();
   std::string color2 = "#" + topo.gui.reference_colors.color2.toDisplayString(false).toStdString();
+  std::string color3 = "#" + topo.gui.reference_colors.color3.toDisplayString(false).toStdString();
 
   std::string css = "th, td { padding: 3px; }";
-  css += "h1 { color: " + color1 + "; }";
-  css += "th { color: " + color2 + "; }";
+  css += "h2 { color: " + color1 + "; }";
+  css += "h3 { color: " + color2 + "; }";
+  css += "th { color: " + color3 + "; }";
   css += "html { position: relative; width: 1024px; margin: auto; }";
   css += "table, th, td { border: 1px solid gray; border-collapse: collapse; text-align: left; }";
   css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
@@ -130,6 +134,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   out << "</head>\n";
   out << "<body>\n";
   generate_modules_ref(topo, out);
+  generate_params_ref(topo, out);
   out << "</body>\n";
   out << "</html>\n";
 }
@@ -137,7 +142,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
 static void
 generate_modules_ref(plugin_topo const& topo, std::ostream& out)
 {
-  out << "<h1>Module Overview</h1>\n";
+  out << "<h2>Module overview</h2>\n";
   out << "<table>\n";
   out << "<tr>\n";
   out << "<th>Order</th>\n";
@@ -165,4 +170,15 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
     }
 
   out << "</table>\n";
+}
+
+static void
+generate_params_ref(plugin_topo const& topo, std::ostream& out)
+{
+  out << "<h2>Parameter overview</h2>\n";
+  for(int m = 0; m < topo.modules.size(); m++)
+    if (topo.modules[m].gui.visible)
+    {
+      out << "<h3>" << topo.modules[m].info.tag.name << "</h3>\n";
+    }
 }

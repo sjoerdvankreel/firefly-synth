@@ -24,3 +24,4 @@ tag the v1.0 release
 
 param_ref=>reference_generator
 rename feature_list
+check if the synth still actually works 
