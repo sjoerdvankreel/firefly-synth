@@ -64,6 +64,7 @@ struct param_domain final {
   double min;
   double max;
   double exp;
+  double midpoint;
   int precision;
   int display_offset;
   std::string unit;

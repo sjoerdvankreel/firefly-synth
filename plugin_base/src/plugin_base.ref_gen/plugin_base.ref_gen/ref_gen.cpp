@@ -165,7 +165,7 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
       out << "<td>" << module.info.tag.short_name << "</td>\n";
       out << "<td>" << (module.dsp.stage == module_stage::voice
         ? "Voice" : module.dsp.stage == module_stage::input
-        ? "Global before voice": "Global after voice") << "</td>\n";
+        ? "Before voice": "After voice") << "</td>\n";
       out << "<td>" << module.info.slot_count << "</td>\n";
       out << "<td>" << module.info.description << "</td>\n";
       out << "</tr>\n";
@@ -197,6 +197,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<th>Min</th>\n";
       out << "<th>Max</th>\n";
       out << "<th>Default</th>\n";
+      out << "<th>Log Mid</th>\n";
       out << "<th>Description</th>\n";
       out << "</tr>\n";
 
@@ -239,6 +240,10 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         std::string max_value = param.domain.raw_to_text(false, param.domain.max);
         std::string default_value = param.domain.raw_to_text(false, param.domain.default_raw(reference_module_slot, reference_param_slot));
 
+        std::string log_mid_value = "N/A";
+        if(param.domain.type == domain_type::log)
+          log_mid_value = param.domain.raw_to_text(false, param.domain.midpoint);
+
         out << "<tr>\n";
         out << "<td>" << param.info.tag.name << "</td>\n";
         out << "<td>" << short_name << "</td>\n";
@@ -250,6 +255,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         out << "<td>" << min_value << "</td>\n";
         out << "<td>" << max_value << "</td>\n";
         out << "<td>" << default_value << "</td>\n";
+        out << "<td>" << log_mid_value << "</td>\n";
         out << "<td>" << param.info.description << "</td>\n";
         out << "</tr>\n";
       }
