@@ -124,7 +124,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   css += "h1 { font-size: 19px; color: " + color1 + "; }";
   css += "h2 { font-size: 17px; color: " + color2 + "; }";
   css += "h3 { font-size: 15px; color: " + color3 + "; }";
-  css += "html { position: relative; width: 1024px; margin: auto; }";
+  css += "html { position: relative; max-width: 1440px; margin: auto; }";
   css += "body { font-family: Verdana; background: " + background + "; color: " + foreground + "; }";
   css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
   css += "table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }";
