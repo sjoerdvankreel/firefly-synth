@@ -189,17 +189,46 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<tr>\n";
       out << "<th>Name</th>\n";
       out << "<th>Short name</th>\n";
+      out << "<th>Section</th>\n";
       out << "<th>Count</th>\n";
+      out << "<th>Rate</th>\n";
+      out << "<th>Automate</th>\n";
       out << "<th>Description</th>\n";
       out << "</tr>\n";
+
+      int automate_module_slot = module.info.slot_count == 1 ? 0 : 1;
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         auto const& short_name = param.info.tag.short_name.size()? param.info.tag.short_name: param.info.tag.name;
+
+        std::string rate = "";
+        switch (param.dsp.rate)
+        {
+        case param_rate::block: rate = "Block"; break;
+        case param_rate::voice: rate = "Voice"; break;
+        case param_rate::accurate: rate = "Accurate"; break;
+        default: assert(false); break;
+        }
+
+        std::string automate = "";
+        auto automate_value = param.dsp.automate_selector_(automate_module_slot);
+        switch (automate_value)
+        {
+        case param_automate::none: automate = "None"; break;
+        case param_automate::midi: automate = "MIDI"; break;
+        case param_automate::automate: automate = "Automate"; break;
+        case param_automate::modulate: automate = "Modulate"; break;
+        default: assert(false); break;
+        }
+
         out << "<tr>\n";
         out << "<td>" << param.info.tag.name << "</td>\n";
         out << "<td>" << short_name << "</td>\n";
+        out << "<td>" << module.sections[param.gui.section].tag.name << "</td>\n";
         out << "<td>" << param.info.slot_count << "</td>\n";
+        out << "<td>" << rate << "</td>\n";
+        out << "<td>" << automate << "</td>\n";
         out << "<td>" << param.info.description << "</td>\n";
         out << "</tr>\n";
       }
