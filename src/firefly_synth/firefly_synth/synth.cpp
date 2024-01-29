@@ -273,6 +273,7 @@ synth_topo()
   result->gui.reference_colors.color1 = custom_color;
   result->gui.reference_colors.color2 = global_color;
   result->gui.reference_colors.color3 = voice_color;
+  result->gui.reference_colors.color4 = matrix_color;
 
   // The same font takes more size on linux ?
 #if (defined __linux__) || (defined  __FreeBSD__)

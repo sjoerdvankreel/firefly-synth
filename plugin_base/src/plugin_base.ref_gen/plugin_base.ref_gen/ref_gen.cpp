@@ -110,17 +110,19 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
     std::to_string(topo.version_major) + "." + 
     std::to_string(topo.version_minor);
   
-  std::string title = name_and_version + " Reference";
+  std::string title = name_and_version + " Reference Manual";
   std::string foreground = "#" + topo.gui.colors.control_text.toDisplayString(false).toStdString();
   std::string background = "#" + topo.gui.colors.control_background.toDisplayString(false).toStdString();
   std::string color1 = "#" + topo.gui.reference_colors.color1.toDisplayString(false).toStdString();
   std::string color2 = "#" + topo.gui.reference_colors.color2.toDisplayString(false).toStdString();
   std::string color3 = "#" + topo.gui.reference_colors.color3.toDisplayString(false).toStdString();
+  std::string color4 = "#" + topo.gui.reference_colors.color4.toDisplayString(false).toStdString();
 
   std::string css = "th, td { padding: 3px; }";
-  css += "h2 { font-size: 17px; color: " + color1 + "; }";
-  css += "h3 { font-size: 15px; color: " + color3 + "; }";
-  css += "th { color: " + color2 + "; }";
+  css += "h1 { font-size: 19px; color: " + color1 + "; }";
+  css += "h2 { font-size: 17px; color: " + color3 + "; }";
+  css += "h3 { font-size: 15px; color: " + color2 + "; }";
+  css += "th { color: " + color4 + "; }";
   css += "html { position: relative; width: 1024px; margin: auto; }";
   css += "table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }";
   css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
@@ -133,6 +135,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   out << "<style>" + css + "</style>\n";
   out << "</head>\n";
   out << "<body>\n";
+  out << "<h1>" << title << "</h1>\n";
   generate_modules_ref(topo, out);
   generate_params_ref(topo, out);
   out << "</body>\n";
