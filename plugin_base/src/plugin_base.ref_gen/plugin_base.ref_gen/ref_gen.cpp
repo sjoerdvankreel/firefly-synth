@@ -140,6 +140,7 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
   out << "<h1>Module Overview</h1>\n";
   out << "<table>\n";
   out << "<tr>\n";
+  out << "<th>Order</th>\n";
   out << "<th>Name</th>\n";
   out << "<th>Short name</th>\n";
   out << "<th>Stage</th>\n";
@@ -147,17 +148,19 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
   out << "<th>Description</th>\n";
   out << "</tr>\n";
 
-  auto sorted_modules = topo.modules;
-  std::sort(sorted_modules.begin(), sorted_modules.end(), [](auto const& l, auto const& r) { return l.info.tag.name < r.info.tag.name; });
-  for(int m = 0; m < sorted_modules.size(); m++)
-    if(sorted_modules[m].gui.visible)
+  int order = 1;
+  for(int m = 0; m < topo.modules.size(); m++)
+    if(topo.modules[m].gui.visible)
     {
       out << "<tr>\n";
-      out << "<td>" << sorted_modules[m].info.tag.name << "</td>\n";
-      out << "<td>" << sorted_modules[m].info.tag.short_name << "</td>\n";
-      out << "<td>" << (sorted_modules[m].dsp.stage == module_stage::voice ? "Voice" : "Global") << "</td>\n";
-      out << "<td>" << sorted_modules[m].info.slot_count << "</td>\n";
-      out << "<td>" << sorted_modules[m].info.description << "</td>\n";
+      out << "<td>" << std::to_string(order++) << "</td>\n";
+      out << "<td>" << topo.modules[m].info.tag.name << "</td>\n";
+      out << "<td>" << topo.modules[m].info.tag.short_name << "</td>\n";
+      out << "<td>" << (topo.modules[m].dsp.stage == module_stage::voice
+        ? "Voice" : topo.modules[m].dsp.stage == module_stage::input
+        ? "Global before voice": "Global after voice") << "</td>\n";
+      out << "<td>" << topo.modules[m].info.slot_count << "</td>\n";
+      out << "<td>" << topo.modules[m].info.description << "</td>\n";
       out << "</tr>\n";
     }
 
