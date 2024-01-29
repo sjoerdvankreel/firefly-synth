@@ -186,7 +186,10 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", "Voice LFO", "V.LFO", true, true, module_vlfo, 10);
   auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", "Global LFO", "G.LFO", true, true, module_glfo, 10);
   module_stage stage = global ? module_stage::input : module_stage::voice;
-  auto const info = topo_info(global ? global_info : voice_info);
+  auto info = topo_info(global ? global_info : voice_info);
+  info.description = std::string("Optional tempo-synced LFO with repeating and one-shot modes, various periodic waveforms, smooth noise, ") +  
+    "static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping " +
+    "and horizontal and vertical skewing controls with various modes.";
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
