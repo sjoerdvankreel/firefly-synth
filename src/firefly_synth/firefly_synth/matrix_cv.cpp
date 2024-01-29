@@ -260,8 +260,9 @@ cv_matrix_topo(
   auto target_matrix = make_cv_target_matrix(targets);
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_matrix, 1);
   auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_matrix, 1);
-  auto const info = topo_info(global? global_info: voice_info);
+  auto info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
+  info.description = "CV routing matrix with min/max control and various stacking options that affect how source signals are combined.";
 
   if (!global)
   {
