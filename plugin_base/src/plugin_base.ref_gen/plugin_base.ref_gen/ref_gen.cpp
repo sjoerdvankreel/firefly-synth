@@ -194,14 +194,18 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<th>Direction</th>\n";
       out << "<th>Rate</th>\n";
       out << "<th>Automate</th>\n";
+      out << "<th>Min</th>\n";
+      out << "<th>Max</th>\n";
+      out << "<th>Default</th>\n";
       out << "<th>Description</th>\n";
       out << "</tr>\n";
 
-      int automate_module_slot = module.info.slot_count == 1 ? 0 : 1;
+      int reference_module_slot = module.info.slot_count == 1 ? 0 : 1;
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         auto const& short_name = param.info.tag.short_name.size()? param.info.tag.short_name: param.info.tag.name;
+        int reference_param_slot = param.info.slot_count == 1 ? 0 : 1;
 
         std::string direction = "";
         switch (param.dsp.direction)
@@ -221,7 +225,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         }
 
         std::string automate = "";
-        auto automate_value = param.dsp.automate_selector_(automate_module_slot);
+        auto automate_value = param.dsp.automate_selector_(reference_module_slot);
         switch (automate_value)
         {
         case param_automate::none: automate = "None"; break;
@@ -231,6 +235,10 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         default: assert(false); break;
         }
 
+        std::string min_value = param.domain.raw_to_text(false, param.domain.min);
+        std::string max_value = param.domain.raw_to_text(false, param.domain.max);
+        std::string default_value = param.domain.raw_to_text(false, param.domain.default_raw(reference_module_slot, reference_param_slot));
+
         out << "<tr>\n";
         out << "<td>" << param.info.tag.name << "</td>\n";
         out << "<td>" << short_name << "</td>\n";
@@ -239,6 +247,9 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         out << "<td>" << direction << "</td>\n";
         out << "<td>" << rate << "</td>\n";
         out << "<td>" << automate << "</td>\n";
+        out << "<td>" << min_value << "</td>\n";
+        out << "<td>" << max_value << "</td>\n";
+        out << "<td>" << default_value << "</td>\n";
         out << "<td>" << param.info.description << "</td>\n";
         out << "</tr>\n";
       }
