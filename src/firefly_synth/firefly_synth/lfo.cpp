@@ -255,30 +255,36 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_x(type_menu, vs[1]); });
+  x.info.description = "Horizontal skew amount.";
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "SkewY", "Y", true, true, param_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_y(type_menu, vs[1]); });
+  y.info.description = "Vertical skew amount.";
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", "Seed", true, true, param_seed, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   seed.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && is_noise(type_menu.multi_items, vs[1]); });
+  seed.info.description = "Seed value for static and smooth noise generators.";
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", "Stp", true, true, param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   steps.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  steps.info.description = std::string("Step count for static and smooth noise generators, set to > 1. ") + 
+    "Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.";
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", "Smth", true, true, param_filter, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   smooth.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
 
   if(global) return result;
   auto& phase = result.params.emplace_back(make_param(
@@ -287,6 +293,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   phase.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
+
   return result;
 }
 
