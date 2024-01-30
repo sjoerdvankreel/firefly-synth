@@ -17,6 +17,7 @@ fx-only version
 implement monophonic mode
 auto-generate the param list
 implement envelope retriggering
+bug: env 2 shows synced by default
 
 demo synth:
 feature list
@@ -27,3 +28,5 @@ rename feature_list
 check if the synth still actually works 
 link the html sections
 assert everything is filled
+document host context menu
+document compare-with-infernal
