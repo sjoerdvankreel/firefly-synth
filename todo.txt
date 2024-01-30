@@ -22,6 +22,7 @@ do more gain for the shelving filters
 do copy/paste patch through clipboard
 do off-mode for static filter
 do a per-osc gain target to allow per-osc env/lfo gains, useful f.e. when driving the osc through a waveshaper
+also do the routing schema image again or equivalent
 
 demo synth:
 feature list
