@@ -236,17 +236,17 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   }
   engine->process_end();
 
-  // scale to 1
+  // scale to max 1, but we still want to show the gain, so don't rescale between [0, 1]
   for(int o = 0; o < result.size(); o++)
   {
-    float max = 0;
+    float max = 1;
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < params.max_frame_count; f++)
         max = std::max(max, std::fabs(result[o].audio()[c][f]));
-    if(max == 0) max = 1;
-    for (int c = 0; c < 2; c++)
-      for (int f = 0; f < params.max_frame_count; f++)
-        result[o].audio()[c][f] /= max;
+    if(max > 1)
+      for (int c = 0; c < 2; c++)
+        for (int f = 0; f < params.max_frame_count; f++)
+          result[o].audio()[c][f] /= max;
   }
 
   return result;
@@ -908,6 +908,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
 
   auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& gain_curve = *(*modulation)[module_osc][block.module_slot][param_gain][0];
   auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
 
   auto const& dsf_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
@@ -1129,7 +1130,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       float uni_total = 0;
       for (int v = 0; v < uni_voices; v++)
         uni_total += block.state.own_audio[0][v + 1][c][f];
-      block.state.own_audio[0][0][c][f] = uni_total / attn;
+      block.state.own_audio[0][0][c][f] = uni_total * gain_curve[f] / attn;
     }
 }
 
