@@ -1,3 +1,8 @@
+always:
+dont forget to tag
+update the history
+keep cpu/mem profiling
+
 someday:
 mseg
 .com website 
@@ -17,17 +22,9 @@ fx-only version
 implement monophonic mode
 auto-generate the param list
 implement envelope retriggering
-bug: env 2 shows synced by default
-do more gain for the shelving filters
 re-do the acid line demo from infernal
 do copy/paste patch through clipboard
-do off-mode for static filter
-do a per-osc gain target to allow per-osc env/lfo gains, useful f.e. when driving the osc through a waveshaper
 also do the routing schema image again or equivalent
-dont limit the noise osc to nyquist ? 
-make a bit wider, some controls clip
-need more ui control on distortion gain => or linear?
-dist filter needs kbd track ?
 
 reference doc:
 param_ref=>reference_generator
