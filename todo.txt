@@ -25,7 +25,7 @@ do a per-osc gain target to allow per-osc env/lfo gains, useful f.e. when drivin
 also do the routing schema image again or equivalent
 dont limit the noise osc to nyquist ? 
 make a bit wider, some controls clip
-need more ui control on distortion gain
+need more ui control on distortion gain => or linear?
 dist filter needs kbd track ?
 
 reference doc:
