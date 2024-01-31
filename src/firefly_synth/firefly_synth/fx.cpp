@@ -542,7 +542,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   dist_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]) && dist_has_lpf(vs[0]); });
   auto& dist_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Dst.Gain", "Gain", true, false, param_dist_gain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 16, 1, 2, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, ""),
     make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
@@ -1234,7 +1234,7 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
   }
 
   auto& gain_curve = block.state.own_scratch[scratch_dist_gain_raw];
-  normalized_to_raw_into_fast<domain_type::linear>(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
+  normalized_to_raw_into_fast<domain_type::log>(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) 
