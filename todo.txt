@@ -24,7 +24,6 @@ re-do the acid line demo from infernal
 do copy/paste patch through clipboard
 do off-mode for static filter
 also do the routing schema image again or equivalent
-dont limit the noise osc to nyquist ? 
 make a bit wider, some controls clip
 need more ui control on distortion gain => or linear?
 dist filter needs kbd track ?

@@ -1085,7 +1085,7 @@ osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulat
       {
         float rand_freq_hz = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, stc_freq_curve[mod_index]);
         float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[mod_index]);
-        float rand_rate_hz = rand_rate_pct * 0.01 * oversampled_rate * 0.5;
+        float rand_rate_hz = rand_rate_pct * 0.01 * oversampled_rate;
         synced_sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_hz, stc_res_curve[mod_index], rand_seed, rand_rate_hz);
       }
 
