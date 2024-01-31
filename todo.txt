@@ -22,7 +22,6 @@ implement envelope retriggering
 re-do the acid line demo from infernal
 do copy/paste patch through clipboard
 also do the routing schema image again or equivalent
-make a bit wider, some controls clip
 
 reference doc:
 param_ref=>reference_generator

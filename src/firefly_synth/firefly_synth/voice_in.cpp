@@ -87,7 +87,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", "Voice In", "V.In", true, true, module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 25, 14, 13 } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 25, 14, 15 } } )));
   
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
@@ -96,7 +96,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& voice_mode = result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
@@ -123,18 +123,18 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Portamento Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   tempo.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 1; });
 
   result.sections.emplace_back(make_param_section(section_oversmp,
     make_topo_tag("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Osc Oversample"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, std::vector<int> { gui_dimension::auto_size })))); // gotta love c++
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1, 1 }))));
   result.params.emplace_back(make_param(
     make_topo_info("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", "Osc Oversample", param_oversmp, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
-    make_param_gui_single(section_oversmp, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_oversmp, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
 
   result.sections.emplace_back(make_param_section(section_pitch,
