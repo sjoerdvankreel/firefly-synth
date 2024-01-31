@@ -8,6 +8,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - Feature list: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature_list.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature_list.md)
 
 Since there's no manual yet, I'll just write it down here:
+- Right-click a parameter pops up the host context menu.
 - Right-click some empty space pops up the undo/redo menu.
 - Right-click a matrix header pops up a context menu with clear and tidy options.
 - Right-click the first column in a matrix pops up a context menu with matrix manipulation options.
