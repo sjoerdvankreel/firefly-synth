@@ -1,4 +1,4 @@
-?, ? - V1.01 (No binaries).
+January 31, 2024 - V1.01 (No binaries).
 
 - Add per-oscillator gain control.
 - Make the ui a bit wider to prevent gui clipping.
