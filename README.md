@@ -29,7 +29,7 @@ This is a very bare-bones release, just to get something out there. In particula
 - There is no monophonic mode yet.<br/>The option to switch poly/mono is grayed out in the UI,<br/>as are the envelope trigger modes (legato, retrigger, multitrigger).
 - That being said, apart from mono-mode the thing is fully functional.
 
-Just to get a feeling for what all the knobs do, you can checkout the host demo files in
+Just to get a feeling for what all the knobs do, you can checkout the demo files in
 [https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos).
 
 # What does it sound like?

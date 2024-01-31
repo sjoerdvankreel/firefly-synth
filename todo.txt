@@ -19,6 +19,7 @@ auto-generate the param list
 implement envelope retriggering
 bug: env 2 shows synced by default
 do more gain for the shelving filters
+re-do the acid line demo from infernal
 do copy/paste patch through clipboard
 do off-mode for static filter
 do a per-osc gain target to allow per-osc env/lfo gains, useful f.e. when driving the osc through a waveshaper
