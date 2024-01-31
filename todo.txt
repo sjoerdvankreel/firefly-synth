@@ -1,3 +1,8 @@
+always:
+dont forget to tag
+update the history
+keep cpu/mem profiling
+
 someday:
 mseg
 .com website 
@@ -9,8 +14,6 @@ midi mpe
 vst3 note expressions
 clap (poly) modulation
 document the header files a bit
-
-update the history
 
 v1.1:
 make a manual
