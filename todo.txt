@@ -10,6 +10,8 @@ vst3 note expressions
 clap (poly) modulation
 document the header files a bit
 
+update the history
+
 v1.1:
 make a manual
 do some presets
