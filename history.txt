@@ -1,3 +1,10 @@
+?, ? - V1.01 (No binaries).
+
+- Add per-oscillator gain control.
+- Changed distortion gain from logarithmic to linear.
+- Bugfix: do not limit whitenoise oscillator to nyquist.
+- Bugfix: envelope whould incorrectly show as tempo-synced.
+
 January 27, 2024 - V1.0.
 
 - Initial release.

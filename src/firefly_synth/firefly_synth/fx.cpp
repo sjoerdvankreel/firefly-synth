@@ -59,7 +59,7 @@ static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (in
 enum { param_type,
   param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_dist_over, param_dist_clip, param_dist_shape, param_dist_x, param_dist_y, param_dist_lp_frq, param_dist_lp_res, param_dist_mix, param_dist_gain,
+  param_dist_over, param_dist_clip, param_dist_shape, param_dist_x, param_dist_y, param_dist_lp_frq, param_dist_lp_res, param_dist_gain, param_dist_mix,
   param_dly_type, param_dly_amt, param_dly_sprd, param_dly_mix,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
   param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps,  
@@ -540,18 +540,18 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]) && dist_has_lpf(vs[0]); });
+  auto& dist_gain = result.params.emplace_back(make_param(
+    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Dst.Gain", "Gain", true, false, param_dist_gain, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(0, 16, 1, 2, true),
+    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 7 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
   auto& dist_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Dst.Mix", "Mix", true, false, param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 7 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
-  auto& dist_gain = result.params.emplace_back(make_param(
-    make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Dst.Gain", "Gain", true, false, param_dist_gain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, "%"),
     make_param_gui_single(section_dist, gui_edit_type::hslider, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
@@ -1234,7 +1234,7 @@ fx_engine::process_dist_clip_shape_xy(plugin_block& block,
   }
 
   auto& gain_curve = block.state.own_scratch[scratch_dist_gain_raw];
-  normalized_to_raw_into_fast<domain_type::log>(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
+  normalized_to_raw_into_fast<domain_type::linear>(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) 
