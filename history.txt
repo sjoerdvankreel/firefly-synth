@@ -1,3 +1,10 @@
+January 31, 2024 - V1.01 (No binaries).
+
+- Add per-oscillator gain control.
+- Make the ui a bit wider to prevent gui clipping.
+- Bugfix: do not limit whitenoise oscillator to nyquist.
+- Bugfix: envelope whould incorrectly show as tempo-synced.
+
 January 27, 2024 - V1.0.
 
 - Initial release.

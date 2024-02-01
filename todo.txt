@@ -1,3 +1,8 @@
+always:
+dont forget to tag
+update the history
+keep cpu/mem profiling
+
 someday:
 mseg
 .com website 
@@ -17,12 +22,11 @@ fx-only version
 implement monophonic mode
 auto-generate the param list
 implement envelope retriggering
-bug: env 2 shows synced by default
+re-do the acid line demo from infernal
+do copy/paste patch through clipboard
+also do the routing schema image again or equivalent
 
-demo synth:
-feature list
-tag the v1.0 release
-
+reference doc:
 param_ref=>reference_generator
 rename feature_list
 check if the synth still actually works 
