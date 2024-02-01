@@ -517,6 +517,9 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_gain_uni, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  gain.info.description = std::string("Per-osc gain control. The same result may be had through the audio routing matrices, ") +
+    "but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it "
+    "when the oscillator is routed through a distortion module.";
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
