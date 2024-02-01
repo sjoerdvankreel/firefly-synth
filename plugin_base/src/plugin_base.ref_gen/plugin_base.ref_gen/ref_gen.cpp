@@ -113,6 +113,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   std::string css = "";
   css += "th, td { padding: 3px; }";
   css += "a, a:visited { color: #666666; }";
+  css += ".description { background:#EEEEEE; }";
   css += "h1 { font-size: 19px; color: black; }";
   css += "h2 { font-size: 17px; color: black; }";
   css += "h3 { font-size: 15px; color: black; }";
@@ -165,7 +166,7 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
       ? "Voice" : module.dsp.stage == module_stage::input
       ? "Before voice": "After voice") << "</td>\n";
     out << "<td>" << module.info.slot_count << "</td>\n";
-    out << "<td>" << module.info.description << "</td>\n";
+    out << "<td class='description'>" << module.info.description << "</td>\n";
     out << "</tr>\n";
   }
 
@@ -257,7 +258,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         out << "<td>" << log_mid_value << "</td>\n";
         out << "</tr>\n";
         out << "<tr>\n";
-        out << "<td colspan='11' style='background:#EEEEEE'>" << param.info.description << "</td>\n";
+        out << "<td colspan='11' class='description'>" << param.info.description << "</td>\n";
         out << "</tr>\n";
       }
       out << "</table>\n";
