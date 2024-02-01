@@ -294,7 +294,8 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   type.gui.submenu->indices.push_back(type_dsf);
   type.gui.submenu->indices.push_back(type_static);
   type.gui.submenu->add_submenu("Karplus-Strong", { type_kps1, type_kps2 });
-  type.info.description = std::string("Selects the oscillator algorithm. Only basic and DSF can be used as an FM target and react to oversampling. ") + 
+  type.info.description = std::string("Selects the oscillator algorithm. ") + 
+    "Only Basic and DSF can be used as an FM target, react to oversampling, and are capable of hard-sync. " + 
     "KPS1 is regular Karplus-Strong, KPS2 is a modified version which auto-adjusts feedback according to pitch.";
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
@@ -492,17 +493,20 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
+  sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
   auto& sync_semi = result.params.emplace_back(make_param(
     make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", "Sync.Semi", "Sync", true, false, param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
     make_param_gui_single(section_sync, gui_edit_type::knob, { 0, 1 }, make_label_none())));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
+  sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
     make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", "Sync.CrossOver", "XOver", true, false, param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
     make_param_gui_single(section_sync, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
+  sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
 
   result.sections.emplace_back(make_param_section(section_gain_uni,
     make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Gain+Unison"),
