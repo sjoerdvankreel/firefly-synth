@@ -98,22 +98,28 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+  // TODO enable for monophonic mode
   auto& voice_mode = result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  // TODO enable for monophonic mode
   voice_mode.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return false; });
-  result.params.emplace_back(make_param(
+  voice_mode.info.description = "TODO - this is fixed to polyphonic for now.";
+  auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Portamento", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
+  porta.info.description = std::string("Selects portamento mode.<br/>") + 
+    "Off - no portamento.<br/>" + 
+    "On - glides 1 semitone in the specified time, so glide pitch is constant and glide time is variable.<br/>" +
+    "Auto - glides pitch difference between old and new note in the specified time, so glide pitch is variable and glide time is constant.";
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", "Portamento Tempo Sync", "Sync", true, false, param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 },  
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
+  sync.info.description = "Selects time or tempo-synced mode.";
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Portamento Time", "Time", true, false, param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
@@ -121,6 +127,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
+  time.info.description = "Pitch glide time.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Portamento Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
@@ -128,16 +135,19 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   tempo.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 1; });
+  tempo.info.description = "Pitch glide time signature.";
 
   result.sections.emplace_back(make_param_section(section_oversmp,
     make_topo_tag("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Osc Oversample"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1, 1 }))));
-  result.params.emplace_back(make_param(
+  auto& oversmp = result.params.emplace_back(make_param(
     make_topo_info("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", "Osc Oversample", param_oversmp, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
     make_param_gui_single(section_oversmp, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-
+  oversmp.info.description = std::string("Oversampling for those rare cases where it makes a positive difference. ") +
+    "Only affects FM and hardsync, but not AM. " +
+    "Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.";
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
     make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
