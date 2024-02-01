@@ -294,28 +294,33 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   type.gui.submenu->indices.push_back(type_dsf);
   type.gui.submenu->indices.push_back(type_static);
   type.gui.submenu->add_submenu("Karplus-Strong", { type_kps1, type_kps2 });
+  type.info.description = "Selects the oscillator algorithm. Only basic and DSF can be used as an FM target and react to oversampling.";
   auto& note = result.params.emplace_back(make_param(
     make_topo_info("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
     make_param_dsp_voice(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
   note.gui.submenu = make_midi_note_submenu();
   note.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
+  note.info.description = "Oscillator base pitch. Also reacts to Voice-In base pitch.";
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::center))));
+  cent.info.description = "Oscillator cents, also reacts to Voice-In cents.";
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
   auto& pitch = result.params.emplace_back(make_param(
     make_topo_info("{6E9030AF-EC7A-4473-B194-5DA200E7F90C}", "Pitch", param_pitch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-128, 128, 0, 0, ""),
     make_param_gui_none()));
   pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
+  pitch.info.description = "Absolute pitch modulation target, also reacts to Voice-in pitch modulation.";
   auto& pb = result.params.emplace_back(make_param(
     make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", "PB", param_pb, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_none()));
   pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
+  pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.";
 
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
