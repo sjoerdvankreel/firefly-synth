@@ -108,24 +108,17 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
 {
   std::string name_and_version = topo.tag.name + " " + 
     std::to_string(topo.version_major) + "." + 
-    std::to_string(topo.version_minor);
-  
-  std::string title = name_and_version + " Reference Manual";
-  std::string foreground = "#" + topo.gui.colors.control_text.toDisplayString(false).toStdString();
-  std::string background = "#" + topo.gui.colors.control_background.toDisplayString(false).toStdString();
-  std::string color1 = "#" + topo.gui.reference_colors.color1.toDisplayString(false).toStdString();
-  std::string color2 = "#" + topo.gui.reference_colors.color2.toDisplayString(false).toStdString();
-  std::string color3 = "#" + topo.gui.reference_colors.color3.toDisplayString(false).toStdString();
-  std::string color4 = "#" + topo.gui.reference_colors.color4.toDisplayString(false).toStdString();
+    std::to_string(topo.version_minor);  
+  std::string title = name_and_version + " Parameter Reference";
 
   std::string css = "";
   css += "th, td { padding: 3px; }";
-  css += "th, a, a:visited { color: " + color4 + "; }";
-  css += "h1 { font-size: 19px; color: " + color1 + "; }";
-  css += "h2 { font-size: 17px; color: " + color2 + "; }";
-  css += "h3 { font-size: 15px; color: " + color3 + "; }";
-  css += "html { position: relative; max-width: 1440px; margin: auto; }";
-  css += "body { font-family: Verdana; background: " + background + "; color: " + foreground + "; }";
+  css += "a, a:visited { color: #666666; }";
+  css += "h1 { font-size: 19px; color: black; }";
+  css += "h2 { font-size: 17px; color: black; }";
+  css += "h3 { font-size: 15px; color: black; }";
+  css += "body { font-family: Verdana; color: black; }";
+  css += "html { position: relative; max-width: 960px; margin: auto; }";
   css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
   css += "table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }";
   css += "tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }";
