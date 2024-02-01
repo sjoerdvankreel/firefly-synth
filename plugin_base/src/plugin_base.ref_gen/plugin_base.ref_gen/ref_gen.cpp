@@ -194,6 +194,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<th>Name</th>\n";
       out << "<th>Short</th>\n";
       out << "<th>Section</th>\n";
+      out << "<th>Hidden</th>\n";
       out << "<th>Num</th>\n";
       out << "<th>Dir</th>\n";
       out << "<th>Rate</th>\n";
@@ -252,6 +253,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         out << "<td>" << param.info.tag.name << "</td>\n";
         out << "<td>" << short_name << "</td>\n";
         out << "<td>" << module.sections[param.gui.section].tag.name << "</td>\n";
+        out << "<td>" << (param.gui.visible? "No": "Yes") << "</td>\n";
         out << "<td>" << param.info.slot_count << "</td>\n";
         out << "<td>" << direction << "</td>\n";
         out << "<td>" << rate << "</td>\n";
