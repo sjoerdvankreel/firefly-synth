@@ -428,7 +428,11 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu->add_submenu("Distortion", { type_dst_a, type_dst_b, type_dst_c });
   if (global) type.gui.submenu->indices.push_back(type_delay);
   if (global) type.gui.submenu->indices.push_back(type_reverb);
-  type.info.description = "Selects the effect type.";
+  type.info.description = std::string("Selects the effect type.<br/>") +
+    "For distortion, the modes affect where the filter is placed.<br/ >" + 
+    "Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>" +
+    "Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>" + 
+    "Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.";
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
