@@ -400,18 +400,21 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+  dsf_partials.info.description = "Controls the number of partials (overtones).";
   auto& dsf_dist = result.params.emplace_back(make_param(
     make_topo_info("{E5E66BBD-DCC9-4A7E-AB09-2D7107548090}", "DSF.Dist", "Dist", true, false, param_dsf_dist, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0.05, 20, 1, 2, ""),
     make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_dist.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+  dsf_dist.info.description = "Controls the frequency distance between the base frequency and subsequent partials.";
   auto& dsf_dcy = result.params.emplace_back(make_param(
     make_topo_info("{2D07A6F2-F4D3-4094-B1C0-453FDF434CC8}", "DSF.Dcy", "Decay", true, false, param_dsf_dcy, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
+  dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
 
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
     make_topo_tag("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
