@@ -120,7 +120,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
 
   std::string css = "";
   css += "th, td { padding: 3px; }";
-  css += "th { color: " + color4 + "; }";
+  css += "th, a, a:visited { color: " + color4 + "; }";
   css += "h1 { font-size: 19px; color: " + color1 + "; }";
   css += "h2 { font-size: 17px; color: " + color2 + "; }";
   css += "h3 { font-size: 15px; color: " + color3 + "; }";
