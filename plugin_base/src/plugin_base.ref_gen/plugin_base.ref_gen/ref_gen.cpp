@@ -158,12 +158,14 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
   out << "<th>Description</th>\n";
   out << "</tr>\n";
 
-  int order = 1;
   for(int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
     out << "<tr>\n";
-    out << "<td>" << std::to_string(order++) << "</td>\n";
+    if(module.gui.visible)
+      out << "<td><a href='#" + std::to_string(m + 1) + "'>" + std::to_string(m + 1) + "</a></td>\n";
+    else
+      out << "<td>" + std::to_string(m + 1) + "</td>\n";
     out << "<td>" << module.info.tag.name << "</td>\n";
     out << "<td>" << module.info.tag.short_name << "</td>\n";
     out << "<td>" << (module.gui.visible? "Yes": "No") << "</td>\n";
@@ -187,6 +189,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
     auto const& module = topo.modules[m];
     if (module.gui.visible)
     {
+      out << "<a name='" + std::to_string(m + 1) + "'/>\n";
       out << "<h3>" << module.info.tag.name << "</h3>\n";
       out << "<table>\n";
       out << "<tr>\n";
