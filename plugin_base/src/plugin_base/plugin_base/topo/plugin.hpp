@@ -53,14 +53,6 @@ struct module_section_gui final {
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
 };
 
-// for reference generator
-struct gui_reference_colors final {
-  juce::Colour color1;
-  juce::Colour color2;
-  juce::Colour color3;
-  juce::Colour color4;
-};
-
 // plugin ui
 struct plugin_topo_gui final {
   int min_width;
@@ -68,7 +60,6 @@ struct plugin_topo_gui final {
   int aspect_ratio_height;
   gui_colors colors;
   gui_dimension dimension;
-  gui_reference_colors reference_colors;
 
   float lighten = 0.15f;
   int font_height = 13;

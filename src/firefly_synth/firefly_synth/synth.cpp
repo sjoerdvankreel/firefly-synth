@@ -270,10 +270,6 @@ synth_topo()
   result->midi_smooth_param = master_in_param_midi_smooth;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
-  result->gui.reference_colors.color1 = custom_color;
-  result->gui.reference_colors.color2 = global_color;
-  result->gui.reference_colors.color3 = voice_color;
-  result->gui.reference_colors.color4 = matrix_color;
 
   // The same font takes more size on linux ?
 #if (defined __linux__) || (defined  __FreeBSD__)
