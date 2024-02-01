@@ -109,7 +109,6 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   std::string name_and_version = topo.tag.name + " " + 
     std::to_string(topo.version_major) + "." + 
     std::to_string(topo.version_minor);  
-  std::string title = name_and_version + " Parameter Reference";
 
   std::string css = "";
   css += "th, td { padding: 3px; }";
@@ -125,11 +124,11 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
 
   out << "<html>\n";
   out << "<head>\n";
-  out << "<title>" << title << "</title>\n";
+  out << "<title>" << name_and_version << "</title>\n";
   out << "<style>" + css + "</style>\n";
   out << "</head>\n";
   out << "<body>\n";
-  out << "<h1>" << title << "</h1>\n";
+  out << "<h1>" << name_and_version << "</h1>\n";
   generate_modules_ref(topo, out);
   generate_params_ref(topo, out);
   out << "</body>\n";
@@ -197,8 +196,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<th>Min</th>\n";
       out << "<th>Max</th>\n";
       out << "<th>Default</th>\n";
-      out << "<th>Log Mid</th>\n";
-      out << "<th>Description</th>\n";
+      out << "<th>Log Midpoint</th>\n";
       out << "</tr>\n";
 
       int reference_module_slot = module.info.slot_count == 1 ? 0 : 1;
@@ -245,7 +243,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
           log_mid_value = param.domain.raw_to_text(false, param.domain.midpoint);
 
         out << "<tr>\n";
-        out << "<td>" << param.info.tag.name << "</td>\n";
+        out << "<td rowspan='2'>" << param.info.tag.name << "</td>\n";
         out << "<td>" << short_name << "</td>\n";
         out << "<td>" << module.sections[param.gui.section].tag.name << "</td>\n";
         out << "<td>" << (param.gui.visible? "Yes": "No") << "</td>\n";
@@ -257,7 +255,9 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         out << "<td>" << max_value << "</td>\n";
         out << "<td>" << default_value << "</td>\n";
         out << "<td>" << log_mid_value << "</td>\n";
-        out << "<td>" << param.info.description << "</td>\n";
+        out << "</tr>\n";
+        out << "<tr>\n";
+        out << "<td colspan='11' style='background:#EEEEEE'>" << param.info.description << "</td>\n";
         out << "</tr>\n";
       }
       out << "</table>\n";
