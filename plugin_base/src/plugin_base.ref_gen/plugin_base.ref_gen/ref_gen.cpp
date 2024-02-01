@@ -152,6 +152,7 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
   out << "<th>#</th>\n";
   out << "<th>Name</th>\n";
   out << "<th>Short</th>\n";
+  out << "<th>UI</th>\n";
   out << "<th>Stage</th>\n";
   out << "<th>Num</th>\n";
   out << "<th>Description</th>\n";
@@ -161,19 +162,17 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
   for(int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
-    if(module.gui.visible)
-    {
-      out << "<tr>\n";
-      out << "<td>" << std::to_string(order++) << "</td>\n";
-      out << "<td>" << module.info.tag.name << "</td>\n";
-      out << "<td>" << module.info.tag.short_name << "</td>\n";
-      out << "<td>" << (module.dsp.stage == module_stage::voice
-        ? "Voice" : module.dsp.stage == module_stage::input
-        ? "Before voice": "After voice") << "</td>\n";
-      out << "<td>" << module.info.slot_count << "</td>\n";
-      out << "<td>" << module.info.description << "</td>\n";
-      out << "</tr>\n";
-    }
+    out << "<tr>\n";
+    out << "<td>" << std::to_string(order++) << "</td>\n";
+    out << "<td>" << module.info.tag.name << "</td>\n";
+    out << "<td>" << module.info.tag.short_name << "</td>\n";
+    out << "<td>" << (module.gui.visible? "Yes": "No") << "</td>\n";
+    out << "<td>" << (module.dsp.stage == module_stage::voice
+      ? "Voice" : module.dsp.stage == module_stage::input
+      ? "Before voice": "After voice") << "</td>\n";
+    out << "<td>" << module.info.slot_count << "</td>\n";
+    out << "<td>" << module.info.description << "</td>\n";
+    out << "</tr>\n";
   }
 
   out << "</table>\n";
@@ -194,7 +193,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       out << "<th>Name</th>\n";
       out << "<th>Short</th>\n";
       out << "<th>Section</th>\n";
-      out << "<th>Hidden</th>\n";
+      out << "<th>UI</th>\n";
       out << "<th>Num</th>\n";
       out << "<th>Dir</th>\n";
       out << "<th>Rate</th>\n";
@@ -253,7 +252,7 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         out << "<td>" << param.info.tag.name << "</td>\n";
         out << "<td>" << short_name << "</td>\n";
         out << "<td>" << module.sections[param.gui.section].tag.name << "</td>\n";
-        out << "<td>" << (param.gui.visible? "No": "Yes") << "</td>\n";
+        out << "<td>" << (param.gui.visible? "Yes": "No") << "</td>\n";
         out << "<td>" << param.info.slot_count << "</td>\n";
         out << "<td>" << direction << "</td>\n";
         out << "<td>" << rate << "</td>\n";
