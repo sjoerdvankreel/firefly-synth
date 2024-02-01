@@ -519,17 +519,22 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
     make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Dst.Clip", "Clip", true, false, param_dist_clip, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Clip"),
     make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).";
   auto& dist_shape = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Dst.Shape.SkewX/SkewY", param_dist_shape, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_shape_menu.items, "Sin.Off/Off"),
     make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
   dist_shape.gui.submenu = dist_shape_menu.submenu;
   dist_shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  dist_shape.info.description = std::string("Selects waveshaper plus before-shape and afer-shape skewing modes. ") +
+    "Shapes are various periodic functions plus foldback distortion. " +
+    "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_x = result.params.emplace_back(make_param(
     make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Dst.X", "X", true, false, param_dist_x, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
@@ -537,6 +542,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_x.gui.bindings.enabled.bind_params({ param_type, param_dist_shape }, [dist_shape_menu](auto const& vs) {
     return type_is_dist(vs[0]) && dst_has_skew_x(dist_shape_menu, vs[1]); });
+  dist_x.info.description = "Before-shape skew amount.";
   auto& dist_y = result.params.emplace_back(make_param(
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Dst.Y", "Y", true, false, param_dist_y, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
@@ -544,30 +550,36 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_y.gui.bindings.enabled.bind_params({ param_type, param_dist_shape }, [dist_shape_menu](auto const& vs) {
     return type_is_dist(vs[0]) && dst_has_skew_y(dist_shape_menu, vs[1]); });
+  dist_y.info.description = "After-shape skew amount.";
   auto& dist_lp = result.params.emplace_back(make_param(
     make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Dst.LPF", "LPF", true, false, param_dist_lp_frq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
     make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_lp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]) && dist_has_lpf(vs[0]); });
+  dist_lp.info.description = "Lowpass filter frequency inside the oversampling stage.";
   auto& dist_res = result.params.emplace_back(make_param(
     make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Dst.Res", "Res", true, false, param_dist_lp_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]) && dist_has_lpf(vs[0]); });
+  dist_res.info.description = "Lowpass filter resonance inside the oversampling stage.";
   auto& dist_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Dst.Gain", "Gain", true, false, param_dist_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, ""),
     make_param_gui_single(section_dist, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  dist_gain.info.description = std::string("Gain amount to drive the shaper and X/Y parameters. ") + 
+    "Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.";
   auto& dist_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Dst.Mix", "Mix", true, false, param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_dist, gui_edit_type::hslider, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return type_is_dist(vs[0]); });
+  dist_mix.info.description = "Dry/wet mix between input and output signal.";
 
   // delay lines and reverb global only, per-voice uses too much memory
   if(!global) return result;
