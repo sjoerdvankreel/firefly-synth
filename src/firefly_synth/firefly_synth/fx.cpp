@@ -428,6 +428,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   type.gui.submenu->add_submenu("Distortion", { type_dst_a, type_dst_b, type_dst_c });
   if (global) type.gui.submenu->indices.push_back(type_delay);
   if (global) type.gui.submenu->indices.push_back(type_reverb);
+  type.info.description = "Selects the effect type.";
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
@@ -439,30 +440,35 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_type_items(), ""),
     make_param_gui_single(section_svf, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   svf_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_type.info.description = "Selects the state-variable filter type.";
   auto& svf_freq = result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "SVF.Frq", "Frq", true, false, param_svf_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_freq.info.description = "Controls filter frequency.";
   auto& svf_res = result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "SVF.Res", "Res", true, false, param_svf_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_res.info.description = "Controls filter resonance.";
   auto& svf_gain = result.params.emplace_back(make_param(
     make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", "SVF.Gain", "Gain", true, false, param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_type }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
+  svf_gain.info.description = "Controls filter gain for shelving filters.";
   auto& svf_kbd = result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "SVF.Kbd", "Kbd", true, false, param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, 1, 0, true),
     make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_kbd.info.description = "Controls keyboard tracking with -/+2 octaves.";
 
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb"),
