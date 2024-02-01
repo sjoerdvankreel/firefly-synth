@@ -25,6 +25,7 @@ implement envelope retriggering
 re-do the acid line demo from infernal
 do copy/paste patch through clipboard
 also do the routing schema image again or equivalent
+show the description in popup menu ?
 
 reference doc:
 publish the filter test
