@@ -4,15 +4,8 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 - Parameter overview: [PARAMREF.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/PARAMREF.html).
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
+- Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 - Features: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md)
-- Manual: [TODO there is no manual yet.] The feature list doubles as a manual for now.
-
-Since there's no manual yet, I'll just write it down here:
-- Right-click a parameter pops up the host context menu.
-- Right-click some empty space pops up the undo/redo menu.
-- Right-click a matrix header pops up a context menu with clear and tidy options.
-- Right-click the first column in a matrix pops up a context menu with matrix manipulation options.
-- Right-click a module header number pops up a context menu with copy/clear/swap etc, including matrix-routing-preserving options.
 
 ![Screenshot](static/screenshot.png)
 
@@ -23,7 +16,6 @@ registered in Europe and other countries.
 
 # Project status
 This is a very bare-bones release, just to get something out there. In particular:
-- There is no manual.
 - There is no fx-only version.
 - There are no presets. None.
 - There is no monophonic mode yet.<br/>The option to switch poly/mono is grayed out in the UI,<br/>as are the envelope trigger modes (legato, retrigger, multitrigger).
