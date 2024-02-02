@@ -9,4 +9,4 @@ make
 
 cd ../../../dist/"$1"/linux
 ./plugin_base.ref_gen firefly_synth_1.vst3/Contents/x86_64-linux/firefly_synth_1.so ../../../PARAMREF.html
-cd ../../../../scripts
+cd ../../../scripts
