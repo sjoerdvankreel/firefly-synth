@@ -127,7 +127,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
-  time.info.description = "Pitch glide time.";
+  time.info.description = "Pitch glide time in seconds.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", "Portamento Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
@@ -135,7 +135,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   tempo.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 1; });
-  tempo.info.description = "Pitch glide time signature.";
+  tempo.info.description = "Pitch glide time in bars.";
 
   result.sections.emplace_back(make_param_section(section_oversmp,
     make_topo_tag("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Osc Oversample"),

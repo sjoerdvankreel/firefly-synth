@@ -626,6 +626,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_time_l.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_time_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
+  delay_fdbk_time_l.info.description = "Feedback delay left length in seconds.";
   auto& delay_fdbk_tempo_l = result.params.emplace_back(make_param(
     make_topo_info("{33BCF50C-C7DE-4630-A835-44D50DA3B8BB}", "Dly.TempoL", "L", true, false, param_dly_fdbk_tempo_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
@@ -634,6 +635,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_fdbk_tempo_l.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_l.domain.timesigs);
   delay_fdbk_tempo_l.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_tempo_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
+  delay_fdbk_tempo_l.info.description = "Feedback delay left length in bars.";
   auto& delay_fdbk_time_r = result.params.emplace_back(make_param(
     make_topo_info("{5561243C-838F-4C33-BD46-3E934E854969}", "Dly.TimeR", "R", true, false, param_dly_fdbk_time_r, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
@@ -641,6 +643,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_time_r.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_time_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
+  delay_fdbk_time_r.info.description = "Feedback delay right length in seconds.";
   auto& delay_fdbk_tempo_r = result.params.emplace_back(make_param(
     make_topo_info("{4FA78F9E-AC3A-45D7-A8A3-E0E2C7C264D7}", "Dly.TempoR", "R", true, false, param_dly_fdbk_tempo_r, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 5, 16 }),
@@ -649,6 +652,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_fdbk_tempo_r.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_r.domain.timesigs);
   delay_fdbk_tempo_r.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_tempo_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
+  delay_fdbk_tempo_r.info.description = "Feedback delay right length in bars.";
 
   auto& delay_multi_time = result.params.emplace_back(make_param(
     make_topo_info("{8D1A0D44-3291-488F-AC86-9B2B608F9562}", "Dly.Time", "Time", true, false, param_dly_multi_time, 1),

@@ -224,7 +224,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
   rate.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return !is_sync(vs[0]); });
-  rate.info.description = "LFO frequency.";
+  rate.info.description = "LFO rate in Hz.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
@@ -232,7 +232,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return is_sync(vs[0]); });
-  tempo.info.description = "LFO time signature.";
+  tempo.info.description = "LFO rate in bars.";
 
   // Don't include the phase param for global lfo.
   std::vector<int> controls_column_sizes(6, gui_dimension::auto_size);
