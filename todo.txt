@@ -24,10 +24,7 @@ implement envelope retriggering
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal
 also do the routing schema image again or equivalent
-
-reference doc:
 publish the filter test
 rename feature_list
-check if the synth still actually works 
 document host context menu
 document compare-with-infernal
