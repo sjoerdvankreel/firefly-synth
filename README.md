@@ -3,7 +3,7 @@ A semi-modular software synthesizer plugin.
 It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
 
 - Manual: [TODO there is no manual yet.] The feature list doubles as a manual for now.
-- Parameter overview: [PARAMREF.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/raw/main/PARAMREF.html).
+- Parameter overview: [PARAMREF.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/PARAMREF.html).
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Feature list: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature_list.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature_list.md)
 
