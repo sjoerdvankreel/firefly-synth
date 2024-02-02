@@ -8,7 +8,7 @@ For a more detailed overview, see the parameter reference document.
 ## Format support
 
 - VST3: does sample accurate automation, no note expressions.
-- CLAP: does sample accurate automation, does threadpool, no modulation, no polyphonic modulation.
+- CLAP: does sample accurate automation, does threadpool, no modulation, no polyphonic modulation.<br/>
 However, this synth is quite capable of per-voice modulation on it's own.
 - MIDI: does PitchBend, ChannelPressure, all CC parameters. No MPE support.
 
