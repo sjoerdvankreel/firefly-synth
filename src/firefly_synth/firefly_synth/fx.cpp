@@ -596,6 +596,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_type.gui.submenu = std::make_shared<gui_submenu>();
   delay_type.gui.submenu->add_submenu("Feedback", { dly_type_fdbk_time, dly_type_fdbk_sync });
   delay_type.gui.submenu->add_submenu("Multi Tap", { dly_type_multi_time, dly_type_multi_sync });
+  delay_type.info.description = "Selects feedback or multi-tap delay.";
   auto& delay_amt = result.params.emplace_back(make_param(
     make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", "Dly.Amt", "Amt", true, false, param_dly_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),

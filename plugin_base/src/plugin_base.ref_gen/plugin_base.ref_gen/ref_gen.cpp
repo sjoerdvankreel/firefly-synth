@@ -118,7 +118,7 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   css += "h2 { font-size: 17px; color: black; }";
   css += "h3 { font-size: 15px; color: black; }";
   css += "body { font-family: Verdana; color: black; }";
-  css += "html { position: relative; max-width: 960px; margin: auto; }";
+  css += "html { position: relative; max-width: 1024px; margin: auto; }";
   css += "tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }";
   css += "table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }";
   css += "tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }";
