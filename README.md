@@ -4,7 +4,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 - Parameter overview: [PARAMREF.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/PARAMREF.html).
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
-- Features: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/FEATURES.md)
+- Features: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md)
 - Manual: [TODO there is no manual yet.] The feature list doubles as a manual for now.
 
 Since there's no manual yet, I'll just write it down here:
