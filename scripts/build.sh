@@ -8,5 +8,5 @@ cmake -DCMAKE_BUILD_TYPE="$1" ../../..
 make
 
 cd ../../../dist/"$1"/linux
-./plugin_base.ref_gen ./firefly_synth_1.vst3/Contents/x86_64-linux/firefly_synth_1.vst3 ../../../PARAMREF.html
+./plugin_base.ref_gen firefly_synth_1.vst3/Contents/x86_64-linux/firefly_synth_1.so ../../../PARAMREF.html
 cd ../../../../scripts
