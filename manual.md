@@ -1,6 +1,8 @@
 # Firefly Synth
 
-Semi-modular synth plugin with various options including subtractive, DSF and FM.
+A semi-modular synth plugin with various options including subtractive, DSF and FM.
+
+## varken2
 
 EFFEKIJKEN OFHET WERKT
 
