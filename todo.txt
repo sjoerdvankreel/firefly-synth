@@ -25,3 +25,6 @@ do copy/paste patch through clipboard
 re-do the acid line demo from infernal
 also do the routing schema image again or equivalent
 document compare-with-infernal
+
+manual! ==>
+do the routing graph again
