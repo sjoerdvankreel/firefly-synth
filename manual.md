@@ -5,7 +5,7 @@ For a more detailed overview, see the parameter reference document.
 
 # General
 
-## Format support
+## Plugin format
 
 - VST3: does sample accurate automation, no note expressions.
 - CLAP: does sample accurate automation, does threadpool, no modulation, no polyphonic modulation.<br/>
