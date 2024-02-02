@@ -16,7 +16,7 @@ clap (poly) modulation
 document the header files a bit
 
 v1.1:
-make a manual
+make a manual + trim features doc
 do some presets
 fx-only version
 implement monophonic mode
