@@ -44,18 +44,32 @@ library_get_address(void* handle, char const* sym)
 #error
 #endif
 
-static void 
-generate_plugin_ref(plugin_topo const& topo, std::ostream& out);
 static void
-generate_params_ref(plugin_topo const& topo, std::ostream& out);
+generate_modules_ref(
+  plugin_topo const& topo, std::ostream& out,
+  int& module_count, int& module_slot_count);
+
 static void
-generate_modules_ref(plugin_topo const& topo, std::ostream& out);
+generate_plugin_ref(
+  plugin_topo const& topo, std::ostream& out,
+  int& module_count, int& module_slot_count,
+  int& visible_param_count, int& visible_param_slot_count);
+
+static void
+generate_params_ref(
+  plugin_topo const& topo, std::ostream& out,
+  int& visible_param_count, int& visible_param_slot_count);
 
 int 
 main(int argc, char** argv)
 {
+  int module_count = 0;
+  int module_slot_count = 0;
+  int visible_param_count = 0;
+  int visible_param_slot_count = 0;
+
   std::ofstream out;
-  std::string err = "Success";
+  std::string err = "";
   void* library = nullptr;
   void* topo_create = nullptr;
   void* topo_destroy = nullptr;
@@ -91,8 +105,16 @@ main(int argc, char** argv)
     goto end;
   }
 
-  generate_plugin_ref(*topo, out);
+  generate_plugin_ref(
+    *topo, out, 
+    module_count, module_slot_count, 
+    visible_param_count, visible_param_slot_count);
   out.flush();
+
+  std::cout << "Module count " << module_count << "\n";
+  std::cout << "Module slot count " << module_slot_count << "\n";
+  std::cout << "Visible param count " << visible_param_count << "\n";
+  std::cout << "Visible param slot count " << visible_param_slot_count << "\n";
 
 end:  
   if(topo != nullptr)
@@ -100,11 +122,14 @@ end:
   if(library != nullptr)
     close_library(library);
   std::cout << err << std::endl;
-  return err == "Success" ? 0 : 1;
+  return err == "" ? 0 : 1;
 }
 
 void
-generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
+generate_plugin_ref(
+  plugin_topo const& topo, std::ostream& out, 
+  int& module_count, int& module_slot_count, 
+  int& param_count, int& param_slot_count)
 {
   std::string name_and_version = topo.tag.name + " " + 
     std::to_string(topo.version_major) + "." + 
@@ -130,14 +155,16 @@ generate_plugin_ref(plugin_topo const& topo, std::ostream& out)
   out << "</head>\n";
   out << "<body>\n";
   out << "<h1>" << name_and_version << "</h1>\n";
-  generate_modules_ref(topo, out);
-  generate_params_ref(topo, out);
+  generate_modules_ref(topo, out, module_count, module_slot_count);
+  generate_params_ref(topo, out, param_count, param_slot_count);
   out << "</body>\n";
   out << "</html>\n";
 }
 
 static void
-generate_modules_ref(plugin_topo const& topo, std::ostream& out)
+generate_modules_ref(
+  plugin_topo const& topo, std::ostream& out,
+  int& module_count, int& module_slot_count)
 {
   out << "<h2>Module Overview</h2>\n";
   out << "<table>\n";
@@ -157,6 +184,9 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
     assert(module.info.description.size());
     assert(module.info.tag.name.size());
     assert(module.info.tag.short_name.size());
+
+    module_count++;
+    module_slot_count += module.info.slot_count;
 
     out << "<tr>\n";
     if(module.gui.visible)
@@ -178,7 +208,9 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
 }
 
 static void
-generate_params_ref(plugin_topo const& topo, std::ostream& out)
+generate_params_ref(
+  plugin_topo const& topo, std::ostream& out,
+  int& visible_param_count, int& visible_param_slot_count)
 {
   out << "<h2>Parameter Overview</h2>\n";
   for(int m = 0; m < topo.modules.size(); m++)
@@ -210,6 +242,9 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
         auto const& param = module.params[p];
         assert(param.info.description.size());
         assert(param.info.tag.name.size());
+
+        visible_param_count++;
+        visible_param_slot_count += module.info.slot_count * param.info.slot_count;
 
         auto const& short_name = param.info.tag.short_name.size()? param.info.tag.short_name: param.info.tag.name;
         int reference_param_slot = param.info.slot_count == 1 ? 0 : 1;
