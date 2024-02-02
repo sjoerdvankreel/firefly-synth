@@ -3,6 +3,8 @@
 A semi-modular synth plugin with various options including subtractive, DSF and FM.<br/>
 For a more detailed overview, see the parameter reference document.
 
+# General
+
 ## Format support
 
 - VST3: does sample accurate automation, no note expressions.
