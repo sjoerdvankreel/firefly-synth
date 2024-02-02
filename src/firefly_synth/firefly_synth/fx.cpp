@@ -661,6 +661,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_multi_time.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
   delay_multi_time.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
+  delay_multi_time.info.description = "Multi-tap delay length in seconds.";
   auto& delay_multi_tempo = result.params.emplace_back(make_param(
     make_topo_info("{8DAED046-7F5F-4E76-A6BF-099510564500}", "Dly.Tempo", "Tempo", true, false, param_dly_multi_tempo, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
@@ -669,6 +670,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_multi_tempo.gui.submenu = make_timesig_submenu(delay_multi_tempo.domain.timesigs);
   delay_multi_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
   delay_multi_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
+  delay_multi_tempo.info.description = "Multi-tap delay length in bars.";
   auto& delay_taps = result.params.emplace_back(make_param(
     make_topo_info("{27572912-0A8E-4A97-9A54-379829E8E794}", "Dly.Taps", "Taps", true, false, param_dly_multi_taps, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_step(1, 8, 4, 0),
@@ -676,7 +678,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_taps.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_multi(vs[1]); });
   delay_taps.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
-
+  delay_taps.info.description = "Multi-tap delay tap count.";
   auto& delay_hold_time = result.params.emplace_back(make_param(
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.HoldTime", "Hld", true, false, param_dly_hold_time, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
@@ -684,6 +686,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_time.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]); });
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
+  delay_hold_time.info.description = "Multi-tap delay hold time in seconds.";
   auto& delay_hold_tempo = result.params.emplace_back(make_param(
     make_topo_info("{AED0D3A5-AB02-441F-A42D-7E2AEE88DF24}", "Dly.HoldTempo", "Hld", true, false, param_dly_hold_tempo, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(true, { 4, 1 }, { 0, 1 }),
@@ -692,6 +695,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_hold_tempo.gui.submenu = make_timesig_submenu(delay_hold_tempo.domain.timesigs);
   delay_hold_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]); });
   delay_hold_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
+  delay_hold_tempo.info.description = "Multi-tap delay hold time in bars.";
 
   auto& reverb = result.sections.emplace_back(make_param_section(section_reverb,
     make_topo_tag("{92EFDFE7-41C5-4E9D-9BE6-DC56965C1C0D}", "Reverb"),
