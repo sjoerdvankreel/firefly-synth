@@ -1,3 +1,7 @@
+February 2, 2024 - V1.02 (No binaries).
+
+- Add detailed parameter reference.
+
 January 31, 2024 - V1.01 (No binaries).
 
 - Add per-oscillator gain control.
