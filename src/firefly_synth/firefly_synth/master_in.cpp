@@ -54,6 +54,7 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", "PB", output_pb, 1)) }),
       make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
+  result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
@@ -63,44 +64,50 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
-  result.params.emplace_back(make_param(
+  auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", "MIDI Smoothing", "MIDI.Smt", true, false, param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
     make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
+  midi_smooth.info.description = "Smoothing MIDI parameter changes.";
+  auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", "BPM Smoothing", "BPM.Smt", true, false, param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 200, 0, "Ms"),
     make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1 }))));
-  result.params.emplace_back(make_param(
+  auto& aux = result.params.emplace_back(make_param(
     make_topo_info("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
 
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
     make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-  result.params.emplace_back(make_param(
+  auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod Wheel", "Mod", true, true, param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
+  mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
+  auto& pitch_bend = result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", "Pitch Bend", "PB", true, true, param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 1 },
     make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  result.params.emplace_back(make_param(
+  pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
+  auto& pb_range = result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", "Pitch Bend Range", "Range", true, true, param_pb_range, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
     make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+  pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
 
   return result;
 }

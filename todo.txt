@@ -20,17 +20,11 @@ make a manual
 do some presets
 fx-only version
 implement monophonic mode
-auto-generate the param list
 implement envelope retriggering
-re-do the acid line demo from infernal
 do copy/paste patch through clipboard
+re-do the acid line demo from infernal
 also do the routing schema image again or equivalent
-
-reference doc:
-param_ref=>reference_generator
+publish the filter test
 rename feature_list
-check if the synth still actually works 
-link the html sections
-assert everything is filled
 document host context menu
 document compare-with-infernal

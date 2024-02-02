@@ -260,8 +260,10 @@ cv_matrix_topo(
   auto target_matrix = make_cv_target_matrix(targets);
   auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_matrix, 1);
   auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_matrix, 1);
-  auto const info = topo_info(global? global_info: voice_info);
+  auto info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
+  info.description = std::string("CV routing matrix with min/max control and various stacking options ") + 
+    "that affect how source signals are combined in case they affect the same target.";
 
   if (!global)
   {
@@ -314,6 +316,13 @@ cv_matrix_topo(
   type.gui.submenu->add_submenu("Mul", { type_mul_abs, type_mul_rel, type_mul_stk });
   type.gui.submenu->add_submenu("Add", { type_add_abs, type_add_rel, type_add_stk });
   type.gui.submenu->add_submenu("Add Bipolar", { type_ab_abs, type_ab_rel, type_ab_stk });
+  type.info.description = std::string("Selects operation and stacking mode.<br/>") +
+    "Add: add source signal to target parameter.<br/>" + 
+    "Mul: multiply target parameter by source signal.<br/>" +
+    "AB (Add-Bipolar): treat source signal as bipolar, then add to target parameter.<br/>" + 
+    "Abs (Absolute): modulate as-if the target parameter has the full [0, 1] range available, may cause clipping.<br/>" + 
+    "Rel (Relative): modulate taking into account only the target parameter value, may cause clipping.<br/>" +
+    "Stk (Stacked): modulate taking into account all previous modulation sources affecting the same parameter.";
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", "Source", true, true, param_source, route_count),
@@ -322,6 +331,8 @@ cv_matrix_topo(
   source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_matrix.submenu;
+  source.info.description = std::string("All global CV and MIDI sources, plus for per-voice CV all per-voice CV sources, ") + 
+    "MIDI note and velocity, and On-Note all global CV sources.";
 
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", "Target", true, true, param_target, route_count),
@@ -331,6 +342,7 @@ cv_matrix_topo(
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
+  target.info.description = "Any modulatable parameter of any audio module, audio matrix or (in case of per-voice) voice-in parameter.";
 
   auto& min = result.params.emplace_back(make_param(
     make_topo_info("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", "Min", true, true, param_min, route_count),
@@ -338,6 +350,7 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   min.gui.tabular = true;
   min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  min.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";
 
   auto& max = result.params.emplace_back(make_param(
     make_topo_info("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", "Max", true, true, param_max, route_count),
@@ -345,6 +358,7 @@ cv_matrix_topo(
     make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   max.gui.tabular = true;
   max.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  max.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";
 
   return result;
 }

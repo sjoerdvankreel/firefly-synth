@@ -138,10 +138,13 @@ audio_matrix_topo(
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto const voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "Voice Audio", "V.Audio", true, true, module_vaudio_matrix, 1);
-  auto const global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "Global Audio", "G.Audio", true, true, module_gaudio_matrix, 1);
+  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "Voice Audio", "V.Audio", true, true, module_vaudio_matrix, 1);
+  voice_info.description = "Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.";
+  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "Global Audio", "G.Audio", true, true, module_gaudio_matrix, 1);
+  global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
+
   int this_module = global? module_gaudio_matrix: module_vaudio_matrix;
   auto source_matrix = make_audio_matrix(sources, 0);
   auto target_matrix = make_audio_matrix(targets, 0);
@@ -174,6 +177,7 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   on.gui.tabular = true;
   on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 1, 0, route_count, 1); };
+  on.info.description = "Toggles audio route on/off.";
 
   auto& source = result.params.emplace_back(make_param(
     make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", "Source", true, true, param_source, route_count),
@@ -189,6 +193,7 @@ audio_matrix_topo(
         return sm[self].slot < tm[other].slot;
       return true;
     });
+  source.info.description = "Selects audio route source. Note that you can only route FX 'upwards', so not FX2 -> FX1.";
 
   auto default_target = global? "M.Out": "V.Out";
   auto& target = result.params.emplace_back(make_param(
@@ -205,6 +210,7 @@ audio_matrix_topo(
         return sm[other].slot < tm[self].slot;
       return true;
     });
+  target.info.description = "Selects audio route target.";
 
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", "Gain", true, true, param_gain, route_count),
@@ -212,6 +218,7 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  amount.info.description = "Controls route gain.";
 
   auto& bal = result.params.emplace_back(make_param(
     make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", "Bal", "Bal", true, true, param_bal, route_count),
@@ -219,6 +226,7 @@ audio_matrix_topo(
     make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
   bal.gui.tabular = true;
   bal.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  bal.info.description = "Controls route stereo balance.";
 
   return result;
 }

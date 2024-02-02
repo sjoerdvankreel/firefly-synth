@@ -311,6 +311,7 @@ make_domain_log(double min, double max, double default_, double midpoint, int pr
   result.min = min;
   result.max = max;
   result.unit = unit;
+  result.midpoint = midpoint;
   result.precision = precision;
   result.type = domain_type::log;
   result.default_selector_ = simple_default(std::to_string(default_));

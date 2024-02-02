@@ -39,6 +39,7 @@ voice_on_note_topo(plugin_topo const* topo, int section)
   module_topo result(make_module(
     make_topo_info("{EF1A4E73-BCAD-4D38-A54E-44B83EF46CB5}", "On Note", "On Nt", true, true, module_voice_on_note, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, outputs), make_module_gui_none(section)));
+  result.info.description = "Provides on-note versions of all global modulation sources for the per-voice CV mod matrix.";
   result.engine_factory = [gm = global_sources.mappings](auto const&, int, int) { return std::make_unique<voice_on_note_engine>(gm); };
   return result;
 }

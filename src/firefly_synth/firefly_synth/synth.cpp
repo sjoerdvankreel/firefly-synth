@@ -242,12 +242,15 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 std::unique_ptr<plugin_topo>
 synth_topo()
 {
+  Colour voice_color(0xFFFF8844);
+  Colour matrix_color(0xFF8888FF);
   Colour custom_color(0xFFFF4488);
+  Colour global_color(0xFF4488FF);
+  gui_colors voice_colors(make_section_colors(voice_color));
+  gui_colors global_colors(make_section_colors(global_color));
+  gui_colors matrix_colors(make_section_colors(matrix_color));
   gui_colors custom_colors(make_section_colors(custom_color));
   gui_colors monitor_colors(make_section_colors(custom_color));
-  gui_colors voice_colors(make_section_colors(Colour(0xFFFF8844)));
-  gui_colors global_colors(make_section_colors(Colour(0xFF4488FF)));
-  gui_colors matrix_colors(make_section_colors(Colour(0xFF8888FF)));
   custom_colors.edit_text = custom_color;
   monitor_colors.control_text = custom_color;
 

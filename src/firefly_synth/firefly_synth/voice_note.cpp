@@ -26,12 +26,12 @@ module_topo
 voice_note_topo(int section)
 {
   module_topo result(make_module(
-    make_topo_info("{4380584E-6CC5-4DA5-A533-17A9A1777476}", "Note", module_voice_note, 1),
+    make_topo_info("{4380584E-6CC5-4DA5-A533-17A9A1777476}", "Note", "Note", true, false, module_voice_note, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info("{376846A2-33FC-4DB0-BCB9-7A43A8488A7F}", "Key", output_key, 1)),
       make_module_dsp_output(true, make_topo_info("{2D59B6B8-3B08-430C-9A8A-E882C8E14597}", "Velo", output_velo, 1)) }),
     make_module_gui_none(section)));
-  
+  result.info.description = "Provides MIDI note and velocity as modulation sources.";
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_note_engine>(); };
   return result;
 }
