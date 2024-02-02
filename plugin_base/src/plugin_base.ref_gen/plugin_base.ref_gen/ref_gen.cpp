@@ -154,6 +154,10 @@ generate_modules_ref(plugin_topo const& topo, std::ostream& out)
   for(int m = 0; m < topo.modules.size(); m++)
   {
     auto const& module = topo.modules[m];
+    assert(module.info.description.size());
+    assert(module.info.tag.name.size());
+    assert(module.info.tag.short_name.size());
+
     out << "<tr>\n";
     if(module.gui.visible)
       out << "<td><a href='#" + std::to_string(m + 1) + "'>" + std::to_string(m + 1) + "</a></td>\n";
@@ -204,6 +208,9 @@ generate_params_ref(plugin_topo const& topo, std::ostream& out)
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
+        assert(param.info.description.size());
+        assert(param.info.tag.name.size());
+
         auto const& short_name = param.info.tag.short_name.size()? param.info.tag.short_name: param.info.tag.name;
         int reference_param_slot = param.info.slot_count == 1 ? 0 : 1;
 
