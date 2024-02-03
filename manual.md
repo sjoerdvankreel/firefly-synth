@@ -1,6 +1,6 @@
 # Firefly Synth
 
-A semi-modular synth plugin with different oscillator and effect types,
+A semi-modular polyphonic synthesizer plugin with different oscillator and effect types,
 2 osc-to-osc routing matrices and both global and per-voice audio and
 cv routing matrices.
 
