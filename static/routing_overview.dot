@@ -1,28 +1,39 @@
 digraph Synth {
   rankdir="LR";
+  bgcolor="#111111";
 
-  comment="Nodes"
-  "Voice In" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "Voice Out" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "Oscillator" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "Voice FX" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "Voice LFO" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "Envelope" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "AM Matrix" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "FM Matrix" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "Voice CV Matrix" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
-  "Voice Audio Matrix" [shape="rect", style="rounded", color="#FD9A4D", fontcolor="#FD9A4D"]
+  comment="Voice Audio Nodes"
+  "Voice Out" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Oscillator" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Voice FX" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
 
-  "Master In" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
-  "Master Out" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
-  "Global FX" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
-  "Global LFO" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
-  "Global CV Matrix" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
-  "Global Audio Matrix" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
+  comment="Voice CV Nodes"
+  "Voice In" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Voice LFO" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Envelope" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
 
-  "MIDI" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
-  "Note Key" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
-  "Note Velocity" [shape="rect", style="rounded", color="#29A5BB", fontcolor="#29A5BB"]
+  comment="Voice Matrix Nodes"
+  "AM Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "FM Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "Voice CV Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "Voice Audio Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+
+  comment="Global Audio Nodes"
+  "Master Out" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+  "Global FX" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+
+  comment="Global CV Nodes"
+  "Master In" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+  "Global LFO" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+
+  comment="Global Matrix Nodes"
+  "Global CV Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "Global Audio Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+
+  comment="External Nodes"
+  "MIDI" [shape="rect", style="rounded", color="#FF4488", fontcolor="#FF4488"]
+  "Note Key" [shape="rect", style="rounded", color="#FF4488", fontcolor="#FF4488"]
+  "Note Velocity" [shape="rect", style="rounded", color="#FF4488", fontcolor="#FF4488"]
 
   comment="Audio edges"
   "Oscillator" -> "AM Matrix" [color="#FD9A4D"]
