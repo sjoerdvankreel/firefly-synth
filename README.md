@@ -3,14 +3,14 @@
 A semi-modular software synthesizer plugin.
 It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
 
+- Detailed parameter reference: [param_reference.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/param_reference.html).
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
-- Detailed parameter reference: [param_reference.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/param_reference.html).
 
 V1.0 is a very bare-bones release, just to get something out there. In particular:
 - There is no FX-only version yet.
-- There is no monophonic mode yet (the poly/mono switch and envelope retrigger options are grayed out).
 - There are no presets, but see [https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos).
+- There is no monophonic mode yet (the poly/mono switch and envelope retrigger options are grayed out).
 
 Other than that, this is fully-functional polyphonic synth plugin.
 ![Screenshot](static/screenshot.png)
