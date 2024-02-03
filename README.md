@@ -12,7 +12,8 @@ V1.0 is a very bare-bones release, just to get something out there. In particula
 - There are no presets, but see [https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos).
 - There is no monophonic mode yet (the poly/mono switch and envelope retrigger options are grayed out).
 
-Other than that, this is fully-functional polyphonic synth plugin.
+Other than that, it is a fully-functional polyphonic synth plugin.
+
 ![Screenshot](static/screenshot.png)
 
 <table><tr>
