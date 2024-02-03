@@ -34,6 +34,7 @@ Just once, after that, the size is stored in a user settings file.
 - Most parameters can be automated
 - Most continuous-valued parameters can be automated per sample
 - Most continuous-valued parameters can be modulated per sample
-- Most per-voice discrete valued parameters can be automated "at voice start"
-- Some global discrete valued parameters can be automated per block
-- See the parameter reference document for details
+- Some global discrete-valued parameters can be automated per block
+- Most per-voice discrete-valued parameters can be automated "at voice start"
+
+See the parameter reference document for details.
