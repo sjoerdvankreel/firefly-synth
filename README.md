@@ -1,36 +1,27 @@
 # About
+
 A semi-modular software synthesizer plugin.
 It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
 
-- Parameter overview: [PARAMREF.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/PARAMREF.html).
+- Detailed parameter reference: [param_reference.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/param_reference.html).
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
-- Features: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md)
-- Manual: [TODO there is no manual yet.] The feature list doubles as a manual for now.
+- Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 
-Since there's no manual yet, I'll just write it down here:
-- Right-click a parameter pops up the host context menu.
-- Right-click some empty space pops up the undo/redo menu.
-- Right-click a matrix header pops up a context menu with clear and tidy options.
-- Right-click the first column in a matrix pops up a context menu with matrix manipulation options.
-- Right-click a module header number pops up a context menu with copy/clear/swap etc, including matrix-routing-preserving options.
+V1.0 is a very bare-bones release, just to get something out there. In particular:
+- There is no FX-only version yet.
+- There are no presets, but see [https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos).
+- There is no monophonic mode yet (the poly/mono switch and envelope retrigger options are grayed out).
+
+Other than that, it is a fully-functional polyphonic synth plugin.
 
 ![Screenshot](static/screenshot.png)
 
-<img align="left" alt="VST logo" src="static/vst_logo.png">
-VST is a trademark of Steinberg Media Technologies GmbH,
-registered in Europe and other countries.
-<br clear="left"/>
-
-# Project status
-This is a very bare-bones release, just to get something out there. In particular:
-- There is no manual.
-- There is no fx-only version.
-- There are no presets. None.
-- There is no monophonic mode yet.<br/>The option to switch poly/mono is grayed out in the UI,<br/>as are the envelope trigger modes (legato, retrigger, multitrigger).
-- That being said, apart from mono-mode the thing is fully functional.
-
-Just to get a feeling for what all the knobs do, you can checkout the demo files in
-[https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos).
+<table><tr>
+<td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
+<td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
+<td><img alt="VST logo" src="static/vst_logo.png"/></td>
+<td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
+</tr></table>
 
 # What does it sound like?
 

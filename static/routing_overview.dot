@@ -1,0 +1,72 @@
+digraph Synth {
+  rankdir="LR";
+  bgcolor="#111111";
+
+  comment="External Nodes"
+  "MIDI" [shape="rect", style="rounded", color="#FF4488", fontcolor="#FF4488"]
+  "Note Key" [shape="rect", style="rounded", color="#FF4488", fontcolor="#FF4488"]
+  "Note Velocity" [shape="rect", style="rounded", color="#FF4488", fontcolor="#FF4488"]
+
+  comment="Global Nodes"
+  "Global FX" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+  "Master Out" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+  "Master In" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+  "Global LFO" [shape="rect", style="rounded", color="#4488FF", fontcolor="#4488FF"]
+
+  comment="Voice Nodes"
+  "Oscillator" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Voice FX" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Voice Out" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Voice In" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Voice LFO" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+  "Envelope" [shape="rect", style="rounded", color="#FF8844", fontcolor="#FF8844"]
+
+  comment="Matrix Nodes"
+  "AM Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "FM Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "Voice CV Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "Voice Audio Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "Global CV Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+  "Global Audio Matrix" [shape="rect", style="rounded", color="#8888FF", fontcolor="#8888FF"]
+
+  comment="External edges"
+  "MIDI" -> "Voice CV Matrix" [color="#FF4488"]
+  "MIDI" -> "Global CV Matrix" [color="#FF4488"]
+  "Note Key" -> "Voice CV Matrix" [color="#FF4488"]
+  "Note Velocity" -> "Voice CV Matrix" [color="#FF4488"]
+
+  comment="Voice edges"
+  "Oscillator" -> "AM Matrix" [color="#FF8844"]
+  "Oscillator" -> "FM Matrix" [color="#FF8844"]
+  "Oscillator" -> "Voice Audio Matrix" [color="#FF8844"]
+  "Voice FX" -> "Voice Audio Matrix" [color="#FF8844"]
+  "Voice Out" -> "Global Audio Matrix" [color="#FF8844"]
+  "Envelope" -> "Voice CV Matrix" [color="#FF8844"]
+  "Voice LFO" -> "Voice CV Matrix" [color="#FF8844"]
+  "Voice In" -> "Oscillator" [color="#FF8844"]
+
+  comment="Global edges"
+  "Master In" -> "Global CV Matrix" [color="#4488FF"]
+  "Global LFO" -> "Global CV Matrix" [color="#4488FF"]
+  "Master In" -> "Voice CV Matrix" [color="#4488FF"]
+  "Global LFO" -> "Voice CV Matrix" [color="#4488FF"]
+  "Global FX" -> "Global Audio Matrix" [color="#4488FF"]
+
+  comment="Matrix edges"
+  "AM Matrix" -> "Oscillator" [color="#8888FF"]
+  "FM Matrix" -> "Oscillator" [color="#8888FF"]
+  "Voice Audio Matrix" -> "Voice FX" [color="#8888FF"]
+  "Voice Audio Matrix" -> "Voice Out" [color="#8888FF"]
+  "Global Audio Matrix" -> "Global FX" [color="#8888FF"]
+  "Global Audio Matrix" -> "Master Out" [color="#8888FF"]
+  "Voice CV Matrix" -> "Voice In" [color="#8888FF"]
+  "Voice CV Matrix" -> "Oscillator" [color="#8888FF"]
+  "Voice CV Matrix" -> "AM Matrix" [color="#8888FF"]
+  "Voice CV Matrix" -> "FM Matrix" [color="#8888FF"]
+  "Voice CV Matrix" -> "Voice FX" [color="#8888FF"]
+  "Voice CV Matrix" -> "Voice Audio Matrix" [color="#8888FF"]
+  "Voice CV Matrix" -> "Voice Out" [color="#8888FF"]
+  "Global CV Matrix" -> "Master Out" [color="#8888FF"]
+  "Global CV Matrix" -> "Global FX" [color="#8888FF"]
+  "Global CV Matrix" -> "Global Audio Matrix" [color="#8888FF"]
+}
