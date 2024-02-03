@@ -10,7 +10,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 ![Screenshot](static/screenshot.png)
 
 <img align="left" alt="CLAP logo" src="static/clap_logo.png"/>
-[https://github.com/free-audio/clap](https://github.com/free-audio/clap)
+<a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a>
 <br clear="left"/>
 
 <img align="left" alt="VST logo" src="static/vst_logo.png"/>
