@@ -9,8 +9,8 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 ![Screenshot](static/screenshot.png)
 
-<table border="0"><tr>
-<td><img alt="CLAP logo" src="static/clap_logo.png"/>TESTTEST</td> 
+<table border="0px"><tr>
+<td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
 <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
 <td><img alt="VST logo" src="static/vst_logo.png"/></td>
 <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
