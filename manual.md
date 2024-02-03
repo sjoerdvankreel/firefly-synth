@@ -17,6 +17,8 @@ Just once, after that, the size is stored in a user settings file.
 See the parameter reference document for details.
 
 - Up to 32 voices in polyphonic mode.
+- Per-voice and global audio and CV routing matrices.
+- Oscillator-to-oscillator AM and FM routing matrices.
 - Pitchbend and modwheel linked to external MIDI input.
 - Smoothing controls for MIDI input and host BPM changes.
 - Portamento with tempo syncing and regular/automatic glide mode.
