@@ -17,6 +17,7 @@ Just once, after that, the size is stored in a user settings file.
 - Up to 32 voices in polyphonic mode.
 - Pitchbend and modwheel linked to external MIDI input.
 - Smoothing controls for MIDI input and host BPM changes.
+- Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
 - Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
 
 
