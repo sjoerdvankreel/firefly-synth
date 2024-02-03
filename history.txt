@@ -1,3 +1,7 @@
+February 3, 2024 - V1.03 (No binaries).
+
+- Add manual / overview document.
+
 February 2, 2024 - V1.02 (No binaries).
 
 - Add detailed parameter reference.
