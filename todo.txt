@@ -21,8 +21,10 @@ do some presets
 fx-only version
 implement monophonic mode
 implement envelope retriggering
+document compare-with-infernal
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal
+do indexed release schema + regular backwards compat
 also do the routing schema image again or equivalent
 document compare-with-infernal
 
