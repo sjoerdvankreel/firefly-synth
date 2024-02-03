@@ -6,7 +6,7 @@ A semi-modular polyphonic synthesizer plugin with different oscillator and effec
 
 ## UI
 A knob with a circle in it or a slider with a small dot in it means it can be modulated by the CV matrices.<br/>
-Hover over a control to see a more detailed description. There is no theming support.
+Hover over a parameter to see a more detailed description. There is no theming support.
 
 It's fully resizable by scaling (by dragging the bottom right corner), but it does not react to OS DPI settings.<br/>
 That means, if you change your DPI settings, you'll have to resize manually.
@@ -17,7 +17,7 @@ Just once, after that, the size is stored in a user settings file.
 - Up to 32 voices in polyphonic mode.
 - Pitchbend and modwheel linked to external MIDI input.
 - Smoothing controls for MIDI input and host BPM changes.
--
+- Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
 
 
 
