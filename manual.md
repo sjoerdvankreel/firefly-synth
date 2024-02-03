@@ -20,8 +20,10 @@ See the parameter reference document for details.
 - Pitchbend and modwheel linked to external MIDI input.
 - Smoothing controls for MIDI input and host BPM changes.
 - Portamento with tempo syncing and regular/automatic glide mode.
+- Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes and a noise generator.
 - Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
 - Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
+- Per-voice and global FX modules with state variable filter, comb filter, distortion and (global only) reverb, feedback- and multitap delay.
 
 ## Context menus
 - Right-click a parameter to show the host menu.
