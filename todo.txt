@@ -5,25 +5,21 @@ keep cpu/mem profiling
 
 someday:
 mseg
-.com website 
+midi mpe
 microtonal
+.com website 
 voice level unison
 cakewalk bug report
-visual routing indicators
-midi mpe
 vst3 note expressions
 clap (poly) modulation
+visual routing indicators
 document the header files a bit
 
 v1.1:
-make a manual
 do some presets
 fx-only version
-lowercase paramref file
 implement monophonic mode
 implement envelope retriggering
-document compare-with-infernal
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal
 do indexed release schema + regular backwards compat
-also do the routing schema image again or equivalent
