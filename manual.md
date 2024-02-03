@@ -12,23 +12,6 @@ It's fully resizable by scaling (by dragging the bottom right corner), but it do
 That means, if you change your DPI settings, you'll have to resize manually.
 Just once, after that, the size is stored in a user settings file.
 
-## Feature overview
-
-See the parameter reference document for details.
-
-- Up to 32 voices in polyphonic mode.
-- Per-voice and global audio and CV routing matrices.
-- Oscillator-to-oscillator AM and FM routing matrices.
-- Pitchbend and modwheel linked to external MIDI input.
-- Smoothing controls for MIDI input and host BPM changes.
-- Portamento with tempo syncing and regular/automatic glide mode.
-- Monitor module with active voice count, cpu and threadpool usage.
-- Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
-- Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync.
-- Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
-- Per-voice and global FX modules with state variable filter, comb filter, distortion and (global only) reverb, feedback- and multitap delay.
-
-
 ## Context menus
 - Right-click a parameter to show the host menu.
 - Right-click some empty space to show the undo/redo menu.
@@ -47,9 +30,25 @@ See the parameter reference document for details.
 ## File and plugin format
 - Ffpreset files are shareable between CLAP and VST3.
 - VST3: does sample accurate automation, no note expressions.
-- CLAP: does sample accurate automation, does threadpool, no modulation, no polyphonic modulation.<br/>
-However, this synth is quite capable of per-voice modulation on it's own.
-- MIDI: does PitchBend, ChannelPressure, all CC parameters. No MPE support.
+- CLAP: does sample accurate automation, does threadpool, no modulation, no polyphonic modulation.
+
+## Feature overview
+
+See the parameter reference document for details.
+
+- Up to 32 voices in polyphonic mode.
+- On-note versions of all global modulation sources.
+- Per-voice and global audio and CV routing matrices.
+- Oscillator-to-oscillator AM and FM routing matrices.
+- Pitchbend and modwheel linked to external MIDI input.
+- Smoothing controls for MIDI input and host BPM changes.
+- Portamento with tempo syncing and regular/automatic glide mode.
+- Responds to MIDI pitchbend, modwheel and all 128 CC parameters.
+- Monitor module with active voice count, cpu and threadpool usage.
+- Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
+- Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync.
+- Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
+- Per-voice and global FX modules with state variable filter, comb filter, distortion and (global only) reverb, feedback- and multitap delay.
 
 ## Routing overview
 ![Routing overview](static/routing_overview.png)
