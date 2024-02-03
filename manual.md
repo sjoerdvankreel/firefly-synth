@@ -24,3 +24,7 @@ Just once, after that, the size is stored in a user settings file.
 - Right-click a matrix header to show clear/tidy matrix options.
 - Right-click a module header to show copy/clear/swap etc options.
 - Right-click the first column in a matrix to show matrix manipulation options.
+
+## Routing overview
+
+![Routing overview](static/routing_overview.png)
