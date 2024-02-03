@@ -15,11 +15,13 @@ clap (poly) modulation
 visual routing indicators
 document the header files a bit
 
+
 v1.1:
 do some presets
 fx-only version
 implement monophonic mode
 implement envelope retriggering
+rename infernal-1.4-preview to 1.4
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal
 do indexed release schema + regular backwards compat
