@@ -10,7 +10,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 ![Screenshot](static/screenshot.png)
 
 
-[https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/feature.md)
+[https://github.com/free-audio/clap](https://github.com/free-audio/clap)
 
 <img align="left" alt="CLAP logo" src="static/clap_logo.png"/>
 
