@@ -1,7 +1,8 @@
 # Firefly Synth
 
-A semi-modular synth plugin with various options including subtractive, DSF and FM.<br/>
-For a more detailed overview, see the parameter reference document.
+A semi-modular synth plugin with different oscillator and effect types,
+2 osc-to-osc routing matrices and both global and per-voice audio and
+cv routing matrices.
 
 # General
 

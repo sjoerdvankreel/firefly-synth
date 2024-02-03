@@ -16,9 +16,10 @@ clap (poly) modulation
 document the header files a bit
 
 v1.1:
-make a manual + trim features doc
+make a manual
 do some presets
 fx-only version
+lowercase paramref file
 implement monophonic mode
 implement envelope retriggering
 document compare-with-infernal
@@ -26,7 +27,3 @@ do copy/paste patch through clipboard
 re-do the acid line demo from infernal
 do indexed release schema + regular backwards compat
 also do the routing schema image again or equivalent
-document compare-with-infernal
-
-manual! ==>
-do the routing graph again
