@@ -25,10 +25,6 @@ Just once, after that, the size is stored in a user settings file.
 - Right-click a module header to show copy/clear/swap etc options.
 - Right-click the first column in a matrix to show matrix manipulation options.
 
-## Routing overview
-
-![Routing overview](static/routing_overview.png)
-
 ## Automation and modulation
 
 - Most parameters can be automated
@@ -38,3 +34,7 @@ Just once, after that, the size is stored in a user settings file.
 - Most per-voice discrete-valued parameters can be automated "at voice start"
 
 See the parameter reference document for details.
+
+## Routing overview
+
+![Routing overview](static/routing_overview.png)
