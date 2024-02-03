@@ -9,12 +9,12 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 ![Screenshot](static/screenshot.png)
 
-<img align="left" alt="CLAP logo" src="static/clap_logo.png"/>
-<a align="left" href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a>
-<img align="left" alt="VST logo" src="static/vst_logo.png"/>
-<span align="left">VST is a trademark of Steinberg Media Technologies GmbH,
-registered in Europe and other countries.</span>
-<br clear="left"/>
+<table><tr>
+<td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
+<td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
+<td><img alt="VST logo" src="static/vst_logo.png"/></td>
+<td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
+</tr></table>
 
 # Project status
 This is a very bare-bones release, just to get something out there. In particular:
