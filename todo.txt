@@ -21,6 +21,7 @@ do some presets
 fx-only version
 update screenshot
 implement monophonic mode
+fix the default patch velo etc
 implement envelope retriggering
 rename infernal-1.4-preview to 1.4
 do copy/paste patch through clipboard
