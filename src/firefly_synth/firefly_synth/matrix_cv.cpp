@@ -464,7 +464,7 @@ cv_matrix_engine::process(plugin_block& block)
     {
       float scale = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_scale, scale_curve[f]);
       float offset = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_offset, offset_curve[f]);
-      transformed_source[f] = std::clamp(offset + scale * source_curve[f], 0.0f, 1.0f);
+      transformed_source[f] = std::clamp((offset + source_curve[f]) * scale, 0.0f, 1.0f);
     }
 
     // apply modulation
