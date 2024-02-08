@@ -558,8 +558,42 @@
 <td colspan='11' class='description'>Any modulatable parameter of any audio module, audio matrix or (in case of per-voice) voice-in parameter.</td>
 </tr>
 <tr>
+<td rowspan='2'>Offset</td>
+<td>Of</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>-1.00</td>
+<td>+1.00</td>
+<td>+0.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal offset. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
+<td rowspan='2'>Scale</td>
+<td>Sc</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>1.00</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal multiplier. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
 <td rowspan='2'>Min</td>
-<td>Min</td>
+<td>Mn</td>
 <td>Main</td>
 <td>Yes</td>
 <td>20</td>
@@ -576,7 +610,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Max</td>
-<td>Max</td>
+<td>Mx</td>
 <td>Main</td>
 <td>Yes</td>
 <td>20</td>
@@ -1190,8 +1224,42 @@
 <td colspan='11' class='description'>Any modulatable parameter of any audio module, audio matrix or (in case of per-voice) voice-in parameter.</td>
 </tr>
 <tr>
+<td rowspan='2'>Offset</td>
+<td>Of</td>
+<td>Main</td>
+<td>Yes</td>
+<td>30</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>-1.00</td>
+<td>+1.00</td>
+<td>+0.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal offset. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
+<td rowspan='2'>Scale</td>
+<td>Sc</td>
+<td>Main</td>
+<td>Yes</td>
+<td>30</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>1.00</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal multiplier. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
 <td rowspan='2'>Min</td>
-<td>Min</td>
+<td>Mn</td>
 <td>Main</td>
 <td>Yes</td>
 <td>30</td>
@@ -1208,7 +1276,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Max</td>
-<td>Max</td>
+<td>Mx</td>
 <td>Main</td>
 <td>Yes</td>
 <td>30</td>

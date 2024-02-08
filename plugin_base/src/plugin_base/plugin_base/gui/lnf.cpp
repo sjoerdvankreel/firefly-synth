@@ -444,7 +444,14 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   if(tabular)
     draw_tabular_cell_bg(g, &s, 0.05f);
 
-  float size = s.getHeight() - padding - stroke / 2;
+  float scale_factor = 1;
+  float size_base = s.getHeight();
+  if(tabular) 
+  {
+    size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
+    scale_factor = size_base / s.getHeight();
+  }
+  float size = size_base - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
   if(tabular) left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2 - padding / 2 + top_margin;
@@ -499,11 +506,11 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   if (!s.isEnabled()) thumb_color = color_to_grayscale(thumb_color);
   g.setColour(thumb_color);
 
-  float thumb_top = top + size - knob_thumb_height * 1.25;
-  float thumb_left = left + size / 2 - knob_thumb_width / 2;
+  float thumb_top = top + size - knob_thumb_height * scale_factor * 1.25;
+  float thumb_left = left + size / 2 - knob_thumb_width * scale_factor / 2;
   thumb.startNewSubPath(thumb_left, thumb_top);
-  thumb.lineTo(thumb_left + knob_thumb_width / 2, thumb_top + knob_thumb_height);
-  thumb.lineTo(thumb_left + knob_thumb_width, thumb_top);
+  thumb.lineTo(thumb_left + knob_thumb_width * scale_factor / 2, thumb_top + knob_thumb_height * scale_factor);
+  thumb.lineTo(thumb_left + knob_thumb_width * scale_factor, thumb_top);
   thumb.closeSubPath();
   auto transform = AffineTransform::rotation(thumb_start_angle + pos * thum_angle_range, left + size / 2, top + size / 2);
   thumb.applyTransform(transform);

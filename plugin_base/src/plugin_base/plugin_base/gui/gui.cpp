@@ -618,9 +618,10 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
-    std::string name = param->info.tag.name;
-    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), name, false, -1, true);
-    header.setText(name, dontSendNotification);
+    assert(param->info.tag.short_name.size());
+    std::string short_name = param->info.tag.short_name;
+    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), short_name, false, -1, true);
+    header.setText(short_name, dontSendNotification);
     header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
     result.add(header, vertical, 0);
   }

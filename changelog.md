@@ -1,3 +1,7 @@
+### February 8, 2024 - V1.04 (No binaries).
+
+- Add scale and offset for CV matrices.
+
 ### February 3, 2024 - V1.03 (No binaries).
 
 - Add manual / overview document.
