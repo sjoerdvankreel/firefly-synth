@@ -351,7 +351,7 @@ cv_matrix_topo(
   offset.gui.tabular = true;
   offset.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   offset.info.description = std::string("Source signal offset. Used to transform source before modulation is applied. ") +
-    "Useful to increase the modulation effect of things like midi note and velocity.";
+    "Useful to stretch things like midi note/velocity into the full [0, 1] range.";
   auto& scale = result.params.emplace_back(make_param(
     make_topo_info("{6564CE04-0AB8-4CDD-8F3D-E477DD1F4715}", "Scale", "Sc", true, true, param_scale, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1, 32, 1, 2, ""),
@@ -359,7 +359,7 @@ cv_matrix_topo(
   scale.gui.tabular = true;
   scale.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   scale.info.description = std::string("Source signal multiplier. Used to transform source before modulation is applied. ") +
-    "Useful to increase the modulation effect of things like midi note and velocity.";
+    "Useful to stretch things like midi note/velocity into the full [0, 1] range.";
   auto& min = result.params.emplace_back(make_param(
     make_topo_info("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", "Mn", true, true, param_min, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
