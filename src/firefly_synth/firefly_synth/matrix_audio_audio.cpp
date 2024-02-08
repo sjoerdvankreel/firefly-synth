@@ -279,7 +279,7 @@ audio_audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 
     // add modulated amount to mixdown
     auto const& source_audio = block.module_audio(sm, smi);
-    auto const& modulation = get_cv_matrix_mixdown(block, _global);
+    auto const& modulation = get_cv_audio_matrix_mixdown(block, _global);
     auto const& bal_curve = *modulation[this_module][0][param_bal][r];
     auto const& gain_curve = *modulation[this_module][0][param_gain][r];
     for(int c = 0; c < 2; c++)

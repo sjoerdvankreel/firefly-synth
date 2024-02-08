@@ -89,7 +89,7 @@ master_audio_out_engine::process(plugin_block& block)
 {
   auto& mixer = get_audio_audio_matrix_mixer(block, true);
   auto const& audio_in = mixer.mix(block, module_master_out, 0);
-  auto const& modulation = get_cv_matrix_mixdown(block, true);
+  auto const& modulation = get_cv_audio_matrix_mixdown(block, true);
   auto const& bal_curve = *modulation[module_master_out][0][param_bal][0];
   auto const& gain_curve = *modulation[module_master_out][0][param_gain][0];
   for (int f = block.start_frame; f < block.end_frame; f++)
@@ -105,7 +105,7 @@ voice_audio_out_engine::process(plugin_block& block)
 {
   auto& mixer = get_audio_audio_matrix_mixer(block, false);
   auto const& audio_in = mixer.mix(block, module_voice_out, 0);
-  auto const& modulation = get_cv_matrix_mixdown(block, false);
+  auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
   auto const& amp_env = block.voice->all_cv[module_env][0][0][0];
   auto const& bal_curve = *modulation[module_voice_out][0][param_bal][0];
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];

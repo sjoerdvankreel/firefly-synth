@@ -67,12 +67,12 @@ public:
 
   jarray<float, 3> const& modulate_am(
     plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation);
+    cv_audio_matrix_mixdown const* cv_modulation);
 
   template <bool Graph>
   jarray<float, 2> const& modulate_fm(
     plugin_block& block, int slot,
-    cv_matrix_mixdown const* cv_modulation);
+    cv_audio_matrix_mixdown const* cv_modulation);
 };
 
 static graph_data
@@ -257,7 +257,7 @@ _am_modulator(this), _fm_modulator(this)
 jarray<float, 3> const&
 osc_osc_matrix_am_modulator::modulate_am(
   plugin_block& block, int slot, 
-  cv_matrix_mixdown const* cv_modulation)
+  cv_audio_matrix_mixdown const* cv_modulation)
 { return _engine->modulate_am(block, slot, cv_modulation); }
 
 // unison-(frame*oversmp)
@@ -265,16 +265,16 @@ template <bool Graph>
 jarray<float, 2> const&
 osc_osc_matrix_fm_modulator::modulate_fm(
   plugin_block& block, int slot, 
-  cv_matrix_mixdown const* cv_modulation)
+  cv_audio_matrix_mixdown const* cv_modulation)
 { return _engine->modulate_fm<Graph>(block, slot, cv_modulation); }
 
 // need explicit instantiation here
 template
 jarray<float, 2> const&
-osc_osc_matrix_fm_modulator::modulate_fm<false>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
+osc_osc_matrix_fm_modulator::modulate_fm<false>(plugin_block& block, int slot, cv_audio_matrix_mixdown const* cv_modulation);
 template
 jarray<float, 2> const&
-osc_osc_matrix_fm_modulator::modulate_fm<true>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
+osc_osc_matrix_fm_modulator::modulate_fm<true>(plugin_block& block, int slot, cv_audio_matrix_mixdown const* cv_modulation);
 
 void
 osc_osc_matrix_engine::process(plugin_block& block)
@@ -289,11 +289,11 @@ osc_osc_matrix_engine::process(plugin_block& block)
 // This returns the final output signal i.e. all modulators applied to carrier.
 jarray<float, 3> const& 
 osc_osc_matrix_engine::modulate_am(
-  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
+  plugin_block& block, int slot, cv_audio_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
   if(cv_modulation == nullptr)
-    cv_modulation = &get_cv_matrix_mixdown(block, false);
+    cv_modulation = &get_cv_audio_matrix_mixdown(block, false);
 
   // loop through the routes
   // the first match we encounter becomes the modulation result
@@ -366,11 +366,11 @@ osc_osc_matrix_engine::modulate_am(
 template <bool Graph>
 jarray<float, 2> const&
 osc_osc_matrix_engine::modulate_fm(
-  plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
+  plugin_block& block, int slot, cv_audio_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
   if (cv_modulation == nullptr)
-    cv_modulation = &get_cv_matrix_mixdown(block, false);
+    cv_modulation = &get_cv_audio_matrix_mixdown(block, false);
 
   // loop through the routes
   // the first match we encounter becomes the modulator result

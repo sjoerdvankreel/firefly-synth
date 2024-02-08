@@ -127,7 +127,7 @@ public:
   void process(plugin_block& block) override { process<false>(block, nullptr); }
   
   template <bool Graph> 
-  void process(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 
 private:
 
@@ -136,22 +136,22 @@ private:
   template <bool AutoFdbk>
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch, float mid_freq);
   
-  void init_kps(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Graph> void process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Graph> void process_basic(plugin_block& block, cv_matrix_mixdown const* modulation);
-  template <bool Graph> void process_static(plugin_block& block, cv_matrix_mixdown const* modulation);  
+  void init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph> void process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph> void process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph> void process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   
   template <bool Graph, bool Sin> void 
-  process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation);
+  process_basic_sin(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw>
-  void process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_basic_sin_saw(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri>
-  void process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_basic_sin_saw_tri(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr>
-  void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
-  void process_unison(plugin_block& block, cv_matrix_mixdown const* modulation);
+  void process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
 static void
@@ -228,7 +228,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
     block = engine->process(module_osc, i, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
       osc_engine engine(max_frame_count, sample_rate);
       engine.reset(&block);
-      cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
+      cv_audio_matrix_mixdown modulation(make_static_cv_audio_matrix_mixdown(block));
       engine.process<true>(block, &modulation);
     });
     jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);
@@ -685,7 +685,7 @@ osc_engine::reset(plugin_block const* block)
 
 // Cant be in the reset call because we need access to modulation.
 void
-osc_engine::init_kps(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   assert(!_kps_initialized);
 
@@ -801,11 +801,11 @@ osc_engine::generate_kps(int voice, float sr, float freq0, float fdbk0, float st
 }
 
 template <bool Graph> void
-osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   // allow custom data for graphs
   if (modulation == nullptr)
-    modulation = &get_cv_matrix_mixdown(block, false);
+    modulation = &get_cv_audio_matrix_mixdown(block, false);
 
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
@@ -828,7 +828,7 @@ osc_engine::process(plugin_block& block, cv_matrix_mixdown const* modulation)
 }
 
 template <bool Graph> void
-osc_engine::process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   if(block.state.own_block_automation[param_hard_sync][0].step())
     process_unison<Graph, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
@@ -837,7 +837,7 @@ osc_engine::process_dsf(plugin_block& block, cv_matrix_mixdown const* modulation
 }
 
 template <bool Graph> void
-osc_engine::process_static(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int svf_type = block_auto[param_rand_svf][0].step();
@@ -853,7 +853,7 @@ osc_engine::process_static(plugin_block& block, cv_matrix_mixdown const* modulat
 }
 
 template <bool Graph> void
-osc_engine::process_basic(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sin = block_auto[param_basic_sin_on][0].step();
@@ -862,7 +862,7 @@ osc_engine::process_basic(plugin_block& block, cv_matrix_mixdown const* modulati
 }
 
 template <bool Graph, bool Sin> void
-osc_engine::process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic_sin(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool saw = block_auto[param_basic_saw_on][0].step();
@@ -871,7 +871,7 @@ osc_engine::process_basic_sin(plugin_block& block, cv_matrix_mixdown const* modu
 }
 
 template <bool Graph, bool Sin, bool Saw> void
-osc_engine::process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic_sin_saw(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool tri = block_auto[param_basic_tri_on][0].step();
@@ -880,7 +880,7 @@ osc_engine::process_basic_sin_saw(plugin_block& block, cv_matrix_mixdown const* 
 }
 
 template <bool Graph, bool Sin, bool Saw, bool Tri> void
-osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
@@ -889,7 +889,7 @@ osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_matrix_mixdown con
 }
 
 template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr> void
-osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sync = block_auto[param_hard_sync][0].step() != 0;
@@ -898,7 +898,7 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_matrix_mixdown
 }
 
 template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> void
-osc_engine::process_unison(plugin_block& block, cv_matrix_mixdown const* modulation)
+osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
   if constexpr (Sin) generator_count++;

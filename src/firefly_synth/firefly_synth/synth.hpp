@@ -35,7 +35,7 @@ inline int const max_unison_voices = 8;
 
 // everybody needs this
 typedef plugin_base::jarray<plugin_base::jarray<
-  float, 1> const*, 4> cv_matrix_mixdown;
+  float, 1> const*, 4> cv_audio_matrix_mixdown;
 
 // shared by midi and cv matrix
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
@@ -43,8 +43,8 @@ enum { midi_output_cp, midi_output_pb, midi_output_cc };
 // this describes our semi-modular synth
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 enum {
-  module_midi, module_master_in, module_glfo, module_gcv_matrix, module_voice_note, 
-  module_voice_on_note, module_vlfo, module_env, module_vcv_matrix, module_voice_in, 
+  module_midi, module_master_in, module_glfo, module_gcv_audio_matrix, module_voice_note,
+  module_voice_on_note, module_vlfo, module_env, module_vcv_audio_matrix, module_voice_in,
   module_vaudio_audio_matrix, module_osc_osc_matrix, module_osc, module_vfx, module_voice_out,
   module_voice_mix, module_gaudio_audio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
@@ -58,7 +58,7 @@ public:
   osc_osc_matrix_am_modulator(osc_osc_matrix_engine* engine) : _engine(engine) {}
   plugin_base::jarray<float, 3> const& modulate_am(
     plugin_base::plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation);
+    cv_audio_matrix_mixdown const* cv_modulation);
 };
 
 // used by the oscillator during it's process call to apply fm
@@ -72,7 +72,7 @@ public:
   template <bool Graph>
   plugin_base::jarray<float, 2> const& modulate_fm(
     plugin_base::plugin_block& block, int slot, 
-    cv_matrix_mixdown const* cv_modulation);
+    cv_audio_matrix_mixdown const* cv_modulation);
 };
 
 inline osc_osc_matrix_am_modulator&
@@ -112,24 +112,24 @@ get_audio_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
   return *static_cast<audio_audio_matrix_mixer*>(context);
 }
 
-// gets the cv mixdown for all modulatable parameters in all modules for the current stage
-inline cv_matrix_mixdown const&
-get_cv_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
+// gets the cv to audio mixdown for all modulatable parameters in all modules for the current stage
+inline cv_audio_matrix_mixdown const&
+get_cv_audio_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
 {
-  int module = global ? module_gcv_matrix : module_vcv_matrix;
+  int module = global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
   void* context = block.module_context(module, 0);
-  return *static_cast<cv_matrix_mixdown const*>(context);
+  return *static_cast<cv_audio_matrix_mixdown const*>(context);
 }
 
 // set all outputs to current automation values
-cv_matrix_mixdown
-make_static_cv_matrix_mixdown(plugin_base::plugin_block& block);
+cv_audio_matrix_mixdown
+make_static_cv_audio_matrix_mixdown(plugin_base::plugin_block& block);
 
 // routing matrices sources/targets
 std::vector<plugin_base::module_topo const*>
-make_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
+make_cv_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::cv_source_entry>
-make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
+make_cv_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
 make_audio_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
@@ -163,7 +163,7 @@ plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
-plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
+plugin_base::module_topo cv_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::cv_source_entry> const& sources, std::vector<plugin_base::cv_source_entry> const& on_note_sources, std::vector<plugin_base::module_topo const*> const& targets);
 
 }

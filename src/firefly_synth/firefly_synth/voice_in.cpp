@@ -202,7 +202,7 @@ voice_in_engine::reset(plugin_block const* block)
 void 
 voice_in_engine::process(plugin_block& block)
 {
-  auto const& modulation = get_cv_matrix_mixdown(block, false);
+  auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
   auto const& pb_curve = *(modulation)[module_voice_in][0][param_pb][0];
   auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
   auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  

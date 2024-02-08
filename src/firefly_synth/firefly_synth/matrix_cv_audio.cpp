@@ -49,10 +49,10 @@ type_items()
   return result;
 }
 
-class cv_matrix_engine:
+class cv_audio_matrix_engine:
 public module_engine { 
   bool const _global;
-  cv_matrix_mixdown _mixdown = {};
+  cv_audio_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
   std::vector<param_topo_mapping> const _targets;
   std::vector<module_output_mapping> const _sources;
@@ -60,44 +60,44 @@ public:
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
 
-  cv_matrix_engine(
+  cv_audio_matrix_engine(
     bool global,
     plugin_topo const& topo, 
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
-  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_matrix_engine);
+  PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_audio_matrix_engine);
 };
 
 static void
 init_voice_default(plugin_state& state)
 {
-  state.set_text_at(module_vcv_matrix, 0, param_type, 0, "Add.Abs");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 0, "Env 2");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 0, "V.FX 1 SVF.Frq");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 1, "AB.Abs");
-  state.set_text_at(module_vcv_matrix, 0, param_min, 1, "35");
-  state.set_text_at(module_vcv_matrix, 0, param_max, 1, "65");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 1, "G.LFO 2");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 1, "V.Audio Bal 1");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 2, "AB.Abs");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 2, "M.In PB");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 2, "V.In PB");
-  state.set_text_at(module_vcv_matrix, 0, param_type, 3, "Mul.Abs");
-  state.set_text_at(module_vcv_matrix, 0, param_source, 3, "Note Velo");
-  state.set_text_at(module_vcv_matrix, 0, param_target, 3, "V.Out Gain");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 0, "Add.Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 0, "Env 2");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 0, "V.FX 1 SVF.Frq");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 1, "AB.Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_min, 1, "35");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_max, 1, "65");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 1, "G.LFO 2");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "V.Audio Bal 1");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 2, "AB.Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "M.In PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "V.In PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 3, "Mul.Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 3, "Note Velo");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 3, "V.Out Gain");
 }
 
 static void
 init_global_default(plugin_state& state)
 {
-  state.set_text_at(module_gcv_matrix, 0, param_type, 0, "AB.Abs");
-  state.set_text_at(module_gcv_matrix, 0, param_min, 0, "35");
-  state.set_text_at(module_gcv_matrix, 0, param_max, 0, "65");
-  state.set_text_at(module_gcv_matrix, 0, param_source, 0, "G.LFO 1");
-  state.set_text_at(module_gcv_matrix, 0, param_target, 0, "G.FX 1 SVF.Frq");
-  state.set_text_at(module_gcv_matrix, 0, param_type, 1, "Add.Abs");
-  state.set_text_at(module_gcv_matrix, 0, param_source, 1, "M.In Mod");
-  state.set_text_at(module_gcv_matrix, 0, param_target, 1, "G.FX 1 SVF.Frq");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_type, 0, "AB.Abs");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_min, 0, "35");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_max, 0, "65");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 0, "G.LFO 1");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 0, "G.FX 1 SVF.Frq");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_type, 1, "Add.Abs");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "M.In Mod");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 1, "G.FX 1 SVF.Frq");
 }
 
 audio_routing_cv_params
@@ -107,8 +107,8 @@ make_audio_routing_cv_params(plugin_state* state, bool global)
   result.off_value = type_off;
   result.on_param = param_type;
   result.target_param = param_target;
-  result.matrix_module = global ? module_gcv_matrix : module_vcv_matrix;
-  result.targets = make_cv_target_matrix(make_cv_matrix_targets(state->desc().plugin, global)).mappings;
+  result.matrix_module = global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
+  result.targets = make_cv_target_matrix(make_cv_audio_matrix_targets(state->desc().plugin, global)).mappings;
   return result;
 }
 
@@ -116,8 +116,8 @@ std::unique_ptr<module_tab_menu_handler>
 make_cv_routing_menu_handler(plugin_state* state)
 {
   std::map<int, std::vector<module_output_mapping>> matrix_sources;
-  matrix_sources[module_gcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
-  matrix_sources[module_vcv_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
+  matrix_sources[module_gcv_audio_matrix] = make_cv_source_matrix(make_cv_audio_matrix_sources(state->desc().plugin, true)).mappings;
+  matrix_sources[module_vcv_audio_matrix] = make_cv_source_matrix(make_cv_audio_matrix_sources(state->desc().plugin, false)).mappings;
   return std::make_unique<cv_routing_menu_handler>(state, param_source, param_type, type_off, matrix_sources);
 }
 
@@ -126,7 +126,7 @@ select_midi_active(
   plugin_state const& state, bool global, int on_note_midi_start,
   std::vector<module_output_mapping> const& mappings, jarray<int, 3>& active)
 {
-  int module = global ? module_gcv_matrix : module_vcv_matrix;
+  int module = global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
 
   // PB and mod wheel are linked so must be always on
   active[module_midi][0][midi_source_pb] = 1;
@@ -188,7 +188,7 @@ render_graph(
   std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
-  bool global = map.module_index == module_gcv_matrix;
+  bool global = map.module_index == module_gcv_audio_matrix;
   int route_count = global ? global_route_count : voice_route_count;
   int type = state.get_plain_at(map.module_index, map.module_slot, param_type, map.param_slot).step();
   if(type == type_off) 
@@ -234,7 +234,7 @@ render_graph(
   int voice_release_at = max_dahds / max_dahdsrf * params.max_frame_count;
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
-  if(map.module_index == module_vcv_matrix)
+  if(map.module_index == module_vcv_audio_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
@@ -243,13 +243,13 @@ render_graph(
   engine->process_end();
 
   std::string partition = float_to_string(max_total, 1) + " Sec " + targets.items[ti].name;
-  auto const& modulation = get_cv_matrix_mixdown(*block, map.module_index == module_gcv_matrix);
+  auto const& modulation = get_cv_audio_matrix_mixdown(*block, map.module_index == module_gcv_audio_matrix);
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
   return graph_data(stacked, false, 1.0f, { partition });
 }
 
 module_topo
-cv_matrix_topo(
+cv_audio_matrix_topo(
   int section, gui_colors const& colors,
   gui_position const& pos, bool global,
   std::vector<cv_source_entry> const& sources,
@@ -259,8 +259,8 @@ cv_matrix_topo(
   int on_note_midi_start = -1;
   auto source_matrix = make_cv_source_matrix(sources);
   auto target_matrix = make_cv_target_matrix(targets);
-  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_matrix, 1);
-  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_matrix, 1);
+  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_audio_matrix, 1);
+  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_audio_matrix, 1);
   auto info = topo_info(global? global_info: voice_info);
   module_stage stage = global ? module_stage::input : module_stage::voice;
   info.description = std::string("CV routing matrix with min/max control and various stacking options ") + 
@@ -297,7 +297,7 @@ cv_matrix_topo(
   };
   result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
     auto const& topo, int, int) { 
-      return std::make_unique<cv_matrix_engine>(global, topo, sm, tm); 
+      return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
   };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
@@ -378,8 +378,8 @@ cv_matrix_topo(
   return result;
 }
 
-cv_matrix_engine::
-cv_matrix_engine(
+cv_audio_matrix_engine::
+cv_audio_matrix_engine(
   bool global,
   plugin_topo const& topo,
   std::vector<module_output_mapping> const& sources,
@@ -392,7 +392,7 @@ _global(global), _sources(sources), _targets(targets)
 }
 
 void
-cv_matrix_engine::process(plugin_block& block)
+cv_audio_matrix_engine::process(plugin_block& block)
 {
   // set every modulatable parameter to its corresponding automation curve
   for (int m = 0; m < _targets.size(); m++)
@@ -456,7 +456,7 @@ cv_matrix_engine::process(plugin_block& block)
       check_unipolar(source_curve[f]);
 
     // pre-transform source signal
-    int this_module = _global? module_gcv_matrix: module_vcv_matrix;
+    int this_module = _global? module_gcv_audio_matrix: module_vcv_audio_matrix;
     auto const& scale_curve = block.state.own_accurate_automation[param_scale][r];
     auto const& offset_curve = block.state.own_accurate_automation[param_offset][r];
     auto& transformed_source = block.state.own_scratch[transform_source_scratch];

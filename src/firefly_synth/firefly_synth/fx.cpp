@@ -173,45 +173,45 @@ public module_engine {
   std::array<std::array<std::vector<float>, reverb_allpass_count>, 2> _rev_allpass = {};
 
   void process_comb(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   void process_reverb(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   void process_dly_fdbk(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   void process_dly_multi(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
  
   // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
   void process_svf(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   template <class Init> 
   void process_svf_type(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Init init);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Init init);
   
   template <bool Graph, int Type>
   void process_dist(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   template <bool Graph, int Type, class Clip>
   void process_dist_clip(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip);
   template <bool Graph, int Type, class Clip, class Shape>
   void process_dist_clip_shape(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape);
   template <bool Graph, int Type, class Clip, class Shape, class SkewX>
   void process_dist_clip_shape_x(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
   template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY>
   void process_dist_clip_shape_xy(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
   void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
 
 public:
   void reset(plugin_block const*) override;
   void process(plugin_block& block) override { process<false>(block, nullptr, nullptr); }
   template<bool Graph> 
-  void process(plugin_block& block, cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
+  void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in);
 
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
   fx_engine(bool global, int sample_rate, int max_frame_count, std::vector<multi_menu_item> const& shape_type_items);
@@ -323,7 +323,7 @@ render_graph(
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, sample_rate, frame_count, shape_type_items);
     engine.reset(&block);
-    cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
+    cv_audio_matrix_mixdown modulation(make_static_cv_audio_matrix_mixdown(block));
     engine.process<true>(block, &modulation, &audio_in);
   });
   engine->process_end();
@@ -815,7 +815,7 @@ fx_engine::reset(plugin_block const* block)
 
 template <bool Graph> void
 fx_engine::process(plugin_block& block, 
-  cv_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in)
+  cv_audio_matrix_mixdown const* modulation, jarray<float, 2> const* audio_in)
 { 
   if (audio_in == nullptr)
   {
@@ -833,7 +833,7 @@ fx_engine::process(plugin_block& block,
   }
 
   if (modulation == nullptr) 
-    modulation = &get_cv_matrix_mixdown(block, _global);  
+    modulation = &get_cv_audio_matrix_mixdown(block, _global);
 
   switch (type)
   {
@@ -850,7 +850,7 @@ fx_engine::process(plugin_block& block,
 
 void
 fx_engine::process_comb(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   float const feedback_factor = 0.98;
   int this_module = _global ? module_gfx : module_vfx;
@@ -892,7 +892,7 @@ fx_engine::process_comb(plugin_block& block,
 
 void
 fx_engine::process_reverb(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto& scratch_in = block.state.own_scratch[scratch_reverb_in];
   auto& scratch_size = block.state.own_scratch[scratch_reverb_size];
@@ -959,7 +959,7 @@ fx_engine::process_reverb(plugin_block& block,
 
 void
 fx_engine::process_svf(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int svf_type = block_auto[param_svf_type][0].step();
@@ -980,7 +980,7 @@ fx_engine::process_svf(plugin_block& block,
 
 template <class Init> void
 fx_engine::process_svf_type(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Init init)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Init init)
 {
   double w, hz, gain, kbd;
   double const max_res = 0.99;
@@ -1009,7 +1009,7 @@ fx_engine::process_svf_type(plugin_block& block,
 
 void
 fx_engine::process_delay(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int dly_type = block_auto[param_dly_type][0].step();
@@ -1031,7 +1031,7 @@ fx_engine::process_delay(plugin_block& block,
 
 void
 fx_engine::process_dly_fdbk(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   float const max_feedback = 0.99f;
   auto const& block_auto = block.state.own_block_automation;
@@ -1093,7 +1093,7 @@ fx_engine::process_dly_fdbk(plugin_block& block,
 
 void
 fx_engine::process_dly_multi(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int dly_type = block_auto[param_dly_type][0].step();
@@ -1168,7 +1168,7 @@ fx_engine::dist_svf_next(plugin_block const& block, int oversmp_factor,
 
 template <bool Graph, int Type> void
 fx_engine::process_dist(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   switch (block_auto[param_dist_clip][0].step())
@@ -1181,7 +1181,7 @@ fx_engine::process_dist(plugin_block& block,
 
 template <bool Graph, int Type, class Clip> void
 fx_engine::process_dist_clip(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip)
 {
   switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index1)
   {
@@ -1209,7 +1209,7 @@ fx_engine::process_dist_clip(plugin_block& block,
 
 template <bool Graph, int Type, class Clip, class Shape> void
 fx_engine::process_dist_clip_shape(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape)
 {
   switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index2)
   {
@@ -1225,7 +1225,7 @@ fx_engine::process_dist_clip_shape(plugin_block& block,
 
 template <bool Graph, int Type, class Clip, class Shape, class SkewX> void
 fx_engine::process_dist_clip_shape_x(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
 {
   switch (_dst_shape_items[block.state.own_block_automation[param_dist_shape][0].step()].index3)
   {
@@ -1241,7 +1241,7 @@ fx_engine::process_dist_clip_shape_x(plugin_block& block,
 
 template <bool Graph, int Type, class Clip, class Shape, class SkewX, class SkewY> void 
 fx_engine::process_dist_clip_shape_xy(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
