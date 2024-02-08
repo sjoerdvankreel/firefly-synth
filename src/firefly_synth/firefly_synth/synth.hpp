@@ -12,15 +12,15 @@
 
 namespace firefly_synth {
 
-class osc_matrix_engine;
-class osc_matrix_am_modulator;
-class osc_matrix_fm_modulator;
+class osc_osc_matrix_engine;
+class osc_osc_matrix_am_modulator;
+class osc_osc_matrix_fm_modulator;
 
 // these are needed by the osc
-struct osc_matrix_context
+struct osc_osc_matrix_context
 {
-  osc_matrix_am_modulator* am_modulator;
-  osc_matrix_fm_modulator* fm_modulator;
+  osc_osc_matrix_am_modulator* am_modulator;
+  osc_osc_matrix_fm_modulator* fm_modulator;
 };
 
 // these are needed by the osc matrix
@@ -45,29 +45,29 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 enum {
   module_midi, module_master_in, module_glfo, module_gcv_matrix, module_voice_note, 
   module_voice_on_note, module_vlfo, module_env, module_vcv_matrix, module_voice_in, 
-  module_vaudio_audio_matrix, module_osc_matrix, module_osc, module_vfx, module_voice_out,
+  module_vaudio_audio_matrix, module_osc_osc_matrix, module_osc, module_vfx, module_voice_out,
   module_voice_mix, module_gaudio_audio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
 // used by the oscillator at the end of it's process call to apply amp/ring mod
 // (e.g. osc 2 is modulated by both osc 1 and osc 2 itself)
-class osc_matrix_am_modulator
+class osc_osc_matrix_am_modulator
 {
-  osc_matrix_engine* _engine;
+  osc_osc_matrix_engine* _engine;
 public:
-  PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_am_modulator);
-  osc_matrix_am_modulator(osc_matrix_engine* engine) : _engine(engine) {}
+  PB_PREVENT_ACCIDENTAL_COPY(osc_osc_matrix_am_modulator);
+  osc_osc_matrix_am_modulator(osc_osc_matrix_engine* engine) : _engine(engine) {}
   plugin_base::jarray<float, 3> const& modulate_am(
     plugin_base::plugin_block& block, int slot, 
     cv_matrix_mixdown const* cv_modulation);
 };
 
 // used by the oscillator during it's process call to apply fm
-class osc_matrix_fm_modulator
+class osc_osc_matrix_fm_modulator
 {
-  osc_matrix_engine* _engine;
+  osc_osc_matrix_engine* _engine;
 public:
-  PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_fm_modulator);
-  osc_matrix_fm_modulator(osc_matrix_engine* engine) : _engine(engine) {}
+  PB_PREVENT_ACCIDENTAL_COPY(osc_osc_matrix_fm_modulator);
+  osc_osc_matrix_fm_modulator(osc_osc_matrix_engine* engine) : _engine(engine) {}
 
   template <bool Graph>
   plugin_base::jarray<float, 2> const& modulate_fm(
@@ -75,20 +75,20 @@ public:
     cv_matrix_mixdown const* cv_modulation);
 };
 
-inline osc_matrix_am_modulator&
-get_osc_matrix_am_modulator(plugin_base::plugin_block& block)
+inline osc_osc_matrix_am_modulator&
+get_osc_osc_matrix_am_modulator(plugin_base::plugin_block& block)
 {
-  void* context = block.module_context(module_osc_matrix, 0);
+  void* context = block.module_context(module_osc_osc_matrix, 0);
   assert(context != nullptr);
-  return *static_cast<osc_matrix_context*>(context)->am_modulator;
+  return *static_cast<osc_osc_matrix_context*>(context)->am_modulator;
 }
 
-inline osc_matrix_fm_modulator&
-get_osc_matrix_fm_modulator(plugin_base::plugin_block& block)
+inline osc_osc_matrix_fm_modulator&
+get_osc_osc_matrix_fm_modulator(plugin_base::plugin_block& block)
 {
-  void* context = block.module_context(module_osc_matrix, 0);
+  void* context = block.module_context(module_osc_osc_matrix, 0);
   assert(context != nullptr);
-  return *static_cast<osc_matrix_context*>(context)->fm_modulator;
+  return *static_cast<osc_osc_matrix_context*>(context)->fm_modulator;
 }
 
 // gets the audio mixdown to be used as input at the beginning of an audio module 
@@ -160,7 +160,7 @@ plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& col
 plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony);
-plugin_base::module_topo osc_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
+plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,

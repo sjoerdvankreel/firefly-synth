@@ -38,7 +38,7 @@ extern int const osc_param_uni_voices;
 extern int const voice_in_param_oversmp;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
-std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_matrix);
+std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix);
 
 static std::vector<list_item>
 fm_mode_items()
@@ -49,18 +49,18 @@ fm_mode_items()
   return result;
 }
 
-class osc_matrix_engine:
+class osc_osc_matrix_engine:
 public module_engine { 
   jarray<float, 2> _no_fm = {};
   jarray<float, 3> _fm_modsig = {};
-  osc_matrix_context _context = {};
+  osc_osc_matrix_context _context = {};
   jarray<float, 4>* _own_audio = {};
   jarray<float, 2>* _own_scratch = {};
-  osc_matrix_am_modulator _am_modulator;
-  osc_matrix_fm_modulator _fm_modulator;
+  osc_osc_matrix_am_modulator _am_modulator;
+  osc_osc_matrix_fm_modulator _fm_modulator;
 public:
-  osc_matrix_engine(int max_frame_count);
-  PB_PREVENT_ACCIDENTAL_COPY(osc_matrix_engine);
+  osc_osc_matrix_engine(int max_frame_count);
+  PB_PREVENT_ACCIDENTAL_COPY(osc_osc_matrix_engine);
 
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
@@ -82,11 +82,11 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   std::vector<float> result_l;
   std::vector<float> result_r;
   for(int r = 0; r < route_count; r++)
-    if(state.get_plain_at(module_osc_matrix, 0, param_am_on, r).step() != 0)
-      max_osc = std::max(max_osc, state.get_plain_at(module_osc_matrix, 0, param_am_target, r).step());
+    if(state.get_plain_at(module_osc_osc_matrix, 0, param_am_on, r).step() != 0)
+      max_osc = std::max(max_osc, state.get_plain_at(module_osc_osc_matrix, 0, param_am_target, r).step());
   for (int r = 0; r < route_count; r++)
-    if (state.get_plain_at(module_osc_matrix, 0, param_fm_on, r).step() != 0)
-      max_osc = std::max(max_osc, state.get_plain_at(module_osc_matrix, 0, param_fm_target, r).step());
+    if (state.get_plain_at(module_osc_osc_matrix, 0, param_fm_on, r).step() != 0)
+      max_osc = std::max(max_osc, state.get_plain_at(module_osc_osc_matrix, 0, param_fm_target, r).step());
   auto graphs(render_osc_graphs(state, engine, max_osc, true));
   for (int mi = 0; mi <= max_osc; mi++)
   {
@@ -106,7 +106,7 @@ make_audio_routing_osc_mod_params(plugin_state* state)
   audio_routing_audio_params result;
   result.off_value = 0;
   result.matrix_section_count = 2;
-  result.matrix_module = module_osc_matrix;
+  result.matrix_module = module_osc_osc_matrix;
   result.matrix_on_params = { param_am_on, param_fm_on };
   result.matrix_source_params = { param_am_source, param_fm_source };
   result.matrix_target_params = { param_am_target, param_fm_target };
@@ -116,7 +116,7 @@ make_audio_routing_osc_mod_params(plugin_state* state)
 }
 
 module_topo 
-osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
+osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
 {
   std::vector<module_dsp_output> outputs;
   auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
@@ -128,7 +128,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
       "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "AM", r, max_unison_voices + 1)));
 
   module_topo result(make_module(
-    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc Mod", true, true, module_osc_matrix, 1),
+    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc Mod", true, true, module_osc_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, outputs),
     make_module_gui(section, colors, pos, { 2, 1 })));
   result.info.description = "Oscillator routing matrices that allow for Osc-to-Osc AM, RM and FM.";
@@ -136,7 +136,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_osc_graph_engine;
   result.gui.tabbed_name = result.info.tag.name;
-  result.engine_factory = [](auto const& topo, int sr, int max_frame_count) { return std::make_unique<osc_matrix_engine>(max_frame_count); };
+  result.engine_factory = [](auto const& topo, int sr, int max_frame_count) { return std::make_unique<osc_osc_matrix_engine>(max_frame_count); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };
 
@@ -157,7 +157,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
   am_source.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
-  am_source.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
+  am_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
       return osc[self].slot <= osc[other].slot; });
   am_source.info.description = "Selects AM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. However self-modulation is possible.";
@@ -167,7 +167,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
   am_target.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
-  am_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
+  am_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) { 
       return osc[other].slot <= osc[self].slot; });
   am_target.info.description = "Selects AM routing target.";
@@ -203,7 +203,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
-  fm_source.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
+  fm_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
       return osc[self].slot < osc[other].slot; });
   fm_source.info.description = std::string("Selects FM routing source. Note that you can only route 'upwards', so not Osc2->Osc1. ") + 
@@ -214,7 +214,7 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
     make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
-  fm_target.gui.item_enabled.bind_param({ module_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
+  fm_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
     [osc = osc_matrix.mappings](int other, int self) {
       return osc[other].slot < osc[self].slot; });
   fm_target.info.description = "Selects FM routing target.";
@@ -239,8 +239,8 @@ osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, 
   return result;
 }
 
-osc_matrix_engine::
-osc_matrix_engine(int max_frame_count) : 
+osc_osc_matrix_engine::
+osc_osc_matrix_engine(int max_frame_count) :
 _am_modulator(this), _fm_modulator(this) 
 {
   _context.am_modulator = &_am_modulator;
@@ -255,7 +255,7 @@ _am_modulator(this), _fm_modulator(this)
 
 // unison-channel-frame
 jarray<float, 3> const&
-osc_matrix_am_modulator::modulate_am(
+osc_osc_matrix_am_modulator::modulate_am(
   plugin_block& block, int slot, 
   cv_matrix_mixdown const* cv_modulation)
 { return _engine->modulate_am(block, slot, cv_modulation); }
@@ -263,7 +263,7 @@ osc_matrix_am_modulator::modulate_am(
 // unison-(frame*oversmp)
 template <bool Graph>
 jarray<float, 2> const&
-osc_matrix_fm_modulator::modulate_fm(
+osc_osc_matrix_fm_modulator::modulate_fm(
   plugin_block& block, int slot, 
   cv_matrix_mixdown const* cv_modulation)
 { return _engine->modulate_fm<Graph>(block, slot, cv_modulation); }
@@ -271,13 +271,13 @@ osc_matrix_fm_modulator::modulate_fm(
 // need explicit instantiation here
 template
 jarray<float, 2> const&
-osc_matrix_fm_modulator::modulate_fm<false>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
+osc_osc_matrix_fm_modulator::modulate_fm<false>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
 template
 jarray<float, 2> const&
-osc_matrix_fm_modulator::modulate_fm<true>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
+osc_osc_matrix_fm_modulator::modulate_fm<true>(plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation);
 
 void
-osc_matrix_engine::process(plugin_block& block)
+osc_osc_matrix_engine::process(plugin_block& block)
 {
   // need to capture stuff here because when we start 
   // modulating "own" does not refer to us but to the caller
@@ -288,7 +288,7 @@ osc_matrix_engine::process(plugin_block& block)
 
 // This returns the final output signal i.e. all modulators applied to carrier.
 jarray<float, 3> const& 
-osc_matrix_engine::modulate_am(
+osc_osc_matrix_engine::modulate_am(
   plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
@@ -299,7 +299,7 @@ osc_matrix_engine::modulate_am(
   // the first match we encounter becomes the modulation result
   jarray<float, 3>* modulated = nullptr;
   jarray<float, 3> const& target_audio = block.voice->all_audio[module_osc][slot][0];
-  auto const& block_auto = block.state.all_block_automation[module_osc_matrix][0];
+  auto const& block_auto = block.state.all_block_automation[module_osc_osc_matrix][0];
 
   for (int r = 0; r < route_count; r++)
   {
@@ -326,8 +326,8 @@ osc_matrix_engine::modulate_am(
     // between oscillators with unequal unison voice count
     int source_osc = block_auto[param_am_source][r].step();
     auto const& source_audio = block.module_audio(module_osc, source_osc);
-    auto const& amt_curve = *(*cv_modulation)[module_osc_matrix][0][param_am_amt][r];
-    auto const& ring_curve = *(*cv_modulation)[module_osc_matrix][0][param_am_ring][r];
+    auto const& amt_curve = *(*cv_modulation)[module_osc_osc_matrix][0][param_am_amt][r];
+    auto const& ring_curve = *(*cv_modulation)[module_osc_osc_matrix][0][param_am_ring][r];
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
 
     for(int v = 0; v < target_uni_voices; v++)
@@ -365,7 +365,7 @@ osc_matrix_engine::modulate_am(
 // Oscillator process() applies stacked modulation to the phase.
 template <bool Graph>
 jarray<float, 2> const&
-osc_matrix_engine::modulate_fm(
+osc_osc_matrix_engine::modulate_fm(
   plugin_block& block, int slot, cv_matrix_mixdown const* cv_modulation)
 {
   // allow custom data for graphs
@@ -375,7 +375,7 @@ osc_matrix_engine::modulate_fm(
   // loop through the routes
   // the first match we encounter becomes the modulator result
   jarray<float, 2>* modulator = nullptr;
-  auto const& block_auto = block.state.all_block_automation[module_osc_matrix][0];
+  auto const& block_auto = block.state.all_block_automation[module_osc_osc_matrix][0];
 
   for (int r = 0; r < route_count; r++)
   {
@@ -418,9 +418,9 @@ osc_matrix_engine::modulate_fm(
     // then linear interpolate. this allows modulation
     // between oscillators with unequal unison voice count
     int source_osc = block_auto[param_fm_source][r].step();
-    auto const& idx_curve_plain = *(*cv_modulation)[module_osc_matrix][0][param_fm_idx][r];
+    auto const& idx_curve_plain = *(*cv_modulation)[module_osc_osc_matrix][0][param_fm_idx][r];
     auto& idx_curve = (*_own_scratch)[scratch_fm_idx];
-    normalized_to_raw_into_fast<domain_type::log>(block, module_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
+    normalized_to_raw_into_fast<domain_type::log>(block, module_osc_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
     int oversmp_stages = block.state.all_block_automation[module_voice_in][0][voice_in_param_oversmp][0].step();
     int oversmp_factor = 1 << oversmp_stages;
