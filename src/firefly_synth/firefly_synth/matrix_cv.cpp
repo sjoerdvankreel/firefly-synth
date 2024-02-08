@@ -21,6 +21,7 @@ static int constexpr global_route_count = 20;
 static int constexpr max_route_count = std::max(voice_route_count, global_route_count);
 
 enum { section_main };
+enum { transform_source_scratch, scratch_count };
 enum { param_type, param_source, param_target, param_offset, param_scale, param_min, param_max };
 enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_add_rel, type_add_stk, type_ab_abs, type_ab_rel, type_ab_stk };
 
@@ -275,7 +276,7 @@ cv_matrix_topo(
 
   int route_count = global ? global_route_count : voice_route_count;
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::cv, 0, {
+    make_module_dsp(stage, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   
@@ -454,46 +455,59 @@ cv_matrix_engine::process(plugin_block& block)
     for(int f = block.start_frame; f < block.end_frame; f++)
       check_unipolar(source_curve[f]);
 
+    // pre-transform source signal
+    int this_module = _global? module_gcv_matrix: module_vcv_matrix;
+    auto const& scale_curve = block.state.own_accurate_automation[param_scale][r];
+    auto const& offset_curve = block.state.own_accurate_automation[param_offset][r];
+    auto& transformed_source = block.state.own_scratch[transform_source_scratch];
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      float scale = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_scale, scale_curve[f]);
+      float offset = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_offset, offset_curve[f]);
+      transformed_source[f] = std::clamp(offset + scale * source_curve[f], 0.0f, 1.0f);
+    }
+
     // apply modulation
     auto const& min_curve = block.state.own_accurate_automation[param_min][r];
     auto const& max_curve = block.state.own_accurate_automation[param_max][r];
+    
     switch (type)
     {
     case type_mul_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] *= min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f];
+        modulated_curve[f] *= min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f];
       break;
     case type_mul_rel:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = target_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * (1 - target_curve[f]);
+        modulated_curve[f] = target_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * (1 - target_curve[f]);
       break;
     case type_mul_stk:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = modulated_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * (1 - modulated_curve[f]);
+        modulated_curve[f] = modulated_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * (1 - modulated_curve[f]);
       break;
     case type_add_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f];
+        modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f];
       break;
     case type_add_rel:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - target_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]);
+        modulated_curve[f] += (1 - target_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]);
       break;
     case type_add_stk:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - modulated_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]);
+        modulated_curve[f] += (1 - modulated_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]);
       break;
     case type_ab_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
+        modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
       break;
     case type_ab_rel:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - std::fabs(0.5f - target_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
+        modulated_curve[f] += (1 - std::fabs(0.5f - target_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
       break;
     case type_ab_stk:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - std::fabs(0.5f - modulated_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * source_curve[f]) * 0.5f;
+        modulated_curve[f] += (1 - std::fabs(0.5f - modulated_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
       break;
     default:
       assert(false);
