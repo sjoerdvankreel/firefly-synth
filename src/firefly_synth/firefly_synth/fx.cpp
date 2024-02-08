@@ -820,7 +820,7 @@ fx_engine::process(plugin_block& block,
   if (audio_in == nullptr)
   {
     int this_module = _global ? module_gfx : module_vfx;
-    auto& mixer = get_audio_matrix_mixer(block, _global);
+    auto& mixer = get_audio_audio_matrix_mixer(block, _global);
     audio_in = &mixer.mix(block, this_module, block.module_slot);
   }
    

@@ -45,8 +45,8 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 enum {
   module_midi, module_master_in, module_glfo, module_gcv_matrix, module_voice_note, 
   module_voice_on_note, module_vlfo, module_env, module_vcv_matrix, module_voice_in, 
-  module_vaudio_matrix, module_osc_matrix, module_osc, module_vfx, module_voice_out,
-  module_voice_mix, module_gaudio_matrix, module_gfx, module_master_out, module_monitor, module_count };
+  module_vaudio_audio_matrix, module_osc_matrix, module_osc, module_vfx, module_voice_out,
+  module_voice_mix, module_gaudio_audio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
 // used by the oscillator at the end of it's process call to apply amp/ring mod
 // (e.g. osc 2 is modulated by both osc 1 and osc 2 itself)
@@ -93,23 +93,23 @@ get_osc_matrix_fm_modulator(plugin_base::plugin_block& block)
 
 // gets the audio mixdown to be used as input at the beginning of an audio module 
 // (e.g. combined audio input for "voice fx 3")
-class audio_matrix_engine;
-class audio_matrix_mixer
+class audio_audio_matrix_engine;
+class audio_audio_matrix_mixer
 {
-  audio_matrix_engine* _engine;
+  audio_audio_matrix_engine* _engine;
 public:
-  PB_PREVENT_ACCIDENTAL_COPY(audio_matrix_mixer);
-  audio_matrix_mixer(audio_matrix_engine* engine) : _engine(engine) {}
+  PB_PREVENT_ACCIDENTAL_COPY(audio_audio_matrix_mixer);
+  audio_audio_matrix_mixer(audio_audio_matrix_engine* engine) : _engine(engine) {}
   plugin_base::jarray<float, 2> const& mix(plugin_base::plugin_block& block, int module, int slot);
 };
 
-inline audio_matrix_mixer&
-get_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
+inline audio_audio_matrix_mixer&
+get_audio_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
 {
-  int module = global ? module_gaudio_matrix : module_vaudio_matrix;
+  int module = global ? module_gaudio_audio_matrix : module_vaudio_audio_matrix;
   void* context = block.module_context(module, 0);
   assert(context != nullptr);
-  return *static_cast<audio_matrix_mixer*>(context);
+  return *static_cast<audio_audio_matrix_mixer*>(context);
 }
 
 // gets the cv mixdown for all modulatable parameters in all modules for the current stage
@@ -131,9 +131,9 @@ make_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::cv_source_entry>
 make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
-make_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
+make_audio_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
-make_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
+make_audio_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 
 // menu handlers to update routing on clear/move/swap/copy
 std::unique_ptr<plugin_base::module_tab_menu_handler>
@@ -161,7 +161,7 @@ plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& co
 plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
 plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony);
 plugin_base::module_topo osc_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
-plugin_base::module_topo audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
+plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
 plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::cv_source_entry> const& sources, std::vector<plugin_base::cv_source_entry> const& on_note_sources, std::vector<plugin_base::module_topo const*> const& targets);
