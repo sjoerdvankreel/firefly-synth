@@ -15,10 +15,11 @@ clap (poly) modulation
 visual routing indicators
 document the header files a bit
 
-
 v1.1:
+cv-to-cv-mod
 do some presets
 fx-only version
+update screenshot
 implement monophonic mode
 implement envelope retriggering
 rename infernal-1.4-preview to 1.4
