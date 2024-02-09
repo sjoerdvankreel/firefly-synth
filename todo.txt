@@ -17,6 +17,8 @@ document the header files a bit
 
 v1.1:
 cv-to-cv-mod
++ test midi active
++ test context menus
 do some presets
 fx-only version
 update screenshot
