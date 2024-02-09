@@ -321,9 +321,10 @@ render_graph(
   } else
   {
     // plotting cv->cv
+    auto const& target_map = targets.mappings[ti];
     auto& mixer = get_cv_cv_matrix_mixer(*block, map.module_index == module_gcv_cv_matrix);
-    auto const& modulation = mixer.mix(*block, map.module_index, map.module_slot);
-    jarray<float, 1> const* stacked = modulation[map.param_index][map.param_slot];
+    auto const& modulation = mixer.mix(*block, target_map.module_index, target_map.module_slot);
+    jarray<float, 1> const* stacked = modulation[target_map.param_index][target_map.param_slot];
     return graph_data(*stacked, false, 1.0f, { partition });
   }
 }
