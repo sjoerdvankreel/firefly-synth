@@ -142,7 +142,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
 
   auto& am = result.sections.emplace_back(make_param_section(section_am,
     make_topo_tag("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "AM"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 2, 2, 3, 3 } })));
   am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
     make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "AM", "AM", true, true, param_am_on, route_count),
@@ -188,7 +188,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
-    make_param_section_gui({ 1, 0 }, { { 1 }, { -25, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 1, 0 }, { { 1 }, { -25, 2, 2, 2, 4 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
     make_topo_info("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM", "FM", true, true, param_fm_on, route_count),
