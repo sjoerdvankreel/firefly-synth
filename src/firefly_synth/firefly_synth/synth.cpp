@@ -98,8 +98,8 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
   module_params.render_on_tab_change = false;
   module_params.render_on_module_mouse_enter = true;
   module_params.render_on_param_mouse_enter_modules = {
-    module_master_in, module_voice_in, module_osc_osc_matrix, module_vaudio_audio_matrix,
-    module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };
+    module_gcv_cv_matrix, module_master_in, module_vcv_cv_matrix, module_voice_in, module_osc_osc_matrix, 
+    module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix };
   return store_component<module_graph>(store, gui, lnf, params, module_params);
 }
 
@@ -118,9 +118,13 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
       case module_gaudio_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true, { }));
       case module_vcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
         { module_master_in, module_glfo, module_vlfo, module_env, module_voice_in, module_voice_out,
-        module_osc, module_osc_osc_matrix, module_vfx, module_vlfo, module_vaudio_audio_matrix }));
+        module_osc, module_osc_osc_matrix, module_vfx, module_vaudio_audio_matrix }));
       case module_gcv_audio_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
         { module_master_in, module_glfo, module_gfx, module_gaudio_audio_matrix, module_master_out }));
+      case module_vcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
+        { module_master_in, module_glfo, module_gcv_audio_matrix, module_vlfo, module_env, module_vcv_audio_matrix }));
+      case module_gcv_cv_matrix: return std::make_unique<module_graph>(gui, lnf, params, make_module_graph_params(module_index, false, true,
+        { module_master_in, module_glfo, module_gcv_audio_matrix }));
       default: assert(false); return std::make_unique<Component>();
       }
     });
@@ -201,6 +205,20 @@ make_audio_audio_matrix_targets(plugin_topo const* topo, bool global)
 }
 
 std::vector<module_topo const*>
+make_cv_cv_matrix_targets(plugin_topo const* topo, bool global)
+{
+  if (global)
+    return {
+      &topo->modules[module_master_in],
+      &topo->modules[module_glfo],
+      &topo->modules[module_gcv_audio_matrix] };
+  else
+    return {
+      &topo->modules[module_vlfo],
+      &topo->modules[module_vcv_audio_matrix] };
+}
+
+std::vector<module_topo const*>
 make_cv_audio_matrix_targets(plugin_topo const* topo, bool global)
 {
   if (global)
@@ -219,7 +237,7 @@ make_cv_audio_matrix_targets(plugin_topo const* topo, bool global)
 }
 
 std::vector<cv_source_entry>
-make_cv_audio_matrix_sources(plugin_topo const* topo, bool global)
+make_cv_matrix_sources(plugin_topo const* topo, bool global)
 {
   if(global)
     return { 
@@ -344,7 +362,8 @@ synth_topo()
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
     "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { 1, 3, 7, 1 },
-    { module_osc_osc_matrix, module_vaudio_audio_matrix, module_gaudio_audio_matrix, module_vcv_audio_matrix, module_gcv_audio_matrix });
+    { module_osc_osc_matrix, module_vaudio_audio_matrix, module_gaudio_audio_matrix, 
+     module_vcv_audio_matrix, module_gcv_audio_matrix, module_vcv_cv_matrix, module_gcv_cv_matrix });
 
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
@@ -367,12 +386,18 @@ synth_topo()
     make_audio_audio_matrix_sources(result.get(), true), make_audio_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false,
     make_audio_audio_matrix_sources(result.get(), false), make_audio_audio_matrix_targets(result.get(), false));
-  result->modules[module_gcv_audio_matrix] = cv_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true,
-    make_cv_audio_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));
-  result->modules[module_vcv_audio_matrix] = cv_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false,
-    make_cv_audio_matrix_sources(result.get(), false),
-    make_cv_audio_matrix_sources(result.get(), true),
+  result->modules[module_gcv_audio_matrix] = cv_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false, true,
+    make_cv_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));
+  result->modules[module_vcv_audio_matrix] = cv_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false, false,
+    make_cv_matrix_sources(result.get(), false),
+    make_cv_matrix_sources(result.get(), true),
     make_cv_audio_matrix_targets(result.get(), false));
+  result->modules[module_gcv_cv_matrix] = cv_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true, true,
+    make_cv_matrix_sources(result.get(), true), {}, make_cv_cv_matrix_targets(result.get(), true));
+  result->modules[module_vcv_cv_matrix] = cv_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true, false,
+    make_cv_matrix_sources(result.get(), false),
+    make_cv_matrix_sources(result.get(), true),
+    make_cv_cv_matrix_targets(result.get(), false));
   return result;
 }
 

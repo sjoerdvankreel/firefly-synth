@@ -16,14 +16,45 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int constexpr voice_route_count = 30;
-static int constexpr global_route_count = 20;
-static int constexpr max_route_count = std::max(voice_route_count, global_route_count);
+static int constexpr vcv_route_count = 20;
+static int constexpr gcv_route_count = 15;
+static int constexpr max_cv_route_count = std::max(vcv_route_count, gcv_route_count);
+
+static int constexpr vaudio_route_count = 30;
+static int constexpr gaudio_route_count = 20;
+static int constexpr max_audio_route_count = std::max(vaudio_route_count, gaudio_route_count);
 
 enum { section_main };
 enum { transform_source_scratch, scratch_count };
 enum { param_type, param_source, param_target, param_offset, param_scale, param_min, param_max };
 enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_add_rel, type_add_stk, type_ab_abs, type_ab_rel, type_ab_stk };
+
+static int
+route_count_from_module(int module)
+{
+  switch (module)
+  {
+  case module_vcv_cv_matrix: return vcv_route_count;
+  case module_gcv_cv_matrix: return gcv_route_count;
+  case module_vcv_audio_matrix: return vaudio_route_count;
+  case module_gcv_audio_matrix: return gaudio_route_count;
+  default: assert(false); return -1;
+  }
+}
+
+static int
+route_count_from_matrix_type(bool cv, bool global)
+{
+  if(cv) return global? gcv_route_count: vcv_route_count;
+  return global? gaudio_route_count: vaudio_route_count;
+}
+
+static int
+module_from_matrix_type(bool cv, bool global)
+{
+  if(cv) return global? module_gcv_cv_matrix: module_vcv_cv_matrix;
+  return global? module_gcv_audio_matrix: module_vcv_audio_matrix;
+}
 
 extern void
 env_plot_length_seconds(
@@ -49,6 +80,13 @@ type_items()
   return result;
 }
 
+class cv_cv_matrix_engine:
+public module_engine { 
+public:
+  void reset(plugin_block const*) override {}
+  void process(plugin_block& block) override {}
+};
+
 class cv_audio_matrix_engine:
 public module_engine { 
   bool const _global;
@@ -69,7 +107,7 @@ public:
 };
 
 static void
-init_voice_default(plugin_state& state)
+init_audio_voice_default(plugin_state& state)
 {
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 0, "Add.Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 0, "Env 2");
@@ -88,7 +126,7 @@ init_voice_default(plugin_state& state)
 }
 
 static void
-init_global_default(plugin_state& state)
+init_audio_global_default(plugin_state& state)
 {
   state.set_text_at(module_gcv_audio_matrix, 0, param_type, 0, "AB.Abs");
   state.set_text_at(module_gcv_audio_matrix, 0, param_min, 0, "35");
@@ -103,6 +141,7 @@ init_global_default(plugin_state& state)
 audio_routing_cv_params
 make_audio_routing_cv_params(plugin_state* state, bool global)
 {
+  // TODO same for cv
   audio_routing_cv_params result;
   result.off_value = type_off;
   result.on_param = param_type;
@@ -115,24 +154,25 @@ make_audio_routing_cv_params(plugin_state* state, bool global)
 std::unique_ptr<module_tab_menu_handler>
 make_cv_routing_menu_handler(plugin_state* state)
 {
+  // TODO same for cv
   std::map<int, std::vector<module_output_mapping>> matrix_sources;
-  matrix_sources[module_gcv_audio_matrix] = make_cv_source_matrix(make_cv_audio_matrix_sources(state->desc().plugin, true)).mappings;
-  matrix_sources[module_vcv_audio_matrix] = make_cv_source_matrix(make_cv_audio_matrix_sources(state->desc().plugin, false)).mappings;
+  matrix_sources[module_gcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, true)).mappings;
+  matrix_sources[module_vcv_audio_matrix] = make_cv_source_matrix(make_cv_matrix_sources(state->desc().plugin, false)).mappings;
   return std::make_unique<cv_routing_menu_handler>(state, param_source, param_type, type_off, matrix_sources);
 }
 
 void
 select_midi_active(
-  plugin_state const& state, bool global, int on_note_midi_start,
+  plugin_state const& state, bool cv, bool global, int on_note_midi_start,
   std::vector<module_output_mapping> const& mappings, jarray<int, 3>& active)
 {
-  int module = global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
-
   // PB and mod wheel are linked so must be always on
   active[module_midi][0][midi_source_pb] = 1;
   active[module_midi][0][midi_source_cc + 1] = 1;
 
-  int route_count = global? global_route_count: voice_route_count;
+  int module = module_from_matrix_type(cv, global);
+  int route_count = route_count_from_matrix_type(cv, global);
+
   for (int r = 0; r < route_count; r++)
   {
     int type = state.get_plain_at(module, 0, param_type, r).step();
@@ -188,8 +228,7 @@ render_graph(
   std::vector<module_output_mapping> const& sources, routing_matrix<param_topo_mapping> const& targets)
 {
   auto const& map = mapping;
-  bool global = map.module_index == module_gcv_audio_matrix;
-  int route_count = global ? global_route_count : voice_route_count;
+  int route_count = route_count_from_module(map.module_index);
   int type = state.get_plain_at(map.module_index, map.module_slot, param_type, map.param_slot).step();
   if(type == type_off) 
   {
@@ -249,19 +288,25 @@ render_graph(
 }
 
 module_topo
-cv_audio_matrix_topo(
+cv_matrix_topo(
   int section, gui_colors const& colors,
-  gui_position const& pos, bool global,
+  gui_position const& pos, bool cv, bool global,
   std::vector<cv_source_entry> const& sources,
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
 {
+  topo_info info;
   int on_note_midi_start = -1;
   auto source_matrix = make_cv_source_matrix(sources);
   auto target_matrix = make_cv_target_matrix(targets);
-  auto const voice_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_audio_matrix, 1);
-  auto const global_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_audio_matrix, 1);
-  auto info = topo_info(global? global_info: voice_info);
+  auto const vcv_info = make_topo_info("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "V.CV Mod", "V.CV Mod", true, true, module_vcv_cv_matrix, 1);
+  auto const gcv_info = make_topo_info("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "G.CV Mod", "G.CV Mod", true, true, module_gcv_cv_matrix, 1);
+  auto const vaudio_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_audio_matrix, 1);
+  auto const gaudio_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_audio_matrix, 1);
+
+  if(cv) info = topo_info(global? gcv_info: vcv_info);
+  else info = topo_info(global ? gaudio_info : vaudio_info);
+
   module_stage stage = global ? module_stage::input : module_stage::voice;
   info.description = std::string("CV routing matrix with min/max control and various stacking options ") + 
     "that affect how source signals are combined in case they affect the same target.";
@@ -274,15 +319,15 @@ cv_audio_matrix_topo(
     assert(on_note_midi_start != -1);
   }
 
-  int route_count = global ? global_route_count : voice_route_count;
+  int route_count = route_count_from_matrix_type(cv, global);
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   
   result.gui.tabbed_name = result.info.tag.short_name;
-  result.default_initializer = global ? init_global_default : init_voice_default;
   result.graph_engine_factory = make_graph_engine;
+  if(!cv) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
@@ -291,14 +336,17 @@ cv_audio_matrix_topo(
     return std::make_unique<tidy_matrix_menu_handler>(
       state, 1, param_type, type_off, std::vector<std::vector<int>>({{ param_target, param_source }})); 
   };
-  result.midi_active_selector_ = [global, on_note_midi_start, sm = source_matrix.mappings](
+  result.midi_active_selector_ = [cv, global, on_note_midi_start, sm = source_matrix.mappings](
     plugin_state const& state, int, jarray<int, 3>& active) { 
-      select_midi_active(state, global, on_note_midi_start, sm, active); 
+      select_midi_active(state, cv, global, on_note_midi_start, sm, active); 
   };
-  result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
-    auto const& topo, int, int) { 
-      return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
-  };
+  if(cv)
+    result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<cv_cv_matrix_engine>(); };
+  else
+    result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
+      auto const& topo, int, int) { 
+        return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
+    };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
@@ -342,6 +390,7 @@ cv_audio_matrix_topo(
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
+  // TODO
   target.info.description = "Any modulatable parameter of any audio module, audio matrix or (in case of per-voice) voice-in parameter.";
 
   auto& offset = result.params.emplace_back(make_param(
@@ -409,8 +458,8 @@ cv_audio_matrix_engine::process(plugin_block& block)
   // apply modulation routing
   int modulation_index = 0;
   auto const& own_automation = block.state.own_block_automation;
-  int route_count = _global ? global_route_count : voice_route_count;
-  jarray<float, 1>* modulated_curve_ptrs[max_route_count] = { nullptr };
+  int route_count = _global ? gaudio_route_count : vaudio_route_count;
+  jarray<float, 1>* modulated_curve_ptrs[max_audio_route_count] = { nullptr };
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;

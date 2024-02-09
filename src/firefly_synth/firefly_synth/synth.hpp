@@ -42,11 +42,15 @@ enum { midi_output_cp, midi_output_pb, midi_output_cc };
 
 // this describes our semi-modular synth
 std::unique_ptr<plugin_base::plugin_topo> synth_topo();
+
+// MIDI goes first! That hosts the midi sources everyone else needs.
+// There's also a whole bunch of other implicit dependencies in here so mind the ordering.
 enum {
-  module_midi, module_master_in, module_glfo, module_gcv_audio_matrix, module_voice_note,
-  module_voice_on_note, module_vlfo, module_env, module_vcv_audio_matrix, module_voice_in,
-  module_vaudio_audio_matrix, module_osc_osc_matrix, module_osc, module_vfx, module_voice_out,
-  module_voice_mix, module_gaudio_audio_matrix, module_gfx, module_master_out, module_monitor, module_count };
+  module_midi, module_gcv_cv_matrix, module_master_in, module_glfo, module_gcv_audio_matrix,
+  module_vcv_cv_matrix, module_voice_note, module_voice_on_note, module_vlfo, module_env, 
+  module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, module_osc_osc_matrix, 
+  module_osc, module_vfx, module_voice_out, module_voice_mix, module_gaudio_audio_matrix, 
+  module_gfx, module_master_out, module_monitor, module_count };
 
 // used by the oscillator at the end of it's process call to apply amp/ring mod
 // (e.g. osc 2 is modulated by both osc 1 and osc 2 itself)
@@ -126,10 +130,12 @@ cv_audio_matrix_mixdown
 make_static_cv_audio_matrix_mixdown(plugin_base::plugin_block& block);
 
 // routing matrices sources/targets
+std::vector<plugin_base::cv_source_entry>
+make_cv_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
+std::vector<plugin_base::module_topo const*>
+make_cv_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
 make_cv_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
-std::vector<plugin_base::cv_source_entry>
-make_cv_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
 make_audio_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
@@ -163,7 +169,7 @@ plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
 plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
-plugin_base::module_topo cv_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
+plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool cv, bool global,
   std::vector<plugin_base::cv_source_entry> const& sources, std::vector<plugin_base::cv_source_entry> const& on_note_sources, std::vector<plugin_base::module_topo const*> const& targets);
 
 }

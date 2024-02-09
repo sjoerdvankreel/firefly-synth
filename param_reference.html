@@ -27,6 +27,15 @@
 </tr>
 <tr>
 <td><a href='#2'>2</a></td>
+<td>G.CV Mod</td>
+<td>G.CV Mod</td>
+<td>Yes</td>
+<td>Before voice</td>
+<td>1</td>
+<td class='description'>CV routing matrix with min/max control and various stacking options that affect how source signals are combined in case they affect the same target.</td>
+</tr>
+<tr>
+<td><a href='#3'>3</a></td>
 <td>Master In</td>
 <td>M.In</td>
 <td>Yes</td>
@@ -35,7 +44,7 @@
 <td class='description'>Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.</td>
 </tr>
 <tr>
-<td><a href='#3'>3</a></td>
+<td><a href='#4'>4</a></td>
 <td>Global LFO</td>
 <td>G.LFO</td>
 <td>Yes</td>
@@ -44,7 +53,7 @@
 <td class='description'>Optional tempo-synced LFO with repeating and one-shot modes, various periodic waveforms, smooth noise, static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various modes.</td>
 </tr>
 <tr>
-<td><a href='#4'>4</a></td>
+<td><a href='#5'>5</a></td>
 <td>Global CV</td>
 <td>G.CV</td>
 <td>Yes</td>
@@ -53,7 +62,16 @@
 <td class='description'>CV routing matrix with min/max control and various stacking options that affect how source signals are combined in case they affect the same target.</td>
 </tr>
 <tr>
-<td>5</td>
+<td><a href='#6'>6</a></td>
+<td>V.CV Mod</td>
+<td>V.CV Mod</td>
+<td>Yes</td>
+<td>Voice</td>
+<td>1</td>
+<td class='description'>CV routing matrix with min/max control and various stacking options that affect how source signals are combined in case they affect the same target.</td>
+</tr>
+<tr>
+<td>7</td>
 <td>Note</td>
 <td>Note</td>
 <td>No</td>
@@ -62,7 +80,7 @@
 <td class='description'>Provides MIDI note and velocity as modulation sources.</td>
 </tr>
 <tr>
-<td>6</td>
+<td>8</td>
 <td>On Note</td>
 <td>On Nt</td>
 <td>No</td>
@@ -71,7 +89,7 @@
 <td class='description'>Provides on-note versions of all global modulation sources for the per-voice CV mod matrix.</td>
 </tr>
 <tr>
-<td><a href='#7'>7</a></td>
+<td><a href='#9'>9</a></td>
 <td>Voice LFO</td>
 <td>V.LFO</td>
 <td>Yes</td>
@@ -80,7 +98,7 @@
 <td class='description'>Optional tempo-synced LFO with repeating and one-shot modes, various periodic waveforms, smooth noise, static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various modes.</td>
 </tr>
 <tr>
-<td><a href='#8'>8</a></td>
+<td><a href='#10'>10</a></td>
 <td>Envelope</td>
 <td>Env</td>
 <td>Yes</td>
@@ -89,7 +107,7 @@
 <td class='description'>DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.</td>
 </tr>
 <tr>
-<td><a href='#9'>9</a></td>
+<td><a href='#11'>11</a></td>
 <td>Voice CV</td>
 <td>V.CV</td>
 <td>Yes</td>
@@ -98,7 +116,7 @@
 <td class='description'>CV routing matrix with min/max control and various stacking options that affect how source signals are combined in case they affect the same target.</td>
 </tr>
 <tr>
-<td><a href='#10'>10</a></td>
+<td><a href='#12'>12</a></td>
 <td>Voice In</td>
 <td>V.In</td>
 <td>Yes</td>
@@ -107,7 +125,7 @@
 <td class='description'>Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.</td>
 </tr>
 <tr>
-<td><a href='#11'>11</a></td>
+<td><a href='#13'>13</a></td>
 <td>Voice Audio</td>
 <td>V.Audio</td>
 <td>Yes</td>
@@ -116,7 +134,7 @@
 <td class='description'>Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.</td>
 </tr>
 <tr>
-<td><a href='#12'>12</a></td>
+<td><a href='#14'>14</a></td>
 <td>Osc Mod</td>
 <td>Osc Mod</td>
 <td>Yes</td>
@@ -125,7 +143,7 @@
 <td class='description'>Oscillator routing matrices that allow for Osc-to-Osc AM, RM and FM.</td>
 </tr>
 <tr>
-<td><a href='#13'>13</a></td>
+<td><a href='#15'>15</a></td>
 <td>Oscillator</td>
 <td>Osc</td>
 <td>Yes</td>
@@ -134,7 +152,7 @@
 <td class='description'>Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.</td>
 </tr>
 <tr>
-<td><a href='#14'>14</a></td>
+<td><a href='#16'>16</a></td>
 <td>Voice FX</td>
 <td>V.FX</td>
 <td>Yes</td>
@@ -143,7 +161,7 @@
 <td class='description'>Per-voice FX module with state variable filter, comb filter and distortion.</td>
 </tr>
 <tr>
-<td><a href='#15'>15</a></td>
+<td><a href='#17'>17</a></td>
 <td>Voice Out</td>
 <td>V.Out</td>
 <td>Yes</td>
@@ -152,7 +170,7 @@
 <td class='description'>Controls gain and balance of individual voices.</td>
 </tr>
 <tr>
-<td>16</td>
+<td>18</td>
 <td>Voice Mix</td>
 <td>V.Mix</td>
 <td>No</td>
@@ -161,7 +179,7 @@
 <td class='description'>Provides voice mixdown as an audio source to the global audio matrix.</td>
 </tr>
 <tr>
-<td><a href='#17'>17</a></td>
+<td><a href='#19'>19</a></td>
 <td>Global Audio</td>
 <td>G.Audio</td>
 <td>Yes</td>
@@ -170,7 +188,7 @@
 <td class='description'>Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.</td>
 </tr>
 <tr>
-<td><a href='#18'>18</a></td>
+<td><a href='#20'>20</a></td>
 <td>Global FX</td>
 <td>G.FX</td>
 <td>Yes</td>
@@ -179,7 +197,7 @@
 <td class='description'>Global FX module with state variable filter, comb filter, distortion, delay and reverb.</td>
 </tr>
 <tr>
-<td><a href='#19'>19</a></td>
+<td><a href='#21'>21</a></td>
 <td>Master Out</td>
 <td>M.Out</td>
 <td>Yes</td>
@@ -188,7 +206,7 @@
 <td class='description'>Controls gain and balance of the master audio output.</td>
 </tr>
 <tr>
-<td><a href='#20'>20</a></td>
+<td><a href='#22'>22</a></td>
 <td>Monitor</td>
 <td>Monitor</td>
 <td>Yes</td>
@@ -199,6 +217,143 @@
 </table>
 <h2>Parameter Overview</h2>
 <a name='2'/>
+<h3>G.CV Mod</h3>
+<table>
+<tr>
+<th>Name</th>
+<th>Short</th>
+<th>Section</th>
+<th>UI</th>
+<th>Num</th>
+<th>Dir</th>
+<th>Rate</th>
+<th>Automate</th>
+<th>Min</th>
+<th>Max</th>
+<th>Default</th>
+<th>Log Midpoint</th>
+</tr>
+<tr>
+<td rowspan='2'>Op</td>
+<td>Op</td>
+<td>Main</td>
+<td>Yes</td>
+<td>15</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>Off</td>
+<td>AB.Stk</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects operation and stacking mode.<br/>Add: add source signal to target parameter.<br/>Mul: multiply target parameter by source signal.<br/>AB (Add-Bipolar): treat source signal as bipolar, then add to target parameter.<br/>Abs (Absolute): modulate as-if the target parameter has the full [0, 1] range available, may cause clipping.<br/>Rel (Relative): modulate taking into account only the target parameter value, may cause clipping.<br/>Stk (Stacked): modulate taking into account all previous modulation sources affecting the same parameter.</td>
+</tr>
+<tr>
+<td rowspan='2'>Source</td>
+<td>Source</td>
+<td>Main</td>
+<td>Yes</td>
+<td>15</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>M.In Aux 1</td>
+<td>MIDI CC 127</td>
+<td>M.In Aux 1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>All global CV and MIDI sources, plus for per-voice CV all per-voice CV sources, MIDI note and velocity, and On-Note all global CV sources.</td>
+</tr>
+<tr>
+<td rowspan='2'>Target</td>
+<td>Target</td>
+<td>Main</td>
+<td>Yes</td>
+<td>15</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>M.In Aux 1</td>
+<td>G.CV Mx 20</td>
+<td>M.In Aux 1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Any modulatable parameter of any audio module, audio matrix or (in case of per-voice) voice-in parameter.</td>
+</tr>
+<tr>
+<td rowspan='2'>Offset</td>
+<td>Of</td>
+<td>Main</td>
+<td>Yes</td>
+<td>15</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>-1.00</td>
+<td>+1.00</td>
+<td>+0.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal offset. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
+<td rowspan='2'>Scale</td>
+<td>Sc</td>
+<td>Main</td>
+<td>Yes</td>
+<td>15</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>1.00</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal multiplier. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
+<td rowspan='2'>Min</td>
+<td>Mn</td>
+<td>Main</td>
+<td>Yes</td>
+<td>15</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
+</tr>
+<tr>
+<td rowspan='2'>Max</td>
+<td>Mx</td>
+<td>Main</td>
+<td>Yes</td>
+<td>15</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>100 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
+</tr>
+</table>
+<a name='3'/>
 <h3>Master In</h3>
 <table>
 <tr>
@@ -318,7 +473,7 @@
 <td colspan='11' class='description'>Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.</td>
 </tr>
 </table>
-<a name='3'/>
+<a name='4'/>
 <h3>Global LFO</h3>
 <table>
 <tr>
@@ -489,7 +644,7 @@
 <td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
 </tr>
 </table>
-<a name='4'/>
+<a name='5'/>
 <h3>Global CV</h3>
 <table>
 <tr>
@@ -626,7 +781,144 @@
 <td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
 </tr>
 </table>
-<a name='7'/>
+<a name='6'/>
+<h3>V.CV Mod</h3>
+<table>
+<tr>
+<th>Name</th>
+<th>Short</th>
+<th>Section</th>
+<th>UI</th>
+<th>Num</th>
+<th>Dir</th>
+<th>Rate</th>
+<th>Automate</th>
+<th>Min</th>
+<th>Max</th>
+<th>Default</th>
+<th>Log Midpoint</th>
+</tr>
+<tr>
+<td rowspan='2'>Op</td>
+<td>Op</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>AB.Stk</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects operation and stacking mode.<br/>Add: add source signal to target parameter.<br/>Mul: multiply target parameter by source signal.<br/>AB (Add-Bipolar): treat source signal as bipolar, then add to target parameter.<br/>Abs (Absolute): modulate as-if the target parameter has the full [0, 1] range available, may cause clipping.<br/>Rel (Relative): modulate taking into account only the target parameter value, may cause clipping.<br/>Stk (Stacked): modulate taking into account all previous modulation sources affecting the same parameter.</td>
+</tr>
+<tr>
+<td rowspan='2'>Source</td>
+<td>Source</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>M.In Aux 1</td>
+<td>On Nt MIDI CC 127</td>
+<td>M.In Aux 1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>All global CV and MIDI sources, plus for per-voice CV all per-voice CV sources, MIDI note and velocity, and On-Note all global CV sources.</td>
+</tr>
+<tr>
+<td rowspan='2'>Target</td>
+<td>Target</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>V.LFO 1 Rate</td>
+<td>V.CV Mx 30</td>
+<td>V.LFO 1 Rate</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Any modulatable parameter of any audio module, audio matrix or (in case of per-voice) voice-in parameter.</td>
+</tr>
+<tr>
+<td rowspan='2'>Offset</td>
+<td>Of</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>-1.00</td>
+<td>+1.00</td>
+<td>+0.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal offset. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
+<td rowspan='2'>Scale</td>
+<td>Sc</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>1.00</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Source signal multiplier. Used to transform source before modulation is applied. Useful to stretch things like midi note/velocity into the full [0, 1] range.</td>
+</tr>
+<tr>
+<td rowspan='2'>Min</td>
+<td>Mn</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
+</tr>
+<tr>
+<td rowspan='2'>Max</td>
+<td>Mx</td>
+<td>Main</td>
+<td>Yes</td>
+<td>20</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>100 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
+</tr>
+</table>
+<a name='9'/>
 <h3>Voice LFO</h3>
 <table>
 <tr>
@@ -814,7 +1106,7 @@
 <td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
 </tr>
 </table>
-<a name='8'/>
+<a name='10'/>
 <h3>Envelope</h3>
 <table>
 <tr>
@@ -1155,7 +1447,7 @@
 <td colspan='11' class='description'>Release section length in bars.</td>
 </tr>
 </table>
-<a name='9'/>
+<a name='11'/>
 <h3>Voice CV</h3>
 <table>
 <tr>
@@ -1292,7 +1584,7 @@
 <td colspan='11' class='description'>Defines the bounds of the modulation effect. When min > max, modulation will invert.</td>
 </tr>
 </table>
-<a name='10'/>
+<a name='12'/>
 <h3>Voice In</h3>
 <table>
 <tr>
@@ -1480,7 +1772,7 @@
 <td colspan='11' class='description'>Pitch-bend modulation target for all Oscs. Reacts to master pitchbend range.</td>
 </tr>
 </table>
-<a name='11'/>
+<a name='13'/>
 <h3>Voice Audio</h3>
 <table>
 <tr>
@@ -1583,7 +1875,7 @@
 <td colspan='11' class='description'>Controls route stereo balance.</td>
 </tr>
 </table>
-<a name='12'/>
+<a name='14'/>
 <h3>Osc Mod</h3>
 <table>
 <tr>
@@ -1771,7 +2063,7 @@
 <td colspan='11' class='description'>Modulation index. This is really just a multiplier for the source signal. Less index is less phase adjustment on the target signal. I did not implement automatic scaling with pitch, but this is a modulatable parameter which you can couple with the Note Key modulation source.</td>
 </tr>
 </table>
-<a name='13'/>
+<a name='15'/>
 <h3>Oscillator</h3>
 <table>
 <tr>
@@ -2350,7 +2642,7 @@
 <td colspan='11' class='description'>Unison stereo spread, works on all oscillator modes.</td>
 </tr>
 </table>
-<a name='14'/>
+<a name='16'/>
 <h3>Voice FX</h3>
 <table>
 <tr>
@@ -2691,7 +2983,7 @@
 <td colspan='11' class='description'>Dry/wet mix between input and output signal.</td>
 </tr>
 </table>
-<a name='15'/>
+<a name='17'/>
 <h3>Voice Out</h3>
 <table>
 <tr>
@@ -2743,7 +3035,7 @@
 <td colspan='11' class='description'>Output stereo balance.</td>
 </tr>
 </table>
-<a name='17'/>
+<a name='19'/>
 <h3>Global Audio</h3>
 <table>
 <tr>
@@ -2846,7 +3138,7 @@
 <td colspan='11' class='description'>Controls route stereo balance.</td>
 </tr>
 </table>
-<a name='18'/>
+<a name='20'/>
 <h3>Global FX</h3>
 <table>
 <tr>
@@ -3493,7 +3785,7 @@
 <td colspan='11' class='description'>Reverb dry/wet control.</td>
 </tr>
 </table>
-<a name='19'/>
+<a name='21'/>
 <h3>Master Out</h3>
 <table>
 <tr>
@@ -3545,7 +3837,7 @@
 <td colspan='11' class='description'>Output stereo balance.</td>
 </tr>
 </table>
-<a name='20'/>
+<a name='22'/>
 <h3>Monitor</h3>
 <table>
 <tr>
