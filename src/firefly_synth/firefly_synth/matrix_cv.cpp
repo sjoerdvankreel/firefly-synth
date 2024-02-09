@@ -16,8 +16,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int constexpr vcv_route_count = 20;
-static int constexpr gcv_route_count = 15;
+static int constexpr vcv_route_count = 25;
+static int constexpr gcv_route_count = 20;
 static int constexpr max_cv_route_count = std::max(vcv_route_count, gcv_route_count);
 
 static int constexpr vaudio_route_count = 30;
@@ -299,8 +299,8 @@ cv_matrix_topo(
   int on_note_midi_start = -1;
   auto source_matrix = make_cv_source_matrix(sources);
   auto target_matrix = make_cv_target_matrix(targets);
-  auto const vcv_info = make_topo_info("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "V.CV Mod", "V.CV Mod", true, true, module_vcv_cv_matrix, 1);
-  auto const gcv_info = make_topo_info("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "G.CV Mod", "G.CV Mod", true, true, module_gcv_cv_matrix, 1);
+  auto const vcv_info = make_topo_info("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "Voice Mod", "V.Mod", true, true, module_vcv_cv_matrix, 1);
+  auto const gcv_info = make_topo_info("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "Global Mod", "G.Mod", true, true, module_gcv_cv_matrix, 1);
   auto const vaudio_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_audio_matrix, 1);
   auto const gaudio_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_audio_matrix, 1);
 

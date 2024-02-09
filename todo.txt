@@ -19,6 +19,7 @@ v1.1:
 cv-to-cv-mod
 + test midi active
 + test context menus
++ paramref
 do some presets
 fx-only version
 update screenshot

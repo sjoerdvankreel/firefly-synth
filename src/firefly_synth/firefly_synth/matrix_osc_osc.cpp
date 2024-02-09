@@ -128,14 +128,14 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
       "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "AM", r, max_unison_voices + 1)));
 
   module_topo result(make_module(
-    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc Mod", true, true, module_osc_osc_matrix, 1),
+    make_topo_info("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", "Osc", true, true, module_osc_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, outputs),
     make_module_gui(section, colors, pos, { 2, 1 })));
   result.info.description = "Oscillator routing matrices that allow for Osc-to-Osc AM, RM and FM.";
 
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_osc_graph_engine;
-  result.gui.tabbed_name = result.info.tag.name;
+  result.gui.tabbed_name = result.info.tag.short_name;
   result.engine_factory = [](auto const& topo, int sr, int max_frame_count) { return std::make_unique<osc_osc_matrix_engine>(max_frame_count); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };
