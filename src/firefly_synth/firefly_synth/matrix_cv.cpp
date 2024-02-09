@@ -80,13 +80,28 @@ type_items()
   return result;
 }
 
-class cv_cv_matrix_engine:
-public module_engine { 
+// mixes down into a single cv (entire module) on demand
+class cv_cv_matrix_engine :
+public module_engine {
+  bool const _global;
+  cv_cv_matrix_mixer _mixer;
+  jarray<float, 3>* _own_cv = {};
+  std::vector<module_output_mapping> const _sources;
+  std::vector<param_topo_mapping> const _targets;
+
 public:
+  PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
+  cv_cv_matrix_engine(bool global,
+    std::vector<module_output_mapping> const& sources,
+    std::vector<param_topo_mapping> const& targets) :
+    _global(global), _mixer(this), _sources(sources), _targets(targets) {}
+
   void reset(plugin_block const*) override {}
-  void process(plugin_block& block) override {}
+  void process(plugin_block& block) override;
+  cv_cv_matrix_mixdown const& mix(plugin_block& block, int module, int slot);
 };
 
+// mixes down all cv to audio targets at once
 class cv_audio_matrix_engine:
 public module_engine { 
   bool const _global;
@@ -343,7 +358,10 @@ cv_matrix_topo(
       select_midi_active(state, cv, global, on_note_midi_start, sm, active); 
   };
   if(cv)
-    result.engine_factory = [](auto const& topo, int, int) { return std::make_unique<cv_cv_matrix_engine>(); };
+    result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
+      auto const& topo, int, int) {
+        return std::make_unique<cv_cv_matrix_engine>(global, sm, tm);
+    };
   else
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
@@ -441,6 +459,19 @@ _global(global), _sources(sources), _targets(targets)
   _mixdown.resize(dims.module_slot_param_slot);
   _modulation_indices.resize(dims.module_slot_param_slot);
 }
+
+void 
+cv_cv_matrix_engine::process(plugin_block& block)
+{
+  // need to capture own cv here because when we start 
+  // mixing "own" does not refer to us but to the caller
+  *block.state.own_context = &_mixer;
+  _own_cv = &block.state.own_cv;
+}
+
+cv_cv_matrix_mixdown const& 
+cv_cv_matrix_mixer::mix(plugin_block& block, int module, int slot)
+{ return _engine->mix(block, module, slot); }
 
 void
 cv_audio_matrix_engine::process(plugin_block& block)

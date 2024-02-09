@@ -33,7 +33,9 @@ struct oscillator_context
 // for osc and voice in
 inline int const max_unison_voices = 8;
 
-// everybody needs this
+// everybody needs these
+typedef plugin_base::jarray<plugin_base::jarray<
+  float, 1> const*, 2> cv_cv_matrix_mixdown;
 typedef plugin_base::jarray<plugin_base::jarray<
   float, 1> const*, 4> cv_audio_matrix_mixdown;
 
@@ -116,6 +118,27 @@ get_audio_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
   return *static_cast<audio_audio_matrix_mixer*>(context);
 }
 
+// gets the cv to cv mixdown to be used as input at the beginning of a cv module 
+// (e.g. combined modulation signals for "voice lfo 3")
+class cv_cv_matrix_engine;
+class cv_cv_matrix_mixer
+{
+  cv_cv_matrix_engine* _engine;
+public:
+  PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_mixer);
+  cv_cv_matrix_mixer(cv_cv_matrix_engine* engine) : _engine(engine) {}
+  cv_cv_matrix_mixdown const& mix(plugin_base::plugin_block& block, int module, int slot);
+};
+
+inline cv_cv_matrix_mixer&
+get_cv_cv_matrix_mixer(plugin_base::plugin_block& block, bool global)
+{
+  int module = global ? module_gcv_cv_matrix : module_vcv_cv_matrix;
+  void* context = block.module_context(module, 0);
+  assert(context != nullptr);
+  return *static_cast<cv_cv_matrix_mixer*>(context);
+}
+
 // gets the cv to audio mixdown for all modulatable parameters in all modules for the current stage
 inline cv_audio_matrix_mixdown const&
 get_cv_audio_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
@@ -125,6 +148,7 @@ get_cv_audio_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
   return *static_cast<cv_audio_matrix_mixdown const*>(context);
 }
 
+// TODO also for cv
 // set all outputs to current automation values
 cv_audio_matrix_mixdown
 make_static_cv_audio_matrix_mixdown(plugin_base::plugin_block& block);

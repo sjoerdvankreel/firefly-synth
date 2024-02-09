@@ -21,6 +21,7 @@ enum { section_main };
 enum { output_silence, output_mixed };
 enum { param_on, param_source, param_target, param_gain, param_bal };
 
+// mixes down into a single audio target on demand
 class audio_audio_matrix_engine:
 public module_engine { 
   bool const _global;
