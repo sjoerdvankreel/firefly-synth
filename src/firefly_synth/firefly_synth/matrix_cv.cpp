@@ -16,8 +16,8 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int constexpr vcv_route_count = 25;
-static int constexpr gcv_route_count = 20;
+static int constexpr vcv_route_count = 20;
+static int constexpr gcv_route_count = 16;
 static int constexpr max_cv_route_count = std::max(vcv_route_count, gcv_route_count);
 
 static int constexpr vaudio_route_count = 30;
