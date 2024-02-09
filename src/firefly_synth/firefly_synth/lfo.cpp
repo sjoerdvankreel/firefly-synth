@@ -21,7 +21,7 @@ static float const max_filter_time_ms = 500;
 static float const log_half = std::log(0.5f);
 
 enum class lfo_stage { cycle, filter, end };
-enum { scratch_time, scratch_count };
+enum { scratch_rate, scratch_count };
 enum { section_main, section_controls };
 enum { mode_off, mode_rate, mode_rate_one, mode_rate_phs, mode_sync, mode_sync_one, mode_sync_phs };
 enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_seed, param_steps, param_filter, param_phase };
@@ -495,7 +495,18 @@ void lfo_engine::process_shape_loop(plugin_block& block, cv_cv_matrix_mixdown co
   auto const& block_auto = block.state.own_block_automation;
   int mode = block_auto[param_mode][0].step();
   int steps = block_auto[param_steps][0].step();
-  auto const& rate_curve = sync_or_freq_into_scratch_fast<domain_type::log>(block, is_sync(mode), this_module, param_rate, param_tempo, scratch_time);
+  
+  auto& rate_curve = block.state.own_scratch[scratch_rate];
+  if (is_sync(mode))
+  {
+    timesig sig = get_timesig_param_value(block, this_module, param_tempo);
+    rate_curve.fill(block.start_frame, block.end_frame, timesig_to_freq(block.host.bpm, sig));
+  }
+  else
+  {
+    auto const& rate_curve_plain = *(*modulation)[param_rate][0];
+    normalized_to_raw_into_fast<domain_type::log>(block, this_module, param_rate, rate_curve_plain, rate_curve);
+  }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {

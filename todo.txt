@@ -26,6 +26,7 @@ cv-to-cv-mod
 + test-on-note
 + test midi + midi_active
 + do envelope before lfo (eg env -> lfo mod)
++ document all the changed stuff (added osc, made stuff continuous, plus the 2 new matrices)
 
 do some presets
 fx-only version
