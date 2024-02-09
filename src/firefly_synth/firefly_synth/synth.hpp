@@ -35,9 +35,11 @@ inline int const max_unison_voices = 8;
 
 // everybody needs these
 typedef plugin_base::jarray<plugin_base::jarray<
-  float, 1> const*, 2> cv_cv_matrix_mixdown;
+  float, 1> const*, 4> cv_matrix_mixdown;
 typedef plugin_base::jarray<plugin_base::jarray<
   float, 1> const*, 4> cv_audio_matrix_mixdown;
+typedef plugin_base::jarray<plugin_base::jarray<
+  float, 1> const*, 2> cv_cv_matrix_mixdown;
 
 // shared by midi and cv matrix
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
