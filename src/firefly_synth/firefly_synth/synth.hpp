@@ -112,7 +112,7 @@ public:
 };
 
 inline audio_audio_matrix_mixer&
-get_audio_audio_matrix_mixer(plugin_base::plugin_block& block, bool global)
+get_audio_audio_matrix_mixer(plugin_base::plugin_block const& block, bool global)
 {
   int module = global ? module_gaudio_audio_matrix : module_vaudio_audio_matrix;
   void* context = block.module_context(module, 0);
@@ -129,11 +129,11 @@ class cv_cv_matrix_mixer
 public:
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_mixer);
   cv_cv_matrix_mixer(cv_cv_matrix_engine* engine) : _engine(engine) {}
-  cv_cv_matrix_mixdown const& mix(plugin_base::plugin_block& block, int module, int slot);
+  cv_cv_matrix_mixdown const& mix(plugin_base::plugin_block const& block, int module, int slot);
 };
 
 inline cv_cv_matrix_mixer&
-get_cv_cv_matrix_mixer(plugin_base::plugin_block& block, bool global)
+get_cv_cv_matrix_mixer(plugin_base::plugin_block const& block, bool global)
 {
   int module = global ? module_gcv_cv_matrix : module_vcv_cv_matrix;
   void* context = block.module_context(module, 0);

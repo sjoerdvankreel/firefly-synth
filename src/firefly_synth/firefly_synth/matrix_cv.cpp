@@ -98,7 +98,7 @@ protected:
 
   // module/slot:-1 is all (for cv->audio)
   // or specific module (for cv->cv)
-  void perform_mixdown(plugin_block& block, int module, int slot);
+  void perform_mixdown(plugin_block const& block, int module, int slot);
 
 public:
   void reset(plugin_block const*) override {}
@@ -118,7 +118,7 @@ public:
 
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
   void process(plugin_block& block) override;
-  cv_cv_matrix_mixdown const& mix(plugin_block& block, int module, int slot);
+  cv_cv_matrix_mixdown const& mix(plugin_block const& block, int module, int slot);
 };
 
 // mixes down all cv to audio targets at once
@@ -301,9 +301,8 @@ render_graph(
   int sample_rate = params.max_frame_count / max_total;
   int voice_release_at = max_dahds / max_dahdsrf * params.max_frame_count;
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
-  // todo whats relevant ?
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
-  if(map.module_index == module_vcv_audio_matrix)
+  if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
@@ -312,10 +311,21 @@ render_graph(
   engine->process_end();
 
   std::string partition = float_to_string(max_total, 1) + " Sec " + targets.items[ti].name;
-  // TODO
-  auto const& modulation = get_cv_audio_matrix_mixdown(*block, map.module_index == module_gcv_audio_matrix);
-  jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
-  return graph_data(stacked, false, 1.0f, { partition });
+
+  // plotting cv->audio
+  if(map.module_index == module_vcv_audio_matrix || map.module_index == module_gcv_audio_matrix)
+  {
+    auto const& modulation = get_cv_audio_matrix_mixdown(*block, map.module_index == module_gcv_audio_matrix);
+    jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
+    return graph_data(stacked, false, 1.0f, { partition });
+  } else
+  {
+    // plotting cv->cv
+    auto& mixer = get_cv_cv_matrix_mixer(*block, map.module_index == module_gcv_cv_matrix);
+    auto const& modulation = mixer.mix(*block, map.module_index, map.module_slot);
+    jarray<float, 1> const* stacked = modulation[map.param_index][map.param_slot];
+    return graph_data(*stacked, false, 1.0f, { partition });
+  }
 }
 
 module_topo
@@ -482,11 +492,11 @@ cv_cv_matrix_engine::process(plugin_block& block)
 }
 
 cv_cv_matrix_mixdown const& 
-cv_cv_matrix_mixer::mix(plugin_block& block, int module, int slot)
+cv_cv_matrix_mixer::mix(plugin_block const& block, int module, int slot)
 { return _engine->mix(block, module, slot); }
 
 cv_cv_matrix_mixdown const&
-cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
+cv_cv_matrix_engine::mix(plugin_block const& block, int module, int slot)
 {
   perform_mixdown(block, module, slot);
   return _mixdown[module][slot];
@@ -500,7 +510,7 @@ cv_audio_matrix_engine::process(plugin_block& block)
 }
 
 void
-cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot)
+cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, int slot)
 {
   // set every modulatable parameter to its corresponding automation curve
   assert((module == -1) == (slot == -1));
