@@ -84,6 +84,7 @@ type_items()
 class cv_matrix_engine_base :
 public module_engine {
 protected:
+
   bool const _global;
   cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
@@ -94,6 +95,10 @@ protected:
     bool global, plugin_topo const& topo,
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
+
+  // module/slot:-1 is all (for cv->audio)
+  // or specific module (for cv->cv)
+  void perform_mixdown(plugin_block& block, int module, int slot);
 
 public:
   void reset(plugin_block const*) override {}
@@ -483,10 +488,24 @@ cv_cv_matrix_mixer::mix(plugin_block& block, int module, int slot)
 cv_cv_matrix_mixdown const&
 cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
 {
-  // TODO merge with cv_audio_matrix
+  perform_mixdown(block, module, slot);
+  return _mixdown[module][slot];
+}
+
+void
+cv_audio_matrix_engine::process(plugin_block& block)
+{
+  perform_mixdown(block, -1, -1);
+  *block.state.own_context = &_mixdown;
+}
+
+void
+cv_matrix_engine_base::perform_mixdown(plugin_block& block, int module, int slot)
+{
   // set every modulatable parameter to its corresponding automation curve
+  assert((module == -1) == (slot == -1));
   for (int m = 0; m < _targets.size(); m++)
-    if(_targets[m].module_index == module && _targets[m].module_slot == slot) // TODO this
+    if (module == -1 || (_targets[m].module_index == module && _targets[m].module_slot == slot))
     {
       int tp = _targets[m].param_index;
       int tpi = _targets[m].param_slot;
@@ -515,9 +534,7 @@ cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
     int tm = _targets[selected_target].module_index;
     int tmi = _targets[selected_target].module_slot;
 
-    // TODO this
-    if(tm != module || tmi != slot) continue;
-
+    if (module != -1 && (tm != module || tmi != slot)) continue;
     auto const& target_curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
 
     // if already modulated, set target curve to own buffer
@@ -615,141 +632,6 @@ cv_cv_matrix_engine::mix(plugin_block& block, int module, int slot)
   for (int r = 0; r < route_count; r++)
     if (modulated_curve_ptrs[r] != nullptr)
       modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
-
-  return _mixdown[module][slot];
-}
-
-void
-cv_audio_matrix_engine::process(plugin_block& block)
-{
-  // set every modulatable parameter to its corresponding automation curve
-  for (int m = 0; m < _targets.size(); m++)
-  {
-    int tp = _targets[m].param_index;
-    int tpi = _targets[m].param_slot;
-    int tm = _targets[m].module_index;
-    int tmi = _targets[m].module_slot;
-    _modulation_indices[tm][tmi][tp][tpi] = -1;
-    auto const& curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-    _mixdown[tm][tmi][tp][tpi] = &curve;
-  }
-
-  // apply modulation routing
-  int modulation_index = 0;
-  auto const& own_automation = block.state.own_block_automation;
-  int route_count = _global ? gaudio_route_count : vaudio_route_count;
-  jarray<float, 1>* modulated_curve_ptrs[max_audio_route_count] = { nullptr };
-  for (int r = 0; r < route_count; r++)
-  {
-    jarray<float, 1>* modulated_curve_ptr = nullptr;
-    int type = own_automation[param_type][r].step();
-    if(type == type_off) continue;
-
-    // found out indices of modulation target
-    int selected_target = own_automation[param_target][r].step();
-    int tp = _targets[selected_target].param_index;
-    int tpi = _targets[selected_target].param_slot;
-    int tm = _targets[selected_target].module_index;
-    int tmi = _targets[selected_target].module_slot;
-    auto const& target_curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-
-    // if already modulated, set target curve to own buffer
-    int existing_modulation_index = _modulation_indices[tm][tmi][tp][tpi];
-    if (existing_modulation_index != -1)
-      modulated_curve_ptr = &block.state.own_cv[0][existing_modulation_index];
-    else
-    {
-      // else pick the next of our own cv outputs
-      modulated_curve_ptr = &block.state.own_cv[0][modulation_index];
-      auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-      target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
-      modulated_curve_ptrs[r] = modulated_curve_ptr;
-      _mixdown[tm][tmi][tp][tpi] = modulated_curve_ptr;
-      _modulation_indices[tm][tmi][tp][tpi] = modulation_index++;
-    }
-
-    assert(modulated_curve_ptr != nullptr);
-    jarray<float, 1>& modulated_curve = *modulated_curve_ptr;
-
-    // find out indices of modulation source
-    int selected_source = own_automation[param_source][r].step();
-    int sm = _sources[selected_source].module_index;
-    int smi = _sources[selected_source].module_slot;
-    int so = _sources[selected_source].output_index;
-    int soi = _sources[selected_source].output_slot;
-    auto const& source_curve = block.module_cv(sm, smi)[so][soi];
-
-    // source must be regular unipolar otherwise add/bi/mul breaks
-    for(int f = block.start_frame; f < block.end_frame; f++)
-      check_unipolar(source_curve[f]);
-
-    // pre-transform source signal
-    int this_module = _global? module_gcv_audio_matrix: module_vcv_audio_matrix;
-    auto const& scale_curve = block.state.own_accurate_automation[param_scale][r];
-    auto const& offset_curve = block.state.own_accurate_automation[param_offset][r];
-    auto& transformed_source = block.state.own_scratch[transform_source_scratch];
-    for (int f = block.start_frame; f < block.end_frame; f++)
-    {
-      float scale = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_scale, scale_curve[f]);
-      float offset = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_offset, offset_curve[f]);
-      transformed_source[f] = std::clamp((offset + source_curve[f]) * scale, 0.0f, 1.0f);
-    }
-
-    // apply modulation
-    auto const& min_curve = block.state.own_accurate_automation[param_min][r];
-    auto const& max_curve = block.state.own_accurate_automation[param_max][r];
-    
-    switch (type)
-    {
-    case type_mul_abs:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] *= min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f];
-      break;
-    case type_mul_rel:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = target_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * (1 - target_curve[f]);
-      break;
-    case type_mul_stk:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = modulated_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * (1 - modulated_curve[f]);
-      break;
-    case type_add_abs:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f];
-      break;
-    case type_add_rel:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - target_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]);
-      break;
-    case type_add_stk:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - modulated_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]);
-      break;
-    case type_ab_abs:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
-      break;
-    case type_ab_rel:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - std::fabs(0.5f - target_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
-      break;
-    case type_ab_stk:
-      for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - std::fabs(0.5f - modulated_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
-      break;
-    default:
-      assert(false);
-      break;
-    }
-  }
-
-  // clamp, modulated_curve_ptrs[r] will point to the first 
-  // occurence of modulation, but mod effects are accumulated there
-  for(int r = 0; r < route_count; r++)
-    if(modulated_curve_ptrs[r] != nullptr)
-      modulated_curve_ptrs[r]->transform(block.start_frame, block.end_frame, [](float v) { return std::clamp(v, 0.0f, 1.0f); });
-  
-  *block.state.own_context = &_mixdown;
 }
 
 }
