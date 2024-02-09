@@ -299,10 +299,10 @@ cv_matrix_topo(
   int on_note_midi_start = -1;
   auto source_matrix = make_cv_source_matrix(sources);
   auto target_matrix = make_cv_target_matrix(targets);
-  auto const vcv_info = make_topo_info("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "Voice Mod", "V.Mod", true, true, module_vcv_cv_matrix, 1);
-  auto const gcv_info = make_topo_info("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "Global Mod", "G.Mod", true, true, module_gcv_cv_matrix, 1);
-  auto const vaudio_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice CV", "V.CV", true, true, module_vcv_audio_matrix, 1);
-  auto const gaudio_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global CV", "G.CV", true, true, module_gcv_audio_matrix, 1);
+  auto const vcv_info = make_topo_info("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "Voice CV Mod", "V.CVMod", true, true, module_vcv_cv_matrix, 1);
+  auto const gcv_info = make_topo_info("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "Global CV Mod", "G.CVMod", true, true, module_gcv_cv_matrix, 1);
+  auto const vaudio_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice Audio Mod", "V.AuMod", true, true, module_vcv_audio_matrix, 1);
+  auto const gaudio_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global Audio Mod", "G.AuMod", true, true, module_gcv_audio_matrix, 1);
 
   if(cv) info = topo_info(global? gcv_info: vcv_info);
   else info = topo_info(global ? gaudio_info : vaudio_info);
