@@ -272,6 +272,7 @@ render_graph(
   int sample_rate = params.max_frame_count / max_total;
   int voice_release_at = max_dahds / max_dahdsrf * params.max_frame_count;
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
+  // todo whats relevant ?
   std::vector<int> relevant_modules({ module_master_in, module_glfo });
   if(map.module_index == module_vcv_audio_matrix)
     relevant_modules.insert(relevant_modules.end(), { module_voice_on_note, module_vlfo, module_env });
@@ -282,6 +283,7 @@ render_graph(
   engine->process_end();
 
   std::string partition = float_to_string(max_total, 1) + " Sec " + targets.items[ti].name;
+  // TODO
   auto const& modulation = get_cv_audio_matrix_mixdown(*block, map.module_index == module_gcv_audio_matrix);
   jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
   return graph_data(stacked, false, 1.0f, { partition });
