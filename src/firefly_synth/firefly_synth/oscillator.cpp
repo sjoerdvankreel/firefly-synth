@@ -228,7 +228,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
     block = engine->process(module_osc, i, [max_frame_count = params.max_frame_count, sample_rate](plugin_block& block) {
       osc_engine engine(max_frame_count, sample_rate);
       engine.reset(&block);
-      cv_audio_matrix_mixdown modulation(make_static_cv_audio_matrix_mixdown(block));
+      cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
       engine.process<true>(block, &modulation);
     });
     jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);

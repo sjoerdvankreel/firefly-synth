@@ -150,10 +150,9 @@ get_cv_audio_matrix_mixdown(plugin_base::plugin_block const& block, bool global)
   return *static_cast<cv_audio_matrix_mixdown const*>(context);
 }
 
-// TODO also for cv
 // set all outputs to current automation values
 cv_audio_matrix_mixdown
-make_static_cv_audio_matrix_mixdown(plugin_base::plugin_block& block);
+make_static_cv_matrix_mixdown(plugin_base::plugin_block& block);
 
 // routing matrices sources/targets
 std::vector<plugin_base::cv_source_entry>

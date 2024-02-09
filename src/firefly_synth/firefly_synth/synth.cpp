@@ -166,7 +166,7 @@ make_audio_routing_menu_handler(plugin_state* state, bool global)
 }
 
 cv_audio_matrix_mixdown
-make_static_cv_audio_matrix_mixdown(plugin_block& block)
+make_static_cv_matrix_mixdown(plugin_block& block)
 {
   cv_audio_matrix_mixdown result;
   plugin_dims dims(block.plugin, block.plugin.audio_polyphony);

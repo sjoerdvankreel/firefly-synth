@@ -323,7 +323,7 @@ render_graph(
     bool global = mapping.module_index == module_gfx;
     fx_engine engine(global, sample_rate, frame_count, shape_type_items);
     engine.reset(&block);
-    cv_audio_matrix_mixdown modulation(make_static_cv_audio_matrix_mixdown(block));
+    cv_audio_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block));
     engine.process<true>(block, &modulation, &audio_in);
   });
   engine->process_end();
