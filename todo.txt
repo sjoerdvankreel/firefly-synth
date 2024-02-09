@@ -23,6 +23,10 @@ cv-to-cv-mod
 + connect all the modulatable targets
 + disable the unwanted ui options
 + make lfo x/y and env slopes modulatable
++ test-on-note
++ test midi + midi_active
++ do envelope before lfo (eg env -> lfo mod)
+
 do some presets
 fx-only version
 update screenshot
