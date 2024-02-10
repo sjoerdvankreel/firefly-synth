@@ -27,7 +27,7 @@ Project status:
 
 Pretty much like InfernalSynth. I reused most of the algorithms, although some of them got upgraded. In particular,
 the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play
-around with, and last-but-not-least, it can do actual (Chowning-style) FM synthesis.
+around with, there's a new CV-to-CV mod matrix and last-but-not-least, it can do actual (Chowning-style) FM synthesis.
 
 - Big Pad (Preset): [big_pad.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/big_pad.mp3)
 - FM Weirdness (Preset): [fm_weirdness.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fm_weirdness.mp3)
