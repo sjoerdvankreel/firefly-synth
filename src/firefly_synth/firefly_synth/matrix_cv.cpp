@@ -441,8 +441,10 @@ cv_matrix_topo(
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
-  // TODO
-  target.info.description = "Any modulatable parameter of any audio module, audio matrix or (in case of per-voice) voice-in parameter.";
+  if(cv)
+    target.info.description = "Any modulatable parameter of any CV module or CV-to-audio matrix. You can only route 'upwards', so not LFO2->LFO1.";
+  else
+    target.info.description = "Any modulatable parameter of any audio module, audio-to-audio matrix or (in case of per-voice) voice-in parameter.";
 
   auto& offset = result.params.emplace_back(make_param(
     make_topo_info("{86ECE946-D554-4445-B8ED-2A7380C910E4}", "Offset", "Off", true, true, param_offset, route_count),
