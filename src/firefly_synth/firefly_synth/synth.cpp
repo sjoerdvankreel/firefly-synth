@@ -209,7 +209,6 @@ make_cv_cv_matrix_targets(plugin_topo const* topo, bool global)
 {
   if (global)
     return {
-      &topo->modules[module_master_in],
       &topo->modules[module_glfo],
       &topo->modules[module_gcv_audio_matrix] };
   else

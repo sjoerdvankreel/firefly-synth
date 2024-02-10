@@ -21,7 +21,7 @@ cv-to-cv-mod
 + test context menus
 + paramref
 + connect all the modulatable targets
-+ make lfo x/y and env slopes modulatable
++ make env slopes modulatable ?
 + test mod->to->audiomod
 + document all the changed stuff (added osc, made stuff continuous, plus the 2 new matrices)
 
