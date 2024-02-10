@@ -56,8 +56,6 @@ public module_engine {
   float _phase;
   float _ref_phase;
   float _lfo_end_value;
-  float _log_skew_x_exp;
-  float _log_skew_y_exp;
   float _filter_end_value;
   
   bool const _global;
@@ -261,14 +259,14 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& x = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", "SkewX", "X", true, true, param_x, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   x.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_x(type_menu, vs[1]); });
   x.info.description = "Horizontal skew amount.";
   auto& y = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", "SkewY", "Y", true, true, param_y, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_controls, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   y.gui.bindings.enabled.bind_params({ param_mode, param_type }, [type_menu](auto const& vs) { return vs[0] != mode_off && has_skew_y(type_menu, vs[1]); });
@@ -336,11 +334,7 @@ void
 lfo_engine::update_block_params(plugin_block const* block)
 {
   auto const& block_auto = block->state.own_block_automation;
-  float x = block_auto[param_x][0].real();
-  float y = block_auto[param_y][0].real();
   float filter = block_auto[param_filter][0].real();
-  _log_skew_x_exp = std::log(0.001 + (x * 0.999)) / log_half;
-  _log_skew_y_exp = std::log(0.001 + (y * 0.999)) / log_half;
   _filter.set(block->sample_rate, filter / 1000.0f);
 }
 
@@ -480,12 +474,37 @@ lfo_engine::process_shape_xy_quantize(plugin_block& block, cv_cv_matrix_mixdown 
   auto const& type_item = _type_items[type];
   int sx = type_item.index2;
   int sy = type_item.index3;
-  float x = block_auto[param_x][0].real();
-  float y = block_auto[param_y][0].real();
-  float px = wave_skew_is_exp(sx)? _log_skew_x_exp: x;
-  float py = wave_skew_is_exp(sy) ? _log_skew_y_exp : y;
-  auto processor = [px, py, skew_x, skew_y, shape](float in) { return wave_calc_uni(in, px, py, shape, skew_x, skew_y); };
-  process_shape_loop<IsSmoothNoise, IsStaticNoise>(block, modulation, processor, quantize);
+  bool x_is_exp = wave_skew_is_exp(sx);
+  bool y_is_exp = wave_skew_is_exp(sy);
+
+  if (!x_is_exp && !y_is_exp)
+  {
+    auto processor = [skew_x, skew_y, shape](float in, float x, float y) { 
+      return wave_calc_uni(in, x, y, shape, skew_x, skew_y); };
+    process_shape_loop<IsSmoothNoise, IsStaticNoise>(block, modulation, processor, quantize);
+  }
+  else if (!x_is_exp && y_is_exp)
+  {
+    auto processor = [skew_x, skew_y, shape](float in, float x, float y) { 
+      float py = std::log(0.001 + (y * 0.999)) / log_half;
+      return wave_calc_uni(in, x, py, shape, skew_x, skew_y); };
+    process_shape_loop<IsSmoothNoise, IsStaticNoise>(block, modulation, processor, quantize);
+  }
+  else if (x_is_exp && !y_is_exp)
+  {
+    auto processor = [skew_x, skew_y, shape](float in, float x, float y) {
+      float px = std::log(0.001 + (x * 0.999)) / log_half;
+      return wave_calc_uni(in, px, y, shape, skew_x, skew_y); };
+    process_shape_loop<IsSmoothNoise, IsStaticNoise>(block, modulation, processor, quantize);
+  }
+  else
+  {
+    auto processor = [skew_x, skew_y, shape](float in, float x, float y) {
+      float px = std::log(0.001 + (x * 0.999)) / log_half;
+      float py = std::log(0.001 + (y * 0.999)) / log_half;
+      return wave_calc_uni(in, px, py, shape, skew_x, skew_y); };
+    process_shape_loop<IsSmoothNoise, IsStaticNoise>(block, modulation, processor, quantize);
+  }
 }
 
 template <bool IsSmoothNoise, bool IsStaticNoise, class Calc, class Quantize>
@@ -496,7 +515,10 @@ void lfo_engine::process_shape_loop(plugin_block& block, cv_cv_matrix_mixdown co
   int mode = block_auto[param_mode][0].step();
   int steps = block_auto[param_steps][0].step();
   
+  auto const& x_curve = *(*modulation)[param_x][0];
+  auto const& y_curve = *(*modulation)[param_y][0];
   auto& rate_curve = block.state.own_scratch[scratch_rate];
+
   if (is_sync(mode))
   {
     timesig sig = get_timesig_param_value(block, this_module, param_tempo);
@@ -531,7 +553,7 @@ void lfo_engine::process_shape_loop(plugin_block& block, cv_cv_matrix_mixdown co
     if constexpr(IsSmoothNoise)
       _smooth_noise_total_samples = std::ceil(block.sample_rate / rate_curve[f]);
 
-    _lfo_end_value = quantize(calc(_phase), steps);
+    _lfo_end_value = quantize(calc(_phase, x_curve[f], y_curve[f]), steps);
     _filter_end_value = _filter.next(check_unipolar(_lfo_end_value));
     block.state.own_cv[0][0][f] = _filter_end_value;
 
