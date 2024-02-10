@@ -359,8 +359,10 @@ cv_matrix_topo(
   info.description = std::string("CV routing matrix with min/max control and various stacking options ") + 
     "that affect how source signals are combined in case they affect the same target.";
 
+  int this_module = cv? module_gcv_cv_matrix: module_gcv_audio_matrix;
   if (!global)
   {
+    this_module = cv ? module_vcv_cv_matrix : module_vcv_audio_matrix;
     auto on_note_matrix(make_cv_source_matrix(on_note_sources).mappings);
     for (int m = 0; m < on_note_matrix.size(); m++)
       if (on_note_matrix[m].module_index == module_midi) { on_note_midi_start = m; break; }
@@ -433,6 +435,13 @@ cv_matrix_topo(
   source.gui.submenu = source_matrix.submenu;
   source.info.description = std::string("All global CV and MIDI sources, plus for per-voice CV all per-voice CV sources, ") + 
     "MIDI note and velocity, and On-Note all global CV sources.";
+  if (cv)
+    source.gui.item_enabled.bind_param({ this_module, 0, param_target, gui_item_binding::match_param_slot },
+      [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
+        return sm[self].module_index < tm[other].module_index || 
+          (sm[self].module_index == tm[other].module_index && sm[self].module_slot < tm[other].module_slot);
+      });  
+  
   auto& target = result.params.emplace_back(make_param(
     make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", "Target", true, true, param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, ""),
@@ -445,6 +454,12 @@ cv_matrix_topo(
     target.info.description = "Any modulatable parameter of any CV module or CV-to-audio matrix. You can only route 'upwards', so not LFO2->LFO1.";
   else
     target.info.description = "Any modulatable parameter of any audio module, audio-to-audio matrix or (in case of per-voice) voice-in parameter.";
+  if (cv)
+    target.gui.item_enabled.bind_param({ this_module, 0, param_source, gui_item_binding::match_param_slot },
+      [global, sm = source_matrix.mappings, tm = target_matrix.mappings](int other, int self) {
+        return sm[other].module_index < tm[self].module_index ||
+          (sm[other].module_index == tm[self].module_index && sm[other].module_slot < tm[self].module_slot);
+      });
 
   auto& offset = result.params.emplace_back(make_param(
     make_topo_info("{86ECE946-D554-4445-B8ED-2A7380C910E4}", "Offset", "Off", true, true, param_offset, route_count),
