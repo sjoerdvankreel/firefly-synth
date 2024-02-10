@@ -91,6 +91,12 @@ protected:
   std::vector<param_topo_mapping> const _targets;
   std::vector<module_output_mapping> const _sources;
 
+  // need to remember this for access during the cv->cv mix() call
+  jarray<float, 3>* _own_cv = {};
+  jarray<float, 2>* _own_scratch = {};
+  jarray<float, 3> const* _own_accurate_automation = {};
+  jarray<plain_value, 2> const* _own_block_automation = {};
+
   cv_matrix_engine_base(
     bool global, plugin_topo const& topo,
     std::vector<module_output_mapping> const& sources,
@@ -101,7 +107,7 @@ protected:
   void perform_mixdown(plugin_block const& block, int module, int slot);
 
 public:
-  void reset(plugin_block const*) override {}
+  void reset(plugin_block const*) override;
 };
 
 // mixes down into a single cv (entire module) on demand
@@ -300,10 +306,11 @@ render_graph(
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / max_total;
   int voice_release_at = max_dahds / max_dahdsrf * params.max_frame_count;
-  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
-  std::vector<int> relevant_modules({ module_master_in, module_glfo });
-  if(map.module_index == module_vcv_audio_matrix || map.module_index == module_vcv_cv_matrix)
-    relevant_modules.insert(relevant_modules.end(), { module_voice_on_note, module_vlfo, module_env });
+  engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);  
+  
+  std::vector<int> relevant_modules({ module_gcv_cv_matrix, module_master_in, module_glfo });
+  if(map.module_index == module_vcv_audio_matrix)
+    relevant_modules.insert(relevant_modules.end(), { module_vcv_cv_matrix, module_voice_on_note, module_vlfo, module_env });
   for(int m = 0; m < relevant_modules.size(); m++)
     for(int mi = 0; mi < state.desc().plugin->modules[relevant_modules[m]].info.slot_count; mi++)
       engine->process_default(relevant_modules[m], mi);
@@ -486,11 +493,7 @@ _global(global), _sources(sources), _targets(targets)
 
 void 
 cv_cv_matrix_engine::process(plugin_block& block)
-{
-  // need to capture own cv here because when we start 
-  // mixing "own" does not refer to us but to the caller
-  *block.state.own_context = &_mixer;
-}
+{ *block.state.own_context = &_mixer; }
 
 cv_cv_matrix_mixdown const& 
 cv_cv_matrix_mixer::mix(plugin_block const& block, int module, int slot)
@@ -508,6 +511,18 @@ cv_audio_matrix_engine::process(plugin_block& block)
 {
   perform_mixdown(block, -1, -1);
   *block.state.own_context = &_mixdown;
+}
+
+void 
+cv_matrix_engine_base::reset(plugin_block const* block)
+{
+  // need to capture stuff here because when we start 
+  // mixing "own" does not refer to us but to the caller
+  // (in case of cv->cv modulation, cv->audio is good)
+  _own_cv = &block->state.own_cv;
+  _own_scratch = &block->state.own_scratch;
+  _own_block_automation = &block->state.own_block_automation;
+  _own_accurate_automation = &block->state.own_accurate_automation;
 }
 
 void
@@ -529,17 +544,16 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
 
   // apply modulation routing
   int modulation_index = 0;
-  auto const& own_automation = block.state.own_block_automation;
   int route_count = _global ? gcv_route_count : vcv_route_count;
   jarray<float, 1>* modulated_curve_ptrs[max_cv_route_count] = { nullptr };
   for (int r = 0; r < route_count; r++)
   {
     jarray<float, 1>* modulated_curve_ptr = nullptr;
-    int type = own_automation[param_type][r].step();
+    int type = (*_own_block_automation)[param_type][r].step();
     if (type == type_off) continue;
 
     // found out indices of modulation target
-    int selected_target = own_automation[param_target][r].step();
+    int selected_target = (*_own_block_automation)[param_target][r].step();
     int tp = _targets[selected_target].param_index;
     int tpi = _targets[selected_target].param_slot;
     int tm = _targets[selected_target].module_index;
@@ -551,11 +565,11 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
     // if already modulated, set target curve to own buffer
     int existing_modulation_index = _modulation_indices[tm][tmi][tp][tpi];
     if (existing_modulation_index != -1)
-      modulated_curve_ptr = &block.state.own_cv[0][existing_modulation_index];
+      modulated_curve_ptr = &(*_own_cv)[0][existing_modulation_index];
     else
     {
       // else pick the next of our own cv outputs
-      modulated_curve_ptr = &block.state.own_cv[0][modulation_index];
+      modulated_curve_ptr = &(*_own_cv)[0][modulation_index];
       auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
       target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
       modulated_curve_ptrs[r] = modulated_curve_ptr;
@@ -567,7 +581,7 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
     jarray<float, 1>& modulated_curve = *modulated_curve_ptr;
 
     // find out indices of modulation source
-    int selected_source = own_automation[param_source][r].step();
+    int selected_source = (*_own_block_automation)[param_source][r].step();
     int sm = _sources[selected_source].module_index;
     int smi = _sources[selected_source].module_slot;
     int so = _sources[selected_source].output_index;
@@ -580,9 +594,9 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
 
     // pre-transform source signal
     int this_module = _global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
-    auto const& scale_curve = block.state.own_accurate_automation[param_scale][r];
-    auto const& offset_curve = block.state.own_accurate_automation[param_offset][r];
-    auto& transformed_source = block.state.own_scratch[transform_source_scratch];
+    auto const& scale_curve = (*_own_accurate_automation)[param_scale][r];
+    auto const& offset_curve = (*_own_accurate_automation)[param_offset][r];
+    auto& transformed_source = (*_own_scratch)[transform_source_scratch];
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
       float scale = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_scale, scale_curve[f]);
@@ -591,8 +605,8 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
     }
 
     // apply modulation
-    auto const& min_curve = block.state.own_accurate_automation[param_min][r];
-    auto const& max_curve = block.state.own_accurate_automation[param_max][r];
+    auto const& min_curve = (*_own_accurate_automation)[param_min][r];
+    auto const& max_curve = (*_own_accurate_automation)[param_max][r];
 
     switch (type)
     {
