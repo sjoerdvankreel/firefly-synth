@@ -546,7 +546,7 @@ cv_routing_menu_handler::clear(int module, int slot)
       if ((matrix.second[selected_source].module_index == module && matrix.second[selected_source].module_slot == slot))
         for (int p = 0; p < topo.params.size(); p++)
           _state->set_plain_at(matrix.first, 0, p, r, topo.params[p].domain.default_plain(0, r));
-    }
+    } 
   }
   for (auto const& matrix : _target_matrices)
   {

@@ -1,6 +1,6 @@
 ### February 10, 2024 - V1.05 (No binaries).
 
-- Add first preset.
+- Add some presets.
 - Add an extra oscillator.
 - LFO x/y become continuous parameters.
 - Bugfix: Basic oscillator with no waveforms must not be processed.

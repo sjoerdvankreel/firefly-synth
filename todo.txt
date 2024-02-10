@@ -18,15 +18,11 @@ document the header files a bit
 
 v1.1:
 fx-only version
-do some presets
-test linux presets
-trim the kicks demo to percussion only, no synth
 do indexed release schema + regular backwards compat
 run the clap validator
 move route up/down
 profile the pad preset
 implement monophonic mode
-test presets win/lin/vst3/clap
 fix the default patch velo etc
 implement envelope retriggering
 fix the init patch (velocity etc)
