@@ -359,8 +359,9 @@ cv_matrix_topo(
   if(cv) info = topo_info(global? gcv_info: vcv_info);
   else info = topo_info(global ? gaudio_info : vaudio_info);
 
+  std::string matrix_type = cv? "CV-to-CV": "CV-to-audio";
   module_stage stage = global ? module_stage::input : module_stage::voice;
-  info.description = std::string("CV routing matrix with min/max control and various stacking options ") + 
+  info.description = std::string(matrix_type + " routing matrix with min/max control and various stacking options ") +
     "that affect how source signals are combined in case they affect the same target.";
 
   int this_module = cv? module_gcv_cv_matrix: module_gcv_audio_matrix;
@@ -455,7 +456,7 @@ cv_matrix_topo(
   target.gui.submenu = target_matrix.submenu;
   target.gui.item_enabled.auto_bind = true;
   if(cv)
-    target.info.description = "Any modulatable parameter of any CV module or CV-to-audio matrix. You can only route 'upwards', so not LFO2->LFO1.";
+    target.info.description = "Any modulatable parameter of any LFO or the CV-to-audio matrix. You can only route 'upwards', so not LFO2->LFO1.";
   else
     target.info.description = "Any modulatable parameter of any audio module, audio-to-audio matrix or (in case of per-voice) voice-in parameter.";
   if (cv)

@@ -17,8 +17,8 @@ document the header files a bit
 
 v1.1:
 cv-to-cv-mod
++ update manual
 + update the routing diagram
-+ paramref
 + document all the changed stuff (added osc, made stuff continuous, plus the 2 new matrices)
 
 do some presets
