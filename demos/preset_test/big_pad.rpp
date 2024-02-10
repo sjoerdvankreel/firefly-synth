@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "6.82/win64" 1707578040
+<REAPER_PROJECT 0.1 "6.82/win64" 1707581796
   <NOTES 0 2
   >
   RIPPLE 0
@@ -17,7 +17,7 @@
   VIDEO_CONFIG 0 0 256
   PANMODE 3
   CURSOR 0
-  ZOOM 69.44444444444446 0 0
+  ZOOM 33.48979766803842 0 0
   VZOOMEX 6 0
   USE_REC_CFG 0
   RECMODE 1
@@ -116,7 +116,7 @@
     MAINSEND 1 0
     <FXCHAIN
       WNDRECT 183 206 1585 738
-      SHOW 1
+      SHOW 0
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
@@ -3115,7 +3115,7 @@
       FADEIN 1 0 0 1 0 0 0
       FADEOUT 1 0 0 1 0 0 0
       MUTE 0 0
-      SEL 1
+      SEL 0
       IGUID {35F76953-6D91-4129-AE96-2161633AEA16}
       IID 1
       NAME 01-MIDI
@@ -3128,6 +3128,74 @@
         HASDATA 1 960 QN
         CCINTERP 32
         POOLEDEVTS {78AE3E89-3D90-4A14-89B4-52A4B616D6FC}
+        E 0 90 30 60
+        E 0 90 35 60
+        E 0 90 38 60
+        E 0 90 3c 60
+        E 7680 80 30 00
+        E 0 80 35 00
+        E 0 80 38 00
+        E 0 80 3c 00
+        E 0 90 30 60
+        E 0 90 35 60
+        E 0 90 37 60
+        E 0 90 3c 60
+        E 7680 80 30 00
+        E 0 80 35 00
+        E 0 80 37 00
+        E 0 80 3c 00
+        E 0 90 30 60
+        E 0 90 37 60
+        E 0 90 3a 60
+        e 0 90 33 60
+        E 7680 80 30 00
+        E 0 80 37 00
+        E 0 80 3a 00
+        e 0 80 33 00
+        E 0 90 3c 60
+        E 0 90 37 60
+        E 0 90 30 60
+        E 0 90 3f 60
+        E 7680 80 3c 00
+        E 0 80 37 00
+        E 0 80 30 00
+        E 0 80 3f 00
+        E 0 b0 7b 00
+        CCINTERP 32
+        CHASE_CC_TAKEOFFS 1
+        GUID {D3BB1DFF-186E-4452-B271-0CF8C62837F8}
+        IGNTEMPO 0 120 4 4
+        SRCCOLOR 0
+        VELLANE 130 100 0
+        CFGEDITVIEW 0 0.048433 61 12 0 -1 0 0 0 0.5
+        KEYSNAP 0
+        TRACKSEL 0
+        EVTFILTER 0 -1 -1 -1 -1 0 0 0 0 -1 -1 -1 -1 0 -1 0 -1 -1
+        CFGEDIT 1 1 0 1 0 0 1 1 1 1 1 0.25 257 169 1386 822 0 0 0 0 0 0 0 1 0 0.5 0 0 1 64
+      >
+    >
+    <ITEM
+      POSITION 16
+      SNAPOFFS 0
+      LENGTH 16
+      LOOP 0
+      ALLTAKES 0
+      FADEIN 1 0 0 1 0 0 0
+      FADEOUT 1 0 0 1 0 0 0
+      MUTE 0 0
+      SEL 1
+      IGUID {AF39E764-F485-4E81-A03A-65AA675F3E95}
+      IID 1
+      NAME 01-MIDI
+      VOLPAN 1 0 1 -1
+      SOFFS 0 0
+      PLAYRATE 1 1 0 -1 0 0.0025
+      CHANMODE 0
+      GUID {0DDB7858-C902-4053-9010-09653DE188A2}
+      <SOURCE MIDI
+        HASDATA 1 960 QN
+        CCINTERP 32
+        POOLEDEVTS {56605F73-BB4A-4205-8738-C7F83A711D7E}
         E 0 90 30 60
         E 0 90 35 60
         E 0 90 38 60
