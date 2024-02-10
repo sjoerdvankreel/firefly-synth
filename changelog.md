@@ -1,3 +1,9 @@
+### February 10, 2024 - V1.05 (No binaries).
+
+- Add an extra oscillator.
+- LFO x/y become continuous parameters.
+- Add CV-to-CV routing matrices (modulate LFO by another LFO or envelope).
+
 ### February 8, 2024 - V1.04 (No binaries).
 
 - Add scale and offset for CV matrices.
