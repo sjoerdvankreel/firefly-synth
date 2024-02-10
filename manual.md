@@ -53,4 +53,4 @@ See the parameter reference document for details.
 - Per-voice and global FX modules with state variable filter, comb filter, distortion and (global only) reverb, feedback- and multitap delay.
 
 ## Routing overview
-![Routing overview](static/routing_overview.png)
+![Routing overview](static/routing.png)
