@@ -21,17 +21,18 @@ enum { section_main };
 enum { output_silence, output_mixed };
 enum { param_on, param_source, param_target, param_gain, param_bal };
 
-class audio_matrix_engine:
+// mixes down into a single audio target on demand
+class audio_audio_matrix_engine:
 public module_engine { 
   bool const _global;
-  audio_matrix_mixer _mixer;
+  audio_audio_matrix_mixer _mixer;
   jarray<float, 4>* _own_audio = {};
   std::vector<module_topo_mapping> const _sources;
   std::vector<module_topo_mapping> const _targets;
 
 public:
-  PB_PREVENT_ACCIDENTAL_COPY(audio_matrix_engine);
-  audio_matrix_engine(bool global,
+  PB_PREVENT_ACCIDENTAL_COPY(audio_audio_matrix_engine);
+  audio_audio_matrix_engine(bool global,
     std::vector<module_topo_mapping> const& sources,
     std::vector<module_topo_mapping> const& targets): 
     _global(global), _mixer(this), _sources(sources), _targets(targets) {}
@@ -44,45 +45,45 @@ public:
 static void
 init_voice_minimal(plugin_state& state)
 {
-  state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "V.Out");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 0, "Osc 1");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 0, "V.Out");
 }
 
 static void
 init_global_minimal(plugin_state& state)
 {
-  state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "V.Mix");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "M.Out");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, "V.Mix");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "M.Out");
 }
 
 static void
 init_voice_default(plugin_state& state)
 {
-  state.set_text_at(module_vaudio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_vaudio_matrix, 0, param_on, 1, "On");
-  state.set_text_at(module_vaudio_matrix, 0, param_on, 2, "On");
-  state.set_text_at(module_vaudio_matrix, 0, param_source, 0, "Osc 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 0, "V.FX 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_source, 1, "Osc 2");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 1, "V.FX 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_source, 2, "V.FX 1");
-  state.set_text_at(module_vaudio_matrix, 0, param_target, 2, "V.Out");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_on, 1, "On");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_on, 2, "On");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 0, "Osc 1");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 0, "V.FX 1");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 1, "Osc 2");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 1, "V.FX 1");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 2, "V.FX 1");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 2, "V.Out");
 }
 
 static void
 init_global_default(plugin_state& state)
 {
-  state.set_text_at(module_gaudio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_gaudio_matrix, 0, param_source, 0, "V.Mix");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 0, "G.FX 1");
-  state.set_text_at(module_gaudio_matrix, 0, param_on, 1, "On");
-  state.set_text_at(module_gaudio_matrix, 0, param_source, 1, "G.FX 1");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 1, "G.FX 2");
-  state.set_text_at(module_gaudio_matrix, 0, param_on, 2, "On");
-  state.set_text_at(module_gaudio_matrix, 0, param_source, 2, "G.FX 2");
-  state.set_text_at(module_gaudio_matrix, 0, param_target, 2, "M.Out");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, "V.Mix");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "G.FX 1");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 1, "On");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 1, "G.FX 1");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "G.FX 2");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 2, "On");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 2, "G.FX 2");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 2, "M.Out");
 }
 
 static graph_data
@@ -125,27 +126,27 @@ make_audio_routing_audio_params(plugin_state* state, bool global)
   result.matrix_on_params = { param_on }; 
   result.matrix_source_params = { param_source };
   result.matrix_target_params = { param_target };
-  result.matrix_module = global ? module_gaudio_matrix : module_vaudio_matrix;
-  result.sources = make_audio_matrix(make_audio_matrix_sources(state->desc().plugin, global), 0).mappings;
-  result.targets = make_audio_matrix(make_audio_matrix_targets(state->desc().plugin, global), 0).mappings;
+  result.matrix_module = global ? module_gaudio_audio_matrix : module_vaudio_audio_matrix;
+  result.sources = make_audio_matrix(make_audio_audio_matrix_sources(state->desc().plugin, global), 0).mappings;
+  result.targets = make_audio_matrix(make_audio_audio_matrix_targets(state->desc().plugin, global), 0).mappings;
   return result;
 }
 
 module_topo 
-audio_matrix_topo(
+audio_audio_matrix_topo(
   int section, gui_colors const& colors,
   gui_position const& pos, bool global,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "Voice Audio", "V.Audio", true, true, module_vaudio_matrix, 1);
+  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "Voice Audio", "V.Audio", true, true, module_vaudio_audio_matrix, 1);
   voice_info.description = "Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.";
-  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "Global Audio", "G.Audio", true, true, module_gaudio_matrix, 1);
+  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "Global Audio", "G.Audio", true, true, module_gaudio_audio_matrix, 1);
   global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
 
-  int this_module = global? module_gaudio_matrix: module_vaudio_matrix;
+  int this_module = global? module_gaudio_audio_matrix: module_vaudio_audio_matrix;
   auto source_matrix = make_audio_matrix(sources, 0);
   auto target_matrix = make_audio_matrix(targets, 0);
 
@@ -162,13 +163,13 @@ audio_matrix_topo(
   result.default_initializer = global ? init_global_default : init_voice_default;
   result.minimal_initializer = global ? init_global_minimal : init_voice_minimal;
   result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) {
-    return std::make_unique<audio_matrix_engine>(global, sm.mappings, tm.mappings); };
+    return std::make_unique<audio_audio_matrix_engine>(global, sm.mappings, tm.mappings); };
   result.gui.menu_handler_factory = [](plugin_state* state) { 
     return std::make_unique<tidy_matrix_menu_handler>(state, 1, param_on, 0, std::vector<std::vector<int>>({{ param_target, param_source }})); };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 2, 2, 3, 3 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& on = result.params.emplace_back(make_param(
@@ -232,11 +233,11 @@ audio_matrix_topo(
 }
 
 jarray<float, 2> const& 
-audio_matrix_mixer::mix(plugin_block& block, int module, int slot)
+audio_audio_matrix_mixer::mix(plugin_block& block, int module, int slot)
 { return _engine->mix(block, module, slot); }
 
 void 
-audio_matrix_engine::process(plugin_block& block) 
+audio_audio_matrix_engine::process(plugin_block& block)
 { 
   // need to capture own audio here because when we start 
   // mixing "own" does not refer to us but to the caller
@@ -245,7 +246,7 @@ audio_matrix_engine::process(plugin_block& block)
 }
 
 jarray<float, 2> const& 
-audio_matrix_engine::mix(plugin_block& block, int module, int slot)
+audio_audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 {
   // audio 0 is silence
   bool activated = false;
@@ -253,7 +254,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 
   // loop through the routes
   // the first match we encounter becomes the mix target
-  int this_module = _global? module_gaudio_matrix: module_vaudio_matrix;
+  int this_module = _global? module_gaudio_audio_matrix: module_vaudio_audio_matrix;
   auto const& block_auto = block.state.all_block_automation[this_module][0];
   for (int r = 0; r < route_count; r++)
   {
@@ -279,7 +280,7 @@ audio_matrix_engine::mix(plugin_block& block, int module, int slot)
 
     // add modulated amount to mixdown
     auto const& source_audio = block.module_audio(sm, smi);
-    auto const& modulation = get_cv_matrix_mixdown(block, _global);
+    auto const& modulation = get_cv_audio_matrix_mixdown(block, _global);
     auto const& bal_curve = *modulation[this_module][0][param_bal][r];
     auto const& gain_curve = *modulation[this_module][0][param_gain][r];
     for(int c = 0; c < 2; c++)

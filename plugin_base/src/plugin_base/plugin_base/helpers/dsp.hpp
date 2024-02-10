@@ -39,31 +39,6 @@ normalized_to_raw_into_fast(
   return out;
 }
 
-template <domain_type DomainType, class TransformTimesig>
-jarray<float, 1> const&
-sync_or_rate_into_scratch_fast(
-  plugin_block const& block, bool sync, int module, int rate_p,
-  int timesig_p, int scratch, TransformTimesig transform_timesig)
-{
-  auto& result = block.state.own_scratch[scratch];
-  timesig sig = get_timesig_param_value(block, module, timesig_p);
-  if (sync) result.fill(block.start_frame, block.end_frame, transform_timesig(block.host.bpm, sig));
-  else normalized_to_raw_into_fast<DomainType>(block, module, rate_p, block.state.own_accurate_automation[rate_p][0], result);
-  return result;
-}
-
-template <domain_type DomainType>
-inline jarray<float, 1> const&
-sync_or_freq_into_scratch_fast(
-  plugin_block const& block, bool sync, int module, int freq_p, int timesig_p, int scratch)
-{ return sync_or_rate_into_scratch_fast<DomainType>(block, sync, module, freq_p, timesig_p, scratch, timesig_to_freq); }
-
-template <domain_type DomainType>
-inline jarray<float, 1> const&
-sync_or_time_into_scratch_fast(
-  plugin_block const& block, bool sync, int module, int time_p, int timesig_p, int scratch)
-{ return sync_or_rate_into_scratch_fast<DomainType>(block, sync, module, time_p, timesig_p, scratch, timesig_to_time); }
-
 template <class TransformTimesig>
 float sync_or_rate_from_state(
   plugin_state const& state, float bpm, bool sync, int module_index, 

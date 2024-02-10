@@ -97,7 +97,7 @@ public:
 class menu_button :
 public text_button
 {
-  int _selected_index = 0;
+  int _selected_index = -1;
   std::vector<std::string> _items;
 protected:
   void clicked() override;

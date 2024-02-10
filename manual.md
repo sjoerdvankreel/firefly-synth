@@ -37,8 +37,10 @@ Just once, after that, the size is stored in a user settings file.
 See the parameter reference document for details.
 
 - Up to 32 voices in polyphonic mode.
+- Per-voice and global audio routing matrices.
+- Per-voice and global cv-to-cv routing matrices.
+- Per-voice and global cv-to-audio routing matrices.
 - On-note versions of all global modulation sources.
-- Per-voice and global audio and CV routing matrices.
 - Oscillator-to-oscillator AM and FM routing matrices.
 - Pitchbend and modwheel linked to external MIDI input.
 - Smoothing controls for MIDI input and host BPM changes.
@@ -51,4 +53,4 @@ See the parameter reference document for details.
 - Per-voice and global FX modules with state variable filter, comb filter, distortion and (global only) reverb, feedback- and multitap delay.
 
 ## Routing overview
-![Routing overview](static/routing_overview.png)
+![Routing overview](static/routing.png)

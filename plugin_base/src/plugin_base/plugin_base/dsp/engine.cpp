@@ -10,7 +10,7 @@ namespace plugin_base {
 
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
-
+ 
 plugin_engine::
 plugin_engine(
   plugin_desc const* desc, int polyphony,
