@@ -109,6 +109,7 @@ public module_tab_menu_handler {
   int const _on_param;
   int const _off_value;
   int const _source_param;
+  int const _target_param;
   std::map<int, std::vector<param_topo_mapping>> const _target_matrices;
   std::map<int, std::vector<module_output_mapping>> const _source_matrices;
 
@@ -121,22 +122,30 @@ public module_tab_menu_handler {
   void insert_after(int module, int slot) { insert(module, slot, true); }
   void insert_before(int module, int slot) { insert(module, slot, false); }
 
-  bool is_selected(
+  bool is_source_selected(
     int matrix, int param, int route, int module, 
     int slot, std::vector<module_output_mapping> const& mappings);
-  bool update_matched_slot(
+  bool is_target_selected(
+    int matrix, int param, int route, int module,
+    int slot, std::vector<param_topo_mapping> const& mappings);
+  bool update_matched_source_slot(
     int matrix, int param, int route, int module, int from_slot, 
     int to_slot, std::vector<module_output_mapping> const& mappings);
+  bool update_matched_target_slot(
+    int matrix, int param, int route, int module, int from_slot,
+    int to_slot, std::vector<param_topo_mapping> const& mappings);
 
 public:
   std::vector<module_menu> module_menus() const override;
   plugin_base::module_tab_menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
 
-  cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, int off_value, 
+  cv_routing_menu_handler(plugin_state* state, int on_param, int off_value, int source_param, int target_param,
     std::map<int, std::vector<module_output_mapping>> const& source_matrices,
     std::map<int, std::vector<param_topo_mapping>> const& target_matrices):
-    module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value),
-  _source_param(source_param), _source_matrices(source_matrices), _target_matrices(target_matrices) {}
+  module_tab_menu_handler(state), 
+  _on_param(on_param), _off_value(off_value),
+  _source_param(source_param), _target_param(target_param), 
+  _source_matrices(source_matrices), _target_matrices(target_matrices) {}
 };
 
 // allows to clear/swap/copy/move with updating routes
