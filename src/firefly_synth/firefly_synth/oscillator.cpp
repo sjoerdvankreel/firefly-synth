@@ -925,7 +925,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   }
   
   assert(generator_count >= 0);
-  if (!on) return;
+  if (!on || generator_count == 0) return;
 
   int oversmp_stages;
   int oversmp_factor;

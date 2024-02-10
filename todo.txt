@@ -10,18 +10,26 @@ microtonal
 .com website 
 voice level unison
 cakewalk bug report
+phaser/flanger/chorus
 vst3 note expressions
 clap (poly) modulation
 visual routing indicators
 document the header files a bit
 
 v1.1:
-do some presets
-profile the pad preset
 fx-only version
+do some presets
+test linux presets
+trim the kicks demo to percussion only, no synth
+do indexed release schema + regular backwards compat
+run the clap validator
+move route up/down
+profile the pad preset
 implement monophonic mode
+test presets win/lin/vst3/clap
 fix the default patch velo etc
 implement envelope retriggering
+fix the init patch (velocity etc)
 osc graph does not vertical fill?
 rename infernal-1.4-preview to 1.4
 do copy/paste patch through clipboard

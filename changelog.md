@@ -3,6 +3,7 @@
 - Add first preset.
 - Add an extra oscillator.
 - LFO x/y become continuous parameters.
+- Bugfix: Basic oscillator with no waveforms must not be processed.
 - Add CV-to-CV routing matrices (modulate LFO by another LFO or envelope).
 
 ### February 8, 2024 - V1.04 (No binaries).
