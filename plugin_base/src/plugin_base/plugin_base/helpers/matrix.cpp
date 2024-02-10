@@ -464,13 +464,13 @@ cv_routing_menu_handler::move_to(int module, int source_slot, int target_slot)
   // overwrite source_slot with target_slot for source parameter
   clear(module, target_slot);
   _state->move_module_to(module, source_slot, target_slot);
-  for (auto const& sources : _matrix_sources)
+  for (auto const& matrix : _source_matrices)
   {
-    auto const& topo = _state->desc().plugin->modules[sources.first];
+    auto const& topo = _state->desc().plugin->modules[matrix.first];
     for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
     {
-      if (_state->get_plain_at(sources.first, 0, _on_param, r).step() == _off_value) continue;
-      update_matched_slot(sources.first, _source_param, r, module, source_slot, target_slot, sources.second);
+      if (_state->get_plain_at(matrix.first, 0, _on_param, r).step() == _off_value) continue;
+      update_matched_slot(matrix.first, _source_param, r, module, source_slot, target_slot, matrix.second);
     }
   }
 }
@@ -480,14 +480,14 @@ cv_routing_menu_handler::swap_with(int module, int source_slot, int target_slot)
 {
   // swap source_slot with target_slot for source parameter
   _state->swap_module_with(module, source_slot, target_slot);
-  for (auto const& sources : _matrix_sources)
+  for (auto const& matrix : _source_matrices)
   {
-    auto const& topo = _state->desc().plugin->modules[sources.first];
+    auto const& topo = _state->desc().plugin->modules[matrix.first];
     for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
     {
-      if (_state->get_plain_at(sources.first, 0, _on_param, r).step() == _off_value) continue;
-      if (!update_matched_slot(sources.first, _source_param, r, module, source_slot, target_slot, sources.second))
-        update_matched_slot(sources.first, _source_param, r, module, target_slot, source_slot, sources.second);
+      if (_state->get_plain_at(matrix.first, 0, _on_param, r).step() == _off_value) continue;
+      if (!update_matched_slot(matrix.first, _source_param, r, module, source_slot, target_slot, matrix.second))
+        update_matched_slot(matrix.first, _source_param, r, module, target_slot, source_slot, matrix.second);
     }
   }
 }
@@ -497,15 +497,15 @@ cv_routing_menu_handler::clear(int module, int slot)
 {
   // set any route matching this module to all defaults
   _state->clear_module(module, slot);
-  for (auto const& sources : _matrix_sources)
+  for (auto const& matrix : _source_matrices)
   {
-    auto const& topo = _state->desc().plugin->modules[sources.first];
+    auto const& topo = _state->desc().plugin->modules[matrix.first];
     for (int r = 0; r < topo.params[_on_param].info.slot_count; r++)
     {
-      int selected_source = _state->get_plain_at(sources.first, 0, _source_param, r).step();
-      if ((sources.second[selected_source].module_index == module && sources.second[selected_source].module_slot == slot))
+      int selected_source = _state->get_plain_at(matrix.first, 0, _source_param, r).step();
+      if ((matrix.second[selected_source].module_index == module && matrix.second[selected_source].module_slot == slot))
         for (int p = 0; p < topo.params.size(); p++)
-          _state->set_plain_at(sources.first, 0, p, r, topo.params[p].domain.default_plain(0, r));
+          _state->set_plain_at(matrix.first, 0, p, r, topo.params[p].domain.default_plain(0, r));
     }
   }
 }

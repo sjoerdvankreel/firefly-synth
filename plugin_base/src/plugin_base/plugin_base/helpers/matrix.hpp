@@ -109,7 +109,8 @@ public module_tab_menu_handler {
   int const _on_param;
   int const _off_value;
   int const _source_param;
-  std::map<int, std::vector<module_output_mapping>> const _matrix_sources;
+  std::map<int, std::vector<param_topo_mapping>> const _target_matrices;
+  std::map<int, std::vector<module_output_mapping>> const _source_matrices;
 
   void clear_all(int module);
   void clear(int module, int slot);
@@ -131,10 +132,11 @@ public:
   std::vector<module_menu> module_menus() const override;
   plugin_base::module_tab_menu_result execute_module(int menu_id, int action, int module, int source_slot, int target_slot) override;
 
-  cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, 
-    int off_value, std::map<int, std::vector<module_output_mapping>> const& matrix_sources):
+  cv_routing_menu_handler(plugin_state* state, int source_param, int on_param, int off_value, 
+    std::map<int, std::vector<module_output_mapping>> const& source_matrices,
+    std::map<int, std::vector<param_topo_mapping>> const& target_matrices):
     module_tab_menu_handler(state), _on_param(on_param), _off_value(off_value),
-  _source_param(source_param), _matrix_sources(matrix_sources) {}
+  _source_param(source_param), _source_matrices(source_matrices), _target_matrices(target_matrices) {}
 };
 
 // allows to clear/swap/copy/move with updating routes
