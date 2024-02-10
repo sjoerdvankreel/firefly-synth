@@ -177,7 +177,7 @@ init_audio_global_default(plugin_state& state)
 audio_routing_cv_params
 make_audio_routing_cv_params(plugin_state* state, bool global)
 {
-  audio_routing_cv_params result;
+  audio_routing_cv_params result; 
   result.off_value = type_off;
   result.on_param = param_type;
   result.target_param = param_target;
