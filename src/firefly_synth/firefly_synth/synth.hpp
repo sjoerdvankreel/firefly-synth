@@ -49,9 +49,10 @@ std::unique_ptr<plugin_base::plugin_topo> synth_topo();
 
 // MIDI goes first! That hosts the midi sources everyone else needs.
 // There's also a whole bunch of other implicit dependencies in here so mind the ordering.
+// For example env can modulate vlfo so env goes first.
 enum {
   module_midi, module_gcv_cv_matrix, module_master_in, module_glfo, module_gcv_audio_matrix,
-  module_vcv_cv_matrix, module_voice_note, module_voice_on_note, module_vlfo, module_env, 
+  module_vcv_cv_matrix, module_voice_note, module_voice_on_note, module_env, module_vlfo,
   module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, module_osc_osc_matrix, 
   module_osc, module_vfx, module_voice_out, module_voice_mix, module_gaudio_audio_matrix, 
   module_gfx, module_master_out, module_monitor, module_count };

@@ -90,21 +90,21 @@
 </tr>
 <tr>
 <td><a href='#9'>9</a></td>
-<td>Voice LFO</td>
-<td>V.LFO</td>
-<td>Yes</td>
-<td>Voice</td>
-<td>10</td>
-<td class='description'>Optional tempo-synced LFO with repeating and one-shot modes, various periodic waveforms, smooth noise, static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various modes.</td>
-</tr>
-<tr>
-<td><a href='#10'>10</a></td>
 <td>Envelope</td>
 <td>Env</td>
 <td>Yes</td>
 <td>Voice</td>
 <td>10</td>
 <td class='description'>DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.</td>
+</tr>
+<tr>
+<td><a href='#10'>10</a></td>
+<td>Voice LFO</td>
+<td>V.LFO</td>
+<td>Yes</td>
+<td>Voice</td>
+<td>10</td>
+<td class='description'>Optional tempo-synced LFO with repeating and one-shot modes, various periodic waveforms, smooth noise, static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping and horizontal and vertical skewing controls with various modes.</td>
 </tr>
 <tr>
 <td><a href='#11'>11</a></td>
@@ -919,194 +919,6 @@
 </tr>
 </table>
 <a name='9'/>
-<h3>Voice LFO</h3>
-<table>
-<tr>
-<th>Name</th>
-<th>Short</th>
-<th>Section</th>
-<th>UI</th>
-<th>Num</th>
-<th>Dir</th>
-<th>Rate</th>
-<th>Automate</th>
-<th>Min</th>
-<th>Max</th>
-<th>Default</th>
-<th>Log Midpoint</th>
-</tr>
-<tr>
-<td rowspan='2'>Mode.Repeat</td>
-<td>Mode.Repeat</td>
-<td>Mode</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Sync.Phs</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects time or tempo-synced and repeating or one-shot mode. In regular one-shot mode, the LFO stays at it's end value after exactly 1 cycle. In phase one-shot mode, the end value takes the phase offset parameter into account.</td>
-</tr>
-<tr>
-<td rowspan='2'>Rate</td>
-<td>Rate</td>
-<td>Mode</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0.01 Hz</td>
-<td>20.00 Hz</td>
-<td>1.00 Hz</td>
-<td>1.00 Hz</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>LFO rate in Hz.</td>
-</tr>
-<tr>
-<td rowspan='2'>Tempo</td>
-<td>Tempo</td>
-<td>Mode</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1/1</td>
-<td>128/15</td>
-<td>1/4</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>LFO rate in bars.</td>
-</tr>
-<tr>
-<td rowspan='2'>Type.SkewX/SkewY</td>
-<td>Type.SkewX/SkewY</td>
-<td>Controls</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Saw.Off/Off</td>
-<td>S/F.XpB/XpB</td>
-<td>Sin.Off/Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>SkewX</td>
-<td>X</td>
-<td>Controls</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Horizontal skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>SkewY</td>
-<td>Y</td>
-<td>Controls</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Vertical skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Seed</td>
-<td>Seed</td>
-<td>Controls</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1</td>
-<td>255</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
-</tr>
-<tr>
-<td rowspan='2'>Steps</td>
-<td>Stp</td>
-<td>Controls</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1</td>
-<td>99</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
-</tr>
-<tr>
-<td rowspan='2'>Smooth</td>
-<td>Smth</td>
-<td>Controls</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 Ms</td>
-<td>500 Ms</td>
-<td>0 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
-</tr>
-<tr>
-<td rowspan='2'>Phase</td>
-<td>Phs</td>
-<td>Controls</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
-</tr>
-</table>
-<a name='10'/>
 <h3>Envelope</h3>
 <table>
 <tr>
@@ -1445,6 +1257,194 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Release section length in bars.</td>
+</tr>
+</table>
+<a name='10'/>
+<h3>Voice LFO</h3>
+<table>
+<tr>
+<th>Name</th>
+<th>Short</th>
+<th>Section</th>
+<th>UI</th>
+<th>Num</th>
+<th>Dir</th>
+<th>Rate</th>
+<th>Automate</th>
+<th>Min</th>
+<th>Max</th>
+<th>Default</th>
+<th>Log Midpoint</th>
+</tr>
+<tr>
+<td rowspan='2'>Mode.Repeat</td>
+<td>Mode.Repeat</td>
+<td>Mode</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Sync.Phs</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects time or tempo-synced and repeating or one-shot mode. In regular one-shot mode, the LFO stays at it's end value after exactly 1 cycle. In phase one-shot mode, the end value takes the phase offset parameter into account.</td>
+</tr>
+<tr>
+<td rowspan='2'>Rate</td>
+<td>Rate</td>
+<td>Mode</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.01 Hz</td>
+<td>20.00 Hz</td>
+<td>1.00 Hz</td>
+<td>1.00 Hz</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>LFO rate in Hz.</td>
+</tr>
+<tr>
+<td rowspan='2'>Tempo</td>
+<td>Tempo</td>
+<td>Mode</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1/1</td>
+<td>128/15</td>
+<td>1/4</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>LFO rate in bars.</td>
+</tr>
+<tr>
+<td rowspan='2'>Type.SkewX/SkewY</td>
+<td>Type.SkewX/SkewY</td>
+<td>Controls</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Saw.Off/Off</td>
+<td>S/F.XpB/XpB</td>
+<td>Sin.Off/Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>SkewX</td>
+<td>X</td>
+<td>Controls</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Horizontal skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>SkewY</td>
+<td>Y</td>
+<td>Controls</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Vertical skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Seed</td>
+<td>Seed</td>
+<td>Controls</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>255</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
+</tr>
+<tr>
+<td rowspan='2'>Steps</td>
+<td>Stp</td>
+<td>Controls</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>99</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
+</tr>
+<tr>
+<td rowspan='2'>Smooth</td>
+<td>Smth</td>
+<td>Controls</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 Ms</td>
+<td>500 Ms</td>
+<td>0 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
+</tr>
+<tr>
+<td rowspan='2'>Phase</td>
+<td>Phs</td>
+<td>Controls</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>In per-voice module, allows for phase adjustment of periodic generators.</td>
 </tr>
 </table>
 <a name='11'/>

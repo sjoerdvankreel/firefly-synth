@@ -17,15 +17,12 @@ document the header files a bit
 
 v1.1:
 cv-to-cv-mod
-+ test midi active
 + test context menus
 + paramref
 + connect all the modulatable targets
 + disable the unwanted ui options
 + make lfo x/y and env slopes modulatable
-+ test-on-note
-+ test midi + midi_active
-+ do envelope before lfo (eg env -> lfo mod)
++ test mod->to->audiomod
 + document all the changed stuff (added osc, made stuff continuous, plus the 2 new matrices)
 
 do some presets
