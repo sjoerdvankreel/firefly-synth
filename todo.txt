@@ -16,13 +16,9 @@ visual routing indicators
 document the header files a bit
 
 v1.1:
-cv-to-cv-mod
-+ document all the changed stuff (added osc, made stuff continuous, plus the 2 new matrices)
-
 do some presets
 profile the pad preset
 fx-only version
-update screenshot
 implement monophonic mode
 fix the default patch velo etc
 implement envelope retriggering
