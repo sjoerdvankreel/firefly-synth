@@ -1,4 +1,4 @@
-### February 10, 2024 - V1.05 (No binaries).
+### February 10, 2024 - V1.05.
 
 - Add some presets.
 - Add an extra oscillator.
