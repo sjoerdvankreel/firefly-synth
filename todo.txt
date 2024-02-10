@@ -20,11 +20,10 @@ cv-to-cv-mod
 + update the routing diagram
 + test context menus
 + paramref
-+ connect all the modulatable targets
-+ test mod->to->audiomod
 + document all the changed stuff (added osc, made stuff continuous, plus the 2 new matrices)
 
 do some presets
+profile the pad preset
 fx-only version
 update screenshot
 implement monophonic mode

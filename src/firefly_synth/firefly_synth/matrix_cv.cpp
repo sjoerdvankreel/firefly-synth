@@ -85,6 +85,7 @@ class cv_matrix_engine_base :
 public module_engine {
 protected:
 
+  bool const _cv;
   bool const _global;
   cv_matrix_mixdown _mixdown = {};
   jarray<int, 4> _modulation_indices = {};
@@ -98,7 +99,7 @@ protected:
   jarray<plain_value, 2> const* _own_block_automation = {};
 
   cv_matrix_engine_base(
-    bool global, plugin_topo const& topo,
+    bool cv, bool global, plugin_topo const& topo,
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets);
 
@@ -120,7 +121,7 @@ public:
     bool global, plugin_topo const& topo,
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets):
-  cv_matrix_engine_base(global, topo, sources, targets), _mixer(this) {}
+  cv_matrix_engine_base(true, global, topo, sources, targets), _mixer(this) {}
 
   PB_PREVENT_ACCIDENTAL_COPY(cv_cv_matrix_engine);
   void process(plugin_block& block) override;
@@ -135,7 +136,7 @@ public:
     bool global, plugin_topo const& topo, 
     std::vector<module_output_mapping> const& sources,
     std::vector<param_topo_mapping> const& targets):
-  cv_matrix_engine_base(global, topo, sources, targets) {}
+  cv_matrix_engine_base(false, global, topo, sources, targets) {}
 
   void process(plugin_block& block) override;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(cv_audio_matrix_engine);
@@ -497,10 +498,10 @@ cv_matrix_topo(
 
 cv_matrix_engine_base::
 cv_matrix_engine_base(
-  bool global, plugin_topo const& topo,
+  bool cv, bool global, plugin_topo const& topo,
   std::vector<module_output_mapping> const& sources,
   std::vector<param_topo_mapping> const& targets):
-_global(global), _sources(sources), _targets(targets)
+_cv(cv), _global(global), _sources(sources), _targets(targets)
 {
   plugin_dims dims(topo, topo.audio_polyphony);
   _mixdown.resize(dims.module_slot_param_slot);
@@ -544,6 +545,17 @@ cv_matrix_engine_base::reset(plugin_block const* block)
 void
 cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, int slot)
 {
+  // cv->cv matrix can modulate the cv->audio matrix
+  cv_cv_matrix_mixer* mixer = nullptr;
+  cv_cv_matrix_mixdown const* modulation = nullptr;
+  int this_module = _global ? module_gcv_cv_matrix : module_vcv_cv_matrix;
+  if (!_cv)
+  {
+    this_module = _global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
+    mixer = &get_cv_cv_matrix_mixer(block, _global);
+    modulation = &mixer->mix(block, this_module, 0);
+  }
+
   // set every modulatable parameter to its corresponding automation curve
   assert((module == -1) == (slot == -1));
   for (int m = 0; m < _targets.size(); m++)
@@ -608,59 +620,81 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
     for (int f = block.start_frame; f < block.end_frame; f++)
       check_unipolar(source_curve[f]);
 
-    // pre-transform source signal
-    int this_module = _global ? module_gcv_audio_matrix : module_vcv_audio_matrix;
-    auto const& scale_curve = (*_own_accurate_automation)[param_scale][r];
-    auto const& offset_curve = (*_own_accurate_automation)[param_offset][r];
+    // pre-transform source signal, 
+    // cv->cv matrix can modulate transformation params (scale/offset) of the cv->audio matrix
+    jarray<float, 1> const* scale_curve = nullptr;
+    jarray<float, 1> const* offset_curve = nullptr;
+    if (_cv)
+    {
+      scale_curve = &(*_own_accurate_automation)[param_scale][r];
+      offset_curve = &(*_own_accurate_automation)[param_offset][r];
+    }
+    else
+    {
+      scale_curve = (*modulation)[param_scale][r];
+      offset_curve = (*modulation)[param_offset][r];
+    }
+
     auto& transformed_source = (*_own_scratch)[transform_source_scratch];
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
-      float scale = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_scale, scale_curve[f]);
-      float offset = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_offset, offset_curve[f]);
+      float scale = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_scale, (*scale_curve)[f]);
+      float offset = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_offset, (*offset_curve)[f]);
       transformed_source[f] = std::clamp((offset + source_curve[f]) * scale, 0.0f, 1.0f);
     }
 
     // apply modulation
-    auto const& min_curve = (*_own_accurate_automation)[param_min][r];
-    auto const& max_curve = (*_own_accurate_automation)[param_max][r];
+    // cv->cv matrix can modulate modulation params (min/max) of the cv->audio matrix
+    jarray<float, 1> const* min_curve = nullptr;
+    jarray<float, 1> const* max_curve = nullptr;
+    if (_cv)
+    {
+      min_curve = &(*_own_accurate_automation)[param_min][r];
+      max_curve = &(*_own_accurate_automation)[param_max][r];
+    }
+    else
+    {
+      min_curve = (*modulation)[param_min][r];
+      max_curve = (*modulation)[param_max][r];
+    }
 
     switch (type)
     {
     case type_mul_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] *= min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f];
+        modulated_curve[f] *= (*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f];
       break;
     case type_mul_rel:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = target_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * (1 - target_curve[f]);
+        modulated_curve[f] = target_curve[f] + ((*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f]) * (1 - target_curve[f]);
       break;
     case type_mul_stk:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] = modulated_curve[f] + (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * (1 - modulated_curve[f]);
+        modulated_curve[f] = modulated_curve[f] + ((*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f]) * (1 - modulated_curve[f]);
       break;
     case type_add_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f];
+        modulated_curve[f] += (*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f];
       break;
     case type_add_rel:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - target_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]);
+        modulated_curve[f] += (1 - target_curve[f]) * ((*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f]);
       break;
     case type_add_stk:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - modulated_curve[f]) * (min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]);
+        modulated_curve[f] += (1 - modulated_curve[f]) * ((*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f]);
       break;
     case type_ab_abs:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
+        modulated_curve[f] += unipolar_to_bipolar((*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f]) * 0.5f;
       break;
     case type_ab_rel:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - std::fabs(0.5f - target_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
+        modulated_curve[f] += (1 - std::fabs(0.5f - target_curve[f]) * 2.0f) * unipolar_to_bipolar((*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f]) * 0.5f;
       break;
     case type_ab_stk:
       for (int f = block.start_frame; f < block.end_frame; f++)
-        modulated_curve[f] += (1 - std::fabs(0.5f - modulated_curve[f]) * 2.0f) * unipolar_to_bipolar(min_curve[f] + (max_curve[f] - min_curve[f]) * transformed_source[f]) * 0.5f;
+        modulated_curve[f] += (1 - std::fabs(0.5f - modulated_curve[f]) * 2.0f) * unipolar_to_bipolar((*min_curve)[f] + ((*max_curve)[f] - (*min_curve)[f]) * transformed_source[f]) * 0.5f;
       break;
     default:
       assert(false);
