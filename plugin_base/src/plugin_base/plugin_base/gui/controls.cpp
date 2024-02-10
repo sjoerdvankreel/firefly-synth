@@ -463,6 +463,9 @@ void
 param_combobox::showPopup()
 {
   auto const& items = _param->param->domain.items;
+  for (int i = 0; i < items.size(); i++)
+    setItemEnabled(i + 1, true);
+
   if(_param->param->gui.item_enabled.is_param_bound())
   {
     auto m = _param->param->gui.item_enabled.param;
@@ -471,7 +474,7 @@ param_combobox::showPopup()
     for(int i = 0; i < items.size(); i++)
       setItemEnabled(i + 1, _param->param->gui.item_enabled.selector(other.step(), _param->param->domain.min + i));
   }
-  else if (_param->param->gui.item_enabled.auto_bind)
+  if (_param->param->gui.item_enabled.auto_bind)
   {
     auto const& topo = *_gui->gui_state()->desc().plugin;
     for (int i = 0; i < items.size(); i++)
@@ -505,7 +508,10 @@ param_combobox::showPopup()
         }
         enabled &= that_topo.gui.bindings.visible.param_selector(that_values);
       }
-      setItemEnabled(i + 1, enabled);
+
+      // note that is is possible to combine auto_bind
+      // with a custom enabled selector so we need to check both
+      setItemEnabled(i + 1, isItemEnabled(i + 1) && enabled);
     }
   }
   ComboBox::showPopup();

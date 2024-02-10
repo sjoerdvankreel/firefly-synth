@@ -51,7 +51,6 @@ struct gui_item_binding final {
   static inline int const match_param_slot = -1;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_item_binding);
 
-  void validate() const { assert(!is_param_bound() || !auto_bind); }
   bool is_param_bound() const { return selector != nullptr; }
   bool is_bound() const { return is_param_bound() || auto_bind; }
   void bind_param(param_topo_mapping param_, gui_item_binding_selector selector_);
