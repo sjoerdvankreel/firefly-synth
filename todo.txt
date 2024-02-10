@@ -25,7 +25,6 @@ profile the pad preset
 implement monophonic mode
 implement envelope retriggering
 osc graph does not vertical fill?
-rename infernal-1.4-preview to 1.4
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal
 do indexed release schema + regular backwards compat
