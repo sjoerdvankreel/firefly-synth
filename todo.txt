@@ -17,7 +17,6 @@ document the header files a bit
 
 v1.1:
 cv-to-cv-mod
-+ update manual
 + update the routing diagram
 + document all the changed stuff (added osc, made stuff continuous, plus the 2 new matrices)
 
@@ -28,6 +27,7 @@ update screenshot
 implement monophonic mode
 fix the default patch velo etc
 implement envelope retriggering
+osc graph does not vertical fill?
 rename infernal-1.4-preview to 1.4
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal
