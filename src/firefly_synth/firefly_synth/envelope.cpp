@@ -517,19 +517,25 @@ env_engine::process_slope(
       // otherwise we'll just keep building up voices in mono mode
       // plugin_base makes sure to only send the release signal after
       // the last note in a monophonic section
-      if(block.state.mono_note_stream[f].note_on && _stage < env_stage::release && trigger != trigger_legato)
+      if(trigger != trigger_legato)
       {
-        _stage_pos = 0;
-        _stage = env_stage::delay;
-        if (trigger == trigger_retrig)
+        if(block.state.mono_note_stream[f].note_on)
         {
-          _current_level = 0;
-          _multitrig_level = 0;
-        }
-        else
-        {
-          // multitrigger
-          _current_level = _multitrig_level;
+          if(_stage < env_stage::release)
+          {
+            _stage_pos = 0;
+            _stage = env_stage::delay;
+            if (trigger == trigger_retrig)
+            {
+              _current_level = 0;
+              _multitrig_level = 0;
+            }
+            else
+            {
+              // multitrigger
+              _current_level = _multitrig_level;
+            }
+          }
         }
       }
     }
