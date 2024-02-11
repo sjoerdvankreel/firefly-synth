@@ -422,6 +422,27 @@ plugin_engine::process_voice(int v, bool threaded)
   }
 }
 
+// recycle by age
+int
+plugin_engine::find_best_voice_slot()
+{
+  int slot = -1;
+  std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
+  for (int i = 0; i < _voice_states.size(); i++)
+    if (_voice_states[i].stage == voice_stage::unused)
+    {
+      slot = i;
+      break;
+    }
+    else if (_voice_states[i].time < min_time)
+    {
+      slot = i;
+      min_time = _voice_states[i].time;
+    }
+  assert(slot != -1);
+  return slot;
+}
+
 void 
 plugin_engine::activate_voice(note_event const& event, int slot, int frame_count)
 {
@@ -658,22 +679,9 @@ plugin_engine::process()
     // poly mode: steal voices for incoming notes by age
     for (int e = 0; e < _host_block->events.notes.size(); e++)
     {
-      int slot = -1;
       auto const& event = _host_block->events.notes[e];
       if (event.type != note_event_type::on) continue;
-      std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
-      for (int i = 0; i < _voice_states.size(); i++)
-        if (_voice_states[i].stage == voice_stage::unused)
-        {
-          slot = i;
-          break;
-        }
-        else if (_voice_states[i].time < min_time)
-        {
-          slot = i;
-          min_time = _voice_states[i].time;
-        }
-
+      int slot = find_best_voice_slot();
       activate_voice(event, slot, frame_count);
 
       // for portamento
@@ -709,12 +717,29 @@ plugin_engine::process()
           break;
         }
 
-      // or just take voice 0  
-      if (slot == -1)
+      if (voice_mode == engine_voice_mode_mono)
       {
-        slot = 0;
-        activate_voice(_host_block->events.notes[first_note_on_index], 0, frame_count);
+        // no slot found, for real mono mode take slot 0
+        if(slot == -1)
+        {
+          slot = 0;
+          activate_voice(_host_block->events.notes[first_note_on_index], 0, frame_count);
+        }
+        else 
+        {
+          // for true mono mode, if the voice was releasing, reactivate it
+          _voice_states[slot].stage = voice_stage::active;
+          _voice_states[slot].release_frame = frame_count;
+        }
       }
+
+      // for release mono mode, need to do the recycling again
+      if (voice_mode == engine_voice_mode_release)
+        if (slot == -1)
+        {
+          slot = find_best_voice_slot();
+          activate_voice(_host_block->events.notes[first_note_on_index], slot, frame_count);
+        }
 
       // set up note stream, plugin will have to do something with it
       for(int e = 0; e < _host_block->events.notes.size(); e++)

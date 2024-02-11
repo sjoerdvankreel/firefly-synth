@@ -93,6 +93,7 @@ class plugin_engine final {
   jarray<std::unique_ptr<module_engine>, 2> _input_engines = {};
   jarray<std::unique_ptr<module_engine>, 2> _output_engines = {};
 
+  int find_best_voice_slot();
   void init_automation_from_state();
   void process_voices_single_threaded();
   void activate_voice(note_event const& event, int slot, int frame_count);
