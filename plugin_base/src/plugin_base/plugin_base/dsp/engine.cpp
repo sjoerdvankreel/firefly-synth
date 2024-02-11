@@ -705,7 +705,6 @@ plugin_engine::process()
         break;
       }
 
-    // todo portamento
     if(first_note_on_index != -1)
     {
       auto& first_event = _host_block->events.notes[first_note_on_index];
