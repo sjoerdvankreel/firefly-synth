@@ -184,6 +184,8 @@ plugin_engine::deactivate()
   _max_frame_count = 0;
   _output_updated_sec = 0;
   _block_start_time_sec = 0;
+  _last_note_key = -1;
+  _last_note_channel = -1;
 
   _high_cpu_module = 0;
   _high_cpu_module_usage = 0;
@@ -234,6 +236,8 @@ plugin_engine::activate(int max_frame_count)
 {  
   deactivate();
   _stream_time = 0;
+  _last_note_key = -1;
+  _last_note_channel = -1;
   _max_frame_count = max_frame_count;
   _output_updated_sec = seconds_since_epoch();
 
@@ -622,9 +626,6 @@ plugin_engine::process()
   /* STEP 5: Voice management in case of polyphonic synth */
   /********************************************************/
 
-  // for mono mode
-  std::fill(_midi_note_stream.begin(), _midi_note_stream.end(), -1);
-
   // always take a voice for an entire block,
   // module processor is handed appropriate start/end_frame.
   // and return voices completed the previous block
@@ -648,6 +649,9 @@ plugin_engine::process()
   assert(topo.voice_mode_param >= 0);
   voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
   assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
+
+  // for mono mode
+  std::fill(_midi_note_stream.begin(), _midi_note_stream.end(), _last_note_key);
 
   if(voice_mode == engine_voice_mode_poly)
   {
@@ -719,7 +723,7 @@ plugin_engine::process()
           auto const& event = _host_block->events.notes[e];
           _last_note_key = event.id.key;
           _last_note_channel = event.id.channel;
-          _midi_note_stream[e] = event.id.key;
+          std::fill(_midi_note_stream.begin() + event.frame, _midi_note_stream.end(), event.id.key);
         }
     }
   }

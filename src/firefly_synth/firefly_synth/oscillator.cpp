@@ -31,6 +31,7 @@ enum {
   param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_gain, param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
+extern int const voice_in_param_mode;
 extern int const voice_in_param_oversmp;
 extern int const master_in_param_pb_range;
 extern int const voice_in_output_pitch_offset;
@@ -136,21 +137,24 @@ private:
   template <bool AutoFdbk>
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch, float mid_freq);
   
+  template <bool Graph, bool Monophonic>
+  void process(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+
   void init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph> void process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph> void process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph> void process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph, bool Monophonic> void process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph, bool Monophonic> void process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
+  template <bool Graph, bool Monophonic> void process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   
-  template <bool Graph, bool Sin> void 
+  template <bool Graph, bool Monophonic, bool Sin> void
   process_basic_sin(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool Sin, bool Saw>
+  template <bool Graph, bool Monophonic, bool Sin, bool Saw>
   void process_basic_sin_saw(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool Sin, bool Saw, bool Tri>
+  template <bool Graph, bool Monophonic, bool Sin, bool Saw, bool Tri>
   void process_basic_sin_saw_tri(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr>
+  template <bool Graph, bool Monophonic, bool Sin, bool Saw, bool Tri, bool Sqr>
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 
-  template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
+  template <bool Graph, bool Monophonic, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
 
@@ -806,98 +810,107 @@ osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulati
   // allow custom data for graphs
   if (modulation == nullptr)
     modulation = &get_cv_audio_matrix_mixdown(block, false);
+  if(block.state.all_block_automation[module_voice_in][0][voice_in_param_mode][0].step() == engine_voice_mode_poly)
+    process<Graph, false>(block, modulation);
+  else
+    process<Graph, true>(block, modulation);
+}
 
+template <bool Graph, bool Monophonic> void
+osc_engine::process(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
+{
   auto const& block_auto = block.state.own_block_automation;
   int type = block_auto[param_type][0].step();
   if (type == type_off)
   {
     // still need to process to clear out the buffer in case we are mod source
-    process_unison<Graph, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
+    process_unison<Graph, Monophonic, false, false, false, false, false, false, false, false, false, -1>(block, modulation);
     return;
   }
 
   switch (type)
   {
-  case type_dsf: process_dsf<Graph>(block, modulation); break;
-  case type_basic: process_basic<Graph>(block, modulation); break;
-  case type_static: process_static<Graph>(block, modulation); break;
-  case type_kps1: process_unison<Graph, false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
-  case type_kps2: process_unison<Graph, false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
+  case type_dsf: process_dsf<Graph, Monophonic>(block, modulation); break;
+  case type_basic: process_basic<Graph, Monophonic>(block, modulation); break;
+  case type_static: process_static<Graph, Monophonic>(block, modulation); break;
+  case type_kps1: process_unison<Graph, Monophonic, false, false, false, false, false, false, true, false, false, -1>(block, modulation); break;
+  case type_kps2: process_unison<Graph, Monophonic, false, false, false, false, false, false, true, true, false, -1>(block, modulation); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph> void
+template <bool Graph, bool Monophonic> void
 osc_engine::process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   if(block.state.own_block_automation[param_hard_sync][0].step())
-    process_unison<Graph, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
+    process_unison<Graph, Monophonic, false, false, false, false, true, true, false, false, false, -1>(block, modulation);
   else
-    process_unison<Graph, false, false, false, false, true, false, false, false, false, -1>(block, modulation);
+    process_unison<Graph, Monophonic, false, false, false, false, true, false, false, false, false, -1>(block, modulation);
 }
 
-template <bool Graph> void
+template <bool Graph, bool Monophonic> void
 osc_engine::process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int svf_type = block_auto[param_rand_svf][0].step();
   switch (svf_type)
   {
-  case rand_svf_lpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
-  case rand_svf_hpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
-  case rand_svf_bpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
-  case rand_svf_bsf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
-  case rand_svf_peq: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
+  case rand_svf_lpf: process_unison<Graph, Monophonic, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
+  case rand_svf_hpf: process_unison<Graph, Monophonic, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;
+  case rand_svf_bpf: process_unison<Graph, Monophonic, false, false, false, false, false, false, false, false, true, rand_svf_bpf>(block, modulation); break;
+  case rand_svf_bsf: process_unison<Graph, Monophonic, false, false, false, false, false, false, false, false, true, rand_svf_bsf>(block, modulation); break;
+  case rand_svf_peq: process_unison<Graph, Monophonic, false, false, false, false, false, false, false, false, true, rand_svf_peq>(block, modulation); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph> void
+template <bool Graph, bool Monophonic> void
 osc_engine::process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sin = block_auto[param_basic_sin_on][0].step();
-  if(sin) process_basic_sin<Graph, true>(block, modulation);
-  else process_basic_sin<Graph, false>(block, modulation);
+  if(sin) process_basic_sin<Graph, Monophonic, true>(block, modulation);
+  else process_basic_sin<Graph, Monophonic, false>(block, modulation);
 }
 
-template <bool Graph, bool Sin> void
+template <bool Graph, bool Monophonic, bool Sin> void
 osc_engine::process_basic_sin(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool saw = block_auto[param_basic_saw_on][0].step();
-  if (saw) process_basic_sin_saw<Graph, Sin, true>(block, modulation);
-  else process_basic_sin_saw<Graph, Sin, false>(block, modulation);
+  if (saw) process_basic_sin_saw<Graph, Monophonic, Sin, true>(block, modulation);
+  else process_basic_sin_saw<Graph, Monophonic, Sin, false>(block, modulation);
 }
 
-template <bool Graph, bool Sin, bool Saw> void
+template <bool Graph, bool Monophonic, bool Sin, bool Saw> void
 osc_engine::process_basic_sin_saw(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool tri = block_auto[param_basic_tri_on][0].step();
-  if (tri) process_basic_sin_saw_tri<Graph, Sin, Saw, true>(block, modulation);
-  else process_basic_sin_saw_tri<Graph, Sin, Saw, false>(block, modulation);
+  if (tri) process_basic_sin_saw_tri<Graph, Monophonic, Sin, Saw, true>(block, modulation);
+  else process_basic_sin_saw_tri<Graph, Monophonic, Sin, Saw, false>(block, modulation);
 }
 
-template <bool Graph, bool Sin, bool Saw, bool Tri> void
+template <bool Graph, bool Monophonic, bool Sin, bool Saw, bool Tri> void
 osc_engine::process_basic_sin_saw_tri(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sqr = block_auto[param_basic_sqr_on][0].step();
-  if (sqr) process_basic_sin_saw_tri_sqr<Graph, Sin, Saw, Tri, true>(block, modulation);
-  else process_basic_sin_saw_tri_sqr<Graph, Sin, Saw, Tri, false>(block, modulation);
+  if (sqr) process_basic_sin_saw_tri_sqr<Graph, Monophonic, Sin, Saw, Tri, true>(block, modulation);
+  else process_basic_sin_saw_tri_sqr<Graph, Monophonic, Sin, Saw, Tri, false>(block, modulation);
 }
 
-template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr> void
+template <bool Graph, bool Monophonic, bool Sin, bool Saw, bool Tri, bool Sqr> void
 osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   bool sync = block_auto[param_hard_sync][0].step() != 0;
-  if (sync) process_unison<Graph, Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
-  else process_unison<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
+  if (sync) process_unison<Graph, Monophonic, Sin, Saw, Tri, Sqr, false, true, false, false, false, -1>(block, modulation);
+  else process_unison<Graph, Monophonic, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
 }
 
-template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> void
+template <bool Graph, bool Monophonic, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> 
+void
 osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
@@ -1011,10 +1024,21 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     int mod_index = block.start_frame + frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
 
+    // mono mode
+    int midi_note_offset = 0;
+    if constexpr (Monophonic)
+    {
+      if(block.state.midi_note_stream[mod_index] != -1)
+      {
+        int midi_note_base = block.voice->state.id.key;
+        midi_note_offset = block.state.midi_note_stream[mod_index] - midi_note_base;
+      }
+    }
+
     float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[mod_index]);
     float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[mod_index]);
     float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[mod_index]);
-    float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[mod_index];
+    float base_pitch_ref = note + midi_note_offset + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[mod_index];
     float base_pitch_sync = base_pitch_ref;
     (void)base_pitch_sync;
 
