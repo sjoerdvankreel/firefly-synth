@@ -241,17 +241,28 @@ voice_in_engine::process(plugin_block& block)
   {
     if constexpr (Monophonic)
     {
-      if (block.state.mono_note_stream[f].note_on && porta_mode != porta_off)
+      if (block.state.mono_note_stream[f].note_on)
       {
-        // start a new porta section within the current voice
-        _position = 0;
-        _from_note = _to_note;
-        _to_note = block.state.mono_note_stream[f].midi_key;
+        if (porta_mode == porta_off)
+        {
+          // pitch switch, will be picked up by the oscs
+          _position = 0;
+          _porta_samples = 0;
+          _to_note = block.state.mono_note_stream[f].midi_key;
+          _from_note = _to_note;
+        }
+        else 
+        {
+          // start a new porta section within the current voice
+          _position = 0;
+          _from_note = _to_note;
+          _to_note = block.state.mono_note_stream[f].midi_key;
 
-        // need to recalc total glide time
-        if (porta_mode == porta_on)
-          _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note - _to_note);
-        _porta_samples = _mono_porta_samples;
+          // need to recalc total glide time
+          if (porta_mode == porta_on)
+            _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note - _to_note);
+          _porta_samples = _mono_porta_samples;
+        }
       }
     }
 
