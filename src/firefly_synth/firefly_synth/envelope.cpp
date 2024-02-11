@@ -215,13 +215,11 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   sync.info.description = "Toggles time or tempo-synced mode.";
-  // TODO enable for monophonic mode
   auto& trigger = result.params.emplace_back(make_param(
     make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", "Trigger", true, true, param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
-  trigger.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return false; });
-  trigger.info.description = "TODO - this is disabled for now.";
+  trigger.info.description = "TODO FILL IN THE BLANKS";
   auto& filter = result.params.emplace_back(make_param(
     make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smooth", true, true, param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),

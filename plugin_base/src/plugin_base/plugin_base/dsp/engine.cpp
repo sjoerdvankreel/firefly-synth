@@ -449,6 +449,7 @@ plugin_engine::activate_voice(note_event const& event, int slot, int frame_count
   assert(slot >= 0);
   auto& state = _voice_states[slot];
   state.id = event.id;
+  state.release_id = event.id;
   state.end_frame = frame_count;
   state.start_frame = event.frame;
   state.velocity = event.velocity;
@@ -696,7 +697,6 @@ plugin_engine::process()
     // note: we do not account for triggering more than 1 voice per block
     // note: need to play *all* incoming notes into this voice
 
-    // todo there might be more
     int first_note_on_index = -1;
     for(int e = 0; e < _host_block->events.notes.size(); e++)
       if (_host_block->events.notes[e].type == note_event_type::on)
@@ -708,6 +708,8 @@ plugin_engine::process()
     // todo portamento
     if(first_note_on_index != -1)
     {
+      auto& first_event = _host_block->events.notes[first_note_on_index];
+
       int slot = -1;
       for(int v = 0; v < _voice_states.size(); v++)
         if (_voice_states[v].stage == voice_stage::active ||
@@ -723,23 +725,33 @@ plugin_engine::process()
         if(slot == -1)
         {
           slot = 0;
-          activate_voice(_host_block->events.notes[first_note_on_index], 0, frame_count);
+          activate_voice(first_event, 0, frame_count);
         }
         else 
         {
-          // for true mono mode, if the voice was releasing, reactivate it
           _voice_states[slot].stage = voice_stage::active;
           _voice_states[slot].release_frame = frame_count;
+          // needed for later release by id or pck
+          _voice_states[slot].release_id = first_event.id;
+          _voice_states[slot].time = _stream_time + first_event.frame;
         }
       }
 
       // for release mono mode, need to do the recycling again
       if (voice_mode == engine_voice_mode_release)
+      {
         if (slot == -1)
         {
           slot = find_best_voice_slot();
-          activate_voice(_host_block->events.notes[first_note_on_index], slot, frame_count);
+          activate_voice(first_event, slot, frame_count);
         }
+        else
+        {
+          // needed for later release by id or pck
+          _voice_states[slot].release_id = first_event.id;
+          _voice_states[slot].time = _stream_time + first_event.frame;
+        }
+      }
 
       // set up note stream, plugin will have to do something with it
       for(int e = 0; e < _host_block->events.notes.size(); e++)
@@ -768,8 +780,8 @@ plugin_engine::process()
       auto& state = _voice_states[v];
       if (state.stage == voice_stage::active &&
         state.time < _stream_time + event.frame &&
-        ((event.id.id != -1 && state.id.id == event.id.id) ||
-          (event.id.id == -1 && (state.id.key == event.id.key && state.id.channel == event.id.channel))))
+        ((event.id.id != -1 && state.release_id.id == event.id.id) ||
+          (event.id.id == -1 && (state.release_id.key == event.id.key && state.release_id.channel == event.id.channel))))
       {
         if (event.type == note_event_type::cut)
         {

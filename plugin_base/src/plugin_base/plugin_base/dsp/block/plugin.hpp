@@ -16,6 +16,8 @@ enum class voice_stage { unused, active, releasing, finishing };
 // for polyphonic synth
 struct voice_state final {
   note_id id = {};
+  // for mono mode
+  note_id release_id = {};
   int end_frame = -1;
   int start_frame = -1;
   int release_frame = -1;
