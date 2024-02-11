@@ -509,7 +509,11 @@ env_engine::process_slope(
     // see if we need to re/multitrigger
     if constexpr (Monophonic)
     {
-      if(block.state.mono_note_stream[f].note_on)
+      // be sure not to revive a released voice
+      // otherwise we'll just keep building up voices in mono mode
+      // plugin_base makes sure to only send the release signal after
+      // the last note in a monophonic section
+      if(block.state.mono_note_stream[f].note_on && _stage < env_stage::release)
       {
         // todo multi
         if (trigger == trigger_retrig)
