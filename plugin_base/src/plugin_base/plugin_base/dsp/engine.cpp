@@ -729,8 +729,6 @@ plugin_engine::process()
         }
         else 
         {
-          _voice_states[slot].stage = voice_stage::active;
-          _voice_states[slot].release_frame = frame_count;
           // needed for later release by id or pck
           _voice_states[slot].release_id = first_event.id;
           _voice_states[slot].time = _stream_time + first_event.frame;
