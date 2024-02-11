@@ -98,13 +98,11 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-  // TODO enable for monophonic mode
   auto& voice_mode = result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  voice_mode.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return false; });
-  voice_mode.info.description = "TODO - this is fixed to polyphonic for now.";
+  voice_mode.info.description = "TODO FILL IN THE BLANKS.";
   auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Portamento", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),

@@ -101,7 +101,8 @@ plugin_engine::make_plugin_block(
     : _voice_automation[voice].state();
 
   plugin_block_state state = {
-    _last_note_key, context_out, cv_out, audio_out, scratch, _bpm_automation,
+    _last_note_key, context_out, _midi_note_stream,
+    cv_out, audio_out, scratch, _bpm_automation,
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
@@ -249,6 +250,7 @@ plugin_engine::activate(int max_frame_count)
   _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
   _bpm_automation.resize(max_frame_count);
+  _midi_note_stream.resize(max_frame_count);
 
   // set automation values to current state, events may overwrite
   mark_all_params_as_automated(true);
@@ -414,6 +416,31 @@ plugin_engine::process_voice(int v, bool threaded)
     std::atomic_thread_fence(std::memory_order_release);
     restore_denormals(denormal_state);
   }
+}
+
+void 
+plugin_engine::activate_voice(note_event const& event, int slot, int frame_count)
+{
+  assert(slot >= 0);
+  auto& state = _voice_states[slot];
+  state.id = event.id;
+  state.end_frame = frame_count;
+  state.start_frame = event.frame;
+  state.velocity = event.velocity;
+  state.stage = voice_stage::active;
+  state.time = _stream_time + event.frame;
+  assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
+
+  // allow module engine to do once-per-voice init
+  voice_block_params_snapshot(slot);
+  for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
+    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+    {
+      plugin_voice_block voice_block(make_voice_block(slot, _voice_states[slot].release_frame, event.id, _last_note_key, _last_note_channel));
+      plugin_block block(make_plugin_block(slot, m, mi, state.start_frame, state.end_frame));
+      block.voice = &voice_block;
+      _voice_engines[slot][m][mi]->reset(&block);
+    }
 }
 
 void 
@@ -595,7 +622,8 @@ plugin_engine::process()
   /* STEP 5: Voice management in case of polyphonic synth */
   /********************************************************/
 
-  // TODO monophonic portamento
+  // for mono mode
+  std::fill(_midi_note_stream.begin(), _midi_note_stream.end(), -1);
 
   // always take a voice for an entire block,
   // module processor is handed appropriate start/end_frame.
@@ -621,48 +649,79 @@ plugin_engine::process()
   voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
   assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
 
-  // steal voices for incoming notes by age
-  for (int e = 0; e < _host_block->events.notes.size(); e++)
+  if(voice_mode == engine_voice_mode_poly)
   {
-    int slot = -1;
-    auto const& event = _host_block->events.notes[e];
-    if (event.type != note_event_type::on) continue;
-    std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
-    for (int i = 0; i < _voice_states.size(); i++)
-      if (_voice_states[i].stage == voice_stage::unused)
+    // poly mode: steal voices for incoming notes by age
+    for (int e = 0; e < _host_block->events.notes.size(); e++)
+    {
+      int slot = -1;
+      auto const& event = _host_block->events.notes[e];
+      if (event.type != note_event_type::on) continue;
+      std::int64_t min_time = std::numeric_limits<std::int64_t>::max();
+      for (int i = 0; i < _voice_states.size(); i++)
+        if (_voice_states[i].stage == voice_stage::unused)
+        {
+          slot = i;
+          break;
+        }
+        else if (_voice_states[i].time < min_time)
+        {
+          slot = i;
+          min_time = _voice_states[i].time;
+        }
+
+      activate_voice(event, slot, frame_count);
+
+      // for portamento
+      _last_note_key = event.id.key;
+      _last_note_channel = event.id.channel;
+    }
+  }
+  else
+  {
+    // true mono mode: recycle the first active or releasing voice, or set up a new one
+    // release mono mode: recycle the first active but not releasing voice, or set up a new one
+    // note: we do not account for triggering more than 1 voice per block
+    // note: need to play *all* incoming notes into this voice
+
+    // todo there might be more
+    int first_note_on_index = -1;
+    for(int e = 0; e < _host_block->events.notes.size(); e++)
+      if (_host_block->events.notes[e].type == note_event_type::on)
       {
-        slot = i;
+        first_note_on_index = e;
         break;
       }
-      else if (_voice_states[i].time < min_time)
-      {
-        slot = i;
-        min_time = _voice_states[i].time;
-      }
-    assert(slot >= 0);
-    auto& state = _voice_states[slot];
-    state.id = event.id;
-    state.end_frame = frame_count;
-    state.start_frame = event.frame;
-    state.velocity = event.velocity;
-    state.stage = voice_stage::active;
-    state.time = _stream_time + event.frame;
-    assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
-    // allow module engine to do once-per-voice init
-    voice_block_params_snapshot(slot);
-    for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
-      for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+    // todo portamento
+    if(first_note_on_index != -1)
+    {
+      int slot = -1;
+      for(int v = 0; v < _voice_states.size(); v++)
+        if (_voice_states[v].stage == voice_stage::active ||
+        (_voice_states[v].stage == voice_stage::releasing && voice_mode == engine_voice_mode::engine_voice_mode_mono))
+        {
+          slot = v;
+          break;
+        }
+
+      // or just take voice 0  
+      if (slot == -1)
       {
-        plugin_voice_block voice_block(make_voice_block(slot, _voice_states[slot].release_frame, event.id, _last_note_key, _last_note_channel));
-        plugin_block block(make_plugin_block(slot, m, mi, state.start_frame, state.end_frame));
-        block.voice = &voice_block;
-        _voice_engines[slot][m][mi]->reset(&block);
+        slot = 0;
+        activate_voice(_host_block->events.notes[first_note_on_index], 0, frame_count);
       }
 
-    // for portamento
-    _last_note_key = event.id.key;
-    _last_note_channel = event.id.channel;
+      // set up note stream, plugin will have to do something with it
+      for(int e = 0; e < _host_block->events.notes.size(); e++)
+        if(_host_block->events.notes[e].type == note_event_type::on)
+        {
+          auto const& event = _host_block->events.notes[e];
+          _last_note_key = event.id.key;
+          _last_note_channel = event.id.channel;
+          _midi_note_stream[e] = event.id.key;
+        }
+    }
   }
 
   // mark voices for completion the next block

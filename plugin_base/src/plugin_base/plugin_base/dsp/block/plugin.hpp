@@ -54,6 +54,9 @@ struct plugin_voice_block final {
 struct plugin_block_state final {
   int last_midi_note = -1;
   void** own_context = {};
+  // for mono mode
+  std::vector<int> const& midi_note_stream;
+
   jarray<float, 3>& own_cv;
   jarray<float, 4>& own_audio;
   jarray<float, 2>& own_scratch;

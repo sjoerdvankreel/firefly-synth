@@ -62,6 +62,7 @@ class plugin_engine final {
   jarray<double, 3> _voice_module_process_duration_sec = {};
   jarray<double, 2> _global_module_process_duration_sec = {};
 
+  std::vector<int> _midi_note_stream = {};
   std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};
@@ -94,6 +95,7 @@ class plugin_engine final {
 
   void init_automation_from_state();
   void process_voices_single_threaded();
+  void activate_voice(note_event const& event, int slot, int frame_count);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
