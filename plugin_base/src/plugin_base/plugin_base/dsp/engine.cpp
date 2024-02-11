@@ -101,7 +101,7 @@ plugin_engine::make_plugin_block(
     : _voice_automation[voice].state();
 
   plugin_block_state state = {
-    _last_note_key, context_out, _midi_note_stream,
+    _last_note_key, context_out, _mono_note_stream,
     cv_out, audio_out, scratch, _bpm_automation,
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
@@ -254,7 +254,7 @@ plugin_engine::activate(int max_frame_count)
   _midi_automation.resize(frame_dims.midi_automation);
   _accurate_automation.resize(frame_dims.accurate_automation);
   _bpm_automation.resize(max_frame_count);
-  _midi_note_stream.resize(max_frame_count);
+  _mono_note_stream.resize(max_frame_count);
 
   // set automation values to current state, events may overwrite
   mark_all_params_as_automated(true);
@@ -673,7 +673,7 @@ plugin_engine::process()
   assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
 
   // for mono mode
-  std::fill(_midi_note_stream.begin(), _midi_note_stream.end(), _last_note_key);
+  std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { -1, false });
 
   if(voice_mode == engine_voice_mode_poly)
   {
@@ -760,7 +760,8 @@ plugin_engine::process()
           auto const& event = _host_block->events.notes[e];
           _last_note_key = event.id.key;
           _last_note_channel = event.id.channel;
-          std::fill(_midi_note_stream.begin() + event.frame, _midi_note_stream.end(), event.id.key);
+          std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, false });
+          _mono_note_stream[event.frame].note_on = true;
         }
     }
   }

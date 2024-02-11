@@ -1028,10 +1028,10 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     int midi_note_offset = 0;
     if constexpr (Monophonic)
     {
-      if(block.state.midi_note_stream[mod_index] != -1)
+      if(block.state.mono_note_stream[mod_index].midi_key != -1)
       {
         int midi_note_base = block.voice->state.id.key;
-        midi_note_offset = block.state.midi_note_stream[mod_index] - midi_note_base;
+        midi_note_offset = block.state.mono_note_stream[mod_index].midi_key - midi_note_base;
       }
     }
 
