@@ -673,7 +673,7 @@ plugin_engine::process()
   assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
 
   // for mono mode
-  std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { -1, false });
+  std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { _last_note_key, false });
 
   if(voice_mode == engine_voice_mode_poly)
   {

@@ -21,7 +21,8 @@ static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { section_main, section_slope, section_dhadsr };
-enum { 
+enum { trigger_legato, trigger_retrig, trigger_multi };
+enum {
   mode_sustain_lin, mode_follow_lin, mode_release_lin, 
   mode_sustain_exp_uni, mode_follow_exp_uni, mode_release_exp_uni,
   mode_sustain_exp_bi, mode_follow_exp_bi, mode_release_exp_bi,
@@ -503,6 +504,21 @@ env_engine::process_slope(
         block.voice->finished |= block.module_slot == 0;
       }
       continue;
+    }
+
+    // see if we need to re/multitrigger
+    if constexpr (Monophonic)
+    {
+      if(block.state.mono_note_stream[f].note_on)
+      {
+        // todo multi
+        if (trigger == trigger_retrig)
+        {
+          _stage_pos = 0;
+          _current_level = 0;
+          _stage = env_stage::delay;
+        }
+      }
     }
 
     if (block.voice->state.release_frame == f && 
