@@ -83,6 +83,7 @@ private:
   cv_filter _filter = {};
   double _stage_pos = 0;
   double _current_level = 0;
+  double _multitrig_level = 0;
 
   double _slp_att_exp = 0;
   double _slp_dcy_exp = 0;
@@ -386,6 +387,7 @@ env_engine::reset(plugin_block const* block)
 {
   _stage_pos = 0;
   _current_level = 0;
+  _multitrig_level = 0;
   _stage = env_stage::delay;
 
   auto const& block_auto = block->state.own_block_automation;
@@ -488,6 +490,7 @@ env_engine::process_slope(
     if (_stage == env_stage::end)
     {
       _current_level = 0;
+      _multitrig_level = 0;
       block.state.own_cv[0][0][f] = 0;
       continue;
     }
@@ -496,6 +499,7 @@ env_engine::process_slope(
     if (_stage == env_stage::filter)
     {
       _current_level = 0;
+      _multitrig_level = 0;
       float level = _filter.next(0);
       block.state.own_cv[0][0][f] = level;
       if (level < 1e-5)
@@ -513,14 +517,19 @@ env_engine::process_slope(
       // otherwise we'll just keep building up voices in mono mode
       // plugin_base makes sure to only send the release signal after
       // the last note in a monophonic section
-      if(block.state.mono_note_stream[f].note_on && _stage < env_stage::release)
+      if(block.state.mono_note_stream[f].note_on && _stage < env_stage::release && trigger != trigger_legato)
       {
-        // todo multi
+        _stage_pos = 0;
+        _stage = env_stage::delay;
         if (trigger == trigger_retrig)
         {
-          _stage_pos = 0;
           _current_level = 0;
-          _stage = env_stage::delay;
+          _multitrig_level = 0;
+        }
+        else
+        {
+          // multitrigger
+          _current_level = _multitrig_level;
         }
       }
     }
@@ -535,6 +544,7 @@ env_engine::process_slope(
     if (_stage == env_stage::sustain && is_sustain(mode))
     {
       _current_level = stn;
+      _multitrig_level = stn;
       block.state.own_cv[0][0][f] = _filter.next(stn);
       continue;
     }
@@ -556,16 +566,27 @@ env_engine::process_slope(
     if (stage_seconds == 0) out = _current_level;
     else switch (_stage)
     {
-    case env_stage::hold: _current_level = out = 1; break;
-    case env_stage::delay: _current_level = out = 0; break;
-    case env_stage::attack: _current_level = out = calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp); break;
+    case env_stage::delay: 
+      if(trigger == trigger_multi)
+        out = _current_level = _multitrig_level;
+      else
+        _current_level = _multitrig_level = out = 0;
+      break;
+    case env_stage::attack: 
+      if(trigger == trigger_multi)
+        out = _current_level = _multitrig_level + (1 - _multitrig_level) * calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp);
+      else
+        _current_level = _multitrig_level = out = calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp); 
+      break;
+    case env_stage::hold: _current_level = _multitrig_level = out = 1; break;
     case env_stage::release: out = _current_level * (1 - calc_slope(slope_pos, _slp_rls_splt_bnd, _slp_rls_exp)); break;
-    case env_stage::decay: _current_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
+    case env_stage::decay: _current_level = _multitrig_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
     default: assert(false); stage_seconds = 0; break;
     }
 
     check_unipolar(out);
     check_unipolar(_current_level);
+    check_unipolar(_multitrig_level);
     block.state.own_cv[0][0][f] = _filter.next(out);
     _stage_pos += 1.0 / block.sample_rate;
     if (_stage_pos < stage_seconds) continue;
