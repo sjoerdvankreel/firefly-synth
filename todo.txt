@@ -23,6 +23,7 @@ run the clap validator
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal
+fix ycollettes build problem
 
 other:
 profile the pad preset
