@@ -251,7 +251,6 @@ voice_in_engine::process(plugin_block& block)
         // need to recalc total glide time
         if (porta_mode == porta_on)
           _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note - _to_note);
-
         _porta_samples = _mono_porta_samples;
       }
     }
