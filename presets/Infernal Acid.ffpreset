@@ -1,5 +1,5 @@
 {
-  "checksum": "fea62f35df8c5fd1a1e3e2e44174f064",
+  "checksum": "a5413f989f312601388d284588df5492",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -33,7 +33,7 @@
         }
       },
       "plugin": {
-        "checksum": "f9d0e23e0fbe47e6ab690975ac2cebb3",
+        "checksum": "dfef312416767298eb6a86887d5cab53",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -1342,8 +1342,8 @@
                       },
                       {
                         "slots": [
-                          "51 %",
-                          "19 %",
+                          "55 %",
+                          "49 %",
                           "0 %"
                         ]
                       },
