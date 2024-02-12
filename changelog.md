@@ -1,3 +1,8 @@
+?, ? - V1.06.
+
+- Add monophonic mode.
+- Add another preset to go with it.
+
 ### February 10, 2024 - V1.05.
 
 - Add some presets.

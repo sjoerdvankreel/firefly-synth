@@ -224,7 +224,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& trigger = result.params.emplace_back(make_param(
     make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", "Trigger", true, true, param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none()))); 
   trigger.info.description = std::string("Selects trigger mode for monophonic mode.<br/>") +
     "Legato - envelope will not reset.<br/>" + 
     "Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>" +
