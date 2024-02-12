@@ -10,9 +10,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 Project status:
 
-- There is no FX-only version yet.
-- There is no monophonic mode yet (the poly/mono switch and envelope retrigger options are grayed out).
-- Other than that, it is a fully-functional polyphonic synth plugin.
+There is no FX-only version yet. Other than that, it is a fully-functional synth plugin.
 
 ![Screenshot](static/screenshot.png)
 
