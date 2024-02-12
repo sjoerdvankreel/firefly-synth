@@ -32,10 +32,24 @@ Just once, after that, the size is stored in a user settings file.
 - VST3: does sample accurate automation, no note expressions.
 - CLAP: does sample accurate automation, does threadpool, no modulation, no polyphonic modulation.
 
+## Monophonic mode
+
+Comes with 2 monophonic modes: true mono ("Mono") and release-monophonic mode ("Release").
+Monophonic mode has all kinds of opportunities to introduce pops and clicks. To combat that:
+
+- Use portamento to get rid of sudden pitch changes.
+- Use multi-triggered envelopes instead of retriggered envelopes to prevent sudden jumps in the envelope.
+
+Furthermode, true monophonic mode may often not do what you want.
+Release-monophonic mode is much more easily understood as a series of
+independent monophonic sections (which may overlap in their envelope release section,
+hence, not "true monophonic").
+
 ## Feature overview
 
 See the parameter reference document for details.
 
+- Envelope 1 hardwired to voice gain.
 - Up to 32 voices in polyphonic mode.
 - Per-voice and global audio routing matrices.
 - Per-voice and global cv-to-cv routing matrices.
