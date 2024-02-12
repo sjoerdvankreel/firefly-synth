@@ -1,3 +1,7 @@
+### February 12, 2024 - V1.07 (No binaries).
+
+- Add another preset (matching to infernal synth's acid line).
+
 ### February 12, 2024 - V1.06.
 
 - Add monophonic mode.
