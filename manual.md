@@ -34,7 +34,7 @@ Just once, after that, the size is stored in a user settings file.
 
 ## Monophonic mode
 
-Comes with 2 monophonic modes: true mono ("Mono") and release-monophonic mode ("Release").
+Comes with 2 monophonic modes: true mono ("Mono") and release-monophonic mode ("Release").<br/>
 Monophonic mode has all kinds of opportunities to introduce pops and clicks. To combat that:
 
 - Use portamento to get rid of sudden pitch changes.
