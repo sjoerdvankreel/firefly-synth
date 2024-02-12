@@ -230,7 +230,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     "Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>" +
     "Multi - upon note-on event, envelope will start over from the current level.<br/>" + 
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
-  auto& filter = result.params.emplace_back(make_param(
+  auto& filter = result.params.emplace_back(make_param( 
     make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smooth", true, true, param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 },
