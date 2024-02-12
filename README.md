@@ -3,14 +3,11 @@
 A semi-modular software synthesizer plugin.
 It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)'s big brother.
 
+- There is no FX-only version yet.
 - Changelog: [changelog.md](changelog.md).
 - Parameter reference: [param_reference.html](https://htmlpreview.github.io/?https://github.com/sjoerdvankreel/firefly-synth/blob/main/param_reference.html).
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
-
-Project status:
-
-There is no FX-only version yet. Other than that, it is a fully-functional synth plugin.
 
 ![Screenshot](static/screenshot.png)
 
