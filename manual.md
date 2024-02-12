@@ -38,9 +38,9 @@ Comes with 2 monophonic modes: true mono ("Mono") and release-monophonic mode ("
 Monophonic mode has all kinds of opportunities to introduce pops and clicks. To combat that:
 
 - Use portamento to get rid of sudden pitch changes.
-- Use multi-triggered envelopes instead of retriggered envelopes to prevent sudden jumps in the envelope.
+- Use multi-triggered envelopes instead of retriggered envelopes to prevent sudden jumps in the envelope (or just go with legato).
 
-Furthermode, true monophonic mode may often not do what you want.
+Furthermore, true monophonic mode may often not do what you want.
 Release-monophonic mode is much more easily understood as a series of
 independent monophonic sections (which may overlap in their envelope release section,
 hence, not "true monophonic").
