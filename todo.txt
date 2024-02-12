@@ -20,8 +20,6 @@ v1.1:
 fx-only version
 move route up/down
 run the clap validator
-implement monophonic mode
-implement envelope retriggering
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
 re-do the acid line demo from infernal

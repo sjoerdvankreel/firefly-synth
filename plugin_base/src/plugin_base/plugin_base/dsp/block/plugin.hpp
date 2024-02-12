@@ -13,9 +13,18 @@ namespace plugin_base {
 struct plugin_topo;
 enum class voice_stage { unused, active, releasing, finishing };
 
+// for monophonic mode
+struct mono_note_state
+{
+  int midi_key = -1;
+  bool note_on = false;
+};
+
 // for polyphonic synth
 struct voice_state final {
   note_id id = {};
+  // for mono mode
+  note_id release_id = {};
   int end_frame = -1;
   int start_frame = -1;
   int release_frame = -1;
@@ -54,6 +63,9 @@ struct plugin_voice_block final {
 struct plugin_block_state final {
   int last_midi_note = -1;
   void** own_context = {};
+  // for mono mode
+  std::vector<mono_note_state> const& mono_note_stream;
+
   jarray<float, 3>& own_cv;
   jarray<float, 4>& own_audio;
   jarray<float, 2>& own_scratch;

@@ -64,6 +64,12 @@ public module_engine {
   int _to_note = -1;
   int _from_note = -1;
   int _porta_samples = -1;
+  float _mono_porta_time = -1;
+  int _mono_porta_samples = -1;
+  
+  template <bool Monophonic>
+  void process(plugin_block& block);
+
 public:
   void reset(plugin_block const*) override;
   void process(plugin_block& block) override;
@@ -98,13 +104,15 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
-  // TODO enable for monophonic mode
   auto& voice_mode = result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  voice_mode.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return false; });
-  voice_mode.info.description = "TODO - this is fixed to polyphonic for now.";
+  voice_mode.info.description = std::string("Selects poly/mono mode.<br/>") +
+    "Poly - regular polyphonic mode.<br/>" +
+    "Mono - true monophonic mode, may cause clicks.<br/>" +
+    "Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>"
+    "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
   auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Portamento", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
@@ -185,9 +193,10 @@ voice_in_engine::reset(plugin_block const* block)
   if (block->voice->state.id.channel == block->voice->state.last_note_channel)
     _from_note = block->voice->state.last_note_key;
 
-  int porta_mode = block->state.own_block_automation[param_porta][0].step();
-  bool porta_sync = block->state.own_block_automation[param_porta_sync][0].step() != 0;
-  float porta_time_time = block->state.own_block_automation[param_porta_time][0].real();
+  auto const& block_auto = block->state.own_block_automation;
+  int porta_mode = block_auto[param_porta][0].step();
+  bool porta_sync = block_auto[param_porta_sync][0].step() != 0;
+  float porta_time_time = block_auto[param_porta_time][0].real();
   float porta_time_tempo = get_timesig_time_value(*block, block->host.bpm, module_voice_in, param_porta_tempo);
   float porta_time = porta_sync? porta_time_tempo: porta_time_time;
   switch (porta_mode)
@@ -197,9 +206,30 @@ voice_in_engine::reset(plugin_block const* block)
   case porta_on: _porta_samples = porta_time * block->sample_rate * std::abs(_from_note - _to_note); break;
   default: assert(false); break;
   }
+
+  // in monophonic mode we do not glide the first note in 
+  // monophonic section. instead the first note is "plain"
+  // and all subsequent notes in mono section apply portamento
+  if(block_auto[param_mode][0].step() != engine_voice_mode_poly)
+  {
+    _from_note = _to_note;
+    _mono_porta_time = porta_time;
+    _mono_porta_samples = _porta_samples;
+    _porta_samples = 0;
+  }
 }
 
-void 
+void
+voice_in_engine::process(plugin_block& block)
+{
+  auto const& block_auto = block.state.own_block_automation;
+  if(block_auto[param_mode][0].step() == engine_voice_mode_poly)
+    process<false>(block);
+  else
+    process<true>(block);
+}
+
+template <bool Monophonic> void 
 voice_in_engine::process(plugin_block& block)
 {
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
@@ -207,10 +237,39 @@ voice_in_engine::process(plugin_block& block)
   auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
   auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  
   
-  int note = block.state.own_block_automation[param_note][0].step();
-  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();  
+  auto const& block_auto = block.state.own_block_automation;
+  int note = block_auto[param_note][0].step();
+  int porta_mode = block_auto[param_porta][0].step();
+  int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
+    if constexpr (Monophonic)
+    {
+      if (block.state.mono_note_stream[f].note_on)
+      {
+        if (porta_mode == porta_off)
+        {
+          // pitch switch, will be picked up by the oscs
+          _position = 0;
+          _porta_samples = 0;
+          _to_note = block.state.mono_note_stream[f].midi_key;
+          _from_note = _to_note;
+        }
+        else 
+        {
+          // start a new porta section within the current voice
+          _position = 0;
+          _from_note = _to_note;
+          _to_note = block.state.mono_note_stream[f].midi_key;
+
+          // need to recalc total glide time
+          if (porta_mode == porta_on)
+            _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note - _to_note);
+          _porta_samples = _mono_porta_samples;
+        }
+      }
+    }
+
     float porta_note = 0;
     float pb = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pb, pb_curve[f]);
     float cent = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_cent, cent_curve[f]);

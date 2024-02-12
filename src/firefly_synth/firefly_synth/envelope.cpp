@@ -15,12 +15,14 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
+extern int const voice_in_param_mode;
 static float const log_half = std::log(0.5f); 
 static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
 enum { section_main, section_slope, section_dhadsr };
-enum { 
+enum { trigger_legato, trigger_retrig, trigger_multi };
+enum {
   mode_sustain_lin, mode_follow_lin, mode_release_lin, 
   mode_sustain_exp_uni, mode_follow_exp_uni, mode_release_exp_uni,
   mode_sustain_exp_bi, mode_follow_exp_bi, mode_release_exp_bi,
@@ -80,7 +82,8 @@ private:
   env_stage _stage = {};
   cv_filter _filter = {};
   double _stage_pos = 0;
-  double _release_level = 0;
+  double _current_level = 0;
+  double _multitrig_level = 0;
 
   double _slp_att_exp = 0;
   double _slp_dcy_exp = 0;
@@ -95,7 +98,10 @@ private:
 
   void init_slope_exp(double slope, double& exp);
   void init_slope_exp_splt(double slope, double split_pos, double& exp, double& splt_bnd);
-  template <class CalcSlope> 
+  
+  template <bool Monophonic> 
+  void process(plugin_block& block);
+  template <bool Monophonic, class CalcSlope> 
   void process_slope(plugin_block& block, float dly, float att, float hld, float dcy, float stn, float rls, CalcSlope calc_slope);
 };
 
@@ -215,13 +221,15 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   sync.info.description = "Toggles time or tempo-synced mode.";
-  // TODO enable for monophonic mode
   auto& trigger = result.params.emplace_back(make_param(
     make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", "Trigger", true, true, param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
-  trigger.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return false; });
-  trigger.info.description = "TODO - this is disabled for now.";
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none()))); 
+  trigger.info.description = std::string("Selects trigger mode for monophonic mode.<br/>") +
+    "Legato - envelope will not reset.<br/>" + 
+    "Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>" +
+    "Multi - upon note-on event, envelope will start over from the current level.<br/>" + 
+    "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
   auto& filter = result.params.emplace_back(make_param(
     make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", "Smooth", true, true, param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
@@ -382,7 +390,8 @@ void
 env_engine::reset(plugin_block const* block)
 {
   _stage_pos = 0;
-  _release_level = 0; 
+  _current_level = 0;
+  _multitrig_level = 0;
   _stage = env_stage::delay;
 
   auto const& block_auto = block->state.own_block_automation;
@@ -437,6 +446,16 @@ env_engine::process(plugin_block& block)
     return;
   }
 
+  if(block.state.all_block_automation[module_voice_in][0][voice_in_param_mode][0].step() == engine_voice_mode_poly)
+    process<false>(block);
+  else
+    process<true>(block);
+}
+
+template <bool Monophonic> void
+env_engine::process(plugin_block& block)
+{
+  auto const& block_auto = block.state.own_block_automation;
   bool sync = block_auto[param_sync][0].step() != 0;
   float stn = block_auto[param_sustain][0].real();
   float hld = block_auto[param_hold_time][0].real();
@@ -455,25 +474,27 @@ env_engine::process(plugin_block& block)
   }
 
   int mode = block_auto[param_mode][0].step();
-  if(is_exp_uni_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_uni);
-  else if(is_exp_bi_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_bi);
-  else if (is_exp_splt_slope(mode)) process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_splt);
-  else process_slope(block, dly, att, hld, dcy, stn, rls, calc_slope_lin);
+  if (is_exp_uni_slope(mode)) process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_uni);
+  else if (is_exp_bi_slope(mode)) process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_bi);
+  else if (is_exp_splt_slope(mode)) process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_splt);
+  else process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_lin);
 }
 
-template <class CalcSlope> void
+template <bool Monophonic, class CalcSlope> void
 env_engine::process_slope(
   plugin_block& block, float dly, float att, float hld, 
   float dcy, float stn, float rls, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
   int mode = block_auto[param_mode][0].step();
+  int trigger = block_auto[param_trigger][0].step();
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if (_stage == env_stage::end)
     {
-      _release_level = 0;
+      _current_level = 0;
+      _multitrig_level = 0;
       block.state.own_cv[0][0][f] = 0;
       continue;
     }
@@ -481,7 +502,8 @@ env_engine::process_slope(
     // need some time for the filter to fade out otherwise we'll pop on fast releases
     if (_stage == env_stage::filter)
     {
-      _release_level = 0;
+      _current_level = 0;
+      _multitrig_level = 0;
       float level = _filter.next(0);
       block.state.own_cv[0][0][f] = level;
       if (level < 1e-5)
@@ -490,6 +512,36 @@ env_engine::process_slope(
         block.voice->finished |= block.module_slot == 0;
       }
       continue;
+    }
+
+    // see if we need to re/multitrigger
+    if constexpr (Monophonic)
+    {
+      // be sure not to revive a released voice
+      // otherwise we'll just keep building up voices in mono mode
+      // plugin_base makes sure to only send the release signal after
+      // the last note in a monophonic section
+      if(trigger != trigger_legato)
+      {
+        if(block.state.mono_note_stream[f].note_on)
+        {
+          if(_stage < env_stage::release)
+          {
+            _stage_pos = 0;
+            _stage = env_stage::delay;
+            if (trigger == trigger_retrig)
+            {
+              _current_level = 0;
+              _multitrig_level = 0;
+            }
+            else
+            {
+              // multitrigger
+              _current_level = _multitrig_level;
+            }
+          }
+        }
+      }
     }
 
     if (block.voice->state.release_frame == f && 
@@ -501,7 +553,8 @@ env_engine::process_slope(
 
     if (_stage == env_stage::sustain && is_sustain(mode))
     {
-      _release_level = stn;
+      _current_level = stn;
+      _multitrig_level = stn;
       block.state.own_cv[0][0][f] = _filter.next(stn);
       continue;
     }
@@ -520,19 +573,30 @@ env_engine::process_slope(
     float out = 0;
     _stage_pos = std::min(_stage_pos, stage_seconds);
     double slope_pos = _stage_pos / stage_seconds;
-    if (stage_seconds == 0) out = _release_level;
+    if (stage_seconds == 0) out = _current_level;
     else switch (_stage)
     {
-    case env_stage::hold: _release_level = out = 1; break;
-    case env_stage::delay: _release_level = out = 0; break;
-    case env_stage::attack: _release_level = out = calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp); break;
-    case env_stage::release: out = _release_level * (1 - calc_slope(slope_pos, _slp_rls_splt_bnd, _slp_rls_exp)); break;
-    case env_stage::decay: _release_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
+    case env_stage::delay: 
+      if(trigger == trigger_multi)
+        out = _current_level = _multitrig_level;
+      else
+        _current_level = _multitrig_level = out = 0;
+      break;
+    case env_stage::attack: 
+      if(trigger == trigger_multi)
+        out = _current_level = _multitrig_level + (1 - _multitrig_level) * calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp);
+      else
+        _current_level = _multitrig_level = out = calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp); 
+      break;
+    case env_stage::hold: _current_level = _multitrig_level = out = 1; break;
+    case env_stage::release: out = _current_level * (1 - calc_slope(slope_pos, _slp_rls_splt_bnd, _slp_rls_exp)); break;
+    case env_stage::decay: _current_level = _multitrig_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
     default: assert(false); stage_seconds = 0; break;
     }
 
     check_unipolar(out);
-    check_unipolar(_release_level);
+    check_unipolar(_current_level);
+    check_unipolar(_multitrig_level);
     block.state.own_cv[0][0][f] = _filter.next(out);
     _stage_pos += 1.0 / block.sample_rate;
     if (_stage_pos < stage_seconds) continue;

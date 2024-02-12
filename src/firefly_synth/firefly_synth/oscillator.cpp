@@ -31,6 +31,7 @@ enum {
   param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_gain, param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
+extern int const voice_in_param_mode;
 extern int const voice_in_param_oversmp;
 extern int const master_in_param_pb_range;
 extern int const voice_in_output_pitch_offset;
@@ -135,13 +136,13 @@ private:
   float generate_static(int voice, float sr, float freq_hz, float res, int seed, float rate_hz);
   template <bool AutoFdbk>
   float generate_kps(int voice, float sr, float freq, float fdbk, float stretch, float mid_freq);
-  
+
   void init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph> void process_dsf(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph> void process_basic(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph> void process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   
-  template <bool Graph, bool Sin> void 
+  template <bool Graph, bool Sin> void
   process_basic_sin(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw>
   void process_basic_sin_saw(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
@@ -149,7 +150,6 @@ private:
   void process_basic_sin_saw_tri(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr>
   void process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
-
   template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType>
   void process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation);
 };
@@ -897,7 +897,8 @@ osc_engine::process_basic_sin_saw_tri_sqr(plugin_block& block, cv_audio_matrix_m
   else process_unison<Graph, Sin, Saw, Tri, Sqr, false, false, false, false, false, -1>(block, modulation);
 }
 
-template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> void
+template <bool Graph, bool Sin, bool Saw, bool Tri, bool Sqr, bool DSF, bool Sync, bool KPS, bool KPSAutoFdbk, bool Static, int StaticSVFType> 
+void
 osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   int generator_count = 0;
@@ -1010,7 +1011,6 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     // so mind the bookkeeping
     int mod_index = block.start_frame + frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
-
     float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[mod_index]);
     float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[mod_index]);
     float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[mod_index]);
