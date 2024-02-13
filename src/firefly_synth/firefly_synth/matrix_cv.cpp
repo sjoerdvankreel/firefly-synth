@@ -544,11 +544,19 @@ cv_matrix_engine_base::reset(plugin_block const* block)
   _own_scratch = &block->state.own_scratch;
   _own_block_automation = &block->state.own_block_automation;
   _own_accurate_automation = &block->state.own_accurate_automation;
+
+  assert(_own_cv);
+  assert(_own_scratch);
+  assert(_own_block_automation);
+  assert(_own_accurate_automation);
 }
 
 void
 cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, int slot)
 {
+  // figuring out where we go wrong with the clap validator
+  assert(_own_block_automation);
+
   // cv->cv matrix can modulate the cv->audio matrix
   cv_cv_matrix_mixer* mixer = nullptr;
   cv_cv_matrix_mixdown const* modulation = nullptr;

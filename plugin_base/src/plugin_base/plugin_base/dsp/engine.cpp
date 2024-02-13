@@ -40,6 +40,7 @@ _voice_processor_context(voice_processor_context)
   int accurate_events_guess = _state.desc().param_count * 64;
 
   // init everything that is not frame-count dependent
+  _voice_was_reset.resize(_polyphony);
   _global_module_process_duration_sec.resize(_dims.module_slot);
   _voice_module_process_duration_sec.resize(_dims.voice_module_slot);
   _voice_states.resize(_polyphony);
@@ -400,6 +401,7 @@ plugin_engine::process_voice(int v, bool threaded)
       plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
       block.voice = &voice_block;
 
+      assert(_voice_was_reset[v]);
       double start_time = seconds_since_epoch();
       _voice_module_process_duration_sec[v][m][mi] = start_time;
       _voice_engines[v][m][mi]->process(block);
@@ -407,7 +409,10 @@ plugin_engine::process_voice(int v, bool threaded)
 
       // plugin completed its envelope
       if (block.voice->finished)
+      {
         _voice_states[v].stage = voice_stage::finishing;
+        _voice_was_reset[v] = 0;
+      }
     }
 
   // plugin should have initiated release state
@@ -467,6 +472,7 @@ plugin_engine::activate_voice(note_event const& event, int slot, int frame_count
       block.voice = &voice_block;
       _voice_engines[slot][m][mi]->reset(&block);
     }
+  _voice_was_reset[slot] = 1;
 }
 
 void 
@@ -678,7 +684,7 @@ plugin_engine::process()
   if(voice_mode == engine_voice_mode_poly)
   {
     // poly mode: steal voices for incoming notes by age
-    for (int e = 0; e < _host_block->events.notes.size(); e++)
+    for (int e = 0; e < _host_block->events.notes.size() && e < _polyphony; e++)
     {
       auto const& event = _host_block->events.notes[e];
       if (event.type != note_event_type::on) continue;
@@ -698,7 +704,7 @@ plugin_engine::process()
     // note: need to play *all* incoming notes into this voice
 
     int first_note_on_index = -1;
-    for(int e = 0; e < _host_block->events.notes.size(); e++)
+    for(int e = 0; e < _host_block->events.notes.size() && e < _polyphony; e++)
       if (_host_block->events.notes[e].type == note_event_type::on)
       {
         first_note_on_index = e;
@@ -751,7 +757,7 @@ plugin_engine::process()
       }
 
       // set up note stream, plugin will have to do something with it
-      for(int e = 0; e < _host_block->events.notes.size(); e++)
+      for(int e = 0; e < _host_block->events.notes.size() && e < _polyphony; e++)
         if(_host_block->events.notes[e].type == note_event_type::on)
         {
           auto const& event = _host_block->events.notes[e];
@@ -769,7 +775,7 @@ plugin_engine::process()
   // clap on bitwig hands us note-on events with note id and note-off events without them
   // so i choose to allow note-off with note-id to only kill the same note-id
   // but allow note-off without note-id to kill any matching pck regardless of note-id
-  for (int e = 0; e < _host_block->events.notes.size(); e++)
+  for (int e = 0; e < _host_block->events.notes.size() && e < _polyphony; e++)
   {
     auto const& event = _host_block->events.notes[e];
     if (event.type == note_event_type::on) continue;
