@@ -68,8 +68,14 @@ public:
 
   void threadPoolExec(uint32_t task_index) noexcept override 
   { _engine.process_voice(task_index, true); }  
+
+  // We cannot pass nullptr for the threadpool callback in the constructor
+  // because clap_init has not taken place yet. So instead we must report
+  // "yeah sure host does threadpool" there and then back out later anyway
+  // if that was not the case. CLAP explicitly allows this, plugin_base will
+  // then revert back to single-threaded processing.
   bool thread_pool_voice_processor(plugin_engine& engine)
-  { return _host.threadPoolRequestExec(engine.state().desc().plugin->audio_polyphony); }
+  { return _host.canUseThreadPool()? _host.threadPoolRequestExec(engine.state().desc().plugin->audio_polyphony): false; }
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;
