@@ -54,8 +54,12 @@ get_plugin_factory(char const* factory_id)
   if (strcmp(factory_id, CLAP_PLUGIN_FACTORY_ID)) return nullptr;
   result.get_plugin_count = [](clap_plugin_factory const*) { return 1u; };
   result.get_plugin_descriptor = [](clap_plugin_factory const*, std::uint32_t) { return &descriptor; };
-  result.create_plugin = [](clap_plugin_factory const*, clap_host const* host, char const*)
-  { return (new pb_plugin(&descriptor, host, _topo.get()))->clapPlugin(); };
+  result.create_plugin = [](clap_plugin_factory const*, clap_host const* host, char const* plugin_id)
+  { 
+    if(!strcmp(descriptor.id, plugin_id))
+      return (new pb_plugin(&descriptor, host, _topo.get()))->clapPlugin(); 
+    return static_cast<clap_plugin_t const*>(nullptr);
+  };
   return &result;
 }
 
