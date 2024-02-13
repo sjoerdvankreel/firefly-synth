@@ -115,8 +115,18 @@ pb_plugin::timerCallback()
 bool 
 pb_plugin::stateSave(clap_ostream const* stream) noexcept
 {
+  // clap validator says we need to be prepared to write in chunks
+  // don't bother with that and just write byte-for-byte
+  int written = 1;
+  int total_written = 0;
   std::vector<char> data(plugin_io_save_all(_gui_state, _extra_state));
-  return stream->write(stream, data.data(), data.size()) == data.size();
+  while(written == 1 && total_written < data.size())
+  {
+    written = stream->write(stream, data.data() + total_written, 1);
+    if(written != 1) return false;
+    total_written++;
+  }
+  return true;
 }
 
 bool 
