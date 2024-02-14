@@ -19,6 +19,7 @@ document the header files a bit
 v1.1:
 fx-only version
 move route up/down
+sort presets by name
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
 
