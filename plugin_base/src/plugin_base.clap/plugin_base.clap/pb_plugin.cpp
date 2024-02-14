@@ -115,8 +115,18 @@ pb_plugin::timerCallback()
 bool 
 pb_plugin::stateSave(clap_ostream const* stream) noexcept
 {
+  // clap validator says we need to be prepared to write in chunks
+  // don't bother with that and just write byte-for-byte
+  int written = 1;
+  int total_written = 0;
   std::vector<char> data(plugin_io_save_all(_gui_state, _extra_state));
-  return stream->write(stream, data.data(), data.size()) == data.size();
+  while(written == 1 && total_written < data.size())
+  {
+    written = stream->write(stream, data.data() + total_written, 1);
+    if(written != 1) return false;
+    total_written++;
+  }
+  return true;
 }
 
 bool 
@@ -301,6 +311,9 @@ pb_plugin::getParamInfoForParamId(clap_id param_id, clap_param_info* info) const
 bool
 pb_plugin::paramsValue(clap_id param_id, double* value) noexcept
 {
+  // need to pull in any outstanding audio-to-ui-values from 
+  // the queue before we can report the current value to the host!
+  timerCallback();
   auto const& topo = *_gui_state.desc().param_at_tag(param_id).param;
   auto normalized = _gui_state.get_normalized_at_tag(param_id);
   *value = normalized_to_clap(topo, normalized).value();
@@ -370,6 +383,7 @@ pb_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 void
 pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept
 {
+  bool main_thread = !_is_active.load();
   for (std::uint32_t i = 0; i < in->size(in); i++)
   {
     auto header = in->get(in, i);
@@ -379,10 +393,18 @@ pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* ou
     int index = getParamIndexForParamId(event->param_id);
     auto const& param = *_engine.state().desc().param_at_index(index).param;
     auto normalized = clap_to_normalized(param, clap_value(event->value));
-    _engine.state().set_normalized_at_index(index, normalized);
-    push_to_gui(index, clap_value(event->value));
+    if (main_thread)
+    {
+      _gui_state.set_normalized_at_index(index, normalized);
+      push_to_audio(index, param.domain.normalized_to_plain(normalized));
+    } else
+    {
+      _engine.state().set_normalized_at_index(index, normalized);
+      push_to_gui(index, clap_value(event->value));
+    }
   }
-  process_gui_to_audio_events(out);
+  if(!main_thread)
+    process_gui_to_audio_events(out);
 }
 
 bool
@@ -415,9 +437,17 @@ pb_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_in
   return true;
 }
 
+void 
+pb_plugin::deactivate() noexcept 
+{ 
+  _engine.deactivate(); 
+  _is_active.store(false);
+}
+
 bool
 pb_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
 {
+  _is_active.store(true);
   _engine.activate(max_frame_count);
   _engine.set_sample_rate(sample_rate);
   _engine.activate_modules();

@@ -1129,10 +1129,6 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
         synced_sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_hz, stc_res_curve[mod_index], rand_seed, rand_rate_hz);
       }
 
-      // random with reso might go out of bounds
-      if constexpr(!KPS && !Static)
-        check_bipolar(synced_sample / generator_count);
-
       increment_and_wrap_phase(_sync_phases[v], inc_sync);
 
       // reset to ref phase

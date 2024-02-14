@@ -10,6 +10,7 @@
 #include <readerwriterqueue.h>
 
 #include <memory>
+#include <atomic>
 #include <cstdint>
 
 namespace plugin_base::clap {
@@ -30,6 +31,7 @@ public gui_param_listener
   plugin_engine _engine;
   extra_state _extra_state;
   plugin_state _gui_state = {};
+  std::atomic<bool> _is_active = {};
   std::unique_ptr<plugin_gui> _gui = {};
   std::vector<int> _block_automation_seen = {};
   std::unique_ptr<event_queue> _to_gui_events = {};
@@ -68,8 +70,14 @@ public:
 
   void threadPoolExec(uint32_t task_index) noexcept override 
   { _engine.process_voice(task_index, true); }  
+
+  // We cannot pass nullptr for the threadpool callback in the constructor
+  // because clap_init has not taken place yet. So instead we must report
+  // "yeah sure host does threadpool" there and then back out later anyway
+  // if that was not the case. CLAP explicitly allows this, plugin_base will
+  // then revert back to single-threaded processing.
   bool thread_pool_voice_processor(plugin_engine& engine)
-  { return _host.threadPoolRequestExec(engine.state().desc().plugin->audio_polyphony); }
+  { return _host.canUseThreadPool()? _host.threadPoolRequestExec(engine.state().desc().plugin->audio_polyphony): false; }
 
   bool guiShow() noexcept override;
   bool guiHide() noexcept override;
@@ -99,7 +107,7 @@ public:
   bool audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept override;
 
   bool init() noexcept override;
-  void deactivate() noexcept override { _engine.deactivate();  }
+  void deactivate() noexcept override;
   clap_process_status process(clap_process const* process) noexcept override;
   bool activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept override;
 
