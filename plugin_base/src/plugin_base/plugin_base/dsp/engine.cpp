@@ -189,6 +189,8 @@ plugin_engine::deactivate()
 
   _high_cpu_module = 0;
   _high_cpu_module_usage = 0;
+
+  std::fill(_voice_states.begin(), _voice_states.end(), voice_state());
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
     auto const& module = _state.desc().plugin->modules[m];
@@ -240,6 +242,7 @@ plugin_engine::activate(int max_frame_count)
   _last_note_channel = -1;
   _max_frame_count = max_frame_count;
   _output_updated_sec = seconds_since_epoch();
+  std::fill(_voice_states.begin(), _voice_states.end(), voice_state());
 
   // init frame-count dependent memory
   plugin_frame_dims frame_dims(*_state.desc().plugin, _polyphony, max_frame_count);
