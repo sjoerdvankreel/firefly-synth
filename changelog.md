@@ -1,3 +1,10 @@
+### February 14, 2024 - V1.08.
+
+- Bugfix: reset voice manager state upon plugin (de)activate.
+- Bugfix: do not assume CLAP host can do threadpool.
+- Bugfix: do not assume CLAP host can do ostream with unlimited size.
+- Bugfix: do not report stale value from CLAP gui to host, sync with audio first.
+
 ### February 12, 2024 - V1.07 (No binaries).
 
 - Add another preset (matching to infernal synth's acid line).
