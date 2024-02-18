@@ -44,8 +44,8 @@ typedef plugin_base::jarray<plugin_base::jarray<
 // shared by midi and cv matrix
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 
-// this describes our semi-modular synth
-std::unique_ptr<plugin_base::plugin_topo> synth_topo();
+// this describes our semi-modular synth/fx plugin
+std::unique_ptr<plugin_base::plugin_topo> synth_topo(bool is_fx);
 
 // MIDI goes first! That hosts the midi sources everyone else needs.
 // There's also a whole bunch of other implicit dependencies in here so mind the ordering.

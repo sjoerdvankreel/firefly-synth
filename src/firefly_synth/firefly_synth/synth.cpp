@@ -257,7 +257,7 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 }
 
 std::unique_ptr<plugin_topo>
-synth_topo()
+synth_topo(bool is_fx)
 {
   Colour voice_color(0xFFFF8844);
   Colour matrix_color(0xFF8888FF);
@@ -276,9 +276,6 @@ synth_topo()
   result->audio_polyphony = 32;
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
-  result->type = plugin_type::synth;
-  result->tag.id = FF_SYNTH_ID;
-  result->tag.name = FF_SYNTH_NAME;
   result->version_minor = FF_SYNTH_VERSION_MINOR;
   result->version_major = FF_SYNTH_VERSION_MAJOR;
   result->bpm_smooth_module = module_master_in;
@@ -287,6 +284,19 @@ synth_topo()
   result->midi_smooth_param = master_in_param_midi_smooth;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
+
+  if(is_fx)
+  {
+    result->type = plugin_type::fx;
+    result->tag.id = FF_SYNTH_FX_ID;
+    result->tag.name = FF_SYNTH_FX_NAME;
+  }
+  else
+  {
+    result->type = plugin_type::synth;
+    result->tag.id = FF_SYNTH_INST_ID;
+    result->tag.name = FF_SYNTH_INST_NAME;
+  }
 
   // The same font takes more size on linux ?
 #if (defined __linux__) || (defined  __FreeBSD__)
