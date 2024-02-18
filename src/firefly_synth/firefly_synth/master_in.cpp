@@ -87,12 +87,11 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
 
-  std::vector<int> column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size };
-  if(!is_fx) column_distribution.push_back(1);
+  std::vector<int> column_distribution = { 1, 1 };
+  if(!is_fx) column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size, 1 };
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
     make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, column_distribution))));
-
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod Wheel", "Mod", true, true, param_mod, 1),
