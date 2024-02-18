@@ -391,9 +391,9 @@ synth_topo(bool is_fx)
   result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true, is_fx);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, result.get());
-  result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true,
+  result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true, is_fx,
     make_audio_audio_matrix_sources(result.get(), true, is_fx), make_audio_audio_matrix_targets(result.get(), true));
-  result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false,
+  result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false, is_fx,
     make_audio_audio_matrix_sources(result.get(), false, is_fx), make_audio_audio_matrix_targets(result.get(), false));
   result->modules[module_gcv_audio_matrix] = cv_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false, true,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));

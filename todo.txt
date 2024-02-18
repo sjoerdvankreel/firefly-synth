@@ -20,6 +20,8 @@ document the header files a bit
 v1.1:
 fx-only version
 + test midi handling
++ test default init
++ test ffpreset not shareable
 
 move route up/down
 sort presets by name
