@@ -668,149 +668,151 @@ plugin_engine::process()
   /* STEP 5: Voice management in case of polyphonic synth */
   /********************************************************/
 
-  // always take a voice for an entire block,
-  // module processor is handed appropriate start/end_frame.
-  // and return voices completed the previous block
-  for (int i = 0; i < _voice_states.size(); i++)
+  if(_state.desc().plugin->type == plugin_type::synth)
   {
-    auto& state = _voice_states[i];
-    if (state.stage == voice_stage::active || state.stage == voice_stage::releasing)
+    // always take a voice for an entire block,
+    // module processor is handed appropriate start/end_frame.
+    // and return voices completed the previous block
+    for (int i = 0; i < _voice_states.size(); i++)
     {
-      voice_count++;
-      state.start_frame = 0;
-      state.end_frame = frame_count;
-      state.release_frame = frame_count;
-    }
-    else if (state.stage == voice_stage::finishing)
-      state = voice_state();
-  }
-
-  // todo this needs adjusting for fx-only version 
-  int voice_mode = -1;
-  assert(topo.voice_mode_module >= 0);
-  assert(topo.voice_mode_param >= 0);
-  voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
-  assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
-
-  // for mono mode
-  std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { _last_note_key, false });
-
-  if(voice_mode == engine_voice_mode_poly)
-  {
-    // poly mode: steal voices for incoming notes by age
-    for (int e = 0; e < _host_block->events.notes.size(); e++)
-    {
-      auto const& event = _host_block->events.notes[e];
-      if (event.type != note_event_type::on) continue;
-      int slot = find_best_voice_slot();
-      activate_voice(event, slot, frame_count);
-
-      // for portamento
-      _last_note_key = event.id.key;
-      _last_note_channel = event.id.channel;
-    }
-  }
-  else
-  {
-    // true mono mode: recycle the first active or releasing voice, or set up a new one
-    // release mono mode: recycle the first active but not releasing voice, or set up a new one
-    // note: we do not account for triggering more than 1 voice per block
-    // note: need to play *all* incoming notes into this voice
-
-    int first_note_on_index = -1;
-    for(int e = 0; e < _host_block->events.notes.size(); e++)
-      if (_host_block->events.notes[e].type == note_event_type::on)
+      auto& state = _voice_states[i];
+      if (state.stage == voice_stage::active || state.stage == voice_stage::releasing)
       {
-        first_note_on_index = e;
-        break;
+        voice_count++;
+        state.start_frame = 0;
+        state.end_frame = frame_count;
+        state.release_frame = frame_count;
       }
+      else if (state.stage == voice_stage::finishing)
+        state = voice_state();
+    }
 
-    if(first_note_on_index != -1)
+    int voice_mode = -1;
+    assert(topo.voice_mode_module >= 0);
+    assert(topo.voice_mode_param >= 0);
+    voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
+    assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
+
+    // for mono mode
+    std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { _last_note_key, false });
+
+    if(voice_mode == engine_voice_mode_poly)
     {
-      auto& first_event = _host_block->events.notes[first_note_on_index];
+      // poly mode: steal voices for incoming notes by age
+      for (int e = 0; e < _host_block->events.notes.size(); e++)
+      {
+        auto const& event = _host_block->events.notes[e];
+        if (event.type != note_event_type::on) continue;
+        int slot = find_best_voice_slot();
+        activate_voice(event, slot, frame_count);
+         
+        // for portamento
+        _last_note_key = event.id.key;
+        _last_note_channel = event.id.channel;
+      }
+    }
+    else
+    {
+      // true mono mode: recycle the first active or releasing voice, or set up a new one
+      // release mono mode: recycle the first active but not releasing voice, or set up a new one
+      // note: we do not account for triggering more than 1 voice per block
+      // note: need to play *all* incoming notes into this voice
 
-      int slot = -1;
-      for(int v = 0; v < _voice_states.size(); v++)
-        if (_voice_states[v].stage == voice_stage::active ||
-        (_voice_states[v].stage == voice_stage::releasing && voice_mode == engine_voice_mode::engine_voice_mode_mono))
+      int first_note_on_index = -1;
+      for(int e = 0; e < _host_block->events.notes.size(); e++)
+        if (_host_block->events.notes[e].type == note_event_type::on)
         {
-          slot = v;
+          first_note_on_index = e;
           break;
         }
 
-      if (voice_mode == engine_voice_mode_mono)
+      if(first_note_on_index != -1)
       {
-        // no slot found, for real mono mode take slot 0
-        if(slot == -1)
-        {
-          slot = 0;
-          activate_voice(first_event, 0, frame_count);
-        }
-        else 
-        {
-          // needed for later release by id or pck
-          _voice_states[slot].release_id = first_event.id;
-          _voice_states[slot].time = _stream_time + first_event.frame;
-        }
-      }
+        auto& first_event = _host_block->events.notes[first_note_on_index];
 
-      // for release mono mode, need to do the recycling again
-      if (voice_mode == engine_voice_mode_release)
-      {
-        if (slot == -1)
-        {
-          slot = find_best_voice_slot();
-          activate_voice(first_event, slot, frame_count);
-        }
-        else
-        {
-          // needed for later release by id or pck
-          _voice_states[slot].release_id = first_event.id;
-          _voice_states[slot].time = _stream_time + first_event.frame;
-        }
-      }
+        int slot = -1;
+        for(int v = 0; v < _voice_states.size(); v++)
+          if (_voice_states[v].stage == voice_stage::active ||
+          (_voice_states[v].stage == voice_stage::releasing && voice_mode == engine_voice_mode::engine_voice_mode_mono))
+          {
+            slot = v;
+            break;
+          }
 
-      // set up note stream, plugin will have to do something with it
-      for(int e = 0; e < _host_block->events.notes.size(); e++)
-        if(_host_block->events.notes[e].type == note_event_type::on)
+        if (voice_mode == engine_voice_mode_mono)
         {
-          auto const& event = _host_block->events.notes[e];
-          _last_note_key = event.id.key;
-          _last_note_channel = event.id.channel;
-          std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, false });
-          _mono_note_stream[event.frame].note_on = true;
+          // no slot found, for real mono mode take slot 0
+          if(slot == -1)
+          {
+            slot = 0;
+            activate_voice(first_event, 0, frame_count);
+          }
+          else 
+          {
+            // needed for later release by id or pck
+            _voice_states[slot].release_id = first_event.id;
+            _voice_states[slot].time = _stream_time + first_event.frame;
+          }
         }
+
+        // for release mono mode, need to do the recycling again
+        if (voice_mode == engine_voice_mode_release)
+        {
+          if (slot == -1)
+          {
+            slot = find_best_voice_slot();
+            activate_voice(first_event, slot, frame_count);
+          }
+          else
+          {
+            // needed for later release by id or pck
+            _voice_states[slot].release_id = first_event.id;
+            _voice_states[slot].time = _stream_time + first_event.frame;
+          }
+        }
+
+        // set up note stream, plugin will have to do something with it
+        for(int e = 0; e < _host_block->events.notes.size(); e++)
+          if(_host_block->events.notes[e].type == note_event_type::on)
+          {
+            auto const& event = _host_block->events.notes[e];
+            _last_note_key = event.id.key;
+            _last_note_channel = event.id.channel;
+            std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, false });
+            _mono_note_stream[event.frame].note_on = true;
+          }
+      }
     }
-  }
 
-  // mark voices for completion the next block
-  // be sure to check the note was on (earlier in time than the event) before we turn it off
-  // not sure how to handle note id vs pck: 
-  // clap on bitwig hands us note-on events with note id and note-off events without them
-  // so i choose to allow note-off with note-id to only kill the same note-id
-  // but allow note-off without note-id to kill any matching pck regardless of note-id
-  for (int e = 0; e < _host_block->events.notes.size(); e++)
-  {
-    auto const& event = _host_block->events.notes[e];
-    if (event.type == note_event_type::on) continue;
-    for (int v = 0; v < _voice_states.size(); v++)
+    // mark voices for completion the next block
+    // be sure to check the note was on (earlier in time than the event) before we turn it off
+    // not sure how to handle note id vs pck: 
+    // clap on bitwig hands us note-on events with note id and note-off events without them
+    // so i choose to allow note-off with note-id to only kill the same note-id
+    // but allow note-off without note-id to kill any matching pck regardless of note-id
+    for (int e = 0; e < _host_block->events.notes.size(); e++)
     {
-      auto& state = _voice_states[v];
-      if (state.stage == voice_stage::active &&
-        state.time < _stream_time + event.frame &&
-        ((event.id.id != -1 && state.release_id.id == event.id.id) ||
-          (event.id.id == -1 && (state.release_id.key == event.id.key && state.release_id.channel == event.id.channel))))
+      auto const& event = _host_block->events.notes[e];
+      if (event.type == note_event_type::on) continue;
+      for (int v = 0; v < _voice_states.size(); v++)
       {
-        if (event.type == note_event_type::cut)
+        auto& state = _voice_states[v];
+        if (state.stage == voice_stage::active &&
+          state.time < _stream_time + event.frame &&
+          ((event.id.id != -1 && state.release_id.id == event.id.id) ||
+            (event.id.id == -1 && (state.release_id.key == event.id.key && state.release_id.channel == event.id.channel))))
         {
-          state.end_frame = event.frame;
-          state.stage = voice_stage::finishing;
-          assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
-        }
-        else {
-          state.release_frame = event.frame;
-          state.stage = voice_stage::releasing;
-          assert(0 <= state.start_frame && state.start_frame <= state.release_frame && state.release_frame < frame_count);
+          if (event.type == note_event_type::cut)
+          {
+            state.end_frame = event.frame;
+            state.stage = voice_stage::finishing;
+            assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
+          }
+          else {
+            state.release_frame = event.frame;
+            state.stage = voice_stage::releasing;
+            assert(0 <= state.start_frame && state.start_frame <= state.release_frame && state.release_frame < frame_count);
+          }
         }
       }
     }
@@ -820,35 +822,38 @@ plugin_engine::process()
   /* STEP 6: Run per-voice modules in case of polyphonic synth */
   /*************************************************************/
 
-  // run voice modules in order taking advantage of host threadpool if possible
-  // note: multithreading over voices, not anything within a single voice
   int thread_count = 1;
-  if (!_voice_processor)
-    process_voices_single_threaded();
-  else
+  if (_state.desc().plugin->type == plugin_type::synth)
   {
-    for (int v = 0; v < _polyphony; v++)
-      _voice_thread_ids[v] = std::thread::id();
-    std::atomic_thread_fence(std::memory_order_release);
-    if (!_voice_processor(*this, _voice_processor_context))
+    // run voice modules in order taking advantage of host threadpool if possible
+    // note: multithreading over voices, not anything within a single voice
+    if (!_voice_processor)
       process_voices_single_threaded();
-    else 
+    else
     {
-      std::atomic_thread_fence(std::memory_order_acquire);
-      std::sort(_voice_thread_ids.begin(), _voice_thread_ids.end());
-      thread_count = std::unique(_voice_thread_ids.begin(), _voice_thread_ids.end()) - _voice_thread_ids.begin();
-      thread_count = std::max(1, thread_count);
+      for (int v = 0; v < _polyphony; v++)
+        _voice_thread_ids[v] = std::thread::id();
+      std::atomic_thread_fence(std::memory_order_release);
+      if (!_voice_processor(*this, _voice_processor_context))
+        process_voices_single_threaded();
+      else 
+      {
+        std::atomic_thread_fence(std::memory_order_acquire);
+        std::sort(_voice_thread_ids.begin(), _voice_thread_ids.end());
+        thread_count = std::unique(_voice_thread_ids.begin(), _voice_thread_ids.end()) - _voice_thread_ids.begin();
+        thread_count = std::max(1, thread_count);
+      }
     }
-  }
 
-  // mixdown voices output
-  _voices_mixdown[0].fill(0, frame_count, 0.0f);
-  _voices_mixdown[1].fill(0, frame_count, 0.0f);
-  for (int v = 0; v < _voice_states.size(); v++)
-    if (_voice_states[v].stage != voice_stage::unused)
-      for(int c = 0; c < 2; c++)
-        for(int f = _voice_states[v].start_frame; f < _voice_states[v].end_frame; f++)
-          _voices_mixdown[c][f] += _voice_results[v][c][f];
+    // mixdown voices output
+    _voices_mixdown[0].fill(0, frame_count, 0.0f);
+    _voices_mixdown[1].fill(0, frame_count, 0.0f);
+    for (int v = 0; v < _voice_states.size(); v++)
+      if (_voice_states[v].stage != voice_stage::unused)
+        for(int c = 0; c < 2; c++)
+          for(int f = _voice_states[v].start_frame; f < _voice_states[v].end_frame; f++)
+            _voices_mixdown[c][f] += _voice_results[v][c][f];
+  }
 
   /****************************************************************************************/
   /* STEP 7: Run global output modules (at least one is expected to write host audio out) */
