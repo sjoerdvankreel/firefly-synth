@@ -323,10 +323,12 @@ synth_topo(bool is_fx)
 
   result->gui.min_width = 1143;
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
-  result->gui.dimension.column_sizes = { is_fx? 19: 17, is_fx? 28: 30, 10, 35 };
+  result->gui.dimension.column_sizes = { is_fx? 19: 17, is_fx? 28: 30, 10 };
+  if(!is_fx) result->gui.dimension.column_sizes.push_back(35);
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 1 }, { true, 1 }, { true, 1 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 1 }, { true, 2 } });
+  else section_vsizes.insert(section_vsizes.end(), { { true, 4 }, { false, 2 } });
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
 
   int section_voffset = is_fx? 1: 0;
@@ -348,7 +350,7 @@ synth_topo(bool is_fx)
     custom_section_glfo_graph, { section_voffset + 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
   result->gui.custom_sections[custom_section_matrix_graphs] = make_custom_section_gui(
-    custom_section_matrix_graphs, { is_fx? 4: 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_matrix_graphs, { is_fx? 6: 8, is_fx? 0: 3, 1, is_fx? 3: 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_matrix_graphs_section(gui, lnf, store); });
   if(!is_fx)
   {
@@ -383,7 +385,7 @@ synth_topo(bool is_fx)
      module_vcv_audio_matrix, module_gcv_audio_matrix, module_vcv_cv_matrix, module_gcv_cv_matrix };
   if(is_fx) matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { is_fx? 0: 1, 3, is_fx? 4: 7, 1 }, matrix_modules);
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { is_fx? 5: 1, is_fx? 0: 3, is_fx? 1: 7, is_fx? 3: 1 }, matrix_modules);
   if (!is_fx)
   {
     result->gui.module_sections[module_section_vlfo] = make_module_section_gui(
