@@ -307,7 +307,7 @@ synth_topo(bool is_fx)
     result->tag.id = FF_SYNTH_FX_ID;
     result->tag.name = FF_SYNTH_FX_NAME;
     result->gui.min_width = 708;
-    result->gui.aspect_ratio_height = 83;
+    result->gui.aspect_ratio_height = 84;
   }
   else
   {
