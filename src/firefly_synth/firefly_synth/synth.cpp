@@ -299,20 +299,22 @@ synth_topo(bool is_fx)
   result->midi_smooth_param = master_in_param_midi_smooth;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
-  result->gui.aspect_ratio_width = 107;
 
+  result->gui.aspect_ratio_width = 107;
   if(is_fx)
   {
     result->type = plugin_type::fx;
     result->tag.id = FF_SYNTH_FX_ID;
     result->tag.name = FF_SYNTH_FX_NAME;
-    result->gui.aspect_ratio_height = 22;
+    result->gui.min_width = 708;
+    result->gui.aspect_ratio_height = 63;
   }
   else
   {
     result->type = plugin_type::synth;
     result->tag.id = FF_SYNTH_INST_ID;
     result->tag.name = FF_SYNTH_INST_NAME;
+    result->gui.min_width = 1143;
     result->gui.aspect_ratio_height = 50;
   }
 
@@ -321,7 +323,6 @@ synth_topo(bool is_fx)
   result->gui.font_height = 11;
 #endif
 
-  result->gui.min_width = 1143;
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
   result->gui.dimension.column_sizes = { is_fx? 19: 17, is_fx? 28: 30, 10 };
   if(!is_fx) result->gui.dimension.column_sizes.push_back(35);

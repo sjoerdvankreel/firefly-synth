@@ -25,7 +25,7 @@ fx-only version
 + fix up the gui - logo image size etc
 + paramref
 + do some presets
-
++ do screenshots
 
 move route up/down
 copy voice<->global
