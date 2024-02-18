@@ -390,7 +390,7 @@ render_graph(
 }
 
 module_topo
-fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
+fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
 {
   auto dist_shape_menu = make_wave_multi_menu(true);
   auto voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", "Voice FX", "V.FX", true, true, module_vfx, 10);
@@ -408,8 +408,8 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   result.graph_engine_factory = make_graph_engine;
   if (global) result.default_initializer = init_global_default;
   if (!global) result.default_initializer = init_voice_default;
-  result.gui.menu_handler_factory = [global](plugin_state* state) {
-    return make_audio_routing_menu_handler(state, global); };
+  result.gui.menu_handler_factory = [global, is_fx](plugin_state* state) {
+    return make_audio_routing_menu_handler(state, global, is_fx); };
   result.engine_factory = [global, shape_type_items = dist_shape_menu.multi_items](auto const&, int sample_rate, int max_frame_count) {
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count, shape_type_items); };
   result.graph_renderer = [shape_type_items = dist_shape_menu.multi_items](auto const& state, auto* engine, int param, auto const& mapping) {

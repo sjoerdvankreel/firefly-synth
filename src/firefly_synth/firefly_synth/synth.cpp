@@ -158,10 +158,10 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour cons
 }
 
 std::unique_ptr<module_tab_menu_handler>
-make_audio_routing_menu_handler(plugin_state* state, bool global)
+make_audio_routing_menu_handler(plugin_state* state, bool global, bool is_fx)
 {
   auto cv_params = make_audio_routing_cv_params(state, global);
-  auto audio_params = make_audio_routing_audio_params(state, global);
+  auto audio_params = make_audio_routing_audio_params(state, global, is_fx);
   return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params }));
 }
 
@@ -187,12 +187,11 @@ make_static_cv_matrix_mixdown(plugin_block& block)
 }
 
 std::vector<module_topo const*>
-make_audio_audio_matrix_sources(plugin_topo const* topo, bool global)
+make_audio_audio_matrix_sources(plugin_topo const* topo, bool global, bool is_fx)
 {
-  if (global)
-    return { &topo->modules[module_voice_mix], &topo->modules[module_gfx] };
-  else
-    return { &topo->modules[module_osc], &topo->modules[module_vfx] };
+  if (!global) return { &topo->modules[module_osc], &topo->modules[module_vfx] };
+  if (!is_fx) return { &topo->modules[module_voice_mix], &topo->modules[module_gfx] };
+  return { &topo->modules[module_external_audio], &topo->modules[module_gfx] };
 }
 
 std::vector<module_topo const*>
@@ -376,25 +375,26 @@ synth_topo(bool is_fx)
 
   result->modules.resize(module_count);
   result->modules[module_midi] = midi_topo(module_section_hidden);
-  result->modules[module_voice_mix] = voice_mix_topo(module_section_hidden);
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
+  result->modules[module_voice_mix] = voice_mix_topo(module_section_hidden, is_fx);
+  result->modules[module_external_audio] = external_audio_topo(module_section_hidden, is_fx);
   result->modules[module_env] = env_topo(module_section_env, voice_colors, { 0, 0 });
-  result->modules[module_gfx] = fx_topo(module_section_gfx, global_colors, { 0, 0 }, true);
-  result->modules[module_vfx] = fx_topo(module_section_vfx, voice_colors, { 0, 0 }, false);
+  result->modules[module_gfx] = fx_topo(module_section_gfx, global_colors, { 0, 0 }, true, is_fx);
+  result->modules[module_vfx] = fx_topo(module_section_vfx, voice_colors, { 0, 0 }, false, is_fx);
   result->modules[module_glfo] = lfo_topo(module_section_glfo, global_colors, { 0, 0 }, true);
   result->modules[module_vlfo] = lfo_topo(module_section_vlfo, voice_colors, { 0, 0 }, false);
   result->modules[module_osc] = osc_topo(module_section_osc, voice_colors, { 0, 0 });
   result->modules[module_master_in] = master_in_topo(module_section_master_in, global_colors, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
   result->modules[module_voice_in] = voice_in_topo(module_section_voice_in, voice_colors, { 0, 0 }); // must be after all cv
-  result->modules[module_voice_out] = audio_out_topo(module_section_voice_out, voice_colors, { 0, 0 }, false);
-  result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true);
+  result->modules[module_voice_out] = audio_out_topo(module_section_voice_out, voice_colors, { 0, 0 }, false, is_fx);
+  result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true, is_fx);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, result.get());
   result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true,
-    make_audio_audio_matrix_sources(result.get(), true), make_audio_audio_matrix_targets(result.get(), true));
+    make_audio_audio_matrix_sources(result.get(), true, is_fx), make_audio_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false,
-    make_audio_audio_matrix_sources(result.get(), false), make_audio_audio_matrix_targets(result.get(), false));
+    make_audio_audio_matrix_sources(result.get(), false, is_fx), make_audio_audio_matrix_targets(result.get(), false));
   result->modules[module_gcv_audio_matrix] = cv_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false, true,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));
   result->modules[module_vcv_audio_matrix] = cv_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, false, false,
