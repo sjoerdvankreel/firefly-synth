@@ -27,6 +27,7 @@ fx-only version
 + do some presets
 + do screenshots
 + check user settings file
++ drop pb range
 
 move route up/down
 copy voice<->global

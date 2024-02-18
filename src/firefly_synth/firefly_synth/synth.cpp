@@ -307,7 +307,7 @@ synth_topo(bool is_fx)
     result->tag.id = FF_SYNTH_FX_ID;
     result->tag.name = FF_SYNTH_FX_NAME;
     result->gui.min_width = 708;
-    result->gui.aspect_ratio_height = 68;
+    result->gui.aspect_ratio_height = 83;
   }
   else
   {
@@ -329,7 +329,7 @@ synth_topo(bool is_fx)
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 1 }, { true, 1 }, { true, 1 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 1 }, { true, 2 } });
-  else section_vsizes.insert(section_vsizes.end(), { { true, 4 }, { false, 2 } });
+  else section_vsizes.insert(section_vsizes.end(), { { true, 7 }, { true, 2 } });
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
 
   int section_voffset = is_fx? 1: 0;
