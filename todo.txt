@@ -23,6 +23,7 @@ fx-only version
 + test default init
 + test ffpreset not shareable
 + fix up the gui - logo image size etc
++ paramref
 
 
 move route up/down
