@@ -22,7 +22,8 @@ fx-only version
 + test midi handling
 + test default init
 + test ffpreset not shareable
-+ fix up the gui
++ fix up the gui - logo image size etc
+
 
 move route up/down
 sort presets by name

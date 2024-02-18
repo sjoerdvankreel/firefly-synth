@@ -22,11 +22,11 @@ enum {
   custom_section_controls,
   custom_section_gfx_graph,
   custom_section_glfo_graph,
+  custom_section_matrix_graphs,
   custom_section_osc_graph,
   custom_section_vfx_graph,
   custom_section_vlfo_graph,
   custom_section_env_graph,
-  custom_section_matrix_graphs,
   custom_section_count };
 
 enum { 
