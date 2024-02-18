@@ -25,9 +25,9 @@ module_topo
 external_audio_topo(int section, bool is_fx)
 {
   module_topo result(make_module(
-    make_topo_info("{B5D634E6-4D8A-4C49-9926-1CE21C9B465F}", "External Audio", "External Audio", true, false, module_external_audio, 1),
+    make_topo_info("{B5D634E6-4D8A-4C49-9926-1CE21C9B465F}", "External Audio", "Ext.Audio", true, false, module_external_audio, 1),
     make_module_dsp(module_stage::input, module_output::audio, 0, {
-      make_module_dsp_output(false, make_topo_info("{EA060413-A2E3-4AD2-98D0-F6FE5F7B987E}", "External Audio", output_ext_audio, 1)) }),
+      make_module_dsp_output(false, make_topo_info("{EA060413-A2E3-4AD2-98D0-F6FE5F7B987E}", "Ext.Audio", output_ext_audio, 1)) }),
     make_module_gui_none(section)));
   result.info.description = "In FX mode, provides external audio input to the global audio matrix.";
   result.engine_factory = nullptr;
