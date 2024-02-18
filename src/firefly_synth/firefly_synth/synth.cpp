@@ -415,7 +415,7 @@ synth_topo(bool is_fx)
   result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, voice_colors, { 0, 0 }); // must be after all cv
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, voice_colors, { 0, 0 }, false, is_fx);
   result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true, is_fx);
-  result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony);
+  result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony, is_fx);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, result.get());
   result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_matrices, matrix_colors, { 0, 0 }, true, is_fx,
     make_audio_audio_matrix_sources(result.get(), true, is_fx), make_audio_audio_matrix_targets(result.get(), true));
