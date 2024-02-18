@@ -24,6 +24,7 @@ fx-only version
 + test ffpreset not shareable
 + fix up the gui - logo image size etc
 + paramref
++ do some presets
 
 
 move route up/down
