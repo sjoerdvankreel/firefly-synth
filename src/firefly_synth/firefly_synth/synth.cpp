@@ -294,7 +294,7 @@ synth_topo(bool is_fx)
     result->type = plugin_type::fx;
     result->tag.id = FF_SYNTH_FX_ID;
     result->tag.name = FF_SYNTH_FX_NAME;
-    result->gui.aspect_ratio_height = 20;
+    result->gui.aspect_ratio_height = 22;
   }
   else
   {
