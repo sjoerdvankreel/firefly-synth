@@ -140,7 +140,7 @@ make_controls_section(plugin_gui* gui, lnf* lnf, bool is_fx, component_store sto
   if(is_fx) 
   {
     row_distribution = { 1 };
-    column_distribution = { 1, 1, 1, 1, 1, 1, 1, 1, 1 };
+    column_distribution = { 100, 100, 100, 100, 100, 100, 145, 55, 100 };
   }
   else 
   {
