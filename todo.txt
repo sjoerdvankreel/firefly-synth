@@ -22,12 +22,10 @@ fx-only version
 + test midi handling
 + test default init
 + test ffpreset not shareable
-+ fix up the gui - logo image size etc
 + paramref
 + do some presets
 + do screenshots
 + check user settings file
-+ drop pb range
 
 move route up/down
 copy voice<->global
