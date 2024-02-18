@@ -22,6 +22,7 @@ fx-only version
 + test midi handling
 + test default init
 + test ffpreset not shareable
++ fix up the gui
 
 move route up/down
 sort presets by name
