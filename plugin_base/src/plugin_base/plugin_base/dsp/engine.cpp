@@ -288,20 +288,34 @@ plugin_engine::activate_modules()
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      plugin_block block(make_plugin_block(-1, m, mi, 0, 0));
-      _input_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-      _input_engines[m][mi]->reset(&block);
+      auto& factory = _state.desc().plugin->modules[m].engine_factory;
+      if (factory)
+      {
+        plugin_block block(make_plugin_block(-1, m, mi, 0, 0));
+        _input_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
+        _input_engines[m][mi]->reset(&block);
+      }
     }
-  for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
-    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for (int v = 0; v < _polyphony; v++)
-        _voice_engines[v][m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
+  
+  if(_state.desc().plugin->type == plugin_type::synth)
+    for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
+      for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+        for (int v = 0; v < _polyphony; v++)
+        {
+          auto& factory = _state.desc().plugin->modules[m].engine_factory;
+          if(factory) _voice_engines[v][m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
+        }
+
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
-      plugin_block block(make_plugin_block(-1, m, mi, 0, 0));
-      _output_engines[m][mi] = _state.desc().plugin->modules[m].engine_factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
-      _output_engines[m][mi]->reset(&block);
+      auto& factory = _state.desc().plugin->modules[m].engine_factory;
+      if(factory)
+      {
+        plugin_block block(make_plugin_block(-1, m, mi, 0, 0));
+        _output_engines[m][mi] = factory(*_state.desc().plugin, _sample_rate, _max_frame_count);
+        _output_engines[m][mi]->reset(&block);
+      }
     }
 }
 
@@ -395,23 +409,24 @@ plugin_engine::process_voice(int v, bool threaded)
   if(threaded) denormal_state = disable_denormals();
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-    {
-      // state has already been copied from note event to 
-      // _voice_states during voice stealing (to allow per-voice init)
-      plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame, 
-        _voice_states[v].id, _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
-      plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
-      block.voice = &voice_block;
+      if(_voice_engines[v][m][mi])
+      {
+        // state has already been copied from note event to 
+        // _voice_states during voice stealing (to allow per-voice init)
+        plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame, 
+          _voice_states[v].id, _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
+        plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
+        block.voice = &voice_block;
 
-      double start_time = seconds_since_epoch();
-      _voice_module_process_duration_sec[v][m][mi] = start_time;
-      _voice_engines[v][m][mi]->process(block);
-      _voice_module_process_duration_sec[v][m][mi] = seconds_since_epoch() - start_time;
+        double start_time = seconds_since_epoch();
+        _voice_module_process_duration_sec[v][m][mi] = start_time;
+        _voice_engines[v][m][mi]->process(block);
+        _voice_module_process_duration_sec[v][m][mi] = seconds_since_epoch() - start_time;
 
-      // plugin completed its envelope
-      if (block.voice->finished)
-        _voice_states[v].stage = voice_stage::finishing;
-    }
+        // plugin completed its envelope
+        if (block.voice->finished)
+          _voice_states[v].stage = voice_stage::finishing;
+      }
 
   // plugin should have initiated release state
   state.release_frame = -1;
@@ -464,12 +479,13 @@ plugin_engine::activate_voice(note_event const& event, int slot, int frame_count
   voice_block_params_snapshot(slot);
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-    {
-      plugin_voice_block voice_block(make_voice_block(slot, _voice_states[slot].release_frame, event.id, _last_note_key, _last_note_channel));
-      plugin_block block(make_plugin_block(slot, m, mi, state.start_frame, state.end_frame));
-      block.voice = &voice_block;
-      _voice_engines[slot][m][mi]->reset(&block);
-    }
+      if(_voice_engines[slot][m][mi])
+      {
+        plugin_voice_block voice_block(make_voice_block(slot, _voice_states[slot].release_frame, event.id, _last_note_key, _last_note_channel));
+        plugin_block block(make_plugin_block(slot, m, mi, state.start_frame, state.end_frame));
+        block.voice = &voice_block;
+        _voice_engines[slot][m][mi]->reset(&block);
+      }
 }
 
 void 
@@ -639,13 +655,14 @@ plugin_engine::process()
   // run input modules in order
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-    {
-      plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
-      double start_time = seconds_since_epoch();
-      _global_module_process_duration_sec[m][mi] = start_time;
-      _input_engines[m][mi]->process(block);
-      _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
-    }
+      if(_input_engines[m][mi])
+      {
+        plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
+        double start_time = seconds_since_epoch();
+        _global_module_process_duration_sec[m][mi] = start_time;
+        _input_engines[m][mi]->process(block);
+        _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
+      }
 
   /********************************************************/
   /* STEP 5: Voice management in case of polyphonic synth */
@@ -840,26 +857,27 @@ plugin_engine::process()
   // run output modules in order
   for (int m = _state.desc().module_output_start; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-    {
-      // output params are written to intermediate buffer first
-      plugin_output_block out_block = {
-        voice_count, thread_count,
-        _cpu_usage, _high_cpu_module, _high_cpu_module_usage,
-        _host_block->audio_out, _output_values[m][mi], _voices_mixdown
-      };
-      plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
-      block.out = &out_block;
-      double start_time = seconds_since_epoch();
-      _global_module_process_duration_sec[m][mi] = start_time;
-      _output_engines[m][mi]->process(block);
-      _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
+      if(_output_engines[m][mi])
+      {
+        // output params are written to intermediate buffer first
+        plugin_output_block out_block = {
+          voice_count, thread_count,
+          _cpu_usage, _high_cpu_module, _high_cpu_module_usage,
+          _host_block->audio_out, _output_values[m][mi], _voices_mixdown
+        };
+        plugin_block block(make_plugin_block(-1, m, mi, 0, frame_count));
+        block.out = &out_block;
+        double start_time = seconds_since_epoch();
+        _global_module_process_duration_sec[m][mi] = start_time;
+        _output_engines[m][mi]->process(block);
+        _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
 
-      // copy back output parameter values
-      for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
-        if(_state.desc().plugin->modules[m].params[p].dsp.direction == param_direction::output)
-          for(int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-            _state.set_plain_at(m, mi, p, pi, _output_values[m][mi][p][pi]);
-    }
+        // copy back output parameter values
+        for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+          if(_state.desc().plugin->modules[m].params[p].dsp.direction == param_direction::output)
+            for(int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+              _state.set_plain_at(m, mi, p, pi, _output_values[m][mi][p][pi]);
+      }
 
   /*************************************/
   /* STEP 8: Process output parameters */
