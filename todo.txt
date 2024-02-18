@@ -26,6 +26,7 @@ fx-only version
 + paramref
 + do some presets
 + do screenshots
++ check user settings file
 
 move route up/down
 copy voice<->global
