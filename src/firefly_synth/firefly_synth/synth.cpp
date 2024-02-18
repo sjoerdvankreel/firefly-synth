@@ -147,11 +147,13 @@ make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 }
 
 static Component&
-make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour const& color)
+make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour const& color, bool is_fx)
 {
+  std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
+  for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
   grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xRight), { 0, 1 });
-  auto& label = store_component<autofit_label>(store, lnf, "FIREFLY SYNTH", true, 15);
+  auto& label = store_component<autofit_label>(store, lnf, name, true, 15);
   label.setColour(Label::ColourIds::textColourId, color);
   grid.add(label, { 0, 0 });
   return grid;
@@ -312,8 +314,8 @@ synth_topo(bool is_fx)
     { { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 1 }, { true, 2 }, { true, 1 }, { true, 1 }, { true, 2 } });
 
   result->gui.custom_sections.resize(custom_section_count);
-  auto make_title_section_ui = [custom_color](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
-    return make_title_section(gui, lnf, store, custom_color); };
+  auto make_title_section_ui = [custom_color, is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
+    return make_title_section(gui, lnf, store, custom_color, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
