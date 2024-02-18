@@ -20,7 +20,6 @@ module_dsp::validate() const
 void
 module_topo::validate(plugin_topo const& plugin, int index) const
 {
-  assert(engine_factory);
   assert(info.index == index);
   assert(!gui.visible || params.size());
   assert(midi_sources.size() == 0 || info.slot_count == 1);

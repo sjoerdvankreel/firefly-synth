@@ -2,8 +2,8 @@
 
 #include <plugin_base/shared/utility.hpp>
 
-#define FF_SYNTH_FX_NAME "Firefly Synth"
 #define FF_SYNTH_INST_NAME "Firefly Synth"
+#define FF_SYNTH_FX_NAME "Firefly Synth FX"
 #define FF_SYNTH_FX_ID "4F18AFC06CA743C7AFEF578388E16CF3"
 #define FF_SYNTH_INST_ID "56AFFFF7565F48348C4359D5E6C856A4"
 

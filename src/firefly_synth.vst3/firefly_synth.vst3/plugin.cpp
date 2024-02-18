@@ -73,7 +73,7 @@ BEGIN_FACTORY_DEF(FF_SYNTH_VENDOR_NAME, FF_SYNTH_VENDOR_URL, FF_SYNTH_VENDOR_MAI
   DEF_CLASS2(
     INLINE_UID_FROM_FUID(fuid_from_text(FF_SYNTH_ID)), PClassInfo::kManyInstances,
     kVstAudioEffectClass, FF_SYNTH_FULL_NAME, Vst::kDistributable, 
-    PlugType::kInstrument, FF_SYNTH_VERSION_TEXT, kVstVersionString, component_factory);
+    FF_SYNTH_PLUG_TYPE, FF_SYNTH_VERSION_TEXT, kVstVersionString, component_factory);
   DEF_CLASS2(
     INLINE_UID_FROM_FUID(fuid_from_text(FF_SYNTH_CONTROLLER_ID)), PClassInfo::kManyInstances,
     kVstComponentControllerClass, FF_SYNTH_FULL_NAME, 0, "", FF_SYNTH_VERSION_TEXT,
