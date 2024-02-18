@@ -133,9 +133,9 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
 }
 
 static Component&
-make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
+make_controls_section(plugin_gui* gui, lnf* lnf, bool is_fx, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 5 }, 2);
+  auto& result = store_component<grid_component>(store, gui_dimension{ is_fx? 1: 2, is_fx? 7: 5 }, 2);
   result.add(gui->make_load_button(), { 0, 0 });
   result.add(gui->make_save_button(), { 0, 1 });
   result.add(gui->make_init_button(), { 0, 2 });
@@ -143,8 +143,8 @@ make_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(store_component<preset_button>(store, gui), { 0, 4 });
   auto& tweak_label = store_component<last_tweaked_label>(store, gui->gui_state());
   tweak_label.setJustificationType(Justification::centredRight);
-  result.add(tweak_label, { 1, 0, 1, 3 });
-  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 3, 1, 2 });
+  result.add(tweak_label, { is_fx? 0: 1, is_fx? 5: 0, 1, is_fx? 1: 3 });
+  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { is_fx? 0: 1, is_fx? 6: 3, 1, is_fx? 1: 2 });
   return result;
 }
 
@@ -324,7 +324,8 @@ synth_topo(bool is_fx)
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { is_fx? 1: 0, is_fx? 0: 3, 1, is_fx? 3: 1 }, custom_colors, make_controls_section);
+    custom_section_controls, { is_fx? 1: 0, is_fx? 0: 3, 1, is_fx? 3: 1 }, custom_colors,
+      [is_fx](auto gui, auto lnf, auto store) -> juce::Component& { return make_controls_section(gui, lnf, is_fx, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
