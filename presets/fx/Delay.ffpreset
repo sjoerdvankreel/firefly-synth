@@ -1,5 +1,5 @@
 {
-  "checksum": "634193f41952333edcffaf0a9c422839",
+  "checksum": "ff2a55e6d3b33be49021a3c9ecf780a5",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "b60adca15203bbf4b7c4540e6abb73e9",
+        "checksum": "b42898a98ed378b95ed4446709e2f63c",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,11 +22,12 @@
             "plugin_version_minor": 0
           },
           "content": {
+            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "c6a6eb13b748e5e1dbf008770d077221",
+        "checksum": "ec9513e1ec6d491554374f10a2a9c983",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -6322,7 +6323,7 @@
                     "params": [
                       {
                         "slots": [
-                          "{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}"
+                          "{789D430C-9636-4FFF-8C75-11B839B9D80D}"
                         ]
                       },
                       {
@@ -6372,7 +6373,7 @@
                       },
                       {
                         "slots": [
-                          "{0E961515-1089-4E65-99C0-3A493253CF07}"
+                          "{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}"
                         ]
                       },
                       {
@@ -6382,32 +6383,32 @@
                       },
                       {
                         "slots": [
-                          "{C8D7BA33-6458-4972-8C31-D9BDAE0A3A54}-{606B62CB-1C17-42CA-931B-61FA4C22A9F0}-{606B62CB-1C17-42CA-931B-61FA4C22A9F0}"
+                          "{4A873C32-8B89-47ED-8C93-44FE0B6A7DCC}-{B15C7C6E-B1A4-49D3-85EF-12A7DC9EAA83}-{B15C7C6E-B1A4-49D3-85EF-12A7DC9EAA83}"
                         ]
                       },
                       {
                         "slots": [
-                          "11 %"
+                          "50 %"
                         ]
                       },
                       {
                         "slots": [
-                          "7 %"
+                          "50 %"
                         ]
                       },
                       {
                         "slots": [
-                          "220 Hz"
+                          "20000 Hz"
                         ]
                       },
                       {
                         "slots": [
-                          "95 %"
+                          "0 %"
                         ]
                       },
                       {
                         "slots": [
-                          "3.11"
+                          "1.00"
                         ]
                       },
                       {
@@ -6417,7 +6418,7 @@
                       },
                       {
                         "slots": [
-                          "{A1481F0B-D6FD-4375-BDF9-C01D2F5C5B79}"
+                          "{7CEC3D1C-6854-4591-9AD7-BDBA9509EA87}"
                         ]
                       },
                       {
