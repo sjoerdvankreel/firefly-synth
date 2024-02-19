@@ -407,21 +407,29 @@ pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* ou
     process_gui_to_audio_events(out);
 }
 
+std::uint32_t
+pb_plugin::notePortsCount(bool is_input) const noexcept
+{
+  if (!is_input) return 0;
+  return _engine.state().desc().plugin->type == plugin_type::synth ? 1 : 0;
+}
+
+std::uint32_t
+pb_plugin::audioPortsCount(bool is_input) const noexcept
+{
+  if (!is_input) return 1;
+  return _engine.state().desc().plugin->type == plugin_type::fx ? 1 : 0;
+}
+
 bool
 pb_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
 {
   if (!is_input || index != 0) return false;
+  if (_engine.state().desc().plugin->type == plugin_type::fx) return false;
   info->id = 0;
   info->preferred_dialect = CLAP_NOTE_DIALECT_CLAP;
   info->supported_dialects = CLAP_NOTE_DIALECT_CLAP | CLAP_NOTE_DIALECT_MIDI;
   return true;
-}
-
-std::uint32_t 
-pb_plugin::audioPortsCount(bool is_input) const noexcept
-{
-  if (!is_input) return 1;
-  return _engine.state().desc().plugin->type == plugin_type::fx? 1: 0;
 }
 
 bool

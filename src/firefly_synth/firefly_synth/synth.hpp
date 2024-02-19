@@ -44,18 +44,18 @@ typedef plugin_base::jarray<plugin_base::jarray<
 // shared by midi and cv matrix
 enum { midi_output_cp, midi_output_pb, midi_output_cc };
 
-// this describes our semi-modular synth
-std::unique_ptr<plugin_base::plugin_topo> synth_topo();
+// this describes our semi-modular synth/fx plugin
+std::unique_ptr<plugin_base::plugin_topo> synth_topo(bool is_fx);
 
 // MIDI goes first! That hosts the midi sources everyone else needs.
 // There's also a whole bunch of other implicit dependencies in here so mind the ordering.
 // For example env can modulate vlfo so env goes first.
 enum {
-  module_midi, module_gcv_cv_matrix, module_master_in, module_glfo, module_gcv_audio_matrix,
-  module_vcv_cv_matrix, module_voice_note, module_voice_on_note, module_env, module_vlfo,
-  module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, module_osc_osc_matrix, 
-  module_osc, module_vfx, module_voice_out, module_voice_mix, module_gaudio_audio_matrix, 
-  module_gfx, module_master_out, module_monitor, module_count };
+  module_external_audio, module_midi, module_gcv_cv_matrix, module_master_in, module_glfo, 
+  module_gcv_audio_matrix, module_vcv_cv_matrix, module_voice_note, module_voice_on_note, 
+  module_env, module_vlfo, module_vcv_audio_matrix, module_voice_in, module_vaudio_audio_matrix, 
+  module_osc_osc_matrix, module_osc, module_vfx, module_voice_out, module_voice_mix, 
+  module_gaudio_audio_matrix, module_gfx, module_master_out, module_monitor, module_count };
 
 // used by the oscillator at the end of it's process call to apply amp/ring mod
 // (e.g. osc 2 is modulated by both osc 1 and osc 2 itself)
@@ -163,39 +163,40 @@ make_cv_cv_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
 make_cv_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
-make_audio_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
-std::vector<plugin_base::module_topo const*>
 make_audio_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
+std::vector<plugin_base::module_topo const*>
+make_audio_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global, bool is_fx);
 
 // menu handlers to update routing on clear/move/swap/copy
 std::unique_ptr<plugin_base::module_tab_menu_handler>
 make_cv_routing_menu_handler(plugin_base::plugin_state* state);
-std::unique_ptr<plugin_base::module_tab_menu_handler>
-make_audio_routing_menu_handler(plugin_base::plugin_state* state, bool global);
 plugin_base::audio_routing_audio_params
 make_audio_routing_osc_mod_params(plugin_base::plugin_state* state);
 plugin_base::audio_routing_cv_params
 make_audio_routing_cv_params(plugin_base::plugin_state* state, bool global);
+std::unique_ptr<plugin_base::module_tab_menu_handler>
+make_audio_routing_menu_handler(plugin_base::plugin_state* state, bool global, bool is_fx);
 plugin_base::audio_routing_audio_params
-make_audio_routing_audio_params(plugin_base::plugin_state* state, bool global);
+make_audio_routing_audio_params(plugin_base::plugin_state* state, bool global, bool is_fx);
 
 // these describe individual modules
 plugin_base::module_topo midi_topo(int section);
-plugin_base::module_topo voice_mix_topo(int section);
 plugin_base::module_topo voice_note_topo(int section);
+plugin_base::module_topo voice_mix_topo(int section, bool is_fx);
+plugin_base::module_topo external_audio_topo(int section, bool is_fx);
 plugin_base::module_topo voice_on_note_topo(plugin_base::plugin_topo const* topo, int section);
 plugin_base::module_topo env_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo osc_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
 plugin_base::module_topo voice_in_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
-plugin_base::module_topo master_in_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
-plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
-plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
-plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global);
-plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony);
+plugin_base::module_topo master_in_topo(int section, bool is_fx, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos);
+plugin_base::module_topo fx_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global, bool is_fx);
+plugin_base::module_topo lfo_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global, bool is_fx);
+plugin_base::module_topo monitor_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, int polyphony, bool is_fx);
+plugin_base::module_topo audio_out_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global, bool is_fx);
 plugin_base::module_topo osc_osc_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, plugin_base::plugin_topo const* plugin);
-plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global,
+plugin_base::module_topo audio_audio_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool global, bool is_fx,
   std::vector<plugin_base::module_topo const*> const& sources, std::vector<plugin_base::module_topo const*> const& targets);
-plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool cv, bool global,
+plugin_base::module_topo cv_matrix_topo(int section, plugin_base::gui_colors const& colors, plugin_base::gui_position const& pos, bool cv, bool global, bool is_fx,
   std::vector<plugin_base::cv_source_entry> const& sources, std::vector<plugin_base::cv_source_entry> const& on_note_sources, std::vector<plugin_base::module_topo const*> const& targets);
 
 }

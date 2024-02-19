@@ -187,7 +187,7 @@ render_graph(
 }
 
 module_topo
-lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
+lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
 {
   auto type_menu = make_wave_multi_menu(false);
   auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", "Voice LFO", "V.LFO", true, true, module_vlfo, 10);
@@ -204,7 +204,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_module_gui(section, colors, pos, { { 1 }, { 1, gui_dimension::auto_size } })));
   
   result.graph_engine_factory = make_graph_engine;
-  if(global) result.default_initializer = init_global_default;
+  if(global && !is_fx) result.default_initializer = init_global_default;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [global, type_items = type_menu.multi_items](auto const&, int, int) {
     return std::make_unique<lfo_engine>(global, type_items); };

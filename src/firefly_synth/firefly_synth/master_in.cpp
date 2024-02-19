@@ -45,7 +45,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 }
 
 module_topo
-master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
+master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", "Master In", "M.In", true, true, module_master_in, 1),
@@ -87,28 +87,32 @@ master_in_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
 
+  std::vector<int> column_distribution = { 1, 1 };
+  if(!is_fx) column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size, 1 };
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, column_distribution))));
+  gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", "Mod Wheel", "Mod", true, true, param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 0 },
+    make_param_gui_single(section_linked, edit_type, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
   auto& pitch_bend = result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", "Pitch Bend", "PB", true, true, param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_linked, gui_edit_type::knob, { 0, 1 },
+    make_param_gui_single(section_linked, edit_type, { 0, 1 },
     make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
+
+  if(is_fx) return result;
   auto& pb_range = result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", "Pitch Bend Range", "Range", true, true, param_pb_range, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
     make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
-
   return result;
 }
 

@@ -40,7 +40,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 }
 
 module_topo
-audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, bool global)
+audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
 {
   auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", "Voice Out", "V.Out", true, true, module_voice_out, 1));
   voice_info.description = "Controls gain and balance of individual voices.";
@@ -54,8 +54,8 @@ audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, b
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
-  result.gui.menu_handler_factory = [global](plugin_state* state) { 
-    return make_audio_routing_menu_handler(state, global); };
+  result.gui.menu_handler_factory = [global, is_fx](plugin_state* state) {
+    return make_audio_routing_menu_handler(state, global, is_fx); };
   if(global)
     result.engine_factory = [](auto const&, int, int) { 
       return std::make_unique<master_audio_out_engine>(); };

@@ -9,6 +9,18 @@
 #include <clap/clap.h>
 #include <cstring>
 
+#ifndef PB_IS_FX
+#error
+#elif PB_IS_FX
+#define FF_SYNTH_ID FF_SYNTH_FX_ID
+#define FF_SYNTH_FULL_NAME FF_SYNTH_FX_FULL_NAME
+#define FF_PLUGIN_FEATURE CLAP_PLUGIN_FEATURE_AUDIO_EFFECT
+#else
+#define FF_SYNTH_ID FF_SYNTH_INST_ID
+#define FF_SYNTH_FULL_NAME FF_SYNTH_INST_FULL_NAME
+#define FF_PLUGIN_FEATURE CLAP_PLUGIN_FEATURE_INSTRUMENT
+#endif
+
 using namespace plugin_base;
 using namespace firefly_synth;
 using namespace plugin_base::clap;
@@ -16,7 +28,7 @@ using namespace plugin_base::clap;
 static std::unique_ptr<plugin_topo> _topo = {};
 
 static char const*
-features[] = { CLAP_PLUGIN_FEATURE_INSTRUMENT, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
+features[] = { FF_PLUGIN_FEATURE, CLAP_PLUGIN_FEATURE_STEREO, nullptr };
 
 static void CLAP_ABI
 deinit()
@@ -28,7 +40,7 @@ deinit()
 static bool CLAP_ABI
 init(char const*)
 {
-  _topo = synth_topo();
+  _topo = synth_topo(PB_IS_FX);
   juce::initialiseJuce_GUI();
   return true;
 }
@@ -74,6 +86,6 @@ clap_plugin_entry_t const clap_entry =
 
 // for param list generator
 extern "C" PB_EXPORT plugin_topo const*
-pb_plugin_topo_create() { return synth_topo().release(); }
+pb_plugin_topo_create() { return synth_topo(PB_IS_FX).release(); }
 extern "C" PB_EXPORT void
 pb_plugin_topo_destroy(plugin_topo const* topo) { delete topo; }

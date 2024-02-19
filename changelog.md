@@ -1,3 +1,7 @@
+### February 19, 2024 - V1.09.
+
+- Add fx-only plugin version.
+
 ### February 14, 2024 - V1.08.
 
 - Bugfix: reset voice manager state upon plugin (de)activate.

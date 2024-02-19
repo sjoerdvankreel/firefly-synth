@@ -123,6 +123,7 @@ plugin_desc::presets() const
   for (auto const& entry : std::filesystem::directory_iterator{ preset_folder })
     if (entry.is_regular_file() && entry.path().extension().string() == std::string(".") + plugin->extension)
       result.push_back({ entry.path().stem().string(), entry.path().string() });
+  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { return l.name < r.name; });
   return result;
 }
 

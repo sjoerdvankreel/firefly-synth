@@ -1,8 +1,10 @@
 # Firefly Synth
 A semi-modular polyphonic synthesizer plugin with different oscillator and effect types,<br/>
-2 osc-to-osc routing matrices and both global and per-voice audio and cv routing matrices.
+2 osc-to-osc routing matrices and both global and per-voice audio and cv routing matrices.<br/>
+There is also an fx version which routes external input instead of voice output to the global effect section.
 
 ![Screenshot](static/screenshot.png)
+![Screenshot](static/screenshot_fx.png)
 
 ## UI
 A knob with a circle in it or a slider with a small dot in it means it can be modulated by the CV matrices.<br/>

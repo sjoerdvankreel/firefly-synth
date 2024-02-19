@@ -101,7 +101,7 @@ public:
   bool paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept override;
   std::uint32_t paramsCount() const noexcept override { return _engine.state().desc().param_count; }
 
-  std::uint32_t notePortsCount(bool is_input) const noexcept override { return is_input? 1: 0;}
+  std::uint32_t notePortsCount(bool is_input) const noexcept override;
   bool notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept override;
   std::uint32_t audioPortsCount(bool is_input) const noexcept override;
   bool audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept override;

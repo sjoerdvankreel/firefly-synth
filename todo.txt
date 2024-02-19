@@ -18,9 +18,9 @@ visual routing indicators
 document the header files a bit
 
 v1.1:
-fx-only version
+automate zip/dist
 move route up/down
-sort presets by name
+copy voice<->global
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
 

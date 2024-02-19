@@ -51,10 +51,10 @@ init_voice_minimal(plugin_state& state)
 }
 
 static void
-init_global_minimal(plugin_state& state)
+init_global_minimal(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, "V.Mix");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext.Audio" : "V.Mix");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "M.Out");
 }
 
@@ -73,13 +73,19 @@ init_voice_default(plugin_state& state)
 }
 
 static void
-init_global_default(plugin_state& state)
+init_global_default(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, "V.Mix");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx? "Ext.Audio": "V.Mix");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "G.FX 1");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 1, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 1, "G.FX 1");
+  if (is_fx)
+  {
+    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "M.Out");
+    return;
+  }
+
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "G.FX 2");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 2, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 2, "G.FX 2");
@@ -118,7 +124,7 @@ render_graph(
 }
 
 audio_routing_audio_params
-make_audio_routing_audio_params(plugin_state* state, bool global)
+make_audio_routing_audio_params(plugin_state* state, bool global, bool is_fx)
 {
   audio_routing_audio_params result;
   result.off_value = 0;
@@ -127,7 +133,7 @@ make_audio_routing_audio_params(plugin_state* state, bool global)
   result.matrix_source_params = { param_source };
   result.matrix_target_params = { param_target };
   result.matrix_module = global ? module_gaudio_audio_matrix : module_vaudio_audio_matrix;
-  result.sources = make_audio_matrix(make_audio_audio_matrix_sources(state->desc().plugin, global), 0).mappings;
+  result.sources = make_audio_matrix(make_audio_audio_matrix_sources(state->desc().plugin, global, is_fx), 0).mappings;
   result.targets = make_audio_matrix(make_audio_audio_matrix_targets(state->desc().plugin, global), 0).mappings;
   return result;
 }
@@ -135,7 +141,7 @@ make_audio_routing_audio_params(plugin_state* state, bool global)
 module_topo 
 audio_audio_matrix_topo(
   int section, gui_colors const& colors,
-  gui_position const& pos, bool global,
+  gui_position const& pos, bool global, bool is_fx,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
@@ -160,8 +166,16 @@ audio_audio_matrix_topo(
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, tm); };
   result.gui.tabbed_name = result.info.tag.short_name;
-  result.default_initializer = global ? init_global_default : init_voice_default;
-  result.minimal_initializer = global ? init_global_minimal : init_voice_minimal;
+  if (global)
+  {
+    result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
+    result.minimal_initializer = [is_fx](auto& s) { init_global_minimal(s, is_fx); };
+  }
+  else
+  {
+    result.default_initializer = init_voice_default;
+    result.minimal_initializer = init_voice_minimal;
+  }
   result.engine_factory = [global, sm = source_matrix, tm = target_matrix](auto const& topo, int, int) {
     return std::make_unique<audio_audio_matrix_engine>(global, sm.mappings, tm.mappings); };
   result.gui.menu_handler_factory = [](plugin_state* state) { 

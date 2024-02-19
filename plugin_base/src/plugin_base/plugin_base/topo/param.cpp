@@ -40,7 +40,7 @@ param_dsp::validate(plugin_topo const& plugin, module_topo const& module, int mo
   if (is_midi(module_slot))
   {
     assert(0 <= midi_source.module_index && midi_source.module_index < plugin.modules.size());
-    assert(0 <= midi_source.module_slot && midi_source.module_index < plugin.modules[midi_source.module_index].info.slot_count);
+    assert(0 <= midi_source.module_slot && midi_source.module_slot < plugin.modules[midi_source.module_index].info.slot_count);
     assert(0 <= midi_source.midi_index && midi_source.midi_index < plugin.modules[midi_source.module_index].midi_sources.size());
   }
 }
