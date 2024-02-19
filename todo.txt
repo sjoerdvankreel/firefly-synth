@@ -19,11 +19,9 @@ document the header files a bit
 
 v1.1:
 fx-only version
-+ test midi handling
 + do some presets
 + do screenshots
 + make host test file
-+ drop the default glfo in fx mode
 
 move route up/down
 copy voice<->global
