@@ -22,6 +22,7 @@ fx-only version
 + do screenshots
 + make audio demo
 
+automate zip/dist
 move route up/down
 copy voice<->global
 osc graph does not vertical fill?
