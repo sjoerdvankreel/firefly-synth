@@ -18,10 +18,6 @@ visual routing indicators
 document the header files a bit
 
 v1.1:
-fx-only version
-+ do screenshots
-+ make audio demo
-
 automate zip/dist
 move route up/down
 copy voice<->global
