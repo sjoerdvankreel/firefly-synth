@@ -23,6 +23,7 @@ fx-only version
 + do some presets
 + do screenshots
 + make host test file
++ drop the default glfo in fx mode
 
 move route up/down
 copy voice<->global
