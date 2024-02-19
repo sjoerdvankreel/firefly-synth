@@ -175,10 +175,9 @@ audio_audio_matrix_topo(
   result.gui.menu_handler_factory = [](plugin_state* state) { 
     return std::make_unique<tidy_matrix_menu_handler>(state, 1, param_on, 0, std::vector<std::vector<int>>({{ param_target, param_source }})); };
 
-  int edit_size = is_fx? 5: 3;
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 2, 2, edit_size, edit_size } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 2, 2, 3, 3 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& on = result.params.emplace_back(make_param(
@@ -229,6 +228,7 @@ audio_audio_matrix_topo(
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   amount.info.description = "Controls route gain.";
+
   auto& bal = result.params.emplace_back(make_param(
     make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", "Bal", "Bal", true, true, param_bal, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
