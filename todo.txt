@@ -20,8 +20,6 @@ document the header files a bit
 v1.1:
 fx-only version
 + test midi handling
-+ test default init
-+ paramref
 + do some presets
 + do screenshots
 

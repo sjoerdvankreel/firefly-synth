@@ -227,12 +227,12 @@ init_voice_default(plugin_state& state)
 }
 
 static void
-init_global_default(plugin_state& state)
+init_global_default(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gfx, 0, param_type, 0, "SVF");
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
-  state.set_text_at(module_gfx, 1, param_type, 0, "Delay");
-  state.set_text_at(module_gfx, 1, param_dly_type, 0, "Fdbk.Sync");
+  state.set_text_at(module_gfx, is_fx ? 0: 1, param_type, 0, "Delay");
+  state.set_text_at(module_gfx, is_fx ? 0 : 1, param_dly_type, 0, "Fdbk.Sync");
 }
 
 static graph_engine_params
@@ -406,7 +406,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, 1 } })));
  
   result.graph_engine_factory = make_graph_engine;
-  if (global) result.default_initializer = init_global_default;
+  if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
   if (!global) result.default_initializer = init_voice_default;
   result.gui.menu_handler_factory = [global, is_fx](plugin_state* state) {
     return make_audio_routing_menu_handler(state, global, is_fx); };

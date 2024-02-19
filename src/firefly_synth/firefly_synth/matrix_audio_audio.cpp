@@ -80,6 +80,12 @@ init_global_default(plugin_state& state, bool is_fx)
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "G.FX 1");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 1, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 1, "G.FX 1");
+  if (is_fx)
+  {
+    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "M.Out");
+    return;
+  }
+
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "G.FX 2");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 2, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 2, "G.FX 2");

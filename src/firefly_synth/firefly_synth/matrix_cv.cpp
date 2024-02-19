@@ -342,7 +342,7 @@ render_graph(
 module_topo
 cv_matrix_topo(
   int section, gui_colors const& colors,
-  gui_position const& pos, bool cv, bool global,
+  gui_position const& pos, bool cv, bool global, bool is_fx,
   std::vector<cv_source_entry> const& sources,
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
@@ -382,7 +382,7 @@ cv_matrix_topo(
   
   result.gui.tabbed_name = result.info.tag.short_name;
   result.graph_engine_factory = make_graph_engine;
-  if(!cv) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
+  if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, sm, tm);
