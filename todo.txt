@@ -22,6 +22,7 @@ fx-only version
 + test midi handling
 + do some presets
 + do screenshots
++ make host test file
 
 move route up/down
 copy voice<->global
