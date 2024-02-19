@@ -1,5 +1,5 @@
 {
-  "checksum": "561805dd42111b0fcfd3ee809ceeafd1",
+  "checksum": "d7bd4ee9d6d9c692eea846e64eb190ff",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "4a81eb73d1bb12e705c31752432e0edd",
+        "checksum": "ef666513549b8ed53ef65de50784c354",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,14 +22,14 @@
             "plugin_version_minor": 0
           },
           "content": {
-            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 2,
+            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
             "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
             "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}/tab": 3
           }
         }
       },
       "plugin": {
-        "checksum": "4411c330f64dadd240541bbd2583a769",
+        "checksum": "2f28354fbdce479f943326b720d9f7d0",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -6201,7 +6201,7 @@
                           "On",
                           "On",
                           "On",
-                          "On",
+                          "Off",
                           "Off",
                           "Off",
                           "Off",
