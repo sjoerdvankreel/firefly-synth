@@ -24,6 +24,7 @@ Pretty much like InfernalSynth, but better ;). I reused most of the algorithms, 
 the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play
 around with, there's a new CV-to-CV mod matrix and last-but-not-least, it can do actual (Chowning-style) FM synthesis.
 
+Presets:
 - Big Pad (Preset): [big_pad.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/big_pad.mp3)
 - Mono Lead (Preset): [mono_lead.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/mono_lead_reaper_clap.mp3)
 - Infernal Acid (Preset): [infernal_acid.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/infernal_acid.mp3)
@@ -33,11 +34,16 @@ around with, there's a new CV-to-CV mod matrix and last-but-not-least, it can do
 - Karplus-Strong (Preset): [karplus_strong_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/karplus_strong_reaper_clap.mp3)
 - I Love Distortion (Preset): [i_love_distortion_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_reaper_clap.mp3)
 
-<br/>
+Demo tunes:
+- Demo track 1: [demo_track_1.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_1.mp3)
+- Demo track 2: [demo_track_2.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_2.mp3)
 
+Other:
 - FX Demo: [fx_demo_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fx_demo_reaper_clap.mp3)
 - Noise generator demo: [stereo_noise_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/stereo_noise_reaper_clap.mp3)
-- Short demo tune with some kicks and percussion: [kick_bass_hat_clap_synth_with_reacomp.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/kick_bass_hat_clap_synth_with_reacomp.mp3)
+
+See also [demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos) for project files.<br/>
+Not all of these sounds are presets, but if you want you can extract the other ones from here.
 
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
