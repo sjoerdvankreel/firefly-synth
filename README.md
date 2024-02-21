@@ -24,8 +24,8 @@ Pretty much like InfernalSynth. I reused most of the algorithms, although some o
 the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play
 around with, there's a new CV-to-CV mod matrix and last-but-not-least, it can do actual (Chowning-style) FM synthesis.
 
-See also [demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos) for project files.<br/>
-Not all of these sounds are presets, but if you want you can extract the other ones from here.
+See also [demos](https://github.com/sjoerdvankreel/firefly-synth/tree/main/demos) for project files.
+Not all of these sounds are presets, but if you want you can extract the other ones from there.
 
 Demo tunes:
 - Demo track 1: [demo_track_1.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_1.mp3)
