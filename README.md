@@ -20,7 +20,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 # What does it sound like?
 
-Pretty much like InfernalSynth, but better ;). I reused most of the algorithms, although some of them got upgraded. In particular,
+Pretty much like InfernalSynth. I reused most of the algorithms, although some of them got upgraded. In particular,
 the waveshaper becomes a full-blown distortion module, the Karplus-Strong oscillator has some extra knobs to play
 around with, there's a new CV-to-CV mod matrix and last-but-not-least, it can do actual (Chowning-style) FM synthesis.
 
