@@ -21,6 +21,7 @@ v1.1:
 automate zip/dist
 move route up/down
 copy voice<->global
+modulate env by glfo/aux
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
 
