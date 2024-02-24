@@ -79,8 +79,17 @@ public:
   void reset(plugin_block const* block) override;
 
 private:
+
+  double _stn = 0;
+  double _hld = 0;
+  double _dcy = 0;
+  double _dly = 0;
+  double _att = 0;
+  double _rls = 0;
+
   env_stage _stage = {};
   cv_filter _filter = {};
+
   double _stage_pos = 0;
   double _current_level = 0;
   double _multitrig_level = 0;
@@ -102,7 +111,7 @@ private:
   template <bool Monophonic> 
   void process(plugin_block& block);
   template <bool Monophonic, class CalcSlope> 
-  void process_slope(plugin_block& block, float dly, float att, float hld, float dcy, float stn, float rls, CalcSlope calc_slope);
+  void process_slope(plugin_block& block, CalcSlope calc_slope);
 };
 
 static void
@@ -243,21 +252,21 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   auto& attack_slope = result.params.emplace_back(make_param(
     make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", "Attack Slope", "A.Slp", true, true, param_attack_slope, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   attack_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
   attack_slope.info.description = "Controls attack slope for exponential modes.";
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", "Decay Slope", "D.Slp", true, true, param_decay_slope, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
   decay_slope.info.description = "Controls decay slope for exponential modes.";
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", "Release Slope", "R.Slp", true, true, param_release_slope, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
@@ -269,7 +278,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
       
   auto& delay_time = result.params.emplace_back(make_param(
     make_topo_info("{E9EF839C-235D-4248-A4E1-FAD62089CC78}", "Delay Time", "Dly", true, true, param_delay_time, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
     make_param_gui_single(section_dhadsr, gui_edit_type::hslider, { 0, 0 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   delay_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
@@ -287,7 +296,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& attack_time = result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", "Attack Time", "A", true, true, param_attack_time, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
     make_param_gui_single(section_dhadsr, gui_edit_type::hslider, { 0, 1 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   attack_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
@@ -305,7 +314,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& hold_time = result.params.emplace_back(make_param(
     make_topo_info("{66F6036E-E64A-422A-87E1-34E59BC93650}", "Hold Time", "Hld", true, true, param_hold_time, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
     make_param_gui_single(section_dhadsr, gui_edit_type::hslider, { 0, 2 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   hold_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
@@ -323,7 +332,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& decay_time = result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", "Decay Time", "D", true, true, param_decay_time, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_dhadsr, gui_edit_type::hslider, { 0, 3 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   decay_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
@@ -341,7 +350,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& sustain = result.params.emplace_back(make_param(
     make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "Sustain", "Stn", true, true, param_sustain, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dhadsr, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -349,7 +358,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   auto& release_time = result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", "Release Time", "R", true, true, param_release_time, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
     make_param_gui_single(section_dhadsr, gui_edit_type::hslider, { 0, 5 }, 
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   release_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
@@ -395,15 +404,39 @@ env_engine::reset(plugin_block const* block)
   _stage = env_stage::delay;
 
   auto const& block_auto = block->state.own_block_automation;
+  auto const& acc_auto = block->state.own_accurate_automation;
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
 
   int mode = block_auto[param_mode][0].step();
+  bool sync = block_auto[param_sync][0].step() != 0;
+
+  // These are not really continuous (we only pick them up at voice start)
+  // but we fake it this way so they can participate in modulation.
+  _stn = acc_auto[param_sustain][0][0];
+  _hld = block->normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, acc_auto[param_hold_time][0][0]);
+  _dcy = block->normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, acc_auto[param_decay_time][0][0]);
+  _dly = block->normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, acc_auto[param_delay_time][0][0]);
+  _att = block->normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, acc_auto[param_attack_time][0][0]);
+  _rls = block->normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, acc_auto[param_release_time][0][0]);
+
+  if (sync)
+  {
+    auto const& params = block->plugin.modules[module_env].params;
+    _hld = timesig_to_time(block->host.bpm, params[param_hold_tempo].domain.timesigs[block_auto[param_hold_tempo][0].step()]);
+    _dcy = timesig_to_time(block->host.bpm, params[param_decay_tempo].domain.timesigs[block_auto[param_decay_tempo][0].step()]);
+    _dly = timesig_to_time(block->host.bpm, params[param_delay_tempo].domain.timesigs[block_auto[param_delay_tempo][0].step()]);
+    _att = timesig_to_time(block->host.bpm, params[param_attack_tempo].domain.timesigs[block_auto[param_attack_tempo][0].step()]);
+    _rls = timesig_to_time(block->host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
+  }
+
   if(!is_expo_slope(mode)) return;
 
-  float ds = block_auto[param_decay_slope][0].real();
-  float as = block_auto[param_attack_slope][0].real();
-  float rs = block_auto[param_release_slope][0].real();
+  // These are not really continuous (we only pick them up at voice start)
+  // but we fake it this way so they can participate in modulation.
+  float ds = acc_auto[param_decay_slope][0][0];
+  float as = acc_auto[param_attack_slope][0][0];
+  float rs = acc_auto[param_release_slope][0][0];
 
   if(is_exp_uni_slope(mode) || is_exp_bi_slope(mode))
   {
@@ -456,34 +489,15 @@ template <bool Monophonic> void
 env_engine::process(plugin_block& block)
 {
   auto const& block_auto = block.state.own_block_automation;
-  bool sync = block_auto[param_sync][0].step() != 0;
-  float stn = block_auto[param_sustain][0].real();
-  float hld = block_auto[param_hold_time][0].real();
-  float dcy = block_auto[param_decay_time][0].real();
-  float dly = block_auto[param_delay_time][0].real();
-  float att = block_auto[param_attack_time][0].real();
-  float rls = block_auto[param_release_time][0].real();
-  if (sync)
-  {
-    auto const& params = block.plugin.modules[module_env].params;
-    hld = timesig_to_time(block.host.bpm, params[param_hold_tempo].domain.timesigs[block_auto[param_hold_tempo][0].step()]);
-    dcy = timesig_to_time(block.host.bpm, params[param_decay_tempo].domain.timesigs[block_auto[param_decay_tempo][0].step()]);
-    dly = timesig_to_time(block.host.bpm, params[param_delay_tempo].domain.timesigs[block_auto[param_delay_tempo][0].step()]);
-    att = timesig_to_time(block.host.bpm, params[param_attack_tempo].domain.timesigs[block_auto[param_attack_tempo][0].step()]);
-    rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
-  }
-
   int mode = block_auto[param_mode][0].step();
-  if (is_exp_uni_slope(mode)) process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_uni);
-  else if (is_exp_bi_slope(mode)) process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_bi);
-  else if (is_exp_splt_slope(mode)) process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_exp_splt);
-  else process_slope<Monophonic>(block, dly, att, hld, dcy, stn, rls, calc_slope_lin);
+  if (is_exp_uni_slope(mode)) process_slope<Monophonic>(block, calc_slope_exp_uni);
+  else if (is_exp_bi_slope(mode)) process_slope<Monophonic>(block, calc_slope_exp_bi);
+  else if (is_exp_splt_slope(mode)) process_slope<Monophonic>(block, calc_slope_exp_splt);
+  else process_slope<Monophonic>(block, calc_slope_lin);
 }
 
 template <bool Monophonic, class CalcSlope> void
-env_engine::process_slope(
-  plugin_block& block, float dly, float att, float hld, 
-  float dcy, float stn, float rls, CalcSlope calc_slope)
+env_engine::process_slope(plugin_block& block, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
   int mode = block_auto[param_mode][0].step();
@@ -553,20 +567,20 @@ env_engine::process_slope(
 
     if (_stage == env_stage::sustain && is_sustain(mode))
     {
-      _current_level = stn;
-      _multitrig_level = stn;
-      block.state.own_cv[0][0][f] = _filter.next(stn);
+      _current_level = _stn;
+      _multitrig_level = _stn;
+      block.state.own_cv[0][0][f] = _filter.next(_stn);
       continue;
     }
 
     double stage_seconds = 0;
     switch (_stage)
     {
-    case env_stage::hold: stage_seconds = hld; break;
-    case env_stage::decay: stage_seconds = dcy; break;
-    case env_stage::delay: stage_seconds = dly; break;
-    case env_stage::attack: stage_seconds = att; break;
-    case env_stage::release: stage_seconds = rls; break;
+    case env_stage::hold: stage_seconds = _hld; break;
+    case env_stage::decay: stage_seconds = _dcy; break;
+    case env_stage::delay: stage_seconds = _dly; break;
+    case env_stage::attack: stage_seconds = _att; break;
+    case env_stage::release: stage_seconds = _rls; break;
     default: assert(false); break;
     }
 
@@ -590,7 +604,7 @@ env_engine::process_slope(
       break;
     case env_stage::hold: _current_level = _multitrig_level = out = 1; break;
     case env_stage::release: out = _current_level * (1 - calc_slope(slope_pos, _slp_rls_splt_bnd, _slp_rls_exp)); break;
-    case env_stage::decay: _current_level = _multitrig_level = out = stn + (1 - stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
+    case env_stage::decay: _current_level = _multitrig_level = out = _stn + (1 - _stn) * (1 - calc_slope(slope_pos, _slp_dcy_splt_bnd, _slp_dcy_exp)); break;
     default: assert(false); stage_seconds = 0; break;
     }
 
