@@ -412,6 +412,7 @@ env_engine::reset(plugin_block const* block)
   _current_level = 0;
   _multitrig_level = 0;
   _stage = env_stage::delay;
+  _voice_initialized = false;
 
   auto const& block_auto = block->state.own_block_automation;
   float filter = block_auto[param_filter][0].real();
@@ -486,12 +487,12 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
 
     // These are not really continuous (we only pick them up at voice start)
     // but we fake it this way so they can participate in modulation.
-    _stn = acc_auto[param_sustain][0][0];
-    _hld = block.normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, acc_auto[param_hold_time][0][0]);
-    _dcy = block.normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, acc_auto[param_decay_time][0][0]);
-    _dly = block.normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, acc_auto[param_delay_time][0][0]);
-    _att = block.normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, acc_auto[param_attack_time][0][0]);
-    _rls = block.normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, acc_auto[param_release_time][0][0]);
+    _stn = *(*modulation)[param_sustain][0];
+    _hld = block.normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, *(*modulation)[param_sustain][0]);
+    _dcy = block.normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, *(*modulation)[param_decay_time][0]);
+    _dly = block.normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, *(*modulation)[param_delay_time][0]);
+    _att = block.normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, *(*modulation)[param_attack_time][0]);
+    _rls = block.normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, *(*modulation)[param_release_time][0]);
 
     if (sync)
     {
