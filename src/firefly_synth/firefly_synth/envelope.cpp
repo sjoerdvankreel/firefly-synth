@@ -75,8 +75,9 @@ public module_engine {
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(env_engine);
-  void process(plugin_block& block) override;
   void reset(plugin_block const* block) override;
+  void process(plugin_block& block) override { process(block, nullptr); }
+  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
 
 private:
 
@@ -111,9 +112,9 @@ private:
   void init_slope_exp_splt(double slope, double split_pos, double& exp, double& splt_bnd);
   
   template <bool Monophonic> 
-  void process(plugin_block& block);
+  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
   template <bool Monophonic, class CalcSlope> 
-  void process_slope(plugin_block& block, CalcSlope calc_slope);
+  void process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope);
 };
 
 static void
@@ -171,9 +172,16 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   auto const params = make_graph_engine_params();
   int sample_rate = params.max_frame_count / dahdsrf;
   int voice_release_at = dahds / dahdsrf * params.max_frame_count;
+
   engine->process_begin(&state, sample_rate, params.max_frame_count, voice_release_at);
-  auto const* block = engine->process_default(module_env, mapping.module_slot);
+  auto const* block = engine->process(module_env, mapping.module_slot, [mapping](plugin_block& block) {
+    env_engine engine;
+    engine.reset(&block);
+    cv_cv_matrix_mixdown modulation(make_static_cv_matrix_mixdown(block)[module_env][mapping.module_slot]);
+    engine.process(block, &modulation);
+  });
   engine->process_end();
+
   jarray<float, 1> series(block->state.own_cv[0][0]);
   return graph_data(series, false, 1.0f, { partition });
 }
@@ -427,8 +435,15 @@ env_engine::init_slope_exp_splt(double slope, double split_pos, double& exp, dou
 }
 
 void
-env_engine::process(plugin_block& block)
+env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
+  // allow custom data for graphs
+  if (modulation == nullptr)
+  {
+    cv_cv_matrix_mixer& mixer = get_cv_cv_matrix_mixer(block, false);
+    modulation = &mixer.mix(block, module_env, block.module_slot);
+  }
+
   auto const& block_auto = block.state.own_block_automation;
   bool on = block_auto[param_on][0].step() != 0;
   if (_stage == env_stage::end || (!on && block.module_slot != 0))
@@ -438,24 +453,24 @@ env_engine::process(plugin_block& block)
   }
 
   if(block.state.all_block_automation[module_voice_in][0][voice_in_param_mode][0].step() == engine_voice_mode_poly)
-    process<false>(block);
+    process<false>(block, modulation);
   else
-    process<true>(block);
+    process<true>(block, modulation);
 }
 
 template <bool Monophonic> void
-env_engine::process(plugin_block& block)
+env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int mode = block_auto[param_mode][0].step();
-  if (is_exp_uni_slope(mode)) process_slope<Monophonic>(block, calc_slope_exp_uni);
-  else if (is_exp_bi_slope(mode)) process_slope<Monophonic>(block, calc_slope_exp_bi);
-  else if (is_exp_splt_slope(mode)) process_slope<Monophonic>(block, calc_slope_exp_splt);
-  else process_slope<Monophonic>(block, calc_slope_lin);
+  if (is_exp_uni_slope(mode)) process_slope<Monophonic>(block, modulation, calc_slope_exp_uni);
+  else if (is_exp_bi_slope(mode)) process_slope<Monophonic>(block, modulation, calc_slope_exp_bi);
+  else if (is_exp_splt_slope(mode)) process_slope<Monophonic>(block, modulation, calc_slope_exp_splt);
+  else process_slope<Monophonic>(block, modulation, calc_slope_lin);
 }
 
 template <bool Monophonic, class CalcSlope> void
-env_engine::process_slope(plugin_block& block, CalcSlope calc_slope)
+env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
   auto const& acc_auto = block.state.own_accurate_automation;
@@ -467,6 +482,8 @@ env_engine::process_slope(plugin_block& block, CalcSlope calc_slope)
   // because we need access to modulation
   if(!_voice_initialized)
   {
+    _voice_initialized = true;
+
     // These are not really continuous (we only pick them up at voice start)
     // but we fake it this way so they can participate in modulation.
     _stn = acc_auto[param_sustain][0][0];
