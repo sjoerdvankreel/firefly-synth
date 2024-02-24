@@ -24,6 +24,7 @@ copy voice<->global
 modulate env by glfo/aux
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
+make dahdsr continuous + modulatable by aux
 
 other:
 profile the pad preset
