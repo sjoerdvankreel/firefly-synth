@@ -86,7 +86,7 @@ private:
   double _dly = 0;
   double _att = 0;
   double _rls = 0;
-
+  
   env_stage _stage = {};
   cv_filter _filter = {};
 
@@ -100,6 +100,8 @@ private:
   double _slp_att_splt_bnd = 0;
   double _slp_dcy_splt_bnd = 0;
   double _slp_rls_splt_bnd = 0;
+
+  bool _voice_initialized = false;
 
   static inline double const slope_min = 0.0001;
   static inline double const slope_max = 0.9999;
@@ -404,52 +406,8 @@ env_engine::reset(plugin_block const* block)
   _stage = env_stage::delay;
 
   auto const& block_auto = block->state.own_block_automation;
-  auto const& acc_auto = block->state.own_accurate_automation;
   float filter = block_auto[param_filter][0].real();
   _filter.set(block->sample_rate, filter / 1000.0f);
-
-  int mode = block_auto[param_mode][0].step();
-  bool sync = block_auto[param_sync][0].step() != 0;
-
-  // These are not really continuous (we only pick them up at voice start)
-  // but we fake it this way so they can participate in modulation.
-  _stn = acc_auto[param_sustain][0][0];
-  _hld = block->normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, acc_auto[param_hold_time][0][0]);
-  _dcy = block->normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, acc_auto[param_decay_time][0][0]);
-  _dly = block->normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, acc_auto[param_delay_time][0][0]);
-  _att = block->normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, acc_auto[param_attack_time][0][0]);
-  _rls = block->normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, acc_auto[param_release_time][0][0]);
-
-  if (sync)
-  {
-    auto const& params = block->plugin.modules[module_env].params;
-    _hld = timesig_to_time(block->host.bpm, params[param_hold_tempo].domain.timesigs[block_auto[param_hold_tempo][0].step()]);
-    _dcy = timesig_to_time(block->host.bpm, params[param_decay_tempo].domain.timesigs[block_auto[param_decay_tempo][0].step()]);
-    _dly = timesig_to_time(block->host.bpm, params[param_delay_tempo].domain.timesigs[block_auto[param_delay_tempo][0].step()]);
-    _att = timesig_to_time(block->host.bpm, params[param_attack_tempo].domain.timesigs[block_auto[param_attack_tempo][0].step()]);
-    _rls = timesig_to_time(block->host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
-  }
-
-  if(!is_expo_slope(mode)) return;
-
-  // These are not really continuous (we only pick them up at voice start)
-  // but we fake it this way so they can participate in modulation.
-  float ds = acc_auto[param_decay_slope][0][0];
-  float as = acc_auto[param_attack_slope][0][0];
-  float rs = acc_auto[param_release_slope][0][0];
-
-  if(is_exp_uni_slope(mode) || is_exp_bi_slope(mode))
-  {
-    init_slope_exp(ds, _slp_dcy_exp);
-    init_slope_exp(rs, _slp_rls_exp);
-    init_slope_exp(as, _slp_att_exp);
-  }
-  else if (is_exp_splt_slope(mode))
-  {
-    init_slope_exp_splt(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
-    init_slope_exp_splt(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
-    init_slope_exp_splt(as, 1 - as, _slp_att_exp, _slp_att_splt_bnd);
-  } else assert(false);
 }
 
 void
@@ -500,8 +458,58 @@ template <bool Monophonic, class CalcSlope> void
 env_engine::process_slope(plugin_block& block, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
+  auto const& acc_auto = block.state.own_accurate_automation;
   int mode = block_auto[param_mode][0].step();
   int trigger = block_auto[param_trigger][0].step();
+  bool sync = block_auto[param_sync][0].step() != 0;
+
+  // we cannot pick up the voice start values on ::reset
+  // because we need access to modulation
+  if(!_voice_initialized)
+  {
+    // These are not really continuous (we only pick them up at voice start)
+    // but we fake it this way so they can participate in modulation.
+    _stn = acc_auto[param_sustain][0][0];
+    _hld = block.normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, acc_auto[param_hold_time][0][0]);
+    _dcy = block.normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, acc_auto[param_decay_time][0][0]);
+    _dly = block.normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, acc_auto[param_delay_time][0][0]);
+    _att = block.normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, acc_auto[param_attack_time][0][0]);
+    _rls = block.normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, acc_auto[param_release_time][0][0]);
+
+    if (sync)
+    {
+      auto const& params = block.plugin.modules[module_env].params;
+      _hld = timesig_to_time(block.host.bpm, params[param_hold_tempo].domain.timesigs[block_auto[param_hold_tempo][0].step()]);
+      _dcy = timesig_to_time(block.host.bpm, params[param_decay_tempo].domain.timesigs[block_auto[param_decay_tempo][0].step()]);
+      _dly = timesig_to_time(block.host.bpm, params[param_delay_tempo].domain.timesigs[block_auto[param_delay_tempo][0].step()]);
+      _att = timesig_to_time(block.host.bpm, params[param_attack_tempo].domain.timesigs[block_auto[param_attack_tempo][0].step()]);
+      _rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
+    }
+
+    if (is_expo_slope(mode))
+    {
+      // These are also not really continuous (we only pick them up at voice start)
+      // but we fake it this way so they can participate in modulation.
+      float ds = acc_auto[param_decay_slope][0][0];
+      float as = acc_auto[param_attack_slope][0][0];
+      float rs = acc_auto[param_release_slope][0][0];
+
+      if (is_exp_uni_slope(mode) || is_exp_bi_slope(mode))
+      {
+        init_slope_exp(ds, _slp_dcy_exp);
+        init_slope_exp(rs, _slp_rls_exp);
+        init_slope_exp(as, _slp_att_exp);
+      }
+      else if (is_exp_splt_slope(mode))
+      {
+        init_slope_exp_splt(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
+        init_slope_exp_splt(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
+        init_slope_exp_splt(as, 1 - as, _slp_att_exp, _slp_att_splt_bnd);
+      }
+      else 
+        assert(false);
+    }
+  }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
