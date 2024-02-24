@@ -488,7 +488,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     // These are not really continuous (we only pick them up at voice start)
     // but we fake it this way so they can participate in modulation.
     _stn = (*(*modulation)[param_sustain][0])[0];
-    _hld = block.normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, (*(*modulation)[param_sustain][0])[0]);
+    _hld = block.normalized_to_raw_fast<domain_type::log>(module_env, param_hold_time, (*(*modulation)[param_hold_time][0])[0]);
     _dcy = block.normalized_to_raw_fast<domain_type::log>(module_env, param_decay_time, (*(*modulation)[param_decay_time][0])[0]);
     _dly = block.normalized_to_raw_fast<domain_type::log>(module_env, param_delay_time, (*(*modulation)[param_delay_time][0])[0]);
     _att = block.normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, (*(*modulation)[param_attack_time][0])[0]);
