@@ -17,14 +17,13 @@ clap (poly) modulation
 visual routing indicators
 document the header files a bit
 
-v1.1:
+v1.2:
 automate zip/dist
 move route up/down
 copy voice<->global
-modulate env by glfo/aux
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
-make dahdsr continuous + modulatable by aux
+do forward compat checks - dont load newer versions
 
 other:
 profile the pad preset
