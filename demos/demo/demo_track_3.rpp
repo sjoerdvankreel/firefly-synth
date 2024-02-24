@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "6.82/win64" 1708801573
+<REAPER_PROJECT 0.1 "6.82/win64" 1708801868
   <NOTES 0 2
   >
   RIPPLE 0
@@ -16,7 +16,7 @@
   TIMEMODE 1 5 -1 30 0 0 -1
   VIDEO_CONFIG 0 0 256
   PANMODE 3
-  CURSOR 0
+  CURSOR 12.92307692307692
   ZOOM 100 0 0
   VZOOMEX 6 0
   USE_REC_CFG 0
@@ -116,7 +116,7 @@
     MAINSEND 1 0
     <FXCHAIN
       WNDRECT 246 161 1389 647
-      SHOW 1
+      SHOW 0
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
@@ -3111,7 +3111,7 @@
     <ITEM
       POSITION 0
       SNAPOFFS 0
-      LENGTH 1.84615384615385
+      LENGTH 14.76923076923077
       LOOP 1
       ALLTAKES 0
       FADEIN 1 0 0 1 0 0 0
@@ -3137,6 +3137,68 @@
         E 0 90 3c 60
         E 960 80 3c 00
         E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 480 80 3c 00
+        E 0 90 3c 60
+        E 480 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 720 80 3c 00
+        E 0 90 3c 60
+        E 240 80 3c 00
+        E 0 90 3c 60
+        E 480 80 3c 00
+        E 0 90 3c 60
+        E 480 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 480 80 3c 00
+        E 0 90 3c 60
+        E 480 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 960 90 3c 60
         E 480 80 3c 00
         e 0 90 3c 60
         e 480 80 3c 00
@@ -3147,7 +3209,7 @@
         IGNTEMPO 0 120 4 4
         SRCCOLOR 692
         VELLANE 1 100 0
-        CFGEDITVIEW -42 0.178125 61 12 0 -1 0 0 0 0.5
+        CFGEDITVIEW 3214.332173 0.062844 61 12 0 -1 0 0 0 0.5
         KEYSNAP 0
         TRACKSEL 0
         EVTFILTER 0 -1 -1 -1 -1 0 0 0 0 -1 -1 -1 -1 0 -1 0 -1 -1
