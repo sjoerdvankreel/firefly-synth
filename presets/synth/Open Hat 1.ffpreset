@@ -1,5 +1,5 @@
 {
-  "checksum": "b78499e8974874981f7509dd47b97499",
+  "checksum": "bb7de1cf6d5979c9055d6e13eaead6b4",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "247cde6a6bbe3a1f592aeab044c71117",
+        "checksum": "5665a6a2864053418267a8e809dbef33",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,18 +22,14 @@
             "plugin_version_minor": 0
           },
           "content": {
-            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 1,
-            "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
-            "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
-            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 1,
-            "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}/tab": 1,
-            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 0,
-            "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}/tab": 0
+            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
+            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 0,
+            "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "f67e92c757b692dfc0527087bb257b23",
+        "checksum": "150a835d270a517b17cdb5549de0dcc2",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -45,6 +41,12 @@
           },
           "content": {
             "modules": [
+              {
+                "id": "{B5D634E6-4D8A-4C49-9926-1CE21C9B465F}",
+                "name": "External Audio",
+                "slot_count": 1,
+                "params": null
+              },
               {
                 "id": "{4E70A342-A95A-4860-8223-D4F029E22874}",
                 "name": "MIDI",
@@ -1171,6 +1173,13 @@
               }
             ],
             "state": [
+              {
+                "slots": [
+                  {
+                    "params": null
+                  }
+                ]
+              },
               {
                 "slots": [
                   {
@@ -8220,7 +8229,7 @@
                     "params": [
                       {
                         "slots": [
-                          "50 %"
+                          "25 %"
                         ]
                       },
                       {
