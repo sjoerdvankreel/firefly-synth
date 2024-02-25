@@ -1,5 +1,5 @@
 {
-  "checksum": "5c367dd9e3f8d925c7eb0a1a16159bae",
+  "checksum": "8c9215dbba953b836728ee4187d4dfd8",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "3ed8eeacc09a0181747fd9feaf3aca44",
+        "checksum": "3f5aa8ef5bc8021425e7bc14dd1af5f9",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,18 +22,15 @@
             "plugin_version_minor": 0
           },
           "content": {
-            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 3,
-            "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
-            "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
-            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 1,
-            "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}/tab": 1,
-            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 0,
-            "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}/tab": 2
+            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
+            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 0,
+            "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}/tab": 0,
+            "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "44add32f07c9042606a94714031be2dc",
+        "checksum": "9e673fae26599e0996a9065986e35ea2",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -8233,7 +8230,7 @@
                     "params": [
                       {
                         "slots": [
-                          "50 %"
+                          "25 %"
                         ]
                       },
                       {
