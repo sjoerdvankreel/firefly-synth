@@ -43,7 +43,7 @@ For cv-to-cv modulation, the processing order matters:
 6. Voice LFO
 
 This means that you can modulate for example global lfo by master in, but not the other way around.<br/>
-Similarly, you can can modulate voice-lfo by voice envelope, but not envelope by vlfo.<br/>
+Similarly, you can can modulate voice-lfo by f.e. global lfo or voice envelope, but not envelope by voice-lfo.<br/>
 Within a single module you can only modulate upwards, for example env1->env2 or lfo1->lfo2, but not lfo2->lfo1.
 
 ## File and plugin format
