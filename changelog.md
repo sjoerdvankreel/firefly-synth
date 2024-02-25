@@ -1,3 +1,7 @@
+### February 25, 2024 - V1.11.
+
+- Add some more presets and fix some existing ones.
+
 ### February 25, 2024 - V1.1.
 
 - Allow envelopes as target in CV-to-CV matrix. Envelopes can be modulated by master in section or global lfos.
