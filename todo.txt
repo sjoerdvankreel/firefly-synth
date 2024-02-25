@@ -23,8 +23,8 @@ move route up/down
 copy voice<->global
 osc graph does not vertical fill?
 do copy/paste patch through clipboard
-clear delay lines etc on patch select
 bug: preset select jumps back to previous
+do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 other:
