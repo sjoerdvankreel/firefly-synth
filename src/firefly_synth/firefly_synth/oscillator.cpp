@@ -438,14 +438,16 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   random_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
-  random_freq.info.description = "Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong.";
+  random_freq.info.description = std::string("Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. ") + 
+    "Modulation takes place only at voice start.";
   auto& random_res = result.params.emplace_back(make_param(
     make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", "Rnd.Res", "Rz", true, false, param_rand_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   random_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
-  random_res.info.description = "Continuous filter resonance for static noise or initial-excite filter resonance for Karplus-Strong.";
+  random_res.info.description = std::string("Continuous filter resonance for static noise or initial-excite filter resonance for Karplus-Strong. ") + 
+    "Modulation takes place only at voice start.";
   auto& random_seed = result.params.emplace_back(make_param(
     make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", "Rnd.Seed", "Sd", true, false, param_rand_seed, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 255, 1, 0),
@@ -459,7 +461,8 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   random_step.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
-  random_step.info.description = "On-voice-init step count for static noise and initial-excite stage of Karplus-Strong.";
+  random_step.info.description = std::string("On-voice-init step count for static noise and initial-excite stage of Karplus-Strong. ") +
+    "Modulation takes place only at voice start.";
   auto& kps_fdbk = result.params.emplace_back(make_param(
     make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", "KPS.Fdbk", "Fbk", true, false, param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
@@ -696,7 +699,7 @@ osc_engine::init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulat
   int kps_svf = block_auto[param_rand_svf][0].step();
   int kps_seed = block_auto[param_rand_seed][0].step();
 
-  // Frequency and rate are not continuous params but we fake it this way so they can 
+  // Frequency, rate and res are not continuous params but we fake it this way so they can 
   // participate in modulation. In particular velocity seems like a good mod source for freq.
   float kps_res = (*(*modulation)[module_osc][block.module_slot][param_rand_res][0])[0];
   float kps_freq_normalized = (*(*modulation)[module_osc][block.module_slot][param_rand_freq][0])[0];

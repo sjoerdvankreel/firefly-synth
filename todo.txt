@@ -22,6 +22,7 @@ automate zip/dist
 move route up/down
 copy voice<->global
 osc graph does not vertical fill?
+add more presets from the demo tunes
 do copy/paste patch through clipboard
 do forward compat checks - dont load newer versions
 

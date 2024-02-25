@@ -29,6 +29,23 @@ Just once, after that, the size is stored in a user settings file.
 - Some global discrete-valued parameters can be automated per block
 - Most per-voice discrete-valued parameters can be automated "at voice start"
 
+Processing order is global cv -> voice cv -> voice audio -> global audio.<br/>
+This means that you can use only global cv sources to modulate global audio,<br/>
+and you can use any cv source to modulate per-voice audio.<br/>
+
+For cv-to-cv modulation, the processing order matters:
+
+1. MIDI
+2. Master In
+3. Global LFO
+4. Note/On-Note
+5. Envelope
+6. Voice LFO
+
+This means that you can modulate for example global lfo by master in, but not the other way around.<br/>
+Similarly, you can can modulate voice-lfo by f.e. global lfo or voice envelope, but not envelope by voice-lfo.<br/>
+Within a single module you can only modulate upwards, for example env1->env2 or lfo1->lfo2, but not lfo2->lfo1.
+
 ## File and plugin format
 - Ffpreset files are shareable between CLAP and VST3.
 - VST3: does sample accurate automation, no note expressions.
