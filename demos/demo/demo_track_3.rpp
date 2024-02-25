@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "6.82/win64" 1708874501
+<REAPER_PROJECT 0.1 "6.82/win64" 1708874767
   <NOTES 0 2
   >
   RIPPLE 0
@@ -103,7 +103,7 @@
     ISBUS 0 0
     BUSCOMP 0 0 0 0 0
     SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
-    SEL 0
+    SEL 1
     REC 0 0 1 0 0 0 0 0
     VU 2
     TRACKHEIGHT 0 0 0 0 0 0
@@ -116,7 +116,7 @@
     MAINSEND 1 0
     <FXCHAIN
       WNDRECT 282 239 1389 647
-      SHOW 3
+      SHOW 0
       LASTSEL 2
       DOCKED 0
       BYPASS 0 0 0
@@ -9122,7 +9122,7 @@
       FADEIN 1 0 0 1 0 0 0
       FADEOUT 1 0 0 1 0 0 0
       MUTE 0 0
-      SEL 0
+      SEL 1
       IGUID {595052C5-6EFA-4C04-93D4-7C6AAA7B264D}
       IID 2
       NAME 01-MIDI
@@ -9150,9 +9150,41 @@
         E 0 90 3c 60
         E 960 80 3c 00
         E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
         E 480 80 3c 00
         E 0 90 3c 60
         E 480 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        E 0 90 3c 60
+        E 960 80 3c 00
+        e 0 90 3c 60
+        e 960 80 3c 00
         E 0 90 3c 60
         E 960 80 3c 00
         E 0 90 3c 60
@@ -9173,40 +9205,6 @@
         E 480 80 3c 00
         E 0 90 3c 60
         E 480 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 480 80 3c 00
-        E 0 90 3c 60
-        E 480 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 0 90 3c 60
-        E 960 80 3c 00
-        E 960 90 3c 60
-        E 480 80 3c 00
-        e 0 90 3c 60
-        e 480 80 3c 00
         E 0 b0 7b 00
         CCINTERP 32
         CHASE_CC_TAKEOFFS 1
@@ -9234,7 +9232,7 @@
     ISBUS 0 0
     BUSCOMP 0 0 0 0 0
     SHOWINMIX 1 0.6667 0.5 1 0.5 0 0 0
-    SEL 1
+    SEL 0
     REC 0 0 1 0 0 0 0 0
     VU 2
     TRACKHEIGHT 0 0 0 0 0 0
@@ -9247,7 +9245,7 @@
     MAINSEND 1 0
     <FXCHAIN
       WNDRECT 354 98 1389 647
-      SHOW 0
+      SHOW 1
       LASTSEL 0
       DOCKED 0
       BYPASS 0 0 0
@@ -12306,7 +12304,7 @@
       FADEIN 1 0 0 1 0 0 0
       FADEOUT 1 0 0 1 0 0 0
       MUTE 0 0
-      SEL 1
+      SEL 0
       IGUID {73EB9513-F9B2-43F8-9F4D-7B27463E5454}
       IID 5
       NAME 02-synth-MIDI
