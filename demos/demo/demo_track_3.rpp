@@ -1,4 +1,4 @@
-<REAPER_PROJECT 0.1 "6.82/win64" 1708876821
+<REAPER_PROJECT 0.1 "6.82/win64" 1708877470
   <NOTES 0 2
   >
   RIPPLE 0
@@ -16,7 +16,7 @@
   TIMEMODE 1 5 -1 30 0 0 -1
   VIDEO_CONFIG 0 0 256
   PANMODE 3
-  CURSOR 0
+  CURSOR 14.22222222222222
   ZOOM 48.22530864197532 0 0
   VZOOMEX 6 0
   USE_REC_CFG 0
@@ -9356,7 +9356,7 @@
     MIDIOUT -1
     MAINSEND 1 0
     <FXCHAIN
-      WNDRECT 355 336 1389 647
+      WNDRECT 397 213 1389 647
       SHOW 0
       LASTSEL 0
       DOCKED 0
@@ -15606,7 +15606,7 @@
       FADEIN 1 0 0 1 0 0 0
       FADEOUT 1 0 0 1 0 0 0
       MUTE 0 0
-      SEL 0
+      SEL 1
       IGUID {D24E1BE2-C0EC-4366-BD65-A7D648250F48}
       IID 17
       NAME 03-hat-MIDI
@@ -15627,19 +15627,17 @@
         E 240 80 3c 00
         E 0 90 3c 7f
         E 240 80 3c 00
+        E 480 90 3c 28
+        E 240 80 3c 00
+        E 0 90 3c 7f
+        E 240 80 3c 00
         e 0 90 3c 3f
         e 240 80 3c 00
         E 240 90 3c 28
         E 240 80 3c 00
         E 0 90 3c 7f
         E 240 80 3c 00
-        E 480 90 3c 28
-        E 240 80 3c 00
-        E 0 90 3c 7f
-        E 240 80 3c 00
-        E 0 90 3c 40
-        E 240 80 3c 00
-        E 0 b0 7b 00
+        E 240 b0 7b 00
         CCINTERP 32
         CHASE_CC_TAKEOFFS 1
         GUID {7B32CC9A-7B82-4775-9D0C-454464C70AF4}
