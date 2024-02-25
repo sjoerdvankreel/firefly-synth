@@ -1,5 +1,5 @@
 {
-  "checksum": "491e5e017ea5ab11de62b14d3b2cba65",
+  "checksum": "08afd89ac3cdab506731f0330a0589a0",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "5fdc5d8ed01c7ac2da7769f0b7be27ab",
+        "checksum": "b6be61eafd5f27576996211ffff24422",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,13 +22,11 @@
             "plugin_version_minor": 0
           },
           "content": {
-            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
-            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "12cde298e9037bffe844ba5fd3a37fec",
+        "checksum": "8413330ff64b243043e666fdbc837749",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -40,6 +38,12 @@
           },
           "content": {
             "modules": [
+              {
+                "id": "{B5D634E6-4D8A-4C49-9926-1CE21C9B465F}",
+                "name": "External Audio",
+                "slot_count": 1,
+                "params": null
+              },
               {
                 "id": "{4E70A342-A95A-4860-8223-D4F029E22874}",
                 "name": "MIDI",
@@ -1166,6 +1170,13 @@
               }
             ],
             "state": [
+              {
+                "slots": [
+                  {
+                    "params": null
+                  }
+                ]
+              },
               {
                 "slots": [
                   {
@@ -4041,7 +4052,7 @@
                       },
                       {
                         "slots": [
-                          "{97B77668-0B4D-4678-BBD9-842AE601E815}-60"
+                          "{97B77668-0B4D-4678-BBD9-842AE601E815}-48"
                         ]
                       },
                       {

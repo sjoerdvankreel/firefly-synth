@@ -1,5 +1,5 @@
 {
-  "checksum": "b6a4b5fd4f4288058e0c4eec3f8f356c",
+  "checksum": "ade2f3269f53c0c22de6d800bd8651a8",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "47c3ef94e160748c780d61e299b6edcc",
+        "checksum": "1bf196651b01f3fead4eab75810043e2",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,18 +22,12 @@
             "plugin_version_minor": 0
           },
           "content": {
-            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 1,
-            "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
-            "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
-            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 0,
-            "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}/tab": 0,
-            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 0,
-            "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}/tab": 0
+            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "6b653a17a6142ed3fb0d3d756f42a1b3",
+        "checksum": "1de8922ccdb02ab948f50d3892272fcc",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -4059,7 +4053,7 @@
                       },
                       {
                         "slots": [
-                          "{97B77668-0B4D-4678-BBD9-842AE601E815}-60"
+                          "{97B77668-0B4D-4678-BBD9-842AE601E815}-48"
                         ]
                       },
                       {
