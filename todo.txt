@@ -17,12 +17,13 @@ clap (poly) modulation
 visual routing indicators
 document the header files a bit
 
-v1.1:
+v1.2:
 automate zip/dist
 move route up/down
 copy voice<->global
 document mod stuff in the manual
 osc graph does not vertical fill?
+add more presets from the demo tunes
 do copy/paste patch through clipboard
 
 other:
