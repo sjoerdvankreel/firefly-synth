@@ -1,5 +1,5 @@
 {
-  "checksum": "e9e98554528b6e0fb4510a6e8ba945cb",
+  "checksum": "a728e49b73fe19144d28713bbc60d414",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -11,7 +11,7 @@
     },
     "content": {
       "extra": {
-        "checksum": "1b9b6a8761ea6807f226022ee34ae445",
+        "checksum": "1bf196651b01f3fead4eab75810043e2",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -22,13 +22,12 @@
             "plugin_version_minor": 0
           },
           "content": {
-            "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
-            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 0
+            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "9aa58ba55963b7c8b061d641615d440e",
+        "checksum": "f5e6dbebdaad17991dc6dc081c4130e5",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -8228,7 +8227,7 @@
                     "params": [
                       {
                         "slots": [
-                          "20 %"
+                          "10 %"
                         ]
                       },
                       {
