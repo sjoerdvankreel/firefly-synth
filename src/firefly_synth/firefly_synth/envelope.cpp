@@ -474,7 +474,6 @@ template <bool Monophonic, class CalcSlope> void
 env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
-  auto const& acc_auto = block.state.own_accurate_automation;
   int mode = block_auto[param_mode][0].step();
   int trigger = block_auto[param_trigger][0].step();
   bool sync = block_auto[param_sync][0].step() != 0;
@@ -508,9 +507,9 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     {
       // These are also not really continuous (we only pick them up at voice start)
       // but we fake it this way so they can participate in modulation.
-      float ds = acc_auto[param_decay_slope][0][0];
-      float as = acc_auto[param_attack_slope][0][0];
-      float rs = acc_auto[param_release_slope][0][0];
+      float ds = (*(*modulation)[param_decay_slope][0])[0];
+      float as = (*(*modulation)[param_attack_slope][0])[0];
+      float rs = (*(*modulation)[param_release_slope][0])[0];
 
       if (is_exp_uni_slope(mode) || is_exp_bi_slope(mode))
       {
