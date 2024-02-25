@@ -22,9 +22,11 @@ automate zip/dist
 move route up/down
 copy voice<->global
 osc graph does not vertical fill?
-add more presets from the demo tunes
 do copy/paste patch through clipboard
+bug: preset select jumps back to previous
+do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
+do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 
 other:
 profile the pad preset
