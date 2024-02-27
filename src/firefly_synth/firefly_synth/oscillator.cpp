@@ -19,7 +19,7 @@ namespace firefly_synth {
 
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_main, section_basic, section_dsf, section_rand, section_sync, section_gain_uni };
+enum { section_main, section_basic, section_dsf, section_rand, section_sync_gain, section_uni };
 
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
@@ -489,67 +489,67 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     "Lower notes will be stretched less, higher notes will be stretched more. " + 
     "This tries to keep audible note lengths relatively equal.";
   
-  result.sections.emplace_back(make_param_section(section_sync,
-    make_topo_tag("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync"),
-    make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+  result.sections.emplace_back(make_param_section(section_sync_gain,
+    make_topo_tag("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync+Gain"),
+    make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& sync_on = result.params.emplace_back(make_param(
     make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", "Sync.On", "Sync", true, false, param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
+    make_param_gui_single(section_sync_gain, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
   auto& sync_semi = result.params.emplace_back(make_param(
     make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", "Sync.Semi", "Sync", true, false, param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
-    make_param_gui_single(section_sync, gui_edit_type::knob, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 1 }, make_label_none())));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
     make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", "Sync.CrossOver", "XOver", true, false, param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
-    make_param_gui_single(section_sync, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
-
-  result.sections.emplace_back(make_param_section(section_gain_uni,
-    make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Gain+Unison"),
-    make_param_section_gui({ 1, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info("{F4224036-9246-4D90-BD0F-5867FF318D1C}", "Gain", "Gain", true, false, param_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
-    make_param_gui_single(section_gain_uni, gui_edit_type::knob, { 0, 0 },
+    make_param_gui_single(section_sync_gain, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   gain.info.description = std::string("Per-osc gain control. The same result may be had through the audio routing matrices, ") +
     "but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it "
     "when the oscillator is routed through a distortion module.";
+
+  result.sections.emplace_back(make_param_section(section_uni,
+    make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
+    make_param_section_gui({ 1, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 }))));
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
-    make_param_gui_single(section_gain_uni, gui_edit_type::autofit_list, { 0, 1 },
+    make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off; });
   uni_voices.info.description = "Unison voice count. Oversampling, hard-sync, AM and FM are applied per-unison-voice.";
   auto& uni_phase = result.params.emplace_back(make_param(
     make_topo_info("{8F1098B6-64F9-407E-A8A3-8C3637D59A26}", "Uni.Phs", "Phs", true, false, param_uni_phase, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_gain_uni, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_uni, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_phase.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1] > 1; });
   uni_phase.info.description = "Phase offset for subsequent voices, to get that unison effect 'right from the start'. Only applicable to Basic and DSF generators.";
   auto& uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{FDAE1E98-B236-4B2B-8124-0B8E1EF72367}", "Uni.Dtn", "Dtn", true, false, param_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
-    make_param_gui_single(section_gain_uni, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_dtn.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return can_do_pitch(vs[0]) && vs[1] > 1; });
   uni_dtn.info.description = "Detune unison voices. Only applicable to Basic and DSF generators.";
   auto& uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{537A8F3F-006B-4F99-90E4-F65D0DF2F59F}", "Uni.Sprd", "Sprd", true, false, param_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_gain_uni, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   uni_spread.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
   uni_spread.info.description = "Unison stereo spread, works on all oscillator modes.";
