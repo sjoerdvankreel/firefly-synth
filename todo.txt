@@ -29,6 +29,7 @@ do forward compat checks - dont load newer versions
 do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 
 small-ui-changes:
+need enough space for karplus-strong
 right-align the osc cent label?
 do icons for the osc modes
 do some more margin between the controls
