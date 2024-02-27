@@ -337,22 +337,21 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
 
   int left = 0;
   if(tabular) 
-    left = tb.getWidth() / 2 - combo_height() / 2;
+    left = tb.getWidth() / 2 - toggle_height() / 2;
 
-  auto cornerSize = 3.0f;
+  int pad = 1;
   int height = tb.getHeight();
-  auto tick = getTickShape(0.5f);
-  int const fixedHeight = combo_height();
+  int const fixedHeight = toggle_height();
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
-  Rectangle<int> boxBounds(left, toggleTop, fixedHeight, fixedHeight);
-  g.setColour(findColour(ComboBox::backgroundColourId));
-  g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
+  Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
+  g.setColour(Colours::white.withAlpha(0.05f));
+  g.fillEllipse(boxBounds.toFloat());
   g.setColour(findColour(ComboBox::outlineColourId).darker());
-  g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
-  if(!tb.getToggleState()) return;
+  g.drawEllipse(boxBounds.toFloat(), 1);
+  if (!tb.getToggleState()) return;
   if (tb.isEnabled()) g.setColour(tb.findColour(ToggleButton::tickColourId));
   else g.setColour(tb.findColour(ToggleButton::tickDisabledColourId));
-  g.fillPath(tick, tick.getTransformToScaleToFit(boxBounds.reduced(6, 6).toFloat(), true));
+  g.fillEllipse(boxBounds.toFloat().reduced(5.0f, 5.0f));
 }
 
 void 
