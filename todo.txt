@@ -36,7 +36,8 @@ check all the short names in the matrices
 fix all the label justifications
 need enough space for karplus-strong
 right-align the osc cent label?
-do icons for the osc modes
+do icons for the osc modes?
+group cv matrix targets by e.g. gaudio gain 1-10
 do some more margin between the controls
 do basic theming support (e.g. config file with colors)
 label all unlabeled stuff (mostly comboboxes)
