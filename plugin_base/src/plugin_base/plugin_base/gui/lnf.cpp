@@ -432,8 +432,7 @@ void
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
   float stroke = 5;
-  float padding = 3;
-  float top_margin = 2;
+  float padding = 5;
   int conic_count = 256;
 
   bool tabular = false;
@@ -453,7 +452,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float size = size_base - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
   if(tabular) left = (s.getWidth() - size) / 2;
-  float top = (s.getHeight() - size) / 2 - padding / 2 + top_margin;
+  float top = (s.getHeight() - size) / 2;
 
   bool bipolar = s.getMinimum() < 0;
   float end_angle = (180 + 340) * pi32 / 180;
