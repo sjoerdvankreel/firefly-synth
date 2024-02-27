@@ -24,7 +24,7 @@ enum { section_main, section_basic, section_dsf, section_rand, section_sync, sec
 enum {
   param_type, param_note, param_cent, param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
-  param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pwm,
+  param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_freq, param_rand_res, param_rand_seed, param_rand_rate, // shared k+s/noise
   param_kps_fdbk, param_kps_stretch, param_kps_mid,
@@ -383,13 +383,13 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 7 }, make_label_none())));
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sqr_mix.info.description = "Square generator mix amount.";
-  auto& basic_sqr_pwm = result.params.emplace_back(make_param(
-    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", "Sqr.PWM", "PWM", true, false, param_basic_sqr_pwm, 1),
+  auto& basic_sqr_pw = result.params.emplace_back(make_param(
+    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", "Sqr.PW", "PW", true, false, param_basic_sqr_pw, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 8 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  basic_sqr_pwm.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
-  basic_sqr_pwm.info.description = "Square generator pulse width.";
+  basic_sqr_pw.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
+  basic_sqr_pw.info.description = "Square generator pulse width.";
 
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
     make_topo_tag("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
@@ -962,11 +962,11 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   auto const& stc_res_curve = *(*modulation)[module_osc][block.module_slot][param_rand_res][0];
   auto const& stc_freq_curve = *(*modulation)[module_osc][block.module_slot][param_rand_freq][0];
 
+  auto const& pw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pw][0];
   auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
   auto const& tri_curve = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
   auto const& sqr_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
-  auto const& pwm_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pwm][0];
 
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
@@ -1093,7 +1093,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       if constexpr (Saw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * saw_mix;
       if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix;
       if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix;
-      if constexpr (Sqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, pwm_curve[mod_index]) * sqr_mix;
+      if constexpr (Sqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix;
       if constexpr (DSF) synced_sample = generate_dsf(_sync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
       // generate the unsynced sample and crossover
@@ -1113,7 +1113,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
           if constexpr (Saw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * saw_mix;
           if constexpr (Sin) unsynced_sample += std::sin(2.0f * pi32 * _unsync_phases[v]) * sin_mix;
           if constexpr (Tri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * tri_mix;
-          if constexpr (Sqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, pwm_curve[mod_index]) * sqr_mix;
+          if constexpr (Sqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix;
           if constexpr (DSF) unsynced_sample = generate_dsf(_unsync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
