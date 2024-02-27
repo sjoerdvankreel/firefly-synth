@@ -552,7 +552,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  uni_spread.gui.bindings.enabled.bind_params({ param_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
+  uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
   uni_spread.info.description = "Unison stereo spread, works on all oscillator modes.";
 
   return result;
