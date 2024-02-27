@@ -406,7 +406,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   dsf_partials.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf_partials.info.description = "Controls the number of partials (overtones).";
   auto& dsf_dist = result.params.emplace_back(make_param(
-    make_topo_info("{E5E66BBD-DCC9-4A7E-AB09-2D7107548090}", "DSF.Dist", "Dist", true, false, param_dsf_dist, 1),
+    make_topo_info("{E5E66BBD-DCC9-4A7E-AB09-2D7107548090}", "DSF.Dist", "Distance", true, false, param_dsf_dist, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0.05, 20, 1, 2, ""),
     make_param_gui_single(section_dsf, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
