@@ -313,10 +313,8 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
   Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
-  g.setColour(box.findColour(ComboBox::backgroundColourId));
+  g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
-  g.setColour(box.findColour(ComboBox::outlineColourId).darker());
-  g.drawRoundedRectangle(boxBounds.toFloat().reduced(0.5f, 0.5f), cornerSize, 1.0f);
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
   path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
@@ -344,7 +342,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   int const fixedHeight = toggle_height();
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
-  g.setColour(Colours::white.withAlpha(0.05f));
+  g.setColour(Colours::white.withAlpha(0.125f));
   g.fillEllipse(boxBounds.toFloat());
   g.setColour(findColour(ComboBox::outlineColourId).darker());
   g.drawEllipse(boxBounds.toFloat(), 1);
