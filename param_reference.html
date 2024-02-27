@@ -2515,6 +2515,23 @@
 <td colspan='11' class='description'>In Karplus-Strong2 mode, controls the midpoint MIDI note (C4=60). Lower notes will be stretched less, higher notes will be stretched more. This tries to keep audible note lengths relatively equal.</td>
 </tr>
 <tr>
+<td rowspan='2'>Gain</td>
+<td>Gain</td>
+<td>Sync+Gain</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>100 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Per-osc gain control. The same result may be had through the audio routing matrices, but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it when the oscillator is routed through a distortion module.</td>
+</tr>
+<tr>
 <td rowspan='2'>Sync.On</td>
 <td>Sync</td>
 <td>Sync+Gain</td>
@@ -2564,23 +2581,6 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Controls cross-over time between the synced and unsyced signal after a phase reset occurs.</td>
-</tr>
-<tr>
-<td rowspan='2'>Gain</td>
-<td>Gain</td>
-<td>Sync+Gain</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>100 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Per-osc gain control. The same result may be had through the audio routing matrices, but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it when the oscillator is routed through a distortion module.</td>
 </tr>
 <tr>
 <td rowspan='2'>Uni.Voices</td>
