@@ -28,6 +28,18 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 
+small-ui-changes:
+do basic theming support (e.g. config file with colors)
+label all unlabeled stuff (mostly comboboxes)
+split the distortion gui over 2 rows its too crowded
+right-align tempo synced comboboxes (and possibly others)
+make checkbox and combobox less prominent on screen
+make the whole ui a bit larger for slightly bigger knobs
+make the left side a bit wider so we dont need to abbreviate labels so much
+divide the matrix tab header over 2 rows so we dont need abbreviations for gm.cv etc
+get rid of the "combined" comboboxes, just make them separate parameters (breaking change!)
+
+
 other:
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
