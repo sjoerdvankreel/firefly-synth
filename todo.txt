@@ -29,6 +29,7 @@ do forward compat checks - dont load newer versions
 do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 
 small-ui-changes:
+check the fx version
 keep track of the matrices layout
 check which colors are still used
 check all the short names in the matrices
