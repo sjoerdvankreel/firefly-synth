@@ -77,28 +77,35 @@ justification_type(gui_label const& label)
   switch (label.align)
   {
   case gui_label_align::top:
+    switch (label.justify) {
+    case gui_label_justify::center: return Justification::centred;
+    case gui_label_justify::far: return Justification::centredTop;
+    case gui_label_justify::near: return Justification::centredBottom;
+    default: assert(false); break; }
+    break;
   case gui_label_align::bottom:
     switch (label.justify) {
     case gui_label_justify::center: return Justification::centred;
-    case gui_label_justify::near: return Justification::centredLeft;
-    case gui_label_justify::far: return Justification::centredRight;
-    default: break; }
+    case gui_label_justify::near: return Justification::centredTop;
+    case gui_label_justify::far: return Justification::centredBottom;
+    default: assert(false); break; }
     break;
   case gui_label_align::left:
     switch (label.justify) {
-    case gui_label_justify::near: return Justification::topLeft;
-    case gui_label_justify::far: return Justification::bottomLeft;
-    case gui_label_justify::center: return Justification::centredLeft;
-    default: break; }
+    case gui_label_justify::center: return Justification::centred;
+    case gui_label_justify::far: return Justification::centredLeft;
+    case gui_label_justify::near: return Justification::centredRight;
+    default: assert(false); break; }
     break;
   case gui_label_align::right:
     switch (label.justify) {
-    case gui_label_justify::near: return Justification::topRight;
-    case gui_label_justify::far: return Justification::bottomRight;
-    case gui_label_justify::center: return Justification::centredRight;
-    default: break; }
+    case gui_label_justify::center: return Justification::centred;
+    case gui_label_justify::far: return Justification::centredRight;
+    case gui_label_justify::near: return Justification::centredLeft;
+    default: assert(false); break; }
     break;
   default:
+    assert(false);
     break;
   }
   assert(false);
