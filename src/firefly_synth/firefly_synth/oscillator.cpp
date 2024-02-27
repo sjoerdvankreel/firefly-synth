@@ -332,55 +332,55 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_basic; });
   auto& basic_sin_on = result.params.emplace_back(make_param(
-    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", "Sin.On", "On", true, false, param_basic_sin_on, 1),
+    make_topo_info("{BD753E3C-B84E-4185-95D1-66EA3B27C76B}", "Sin.On", "Sin", true, false, param_basic_sin_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(true),
-    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_sin_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_sin_on.info.description = "Toggle sine generator on/off.";
   auto& basic_sin_mix = result.params.emplace_back(make_param(
-    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", "Sin.Mix", "Sin", true, false, param_basic_sin_mix, 1),
+    make_topo_info("{60FAAC91-7F69-4804-AC8B-2C7E6F3E4238}", "Sin.Mix", "Sin.Mix", true, false, param_basic_sin_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
-    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 1 }, make_label_none())));
   basic_sin_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sin_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sin_mix.info.description = "Sine generator mix amount.";
   auto& basic_saw_on = result.params.emplace_back(make_param(
-    make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", "Saw.On", "On", true, false, param_basic_saw_on, 1),
+    make_topo_info("{A31C1E92-E7FF-410F-8466-7AC235A95BDB}", "Saw.On", "Saw", true, false, param_basic_saw_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 2 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_saw_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_saw_on.info.description = "Toggle saw generator on/off.";
   auto& basic_saw_mix = result.params.emplace_back(make_param(
-    make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", "Saw.Mix", "Saw", true, false, param_basic_saw_mix, 1),
+    make_topo_info("{A459839C-F78E-4871-8494-6D524F00D0CE}", "Saw.Mix", "Saw.Mix", true, false, param_basic_saw_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
-    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 3 }, make_label_none())));
   basic_saw_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_saw_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_saw_mix.info.description = "Saw generator mix amount.";
   auto& basic_tri_on = result.params.emplace_back(make_param(
-    make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", "Tri.On", "On", true, false, param_basic_tri_on, 1),
+    make_topo_info("{F2B92036-ED14-4D88-AFE3-B83C1AAE5E76}", "Tri.On", "Tri", true, false, param_basic_tri_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 4 }, make_label_none())));
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 4 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_tri_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_tri_on.info.description = "Toggle triangle generator on/off.";
   auto& basic_tri_mix = result.params.emplace_back(make_param(
-    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", "Tri.Mix", "Tri", true, false, param_basic_tri_mix, 1),
+    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", "Tri.Mix", "Tri.Mix", true, false, param_basic_tri_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
-    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 5 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 5 }, make_label_none())));
   basic_tri_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_tri_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_tri_mix.info.description = "Triangle generator mix amount.";
   auto& basic_sqr_on = result.params.emplace_back(make_param(
-    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", "Sqr.On", "On", true, false, param_basic_sqr_on, 1),
+    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", "Sqr.On", "Sqr", true, false, param_basic_sqr_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 6 }, make_label_none())));
+    make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 6 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   basic_sqr_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_sqr_on.info.description = "Toggle square generator on/off.";
   auto& basic_sqr_mix = result.params.emplace_back(make_param(
-    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", "Sqr.Mix", "Sqr", true, false, param_basic_sqr_mix, 1),
+    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", "Sqr.Mix", "Sqr.Mix", true, false, param_basic_sqr_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
-    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 7 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 7 }, make_label_none())));
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sqr_mix.info.description = "Square generator mix amount.";
   auto& basic_sqr_pwm = result.params.emplace_back(make_param(

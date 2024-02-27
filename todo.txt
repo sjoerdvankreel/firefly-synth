@@ -29,6 +29,8 @@ do forward compat checks - dont load newer versions
 do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 
 small-ui-changes:
+do icons for the osc modes
+do some more margin between the controls
 do basic theming support (e.g. config file with colors)
 label all unlabeled stuff (mostly comboboxes)
 split the distortion gui over 2 rows its too crowded
