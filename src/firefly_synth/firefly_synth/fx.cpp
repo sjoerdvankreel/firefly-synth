@@ -148,13 +148,16 @@ dist_over_items()
 class fx_state_converter:
 public state_converter
 {
+  plugin_desc const* const _desc;
 public:
+  fx_state_converter(plugin_desc const* const desc): _desc(desc) {}
+  void post_process(load_handler const& handler, plugin_state& new_state) override;
+
   bool handle_invalid_param_value(
     std::string const& module_id, int module_index,
     std::string const& param_id, int param_index,
     std::string const& old_value, load_handler const& handler, 
     plain_value& new_value) override;
-  void post_process(load_handler const& handler, plugin_state& new_state) override;
 };
 
 class fx_engine: 
@@ -416,9 +419,24 @@ fx_state_converter::handle_invalid_param_value(
   std::string const& old_value, load_handler const& handler, 
   plain_value& new_value)
 {
+  // note param ids are equal between vfx/gfx, gfx just has more
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
-
+    if (param_id == _desc->plugin->modules[module_gfx].params[param_type].info.tag.id)
+    {
+      if (old_value == "{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}")
+      {
+        // Distortion B
+        new_value = _desc->raw_to_plain_at(module_gfx, param_type, type_dst);
+        return true;
+      }
+      if (old_value == "{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}")
+      {
+        // Distortion C
+        new_value = _desc->raw_to_plain_at(module_gfx, param_type, type_dst);
+        return true;
+      }
+    }
   }
   return false;
 }
@@ -455,7 +473,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     return make_audio_routing_menu_handler(state, global, is_fx); };
   result.engine_factory = [global](auto const&, int sample_rate, int max_frame_count) {
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count); };
-  result.state_converter_factory = [](auto) { return std::make_unique<fx_state_converter>(); };
+  result.state_converter_factory = [](auto desc) { return std::make_unique<fx_state_converter>(desc); };
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
