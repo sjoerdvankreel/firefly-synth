@@ -846,8 +846,8 @@ template <bool Graph> void
 osc_engine::process_static(plugin_block& block, cv_audio_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int svf_type = block_auto[param_rand_svf][0].step();
-  switch (svf_type)
+  int svf_mode = block_auto[param_rand_svf][0].step();
+  switch (svf_mode)
   {
   case rand_svf_lpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_lpf>(block, modulation); break;
   case rand_svf_hpf: process_unison<Graph, false, false, false, false, false, false, false, false, true, rand_svf_hpf>(block, modulation); break;

@@ -48,8 +48,8 @@ enum { dist_clip_hard, dist_clip_tanh };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
-enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync };
-enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
+enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync }; // todo mode
+enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
 enum { section_main_top, section_main_bottom, section_svf_top, section_svf_bottom, 
   section_comb_top, section_comb_bottom, section_dist_top, section_dist_bottom, 
   section_delay_top, section_delay_bottom, section_reverb_top, section_reverb_bottom };
@@ -61,7 +61,7 @@ enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reve
 static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, (int)scratch_reverb_count });
 
 enum { param_type,
-  param_svf_type, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
+  param_svf_mode, param_svf_freq, param_svf_res, param_svf_gain, param_svf_kbd,
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
   param_dist_mode, param_dist_over, param_dist_clip, param_dist_shaper, param_dist_skew_x, param_dist_skew_y, 
   param_dist_x, param_dist_y, param_dist_lp_frq, param_dist_lp_res, param_dist_gain, param_dist_mix,
@@ -72,7 +72,7 @@ enum { param_type,
   param_reverb_size, param_reverb_damp, param_reverb_spread, param_reverb_apf, param_reverb_mix
 };
 
-static bool svf_has_gain(int svf_type) { return svf_type >= svf_type_bll; }
+static bool svf_has_gain(int svf_mode) { return svf_mode >= svf_mode_bll; }
 static bool dly_is_sync(int dly_type) { return dly_type == dly_type_fdbk_sync || dly_type == dly_type_multi_sync; }
 static bool dly_is_multi(int dly_type) { return dly_type == dly_type_multi_time || dly_type == dly_type_multi_sync; }
 
@@ -101,7 +101,7 @@ dist_mode_items()
 }
 
 static std::vector<list_item>
-svf_type_items()
+svf_mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{8B7E5C75-C3F6-4F53-900C-0A75703F5570}", "LPF");
@@ -211,7 +211,7 @@ public module_engine {
   void process_svf(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   template <class Init> 
-  void process_svf_type(plugin_block& block, 
+  void process_svf_mode(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Init init);
   
   template <bool Graph>
@@ -248,7 +248,7 @@ static void
 init_voice_default(plugin_state& state)
 {
   state.set_text_at(module_vfx, 0, param_type, 0, "SV Filter");
-  state.set_text_at(module_vfx, 0, param_svf_type, 0, "LPF");
+  state.set_text_at(module_vfx, 0, param_svf_mode, 0, "LPF");
   state.set_text_at(module_vfx, 0, param_svf_res, 0, "50");
   state.set_text_at(module_vfx, 0, param_svf_freq, 0, "20");
 }
@@ -257,7 +257,7 @@ static void
 init_global_default(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gfx, 0, param_type, 0, "SV Filter");
-  state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
+  state.set_text_at(module_gfx, 0, param_svf_mode, 0, "LPF");
   state.set_text_at(module_gfx, is_fx ? 0: 1, param_type, 0, "Delay");
   state.set_text_at(module_gfx, is_fx ? 0 : 1, param_dly_type, 0, "Fdbk.Sync");
 }
@@ -557,12 +557,12 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_tag("{D6B3BE3C-BE16-44FB-84D6-D34A381C3334}", "Main Bottom"),
     make_param_section_gui({ 1, 0, 1, 1 }, { 1, 1 })));
 
-  auto& svf_type = result.params.emplace_back(make_param(
-    make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", "SVF.Type", "Type", true, false, param_svf_type, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(svf_type_items(), ""),
+  auto& svf_mode = result.params.emplace_back(make_param(
+    make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", "SVF.Mode", "Mode", true, false, param_svf_mode, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(svf_mode_items(), ""),
     make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  svf_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
-  svf_type.info.description = "Selects the state-variable filter type.";
+  svf_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_mode.info.description = "Selects the state-variable filter mode.";
   auto& svf_top = result.sections.emplace_back(make_param_section(section_svf_top,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
@@ -593,7 +593,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
     make_param_gui_single(section_svf_bottom, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
-  svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_type }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
+  svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_mode }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
   svf_gain.info.description = "Controls filter gain for shelving filters.";
   auto& svf_kbd = result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "SVF.Kbd", "Kbd", true, false, param_svf_kbd, 1),
@@ -1124,24 +1124,24 @@ fx_engine::process_svf(plugin_block& block,
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int svf_type = block_auto[param_svf_type][0].step();
-  switch (svf_type)
+  int svf_mode = block_auto[param_svf_mode][0].step();
+  switch (svf_mode)
   {
-  case svf_type_lpf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
-  case svf_type_hpf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
-  case svf_type_bpf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
-  case svf_type_bsf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
-  case svf_type_apf: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
-  case svf_type_peq: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
-  case svf_type_bll: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
-  case svf_type_lsh: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
-  case svf_type_hsh: process_svf_type(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
+  case svf_mode_lpf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
+  case svf_mode_hpf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
+  case svf_mode_bpf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
+  case svf_mode_bsf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
+  case svf_mode_apf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
+  case svf_mode_peq: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
+  case svf_mode_bll: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
+  case svf_mode_lsh: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
+  case svf_mode_hsh: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
   default: assert(false); break;
   }
 }
 
 template <class Init> void
-fx_engine::process_svf_type(plugin_block& block, 
+fx_engine::process_svf_mode(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Init init)
 {
   double w, hz, gain, kbd;
