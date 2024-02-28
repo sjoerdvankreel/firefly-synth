@@ -63,8 +63,8 @@ static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (in
 enum { param_type,
   param_svf_mode, param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_dist_mode, param_dist_over, param_dist_clip, param_dist_shaper, param_dist_skew_x, param_dist_skew_y, 
-  param_dist_x, param_dist_y, param_dist_lp_frq, param_dist_lp_res, param_dist_gain, param_dist_mix,
+  param_dist_mode, param_dist_shaper, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt,
+  param_dist_over, param_dist_clip, param_dist_lp_frq, param_dist_lp_res, param_dist_gain, param_dist_mix,
   param_dly_type, param_dly_amt, param_dly_sprd, param_dly_mix,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
   param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps,  
@@ -656,60 +656,60 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     "Shaper To Filter: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.";
   auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, gui_dimension::auto_size, 1 } })));
   distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  auto& dist_over = result.params.emplace_back(make_param(
-    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Dst.OverSmp", "Dst.OverSmp", true, false, param_dist_over, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
-  auto& dist_clip = result.params.emplace_back(make_param(
-    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Dst.Clip", "Clip", true, false, param_dist_clip, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Hard"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
-  dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Dst.Shape", "Shape", true, false, param_dist_shaper, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sin"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
   auto& dist_skew_x = result.params.emplace_back(make_param(
     make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", "Dst.SkewX", "SkewX", true, false, param_dist_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
   dist_skew_x.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_x.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
+  auto& dist_x = result.params.emplace_back(make_param(
+    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Dst.X", "X", true, false, param_dist_skew_x_amt, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_dist_top, gui_edit_type::knob, { 0, 2 },
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+  dist_x.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
+    return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
+  dist_x.info.description = "Before-shape skew amount.";
   auto& dist_skew_y = result.params.emplace_back(make_param(
     make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", "Dst.SkewY", "SkewY", true, false, param_dist_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 4 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
   dist_skew_y.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_y.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
+  auto& dist_y = result.params.emplace_back(make_param(
+    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Dst.Y", "Y", true, false, param_dist_skew_y_amt, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_dist_top, gui_edit_type::knob, { 0, 4 },
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+  dist_y.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
+    return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
+  dist_y.info.description = "After-shape skew amount.";
 
   auto& distortion_bottom = result.sections.emplace_back(make_param_section(section_dist_bottom,
     make_topo_tag("{A6A60A20-DADD-42B5-B307-D5B35AABB510}", "Distortion Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size,
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   distortion_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  auto& dist_x = result.params.emplace_back(make_param(
-    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Dst.X", "X", true, false, param_dist_x, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_bottom, gui_edit_type::knob, { 0, 0 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
-  dist_x.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
-    return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
-  dist_x.info.description = "Before-shape skew amount.";
-  auto& dist_y = result.params.emplace_back(make_param(
-    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Dst.Y", "Y", true, false, param_dist_y, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_bottom, gui_edit_type::knob, { 0, 1 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
-  dist_y.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
-    return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
-  dist_y.info.description = "After-shape skew amount.";
+  auto& dist_over = result.params.emplace_back(make_param(
+    make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Dst.OverSmp", "Dst.OverSmp", true, false, param_dist_over, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
+    make_param_gui_single(section_dist_bottom, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+  dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
+  auto& dist_clip = result.params.emplace_back(make_param(
+    make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Dst.Clip", "Clip", true, false, param_dist_clip, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Hard"),
+    make_param_gui_single(section_dist_bottom, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
+  dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).";
   auto& dist_lp = result.params.emplace_back(make_param(
     make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Dst.LPF", "LPF", true, false, param_dist_lp_frq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
@@ -1431,10 +1431,10 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
   auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
-  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_x][0];
-  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_y][0];
   auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
   auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
+  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_x_amt][0];
+  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_y_amt][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(sx))

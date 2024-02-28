@@ -2856,40 +2856,6 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.OverSmp</td>
-<td>Dst.OverSmp</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1X</td>
-<td>8X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dst.Clip</td>
-<td>Clip</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Hard</td>
-<td>Tanh</td>
-<td>Hard</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
-</tr>
-<tr>
 <td rowspan='2'>Dst.Shape</td>
 <td>Shape</td>
 <td>Distortion Top</td>
@@ -2924,6 +2890,23 @@
 <td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dst.X</td>
+<td>X</td>
+<td>Distortion Top</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew amount.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dst.SkewY</td>
 <td>SkewY</td>
 <td>Distortion Top</td>
@@ -2941,26 +2924,9 @@
 <td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.X</td>
-<td>X</td>
-<td>Distortion Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew amount.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dst.Y</td>
 <td>Y</td>
-<td>Distortion Bottom</td>
+<td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2973,6 +2939,40 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>After-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.OverSmp</td>
+<td>Dst.OverSmp</td>
+<td>Distortion Bottom</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1X</td>
+<td>8X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.Clip</td>
+<td>Clip</td>
+<td>Distortion Bottom</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Hard</td>
+<td>Tanh</td>
+<td>Hard</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
 </tr>
 <tr>
 <td rowspan='2'>Dst.LPF</td>
@@ -3403,40 +3403,6 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.OverSmp</td>
-<td>Dst.OverSmp</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1X</td>
-<td>8X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dst.Clip</td>
-<td>Clip</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Hard</td>
-<td>Tanh</td>
-<td>Hard</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
-</tr>
-<tr>
 <td rowspan='2'>Dst.Shape</td>
 <td>Shape</td>
 <td>Distortion Top</td>
@@ -3471,6 +3437,23 @@
 <td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dst.X</td>
+<td>X</td>
+<td>Distortion Top</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew amount.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dst.SkewY</td>
 <td>SkewY</td>
 <td>Distortion Top</td>
@@ -3488,26 +3471,9 @@
 <td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.X</td>
-<td>X</td>
-<td>Distortion Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew amount.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dst.Y</td>
 <td>Y</td>
-<td>Distortion Bottom</td>
+<td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3520,6 +3486,40 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>After-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.OverSmp</td>
+<td>Dst.OverSmp</td>
+<td>Distortion Bottom</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1X</td>
+<td>8X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.Clip</td>
+<td>Clip</td>
+<td>Distortion Bottom</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Hard</td>
+<td>Tanh</td>
+<td>Hard</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
 </tr>
 <tr>
 <td rowspan='2'>Dst.LPF</td>
