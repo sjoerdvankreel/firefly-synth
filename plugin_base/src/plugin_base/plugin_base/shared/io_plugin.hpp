@@ -12,6 +12,7 @@ namespace plugin_base {
 
 // per-instance state (plugin parameters and ui specific stuff like selected tabs)
 
+// ok, error, or ok with warnings
 struct load_result
 {
   std::string error = {};
@@ -22,13 +23,14 @@ struct load_result
   load_result(std::string const& error): error(error) {}
 };
 
+// allows file format conversions to read old state
 class load_handler
 {
   juce::var const* _json;
   plugin_version const _old_version;
 
 public:
-  plugin_version const& old_version() { return _old_version; }
+  plugin_version const& old_version() const { return _old_version; }
   load_handler(juce::var const* json, plugin_version const& old_version);
 
   bool old_param_value(
@@ -37,6 +39,7 @@ public:
     std::string& old_value) const;
 };
 
+// allows individual modules to perform file format conversion
 class state_converter
 {
 public:

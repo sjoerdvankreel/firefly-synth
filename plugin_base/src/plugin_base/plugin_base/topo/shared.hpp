@@ -41,6 +41,16 @@ struct plugin_version final {
   int patch;
 };
 
+inline bool 
+operator<(plugin_version const& l, plugin_version const& r)
+{
+  if(l.major < r.major) return true;
+  if(l.major > r.major) return false;
+  if (l.minor < r.minor) return true;
+  if (l.minor > r.minor) return false;
+  return l.patch < r.patch;
+}
+
 // plugin and section metadata
 struct topo_tag final {
   std::string id;

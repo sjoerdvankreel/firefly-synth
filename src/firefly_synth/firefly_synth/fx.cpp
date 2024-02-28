@@ -5,6 +5,7 @@
 #include <plugin_base/topo/support.hpp>
 #include <plugin_base/dsp/oversampler.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 
 #include <firefly_synth/svf.hpp>
 #include <firefly_synth/synth.hpp>
@@ -143,6 +144,17 @@ dist_over_items()
   result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "8X");
   return result;
 }
+
+class fx_state_converter:
+public state_converter
+{
+public:
+  bool handle_invalid_param_value(
+    std::string const& module_id, int module_index,
+    std::string const& param_id, int param_index,
+    load_handler const& handler, plain_value& new_value) override;
+  void post_process(load_handler const& handler, plugin_state& new_state) override;
+};
 
 class fx_engine: 
 public module_engine {  
@@ -396,6 +408,28 @@ render_graph(
     stroke, { partition });
 }
 
+bool 
+fx_state_converter::handle_invalid_param_value(
+  std::string const& module_id, int module_index,
+  std::string const& param_id, int param_index,
+  load_handler const& handler, plain_value& new_value)
+{
+  if (handler.old_version() < plugin_version{ 1, 2, 0 })
+  {
+
+  }
+  return false;
+}
+  
+void 
+fx_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
+{
+  if (handler.old_version() < plugin_version{ 1, 2, 0 })
+  {
+
+  }
+}
+
 module_topo
 fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
 {
@@ -419,6 +453,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     return make_audio_routing_menu_handler(state, global, is_fx); };
   result.engine_factory = [global](auto const&, int sample_rate, int max_frame_count) {
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count); };
+  result.state_converter_factory = [](auto) { return std::make_unique<fx_state_converter>(); };
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
