@@ -94,9 +94,9 @@ static std::vector<list_item>
 dist_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{4216D379-72FD-4C2D-B594-20C175CF275E}", "Mode A");
-  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "Mode B");
-  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "Mode C");
+  result.emplace_back("{4216D379-72FD-4C2D-B594-20C175CF275E}", "No Filter");
+  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "Filter To Shaper");
+  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "Shaper To Filter");
   return result;
 }
 
@@ -523,10 +523,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { gui_dimension::auto_size, 1 } })));
-
-  // autofit to svf mode list
-  result.gui.autofit_row = 1;
+    make_module_gui(section, colors, pos, { { 1, 1 }, { 2, 7 } })));
  
   result.graph_engine_factory = make_graph_engine;
   if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
@@ -654,9 +651,9 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   dist_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.info.description = std::string("Affects where the filter is placed.<br/ >") +
-    "Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>" +
-    "Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>" +
-    "Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.";
+    "No Filter: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>" +
+    "Filter To Shaper: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>" +
+    "Shaper To Filter: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.";
   auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
