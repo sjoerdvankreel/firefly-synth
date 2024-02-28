@@ -14,15 +14,16 @@ wave_make_name_skew(int skew)
   switch (skew)
   {
   case wave_skew_type_off: return "Off";
-  case wave_skew_type_lin: return "Lin";
-  case wave_skew_type_scu: return "ScU";
-  case wave_skew_type_scb: return "ScB";
-  case wave_skew_type_xpu: return "XpU";
-  case wave_skew_type_xpb: return "XpB";
+  case wave_skew_type_lin: return "Linear";
+  case wave_skew_type_xpb: return "Exp Bi";
+  case wave_skew_type_xpu: return "Exp Uni";
+  case wave_skew_type_scb: return "Scale Bi";
+  case wave_skew_type_scu: return "Scale Uni";
   default: assert(false); return {};
   }
 }
 
+// todo drop this
 static std::string
 wave_make_header_shape(int shape, bool for_shaper)
 {
@@ -58,25 +59,25 @@ wave_make_name_shape(int shape, bool for_shaper)
   switch (shape)
   {
   case wave_shape_type_saw: return "Saw";
-  case wave_shape_type_sqr: return "Sqr";
-  case wave_shape_type_tri: return "Tri";
-  case wave_shape_type_sin: return "Sin";
-  case wave_shape_type_cos: return "Cos";
-  case wave_shape_type_sin_sin: return "SS";
-  case wave_shape_type_sin_cos: return "SC";
-  case wave_shape_type_cos_sin: return "CS";
-  case wave_shape_type_cos_cos: return "CC";
-  case wave_shape_type_sin_sin_sin: return "SSS";
-  case wave_shape_type_sin_sin_cos: return "SSC";
-  case wave_shape_type_sin_cos_sin: return "SCS";
-  case wave_shape_type_sin_cos_cos: return "SCC";
-  case wave_shape_type_cos_sin_sin: return "CSS";
-  case wave_shape_type_cos_sin_cos: return "CSC";
-  case wave_shape_type_cos_cos_sin: return "CCS";
-  case wave_shape_type_cos_cos_cos: return "CCC";
-  case wave_shape_type_smooth_or_fold: return for_shaper? "Fld": "Smt";
-  case wave_shape_type_static: return "Stc";
-  case wave_shape_type_static_free: return "S/F";
+  case wave_shape_type_sqr: return "Square";
+  case wave_shape_type_tri: return "Triangle";
+  case wave_shape_type_sin: return "Sine";
+  case wave_shape_type_cos: return "Cosine";
+  case wave_shape_type_sin_sin: return "SinSin";
+  case wave_shape_type_sin_cos: return "SinCos";
+  case wave_shape_type_cos_sin: return "CosSin";
+  case wave_shape_type_cos_cos: return "CosCos";
+  case wave_shape_type_sin_sin_sin: return "SinSinSin";
+  case wave_shape_type_sin_sin_cos: return "SinSinCos";
+  case wave_shape_type_sin_cos_sin: return "SinCosSin";
+  case wave_shape_type_sin_cos_cos: return "SinCosCos";
+  case wave_shape_type_cos_sin_sin: return "CosSinSin";
+  case wave_shape_type_cos_sin_cos: return "CosSinCos";
+  case wave_shape_type_cos_cos_sin: return "CosCosSin";
+  case wave_shape_type_cos_cos_cos: return "CosCosCos";
+  case wave_shape_type_smooth_or_fold: return for_shaper? "Foldback": "Smooth";
+  case wave_shape_type_static: return "Static";
+  case wave_shape_type_static_free: return "Free Static";
   default: assert(false); return {};
   }
 }

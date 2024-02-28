@@ -659,9 +659,10 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, gui_dimension::auto_size, 1 } })));
   distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_shaper = result.params.emplace_back(make_param(
-    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Dst.Shape", "Shape", true, false, param_dist_shaper, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sin"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Dst.Shaper", "Shaper", true, false, param_dist_shaper, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sine"),
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
   auto& dist_skew_x = result.params.emplace_back(make_param(
