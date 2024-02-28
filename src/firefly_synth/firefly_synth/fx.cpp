@@ -469,10 +469,10 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
   std::string module_id = modules[this_module].info.tag.id;
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
-    // pick up distortion mode from old combined dstA/dstB/dstC
     auto skew_items = wave_skew_type_items();
     for (int i = 0; i < modules[this_module].info.slot_count; i++)
     {
+      // pick up distortion mode from old combined dstA/dstB/dstC
       if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_type].info.tag.id, 0, old_value))
       {
         // Distortion B
@@ -484,8 +484,10 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
           new_state.set_plain_at(this_module, i, param_dist_mode, 0,
             _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_c));
       }
-    }
-#if 0
+
+      // pick up skewx/skewy mode from old combined shaper+skewx/y
+      if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_dist_shaper].info.tag.id, 0, old_value))
+      {
         // format is {guid}-{guid}-{guid}
         if (old_value.size() == 3 * 38 + 2)
         {
@@ -493,15 +495,16 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
           std::string old_skew_y_guid = old_value.substr(2 * 38 + 2, 38);
           for (int j = 0; j < skew_items.size(); j++)
           {
-            if(skew_items[j].id == old_skew_x_guid)
-              new_state.set_plain_at(this_module, i, param_dist_skew_x, 0, 
+            if (skew_items[j].id == old_skew_x_guid)
+              new_state.set_plain_at(this_module, i, param_dist_skew_x, 0,
                 _desc->raw_to_plain_at(this_module, param_dist_skew_x, i));
             if (skew_items[j].id == old_skew_y_guid)
               new_state.set_plain_at(this_module, i, param_dist_skew_y, 0,
                 _desc->raw_to_plain_at(this_module, param_dist_skew_y, i));
           }
         }
-#endif
+      }
+    }
   }
 }
 
