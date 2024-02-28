@@ -50,7 +50,7 @@ enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync };
 enum { svf_type_lpf, svf_type_hpf, svf_type_bpf, svf_type_bsf, svf_type_apf, svf_type_peq, svf_type_bll, svf_type_lsh, svf_type_hsh };
-enum { section_type, section_svf_top, section_svf_bottom, 
+enum { section_main_top, section_main_bottom, section_svf_top, section_svf_bottom, 
   section_comb_top, section_comb_bottom, section_dist_top, section_dist_bottom, 
   section_delay_top, section_delay_bottom, section_reverb_top, section_reverb_bottom };
 
@@ -535,13 +535,13 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<fx_state_converter>(desc, global); };
 
-  result.sections.emplace_back(make_param_section(section_type,
-    make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Type"),
-    make_param_section_gui({ 0, 0, 2, 1 }, { 1, 1 })));
+  result.sections.emplace_back(make_param_section(section_main_top,
+    make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main Top"),
+    make_param_section_gui({ 0, 0, 1, 1 }, { 1, 1 })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(global), ""),
-    make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_main_top, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
@@ -552,28 +552,33 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   if (global) type.gui.submenu->indices.push_back(type_reverb);
   type.info.description = "Selects the effect type.";
 
-  auto& svf_top = result.sections.emplace_back(make_param_section(section_svf_top,
-    make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter Top"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1 } })));
-  svf_top.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
-  svf_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
+  // for this we put an fx-type dependent control in it
+  result.sections.emplace_back(make_param_section(section_main_bottom,
+    make_topo_tag("{D6B3BE3C-BE16-44FB-84D6-D34A381C3334}", "Main Bottom"),
+    make_param_section_gui({ 1, 0, 1, 1 }, { 1, 1 })));
+
   auto& svf_type = result.params.emplace_back(make_param(
     make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", "SVF.Type", "Type", true, false, param_svf_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_type_items(), ""),
-    make_param_gui_single(section_svf_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   svf_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_type.info.description = "Selects the state-variable filter type.";
+  auto& svf_top = result.sections.emplace_back(make_param_section(section_svf_top,
+    make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter Top"),
+    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
+  svf_top.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "SVF.Frq", "Frq", true, false, param_svf_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
-    make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_freq.info.description = "Controls filter frequency.";
   auto& svf_res = result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "SVF.Res", "Res", true, false, param_svf_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_res.info.description = "Controls filter resonance.";
