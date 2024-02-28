@@ -78,8 +78,8 @@ type_items(bool global)
 {
   std::vector<list_item> result;
   result.emplace_back("{F37A19CE-166A-45BF-9F75-237324221C39}", "Off");
-  result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SVF");
-  result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb");
+  result.emplace_back("{9CB55AC0-48CB-43ED-B81E-B97C08771815}", "SV Filter");
+  result.emplace_back("{8140F8BC-E4FD-48A1-B147-CD63E9616450}", "Comb Filter");
   result.emplace_back("{277BDD6B-C1F8-4C33-90DB-F4E144FE06A6}", "Distortion");
   if(!global) return result;
   result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
@@ -228,7 +228,7 @@ public:
 static void
 init_voice_default(plugin_state& state)
 {
-  state.set_text_at(module_vfx, 0, param_type, 0, "SVF");
+  state.set_text_at(module_vfx, 0, param_type, 0, "SV Filter");
   state.set_text_at(module_vfx, 0, param_svf_type, 0, "LPF");
   state.set_text_at(module_vfx, 0, param_svf_res, 0, "50");
   state.set_text_at(module_vfx, 0, param_svf_freq, 0, "20");
@@ -237,7 +237,7 @@ init_voice_default(plugin_state& state)
 static void
 init_global_default(plugin_state& state, bool is_fx)
 {
-  state.set_text_at(module_gfx, 0, param_type, 0, "SVF");
+  state.set_text_at(module_gfx, 0, param_type, 0, "SV Filter");
   state.set_text_at(module_gfx, 0, param_svf_type, 0, "LPF");
   state.set_text_at(module_gfx, is_fx ? 0: 1, param_type, 0, "Delay");
   state.set_text_at(module_gfx, is_fx ? 0 : 1, param_dly_type, 0, "Fdbk.Sync");
@@ -426,18 +426,19 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(global), ""),
-    make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
+  type.gui.submenu->indices.push_back(type_svf);
+  type.gui.submenu->indices.push_back(type_cmb);
   type.gui.submenu->indices.push_back(type_dst);
-  // TODO untangle the filters
-  type.gui.submenu->add_submenu("Filter", { type_svf, type_cmb });
   if (global) type.gui.submenu->indices.push_back(type_delay);
   if (global) type.gui.submenu->indices.push_back(type_reverb);
   type.info.description = "Selects the effect type.";
 
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
-    make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SVF"),
+    make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1 } })));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
@@ -477,7 +478,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_kbd.info.description = "Controls keyboard tracking with -/+2 octaves.";
 
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
-    make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb"),
+    make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1, 1 } })));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
