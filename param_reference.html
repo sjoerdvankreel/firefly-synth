@@ -2873,21 +2873,55 @@
 <td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.Shape.SkewX/SkewY</td>
-<td>Dst.Shape.SkewX/SkewY</td>
+<td rowspan='2'>Dst.Shape</td>
+<td>Shape</td>
 <td>Dist</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Saw.Off/Off</td>
-<td>Fld.XpB/XpB</td>
-<td>Sin.Off/Off</td>
+<td>Saw</td>
+<td>Fld</td>
+<td>Sin</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects waveshaper plus before-shape and afer-shape skewing modes. Shapes are various periodic functions plus foldback distortion. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.SkewX</td>
+<td>SkewX</td>
+<td>Dist</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>XpB</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.SkewY</td>
+<td>SkewY</td>
+<td>Dist</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>XpB</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dst.X</td>
@@ -3369,21 +3403,55 @@
 <td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.Shape.SkewX/SkewY</td>
-<td>Dst.Shape.SkewX/SkewY</td>
+<td rowspan='2'>Dst.Shape</td>
+<td>Shape</td>
 <td>Dist</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
 <td>None</td>
-<td>Saw.Off/Off</td>
-<td>Fld.XpB/XpB</td>
-<td>Sin.Off/Off</td>
+<td>Saw</td>
+<td>Fld</td>
+<td>Sin</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects waveshaper plus before-shape and afer-shape skewing modes. Shapes are various periodic functions plus foldback distortion. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.SkewX</td>
+<td>SkewX</td>
+<td>Dist</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>XpB</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dst.SkewY</td>
+<td>SkewY</td>
+<td>Dist</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>XpB</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dst.X</td>

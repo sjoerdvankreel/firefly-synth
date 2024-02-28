@@ -16,6 +16,9 @@ using plugin_base::bipolar_to_unipolar;
 inline float const pi32 = plugin_base::pi32;
 
 std::vector<plugin_base::list_item> wave_skew_type_items();
+std::vector<plugin_base::list_item> wave_shape_type_items(bool for_shaper);
+
+// TODO remove me
 plugin_base::multi_menu make_wave_multi_menu(bool for_shaper);
 
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };

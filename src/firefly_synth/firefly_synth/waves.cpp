@@ -7,6 +7,7 @@ using namespace plugin_base;
 namespace firefly_synth
 {
 
+// TODO longer names
 static std::string
 wave_make_name_skew(int skew)
 {
@@ -132,6 +133,16 @@ wave_shape_type_tags(bool for_shaper)
   return result;
 }
 
+std::vector<list_item>
+wave_shape_type_items(bool for_shaper)
+{
+  std::vector<list_item> result;
+  auto tags = wave_shape_type_tags(for_shaper);
+  for (int i = 0; i < tags.size(); i++)
+    result.push_back({ tags[i].id, tags[i].name });
+  return result;
+}
+
 static std::string
 wave_make_name(int shape, int skew_x, int skew_y, bool for_shaper)
 {
@@ -141,6 +152,7 @@ wave_make_name(int shape, int skew_x, int skew_y, bool for_shaper)
   return name_shape + "." + name_x + "/" + name_y;
 }
 
+// todo remove me and simplify skew_type_tags
 multi_menu 
 make_wave_multi_menu(bool for_shaper)
 {
