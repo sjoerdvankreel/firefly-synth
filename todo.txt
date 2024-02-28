@@ -28,17 +28,14 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
-check if distortion still works
+do the conversion, again
 do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
-make "dstA" separate mode
 fix up all the presets
 check the fx version
 keep track of the matrices layout
 check which colors are still used
 check all the short names in the matrices
 fix all the label justifications
-need enough space for karplus-strong
-right-align the osc cent label?
 do icons for the osc modes?
 group cv matrix targets by e.g. gaudio gain 1-10
 do some more margin between the controls
