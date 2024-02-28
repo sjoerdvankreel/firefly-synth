@@ -497,10 +497,10 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
           {
             if (skew_items[j].id == old_skew_x_guid)
               new_state.set_plain_at(this_module, i, param_dist_skew_x, 0,
-                _desc->raw_to_plain_at(this_module, param_dist_skew_x, i));
+                _desc->raw_to_plain_at(this_module, param_dist_skew_x, j));
             if (skew_items[j].id == old_skew_y_guid)
               new_state.set_plain_at(this_module, i, param_dist_skew_y, 0,
-                _desc->raw_to_plain_at(this_module, param_dist_skew_y, i));
+                _desc->raw_to_plain_at(this_module, param_dist_skew_y, j));
           }
         }
       }
