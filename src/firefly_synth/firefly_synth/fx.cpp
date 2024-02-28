@@ -104,15 +104,15 @@ static std::vector<list_item>
 svf_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{8B7E5C75-C3F6-4F53-900C-0A75703F5570}", "LPF");
-  result.emplace_back("{673C872A-F740-431C-8CD3-F577CE984C2D}", "HPF");
-  result.emplace_back("{9AADCB70-4753-400A-B4C3-A68AFA60273E}", "BPF");
-  result.emplace_back("{3516F76F-1162-4180-AAE6-BA658A6035C6}", "BSF");
-  result.emplace_back("{57BA905C-9735-4090-9D4D-75F6CD639387}", "APF");
-  result.emplace_back("{13013D87-0DBA-47D7-BE59-F6B1B65CA118}", "PEQ");
-  result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "BLL");
-  result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "LSH");
-  result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "HSH");
+  result.emplace_back("{8B7E5C75-C3F6-4F53-900C-0A75703F5570}", "Low Pass");
+  result.emplace_back("{673C872A-F740-431C-8CD3-F577CE984C2D}", "High Pass");
+  result.emplace_back("{9AADCB70-4753-400A-B4C3-A68AFA60273E}", "Band Pass");
+  result.emplace_back("{3516F76F-1162-4180-AAE6-BA658A6035C6}", "Notch");
+  result.emplace_back("{57BA905C-9735-4090-9D4D-75F6CD639387}", "All Pass");
+  result.emplace_back("{13013D87-0DBA-47D7-BE59-F6B1B65CA118}", "Peaking EQ");
+  result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "Bell");
+  result.emplace_back("{0ECA44F9-57AD-44F4-A066-60A166F4BD86}", "Low Shelf");
+  result.emplace_back("{D28FA8B1-3D45-4C80-BAA3-C6735FA4A5E2}", "High Shelf");
   return result;
 }
 
@@ -248,7 +248,7 @@ static void
 init_voice_default(plugin_state& state)
 {
   state.set_text_at(module_vfx, 0, param_type, 0, "SV Filter");
-  state.set_text_at(module_vfx, 0, param_svf_mode, 0, "LPF");
+  state.set_text_at(module_vfx, 0, param_svf_mode, 0, "Low Pass");
   state.set_text_at(module_vfx, 0, param_svf_res, 0, "50");
   state.set_text_at(module_vfx, 0, param_svf_freq, 0, "20");
 }
@@ -257,7 +257,7 @@ static void
 init_global_default(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gfx, 0, param_type, 0, "SV Filter");
-  state.set_text_at(module_gfx, 0, param_svf_mode, 0, "LPF");
+  state.set_text_at(module_gfx, 0, param_svf_mode, 0, "Low Pass");
   state.set_text_at(module_gfx, is_fx ? 0: 1, param_type, 0, "Delay");
   state.set_text_at(module_gfx, is_fx ? 0 : 1, param_dly_type, 0, "Fdbk.Sync");
 }
@@ -563,6 +563,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_mode.info.description = "Selects the state-variable filter mode.";
   auto& svf_top = result.sections.emplace_back(make_param_section(section_svf_top,
     make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter Top"),
