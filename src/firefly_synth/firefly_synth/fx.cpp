@@ -94,9 +94,9 @@ static std::vector<list_item>
 dist_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{4216D379-72FD-4C2D-B594-20C175CF275E}", "A");
-  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "B");
-  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "C");
+  result.emplace_back("{4216D379-72FD-4C2D-B594-20C175CF275E}", "Mode A");
+  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "Mode B");
+  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "Mode C");
   return result;
 }
 
@@ -646,48 +646,49 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_gain_min.info.description = "Feed-back amount.";
 
-  auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
-    make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
-  distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_mode = result.params.emplace_back(make_param(
-    make_topo_info("{D62129D2-9818-4C05-9705-3D6AEAABA636}", "Dst.Mode", "Dst.Mode", true, false, param_dist_mode, 1),
+    make_topo_info("{D62129D2-9818-4C05-9705-3D6AEAABA636}", "Dst.Mode", "Mode", true, false, param_dist_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_mode_items(), ""),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.info.description = std::string("Affects where the filter is placed.<br/ >") +
     "Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>" +
     "Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>" +
     "Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.";
+  auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
+    make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+  distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", "Dst.OverSmp", "Dst.OverSmp", true, false, param_dist_over, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Dst.Clip", "Clip", true, false, param_dist_clip, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Hard"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Dst.Shape", "Shape", true, false, param_dist_shaper, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sin"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
   auto& dist_skew_x = result.params.emplace_back(make_param(
     make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", "Dst.SkewX", "SkewX", true, false, param_dist_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 4 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 3 }, make_label_none())));
   dist_skew_x.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_x.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_y = result.params.emplace_back(make_param(
     make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", "Dst.SkewY", "SkewY", true, false, param_dist_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 5 }, make_label_none())));
+    make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 4 }, make_label_none())));
   dist_skew_y.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_y.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
 
