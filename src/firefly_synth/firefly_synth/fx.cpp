@@ -560,7 +560,8 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& svf_mode = result.params.emplace_back(make_param(
     make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", "SVF.Mode", "Mode", true, false, param_svf_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_mode_items(), ""),
-    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   svf_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_mode.info.description = "Selects the state-variable filter mode.";
   auto& svf_top = result.sections.emplace_back(make_param_section(section_svf_top,
