@@ -34,8 +34,8 @@ public:
   load_handler(juce::var const* json, plugin_version const& old_version);
 
   bool old_param_value(
-    std::string const& module_id, int module_index,
-    std::string const& param_id, int param_index,
+    std::string const& old_module_id, int old_module_slot,
+    std::string const& old_param_id, int old_param_slot,
     std::string& old_value) const;
 };
 
@@ -45,8 +45,8 @@ class state_converter
 public:
   virtual bool 
   handle_invalid_param_value(
-    std::string const& module_id, int module_index,
-    std::string const& param_id, int param_index,
+    std::string const& new_module_id, int new_module_slot,
+    std::string const& new_param_id, int new_param_slot,
     std::string const& old_value, load_handler const& handler, 
     plain_value& new_value) = 0;
 

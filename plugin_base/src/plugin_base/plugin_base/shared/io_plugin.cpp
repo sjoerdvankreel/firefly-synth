@@ -26,10 +26,29 @@ _json(json), _old_version(old_version) {}
 
 bool 
 load_handler::old_param_value(
-  std::string const& module_id, int module_index,
-  std::string const& param_id, int param_index,
+  std::string const& old_module_id, int old_module_slot,
+  std::string const& old_param_id, int old_param_slot,
   std::string& old_value) const
 {
+  for (int m = 0; m < (*_json)["state"].size(); m++)
+    if((*_json)["modules"][m]["id"].toString().toStdString() == old_module_id)
+    {
+      var module_slots = (*_json)["state"][m]["slots"];
+      if(module_slots.size() > old_module_slot)
+      {
+        var old_params = (*_json)["modules"][old_module_slot]["params"];
+        for(int p = 0; p < old_params.size(); p++)
+          if(old_params[p]["id"].toString().toStdString() == old_param_id)
+          {
+            var param_slots = old_params[p]["slots"];
+            if(param_slots.size() > old_param_slot)
+            {
+              old_value = param_slots[old_param_slot].toString().toStdString();
+              return true;
+            }
+          }
+      }
+    }
   return false;
 }
 

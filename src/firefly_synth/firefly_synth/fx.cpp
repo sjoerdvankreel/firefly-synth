@@ -148,14 +148,15 @@ dist_over_items()
 class fx_state_converter:
 public state_converter
 {
+  bool const _global;
   plugin_desc const* const _desc;
 public:
-  fx_state_converter(plugin_desc const* const desc): _desc(desc) {}
+  fx_state_converter(plugin_desc const* const desc, bool global): _desc(desc), _global(global) {}
   void post_process(load_handler const& handler, plugin_state& new_state) override;
 
   bool handle_invalid_param_value(
-    std::string const& module_id, int module_index,
-    std::string const& param_id, int param_index,
+    std::string const& new_module_id, int new_module_slot,
+    std::string const& new_param_id, int new_param_slot,
     std::string const& old_value, load_handler const& handler, 
     plain_value& new_value) override;
 };
@@ -414,8 +415,8 @@ render_graph(
 
 bool 
 fx_state_converter::handle_invalid_param_value(
-  std::string const& module_id, int module_index,
-  std::string const& param_id, int param_index,
+  std::string const& new_module_id, int new_module_slot,
+  std::string const& new_param_id, int new_param_slot,
   std::string const& old_value, load_handler const& handler, 
   plain_value& new_value)
 {
@@ -423,7 +424,7 @@ fx_state_converter::handle_invalid_param_value(
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
     // distA/distB/distC in fx type got split out to separate A/B/C control
-    if (param_id == _desc->plugin->modules[module_gfx].params[param_type].info.tag.id)
+    if (new_param_id == _desc->plugin->modules[module_gfx].params[param_type].info.tag.id)
     {
       if (old_value == "{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}")
       {
@@ -440,7 +441,7 @@ fx_state_converter::handle_invalid_param_value(
     }
 
     // Shape+SkewX/SkewY got split out to separate shape/skew x/skew y controls
-    if (param_id == _desc->plugin->modules[module_gfx].params[param_dist_shaper].info.tag.id)
+    if (new_param_id == _desc->plugin->modules[module_gfx].params[param_dist_shaper].info.tag.id)
     {
       // format is {guid}-{guid}-{guid}
       if(old_value.size() != 3 * 38 + 2) return false;
@@ -462,9 +463,45 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
 {
   // todo set the mode
   // todo set the skew params
+  std::string old_value;
+  int this_module = _global ? module_gfx: module_vfx;
+  auto const& modules = new_state.desc().plugin->modules;
+  std::string module_id = modules[this_module].info.tag.id;
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
-
+    // pick up distortion mode from old combined dstA/dstB/dstC
+    auto skew_items = wave_skew_type_items();
+    for (int i = 0; i < modules[this_module].info.slot_count; i++)
+    {
+      if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_type].info.tag.id, 0, old_value))
+      {
+        // Distortion B
+        if (old_value == "{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}")
+          new_state.set_plain_at(this_module, i, param_dist_mode, 0,
+            _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_b));
+        // Distortion C
+        if (old_value == "{4A7A2979-0E1F-49E9-87CC-6E82355CFEA7}")
+          new_state.set_plain_at(this_module, i, param_dist_mode, 0,
+            _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_c));
+      }
+    }
+#if 0
+        // format is {guid}-{guid}-{guid}
+        if (old_value.size() == 3 * 38 + 2)
+        {
+          std::string old_skew_x_guid = old_value.substr(38 + 1, 38);
+          std::string old_skew_y_guid = old_value.substr(2 * 38 + 2, 38);
+          for (int j = 0; j < skew_items.size(); j++)
+          {
+            if(skew_items[j].id == old_skew_x_guid)
+              new_state.set_plain_at(this_module, i, param_dist_skew_x, 0, 
+                _desc->raw_to_plain_at(this_module, param_dist_skew_x, i));
+            if (skew_items[j].id == old_skew_y_guid)
+              new_state.set_plain_at(this_module, i, param_dist_skew_y, 0,
+                _desc->raw_to_plain_at(this_module, param_dist_skew_y, i));
+          }
+        }
+#endif
   }
 }
 
@@ -491,7 +528,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     return make_audio_routing_menu_handler(state, global, is_fx); };
   result.engine_factory = [global](auto const&, int sample_rate, int max_frame_count) {
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count); };
-  result.state_converter_factory = [](auto desc) { return std::make_unique<fx_state_converter>(desc); };
+  result.state_converter_factory = [global](auto desc) { return std::make_unique<fx_state_converter>(desc, global); };
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
