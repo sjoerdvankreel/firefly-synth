@@ -15,10 +15,10 @@ namespace plugin_base {
 static int const file_version = 1;
 static std::string const file_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
-static load_result load_extra_internal(var const& json, extra_state& state);
-static load_result load_state_internal(var const& json, plugin_state& state);
 static std::unique_ptr<DynamicObject> save_extra_internal(extra_state const& state);
 static std::unique_ptr<DynamicObject> save_state_internal(plugin_state const& state);
+static load_result load_extra_internal(var const& json, extra_state& state);
+static load_result load_state_internal(var const& json, plugin_version const& old_version, plugin_state& state);
 
 load_handler::
 load_handler(juce::var const* json, plugin_version const& old_version):
@@ -148,7 +148,7 @@ plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
   result = unwrap_json_from_meta(*state.desc().plugin, json, content, old_version);
-  return load_state_internal(content, state);
+  return load_state_internal(content, old_version, state);
 }
 
 load_result
@@ -217,7 +217,7 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
   var plugin_content;
   result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content, old_version);
   if (!result.ok()) return result;
-  result = load_state_internal(plugin_content, plugin);
+  result = load_state_internal(plugin_content, old_version, plugin);
   if(!result.ok()) return result;
   for(auto k: extra_state_load.keyset())
     if(extra_state_load.contains_key(k))
@@ -312,7 +312,7 @@ save_state_internal(plugin_state const& state)
 
 load_result
 load_state_internal(
-  var const& json, plugin_state& state)
+  var const& json, plugin_version const& old_version, plugin_state& state)
 {
   if(!json.hasProperty("state"))
     return load_result("Invalid plugin.");
@@ -320,8 +320,12 @@ load_state_internal(
     return load_result("Invalid plugin.");
   
   // good to go - only warnings from now on
+  // set up handler for loading old state
+  // in case plugin wants to do conversion
   load_result result;
   state.init(state_init_type::empty);
+  load_handler handler(&json, old_version);
+
   for(int m = 0; m < json["modules"].size(); m++)
   {
     // check for old module not found
@@ -367,9 +371,15 @@ load_state_internal(
     auto module_iter = state.desc().module_id_to_index.find(module_id);
     if(module_iter == state.desc().module_id_to_index.end()) continue;
     var module_slots = json["state"][m]["slots"];
+
+    // set up the topo specific converter, if any
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
+    std::unique_ptr<state_converter> converter = {};
+    if (new_module.state_converter_factory != nullptr)
+      converter = new_module.state_converter_factory(&state.desc());
 
     for(int mi = 0; mi < module_slots.size() && mi < new_module.info.slot_count; mi++)
+    {
       for (int p = 0; p < module_slots[mi]["params"].size(); p++)
       {
         auto param_id = json["modules"][m]["params"][p]["id"].toString().toStdString();
@@ -385,9 +395,21 @@ load_state_internal(
           if(state.text_to_plain_at_index(true, index, text, plain))
             state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, plain);
           else
-            result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
+          {
+            // give plugin a chance to recover
+            plain_value new_value;
+            if(converter && converter->handle_invalid_param_value(new_module.info.tag.id, mi, new_param.info.tag.id, pi, handler, new_value))
+              state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, new_value);
+            else
+              result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
+          }
         }
       }
+
+      // all params are set, do optional post-process conversion
+      if(converter) 
+        converter->post_process(handler, state);
+    }
   }
 
   return result;
