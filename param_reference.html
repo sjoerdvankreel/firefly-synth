@@ -2853,11 +2853,11 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
+<td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewX</td>
-<td>SkewX</td>
+<td rowspan='2'>Dst.SkewIn</td>
+<td>Skew In</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
@@ -2873,8 +2873,8 @@
 <td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewXAmt</td>
-<td>SkewXAmt</td>
+<td rowspan='2'>Dst.SkewInAmt</td>
+<td>Skew In Amt</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
@@ -2907,8 +2907,8 @@
 <td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewY</td>
-<td>SkewY</td>
+<td rowspan='2'>Dst.SkewOut</td>
+<td>Skew Out</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
@@ -2924,8 +2924,8 @@
 <td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewYAmt</td>
-<td>SkewYAmt</td>
+<td rowspan='2'>Dst.SkewOutAmt</td>
+<td>Skew Out Amt</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
@@ -3400,11 +3400,11 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
+<td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewX</td>
-<td>SkewX</td>
+<td rowspan='2'>Dst.SkewIn</td>
+<td>Skew In</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
@@ -3420,8 +3420,8 @@
 <td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewXAmt</td>
-<td>SkewXAmt</td>
+<td rowspan='2'>Dst.SkewInAmt</td>
+<td>Skew In Amt</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
@@ -3454,8 +3454,8 @@
 <td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewY</td>
-<td>SkewY</td>
+<td rowspan='2'>Dst.SkewOut</td>
+<td>Skew Out</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>
@@ -3471,8 +3471,8 @@
 <td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dst.SkewYAmt</td>
-<td>SkewYAmt</td>
+<td rowspan='2'>Dst.SkewOutAmt</td>
+<td>Skew Out Amt</td>
 <td>Distortion Top</td>
 <td>Yes</td>
 <td>1</td>

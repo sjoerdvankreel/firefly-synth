@@ -145,10 +145,10 @@ wave_shape_type_items(bool for_shaper)
 }
 
 static std::string
-wave_make_name(int shape, int skew_x, int skew_y, bool for_shaper)
+wave_make_name(int shape, int skew_in, int skew_out, bool for_shaper)
 {
-  auto name_x = wave_make_name_skew(skew_x);
-  auto name_y = wave_make_name_skew(skew_y);
+  auto name_x = wave_make_name_skew(skew_in);
+  auto name_y = wave_make_name_skew(skew_out);
   auto name_shape = wave_make_name_shape(shape, for_shaper);
   return name_shape + "." + name_x + "/" + name_y;
 }

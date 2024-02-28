@@ -105,22 +105,14 @@ wave_shape_bi_fold(float in)
   return 0.0f;
 }
 
-template <class Shape, class SkewX, class SkewY>
-inline float wave_calc_uni(float in, float x, float y, Shape shape, SkewX skew_x, SkewY skew_y)
+template <class Shape, class SkewIn, class SkewOut>
+inline float wave_calc_uni(float in, float x, float y, Shape shape, SkewIn skew_in, SkewOut skew_out)
 {
   using plugin_base::check_unipolar;
   check_unipolar(in);
-  float skewed_in = check_unipolar(skew_x(in, x));
+  float skewed_in = check_unipolar(skew_in(in, x));
   float shaped = check_unipolar(shape(skewed_in));
-  return check_unipolar(skew_y(shaped, y));
-}
-
-template <class Shape, class SkewX, class SkewY>
-inline float wave_calc_bi(float in, float x, float y, Shape shape, SkewX skew_x, SkewY skew_y)
-{
-  float skewed_in = skew_x(in, x);
-  float shaped = shape(skewed_in);
-  return skew_y(shaped, y);
+  return check_unipolar(skew_out(shaped, y));
 }
 
 }

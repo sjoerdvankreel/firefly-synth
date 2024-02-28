@@ -29,6 +29,8 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+re-read the param docs and manual
+rename x/y -> in/out also for lfo
 check all the tooltips and names in matrices
 check regular/alt name in tooltips => actually make that option
 see if its possible to expand combobox text values

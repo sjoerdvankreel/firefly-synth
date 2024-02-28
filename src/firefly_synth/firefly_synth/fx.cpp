@@ -63,7 +63,7 @@ static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (in
 enum { param_type,
   param_svf_mode, param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
   param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_dist_mode, param_dist_skew_x, param_dist_skew_x_amt, param_dist_shaper, param_dist_skew_y, param_dist_skew_y_amt,
+  param_dist_mode, param_dist_skew_in, param_dist_skew_in_amt, param_dist_shaper, param_dist_skew_out, param_dist_skew_out_amt,
   param_dist_over, param_dist_clip, param_dist_lp_frq, param_dist_lp_res, param_dist_gain, param_dist_mix,
   param_dly_type, param_dly_amt, param_dly_sprd, param_dly_mix,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
@@ -226,12 +226,12 @@ public module_engine {
   template <bool Graph, int Mode, class Clip, class Shape>
   void process_dist_mode_clip_shape(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape);
-  template <bool Graph, int Mode, class Clip, class Shape, class SkewX>
-  void process_dist_mode_clip_shape_x(plugin_block& block,
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
-  template <bool Graph, int Mode, class Clip, class Shape, class SkewX, class SkewY>
-  void process_dist_mode_clip_shape_xy(plugin_block& block,
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
+  template <bool Graph, int Mode, class Clip, class Shape, class SkewIn>
+  void process_dist_mode_clip_shape_in(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in);
+  template <bool Graph, int Mode, class Clip, class Shape, class SkewIn, class SkewOut>
+  void process_dist_mode_clip_shape_in_out(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in, SkewOut skew_out);
   void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
 
 public:
@@ -442,7 +442,7 @@ fx_state_converter::handle_invalid_param_value(
       }
     }
 
-    // Shape+SkewX/SkewY got split out to separate shape/skew x/skew y controls
+    // Shape+SkewIn/SkewOut got split out to separate shape/skew in/skew out controls
     if (new_param_id == _desc->plugin->modules[module_gfx].params[param_dist_shaper].info.tag.id)
     {
       // format is {guid}-{guid}-{guid}
@@ -487,7 +487,7 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
             _desc->raw_to_plain_at(this_module, param_dist_mode, dist_mode_c));
       }
 
-      // pick up skewx/skewy mode from old combined shaper+skewx/y
+      // pick up skew in/skew out mode from old combined shaper + skew x/y
       if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_dist_shaper].info.tag.id, 0, old_value))
       {
         // format is {guid}-{guid}-{guid}
@@ -498,11 +498,11 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
           for (int j = 0; j < skew_items.size(); j++)
           {
             if (skew_items[j].id == old_skew_x_guid)
-              new_state.set_plain_at(this_module, i, param_dist_skew_x, 0,
-                _desc->raw_to_plain_at(this_module, param_dist_skew_x, j));
+              new_state.set_plain_at(this_module, i, param_dist_skew_in, 0,
+                _desc->raw_to_plain_at(this_module, param_dist_skew_in, j));
             if (skew_items[j].id == old_skew_y_guid)
-              new_state.set_plain_at(this_module, i, param_dist_skew_y, 0,
-                _desc->raw_to_plain_at(this_module, param_dist_skew_y, j));
+              new_state.set_plain_at(this_module, i, param_dist_skew_out, 0,
+                _desc->raw_to_plain_at(this_module, param_dist_skew_out, j));
           }
         }
       }
@@ -651,27 +651,27 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   dist_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.info.description = std::string("Affects where the filter is placed.<br/ >") +
-    "No Filter: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>" +
-    "Filter To Shaper: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>" +
-    "Shaper To Filter: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.";
+    "No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>" +
+    "Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>" +
+    "Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.";
   auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  auto& dist_skew_x = result.params.emplace_back(make_param(
-    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", "Dst.SkewX", "SkewX", true, false, param_dist_skew_x, 1),
+  auto& dist_skew_in = result.params.emplace_back(make_param(
+    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", "Dst.SkewIn", "Skew In", true, false, param_dist_skew_in, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
-  dist_skew_x.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_skew_x.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
-  auto& dist_x = result.params.emplace_back(make_param(
-    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Dst.SkewXAmt", "SkewXAmt", true, false, param_dist_skew_x_amt, 1),
+  dist_skew_in.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_skew_in.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
+  auto& dist_skew_in_amt = result.params.emplace_back(make_param(
+    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Dst.SkewInAmt", "Skew In Amt", true, false, param_dist_skew_in_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_top, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
-  dist_x.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
+  dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_in }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
-  dist_x.info.description = "Before-shape skew amount.";
+  dist_skew_in_amt.info.description = "Before-shape skew amount.";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", "Dst.Shaper", "Shaper", true, false, param_dist_shaper, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sine"),
@@ -679,20 +679,20 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
-  auto& dist_skew_y = result.params.emplace_back(make_param(
-    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", "Dst.SkewY", "SkewY", true, false, param_dist_skew_y, 1),
+  auto& dist_skew_out = result.params.emplace_back(make_param(
+    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", "Dst.SkewOut", "Skew Out", true, false, param_dist_skew_out, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 3 },
       make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
-  dist_skew_y.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_skew_y.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
-  auto& dist_y = result.params.emplace_back(make_param(
-    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Dst.SkewYAmt", "SkewYAmt", true, false, param_dist_skew_y_amt, 1),
+  dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  dist_skew_out.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
+  auto& dist_skew_out_amt = result.params.emplace_back(make_param(
+    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Dst.SkewOutAmt", "Skew Out Amt", true, false, param_dist_skew_out_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_top, gui_edit_type::hslider, { 0, 4 }, make_label_none())));
-  dist_y.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
+  dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_out }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
-  dist_y.info.description = "After-shape skew amount.";
+  dist_skew_out_amt.info.description = "After-shape skew amount.";
 
   auto& distortion_bottom = result.sections.emplace_back(make_param_section(section_dist_bottom,
     make_topo_tag("{A6A60A20-DADD-42B5-B307-D5B35AABB510}", "Distortion Bottom"),
@@ -1391,54 +1391,54 @@ template <bool Graph, int Mode, class Clip, class Shape> void
 fx_engine::process_dist_mode_clip_shape(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape)
 {
-  switch (block.state.own_block_automation[param_dist_skew_x][0].step())
+  switch (block.state.own_block_automation[param_dist_skew_in][0].step())
   {
-  case wave_skew_type_off: process_dist_mode_clip_shape_x<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_mode_clip_shape_x<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_mode_clip_shape_x<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_mode_clip_shape_x<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_mode_clip_shape_x<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_mode_clip_shape_x<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_mode_clip_shape_in<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_mode_clip_shape_in<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_mode_clip_shape_in<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_mode_clip_shape_in<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_mode_clip_shape_in<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_mode_clip_shape_in<Graph, Mode>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, int Mode, class Clip, class Shape, class SkewX> void
-fx_engine::process_dist_mode_clip_shape_x(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
+template <bool Graph, int Mode, class Clip, class Shape, class SkewIn> void
+fx_engine::process_dist_mode_clip_shape_in(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in)
 {
-  switch (block.state.own_block_automation[param_dist_skew_y][0].step())
+  switch (block.state.own_block_automation[param_dist_skew_out][0].step())
   {
-  case wave_skew_type_off: process_dist_mode_clip_shape_xy<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_mode_clip_shape_xy<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_mode_clip_shape_xy<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_mode_clip_shape_xy<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_mode_clip_shape_xy<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_mode_clip_shape_xy<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_mode_clip_shape_in_out<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_mode_clip_shape_in_out<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_mode_clip_shape_in_out<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_mode_clip_shape_in_out<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_mode_clip_shape_in_out<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_mode_clip_shape_in_out<Graph, Mode>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, int Mode, class Clip, class Shape, class SkewX, class SkewY> void
-fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
+template <bool Graph, int Mode, class Clip, class Shape, class SkewIn, class SkewOut> void
+fx_engine::process_dist_mode_clip_shape_in_out(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in, SkewOut skew_out)
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
   int oversmp_stages = block_auto[param_dist_over][0].step();
   int oversmp_factor = 1 << oversmp_stages;
-  int sx = block_auto[param_dist_skew_x][0].step();
-  int sy = block_auto[param_dist_skew_y][0].step();
+  int skew_in_type = block_auto[param_dist_skew_in][0].step();
+  int skew_out_type = block_auto[param_dist_skew_out][0].step();
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
   auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
   auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
   auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
-  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_x_amt][0];
-  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_y_amt][0];
+  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_in_amt][0];
+  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_out_amt][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
-  if(wave_skew_is_exp(sx))
+  if(wave_skew_is_exp(skew_in_type))
   {
     auto& x_scratch = block.state.own_scratch[scratch_dist_x];
     for (int f = block.start_frame; f < block.end_frame; f++)
@@ -1447,7 +1447,7 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
   }
 
   jarray<float, 1> const* y_curve = &y_curve_plain;
-  if (wave_skew_is_exp(sy))
+  if (wave_skew_is_exp(skew_out_type))
   {
     auto& y_scratch = block.state.own_scratch[scratch_dist_y];
     for (int f = block.start_frame; f < block.end_frame; f++)
@@ -1483,16 +1483,16 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
       // so mind the bookkeeping
       int mod_index = block.start_frame + frame / oversmp_factor;
 
-      left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
-      right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
+      left = skew_in(left * gain_curve[mod_index], (*x_curve)[mod_index]);
+      right = skew_in(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_b)
         dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
       left = shape(left);
       right = shape(right);
       if constexpr (Mode == dist_mode_c)
         dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
-      left = clip(skew_y(left, (*y_curve)[mod_index]));
-      right = clip(skew_y(right, (*y_curve)[mod_index]));
+      left = clip(skew_out(left, (*y_curve)[mod_index]));
+      right = clip(skew_out(right, (*y_curve)[mod_index]));
       left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
       right = (1 - mix_curve[mod_index]) * right_in + mix_curve[mod_index] * right;
     });
