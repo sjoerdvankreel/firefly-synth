@@ -422,6 +422,7 @@ fx_state_converter::handle_invalid_param_value(
   // note param ids are equal between vfx/gfx, gfx just has more
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
+    // distA/distB/distC in fx type got split out to separate A/B/C control
     if (param_id == _desc->plugin->modules[module_gfx].params[param_type].info.tag.id)
     {
       if (old_value == "{6CCE41B3-3A74-4F6A-9AB1-660BF492C8E7}")
@@ -437,6 +438,21 @@ fx_state_converter::handle_invalid_param_value(
         return true;
       }
     }
+
+    // Shape+SkewX/SkewY got split out to separate shape/skew x/skew y controls
+    if (param_id == _desc->plugin->modules[module_gfx].params[param_dist_shaper].info.tag.id)
+    {
+      // format is {guid}-{guid}-{guid}
+      if(old_value.size() != 3 * 38 + 2) return false;
+      auto shaper_items = wave_shape_type_items(true);
+      std::string old_shaper_guid = old_value.substr(0, 38);
+      for(int i = 0; i < shaper_items.size(); i++)
+        if (old_shaper_guid == shaper_items[i].id)
+        {
+          new_value = _desc->raw_to_plain_at(module_gfx, param_dist_shaper, i);
+          return true;
+        }
+    }
   }
   return false;
 }
@@ -444,6 +460,8 @@ fx_state_converter::handle_invalid_param_value(
 void 
 fx_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
 {
+  // todo set the mode
+  // todo set the skew params
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
 
