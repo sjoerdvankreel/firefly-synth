@@ -152,7 +152,8 @@ public:
   bool handle_invalid_param_value(
     std::string const& module_id, int module_index,
     std::string const& param_id, int param_index,
-    load_handler const& handler, plain_value& new_value) override;
+    std::string const& old_value, load_handler const& handler, 
+    plain_value& new_value) override;
   void post_process(load_handler const& handler, plugin_state& new_state) override;
 };
 
@@ -412,7 +413,8 @@ bool
 fx_state_converter::handle_invalid_param_value(
   std::string const& module_id, int module_index,
   std::string const& param_id, int param_index,
-  load_handler const& handler, plain_value& new_value)
+  std::string const& old_value, load_handler const& handler, 
+  plain_value& new_value)
 {
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {

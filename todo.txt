@@ -32,6 +32,7 @@ small-ui-changes:
 document the changes
 do the conversion, again
 do major-minor-patch
+retest all presets and demo tracks and host tests
 do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 fix up all the presets
 check the fx version

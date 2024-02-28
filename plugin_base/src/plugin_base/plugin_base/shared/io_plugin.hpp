@@ -47,7 +47,8 @@ public:
   handle_invalid_param_value(
     std::string const& module_id, int module_index,
     std::string const& param_id, int param_index,
-    load_handler const& handler, plain_value& new_value) = 0;
+    std::string const& old_value, load_handler const& handler, 
+    plain_value& new_value) = 0;
 
   virtual void
   post_process(load_handler const& handler, plugin_state& new_state) = 0;

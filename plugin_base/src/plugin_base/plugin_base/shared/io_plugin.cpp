@@ -398,7 +398,7 @@ load_state_internal(
           {
             // give plugin a chance to recover
             plain_value new_value;
-            if(converter && converter->handle_invalid_param_value(new_module.info.tag.id, mi, new_param.info.tag.id, pi, handler, new_value))
+            if(converter && converter->handle_invalid_param_value(new_module.info.tag.id, mi, new_param.info.tag.id, pi, text, handler, new_value))
               state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, new_value);
             else
               result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
