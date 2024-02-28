@@ -537,7 +537,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   result.sections.emplace_back(make_param_section(section_type,
     make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Type"),
-    make_param_section_gui({ 0, 0 }, { 2, 1 })));
+    make_param_section_gui({ 0, 0, 2, 1 }, { 1, 1 })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(global), ""),
@@ -638,9 +638,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
     make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_mode = result.params.emplace_back(make_param(
@@ -739,7 +737,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& delay_top = result.sections.emplace_back(make_param_section(section_delay_top,
     make_topo_tag("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay Top"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   delay_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_type = result.params.emplace_back(make_param(
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Dly.Type", "Type", true, false, param_dly_type, 1),
@@ -883,17 +881,18 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   auto& reverb_bottom = result.sections.emplace_back(make_param_section(section_reverb_bottom,
     make_topo_tag("{EA985925-E687-4168-9A2B-A13378FCEBF2}", "Reverb Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
+  reverb_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_apf = result.params.emplace_back(make_param(
     make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", "Rev.APF", "APF", true, false, param_reverb_apf, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
-    make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   reverb_apf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_apf.info.description = "Reverb all-pass filter amount.";
   auto& reverb_mix = result.params.emplace_back(make_param(
     make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", "Rev.Mix", "Mix", true, false, param_reverb_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
   reverb_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_mix.info.description = "Reverb dry/wet control.";
