@@ -15,7 +15,7 @@ user_location(plugin_topo const& topo)
   std::filesystem::path result = topo.vendor;
   result /= topo.tag.name;
   result /= topo.tag.id;
-  result /= std::to_string(topo.version_major) + "." + std::to_string(topo.version_minor);
+  result /= std::to_string(topo.version.major) + "." + std::to_string(topo.version.minor) + "." + std::to_string(topo.version.patch);
   return result.string();
 }
 

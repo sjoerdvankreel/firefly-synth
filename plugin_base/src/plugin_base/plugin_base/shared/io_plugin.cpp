@@ -1,3 +1,4 @@
+#include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
 
 #include <juce_core/juce_core.h>
@@ -20,8 +21,8 @@ static std::unique_ptr<DynamicObject> save_extra_internal(extra_state const& sta
 static std::unique_ptr<DynamicObject> save_state_internal(plugin_state const& state);
 
 load_handler::
-load_handler(juce::var const* json, int old_version_major, int old_version_minor):
-_json(json), _old_version_major(old_version_major), _old_version_minor(old_version_minor) {}
+load_handler(juce::var const* json, plugin_version const& old_version):
+_json(json), _old_version(old_version) {}
 
 bool 
 load_handler::old_param_value(
@@ -58,8 +59,9 @@ wrap_json_with_meta(plugin_topo const& topo, var const& json)
   meta->setProperty("file_version", var(file_version));
   meta->setProperty("plugin_id", String(topo.tag.id));
   meta->setProperty("plugin_name", String(topo.tag.name));
-  meta->setProperty("plugin_version_major", topo.version_major);
-  meta->setProperty("plugin_version_minor", topo.version_minor);  
+  meta->setProperty("plugin_version_major", topo.version.major);
+  meta->setProperty("plugin_version_minor", topo.version.minor);  
+  meta->setProperty("plugin_version_patch", topo.version.patch);
 
   auto checked = std::make_unique<DynamicObject>();
   checked->setProperty("meta", var(meta.release()));
@@ -78,10 +80,11 @@ wrap_json_with_meta(plugin_topo const& topo, var const& json)
 static load_result
 unwrap_json_from_meta(
   plugin_topo const& topo, var const& json, 
-  var& result, int& old_version_major, int& old_version_minor)
+  var& result, plugin_version& old_version)
 {
-  old_version_major = 0;
-  old_version_minor = 0;
+  old_version.major = 0;
+  old_version.minor = 0;
+  old_version.patch = 0;
 
   if(!json.hasProperty("checksum"))
     return load_result("Invalid checksum.");
@@ -104,12 +107,18 @@ unwrap_json_from_meta(
   if (meta["plugin_id"] != topo.tag.id)
     return load_result("Invalid plugin id.");
 
-  old_version_major = (int)meta["plugin_version_major"];
-  old_version_minor = (int)meta["plugin_version_minor"];
-  if (old_version_major > topo.version_major)
+  old_version.major = (int)meta["plugin_version_major"];
+  old_version.minor = (int)meta["plugin_version_minor"];
+  if(meta.hasProperty("plugin_version_patch"))
+    old_version.patch = (int)meta["plugin_version_patch"];
+
+  if (old_version.major > topo.version.major)
     return load_result("Invalid plugin version.");
-  if (old_version_major == topo.version_major)
-    if (old_version_minor > topo.version_minor)
+  if (old_version.major == topo.version.major)
+    if (old_version.minor > topo.version.minor)
+      return load_result("Invalid plugin version.");
+  if (old_version.major == topo.version.major && old_version.minor == topo.version.minor)
+    if (old_version.patch > topo.version.patch)
       return load_result("Invalid plugin version.");
 
   result = checked["content"];
@@ -135,11 +144,10 @@ plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
 {
   var json;
   var content;
-  int old_version_major;
-  int old_version_minor;
+  plugin_version old_version;
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
-  result = unwrap_json_from_meta(*state.desc().plugin, json, content, old_version_major, old_version_minor);
+  result = unwrap_json_from_meta(*state.desc().plugin, json, content, old_version);
   return load_state_internal(content, state);
 }
 
@@ -148,11 +156,10 @@ plugin_io_load_extra(plugin_topo const& topo, std::vector<char> const& data, ext
 {
   var json;
   var content;
-  int old_version_major;
-  int old_version_minor;
+  plugin_version old_version;
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
-  result = unwrap_json_from_meta(topo, json, content, old_version_major, old_version_minor);
+  result = unwrap_json_from_meta(topo, json, content, old_version);
   return load_extra_internal(content, state);
 }
 
@@ -192,24 +199,23 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
 {
   var json;
   var content;
-  int old_version_major;
-  int old_version_minor;
+  plugin_version old_version;
 
   auto result = load_json_from_buffer(data, json);
   if(!result.ok()) return result;
-  result = unwrap_json_from_meta(*plugin.desc().plugin, json, content, old_version_major, old_version_minor);
+  result = unwrap_json_from_meta(*plugin.desc().plugin, json, content, old_version);
   if (!result.ok()) return result;
 
   // can't produce warnings, only errors
   var extra_content;
-  result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content, old_version_major, old_version_minor);
+  result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content, old_version);
   if (!result.ok()) return result;
   auto extra_state_load = extra_state(extra.keyset());
   result = load_extra_internal(extra_content, extra_state_load);
   if (!result.ok()) return result;
 
   var plugin_content;
-  result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content, old_version_major, old_version_minor);
+  result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content, old_version);
   if (!result.ok()) return result;
   result = load_state_internal(plugin_content, plugin);
   if(!result.ok()) return result;

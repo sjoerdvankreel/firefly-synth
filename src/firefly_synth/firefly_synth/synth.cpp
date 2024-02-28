@@ -292,8 +292,9 @@ synth_topo(bool is_fx)
   result->audio_polyphony = 32;
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
-  result->version_minor = FF_SYNTH_VERSION_MINOR;
-  result->version_major = FF_SYNTH_VERSION_MAJOR;
+  result->version.major = FF_SYNTH_VERSION_MAJOR;
+  result->version.minor = FF_SYNTH_VERSION_MINOR;
+  result->version.patch = FF_SYNTH_VERSION_PATCH;
   result->bpm_smooth_module = module_master_in;
   result->bpm_smooth_param = master_in_param_tempo_smooth;
   result->midi_smooth_module = module_master_in;

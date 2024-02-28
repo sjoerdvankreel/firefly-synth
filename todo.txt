@@ -2,6 +2,7 @@ always:
 dont forget to tag
 update the history
 keep cpu/mem profiling
+dont forget to update the version nr in code and cmake
 
 someday:
 mseg

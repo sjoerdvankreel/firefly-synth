@@ -132,8 +132,9 @@ generate_plugin_ref(
   int& param_count, int& param_slot_count)
 {
   std::string name_and_version = topo.tag.name + " " + 
-    std::to_string(topo.version_major) + "." + 
-    std::to_string(topo.version_minor) ;
+    std::to_string(topo.version.major) + "." + 
+    std::to_string(topo.version.minor) + "." +
+    std::to_string(topo.version.patch) ;
 
   std::string css = "";
   css += "th, td { padding: 3px; }";

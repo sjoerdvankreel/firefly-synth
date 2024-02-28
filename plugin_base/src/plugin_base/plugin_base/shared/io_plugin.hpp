@@ -1,5 +1,6 @@
 #pragma once
 
+#include <plugin_base/topo/shared.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/shared/extra_state.hpp>
 
@@ -24,14 +25,12 @@ struct load_result
 class load_handler
 {
   juce::var const* _json;
-  int const _old_version_major;
-  int const _old_version_minor;
+  plugin_version const _old_version;
 
 public:
-  load_handler(juce::var const* json, int old_version_major, int old_version_minor);
+  plugin_version const& old_version() { return _old_version; }
+  load_handler(juce::var const* json, plugin_version const& old_version);
 
-  bool const old_version_major() { return _old_version_major; }
-  bool const old_version_minor() { return _old_version_minor; }
   bool old_param_value(
     std::string const& module_id, int module_index,
     std::string const& param_id, int param_index,

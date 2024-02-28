@@ -34,6 +34,13 @@ gui_global_param_binding_selector;
 struct custom_menu_entry { int action; std::string title; };
 struct custom_menu { int menu_id; std::string name; std::vector<custom_menu_entry> entries; };
 
+// plugin version
+struct plugin_version final {
+  int major;
+  int minor;
+  int patch;
+};
+
 // plugin and section metadata
 struct topo_tag final {
   std::string id;
