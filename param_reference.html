@@ -2678,12 +2678,12 @@
 <td>Voice</td>
 <td>Automate</td>
 <td>Off</td>
-<td>DstC</td>
+<td>Distortion</td>
 <td>Off</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects the effect type.<br/>For distortion, the modes affect where the filter is placed.<br/ >Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
+<td colspan='11' class='description'>Selects the effect type.</td>
 </tr>
 <tr>
 <td rowspan='2'>SVF.Type</td>
@@ -2839,6 +2839,23 @@
 <td colspan='11' class='description'>Feed-back amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dst.Mode</td>
+<td>Dst.Mode</td>
+<td>Dist</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>A</td>
+<td>C</td>
+<td>A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Affects where the filter is placed.<br/ >Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dst.OverSmp</td>
 <td>Dst.OverSmp</td>
 <td>Dist</td>
@@ -2864,9 +2881,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Clip</td>
+<td>Hard</td>
 <td>Tanh</td>
-<td>Clip</td>
+<td>Hard</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -3213,7 +3230,7 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects the effect type.<br/>For distortion, the modes affect where the filter is placed.<br/ >Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
+<td colspan='11' class='description'>Selects the effect type.</td>
 </tr>
 <tr>
 <td rowspan='2'>SVF.Type</td>
@@ -3369,6 +3386,23 @@
 <td colspan='11' class='description'>Feed-back amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dst.Mode</td>
+<td>Dst.Mode</td>
+<td>Dist</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>A</td>
+<td>C</td>
+<td>A</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Affects where the filter is placed.<br/ >Mode A: filter is not used, schema is Input => Gain => SkewX => Shape => SkewY => Clip => Mix.<br/>Mode B: filter before shape, schema is Input => Gain => SkewX => Filter => Shape => SkewY => Clip => Mix.<br/>Mode C: filter after shape, schema is Input => Gain => SkewX => Shape => Filter => SkewY => Clip => Mix.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dst.OverSmp</td>
 <td>Dst.OverSmp</td>
 <td>Dist</td>
@@ -3394,9 +3428,9 @@
 <td>Input</td>
 <td>Block</td>
 <td>None</td>
-<td>Clip</td>
+<td>Hard</td>
 <td>Tanh</td>
-<td>Clip</td>
+<td>Hard</td>
 <td>N/A</td>
 </tr>
 <tr>

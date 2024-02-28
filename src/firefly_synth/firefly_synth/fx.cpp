@@ -533,7 +533,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", "Dst.Clip", "Clip", true, false, param_dist_clip, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Clip"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Hard"),
     make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).";
