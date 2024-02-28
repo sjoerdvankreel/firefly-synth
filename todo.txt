@@ -29,6 +29,8 @@ do forward compat checks - dont load newer versions
 do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 
 small-ui-changes:
+check if distortion still works
+do a mix control for all fx and remove it from the delay lines => but what about reverb ?
 make "dstA" separate mode
 fix up all the presets
 check the fx version
