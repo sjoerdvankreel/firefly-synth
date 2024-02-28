@@ -29,6 +29,7 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+see if its possible to expand combobox text values
 do large labels as much as possible
 do gain meter for master out gain?
 check the fx-version ui layout

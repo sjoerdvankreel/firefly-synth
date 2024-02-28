@@ -302,7 +302,7 @@ synth_topo(bool is_fx)
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 
-  result->gui.min_width = 1257;
+  result->gui.min_width = 1280;
   result->gui.aspect_ratio_width = 118;
   if(is_fx)
   {
@@ -316,7 +316,7 @@ synth_topo(bool is_fx)
     result->type = plugin_type::synth;
     result->tag.id = FF_SYNTH_INST_ID;
     result->tag.name = FF_SYNTH_INST_NAME;
-    result->gui.aspect_ratio_height = 57;
+    result->gui.aspect_ratio_height = 56;
   }
 
   // The same font takes more size on linux ?
