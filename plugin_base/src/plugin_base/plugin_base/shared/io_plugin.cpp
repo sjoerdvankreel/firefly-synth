@@ -36,9 +36,11 @@ load_handler::old_param_value(
       var module_slots = (*_json)["state"][m]["slots"];
       if(module_slots.size() > old_module_slot)
       {
-        var old_params = (*_json)["modules"][old_module_slot]["params"];
+        var old_params = module_slots[old_module_slot]["params"];
         for(int p = 0; p < old_params.size(); p++)
-          if(old_params[p]["id"].toString().toStdString() == old_param_id)
+        {
+          auto old_json_param_id = (*_json)["modules"][m]["params"][p]["id"].toString().toStdString();
+          if(old_json_param_id == old_param_id)
           {
             var param_slots = old_params[p]["slots"];
             if(param_slots.size() > old_param_slot)
@@ -47,6 +49,7 @@ load_handler::old_param_value(
               return true;
             }
           }
+        }
       }
     }
   return false;
