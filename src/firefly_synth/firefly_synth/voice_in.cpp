@@ -125,14 +125,14 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", "Portamento Tempo Sync", "Sync", true, false, param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 },  
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   sync.info.description = "Selects time or tempo-synced mode.";
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", "Portamento Time", "Time", true, false, param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   time.info.description = "Pitch glide time in seconds.";

@@ -20,7 +20,7 @@ inline int constexpr topo_max = 1024;
 enum class gui_scroll_mode { none, vertical };
 enum class gui_label_justify { near, far, center };
 enum class gui_label_align { top, bottom, left, right };
-enum class gui_label_contents { none, name, short_name, value };
+enum class gui_label_contents { none, name, alt_name, value };
 enum class gui_edit_type { none, toggle, list, autofit_list, knob, hslider, vslider, output, output_module_name };
 
 typedef std::function<bool(int module_slot)>
@@ -55,9 +55,9 @@ operator<(plugin_version const& l, plugin_version const& r)
 struct topo_tag final {
   std::string id;
   std::string name;
-  std::string short_name = {};
+  std::string alt_name = {};
   bool name_one_based = true;
-  bool short_name_in_menu = true;
+  bool alt_name_in_menu = true;
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_tag);

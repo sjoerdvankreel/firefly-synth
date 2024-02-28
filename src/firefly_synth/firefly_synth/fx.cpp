@@ -564,7 +564,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", "SVF.Mode", "Mode", true, false, param_svf_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_mode_items(), ""),
     make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   svf_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf || vs[0] == type_off; });
   svf_mode.info.description = "Selects the state-variable filter mode.";
@@ -577,14 +577,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", "SVF.Frq", "Frq", true, false, param_svf_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_freq.info.description = "Controls filter frequency.";
   auto& svf_res = result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", "SVF.Res", "Res", true, false, param_svf_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_res.info.description = "Controls filter resonance.";
 
@@ -597,14 +597,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", "SVF.Gain", "Gain", true, false, param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
     make_param_gui_single(section_svf_bottom, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_mode }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
   svf_gain.info.description = "Controls filter gain for shelving filters.";
   auto& svf_kbd = result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", "SVF.Kbd", "Kbd", true, false, param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, 1, 0, true),
     make_param_gui_single(section_svf_bottom, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_kbd.info.description = "Controls keyboard tracking with -/+2 octaves.";
 
@@ -616,14 +616,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", "Cmb.Dly+", "Dly+", true, false, param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_top, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_dly_plus.info.description = "Feed-forward time.";
   auto& comb_gain_plus = result.params.emplace_back(make_param(
     make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", "Cmb.Gain+", "Gain+", true, false, param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
     make_param_gui_single(section_comb_top, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_gain_plus.info.description = "Feed-forward amount.";
 
@@ -635,14 +635,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", "Cmb.Dly-", "Dly-", true, false, param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_bottom, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_dly_min.info.description = "Feed-back time.";
   auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", "Cmb.Gain-", "Gain-", true, false, param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_comb_bottom, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_gain_min.info.description = "Feed-back amount.";
 
@@ -700,7 +700,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", "Dst.X", "X", true, false, param_dist_x, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_bottom, gui_edit_type::knob, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_x.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_x.info.description = "Before-shape skew amount.";
@@ -708,7 +708,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", "Dst.Y", "Y", true, false, param_dist_y, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_bottom, gui_edit_type::knob, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_y.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_y.info.description = "After-shape skew amount.";
@@ -716,21 +716,21 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{C82BC20D-2F1E-4001-BCFB-0C8945D1B329}", "Dst.LPF", "LPF", true, false, param_dist_lp_frq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, flt_max_freq, 1000, 0, "Hz"),
     make_param_gui_single(section_dist_bottom, gui_edit_type::knob, { 0, 2 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_lp.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
   dist_lp.info.description = "Lowpass filter frequency inside the oversampling stage.";
   auto& dist_res = result.params.emplace_back(make_param(
     make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", "Dst.Res", "Res", true, false, param_dist_lp_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_dist_bottom, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_res.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
   dist_res.info.description = "Lowpass filter resonance inside the oversampling stage.";
   auto& dist_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", "Dst.Gain", "Gain", true, false, param_dist_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, ""),
     make_param_gui_single(section_dist_bottom, gui_edit_type::knob, { 0, 4 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_gain.info.description = std::string("Gain amount to drive the shaper and X/Y parameters. ") + 
     "Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.";
@@ -738,7 +738,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", "Dst.Mix", "Mix", true, false, param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_dist_bottom, gui_edit_type::hslider, { 0, 5 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mix.info.description = "Dry/wet mix between input and output signal.";
 
@@ -762,21 +762,21 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", "Dly.Amt", "Amt", true, false, param_dly_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_top, gui_edit_type::knob, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_amt.info.description = "Feedback-amount or tap-amount control.";
   auto& delay_sprd = result.params.emplace_back(make_param(
     make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", "Dly.Spr", "Spr", true, false, param_dly_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_delay_top, gui_edit_type::knob, { 0, 2 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_sprd.info.description = "Stereo spread control.";
   auto& delay_mix = result.params.emplace_back(make_param(
     make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", "Dly.Mix", "Mix", true, false, param_dly_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_top, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_mix.info.description = "Dry/wet control.";
 
@@ -788,7 +788,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{E32F17BC-03D2-4F2D-8292-2B4C3AB24E8D}", "Dly.TimeL", "L", true, false, param_dly_fdbk_time_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay_bottom, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_time_l.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_time_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_time_l.info.description = "Feedback delay left length in seconds.";
@@ -796,7 +796,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{33BCF50C-C7DE-4630-A835-44D50DA3B8BB}", "Dly.TempoL", "L", true, false, param_dly_fdbk_tempo_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
     make_param_gui_single(section_delay_bottom, gui_edit_type::list, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_tempo_l.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_l.domain.timesigs);
   delay_fdbk_tempo_l.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_tempo_l.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
@@ -805,7 +805,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{5561243C-838F-4C33-BD46-3E934E854969}", "Dly.TimeR", "R", true, false, param_dly_fdbk_time_r, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay_bottom, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_time_r.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_time_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_time_r.info.description = "Feedback delay right length in seconds.";
@@ -813,7 +813,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{4FA78F9E-AC3A-45D7-A8A3-E0E2C7C264D7}", "Dly.TempoR", "R", true, false, param_dly_fdbk_tempo_r, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 5, 16 }),
     make_param_gui_single(section_delay_bottom, gui_edit_type::list, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_fdbk_tempo_r.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_r.domain.timesigs);
   delay_fdbk_tempo_r.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
   delay_fdbk_tempo_r.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && !dly_is_multi(vs[1]); });
@@ -823,7 +823,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{8D1A0D44-3291-488F-AC86-9B2B608F9562}", "Dly.Time", "Time", true, false, param_dly_multi_time, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
     make_param_gui_single(section_delay_bottom, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_multi_time.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
   delay_multi_time.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && !dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
   delay_multi_time.info.description = "Multi-tap delay length in seconds.";
@@ -831,7 +831,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{8DAED046-7F5F-4E76-A6BF-099510564500}", "Dly.Tempo", "Tempo", true, false, param_dly_multi_tempo, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
     make_param_gui_single(section_delay_bottom, gui_edit_type::list, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_multi_tempo.gui.submenu = make_timesig_submenu(delay_multi_tempo.domain.timesigs);
   delay_multi_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
   delay_multi_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_sync(vs[1]) && dly_is_multi(vs[1]); });
@@ -840,7 +840,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{27572912-0A8E-4A97-9A54-379829E8E794}", "Dly.Taps", "Taps", true, false, param_dly_multi_taps, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_step(1, 8, 4, 0),
     make_param_gui_single(section_delay_bottom, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_taps.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_multi(vs[1]); });
   delay_taps.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
   delay_taps.info.description = "Multi-tap delay tap count.";
@@ -848,7 +848,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", "Dly.HoldTime", "Hld", true, false, param_dly_hold_time, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
     make_param_gui_single(section_delay_bottom, gui_edit_type::hslider, { 0, 2 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_time.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return !dly_is_sync(vs[1]); });
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
   delay_hold_time.info.description = "Multi-tap delay hold time in seconds.";
@@ -856,7 +856,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{AED0D3A5-AB02-441F-A42D-7E2AEE88DF24}", "Dly.HoldTempo", "Hld", true, false, param_dly_hold_tempo, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(true, { 4, 1 }, { 0, 1 }),
     make_param_gui_single(section_delay_bottom, gui_edit_type::list, { 0, 2 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_tempo.gui.submenu = make_timesig_submenu(delay_hold_tempo.domain.timesigs);
   delay_hold_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return dly_is_sync(vs[1]); });
   delay_hold_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_type }, [](auto const& vs) { return vs[0] == type_delay && dly_is_multi(vs[1]); });
@@ -870,21 +870,21 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", "Rev.Size", "Size", true, false, param_reverb_size, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_top, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   reverb_size.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_size.info.description = "Reverb room size.";
   auto& reverb_damp = result.params.emplace_back(make_param(
     make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", "Rev.Damp", "Damp", true, false, param_reverb_damp, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_top, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   reverb_damp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_damp.info.description = "Reverb damping factor.";
   auto& reverb_sprd = result.params.emplace_back(make_param(
     make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", "Rev.Sprd", "Sprd", true, false, param_reverb_spread, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_reverb_top, gui_edit_type::hslider, { 0, 2 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   reverb_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_sprd.info.description = "Reverb stereo-spread control.";
 
@@ -896,14 +896,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", "Rev.APF", "APF", true, false, param_reverb_apf, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
     make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   reverb_apf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_apf.info.description = "Reverb all-pass filter amount.";
   auto& reverb_mix = result.params.emplace_back(make_param(
     make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", "Rev.Mix", "Mix", true, false, param_reverb_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::short_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
   reverb_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_mix.info.description = "Reverb dry/wet control.";
 

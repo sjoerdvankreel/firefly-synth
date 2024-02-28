@@ -380,7 +380,7 @@ cv_matrix_topo(
       make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   
-  result.gui.tabbed_name = result.info.tag.short_name;
+  result.gui.tabbed_name = result.info.tag.alt_name;
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](

@@ -172,7 +172,7 @@ generate_modules_ref(
   out << "<tr>\n";
   out << "<th>#</th>\n";
   out << "<th>Name</th>\n";
-  out << "<th>Short</th>\n";
+  out << "<th>Alt Name</th>\n";
   out << "<th>UI</th>\n";
   out << "<th>Stage</th>\n";
   out << "<th>Num</th>\n";
@@ -184,7 +184,7 @@ generate_modules_ref(
     auto const& module = topo.modules[m];
     assert(module.info.description.size());
     assert(module.info.tag.name.size());
-    assert(module.info.tag.short_name.size());
+    assert(module.info.tag.alt_name.size());
 
     module_count++;
     module_slot_count += module.info.slot_count;
@@ -195,7 +195,7 @@ generate_modules_ref(
     else
       out << "<td>" + std::to_string(m + 1) + "</td>\n";
     out << "<td>" << module.info.tag.name << "</td>\n";
-    out << "<td>" << module.info.tag.short_name << "</td>\n";
+    out << "<td>" << module.info.tag.alt_name << "</td>\n";
     out << "<td>" << (module.gui.visible? "Yes": "No") << "</td>\n";
     out << "<td>" << (module.dsp.stage == module_stage::voice
       ? "Voice" : module.dsp.stage == module_stage::input
@@ -247,7 +247,7 @@ generate_params_ref(
         visible_param_count++;
         visible_param_slot_count += module.info.slot_count * param.info.slot_count;
 
-        auto const& short_name = param.info.tag.short_name.size()? param.info.tag.short_name: param.info.tag.name;
+        auto const& alt_name = param.info.tag.alt_name.size()? param.info.tag.alt_name : param.info.tag.name;
         int reference_param_slot = param.info.slot_count == 1 ? 0 : 1;
 
         std::string direction = "";
@@ -288,7 +288,7 @@ generate_params_ref(
 
         out << "<tr>\n";
         out << "<td rowspan='2'>" << param.info.tag.name << "</td>\n";
-        out << "<td>" << short_name << "</td>\n";
+        out << "<td>" << alt_name << "</td>\n";
         out << "<td>" << module.sections[param.gui.section].tag.name << "</td>\n";
         out << "<td>" << (param.gui.visible? "Yes": "No") << "</td>\n";
         out << "<td>" << param.info.slot_count << "</td>\n";

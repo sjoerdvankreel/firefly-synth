@@ -135,7 +135,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
 
   result.graph_renderer = render_graph;
   result.graph_engine_factory = make_osc_graph_engine;
-  result.gui.tabbed_name = result.info.tag.short_name;
+  result.gui.tabbed_name = result.info.tag.alt_name;
   result.engine_factory = [](auto const& topo, int sr, int max_frame_count) { return std::make_unique<osc_osc_matrix_engine>(max_frame_count); };
   result.gui.menu_handler_factory = [](plugin_state* state) { return std::make_unique<tidy_matrix_menu_handler>(
     state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };

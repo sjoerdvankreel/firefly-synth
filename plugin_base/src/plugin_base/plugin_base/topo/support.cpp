@@ -42,24 +42,24 @@ make_midi_note_list()
 }
 
 topo_tag
-make_topo_tag(std::string const& id, std::string const& name, std::string short_name)
+make_topo_tag(std::string const& id, std::string const& name, std::string alt_name)
 {
   topo_tag result = {};
   result.id = id;
   result.name = name;
-  result.short_name = short_name;
+  result.alt_name = alt_name;
   return result;
 }
 
 topo_info
-make_topo_info(std::string const& id, std::string const& name, std::string const& short_name, bool name_one_based, bool short_name_in_menu, int index, int slot_count)
+make_topo_info(std::string const& id, std::string const& name, std::string const& alt_name, bool name_one_based, bool alt_name_in_menu, int index, int slot_count)
 {
   topo_info result = {};
   result.tag.id = id;
   result.tag.name = name;
-  result.tag.short_name = short_name;
+  result.tag.alt_name = alt_name;
   result.tag.name_one_based = name_one_based;
-  result.tag.short_name_in_menu = short_name_in_menu;
+  result.tag.alt_name_in_menu = alt_name_in_menu;
   result.index = index;
   result.slot_count = slot_count;
   return result;

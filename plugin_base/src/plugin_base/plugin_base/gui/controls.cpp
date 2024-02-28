@@ -78,11 +78,11 @@ menu_button::clicked()
 }
 
 std::string 
-param_name_label::label_ref_text(param_desc const* param, bool short_)
+param_name_label::label_ref_text(param_desc const* param, bool alt)
 {
   auto const& ref_text = param->param->gui.label_reference_text;
   if (ref_text.size()) return ref_text;
-  return short_ ? param->param->info.tag.short_name : param->info.name;
+  return alt ? param->param->info.tag.alt_name : param->info.name;
 }
 
 last_tweaked_label::
@@ -355,15 +355,15 @@ module_name_label::own_param_changed(plain_value plain)
     return;
   }
   std::string name = desc.module->info.tag.name;
-  std::string short_name = desc.module->info.tag.short_name;
+  std::string alt_name = desc.module->info.tag.alt_name;
   if(desc.module->info.slot_count > 1)
   {
     std::string slot = std::to_string(desc.info.slot + 1);
     name += " " + slot;
-    short_name += " " + slot;
+    alt_name += " " + slot;
   }
   setTooltip(name);
-  setText(short_name, dontSendNotification);
+  setText(alt_name, dontSendNotification);
 }
 
 void 

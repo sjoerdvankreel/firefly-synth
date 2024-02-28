@@ -625,10 +625,10 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
-    assert(param->info.tag.short_name.size());
-    std::string short_name = param->info.tag.short_name;
-    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), short_name, false, -1, true);
-    header.setText(short_name, dontSendNotification);
+    assert(param->info.tag.alt_name.size());
+    std::string alt_name = param->info.tag.alt_name;
+    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), alt_name, false, -1, true);
+    header.setText(alt_name, dontSendNotification);
     header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
     result.add(header, vertical, 0);
   }
@@ -689,9 +689,9 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
   switch (contents)
   {
   case gui_label_contents::name:
-  case gui_label_contents::short_name:
+  case gui_label_contents::alt_name:
     result = &make_component<param_name_label>(this, &module, &param, 
-      contents == gui_label_contents::short_name, _module_lnfs[module.module->info.index].get());
+      contents == gui_label_contents::alt_name, _module_lnfs[module.module->info.index].get());
     break;
   case gui_label_contents::value:
     result = &make_component<param_value_label>(this, &module, &param, _module_lnfs[module.module->info.index].get()); 
