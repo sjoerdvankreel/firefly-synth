@@ -21,6 +21,36 @@ struct load_result
   load_result(std::string const& error): error(error) {}
 };
 
+class load_handler
+{
+  juce::var const* _json;
+  int const _old_version_major;
+  int const _old_version_minor;
+
+public:
+  load_handler(juce::var const* json, int old_version_major, int old_version_minor);
+
+  bool const old_version_major() { return _old_version_major; }
+  bool const old_version_minor() { return _old_version_minor; }
+  bool old_param_value(
+    std::string const& module_id, int module_index,
+    std::string const& param_id, int param_index,
+    std::string& old_value) const;
+};
+
+class state_converter
+{
+public:
+  virtual bool 
+  handle_invalid_param_value(
+    std::string const& module_id, int module_index,
+    std::string const& param_id, int param_index,
+    load_handler const& handler, plain_value& new_value) = 0;
+
+  virtual void
+  post_process(load_handler const& handler, plugin_state& new_state) = 0;
+};
+
 std::vector<char> plugin_io_save_state(plugin_state const& state);
 load_result plugin_io_load_state(std::vector<char> const& data, plugin_state& state);
 std::vector<char> plugin_io_save_extra(plugin_topo const& topo, extra_state const& state);

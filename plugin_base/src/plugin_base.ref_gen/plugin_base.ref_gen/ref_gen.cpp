@@ -133,7 +133,7 @@ generate_plugin_ref(
 {
   std::string name_and_version = topo.tag.name + " " + 
     std::to_string(topo.version_major) + "." + 
-    std::to_string(topo.version_minor);  
+    std::to_string(topo.version_minor) ;
 
   std::string css = "";
   css += "th, td { padding: 3px; }";
