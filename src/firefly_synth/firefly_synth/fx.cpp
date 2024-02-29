@@ -107,7 +107,7 @@ svf_mode_items()
   result.emplace_back("{8B7E5C75-C3F6-4F53-900C-0A75703F5570}", "Low Pass");
   result.emplace_back("{673C872A-F740-431C-8CD3-F577CE984C2D}", "High Pass");
   result.emplace_back("{9AADCB70-4753-400A-B4C3-A68AFA60273E}", "Band Pass");
-  result.emplace_back("{3516F76F-1162-4180-AAE6-BA658A6035C6}", "Notch");
+  result.emplace_back("{3516F76F-1162-4180-AAE6-BA658A6035C6}", "Band Stop");
   result.emplace_back("{57BA905C-9735-4090-9D4D-75F6CD639387}", "All Pass");
   result.emplace_back("{13013D87-0DBA-47D7-BE59-F6B1B65CA118}", "Peaking EQ");
   result.emplace_back("{463BAD99-6E33-4052-B6EF-31D6D781F002}", "Bell");

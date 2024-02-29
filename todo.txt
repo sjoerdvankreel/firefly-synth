@@ -29,6 +29,7 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+do separate label-tooltip-menu-name? or just show the name in the tooltip, not the alt name?
 re-read the param docs and manual
 rename x/y -> in/out also for lfo
 check all the tooltips and names in matrices
