@@ -29,6 +29,8 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+todo drop the dot-notation (for menus)?
+make sure full name goes into automation
 check all the todos
 check the reference generator output
 check all the short/long names + also in menus
