@@ -147,7 +147,7 @@ init_audio_voice_default(plugin_state& state)
 {
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 0, "Add.Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 0, "Env 2");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 0, "V.FX 1 SVF.Frq");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 0, "V.FX 1 SVF Freq");
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 1, "AB.Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_min, 1, "35");
   state.set_text_at(module_vcv_audio_matrix, 0, param_max, 1, "65");
@@ -168,10 +168,10 @@ init_audio_global_default(plugin_state& state)
   state.set_text_at(module_gcv_audio_matrix, 0, param_min, 0, "35");
   state.set_text_at(module_gcv_audio_matrix, 0, param_max, 0, "65");
   state.set_text_at(module_gcv_audio_matrix, 0, param_source, 0, "G.LFO 1");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 0, "G.FX 1 SVF.Frq");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 0, "G.FX 1 SVF Freq");
   state.set_text_at(module_gcv_audio_matrix, 0, param_type, 1, "Add.Abs");
   state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "M.In Mod");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 1, "G.FX 1 SVF.Frq");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 1, "G.FX 1 SVF Freq");
 }
 
 audio_routing_cv_params
