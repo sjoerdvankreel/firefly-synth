@@ -29,7 +29,9 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+"voice osc"/"voice env" etc
 check module header sizes
+expose short module names to the host
 drop dot notation for modules too
 todo drop the dot-notation (for menus)?
 make sure full name goes into automation

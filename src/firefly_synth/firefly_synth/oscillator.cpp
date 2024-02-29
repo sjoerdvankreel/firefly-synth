@@ -429,14 +429,14 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   auto& random_svf = result.params.emplace_back(make_param(
-    make_topo_info("{7E47ACD4-88AC-4D3B-86B1-05CCDFB4BC7D}", true, "Random Filter Mode", "Flt", "Rnd.Flt", param_rand_svf, 1),
+    make_topo_info("{7E47ACD4-88AC-4D3B-86B1-05CCDFB4BC7D}", true, "Rnd Filter Mode", "Flt", "Rnd.Flt", param_rand_svf, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(random_svf_items(), ""),
     make_param_gui_single(section_rand, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   random_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_svf.info.description = "Continuous filter type for static noise or initial-excite filter type for Karplus-Strong.";
   auto& random_freq = result.params.emplace_back(make_param(
-    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Random LPF Freq", "Frq", "Rnd Freq", param_rand_freq, 1),
+    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Rnd Filter Freq", "Frq", "Rnd Freq", param_rand_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -444,7 +444,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random_freq.info.description = std::string("Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. ") + 
     "Modulation takes place only at voice start.";
   auto& random_res = result.params.emplace_back(make_param(
-    make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Random LPF Res", "Res", "Rnd Res", param_rand_res, 1),
+    make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Rnd Filter Res", "Res", "Rnd Res", param_rand_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -452,14 +452,14 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random_res.info.description = std::string("Continuous filter resonance for static noise or initial-excite filter resonance for Karplus-Strong. ") + 
     "Modulation takes place only at voice start.";
   auto& random_seed = result.params.emplace_back(make_param(
-    make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", true, "Random Seed", "Seed", "Rnd Seed", param_rand_seed, 1),
+    make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", true, "Rnd Seed", "Seed", "Rnd Seed", param_rand_seed, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   random_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_seed.info.description = "On-voice-init random seed for static noise and initial-excite stage of Karplus-Strong.";
   auto& random_step = result.params.emplace_back(make_param(
-    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", true, "Random Rate", "Rate", "Rnd Rate", param_rand_rate, 1),
+    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", true, "Rnd Rate", "Rate", "Rnd Rate", param_rand_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(1, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -503,20 +503,20 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     "but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it "
     "when the oscillator is routed through a distortion module.";
   auto& sync_on = result.params.emplace_back(make_param(
-    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard-Sync On", "Sync", "Sync", param_hard_sync, 1),
+    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Sync On", "Sync", "Sync", param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_sync_gain, gui_edit_type::toggle, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
   auto& sync_semi = result.params.emplace_back(make_param(
-    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard-Sync Semis", "Sync", "Sync", param_hard_sync_semis, 1),
+    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Sync Semis", "Sync", "Sync", param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
     make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
-    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard-Sync XOver Time", "XOver", "XOver", param_hard_sync_xover, 1),
+    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Sync XOver Time", "XOver", "XOver", param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
     make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
