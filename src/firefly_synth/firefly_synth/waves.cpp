@@ -59,10 +59,10 @@ wave_make_name_shape(int shape, bool for_shaper)
   switch (shape)
   {
   case wave_shape_type_saw: return "Saw";
-  case wave_shape_type_sqr: return "Square";
+  case wave_shape_type_sqr: return "Sqr";
   case wave_shape_type_tri: return "Tri";
-  case wave_shape_type_sin: return "Sine";
-  case wave_shape_type_cos: return "Cosine";
+  case wave_shape_type_sin: return "Sin";
+  case wave_shape_type_cos: return "Cos";
   case wave_shape_type_sin_sin: return "SinSin";
   case wave_shape_type_sin_cos: return "SinCos";
   case wave_shape_type_cos_sin: return "CosSin";

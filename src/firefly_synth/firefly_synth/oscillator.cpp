@@ -367,26 +367,26 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_tri_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_tri_on.info.description = "Toggle triangle generator on/off.";
   auto& basic_tri_mix = result.params.emplace_back(make_param(
-    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", true, "Basic Triangle Mix", "Tri", "Tri", param_basic_tri_mix, 1),
+    make_topo_info("{88F88506-5916-4668-BD8B-5C35D01D1147}", true, "Basic Tri Mix", "Tri", "Tri", param_basic_tri_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 5 }, make_label_none())));
   basic_tri_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_tri_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_tri_mix.info.description = "Triangle generator mix amount.";
   auto& basic_sqr_on = result.params.emplace_back(make_param(
-    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", true, "Basic Square On", "Sqr", "Sqr", param_basic_sqr_on, 1),
+    make_topo_info("{C3AF1917-64FD-481B-9C21-3FE6F8D039C4}", true, "Basic Sqr On", "Sqr", "Sqr", param_basic_sqr_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_basic, gui_edit_type::toggle, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   basic_sqr_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
   basic_sqr_on.info.description = "Toggle square generator on/off.";
   auto& basic_sqr_mix = result.params.emplace_back(make_param(
-    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", true, "Basic Square Mix", "Sqr", "Sqr", param_basic_sqr_mix, 1),
+    make_topo_info("{B133B0E6-23DC-4B44-AA3B-6D04649271A4}", true, "Basic Sqr Mix", "Sqr", "Sqr", param_basic_sqr_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::hslider, { 0, 7 }, make_label_none())));
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sqr_mix.info.description = "Square generator mix amount.";
   auto& basic_sqr_pw = result.params.emplace_back(make_param(
-    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Square PW", "PW", "PW", param_basic_sqr_pw, 1), // TODO or Sqr.PW/Square PW for menu?
+    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Sqr PW", "PW", "PW", param_basic_sqr_pw, 1), // TODO or Sqr.PW/Square PW for menu?
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 8 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
