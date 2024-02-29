@@ -386,7 +386,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sqr_mix.info.description = "Square generator mix amount.";
   auto& basic_sqr_pw = result.params.emplace_back(make_param(
-    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Square Pulse Width", "PW", "PW", param_basic_sqr_pw, 1), // TODO or Sqr.PW/Square PW for menu?
+    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Square PW", "PW", "PW", param_basic_sqr_pw, 1), // TODO or Sqr.PW/Square PW for menu?
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 8 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -436,7 +436,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_svf.info.description = "Continuous filter type for static noise or initial-excite filter type for Karplus-Strong.";
   auto& random_freq = result.params.emplace_back(make_param(
-    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Random Filter Frequency", "Frq", "Rnd Freq", param_rand_freq, 1),
+    make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Random LPF Freq", "Frq", "Rnd Freq", param_rand_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -444,7 +444,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random_freq.info.description = std::string("Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. ") + 
     "Modulation takes place only at voice start.";
   auto& random_res = result.params.emplace_back(make_param(
-    make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Random Filter Resonance", "Res", "Rnd Res", param_rand_res, 1),
+    make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Random LPF Res", "Res", "Rnd Res", param_rand_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -467,21 +467,21 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random_step.info.description = std::string("On-voice-init step count for static noise and initial-excite stage of Karplus-Strong. ") +
     "Modulation takes place only at voice start.";
   auto& kps_fdbk = result.params.emplace_back(make_param(
-    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", true, "Karplus-Strong Feedback", "Fdbk", "KPS Fdbk", param_kps_fdbk, 1),
+    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", true, "K+S Feedback", "Fdbk", "KPS Fdbk", param_kps_fdbk, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 5 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   kps_fdbk.info.description = "Use to shorten low-frequency notes.";
   auto& kps_stretch = result.params.emplace_back(make_param(
-    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "Karplus-Strong Stretch", "Stretch", "KPS Str", param_kps_stretch, 1),
+    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "K+S Stretch", "Stretch", "KPS Str", param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   kps_stretch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   kps_stretch.info.description = "Use to stretch high-frequency notes.";
   auto& kps_mid = result.params.emplace_back(make_param(
-    make_topo_info("{AE914D18-C5AB-4ABB-A43B-C80E24868F78}", true, "Karplus-Strong Midpoint", "Mid", "KPS Mid", param_kps_mid, 1),
+    make_topo_info("{AE914D18-C5AB-4ABB-A43B-C80E24868F78}", true, "K+S Midpoint", "Mid", "KPS Mid", param_kps_mid, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 127, midi_middle_c, 0),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 7 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -510,13 +510,13 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
   auto& sync_semi = result.params.emplace_back(make_param(
-    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard-Sync Semitones", "Sync", "Sync", param_hard_sync_semis, 1),
+    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard-Sync Semis", "Sync", "Sync", param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
     make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
-    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard-Sync Cross-Over Time", "XOver", "XOver", param_hard_sync_xover, 1),
+    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard-Sync XOver Time", "XOver", "XOver", param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
     make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -527,7 +527,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_tag_basic("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
     make_param_section_gui({ 1, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
   auto& uni_voices = result.params.emplace_back(make_param(
-    make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", true, "Unison Voice Count", "Unison", "Unison", param_uni_voices, 1),
+    make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", true, "Unison Voices", "Unison", "Unison", param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
