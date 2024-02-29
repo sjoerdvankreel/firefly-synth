@@ -141,7 +141,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
     state, 2, param_am_on, 0, std::vector<std::vector<int>>({{ param_am_target, param_am_source }, { param_fm_target, param_fm_source } })); };
 
   auto& am = result.sections.emplace_back(make_param_section(section_am,
-    make_topo_tag("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "AM"), 
+    make_topo_tag_basic("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "AM"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 2, 2, 3, 3 } })));
   am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
@@ -187,7 +187,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   am_ring.info.description = "Dry/wet control between amplitude-modulated and ring-modulated signal.";
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
-    make_topo_tag("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
+    make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
     make_param_section_gui({ 1, 0 }, { { 1 }, { -25, 2, 2, 2, 4 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(

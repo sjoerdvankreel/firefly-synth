@@ -282,7 +282,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.engine_factory = [](auto const&, int sr, int max_frame_count) { return std::make_unique<osc_engine>(max_frame_count, sr); };
 
   result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
+    make_topo_tag_basic("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
@@ -327,7 +327,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.";
 
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
-    make_topo_tag("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
+    make_topo_tag_basic("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, gui_dimension::auto_size }))));
@@ -394,7 +394,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_sqr_pw.info.description = "Square generator pulse width.";
 
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
-    make_topo_tag("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
+    make_topo_tag_basic("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
   dsf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
@@ -421,7 +421,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
 
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
-    make_topo_tag("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
+    make_topo_tag_basic("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
@@ -491,7 +491,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     "This tries to keep audible note lengths relatively equal.";
   
   result.sections.emplace_back(make_param_section(section_sync_gain,
-    make_topo_tag("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync+Gain"),
+    make_topo_tag_basic("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync+Gain"),
     make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ 1 }, { 1, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info("{F4224036-9246-4D90-BD0F-5867FF318D1C}", "Gain", "Gain", true, false, param_gain, 1),
@@ -524,7 +524,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
 
   result.sections.emplace_back(make_param_section(section_uni,
-    make_topo_tag("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
+    make_topo_tag_basic("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
     make_param_section_gui({ 1, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", "Uni.Voices", "Unison", true, false, param_uni_voices, 1),

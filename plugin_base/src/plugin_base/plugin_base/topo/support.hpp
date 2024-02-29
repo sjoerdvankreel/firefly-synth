@@ -30,11 +30,20 @@ make_topo_tag(
   std::string const& id, bool name_one_based,
   std::string const& full_name, std::string const& display_name, 
   std::string const& menu_display_name);
+inline topo_tag
+make_topo_tag_basic(
+  std::string const& id, std::string const& name)
+{ return make_topo_tag(id, true, name, name, name); }
+
 topo_info
 make_topo_info(
   std::string const& id, bool name_one_based,
   std::string const& full_name, std::string const& display_name,
   std::string const& menu_display_name, int index, int slot_count);
+inline topo_info
+make_topo_info_basic(
+  std::string const& id, std::string const& name, int index, int slot_count)
+{ return make_topo_info(id, true, name, name, name, index, slot_count); }
 
 param_section
 make_param_section(int index, topo_tag const& tag, param_section_gui const& gui);

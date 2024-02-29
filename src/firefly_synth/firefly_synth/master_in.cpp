@@ -50,7 +50,7 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", true, "Master In", "Master In", "M.In", module_master_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
-      make_module_dsp_output(true, make_topo_info("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", true, "Aux", "Aux", "Aux", output_aux, aux_count)),
+      make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
       make_module_gui(section, colors, pos, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
@@ -62,7 +62,7 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_smooth,
-    make_topo_tag("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", true, "Smooth", "Smooth", "Smooth"),
+    make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI.Smth", "MIDI.Smth", param_midi_smooth, 1),
@@ -78,10 +78,10 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
   result.sections.emplace_back(make_param_section(section_aux,
-    make_topo_tag("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", true, "Aux", "Aux", "Aux"),
+    make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1 }))));
   auto& aux = result.params.emplace_back(make_param(
-    make_topo_info("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", true, "Aux", "Aux", "Aux", param_aux, aux_count),
+    make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -90,7 +90,7 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
   std::vector<int> column_distribution = { 1, 1 };
   if(!is_fx) column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size, 1 };
   result.sections.emplace_back(make_param_section(section_linked,
-    make_topo_tag("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", true, "Linked", "Linked", "Linked"),
+    make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
     make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, column_distribution))));
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(

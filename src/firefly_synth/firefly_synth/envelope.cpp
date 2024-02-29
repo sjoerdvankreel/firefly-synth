@@ -192,7 +192,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", true, "Envelope", "Env", "Env", module_env, 10),
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
-      make_module_dsp_output(true, make_topo_info("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", true, "Output", "Output", "Output", 0, 1)) }),
+      make_module_dsp_output(true, make_topo_info_basic("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
     make_module_gui(section, colors, pos, { { 1, 1 }, { 1, gui_dimension::auto_size } })));
   result.gui.autofit_column = 1;
   result.info.description = "DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.";
@@ -204,10 +204,10 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<env_engine>(); };
 
   result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", true, "Main", "Main", "Main"),
+    make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   auto& on = result.params.emplace_back(make_param(
-    make_topo_info("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", true, "On", "On", "On", param_on, 1),
+    make_topo_info_basic("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 0 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -215,7 +215,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   on.info.description = "Toggles envelope on/off.";
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", true, "Mode.Slope", "Mode.Slope", "Mode.Slope", param_mode, 1),
+    make_topo_info_basic("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Mode.Slope", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
       make_label_none())));
@@ -241,7 +241,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   sync.info.description = "Toggles time or tempo-synced mode.";
   auto& trigger = result.params.emplace_back(make_param(
-    make_topo_info("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", true, "Trigger", "Trigger", "Trigger", param_trigger, 1),
+    make_topo_info_basic("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none()))); 
   trigger.info.description = std::string("Selects trigger mode for monophonic mode.<br/>") +
@@ -250,7 +250,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     "Multi - upon note-on event, envelope will start over from the current level.<br/>" + 
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
   auto& filter = result.params.emplace_back(make_param( 
-    make_topo_info("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", true, "Smooth", "Smooth", "Smooth", param_filter, 1),
+    make_topo_info_basic("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -258,7 +258,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   filter.info.description = "Lowpass filter to smooth out rough edges.";
 
   result.sections.emplace_back(make_param_section(section_slope,
-    make_topo_tag("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", true, "Slope", "Slope", "Slope"),
+    make_topo_tag_basic("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", "Slope"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   auto& attack_slope = result.params.emplace_back(make_param(
     make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", true, "Attack Slope", "Attack Slope", "A.Slope", param_attack_slope, 1),
@@ -283,7 +283,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   release_slope.info.description = "Controls release slope for exponential modes. Modulation takes place only at voice start.";
 
   result.sections.emplace_back(make_param_section(section_dhadsr,
-    make_topo_tag("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", true, "DAHDSR", "DAHDSR", "DAHDSR"),
+    make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
     make_param_section_gui({ 1, 0, 1, 2 }, { 1, 6 })));
       
   auto& delay_time = result.params.emplace_back(make_param(
@@ -359,7 +359,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   decay_tempo.info.description = "Decay section length in bars.";
 
   auto& sustain = result.params.emplace_back(make_param(
-    make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", true, "Sustain", "Sustain", "Sustain", param_sustain, 1),
+    make_topo_info_basic("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "Sustain", param_sustain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dhadsr, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));

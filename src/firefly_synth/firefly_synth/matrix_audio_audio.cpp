@@ -182,7 +182,7 @@ audio_audio_matrix_topo(
     return std::make_unique<tidy_matrix_menu_handler>(state, 1, param_on, 0, std::vector<std::vector<int>>({{ param_target, param_source }})); };
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"), 
+    make_topo_tag_basic("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 2, 2, 3, 3 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   

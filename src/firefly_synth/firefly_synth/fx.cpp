@@ -536,7 +536,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   result.state_converter_factory = [global](auto desc) { return std::make_unique<fx_state_converter>(desc, global); };
 
   result.sections.emplace_back(make_param_section(section_main_top,
-    make_topo_tag("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main Top"),
+    make_topo_tag_basic("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main Top"),
     make_param_section_gui({ 0, 0, 1, 1 }, { 1, 1 })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
@@ -554,7 +554,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   // for this we put an fx-type dependent control in it
   result.sections.emplace_back(make_param_section(section_main_bottom,
-    make_topo_tag("{D6B3BE3C-BE16-44FB-84D6-D34A381C3334}", "Main Bottom"),
+    make_topo_tag_basic("{D6B3BE3C-BE16-44FB-84D6-D34A381C3334}", "Main Bottom"),
     make_param_section_gui({ 1, 0, 1, 1 }, { 1, 1 })));
 
   auto& svf_mode = result.params.emplace_back(make_param(
@@ -566,7 +566,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf || vs[0] == type_off; });
   svf_mode.info.description = "Selects the state-variable filter mode.";
   auto& svf_top = result.sections.emplace_back(make_param_section(section_svf_top,
-    make_topo_tag("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter Top"),
+    make_topo_tag_basic("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
   svf_top.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
@@ -586,7 +586,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_res.info.description = "Controls filter resonance.";
 
   auto& svf_bottom = result.sections.emplace_back(make_param_section(section_svf_bottom,
-    make_topo_tag("{F20AFB1F-CCD2-43EF-B658-F8C02310BD9D}", "SV Filter Bottom"),
+    make_topo_tag_basic("{F20AFB1F-CCD2-43EF-B658-F8C02310BD9D}", "SV Filter Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
   svf_bottom.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
@@ -606,7 +606,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_gain.info.description = "Controls filter gain for shelving filters.";
 
   auto& comb_top = result.sections.emplace_back(make_param_section(section_comb_top,
-    make_topo_tag("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter Top"),
+    make_topo_tag_basic("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
   comb_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
@@ -625,7 +625,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   comb_gain_plus.info.description = "Feed-forward amount.";
 
   auto& comb_bottom = result.sections.emplace_back(make_param_section(section_comb_bottom,
-    make_topo_tag("{BE96C1CA-8ED7-4E66-A9C6-65171C345352}", "Comb Filter Bottom"),
+    make_topo_tag_basic("{BE96C1CA-8ED7-4E66-A9C6-65171C345352}", "Comb Filter Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
   comb_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
@@ -655,7 +655,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     "Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>" +
     "Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.";
   auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
-    make_topo_tag("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
+    make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_skew_in = result.params.emplace_back(make_param(
@@ -695,7 +695,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   dist_skew_out_amt.info.description = "After-shape skew amount.";
 
   auto& distortion_bottom = result.sections.emplace_back(make_param_section(section_dist_bottom,
-    make_topo_tag("{A6A60A20-DADD-42B5-B307-D5B35AABB510}", "Distortion Bottom"),
+    make_topo_tag_basic("{A6A60A20-DADD-42B5-B307-D5B35AABB510}", "Distortion Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1, 1 } })));
   distortion_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_over = result.params.emplace_back(make_param(
@@ -746,7 +746,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   if(!global) return result;
 
   auto& delay_top = result.sections.emplace_back(make_param_section(section_delay_top,
-    make_topo_tag("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay Top"),
+    make_topo_tag_basic("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   delay_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_type = result.params.emplace_back(make_param(
@@ -781,7 +781,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_mix.info.description = "Dry/wet control.";
 
   auto& delay_bottom = result.sections.emplace_back(make_param_section(section_delay_bottom,
-    make_topo_tag("{D8A8921D-C84F-4284-9F2C-03E286CBCDCF}", "Delay Bottom"),
+    make_topo_tag_basic("{D8A8921D-C84F-4284-9F2C-03E286CBCDCF}", "Delay Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1, 1 } })));
   delay_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_fdbk_time_l = result.params.emplace_back(make_param(
@@ -863,7 +863,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_hold_tempo.info.description = "Multi-tap delay hold time in bars.";
 
   auto& reverb_top = result.sections.emplace_back(make_param_section(section_reverb_top,
-    make_topo_tag("{92EFDFE7-41C5-4E9D-9BE6-DC56965C1C0D}", "Reverb Top"),
+    make_topo_tag_basic("{92EFDFE7-41C5-4E9D-9BE6-DC56965C1C0D}", "Reverb Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1 } })));
   reverb_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_size = result.params.emplace_back(make_param(
@@ -889,7 +889,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   reverb_sprd.info.description = "Reverb stereo-spread control.";
 
   auto& reverb_bottom = result.sections.emplace_back(make_param_section(section_reverb_bottom,
-    make_topo_tag("{EA985925-E687-4168-9A2B-A13378FCEBF2}", "Reverb Bottom"),
+    make_topo_tag_basic("{EA985925-E687-4168-9A2B-A13378FCEBF2}", "Reverb Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
   reverb_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_apf = result.params.emplace_back(make_param(

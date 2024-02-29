@@ -309,14 +309,14 @@ synth_topo(bool is_fx)
     result->type = plugin_type::fx;
     result->tag.id = FF_SYNTH_FX_ID;
     result->tag.full_name = FF_SYNTH_FX_NAME;
-    result->tag = make_topo_tag(FF_SYNTH_FX_ID, true, FF_SYNTH_FX_NAME, FF_SYNTH_FX_NAME, FF_SYNTH_FX_NAME);
+    result->tag = make_topo_tag_basic(FF_SYNTH_FX_ID, FF_SYNTH_FX_NAME);
   }
   else
   {
     result->type = plugin_type::synth;
     result->tag.id = FF_SYNTH_INST_ID;
     result->gui.aspect_ratio_height = 56;
-    result->tag = make_topo_tag(FF_SYNTH_INST_ID, true, FF_SYNTH_INST_NAME, FF_SYNTH_INST_NAME, FF_SYNTH_INST_NAME);
+    result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
 
   // The same font takes more size on linux ?
