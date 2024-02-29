@@ -81,7 +81,7 @@ std::string
 param_name_label::label_ref_text(param_desc const* param)
 {
   auto const& ref_text = param->param->gui.label_reference_text;
-  return ref_text.size()? ref_text: param->info.name;
+  return ref_text.size()? ref_text: param->param->info.tag.display_name;
 }
 
 last_tweaked_label::

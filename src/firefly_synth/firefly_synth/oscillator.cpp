@@ -503,20 +503,20 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
     "but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it "
     "when the oscillator is routed through a distortion module.";
   auto& sync_on = result.params.emplace_back(make_param(
-    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard-sync On", "Sync", "Sync", param_hard_sync, 1),
+    make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard-Sync On", "Sync", "Sync", param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_sync_gain, gui_edit_type::toggle, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
   auto& sync_semi = result.params.emplace_back(make_param(
-    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard-sync semitones", "Sync", "Sync", param_hard_sync_semis, 1),
+    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard-Sync Semitones", "Sync", "Sync", param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
     make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
-    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard-sync cross-over time", "XOver", "XOver", param_hard_sync_xover, 1),
+    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard-Sync Cross-Over Time", "XOver", "XOver", param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
     make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));

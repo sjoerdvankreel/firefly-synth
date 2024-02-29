@@ -184,7 +184,7 @@ public:
   param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
   binding_component(gui, module, &param->param->gui.bindings, param->info.slot), 
   autofit_label(lnf, label_ref_text(param)), _param(param)
-  { setText(param->info.name, juce::dontSendNotification); init(); }
+  { setText(param->param->info.tag.display_name, juce::dontSendNotification); init(); }
 };
 
 // dynamic parameter value display
