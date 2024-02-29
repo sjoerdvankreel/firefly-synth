@@ -14,7 +14,7 @@ make_id(std::string const& id, int slot)
 static std::string
 make_name(topo_tag const& tag, int slot, int slots)
 {
-  std::string result = (tag.alt_name_in_menu && tag.alt_name.size()) ? tag.alt_name : tag.name;
+  std::string result = tag.menu_display_name;
   if(slots > 1) result += " " + std::to_string(slot + (tag.name_one_based? 1: 0));
   return result;
 }
@@ -32,9 +32,9 @@ make_id(std::string const& id1, int slot1, std::string const& id2, int slot2)
 static std::string
 make_name(topo_tag const& tag1, int slot1, int slots1, topo_tag const& tag2, int slot2, int slots2)
 {
-  std::string result = (tag1.alt_name_in_menu && tag1.alt_name.size()) ? tag1.alt_name : tag1.name;
+  std::string result = tag1.menu_display_name;
   if (slots1 > 1) result += " " + std::to_string(slot1 + (tag1.name_one_based ? 1: 0));
-  result += " " + ((tag2.alt_name_in_menu && tag2.alt_name.size()) ? tag2.alt_name : tag2.name);
+  result += " " + tag2.menu_display_name;
   if (slots2 > 1) result += " " + std::to_string(slot2 + (tag2.name_one_based ? 1 : 0));
   return result;
 }
@@ -67,7 +67,7 @@ matrix_param_menu_handler::execute(
   int section_index = param_index / (topo.params.size() / _section_count);
   int section_param_index = param_index % (topo.params.size() / _section_count);
   execute(menu_id, action, module_index, module_slot, section_index, section_param_index, param_slot);
-  return topo.info.tag.name + " Route " + std::to_string(param_slot + 1);
+  return topo.info.tag.display_name + " Route " + std::to_string(param_slot + 1);
 }
 
 void 
@@ -138,7 +138,7 @@ make_audio_matrix(std::vector<module_topo const*> const& modules, int start_slot
       result.items.push_back({ make_id(tag.id, 0), make_name(tag, 0, slots) });
     } else
     {
-      auto module_submenu = result.submenu->add_submenu(tag.name);
+      auto module_submenu = result.submenu->add_submenu(tag.display_name);
       for (int mi = start_slot; mi < slots; mi++)
       {
         module_submenu->indices.push_back(index++);
@@ -174,7 +174,7 @@ make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
       if(!output.is_modulation_source) continue;
       assert(output.info.slot_count == 1);
       assert(module->dsp.outputs.size() == 1);
-      auto module_submenu = result.submenu->add_submenu(module_tag.name);
+      auto module_submenu = result.submenu->add_submenu(module_tag.display_name);
       for (int mi = 0; mi < module_slots; mi++)
       {
         module_submenu->indices.push_back(index++);
@@ -195,7 +195,7 @@ make_cv_source_matrix(std::vector<cv_source_entry> const& entries)
     }
     else
     {
-      auto output_submenu = result.submenu->add_submenu(module_tag.name);
+      auto output_submenu = result.submenu->add_submenu(module_tag.display_name);
       for (int o = 0; o < module->dsp.outputs.size(); o++)
       {
         auto const& output = module->dsp.outputs[o];
@@ -223,7 +223,7 @@ make_cv_target_matrix(std::vector<module_topo const*> const& modules)
   for (int m = 0; m < modules.size(); m++)
   {
     auto const& module_info = modules[m]->info;
-    auto module_submenu = result.submenu->add_submenu(module_info.tag.name);
+    auto module_submenu = result.submenu->add_submenu(module_info.tag.display_name);
     if (module_info.slot_count == 1)
     {
       for (int p = 0; p < modules[m]->params.size(); p++)
@@ -291,7 +291,7 @@ tidy_matrix_menu_handler::execute_custom(int menu_id, int action, int module, in
   if(action == 1)
   {
     _state->clear_module(module, slot);
-    return module_tab_menu_result(topo.info.tag.name, false, "", "");
+    return module_tab_menu_result(topo.info.tag.display_name, false, "", "");
   }
 
   // keep track of current values
@@ -334,7 +334,7 @@ tidy_matrix_menu_handler::execute_custom(int menu_id, int action, int module, in
         _state->set_plain_at(module, slot, p, r, map.at(p));
     }
 
-  return module_tab_menu_result(topo.info.tag.name, false, "", "");
+  return module_tab_menu_result(topo.info.tag.display_name, false, "", "");
 }
 
 bool
@@ -403,7 +403,7 @@ cv_routing_menu_handler::execute_module(int menu_id, int action, int module, int
   assert(menu_id == menu_plain || menu_id == menu_with_cv);
 
   int slot_count = _state->desc().plugin->modules[module].info.slot_count;
-  std::string base_item = _state->desc().plugin->modules[module].info.tag.name;
+  std::string base_item = _state->desc().plugin->modules[module].info.tag.display_name;
   std::string source_item = base_item;
   std::string target_item = base_item;
   if(slot_count > 1) source_item += " " + std::to_string(source_slot + 1);
@@ -629,7 +629,7 @@ module_tab_menu_result
 audio_routing_menu_handler::execute_module(int menu_id, int action, int module, int source_slot, int target_slot)
 {
   int slot_count = _state->desc().plugin->modules[module].info.slot_count;
-  std::string base_item = _state->desc().plugin->modules[module].info.tag.name;
+  std::string base_item = _state->desc().plugin->modules[module].info.tag.display_name;
   std::string source_item = base_item;
   std::string target_item = base_item;
   if (slot_count > 1) source_item += " " + std::to_string(source_slot + 1);
@@ -779,7 +779,7 @@ audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int tar
   }
 
   if (cv_routes_to_copy.size() > cv_slots_available)
-    return make_copy_failed_result(cv_topo.info.tag.name);
+    return make_copy_failed_result(cv_topo.info.tag.display_name);
 
   // copy module and update cv routing
   with_cv_clear(module, target_slot);
@@ -795,7 +795,7 @@ audio_routing_menu_handler::with_cv_copy_to(int module, int source_slot, int tar
       }
 
   int slot_count = _state->desc().plugin->modules[module].info.slot_count;
-  std::string base_item = _state->desc().plugin->modules[module].info.tag.name;
+  std::string base_item = _state->desc().plugin->modules[module].info.tag.display_name;
   std::string target_item = base_item;
   if (slot_count > 1) target_item += " " + std::to_string(target_slot + 1);
   return module_tab_menu_result(target_item, false, "", "");

@@ -575,7 +575,7 @@ plugin_gui::make_modules(module_desc const* slots)
 {
   int index = slots[0].module->info.index;
   auto const& tag = slots[0].module->info.tag;
-  auto& result = make_tab_component(tag.id, tag.name, index);
+  auto& result = make_tab_component(tag.id, tag.display_name, index);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
     add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
   if(slots[0].module->info.slot_count > 1)
@@ -625,10 +625,9 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
-    assert(param->info.tag.alt_name.size());
-    std::string alt_name = param->info.tag.alt_name;
-    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), alt_name, false, -1, true);
-    header.setText(alt_name, dontSendNotification);
+    std::string display_name = param->info.tag.display_name;
+    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), display_name, false, -1, true);
+    header.setText(display_name, dontSendNotification);
     header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
     result.add(header, vertical, 0);
   }
@@ -689,9 +688,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
   switch (contents)
   {
   case gui_label_contents::name:
-  case gui_label_contents::alt_name:
-    result = &make_component<param_name_label>(this, &module, &param, 
-      contents == gui_label_contents::alt_name, _module_lnfs[module.module->info.index].get());
+    result = &make_component<param_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());
     break;
   case gui_label_contents::value:
     result = &make_component<param_value_label>(this, &module, &param, _module_lnfs[module.module->info.index].get()); 

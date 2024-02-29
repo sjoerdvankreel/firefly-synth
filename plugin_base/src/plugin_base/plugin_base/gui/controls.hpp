@@ -178,13 +178,13 @@ public binding_component,
 public autofit_label
 {
   param_desc const* const _param;
-  static std::string label_ref_text(param_desc const* param, bool short_);
+  static std::string label_ref_text(param_desc const* param);
 public:
   param_desc const* param() const { return _param; }
-  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, bool alt, lnf* lnf):
+  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
   binding_component(gui, module, &param->param->gui.bindings, param->info.slot), 
-  autofit_label(lnf, label_ref_text(param, alt)), _param(param)
-  { setText(alt ? param->param->info.tag.alt_name : param->info.name, juce::dontSendNotification); init(); }
+  autofit_label(lnf, label_ref_text(param)), _param(param)
+  { setText(param->info.name, juce::dontSendNotification); init(); }
 };
 
 // dynamic parameter value display

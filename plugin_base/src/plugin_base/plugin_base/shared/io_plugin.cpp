@@ -80,7 +80,7 @@ wrap_json_with_meta(plugin_topo const& topo, var const& json)
   meta->setProperty("file_magic", var(file_magic));
   meta->setProperty("file_version", var(file_version));
   meta->setProperty("plugin_id", String(topo.tag.id));
-  meta->setProperty("plugin_name", String(topo.tag.name));
+  meta->setProperty("plugin_name", String(topo.tag.full_name));
   meta->setProperty("plugin_version_major", topo.version.major);
   meta->setProperty("plugin_version_minor", topo.version.minor);  
   meta->setProperty("plugin_version_patch", topo.version.patch);
@@ -280,16 +280,16 @@ save_state_internal(plugin_state const& state)
     auto const& module_topo = state.desc().plugin->modules[m];
     auto module = std::make_unique<DynamicObject>();
     module->setProperty("id", String(module_topo.info.tag.id));
-    module->setProperty("name", String(module_topo.info.tag.name));
     module->setProperty("slot_count", module_topo.info.slot_count);
+    module->setProperty("name", String(module_topo.info.tag.full_name));
     for (int p = 0; p < module_topo.params.size(); p++)
     {
       auto const& param_topo = module_topo.params[p];
       if(param_topo.dsp.direction == param_direction::output) continue;
       auto param = std::make_unique<DynamicObject>();
       param->setProperty("id", String(param_topo.info.tag.id));
-      param->setProperty("name", String(param_topo.info.tag.name));
       param->setProperty("slot_count", param_topo.info.slot_count);
+      param->setProperty("name", String(param_topo.info.tag.full_name));
       params.append(var(param.release()));
     }
     module->setProperty("params", params);
@@ -364,7 +364,7 @@ load_state_internal(
     var module_slot_count = json["modules"][m]["slot_count"];
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
     if ((int)module_slot_count != new_module.info.slot_count)
-      result.warnings.push_back("Module '" + new_module.info.tag.name + "' changed slot count.");
+      result.warnings.push_back("Module '" + new_module.info.tag.full_name + "' changed slot count.");
 
     for (int p = 0; p < json["modules"][m]["params"].size(); p++)
     {
@@ -382,7 +382,7 @@ load_state_internal(
       var param_slot_count = json["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
       if ((int)param_slot_count != new_param.info.slot_count)
-        result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "' slot count changed.");
+        result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "' slot count changed.");
     }
   }
 
@@ -423,7 +423,7 @@ load_state_internal(
             if(converter && converter->handle_invalid_param_value(new_module.info.tag.id, mi, new_param.info.tag.id, pi, text, handler, new_value))
               state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, new_value);
             else
-              result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
+              result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "': invalid value '" + text + "'.");
           }
         }
       }

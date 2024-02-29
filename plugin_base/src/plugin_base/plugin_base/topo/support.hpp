@@ -26,12 +26,15 @@ make_label_none()
 { return make_label(gui_label_contents::none, gui_label_align::left, gui_label_justify::center); }
 
 topo_tag
-make_topo_tag(std::string const& id, std::string const& name, std::string alt_name = "");
+make_topo_tag(
+  std::string const& id, bool name_one_based,
+  std::string const& full_name, std::string const& display_name, 
+  std::string const& menu_display_name);
 topo_info
-make_topo_info(std::string const& id, std::string const& name, std::string const& alt_name, bool name_one_based, bool alt_name_in_menu, int index, int slot_count);
-inline topo_info
-make_topo_info(std::string const& id, std::string const& name, int index, int slot_count)
-{ return make_topo_info(id, name, "", true, true, index, slot_count); }
+make_topo_info(
+  std::string const& id, bool name_one_based,
+  std::string const& full_name, std::string const& display_name,
+  std::string const& menu_display_name, int index, int slot_count);
 
 param_section
 make_param_section(int index, topo_tag const& tag, param_section_gui const& gui);
