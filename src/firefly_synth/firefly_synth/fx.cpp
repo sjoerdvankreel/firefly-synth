@@ -867,24 +867,24 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1 } })));
   reverb_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_size = result.params.emplace_back(make_param(
-    make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", "Rev.Size", "Size", true, false, param_reverb_size, 1),
+    make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", true, "Reverb Size", "Size", "Rev.Size", param_reverb_size, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_top, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   reverb_size.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_size.info.description = "Reverb room size.";
   auto& reverb_damp = result.params.emplace_back(make_param(
-    make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", "Rev.Damp", "Damp", true, false, param_reverb_damp, 1),
+    make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", true, "Reverb Damping", "Damp", "Rev.Damp", param_reverb_damp, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.8, 0, true),
     make_param_gui_single(section_reverb_top, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   reverb_damp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_damp.info.description = "Reverb damping factor.";
   auto& reverb_sprd = result.params.emplace_back(make_param(
-    make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", "Rev.Sprd", "Sprd", true, false, param_reverb_spread, 1),
+    make_topo_info("{0D138920-65D2-42E9-98C5-D8FEC5FD2C55}", true, "Reverb Spread", "Spread", "Rev.Sprd", param_reverb_spread, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_reverb_top, gui_edit_type::hslider, { 0, 2 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   reverb_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_sprd.info.description = "Reverb stereo-spread control.";
 
@@ -893,17 +893,17 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
   reverb_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_apf = result.params.emplace_back(make_param(
-    make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", "Rev.APF", "APF", true, false, param_reverb_apf, 1),
+    make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", true, "Reverb APF", "APF", "Rev.APF", param_reverb_apf, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
     make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   reverb_apf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_apf.info.description = "Reverb all-pass filter amount.";
   auto& reverb_mix = result.params.emplace_back(make_param(
-    make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", "Rev.Mix", "Mix", true, false, param_reverb_mix, 1),
+    make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Rev.Mix", param_reverb_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_reverb_bottom, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   reverb_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_mix.info.description = "Reverb dry/wet control.";
 
