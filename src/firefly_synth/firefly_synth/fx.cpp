@@ -674,7 +674,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Distortion Shaper", "Shaper", "Dst.Shaper", param_dist_shaper, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sine"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sin"),
     make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
