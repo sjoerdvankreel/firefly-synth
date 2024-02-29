@@ -131,7 +131,7 @@ generate_plugin_ref(
   int& module_count, int& module_slot_count, 
   int& param_count, int& param_slot_count)
 {
-  std::string name_and_version = topo.tag.name + " " + 
+  std::string name_and_version = topo.tag.full_name + " " + 
     std::to_string(topo.version.major) + "." + 
     std::to_string(topo.version.minor) + "." +
     std::to_string(topo.version.patch) ;
@@ -172,7 +172,6 @@ generate_modules_ref(
   out << "<tr>\n";
   out << "<th>#</th>\n";
   out << "<th>Name</th>\n";
-  out << "<th>Alt Name</th>\n";
   out << "<th>UI</th>\n";
   out << "<th>Stage</th>\n";
   out << "<th>Num</th>\n";
@@ -183,8 +182,7 @@ generate_modules_ref(
   {
     auto const& module = topo.modules[m];
     assert(module.info.description.size());
-    assert(module.info.tag.name.size());
-    assert(module.info.tag.alt_name.size());
+    assert(module.info.tag.full_name.size());
 
     module_count++;
     module_slot_count += module.info.slot_count;
@@ -194,8 +192,7 @@ generate_modules_ref(
       out << "<td><a href='#" + std::to_string(m + 1) + "'>" + std::to_string(m + 1) + "</a></td>\n";
     else
       out << "<td>" + std::to_string(m + 1) + "</td>\n";
-    out << "<td>" << module.info.tag.name << "</td>\n";
-    out << "<td>" << module.info.tag.alt_name << "</td>\n";
+    out << "<td>" << module.info.tag.full_name << "</td>\n";
     out << "<td>" << (module.gui.visible? "Yes": "No") << "</td>\n";
     out << "<td>" << (module.dsp.stage == module_stage::voice
       ? "Voice" : module.dsp.stage == module_stage::input
@@ -220,11 +217,10 @@ generate_params_ref(
     if (module.gui.visible)
     {
       out << "<a name='" + std::to_string(m + 1) + "'/>\n";
-      out << "<h3>" << module.info.tag.name << "</h3>\n";
+      out << "<h3>" << module.info.tag.full_name << "</h3>\n";
       out << "<table>\n";
       out << "<tr>\n";
       out << "<th>Name</th>\n";
-      out << "<th>Short</th>\n";
       out << "<th>Section</th>\n";
       out << "<th>UI</th>\n";
       out << "<th>Num</th>\n";
@@ -242,12 +238,10 @@ generate_params_ref(
       {
         auto const& param = module.params[p];
         assert(param.info.description.size());
-        assert(param.info.tag.name.size());
+        assert(param.info.tag.full_name.size());
 
         visible_param_count++;
         visible_param_slot_count += module.info.slot_count * param.info.slot_count;
-
-        auto const& alt_name = param.info.tag.alt_name.size()? param.info.tag.alt_name : param.info.tag.name;
         int reference_param_slot = param.info.slot_count == 1 ? 0 : 1;
 
         std::string direction = "";
@@ -287,9 +281,8 @@ generate_params_ref(
           log_mid_value = param.domain.raw_to_text(false, param.domain.midpoint);
 
         out << "<tr>\n";
-        out << "<td rowspan='2'>" << param.info.tag.name << "</td>\n";
-        out << "<td>" << alt_name << "</td>\n";
-        out << "<td>" << module.sections[param.gui.section].tag.name << "</td>\n";
+        out << "<td rowspan='2'>" << param.info.tag.full_name << "</td>\n";
+        out << "<td>" << module.sections[param.gui.section].tag.full_name << "</td>\n";
         out << "<td>" << (param.gui.visible? "Yes": "No") << "</td>\n";
         out << "<td>" << param.info.slot_count << "</td>\n";
         out << "<td>" << direction << "</td>\n";
