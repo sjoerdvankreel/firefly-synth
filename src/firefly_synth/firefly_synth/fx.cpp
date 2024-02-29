@@ -749,8 +749,8 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_topo_tag_basic("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   delay_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-  auto& delay_type = result.params.emplace_back(make_param(
-    make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", "Dly.Type", "Type", true, false, param_dly_type, 1),
+  auto& delay_type = result.params.emplace_back(make_param( // TODO mode
+    make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", true, "Delay Mode", "Mode", "Dly.Mode", param_dly_type, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(dly_type_items(), ""),
     make_param_gui_single(section_delay_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   delay_type.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
@@ -759,24 +759,24 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   delay_type.gui.submenu->add_submenu("Multi Tap", { dly_type_multi_time, dly_type_multi_sync });
   delay_type.info.description = "Selects feedback or multi-tap delay.";
   auto& delay_amt = result.params.emplace_back(make_param(
-    make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", "Dly.Amt", "Amt", true, false, param_dly_amt, 1),
+    make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", true, "Delay Amount", "Amount", "Dly.Amt", param_dly_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_top, gui_edit_type::knob, { 0, 1 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_amt.info.description = "Feedback-amount or tap-amount control.";
   auto& delay_sprd = result.params.emplace_back(make_param(
-    make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", "Dly.Spr", "Spr", true, false, param_dly_sprd, 1),
+    make_topo_info("{1BD8008B-DC2C-4A77-A5DE-869983E5786C}", true, "Delay Spread", "Spread", "Dly.Sprd", param_dly_sprd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_delay_top, gui_edit_type::knob, { 0, 2 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_sprd.info.description = "Stereo spread control.";
   auto& delay_mix = result.params.emplace_back(make_param(
-    make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", "Dly.Mix", "Mix", true, false, param_dly_mix, 1),
+    make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", true, "Delay Mix", "Mix", "Dly.Mix", param_dly_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_delay_top, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::alt_name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_mix.info.description = "Dry/wet control.";
 
