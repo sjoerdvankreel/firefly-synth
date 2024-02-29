@@ -145,9 +145,9 @@ audio_audio_matrix_topo(
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", "Voice Audio", "V.Audio", true, true, module_vaudio_audio_matrix, 1);
+  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", true, "Voice Audio", "Voice Audio", "V.Audio", module_vaudio_audio_matrix, 1);
   voice_info.description = "Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.";
-  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", "Global Audio", "G.Audio", true, true, module_gaudio_audio_matrix, 1);
+  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", true, "Global Audio", "Global Audio", "G.Audio", module_gaudio_audio_matrix, 1);
   global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
@@ -158,14 +158,14 @@ audio_audio_matrix_topo(
 
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, 0, { 
-      make_module_dsp_output(false, make_topo_info("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
-      make_module_dsp_output(false, make_topo_info("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
+      make_module_dsp_output(false, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
+      make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
 
   result.graph_renderer = [tm = target_matrix.items](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, tm); };
-  result.gui.tabbed_name = result.info.tag.alt_name;
+  result.gui.tabbed_name = result.info.tag.menu_display_name;
   if (global)
   {
     result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
@@ -187,7 +187,7 @@ audio_audio_matrix_topo(
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& on = result.params.emplace_back(make_param(
-    make_topo_info("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", "On", true, true, param_on, route_count),
+    make_topo_info_basic("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_toggle(false),
     make_param_gui(section_main, gui_edit_type::toggle, param_layout::vertical, { 0, 0 }, make_label_none())));
   on.gui.tabular = true;
@@ -195,7 +195,7 @@ audio_audio_matrix_topo(
   on.info.description = "Toggles audio route on/off.";
 
   auto& source = result.params.emplace_back(make_param(
-    make_topo_info("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", "Source", true, true, param_source, route_count),
+    make_topo_info_basic("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(source_matrix.items, ""),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
@@ -212,7 +212,7 @@ audio_audio_matrix_topo(
 
   auto default_target = global? "M.Out": "V.Out";
   auto& target = result.params.emplace_back(make_param(
-    make_topo_info("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", "Target", true, true, param_target, route_count),
+    make_topo_info_basic("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, default_target),
     make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
@@ -228,7 +228,7 @@ audio_audio_matrix_topo(
   target.info.description = "Selects audio route target.";
 
   auto& amount = result.params.emplace_back(make_param(
-    make_topo_info("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", "Gain", true, true, param_gain, route_count),
+    make_topo_info_basic("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
@@ -236,7 +236,7 @@ audio_audio_matrix_topo(
   amount.info.description = "Controls route gain.";
 
   auto& bal = result.params.emplace_back(make_param(
-    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", "Bal", "Bal", true, true, param_bal, route_count),
+    make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", true, "Balance", "Bal", "Bal", param_bal, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
   bal.gui.tabular = true;
