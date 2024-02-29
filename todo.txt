@@ -30,6 +30,7 @@ do forward compat checks - dont load newer versions
 
 small-ui-changes:
 check all the todos
+check the reference generator output
 check all the short/long names + also in menus
 check all references to alt_name
 drop square shaper (why is it even in there?)
