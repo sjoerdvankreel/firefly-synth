@@ -29,6 +29,10 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+drop square shaper (why is it even in there?)
+rename saw to off shaper
+tri shaper is broken
+now have room for cheby shaper/smooth random?
 do separate label-tooltip-menu-name? or just show the name in the tooltip, not the alt name?
 re-read the param docs and manual
 rename x/y -> in/out also for lfo
