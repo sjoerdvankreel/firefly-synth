@@ -688,14 +688,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_skew_in = result.params.emplace_back(make_param(
-    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Distortion Skew In Mode", "Skew In", "Dst SkIn", param_dist_skew_in, 1),
+    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Distortion Skew In Mode", "Skew In", "Dst Sk In", param_dist_skew_in, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   dist_skew_in.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_in.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_in_amt = result.params.emplace_back(make_param(
-    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Distortion Skew In Amt", "Skew In", "Dst SkIn", param_dist_skew_in_amt, 1),
+    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Distortion Skew In Amt", "Skew In", "Dst Sk In", param_dist_skew_in_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_top, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
   dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_in }, [](auto const& vs) {
@@ -709,14 +709,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
   auto& dist_skew_out = result.params.emplace_back(make_param(
-    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Distortion Skew Out Mode", "Skew Out", "Dst SkOut", param_dist_skew_out, 1),
+    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Distortion Skew Out Mode", "Skew Out", "Dst Sk Out", param_dist_skew_out, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_top, gui_edit_type::autofit_list, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_out.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
-    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Distortion Skew Out Amt", "Skew Out", "Dst SkOut", param_dist_skew_out_amt, 1),
+    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Distortion Skew Out Amt", "Skew Out", "Dst Sk Out", param_dist_skew_out_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_top, gui_edit_type::hslider, { 0, 4 }, make_label_none())));
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_out }, [](auto const& vs) {
