@@ -1,8 +1,10 @@
 ### ?, ? - V1.2.0.
 
 - Lots of small ui fixes / cleanup.
+- Comb filter gets additional mode select (feedback/feedforward/both).
 - Split out distortion+mode selection to separate controls (breaking change for automation only).
 - Split out distortion shape+skewx/y selection to separate controls (breaking change for automation only).
+
 - Even though there are some breaking changes I decided *against* changing the plugin id,
 because breaking changes relate to automation of discrete-valued parameters only.
 Regular loading of projects/preset files applies the appropriate conversion from previous formats.

@@ -47,6 +47,7 @@ static float const reverb_comb_length[reverb_comb_count] = {
 enum { dist_clip_hard, dist_clip_tanh };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
+enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { dly_type_fdbk_time, dly_type_fdbk_sync, dly_type_multi_time, dly_type_multi_sync }; // todo mode
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
@@ -62,7 +63,7 @@ static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (in
 
 enum { param_type,
   param_svf_mode, param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
-  param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
+  param_comb_mode, param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
   param_dist_mode, param_dist_skew_in, param_dist_skew_in_amt, param_dist_shaper, param_dist_skew_out, param_dist_skew_out_amt,
   param_dist_over, param_dist_clip, param_dist_lp_frq, param_dist_lp_res, param_dist_gain, param_dist_mix,
   param_dly_type, param_dly_amt, param_dly_sprd, param_dly_mix,
@@ -75,6 +76,8 @@ enum { param_type,
 static bool svf_has_gain(int svf_mode) { return svf_mode >= svf_mode_bll; }
 static bool dly_is_sync(int dly_type) { return dly_type == dly_type_fdbk_sync || dly_type == dly_type_multi_sync; }
 static bool dly_is_multi(int dly_type) { return dly_type == dly_type_multi_time || dly_type == dly_type_multi_sync; }
+static bool comb_has_feedback(int comb_mode) { return comb_mode == comb_mode_feedback || comb_mode == comb_mode_both; }
+static bool comb_has_feedforward(int comb_mode) { return comb_mode == comb_mode_feedforward || comb_mode == comb_mode_both; }
 
 static std::vector<list_item>
 type_items(bool global)
@@ -87,6 +90,16 @@ type_items(bool global)
   if(!global) return result;
   result.emplace_back("{789D430C-9636-4FFF-8C75-11B839B9D80D}", "Delay");
   result.emplace_back("{7BB990E6-9A61-4C9F-BDAC-77D1CC260017}", "Reverb");
+  return result;
+}
+
+static std::vector<list_item>
+comb_mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{D74DBD2D-CAE9-4993-899B-F1F2AFC18444}", "Feedforward");
+  result.emplace_back("{1F75F32E-1938-4314-B14F-CE2D16C8D603}", "Feedback");
+  result.emplace_back("{2F21C25C-0CC6-486D-97B3-439BC761D4BF}", "Both");
   return result;
 }
 
@@ -605,23 +618,31 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_mode }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
   svf_gain.info.description = "Controls filter gain for shelving filters.";
 
+  auto& comb_mode = result.params.emplace_back(make_param(
+    make_topo_info("{93E738FC-F0D1-471C-B46E-467C5869BB03}", true, "Comb Filter Mode", "Mode", "Cmb Mode", param_comb_mode, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(comb_mode_items(), ""),
+    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  comb_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
+  comb_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
+  comb_mode.info.description = "Selects the state-variable filter mode.";
   auto& comb_top = result.sections.emplace_back(make_param_section(section_comb_top,
     make_topo_tag_basic("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
   comb_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
-    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Cmb.Dly+", param_comb_dly_plus, 1),
+    make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Cmb Dly+", param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_top, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  comb_dly_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
+  comb_dly_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_dly_plus.info.description = "Feed-forward time.";
   auto& comb_gain_plus = result.params.emplace_back(make_param(
-    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Cmb.Gain+", param_comb_gain_plus, 1),
+    make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Cmb Gain+", param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
     make_param_gui_single(section_comb_top, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
+  comb_gain_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_gain_plus.info.description = "Feed-forward amount.";
 
   auto& comb_bottom = result.sections.emplace_back(make_param_section(section_comb_bottom,
@@ -629,18 +650,18 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
   comb_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
-    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", true, "Comb Filter Delay-", "Delay-", "Cmb.Dly-", param_comb_dly_min, 1),
+    make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", true, "Comb Filter Delay-", "Delay-", "Cmb Dly-", param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
     make_param_gui_single(section_comb_bottom, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  comb_dly_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
+  comb_dly_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
   comb_dly_min.info.description = "Feed-back time.";
   auto& comb_gain_min = result.params.emplace_back(make_param(
-    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Cmb.Gain-", param_comb_gain_min, 1),
+    make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Cmb Gain-", param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_comb_bottom, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  comb_gain_min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
+  comb_gain_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
   comb_gain_min.info.description = "Feed-back amount.";
 
   auto& dist_mode = result.params.emplace_back(make_param(
