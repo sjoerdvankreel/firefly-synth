@@ -10,7 +10,7 @@ desc_id_hash(std::string const& text);
 std::string
 desc_id(topo_info const& info, int slot);
 std::string
-desc_name(topo_info const& info, int slot);
+desc_name(topo_info const& info, std::string const& name_base, int slot);
 
 // only used for midi source descriptors
 struct desc_info {

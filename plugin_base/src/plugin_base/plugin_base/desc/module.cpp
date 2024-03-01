@@ -14,8 +14,8 @@ module_desc(
   info.slot = slot;
   info.global = global;
   info.id = desc_id(module_.info, slot);
-  info.name = desc_name(module_.info, slot);
   info.id_hash = desc_id_hash(info.id);
+  info.name = desc_name(module_.info, module_.info.tag.full_name, slot);
 
   int param_local = 0;
   for(int p = 0; p < module_.params.size(); p++)
