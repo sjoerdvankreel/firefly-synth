@@ -534,9 +534,9 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
 module_topo
 fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
 {
-  auto voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", true, "Voice FX", "V.FX", "V.FX", module_vfx, 10);
+  auto voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", true, "Voice FX", "Voice FX", "VFX", module_vfx, 10);
   voice_info.description = "Per-voice FX module with state variable filter, comb filter and distortion.";
-  auto global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", true, "Global FX", "G.FX", "G.FX", module_gfx, 10);
+  auto global_info = make_topo_info("{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}", true, "Global FX", "Global FX", "GFX", module_gfx, 10);
   global_info.description = "Global FX module with state variable filter, comb filter, distortion, delay and reverb.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
