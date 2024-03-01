@@ -209,8 +209,6 @@ public module_engine {
   std::array<std::array<std::int32_t, reverb_allpass_count>, 2> _rev_allpass_pos = {};
   std::array<std::array<std::vector<float>, reverb_allpass_count>, 2> _rev_allpass = {};
 
-  void process_comb(plugin_block& block, 
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   void process_delay(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   void process_reverb(plugin_block& block, 
@@ -220,6 +218,12 @@ public module_engine {
   void process_dly_multi(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
  
+  void process_comb(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
+  template <bool Feedforward, bool Feedback>
+  void process_comb_mode(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
+
   // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
   void process_svf(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
@@ -487,6 +491,10 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
     auto skew_items = wave_skew_type_items();
     for (int i = 0; i < modules[this_module].info.slot_count; i++)
     {
+      // old comb filter was always "both"
+      new_state.set_plain_at(this_module, i, param_comb_mode, 0,
+        _desc->raw_to_plain_at(this_module, param_comb_mode, comb_mode_both));
+
       // pick up distortion mode from old combined dstA/dstB/dstC
       if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_type].info.tag.id, 0, old_value))
       {
@@ -1037,9 +1045,25 @@ fx_engine::process(plugin_block& block,
 }
 
 void
-fx_engine::process_comb(plugin_block& block, 
+fx_engine::process_comb(plugin_block& block,
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
+  int mode = block.state.own_block_automation[param_comb_mode][0].step();
+  switch (mode)
+  {
+  case comb_mode_both: process_comb_mode<true, true>(block, audio_in, modulation); break;
+  case comb_mode_feedback: process_comb_mode<false, true>(block, audio_in, modulation); break;
+  case comb_mode_feedforward: process_comb_mode<true, false>(block, audio_in, modulation); break;
+  default: assert(false); break;
+  }
+}
+
+template <bool Feedforward, bool Feedback>
+void fx_engine::process_comb_mode(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
+{
+  static_assert(Feedforward || Feedback);
+  
   float const feedback_factor = 0.98;
   int this_module = _global ? module_gfx : module_vfx;
   auto const& dly_min_curve = *modulation[this_module][block.module_slot][param_comb_dly_min][0];
@@ -1049,27 +1073,56 @@ fx_engine::process_comb(plugin_block& block,
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float dly_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_min, dly_min_curve[f]);
-    float dly_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_plus, dly_plus_curve[f]);
-    float gain_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_min, gain_min_curve[f]);
-    float gain_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_plus, gain_plus_curve[f]);
-    float dly_min_samples_t = dly_min * block.sample_rate * 0.001;
-    float dly_plus_samples_t = dly_plus * block.sample_rate * 0.001;
-    float dly_min_t = dly_min_samples_t - (int)dly_min_samples_t;
-    float dly_plus_t = dly_plus_samples_t - (int)dly_plus_samples_t;
-    int dly_min_samples_0 = (int)dly_min_samples_t;
-    int dly_min_samples_1 = (int)dly_min_samples_t + 1;
-    int dly_plus_samples_0 = (int)dly_plus_samples_t;
-    int dly_plus_samples_1 = (int)dly_plus_samples_t + 1;
+    float gain_min = 0;
+    float dly_min_t = 0;
+    int dly_min_samples_0 = 0;
+    int dly_min_samples_1 = 0;
+
+    float gain_plus = 0;
+    float dly_plus_t = 0;
+    int dly_plus_samples_0 = 0;
+    int dly_plus_samples_1 = 0;
+
+    if constexpr (Feedback)
+    {
+      gain_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_min, gain_min_curve[f]);
+      float dly_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_min, dly_min_curve[f]);
+      float dly_min_samples_t = dly_min * block.sample_rate * 0.001;
+      dly_min_t = dly_min_samples_t - (int)dly_min_samples_t;
+      dly_min_samples_0 = (int)dly_min_samples_t;
+      dly_min_samples_1 = (int)dly_min_samples_t + 1;
+    }
+
+    if constexpr (Feedforward)
+    {
+      gain_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_plus, gain_plus_curve[f]);
+      float dly_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_plus, dly_plus_curve[f]);
+      float dly_plus_samples_t = dly_plus * block.sample_rate * 0.001;
+      dly_plus_t = dly_plus_samples_t - (int)dly_plus_samples_t;
+      dly_plus_samples_0 = (int)dly_plus_samples_t;
+      dly_plus_samples_1 = (int)dly_plus_samples_t + 1;
+    }
+
     for (int c = 0; c < 2; c++)
     {
+      float min = 0;
+      float plus = 0;
+
       // double mod is needed to not go negative
-      float min0 = _comb_out[c][(((_comb_pos - dly_min_samples_0) % _comb_samples) + _comb_samples) % _comb_samples];
-      float min1 = _comb_out[c][(((_comb_pos - dly_min_samples_1) % _comb_samples) + _comb_samples) % _comb_samples];
-      float min = ((1 - dly_min_t) * min0 + dly_min_t * min1) * gain_min;
-      float plus0 = _comb_in[c][(((_comb_pos - dly_plus_samples_0) % _comb_samples) + _comb_samples) % _comb_samples];
-      float plus1 = _comb_in[c][(((_comb_pos - dly_plus_samples_1) % _comb_samples) + _comb_samples) % _comb_samples];
-      float plus = ((1 - dly_plus_t) * plus0 + dly_plus_t * plus1) * gain_plus;
+      if constexpr(Feedback)
+      {
+        float min0 = _comb_out[c][(((_comb_pos - dly_min_samples_0) % _comb_samples) + _comb_samples) % _comb_samples];
+        float min1 = _comb_out[c][(((_comb_pos - dly_min_samples_1) % _comb_samples) + _comb_samples) % _comb_samples];
+        min = ((1 - dly_min_t) * min0 + dly_min_t * min1) * gain_min;
+      }
+      
+      if constexpr(Feedforward)
+      {
+        float plus0 = _comb_in[c][(((_comb_pos - dly_plus_samples_0) % _comb_samples) + _comb_samples) % _comb_samples];
+        float plus1 = _comb_in[c][(((_comb_pos - dly_plus_samples_1) % _comb_samples) + _comb_samples) % _comb_samples];
+        plus = ((1 - dly_plus_t) * plus0 + dly_plus_t * plus1) * gain_plus;
+      }
+      
       _comb_in[c][_comb_pos] = audio_in[c][f];
       _comb_out[c][_comb_pos] = audio_in[c][f] + plus + min * feedback_factor;
       block.state.own_audio[0][0][c][f] = _comb_out[c][_comb_pos];
