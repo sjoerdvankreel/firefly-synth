@@ -558,7 +558,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_section_gui({ 1, 0, 1, 1 }, { 1, 1 })));
 
   auto& svf_mode = result.params.emplace_back(make_param(
-    make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", true, "State Variable Filter Mode", "Mode", "SVF.Mode", param_svf_mode, 1),
+    make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", true, "SV Filter Mode", "Mode", "SVF.Mode", param_svf_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_mode_items(), ""),
     make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -571,14 +571,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_top.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
-    make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", true, "State Variable Filter Frequency", "Frequency", "SVF Freq", param_svf_freq, 1),
+    make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", true, "SV Filter Frequency", "Frequency", "SVF Freq", param_svf_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
     make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_freq.info.description = "Controls filter frequency.";
   auto& svf_res = result.params.emplace_back(make_param(
-    make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", true, "State Variable Filter Resonance", "Resonance", "SVF Res", param_svf_res, 1),
+    make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", true, "SV Filter Resonance", "Resonance", "SVF Res", param_svf_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_svf_top, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -591,14 +591,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   svf_bottom.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_kbd = result.params.emplace_back(make_param(
-    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "State Variable Filter Keyboard Tracking", "Keyboard Tracking", "SVF Kbd", param_svf_kbd, 1),
+    make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "SV Filter Keytrack", "Keytrack", "SVF Kbd", param_svf_kbd, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, 1, 0, true),
     make_param_gui_single(section_svf_bottom, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_kbd.info.description = "Controls keyboard tracking with -/+2 octaves.";
   auto& svf_gain = result.params.emplace_back(make_param(
-    make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", true, "State Variable Filter Shelf Gain", "Shelf Gain", "SVF Gain", param_svf_gain, 1),
+    make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", true, "SV Filter Shelf Gain", "Shelf Gain", "SVF Gain", param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
     make_param_gui_single(section_svf_bottom, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
