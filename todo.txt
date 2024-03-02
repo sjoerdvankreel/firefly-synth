@@ -29,6 +29,8 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+bigger graphs
+smaller graph text for the big one
 todo lfo convert
 bigger vertical modulation graph
 check module header sizes
