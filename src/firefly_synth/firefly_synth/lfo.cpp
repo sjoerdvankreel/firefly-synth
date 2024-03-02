@@ -224,7 +224,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
 
   result.sections.emplace_back(make_param_section(section_left_bottom,
     make_topo_tag_basic("{98869A27-5991-4BA3-9481-01636BDACDCB}", "Left Bottom"),
-    make_param_section_gui({ 1, 0 }, gui_dimension({ 1 }, { { 1, 1 } }))));
+    make_param_section_gui({ 1, 0 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, 1 } }))));
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
@@ -237,7 +237,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
     make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
   rate.gui.bindings.enabled.bind_params({ param_mode, param_sync }, [](auto const& vs) { return vs[0] != mode_off && vs[1] == 0; });
-  rate.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
+  rate.gui.bindings.visible.bind_params({ param_mode, param_sync }, [](auto const& vs) { return vs[1] == 0; });
   rate.info.description = "LFO rate in Hz.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
@@ -245,7 +245,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_mode, param_sync }, [](auto const& vs) { return vs[0] != mode_off && vs[1] != 0; });
-  tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
+  tempo.gui.bindings.visible.bind_params({ param_mode, param_sync }, [](auto const& vs) { return vs[1] != 0; });
   tempo.info.description = "LFO rate in bars.";
 
   // Don't include the phase param for global lfo.
