@@ -210,6 +210,29 @@ lfo_state_converter::handle_invalid_param_value(
   // note param ids are equal between vlfo/glfo, glfo just has more
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
+    // smooth or fold -> sqr or fold
+    if (new_param_id == _desc->plugin->modules[module_glfo].params[param_shape].info.tag.id)
+    {
+      // format is {guid}-{guid}-{guid}
+      if (old_value.size() != 3 * 38 + 2) return false;
+      auto shape_items = wave_shape_type_items(true);
+      std::string old_shape_guid = old_value.substr(0, 38);
+      
+      // was smooth or fold
+      if (old_shape_guid == "{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}")
+      {
+        new_value = _desc->raw_to_plain_at(module_glfo, param_shape, wave_shape_type_smooth);
+        return true;
+      }
+
+      // was sqr
+      if (old_shape_guid == "{7176FE9E-D2A8-44FE-B312-93D712173D29}")
+      {
+        new_value = _desc->raw_to_plain_at(module_glfo, param_shape, wave_shape_type_sqr_or_fold);
+        return true;
+      }
+    }
+
     // sync/rate + repeat/one-shot/one-phase got split out to separate controls
     if (new_param_id == _desc->plugin->modules[module_glfo].params[param_mode].info.tag.id)
     {
