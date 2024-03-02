@@ -259,7 +259,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Skew X", "Skew X", param_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_right_top, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
-  x_amt.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  x_amt.gui.bindings.enabled.bind_params({ param_mode, param_skew_x }, [](auto const& vs) { return vs[0] != mode_off && vs[1] != wave_skew_type_off; });
   x_amt.info.description = "Horizontal skew amount.";
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
@@ -281,7 +281,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y", param_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_right_top, gui_edit_type::hslider, { 0, 4 }, make_label_none())));
-  y_amt.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  y_amt.gui.bindings.enabled.bind_params({ param_mode, param_skew_y }, [](auto const& vs) { return vs[0] != mode_off && vs[1] != wave_skew_type_off; });
   y_amt.info.description = "Vertical skew amount.";
 
   // Don't include the phase param for global lfo.
