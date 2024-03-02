@@ -22,13 +22,9 @@ static float const log_half = std::log(0.5f);
 
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
+enum { mode_off, mode_repeat, mode_one_shot, mode_one_phase }; // todo rename to type
 enum { section_left_top, section_left_bottom, section_right_top, section_right_bottom };
-enum { mode_off, mode_rate, mode_rate_one, mode_rate_phs, mode_sync, mode_sync_one, mode_sync_phs };
-enum { param_mode, param_rate, param_tempo, param_type, param_x, param_y, param_seed, param_steps, param_filter, param_phase };
-
-static bool is_one_shot_full(int mode) { return mode == mode_rate_one || mode == mode_sync_one; }
-static bool is_one_shot_phase(int mode) { return mode == mode_rate_phs || mode == mode_sync_phs; }
-static bool is_sync(int mode) { return mode == mode_sync || mode == mode_sync_one || mode == mode_sync_phs; }
+enum { param_mode, param_sync, param_rate, param_tempo, param_type, param_x, param_y, param_seed, param_steps, param_filter, param_phase };
 
 static bool has_skew_x(multi_menu const& menu, int type) { return menu.multi_items[type].index2 != wave_skew_type_off; }
 static bool has_skew_y(multi_menu const& menu, int type) { return menu.multi_items[type].index3 != wave_skew_type_off; }
@@ -42,12 +38,9 @@ mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{E8D04800-17A9-42AB-9CAE-19322A400334}", "Off");
-  result.emplace_back("{5F57863F-4157-4F53-BB02-C6693675B881}", "Rate.Rep");
-  result.emplace_back("{0A5F479F-9180-4498-9464-DBEA0595C86B}", "Rate.One");
-  result.emplace_back("{12E9AF37-1C1F-43AB-9405-86F103293C4C}", "Rate.Phs");
-  result.emplace_back("{E2692483-F48B-4037-BF74-64BB62110538}", "Sync.Rep");
-  result.emplace_back("{85B1AC0B-FA06-4E23-A7EF-3EBF6F620948}", "Sync.One");
-  result.emplace_back("{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}", "Sync.Phs");
+  result.emplace_back("{F2B8F550-76EA-41B9-97C3-13C1CC4414F1}", "Repeat");
+  result.emplace_back("{BAE7EAC9-D7D2-4DD9-B550-C0ABC09F1C0D}", "One Shot");
+  result.emplace_back("{377AF4E8-0FD8-4CC2-B9D1-4DB4F2FC114A}", "One Phase");
   return result;
 }
 
@@ -99,9 +92,11 @@ public:
 static void
 init_global_default(plugin_state& state)
 {
-  state.set_text_at(module_glfo, 0, param_mode, 0, "Sync.Rep");
+  state.set_text_at(module_glfo, 0, param_mode, 0, "Repeat");
+  state.set_text_at(module_glfo, 0, param_sync, 0, "On");
   state.set_text_at(module_glfo, 0, param_tempo, 0, "3/1");
-  state.set_text_at(module_glfo, 1, param_mode, 0, "Rate.Rep");
+  state.set_text_at(module_glfo, 1, param_mode, 0, "Repeat");
+  state.set_text_at(module_glfo, 1, param_sync, 0, "Off");
 }
 
 static graph_engine_params
@@ -123,8 +118,8 @@ make_graph_engine(plugin_desc const* desc)
 float
 lfo_frequency_from_state(plugin_state const& state, int module_index, int module_slot, int bpm)
 {
-  int mode = state.get_plain_at(module_index, module_slot, param_mode, 0).step();
-  return sync_or_freq_from_state(state, 120, is_sync(mode), module_index, module_slot, param_rate, param_tempo);
+  bool sync = state.get_plain_at(module_index, module_slot, param_sync, 0).step() != 0;
+  return sync_or_freq_from_state(state, 120, sync, module_index, module_slot, param_rate, param_tempo);
 }
 
 static graph_data
@@ -133,8 +128,8 @@ render_graph(
   graph_engine* engine, int param, param_topo_mapping const& mapping)
 {
   int mode = state.get_plain_at(mapping.module_index, mapping.module_slot, param_mode, mapping.param_slot).step();
-  if(mode == mode_off)
-    return graph_data(graph_data_type::off, {});
+  bool sync = state.get_plain_at(mapping.module_index, mapping.module_slot, param_sync, mapping.param_slot).step() != 0;
+  if(mode == mode_off) return graph_data(graph_data_type::off, {});
   
   int sample_rate = -1;
   std::string partition;
@@ -142,7 +137,7 @@ render_graph(
   bool global = mapping.module_index == module_glfo;
   float freq = lfo_frequency_from_state(state, mapping.module_index, mapping.module_slot, 120);
 
-  if (!is_sync(mode))
+  if (!sync)
   {
     // 1 second, or the minimum that shows 1 cycle
     if (freq >= 1)
@@ -158,7 +153,7 @@ render_graph(
   }
   
   // draw synced 1/1 as full cycle
-  if (is_sync(mode))
+  if (sync)
   {
     // 1 bar, or the minimum that shows 1 cycle
     float one_bar_freq = timesig_to_freq(120, { 1, 1 });
@@ -215,35 +210,37 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
     make_topo_tag_basic("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Left Top"),
     make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { { 1 } }))));
   auto& mode = result.params.emplace_back(make_param(
-    make_topo_info_basic("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode.Repeat", param_mode, 1),
+    make_topo_info_basic("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(mode_items(), ""),
     make_param_gui_single(section_left_top, gui_edit_type::list, { 0, 0 }, make_label_none())));
-  mode.gui.submenu = std::make_shared<gui_submenu>();
-  mode.gui.submenu->indices.push_back(mode_off);
-  mode.gui.submenu->add_submenu("Repeat", { mode_rate, mode_sync });
-  mode.gui.submenu->add_submenu("One Shot", { mode_rate_one, mode_sync_one });
-  mode.gui.submenu->add_submenu("Phase One Shot", { mode_rate_phs, mode_sync_phs });
-  mode.info.description = std::string("Selects time or tempo-synced and repeating or one-shot mode. ") + 
-    "In regular one-shot mode, the LFO stays at it's end value after exactly 1 cycle. " + 
-    "In phase one-shot mode, the end value takes the phase offset parameter into account.";
+  mode.info.description = std::string("Selects time or tempo-synced and repeating or one-shot mode. ") +
+    "For regular one-shot mode, the LFO stays at it's end value after exactly 1 cycle. " + 
+    "For phase one-shot mode, the end value takes the phase offset parameter into account.";
 
   result.sections.emplace_back(make_param_section(section_left_bottom,
     make_topo_tag_basic("{98869A27-5991-4BA3-9481-01636BDACDCB}", "Left Bottom"),
-    make_param_section_gui({ 1, 0 }, gui_dimension({ 1 }, { { 1 } }))));
+    make_param_section_gui({ 1, 0 }, gui_dimension({ 1 }, { { 1, 1 } }))));
+  auto& sync = result.params.emplace_back(make_param(
+    make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
+    make_param_gui_single(section_left_bottom, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  sync.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  sync.info.description = "Toggles time or tempo-synced mode.";
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
-    make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 0 }, make_label_none())));
-  rate.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  rate.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return !is_sync(vs[0]); });
+    make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
+  rate.gui.bindings.enabled.bind_params({ param_mode, param_sync }, [](auto const& vs) { return vs[0] != mode_off && vs[1] == 0; });
+  rate.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   rate.info.description = "LFO rate in Hz.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
-    make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
-  tempo.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  tempo.gui.bindings.visible.bind_params({ param_mode }, [](auto const& vs) { return is_sync(vs[0]); });
+  tempo.gui.bindings.enabled.bind_params({ param_mode, param_sync }, [](auto const& vs) { return vs[0] != mode_off && vs[1] != 0; });
+  tempo.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] != 0; });
   tempo.info.description = "LFO rate in bars.";
 
   // Don't include the phase param for global lfo.
@@ -523,12 +520,13 @@ void lfo_engine::process_shape_loop(plugin_block& block, cv_cv_matrix_mixdown co
   auto const& block_auto = block.state.own_block_automation;
   int mode = block_auto[param_mode][0].step();
   int steps = block_auto[param_steps][0].step();
-  
+  bool sync = block_auto[param_sync][0].step() != 0; // todo template
+
   auto const& x_curve = *(*modulation)[param_x][0];
   auto const& y_curve = *(*modulation)[param_y][0];
   auto& rate_curve = block.state.own_scratch[scratch_rate];
 
-  if (is_sync(mode))
+  if (sync)
   {
     timesig sig = get_timesig_param_value(block, this_module, param_tempo);
     rate_curve.fill(block.start_frame, block.end_frame, timesig_to_freq(block.host.bpm, sig));
@@ -568,7 +566,7 @@ void lfo_engine::process_shape_loop(plugin_block& block, cv_cv_matrix_mixdown co
 
     bool phase_wrapped = increment_and_wrap_phase(_phase, rate_curve[f], block.sample_rate);
     bool ref_wrapped = increment_and_wrap_phase(_ref_phase, rate_curve[f], block.sample_rate);
-    bool ended = ref_wrapped && is_one_shot_full(mode) || phase_wrapped && is_one_shot_phase(mode);
+    bool ended = ref_wrapped && mode == mode_one_shot || phase_wrapped && mode == mode_one_phase;
     if (ended)
     {
       _stage = lfo_stage::filter;
