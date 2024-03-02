@@ -216,7 +216,8 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   auto& mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Mode", param_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(mode_items(), ""),
-    make_param_gui_single(section_left_top, gui_edit_type::list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_left_top, gui_edit_type::list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   mode.info.description = std::string("Selects time or tempo-synced and repeating or one-shot mode. ") +
     "For regular one-shot mode, the LFO stays at it's end value after exactly 1 cycle. " + 
     "For phase one-shot mode, the end value takes the phase offset parameter into account.";
@@ -418,7 +419,7 @@ lfo_engine::process_mode(plugin_block& block, cv_cv_matrix_mixdown const* modula
   static_assert(Mode != mode_off);
   bool sync = block.state.own_block_automation[param_sync][0].step() != 0;
   if(sync) process_mode_sync<Mode, true>(block, modulation);
-  else if (sync) process_mode_sync<Mode, false>(block, modulation);
+  else process_mode_sync<Mode, false>(block, modulation);
 }
 
 template <int Mode, bool Sync> void
