@@ -19,7 +19,7 @@ clap (poly) modulation
 visual routing indicators
 document the header files a bit
 
-v1.2:
+v1.3:
 automate zip/dist
 move route up/down
 copy voice<->global
@@ -33,7 +33,6 @@ small-ui-changes:
 rename lfo type/mode
 bigger graphs
 smaller graph text for the big one
-todo lfo convert
 bigger vertical modulation graph
 check module header sizes
 todo drop the dot-notation
@@ -49,7 +48,6 @@ do gain meter for master out gain?
 check the fx-version ui layout
 test all the host demos
 update the demo tracks
-dont forget to convert on split lfo params
 document the changes
 retest all presets and demo tracks and host tests
 fix up all the presets
