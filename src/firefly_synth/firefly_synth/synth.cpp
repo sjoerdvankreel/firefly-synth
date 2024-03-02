@@ -307,15 +307,13 @@ synth_topo(bool is_fx)
   if(is_fx)
   {
     result->type = plugin_type::fx;
-    result->tag.id = FF_SYNTH_FX_ID;
-    result->tag.full_name = FF_SYNTH_FX_NAME;
+    result->gui.aspect_ratio_height = 25;
     result->tag = make_topo_tag_basic(FF_SYNTH_FX_ID, FF_SYNTH_FX_NAME);
   }
   else
   {
     result->type = plugin_type::synth;
-    result->tag.id = FF_SYNTH_INST_ID;
-    result->gui.aspect_ratio_height = 56;
+    result->gui.aspect_ratio_height = 61;
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
 
@@ -324,11 +322,11 @@ synth_topo(bool is_fx)
   result->gui.font_height = 11;
 #endif
 
-  result->gui.typeface_file_name = "Handel Gothic Regular.ttf";
+  result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
   result->gui.dimension.column_sizes = { is_fx? 19: 17, is_fx? 28: 30, 8, 25 };
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 2 }, { true, 1 }, { true, 1 } };
-  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 2 }, { true, 1 }, { true, 2 } });
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 2 }, { true, 2 }, { true, 1 } };
+  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
 
   int section_voffset = is_fx? 1: 0;
