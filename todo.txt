@@ -57,7 +57,6 @@ do icons for the osc modes?
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
 label all unlabeled stuff (mostly comboboxes)
-right-align tempo synced comboboxes (and possibly others)
 make the whole ui a bit larger for slightly bigger knobs
 divide the matrix tab header over 2 rows so we dont need abbreviations for gm.cv etc
 get rid of the "combined" comboboxes, just make them separate parameters (breaking change!)
