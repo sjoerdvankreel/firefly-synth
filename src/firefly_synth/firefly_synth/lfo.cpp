@@ -215,7 +215,7 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(true);
+      auto shape_items = wave_shape_type_items(false);
       std::string old_shape_guid = old_value.substr(0, 38);
       
       // was smooth or fold
@@ -261,7 +261,7 @@ lfo_state_converter::handle_invalid_param_value(
     {
       // format is {guid}-{guid}-{guid}
       if (old_value.size() != 3 * 38 + 2) return false;
-      auto shape_items = wave_shape_type_items(true);
+      auto shape_items = wave_shape_type_items(false);
       std::string old_shape_guid = old_value.substr(0, 38);
       for (int i = 0; i < shape_items.size(); i++)
         if (old_shape_guid == shape_items[i].id)
