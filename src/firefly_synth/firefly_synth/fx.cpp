@@ -480,8 +480,6 @@ fx_state_converter::handle_invalid_param_value(
 void 
 fx_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
 {
-  // todo set the mode
-  // todo set the skew params
   std::string old_value;
   int this_module = _global ? module_gfx: module_vfx;
   auto const& modules = new_state.desc().plugin->modules;

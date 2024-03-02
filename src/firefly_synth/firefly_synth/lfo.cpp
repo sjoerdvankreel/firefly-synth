@@ -3,6 +3,7 @@
 #include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/waves.hpp>
@@ -42,6 +43,22 @@ mode_items()
   result.emplace_back("{377AF4E8-0FD8-4CC2-B9D1-4DB4F2FC114A}", "One Phase");
   return result;
 }
+
+class lfo_state_converter :
+public state_converter
+{
+  bool const _global;
+  plugin_desc const* const _desc;
+public:
+  lfo_state_converter(plugin_desc const* const desc, bool global) : _desc(desc), _global(global) {}
+  void post_process(load_handler const& handler, plugin_state& new_state) override;
+
+  bool handle_invalid_param_value(
+    std::string const& new_module_id, int new_module_slot,
+    std::string const& new_param_id, int new_param_slot,
+    std::string const& old_value, load_handler const& handler,
+    plain_value& new_value) override;
+};
 
 class lfo_engine :
 public module_engine {
@@ -183,6 +200,109 @@ render_graph(
   return graph_data(series, false, 1.0f, { partition });
 }
 
+bool
+lfo_state_converter::handle_invalid_param_value(
+  std::string const& new_module_id, int new_module_slot,
+  std::string const& new_param_id, int new_param_slot,
+  std::string const& old_value, load_handler const& handler,
+  plain_value& new_value)
+{
+  // note param ids are equal between vlfo/glfo, glfo just has more
+  if (handler.old_version() < plugin_version{ 1, 2, 0 })
+  {
+    // sync/rate + repeat/one-shot/one-phase got split out to separate controls
+    if (new_param_id == _desc->plugin->modules[module_glfo].params[param_mode].info.tag.id)
+    {
+      if (old_value == "{5F57863F-4157-4F53-BB02-C6693675B881}" || old_value == "{E2692483-F48B-4037-BF74-64BB62110538}")
+      {
+        // repeat
+        new_value = _desc->raw_to_plain_at(module_glfo, param_mode, mode_repeat);
+        return true;
+      }
+      if (old_value == "{0A5F479F-9180-4498-9464-DBEA0595C86B}" || old_value == "{85B1AC0B-FA06-4E23-A7EF-3EBF6F620948}")
+      {
+        // one shot
+        new_value = _desc->raw_to_plain_at(module_glfo, param_mode, mode_one_shot);
+        return true;
+      }
+      if (old_value == "{12E9AF37-1C1F-43AB-9405-86F103293C4C}" || old_value == "{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}")
+      {
+        // one phase
+        new_value = _desc->raw_to_plain_at(module_glfo, param_mode, mode_one_phase);
+        return true;
+      }
+    }
+
+    // Shape+SkewX/SkewY got split out to separate shape/skew x/skew y controls
+    if (new_param_id == _desc->plugin->modules[module_glfo].params[param_shape].info.tag.id)
+    {
+      // format is {guid}-{guid}-{guid}
+      if (old_value.size() != 3 * 38 + 2) return false;
+      auto shape_items = wave_shape_type_items(true);
+      std::string old_shape_guid = old_value.substr(0, 38);
+      for (int i = 0; i < shape_items.size(); i++)
+        if (old_shape_guid == shape_items[i].id)
+        {
+          new_value = _desc->raw_to_plain_at(module_glfo, param_shape, i);
+          return true;
+        }
+    }
+  }
+  return false;
+}
+
+void
+lfo_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
+{
+  std::string old_value;
+  int this_module = _global ? module_glfo : module_vlfo;
+  auto const& modules = new_state.desc().plugin->modules;
+  std::string module_id = modules[this_module].info.tag.id;
+  if (handler.old_version() < plugin_version{ 1, 2, 0 })
+  {
+    auto skew_items = wave_skew_type_items();
+    for (int i = 0; i < modules[this_module].info.slot_count; i++)
+    {
+      // pick up sync mode from old repeat+sync
+      if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_mode].info.tag.id, 0, old_value))
+      {
+        // Rate
+        if (old_value == "{5F57863F-4157-4F53-BB02-C6693675B881}" || 
+            old_value == "{0A5F479F-9180-4498-9464-DBEA0595C86B}" || 
+            old_value == "{12E9AF37-1C1F-43AB-9405-86F103293C4C}")
+          new_state.set_plain_at(this_module, i, param_sync, 0,
+            _desc->raw_to_plain_at(this_module, param_sync, 0));
+        // Tempo synced
+        if (old_value == "{E2692483-F48B-4037-BF74-64BB62110538}" ||
+          old_value == "{85B1AC0B-FA06-4E23-A7EF-3EBF6F620948}" ||
+          old_value == "{9CFBC6ED-1024-4FDE-9291-9280FDA9BC1E}")
+          new_state.set_plain_at(this_module, i, param_sync, 0,
+            _desc->raw_to_plain_at(this_module, param_sync, 1));
+      }
+
+      // pick up skew x/skew y mode from old combined shape + skew x/y
+      if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_shape].info.tag.id, 0, old_value))
+      {
+        // format is {guid}-{guid}-{guid}
+        if (old_value.size() == 3 * 38 + 2)
+        {
+          std::string old_skew_x_guid = old_value.substr(38 + 1, 38);
+          std::string old_skew_y_guid = old_value.substr(2 * 38 + 2, 38);
+          for (int j = 0; j < skew_items.size(); j++)
+          {
+            if (skew_items[j].id == old_skew_x_guid)
+              new_state.set_plain_at(this_module, i, param_skew_x, 0,
+                _desc->raw_to_plain_at(this_module, param_skew_x, j));
+            if (skew_items[j].id == old_skew_y_guid)
+              new_state.set_plain_at(this_module, i, param_skew_y, 0,
+                _desc->raw_to_plain_at(this_module, param_skew_y, j));
+          }
+        }
+      }
+    }
+  }
+}
+
 module_topo
 lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
 {
@@ -205,6 +325,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   result.engine_factory = [global](auto const&, int, int) { return std::make_unique<lfo_engine>(global); };
   result.graph_renderer = [](auto const& state, auto* engine, int param, auto const& mapping) {
     return render_graph(state, engine, param, mapping); };
+  result.state_converter_factory = [global](auto desc) { return std::make_unique<lfo_state_converter>(desc, global); };
 
   result.sections.emplace_back(make_param_section(section_left_top,
     make_topo_tag_basic("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Left Top"),
