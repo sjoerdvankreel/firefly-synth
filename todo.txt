@@ -29,25 +29,16 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
-"voice osc"/"voice env" etc
 check module header sizes
-expose short module names to the host
-drop dot notation for modules too
-todo drop the dot-notation (for menus)?
-make sure full name goes into automation
+todo drop the dot-notation
 check all the todos
 check the reference generator output
 check all the short/long names + also in menus
-check all references to alt_name
 drop square shaper (why is it even in there?)
-rename saw to off shaper
 tri shaper is broken
 now have room for cheby shaper/smooth random?
-do separate label-tooltip-menu-name? or just show the name in the tooltip, not the alt name?
 re-read the param docs and manual
-rename x/y -> in/out also for lfo
 check all the tooltips and names in matrices
-check regular/alt name in tooltips => actually make that option
 see if its possible to expand combobox text values
 do large labels as much as possible
 do gain meter for master out gain?
@@ -56,29 +47,20 @@ test all the host demos
 update the demo tracks
 dont forget to convert on split lfo params
 document the changes
-do the conversion, again
-do major-minor-patch
 retest all presets and demo tracks and host tests
-do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 fix up all the presets
 check the fx version
 keep track of the matrices layout
 check which colors are still used
 check all the short names in the matrices
-fix all the label justifications
 do icons for the osc modes?
 group cv matrix targets by e.g. gaudio gain 1-10
-do some more margin between the controls
 do basic theming support (e.g. config file with colors)
 label all unlabeled stuff (mostly comboboxes)
-split the distortion gui over 2 rows its too crowded
 right-align tempo synced comboboxes (and possibly others)
-make checkbox and combobox less prominent on screen
 make the whole ui a bit larger for slightly bigger knobs
-make the left side a bit wider so we dont need to abbreviate labels so much
 divide the matrix tab header over 2 rows so we dont need abbreviations for gm.cv etc
 get rid of the "combined" comboboxes, just make them separate parameters (breaking change!)
-
 
 other:
 profile the pad preset
