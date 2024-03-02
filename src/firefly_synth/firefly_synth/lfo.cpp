@@ -26,7 +26,7 @@ enum { mode_off, mode_repeat, mode_one_shot, mode_one_phase }; // todo rename to
 enum { section_left_top, section_left_bottom, section_right_top, section_right_bottom };
 enum { 
   param_mode, param_sync, param_rate, param_tempo, 
-  param_type, param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
+  param_skew_x, param_skew_x_amt, param_type, param_skew_y, param_skew_y_amt,
   param_seed, param_steps, param_filter, param_phase };
 
 static bool is_noise(int type) {
@@ -247,38 +247,38 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   // Don't include the phase param for global lfo.
   result.sections.emplace_back(make_param_section(section_right_top,
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right Top"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, gui_dimension::auto_size, 1 }))));
-  auto& type = result.params.emplace_back(make_param(
-    make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false), "Sin"),
-    make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
-  type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
-  type.info.description = std::string("Selects waveform plus horizontal and vertical skewing modes. ") + 
-    "Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. " +
-    "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& x_mode = result.params.emplace_back(make_param(
     make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 1 },
+    make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   x_mode.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   x_mode.info.description = "Horizontal skew mode.";
   auto& x_amt = result.params.emplace_back(make_param(
-    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Skew X Amt", "SkX Amt", param_skew_x_amt, 1),
+    make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Skew X", "Skew X", param_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_right_top, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_right_top, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   x_amt.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   x_amt.info.description = "Horizontal skew amount.";
+  auto& type = result.params.emplace_back(make_param(
+    make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Type", param_type, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false), "Sin"),
+    make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
+  type.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
+  type.info.description = std::string("Selects waveform plus horizontal and vertical skewing modes. ") +
+    "Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. " +
+    "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& y_mode = result.params.emplace_back(make_param(
-    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y Mode", "Skew Y", param_skew_y, 1),
+    make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   y_mode.gui.bindings.enabled.bind_params({ param_mode }, [](auto const& vs) { return vs[0] != mode_off; });
   y_mode.info.description = "Vertical skew mode.";
   auto& y_amt = result.params.emplace_back(make_param(
-    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y Amt", "SkY Amt", param_skew_y_amt, 1),
+    make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y", param_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_right_top, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
