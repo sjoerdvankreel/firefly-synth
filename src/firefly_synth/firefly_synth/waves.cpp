@@ -7,7 +7,6 @@ using namespace plugin_base;
 namespace firefly_synth
 {
 
-// TODO longer names
 static std::string
 wave_make_name_skew(int skew)
 {
@@ -44,8 +43,8 @@ wave_make_name_shape(int shape, bool for_shaper)
   case wave_shape_type_cos_sin_cos: return "CosSinCos";
   case wave_shape_type_cos_cos_sin: return "CosCosSin";
   case wave_shape_type_cos_cos_cos: return "CosCosCos";
-  case wave_shape_type_smooth_or_fold: return for_shaper? "Foldback": "Smooth";
-  case wave_shape_type_sqr: return "Sqr";
+  case wave_shape_type_sqr_or_fold: return for_shaper? "Foldback": "Sqr";
+  case wave_shape_type_smooth: return "Smooth";
   case wave_shape_type_static: return "Static";
   case wave_shape_type_static_free: return "Free Static";
   default: assert(false); return {};
@@ -62,16 +61,6 @@ wave_skew_type_tags()
   result.push_back(make_topo_tag_basic("{905936B8-3083-4293-A549-89F3979E02B7}", wave_make_name_skew(wave_skew_type_scb)));
   result.push_back(make_topo_tag_basic("{606B62CB-1C17-42CA-931B-61FA4C22A9F0}", wave_make_name_skew(wave_skew_type_xpu)));
   result.push_back(make_topo_tag_basic("{66CE54E3-84A7-4279-BF93-F0367266B389}", wave_make_name_skew(wave_skew_type_xpb)));
-  return result;
-}
-
-std::vector<list_item> 
-wave_skew_type_items()
-{
-  std::vector<list_item> result;
-  auto tags = wave_skew_type_tags();
-  for(int i = 0; i < tags.size(); i++)
-    result.push_back({ tags[i].id, tags[i].menu_display_name });
   return result;
 }
 
@@ -95,12 +84,22 @@ wave_shape_type_tags(bool for_shaper)
   result.push_back(make_topo_tag_basic("{B191D364-1951-449A-ABC7-09AEE9DB9FC4}", wave_make_name_shape(wave_shape_type_cos_sin_cos, for_shaper)));
   result.push_back(make_topo_tag_basic("{094482D1-5BAC-4F70-80F3-CA3924DDFBE6}", wave_make_name_shape(wave_shape_type_cos_cos_sin, for_shaper)));
   result.push_back(make_topo_tag_basic("{6A56691C-0F9C-4CE1-B835-85CF4D3B1F9B}", wave_make_name_shape(wave_shape_type_cos_cos_cos, for_shaper)));
-  result.push_back(make_topo_tag_basic("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_smooth_or_fold, for_shaper)));
+  result.push_back(make_topo_tag_basic("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_sqr_or_fold, for_shaper)));
 
   if(for_shaper) return result;
-  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_sqr, for_shaper)));
+  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_smooth, for_shaper)));
   result.push_back(make_topo_tag_basic("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static, for_shaper)));
   result.push_back(make_topo_tag_basic("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free, for_shaper)));
+  return result;
+}
+
+std::vector<list_item>
+wave_skew_type_items()
+{
+  std::vector<list_item> result;
+  auto tags = wave_skew_type_tags();
+  for (int i = 0; i < tags.size(); i++)
+    result.push_back({ tags[i].id, tags[i].menu_display_name });
   return result;
 }
 
@@ -112,25 +111,6 @@ wave_shape_type_items(bool for_shaper)
   for (int i = 0; i < tags.size(); i++)
     result.push_back({ tags[i].id, tags[i].menu_display_name });
   return result;
-}
-
-static std::string
-wave_make_name(int shape, int skew_in, int skew_out, bool for_shaper)
-{
-  auto name_x = wave_make_name_skew(skew_in);
-  auto name_y = wave_make_name_skew(skew_out);
-  auto name_shape = wave_make_name_shape(shape, for_shaper);
-  return name_shape + "." + name_x + "/" + name_y;
-}
-
-// todo remove me and simplify skew_type_tags
-multi_menu 
-make_wave_multi_menu(bool for_shaper)
-{
-  return make_multi_menu(
-    wave_shape_type_tags(for_shaper), wave_skew_type_tags(), wave_skew_type_tags(),
-    [=](int s) { return wave_make_name_shape(s, for_shaper); },
-    [=](int s, int x, int y) { return wave_make_name(s, x, y, for_shaper); });
 }
 
 }

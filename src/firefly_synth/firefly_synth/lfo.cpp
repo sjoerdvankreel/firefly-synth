@@ -30,7 +30,7 @@ enum {
   param_seed, param_steps, param_filter, param_phase };
 
 static bool is_noise(int shape) {
-  return shape == wave_shape_type_smooth_or_fold || shape == wave_shape_type_static || shape == wave_shape_type_static_free; }
+  return shape == wave_shape_type_smooth || shape == wave_shape_type_static || shape == wave_shape_type_static_free; }
 
 static std::vector<list_item>
 mode_items()
@@ -439,10 +439,10 @@ lfo_engine::process_mode_sync(plugin_block& block, cv_cv_matrix_mixdown const* m
   switch (block.state.own_block_automation[param_shape][0].step())
   {
   case wave_shape_type_saw: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_saw); break;
-  case wave_shape_type_sqr: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_sqr); break;
   case wave_shape_type_tri: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_tri); break;
   case wave_shape_type_sin: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_sin); break;
   case wave_shape_type_cos: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_cos); break;
+  case wave_shape_type_sqr_or_fold: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_sqr); break;
   case wave_shape_type_sin_sin: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_sin_sin); break;
   case wave_shape_type_sin_cos: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_sin_cos); break;
   case wave_shape_type_cos_sin: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_cos_sin); break;
@@ -455,7 +455,7 @@ lfo_engine::process_mode_sync(plugin_block& block, cv_cv_matrix_mixdown const* m
   case wave_shape_type_cos_sin_cos: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_cos_sin_cos); break;
   case wave_shape_type_cos_cos_sin: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_mode_sync_shape<Mode, Sync, false, false>(block, modulation, wave_shape_uni_cos_cos_cos); break;
-  case wave_shape_type_smooth_or_fold: process_mode_sync_shape<Mode, Sync, true, false>(block, modulation, [this, seed, steps](float in) {
+  case wave_shape_type_smooth: process_mode_sync_shape<Mode, Sync, true, false>(block, modulation, [this, seed, steps](float in) {
     return wave_shape_uni_custom(in, [this, seed, steps](float in) {
       return calc_smooth(in, seed, steps); }); }); break;
   case wave_shape_type_static: process_mode_sync_shape<Mode, Sync, false, true>(block, modulation, [this, seed](float in) {

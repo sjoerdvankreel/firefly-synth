@@ -18,9 +18,6 @@ inline float const pi32 = plugin_base::pi32;
 std::vector<plugin_base::list_item> wave_skew_type_items();
 std::vector<plugin_base::list_item> wave_shape_type_items(bool for_shaper);
 
-// TODO remove me
-plugin_base::multi_menu make_wave_multi_menu(bool for_shaper);
-
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };
 enum { 
   wave_shape_type_saw, wave_shape_type_tri, 
@@ -31,7 +28,7 @@ enum {
   wave_shape_type_sin_cos_sin, wave_shape_type_sin_cos_cos,
   wave_shape_type_cos_sin_sin, wave_shape_type_cos_sin_cos,
   wave_shape_type_cos_cos_sin, wave_shape_type_cos_cos_cos,
-  wave_shape_type_smooth_or_fold, wave_shape_type_sqr, 
+  wave_shape_type_sqr_or_fold, wave_shape_type_smooth, // TODO conversion
   wave_shape_type_static, wave_shape_type_static_free };
 
 inline bool wave_skew_is_exp(int skew) { return skew == wave_skew_type_xpu || skew == wave_skew_type_xpb; }

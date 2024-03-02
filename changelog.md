@@ -5,6 +5,9 @@
 - Fixed a bug in the triangle waveshaper.
 - Drop square waveshaper (bug, it shouldn't have been there).
 - Comb filter gets additional mode select (feedback/feedforward/both).
+- Rearranged sqr/smooth/foldback shaper/lfo (breaking change for automation only).
+- Split out lfo repeat type + sync to separate controls (breaking change for automation only).
+- Split out lfo shape+skewx/y selection to separate controls (breaking change for automation only).
 - Split out distortion+mode selection to separate controls (breaking change for automation only).
 - Split out distortion shape+skewx/y selection to separate controls (breaking change for automation only).
 

@@ -1441,7 +1441,6 @@ fx_engine::process_dist_mode_clip(plugin_block& block,
   switch (block.state.own_block_automation[param_dist_shaper][0].step())
   {
   case wave_shape_type_saw: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_saw); break;
-  case wave_shape_type_sqr: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_sqr); break;
   case wave_shape_type_tri: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_tri); break;
   case wave_shape_type_sin: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_sin); break;
   case wave_shape_type_cos: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_cos); break;
@@ -1457,7 +1456,7 @@ fx_engine::process_dist_mode_clip(plugin_block& block,
   case wave_shape_type_cos_sin_cos: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_cos_sin_cos); break;
   case wave_shape_type_cos_cos_sin: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos_sin); break;
   case wave_shape_type_cos_cos_cos: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_cos_cos_cos); break;
-  case wave_shape_type_smooth_or_fold: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_fold); break;
+  case wave_shape_type_sqr_or_fold: process_dist_mode_clip_shape<Graph, Mode>(block, audio_in, modulation, clip, wave_shape_bi_fold); break;
   default: assert(false); break;
   }
 }
