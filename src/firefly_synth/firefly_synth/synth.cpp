@@ -348,7 +348,7 @@ synth_topo(bool is_fx)
     custom_section_glfo_graph, { section_voffset + 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
   result->gui.custom_sections[custom_section_matrix_graphs] = make_custom_section_gui(
-    custom_section_matrix_graphs, { is_fx? 4: 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_matrix_graphs, { is_fx? 4: 7, 3, is_fx? 1: 2, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_matrix_graphs_section(gui, lnf, store); });
   if(!is_fx)
   {
@@ -383,7 +383,7 @@ synth_topo(bool is_fx)
      module_vcv_audio_matrix, module_gcv_audio_matrix, module_vcv_cv_matrix, module_gcv_cv_matrix };
   if(is_fx) matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
   result->gui.module_sections[module_section_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { is_fx? 0: 1, 3, is_fx? 4: 7, 1 }, matrix_modules);
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_matrices, { is_fx? 0: 1, 3, is_fx? 4: 6, 1 }, matrix_modules);
   if (!is_fx)
   {
     result->gui.module_sections[module_section_vlfo] = make_module_section_gui(
