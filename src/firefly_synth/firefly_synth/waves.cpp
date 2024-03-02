@@ -23,42 +23,12 @@ wave_make_name_skew(int skew)
   }
 }
 
-// todo drop this
-static std::string
-wave_make_header_shape(int shape, bool for_shaper)
-{
-  switch (shape)
-  {
-  case wave_shape_type_saw: return "Saw";
-  case wave_shape_type_sqr: return "Sqr";
-  case wave_shape_type_tri: return "Tri";
-  case wave_shape_type_sin: return "Sin";
-  case wave_shape_type_cos: return "Cos";
-  case wave_shape_type_sin_sin: return "SinSin";
-  case wave_shape_type_sin_cos: return "SinCos";
-  case wave_shape_type_cos_sin: return "CosSin";
-  case wave_shape_type_cos_cos: return "CosCos";
-  case wave_shape_type_sin_sin_sin: return "SinSinSin";
-  case wave_shape_type_sin_sin_cos: return "SinSinCos";
-  case wave_shape_type_sin_cos_sin: return "SinCosSin";
-  case wave_shape_type_sin_cos_cos: return "SinCosCos";
-  case wave_shape_type_cos_sin_sin: return "CosSinSin";
-  case wave_shape_type_cos_sin_cos: return "CosSinCos";
-  case wave_shape_type_cos_cos_sin: return "CosCosSin";
-  case wave_shape_type_cos_cos_cos: return "CosCosCos";
-  case wave_shape_type_smooth_or_fold: return for_shaper? "Fold": "Smooth";
-  case wave_shape_type_static: return "Static";
-  case wave_shape_type_static_free: return "Static/Free";
-  default: assert(false); return {};
-  }
-}
-
 static std::string
 wave_make_name_shape(int shape, bool for_shaper)
 {
   switch (shape)
   {
-  case wave_shape_type_saw: return "Saw";
+  case wave_shape_type_saw: return for_shaper? "Off": "Saw";
   case wave_shape_type_sqr: return "Sqr";
   case wave_shape_type_tri: return "Tri";
   case wave_shape_type_sin: return "Sin";
@@ -159,7 +129,7 @@ make_wave_multi_menu(bool for_shaper)
 {
   return make_multi_menu(
     wave_shape_type_tags(for_shaper), wave_skew_type_tags(), wave_skew_type_tags(),
-    [=](int s) { return wave_make_header_shape(s, for_shaper); },
+    [=](int s) { return wave_make_name_shape(s, for_shaper); },
     [=](int s, int x, int y) { return wave_make_name(s, x, y, for_shaper); });
 }
 
