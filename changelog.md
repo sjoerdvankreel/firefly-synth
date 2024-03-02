@@ -1,6 +1,9 @@
 ### ?, ? - V1.2.0.
 
 - Lots of small ui fixes / cleanup.
+- Rename saw waveshaper to off.
+- Fixed a bug in the triangle waveshaper.
+- Drop square waveshaper (bug, it shouldn't have been there).
 - Comb filter gets additional mode select (feedback/feedforward/both).
 - Split out distortion+mode selection to separate controls (breaking change for automation only).
 - Split out distortion shape+skewx/y selection to separate controls (breaking change for automation only).

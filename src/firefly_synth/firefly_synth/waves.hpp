@@ -23,7 +23,7 @@ plugin_base::multi_menu make_wave_multi_menu(bool for_shaper);
 
 enum { wave_skew_type_off, wave_skew_type_lin, wave_skew_type_scu, wave_skew_type_scb, wave_skew_type_xpu, wave_skew_type_xpb };
 enum { 
-  wave_shape_type_saw, wave_shape_type_sqr, wave_shape_type_tri, 
+  wave_shape_type_saw, wave_shape_type_tri, 
   wave_shape_type_sin, wave_shape_type_cos,
   wave_shape_type_sin_sin, wave_shape_type_sin_cos,
   wave_shape_type_cos_sin, wave_shape_type_cos_cos,
@@ -31,7 +31,8 @@ enum {
   wave_shape_type_sin_cos_sin, wave_shape_type_sin_cos_cos,
   wave_shape_type_cos_sin_sin, wave_shape_type_cos_sin_cos,
   wave_shape_type_cos_cos_sin, wave_shape_type_cos_cos_cos,
-  wave_shape_type_smooth_or_fold, wave_shape_type_static, wave_shape_type_static_free };
+  wave_shape_type_smooth_or_fold, wave_shape_type_sqr, 
+  wave_shape_type_static, wave_shape_type_static_free };
 
 inline bool wave_skew_is_exp(int skew) { return skew == wave_skew_type_xpu || skew == wave_skew_type_xpb; }
 
@@ -73,7 +74,7 @@ inline float wave_shape_uni_cos_cos_cos(float in) { return bipolar_to_unipolar(s
 
 inline float wave_shape_bi_saw(float in) { return in; }
 inline float wave_shape_bi_sqr(float in) { return in < 0 ? -1.0f : 1.0f; }
-inline float wave_shape_bi_tri(float in) { return in < -1? in: in > 1? in: unipolar_to_bipolar(1 - std::fabs(in)); }
+inline float wave_shape_bi_tri(float in) { return in < -1? in: in > 1? -in: unipolar_to_bipolar(1 - std::fabs(in)); }
 inline float wave_shape_bi_sin(float in) { return std::sin(in * pi32); }
 inline float wave_shape_bi_cos(float in) { return std::cos(in * pi32); }
 inline float wave_shape_bi_sin_sin(float in) { return std::sin(in * pi32 + std::sin(in * pi32)); }

@@ -34,8 +34,6 @@ todo drop the dot-notation
 check all the todos
 check the reference generator output
 check all the short/long names + also in menus
-drop square shaper (why is it even in there?)
-tri shaper is broken
 now have room for cheby shaper/smooth random?
 re-read the param docs and manual
 check all the tooltips and names in matrices
@@ -63,6 +61,7 @@ divide the matrix tab header over 2 rows so we dont need abbreviations for gm.cv
 get rid of the "combined" comboboxes, just make them separate parameters (breaking change!)
 
 other:
+redo cheby shaper?
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
 do indexed release schema + regular backwards compat

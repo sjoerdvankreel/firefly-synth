@@ -29,7 +29,6 @@ wave_make_name_shape(int shape, bool for_shaper)
   switch (shape)
   {
   case wave_shape_type_saw: return for_shaper? "Off": "Saw";
-  case wave_shape_type_sqr: return "Sqr";
   case wave_shape_type_tri: return "Tri";
   case wave_shape_type_sin: return "Sin";
   case wave_shape_type_cos: return "Cos";
@@ -46,6 +45,7 @@ wave_make_name_shape(int shape, bool for_shaper)
   case wave_shape_type_cos_cos_sin: return "CosCosSin";
   case wave_shape_type_cos_cos_cos: return "CosCosCos";
   case wave_shape_type_smooth_or_fold: return for_shaper? "Foldback": "Smooth";
+  case wave_shape_type_sqr: return "Sqr";
   case wave_shape_type_static: return "Static";
   case wave_shape_type_static_free: return "Free Static";
   default: assert(false); return {};
@@ -80,7 +80,6 @@ wave_shape_type_tags(bool for_shaper)
 {
   std::vector<topo_tag> result;
   result.push_back(make_topo_tag_basic("{CA30E83B-2A11-4833-8A45-81F666A3A4F5}", wave_make_name_shape(wave_shape_type_saw, for_shaper)));
-  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_sqr, for_shaper)));
   result.push_back(make_topo_tag_basic("{41D6859E-3A16-432A-8851-D4E5D3F39662}", wave_make_name_shape(wave_shape_type_tri, for_shaper)));
   result.push_back(make_topo_tag_basic("{4A873C32-8B89-47ED-8C93-44FE0B6A7DCC}", wave_make_name_shape(wave_shape_type_sin, for_shaper)));
   result.push_back(make_topo_tag_basic("{102A7369-1994-41B1-9E2E-EC96AB60162E}", wave_make_name_shape(wave_shape_type_cos, for_shaper)));
@@ -99,6 +98,7 @@ wave_shape_type_tags(bool for_shaper)
   result.push_back(make_topo_tag_basic("{E16E6DC4-ACB3-4313-A094-A6EA9F8ACA85}", wave_make_name_shape(wave_shape_type_smooth_or_fold, for_shaper)));
 
   if(for_shaper) return result;
+  result.push_back(make_topo_tag_basic("{7176FE9E-D2A8-44FE-B312-93D712173D29}", wave_make_name_shape(wave_shape_type_sqr, for_shaper)));
   result.push_back(make_topo_tag_basic("{FA26FEFB-CACD-4D00-A986-246F09959F5E}", wave_make_name_shape(wave_shape_type_static, for_shaper)));
   result.push_back(make_topo_tag_basic("{FA86B2EE-12F7-40FB-BEB9-070E62C7C691}", wave_make_name_shape(wave_shape_type_static_free, for_shaper)));
   return result;
