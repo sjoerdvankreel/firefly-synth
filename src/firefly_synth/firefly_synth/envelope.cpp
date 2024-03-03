@@ -20,26 +20,18 @@ static float const log_half = std::log(0.5f);
 static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
 
+enum { type_sustain, type_follow, type_release };
 enum { section_main, section_slope, section_dahdsr };
 enum { trigger_legato, trigger_retrig, trigger_multi };
+enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split };
 enum {
-  type_sustain_lin, type_follow_lin, type_release_lin,
-  type_sustain_exp_uni, type_follow_exp_uni, type_release_exp_uni,
-  type_sustain_exp_bi, type_follow_exp_bi, type_release_exp_bi,
-  type_sustain_exp_splt, type_follow_exp_splt, type_release_exp_splt };
-enum {
-  param_on, param_type, param_trigger, param_filter,
+  param_on, param_type, param_mode, param_trigger, param_filter,
   param_attack_slope, param_decay_slope, param_release_slope,
   param_sync, param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
-static bool is_exp_bi_slope(int type) { return type_sustain_exp_bi <= type && type <= type_release_exp_bi; }
-static bool is_exp_uni_slope(int type) { return type_sustain_exp_uni <= type && type <= type_release_exp_uni; }
-static bool is_exp_splt_slope(int type) { return type_sustain_exp_splt <= type && type <= type_release_exp_splt; }
-static bool is_expo_slope(int type) { return is_exp_uni_slope(type) || is_exp_bi_slope(type) || is_exp_splt_slope(type); }
-static bool is_sustain(int type) { return type == type_sustain_lin || type == type_sustain_exp_uni || type == type_sustain_exp_bi || type == type_sustain_exp_splt; }
-static bool is_release(int type) { return type == type_release_lin || type == type_release_exp_uni || type == type_release_exp_bi || type == type_release_exp_splt; }
+static bool is_exp_slope(int mode) { return mode != mode_linear; }
 
 static std::vector<list_item>
 trigger_items()
@@ -51,26 +43,29 @@ trigger_items()
   return result;
 }
 
+// TODO conversion
 static std::vector<list_item>
 type_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{021EA627-F467-4879-A045-3694585AD694}", "Sustain.Lin");
-  result.emplace_back("{927DBB76-A0F2-4007-BD79-B205A3697F31}", "Follow.Lin");
-  result.emplace_back("{0AF743E3-9248-4FF6-98F1-0847BD5790FA}", "Release.Lin");
-  result.emplace_back("{A23646C9-047D-485A-9A31-54D78D85570E}", "Sustain.ExpUni");
-  result.emplace_back("{CB268F2B-8A33-49CF-9569-675159ACC0E1}", "Follow.ExpUni");
-  result.emplace_back("{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}", "Release.ExpUni");
-  result.emplace_back("{CB4C4B41-8165-4303-BDAC-29142DF871DC}", "Sustain.ExpBi");
-  result.emplace_back("{221089F7-A516-4BCE-AE9A-D0D4F80A6BC5}", "Follow.ExpBi");
-  result.emplace_back("{5FBDD433-C4E2-47E4-B471-F7B19485B31E}", "Release.ExpBi");
-  result.emplace_back("{DB38D81F-A6DC-4774-BA10-6714EA43938F}", "Sustain.ExpSplt");
-  result.emplace_back("{93473324-66FB-422F-9160-72B175A81207}", "Follow.ExpSplt");
-  result.emplace_back("{1ECF13C0-EE16-4226-98D3-570040E6DA9D}", "Release.ExpSplt");
+  result.emplace_back("{D6F91E8A-D682-4EE7-BBDC-5147E62BC4F4}", "Sustain");
+  result.emplace_back("{2E644E98-2F57-4E91-881C-51700F32D804}", "Follow");
+  result.emplace_back("{5A38B671-FE8F-4C0E-B628-985AF6F1F822}", "Release");
   return result;
 }
 
-class env_engine: 
+static std::vector<list_item>
+mode_items()
+{
+  std::vector<list_item> result;
+  result.emplace_back("{B3310A09-6A49-4EB6-848C-1F61A1028126}", "Linear");
+  result.emplace_back("{924FB84C-7509-446F-82E7-B9E39DE399A5}", "Exp Uni");
+  result.emplace_back("{35EDA297-B042-41C0-9A1C-9502DBDAF633}", "Exp Bi");
+  result.emplace_back("{666FEFDF-3BC5-4FDA-8490-A8980741D6E7}", "Exp Split");
+  return result;
+}
+
+class env_engine:
 public module_engine {
 
 public:
@@ -111,6 +106,7 @@ private:
   void init_slope_exp(double slope, double& exp);
   void init_slope_exp_splt(double slope, double split_pos, double& exp, double& splt_bnd);
   
+  // todo template type + mode
   template <bool Monophonic> 
   void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
   template <bool Monophonic, class CalcSlope> 
@@ -133,7 +129,7 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float
   float decay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
   float attack = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
   float release = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
-  float sustain = !is_sustain(type) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
+  float sustain = type != type_sustain? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
   dahds = delay + attack + hold + decay + sustain;
   dahdsrf = dahds + release + filter;
 }
@@ -205,7 +201,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   auto& on = result.params.emplace_back(make_param(
     make_topo_info_basic("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -215,28 +211,30 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   on.info.description = "Toggles envelope on/off.";
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info_basic("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type.Slope", param_type, 1),
+    make_topo_info_basic("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
-      make_label_none())));
-  type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Linear", { type_sustain_lin, type_follow_lin, type_release_lin });
-  type.gui.submenu->add_submenu("Exp.Uni", { type_sustain_exp_uni, type_follow_exp_uni, type_release_exp_uni });
-  type.gui.submenu->add_submenu("Exp.Bi", { type_sustain_exp_bi, type_follow_exp_bi, type_release_exp_bi });
-  type.gui.submenu->add_submenu("Exp.Split", { type_sustain_exp_splt, type_follow_exp_splt, type_release_exp_splt });
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });  
-  type.info.description = std::string("Selects envelope type and slope.<br/>") + 
+  type.info.description = std::string("Selects envelope type.<br/>") + 
     "Sustain - regular sustain type.<br/>" + 
     "Follow - exactly follows the envelope ignoring note-off.<br/>" +
-    "Release - follows the envelope (does not sustain) but respects note-off.<br/>" +
+    "Release - follows the envelope (does not sustain) but respects note-off.";
+  auto& mode = result.params.emplace_back(make_param(
+    make_topo_info_basic("{C984B22A-68FB-44E4-8811-163D05CEC58B}", "Mode", param_mode, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  mode.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  mode.info.description = std::string("Selects envelope slode mode.<br/>") +
     "Linear - linear slope, most cpu efficient.<br/>" +
-    "Exponential unipolar - regular exponential slope.<br/>" + 
-    "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" + 
+    "Exponential unipolar - regular exponential slope.<br/>" +
+    "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" +
     "Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.";
   auto& trigger = result.params.emplace_back(make_param(
     make_topo_info_basic("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   trigger.info.description = std::string("Selects trigger mode for monophonic mode.<br/>") +
     "Legato - envelope will not reset.<br/>" + 
@@ -246,7 +244,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& filter = result.params.emplace_back(make_param( 
     make_topo_info_basic("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   filter.info.description = "Lowpass filter to smooth out rough edges.";
@@ -259,21 +257,21 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
+  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   attack_slope.info.description = "Controls attack slope for exponential types. Modulation takes place only at voice start.";
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", true, "D Slope", "D Slope", "D Slp", param_decay_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
+  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   decay_slope.info.description = "Controls decay slope for exponential types. Modulation takes place only at voice start.";
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", true, "R Slope", "R Slope", "R Slp", param_release_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  release_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
+  release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   release_slope.info.description = "Controls release slope for exponential types. Modulation takes place only at voice start.";
 
   result.sections.emplace_back(make_param_section(section_dahdsr,
