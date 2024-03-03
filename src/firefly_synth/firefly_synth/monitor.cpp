@@ -48,20 +48,20 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   gain.info.description = "Master output gain. Nothing is clipped, so this may well exceed 100%.";
   auto& cpu = result.params.emplace_back(make_param(
-    make_topo_info_basic("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "Cpu", param_cpu, 1),
+    make_topo_info_basic("{55919A34-BF81-4EDF-8222-F0F0BE52DB8E}", "CPU", param_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 9.99, 0, 0, false),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 3 + column_hoffset },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   cpu.info.description = std::string("CPU usage relative to last processing block length. ") + 
     "For example, if it took 1 ms to render a 5 ms block, this will be 20%.";
   auto& hi_cpu = result.params.emplace_back(make_param(
-    make_topo_info("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", true, "High Cpu", "High", "High", param_hi_mod_cpu, 1),
+    make_topo_info_basic("{2B13D43C-FFB5-4A66-9532-39B0F8258161}", "High CPU", param_hi_mod_cpu, 1),
     make_param_dsp_output(), make_domain_percentage(0, 0.99, 0, 0, false),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 4 + column_hoffset },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hi_cpu.info.description = "CPU usage of the most expensive module, relative to total CPU usage.";
   auto& hi_module = result.params.emplace_back(make_param(
-    make_topo_info_basic("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "Hi Cpu Module", param_hi_mod, 1),
+    make_topo_info_basic("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "High CPU Module", param_hi_mod, 1),
     make_param_dsp_output(), make_domain_step(0, 999, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output_module_name, { 0, 5 + column_hoffset },
       make_label(gui_label_contents::none, gui_label_align::left, gui_label_justify::center))));
@@ -76,7 +76,7 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   voices.info.description = "Active voice count. Max 32, after that, recycling will occur.";
   auto& thrs = result.params.emplace_back(make_param(
-    make_topo_info("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", true, "Threads", "Thrds", "Thrds", param_threads, 1),
+    make_topo_info_basic("{FD7E410D-D4A6-4AA2-BDA0-5B5E6EC3E13A}", "Threads", param_threads, 1),
     make_param_dsp_output(), make_domain_step(0, polyphony, 0, 0),
     make_param_gui_single(section_main, gui_edit_type::output, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
