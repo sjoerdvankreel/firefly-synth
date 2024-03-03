@@ -28,9 +28,9 @@ enum {
   type_sustain_exp_bi, type_follow_exp_bi, type_release_exp_bi,
   type_sustain_exp_splt, type_follow_exp_splt, type_release_exp_splt };
 enum {
-  param_on, param_type, param_sync, param_trigger, param_filter,
+  param_on, param_type, param_trigger, param_filter,
   param_attack_slope, param_decay_slope, param_release_slope,
-  param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
+  param_sync, param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
@@ -205,7 +205,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   auto& on = result.params.emplace_back(make_param(
     make_topo_info_basic("{5EB485ED-6A5B-4A91-91F9-15BDEC48E5E6}", "On", param_on, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -233,17 +233,10 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     "Exponential unipolar - regular exponential slope.<br/>" + 
     "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" + 
     "Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.";
-  auto& sync = result.params.emplace_back(make_param(
-    make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 }, 
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  sync.info.description = "Toggles time or tempo-synced mode.";
   auto& trigger = result.params.emplace_back(make_param(
     make_topo_info_basic("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 3 }, make_label_none()))); 
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 }, make_label_none()))); 
   trigger.info.description = std::string("Selects trigger mode for monophonic mode.<br/>") +
     "Legato - envelope will not reset.<br/>" + 
     "Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>" +
@@ -252,7 +245,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& filter = result.params.emplace_back(make_param( 
     make_topo_info_basic("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   filter.info.description = "Lowpass filter to smooth out rough edges.";
@@ -284,12 +277,19 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_dahdsr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
-    make_param_section_gui({ 1, 0, 1, 2 }, { 1, 6 })));
-      
+    make_param_section_gui({ 1, 0, 1, 2 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 } })));
+  auto& sync = result.params.emplace_back(make_param(
+    make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_dahdsr, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  sync.info.description = "Toggles time or tempo-synced mode.";
+
   auto& delay_time = result.params.emplace_back(make_param(
     make_topo_info("{E9EF839C-235D-4248-A4E1-FAD62089CC78}", true, "Delay Time", "Delay", "Delay", param_delay_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
-    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 0 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
   delay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
@@ -297,7 +297,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& delay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{A016A3B5-8BFC-4DCD-B41F-F69F3A239AFA}", true, "Delay Tempo", "Delay", "Delay", param_delay_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, { 0, 1 }),
-    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_tempo.gui.submenu = make_timesig_submenu(delay_tempo.domain.timesigs);
   delay_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
@@ -307,7 +307,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& attack_time = result.params.emplace_back(make_param(
     make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", true, "Attack Time", "Attack", "Attack", param_attack_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
-    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   attack_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
   attack_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
@@ -315,7 +315,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& attack_tempo = result.params.emplace_back(make_param(
     make_topo_info("{3130A19C-AA2C-40C8-B586-F3A1E96ED8C6}", true, "Attack Tempo", "Attack", "Attack", param_attack_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, { 1, 64 }),
-    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 1 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   attack_tempo.gui.submenu = make_timesig_submenu(attack_tempo.domain.timesigs);
   attack_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
@@ -325,7 +325,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& hold_time = result.params.emplace_back(make_param(
     make_topo_info("{66F6036E-E64A-422A-87E1-34E59BC93650}", true, "Hold Time", "Hold", "Hold", param_hold_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),
-    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hold_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
   hold_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
@@ -333,7 +333,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& hold_tempo = result.params.emplace_back(make_param(
     make_topo_info("{97846CDB-7349-4DE9-8BDF-14EAD0586B28}", true, "Hold Tempo", "Hold", "Hold", param_hold_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, { 0, 1}),
-    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 2 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   hold_tempo.gui.submenu = make_timesig_submenu(hold_tempo.domain.timesigs);
   hold_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
@@ -343,7 +343,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& decay_time = result.params.emplace_back(make_param(
     make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", true, "Decay Time", "Decay", "Decay", param_decay_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
   decay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
@@ -351,7 +351,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& decay_tempo = result.params.emplace_back(make_param(
     make_topo_info("{47253C57-FBCA-4A49-AF88-88AC9F4781D7}", true, "Decay Tempo", "Decay", "Decay", param_decay_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, { 1, 32 }),
-    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 3 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   decay_tempo.gui.submenu = make_timesig_submenu(decay_tempo.domain.timesigs);
   decay_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
@@ -361,7 +361,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& sustain = result.params.emplace_back(make_param(
     make_topo_info_basic("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "Sustain", param_sustain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 5 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
@@ -369,7 +369,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& release_time = result.params.emplace_back(make_param(
     make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", true, "Release Time", "Release", "Release", param_release_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
-    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 5 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::hslider, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_time.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] == 0; });
   release_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
@@ -377,7 +377,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& release_tempo = result.params.emplace_back(make_param(
     make_topo_info("{FDC00AA5-8648-4064-BE77-1A9CDB6B53EE}", true, "Release Tempo", "Release", "Release", param_release_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, {1, 16 }),
-    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 5 },
+    make_param_gui_single(section_dahdsr, gui_edit_type::list, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_tempo.gui.submenu = make_timesig_submenu(release_tempo.domain.timesigs);
   release_tempo.gui.bindings.enabled.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
