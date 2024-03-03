@@ -31,7 +31,7 @@ enum {
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
-static bool is_exp_slope(int mode) { return mode != mode_linear; }
+static constexpr bool is_exp_slope(int mode) { return mode != mode_linear; }
 
 static std::vector<list_item>
 trigger_items()
@@ -105,12 +105,17 @@ private:
 
   void init_slope_exp(double slope, double& exp);
   void init_slope_exp_splt(double slope, double split_pos, double& exp, double& splt_bnd);
-  
-  // todo template type + mode
+
   template <bool Monophonic> 
-  void process(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
-  template <bool Monophonic, class CalcSlope> 
-  void process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope);
+  void process_mono(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+  template <bool Monophonic, int Type>
+  void process_mono_type(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+  template <bool Monophonic, int Type, bool Sync>
+  void process_mono_type_sync(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+  template <bool Monophonic, int Type, bool Sync, int Trigger>
+  void process_mono_type_sync_trigger(plugin_block& block, cv_cv_matrix_mixdown const* modulation);
+  template <bool Monophonic, int Type, bool Sync, int Trigger, int Mode, class CalcSlope>
+  void process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope);
 };
 
 static void
@@ -453,29 +458,60 @@ env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
   }
 
   if(block.state.all_block_automation[module_voice_in][0][voice_in_param_mode][0].step() == engine_voice_mode_poly)
-    process<false>(block, modulation);
+    process_mono<false>(block, modulation);
   else
-    process<true>(block, modulation);
+    process_mono<true>(block, modulation);
 }
 
-template <bool Monophonic> void
-env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+template <bool Monophonic>
+void env_engine::process_mono(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
-  auto const& block_auto = block.state.own_block_automation;
-  int type = block_auto[param_type][0].step();
-  if (is_exp_uni_slope(type)) process_slope<Monophonic>(block, modulation, calc_slope_exp_uni);
-  else if (is_exp_bi_slope(type)) process_slope<Monophonic>(block, modulation, calc_slope_exp_bi);
-  else if (is_exp_splt_slope(type)) process_slope<Monophonic>(block, modulation, calc_slope_exp_splt);
-  else process_slope<Monophonic>(block, modulation, calc_slope_lin);
+  switch (block.state.own_block_automation[param_type][0].step())
+  {
+  case type_sustain: process_mono_type<Monophonic, type_sustain>(block, modulation); break;
+  case type_follow: process_mono_type<Monophonic, type_follow>(block, modulation); break;
+  case type_release: process_mono_type<Monophonic, type_release>(block, modulation); break;
+  default: assert(false); break;
+  }
 }
 
-template <bool Monophonic, class CalcSlope> void
-env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope)
+template <bool Monophonic, int Type>
+void env_engine::process_mono_type(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+{
+  bool sync = block.state.own_block_automation[param_sync][0].step() != 0;
+  if (sync) process_mono_type_sync<Monophonic, Type, true>(block, modulation);
+  else process_mono_type_sync<Monophonic, Type, false>(block, modulation);
+}
+
+template <bool Monophonic, int Type, bool Sync>
+void env_engine::process_mono_type_sync(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+{
+  switch (block.state.own_block_automation[param_trigger][0].step())
+  {
+  case trigger_legato: process_mono_type_sync_trigger<Monophonic, Type, Sync, trigger_legato>(block, modulation); break;
+  case trigger_retrig: process_mono_type_sync_trigger<Monophonic, Type, Sync, trigger_retrig>(block, modulation); break;
+  case trigger_multi: process_mono_type_sync_trigger<Monophonic, Type, Sync, trigger_multi>(block, modulation); break;
+  default: assert(false); break;
+  }
+}
+
+template <bool Monophonic, int Type, bool Sync, int Trigger>
+void env_engine::process_mono_type_sync_trigger(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
+{
+  switch (block.state.own_block_automation[param_mode][0].step())
+  {
+  case mode_linear: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_linear>(block, modulation, calc_slope_lin); break;
+  case mode_exp_bi: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_bi>(block, modulation, calc_slope_exp_bi); break;
+  case mode_exp_uni: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_uni>(block, modulation, calc_slope_exp_uni); break;
+  case mode_exp_split: process_mono_type_sync_trigger_mode<Monophonic, Type, Sync, Trigger, mode_exp_split>(block, modulation, calc_slope_exp_splt); break;
+  default: assert(false); break;
+  }
+}
+
+template <bool Monophonic, int Type, bool Sync, int Trigger, int Mode, class CalcSlope>
+void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int type = block_auto[param_type][0].step();
-  int trigger = block_auto[param_trigger][0].step();
-  bool sync = block_auto[param_sync][0].step() != 0;
 
   // we cannot pick up the voice start values on ::reset
   // because we need access to modulation
@@ -492,7 +528,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     _att = block.normalized_to_raw_fast<domain_type::log>(module_env, param_attack_time, (*(*modulation)[param_attack_time][0])[0]);
     _rls = block.normalized_to_raw_fast<domain_type::log>(module_env, param_release_time, (*(*modulation)[param_release_time][0])[0]);
 
-    if (sync)
+    if constexpr (Sync)
     {
       auto const& params = block.plugin.modules[module_env].params;
       _hld = timesig_to_time(block.host.bpm, params[param_hold_tempo].domain.timesigs[block_auto[param_hold_tempo][0].step()]);
@@ -502,7 +538,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
       _rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
     }
 
-    if (is_expo_slope(type))
+    if constexpr (is_exp_slope(Mode))
     {
       // These are also not really continuous (we only pick them up at voice start)
       // but we fake it this way so they can participate in modulation.
@@ -510,13 +546,13 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
       float as = (*(*modulation)[param_attack_slope][0])[0];
       float rs = (*(*modulation)[param_release_slope][0])[0];
 
-      if (is_exp_uni_slope(type) || is_exp_bi_slope(type))
+      if constexpr(Mode == mode_exp_uni || Mode == mode_exp_bi)
       {
         init_slope_exp(ds, _slp_dcy_exp);
         init_slope_exp(rs, _slp_rls_exp);
         init_slope_exp(as, _slp_att_exp);
       }
-      else if (is_exp_splt_slope(type))
+      else if constexpr (Mode == mode_exp_split)
       {
         init_slope_exp_splt(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
         init_slope_exp_splt(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
@@ -559,7 +595,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
       // otherwise we'll just keep building up voices in mono mode
       // plugin_base makes sure to only send the release signal after
       // the last note in a monophonic section
-      if(trigger != trigger_legato)
+      if constexpr (Trigger != trigger_legato)
       {
         if(block.state.mono_note_stream[f].note_on)
         {
@@ -567,7 +603,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
           {
             _stage_pos = 0;
             _stage = env_stage::delay;
-            if (trigger == trigger_retrig)
+            if constexpr (Trigger == trigger_retrig)
             {
               _current_level = 0;
               _multitrig_level = 0;
@@ -583,13 +619,13 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     }
 
     if (block.voice->state.release_frame == f && 
-      (is_sustain(type) || (is_release(type) && _stage != env_stage::release)))
+      (Type == type_sustain || (Type == type_release && _stage != env_stage::release)))
     {
       _stage_pos = 0;
       _stage = env_stage::release;
     }
 
-    if (_stage == env_stage::sustain && is_sustain(type))
+    if (_stage == env_stage::sustain && Type == type_sustain)
     {
       _current_level = _stn;
       _multitrig_level = _stn;
@@ -615,13 +651,13 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     else switch (_stage)
     {
     case env_stage::delay: 
-      if(trigger == trigger_multi)
+      if constexpr(Trigger == trigger_multi)
         out = _current_level = _multitrig_level;
       else
         _current_level = _multitrig_level = out = 0;
       break;
     case env_stage::attack: 
-      if(trigger == trigger_multi)
+      if constexpr (Trigger == trigger_multi)
         out = _current_level = _multitrig_level + (1 - _multitrig_level) * calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp);
       else
         _current_level = _multitrig_level = out = calc_slope(slope_pos, _slp_att_splt_bnd, _slp_att_exp); 
@@ -646,7 +682,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     case env_stage::attack: _stage = env_stage::hold; break;
     case env_stage::delay: _stage = env_stage::attack; break;
     case env_stage::release: _stage = env_stage::filter; break;
-    case env_stage::decay: _stage = is_sustain(type) ? env_stage::sustain : env_stage::release; break;
+    case env_stage::decay: _stage = Type == type_sustain ? env_stage::sustain : env_stage::release; break;
     default: assert(false); break;
     }
   }
