@@ -3,6 +3,7 @@
 #include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
 
 #include <firefly_synth/synth.hpp>
@@ -43,7 +44,6 @@ trigger_items()
   return result;
 }
 
-// TODO conversion
 static std::vector<list_item>
 type_items()
 {
@@ -64,6 +64,21 @@ mode_items()
   result.emplace_back("{666FEFDF-3BC5-4FDA-8490-A8980741D6E7}", "Exp Split");
   return result;
 }
+
+class env_state_converter :
+public state_converter
+{
+  plugin_desc const* const _desc;
+public:
+  env_state_converter(plugin_desc const* const desc) : _desc(desc) {}
+  void post_process(load_handler const& handler, plugin_state& new_state) override;
+
+  bool handle_invalid_param_value(
+    std::string const& new_module_id, int new_module_slot,
+    std::string const& new_param_id, int new_param_slot,
+    std::string const& old_value, load_handler const& handler,
+    plain_value& new_value) override;
+};
 
 class env_engine:
 public module_engine {
@@ -187,6 +202,92 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   return graph_data(series, false, 1.0f, { partition });
 }
 
+bool
+env_state_converter::handle_invalid_param_value(
+  std::string const& new_module_id, int new_module_slot,
+  std::string const& new_param_id, int new_param_slot,
+  std::string const& old_value, load_handler const& handler,
+  plain_value& new_value)
+{
+  if (handler.old_version() < plugin_version{ 1, 2, 0 })
+  {
+    // type + mode split out to separate controls
+    if (new_param_id == _desc->plugin->modules[module_env].params[param_type].info.tag.id)
+    {
+      if (old_value == "{021EA627-F467-4879-A045-3694585AD694}" || 
+          old_value == "{A23646C9-047D-485A-9A31-54D78D85570E}" ||
+          old_value == "{CB4C4B41-8165-4303-BDAC-29142DF871DC}" ||
+          old_value == "{DB38D81F-A6DC-4774-BA10-6714EA43938F}")
+      {
+        // sustain
+        new_value = _desc->raw_to_plain_at(module_env, param_type, type_sustain);
+        return true;
+      }
+      if (old_value == "{927DBB76-A0F2-4007-BD79-B205A3697F31}" ||
+          old_value == "{CB268F2B-8A33-49CF-9569-675159ACC0E1}" ||
+          old_value == "{221089F7-A516-4BCE-AE9A-D0D4F80A6BC5}" ||
+          old_value == "{93473324-66FB-422F-9160-72B175A81207}")
+      {
+        // follow
+        new_value = _desc->raw_to_plain_at(module_env, param_type, type_follow);
+        return true;
+      }
+      if (old_value == "{0AF743E3-9248-4FF6-98F1-0847BD5790FA}" ||
+         old_value == "{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}" ||
+         old_value == "{5FBDD433-C4E2-47E4-B471-F7B19485B31E}" ||
+         old_value == "{1ECF13C0-EE16-4226-98D3-570040E6DA9D}")
+      {
+        // release
+        new_value = _desc->raw_to_plain_at(module_env, param_type, type_release);
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void
+env_state_converter::post_process(load_handler const& handler, plugin_state& new_state)
+{
+  std::string old_value;
+  auto const& modules = new_state.desc().plugin->modules;
+  std::string module_id = modules[module_env].info.tag.id;
+  if (handler.old_version() < plugin_version{ 1, 2, 0 })
+  {
+    for (int i = 0; i < modules[module_env].info.slot_count; i++)
+    {
+      // pick up mode from old type + mode
+      if (handler.old_param_value(modules[module_env].info.tag.id, i, modules[module_env].params[param_type].info.tag.id, 0, old_value))
+      {
+        // Linear
+        if (old_value == "{021EA627-F467-4879-A045-3694585AD694}" ||
+          old_value == "{927DBB76-A0F2-4007-BD79-B205A3697F31}" ||
+          old_value == "{0AF743E3-9248-4FF6-98F1-0847BD5790FA}")
+          new_state.set_plain_at(module_env, i, param_mode, 0,
+            _desc->raw_to_plain_at(module_env, param_mode, mode_linear));
+        // Exp uni
+        if (old_value == "{A23646C9-047D-485A-9A31-54D78D85570E}" ||
+          old_value == "{CB268F2B-8A33-49CF-9569-675159ACC0E1}" ||
+          old_value == "{05AACFCF-4A2F-4EC6-B5A3-0EBF5A8B2800}")
+          new_state.set_plain_at(module_env, i, param_mode, 0,
+            _desc->raw_to_plain_at(module_env, param_mode, mode_exp_uni));
+        // Exp bi
+        if (old_value == "{CB4C4B41-8165-4303-BDAC-29142DF871DC}" ||
+          old_value == "{221089F7-A516-4BCE-AE9A-D0D4F80A6BC5}" ||
+          old_value == "{5FBDD433-C4E2-47E4-B471-F7B19485B31E}")
+          new_state.set_plain_at(module_env, i, param_mode, 0,
+            _desc->raw_to_plain_at(module_env, param_mode, mode_exp_bi));
+        // Exp split
+        if (old_value == "{DB38D81F-A6DC-4774-BA10-6714EA43938F}" ||
+          old_value == "{93473324-66FB-422F-9160-72B175A81207}" ||
+          old_value == "{1ECF13C0-EE16-4226-98D3-570040E6DA9D}")
+          new_state.set_plain_at(module_env, i, param_mode, 0,
+            _desc->raw_to_plain_at(module_env, param_mode, mode_exp_split));
+      }
+    }
+  }
+}
+
 module_topo
 env_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
@@ -203,6 +304,7 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   result.default_initializer = init_default;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<env_engine>(); };
+  result.state_converter_factory = [](auto desc) { return std::make_unique<env_state_converter>(desc); };
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
