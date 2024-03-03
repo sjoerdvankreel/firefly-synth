@@ -23,23 +23,23 @@ enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end
 enum { section_main, section_slope, section_dhadsr };
 enum { trigger_legato, trigger_retrig, trigger_multi };
 enum {
-  mode_sustain_lin, mode_follow_lin, mode_release_lin, 
-  mode_sustain_exp_uni, mode_follow_exp_uni, mode_release_exp_uni,
-  mode_sustain_exp_bi, mode_follow_exp_bi, mode_release_exp_bi,
-  mode_sustain_exp_splt, mode_follow_exp_splt, mode_release_exp_splt };
+  type_sustain_lin, type_follow_lin, type_release_lin,
+  type_sustain_exp_uni, type_follow_exp_uni, type_release_exp_uni,
+  type_sustain_exp_bi, type_follow_exp_bi, type_release_exp_bi,
+  type_sustain_exp_splt, type_follow_exp_splt, type_release_exp_splt };
 enum {
-  param_on, param_mode, param_sync, param_trigger, param_filter,
+  param_on, param_type, param_sync, param_trigger, param_filter,
   param_attack_slope, param_decay_slope, param_release_slope,
   param_delay_time, param_delay_tempo, param_attack_time, param_attack_tempo,
   param_hold_time, param_hold_tempo, param_decay_time, param_decay_tempo, 
   param_sustain, param_release_time, param_release_tempo };
 
-static bool is_exp_bi_slope(int mode) { return mode_sustain_exp_bi <= mode && mode <= mode_release_exp_bi; }
-static bool is_exp_uni_slope(int mode) { return mode_sustain_exp_uni <= mode && mode <= mode_release_exp_uni; }
-static bool is_exp_splt_slope(int mode) { return mode_sustain_exp_splt <= mode && mode <= mode_release_exp_splt; }
-static bool is_expo_slope(int mode) { return is_exp_uni_slope(mode) || is_exp_bi_slope(mode) || is_exp_splt_slope(mode); }
-static bool is_sustain(int mode) { return mode == mode_sustain_lin || mode == mode_sustain_exp_uni || mode == mode_sustain_exp_bi || mode == mode_sustain_exp_splt; }
-static bool is_release(int mode) { return mode == mode_release_lin || mode == mode_release_exp_uni || mode == mode_release_exp_bi || mode == mode_release_exp_splt; }
+static bool is_exp_bi_slope(int type) { return type_sustain_exp_bi <= type && type <= type_release_exp_bi; }
+static bool is_exp_uni_slope(int type) { return type_sustain_exp_uni <= type && type <= type_release_exp_uni; }
+static bool is_exp_splt_slope(int type) { return type_sustain_exp_splt <= type && type <= type_release_exp_splt; }
+static bool is_expo_slope(int type) { return is_exp_uni_slope(type) || is_exp_bi_slope(type) || is_exp_splt_slope(type); }
+static bool is_sustain(int type) { return type == type_sustain_lin || type == type_sustain_exp_uni || type == type_sustain_exp_bi || type == type_sustain_exp_splt; }
+static bool is_release(int type) { return type == type_release_lin || type == type_release_exp_uni || type == type_release_exp_bi || type == type_release_exp_splt; }
 
 static std::vector<list_item>
 trigger_items()
@@ -126,14 +126,14 @@ env_plot_length_seconds(plugin_state const& state, int slot, float& dahds, float
 {
   float const bpm = 120;
   bool sync = state.get_plain_at(module_env, slot, param_sync, 0).step() != 0;
-  int mode = state.get_plain_at(module_env, slot, param_mode, 0).step();
+  int type = state.get_plain_at(module_env, slot, param_type, 0).step();
   float filter = state.get_plain_at(module_env, slot, param_filter, 0).real() / 1000.0f;
   float hold = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_hold_time, param_hold_tempo);
   float delay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_delay_time, param_delay_tempo);
   float decay = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_decay_time, param_decay_tempo);
   float attack = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_attack_time, param_attack_tempo);
   float release = sync_or_time_from_state(state, bpm, sync, module_env, slot, param_release_time, param_release_tempo);
-  float sustain = !is_sustain(mode) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
+  float sustain = !is_sustain(type) ? 0.0f : std::max((delay + attack + hold + decay + release + filter) / 5, 0.01f);
   dahds = delay + attack + hold + decay + sustain;
   dahdsrf = dahds + release + filter;
 }
@@ -215,18 +215,18 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   on.info.description = "Toggles envelope on/off.";
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info_basic("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Mode.Slope", param_mode, 1),
+    make_topo_info_basic("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type.Slope", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
       make_label_none())));
   type.gui.submenu = std::make_shared<gui_submenu>();
-  type.gui.submenu->add_submenu("Linear", { mode_sustain_lin, mode_follow_lin, mode_release_lin });
-  type.gui.submenu->add_submenu("Exp.Uni", { mode_sustain_exp_uni, mode_follow_exp_uni, mode_release_exp_uni });
-  type.gui.submenu->add_submenu("Exp.Bi", { mode_sustain_exp_bi, mode_follow_exp_bi, mode_release_exp_bi });
-  type.gui.submenu->add_submenu("Exp.Split", { mode_sustain_exp_splt, mode_follow_exp_splt, mode_release_exp_splt });
+  type.gui.submenu->add_submenu("Linear", { type_sustain_lin, type_follow_lin, type_release_lin });
+  type.gui.submenu->add_submenu("Exp.Uni", { type_sustain_exp_uni, type_follow_exp_uni, type_release_exp_uni });
+  type.gui.submenu->add_submenu("Exp.Bi", { type_sustain_exp_bi, type_follow_exp_bi, type_release_exp_bi });
+  type.gui.submenu->add_submenu("Exp.Split", { type_sustain_exp_splt, type_follow_exp_splt, type_release_exp_splt });
   type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });  
-  type.info.description = std::string("Selects envelope mode and slope.<br/>") + 
-    "Sustain - regular sustain mode.<br/>" + 
+  type.info.description = std::string("Selects envelope type and slope.<br/>") + 
+    "Sustain - regular sustain type.<br/>" + 
     "Follow - exactly follows the envelope ignoring note-off.<br/>" +
     "Release - follows the envelope (does not sustain) but respects note-off.<br/>" +
     "Linear - linear slope, most cpu efficient.<br/>" +
@@ -265,22 +265,22 @@ env_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 0 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
-  attack_slope.info.description = "Controls attack slope for exponential modes. Modulation takes place only at voice start.";
+  attack_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
+  attack_slope.info.description = "Controls attack slope for exponential types. Modulation takes place only at voice start.";
   auto& decay_slope = result.params.emplace_back(make_param(
     make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", true, "Decay Slope", "Decay Slope", "D.Slope", param_decay_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 1 }, 
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
-  decay_slope.info.description = "Controls decay slope for exponential modes. Modulation takes place only at voice start.";
+  decay_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
+  decay_slope.info.description = "Controls decay slope for exponential types. Modulation takes place only at voice start.";
   auto& release_slope = result.params.emplace_back(make_param(
     make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", true, "Release Slope", "Release Slope", "R.Slope", param_release_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_slope, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
-  release_slope.info.description = "Controls release slope for exponential modes. Modulation takes place only at voice start.";
+  release_slope.gui.bindings.enabled.bind_params({ param_on, param_type }, [](auto const& vs) { return vs[0] != 0 && is_expo_slope(vs[1]); });
+  release_slope.info.description = "Controls release slope for exponential types. Modulation takes place only at voice start.";
 
   result.sections.emplace_back(make_param_section(section_dhadsr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
@@ -463,10 +463,10 @@ template <bool Monophonic> void
 env_engine::process(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int mode = block_auto[param_mode][0].step();
-  if (is_exp_uni_slope(mode)) process_slope<Monophonic>(block, modulation, calc_slope_exp_uni);
-  else if (is_exp_bi_slope(mode)) process_slope<Monophonic>(block, modulation, calc_slope_exp_bi);
-  else if (is_exp_splt_slope(mode)) process_slope<Monophonic>(block, modulation, calc_slope_exp_splt);
+  int type = block_auto[param_type][0].step();
+  if (is_exp_uni_slope(type)) process_slope<Monophonic>(block, modulation, calc_slope_exp_uni);
+  else if (is_exp_bi_slope(type)) process_slope<Monophonic>(block, modulation, calc_slope_exp_bi);
+  else if (is_exp_splt_slope(type)) process_slope<Monophonic>(block, modulation, calc_slope_exp_splt);
   else process_slope<Monophonic>(block, modulation, calc_slope_lin);
 }
 
@@ -474,7 +474,7 @@ template <bool Monophonic, class CalcSlope> void
 env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modulation, CalcSlope calc_slope)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int mode = block_auto[param_mode][0].step();
+  int type = block_auto[param_type][0].step();
   int trigger = block_auto[param_trigger][0].step();
   bool sync = block_auto[param_sync][0].step() != 0;
 
@@ -503,7 +503,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
       _rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
     }
 
-    if (is_expo_slope(mode))
+    if (is_expo_slope(type))
     {
       // These are also not really continuous (we only pick them up at voice start)
       // but we fake it this way so they can participate in modulation.
@@ -511,13 +511,13 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
       float as = (*(*modulation)[param_attack_slope][0])[0];
       float rs = (*(*modulation)[param_release_slope][0])[0];
 
-      if (is_exp_uni_slope(mode) || is_exp_bi_slope(mode))
+      if (is_exp_uni_slope(type) || is_exp_bi_slope(type))
       {
         init_slope_exp(ds, _slp_dcy_exp);
         init_slope_exp(rs, _slp_rls_exp);
         init_slope_exp(as, _slp_att_exp);
       }
-      else if (is_exp_splt_slope(mode))
+      else if (is_exp_splt_slope(type))
       {
         init_slope_exp_splt(ds, ds, _slp_dcy_exp, _slp_dcy_splt_bnd);
         init_slope_exp_splt(rs, rs, _slp_rls_exp, _slp_rls_splt_bnd);
@@ -584,13 +584,13 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     }
 
     if (block.voice->state.release_frame == f && 
-      (is_sustain(mode) || (is_release(mode) && _stage != env_stage::release)))
+      (is_sustain(type) || (is_release(type) && _stage != env_stage::release)))
     {
       _stage_pos = 0;
       _stage = env_stage::release;
     }
 
-    if (_stage == env_stage::sustain && is_sustain(mode))
+    if (_stage == env_stage::sustain && is_sustain(type))
     {
       _current_level = _stn;
       _multitrig_level = _stn;
@@ -647,7 +647,7 @@ env_engine::process_slope(plugin_block& block, cv_cv_matrix_mixdown const* modul
     case env_stage::attack: _stage = env_stage::hold; break;
     case env_stage::delay: _stage = env_stage::attack; break;
     case env_stage::release: _stage = env_stage::filter; break;
-    case env_stage::decay: _stage = is_sustain(mode) ? env_stage::sustain : env_stage::release; break;
+    case env_stage::decay: _stage = is_sustain(type) ? env_stage::sustain : env_stage::release; break;
     default: assert(false); break;
     }
   }
