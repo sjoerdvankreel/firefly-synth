@@ -41,9 +41,9 @@ static std::vector<list_item>
 porta_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{51C360E5-967A-4218-B375-5052DAC4FD02}", "Porta Off");
-  result.emplace_back("{112A9728-8564-469E-95A7-34FE5CC7C8FC}", "Porta On");
-  result.emplace_back("{0E3AF80A-F242-4176-8C72-C0C91D72AEBB}", "Porta Auto");
+  result.emplace_back("{51C360E5-967A-4218-B375-5052DAC4FD02}", "Off");
+  result.emplace_back("{112A9728-8564-469E-95A7-34FE5CC7C8FC}", "On");
+  result.emplace_back("{0E3AF80A-F242-4176-8C72-C0C91D72AEBB}", "Auto");
   return result;
 }
 
@@ -107,29 +107,31 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& voice_mode = result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", true, "Voice Mode", "Mode", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   voice_mode.info.description = std::string("Selects poly/mono mode.<br/>") +
     "Poly - regular polyphonic mode.<br/>" +
     "Mono - true monophonic mode, may cause clicks.<br/>" +
     "Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>"
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
   auto& porta = result.params.emplace_back(make_param(
-    make_topo_info_basic("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Portamento", param_porta, 1),
+    make_topo_info_basic("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Porta", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   porta.info.description = std::string("Selects portamento mode.<br/>") + 
     "Off - no portamento.<br/>" + 
     "On - glides 1 semitone in the specified time, so glide pitch is constant and glide time is variable.<br/>" +
     "Auto - glides pitch difference between old and new note in the specified time, so glide pitch is variable and glide time is constant.";
   auto& sync = result.params.emplace_back(make_param(
-    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Portamento Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
+    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Porta Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 },  
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   sync.info.description = "Selects time or tempo-synced mode.";
   auto& time = result.params.emplace_back(make_param(
-    make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", true, "Portamento Time", "Time", "Time", param_porta_time, 1),
+    make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", true, "Porta Time", "Time", "Time", param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -137,7 +139,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   time.info.description = "Pitch glide time in seconds.";
   auto& tempo = result.params.emplace_back(make_param(
-    make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Portamento Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
+    make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Porta Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
@@ -149,7 +151,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_tag_basic("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Osc Oversample"),
     make_param_section_gui({ 0, 1 }, gui_dimension({ 1, 1 }))));
   auto& oversmp = result.params.emplace_back(make_param(
-    make_topo_info("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", true, "Oscillator Oversampling", "Osc Oversample", "Osc Oversample", param_oversmp, 1),
+    make_topo_info_basic("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", "Osc Oversample", param_oversmp, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
     make_param_gui_single(section_oversmp, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
