@@ -17,8 +17,8 @@ int const aux_count = 5;
 int const max_ext_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
-enum { section_smooth, section_aux, section_linked };
-enum { param_midi_smooth, param_tempo_smooth, param_aux, param_mod, param_pb, param_pb_range, param_count };
+enum { section_aux, section_smooth, section_linked };
+enum { param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, param_count };
 extern int const master_in_param_pb_range = param_pb_range;
 extern int const master_in_param_midi_smooth = param_midi_smooth;
 extern int const master_in_param_tempo_smooth = param_tempo_smooth;
@@ -61,9 +61,19 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
+  result.sections.emplace_back(make_param_section(section_aux,
+    make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
+    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1 }))));
+  auto& aux = result.params.emplace_back(make_param(
+    make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
+    make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
+  
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smth", "MIDI Smth", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
@@ -76,16 +86,6 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
     make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
-
-  result.sections.emplace_back(make_param_section(section_aux,
-    make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1 }))));
-  auto& aux = result.params.emplace_back(make_param(
-    make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
 
   std::vector<int> column_distribution = { 1, 1 };
   if(!is_fx) column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size, 1 };
@@ -108,7 +108,7 @@ master_in_topo(int section, bool is_fx, gui_colors const& colors, gui_position c
 
   if(is_fx) return result;
   auto& pb_range = result.params.emplace_back(make_param(
-    make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "Pitch Bend Range", "Range", "Range", param_pb_range, 1),
+    make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "PB Range", "Range", "Range", param_pb_range, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
     make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
