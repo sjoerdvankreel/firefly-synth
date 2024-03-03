@@ -323,7 +323,7 @@ synth_topo(bool is_fx)
 #endif
 
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
-  result->gui.dimension.column_sizes = { is_fx? 19: 17, is_fx? 28: 30, 8, 25 };
+  result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 25 };
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 2 }, { true, 2 }, { true, 1 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
