@@ -2,7 +2,7 @@
 
 - Lots of small ui fixes / cleanup.
 - Rename saw waveshaper to off.
-- Add an extra master cv aux parameter.
+- Add 2 extra master cv aux parameters.
 - Fixed a bug in the triangle waveshaper.
 - Drop square waveshaper (bug, it shouldn't have been there).
 - Comb filter gets additional mode select (feedback/feedforward/both).

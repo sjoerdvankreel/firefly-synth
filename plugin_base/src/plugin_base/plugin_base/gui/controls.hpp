@@ -181,10 +181,7 @@ public autofit_label
   static std::string label_ref_text(param_desc const* param);
 public:
   param_desc const* param() const { return _param; }
-  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
-  binding_component(gui, module, &param->param->gui.bindings, param->info.slot), 
-  autofit_label(lnf, label_ref_text(param)), _param(param)
-  { setText(param->param->info.tag.display_name, juce::dontSendNotification); init(); }
+  param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf);
 };
 
 // dynamic parameter value display

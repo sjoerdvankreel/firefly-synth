@@ -77,11 +77,29 @@ menu_button::clicked()
     });
 }
 
+static std::string
+param_slot_name(param_desc const* param)
+{
+  std::string result = param->param->info.tag.display_name;
+  if (param->param->info.slot_count > 1)
+    result += " " + std::to_string(param->info.slot + 1);
+  return result;
+}
+
 std::string 
 param_name_label::label_ref_text(param_desc const* param)
 {
   auto const& ref_text = param->param->gui.label_reference_text;
-  return ref_text.size()? ref_text: param->param->info.tag.display_name;
+  return ref_text.size()? ref_text: param_slot_name(param);
+}
+
+param_name_label::
+param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
+binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
+autofit_label(lnf, label_ref_text(param)), _param(param)
+{
+  std::string name = param_slot_name(param);
+  setText(name, juce::dontSendNotification); init();
 }
 
 last_tweaked_label::
