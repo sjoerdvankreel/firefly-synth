@@ -30,6 +30,7 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+fix the fx gui
 rename lfo type/mode
 bigger graphs
 smaller graph text for the big one
