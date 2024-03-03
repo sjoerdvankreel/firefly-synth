@@ -42,9 +42,9 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 module_topo
 audio_out_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
 {
-  auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", true, "Voice Out", "Voice Out", "V.Out", module_voice_out, 1));
+  auto voice_info(make_topo_info("{D5E1D8AF-8263-4976-BF68-B52A5CB82774}", true, "Voice Out", "Voice Out", "VOut", module_voice_out, 1));
   voice_info.description = "Controls gain and balance of individual voices.";
-  auto master_info(make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", true, "Master Out", "Master Out", "M.Out", module_master_out, 1));
+  auto master_info(make_topo_info("{3EEB56AB-FCBC-4C15-B6F3-536DB0D93E67}", true, "Master Out", "Master Out", "MOut", module_master_out, 1));
   master_info.description = "Controls gain and balance of the master audio output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? master_info : voice_info);

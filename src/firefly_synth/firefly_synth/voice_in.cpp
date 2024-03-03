@@ -90,10 +90,10 @@ module_topo
 voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 {
   module_topo result(make_module(
-    make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "V.In", module_voice_in, 1),
+    make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "VIn", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 2, gui_dimension::auto_size, 1 } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 5, gui_dimension::auto_size, 3 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.";
   
   result.graph_renderer = render_graph;
@@ -115,7 +115,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     "Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>"
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
   auto& porta = result.params.emplace_back(make_param(
-    make_topo_info_basic("{586BEE16-430A-483E-891B-48E89C4B8FC1}", "Porta", param_porta, 1),
+    make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", true, "Portamento Mode", "Portamento", "Portamento", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -124,22 +124,21 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     "On - glides 1 semitone in the specified time, so glide pitch is constant and glide time is variable.<br/>" +
     "Auto - glides pitch difference between old and new note in the specified time, so glide pitch is variable and glide time is constant.";
   auto& sync = result.params.emplace_back(make_param(
-    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Porta Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
+    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Portamento Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_main, gui_edit_type::toggle, { 0, 2 },  
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   sync.info.description = "Selects time or tempo-synced mode.";
   auto& time = result.params.emplace_back(make_param(
-    make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", true, "Porta Time", "Time", "Time", param_porta_time, 1),
+    make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", true, "Portamento Time", "Time", "Time", param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 }, make_label_none())));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   time.info.description = "Pitch glide time in seconds.";
   auto& tempo = result.params.emplace_back(make_param(
-    make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Porta Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
+    make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Portamento Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
     make_param_gui_single(section_main, gui_edit_type::list, { 0, 3 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
@@ -165,7 +164,8 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& note = result.params.emplace_back(make_param(
     make_topo_info_basic("{CB6D7BC8-5DE6-4A84-97C9-4E405A96E0C8}", "Note", param_note, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
-    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
+    make_param_gui_single(section_pitch, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   note.gui.submenu = make_midi_note_submenu();
   note.info.description = "Oscillator base pitch adjustment for all Oscs, C4 is no adjustment.";
   auto& cent = result.params.emplace_back(make_param(

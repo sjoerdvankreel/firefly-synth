@@ -47,7 +47,7 @@ init_voice_minimal(plugin_state& state)
 {
   state.set_text_at(module_vaudio_audio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 0, "Osc 1");
-  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 0, "V.Out");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 0, "VOut");
 }
 
 static void
@@ -55,7 +55,7 @@ init_global_minimal(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext.Audio" : "V.Mix");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "M.Out");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "MOut");
 }
 
 static void
@@ -69,7 +69,7 @@ init_voice_default(plugin_state& state)
   state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 1, "Osc 2");
   state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 1, "VFX 1");
   state.set_text_at(module_vaudio_audio_matrix, 0, param_source, 2, "VFX 1");
-  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 2, "V.Out");
+  state.set_text_at(module_vaudio_audio_matrix, 0, param_target, 2, "VOut");
 }
 
 static void
@@ -82,14 +82,14 @@ init_global_default(plugin_state& state, bool is_fx)
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 1, "GFX 1");
   if (is_fx)
   {
-    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "M.Out");
+    state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "MOut");
     return;
   }
 
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 1, "GFX 2");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 2, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 2, "GFX 2");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 2, "M.Out");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 2, "MOut");
 }
 
 static graph_data
@@ -210,7 +210,7 @@ audio_audio_matrix_topo(
     });
   source.info.description = "Selects audio route source. Note that you can only route FX 'upwards', so not FX2 -> FX1.";
 
-  auto default_target = global? "M.Out": "V.Out";
+  auto default_target = global? "MOut": "VOut";
   auto& target = result.params.emplace_back(make_param(
     make_topo_info_basic("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, default_target),
