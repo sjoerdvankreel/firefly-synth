@@ -93,7 +93,7 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "V.In", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1 }, { 13, 7, 7 } } )));
+    make_module_gui(section, colors, pos, { { 1 }, { 2, gui_dimension::auto_size, 1 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.";
   
   result.graph_renderer = render_graph;
@@ -149,15 +149,16 @@ voice_in_topo(int section, gui_colors const& colors, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_oversmp,
     make_topo_tag_basic("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Osc Oversample"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1, 1 }))));
+    make_param_section_gui({ 0, 1 }, gui_dimension({ { 1 }, { { gui_dimension::auto_size } }}))));
   auto& oversmp = result.params.emplace_back(make_param(
     make_topo_info_basic("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", "Osc Oversample", param_oversmp, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
-    make_param_gui_single(section_oversmp, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_oversmp, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   oversmp.info.description = std::string("Oversampling for those rare cases where it makes a positive difference. ") +
     "Only affects FM and hardsync, but not AM. " +
     "Oversampling is per unison voice, so setting both this and unison to 8 results in an oscillator being 64 times as expensive to calculate.";
+
   result.sections.emplace_back(make_param_section(section_pitch,
     make_topo_tag_basic("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Pitch"),
     make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1 }))));
