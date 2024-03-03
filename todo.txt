@@ -31,10 +31,8 @@ do forward compat checks - dont load newer versions
 
 small-ui-changes:
 fix the fx gui
-rename lfo type/mode
 bigger graphs
 smaller graph text for the big one
-bigger vertical modulation graph
 check module header sizes
 todo drop the dot-notation
 check all the todos
