@@ -142,7 +142,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
 
   auto& am = result.sections.emplace_back(make_param_section(section_am,
     make_topo_tag_basic("{A48C0675-C020-4D05-A384-EF2B8CA8A066}", "AM"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, 2, 2 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   am.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& am_on = result.params.emplace_back(make_param(
     make_topo_info_basic("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "AM", param_am_on, route_count),
@@ -154,7 +154,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   auto& am_source = result.params.emplace_back(make_param(
     make_topo_info_basic("{1D8F3294-2463-470D-853B-561E8228467A}", "Source", param_am_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
-    make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
+    make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   am_source.gui.tabular = true;
   am_source.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_target, gui_item_binding::match_param_slot },
@@ -164,7 +164,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   auto& am_target = result.params.emplace_back(make_param(
     make_topo_info_basic("{1AF0E66A-ADB5-40F4-A4E1-9F31941171E2}", "Target", param_am_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
-    make_param_gui(section_am, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
+    make_param_gui(section_am, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   am_target.gui.tabular = true;
   am_target.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_am_source, gui_item_binding::match_param_slot },
@@ -188,7 +188,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
-    make_param_section_gui({ 1, 0 }, { { 1 }, { -25, 1, 1, 1, 3 } })));
+    make_param_section_gui({ 1, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 3 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
     make_topo_info_basic("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM", param_fm_on, route_count),
@@ -200,7 +200,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   auto& fm_source = result.params.emplace_back(make_param(
     make_topo_info_basic("{61E9C704-E704-4669-9DC3-D3AA9FD6A952}", "Source", param_fm_source, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, ""),
-    make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
+    make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   fm_source.gui.tabular = true;
   fm_source.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_source.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_target, gui_item_binding::match_param_slot },
@@ -211,7 +211,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   auto& fm_target = result.params.emplace_back(make_param(
     make_topo_info_basic("{DBDD28D6-46B9-4F9A-9682-66E68A261B87}", "Target", param_fm_target, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(osc_matrix.items, "Osc 2"),
-    make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
+    make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   fm_target.gui.tabular = true;
   fm_target.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_target.gui.item_enabled.bind_param({ module_osc_osc_matrix, 0, param_fm_source, gui_item_binding::match_param_slot },
