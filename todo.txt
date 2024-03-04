@@ -10,6 +10,7 @@ mseg
 midi mpe
 microtonal
 .com website 
+cheby shaper
 voice level unison
 cakewalk bug report
 phaser/flanger/chorus
@@ -18,6 +19,10 @@ vst3 note expressions
 clap (poly) modulation
 visual routing indicators
 document the header files a bit
+out gain/cpu meter
+basic osc waveform logos
+group cv matrix targets by e.g. gaudio gain 1-10
+do basic theming support (e.g. config file with colors)
 
 v1.3:
 automate zip/dist
@@ -32,34 +37,16 @@ do forward compat checks - dont load newer versions
 small-ui-changes:
 redo all the presets (prevent slot count warning)
 fix the big graph
-high-module use short name
-check the longer names in the monitor
-check module header sizes
-todo drop the dot-notation
-check all the todos
 check the reference generator output
-check all the short/long names + also in menus
-now have room for cheby shaper/smooth random?
 re-read the param docs and manual
-check all the tooltips and names in matrices
-do gain meter for master out gain?
 check the fx-version ui layout
 test all the host demos
 update the demo tracks
-document the changes
 retest all presets and demo tracks and host tests
 fix up all the presets
 check the fx version
-keep track of the matrices layout
-check which colors are still used
-check all the short names in the matrices
-do icons for the osc modes?
-group cv matrix targets by e.g. gaudio gain 1-10
-do basic theming support (e.g. config file with colors)
-divide the matrix tab header over 2 rows so we dont need abbreviations for gm.cv etc
 
 other:
-redo cheby shaper?
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
 do indexed release schema + regular backwards compat

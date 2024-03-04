@@ -227,7 +227,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   fm_mode.info.description = std::string("Selects unipolar/bipolar mode. ") + 
     "Bipolar causes the target Osc's phase to travel both forward and backward and is apparently referred to as through-zero FM.";
   auto& fm_amount = result.params.emplace_back(make_param(
-    make_topo_info_basic("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "Index", param_fm_idx, route_count), // TODO full-name FM-index for automation. Probably others for the matrices.
+    make_topo_info_basic("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "Index", param_fm_idx, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 4, ""),
     make_param_gui(section_fm, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
   fm_amount.gui.tabular = true;

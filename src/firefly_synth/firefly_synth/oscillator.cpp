@@ -386,7 +386,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   basic_sqr_mix.gui.bindings.enabled.bind_params({ param_type, param_basic_sqr_on }, [](auto const& vs) { return vs[0] == type_basic && vs[1] != 0; });
   basic_sqr_mix.info.description = "Square generator mix amount.";
   auto& basic_sqr_pw = result.params.emplace_back(make_param(
-    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Sqr PW", "PW", "Bsc PW", param_basic_sqr_pw, 1), // TODO or Sqr.PW/Square PW for menu?
+    make_topo_info("{57A231B9-CCC7-4881-885E-3244AE61107C}", true, "Basic Sqr PW", "PW", "Bsc PW", param_basic_sqr_pw, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
     make_param_gui_single(section_basic, gui_edit_type::knob, { 0, 8 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));

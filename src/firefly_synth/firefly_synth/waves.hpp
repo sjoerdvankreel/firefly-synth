@@ -28,7 +28,7 @@ enum {
   wave_shape_type_sin_cos_sin, wave_shape_type_sin_cos_cos,
   wave_shape_type_cos_sin_sin, wave_shape_type_cos_sin_cos,
   wave_shape_type_cos_cos_sin, wave_shape_type_cos_cos_cos,
-  wave_shape_type_sqr_or_fold, wave_shape_type_smooth, // TODO conversion
+  wave_shape_type_sqr_or_fold, wave_shape_type_smooth,
   wave_shape_type_static, wave_shape_type_static_free };
 
 inline bool wave_skew_is_exp(int skew) { return skew == wave_skew_type_xpu || skew == wave_skew_type_xpb; }
