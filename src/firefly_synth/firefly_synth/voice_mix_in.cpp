@@ -21,9 +21,9 @@ module_topo
 voice_mix_topo(int section, bool is_fx)
 {
   module_topo result(make_module(
-    make_topo_info("{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}", true, "Voice Mix", "V.Mix", "V.Mix", module_voice_mix, 1),
+    make_topo_info("{70C5721B-4D0C-4ED3-B5B9-3D3E0D46C62E}", true, "Voice Out", "VOut", "VOut", module_voice_mix, 1),
     make_module_dsp(module_stage::output, module_output::audio, 0, {
-      make_module_dsp_output(false, make_topo_info_basic("{FFA367C9-23C1-4E89-95C5-90EE59CB034D}", "Output", 0, 1)) }),
+      make_module_dsp_output(false, make_topo_info_basic("{FFA367C9-23C1-4E89-95C5-90EE59CB034D}", "VOut", 0, 1)) }),
     make_module_gui_none(section)));
   result.info.description = "Provides voice mixdown as an audio source to the global audio matrix.";
   result.engine_factory = nullptr;

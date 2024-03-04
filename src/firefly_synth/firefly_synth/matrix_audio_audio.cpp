@@ -54,7 +54,7 @@ static void
 init_global_minimal(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext.Audio" : "V.Mix");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext" : "VOut");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "MOut");
 }
 
@@ -76,7 +76,7 @@ static void
 init_global_default(plugin_state& state, bool is_fx)
 {
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
-  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx? "Ext.Audio": "V.Mix");
+  state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx? "Ext": "VOut");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "GFX 1");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 1, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 1, "GFX 1");
