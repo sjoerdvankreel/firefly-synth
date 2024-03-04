@@ -30,7 +30,6 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
-todo delay conversion
 check the longer names in the monitor
 bigger graphs
 smaller graph text for the big one
