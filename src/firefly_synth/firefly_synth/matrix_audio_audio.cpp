@@ -184,7 +184,7 @@ audio_audio_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, 1, 1, 2, 2 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& on = result.params.emplace_back(make_param(
@@ -198,7 +198,7 @@ audio_audio_matrix_topo(
   auto& source = result.params.emplace_back(make_param(
     make_topo_info_basic("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(source_matrix.items, ""),
-    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
   source.gui.submenu = source_matrix.submenu;
   source.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
@@ -215,7 +215,7 @@ audio_audio_matrix_topo(
   auto& target = result.params.emplace_back(make_param(
     make_topo_info_basic("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, default_target),
-    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
   target.gui.submenu = target_matrix.submenu;
   target.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
