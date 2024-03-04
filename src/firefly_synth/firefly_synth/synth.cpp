@@ -111,7 +111,7 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store)
   return store_component<tabbed_module_section_container>(store, gui, module_section_matrices, 
     [gui, lnf](int module_index) -> std::unique_ptr<juce::Component> {
       graph_params params;
-      params.partition_scale = 0.33f;
+      params.partition_scale = 0.2f;
       params.scale_type = graph_params::scale_h;
       switch (module_index)
       {

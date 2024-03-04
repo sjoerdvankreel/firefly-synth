@@ -32,8 +32,6 @@ do forward compat checks - dont load newer versions
 small-ui-changes:
 high-module use short name
 check the longer names in the monitor
-bigger graphs
-smaller graph text for the big one
 check module header sizes
 todo drop the dot-notation
 check all the todos
