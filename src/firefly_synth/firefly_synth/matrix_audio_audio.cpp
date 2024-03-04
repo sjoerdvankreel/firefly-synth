@@ -145,9 +145,9 @@ audio_audio_matrix_topo(
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
-  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", true, "Voice Audio", "Voice Audio", "V.Audio", module_vaudio_audio_matrix, 1);
+  auto voice_info = make_topo_info("{6EDEA9FD-901E-4B5D-9CDE-724AC5538B35}", true, "VAudio Routing", "VAudio", "VAudio", module_vaudio_audio_matrix, 1);
   voice_info.description = "Audio routing matrix with gain/balance control to route from oscillators to fx modules to voice mixdown.";
-  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", true, "Global Audio", "Global Audio", "G.Audio", module_gaudio_audio_matrix, 1);
+  auto global_info = make_topo_info("{787CDC52-0F59-4855-A7B6-ECC1FB024742}", true, "GAudio Routing", "GAudio", "GAudio", module_gaudio_audio_matrix, 1);
   global_info.description = "Audio routing matrix with gain/balance control to route from voice mixdown to fx modules to master output.";
   module_stage stage = global ? module_stage::output : module_stage::voice;
   auto const info = topo_info(global ? global_info : voice_info);
@@ -165,14 +165,15 @@ audio_audio_matrix_topo(
   result.graph_renderer = [tm = target_matrix.items](
     auto const& state, auto* engine, int param, auto const& mapping) {
       return render_graph(state, engine, param, mapping, tm); };
-  result.gui.tabbed_name = result.info.tag.menu_display_name;
   if (global)
   {
+    result.gui.tabbed_name = "Global Audio Routing";
     result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
     result.minimal_initializer = [is_fx](auto& s) { init_global_minimal(s, is_fx); };
   }
   else
   {
+    result.gui.tabbed_name = "Voice Audio Routing";
     result.default_initializer = init_voice_default;
     result.minimal_initializer = init_voice_minimal;
   }

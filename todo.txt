@@ -30,6 +30,7 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+fix the big graph
 high-module use short name
 check the longer names in the monitor
 check module header sizes

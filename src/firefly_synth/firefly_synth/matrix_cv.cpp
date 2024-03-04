@@ -152,7 +152,7 @@ init_audio_voice_default(plugin_state& state)
   state.set_text_at(module_vcv_audio_matrix, 0, param_min, 1, "35");
   state.set_text_at(module_vcv_audio_matrix, 0, param_max, 1, "65");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 1, "GLFO 2");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "V.Audio Bal 1");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "VAudio Bal 1");
   state.set_text_at(module_vcv_audio_matrix, 0, param_type, 2, "AB.Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "MIn PB");
   state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "VIn PB");
