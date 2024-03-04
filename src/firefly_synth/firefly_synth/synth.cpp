@@ -381,7 +381,7 @@ synth_topo(bool is_fx)
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 1 }, { { 1 }, { 1 } });
   std::vector<int> audio_matrix_modules = { module_osc_osc_matrix, module_vaudio_audio_matrix, module_gaudio_audio_matrix };
-  std::vector<int> cv_matrix_modules = { module_vcv_audio_matrix, module_gcv_audio_matrix, module_vcv_cv_matrix, module_gcv_cv_matrix };
+  std::vector<int> cv_matrix_modules = { module_vcv_audio_matrix, module_vcv_cv_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
   if(is_fx) 
   {
     audio_matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
