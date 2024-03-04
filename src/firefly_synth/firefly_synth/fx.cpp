@@ -445,6 +445,23 @@ fx_state_converter::handle_invalid_param_value(
   // note param ids are equal between vfx/gfx, gfx just has more
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
+    // mode + sync in delay got split out to separate controls
+    if (_global && new_param_id == _desc->plugin->modules[module_gfx].params[param_dly_mode].info.tag.id)
+    {
+      if (old_value == "{A1481F0B-D6FD-4375-BDF9-C01D2F5C5B79}" || old_value == "{7CEC3D1C-6854-4591-9AD7-BDBA9509EA87}")
+      {
+        // Feedback
+        new_value = _desc->raw_to_plain_at(module_gfx, param_dly_mode, dly_mode_fdbk);
+        return true;
+      }
+      if (old_value == "{871622C7-EC8A-4E3B-A76C-CFDE3467A998}" || old_value == "{62EB5BA9-889A-4C46-8534-12881A4F02D1}")
+      {
+        // Multi
+        new_value = _desc->raw_to_plain_at(module_gfx, param_dly_mode, dly_mode_multi);
+        return true;
+      }
+    }
+
     // distA/distB/distC in fx type got split out to separate A/B/C control
     if (new_param_id == _desc->plugin->modules[module_gfx].params[param_type].info.tag.id)
     {
@@ -495,6 +512,21 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
       // old comb filter was always "both"
       new_state.set_plain_at(this_module, i, param_comb_mode, 0,
         _desc->raw_to_plain_at(this_module, param_comb_mode, comb_mode_both));
+
+      // pick up delay sync from old combined mode + sync
+      if (_global && handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_dly_mode].info.tag.id, 0, old_value))
+      {
+        // Time
+        if (old_value == "{A1481F0B-D6FD-4375-BDF9-C01D2F5C5B79}" ||
+            old_value == "{871622C7-EC8A-4E3B-A76C-CFDE3467A998}")
+          new_state.set_plain_at(this_module, i, param_dly_sync, 0,
+            _desc->raw_to_plain_at(this_module, param_dly_sync, 0));
+        // Sync
+        if (old_value == "{7CEC3D1C-6854-4591-9AD7-BDBA9509EA87}" ||
+          old_value == "{62EB5BA9-889A-4C46-8534-12881A4F02D1}")
+          new_state.set_plain_at(this_module, i, param_dly_sync, 0,
+            _desc->raw_to_plain_at(this_module, param_dly_sync, 1));
+      }
 
       // pick up distortion mode from old combined dstA/dstB/dstC
       if (handler.old_param_value(modules[this_module].info.tag.id, i, modules[this_module].params[param_type].info.tag.id, 0, old_value))
