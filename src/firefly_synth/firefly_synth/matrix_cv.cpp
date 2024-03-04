@@ -404,7 +404,7 @@ cv_matrix_topo(
   }
   else
   {
-    result.gui.tabbed_name = global ? "Global CV Audio Mtx" : "Voice CV Audio Mtx";
+    result.gui.tabbed_name = global ? "Global CV Audio Matrix" : "Voice CV Audio Matrix";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
         return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
