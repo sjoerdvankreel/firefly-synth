@@ -886,7 +886,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
     make_param_gui_single(section_delay_bottom, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  delay_hold_time.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_multi && vs[2] == 0; });
+  delay_hold_time.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[2] == 0; });
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_multi && vs[2] == 0; });
   delay_hold_time.info.description = "Multi-tap delay hold time in seconds.";
   auto& delay_hold_tempo = result.params.emplace_back(make_param(
@@ -895,7 +895,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
     make_param_gui_single(section_delay_bottom, gui_edit_type::list, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_hold_tempo.gui.submenu = make_timesig_submenu(delay_hold_tempo.domain.timesigs);
-  delay_hold_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_multi && vs[2] != 0; });
+  delay_hold_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[2] != 0; });
   delay_hold_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_multi && vs[2] != 0; });
   delay_hold_tempo.info.description = "Multi-tap delay hold time in bars.";
 
