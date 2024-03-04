@@ -30,6 +30,7 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+rename sync->hardsync
 check the longer names in the monitor
 fix the fx gui
 bigger graphs
