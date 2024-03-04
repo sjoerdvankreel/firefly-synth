@@ -351,15 +351,15 @@ cv_matrix_topo(
   int on_note_midi_start = -1;
   auto source_matrix = make_cv_source_matrix(sources);
   auto target_matrix = make_cv_target_matrix(targets);
-  auto const vcv_info = make_topo_info("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", true, "Voice CV Mod", "VM.CV", "VM.CV", module_vcv_cv_matrix, 1);
-  auto const gcv_info = make_topo_info("{330B00F5-2298-4418-A0DC-521B30A8D72D}", true, "Global CV Mod", "GM.CV", "GM.CV", module_gcv_cv_matrix, 1);
-  auto const vaudio_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", true, "Voice Audio Mod", "VM.Audio", "VM.Audio", module_vcv_audio_matrix, 1);
-  auto const gaudio_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", true, "Global Audio Mod", "GM.Audio", "GM.Audio", module_gcv_audio_matrix, 1);
+  auto const vcv_info = make_topo_info_basic("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "VCV-CV", module_vcv_cv_matrix, 1);
+  auto const gcv_info = make_topo_info_basic("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "GCV-CV", module_gcv_cv_matrix, 1);
+  auto const vaudio_info = make_topo_info_basic("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV-A", module_vcv_audio_matrix, 1);
+  auto const gaudio_info = make_topo_info_basic("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "GCV-A", module_gcv_audio_matrix, 1);
 
   if(cv) info = topo_info(global? gcv_info: vcv_info);
   else info = topo_info(global ? gaudio_info : vaudio_info);
 
-  std::string matrix_type = cv? "CV-to-CV": "CV-to-audio";
+  std::string matrix_type = cv? "CV-To-CV": "CV-To-Audio";
   module_stage stage = global ? module_stage::input : module_stage::voice;
   info.description = std::string(matrix_type + " routing matrix with min/max control and various stacking options ") +
     "that affect how source signals are combined in case they affect the same target.";
@@ -380,7 +380,6 @@ cv_matrix_topo(
       make_module_dsp_output(false, make_topo_info_basic("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   
-  result.gui.tabbed_name = result.info.tag.menu_display_name;
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
@@ -396,15 +395,21 @@ cv_matrix_topo(
       select_midi_active(state, cv, global, on_note_midi_start, sm, active); 
   };
   if(cv)
+  {
+    result.gui.tabbed_name = global? "GCV CV Mtx": "VCV CV Mtx";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) {
         return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm);
     };
+  }
   else
+  {
+    result.gui.tabbed_name = global ? "GCV Audio Mtx" : "VCV Audio Mtx";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
         return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
     };
+  }
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"),
