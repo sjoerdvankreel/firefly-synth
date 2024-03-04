@@ -205,15 +205,21 @@ public module_engine {
   std::array<std::array<std::int32_t, reverb_allpass_count>, 2> _rev_allpass_pos = {};
   std::array<std::array<std::vector<float>, reverb_allpass_count>, 2> _rev_allpass = {};
 
-  void process_delay(plugin_block& block, 
+  void process_reverb(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
-  void process_reverb(plugin_block& block, 
+
+  void process_delay(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
-  void process_dly_fdbk(plugin_block& block, 
+  template <bool Sync>
+  void process_delay_sync(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
-  void process_dly_multi(plugin_block& block, 
+  template <bool Sync>
+  void process_dly_fdbk_sync(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
- 
+  template <bool Sync>
+  void process_dly_multi_sync(plugin_block& block, 
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
+
   void process_comb(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
   template <bool Feedforward, bool Feedback>
@@ -1248,39 +1254,37 @@ fx_engine::process_delay(plugin_block& block,
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int dly_mode = block_auto[param_dly_mode][0].step();
-  switch (dly_mode)
+  bool sync = block_auto[param_dly_sync][0].step() != 0;
+  if(sync) process_delay_sync<true>(block, audio_in, modulation);
+  else process_delay_sync<false>(block, audio_in, modulation);
+}
+
+template <bool Sync>
+void fx_engine::process_delay_sync(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
+{
+  switch (block.state.own_block_automation[param_dly_mode][0].step())
   {
-  case dly_mode_fdbk_sync:
-  case dly_mode_fdbk_time:
-    process_dly_fdbk(block, audio_in, modulation);
-    break;
-  case dly_mode_multi_sync:
-  case dly_mode_multi_time:
-    process_dly_multi(block, audio_in, modulation);
-    break;
-  default:
-    assert(false); 
-    break;
+  case dly_mode_fdbk: process_dly_fdbk_sync<Sync>(block, audio_in, modulation); break;
+  case dly_mode_multi: process_dly_multi_sync<Sync>(block, audio_in, modulation); break;
+  default: assert(false); break;
   }
 }
 
-// TODO template
-void
-fx_engine::process_dly_fdbk(plugin_block& block, 
+template <bool Sync>
+void fx_engine::process_dly_fdbk_sync(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   float const max_feedback = 0.99f;
   auto const& block_auto = block.state.own_block_automation;
-  int dly_mode = block_auto[param_dly_mode][0].step();
-  bool sync = dly_is_sync(dly_mode);
 
   auto& l_time_curve = block.state.own_scratch[scratch_dly_fdbk_l];
   auto& r_time_curve = block.state.own_scratch[scratch_dly_fdbk_r];
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
   auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
-  if (sync)
+  
+  if constexpr (Sync)
   {
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
@@ -1328,22 +1332,19 @@ fx_engine::process_dly_fdbk(plugin_block& block,
   }
 }
 
-// TODO template
-void
-fx_engine::process_dly_multi(plugin_block& block, 
+template <bool Sync>
+void fx_engine::process_dly_multi_sync(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
-  int dly_mode = block_auto[param_dly_mode][0].step();
   int tap_count = block_auto[param_dly_multi_taps][0].step();
-  bool sync = dly_is_sync(dly_mode);
-
   auto& time_curve = block.state.own_scratch[scratch_dly_multi_time];
   auto& hold_curve = block.state.own_scratch[scratch_dly_multi_hold];
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
   auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
-  if (sync)
+  
+  if constexpr (Sync)
   {
     for (int f = block.start_frame; f < block.end_frame; f++)
     {
