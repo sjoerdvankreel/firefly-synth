@@ -32,7 +32,6 @@ do forward compat checks - dont load newer versions
 small-ui-changes:
 todo delay conversion
 check the longer names in the monitor
-fix the fx gui
 bigger graphs
 smaller graph text for the big one
 check module header sizes
@@ -43,8 +42,6 @@ check all the short/long names + also in menus
 now have room for cheby shaper/smooth random?
 re-read the param docs and manual
 check all the tooltips and names in matrices
-see if its possible to expand combobox text values
-do large labels as much as possible
 do gain meter for master out gain?
 check the fx-version ui layout
 test all the host demos
@@ -59,10 +56,7 @@ check all the short names in the matrices
 do icons for the osc modes?
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
-label all unlabeled stuff (mostly comboboxes)
-make the whole ui a bit larger for slightly bigger knobs
 divide the matrix tab header over 2 rows so we dont need abbreviations for gm.cv etc
-get rid of the "combined" comboboxes, just make them separate parameters (breaking change!)
 
 other:
 redo cheby shaper?
