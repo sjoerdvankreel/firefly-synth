@@ -35,6 +35,7 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+shrink the big graph
 redo all the presets (prevent slot count warning)
 fix the big graph
 check the reference generator output
