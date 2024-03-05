@@ -35,20 +35,13 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
-vcv-a => vcv->am?
 do kvr update
-better layout upper matrices
-shrink the big graph
 redo all the presets (prevent slot count warning)
-fix the big graph
-check the reference generator output
-re-read the param docs and manual
 check the fx-version ui layout
 test all the host demos
 update the demo tracks
 retest all presets and demo tracks and host tests
 fix up all the presets
-check the fx version
 
 other:
 profile the pad preset
