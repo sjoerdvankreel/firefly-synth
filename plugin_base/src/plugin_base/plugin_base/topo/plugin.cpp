@@ -22,7 +22,8 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
   position.validate(plugin.gui.dimension); 
   if (tabbed) 
   {
-    assert(tab_order.size());
+    assert(tab_modules.size());
+    assert(tab_headers.size() == tab_modules.size());
     assert(dimension.column_sizes.size() == 1 && dimension.row_sizes.size() == 1);
   } else
     dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
@@ -82,7 +83,6 @@ plugin_topo::validate() const
     for (int o = 0; o < modules[m].dsp.outputs.size(); o++)
       PB_ASSERT_EXEC(output_ids.insert(modules[m].dsp.outputs[o].info.tag.id).second);
     if (gui.module_sections[modules[m].gui.section].tabbed) assert(modules[m].info.slot_count == 1);
-    assert(!gui.module_sections[modules[m].gui.section].tabbed || modules[m].gui.tabbed_name.size());
   }
 }
 

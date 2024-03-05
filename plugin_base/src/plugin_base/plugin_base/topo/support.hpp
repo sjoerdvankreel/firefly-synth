@@ -57,7 +57,9 @@ make_module_section_gui_none(std::string const& id, int index);
 module_section_gui
 make_module_section_gui(std::string const& id, int index, gui_position const& position, gui_dimension const& dimension);
 module_section_gui
-make_module_section_gui_tabbed(std::string const& id, int index, gui_position const& position, std::vector<int> const& tab_order);
+make_module_section_gui_tabbed(
+  std::string const& id, int index, gui_position const& position, 
+  std::vector<std::string> tab_headers, std::vector<std::vector<int>> tab_modules);
 
 midi_source
 make_midi_source(topo_tag const& tag, int id, float default_);

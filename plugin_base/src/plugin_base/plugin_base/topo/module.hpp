@@ -105,7 +105,6 @@ struct module_topo_gui final {
   gui_colors colors;
   gui_position position;
   gui_dimension dimension;
-  std::string tabbed_name;
   int autofit_row = 0;
   int autofit_column = 0;
   bool enable_tab_menu = true;

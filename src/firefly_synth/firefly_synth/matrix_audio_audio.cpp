@@ -167,13 +167,11 @@ audio_audio_matrix_topo(
       return render_graph(state, engine, param, mapping, tm); };
   if (global)
   {
-    result.gui.tabbed_name = "Global Audio Matrix";
     result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
     result.minimal_initializer = [is_fx](auto& s) { init_global_minimal(s, is_fx); };
   }
   else
   {
-    result.gui.tabbed_name = "Voice Audio Matrix";
     result.default_initializer = init_voice_default;
     result.minimal_initializer = init_voice_minimal;
   }
