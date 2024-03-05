@@ -32,7 +32,7 @@ enum {
   param_fm_on, param_fm_source, param_fm_target, param_fm_mode, param_fm_idx
 };
 
-static int const route_count = 10;
+static int const route_count = 8;
 extern int const osc_param_type;
 extern int const osc_param_uni_voices;
 extern int const voice_in_param_oversmp;
@@ -130,7 +130,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   module_topo result(make_module(
     make_topo_info_basic("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", module_osc_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, outputs),
-    make_module_gui(section, colors, pos, { 1, 2 })));
+    make_module_gui(section, colors, pos, { 2, 1 })));
   result.info.description = "Oscillator routing matrices that allow for Osc-to-Osc AM, RM and FM.";
 
   result.graph_renderer = render_graph;
@@ -188,7 +188,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 1, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 3 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
     make_topo_info_basic("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM", param_fm_on, route_count),
@@ -221,7 +221,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   auto& fm_mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "Mode", param_fm_mode, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(fm_mode_items(), ""),
-    make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 3 }, make_label_none())));
   fm_mode.gui.tabular = true;
   fm_mode.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_mode.info.description = std::string("Selects unipolar/bipolar mode. ") + 
