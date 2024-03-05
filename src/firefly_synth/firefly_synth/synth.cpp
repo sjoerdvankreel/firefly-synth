@@ -326,8 +326,8 @@ synth_topo(bool is_fx)
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
   result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 38 };
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 2 }, { true, 2 }, { true, 1 } };
-  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 2 }, { true, 2 }, { true, 2 } });
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 2 }, { true, 2 }, { true, 2 } };
+  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
 
   int section_voffset = is_fx? 1: 0;
@@ -354,7 +354,7 @@ synth_topo(bool is_fx)
   if(!is_fx)
   {
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
-      custom_section_osc_graph, { 5, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_osc_graph, { 4, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false, false, { module_osc_osc_matrix, module_voice_in }); });
     result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
       custom_section_vfx_graph, { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
@@ -400,11 +400,11 @@ synth_topo(bool is_fx)
     result->gui.module_sections[module_section_env] = make_module_section_gui(
       "{AB26F56E-DC6D-4F0B-845D-C750728F8FA2}", module_section_env, { 8, 0, 1, 2 }, { 1, 1 });
     result->gui.module_sections[module_section_osc] = make_module_section_gui(
-      "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 5, 0, 1, 2 }, { { 1 }, { 1 } });
+      "{7A457CCC-E719-4C07-98B1-017EA7DEFB1F}", module_section_osc, { 4, 0, 1, 2 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_in] = make_module_section_gui(
-      "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 4, 0, 1, 2 }, { { 1 }, { 1 } });
+      "{FB435C64-8349-4F0F-84FC-FFC82002D69F}", module_section_voice_in, { 5, 0, 1, 2 }, { { 1 }, { 1 } });
     result->gui.module_sections[module_section_voice_out] = make_module_section_gui(
-      "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 4, 2, 1, 1 }, { { 1 }, { 1 } });
+      "{2B764ECA-B745-4087-BB73-1B5952BC6B96}", module_section_voice_out, { 5, 2, 1, 1 }, { { 1 }, { 1 } });
   }
 
   result->modules.resize(module_count);
