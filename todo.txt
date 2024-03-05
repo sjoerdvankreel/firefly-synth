@@ -20,7 +20,7 @@ clap (poly) modulation
 visual routing indicators
 document the header files a bit
 out gain/cpu meter
-basic osc waveform logos
+basic osc waveform icons
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
 
@@ -35,7 +35,9 @@ do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
 small-ui-changes:
+vcv-a => vcv->am?
 do kvr update
+better layout upper matrices
 shrink the big graph
 redo all the presets (prevent slot count warning)
 fix the big graph
