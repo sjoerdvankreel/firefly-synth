@@ -47,8 +47,7 @@ struct module_section_gui final {
   std::string id;
   gui_position position;
   gui_dimension dimension;
-  std::vector<std::string> tab_headers;
-  std::vector<std::vector<int>> tab_modules; // horizontal divide hardcoded
+  std::vector<int> tab_order;
   
   void validate(plugin_topo const& plugin, int index_) const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);

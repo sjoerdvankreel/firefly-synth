@@ -395,13 +395,21 @@ cv_matrix_topo(
       select_midi_active(state, cv, global, on_note_midi_start, sm, active); 
   };
   if(cv)
+  {
+    result.gui.tabbed_name = global? "Global CV CV Matrix": "Voice CV CV Matrix";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) {
-        return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm); };
+        return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm);
+    };
+  }
   else
+  {
+    result.gui.tabbed_name = global ? "Global CV Audio Matrix" : "Voice CV Audio Matrix";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
-        return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm); };
+        return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
+    };
+  }
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"),
