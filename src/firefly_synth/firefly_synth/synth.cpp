@@ -22,6 +22,7 @@ enum {
   custom_section_controls,
   custom_section_gfx_graph,
   custom_section_glfo_graph,
+  custom_section_osc_osc_matrix_graph,
   custom_section_audio_matrix_graphs,
   custom_section_cv_matrix_graphs,
   custom_section_fx_count,
@@ -366,9 +367,12 @@ synth_topo(bool is_fx)
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
       custom_section_env_graph, { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_env, false, false, {}); });
+    result->gui.custom_sections[custom_section_osc_osc_matrix_graph] = make_custom_section_gui(
+      custom_section_osc_osc_matrix_graph, { 4, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_osc_osc_matrix); });
     result->gui.custom_sections[custom_section_audio_matrix_graphs] = make_custom_section_gui(
-      custom_section_audio_matrix_graphs, { 4, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_audio_matrices); }); // TODO
+      custom_section_audio_matrix_graphs, { 4, 4, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_audio_matrices); });
   }
 
   result->gui.module_sections.resize(is_fx? module_section_fx_count: module_section_synth_count);
@@ -384,11 +388,11 @@ synth_topo(bool is_fx)
     "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_master_out, { section_voffset + 1, 2, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 1 }, { { 1 }, { 1 } });
-  std::vector<int> audio_matrix_modules = { module_osc_osc_matrix, module_vaudio_audio_matrix, module_gaudio_audio_matrix };
+  std::vector<int> audio_matrix_modules = { module_vaudio_audio_matrix, module_gaudio_audio_matrix };
   std::vector<int> cv_matrix_modules = { module_vcv_audio_matrix, module_vcv_cv_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
   if(is_fx) 
   {
-    audio_matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
+    audio_matrix_modules = { module_gaudio_audio_matrix };
     cv_matrix_modules = { module_gcv_audio_matrix, module_gcv_cv_matrix };
   }
   result->gui.module_sections[module_section_osc_osc_matrix] = make_module_section_gui(
