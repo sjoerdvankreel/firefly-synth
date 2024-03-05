@@ -334,10 +334,10 @@ synth_topo(bool is_fx)
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
-    custom_section_patch_controls, { is_fx? 1: 0, is_fx? 0: 3, 1, is_fx? 3: 1 }, custom_colors,
+    custom_section_patch_controls, { is_fx? 1: 0, is_fx? 0: 4, 1, is_fx? 3: 1 }, custom_colors,
       [is_fx](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, is_fx, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
-    custom_section_edit_controls, { is_fx ? 1 : 0, is_fx ? 0 : 4, 1, is_fx ? 3 : 1 }, custom_colors,
+    custom_section_edit_controls, { is_fx ? 1 : 0, is_fx ? 0 : 3, 1, is_fx ? 3 : 1 }, custom_colors,
       [is_fx](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, is_fx, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
