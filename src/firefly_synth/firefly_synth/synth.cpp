@@ -36,7 +36,7 @@ enum {
   module_section_master_in, module_section_master_out,
   module_section_gfx, module_section_glfo,
   module_section_monitor, 
-  module_section_audio_matrices, module_section_cv_matrices,
+  module_section_osc_osc_matrix, module_section_audio_matrices, module_section_cv_matrices,
   module_section_fx_count,
   module_section_voice_in = module_section_fx_count, module_section_voice_out,
   module_section_osc, module_section_vfx, 
@@ -368,7 +368,7 @@ synth_topo(bool is_fx)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_env, false, false, {}); });
     result->gui.custom_sections[custom_section_audio_matrix_graphs] = make_custom_section_gui(
       custom_section_audio_matrix_graphs, { 4, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_audio_matrices); });
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_audio_matrices); }); // TODO
   }
 
   result->gui.module_sections.resize(is_fx? module_section_fx_count: module_section_synth_count);
@@ -391,8 +391,10 @@ synth_topo(bool is_fx)
     audio_matrix_modules = { module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
     cv_matrix_modules = { module_gcv_audio_matrix, module_gcv_cv_matrix };
   }
+  result->gui.module_sections[module_section_osc_osc_matrix] = make_module_section_gui(
+    "{7529B223-CB9F-429F-A547-2E3480A896A6}", module_section_osc_osc_matrix, { 1, 3, 3, 1 }, { 1, 1 });
   result->gui.module_sections[module_section_audio_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_audio_matrices, { is_fx? 0: 1, 3, 3, 2 }, audio_matrix_modules);
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_audio_matrices, { is_fx? 0: 1, 4, 3, 1 }, audio_matrix_modules);
   result->gui.module_sections[module_section_cv_matrices] = make_module_section_gui_tabbed(
     "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_cv_matrices, { is_fx ? 2 : 5, 3, 3, 2 }, cv_matrix_modules);
   if (!is_fx)
@@ -428,7 +430,7 @@ synth_topo(bool is_fx)
   result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, voice_colors, { 0, 0 }, false, is_fx);
   result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true, is_fx);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony, is_fx);
-  result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_audio_matrices, matrix_colors, { 0, 0 }, result.get());
+  result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_osc_osc_matrix, matrix_colors, { 0, 0 }, result.get());
   result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_audio_matrices, matrix_colors, { 0, 0 }, true, is_fx,
     make_audio_audio_matrix_sources(result.get(), true, is_fx), make_audio_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_hidden : module_section_audio_matrices, matrix_colors, { 0, 0 }, false, is_fx,
