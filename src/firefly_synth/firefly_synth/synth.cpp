@@ -325,7 +325,7 @@ synth_topo(bool is_fx)
 #endif
 
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
-  result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 38 };
+  result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 19, 19 };
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 2 }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
@@ -338,7 +338,7 @@ synth_topo(bool is_fx)
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_controls] = make_custom_section_gui(
-    custom_section_controls, { is_fx? 1: 0, is_fx? 0: 3, 1, is_fx? 3: 1 }, custom_colors,
+    custom_section_controls, { is_fx? 1: 0, is_fx? 0: 3, 1, is_fx? 3: 2 }, custom_colors,
       [is_fx](auto gui, auto lnf, auto store) -> juce::Component& { return make_controls_section(gui, lnf, is_fx, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
@@ -350,7 +350,7 @@ synth_topo(bool is_fx)
     custom_section_glfo_graph, { section_voffset + 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
   result->gui.custom_sections[custom_section_cv_matrix_graphs] = make_custom_section_gui(
-    custom_section_cv_matrix_graphs, { is_fx? 3: 8, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_cv_matrix_graphs, { is_fx? 3: 8, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_cv_matrices); });
   if(!is_fx)
   {
@@ -367,7 +367,7 @@ synth_topo(bool is_fx)
       custom_section_env_graph, { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_env, false, false, {}); });
     result->gui.custom_sections[custom_section_audio_matrix_graphs] = make_custom_section_gui(
-      custom_section_audio_matrix_graphs, { 4, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_audio_matrix_graphs, { 4, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_audio_matrices); });
   }
 
@@ -392,9 +392,9 @@ synth_topo(bool is_fx)
     cv_matrix_modules = { module_gcv_audio_matrix, module_gcv_cv_matrix };
   }
   result->gui.module_sections[module_section_audio_matrices] = make_module_section_gui_tabbed(
-    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_audio_matrices, { is_fx? 0: 1, 3, 3, 1 }, audio_matrix_modules);
+    "{11A46FE6-9009-4C17-B177-467243E171C8}", module_section_audio_matrices, { is_fx? 0: 1, 3, 3, 2 }, audio_matrix_modules);
   result->gui.module_sections[module_section_cv_matrices] = make_module_section_gui_tabbed(
-    "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_cv_matrices, { is_fx ? 2 : 5, 3, 3, 1 }, cv_matrix_modules);
+    "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_cv_matrices, { is_fx ? 2 : 5, 3, 3, 2 }, cv_matrix_modules);
   if (!is_fx)
   {
     result->gui.module_sections[module_section_vlfo] = make_module_section_gui(
