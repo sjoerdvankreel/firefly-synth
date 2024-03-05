@@ -80,10 +80,10 @@ make_module_graph_params(int module, bool render_on_module_mouse_enter,
 static Component&
 make_module_graph_section(
   plugin_gui* gui, lnf* lnf, component_store store, int module, bool render_on_module_mouse_enter,
-  bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices)
+  bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices, float partition_scale = 0.15f)
 {
   graph_params params;
-  params.partition_scale = 0.15f;
+  params.partition_scale = partition_scale;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params = make_module_graph_params(module, 
     render_on_module_mouse_enter, render_on_param_mouse_enter, dependent_module_indices);
@@ -368,7 +368,7 @@ synth_topo(bool is_fx)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_env, false, false, {}); });
     result->gui.custom_sections[custom_section_osc_osc_matrix_graph] = make_custom_section_gui(
       custom_section_osc_osc_matrix_graph, { 4, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc_osc_matrix, true, false, { module_osc, module_voice_in }); });
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc_osc_matrix, true, false, { module_osc, module_voice_in }, 0.075f); });
     result->gui.custom_sections[custom_section_audio_matrix_graphs] = make_custom_section_gui(
       custom_section_audio_matrix_graphs, { 4, 4, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, module_section_audio_matrices); });
