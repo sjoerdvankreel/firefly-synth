@@ -758,7 +758,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
 
   auto& distortion_bottom = result.sections.emplace_back(make_param_section(section_dist_bottom,
     make_topo_tag_basic("{A6A60A20-DADD-42B5-B307-D5B35AABB510}", "Distortion Bottom"),
-    make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, gui_dimension::auto_size, 1 } })));
   distortion_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "Oversample", "Dst.OverSmp", param_dist_over, 1),
