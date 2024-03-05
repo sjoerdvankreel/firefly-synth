@@ -136,7 +136,7 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store, int
 }
 
 static Component&
-make_patch_controls_section(plugin_gui* gui, lnf* lnf, bool is_fx, component_store store)
+make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2);
   result.add(gui->make_load_button(), { 0, 0 });
@@ -147,7 +147,7 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, bool is_fx, component_sto
 }
 
 static Component&
-make_edit_controls_section(plugin_gui* gui, lnf* lnf, bool is_fx, component_store store)
+make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2);
   auto& tweak_label = store_component<juce::Label>(store);
@@ -326,30 +326,29 @@ synth_topo(bool is_fx)
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
   result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 19, 19 };
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { !is_fx, 1 }, { true, 2 }, { true, 2 }, { true, 2 } };
-  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
+  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
 
-  int section_voffset = is_fx? 1: 0;
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   auto make_title_section_ui = [custom_color, is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
     return make_title_section(gui, lnf, store, custom_color, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
-    custom_section_patch_controls, { is_fx? 1: 0, is_fx? 0: 4, 1, is_fx? 3: 1 }, custom_colors,
-      [is_fx](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, is_fx, store); });
+    custom_section_patch_controls, { 0, 4, 1, 1 }, custom_colors,
+      [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
-    custom_section_edit_controls, { is_fx ? 1 : 0, is_fx ? 0 : 3, 1, is_fx ? 3 : 1 }, custom_colors,
-      [is_fx](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, is_fx, store); });
+    custom_section_edit_controls, { 0, 3, 1, 1 }, custom_colors,
+      [](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
-    custom_section_gfx_graph, { section_voffset + 2, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_gfx_graph, { 2, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, false, false, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
-    custom_section_glfo_graph, { section_voffset + 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_glfo_graph, { 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
   result->gui.custom_sections[custom_section_cv_matrix_graphs] = make_custom_section_gui(
     custom_section_cv_matrix_graphs, { is_fx? 3: 8, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
@@ -380,13 +379,13 @@ synth_topo(bool is_fx)
   result->gui.module_sections[module_section_hidden] = make_module_section_gui_none(
     "{F289D07F-0A00-4AB1-B87B-685CB4D8B2F8}", module_section_hidden);
   result->gui.module_sections[module_section_glfo] = make_module_section_gui(
-    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_glfo, { section_voffset + 3, 0, 1, 2 }, { 1, 1 });
+    "{96C75EE5-577E-4508-A85A-E92FF9FD8A4D}", module_section_glfo, { 3, 0, 1, 2 }, { 1, 1 });
   result->gui.module_sections[module_section_gfx] = make_module_section_gui(
-    "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { section_voffset + 2, 0, 1, 2 }, { 1, 1 });
+    "{654B206B-27AE-4DFD-B885-772A8AD0A4F3}", module_section_gfx, { 2, 0, 1, 2 }, { 1, 1 });
   result->gui.module_sections[module_section_master_in] = make_module_section_gui(
-    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { section_voffset + 1, 0, 1, 2 }, { { 1 }, { 1 } });
+    "{F9578AAA-66A4-4B0C-A941-4719B5F0E998}", module_section_master_in, { 1, 0, 1, 2 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_master_out] = make_module_section_gui(
-    "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_master_out, { section_voffset + 1, 2, 1, 1 }, { { 1 }, { 1 } });
+    "{F77335AC-B701-40DA-B4C2-1F55DBCC29A4}", module_section_master_out, { 1, 2, 1, 1 }, { { 1 }, { 1 } });
   result->gui.module_sections[module_section_monitor] = make_module_section_gui(
     "{8FDAEB21-8876-4A90-A8E1-95A96FB98FD8}", module_section_monitor, { 0, 1, 1, 1 }, { { 1 }, { 1 } });
   std::vector<int> audio_matrix_modules = { module_vaudio_audio_matrix, module_gaudio_audio_matrix };
