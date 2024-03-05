@@ -782,7 +782,7 @@ Component&
 plugin_gui::make_init_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Init");
+  result.setButtonText("Init Patch");
   result.onClick = [this] { init_patch(); };
   return result;
 }
@@ -791,7 +791,7 @@ Component&
 plugin_gui::make_clear_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Clear");
+  result.setButtonText("Clear Patch");
   result.onClick = [this] { clear_patch(); };
   return result;
 }
@@ -800,7 +800,7 @@ Component&
 plugin_gui::make_load_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Load");
+  result.setButtonText("Load Patch");
   result.onClick = [this] { load_patch(); };
   return result;
 }
@@ -809,7 +809,7 @@ Component&
 plugin_gui::make_save_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Save");
+  result.setButtonText("Save Patch");
   result.onClick = [this] { save_patch(); };
   return result;
 }
@@ -852,7 +852,7 @@ void
 plugin_gui::save_patch()
 {
   int save_flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
-  FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  FileChooser* chooser = new FileChooser("Save Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(save_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
@@ -865,7 +865,7 @@ void
 plugin_gui::load_patch()
 {
   int load_flags = FileBrowserComponent::openMode;
-  FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  FileChooser* chooser = new FileChooser("Load Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(load_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
