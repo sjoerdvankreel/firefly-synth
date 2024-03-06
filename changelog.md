@@ -15,7 +15,7 @@
   - Envelope type + slope mode.
   - Distortion shaper + skew controls.
 - Rearranged lfo/distortion shape options
-  - NOTE! This is a breaking change for automation on this parameters.
+  - NOTE! This is a breaking change for automation on this parameter.
 
 Even though there are some breaking changes I decided *against* changing the plugin id,
 because breaking changes relate to automation of discrete-valued parameters only.
