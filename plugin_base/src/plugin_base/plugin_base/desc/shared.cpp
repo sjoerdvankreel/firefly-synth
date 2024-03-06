@@ -11,9 +11,9 @@ desc_id(topo_info const& info, int slot)
 }
 
 std::string
-desc_name(topo_info const& info, int slot)
+desc_name(topo_info const& info, std::string const& name_base, int slot)
 {
-  std::string result = info.tag.name;
+  std::string result = name_base;
   if (info.slot_count > 1) result += " " + std::to_string(slot + (info.tag.name_one_based? 1: 0));
   return result;
 }

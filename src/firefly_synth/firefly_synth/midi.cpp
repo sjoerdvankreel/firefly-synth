@@ -24,11 +24,11 @@ module_topo
 midi_topo(int section)
 {
   module_topo result(make_module(
-    make_topo_info("{4E70A342-A95A-4860-8223-D4F029E22874}", "MIDI", "MIDI", true, false, module_midi, 1),
+    make_topo_info("{4E70A342-A95A-4860-8223-D4F029E22874}", true, "MIDI", "MIDI", "MIDI", module_midi, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
-      make_module_dsp_output(true, make_topo_info("{D38E46EA-4064-410C-BB33-DB6DA418463B}", "CP", midi_output_cp, 1)),
-      make_module_dsp_output(true, make_topo_info("{C3A35C9F-3F80-4DE0-8C8D-D18D340F9DBC}", "PB", midi_output_pb, 1)),
-      make_module_dsp_output(true, make_topo_info("{023C1F1C-873C-4D43-9469-6F36D948EE7A}", "CC", "", false, false, midi_output_cc, 128))}),
+      make_module_dsp_output(true, make_topo_info_basic("{D38E46EA-4064-410C-BB33-DB6DA418463B}", "CP", midi_output_cp, 1)),
+      make_module_dsp_output(true, make_topo_info_basic("{C3A35C9F-3F80-4DE0-8C8D-D18D340F9DBC}", "PB", midi_output_pb, 1)),
+      make_module_dsp_output(true, make_topo_info("{023C1F1C-873C-4D43-9469-6F36D948EE7A}", false, "CC", "CC", "CC", midi_output_cc, 128))}),
     make_module_gui_none(section)));
   result.info.description = "Provides MIDI pitchbend, channel pressure and 128 CC parameters as modulation sources.";
 

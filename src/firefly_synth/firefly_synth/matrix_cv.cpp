@@ -68,15 +68,15 @@ type_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{7CE8B8A1-0711-4BDE-BDFF-0F97BF16EB57}", "Off");
-  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul.Abs");
-  result.emplace_back("{51FBF610-2039-448E-96B0-3C5FDED5DC7C}", "Mul.Rel");
-  result.emplace_back("{D9AEAC34-8E75-4EFD-91D3-6F9058226816}", "Mul.Stk");
-  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add.Abs");
-  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add.Rel");
-  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add.Stk");
-  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "AB.Abs");
-  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "AB.Rel");
-  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "AB.Stk");
+  result.emplace_back("{C185C0A7-AE6A-4ADE-8171-119A96C24233}", "Mul Abs");
+  result.emplace_back("{51FBF610-2039-448E-96B0-3C5FDED5DC7C}", "Mul Rel");
+  result.emplace_back("{D9AEAC34-8E75-4EFD-91D3-6F9058226816}", "Mul Stk");
+  result.emplace_back("{000C0860-B191-4554-9249-85846B1AFFD1}", "Add Abs");
+  result.emplace_back("{169406D2-E86F-4275-A49F-59ED67CD7661}", "Add Rel");
+  result.emplace_back("{621467B6-CFB7-4801-9DF4-6F9A200AD098}", "Add Stk");
+  result.emplace_back("{23FB17DA-B98B-49FF-8D46-4E5FE7F486D6}", "AB Abs");
+  result.emplace_back("{6708DDD1-14EA-4E1D-8A1F-E4FFE76A87F0}", "AB Rel");
+  result.emplace_back("{1CCAB37F-0AA7-4A77-8C4C-28838970665B}", "AB Stk");
   return result;
 }
 
@@ -145,33 +145,33 @@ public:
 static void
 init_audio_voice_default(plugin_state& state)
 {
-  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 0, "Add.Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 0, "Add Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 0, "Env 2");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 0, "V.FX 1 SVF.Frq");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 1, "AB.Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 0, "VFX 1 SVF Freq");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 1, "AB Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_min, 1, "35");
   state.set_text_at(module_vcv_audio_matrix, 0, param_max, 1, "65");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 1, "G.LFO 2");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "V.Audio Bal 1");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 2, "AB.Abs");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "M.In PB");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "V.In PB");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 3, "Mul.Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 1, "GLFO 2");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 1, "VAudio Bal 1");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 2, "AB Abs");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_source, 2, "MIn PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 2, "VIn PB");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_type, 3, "Mul Abs");
   state.set_text_at(module_vcv_audio_matrix, 0, param_source, 3, "Note Velo");
-  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 3, "V.Out Gain");
+  state.set_text_at(module_vcv_audio_matrix, 0, param_target, 3, "VOut Gain");
 }
 
 static void
 init_audio_global_default(plugin_state& state)
 {
-  state.set_text_at(module_gcv_audio_matrix, 0, param_type, 0, "AB.Abs");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_type, 0, "AB Abs");
   state.set_text_at(module_gcv_audio_matrix, 0, param_min, 0, "35");
   state.set_text_at(module_gcv_audio_matrix, 0, param_max, 0, "65");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 0, "G.LFO 1");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 0, "G.FX 1 SVF.Frq");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_type, 1, "Add.Abs");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "M.In Mod");
-  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 1, "G.FX 1 SVF.Frq");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 0, "GLFO 1");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 0, "GFX 1 SVF Freq");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_type, 1, "Add Abs");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_source, 1, "MIn Mod");
+  state.set_text_at(module_gcv_audio_matrix, 0, param_target, 1, "GFX 1 SVF Freq");
 }
 
 audio_routing_cv_params
@@ -351,15 +351,15 @@ cv_matrix_topo(
   int on_note_midi_start = -1;
   auto source_matrix = make_cv_source_matrix(sources);
   auto target_matrix = make_cv_target_matrix(targets);
-  auto const vcv_info = make_topo_info("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "Voice CV Mod", "VM.CV", true, true, module_vcv_cv_matrix, 1);
-  auto const gcv_info = make_topo_info("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "Global CV Mod", "GM.CV", true, true, module_gcv_cv_matrix, 1);
-  auto const vaudio_info = make_topo_info("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "Voice Audio Mod", "VM.Audio", true, true, module_vcv_audio_matrix, 1);
-  auto const gaudio_info = make_topo_info("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "Global Audio Mod", "GM.Audio", true, true, module_gcv_audio_matrix, 1);
+  auto const vcv_info = make_topo_info_basic("{C21FFFB0-DD6E-46B9-89E9-01D88CE3DE46}", "VCV-CV", module_vcv_cv_matrix, 1);
+  auto const gcv_info = make_topo_info_basic("{330B00F5-2298-4418-A0DC-521B30A8D72D}", "GCV-CV", module_gcv_cv_matrix, 1);
+  auto const vaudio_info = make_topo_info_basic("{5F794E80-735C-43E8-B8EC-83910D118AF0}", "VCV-A", module_vcv_audio_matrix, 1);
+  auto const gaudio_info = make_topo_info_basic("{DB22D4C1-EDA5-45F6-AE9B-183CA6F4C28D}", "GCV-A", module_gcv_audio_matrix, 1);
 
   if(cv) info = topo_info(global? gcv_info: vcv_info);
   else info = topo_info(global ? gaudio_info : vaudio_info);
 
-  std::string matrix_type = cv? "CV-to-CV": "CV-to-audio";
+  std::string matrix_type = cv? "CV-To-CV": "CV-To-Audio";
   module_stage stage = global ? module_stage::input : module_stage::voice;
   info.description = std::string(matrix_type + " routing matrix with min/max control and various stacking options ") +
     "that affect how source signals are combined in case they affect the same target.";
@@ -377,10 +377,9 @@ cv_matrix_topo(
   int route_count = route_count_from_matrix_type(cv, global);
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, scratch_count, {
-      make_module_dsp_output(false, make_topo_info("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
+      make_module_dsp_output(false, make_topo_info_basic("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
     make_module_gui(section, colors, pos, { 1, 1 })));
   
-  result.gui.tabbed_name = result.info.tag.short_name;
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;
   result.graph_renderer = [sm = source_matrix.mappings, tm = target_matrix](
@@ -396,23 +395,29 @@ cv_matrix_topo(
       select_midi_active(state, cv, global, on_note_midi_start, sm, active); 
   };
   if(cv)
+  {
+    result.gui.tabbed_name = global? "Global CV CV Matrix": "Voice CV CV Matrix";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) {
         return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm);
     };
+  }
   else
+  {
+    result.gui.tabbed_name = global ? "Global CV Audio Matrix" : "Voice CV Audio Matrix";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
         return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
     };
+  }
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"), 
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 4, 5, -30, -30, -30, -30 } })));
+    make_topo_tag_basic("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"),
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1, 1 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
-    make_topo_info("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", "Op", true, true, param_type, route_count),
+    make_topo_info_basic("{4DF9B283-36FC-4500-ACE6-4AEBF74BA694}", "Op", param_type, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(type_items(), ""),
     make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 0 }, make_label_none())));
   type.gui.tabular = true;
@@ -432,9 +437,9 @@ cv_matrix_topo(
     "Stk (Stacked): modulate taking into account all previous modulation sources affecting the same parameter.";
 
   auto& source = result.params.emplace_back(make_param(
-    make_topo_info("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", "Source", true, true, param_source, route_count),
+    make_topo_info_basic("{E6D638C0-2337-426D-8C8C-71E9E1595ED3}", "Source", param_source, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(source_matrix.items, ""),
-    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 1 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 1 }, make_label_none())));
   source.gui.tabular = true;
   source.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   source.gui.submenu = source_matrix.submenu;
@@ -448,9 +453,9 @@ cv_matrix_topo(
       });  
   
   auto& target = result.params.emplace_back(make_param(
-    make_topo_info("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", "Target", true, true, param_target, route_count),
+    make_topo_info_basic("{94A037CE-F410-4463-8679-5660AFD1582E}", "Target", param_target, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(target_matrix.items, ""),
-    make_param_gui(section_main, gui_edit_type::list, param_layout::vertical, { 0, 2 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::autofit_list, param_layout::vertical, { 0, 2 }, make_label_none())));
   target.gui.tabular = true;
   target.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   target.gui.submenu = target_matrix.submenu;
@@ -467,32 +472,32 @@ cv_matrix_topo(
       });
 
   auto& offset = result.params.emplace_back(make_param(
-    make_topo_info("{86ECE946-D554-4445-B8ED-2A7380C910E4}", "Offset", "Off", true, true, param_offset, route_count),
+    make_topo_info_basic("{86ECE946-D554-4445-B8ED-2A7380C910E4}", "Offset", param_offset, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-1, 1, 0, 2, ""),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
   offset.gui.tabular = true;
   offset.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   offset.info.description = std::string("Source signal offset. Used to transform source before modulation is applied. ") +
     "Useful to stretch things like midi note/velocity into the full [0, 1] range.";
   auto& scale = result.params.emplace_back(make_param(
-    make_topo_info("{6564CE04-0AB8-4CDD-8F3D-E477DD1F4715}", "Scale", "Scl", true, true, param_scale, route_count),
+    make_topo_info_basic("{6564CE04-0AB8-4CDD-8F3D-E477DD1F4715}", "Scale", param_scale, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1, 32, 1, 2, ""),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
   scale.gui.tabular = true;
   scale.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   scale.info.description = std::string("Source signal multiplier. Used to transform source before modulation is applied. ") +
     "Useful to stretch things like midi note/velocity into the full [0, 1] range.";
   auto& min = result.params.emplace_back(make_param(
-    make_topo_info("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", "Min", true, true, param_min, route_count),
+    make_topo_info_basic("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", param_min, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 5 }, make_label_none())));
   min.gui.tabular = true;
   min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   min.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";
   auto& max = result.params.emplace_back(make_param(
-    make_topo_info("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", "Max", true, true, param_max, route_count),
+    make_topo_info_basic("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", param_max, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 6 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 6 }, make_label_none())));
   max.gui.tabular = true;
   max.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   max.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";

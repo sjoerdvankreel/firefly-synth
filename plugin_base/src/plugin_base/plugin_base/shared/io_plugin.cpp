@@ -1,3 +1,4 @@
+#include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/shared/io_plugin.hpp>
 
 #include <juce_core/juce_core.h>
@@ -14,10 +15,45 @@ namespace plugin_base {
 static int const file_version = 1;
 static std::string const file_magic = "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}";
 
-static load_result load_extra_internal(var const& json, extra_state& state);
-static load_result load_state_internal(var const& json, plugin_state& state);
 static std::unique_ptr<DynamicObject> save_extra_internal(extra_state const& state);
 static std::unique_ptr<DynamicObject> save_state_internal(plugin_state const& state);
+static load_result load_extra_internal(var const& json, extra_state& state);
+static load_result load_state_internal(var const& json, plugin_version const& old_version, plugin_state& state);
+
+load_handler::
+load_handler(juce::var const* json, plugin_version const& old_version):
+_json(json), _old_version(old_version) {}
+
+bool 
+load_handler::old_param_value(
+  std::string const& old_module_id, int old_module_slot,
+  std::string const& old_param_id, int old_param_slot,
+  std::string& old_value) const
+{
+  for (int m = 0; m < (*_json)["state"].size(); m++)
+    if((*_json)["modules"][m]["id"].toString().toStdString() == old_module_id)
+    {
+      var module_slots = (*_json)["state"][m]["slots"];
+      if(module_slots.size() > old_module_slot)
+      {
+        var old_params = module_slots[old_module_slot]["params"];
+        for(int p = 0; p < old_params.size(); p++)
+        {
+          auto old_json_param_id = (*_json)["modules"][m]["params"][p]["id"].toString().toStdString();
+          if(old_json_param_id == old_param_id)
+          {
+            var param_slots = old_params[p]["slots"];
+            if(param_slots.size() > old_param_slot)
+            {
+              old_value = param_slots[old_param_slot].toString().toStdString();
+              return true;
+            }
+          }
+        }
+      }
+    }
+  return false;
+}
 
 static std::vector<char>
 release_json_to_buffer(std::unique_ptr<DynamicObject>&& json)
@@ -44,9 +80,10 @@ wrap_json_with_meta(plugin_topo const& topo, var const& json)
   meta->setProperty("file_magic", var(file_magic));
   meta->setProperty("file_version", var(file_version));
   meta->setProperty("plugin_id", String(topo.tag.id));
-  meta->setProperty("plugin_name", String(topo.tag.name));
-  meta->setProperty("plugin_version_major", topo.version_major);
-  meta->setProperty("plugin_version_minor", topo.version_minor);  
+  meta->setProperty("plugin_name", String(topo.tag.full_name));
+  meta->setProperty("plugin_version_major", topo.version.major);
+  meta->setProperty("plugin_version_minor", topo.version.minor);  
+  meta->setProperty("plugin_version_patch", topo.version.patch);
 
   auto checked = std::make_unique<DynamicObject>();
   checked->setProperty("meta", var(meta.release()));
@@ -63,8 +100,14 @@ wrap_json_with_meta(plugin_topo const& topo, var const& json)
 }
 
 static load_result
-unwrap_json_from_meta(plugin_topo const& topo, var const& json, var& result)
+unwrap_json_from_meta(
+  plugin_topo const& topo, var const& json, 
+  var& result, plugin_version& old_version)
 {
+  old_version.major = 0;
+  old_version.minor = 0;
+  old_version.patch = 0;
+
   if(!json.hasProperty("checksum"))
     return load_result("Invalid checksum.");
   if (!json.hasProperty("checked"))
@@ -85,10 +128,19 @@ unwrap_json_from_meta(plugin_topo const& topo, var const& json, var& result)
     return load_result("Invalid file version.");
   if (meta["plugin_id"] != topo.tag.id)
     return load_result("Invalid plugin id.");
-  if ((int)meta["plugin_version_major"] > topo.version_major)
+
+  old_version.major = (int)meta["plugin_version_major"];
+  old_version.minor = (int)meta["plugin_version_minor"];
+  if(meta.hasProperty("plugin_version_patch"))
+    old_version.patch = (int)meta["plugin_version_patch"];
+
+  if (old_version.major > topo.version.major)
     return load_result("Invalid plugin version.");
-  if ((int)meta["plugin_version_major"] == topo.version_major)
-    if ((int)meta["plugin_version_minor"] > topo.version_minor)
+  if (old_version.major == topo.version.major)
+    if (old_version.minor > topo.version.minor)
+      return load_result("Invalid plugin version.");
+  if (old_version.major == topo.version.major && old_version.minor == topo.version.minor)
+    if (old_version.patch > topo.version.patch)
       return load_result("Invalid plugin version.");
 
   result = checked["content"];
@@ -114,10 +166,11 @@ plugin_io_load_state(std::vector<char> const& data, plugin_state& state)
 {
   var json;
   var content;
+  plugin_version old_version;
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
-  result = unwrap_json_from_meta(*state.desc().plugin, json, content);
-  return load_state_internal(content, state);
+  result = unwrap_json_from_meta(*state.desc().plugin, json, content, old_version);
+  return load_state_internal(content, old_version, state);
 }
 
 load_result
@@ -125,9 +178,10 @@ plugin_io_load_extra(plugin_topo const& topo, std::vector<char> const& data, ext
 {
   var json;
   var content;
+  plugin_version old_version;
   auto result = load_json_from_buffer(data, json);
   if (!result.ok()) return result;
-  result = unwrap_json_from_meta(topo, json, content);
+  result = unwrap_json_from_meta(topo, json, content, old_version);
   return load_extra_internal(content, state);
 }
 
@@ -167,23 +221,25 @@ plugin_io_load_all(std::vector<char> const& data, plugin_state& plugin, extra_st
 {
   var json;
   var content;
+  plugin_version old_version;
+
   auto result = load_json_from_buffer(data, json);
   if(!result.ok()) return result;
-  result = unwrap_json_from_meta(*plugin.desc().plugin, json, content);
+  result = unwrap_json_from_meta(*plugin.desc().plugin, json, content, old_version);
   if (!result.ok()) return result;
 
   // can't produce warnings, only errors
   var extra_content;
-  result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content);
+  result = unwrap_json_from_meta(*plugin.desc().plugin, content["extra"], extra_content, old_version);
   if (!result.ok()) return result;
   auto extra_state_load = extra_state(extra.keyset());
   result = load_extra_internal(extra_content, extra_state_load);
   if (!result.ok()) return result;
 
   var plugin_content;
-  result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content);
+  result = unwrap_json_from_meta(*plugin.desc().plugin, content["plugin"], plugin_content, old_version);
   if (!result.ok()) return result;
-  result = load_state_internal(plugin_content, plugin);
+  result = load_state_internal(plugin_content, old_version, plugin);
   if(!result.ok()) return result;
   for(auto k: extra_state_load.keyset())
     if(extra_state_load.contains_key(k))
@@ -224,16 +280,16 @@ save_state_internal(plugin_state const& state)
     auto const& module_topo = state.desc().plugin->modules[m];
     auto module = std::make_unique<DynamicObject>();
     module->setProperty("id", String(module_topo.info.tag.id));
-    module->setProperty("name", String(module_topo.info.tag.name));
     module->setProperty("slot_count", module_topo.info.slot_count);
+    module->setProperty("name", String(module_topo.info.tag.full_name));
     for (int p = 0; p < module_topo.params.size(); p++)
     {
       auto const& param_topo = module_topo.params[p];
       if(param_topo.dsp.direction == param_direction::output) continue;
       auto param = std::make_unique<DynamicObject>();
       param->setProperty("id", String(param_topo.info.tag.id));
-      param->setProperty("name", String(param_topo.info.tag.name));
       param->setProperty("slot_count", param_topo.info.slot_count);
+      param->setProperty("name", String(param_topo.info.tag.full_name));
       params.append(var(param.release()));
     }
     module->setProperty("params", params);
@@ -278,7 +334,7 @@ save_state_internal(plugin_state const& state)
 
 load_result
 load_state_internal(
-  var const& json, plugin_state& state)
+  var const& json, plugin_version const& old_version, plugin_state& state)
 {
   if(!json.hasProperty("state"))
     return load_result("Invalid plugin.");
@@ -286,8 +342,12 @@ load_state_internal(
     return load_result("Invalid plugin.");
   
   // good to go - only warnings from now on
+  // set up handler for loading old state
+  // in case plugin wants to do conversion
   load_result result;
   state.init(state_init_type::empty);
+  load_handler handler(&json, old_version);
+
   for(int m = 0; m < json["modules"].size(); m++)
   {
     // check for old module not found
@@ -304,7 +364,7 @@ load_state_internal(
     var module_slot_count = json["modules"][m]["slot_count"];
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
     if ((int)module_slot_count != new_module.info.slot_count)
-      result.warnings.push_back("Module '" + new_module.info.tag.name + "' changed slot count.");
+      result.warnings.push_back("Module '" + new_module.info.tag.full_name + "' changed slot count.");
 
     for (int p = 0; p < json["modules"][m]["params"].size(); p++)
     {
@@ -322,7 +382,7 @@ load_state_internal(
       var param_slot_count = json["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
       if ((int)param_slot_count != new_param.info.slot_count)
-        result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "' slot count changed.");
+        result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "' slot count changed.");
     }
   }
 
@@ -333,9 +393,15 @@ load_state_internal(
     auto module_iter = state.desc().module_id_to_index.find(module_id);
     if(module_iter == state.desc().module_id_to_index.end()) continue;
     var module_slots = json["state"][m]["slots"];
+
+    // set up the topo specific converter, if any
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
+    std::unique_ptr<state_converter> converter = {};
+    if (new_module.state_converter_factory != nullptr)
+      converter = new_module.state_converter_factory(&state.desc());
 
     for(int mi = 0; mi < module_slots.size() && mi < new_module.info.slot_count; mi++)
+    {
       for (int p = 0; p < module_slots[mi]["params"].size(); p++)
       {
         auto param_id = json["modules"][m]["params"][p]["id"].toString().toStdString();
@@ -351,9 +417,21 @@ load_state_internal(
           if(state.text_to_plain_at_index(true, index, text, plain))
             state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, plain);
           else
-            result.warnings.push_back("Param '" + new_module.info.tag.name + " " + new_param.info.tag.name + "': invalid value '" + text + "'.");
+          {
+            // give plugin a chance to recover
+            plain_value new_value;
+            if(converter && converter->handle_invalid_param_value(new_module.info.tag.id, mi, new_param.info.tag.id, pi, text, handler, new_value))
+              state.set_plain_at(new_module.info.index, mi, new_param.info.index, pi, new_value);
+            else
+              result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "': invalid value '" + text + "'.");
+          }
         }
       }
+
+      // all params are set, do optional post-process conversion
+      if(converter) 
+        converter->post_process(handler, state);
+    }
   }
 
   return result;

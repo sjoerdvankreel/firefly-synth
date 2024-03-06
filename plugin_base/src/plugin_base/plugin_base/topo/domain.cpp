@@ -97,7 +97,6 @@ param_domain::text_to_plain(
     for (int i = 0; i < timesigs.size(); i++)
       if (textual == timesigs[i].to_text())
         return plain = plain_value::from_step(i), true;
-    assert(false);
     return false;
   }
 
@@ -106,7 +105,6 @@ param_domain::text_to_plain(
     for (int i = 0; i < names.size(); i++)
       if (names[i] == textual)
         return plain = plain_value::from_step(i), true;
-    assert(false);
     return false;
   }
 
@@ -115,7 +113,6 @@ param_domain::text_to_plain(
     for (int i = 0; i < items.size(); i++)
       if ((io && items[i].id == textual) || (!io && items[i].name == textual))
         return plain = plain_value::from_step(i), true;
-    assert(false);
     return false;
   }
 
@@ -123,7 +120,6 @@ param_domain::text_to_plain(
   {
     if (textual == "On") return plain = plain_value::from_step(1), true;
     if (textual == "Off") return plain = plain_value::from_step(0), true;
-    assert(false);
     return false;
   }
 

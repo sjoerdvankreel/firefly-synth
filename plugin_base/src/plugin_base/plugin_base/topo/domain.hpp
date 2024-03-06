@@ -55,7 +55,6 @@ struct list_item final {
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(list_item);
-  list_item(topo_tag const& tag);
   list_item(std::string const& id, std::string const& name);
 };
 
@@ -109,9 +108,6 @@ struct param_domain final {
   plain_value normalized_to_plain_fast(normalized_value normalized) const;
 };
 
-inline list_item::
-list_item(topo_tag const& tag):
-id(tag.id), name(tag.name) {}
 inline list_item::
 list_item(std::string const& id, std::string const& name) :
 id(id), name(name) {}

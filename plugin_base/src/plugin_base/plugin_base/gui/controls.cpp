@@ -77,12 +77,29 @@ menu_button::clicked()
     });
 }
 
+static std::string
+param_slot_name(param_desc const* param)
+{
+  std::string result = param->param->info.tag.display_name;
+  if (param->param->info.slot_count > 1)
+    result += " " + std::to_string(param->info.slot + 1);
+  return result;
+}
+
 std::string 
-param_name_label::label_ref_text(param_desc const* param, bool short_)
+param_name_label::label_ref_text(param_desc const* param)
 {
   auto const& ref_text = param->param->gui.label_reference_text;
-  if (ref_text.size()) return ref_text;
-  return short_ ? param->param->info.tag.short_name : param->info.name;
+  return ref_text.size()? ref_text: param_slot_name(param);
+}
+
+param_name_label::
+param_name_label(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
+binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
+autofit_label(lnf, label_ref_text(param)), _param(param)
+{
+  std::string name = param_slot_name(param);
+  setText(name, juce::dontSendNotification); init();
 }
 
 last_tweaked_label::
@@ -354,16 +371,16 @@ module_name_label::own_param_changed(plain_value plain)
     setText("", dontSendNotification);
     return;
   }
-  std::string name = desc.module->info.tag.name;
-  std::string short_name = desc.module->info.tag.short_name;
+  std::string full_name = desc.module->info.tag.full_name;
+  std::string display_name = desc.module->info.tag.display_name;
   if(desc.module->info.slot_count > 1)
   {
     std::string slot = std::to_string(desc.info.slot + 1);
-    name += " " + slot;
-    short_name += " " + slot;
+    full_name += " " + slot;
+    display_name += " " + slot;
   }
-  setTooltip(name);
-  setText(short_name, dontSendNotification);
+  setTooltip(full_name);
+  setText(display_name, dontSendNotification);
 }
 
 void 

@@ -30,7 +30,7 @@
 
 #define PB_STR_(x) #x
 #define PB_STR(x) PB_STR_(x)
-#define PB_VERSION_TEXT(major, minor) PB_STR(major.minor)
+#define PB_VERSION_TEXT(major, minor, patch) PB_STR(major.minor.patch)
 #define PB_ASSERT_EXEC(x) do { if(!(x)) assert(false); } while(false)
 
 namespace plugin_base {

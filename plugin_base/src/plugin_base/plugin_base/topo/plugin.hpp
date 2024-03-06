@@ -78,10 +78,9 @@ struct plugin_topo_gui final {
 
 // plugin definition
 struct plugin_topo final {
-  int version_major;
-  int version_minor;
   int audio_polyphony;
   int graph_polyphony;
+  plugin_version version;
 
   topo_tag tag;
   plugin_type type;

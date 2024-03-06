@@ -1,3 +1,26 @@
+### March 6, 2024 - V1.2.0.
+
+- Lots of small ui fixes / cleanup.
+- Rename saw waveshaper to off.
+- Add 2 extra master cv aux parameters.
+- Fixed a bug in the triangle waveshaper.
+- Drop square waveshaper (bug, it shouldn't have been there).
+- Comb filter gets additional mode select (feedback/feedforward/both).
+- Split out combined comboboxes to separate controls:
+  - NOTE! This is a breaking change for automation on those parameters.
+  - LFO mode + sync.
+  - Delay mode + sync.
+  - LFO shape + skew controls.
+  - FX Type + distortion mode.
+  - Envelope type + slope mode.
+  - Distortion shaper + skew controls.
+- Rearranged lfo/distortion shape options
+  - NOTE! This is a breaking change for automation on this parameter.
+
+Even though there are some breaking changes I decided *against* changing the plugin id,
+because breaking changes relate to automation of discrete-valued parameters only.
+Regular loading of projects/preset files applies the appropriate conversion from previous formats.
+
 ### February 25, 2024 - V1.11.
 
 - Add some more presets and fix some existing ones.

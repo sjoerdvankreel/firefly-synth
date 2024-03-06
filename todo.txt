@@ -2,12 +2,15 @@ always:
 dont forget to tag
 update the history
 keep cpu/mem profiling
+drop all conversion code on breaking plugin id
+dont forget to update the version nr in code and cmake
 
 someday:
 mseg
 midi mpe
 microtonal
 .com website 
+cheby shaper
 voice level unison
 cakewalk bug report
 phaser/flanger/chorus
@@ -16,8 +19,12 @@ vst3 note expressions
 clap (poly) modulation
 visual routing indicators
 document the header files a bit
+out gain/cpu meter
+basic osc waveform icons
+group cv matrix targets by e.g. gaudio gain 1-10
+do basic theming support (e.g. config file with colors)
 
-v1.2:
+v1.3:
 automate zip/dist
 move route up/down
 copy voice<->global
@@ -26,7 +33,6 @@ do copy/paste patch through clipboard
 bug: preset select jumps back to previous
 do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
-do a dry/wet control on the comb filter so i can get rid of the transient amplifier at start
 
 other:
 profile the pad preset

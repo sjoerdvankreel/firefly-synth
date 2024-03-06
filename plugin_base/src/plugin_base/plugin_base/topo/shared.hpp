@@ -19,8 +19,8 @@ inline int constexpr topo_max = 1024;
 
 enum class gui_scroll_mode { none, vertical };
 enum class gui_label_justify { near, far, center };
+enum class gui_label_contents { none, name, value };
 enum class gui_label_align { top, bottom, left, right };
-enum class gui_label_contents { none, name, short_name, value };
 enum class gui_edit_type { none, toggle, list, autofit_list, knob, hslider, vslider, output, output_module_name };
 
 typedef std::function<bool(int module_slot)>
@@ -34,13 +34,30 @@ gui_global_param_binding_selector;
 struct custom_menu_entry { int action; std::string title; };
 struct custom_menu { int menu_id; std::string name; std::vector<custom_menu_entry> entries; };
 
+// plugin version
+struct plugin_version final {
+  int major;
+  int minor;
+  int patch;
+};
+
+inline bool 
+operator<(plugin_version const& l, plugin_version const& r)
+{
+  if(l.major < r.major) return true;
+  if(l.major > r.major) return false;
+  if (l.minor < r.minor) return true;
+  if (l.minor > r.minor) return false;
+  return l.patch < r.patch;
+}
+
 // plugin and section metadata
 struct topo_tag final {
-  std::string id;
-  std::string name;
-  std::string short_name = {};
+  std::string id = {};
+  std::string full_name = {};
+  std::string display_name = {};
+  std::string menu_display_name = {};
   bool name_one_based = true;
-  bool short_name_in_menu = true;
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(topo_tag);

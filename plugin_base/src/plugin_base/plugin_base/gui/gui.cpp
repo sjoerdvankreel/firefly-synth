@@ -77,28 +77,35 @@ justification_type(gui_label const& label)
   switch (label.align)
   {
   case gui_label_align::top:
+    switch (label.justify) {
+    case gui_label_justify::center: return Justification::centred;
+    case gui_label_justify::far: return Justification::centredTop;
+    case gui_label_justify::near: return Justification::centredBottom;
+    default: assert(false); break; }
+    break;
   case gui_label_align::bottom:
     switch (label.justify) {
     case gui_label_justify::center: return Justification::centred;
-    case gui_label_justify::near: return Justification::centredLeft;
-    case gui_label_justify::far: return Justification::centredRight;
-    default: break; }
+    case gui_label_justify::near: return Justification::centredTop;
+    case gui_label_justify::far: return Justification::centredBottom;
+    default: assert(false); break; }
     break;
   case gui_label_align::left:
     switch (label.justify) {
-    case gui_label_justify::near: return Justification::topLeft;
-    case gui_label_justify::far: return Justification::bottomLeft;
-    case gui_label_justify::center: return Justification::centredLeft;
-    default: break; }
+    case gui_label_justify::center: return Justification::centred;
+    case gui_label_justify::far: return Justification::centredLeft;
+    case gui_label_justify::near: return Justification::centredRight;
+    default: assert(false); break; }
     break;
   case gui_label_align::right:
     switch (label.justify) {
-    case gui_label_justify::near: return Justification::topRight;
-    case gui_label_justify::far: return Justification::bottomRight;
-    case gui_label_justify::center: return Justification::centredRight;
-    default: break; }
+    case gui_label_justify::center: return Justification::centred;
+    case gui_label_justify::far: return Justification::centredRight;
+    case gui_label_justify::near: return Justification::centredLeft;
+    default: assert(false); break; }
     break;
   default:
+    assert(false);
     break;
   }
   assert(false);
@@ -568,7 +575,7 @@ plugin_gui::make_modules(module_desc const* slots)
 {
   int index = slots[0].module->info.index;
   auto const& tag = slots[0].module->info.tag;
-  auto& result = make_tab_component(tag.id, tag.name, index);
+  auto& result = make_tab_component(tag.id, tag.display_name, index);
   for (int i = 0; i < slots[0].module->info.slot_count; i++)
     add_component_tab(result, make_param_sections(slots[i]), slots[i].info.global, std::to_string(i + 1));
   if(slots[0].module->info.slot_count > 1)
@@ -618,10 +625,9 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
-    assert(param->info.tag.short_name.size());
-    std::string short_name = param->info.tag.short_name;
-    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), short_name, false, -1, true);
-    header.setText(short_name, dontSendNotification);
+    std::string display_name = param->info.tag.display_name;
+    auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), display_name, false, -1, true);
+    header.setText(display_name, dontSendNotification);
     header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
     result.add(header, vertical, 0);
   }
@@ -682,9 +688,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
   switch (contents)
   {
   case gui_label_contents::name:
-  case gui_label_contents::short_name:
-    result = &make_component<param_name_label>(this, &module, &param, 
-      contents == gui_label_contents::short_name, _module_lnfs[module.module->info.index].get());
+    result = &make_component<param_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());
     break;
   case gui_label_contents::value:
     result = &make_component<param_value_label>(this, &module, &param, _module_lnfs[module.module->info.index].get()); 
@@ -778,7 +782,7 @@ Component&
 plugin_gui::make_init_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Init");
+  result.setButtonText("Init Patch");
   result.onClick = [this] { init_patch(); };
   return result;
 }
@@ -787,7 +791,7 @@ Component&
 plugin_gui::make_clear_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Clear");
+  result.setButtonText("Clear Patch");
   result.onClick = [this] { clear_patch(); };
   return result;
 }
@@ -796,7 +800,7 @@ Component&
 plugin_gui::make_load_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Load");
+  result.setButtonText("Load Patch");
   result.onClick = [this] { load_patch(); };
   return result;
 }
@@ -805,7 +809,7 @@ Component&
 plugin_gui::make_save_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Save");
+  result.setButtonText("Save Patch");
   result.onClick = [this] { save_patch(); };
   return result;
 }
@@ -848,7 +852,7 @@ void
 plugin_gui::save_patch()
 {
   int save_flags = FileBrowserComponent::saveMode | FileBrowserComponent::warnAboutOverwriting;
-  FileChooser* chooser = new FileChooser("Save", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  FileChooser* chooser = new FileChooser("Save Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(save_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;
@@ -861,7 +865,7 @@ void
 plugin_gui::load_patch()
 {
   int load_flags = FileBrowserComponent::openMode;
-  FileChooser* chooser = new FileChooser("Load", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
+  FileChooser* chooser = new FileChooser("Load Patch", File(), String("*.") + _gui_state->desc().plugin->extension, true, false, this);
   chooser->launchAsync(load_flags, [this](FileChooser const& chooser) {
     auto path = chooser.getResult().getFullPathName();
     delete& chooser;

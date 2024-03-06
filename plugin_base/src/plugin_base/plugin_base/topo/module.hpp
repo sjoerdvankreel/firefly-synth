@@ -22,6 +22,7 @@ struct plugin_desc;
 class plugin_state;
 class graph_engine;
 class module_engine;
+class state_converter;
 
 enum class module_output { none, cv, audio };
 enum class module_stage { input, voice, output };
@@ -70,6 +71,8 @@ typedef std::function<std::unique_ptr<graph_engine>(plugin_desc const* desc)>
 module_graph_engine_factory;
 typedef std::function<std::unique_ptr<module_tab_menu_handler>(plugin_state*)>
 module_tab_menu_handler_factory;
+typedef std::function<std::unique_ptr<state_converter>(plugin_desc const* desc)>
+module_state_converter_factory;
 
 typedef std::function<void(
   plugin_state const& state, int slot, jarray<int, 3>& active)>
@@ -141,6 +144,7 @@ struct module_topo final {
   module_graph_renderer graph_renderer;
   module_engine_factory engine_factory;
   module_graph_engine_factory graph_engine_factory;
+  module_state_converter_factory state_converter_factory;
 
   state_initializer minimal_initializer;
   state_initializer default_initializer;
