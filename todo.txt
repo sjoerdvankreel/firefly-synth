@@ -25,6 +25,7 @@ group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
 
 v1.3:
+prettify the edit controls section
 rename preset->load preset
 automate zip/dist
 move route up/down
