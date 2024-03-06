@@ -36,11 +36,7 @@ do forward compat checks - dont load newer versions
 
 small-ui-changes:
 do kvr update
-fix up all the presets
-redo all the presets (prevent slot count warning)
-test all the host demos
-update the demo tracks
-retest all presets and demo tracks and host tests
+test + update the demo tracks
 
 other:
 profile the pad preset
