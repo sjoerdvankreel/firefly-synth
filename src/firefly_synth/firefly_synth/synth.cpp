@@ -415,7 +415,7 @@ synth_topo(bool is_fx)
     std::vector<int> fx_only_matrix_modules = { 
       module_gcv_audio_matrix, module_gcv_cv_matrix, module_gaudio_audio_matrix };
     result->gui.module_sections[module_section_fx_only_matrices] = make_module_section_gui_tabbed(
-      "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_fx_only_matrices, { 3, 3, 2, 2 }, fx_only_matrix_modules);
+      "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_fx_only_matrices, { 1, 3, 2, 2 }, fx_only_matrix_modules);
   } else 
   {
     result->gui.module_sections[module_section_vlfo] = make_module_section_gui(
@@ -459,17 +459,17 @@ synth_topo(bool is_fx)
   result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true, is_fx);
   result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony, is_fx);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_osc_osc_matrix, matrix_colors, { 0, 0 }, result.get());
-  result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(module_section_audio_matrices, matrix_colors, { 0, 0 }, true, is_fx,
+  result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_fx_only_matrices: module_section_audio_matrices, matrix_colors, { 0, 0 }, true, is_fx,
     make_audio_audio_matrix_sources(result.get(), true, is_fx), make_audio_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_hidden : module_section_audio_matrices, matrix_colors, { 0, 0 }, false, is_fx,
     make_audio_audio_matrix_sources(result.get(), false, is_fx), make_audio_audio_matrix_targets(result.get(), false));
-  result->modules[module_gcv_audio_matrix] = cv_matrix_topo(module_section_cv_matrices, matrix_colors, { 0, 0 }, false, true, is_fx,
+  result->modules[module_gcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_fx_only_matrices : module_section_cv_matrices, matrix_colors, { 0, 0 }, false, true, is_fx,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));
   result->modules[module_vcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_cv_matrices, matrix_colors, { 0, 0 }, false, false, is_fx,
     make_cv_matrix_sources(result.get(), false),
     make_cv_matrix_sources(result.get(), true),
     make_cv_audio_matrix_targets(result.get(), false));
-  result->modules[module_gcv_cv_matrix] = cv_matrix_topo(module_section_cv_matrices, matrix_colors, { 0, 0 }, true, true, is_fx, 
+  result->modules[module_gcv_cv_matrix] = cv_matrix_topo(is_fx ? module_section_fx_only_matrices : module_section_cv_matrices, matrix_colors, { 0, 0 }, true, true, is_fx,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_cv_matrix_targets(result.get(), true));
   result->modules[module_vcv_cv_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_cv_matrices, matrix_colors, { 0, 0 }, true, false, is_fx,
     make_cv_matrix_sources(result.get(), false),
