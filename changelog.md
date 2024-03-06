@@ -1,4 +1,4 @@
-### ?, ? - V1.2.0.
+### March 6, 2024 - V1.2.0.
 
 - Lots of small ui fixes / cleanup.
 - Rename saw waveshaper to off.
@@ -6,15 +6,18 @@
 - Fixed a bug in the triangle waveshaper.
 - Drop square waveshaper (bug, it shouldn't have been there).
 - Comb filter gets additional mode select (feedback/feedforward/both).
-- Rearranged sqr/smooth/foldback shaper/lfo (breaking change for automation only).
-- Split out delay type + sync to separate controls (breaking change for automation only).
-- Split out env type + mode to separate controls (breaking change for automation only).
-- Split out lfo repeat type + sync to separate controls (breaking change for automation only).
-- Split out lfo shape+skewx/y selection to separate controls (breaking change for automation only).
-- Split out distortion+mode selection to separate controls (breaking change for automation only).
-- Split out distortion shape+skewx/y selection to separate controls (breaking change for automation only).
+- Split out combined comboboxes to separate controls:
+  - NOTE! This is a breaking change for automation on those parameters.
+  - LFO mode + sync.
+  - Delay mode + sync.
+  - LFO shape + skew controls.
+  - FX Type + distortion mode.
+  - Envelope type + slope mode.
+  - Distortion shaper + skew controls.
+- Rearranged lfo/distortion shape options
+  - NOTE! This is a breaking change for automation on this parameters.
 
-- Even though there are some breaking changes I decided *against* changing the plugin id,
+Even though there are some breaking changes I decided *against* changing the plugin id,
 because breaking changes relate to automation of discrete-valued parameters only.
 Regular loading of projects/preset files applies the appropriate conversion from previous formats.
 

@@ -34,10 +34,6 @@ bug: preset select jumps back to previous
 do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
-small-ui-changes:
-do kvr update
-test + update the demo tracks
-
 other:
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
