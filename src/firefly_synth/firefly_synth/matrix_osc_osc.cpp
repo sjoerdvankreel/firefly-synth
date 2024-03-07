@@ -44,8 +44,8 @@ static std::vector<list_item>
 fm_mode_items()
 {
   std::vector<list_item> result;
-  result.emplace_back("{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}", "Bipolar"); // thru-zero
-  result.emplace_back("{0E688960-E59A-4E78-8812-6BADDAF881B8}", "Unipolar");
+  result.emplace_back("{B5CD2CE9-89C0-4E15-87E9-D8EF4D399EE6}", "Bi");
+  result.emplace_back("{0E688960-E59A-4E78-8812-6BADDAF881B8}", "Uni");
   return result;
 }
 
@@ -174,7 +174,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   auto& am_amount = result.params.emplace_back(make_param(
     make_topo_info_basic("{A1A7298E-542D-4C2F-9B26-C1AF7213D095}", "Mix", param_am_amt, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_am, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_am, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   am_amount.gui.tabular = true;
   am_amount.gui.bindings.enabled.bind_params({ param_am_on }, [](auto const& vs) { return vs[0] != 0; });
   am_amount.info.description = "Dry/wet control between unmodulated and modulated signal.";
@@ -188,7 +188,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
 
   auto& fm = result.sections.emplace_back(make_param_section(section_fm,
     make_topo_tag_basic("{1B39A828-3429-4245-BF07-551C17A78341}", "FM"),
-    make_param_section_gui({ 1, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
+    make_param_section_gui({ 1, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   fm.gui.scroll_mode = gui_scroll_mode::vertical;
   auto& fm_on = result.params.emplace_back(make_param(
     make_topo_info_basic("{02112C80-D1E9-409E-A9FB-6DCA34F5CABA}", "FM", param_fm_on, route_count),
@@ -221,13 +221,13 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   auto& fm_mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{277ED206-E225-46C9-BFBF-DC277C7F264A}", "Mode", param_fm_mode, route_count),
     make_param_dsp_voice(param_automate::automate), make_domain_item(fm_mode_items(), ""),
-    make_param_gui(section_fm, gui_edit_type::list, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_fm, gui_edit_type::autofit_list, param_layout::vertical, { 0, 3 }, make_label_none())));
   fm_mode.gui.tabular = true;
   fm_mode.gui.bindings.enabled.bind_params({ param_fm_on }, [](auto const& vs) { return vs[0] != 0; });
   fm_mode.info.description = std::string("Selects unipolar/bipolar mode. ") + 
     "Bipolar causes the target Osc's phase to travel both forward and backward and is apparently referred to as through-zero FM.";
   auto& fm_amount = result.params.emplace_back(make_param(
-    make_topo_info_basic("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", "Index", param_fm_idx, route_count),
+    make_topo_info("{444B0AFD-2B4A-40B5-B952-52002141C5DD}", true, "Index", "Idx", "Index", param_fm_idx, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 1, 0.01, 0.05, 4, ""),
     make_param_gui(section_fm, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   fm_amount.gui.tabular = true;

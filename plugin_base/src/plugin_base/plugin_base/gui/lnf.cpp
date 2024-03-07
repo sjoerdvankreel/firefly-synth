@@ -434,7 +434,6 @@ void
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
   float stroke = 5;
-  float padding = 5;
   int conic_count = 256;
 
   bool tabular = false;
@@ -451,6 +450,8 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
     scale_factor = size_base / s.getHeight();
   }
+
+  float padding = tabular? 3: 5;
   float size = size_base - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
   if(tabular) left = (s.getWidth() - size) / 2;
