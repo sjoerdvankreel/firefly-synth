@@ -54,10 +54,11 @@ public toggle_button,
 public autofit_component
 {
   lnf* const _lnf;
+  bool const _tabular;
 public:
-  int fixed_width(int parent_w, int parent_h) const override { return _lnf->toggle_height(); }
-  int fixed_height(int parent_w, int parent_h) const override { return _lnf->toggle_height(); }
-  autofit_togglebutton(lnf* lnf): _lnf(lnf) { setSize(lnf->toggle_height(), lnf->toggle_height()); }
+  int fixed_width(int parent_w, int parent_h) const override { return _lnf->toggle_height(_tabular); }
+  int fixed_height(int parent_w, int parent_h) const override { return _lnf->toggle_height(_tabular); }
+  autofit_togglebutton(lnf* lnf, bool tabular): _lnf(lnf), _tabular(tabular) { setSize(lnf->toggle_height(_tabular), lnf->toggle_height(_tabular)); }
 };
 
 // label that resizes to text content
@@ -84,12 +85,13 @@ public autofit_component
 {
   lnf* const _lnf;
   bool const _autofit;
+  bool const _tabular;
   float max_text_width(juce::PopupMenu const& menu);
 public:
   void autofit();
-  autofit_combobox(lnf* lnf, bool autofit) : _lnf(lnf), _autofit(autofit) {}
+  autofit_combobox(lnf* lnf, bool autofit, bool tabular) : _lnf(lnf), _autofit(autofit), _tabular(tabular) {}
   int fixed_width(int parent_w, int parent_h) const override { return getWidth(); }
-  int fixed_height(int parent_w, int parent_h) const override { return _lnf->combo_height(); }
+  int fixed_height(int parent_w, int parent_h) const override { return _lnf->combo_height(_tabular); }
 };
 
 // button that opens a popupmenu

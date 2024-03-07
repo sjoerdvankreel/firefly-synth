@@ -301,15 +301,19 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
 void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
+  bool tabular = false;
   if (auto ps = dynamic_cast<param_combobox*>(&box))
     if (ps->param()->param->gui.tabular)
+    {
+      tabular = true;
       draw_tabular_cell_bg(g, &box, 0.05f);
+    }
 
   Path path;
   int arrowPad = 4;
   int arrowWidth = 6;
   int arrowHeight = 4;
-  int const fixedHeight = combo_height();
+  int const fixedHeight = combo_height(tabular);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
   Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
@@ -335,11 +339,11 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
 
   int left = 0;
   if(tabular) 
-    left = tb.getWidth() / 2 - toggle_height() / 2;
+    left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
 
   int pad = 1;
   int height = tb.getHeight();
-  int const fixedHeight = toggle_height();
+  int const fixedHeight = toggle_height(tabular);
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
   g.setColour(Colours::white.withAlpha(0.125f));
