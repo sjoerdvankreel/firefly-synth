@@ -31,7 +31,6 @@ fix the fx ui again
 scale to less than 100% gui
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
-default global keytrack to 0
 automate zip/dist
 osc graph does not vertical fill?
 bug: preset select jumps back to previous
