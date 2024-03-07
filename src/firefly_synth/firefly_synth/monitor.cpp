@@ -63,8 +63,7 @@ monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int
   auto& hi_module = result.params.emplace_back(make_param(
     make_topo_info_basic("{BE8AF913-E888-4A0E-B674-8151AF1B7D65}", "High Module", param_hi_mod, 1),
     make_param_dsp_output(), make_domain_step(0, 999, 0, 0),
-    make_param_gui_single(section_main, gui_edit_type::output_module_name, { 0, 5 + column_hoffset },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_main, gui_edit_type::output_module_name, { 0, 5 + column_hoffset }, make_label_none())));
   hi_module.info.description = "Module that used the most CPU relative to total usage.";
   
   if(is_fx) return result;
