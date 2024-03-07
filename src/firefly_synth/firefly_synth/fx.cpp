@@ -666,7 +666,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   comb_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
-  comb_mode.info.description = "Selects the state-variable filter mode.";
+  comb_mode.info.description = "Selects the comb filter mode.";
   auto& comb_top = result.sections.emplace_back(make_param_section(section_comb_top,
     make_topo_tag_basic("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
