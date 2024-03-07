@@ -313,10 +313,10 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int arrowPad = 4;
   int arrowWidth = 6;
   int arrowHeight = 4;
-  int const fixedHeight = combo_height(tabular);
+  int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
-  Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
+  Rectangle<int> boxBounds(tabular? 2: 0, comboTop, width - (tabular? 4: 0), fixedHeight);
   g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
@@ -341,7 +341,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   if(tabular) 
     left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
 
-  int pad = 1;
+  int pad = tabular? 3: 1;
   int height = tb.getHeight();
   int const fixedHeight = toggle_height(tabular);
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
