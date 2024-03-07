@@ -106,8 +106,8 @@ dist_mode_items()
 {
   std::vector<list_item> result;
   result.emplace_back("{4216D379-72FD-4C2D-B594-20C175CF275E}", "No Filter");
-  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "Filter To Shaper");
-  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "Shaper To Filter");
+  result.emplace_back("{90657FC7-42E9-4D8E-88D1-5380F916A6C1}", "Flt To Shaper");
+  result.emplace_back("{01871DF5-5834-43F9-B95C-09D8102BF985}", "Shaper To Flt");
   return result;
 }
 
