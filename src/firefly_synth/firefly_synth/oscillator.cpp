@@ -472,7 +472,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   kps_fdbk.info.description = "Use to shorten low-frequency notes.";
-  auto& kps_stretch = result.params.emplace_back(make_param(
+  auto& kps_stretch = result.params.emplace_back(make_param( 
     make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "K+S Stretch", "Strt", "KPS Strt", param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 6 },
