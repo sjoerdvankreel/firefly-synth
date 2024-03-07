@@ -173,11 +173,10 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2);
   auto& tweak_label = store_component<juce::Label>(store);
   tweak_label.setText("Last Tweaked", juce::dontSendNotification);
-  tweak_label.setJustificationType(Justification::centredRight);
   result.add(tweak_label, { 0, 0, 1, 1 });
+  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 0, 1 });
   auto& tweak = store_component<last_tweaked_label>(store, gui->gui_state());
-  result.add(tweak, { 0, 1, 1, 1 });
-  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 0 });
+  result.add(tweak, { 1, 0, 1, 2 });
   return result;
 }
 
