@@ -422,7 +422,7 @@ synth_topo(bool is_fx)
   if(is_fx) 
   {
     std::vector<int> fx_only_matrix_modules = { 
-      module_gcv_audio_matrix, module_gcv_cv_matrix, module_gaudio_audio_matrix };
+      module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
     result->gui.module_sections[module_section_fx_only_matrices] = make_module_section_gui_tabbed(
       "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_fx_only_matrices, { 1, 3, 2, 2 }, fx_only_matrix_modules);
   } else 

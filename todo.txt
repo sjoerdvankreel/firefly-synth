@@ -27,7 +27,6 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 more-small-ui-changes:
-fix the fx ui again
 scale to less than 100% gui
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
