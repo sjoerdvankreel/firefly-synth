@@ -31,11 +31,8 @@ scale to less than 100% gui
 out gain/cpu meter
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
-sliders in all matrices to knobs
 todo add big pad 2 preset
 default global keytrack to 0
-prettify the edit controls section
-rename preset->load preset
 automate zip/dist
 osc graph does not vertical fill?
 bug: preset select jumps back to previous
