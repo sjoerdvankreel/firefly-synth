@@ -782,7 +782,7 @@ Component&
 plugin_gui::make_init_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Init Patch");
+  result.setButtonText("Init");
   result.onClick = [this] { init_patch(); };
   return result;
 }
@@ -791,7 +791,7 @@ Component&
 plugin_gui::make_clear_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Clear Patch");
+  result.setButtonText("Clear");
   result.onClick = [this] { clear_patch(); };
   return result;
 }
@@ -800,7 +800,7 @@ Component&
 plugin_gui::make_load_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Load Patch");
+  result.setButtonText("Load");
   result.onClick = [this] { load_patch(); };
   return result;
 }
@@ -809,7 +809,7 @@ Component&
 plugin_gui::make_save_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Save Patch");
+  result.setButtonText("Save");
   result.onClick = [this] { save_patch(); };
   return result;
 }
