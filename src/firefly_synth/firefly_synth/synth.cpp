@@ -151,13 +151,19 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store, boo
 }
 
 static Component&
-make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
+make_patch_controls_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2);
-  result.add(gui->make_load_button(), { 0, 0 });
-  result.add(gui->make_save_button(), { 0, 1 });
-  result.add(gui->make_init_button(), { 1, 0 });
-  result.add(gui->make_clear_button(), { 1, 1 });
+  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 3 }, 2);
+  auto& patch_label = store_component<juce::Label>(store);
+  patch_label.setText("Patch", juce::dontSendNotification);
+  patch_label.setColour(Label::ColourIds::textColourId, color);
+  patch_label.setJustificationType(Justification::centred);
+  result.add(patch_label, { 0, 0 });
+  result.add(store_component<preset_button>(store, gui), { 1, 0 });
+  result.add(gui->make_load_button(), { 0, 1 });
+  result.add(gui->make_save_button(), { 0, 2 });
+  result.add(gui->make_init_button(), { 1, 1 });
+  result.add(gui->make_clear_button(), { 1, 2 });
   return result;
 }
 
@@ -172,7 +178,6 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   auto& tweak = store_component<last_tweaked_label>(store, gui->gui_state());
   result.add(tweak, { 0, 1, 1, 1 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 0 });
-  result.add(store_component<preset_button>(store, gui), { 1, 1 });
   return result;
 }
 
@@ -350,7 +355,7 @@ synth_topo(bool is_fx)
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
     custom_section_patch_controls, { 0, 4, 1, 1 }, custom_colors,
-      [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });
+      [custom_color](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, custom_color, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
     custom_section_edit_controls, { 0, 3, 1, 1 }, custom_colors,
       [](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, store); });
