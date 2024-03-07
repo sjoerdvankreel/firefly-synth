@@ -229,10 +229,8 @@ make_audio_audio_matrix_sources(plugin_topo const* topo, bool global, bool is_fx
 std::vector<module_topo const*>
 make_audio_audio_matrix_targets(plugin_topo const* topo, bool global)
 {
-  if (global)
-    return { &topo->modules[module_gfx], &topo->modules[module_master_out] };
-  else
-    return { &topo->modules[module_vfx], &topo->modules[module_voice_out] };
+  if (global) return { &topo->modules[module_gfx], &topo->modules[module_master_out] };
+  else return { &topo->modules[module_vfx], &topo->modules[module_voice_out] };
 }
 
 std::vector<module_topo const*>
@@ -318,8 +316,8 @@ synth_topo(bool is_fx)
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 
-  result->gui.min_width = 1480;
-  result->gui.aspect_ratio_width = 136;
+  result->gui.min_width = 1280;
+  result->gui.aspect_ratio_width = 118;
   if(is_fx)
   {
     result->type = plugin_type::fx;
@@ -339,7 +337,7 @@ synth_topo(bool is_fx)
 #endif
 
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
-  result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 19, 19 };
+  result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 16, 16 };
   int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
