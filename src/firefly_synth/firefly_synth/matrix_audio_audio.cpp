@@ -185,8 +185,7 @@ audio_audio_matrix_topo(
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{5DF08D18-3EB9-4A43-A76C-C56519E837A2}", "Main"),
     make_param_section_gui({ 0, 0 }, { { 1 }, { -25, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1 } })));
-  main.gui.scroll_mode = gui_scroll_mode::vertical;
-  
+  main.gui.scroll_mode = gui_scroll_mode::vertical;  
   auto& on = result.params.emplace_back(make_param(
     make_topo_info_basic("{13B61F71-161B-40CE-BF7F-5022F48D60C7}", "On", param_on, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_toggle(false),
@@ -194,7 +193,6 @@ audio_audio_matrix_topo(
   on.gui.tabular = true;
   on.gui.menu_handler_factory = [](plugin_state* state) { return make_matrix_param_menu_handler(state, 1, 0, route_count, 1); };
   on.info.description = "Toggles audio route on/off.";
-
   auto& source = result.params.emplace_back(make_param(
     make_topo_info_basic("{842002C4-1946-47CF-9346-E3C865FA3F77}", "Source", param_source, route_count),
     make_param_dsp_input(!global, param_automate::automate), make_domain_item(source_matrix.items, ""),
@@ -207,10 +205,8 @@ audio_audio_matrix_topo(
       int fx_index = global ? module_gfx : module_vfx;
       if (sm[self].index == fx_index && tm[other].index == fx_index)
         return sm[self].slot < tm[other].slot;
-      return true;
-    });
+      return true; });
   source.info.description = "Selects audio route source. Note that you can only route FX 'upwards', so not FX2 -> FX1.";
-
   auto default_target = global? "MOut": "VOut";
   auto& target = result.params.emplace_back(make_param(
     make_topo_info_basic("{F05208C5-F8D3-4418-ACFE-85CE247F222A}", "Target", param_target, route_count),
@@ -224,26 +220,22 @@ audio_audio_matrix_topo(
       int fx_index = global? module_gfx: module_vfx;
       if(sm[other].index == fx_index && tm[self].index == fx_index)
         return sm[other].slot < tm[self].slot;
-      return true;
-    });
+      return true; });
   target.info.description = "Selects audio route target.";
-
   auto& amount = result.params.emplace_back(make_param(
     make_topo_info_basic("{C12ADFE9-1D83-439C-BCA3-30AD7B86848B}", "Gain", param_gain, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   amount.gui.tabular = true;
   amount.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   amount.info.description = "Controls route gain.";
-
   auto& bal = result.params.emplace_back(make_param(
     make_topo_info("{941C6961-044F-431E-8296-C5303EAFD11D}", true, "Balance", "Bal", "Bal", param_bal, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   bal.gui.tabular = true;
   bal.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   bal.info.description = "Controls route stereo balance.";
-
   return result;
 }
 
