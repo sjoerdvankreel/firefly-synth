@@ -174,10 +174,12 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, Colour const& color, compo
   auto& tweak_name_label = store_component<juce::Label>(store);
   tweak_name_label.setText("Tweak", juce::dontSendNotification);
   tweak_name_label.setJustificationType(Justification::centredLeft);
+  tweak_name_label.setColour(Label::ColourIds::textColourId, color);
   result.add(tweak_name_label, { 0, 0 });
   auto& tweak_value_label = store_component<juce::Label>(store);
   tweak_value_label.setText("Value", juce::dontSendNotification);
   tweak_value_label.setJustificationType(Justification::centredLeft);
+  tweak_value_label.setColour(Label::ColourIds::textColourId, color);
   result.add(tweak_value_label, { 1, 0 });
   auto& tweak = store_component<last_tweaked_label>(store, gui->gui_state());
   result.add(tweak, { 0, 1, 1, 3 });
