@@ -431,8 +431,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   auto& random_svf = result.params.emplace_back(make_param(
     make_topo_info("{7E47ACD4-88AC-4D3B-86B1-05CCDFB4BC7D}", true, "Rnd Filter Mode", "Flt", "Rnd.Flt", param_rand_svf, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(random_svf_items(), ""),
-    make_param_gui_single(section_rand, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_rand, gui_edit_type::autofit_list, { 0, 0 }, make_label_none())));
   random_svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_svf.info.description = "Continuous filter type for static noise or initial-excite filter type for Karplus-Strong.";
   auto& random_freq = result.params.emplace_back(make_param(
@@ -452,14 +451,14 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   random_res.info.description = std::string("Continuous filter resonance for static noise or initial-excite filter resonance for Karplus-Strong. ") + 
     "Modulation takes place only at voice start.";
   auto& random_seed = result.params.emplace_back(make_param(
-    make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", true, "Rnd Seed", "Seed", "Rnd Seed", param_rand_seed, 1),
+    make_topo_info("{81873698-DEA9-4541-8E99-FEA21EAA2FEF}", true, "Rnd Seed", "Sed", "Rnd Seed", param_rand_seed, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 255, 1, 0),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   random_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_seed.info.description = "On-voice-init random seed for static noise and initial-excite stage of Karplus-Strong.";
   auto& random_step = result.params.emplace_back(make_param(
-    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", true, "Rnd Rate", "Rate", "Rnd Rate", param_rand_rate, 1),
+    make_topo_info("{41E7954F-27B0-48A8-932F-ACB3B3F310A7}", true, "Rnd Rate", "Rte", "Rnd Rate", param_rand_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(1, 100, 10, 10, 1, "%"),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -474,7 +473,7 @@ osc_topo(int section, gui_colors const& colors, gui_position const& pos)
   kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
   kps_fdbk.info.description = "Use to shorten low-frequency notes.";
   auto& kps_stretch = result.params.emplace_back(make_param(
-    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "K+S Stretch", "Stretch", "KPS Str", param_kps_stretch, 1),
+    make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "K+S Stretch", "Strt", "KPS Strt", param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
