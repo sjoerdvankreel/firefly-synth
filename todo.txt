@@ -20,26 +20,28 @@ vst3 note expressions
 clap (poly) modulation
 visual routing indicators
 document the header files a bit
-out gain/cpu meter
 basic osc waveform icons
 solo osc/fx
-group cv matrix targets by e.g. gaudio gain 1-10
-do basic theming support (e.g. config file with colors)
 normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
-v1.3:
+more-small-ui-changes:
+out gain/cpu meter
+group cv matrix targets by e.g. gaudio gain 1-10
+do basic theming support (e.g. config file with colors)
 sliders in all matrices to knobs
 todo add big pad 2 preset
 default global keytrack to 0
 prettify the edit controls section
 rename preset->load preset
 automate zip/dist
+osc graph does not vertical fill?
+bug: preset select jumps back to previous
+
+v1.3:
 move route up/down
 copy voice<->global
-osc graph does not vertical fill?
 do copy/paste patch through clipboard
-bug: preset select jumps back to previous
 do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
