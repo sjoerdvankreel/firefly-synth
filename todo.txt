@@ -30,12 +30,12 @@ more-small-ui-changes:
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
 automate zip/dist
-bug: preset select jumps back to previous
 
 v1.3:
 move route up/down
 copy voice<->global
 do copy/paste patch through clipboard
+bug: preset select jumps back to previous
 do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 
