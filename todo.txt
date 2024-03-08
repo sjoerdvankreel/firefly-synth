@@ -38,6 +38,7 @@ do basic theming support (e.g. config file with colors)
 automate zip/dist
 
 other:
+update the hosts
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
 do indexed release schema + regular backwards compat
