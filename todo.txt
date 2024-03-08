@@ -1,10 +1,14 @@
-always:
+on release:
+update kvr
 dont forget to tag
+upload new binaries
 update the history
-keep cpu/mem profiling
 check if need update github social preview
 drop all conversion code on breaking plugin id
 dont forget to update the version nr in code and cmake
+
+always:
+keep cpu/mem profiling
 
 someday:
 mseg
