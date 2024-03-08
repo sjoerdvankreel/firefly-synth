@@ -1,10 +1,14 @@
-always:
+on release:
+update kvr
 dont forget to tag
+upload new binaries
 update the history
-keep cpu/mem profiling
 check if need update github social preview
 drop all conversion code on breaking plugin id
 dont forget to update the version nr in code and cmake
+
+always:
+keep cpu/mem profiling
 
 someday:
 mseg
@@ -22,30 +26,23 @@ visual routing indicators
 document the header files a bit
 basic osc waveform icons
 solo osc/fx
+out gain/cpu meter
 normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
-more-small-ui-changes:
-out gain/cpu meter
-group cv matrix targets by e.g. gaudio gain 1-10
-do basic theming support (e.g. config file with colors)
-sliders in all matrices to knobs
-todo add big pad 2 preset
-default global keytrack to 0
-prettify the edit controls section
-rename preset->load preset
-automate zip/dist
-osc graph does not vertical fill?
-bug: preset select jumps back to previous
-
 v1.3:
+fix clap resizing
 move route up/down
 copy voice<->global
 do copy/paste patch through clipboard
+bug: preset select jumps back to previous
 do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
+do basic theming support (e.g. config file with colors)
+automate zip/dist
 
 other:
+update the hosts
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
 do indexed release schema + regular backwards compat

@@ -151,33 +151,44 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store, boo
 }
 
 static Component&
-make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
+make_patch_controls_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2);
-  result.add(gui->make_load_button(), { 0, 0 });
-  result.add(gui->make_save_button(), { 0, 1 });
-  result.add(gui->make_init_button(), { 1, 0 });
-  result.add(gui->make_clear_button(), { 1, 1 });
+  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 3 }, 2);
+  auto& patch_label = store_component<juce::Label>(store);
+  patch_label.setText("Patch", juce::dontSendNotification);
+  patch_label.setColour(Label::ColourIds::textColourId, color);
+  patch_label.setJustificationType(Justification::centred);
+  result.add(patch_label, { 0, 0 });
+  result.add(store_component<preset_button>(store, gui), { 1, 0 });
+  result.add(gui->make_load_button(), { 0, 1 });
+  result.add(gui->make_save_button(), { 0, 2 });
+  result.add(gui->make_init_button(), { 1, 1 });
+  result.add(gui->make_clear_button(), { 1, 2 });
   return result;
 }
 
 static Component&
-make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
+make_edit_controls_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_store store)
 {
-  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 2 }, 2);
-  auto& tweak_label = store_component<juce::Label>(store);
-  tweak_label.setText("Last Tweaked", juce::dontSendNotification);
-  tweak_label.setJustificationType(Justification::centredRight);
-  result.add(tweak_label, { 0, 0, 1, 1 });
+  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 4 }, 2);
+  auto& tweak_name_label = store_component<juce::Label>(store);
+  tweak_name_label.setText("Tweak", juce::dontSendNotification);
+  tweak_name_label.setJustificationType(Justification::centredLeft);
+  tweak_name_label.setColour(Label::ColourIds::textColourId, color);
+  result.add(tweak_name_label, { 0, 0 });
+  auto& tweak_value_label = store_component<juce::Label>(store);
+  tweak_value_label.setText("Value", juce::dontSendNotification);
+  tweak_value_label.setJustificationType(Justification::centredLeft);
+  tweak_value_label.setColour(Label::ColourIds::textColourId, color);
+  result.add(tweak_value_label, { 1, 0 });
   auto& tweak = store_component<last_tweaked_label>(store, gui->gui_state());
-  result.add(tweak, { 0, 1, 1, 1 });
-  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 0 });
-  result.add(store_component<preset_button>(store, gui), { 1, 1 });
+  result.add(tweak, { 0, 1, 1, 3 });
+  result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 1, 1, 3 });
   return result;
 }
 
 static Component&
-make_title_section(plugin_gui* gui, lnf* lnf, component_store store, Colour const& color, bool is_fx)
+make_title_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_store store, bool is_fx)
 {
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
@@ -229,10 +240,8 @@ make_audio_audio_matrix_sources(plugin_topo const* topo, bool global, bool is_fx
 std::vector<module_topo const*>
 make_audio_audio_matrix_targets(plugin_topo const* topo, bool global)
 {
-  if (global)
-    return { &topo->modules[module_gfx], &topo->modules[module_master_out] };
-  else
-    return { &topo->modules[module_vfx], &topo->modules[module_voice_out] };
+  if (global) return { &topo->modules[module_gfx], &topo->modules[module_master_out] };
+  else return { &topo->modules[module_vfx], &topo->modules[module_voice_out] };
 }
 
 std::vector<module_topo const*>
@@ -318,8 +327,8 @@ synth_topo(bool is_fx)
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 
-  result->gui.min_width = 1480;
-  result->gui.aspect_ratio_width = 136;
+  result->gui.default_width = 1280;
+  result->gui.aspect_ratio_width = 118;
   if(is_fx)
   {
     result->type = plugin_type::fx;
@@ -339,23 +348,23 @@ synth_topo(bool is_fx)
 #endif
 
   result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
-  result->gui.dimension.column_sizes = { is_fx? 15: 13, is_fx? 32: 34, 8, 19, 19 };
-  int height = result->gui.min_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
+  result->gui.dimension.column_sizes = { is_fx? 30: 26, is_fx? 63: 67, 17, 32, 32 };
+  int height = result->gui.default_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
   result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
 
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   auto make_title_section_ui = [custom_color, is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
-    return make_title_section(gui, lnf, store, custom_color, is_fx); };
+    return make_title_section(gui, lnf, custom_color, store, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
     custom_section_patch_controls, { 0, 4, 1, 1 }, custom_colors,
-      [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });
+      [custom_color](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, custom_color, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
     custom_section_edit_controls, { 0, 3, 1, 1 }, custom_colors,
-      [](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, store); });
+      [custom_color](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, custom_color, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
     custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
@@ -413,7 +422,7 @@ synth_topo(bool is_fx)
   if(is_fx) 
   {
     std::vector<int> fx_only_matrix_modules = { 
-      module_gcv_audio_matrix, module_gcv_cv_matrix, module_gaudio_audio_matrix };
+      module_gaudio_audio_matrix, module_gcv_audio_matrix, module_gcv_cv_matrix };
     result->gui.module_sections[module_section_fx_only_matrices] = make_module_section_gui_tabbed(
       "{D450B51E-468E-457E-B954-FF1B9645CADB}", module_section_fx_only_matrices, { 1, 3, 2, 2 }, fx_only_matrix_modules);
   } else 

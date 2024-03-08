@@ -402,7 +402,7 @@ param_toggle_button::buttonStateChanged(Button*)
 
 param_toggle_button::
 param_toggle_button(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf):
-param_component(gui, module, param), autofit_togglebutton(lnf)
+param_component(gui, module, param), autofit_togglebutton(lnf, param->param->gui.tabular)
 {
   auto value = param->param->domain.default_plain(module->info.slot, param->info.slot);
   setTooltip(_param->info.name + ": " + _param->param->domain.plain_to_text(false, value));
@@ -447,7 +447,7 @@ param_slider::fixed_width(int parent_w, int parent_h) const
 param_combobox::
 param_combobox(plugin_gui* gui, module_desc const* module, param_desc const* param, lnf* lnf) :
 param_component(gui, module, param), 
-autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list)
+autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list, param->param->gui.tabular)
 {
   auto const& domain = param->param->domain;
   auto const& param_gui = param->param->gui;

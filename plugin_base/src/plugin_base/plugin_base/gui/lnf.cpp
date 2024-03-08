@@ -301,18 +301,22 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
 void
 lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, ComboBox& box)
 {
+  bool tabular = false;
   if (auto ps = dynamic_cast<param_combobox*>(&box))
     if (ps->param()->param->gui.tabular)
+    {
+      tabular = true;
       draw_tabular_cell_bg(g, &box, 0.05f);
+    }
 
   Path path;
   int arrowPad = 4;
   int arrowWidth = 6;
   int arrowHeight = 4;
-  int const fixedHeight = combo_height();
+  int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
-  Rectangle<int> boxBounds(0, comboTop, width, fixedHeight);
+  Rectangle<int> boxBounds(tabular? 2: 0, comboTop, width - (tabular? 4: 0), fixedHeight);
   g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
@@ -335,11 +339,11 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
 
   int left = 0;
   if(tabular) 
-    left = tb.getWidth() / 2 - toggle_height() / 2;
+    left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
 
-  int pad = 1;
+  int pad = tabular? 3: 1;
   int height = tb.getHeight();
-  int const fixedHeight = toggle_height();
+  int const fixedHeight = toggle_height(tabular);
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
   g.setColour(Colours::white.withAlpha(0.125f));
@@ -430,7 +434,6 @@ void
 lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, Slider& s)
 {
   float stroke = 5;
-  float padding = 5;
   int conic_count = 256;
 
   bool tabular = false;
@@ -447,6 +450,8 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     size_base = 0.9 * std::min(s.getHeight(), s.getWidth());
     scale_factor = size_base / s.getHeight();
   }
+
+  float padding = tabular? 3: 5;
   float size = size_base - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
   if(tabular) left = (s.getWidth() - size) / 2;

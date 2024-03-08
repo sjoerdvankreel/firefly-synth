@@ -314,9 +314,10 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 
   add_and_make_visible(*this, make_content());
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
-  getChildComponent(0)->setSize(topo.gui.min_width, topo.gui.min_width * ratio);
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
-  setSize(w, topo.gui.min_width * ratio);
+  getChildComponent(0)->setSize(topo.gui.default_width, topo.gui.default_width * ratio);
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.default_width, 
+    (int)(topo.gui.default_width * topo.gui.min_scale), (int)(topo.gui.default_width * topo.gui.max_scale));
+  setSize(w, w * ratio);
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
 }
 
@@ -464,7 +465,7 @@ void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
-  float scale = w / _gui_state->desc().plugin->gui.min_width;
+  float scale = w / _gui_state->desc().plugin->gui.default_width;
   getChildComponent(0)->setTransform(AffineTransform::scale(scale));
   user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
 }
@@ -501,8 +502,9 @@ plugin_gui::reloaded()
 {
   auto const& topo = *_gui_state->desc().plugin;
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.min_width, topo.gui.min_width, std::numeric_limits<int>::max());
-  setSize(w, topo.gui.min_width * ratio);
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.default_width, 
+    (int)(topo.gui.default_width * topo.gui.min_scale), (int)(topo.gui.default_width * topo.gui.max_scale));
+  setSize(w, (int)(w * ratio));
 }
 
 Component&
@@ -782,7 +784,7 @@ Component&
 plugin_gui::make_init_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Init Patch");
+  result.setButtonText("Init");
   result.onClick = [this] { init_patch(); };
   return result;
 }
@@ -791,7 +793,7 @@ Component&
 plugin_gui::make_clear_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Clear Patch");
+  result.setButtonText("Clear");
   result.onClick = [this] { clear_patch(); };
   return result;
 }
@@ -800,7 +802,7 @@ Component&
 plugin_gui::make_load_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Load Patch");
+  result.setButtonText("Load");
   result.onClick = [this] { load_patch(); };
   return result;
 }
@@ -809,7 +811,7 @@ Component&
 plugin_gui::make_save_button()
 {
   auto& result = make_component<text_button>();
-  result.setButtonText("Save Patch");
+  result.setButtonText("Save");
   result.onClick = [this] { save_patch(); };
   return result;
 }

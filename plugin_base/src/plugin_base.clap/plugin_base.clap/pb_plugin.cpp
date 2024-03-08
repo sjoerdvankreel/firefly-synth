@@ -242,7 +242,9 @@ bool
 pb_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
   auto const& topo = *_engine.state().desc().plugin;
-  *width = std::max((int)*width, topo.gui.min_width);
+  int min_width = (int)(topo.gui.default_width * topo.gui.min_scale);
+  int max_width = (int)(topo.gui.default_width * topo.gui.max_scale);
+  *width = std::clamp((int)*width, min_width, max_width);
   *height = *width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width;
   return true;
 }

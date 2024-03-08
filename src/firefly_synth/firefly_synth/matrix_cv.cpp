@@ -396,7 +396,7 @@ cv_matrix_topo(
   };
   if(cv)
   {
-    result.gui.tabbed_name = global? "Global CV CV Matrix": "Voice CV CV Matrix";
+    result.gui.tabbed_name = global? "GCV-CV Matrix": "VCV-CV Matrix";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) {
         return std::make_unique<cv_cv_matrix_engine>(global, topo, sm, tm);
@@ -404,7 +404,7 @@ cv_matrix_topo(
   }
   else
   {
-    result.gui.tabbed_name = global ? "Global CV Audio Matrix" : "Voice CV Audio Matrix";
+    result.gui.tabbed_name = global ? "GCV-Audio Matrix" : "VCV-Audio Matrix";
     result.engine_factory = [global, sm = source_matrix.mappings, tm = target_matrix.mappings](
       auto const& topo, int, int) { 
         return std::make_unique<cv_audio_matrix_engine>(global, topo, sm, tm);
@@ -413,7 +413,7 @@ cv_matrix_topo(
 
   auto& main = result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{A19E18F8-115B-4EAB-A3C7-43381424E7AB}", "Main"),
-    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 0, 0 }, { { 1 }, { gui_dimension::auto_size, 3, gui_dimension::auto_size, 1, 1, 1, 1 } })));
   main.gui.scroll_mode = gui_scroll_mode::vertical;
   
   auto& type = result.params.emplace_back(make_param(
@@ -472,17 +472,17 @@ cv_matrix_topo(
       });
 
   auto& offset = result.params.emplace_back(make_param(
-    make_topo_info_basic("{86ECE946-D554-4445-B8ED-2A7380C910E4}", "Offset", param_offset, route_count),
+    make_topo_info("{86ECE946-D554-4445-B8ED-2A7380C910E4}", true, "Offset", "Off", "Off", param_offset, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-1, 1, 0, 2, ""),
-    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 3 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 3 }, make_label_none())));
   offset.gui.tabular = true;
   offset.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   offset.info.description = std::string("Source signal offset. Used to transform source before modulation is applied. ") +
     "Useful to stretch things like midi note/velocity into the full [0, 1] range.";
   auto& scale = result.params.emplace_back(make_param(
-    make_topo_info_basic("{6564CE04-0AB8-4CDD-8F3D-E477DD1F4715}", "Scale", param_scale, route_count),
+    make_topo_info("{6564CE04-0AB8-4CDD-8F3D-E477DD1F4715}", true, "Scale", "Scl", "Scl", param_scale, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(1, 32, 1, 2, ""),
-    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 4 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 4 }, make_label_none())));
   scale.gui.tabular = true;
   scale.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   scale.info.description = std::string("Source signal multiplier. Used to transform source before modulation is applied. ") +
@@ -490,14 +490,14 @@ cv_matrix_topo(
   auto& min = result.params.emplace_back(make_param(
     make_topo_info_basic("{71E6F836-1950-4C8D-B62B-FAAD20B1FDBD}", "Min", param_min, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 5 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 5 }, make_label_none())));
   min.gui.tabular = true;
   min.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   min.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";
   auto& max = result.params.emplace_back(make_param(
     make_topo_info_basic("{DB3A5D43-95CB-48DC-97FA-984F55B57F7B}", "Max", param_max, route_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui(section_main, gui_edit_type::hslider, param_layout::vertical, { 0, 6 }, make_label_none())));
+    make_param_gui(section_main, gui_edit_type::knob, param_layout::vertical, { 0, 6 }, make_label_none())));
   max.gui.tabular = true;
   max.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   max.info.description = "Defines the bounds of the modulation effect. When min > max, modulation will invert.";

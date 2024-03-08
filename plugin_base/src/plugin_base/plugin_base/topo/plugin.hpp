@@ -55,7 +55,9 @@ struct module_section_gui final {
 
 // plugin ui
 struct plugin_topo_gui final {
-  int min_width;
+  int default_width;
+  float min_scale = 0.5f;
+  float max_scale = 2.0f;
   int aspect_ratio_width;
   int aspect_ratio_height;
   gui_colors colors;
