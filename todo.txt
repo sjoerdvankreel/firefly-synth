@@ -30,7 +30,6 @@ more-small-ui-changes:
 group cv matrix targets by e.g. gaudio gain 1-10
 do basic theming support (e.g. config file with colors)
 automate zip/dist
-osc graph does not vertical fill?
 bug: preset select jumps back to previous
 
 v1.3:

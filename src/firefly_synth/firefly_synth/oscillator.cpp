@@ -206,6 +206,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   int note = state.get_plain_at(module_osc, slot, param_note, 0).step();
   int type = state.get_plain_at(module_osc, slot, param_type, 0).step();
   float cent = state.get_plain_at(module_osc, slot, param_cent, 0).real();
+  float gain = state.get_plain_at(module_osc, slot, param_gain, 0).real();
   float freq = pitch_to_freq(note + cent);
   
   plugin_block const* block = nullptr;
@@ -236,17 +237,16 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
   }
   engine->process_end();
 
-  // scale to max 1, but we still want to show the gain, so don't rescale between [0, 1]
+  // scale to max 1, but we still want to show the gain
   for(int o = 0; o < result.size(); o++)
   {
-    float max = 1;
+    float max = 0;
     for(int c = 0; c < 2; c++)
       for(int f = 0; f < params.max_frame_count; f++)
         max = std::max(max, std::fabs(result[o].audio()[c][f]));
-    if(max > 1)
-      for (int c = 0; c < 2; c++)
-        for (int f = 0; f < params.max_frame_count; f++)
-          result[o].audio()[c][f] /= max;
+    for (int c = 0; c < 2; c++)
+      for (int f = 0; f < params.max_frame_count; f++)
+        result[o].audio()[c][f] = (result[o].audio()[c][f] / (max > 0? max: 1)) * gain;
   }
 
   return result;

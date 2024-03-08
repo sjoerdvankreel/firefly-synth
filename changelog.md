@@ -2,6 +2,7 @@
 
 - Add big pad 2 preset.
 - Scale back default ui width to 1280.
+- Bugfix: osc graph scales to 100% * gain.
 - Bugfix: default global SVF keyboard tracking to 0.
 - UI scaling from 50% to 200% (was 100 to unlimited).
 
