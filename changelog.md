@@ -1,8 +1,9 @@
 ### ?, ? - V1.2.1.
 
 - Add big pad 2 preset.
-- Scale back ui width to 1280.
+- Scale back default ui width to 1280.
 - Bugfix: default global SVF keyboard tracking to 0.
+- UI scaling from 50% to 200% (was 100 to unlimited).
 
 ### March 6, 2024 - V1.2.0.
 
