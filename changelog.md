@@ -1,4 +1,4 @@
-### ?, ? - V1.2.1.
+### March 8, 2024 - V1.2.1.
 
 - Add big pad 2 preset.
 - Scale back default ui width to 1280.
