@@ -193,7 +193,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_sto
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
-  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xRight), { 0, 1 });
+  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "Firefly Default", "image.png", RectanglePlacement::xRight), { 0, 1 }); // TODO
   auto& label = store_component<autofit_label>(store, lnf, name, true, 15);
   label.setColour(Label::ColourIds::textColourId, color);
   grid.add(label, { 0, 0 });

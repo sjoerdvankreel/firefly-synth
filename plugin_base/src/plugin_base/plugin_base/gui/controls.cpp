@@ -183,10 +183,11 @@ preset_button::extra_state_changed()
 image_component::
 image_component(
   format_config const* config, 
+  std::string const& theme,
   std::string const& file_name, 
   RectanglePlacement placement)
 {
-  String path((get_resource_location(config) / resource_folder_ui / file_name).string());
+  String path((get_resource_location(config) / resource_folder_themes / theme / file_name).string());
   setImage(ImageCache::getFromFile(path), placement);
 }
 
