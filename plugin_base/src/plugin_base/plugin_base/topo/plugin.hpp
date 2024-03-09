@@ -71,7 +71,6 @@ struct plugin_topo_gui final {
   int module_header_width = 80;
   int module_corner_radius = 4;
   int section_corner_radius = 4;
-  std::string typeface_file_name;
   int font_flags = juce::Font::plain;
 
   std::vector<custom_section_gui> custom_sections;

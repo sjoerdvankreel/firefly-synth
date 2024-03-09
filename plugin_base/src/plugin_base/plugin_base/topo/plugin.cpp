@@ -38,7 +38,6 @@ plugin_topo::validate() const
   assert(version.major >= 0);
   assert(version.minor >= 0);
   assert(version.patch >= 0);
-  assert(gui.typeface_file_name.size());
   assert(0 < gui.min_scale && gui.min_scale <= gui.max_scale);
   assert(audio_polyphony >= 0 && audio_polyphony < topo_max);
   assert(graph_polyphony >= 0 && graph_polyphony < topo_max);

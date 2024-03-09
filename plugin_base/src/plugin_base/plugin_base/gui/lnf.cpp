@@ -49,7 +49,8 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   assert(module_section == -1 || module >= 0);
   assert(custom_section == -1 || module == -1);
 
-  auto font_path = get_resource_location(desc->config) / resource_folder_ui / desc->plugin->gui.typeface_file_name;
+  auto theme_path = get_resource_location(desc->config) / resource_folder_themes / _theme;
+  auto font_path = theme_path / "font.ttf";
   std::vector<char> typeface = file_load(font_path);
   assert(typeface.size());
   _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
