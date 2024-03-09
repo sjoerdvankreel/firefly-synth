@@ -111,10 +111,10 @@ gui_colors const&
 lnf::colors() const
 {
   if(_custom_section != -1)
-    return _desc->plugin->gui.custom_sections[_custom_section].colors;
+    return _section_colors.at(_desc->plugin->gui.custom_sections[_custom_section].full_name);
   if(_module != -1)
-    return  _desc->plugin->modules[_module].gui.colors;
-  return _desc->plugin->gui.colors;
+    return  _module_colors.at(_desc->plugin->modules[_module].info.tag.full_name);
+  return _default_colors;
 }
 
 Font 

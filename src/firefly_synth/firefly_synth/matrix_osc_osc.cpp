@@ -116,7 +116,7 @@ make_audio_routing_osc_mod_params(plugin_state* state)
 }
 
 module_topo 
-osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& pos, plugin_topo const* plugin)
+osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plugin)
 {
   std::vector<module_dsp_output> outputs;
   auto osc_matrix = make_audio_matrix({ &plugin->modules[module_osc] }, 0);
@@ -130,7 +130,7 @@ osc_osc_matrix_topo(int section, gui_colors const& colors, gui_position const& p
   module_topo result(make_module(
     make_topo_info_basic("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", module_osc_osc_matrix, 1),
     make_module_dsp(module_stage::voice, module_output::audio, scratch_count, outputs),
-    make_module_gui(section, colors, pos, { 2, 1 })));
+    make_module_gui(section, pos, { 2, 1 })));
   result.info.description = "Oscillator routing matrices that allow for Osc-to-Osc AM, RM and FM.";
 
   result.graph_renderer = render_graph;

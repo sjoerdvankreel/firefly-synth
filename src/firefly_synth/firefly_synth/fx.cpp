@@ -565,7 +565,7 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
 }
 
 module_topo
-fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
+fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
 {
   auto voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", true, "Voice FX", "Voice FX", "VFX", module_vfx, 10);
   voice_info.description = "Per-voice FX module with state variable filter, comb filter and distortion.";
@@ -577,7 +577,7 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { 2, 7 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 2, 7 } })));
  
   result.graph_engine_factory = make_graph_engine;
   if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };

@@ -140,8 +140,7 @@ make_audio_routing_audio_params(plugin_state* state, bool global, bool is_fx)
 
 module_topo 
 audio_audio_matrix_topo(
-  int section, gui_colors const& colors,
-  gui_position const& pos, bool global, bool is_fx,
+  int section, gui_position const& pos, bool global, bool is_fx,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
@@ -160,7 +159,7 @@ audio_audio_matrix_topo(
     make_module_dsp(stage, module_output::audio, 0, { 
       make_module_dsp_output(false, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
       make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
-    make_module_gui(section, colors, pos, { 1, 1 })));
+    make_module_gui(section, pos, { 1, 1 })));
 
   result.graph_renderer = [tm = target_matrix.items](
     auto const& state, auto* engine, int param, auto const& mapping) {

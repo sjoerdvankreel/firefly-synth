@@ -341,8 +341,7 @@ render_graph(
 
 module_topo
 cv_matrix_topo(
-  int section, gui_colors const& colors,
-  gui_position const& pos, bool cv, bool global, bool is_fx,
+  int section, gui_position const& pos, bool cv, bool global, bool is_fx,
   std::vector<cv_source_entry> const& sources,
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
@@ -378,7 +377,7 @@ cv_matrix_topo(
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
-    make_module_gui(section, colors, pos, { 1, 1 })));
+    make_module_gui(section, pos, { 1, 1 })));
   
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;

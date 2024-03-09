@@ -442,7 +442,7 @@ plugin_gui::module_mouse_enter(int module)
 void
 plugin_gui::add_tab_menu_listener(juce::TabBarButton& button, int module, int slot)
 {
-  auto listener = std::make_unique<gui_tab_menu_listener>(gui_state(), &button, module, slot);
+  auto listener = std::make_unique<gui_tab_menu_listener>(gui_state(), &_lnf, &button, module, slot);
   _tab_menu_listeners.push_back(std::move(listener));
 }
 
@@ -652,11 +652,11 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       grid.add(make_params(module, &(*iter)), iter->param->gui.position);
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<param_section_container>(this, &module, &section, &grid);
+    return make_component<param_section_container>(this, &_lnf, &module, &section, &grid);
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
-  return make_component<param_section_container>(this, &module, &section, &viewer);
+  return make_component<param_section_container>(this, &_lnf, &module, &section, &viewer);
 }
 
 Component&

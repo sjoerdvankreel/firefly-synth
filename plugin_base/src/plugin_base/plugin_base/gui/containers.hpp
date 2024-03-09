@@ -115,10 +115,7 @@ public binding_component,
 public rounded_container
 {
 public:
-  param_section_container(plugin_gui* gui, module_desc const* module, param_section const* section, juce::Component* child) :
-  binding_component(gui, module, &section->gui.bindings, 0), 
-  rounded_container(child, gui->gui_state()->desc().plugin->gui.section_corner_radius, false, rounded_container_mode::both, 
-    module->module->gui.colors.section_outline1, module->module->gui.colors.section_outline2) { init(); }
+  param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child);
 };
 
 // grid component as opposed to grid layout

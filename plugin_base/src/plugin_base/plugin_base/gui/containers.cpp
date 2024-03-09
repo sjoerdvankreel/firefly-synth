@@ -34,6 +34,16 @@ extra_state_container::extra_state_changed()
   add_and_make_visible(*this, *_child.get());
 }
 
+param_section_container::
+param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child) :
+  binding_component(gui, module, &section->gui.bindings, 0),
+  rounded_container(child, 
+    gui->gui_state()->desc().plugin->gui.section_corner_radius, false, rounded_container_mode::both,
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_outline1, 
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_outline2) {
+  init(); 
+}
+
 tabbed_module_section_container::
 tabbed_module_section_container(plugin_gui* gui, int section_index,
   std::function<std::unique_ptr<juce::Component>(int module_index)> factory):
