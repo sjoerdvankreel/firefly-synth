@@ -7,6 +7,7 @@ void
 custom_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
   assert(index == index_);
+  assert(full_name.size());
   assert(gui_factory != nullptr);
   position.validate(plugin.gui.dimension);
 }

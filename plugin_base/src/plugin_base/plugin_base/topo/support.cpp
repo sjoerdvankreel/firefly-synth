@@ -99,12 +99,15 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
 }
 
 custom_section_gui
-make_custom_section_gui(int index, gui_position const& position, gui_colors const& colors, custom_gui_factory factory)
+make_custom_section_gui(
+  int index, std::string const& full_name, 
+  gui_position const& position, gui_colors const& colors, custom_gui_factory factory)
 {
   custom_section_gui result = {};
   result.index = index;
   result.position = position;
   result.gui_factory = factory;
+  result.full_name = full_name;
   result.colors = gui_colors(colors);
   return result;
 }

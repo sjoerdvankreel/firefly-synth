@@ -39,7 +39,7 @@
   },
   "overrides": [
     {
-      "custom_sections": ["title", "monitor", "main_graph", "tweak", "patch"],
+      "custom_sections": ["Title", "Monitor", "Main Graph", "Tweak", "Patch"],
       "colors": {
         "tab_text": "FFFF4488",
         "knob_thumb": "FFFF4488",
@@ -54,8 +54,8 @@
       }
     },
     {
-      "custom_sections": ["global_fx_graph", "global_lfo_graph"],
-      "module_sections": ["master_in", "master_out", "global_fx", "global_lfo"],
+      "custom_sections": ["Global FX Graph", "Global LFO Graph"],
+      "module_sections": ["Master In", "Master Out", "Global FX", "Global LFO"],
       "colors": {
         "tab_text": "FF4488FF",
         "knob_thumb": "FF4488FF",
@@ -70,8 +70,8 @@
       }
     },
     {
-      "custom_sections": ["osc_graph", "voice_fx_graph", "voice_lfo_graph", "env_graph"],
-      "module_sections": ["osc", "voice_in", "voice_out", "voice_fx", "voice_lfo", "env"],
+      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph"],
+      "module_sections": ["Oscillator", "Voice In", "Voice Out", "Voice FX", "Voice LFO", "Envelope"],
       "colors": {
         "tab_text": "FFFF8844",
         "knob_thumb": "FFFF8844",
@@ -86,8 +86,8 @@
       }
     },
     {
-      "custom_sections": ["osc_mod_graph", "audio_matrix_graph", "cv_matrix_graph"],
-      "module_sections": ["osc_mod", "vaudio_matrix", "gaudio_matrix", "vcv_audio_matrix", "vcv_cv_matrix", "gcv_audio_matrix", "gcv_cv_matrix"],
+      "custom_sections": ["Osc Mod Graph", "Audio Matrix Graphs", "CV Matrix Graphs", "FX Matrix Graphs"],
+      "module_sections": ["Osc Mod", "VAudio Matrix", "GAudio Matrix", "VCV-Audio Matrix", "VCV-CV Matrix", "GCV-Audio Matrix", "GCV-CV Matrix"],
       "colors": {
         "tab_text": "FF8888FF",
         "knob_thumb": "FF8888FF",

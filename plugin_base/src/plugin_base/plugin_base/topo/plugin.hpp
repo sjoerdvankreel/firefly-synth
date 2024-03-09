@@ -31,6 +31,7 @@ struct custom_section_gui final {
   int index;
   gui_colors colors;
   gui_position position;
+  std::string full_name; // needed for theme
   std::string background_image;
   custom_gui_factory gui_factory;
 

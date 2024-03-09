@@ -358,50 +358,50 @@ synth_topo(bool is_fx)
   auto make_title_section_ui = [custom_color, is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
     return make_title_section(gui, lnf, custom_color, store, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
+    custom_section_title, "Title", { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
-    custom_section_patch_controls, { 0, 4, 1, 1 }, custom_colors,
+    custom_section_patch_controls, "Patch", { 0, 4, 1, 1 }, custom_colors,
       [custom_color](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, custom_color, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
-    custom_section_edit_controls, { 0, 3, 1, 1 }, custom_colors,
+    custom_section_edit_controls, "Tweak", { 0, 3, 1, 1 }, custom_colors,
       [custom_color](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, custom_color, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
-    custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_main_graph, "Main Graph", { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
-    custom_section_gfx_graph, { 2, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_gfx_graph, "Global FX Graph", { 2, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, false, false, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
-    custom_section_glfo_graph, { 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_glfo_graph, "Global LFO Graph", { 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
   if (is_fx)
   {
     result->gui.custom_sections[custom_section_fx_only_matrix_graphs] = make_custom_section_gui(
-      custom_section_fx_only_matrix_graphs, { 3, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_fx_only_matrix_graphs, "FX Matrix Graphs", { 3, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_fx_only_matrices); });
   }
   else
   {
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
-      custom_section_osc_graph, { 4, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_osc_graph, "Oscillator Graph", { 4, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false, false, { module_osc_osc_matrix, module_voice_in }); });
     result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
-      custom_section_vfx_graph, { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_vfx_graph, "Voice FX Graph", { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, false, false, {}); });
     result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
-      custom_section_vlfo_graph, { 7, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_vlfo_graph, "Voice LFO Graph", { 7, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, false, false, {}); });
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
-      custom_section_env_graph, { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_env_graph, "Envelope Graph", { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_env, false, false, {}); });
     result->gui.custom_sections[custom_section_osc_osc_matrix_graph] = make_custom_section_gui(
-      custom_section_osc_osc_matrix_graph, { 4, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_osc_osc_matrix_graph, "Osc Mod Graph", { 4, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_module_graph_section(gui, lnf, store, module_osc_osc_matrix, true, false, { module_osc, module_voice_in }, 0.075f); });
     result->gui.custom_sections[custom_section_audio_matrix_graphs] = make_custom_section_gui(
-      custom_section_audio_matrix_graphs, { 4, 4, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_audio_matrix_graphs, "Audio Matrix Graphs", { 4, 4, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_audio_matrices); });
     result->gui.custom_sections[custom_section_cv_matrix_graphs] = make_custom_section_gui(
-      custom_section_cv_matrix_graphs, { 8, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
+      custom_section_cv_matrix_graphs, "CV Matrix Graphs", { 8, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
       -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_cv_matrices); });
   }
 
