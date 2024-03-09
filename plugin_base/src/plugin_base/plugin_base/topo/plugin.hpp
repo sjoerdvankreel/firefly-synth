@@ -29,9 +29,7 @@ custom_gui_factory;
 // free-form ui
 struct custom_section_gui final {
   int index;
-  gui_colors colors;
   gui_position position;
-  std::string background_image;
   custom_gui_factory gui_factory;
 
   void validate(plugin_topo const& topo, int index_) const;
@@ -61,7 +59,6 @@ struct plugin_topo_gui final {
   float max_scale = 2.0f;
   int aspect_ratio_width;
   int aspect_ratio_height;
-  gui_colors colors;
   gui_dimension dimension;
 
   float lighten = 0.15f;
