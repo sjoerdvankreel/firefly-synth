@@ -1,3 +1,4 @@
+#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/controls.hpp>
 
 #include <limits>
@@ -289,6 +290,9 @@ param_component::mouseUp(MouseEvent const& evt)
   menu.setLookAndFeel(&self.getLookAndFeel());
 
   bool have_menu = false;
+  auto lnf = dynamic_cast<plugin_base::lnf*>(&self.getLookAndFeel());
+  auto colors = lnf->module_gui_colors(_module->module->info.tag.full_name);
+
   std::unique_ptr<param_menu_handler> plugin_handler = {};
   param_menu_handler_factory plugin_handler_factory = _param->param->gui.menu_handler_factory;
   if(plugin_handler_factory)
@@ -300,7 +304,7 @@ param_component::mouseUp(MouseEvent const& evt)
     {
       have_menu = true;
       if (!plugin_menus[m].name.empty())
-        menu.addColouredItem(-1, plugin_menus[m].name, _module->module->gui.colors.tab_text, false, false, nullptr);
+        menu.addColouredItem(-1, plugin_menus[m].name, colors.tab_text, false, false, nullptr);
       for (int e = 0; e < plugin_menus[m].entries.size(); e++)
         menu.addItem(10000 + m * 1000 + e * 100, plugin_menus[m].entries[e].title);
     }
@@ -310,7 +314,7 @@ param_component::mouseUp(MouseEvent const& evt)
   if (host_menu && host_menu->root.children.size())
   {
     have_menu = true;
-    menu.addColouredItem(-1, "Host", _module->module->gui.colors.tab_text, false, false, nullptr);
+    menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
     fill_host_menu(menu, host_menu->root.children);
   }
 
@@ -452,6 +456,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 {
   auto const& domain = param->param->domain;
   auto const& param_gui = param->param->gui;
+  auto colors = lnf->module_gui_colors(module->module->info.tag.full_name);
   if(!param_gui.submenu)
   {
     int index = 0;
@@ -460,7 +465,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   }
   else
   {
-    auto const& color = module->module->gui.colors.tab_text;
+    auto const& color = colors.tab_text;
     fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get(), color);
   }
   autofit();

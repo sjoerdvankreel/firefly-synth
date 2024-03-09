@@ -49,12 +49,20 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   assert(module_section == -1 || module >= 0);
   assert(custom_section == -1 || module == -1);
 
-  auto theme_path = get_resource_location(desc->config) / resource_folder_themes / _theme;
-  auto font_path = theme_path / "font.ttf";
+  auto theme_folder = get_resource_location(desc->config) / resource_folder_themes / _theme;
+  auto font_path = theme_folder / "font.ttf";
   std::vector<char> typeface = file_load(font_path);
   assert(typeface.size());
   _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
   assert(-1 <= module && module < (int)_desc->plugin->modules.size());
+
+  auto theme_path = theme_folder / "theme.json";
+  std::vector<char> theme_contents = file_load(theme_path);
+  theme_contents.push_back('0');
+  assert(theme_contents.size());
+  juce::String theme_string = juce::String(theme_contents.data());
+  auto theme_json = JSON::parse(theme_string);
+  init_theme(theme_json);
 
   auto control_text_high = colors().control_text.brighter(_desc->plugin->gui.lighten);
   auto control_bg_high = colors().control_background.brighter(_desc->plugin->gui.lighten);
@@ -91,6 +99,12 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
   setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text.brighter(_desc->plugin->gui.lighten));
   setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_desc->plugin->gui.lighten));
+}
+
+void 
+lnf::init_theme(var const& json)
+{
+
 }
 
 gui_colors const& 

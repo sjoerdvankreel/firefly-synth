@@ -213,6 +213,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
 {
   if(!event.mods.isRightButtonDown()) return;
   auto const& topo = _state->desc().plugin->modules[_module];
+  auto colors = _lnf->module_gui_colors(topo.info.tag.full_name);
   int slots = topo.info.slot_count;
 
   PopupMenu menu;
@@ -228,7 +229,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
       if(dummy_menu.getNumItems() > 0)
       {
         if(!module_menus[m].name.empty())
-          menu.addColouredItem(-1, module_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+          menu.addColouredItem(-1, module_menus[m].name, colors.tab_text, false, false, nullptr);
         fill_module_tab_menu(menu, m * 1000, _slot, slots, module_menus[m].actions);
       }
     }
@@ -236,7 +237,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
     for(int m = 0; m < custom_menus.size(); m++)
     {
       if (!custom_menus[m].name.empty())
-        menu.addColouredItem(-1, custom_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+        menu.addColouredItem(-1, custom_menus[m].name, colors.tab_text, false, false, nullptr);
       for(int e = 0; e < custom_menus[m].entries.size(); e++)
         menu.addItem(10000 + m * 1000 + e * 100, custom_menus[m].entries[e].title);
     }
@@ -525,10 +526,11 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
 {
   auto const& topo = *_gui_state->desc().plugin;
   int radius = topo.gui.section_corner_radius;
-  auto outline1 = section.colors.section_outline1;
-  auto outline2 = section.colors.section_outline2;
-  auto background1 = section.colors.custom_background1;
-  auto background2 = section.colors.custom_background2;
+  auto colors = _lnf.section_gui_colors(section.full_name);
+  auto outline1 = colors.section_outline1;
+  auto outline2 = colors.section_outline2;
+  auto background1 = colors.custom_background1;
+  auto background2 = colors.custom_background2;
   auto store = [this](std::unique_ptr<Component>&& owned) -> Component& { 
     auto result = owned.get(); 
     _components.emplace_back(std::move(owned)); 
@@ -562,8 +564,9 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   int radius = topo.gui.module_corner_radius;
   int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
-  auto background1 = topo.modules[module_index].gui.colors.tab_background1;
-  auto background2 = topo.modules[module_index].gui.colors.tab_background2;
+  auto colors = _lnf.module_gui_colors(topo.modules[module_index].info.tag.full_name);
+  auto background1 = colors.tab_background1;
+  auto background2 = colors.tab_background2;
   auto& corners = make_component<rounded_container>(&child, radius, true, rounded_container_mode::fill, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
@@ -624,13 +627,14 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   bool vertical = param->gui.layout == param_layout::vertical;
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
+  auto colors = _lnf.module_gui_colors(module.module->info.tag.full_name);
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
     std::string display_name = param->info.tag.display_name;
     auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), display_name, false, -1, true);
     header.setText(display_name, dontSendNotification);
-    header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
+    header.setColour(Label::ColourIds::textColourId, colors.table_header);
     result.add(header, vertical, 0);
   }
   for (int i = 0; i < param->info.slot_count; i++)
@@ -706,17 +710,18 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
 Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
+  auto colors = _lnf.module_gui_colors(module.module->info.tag.full_name);
   if(param.param->gui.edit_type == gui_edit_type::output)
   {
     auto& result = make_param_label(module, param, gui_label_contents::value);
-    result.setColour(Label::ColourIds::textColourId, module.module->gui.colors.control_text);
+    result.setColour(Label::ColourIds::textColourId, colors.control_text);
     return result;
   }
 
   if (param.param->gui.edit_type == gui_edit_type::output_module_name)
   {
     auto& result = make_component<module_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());
-    result.setColour(Label::ColourIds::textColourId, module.module->gui.colors.control_text);
+    result.setColour(Label::ColourIds::textColourId, colors.control_text);
     return result;
   }
 

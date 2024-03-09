@@ -3,6 +3,8 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include <map>
+
 namespace plugin_base {
 
 class lnf:
@@ -16,7 +18,11 @@ public juce::LookAndFeel_V4 {
   plugin_desc const* const _desc;
   juce::Typeface::Ptr _typeface = {};
 
+  std::map<std::string, gui_colors> _module_colors = {};
+  std::map<std::string, gui_colors> _section_colors = {};
+
   int tab_width() const;
+  void init_theme(juce::var const& json);
 
 public:
   juce::Font font() const;
@@ -27,6 +33,9 @@ public:
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }
+
+  gui_colors module_gui_colors(std::string const& module_full_name);
+  gui_colors section_gui_colors(std::string const& module_full_name);
 
   juce::Font getLabelFont(juce::Label&) override;
   juce::Font getPopupMenuFont() override { return font(); }
