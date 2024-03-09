@@ -58,7 +58,7 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 
   auto theme_path = theme_folder / "theme.json";
   std::vector<char> theme_contents = file_load(theme_path);
-  theme_contents.push_back('0');
+  theme_contents.push_back('\0');
   assert(theme_contents.size());
   juce::String theme_string = juce::String(theme_contents.data());
   auto theme_json = JSON::parse(theme_string);
