@@ -31,6 +31,7 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 v1.3:
+rename big pad 2 aux 12345
 fix clap resizing
 move route up/down
 copy voice<->global
