@@ -1,0 +1,57 @@
+{
+  "defaults": {
+    "colors": {
+      "tab_text": "FFFF8844",
+      "tab_text_inactive": "FFAAAAAA",
+      "tab_button": "FF333333",
+      "tab_header": "FF222222",
+      "tab_background1": "FF222222",
+      "tab_background2": "FF111111",
+      "graph_grid": "FFFFFFFF",
+      "graph_background": "FF000000",
+      "graph_foreground": "FFFF8844",
+      "bubble_outline": "FFFF8844",
+      "knob_thumb": "FFFF8844",
+      "knob_track1": "FF222222",
+      "knob_track2": "FFFF8844",
+      "knob_background1": "FF222222",
+      "knob_background2": "FF999999",
+      "section_outline1": "FF884422",
+      "section_outline2": "FF444444",
+      "slider_thumb": "FFFF8844",
+      "slider_track1": "FF222222",
+      "slider_track2": "FF999999",
+      "slider_outline1": "FF444444",
+      "slider_outline2": "FFBBBBBB",
+      "slider_background": "FF000000",
+      "edit_text": "FFFFFFFF",
+      "table_header": "FFFF8844",
+      "label_text": "FFEEEEEE",
+      "control_tick": "FFFF8844",
+      "control_text": "FFEEEEEE",
+      "control_outline": "FFAAAAAA",
+      "control_background": "FF111111",
+      "custom_background1": "FF222222",
+      "custom_background2": "FF111111",
+      "scrollbar_thumb": "FFFF8844",
+      "scrollbar_background": "FF444444"
+    }
+  },
+  "overrides": [
+    {
+      "sections": ["title", "monitor", "main_graph", "tweak", "patch"],
+      "colors": {
+        "tab_text": "FFFF4488",
+        "knob_thumb": "FFFF4488",
+        "knob_track2": "FFFF4488",
+        "slider_thumb": "FFFF4488",
+        "control_tick": "FFFF4488",
+        "bubble_outline": "FFFF4488",
+        "scrollbar_thumb": "FFFF4488",
+        "graph_foreground": "FFFF4488",
+        "table_header": "FFC43468",
+        "section_outline1": "FF7F2244"
+      }
+    }
+  ]
+}
