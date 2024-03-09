@@ -299,7 +299,7 @@ plugin_gui::
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
-_lnf(&gui_state->desc(), -1, -1, -1), _tooltip(), 
+_lnf(&gui_state->desc(), "Firefly Default", -1, -1, -1), _tooltip(), // TODO
 _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
   setOpaque(true);
@@ -308,9 +308,9 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
   auto const& topo = *gui_state->desc().plugin;
   
   for(int i = 0; i < gui_state->desc().plugin->gui.custom_sections.size(); i++)
-    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), i, -1, -1);
+    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), "Firefly Default", i, -1, -1); // TODO
   for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
-    _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), -1, gui_state->desc().plugin->modules[i].gui.section, i);
+    _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), "Firefly Default", -1, gui_state->desc().plugin->modules[i].gui.section, i); // TODO
 
   add_and_make_visible(*this, make_content());
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;

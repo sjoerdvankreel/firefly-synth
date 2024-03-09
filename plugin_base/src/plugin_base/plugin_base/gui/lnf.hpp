@@ -11,6 +11,8 @@ public juce::LookAndFeel_V4 {
   int const _module = -1;
   int const _module_section = -1;
   int const _custom_section = -1;
+
+  std::string const _theme;
   plugin_desc const* const _desc;
   juce::Typeface::Ptr _typeface = {};
 
@@ -21,7 +23,7 @@ public:
   gui_colors const& colors() const;
   int combo_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
   int toggle_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
-  lnf(plugin_desc const* desc, int custom_section, int module_section, int module); 
+  lnf(plugin_desc const* desc, std::string const& theme, int custom_section, int module_section, int module); 
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }

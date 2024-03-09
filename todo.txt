@@ -30,6 +30,11 @@ out gain/cpu meter
 normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
+basic theming:
+- theme picker
+- store selected theme in user config
+- see what can be moved there: colors, image, font ttf, font height, corner radius etc etc  
+
 v1.3:
 rename big pad 2 aux 12345
 fix clap resizing

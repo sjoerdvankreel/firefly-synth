@@ -43,8 +43,8 @@ draw_conic_arc(
 }
 
 lnf::
-lnf(plugin_desc const* desc, int custom_section, int module_section, int module) :
-_desc(desc), _custom_section(custom_section), _module_section(module_section), _module(module)
+lnf(plugin_desc const* desc, std::string const& theme, int custom_section, int module_section, int module) :
+_theme(theme), _desc(desc), _custom_section(custom_section), _module_section(module_section), _module(module)
 {
   assert(module_section == -1 || module >= 0);
   assert(custom_section == -1 || module == -1);
