@@ -52,6 +52,51 @@
         "table_header": "FFC43468",
         "section_outline1": "FF7F2244"
       }
+    },
+    {
+      "sections": ["master_in", "master_out", "global_fx", "global_fx_graph", "global_lfo, "global_lfo_graph"],
+      "colors": {
+        "tab_text": "FF4488FF",
+        "knob_thumb": "FF4488FF",
+        "knob_track2": "FF4488FF",
+        "slider_thumb": "FF4488FF",
+        "control_tick": "FF4488FF",
+        "bubble_outline": "FF4488FF",
+        "scrollbar_thumb": "FF4488FF",
+        "graph_foreground": "FF4488FF",
+        "table_header": "FF3468C4",
+        "section_outline1": "FF22447F"
+      }
+    },
+    {
+      "sections": ["osc", "osc_graph", "voice_in", "voice_out", "voice_fx, "voice_fx_graph", "voice_lfo", "voice_lfo_graph", "env", "env_graph"],
+      "colors": {
+        "tab_text": "FFFF8844",
+        "knob_thumb": "FFFF8844",
+        "knob_track2": "FFFF8844",
+        "slider_thumb": "FFFF8844",
+        "control_tick": "FFFF8844",
+        "bubble_outline": "FFFF8844",
+        "scrollbar_thumb": "FFFF8844",
+        "graph_foreground": "FFFF8844",
+        "table_header": "FFC46834",
+        "section_outline1": "FF7F4422"
+      }
+    },
+    {
+      "sections": ["osc_mod", "osc_mod_graph", "vaudio_matrix", "gaudio_matrix", "audio_matrix_graph", "vcv_audio_matrix", "vcv_cv_matrix", "gcv_audio_matrix", "gcv_cv_matrix", "cv_matrix_graph"],
+      "colors": {
+        "tab_text": "FF8888FF",
+        "knob_thumb": "FF8888FF",
+        "knob_track2": "FF8888FF",
+        "slider_thumb": "FF8888FF",
+        "control_tick": "FF8888FF",
+        "bubble_outline": "FF8888FF",
+        "scrollbar_thumb": "FF8888FF",
+        "graph_foreground": "FF8888FF",
+        "table_header": "FF6868C4",
+        "section_outline1": "FF44447F"
+      }
     }
   ]
 }
