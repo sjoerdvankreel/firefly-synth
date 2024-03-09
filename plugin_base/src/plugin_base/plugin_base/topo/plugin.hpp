@@ -54,6 +54,7 @@ struct module_section_gui final {
 };
 
 // plugin ui
+// TODO move lots off this stuff to theme file
 struct plugin_topo_gui final {
   int default_width;
   float min_scale = 0.5f;
