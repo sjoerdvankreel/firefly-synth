@@ -111,7 +111,9 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   theme_contents.push_back('\0');
   assert(theme_contents.size());
   juce::String theme_string = juce::String(theme_contents.data());
-  auto theme_json = JSON::parse(theme_string);
+  var theme_json;
+  auto parse_result = JSON::parse(theme_string, theme_json);
+  assert(parse_result.ok());
   init_theme(theme_json);
 
   auto control_text_high = colors().control_text.brighter(_desc->plugin->gui.lighten);
@@ -167,16 +169,16 @@ lnf::init_theme(var const& json)
       var this_override = overrides[i];
       assert(this_override.hasProperty("colors"));
       auto this_colors = override_colors(_default_colors, this_override["colors"]);
-      if (overrides.hasProperty("custom_sections"))
+      if (this_override.hasProperty("custom_sections"))
       {
-        var custom_sections = overrides["custom_sections"];
+        var custom_sections = this_override["custom_sections"];
         assert(custom_sections.isArray());
         for(int j = 0; j < custom_sections.size(); j++)
           _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
       }
-      if (overrides.hasProperty("module_sections"))
+      if (this_override.hasProperty("module_sections"))
       {
-        var module_sections = overrides["module_sections"];
+        var module_sections = this_override["module_sections"];
         assert(module_sections.isArray());
         for (int j = 0; j < module_sections.size(); j++)
           _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
@@ -205,9 +207,15 @@ gui_colors const&
 lnf::colors() const
 {
   if(_custom_section != -1)
-    return _section_colors.at(_desc->plugin->gui.custom_sections[_custom_section].full_name);
+  {
+    auto full_name = _desc->plugin->gui.custom_sections[_custom_section].full_name;
+    return _section_colors.contains(full_name)? _section_colors.at(full_name): _default_colors;
+  }
   if(_module != -1)
-    return  _module_colors.at(_desc->plugin->modules[_module].info.tag.full_name);
+  {
+    auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
+    return _module_colors.contains(full_name) ? _module_colors.at(full_name) : _default_colors;
+  }
   return _default_colors;
 }
 
