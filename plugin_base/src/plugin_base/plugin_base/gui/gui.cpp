@@ -186,7 +186,11 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
   if(dynamic_cast<param_component*>(event.originalComponent)) return;
 
   juce::PopupMenu menu;
+  juce::PopupMenu::Options options;
   menu.setLookAndFeel(&_gui->getLookAndFeel());
+  // single child is where content scaling is applied
+  options = options.withTargetComponent(_gui->getChildComponent(0));
+  options = options.withMousePosition();
 
   juce::PopupMenu undo_menu;
   auto undo_stack = _gui->gui_state()->undo_stack();
@@ -200,7 +204,7 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
     redo_menu.addItem(i + 1000 + 1, redo_stack[i]);
   menu.addSubMenu("Redo", redo_menu);
 
-  menu.showMenuAsync(PopupMenu::Options(), [this](int result) {
+  menu.showMenuAsync(options, [this](int result) {
     if(1 <= result && result < 1000)
       _gui->gui_state()->undo(result - 1);
     else if(1001 <= result && result < 2000)
