@@ -42,6 +42,56 @@ draw_conic_arc(
   }
 }
 
+static Colour
+override_color_if_present(var const& json, std::string const& name, Colour const& current)
+{
+  auto juce_name = String(name);
+  if (json.hasProperty(juce_name))
+    return Colour::fromString(json[StringRef(juce_name)].toString());
+  return current;
+}
+
+static gui_colors 
+override_colors(gui_colors const& base, var const& json)
+{
+  gui_colors result = gui_colors(base);
+  result.tab_text = override_color_if_present(json, "tab_text", result.tab_text);
+  result.tab_text_inactive = override_color_if_present(json, "tab_text_inactive", result.tab_text_inactive);
+  result.tab_button = override_color_if_present(json, "tab_button", result.tab_button);
+  result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
+  result.tab_background1 = override_color_if_present(json, "tab_background1", result.tab_background1);
+  result.tab_background2 = override_color_if_present(json, "tab_background2", result.tab_background2);
+  result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
+  result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
+  result.graph_foreground = override_color_if_present(json, "graph_foreground", result.graph_foreground);
+  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);
+  result.knob_thumb = override_color_if_present(json, "knob_thumb", result.knob_thumb);
+  result.knob_track1 = override_color_if_present(json, "knob_track1", result.knob_track1);
+  result.knob_track2 = override_color_if_present(json, "knob_track2", result.knob_track2);
+  result.knob_background1 = override_color_if_present(json, "knob_background1", result.knob_background1);
+  result.knob_background2 = override_color_if_present(json, "knob_background2", result.knob_background2);
+  result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);
+  result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
+  result.slider_thumb = override_color_if_present(json, "slider_thumb", result.slider_thumb);
+  result.slider_track1 = override_color_if_present(json, "slider_track1", result.slider_track1);
+  result.slider_track2 = override_color_if_present(json, "slider_track2", result.slider_track2);
+  result.slider_outline1 = override_color_if_present(json, "slider_outline1", result.slider_outline1);
+  result.slider_outline2 = override_color_if_present(json, "slider_outline2", result.slider_outline2);
+  result.slider_background = override_color_if_present(json, "slider_background", result.slider_background);
+  result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
+  result.label_text = override_color_if_present(json, "label_text", result.label_text);
+  result.table_header = override_color_if_present(json, "table_header", result.table_header);
+  result.control_tick = override_color_if_present(json, "control_tick", result.control_tick);
+  result.control_text = override_color_if_present(json, "control_text", result.control_text);
+  result.control_outline = override_color_if_present(json, "control_outline", result.control_outline);
+  result.control_background = override_color_if_present(json, "control_background", result.control_background);
+  result.custom_background1 = override_color_if_present(json, "custom_background1", result.custom_background1);
+  result.custom_background2 = override_color_if_present(json, "custom_background2", result.custom_background2);
+  result.scrollbar_thumb = override_color_if_present(json, "scrollbar_thumb", result.scrollbar_thumb);
+  result.scrollbar_background = override_color_if_present(json, "scrollbar_background", result.scrollbar_background);
+  return gui_colors(base);
+}
+
 lnf::
 lnf(plugin_desc const* desc, std::string const& theme, int custom_section, int module_section, int module) :
 _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(module_section), _module(module)
@@ -104,7 +154,51 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 void 
 lnf::init_theme(var const& json)
 {
+  assert(json.hasProperty("defaults"));
+  var defaults = json["defaults"];
+  assert(defaults.hasProperty("colors"));
+  _default_colors = override_colors(_default_colors, defaults["colors"]);
+  if (json.hasProperty("overrides"))
+  {
+    var overrides = json["overrides"];
+    assert(overrides.isArray());
+    for (int i = 0; i < overrides.size(); i++)
+    {
+      var this_override = overrides[i];
+      assert(this_override.hasProperty("colors"));
+      auto this_colors = override_colors(_default_colors, this_override["colors"]);
+      if (overrides.hasProperty("custom_sections"))
+      {
+        var custom_sections = overrides["custom_sections"];
+        assert(custom_sections.isArray());
+        for(int j = 0; j < custom_sections.size(); j++)
+          _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
+      }
+      if (overrides.hasProperty("module_sections"))
+      {
+        var module_sections = overrides["module_sections"];
+        assert(module_sections.isArray());
+        for (int j = 0; j < module_sections.size(); j++)
+          _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
+      }
+    }
+  }
+}
 
+gui_colors 
+lnf::module_gui_colors(std::string const& module_full_name)
+{ 
+  if(_module_colors.contains(module_full_name))
+    return gui_colors(_module_colors.at(module_full_name)); 
+  return gui_colors(_default_colors);
+}
+
+gui_colors 
+lnf::section_gui_colors(std::string const& section_full_name) 
+{ 
+  if (_section_colors.contains(section_full_name))
+    return gui_colors(_section_colors.at(section_full_name));
+  return gui_colors(_default_colors);
 }
 
 gui_colors const& 

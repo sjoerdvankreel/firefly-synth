@@ -30,10 +30,10 @@ public:
   gui_colors const& colors() const;
   lnf(plugin_desc const* desc, std::string const& theme, int custom_section, int module_section, int module);
 
+  gui_colors module_gui_colors(std::string const& module_full_name);
+  gui_colors section_gui_colors(std::string const& section_full_name);
   int combo_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
   int toggle_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
-  gui_colors module_gui_colors(std::string const& module_full_name) { return gui_colors(_module_colors.at(module_full_name)); }
-  gui_colors section_gui_colors(std::string const& section_full_name) { return gui_colors(_section_colors.at(section_full_name)); }
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }
