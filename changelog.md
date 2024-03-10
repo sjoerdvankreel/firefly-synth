@@ -1,3 +1,7 @@
+### ?, ? - V1.2.4 (No binaries).
+
+- Swap out native message boxes for juce alert windows so they react to content scaling.
+
 ### March 10, 2024 - V1.2.3 (No binaries).
 
 - Bugfix: undo menu did not react to content scaling.
