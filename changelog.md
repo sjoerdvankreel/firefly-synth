@@ -1,3 +1,7 @@
+### March 10, 2024 - V1.2.3 (No binaries).
+
+- Bugfix: undo menu did not react to content scaling.
+
 ### March 9, 2024 - V1.2.2 (No binaries).
 
 - Change max ui scale factor from 200% to 800%.
