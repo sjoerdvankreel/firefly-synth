@@ -9,7 +9,7 @@ binding_component(
   plugin_gui* gui, module_desc const* module, 
   gui_bindings const* bindings, int own_slot_index):
 _gui(gui), _own_slot_index(own_slot_index), _bindings(bindings), _module(module)
-{
+{ 
   setup_param_bindings(bindings->global_enabled, bindings->enabled.params, _enabled_params);
   setup_param_bindings(bindings->global_visible, bindings->visible.params, _visibility_params);
 }
