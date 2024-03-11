@@ -529,8 +529,7 @@ plugin_gui::make_content()
 Component& 
 plugin_gui::make_custom_section(custom_section_gui const& section)
 {
-  auto const& topo = *_gui_state->desc().plugin;
-  int radius = topo.gui.section_corner_radius;
+  int radius = _lnf.theme_settings().section_corner_radius;
   auto colors = _lnf.section_gui_colors(section.full_name);
   auto outline1 = colors.section_outline1;
   auto outline2 = colors.section_outline2;
@@ -553,12 +552,11 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
 tab_component&
 plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module)
 {
-  auto const& topo = *_gui_state->desc().plugin;
   auto& result = make_component<tab_component>(_extra_state, id + "/tab", TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
   result.setLookAndFeel(module_lnf(module));
   result.getTabbedButtonBar().setTitle(title);
-  result.setTabBarDepth(module_header_height(topo.gui.font_height));
+  result.setTabBarDepth(module_header_height(_lnf.theme_settings().font_height));
   return result;
 }
 
@@ -566,7 +564,7 @@ void
 plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
 {
   auto const& topo = *_gui_state->desc().plugin;
-  int radius = topo.gui.module_corner_radius;
+  int radius = _lnf.theme_settings().module_corner_radius;
   int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
   auto colors = _lnf.module_gui_colors(topo.modules[module_index].info.tag.full_name);

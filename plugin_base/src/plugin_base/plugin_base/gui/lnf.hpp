@@ -19,6 +19,7 @@ public juce::LookAndFeel_V4 {
   juce::Typeface::Ptr _typeface = {};
 
   gui_colors _default_colors = {};
+  plugin_topo_gui_theme_settings _theme_settings = {};
   std::map<std::string, gui_colors> _module_colors = {};
   std::map<std::string, gui_colors> _section_colors = {};
 
@@ -32,8 +33,10 @@ public:
 
   gui_colors module_gui_colors(std::string const& module_full_name);
   gui_colors section_gui_colors(std::string const& section_full_name);
-  int combo_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
-  int toggle_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
+  
+  plugin_topo_gui_theme_settings const& theme_settings() const { return _theme_settings; }
+  int combo_height(bool tabular) const { return _theme_settings.font_height + (tabular ? 8 : 4); }
+  int toggle_height(bool tabular) const { return _theme_settings.font_height + (tabular ? 8 : 4); }
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }

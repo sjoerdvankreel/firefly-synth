@@ -38,7 +38,7 @@ param_section_container::
 param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child) :
   binding_component(gui, module, &section->gui.bindings, 0),
   rounded_container(child, 
-    gui->gui_state()->desc().plugin->gui.section_corner_radius, false, rounded_container_mode::both,
+    lnf->theme_settings().section_corner_radius, false, rounded_container_mode::both,
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline1, 
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline2) {
   init(); 

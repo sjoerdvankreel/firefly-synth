@@ -52,8 +52,17 @@ struct module_section_gui final {
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(module_section_gui);
 };
 
+// from theme json
+struct plugin_topo_gui_theme_settings final {
+  float lighten = 0.15f;
+  int font_height = 13;
+  int module_tab_width = 30;
+  int module_header_width = 80;
+  int module_corner_radius = 4;
+  int section_corner_radius = 4;
+};
+
 // plugin ui
-// TODO move lots off this stuff to theme file
 struct plugin_topo_gui final {
   int default_width;
   float min_scale = 0.5f;
@@ -61,18 +70,10 @@ struct plugin_topo_gui final {
   int aspect_ratio_width;
   int aspect_ratio_height;
   gui_dimension dimension;
-
-  float lighten = 0.15f;
-  int font_height = 13;
-  int module_tab_width = 30;
-  int module_header_width = 80;
-  int module_corner_radius = 4;
-  int section_corner_radius = 4;
   int font_flags = juce::Font::plain;
 
   std::vector<custom_section_gui> custom_sections;
   std::vector<module_section_gui> module_sections;
-
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);
 };
 

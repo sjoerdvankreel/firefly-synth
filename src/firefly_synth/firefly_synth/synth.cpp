@@ -322,10 +322,10 @@ synth_topo(bool is_fx)
 #endif
 
   result->gui.dimension.column_sizes = { is_fx? 30: 26, is_fx? 63: 67, 17, 32, 32 };
-  int height = result->gui.default_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
+  int height = result->gui.default_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width; // TODO move to theme
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
-  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
+  result->gui.dimension.row_sizes = gui_vertical_distribution(height, 13, section_vsizes); // TODO not 13
 
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 

@@ -116,8 +116,8 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   assert(parse_result.ok());
   init_theme(theme_json);
 
-  auto control_text_high = colors().control_text.brighter(_desc->plugin->gui.lighten);
-  auto control_bg_high = colors().control_background.brighter(_desc->plugin->gui.lighten);
+  auto control_text_high = colors().control_text.brighter(_theme_settings.lighten);
+  auto control_bg_high = colors().control_background.brighter(_theme_settings.lighten);
 
   setColour(Label::ColourIds::textColourId, colors().label_text);
 
@@ -149,13 +149,28 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 
   setColour(PopupMenu::ColourIds::textColourId, colors().label_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_desc->plugin->gui.lighten));
-  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_desc->plugin->gui.lighten));
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_theme_settings.lighten));
+  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_theme_settings.lighten));
 }
 
 void 
 lnf::init_theme(var const& json)
 {
+  assert(json.hasProperty("settings"));
+  var settings = json["settings"];
+  if(settings.hasProperty("lighten")) 
+    _theme_settings.lighten = (float)settings["lighten"];
+  if (settings.hasProperty("font_height"))
+    _theme_settings.font_height = (float)settings["font_height"];
+  if (settings.hasProperty("module_tab_width"))
+    _theme_settings.module_tab_width = (int)settings["module_tab_width"];
+  if (settings.hasProperty("module_header_width"))
+    _theme_settings.module_header_width = (int)settings["module_header_width"];
+  if (settings.hasProperty("module_corner_radius"))
+    _theme_settings.module_corner_radius = (int)settings["module_corner_radius"];
+  if (settings.hasProperty("section_corner_radius"))
+    _theme_settings.section_corner_radius = (int)settings["section_corner_radius"];
+
   assert(json.hasProperty("defaults"));
   var defaults = json["defaults"];
   assert(defaults.hasProperty("colors"));
@@ -223,7 +238,7 @@ Font
 lnf::font() const
 {
   Font result(_typeface);
-  result.setHeight(_desc->plugin->gui.font_height);
+  result.setHeight(_theme_settings.font_height);
   result.setStyleFlags(_desc->plugin->gui.font_flags);
   return result;
 }
@@ -246,7 +261,7 @@ lnf::tab_width() const
 {
   assert(_module_section != -1);
   auto const& section = _desc->plugin->gui.module_sections[_module_section];
-  return section.tabbed ? -1 : _desc->plugin->gui.module_tab_width;
+  return section.tabbed ? -1 : _theme_settings.module_tab_width;
 }
 
 Path 
@@ -269,7 +284,7 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
 { 
   int result = tab_width();
   if(result == -1) return b.getTabbedButtonBar().getWidth() / b.getTabbedButtonBar().getNumTabs();
-  if(b.getIndex() == 0) result += _desc->plugin->gui.module_header_width;
+  if(b.getIndex() == 0) result += _theme_settings.module_header_width;
   return result;
 }
 
@@ -277,14 +292,14 @@ void
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
   g.setColour(colors().tab_header);
-  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _desc->plugin->gui.module_corner_radius);
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _theme_settings.module_corner_radius);
 }
 
 void
 lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardHeight, int& w, int& h)
 {
   LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
-  h = _desc->plugin->gui.font_height + 8;
+  h = _theme_settings.font_height + 8;
 }
 
 void
@@ -476,12 +491,12 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  int radius = _desc->plugin->gui.module_corner_radius;
+  int radius = _theme_settings.module_corner_radius;
   int strip_left = radius + 2;
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   
-  float button_lighten = button.getToggleState() || isMouseOver ? _desc->plugin->gui.lighten : 0;
+  float button_lighten = (button.getToggleState() || isMouseOver) ? _theme_settings.lighten : 0;
   auto text_color = (is_section || button.getToggleState()) ? colors().tab_text : colors().tab_text_inactive;
   g.setColour(colors().tab_button.brighter(button_lighten));
 
