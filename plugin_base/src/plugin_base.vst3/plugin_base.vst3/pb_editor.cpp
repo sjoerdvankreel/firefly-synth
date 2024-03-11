@@ -33,7 +33,7 @@ pb_editor::onSize(ViewRect* new_size)
 tresult PLUGIN_API
 pb_editor::checkSizeConstraint(ViewRect* new_size)
 {
-  assert(_gui);
+  assert(_gui.get());
   auto settings = _gui->get_lnf()->theme_settings();
   auto const& topo = *_controller->gui_state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
