@@ -124,9 +124,9 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   setColour(ToggleButton::ColourIds::textColourId, colors().control_text);
   setColour(ToggleButton::ColourIds::tickColourId, colors().control_tick);
 
-  setColour(TextButton::ColourIds::textColourOnId, control_text_high);
+  setColour(TextButton::ColourIds::textColourOnId, colors().label_text);
+  setColour(TextButton::ColourIds::textColourOffId, colors().label_text);
   setColour(TextButton::ColourIds::buttonOnColourId, control_bg_high);
-  setColour(TextButton::ColourIds::textColourOffId, colors().control_text);
   setColour(TextButton::ColourIds::buttonColourId, colors().control_background);
 
   setColour(TextEditor::ColourIds::textColourId, colors().edit_text);
@@ -147,9 +147,9 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   setColour(ScrollBar::ColourIds::thumbColourId, colors().scrollbar_thumb);
   setColour(ScrollBar::ColourIds::backgroundColourId, colors().scrollbar_background);
 
-  setColour(PopupMenu::ColourIds::textColourId, colors().control_text);
+  setColour(PopupMenu::ColourIds::textColourId, colors().label_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text.brighter(_desc->plugin->gui.lighten));
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_desc->plugin->gui.lighten));
   setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_desc->plugin->gui.lighten));
 }
 
@@ -345,7 +345,7 @@ lnf::drawPopupMenuItemWithOptions(
     new_item.isEnabled = true; // just for painting submenu headers, not actually enabled
   LookAndFeel_V4::drawPopupMenuItemWithOptions(g, area, highlighted, new_item, options);
 }
-
+ 
 void
 lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   bool vertical, int pos, int size, bool over, bool down)
@@ -411,7 +411,7 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   arrow.lineTo(x + w, y);
   arrow.lineTo(x + w / 2, y + h);
   arrow.closeSubPath();
-  g.setColour(colors().edit_text);
+  g.setColour(colors().control_text);
   g.fillPath(arrow);
 }
 

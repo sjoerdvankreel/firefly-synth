@@ -170,7 +170,7 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
   result.add(tweak, { 0, 1, 1, 3 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 1, 1, 3 });
   return result;
-}
+} 
 
 static Component&
 make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
