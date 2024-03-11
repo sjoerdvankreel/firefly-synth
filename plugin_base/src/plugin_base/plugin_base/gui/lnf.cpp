@@ -46,9 +46,9 @@ static Colour
 override_color_if_present(var const& json, std::string const& name, Colour const& current)
 {
   auto juce_name = String(name);
-  if (json.hasProperty(juce_name))
-    return Colour::fromString(json[StringRef(juce_name)].toString());
-  return current;
+  if (!json.hasProperty(juce_name)) return current;
+  auto color_text = json[StringRef(juce_name)].toString();
+  return Colour::fromString(color_text);
 }
 
 static gui_colors 
@@ -89,7 +89,7 @@ override_colors(gui_colors const& base, var const& json)
   result.custom_background2 = override_color_if_present(json, "custom_background2", result.custom_background2);
   result.scrollbar_thumb = override_color_if_present(json, "scrollbar_thumb", result.scrollbar_thumb);
   result.scrollbar_background = override_color_if_present(json, "scrollbar_background", result.scrollbar_background);
-  return gui_colors(base);
+  return gui_colors(result); 
 }
 
 lnf::

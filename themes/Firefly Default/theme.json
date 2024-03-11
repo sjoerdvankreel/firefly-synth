@@ -40,6 +40,7 @@
   "overrides": [
     {
       "custom_sections": ["Title", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "module_sections": ["Monitor"],
       "colors": {
         "tab_text": "FFFF4488",
         "knob_thumb": "FFFF4488",
@@ -87,7 +88,7 @@
     },
     {
       "custom_sections": ["Osc Mod Graph", "Audio Matrix Graphs", "CV Matrix Graphs", "FX Matrix Graphs"],
-      "module_sections": ["Osc Mod", "VAudio Matrix", "GAudio Matrix", "VCV-Audio Matrix", "VCV-CV Matrix", "GCV-Audio Matrix", "GCV-CV Matrix"],
+      "module_sections": ["Osc Mod", "VAudio", "GAudio", "VCV-A", "VCV-CV", "GCV-A", "GCV-CV"],
       "colors": {
         "tab_text": "FF8888FF",
         "knob_thumb": "FF8888FF",

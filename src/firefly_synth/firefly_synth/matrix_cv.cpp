@@ -365,7 +365,7 @@ cv_matrix_topo(
 
   int this_module = cv? module_gcv_cv_matrix: module_gcv_audio_matrix;
   if (!global)
-  {
+  { 
     this_module = cv ? module_vcv_cv_matrix : module_vcv_audio_matrix;
     auto on_note_matrix(make_cv_source_matrix(on_note_sources).mappings);
     for (int m = 0; m < on_note_matrix.size(); m++)
