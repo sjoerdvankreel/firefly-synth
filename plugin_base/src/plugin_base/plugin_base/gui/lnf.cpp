@@ -370,7 +370,7 @@ lnf::drawLabel(Graphics& g, Label& label)
     if (afl->tabular())
       draw_tabular_cell_bg(g, &label, 0.075f);
 
-  if (!label.isBeingEdited())
+  if (!label.isBeingEdited()) 
   {
     auto alpha = label.isEnabled() ? 1.0f : 0.5f;
     auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
