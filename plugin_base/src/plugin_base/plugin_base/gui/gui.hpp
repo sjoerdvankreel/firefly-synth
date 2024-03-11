@@ -84,6 +84,7 @@ public juce::MouseListener
 {
   int const _slot;
   int const _module;
+  plugin_gui* const _gui;  
   lnf* const  _lnf;
   plugin_state* const _state;
   juce::TabBarButton* _button;
@@ -91,8 +92,8 @@ public juce::MouseListener
 public:
   void mouseUp(juce::MouseEvent const& event);
   ~gui_tab_menu_listener() { _button->removeMouseListener(this); }
-  gui_tab_menu_listener(plugin_state* state, lnf* lnf, juce::TabBarButton* button, int module, int slot):
-  _state(state), _lnf(lnf), _button(button), _module(module), _slot(slot) { _button->addMouseListener(this, true); }
+  gui_tab_menu_listener(plugin_gui* gui, plugin_state* state, lnf* lnf, juce::TabBarButton* button, int module, int slot):
+  _gui(gui), _lnf(lnf), _state(state), _button(button), _module(module), _slot(slot) { _button->addMouseListener(this, true); }
 };
 
 // triggers gui_mouse_listener

@@ -273,7 +273,8 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
     delete handler;
     if(!result.show_warning()) return;
     auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::WarningIcon, result.title(), result.content());
-    NativeMessageBox::showAsync(options, [](int){});
+    options = options.withAssociatedComponent(_gui->getChildComponent(0));
+    AlertWindow::showAsync(options, [](int){});
   });
 }
 
@@ -446,7 +447,7 @@ plugin_gui::module_mouse_enter(int module)
 void
 plugin_gui::add_tab_menu_listener(juce::TabBarButton& button, int module, int slot)
 {
-  auto listener = std::make_unique<gui_tab_menu_listener>(gui_state(), &_lnf, &button, module, slot);
+  auto listener = std::make_unique<gui_tab_menu_listener>(this, gui_state(), &_lnf, &button, module, slot);
   _tab_menu_listeners.push_back(std::move(listener));
 }
 
@@ -830,8 +831,9 @@ plugin_gui::init_patch()
 {
   auto options = MessageBoxOptions::makeOptionsOkCancel(
     MessageBoxIconType::QuestionIcon, "Init Patch", "Are you sure?");
-  NativeMessageBox::showAsync(options, [this](int result) {
-    if(result == 0)
+  options = options.withAssociatedComponent(getChildComponent(0));
+  AlertWindow::showAsync(options, [this](int result) {
+    if(result == 1)
     {
       _extra_state->clear();
       _gui_state->begin_undo_region();
@@ -847,8 +849,9 @@ plugin_gui::clear_patch()
 {
   auto options = MessageBoxOptions::makeOptionsOkCancel(
     MessageBoxIconType::QuestionIcon, "Clear Patch", "Are you sure?");
-  NativeMessageBox::showAsync(options, [this](int result) {
-    if (result == 0)
+  options = options.withAssociatedComponent(getChildComponent(0));
+  AlertWindow::showAsync(options, [this](int result) {
+    if (result == 1)
     {
       _extra_state->clear();
       _gui_state->begin_undo_region();
@@ -894,7 +897,8 @@ plugin_gui::load_patch(std::string const& path, bool preset)
   if (result.error.size())
   {
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Error", result.error, String(), this);
-    NativeMessageBox::showAsync(options, nullptr);
+    options = options.withAssociatedComponent(getChildComponent(0));
+    AlertWindow::showAsync(options, nullptr);
     return;
   }
 
@@ -910,7 +914,8 @@ plugin_gui::load_patch(std::string const& path, bool preset)
     if (result.warnings.size() > 5)
       warnings += String(std::to_string(result.warnings.size() - 5)) + " more...\n";
     auto options = MessageBoxOptions::makeOptionsOk(icon, "Warning", warnings, String(), this);
-    NativeMessageBox::showAsync(options, nullptr);
+    options = options.withAssociatedComponent(getChildComponent(0));
+    AlertWindow::showAsync(options, nullptr);
   }
 }
 
