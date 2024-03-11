@@ -29,6 +29,7 @@ public juce::LookAndFeel_V4 {
 public:
   juce::Font font() const;
   gui_colors const& colors() const;
+  std::string const& theme() const { return _theme; }
   lnf(plugin_desc const* desc, std::string const& theme, int custom_section, int module_section, int module);
 
   gui_colors module_gui_colors(std::string const& module_full_name);

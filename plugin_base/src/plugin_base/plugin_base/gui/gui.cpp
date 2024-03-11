@@ -314,9 +314,9 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
   auto const& topo = *gui_state->desc().plugin;
   
   for(int i = 0; i < gui_state->desc().plugin->gui.custom_sections.size(); i++)
-    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), "Firefly Default", i, -1, -1); // TODO
+    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf.theme(), i, -1, -1);
   for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
-    _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), "Firefly Default", -1, gui_state->desc().plugin->modules[i].gui.section, i); // TODO
+    _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), _lnf.theme(), -1, gui_state->desc().plugin->modules[i].gui.section, i);
 
   add_and_make_visible(*this, make_content());
   float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
