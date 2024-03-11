@@ -170,7 +170,11 @@ lnf::init_theme(var const& json)
     _theme_settings.module_corner_radius = (int)settings["module_corner_radius"];
   if (settings.hasProperty("section_corner_radius"))
     _theme_settings.section_corner_radius = (int)settings["section_corner_radius"];
-     
+  if (settings.hasProperty("knob_padding"))
+    _theme_settings.knob_padding = (int)settings["knob_padding"];
+  if (settings.hasProperty("tabular_knob_padding"))
+    _theme_settings.tabular_knob_padding = (int)settings["tabular_knob_padding"];
+
   assert(json.hasProperty("defaults"));
   var defaults = json["defaults"];
   assert(defaults.hasProperty("colors"));
@@ -583,7 +587,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     scale_factor = size_base / s.getHeight();
   }
 
-  float padding = tabular? 3: 5;
+  float padding = tabular? _theme_settings.tabular_knob_padding: _theme_settings.knob_padding;
   float size = size_base - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
   if(tabular) left = (s.getWidth() - size) / 2;

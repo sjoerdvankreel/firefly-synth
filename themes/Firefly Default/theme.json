@@ -5,7 +5,9 @@
     "module_tab_width": "30",
     "module_header_width": "80",
     "module_corner_radius": "4",
-    "section_corner_radius": "4"
+    "section_corner_radius": "4",
+    "knob_padding": "5",
+    "tabular_knob_padding": "3"
   },
   "defaults": {
     "colors": {
