@@ -170,7 +170,7 @@ lnf::init_theme(var const& json)
     _theme_settings.module_corner_radius = (int)settings["module_corner_radius"];
   if (settings.hasProperty("section_corner_radius"))
     _theme_settings.section_corner_radius = (int)settings["section_corner_radius"];
-
+     
   assert(json.hasProperty("defaults"));
   var defaults = json["defaults"];
   assert(defaults.hasProperty("colors"));
