@@ -174,6 +174,22 @@ lnf::init_theme(var const& json)
     _theme_settings.knob_padding = (int)settings["knob_padding"];
   if (settings.hasProperty("tabular_knob_padding"))
     _theme_settings.tabular_knob_padding = (int)settings["tabular_knob_padding"];
+  if (settings.hasProperty("min_scale"))
+    _theme_settings.min_scale = (float)settings["min_scale"];
+  if (settings.hasProperty("max_scale"))
+    _theme_settings.max_scale = (float)settings["max_scale"];
+  if (settings.hasProperty("default_width_fx"))
+    _theme_settings.default_width_fx = (int)settings["default_width_fx"];
+  if (settings.hasProperty("aspect_ratio_width_fx"))
+    _theme_settings.aspect_ratio_width_fx = (int)settings["aspect_ratio_width_fx"];
+  if (settings.hasProperty("aspect_ratio_height_fx"))
+    _theme_settings.aspect_ratio_height_fx = (int)settings["aspect_ratio_height_fx"];
+  if (settings.hasProperty("default_width_instrument"))
+    _theme_settings.default_width_instrument = (int)settings["default_width_instrument"];
+  if (settings.hasProperty("aspect_ratio_width_instrument"))
+    _theme_settings.aspect_ratio_width_instrument = (int)settings["aspect_ratio_width_instrument"];
+  if (settings.hasProperty("aspect_ratio_height_instrument"))
+    _theme_settings.aspect_ratio_height_instrument = (int)settings["aspect_ratio_height_instrument"];
 
   assert(json.hasProperty("defaults"));
   var defaults = json["defaults"];

@@ -54,8 +54,8 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_module_gui(section, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
-  result.gui.menu_handler_factory = [global, is_fx](plugin_state* state) {
-    return make_audio_routing_menu_handler(state, global, is_fx); };
+  result.gui.menu_handler_factory = [global](plugin_state* state) {
+    return make_audio_routing_menu_handler(state, global); };
   if(global)
     result.engine_factory = [](auto const&, int, int) { 
       return std::make_unique<master_audio_out_engine>(); };

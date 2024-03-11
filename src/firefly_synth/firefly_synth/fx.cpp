@@ -273,8 +273,9 @@ init_voice_default(plugin_state& state)
 }
 
 static void
-init_global_default(plugin_state& state, bool is_fx)
+init_global_default(plugin_state& state)
 {
+  bool is_fx = state.desc().plugin->type == plugin_type::fx;
   state.set_text_at(module_gfx, 0, param_type, 0, "SV Filter");
   state.set_text_at(module_gfx, 0, param_svf_mode, 0, "Low Pass");
   state.set_text_at(module_gfx, is_fx ? 0: 1, param_type, 0, "Delay");
@@ -580,11 +581,11 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_module_gui(section, pos, { { 1, 1 }, { 2, 7 } })));
  
   result.graph_engine_factory = make_graph_engine;
-  if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
+  if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s); };
   if (!global) result.default_initializer = init_voice_default;
   result.graph_renderer = render_graph;
-  result.gui.menu_handler_factory = [global, is_fx](plugin_state* state) {
-    return make_audio_routing_menu_handler(state, global, is_fx); };
+  result.gui.menu_handler_factory = [global](plugin_state* state) {
+    return make_audio_routing_menu_handler(state, global); };
   result.engine_factory = [global](auto const&, int sample_rate, int max_frame_count) {
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<fx_state_converter>(desc, global); };

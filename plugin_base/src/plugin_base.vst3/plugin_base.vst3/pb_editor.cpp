@@ -33,12 +33,15 @@ pb_editor::onSize(ViewRect* new_size)
 tresult PLUGIN_API
 pb_editor::checkSizeConstraint(ViewRect* new_size)
 {
+  assert(_gui);
+  auto settings = _gui->get_lnf()->theme_settings();
   auto const& topo = *_controller->gui_state().desc().plugin;
-  int min_width = (int)(topo.gui.default_width * topo.gui.min_scale);
-  int max_width = (int)(topo.gui.default_width * topo.gui.max_scale);
+  bool is_fx = topo.type == plugin_type::fx;
+  int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale);
+  int max_width = (int)(settings.get_default_width(is_fx) * settings.max_scale);
   int new_width = std::clamp((int)new_size->getWidth(), min_width, max_width);
   new_size->right = new_size->left + new_width;
-  new_size->bottom = new_size->top + (new_width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width);
+  new_size->bottom = new_size->top + (new_width * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx));
   return kResultTrue;
 }
 

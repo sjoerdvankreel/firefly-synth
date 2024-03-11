@@ -312,6 +312,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
   setLookAndFeel(&_lnf);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
+  bool is_fx = topo.type == plugin_type::fx;
   
   for(int i = 0; i < gui_state->desc().plugin->gui.custom_sections.size(); i++)
     _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf.theme(), i, -1, -1);
@@ -319,10 +320,11 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
     _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), _lnf.theme(), -1, gui_state->desc().plugin->modules[i].gui.section, i);
 
   add_and_make_visible(*this, make_content());
-  float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
-  getChildComponent(0)->setSize(topo.gui.default_width, topo.gui.default_width * ratio);
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.default_width, 
-    (int)(topo.gui.default_width * topo.gui.min_scale), (int)(topo.gui.default_width * topo.gui.max_scale));
+  int default_width = _lnf.theme_settings().get_default_width(is_fx);
+  float ratio = _lnf.theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf.theme_settings().get_aspect_ratio_width(is_fx);
+  getChildComponent(0)->setSize(default_width, default_width * ratio);
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, default_width,
+    (int)(default_width * _lnf.theme_settings().min_scale), (int)(default_width * _lnf.theme_settings().max_scale));
   setSize(w, w * ratio);
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
 }
@@ -471,7 +473,8 @@ void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
-  float scale = w / _gui_state->desc().plugin->gui.default_width;
+  bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
+  float scale = w / _lnf.theme_settings().get_default_width(is_fx);
   getChildComponent(0)->setTransform(AffineTransform::scale(scale));
   user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
 }
@@ -507,9 +510,12 @@ void
 plugin_gui::reloaded()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.default_width, 
-    (int)(topo.gui.default_width * topo.gui.min_scale), (int)(topo.gui.default_width * topo.gui.max_scale));
+  auto settings = _lnf.theme_settings();
+  bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
+  int default_width = settings.get_default_width(is_fx);
+  float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, settings.get_default_width(is_fx),
+    (int)(default_width * settings.min_scale), (int)(default_width * settings.max_scale));
   setSize(w, (int)(w * ratio));
 }
 
@@ -517,7 +523,7 @@ Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& grid = make_component<grid_component>(topo.gui.dimension, margin_module);
+  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf.theme_settings()), margin_module);
   for(int s = 0; s < topo.gui.custom_sections.size(); s++)
     grid.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
   for(int s = 0; s < topo.gui.module_sections.size(); s++)

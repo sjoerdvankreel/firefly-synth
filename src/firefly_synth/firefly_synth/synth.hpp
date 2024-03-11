@@ -165,7 +165,7 @@ make_cv_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
 make_audio_audio_matrix_targets(plugin_base::plugin_topo const* topo, bool global);
 std::vector<plugin_base::module_topo const*>
-make_audio_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global, bool is_fx);
+make_audio_audio_matrix_sources(plugin_base::plugin_topo const* topo, bool global);
 
 // menu handlers to update routing on clear/move/swap/copy
 std::unique_ptr<plugin_base::module_tab_menu_handler>
@@ -175,9 +175,9 @@ make_audio_routing_osc_mod_params(plugin_base::plugin_state* state);
 plugin_base::audio_routing_cv_params
 make_audio_routing_cv_params(plugin_base::plugin_state* state, bool global);
 std::unique_ptr<plugin_base::module_tab_menu_handler>
-make_audio_routing_menu_handler(plugin_base::plugin_state* state, bool global, bool is_fx);
+make_audio_routing_menu_handler(plugin_base::plugin_state* state, bool global);
 plugin_base::audio_routing_audio_params
-make_audio_routing_audio_params(plugin_base::plugin_state* state, bool global, bool is_fx);
+make_audio_routing_audio_params(plugin_base::plugin_state* state, bool global);
 
 // these describe individual modules
 plugin_base::module_topo midi_topo(int section);

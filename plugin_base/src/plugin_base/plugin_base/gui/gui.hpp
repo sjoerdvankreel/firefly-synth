@@ -150,6 +150,7 @@ public:
   void param_changing(int index, plain_value plain);
   graph_engine* get_module_graph_engine(module_topo const& module);
 
+  lnf const* get_lnf() const { return &_lnf; }
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state_() const { return _extra_state; }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }

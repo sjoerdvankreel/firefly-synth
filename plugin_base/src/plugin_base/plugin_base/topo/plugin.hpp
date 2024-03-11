@@ -19,10 +19,14 @@ class plugin_state;
 
 struct plugin_desc;
 struct plugin_topo_gui;
+struct plugin_topo_gui_theme_settings;
+
 enum class plugin_type { synth, fx };
 
 typedef std::function<juce::Component&(std::unique_ptr<juce::Component>&&)>
 component_store;
+typedef std::function<gui_dimension(plugin_topo_gui_theme_settings const& settings)>
+plugin_dimension_factory;
 typedef std::function<juce::Component&(plugin_gui* gui, lnf* lnf, component_store store)>
 custom_gui_factory;
 
@@ -54,27 +58,36 @@ struct module_section_gui final {
 
 // from theme json
 struct plugin_topo_gui_theme_settings final {
-  int module_tab_width = 30;
-  int module_header_width = 80;
-  int module_corner_radius = 4;
-  int section_corner_radius = 4;
 
   float lighten = 0.15f;
   int font_height = 13;
   int knob_padding = 5;
   int tabular_knob_padding = 3;
+
+  int module_tab_width = 30;
+  int module_header_width = 80;
+  int module_corner_radius = 4;
+  int section_corner_radius = 4;
+
+  float min_scale = 0.5f;
+  float max_scale = 8.0f;
+  
+  int default_width_fx = 800;
+  int aspect_ratio_width_fx = 4;
+  int aspect_ratio_height_fx = 3;
+  int default_width_instrument = 800;
+  int aspect_ratio_width_instrument = 4;
+  int aspect_ratio_height_instrument = 3;
+
+  int get_default_width(bool is_fx) const { return is_fx? default_width_fx: default_width_instrument; }
+  int get_aspect_ratio_width(bool is_fx) const { return is_fx? aspect_ratio_width_fx: aspect_ratio_width_instrument; }
+  int get_aspect_ratio_height(bool is_fx) const { return is_fx? aspect_ratio_height_fx: aspect_ratio_height_instrument; }
 };
 
 // plugin ui
 struct plugin_topo_gui final {
-  int default_width;
-  float min_scale = 0.5f;
-  float max_scale = 8.0f;
-  int aspect_ratio_width;
-  int aspect_ratio_height;
-  gui_dimension dimension;
   int font_flags = juce::Font::plain;
-
+  plugin_dimension_factory dimension_factory;
   std::vector<custom_section_gui> custom_sections;
   std::vector<module_section_gui> module_sections;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo_gui);

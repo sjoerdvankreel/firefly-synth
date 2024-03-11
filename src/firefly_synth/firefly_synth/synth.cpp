@@ -54,6 +54,18 @@ enum {
   module_section_env, 
   module_section_synth_count };
 
+static gui_dimension
+make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings)
+{
+  gui_dimension result;
+  result.column_sizes = { is_fx ? 30 : 26, is_fx ? 63 : 67, 17, 32, 32 };
+  int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
+  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
+  result.row_sizes = gui_vertical_distribution(height, settings.font_height, section_vsizes);
+  return result;
+}
+
 static module_graph_params
 make_module_graph_params(int module, bool render_on_module_mouse_enter, 
   bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices)
@@ -187,10 +199,10 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
 }
 
 std::unique_ptr<module_tab_menu_handler>
-make_audio_routing_menu_handler(plugin_state* state, bool global, bool is_fx)
+make_audio_routing_menu_handler(plugin_state* state, bool global)
 {
   auto cv_params = make_audio_routing_cv_params(state, global);
-  auto audio_params = make_audio_routing_audio_params(state, global, is_fx);
+  auto audio_params = make_audio_routing_audio_params(state, global);
   return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params }));
 }
 
@@ -216,8 +228,9 @@ make_static_cv_matrix_mixdown(plugin_block& block)
 }
 
 std::vector<module_topo const*>
-make_audio_audio_matrix_sources(plugin_topo const* topo, bool global, bool is_fx)
+make_audio_audio_matrix_sources(plugin_topo const* topo, bool global)
 {
+  bool is_fx = topo->type == plugin_type::fx;
   if (!global) return { &topo->modules[module_osc], &topo->modules[module_vfx] };
   if (!is_fx) return { &topo->modules[module_voice_mix], &topo->modules[module_gfx] };
   return { &topo->modules[module_external_audio], &topo->modules[module_gfx] };
@@ -301,18 +314,14 @@ synth_topo(bool is_fx)
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 
-  result->gui.default_width = 1280;
-  result->gui.aspect_ratio_width = 118;
   if(is_fx)
   {
     result->type = plugin_type::fx;
-    result->gui.aspect_ratio_height = 25;
     result->tag = make_topo_tag_basic(FF_SYNTH_FX_ID, FF_SYNTH_FX_NAME);
   }
   else
   {
     result->type = plugin_type::synth;
-    result->gui.aspect_ratio_height = 61;
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
 
@@ -321,14 +330,9 @@ synth_topo(bool is_fx)
   result->gui.font_height = 11;
 #endif
 
-  result->gui.dimension.column_sizes = { is_fx? 30: 26, is_fx? 63: 67, 17, 32, 32 };
-  int height = result->gui.default_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width; // TODO move to theme
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
-  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
-  result->gui.dimension.row_sizes = gui_vertical_distribution(height, 13, section_vsizes); // TODO not 13
-
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
-  auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
+  result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
+  auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
     return make_title_section(gui, lnf, store, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
     custom_section_title, "Title", { 0, 0, 1, 1 }, make_title_section_ui);
@@ -442,9 +446,9 @@ synth_topo(bool is_fx)
   result->modules[module_monitor] = monitor_topo(module_section_monitor, { 0, 0 }, result->audio_polyphony, is_fx);
   result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_osc_osc_matrix, { 0, 0 }, result.get());
   result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_fx_only_matrices: module_section_audio_matrices, { 0, 0 }, true, is_fx,
-    make_audio_audio_matrix_sources(result.get(), true, is_fx), make_audio_audio_matrix_targets(result.get(), true));
+    make_audio_audio_matrix_sources(result.get(), true), make_audio_audio_matrix_targets(result.get(), true));
   result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_hidden : module_section_audio_matrices, { 0, 0 }, false, is_fx,
-    make_audio_audio_matrix_sources(result.get(), false, is_fx), make_audio_audio_matrix_targets(result.get(), false));
+    make_audio_audio_matrix_sources(result.get(), false), make_audio_audio_matrix_targets(result.get(), false));
   result->modules[module_gcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_fx_only_matrices : module_section_cv_matrices, { 0, 0 }, false, true, is_fx,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));
   result->modules[module_vcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_cv_matrices, { 0, 0 }, false, false, is_fx,
