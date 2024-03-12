@@ -169,16 +169,12 @@ make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto colors = lnf->section_gui_colors("Patch");
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 3 }, 2);
-  auto& patch_label = store_component<juce::Label>(store);
-  patch_label.setText("Patch", juce::dontSendNotification);
-  patch_label.setColour(Label::ColourIds::textColourId, colors.control_text);
-  patch_label.setJustificationType(Justification::centred);
-  result.add(patch_label, { 0, 0 });
-  result.add(store_component<preset_button>(store, gui), { 1, 0 });
-  result.add(gui->make_load_button(), { 0, 1 });
-  result.add(gui->make_save_button(), { 0, 2 });
-  result.add(gui->make_init_button(), { 1, 1 });
-  result.add(gui->make_clear_button(), { 1, 2 });
+  result.add(gui->make_load_button(), { 0, 0 });
+  result.add(gui->make_save_button(), { 0, 1 });
+  result.add(gui->make_init_button(), { 1, 0 });
+  result.add(gui->make_clear_button(), { 1, 1 });
+  result.add(store_component<preset_button>(store, gui), { 0, 2 });
+  result.add(store_component<theme_button>(store, gui), { 1, 2 });
   return result;
 }
 
