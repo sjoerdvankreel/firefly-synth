@@ -73,7 +73,7 @@
       "custom_sections": ["Title", "Monitor", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
-        "tab_text": "FFFF4488",
+        "tab_text": "FFFF0000",
         "knob_thumb": "FFFF4488",
         "knob_track2": "FFFF4488",
         "control_text": "FFFF4488",

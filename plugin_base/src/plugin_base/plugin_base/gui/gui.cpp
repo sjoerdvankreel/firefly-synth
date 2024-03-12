@@ -321,14 +321,21 @@ plugin_gui::theme_changed(std::string const& theme_name)
   
   removeAllChildren();
   _tooltip = {};
-  _module_lnfs.clear();
-  _custom_lnfs.clear();
-  _gui_mouse_listeners.clear();
-  _tab_selection_listeners.clear();
+  setLookAndFeel(nullptr);
+
+  // drop listeners before components
+  // they deregister themselves from components
   _hover_listeners.clear();
   _tab_menu_listeners.clear();
+  _gui_mouse_listeners.clear();
+  _tab_selection_listeners.clear();
+
+  // drop components before lnfs
   _components.clear();
-  setLookAndFeel(nullptr);
+
+  // finally drop lnfs
+  _module_lnfs.clear();
+  _custom_lnfs.clear();
 
   _lnf = std::make_unique<lnf>(&gui_state()->desc(), theme_name, -1, -1, -1);
   setLookAndFeel(_lnf.get());
