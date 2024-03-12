@@ -191,7 +191,7 @@ _gui(gui), _themes(gui->gui_state()->desc().themes())
   selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
     // TODO store preset
-    // TODO apply preset
+    _gui->theme_changed(_themes[index].name);
   };
 }
 

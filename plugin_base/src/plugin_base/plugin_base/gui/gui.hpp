@@ -145,7 +145,7 @@ public:
 
   void reloaded();
   void resized() override;
-  void theme_changed(std::string const& theme);
+  void theme_changed(std::string const& theme_name);
 
   void param_end_changes(int index);
   void param_begin_changes(int index);

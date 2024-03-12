@@ -313,7 +313,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 }
 
 void
-plugin_gui::theme_changed(std::string const& theme)
+plugin_gui::theme_changed(std::string const& theme_name)
 {
   // don't just clear out everything!
   // only stuff that gets rebuild by the gui must be reset
@@ -330,7 +330,7 @@ plugin_gui::theme_changed(std::string const& theme)
   _components.clear();
   setLookAndFeel(nullptr);
 
-  _lnf = std::make_unique<lnf>(&gui_state()->desc(), "Firefly Default", -1, -1, -1);
+  _lnf = std::make_unique<lnf>(&gui_state()->desc(), theme_name, -1, -1, -1);
   setLookAndFeel(_lnf.get());
   auto const& topo = *gui_state()->desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
