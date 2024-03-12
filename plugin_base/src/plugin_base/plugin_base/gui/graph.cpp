@@ -193,6 +193,16 @@ graph::paint(Graphics& g)
   float h = getHeight();
   g.fillAll(_lnf->colors().graph_background);
 
+  // draw optional background image
+  plugin_base::lnf& lnf = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  auto const& bg_images = lnf.theme_settings().graph_background_images;
+  auto iter = bg_images.find(_params.name_in_theme);
+  if (iter != bg_images.end())
+  {
+    auto image = ImageCache::getFromFile(juce::File(juce::String(iter->second)));
+    g.drawImage(image, getLocalBounds().toFloat(), RectanglePlacement::fillDestination);
+  }
+
   // figure out grid box size such that row count is even and line 
   // count is uneven because we want a horizontal line in the middle
   float preferred_box_size = 9;
@@ -228,7 +238,7 @@ graph::paint(Graphics& g)
   {
     g.setColour(foreground.withAlpha(0.75f));
     auto text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
-    g.setFont(dynamic_cast<lnf&>(getLookAndFeel()).font().boldened());
+    g.setFont(dynamic_cast<plugin_base::lnf&>(getLookAndFeel()).font().boldened());
     g.drawText(text, getLocalBounds().toFloat(), Justification::centred, false);
     return;
   }
