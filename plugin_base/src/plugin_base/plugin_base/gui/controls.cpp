@@ -181,6 +181,20 @@ preset_button::extra_state_changed()
     set_selected_index((int)(iter - get_items().begin()));
 }
 
+theme_button::
+theme_button(plugin_gui* gui) :
+_gui(gui), _themes(gui->gui_state()->desc().themes())
+{ 
+  // TODO deal with initial preset
+  set_items(vector_map(_themes, [](auto const& p) { return p.name; }));
+  setButtonText("Theme");
+  selected_index_changed = [this](int index) {
+    index = std::clamp(index, 0, (int)get_items().size());
+    // TODO store preset
+    // TODO apply preset
+  };
+}
+
 image_component::
 image_component(
   format_config const* config, 

@@ -116,6 +116,18 @@ plugin(plugin), config(config)
 }
 
 std::vector<resource_item>
+plugin_desc::themes() const
+{
+  std::vector<resource_item> result;
+  auto themes_folder = get_resource_location(config) / resource_folder_themes;
+  for (auto const& entry : std::filesystem::directory_iterator{ themes_folder })
+    if (entry.is_directory())
+      result.push_back({ entry.path().filename().string(), entry.path().string() });
+  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { return l.name < r.name; });
+  return result;
+}
+
+std::vector<resource_item>
 plugin_desc::presets() const
 {
   std::vector<resource_item> result;

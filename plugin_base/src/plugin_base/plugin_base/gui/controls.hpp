@@ -153,6 +153,16 @@ public:
   ~preset_button() { _gui->extra_state_()->remove_listener(factory_preset_key, this); }
 };
 
+// binds theme selection preset to user config
+class theme_button:
+public menu_button
+{
+  plugin_gui* const _gui;
+  std::vector<resource_item> _themes = {};
+public:
+  theme_button(plugin_gui* gui);
+};
+
 // binding_component that is additionally bound to a single parameter value
 // i.e., edit control or a label that displays a plugin parameter value
 // also provides host context menu
