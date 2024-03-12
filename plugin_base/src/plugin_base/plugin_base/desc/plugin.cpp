@@ -115,10 +115,10 @@ plugin(plugin), config(config)
   module_count = modules.size();
 }
 
-std::vector<factory_preset>
+std::vector<resource_item>
 plugin_desc::presets() const
 {
-  std::vector<factory_preset> result;
+  std::vector<resource_item> result;
   auto preset_folder = get_resource_location(config) / resource_folder_presets;
   for (auto const& entry : std::filesystem::directory_iterator{ preset_folder })
     if (entry.is_regular_file() && entry.path().extension().string() == std::string(".") + plugin->extension)

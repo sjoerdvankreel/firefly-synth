@@ -146,7 +146,7 @@ public menu_button,
 public extra_state_listener
 {
   plugin_gui* const _gui;
-  std::vector<factory_preset> _presets = {};
+  std::vector<resource_item> _presets = {};
 public:
   preset_button(plugin_gui* gui);
   void extra_state_changed() override;

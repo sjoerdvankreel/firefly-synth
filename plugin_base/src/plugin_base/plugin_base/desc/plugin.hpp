@@ -89,7 +89,7 @@ public:
   std::map<std::string, int> module_id_to_index = {};
 
   void validate() const;
-  std::vector<factory_preset> presets() const;
+  std::vector<resource_item> presets() const;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_desc);
   plugin_desc(plugin_topo const* plugin, format_config const* config);

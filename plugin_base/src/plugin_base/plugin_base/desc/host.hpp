@@ -10,7 +10,8 @@
 namespace plugin_base {
 
 // from resources folder
-struct factory_preset
+// used for presets and themes
+struct resource_item
 {
   std::string name;
   std::string path;

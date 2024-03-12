@@ -23,6 +23,7 @@ class grid_component;
 enum class gui_hover_type { param, module, custom };
 
 // for serialization
+inline std::string const theme_key = "theme";
 inline std::string const factory_preset_key = "factory_preset";
 std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
 std::string module_section_tab_key(plugin_topo const& topo, int section_index);
