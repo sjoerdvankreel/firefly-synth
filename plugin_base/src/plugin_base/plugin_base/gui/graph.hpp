@@ -15,6 +15,7 @@ struct graph_params
 {
   enum partition_scale_type { scale_w, scale_h };
   float partition_scale = {};
+  std::string name_in_theme = {};
   partition_scale_type scale_type = {};
 };
 
