@@ -114,7 +114,7 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   var theme_json;
   auto parse_result = JSON::parse(theme_string, theme_json);
   assert(parse_result.ok());
-  init_theme(theme_json);
+  init_theme(theme_folder, theme_json);
 
   auto control_text_high = colors().control_text.brighter(_theme_settings.lighten);
   auto control_bg_high = colors().control_background.brighter(_theme_settings.lighten);
@@ -154,11 +154,60 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 }
 
 void 
-lnf::init_theme(var const& json)
+lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
 {
+  if (json.hasProperty("graph_background_images"))
+  {
+    var graph_background_images = json["graph_background_images"];
+    for (int i = 0; i < graph_background_images.size(); i++)
+    {
+      var this_bg_image = graph_background_images[i];
+      if (this_bg_image.hasProperty("graph") && this_bg_image.hasProperty("image"))
+      {
+        std::string image = this_bg_image["image"].toString().toStdString();
+        if(!image.empty())
+        {
+          std::string graph = this_bg_image["graph"].toString().toStdString();
+          std::string image_path = (theme_folder / image).string();
+          _theme_settings.graph_background_images[graph] = image_path;
+        }
+      }
+    }
+  }
+
+  assert(json.hasProperty("defaults"));
+  var defaults = json["defaults"];
+  assert(defaults.hasProperty("colors"));
+  _default_colors = override_colors(_default_colors, defaults["colors"]);
+  if (json.hasProperty("overrides"))
+  {
+    var overrides = json["overrides"];
+    assert(overrides.isArray());
+    for (int i = 0; i < overrides.size(); i++)
+    {
+      var this_override = overrides[i];
+      assert(this_override.hasProperty("colors"));
+      auto this_colors = override_colors(_default_colors, this_override["colors"]);
+      if (this_override.hasProperty("custom_sections"))
+      {
+        var custom_sections = this_override["custom_sections"];
+        assert(custom_sections.isArray());
+        for(int j = 0; j < custom_sections.size(); j++)
+          _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
+      }
+      if (this_override.hasProperty("module_sections"))
+      {
+        var module_sections = this_override["module_sections"];
+        assert(module_sections.isArray());
+        for (int j = 0; j < module_sections.size(); j++)
+          _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
+      }
+    }
+  }
+
   assert(json.hasProperty("settings"));
   var settings = json["settings"];
-  if(settings.hasProperty("lighten")) 
+  if (settings.hasProperty("lighten"))
     _theme_settings.lighten = (float)settings["lighten"];
   if (settings.hasProperty("font_height"))
     _theme_settings.font_height = (float)settings["font_height"];
@@ -190,36 +239,6 @@ lnf::init_theme(var const& json)
     _theme_settings.aspect_ratio_width_instrument = (int)settings["aspect_ratio_width_instrument"];
   if (settings.hasProperty("aspect_ratio_height_instrument"))
     _theme_settings.aspect_ratio_height_instrument = (int)settings["aspect_ratio_height_instrument"];
-
-  assert(json.hasProperty("defaults"));
-  var defaults = json["defaults"];
-  assert(defaults.hasProperty("colors"));
-  _default_colors = override_colors(_default_colors, defaults["colors"]);
-  if (json.hasProperty("overrides"))
-  {
-    var overrides = json["overrides"];
-    assert(overrides.isArray());
-    for (int i = 0; i < overrides.size(); i++)
-    {
-      var this_override = overrides[i];
-      assert(this_override.hasProperty("colors"));
-      auto this_colors = override_colors(_default_colors, this_override["colors"]);
-      if (this_override.hasProperty("custom_sections"))
-      {
-        var custom_sections = this_override["custom_sections"];
-        assert(custom_sections.isArray());
-        for(int j = 0; j < custom_sections.size(); j++)
-          _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
-      }
-      if (this_override.hasProperty("module_sections"))
-      {
-        var module_sections = this_override["module_sections"];
-        assert(module_sections.isArray());
-        for (int j = 0; j < module_sections.size(); j++)
-          _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
-      }
-    }
-  }
 }
 
 gui_colors 

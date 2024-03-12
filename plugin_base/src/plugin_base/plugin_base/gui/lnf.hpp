@@ -4,6 +4,7 @@
 #include <juce_gui_basics/juce_gui_basics.h>
 
 #include <map>
+#include <filesystem>
 
 namespace plugin_base {
 
@@ -24,7 +25,7 @@ public juce::LookAndFeel_V4 {
   std::map<std::string, gui_colors> _section_colors = {};
 
   int tab_width() const;
-  void init_theme(juce::var const& json);
+  void init_theme(std::filesystem::path const& theme_folder, juce::var const& json);
 
 public:
   juce::Font font() const;

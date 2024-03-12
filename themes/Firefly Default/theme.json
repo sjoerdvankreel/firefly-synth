@@ -55,6 +55,18 @@
       "scrollbar_background": "FF444444"
     }
   },
+  "graph_background_images": [
+    { "graph": "Main Graph", "image": "image.png" },
+    { "graph": "Global FX Graph", "image": "image.png" },
+    { "graph": "Oscillator Graph", "image": "image.png" },
+    { "graph": "Voice FX Graph", "image": "image.png" },
+    { "graph": "Voice LFO Graph", "image": "image.png" },
+    { "graph": "Envelope Graph", "image": "image.png" },
+    { "graph": "Osc Mod Graph", "image": "image.png" },
+    { "graph": "Audio Matrix Graphs", "image": "image.png" },
+    { "graph": "CV Matrix Graphs", "image": "image.png" },
+    { "graph": "FX Matrix Graphs", "image": "image.png" }
+  ],
   "overrides": [
     {
       "custom_sections": ["Title", "Monitor", "Main Graph", "Tweak", "Patch"],
