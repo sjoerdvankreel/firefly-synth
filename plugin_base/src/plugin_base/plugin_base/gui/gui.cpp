@@ -305,26 +305,48 @@ plugin_gui::
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
-_lnf(&gui_state->desc(), "Firefly Default", -1, -1, -1), _tooltip(), // TODO
 _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
   setOpaque(true);
-  setLookAndFeel(&_lnf);
   addMouseListener(&_undo_listener, true);
-  auto const& topo = *gui_state->desc().plugin;
-  bool is_fx = topo.type == plugin_type::fx;
-  
-  for(int i = 0; i < gui_state->desc().plugin->gui.custom_sections.size(); i++)
-    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf.theme(), i, -1, -1);
-  for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
-    _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), _lnf.theme(), -1, gui_state->desc().plugin->modules[i].gui.section, i);
+  theme_changed("Firefly Default"); // TODO
+}
 
+void
+plugin_gui::theme_changed(std::string const& theme)
+{
+  // don't just clear out everything!
+  // only stuff that gets rebuild by the gui must be reset
+  // stuff that get bound by the plugin (e.g. param_listener) must remain
+  
+  removeAllChildren();
+  _tooltip = {};
+  _module_lnfs.clear();
+  _custom_lnfs.clear();
+  _gui_mouse_listeners.clear();
+  _tab_selection_listeners.clear();
+  _hover_listeners.clear();
+  _tab_menu_listeners.clear();
+  _components.clear();
+  setLookAndFeel(nullptr);
+
+  _lnf = std::make_unique<lnf>(&gui_state()->desc(), "Firefly Default", -1, -1, -1);
+  setLookAndFeel(_lnf.get());
+  auto const& topo = *gui_state()->desc().plugin;
+  bool is_fx = topo.type == plugin_type::fx;
+
+  for (int i = 0; i < gui_state()->desc().plugin->gui.custom_sections.size(); i++)
+    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), i, -1, -1);
+  for (int i = 0; i < gui_state()->desc().plugin->modules.size(); i++)
+    _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), -1, gui_state()->desc().plugin->modules[i].gui.section, i);
+
+  // note: default width and aspect ratios are contained in theme
   add_and_make_visible(*this, make_content());
-  int default_width = _lnf.theme_settings().get_default_width(is_fx);
-  float ratio = _lnf.theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf.theme_settings().get_aspect_ratio_width(is_fx);
+  int default_width = _lnf->theme_settings().get_default_width(is_fx);
+  float ratio = _lnf->theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->theme_settings().get_aspect_ratio_width(is_fx);
   getChildComponent(0)->setSize(default_width, default_width * ratio);
   float w = user_io_load_num(topo, user_io::base, user_state_width_key, default_width,
-    (int)(default_width * _lnf.theme_settings().min_scale), (int)(default_width * _lnf.theme_settings().max_scale));
+    (int)(default_width * _lnf->theme_settings().min_scale), (int)(default_width * _lnf->theme_settings().max_scale));
   setSize(w, w * ratio);
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
 }
@@ -449,7 +471,7 @@ plugin_gui::module_mouse_enter(int module)
 void
 plugin_gui::add_tab_menu_listener(juce::TabBarButton& button, int module, int slot)
 {
-  auto listener = std::make_unique<gui_tab_menu_listener>(this, gui_state(), &_lnf, &button, module, slot);
+  auto listener = std::make_unique<gui_tab_menu_listener>(this, gui_state(), _lnf.get(), &button, module, slot);
   _tab_menu_listeners.push_back(std::move(listener));
 }
 
@@ -474,7 +496,7 @@ plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
-  float scale = w / _lnf.theme_settings().get_default_width(is_fx);
+  float scale = w / _lnf->theme_settings().get_default_width(is_fx);
   getChildComponent(0)->setTransform(AffineTransform::scale(scale));
   user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
 }
@@ -510,7 +532,7 @@ void
 plugin_gui::reloaded()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto settings = _lnf.theme_settings();
+  auto settings = _lnf->theme_settings();
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   int default_width = settings.get_default_width(is_fx);
   float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
@@ -523,7 +545,7 @@ Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf.theme_settings()), margin_module);
+  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf->theme_settings()), margin_module);
   for(int s = 0; s < topo.gui.custom_sections.size(); s++)
     grid.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
   for(int s = 0; s < topo.gui.module_sections.size(); s++)
@@ -535,8 +557,8 @@ plugin_gui::make_content()
 Component& 
 plugin_gui::make_custom_section(custom_section_gui const& section)
 {
-  int radius = _lnf.theme_settings().section_corner_radius;
-  auto colors = _lnf.section_gui_colors(section.full_name);
+  int radius = _lnf->theme_settings().section_corner_radius;
+  auto colors = _lnf->section_gui_colors(section.full_name);
   auto outline1 = colors.section_outline1;
   auto outline2 = colors.section_outline2;
   auto background1 = colors.custom_background1;
@@ -562,7 +584,7 @@ plugin_gui::make_tab_component(std::string const& id, std::string const& title, 
   result.setOutline(0);
   result.setLookAndFeel(module_lnf(module));
   result.getTabbedButtonBar().setTitle(title);
-  result.setTabBarDepth(module_header_height(_lnf.theme_settings().font_height));
+  result.setTabBarDepth(module_header_height(_lnf->theme_settings().font_height));
   return result;
 }
 
@@ -570,10 +592,10 @@ void
 plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
 {
   auto const& topo = *_gui_state->desc().plugin;
-  int radius = _lnf.theme_settings().module_corner_radius;
+  int radius = _lnf->theme_settings().module_corner_radius;
   int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
-  auto colors = _lnf.module_gui_colors(topo.modules[module_index].info.tag.full_name);
+  auto colors = _lnf->module_gui_colors(topo.modules[module_index].info.tag.full_name);
   auto background1 = colors.tab_background1;
   auto background2 = colors.tab_background2;
   auto& corners = make_component<rounded_container>(&child, radius, true, rounded_container_mode::fill, background1, background2);
@@ -636,7 +658,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   bool vertical = param->gui.layout == param_layout::vertical;
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
-  auto colors = _lnf.module_gui_colors(module.module->info.tag.full_name);
+  auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
@@ -661,11 +683,11 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       grid.add(make_params(module, &(*iter)), iter->param->gui.position);
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<param_section_container>(this, &_lnf, &module, &section, &grid);
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid);
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
-  return make_component<param_section_container>(this, &_lnf, &module, &section, &viewer);
+  return make_component<param_section_container>(this, _lnf.get(), &module, &section, &viewer);
 }
 
 Component&
@@ -719,7 +741,7 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
 Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
-  auto colors = _lnf.module_gui_colors(module.module->info.tag.full_name);
+  auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
   if(param.param->gui.edit_type == gui_edit_type::output)
   {
     auto& result = make_param_label(module, param, gui_label_contents::value);
