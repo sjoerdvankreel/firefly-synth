@@ -348,6 +348,9 @@ plugin_gui::theme_changed(std::string const& theme_name)
     _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), -1, gui_state()->desc().plugin->modules[i].gui.section, i);
 
   // note: default width and aspect ratios are contained in theme
+  // todo : reset size on theme switch
+  // todo : store theme in user config
+  // todo : it resizes a bit on theme switch
   add_and_make_visible(*this, make_content());
   int default_width = _lnf->theme_settings().get_default_width(is_fx);
   float ratio = _lnf->theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->theme_settings().get_aspect_ratio_width(is_fx);
