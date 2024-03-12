@@ -193,23 +193,6 @@ graph::paint(Graphics& g)
   float h = getHeight();
   g.fillAll(_lnf->colors().graph_background);
 
-  // draw background partitions
-  for (int part = 0; part < _data.partitions().size(); part++)
-  {
-    Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
-    if(part % 2 == 1)
-    {
-      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
-      g.fillRect(area);
-    }
-    g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
-    if(_params.scale_type == graph_params::scale_h)
-      g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
-    else
-      g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
-    g.drawText(_data.partitions()[part], area, Justification::centred, false);
-  }
-
   // figure out grid box size such that row count is even and line 
   // count is uneven because we want a horizontal line in the middle
   float preferred_box_size = 9;
@@ -222,6 +205,23 @@ graph::paint(Graphics& g)
     g.fillRect(0.0f, i / (float)(row_count) * h, w, 1.0f);
   for (int i = 1; i < col_count; i++)
     g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
+
+  // draw background partitions
+  for (int part = 0; part < _data.partitions().size(); part++)
+  {
+    Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
+    if (part % 2 == 1)
+    {
+      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
+      g.fillRect(area);
+    }
+    g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
+    if (_params.scale_type == graph_params::scale_h)
+      g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
+    else
+      g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
+    g.drawText(_data.partitions()[part], area, Justification::centred, false);
+  }
 
   auto foreground = _lnf->colors().graph_foreground;
   if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
