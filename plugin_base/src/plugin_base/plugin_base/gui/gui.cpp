@@ -308,7 +308,7 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
-  theme_changed("Firefly Default"); // TODO
+  theme_changed("Firefly"); // TODO 
 }
 
 void
