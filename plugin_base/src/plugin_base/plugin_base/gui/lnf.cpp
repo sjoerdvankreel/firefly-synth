@@ -15,10 +15,10 @@ static int const slider_thumb_width = 9;
 static int const slider_thumb_height = 6;
 
 static void
-draw_tabular_cell_bg(Graphics& g, Component* c, float alpha)
+draw_tabular_cell_bg(Graphics& g, Component* c, float alpha, int radius)
 {
   g.setColour(Colours::white.withAlpha(alpha));
-  g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), 3);
+  g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), radius);
 }
 
 static void 
@@ -367,7 +367,7 @@ lnf::drawTooltip(Graphics& g, String const& text, int w, int h)
 void 
 lnf::drawTextEditorOutline(juce::Graphics& g, int w, int h, TextEditor& te)
 {
-  auto cornerSize = 6.0f;
+  auto cornerSize = theme_settings().text_editor_radius;
   if (!te.isEnabled()) return;
   if (dynamic_cast<AlertWindow*> (te.getParentComponent()) != nullptr) return;
   if (te.hasKeyboardFocus(true) && !te.isReadOnly())
@@ -488,7 +488,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int arrowHeight = 4;
   int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
-  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
+  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : theme_settings().combo_radius;
   Rectangle<int> boxBounds(tabular? 2: 0, comboTop, width - (tabular? 4: 0), fixedHeight);
   g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);

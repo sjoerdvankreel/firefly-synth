@@ -2,6 +2,9 @@
   "settings": {
     "lighten": "0.15",
     "font_height": "13",
+    "combo_radius": "2",
+    "table_cell_radius: "2",
+    "text_editor_radius: "4",
     "module_tab_width": "30",
     "module_header_width": "80",
     "module_corner_radius": "2",
