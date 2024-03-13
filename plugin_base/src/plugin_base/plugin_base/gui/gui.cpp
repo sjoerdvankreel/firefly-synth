@@ -570,6 +570,7 @@ Component&
 plugin_gui::make_custom_section(custom_section_gui const& section)
 {
   int radius = _lnf->theme_settings().module_corner_radius;
+  int vpadding = _lnf->theme_settings().param_section_vpadding;
   auto colors = _lnf->section_gui_colors(section.full_name);
   auto outline1 = colors.section_outline1;
   auto outline2 = colors.section_outline2;
@@ -582,7 +583,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   };
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, 0, false, rounded_container_mode::both, outline1, outline2);
+  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, false, rounded_container_mode::both, outline1, outline2);
   auto& result = make_component<rounded_container>(&content_outline, radius, 0, true, rounded_container_mode::fill, background1, background2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
