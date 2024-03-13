@@ -212,11 +212,11 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
   if (settings.hasProperty("font_height"))
     _theme_settings.font_height = (float)settings["font_height"];
   if (settings.hasProperty("table_cell_radius"))
-    _theme_settings.table_cell_radius = (float)settings["table_cell_radius"];
+    _theme_settings.table_cell_radius = (int)settings["table_cell_radius"];
   if (settings.hasProperty("text_editor_radius"))
-    _theme_settings.text_editor_radius = (float)settings["text_editor_radius"];
+    _theme_settings.text_editor_radius = (int)settings["text_editor_radius"];
   if (settings.hasProperty("combo_radius"))
-    _theme_settings.combo_radius = (float)settings["combo_radius"];
+    _theme_settings.combo_radius = (int)settings["combo_radius"];
   if (settings.hasProperty("module_tab_width"))
     _theme_settings.module_tab_width = (int)settings["module_tab_width"];
   if (settings.hasProperty("module_header_width"))
