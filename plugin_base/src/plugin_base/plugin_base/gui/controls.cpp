@@ -127,6 +127,8 @@ _state(state)
   state->add_any_listener(this);
   setJustification(Justification::centredRight);
   any_state_changed(0, state->get_plain_at_index(0));
+  setColour(TextEditor::ColourIds::textColourId, lnf->colors().control_text);
+  setColour(TextEditor::ColourIds::highlightedTextColourId, lnf->colors().control_text);
 }
 
 last_tweaked_editor::
