@@ -424,7 +424,7 @@ lnf::drawLabel(Graphics& g, Label& label)
 
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label, 0.075f);
+      draw_tabular_cell_bg(g, &label, 0.075f, theme_settings().table_cell_radius);
 
   if (!label.isBeingEdited()) 
   {
@@ -479,7 +479,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     if (ps->param()->param->gui.tabular)
     {
       tabular = true;
-      draw_tabular_cell_bg(g, &box, 0.05f);
+      draw_tabular_cell_bg(g, &box, 0.05f, theme_settings().table_cell_radius);
     }
 
   Path path;
@@ -508,7 +508,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &tb, 0.05f);
+    draw_tabular_cell_bg(g, &tb, 0.05f, theme_settings().table_cell_radius);
 
   int left = 0;
   if(tabular) 
@@ -614,7 +614,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &s, 0.05f);
+    draw_tabular_cell_bg(g, &s, 0.05f, theme_settings().table_cell_radius);
 
   float scale_factor = 1;
   float size_base = s.getHeight();
@@ -706,7 +706,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     if(ps->param()->param->gui.tabular)
     {
       padh = 2;
-      draw_tabular_cell_bg(g, &s, 0.05f);
+      draw_tabular_cell_bg(g, &s, 0.05f, theme_settings().table_cell_radius);
     }
   }
 
