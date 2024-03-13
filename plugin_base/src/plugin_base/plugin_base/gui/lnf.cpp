@@ -495,7 +495,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : theme_settings().combo_radius;
-  Rectangle<int> boxBounds(tabular? 2: 0, comboTop, width - 1 - (tabular? 4: 0), fixedHeight);
+  Rectangle<int> boxBounds(tabular? 3: 1, comboTop, width - 2 - (tabular? 4: 0), fixedHeight);
   g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
