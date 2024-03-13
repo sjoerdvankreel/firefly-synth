@@ -209,7 +209,7 @@ graph::paint(Graphics& g)
   if(row_count % 2 != 0) row_count++;
   float box_size = h / row_count;
   int col_count = std::round(w / box_size);
-  g.setColour(_lnf->colors().graph_grid.withAlpha(0.25f));
+  g.setColour(_lnf->colors().graph_grid);
   for(int i = 1; i < row_count; i++)
     g.fillRect(0.0f, i / (float)(row_count) * h, w, 1.0f);
   for (int i = 1; i < col_count; i++)
@@ -224,7 +224,7 @@ graph::paint(Graphics& g)
       g.setColour(_lnf->colors().graph_line.withAlpha(0.33f));
       g.fillRect(area);
     }
-    g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
+    g.setColour(_lnf->colors().graph_text);
     if (_params.scale_type == graph_params::scale_h)
       g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
     else

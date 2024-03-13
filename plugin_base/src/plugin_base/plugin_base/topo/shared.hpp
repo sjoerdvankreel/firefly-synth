@@ -172,7 +172,8 @@ struct gui_colors final {
   juce::Colour tab_header = juce::Colour(0xFF222222);
   juce::Colour tab_background1 = juce::Colour(0xFF222222);
   juce::Colour tab_background2 = juce::Colour(0xFF111111);
-  juce::Colour graph_grid = juce::Colour(0xFFFFFFFF);
+  juce::Colour graph_grid = juce::Colour(0x40FFFFFF);
+  juce::Colour graph_text = juce::Colour(0xC0FFFFFF);
   juce::Colour graph_background = juce::Colour(0xFF000000);
   juce::Colour graph_area = juce::Colour(0x80FF8844);
   juce::Colour graph_line = juce::Colour(0xFFFF8844);
