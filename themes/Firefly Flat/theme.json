@@ -124,7 +124,7 @@
       }
     },
     {
-      "custom_sections": ["Osc Mod Graph", "Audio Matrix Graphs", "CV Matrix Graphs", "FX Matrix Graphs"],
+      "custom_sections": ["Osc Mod Graph", "Audio Matrix Graphs", "CV Matrix Graphs", "FX Only Matrix Graphs"],
       "module_sections": ["Osc Mod", "VAudio", "GAudio", "VCV-A", "VCV-CV", "GCV-A", "GCV-CV"],
       "colors": {
         "tab_text": "FF8888FF",

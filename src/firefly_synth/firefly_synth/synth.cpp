@@ -26,7 +26,7 @@ static std::string const glfo_graph_name = "Global LFO Graph";
 static std::string const osc_mod_graph_name = "Osc Mod Graph";
 static std::string const cv_matrix_graphs_name = "CV Matrix Graphs";
 static std::string const audio_matrix_graphs_name = "Audio Matrix Graphs";
-static std::string const fx_only_matrix_graphs_name = "FX Only Matrix Graphs";
+static std::string const fx_only_matrix_graphs_name = "FX Only Matrix Graphs"; 
 
 enum {
   custom_section_title,
