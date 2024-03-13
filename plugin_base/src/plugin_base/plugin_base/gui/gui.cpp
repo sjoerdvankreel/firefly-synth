@@ -452,7 +452,8 @@ void
 plugin_gui::custom_mouse_enter(int section)
 {
   if(_last_mouse_enter_custom == section) return;
-  _tooltip->setLookAndFeel(_custom_lnfs[section].get());
+  // tooltip may not be there yet during theme switching
+  if(_tooltip) _tooltip->setLookAndFeel(_custom_lnfs[section].get());
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->custom_mouse_enter(section);
   _last_mouse_enter_custom = section;
@@ -472,7 +473,8 @@ plugin_gui::module_mouse_enter(int module)
 {
   if(_last_mouse_enter_module == module) return;
   int index = gui_state()->desc().modules[module].module->info.index;
-  _tooltip->setLookAndFeel(_module_lnfs[index].get());
+  // tooltip may not be there yet during theme switching
+  if(_tooltip) _tooltip->setLookAndFeel(_module_lnfs[index].get());
   for(int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->module_mouse_enter(module);
   _last_mouse_enter_module = module;
