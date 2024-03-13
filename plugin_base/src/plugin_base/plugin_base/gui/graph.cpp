@@ -180,7 +180,8 @@ graph::paint_series(
 
   g.setColour(_lnf->colors().graph_area);
   g.fillPath(pFill);
-  g.setColour(_lnf->colors().graph_line);
+  if (!_data.stroke_with_area())
+    g.setColour(_lnf->colors().graph_line);
   g.strokePath(pStroke, PathStrokeType(stroke_thickness));
 }
 

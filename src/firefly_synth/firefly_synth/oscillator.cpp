@@ -233,7 +233,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
       engine.process<true>(block, &modulation);
     });
     jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);
-    result.push_back(graph_data(audio, 1.0f, {}));
+    result.push_back(graph_data(audio, 1.0f, false, {}));
   }
   engine->process_end();
 
@@ -261,7 +261,7 @@ render_osc_graph(plugin_state const& state, graph_engine* engine, int param, par
     return graph_data(graph_data_type::off, {});
   auto data = render_osc_graphs(state, engine, mapping.module_slot, false)[mapping.module_slot];
   std::string partition = is_random(type)? "5 Cycles": "First Cycle";
-  return graph_data(data.audio(), 1.0f, { partition });
+  return graph_data(data.audio(), 1.0f, false, { partition });
 }
 
 module_topo

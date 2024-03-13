@@ -97,7 +97,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   for(int i = 0; i <= max_osc; i++)
     partitions.push_back(std::to_string(i + 1));
   return graph_data(jarray<float, 2>(std::vector<jarray<float, 1>> { 
-    jarray<float, 1>(result_l), jarray<float, 1>(result_r) }), 1.0f, partitions);
+    jarray<float, 1>(result_l), jarray<float, 1>(result_r) }), 1.0f, false, partitions);
 }
 
 audio_routing_audio_params

@@ -9,6 +9,7 @@ graph_data::init(graph_data const& rhs)
   _bipolar = rhs.bipolar();
   _partitions = rhs.partitions();
   _stroke_thickness = rhs.stroke_thickness();
+  _stroke_with_area = rhs.stroke_with_area();
   switch (rhs.type())
   {
   case graph_data_type::na: break;
