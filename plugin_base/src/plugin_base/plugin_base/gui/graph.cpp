@@ -165,7 +165,6 @@ graph::paint_series(
   float h = getHeight();
   float count = series.size();
 
-  auto foreground = _lnf->colors().graph_foreground;
   float y0 = (1 - std::clamp(series[0], 0.0f, 1.0f)) * h;
   pFill.startNewSubPath(0, bipolar? h * midpoint : h);
   pFill.lineTo(0, y0);
@@ -179,9 +178,9 @@ graph::paint_series(
   pFill.lineTo(w, bipolar? h * midpoint : h);
   pFill.closeSubPath();
 
-  g.setColour(foreground.withAlpha(0.5f));
+  g.setColour(_lnf->colors().graph_area);
   g.fillPath(pFill);
-  g.setColour(foreground);
+  g.setColour(_lnf->colors().graph_line);
   g.strokePath(pStroke, PathStrokeType(stroke_thickness));
 }
 
@@ -222,7 +221,7 @@ graph::paint(Graphics& g)
     Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
     if (part % 2 == 1)
     {
-      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
+      g.setColour(_lnf->colors().graph_line.withAlpha(0.33f));
       g.fillRect(area);
     }
     g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
@@ -232,8 +231,8 @@ graph::paint(Graphics& g)
       g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
     g.drawText(_data.partitions()[part], area, Justification::centred, false);
   }
-
-  auto foreground = _lnf->colors().graph_foreground;
+    
+  auto foreground = _lnf->colors().graph_line;
   if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
   {
     g.setColour(foreground.withAlpha(0.75f));

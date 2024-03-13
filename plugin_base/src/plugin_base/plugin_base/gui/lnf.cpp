@@ -63,7 +63,8 @@ override_colors(gui_colors const& base, var const& json)
   result.tab_background2 = override_color_if_present(json, "tab_background2", result.tab_background2);
   result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
   result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
-  result.graph_foreground = override_color_if_present(json, "graph_foreground", result.graph_foreground);
+  result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
+  result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
   result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);
   result.knob_thumb = override_color_if_present(json, "knob_thumb", result.knob_thumb);
   result.knob_track1 = override_color_if_present(json, "knob_track1", result.knob_track1);

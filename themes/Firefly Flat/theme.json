@@ -33,7 +33,8 @@
       "tab_background2": "FF222222",
       "graph_grid": "FFFFFFFF",
       "graph_background": "FF000000",
-      "graph_foreground": "FFFF8844",
+      "graph_area": "80FF8844",
+      "graph_line": "FFFF8844",
       "bubble_outline": "FFFF8844",
       "knob_thumb": "FFFF8844",
       "knob_track1": "FF999999",
@@ -86,7 +87,8 @@
         "control_tick": "FFFF4488",
         "bubble_outline": "FFFF4488",
         "scrollbar_thumb": "FFFF4488",
-        "graph_foreground": "FFFF4488",
+        "graph_area": "80FF4488",
+        "graph_line": "FFFF4488",
         "table_header": "FFC43468"
       }
     },
@@ -100,7 +102,8 @@
         "control_tick": "FF4488FF",
         "bubble_outline": "FF4488FF",
         "scrollbar_thumb": "FF4488FF",
-        "graph_foreground": "FF4488FF",
+        "graph_area": "804488FF",
+        "graph_line": "FF4488FF",
         "table_header": "FF3468C4"
       }
     },
@@ -114,7 +117,8 @@
         "control_tick": "FFFF8844",
         "bubble_outline": "FFFF8844",
         "scrollbar_thumb": "FFFF8844",
-        "graph_foreground": "FFFF8844",
+        "graph_area": "80FF8844",
+        "graph_line": "FFFF8844",
         "table_header": "FFC46834"
       }
     },
@@ -128,7 +132,8 @@
         "control_tick": "FF8888FF",
         "bubble_outline": "FF8888FF",
         "scrollbar_thumb": "FF8888FF",
-        "graph_foreground": "FF8888FF",
+        "graph_area": "808888FF",
+        "graph_line": "FF8888FF",
         "table_header": "FF6868C4"
       }
     }
