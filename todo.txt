@@ -31,6 +31,7 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 basic theming:
+- make it 1.3
 - text editor color
 - infernal skin + graph images
 - store selected theme in user config

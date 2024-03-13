@@ -232,10 +232,9 @@ graph::paint(Graphics& g)
     g.drawText(_data.partitions()[part], area, Justification::centred, false);
   }
        
-  auto foreground = _lnf->colors().graph_line;
   if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
   {
-    g.setColour(foreground.withAlpha(0.75f));
+    g.setColour(_lnf->colors().graph_text);
     auto text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
     g.setFont(dynamic_cast<plugin_base::lnf&>(getLookAndFeel()).font().boldened());
     g.drawText(text, getLocalBounds().toFloat(), Justification::centred, false);
@@ -259,6 +258,7 @@ graph::paint(Graphics& g)
     return;
   }
 
+  auto foreground = _lnf->colors().graph_line;
   if (_data.type() == graph_data_type::scalar)
   {
     float scalar = _data.scalar();
