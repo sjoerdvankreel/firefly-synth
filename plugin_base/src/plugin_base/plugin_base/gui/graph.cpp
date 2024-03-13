@@ -231,7 +231,7 @@ graph::paint(Graphics& g)
       g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
     g.drawText(_data.partitions()[part], area, Justification::centred, false);
   }
-    
+       
   auto foreground = _lnf->colors().graph_line;
   if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
   {
@@ -244,14 +244,15 @@ graph::paint(Graphics& g)
 
   if (_data.type() == graph_data_type::multi_stereo)
   {
+    auto area = _lnf->colors().graph_area;
     for (int i = 0; i < _data.multi_stereo().size(); i++)
     {
       float l = 1 - _data.multi_stereo()[i].first;
       float r = 1 - _data.multi_stereo()[i].second;
-      g.setColour(foreground.withAlpha(0.5f / _data.multi_stereo().size()));
+      g.setColour(area.withAlpha(0.67f / _data.multi_stereo().size()));
       g.fillRect(0.0f, l * h, w * 0.5f, (1 - l) * h);
       g.fillRect(w * 0.5f, r * h, w * 0.5f, (1 - r) * h);
-      g.setColour(foreground);
+      g.setColour(area);
       g.fillRect(0.0f, l * h, w * 0.5f, 1.0f);
       g.fillRect(w * 0.5f, r * h, w * 0.5f, 1.0f);
     }
