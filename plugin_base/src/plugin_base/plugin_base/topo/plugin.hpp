@@ -61,6 +61,9 @@ struct module_section_gui final {
 struct plugin_topo_gui_theme_settings final {
 
   float lighten = 0.15f;
+  float min_scale = 0.5f;
+  float max_scale = 8.0f;
+
   int font_height = 13;
   int knob_padding = 5;
   int tabular_knob_padding = 3;
@@ -68,10 +71,8 @@ struct plugin_topo_gui_theme_settings final {
   int module_tab_width = 30;
   int module_header_width = 80;
   int module_corner_radius = 4;
-  int section_corner_radius = 4;
-
-  float min_scale = 0.5f;
-  float max_scale = 8.0f;
+  int param_section_vpadding = 0;
+  int param_section_corner_radius = 4;
   
   int default_width_fx = 800;
   int aspect_ratio_width_fx = 4;

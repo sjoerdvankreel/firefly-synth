@@ -217,8 +217,10 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     _theme_settings.module_header_width = (int)settings["module_header_width"];
   if (settings.hasProperty("module_corner_radius"))
     _theme_settings.module_corner_radius = (int)settings["module_corner_radius"];
-  if (settings.hasProperty("section_corner_radius"))
-    _theme_settings.section_corner_radius = (int)settings["section_corner_radius"];
+  if (settings.hasProperty("param_section_corner_radius"))
+    _theme_settings.param_section_corner_radius = (int)settings["param_section_corner_radius"];
+  if (settings.hasProperty("param_section_vpadding"))
+    _theme_settings.param_section_vpadding = (int)settings["param_section_vpadding"];
   if (settings.hasProperty("knob_padding"))
     _theme_settings.knob_padding = (int)settings["knob_padding"];
   if (settings.hasProperty("tabular_knob_padding"))
