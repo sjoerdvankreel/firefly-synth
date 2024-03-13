@@ -11,7 +11,7 @@
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/waves.hpp>
 
-#include <cmath>    
+#include <cmath>      
 #include <array>
 #include <algorithm>
 
