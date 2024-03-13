@@ -580,7 +580,7 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
     auto result = owned.get(); 
     _components.emplace_back(std::move(owned)); 
     return *result; 
-  };
+  };      
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
   auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, false, rounded_container_mode::both, outline1, outline2);
