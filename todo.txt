@@ -31,11 +31,13 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 basic theming:
+- new fun with patch
 - update manual
 - fix the reverb color
 - infernal skin + graph images
 
 v1.4:
+do visual am/fm demo
 implement DPI awareness
 fix clap resizing
 move route up/down
