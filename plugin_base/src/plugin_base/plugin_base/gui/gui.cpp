@@ -20,7 +20,6 @@ static int const margin_content = 2;
 
 static std::string const extra_state_tab_index = "tab";
 static std::string const user_state_width_key = "width";
-static BorderSize<int> const param_section_border(16, 6, 6, 6);
 static std::vector<std::string> tab_menu_module_actions = { 
   "", "Clear", "Clear All", "Delete", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
 
@@ -357,6 +356,7 @@ plugin_gui::theme_changed(std::string const& theme_name)
   getChildComponent(0)->setSize(default_width, default_width * ratio);
   float w = user_io_load_num(topo, user_io::base, user_state_width_key, default_width,
     (int)(default_width * _lnf->theme_settings().min_scale), (int)(default_width * _lnf->theme_settings().max_scale));
+  w = default_width; // TODO
   setSize(w, w * ratio);
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
 }
