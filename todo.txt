@@ -31,10 +31,9 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 basic theming:
-- theme picker
+- text editor color
 - infernal skin + graph images
 - store selected theme in user config
-- see what can be moved there: colors, image, font ttf, font height, corner radius etc etc  
 
 v1.3:
 implement DPI awareness

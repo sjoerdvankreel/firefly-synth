@@ -217,6 +217,8 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     _theme_settings.text_editor_radius = (int)settings["text_editor_radius"];
   if (settings.hasProperty("combo_radius"))
     _theme_settings.combo_radius = (int)settings["combo_radius"];
+  if (settings.hasProperty("button_radius"))
+    _theme_settings.button_radius = (int)settings["button_radius"];
   if (settings.hasProperty("module_tab_width"))
     _theme_settings.module_tab_width = (int)settings["module_tab_width"];
   if (settings.hasProperty("module_header_width"))
@@ -475,6 +477,53 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   arrow.closeSubPath();
   g.setColour(colors().control_text);
   g.fillPath(arrow);
+}
+
+void 
+lnf::drawButtonBackground(
+  Graphics& g, Button& button, Colour const& backgroundColour, 
+  bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+{
+  // this is a 1:1 copy of LookAndFeel_V4::drawButtonBackground,
+  // with 1 modification: we pick the corner size from theme_settings
+  // whereas base class hardcodes it as 6
+
+  auto cornerSize = theme_settings().button_radius;
+
+  auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
+  auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
+    .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
+
+  if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
+    baseColour = baseColour.contrasting(shouldDrawButtonAsDown ? 0.2f : 0.05f);
+  g.setColour(baseColour);
+
+  auto flatOnLeft = button.isConnectedOnLeft();
+  auto flatOnRight = button.isConnectedOnRight();
+  auto flatOnTop = button.isConnectedOnTop();
+  auto flatOnBottom = button.isConnectedOnBottom();
+
+  if (flatOnLeft || flatOnRight || flatOnTop || flatOnBottom)
+  {
+    Path path;
+    path.addRoundedRectangle(bounds.getX(), bounds.getY(),
+      bounds.getWidth(), bounds.getHeight(),
+      cornerSize, cornerSize,
+      !(flatOnLeft || flatOnTop),
+      !(flatOnRight || flatOnTop),
+      !(flatOnLeft || flatOnBottom),
+      !(flatOnRight || flatOnBottom));
+
+    g.fillPath(path);
+    g.setColour(button.findColour(ComboBox::outlineColourId));
+    g.strokePath(path, PathStrokeType(1.0f));
+  }
+  else
+  {
+    g.fillRoundedRectangle(bounds, cornerSize);
+    g.setColour(button.findColour(ComboBox::outlineColourId));
+    g.drawRoundedRectangle(bounds, cornerSize, 1.0f);
+  }
 }
 
 void

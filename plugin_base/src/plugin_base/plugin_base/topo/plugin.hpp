@@ -69,6 +69,7 @@ struct plugin_topo_gui_theme_settings final {
   int tabular_knob_padding = 3;
 
   int combo_radius = 3;
+  int button_radius = 6;
   int table_cell_radius = 3;
   int text_editor_radius = 6;
 
