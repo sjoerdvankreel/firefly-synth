@@ -221,7 +221,7 @@ graph::paint(Graphics& g)
     Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
     if (part % 2 == 1)
     {
-      g.setColour(_lnf->colors().graph_line.withAlpha(0.33f));
+      g.setColour(_lnf->colors().graph_area.withAlpha(0.33f));
       g.fillRect(area);
     }
     g.setColour(_lnf->colors().graph_text);
@@ -258,27 +258,27 @@ graph::paint(Graphics& g)
     return;
   }
 
-  auto foreground = _lnf->colors().graph_line;
   if (_data.type() == graph_data_type::scalar)
   {
+    auto area = _lnf->colors().graph_area;
     float scalar = _data.scalar();
     if (_data.bipolar())
     {
       scalar = 1.0f - bipolar_to_unipolar(scalar);
-      g.setColour(foreground.withAlpha(0.5f));
+      g.setColour(area.withAlpha(0.67f));
       if (scalar <= 0.5f)
         g.fillRect(0.0f, scalar * h, w, (0.5f - scalar) * h);
       else
         g.fillRect(0.0f, 0.5f * h, w, (scalar - 0.5f) * h);
-      g.setColour(foreground);
+      g.setColour(area);
       g.fillRect(0.0f, scalar * h, w, 1.0f);
     }
     else
     {
       scalar = 1.0f - scalar;
-      g.setColour(foreground.withAlpha(0.5f));
+      g.setColour(area.withAlpha(0.67f));
       g.fillRect(0.0f, scalar * h, w, (1 - scalar) * h);
-      g.setColour(foreground);
+      g.setColour(area);
       g.fillRect(0.0f, scalar * h, w, 1.0f);
     }
     return;
@@ -293,7 +293,7 @@ graph::paint(Graphics& g)
     paint_series(g, audio[0], true, _data.stroke_thickness(), 0.25f);
     paint_series(g, audio[1], true, _data.stroke_thickness(), 0.75f);
     return;
-  }
+  }  
 
   assert(_data.type() == graph_data_type::series);
   jarray<float, 1> series(_data.series());
