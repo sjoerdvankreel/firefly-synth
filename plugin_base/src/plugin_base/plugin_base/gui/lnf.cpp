@@ -415,7 +415,7 @@ lnf::drawPopupMenuItemWithOptions(
 void
 lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   bool vertical, int pos, int size, bool over, bool down)
-{ 
+{   
   g.setColour(findColour(ScrollBar::ColourIds::backgroundColourId));
   g.fillRect(bar.getLocalBounds());
 
