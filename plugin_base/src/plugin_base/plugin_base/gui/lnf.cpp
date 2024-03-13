@@ -215,6 +215,8 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     _theme_settings.table_cell_radius = (int)settings["table_cell_radius"];
   if (settings.hasProperty("text_editor_radius"))
     _theme_settings.text_editor_radius = (int)settings["text_editor_radius"];
+  if (settings.hasProperty("scroll_thumb_radius"))
+    _theme_settings.scroll_thumb_radius = (int)settings["scroll_thumb_radius"];
   if (settings.hasProperty("combo_radius"))
     _theme_settings.combo_radius = (int)settings["combo_radius"];
   if (settings.hasProperty("button_radius"))
@@ -413,7 +415,7 @@ lnf::drawPopupMenuItemWithOptions(
 void
 lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   bool vertical, int pos, int size, bool over, bool down)
-{
+{ 
   g.setColour(findColour(ScrollBar::ColourIds::backgroundColourId));
   g.fillRect(bar.getLocalBounds());
 
@@ -422,7 +424,7 @@ lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   else thumbBounds = { pos, y, size, h };
   auto c = bar.findColour(ScrollBar::ColourIds::thumbColourId);
   g.setColour(over ? c.brighter(0.25f) : c);
-  g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), 2.0f);
+  g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), theme_settings().scroll_thumb_radius);
 }
 
 void

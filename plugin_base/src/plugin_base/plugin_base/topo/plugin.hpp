@@ -72,6 +72,7 @@ struct plugin_topo_gui_theme_settings final {
   int button_radius = 6;
   int table_cell_radius = 3;
   int text_editor_radius = 6;
+  int scroll_thumb_radius = 2;
 
   int module_tab_width = 30;
   int module_header_width = 80;

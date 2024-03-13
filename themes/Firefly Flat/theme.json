@@ -6,6 +6,7 @@
     "button_radius": "4",
     "table_cell_radius": "2",
     "text_editor_radius": "4",
+    "scroll_thumb_radius": "0",
     "module_tab_width": "30",
     "module_header_width": "80",
     "module_corner_radius": "2",
