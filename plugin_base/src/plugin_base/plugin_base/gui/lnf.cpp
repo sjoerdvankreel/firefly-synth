@@ -501,7 +501,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
   path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
-  path.closeSubPath();
+  path.closeSubPath();  
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
   g.fillPath(path);
 }
