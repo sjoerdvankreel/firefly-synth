@@ -359,7 +359,7 @@ plugin_gui::theme_changed(std::string const& theme_name)
   w = default_width; // TODO
   setSize(w, w * ratio);
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
-}
+} 
 
 void
 plugin_gui::param_changed(int index, plain_value plain)

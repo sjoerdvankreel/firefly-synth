@@ -6,7 +6,7 @@
     "module_header_width": "80",
     "module_corner_radius": "2",
     "param_section_corner_radius": "2",
-    "param_section_vpadding": "2",
+    "param_section_vpadding": "4",
     "knob_padding": "5",
     "tabular_knob_padding": "3",
     "min_scale": "0.5",
