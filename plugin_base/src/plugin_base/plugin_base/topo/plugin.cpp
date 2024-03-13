@@ -42,6 +42,7 @@ plugin_topo::validate() const
   assert(graph_polyphony >= 0 && graph_polyphony < topo_max);
 
   tag.validate();
+  assert(gui.default_theme.size());
   assert(gui.dimension_factory != nullptr);
 
   // need to validate module and custom sections together

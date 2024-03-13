@@ -345,6 +345,7 @@ synth_topo(bool is_fx)
   result->gui.font_height = 11;
 #endif
 
+  result->gui.default_theme = "Firefly";
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
   auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {

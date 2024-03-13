@@ -12,8 +12,8 @@
 #define FF_SYNTH_VENDOR_URL "https://sjoerdvankreel.github.io/firefly-synth"
 
 #define FF_SYNTH_VERSION_MAJOR 1
-#define FF_SYNTH_VERSION_MINOR 2
-#define FF_SYNTH_VERSION_PATCH 5
+#define FF_SYNTH_VERSION_MINOR 3
+#define FF_SYNTH_VERSION_PATCH 0
 #define FF_SYNTH_REVERSE_URI "io.github.sjoerdvankreel.firefly_synth"
 #define FF_SYNTH_VERSION_TEXT PB_VERSION_TEXT(FF_SYNTH_VERSION_MAJOR, FF_SYNTH_VERSION_MINOR, FF_SYNTH_VERSION_PATCH)
 

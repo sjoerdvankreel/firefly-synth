@@ -158,7 +158,7 @@ class theme_button:
 public menu_button
 {
   plugin_gui* const _gui;
-  std::vector<resource_item> _themes = {};
+  std::vector<std::string> _themes = {};
 public:
   theme_button(plugin_gui* gui);
 };

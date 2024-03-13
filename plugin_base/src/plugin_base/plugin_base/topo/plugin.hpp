@@ -98,6 +98,7 @@ struct plugin_topo_gui_theme_settings final {
 
 // plugin ui
 struct plugin_topo_gui final {
+  std::string default_theme = {};
   int font_flags = juce::Font::plain;
   plugin_dimension_factory dimension_factory;
   std::vector<custom_section_gui> custom_sections;

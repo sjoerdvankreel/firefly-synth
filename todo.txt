@@ -31,12 +31,10 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 basic theming:
-- make it 1.3
-- text editor color
+- update manual
 - infernal skin + graph images
-- store selected theme in user config
 
-v1.3:
+v1.4:
 implement DPI awareness
 fix clap resizing
 move route up/down

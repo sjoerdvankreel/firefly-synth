@@ -1,5 +1,6 @@
 #include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/controls.hpp>
+#include <plugin_base/shared/io_user.hpp>
 
 #include <limits>
 #include <algorithm>
@@ -187,14 +188,19 @@ theme_button::
 theme_button(plugin_gui* gui) :
 _gui(gui), _themes(gui->gui_state()->desc().themes())
 { 
-  // TODO deal with initial preset
-  set_items(vector_map(_themes, [](auto const& p) { return p.name; }));
+  auto const& topo = *gui->gui_state()->desc().plugin;
+  std::string default_theme = topo.gui.default_theme;
+  std::string theme = user_io_load_list(topo, user_io::base, user_state_theme_key, default_theme, _themes);
+  set_items(_themes);
   setButtonText("Theme");
+  for(int i = 0; i < _themes.size(); i++)
+    if(_themes[i] == theme)
+      set_selected_index(i);
   selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
-    // TODO store preset
     // DONT run synchronously because theme_changed will destroy [this]!
-    MessageManager::callAsync([gui = _gui, theme_name = _themes[index].name]() { gui->theme_changed(theme_name); });
+    user_io_save_list(*_gui->gui_state()->desc().plugin, user_io::base, user_state_theme_key, _themes[index]);
+    MessageManager::callAsync([gui = _gui, theme_name = _themes[index]]() { gui->theme_changed(theme_name); });
   };
 }
 

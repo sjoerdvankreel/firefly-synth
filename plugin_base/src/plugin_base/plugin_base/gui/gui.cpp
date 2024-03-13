@@ -18,8 +18,6 @@ static int const margin_module = 2;
 static int const margin_section = 2;
 static int const margin_content = 2;
 
-static std::string const extra_state_tab_index = "tab";
-static std::string const user_state_width_key = "width";
 static std::vector<std::string> tab_menu_module_actions = { 
   "", "Clear", "Clear All", "Delete", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
 
@@ -308,7 +306,8 @@ _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
   setOpaque(true);
   addMouseListener(&_undo_listener, true);
-  theme_changed("Firefly"); // TODO 
+  auto const& topo = *gui_state->desc().plugin;
+  theme_changed(user_io_load_list(topo, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
 }
 
 void
@@ -347,7 +346,6 @@ plugin_gui::theme_changed(std::string const& theme_name)
     _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), -1, gui_state()->desc().plugin->modules[i].gui.section, i);
 
   // note: default width and aspect ratios are contained in theme
-  // todo : store theme in user config
   add_and_make_visible(*this, make_content());
   int default_width = _lnf->theme_settings().get_default_width(is_fx);
   float ratio = _lnf->theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->theme_settings().get_aspect_ratio_width(is_fx);

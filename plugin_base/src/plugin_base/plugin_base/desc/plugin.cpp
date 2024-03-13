@@ -115,15 +115,15 @@ plugin(plugin), config(config)
   module_count = modules.size();
 }
 
-std::vector<resource_item>
+std::vector<std::string>
 plugin_desc::themes() const
 {
-  std::vector<resource_item> result;
+  std::vector<std::string> result;
   auto themes_folder = get_resource_location(config) / resource_folder_themes;
   for (auto const& entry : std::filesystem::directory_iterator{ themes_folder })
     if (entry.is_directory())
-      result.push_back({ entry.path().filename().string(), entry.path().string() });
-  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { return l.name < r.name; });
+      result.push_back(entry.path().filename().string());
+  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { return l < r; });
   return result;
 }
 
