@@ -39,8 +39,8 @@
       "knob_track2": "FF999999",
       "knob_background1": "FF555555",
       "knob_background2": "FF555555",
-      "section_outline1": "FF444444",
-      "section_outline2": "FF444444",
+      "section_outline1": "FF884422",
+      "section_outline2": "FF884422",
       "slider_thumb": "FFFF8844",
       "slider_track1": "FF222222",
       "slider_track2": "FF222222",
@@ -86,7 +86,9 @@
         "bubble_outline": "FFFF4488",
         "scrollbar_thumb": "FFFF4488",
         "graph_foreground": "FFFF4488",
-        "table_header": "FFC43468"
+        "table_header": "FFC43468",
+        "section_outline1": "FF882244",
+        "section_outline2": "FF882244"
       }
     },
     {
@@ -100,7 +102,9 @@
         "bubble_outline": "FF4488FF",
         "scrollbar_thumb": "FF4488FF",
         "graph_foreground": "FF4488FF",
-        "table_header": "FF3468C4"
+        "table_header": "FF3468C4",
+        "section_outline1": "FF224488",
+        "section_outline2": "FF224488"
       }
     },
     {
@@ -114,7 +118,9 @@
         "bubble_outline": "FFFF8844",
         "scrollbar_thumb": "FFFF8844",
         "graph_foreground": "FFFF8844",
-        "table_header": "FFC46834"
+        "table_header": "FFC46834",
+        "section_outline1": "FF884422",
+        "section_outline2": "FF884422"
       }
     },
     {
@@ -128,7 +134,9 @@
         "bubble_outline": "FF8888FF",
         "scrollbar_thumb": "FF8888FF",
         "graph_foreground": "FF8888FF",
-        "table_header": "FF6868C4"
+        "table_header": "FF6868C4",
+        "section_outline1": "FF444488",
+        "section_outline2": "FF444488"
       }
     }
   ]
