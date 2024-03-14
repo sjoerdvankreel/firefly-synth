@@ -74,7 +74,7 @@ make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
-  result.row_sizes = gui_vertical_distribution(height, settings.font_height, section_vsizes);
+  result.row_sizes = gui_vertical_distribution(height, settings.get_font_height(), section_vsizes);
   return result;
 }
 
@@ -339,11 +339,6 @@ synth_topo(bool is_fx)
     result->type = plugin_type::synth;
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
-
-  // The same font takes more size on linux ?
-#if (defined __linux__) || (defined  __FreeBSD__)
-  result->gui.font_height = 11;
-#endif
 
   result->gui.default_theme = "Firefly";
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);

@@ -593,7 +593,7 @@ plugin_gui::make_tab_component(std::string const& id, std::string const& title, 
   result.setOutline(0);
   result.setLookAndFeel(module_lnf(module));
   result.getTabbedButtonBar().setTitle(title);
-  result.setTabBarDepth(module_header_height(_lnf->theme_settings().font_height));
+  result.setTabBarDepth(module_header_height(_lnf->theme_settings().get_font_height()));
   return result;
 }
 

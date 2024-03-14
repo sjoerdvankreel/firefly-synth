@@ -1,7 +1,8 @@
 {
   "settings": {
     "lighten": "0.15",
-    "font_height": "13",
+    "windows_font_height": "13",
+    "linux_font_height": "11",
     "combo_radius": "3",
     "button_radius": "6",
     "table_cell_radius": "3",

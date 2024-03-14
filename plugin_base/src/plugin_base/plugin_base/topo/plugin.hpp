@@ -64,9 +64,10 @@ struct plugin_topo_gui_theme_settings final {
   float min_scale = 0.5f;
   float max_scale = 8.0f;
 
-  int font_height = 13;
   int knob_padding = 5;
   int tabular_knob_padding = 3;
+  int linux_font_height = 11;
+  int windows_font_height = 13;
 
   int combo_radius = 3;
   int button_radius = 6;
@@ -87,6 +88,17 @@ struct plugin_topo_gui_theme_settings final {
   int default_width_instrument = 800;
   int aspect_ratio_width_instrument = 4;
   int aspect_ratio_height_instrument = 3;
+
+  int get_font_height() const
+  {
+#if WIN32
+    return windows_font_height;
+#elif (defined __linux__) || (defined  __FreeBSD__)
+    return linux_font_height;
+#else
+#error
+#endif
+  }
 
   // graph name to image path in theme folder
   std::map<std::string, std::string> graph_background_images = {};

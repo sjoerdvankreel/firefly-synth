@@ -211,8 +211,10 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
   var settings = json["settings"];
   if (settings.hasProperty("lighten"))
     _theme_settings.lighten = (float)settings["lighten"];
-  if (settings.hasProperty("font_height"))
-    _theme_settings.font_height = (float)settings["font_height"];
+  if (settings.hasProperty("windows_font_height"))
+    _theme_settings.windows_font_height = (float)settings["windows_font_height"];
+  if (settings.hasProperty("linux_font_height"))
+    _theme_settings.linux_font_height = (float)settings["linux_font_height"];
   if (settings.hasProperty("table_cell_radius"))
     _theme_settings.table_cell_radius = (int)settings["table_cell_radius"];
   if (settings.hasProperty("text_editor_radius"))
@@ -291,7 +293,7 @@ Font
 lnf::font() const
 {
   Font result(_typeface);
-  result.setHeight(_theme_settings.font_height);
+  result.setHeight(_theme_settings.get_font_height());
   result.setStyleFlags(_desc->plugin->gui.font_flags);
   return result;
 }
@@ -352,7 +354,7 @@ void
 lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardHeight, int& w, int& h)
 {
   LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
-  h = _theme_settings.font_height + 8;
+  h = _theme_settings.get_font_height() + 8;
 }
 
 void
