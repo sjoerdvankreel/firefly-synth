@@ -327,7 +327,7 @@ render_graph(
     // plotting cv->audio
     auto const& modulation = get_cv_audio_matrix_mixdown(*block, map.module_index == module_gcv_audio_matrix);
     jarray<float, 1> stacked = jarray<float, 1>(*targets.mappings[ti].value_at(modulation));
-    return graph_data(stacked, false, 1.0f, { partition });
+    return graph_data(stacked, false, 1.0f, false, { partition });
   } else
   {
     // plotting cv->cv
@@ -335,14 +335,13 @@ render_graph(
     auto& mixer = get_cv_cv_matrix_mixer(*block, map.module_index == module_gcv_cv_matrix);
     auto const& modulation = mixer.mix(*block, target_map.module_index, target_map.module_slot);
     jarray<float, 1> const* stacked = modulation[target_map.param_index][target_map.param_slot];
-    return graph_data(*stacked, false, 1.0f, { partition });
+    return graph_data(*stacked, false, 1.0f, false, { partition });
   }
 }
 
 module_topo
 cv_matrix_topo(
-  int section, gui_colors const& colors,
-  gui_position const& pos, bool cv, bool global, bool is_fx,
+  int section, gui_position const& pos, bool cv, bool global, bool is_fx,
   std::vector<cv_source_entry> const& sources,
   std::vector<cv_source_entry> const& on_note_sources,
   std::vector<module_topo const*> const& targets)
@@ -366,7 +365,7 @@ cv_matrix_topo(
 
   int this_module = cv? module_gcv_cv_matrix: module_gcv_audio_matrix;
   if (!global)
-  {
+  { 
     this_module = cv ? module_vcv_cv_matrix : module_vcv_audio_matrix;
     auto on_note_matrix(make_cv_source_matrix(on_note_sources).mappings);
     for (int m = 0; m < on_note_matrix.size(); m++)
@@ -378,7 +377,7 @@ cv_matrix_topo(
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{3AEE42C9-691E-484F-B913-55EB05CFBB02}", "Output", 0, route_count)) }),
-    make_module_gui(section, colors, pos, { 1, 1 })));
+    make_module_gui(section, pos, { 1, 1 })));
   
   result.graph_engine_factory = make_graph_engine;
   if(!cv && !is_fx) result.default_initializer = global ? init_audio_global_default : init_audio_voice_default;

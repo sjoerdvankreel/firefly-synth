@@ -1,4 +1,6 @@
+#include <plugin_base/gui/lnf.hpp>
 #include <plugin_base/gui/controls.hpp>
+#include <plugin_base/shared/io_user.hpp>
 
 #include <limits>
 #include <algorithm>
@@ -126,6 +128,8 @@ _state(state)
   state->add_any_listener(this);
   setJustification(Justification::centredRight);
   any_state_changed(0, state->get_plain_at_index(0));
+  setColour(TextEditor::ColourIds::textColourId, lnf->colors().control_text);
+  setColour(TextEditor::ColourIds::highlightedTextColourId, lnf->colors().control_text);
 }
 
 last_tweaked_editor::
@@ -180,13 +184,34 @@ preset_button::extra_state_changed()
     set_selected_index((int)(iter - get_items().begin()));
 }
 
+theme_button::
+theme_button(plugin_gui* gui) :
+_gui(gui), _themes(gui->gui_state()->desc().themes())
+{ 
+  auto const& topo = *gui->gui_state()->desc().plugin;
+  std::string default_theme = topo.gui.default_theme;
+  std::string theme = user_io_load_list(topo, user_io::base, user_state_theme_key, default_theme, _themes);
+  set_items(_themes);
+  setButtonText("Theme");
+  for(int i = 0; i < _themes.size(); i++)
+    if(_themes[i] == theme)
+      set_selected_index(i);
+  selected_index_changed = [this](int index) {
+    index = std::clamp(index, 0, (int)get_items().size());
+    // DONT run synchronously because theme_changed will destroy [this]!
+    user_io_save_list(*_gui->gui_state()->desc().plugin, user_io::base, user_state_theme_key, _themes[index]);
+    MessageManager::callAsync([gui = _gui, theme_name = _themes[index]]() { gui->theme_changed(theme_name); });
+  };
+}
+
 image_component::
 image_component(
   format_config const* config, 
+  std::string const& theme,
   std::string const& file_name, 
   RectanglePlacement placement)
 {
-  String path((get_resource_location(config) / resource_folder_ui / file_name).string());
+  String path((get_resource_location(config) / resource_folder_themes / theme / file_name).string());
   setImage(ImageCache::getFromFile(path), placement);
 }
 
@@ -288,6 +313,9 @@ param_component::mouseUp(MouseEvent const& evt)
   menu.setLookAndFeel(&self.getLookAndFeel());
 
   bool have_menu = false;
+  auto lnf = dynamic_cast<plugin_base::lnf*>(&self.getLookAndFeel());
+  auto colors = lnf->module_gui_colors(_module->module->info.tag.full_name);
+
   std::unique_ptr<param_menu_handler> plugin_handler = {};
   param_menu_handler_factory plugin_handler_factory = _param->param->gui.menu_handler_factory;
   if(plugin_handler_factory)
@@ -299,7 +327,7 @@ param_component::mouseUp(MouseEvent const& evt)
     {
       have_menu = true;
       if (!plugin_menus[m].name.empty())
-        menu.addColouredItem(-1, plugin_menus[m].name, _module->module->gui.colors.tab_text, false, false, nullptr);
+        menu.addColouredItem(-1, plugin_menus[m].name, colors.tab_text, false, false, nullptr);
       for (int e = 0; e < plugin_menus[m].entries.size(); e++)
         menu.addItem(10000 + m * 1000 + e * 100, plugin_menus[m].entries[e].title);
     }
@@ -309,7 +337,7 @@ param_component::mouseUp(MouseEvent const& evt)
   if (host_menu && host_menu->root.children.size())
   {
     have_menu = true;
-    menu.addColouredItem(-1, "Host", _module->module->gui.colors.tab_text, false, false, nullptr);
+    menu.addColouredItem(-1, "Host", colors.tab_text, false, false, nullptr);
     fill_host_menu(menu, host_menu->root.children);
   }
 
@@ -451,6 +479,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
 {
   auto const& domain = param->param->domain;
   auto const& param_gui = param->param->gui;
+  auto colors = lnf->module_gui_colors(module->module->info.tag.full_name);
   if(!param_gui.submenu)
   {
     int index = 0;
@@ -459,7 +488,7 @@ autofit_combobox(lnf, param->param->gui.edit_type == gui_edit_type::autofit_list
   }
   else
   {
-    auto const& color = module->module->gui.colors.tab_text;
+    auto const& color = colors.tab_text;
     fill_popup_menu(domain, *getRootMenu(), param_gui.submenu.get(), color);
   }
   autofit();

@@ -241,11 +241,14 @@ pb_plugin::guiGetSize(uint32_t* width, uint32_t* height) noexcept
 bool
 pb_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
+  assert(_gui.get());
   auto const& topo = *_engine.state().desc().plugin;
-  int min_width = (int)(topo.gui.default_width * topo.gui.min_scale);
-  int max_width = (int)(topo.gui.default_width * topo.gui.max_scale);
+  bool is_fx = topo.type == plugin_type::fx;
+  auto settings = _gui->get_lnf()->theme_settings();
+  int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale);
+  int max_width = (int)(settings.get_default_width(is_fx) * settings.max_scale);
   *width = std::clamp((int)*width, min_width, max_width);
-  *height = *width * topo.gui.aspect_ratio_height / topo.gui.aspect_ratio_width;
+  *height = *width * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
   return true;
 }
 
@@ -255,8 +258,11 @@ pb_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
   hints->preserve_aspect_ratio = true;
   hints->can_resize_vertically = true;
   hints->can_resize_horizontally = true;
-  hints->aspect_ratio_width = _engine.state().desc().plugin->gui.aspect_ratio_width;
-  hints->aspect_ratio_height = _engine.state().desc().plugin->gui.aspect_ratio_height;
+  auto const& topo = *_engine.state().desc().plugin;
+  bool is_fx = topo.type == plugin_type::fx;
+  auto settings = _gui->get_lnf()->theme_settings();
+  hints->aspect_ratio_width = settings.get_aspect_ratio_width(is_fx);
+  hints->aspect_ratio_height = settings.get_aspect_ratio_height(is_fx);
   return true;
 }
 

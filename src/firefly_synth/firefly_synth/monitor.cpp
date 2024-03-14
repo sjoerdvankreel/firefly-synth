@@ -24,12 +24,12 @@ public:
 };
 
 module_topo
-monitor_topo(int section, gui_colors const& colors, gui_position const& pos, int polyphony, bool is_fx)
+monitor_topo(int section, gui_position const& pos, int polyphony, bool is_fx)
 {
   module_topo result(make_module(
     make_topo_info_basic("{C20F2D2C-23C6-41BE-BFB3-DE9EDFB051EC}", "Monitor", module_monitor, 1),
     make_module_dsp(module_stage::output, module_output::none, 0, {}),
-    make_module_gui(section, colors, pos, { 1, 1 })));
+    make_module_gui(section, pos, { 1, 1 })));
   result.info.description = "Monitor module with active voice count, CLAP threadpool thread count, master gain, overall CPU usage and highest-module CPU usage.";
   
   result.gui.enable_tab_menu = false;

@@ -11,10 +11,22 @@ using namespace juce;
 using namespace plugin_base;
 
 namespace firefly_synth {
-
+                          
 extern int const voice_in_param_mode;
 extern int const master_in_param_midi_smooth;
 extern int const master_in_param_tempo_smooth;
+  
+static std::string const main_graph_name = "Main Graph";
+static std::string const vfx_graph_name = "Voice FX Graph";
+static std::string const env_graph_name = "Envelope Graph";
+static std::string const gfx_graph_name = "Global FX Graph";
+static std::string const osc_graph_name = "Oscillator Graph";
+static std::string const vlfo_graph_name = "Voice LFO Graph";
+static std::string const glfo_graph_name = "Global LFO Graph";
+static std::string const osc_mod_graph_name = "Osc Mod Graph";
+static std::string const cv_matrix_graphs_name = "CV Matrix Graphs";
+static std::string const audio_matrix_graphs_name = "Audio Matrix Graphs";
+static std::string const fx_only_matrix_graphs_name = "FX Only Matrix Graphs"; 
 
 enum {
   custom_section_title,
@@ -54,20 +66,15 @@ enum {
   module_section_env, 
   module_section_synth_count };
 
-static gui_colors
-make_section_colors(Colour const& c)
+static gui_dimension
+make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings)
 {
-  gui_colors result;
-  result.tab_text = c;
-  result.knob_thumb = c;
-  result.knob_track2 = c;
-  result.slider_thumb = c;
-  result.control_tick = c;
-  result.bubble_outline = c;
-  result.scrollbar_thumb = c;
-  result.graph_foreground = c;
-  result.table_header = c.darker(0.3f);
-  result.section_outline1 = c.darker(1);
+  gui_dimension result;
+  result.column_sizes = { is_fx ? 30 : 26, is_fx ? 63 : 67, 17, 32, 32 };
+  int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
+  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
+  result.row_sizes = gui_vertical_distribution(height, settings.get_font_height(), section_vsizes);
   return result;
 }
 
@@ -89,10 +96,13 @@ make_module_graph_params(int module, bool render_on_module_mouse_enter,
 
 static Component&
 make_module_graph_section(
-  plugin_gui* gui, lnf* lnf, component_store store, int module, bool render_on_module_mouse_enter,
-  bool render_on_param_mouse_enter, std::vector<int> const& dependent_module_indices, float partition_scale = 0.15f)
+  plugin_gui* gui, lnf* lnf, component_store store, 
+  int module, std::string const& name_in_theme, 
+  bool render_on_module_mouse_enter, bool render_on_param_mouse_enter, 
+  std::vector<int> const& dependent_module_indices, float partition_scale = 0.15f)
 {
   graph_params params;
+  params.name_in_theme = name_in_theme;
   params.partition_scale = partition_scale;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params = make_module_graph_params(module, 
@@ -105,6 +115,7 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   graph_params params;
   params.partition_scale = 0.125f;
+  params.name_in_theme = main_graph_name;
   params.scale_type = graph_params::scale_w;
   module_graph_params module_params;
   module_params.fps = 10;
@@ -119,12 +130,15 @@ make_main_graph_section(plugin_gui* gui, lnf* lnf, component_store store)
 }
 
 static Component&
-make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx, int module_section)
+make_matrix_graphs_section(
+  plugin_gui* gui, lnf* lnf, component_store store, 
+  bool is_fx, int module_section, std::string const& name_in_theme)
 {
   return store_component<tabbed_module_section_container>(store, gui, module_section,
-    [gui, is_fx, lnf, module_section](int module_index) -> std::unique_ptr<juce::Component> {
+    [gui, is_fx, lnf, module_section, name_in_theme](int module_index) -> std::unique_ptr<juce::Component> {
       graph_params params;
       params.partition_scale = 0.33f;
+      params.name_in_theme = name_in_theme;
       params.scale_type = graph_params::scale_h;
       if (is_fx)
       {
@@ -151,60 +165,59 @@ make_matrix_graphs_section(plugin_gui* gui, lnf* lnf, component_store store, boo
 }
 
 static Component&
-make_patch_controls_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_store store)
+make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
+  auto colors = lnf->section_gui_colors("Patch");
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 3 }, 2);
-  auto& patch_label = store_component<juce::Label>(store);
-  patch_label.setText("Patch", juce::dontSendNotification);
-  patch_label.setColour(Label::ColourIds::textColourId, color);
-  patch_label.setJustificationType(Justification::centred);
-  result.add(patch_label, { 0, 0 });
-  result.add(store_component<preset_button>(store, gui), { 1, 0 });
-  result.add(gui->make_load_button(), { 0, 1 });
-  result.add(gui->make_save_button(), { 0, 2 });
-  result.add(gui->make_init_button(), { 1, 1 });
-  result.add(gui->make_clear_button(), { 1, 2 });
+  result.add(gui->make_load_button(), { 0, 0 });
+  result.add(gui->make_save_button(), { 0, 1 });
+  result.add(gui->make_init_button(), { 1, 0 });
+  result.add(gui->make_clear_button(), { 1, 1 });
+  result.add(store_component<preset_button>(store, gui), { 0, 2 });
+  result.add(store_component<theme_button>(store, gui), { 1, 2 });
   return result;
 }
 
 static Component&
-make_edit_controls_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_store store)
+make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
+  auto colors = lnf->section_gui_colors("Tweak");
   auto& result = store_component<grid_component>(store, gui_dimension{ 2, 4 }, 2);
   auto& tweak_name_label = store_component<juce::Label>(store);
   tweak_name_label.setText("Tweak", juce::dontSendNotification);
   tweak_name_label.setJustificationType(Justification::centredLeft);
-  tweak_name_label.setColour(Label::ColourIds::textColourId, color);
+  tweak_name_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   result.add(tweak_name_label, { 0, 0 });
   auto& tweak_value_label = store_component<juce::Label>(store);
   tweak_value_label.setText("Value", juce::dontSendNotification);
   tweak_value_label.setJustificationType(Justification::centredLeft);
-  tweak_value_label.setColour(Label::ColourIds::textColourId, color);
+  tweak_value_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   result.add(tweak_value_label, { 1, 0 });
   auto& tweak = store_component<last_tweaked_label>(store, gui->gui_state());
   result.add(tweak, { 0, 1, 1, 3 });
   result.add(store_component<last_tweaked_editor>(store, gui->gui_state(), lnf), { 1, 1, 1, 3 });
   return result;
-}
+} 
 
 static Component&
-make_title_section(plugin_gui* gui, lnf* lnf, Colour const& color, component_store store, bool is_fx)
+make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
 {
+  auto colors = lnf->section_gui_colors("Title");
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
-  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, "firefly.png", RectanglePlacement::xRight), { 0, 1 });
+  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, lnf->theme(), "header.png", RectanglePlacement::xRight), {0, 1});
   auto& label = store_component<autofit_label>(store, lnf, name, true, 15);
-  label.setColour(Label::ColourIds::textColourId, color);
+  label.setColour(Label::ColourIds::textColourId, colors.control_text);
   grid.add(label, { 0, 0 });
   return grid;
 }
 
 std::unique_ptr<module_tab_menu_handler>
-make_audio_routing_menu_handler(plugin_state* state, bool global, bool is_fx)
+make_audio_routing_menu_handler(plugin_state* state, bool global)
 {
   auto cv_params = make_audio_routing_cv_params(state, global);
-  auto audio_params = make_audio_routing_audio_params(state, global, is_fx);
+  auto audio_params = make_audio_routing_audio_params(state, global);
   return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params }));
 }
 
@@ -230,8 +243,9 @@ make_static_cv_matrix_mixdown(plugin_block& block)
 }
 
 std::vector<module_topo const*>
-make_audio_audio_matrix_sources(plugin_topo const* topo, bool global, bool is_fx)
+make_audio_audio_matrix_sources(plugin_topo const* topo, bool global)
 {
+  bool is_fx = topo->type == plugin_type::fx;
   if (!global) return { &topo->modules[module_osc], &topo->modules[module_vfx] };
   if (!is_fx) return { &topo->modules[module_voice_mix], &topo->modules[module_gfx] };
   return { &topo->modules[module_external_audio], &topo->modules[module_gfx] };
@@ -300,18 +314,6 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 std::unique_ptr<plugin_topo>
 synth_topo(bool is_fx)
 {
-  Colour voice_color(0xFFFF8844);
-  Colour matrix_color(0xFF8888FF);
-  Colour custom_color(0xFFFF4488);
-  Colour global_color(0xFF4488FF);
-  gui_colors voice_colors(make_section_colors(voice_color));
-  gui_colors global_colors(make_section_colors(global_color));
-  gui_colors matrix_colors(make_section_colors(matrix_color));
-  gui_colors custom_colors(make_section_colors(custom_color));
-  gui_colors monitor_colors(make_section_colors(custom_color));
-  custom_colors.edit_text = custom_color;
-  monitor_colors.control_text = custom_color;
-
   auto result = std::make_unique<plugin_topo>();
   result->graph_polyphony = 1;
   result->audio_polyphony = 32;
@@ -327,82 +329,68 @@ synth_topo(bool is_fx)
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 
-  result->gui.default_width = 1280;
-  result->gui.aspect_ratio_width = 118;
   if(is_fx)
   {
     result->type = plugin_type::fx;
-    result->gui.aspect_ratio_height = 25;
     result->tag = make_topo_tag_basic(FF_SYNTH_FX_ID, FF_SYNTH_FX_NAME);
   }
   else
   {
     result->type = plugin_type::synth;
-    result->gui.aspect_ratio_height = 61;
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
 
-  // The same font takes more size on linux ?
-#if (defined __linux__) || (defined  __FreeBSD__)
-  result->gui.font_height = 11;
-#endif
-
-  result->gui.typeface_file_name = "Handel Gothic Regular.ttf"; 
-  result->gui.dimension.column_sizes = { is_fx? 30: 26, is_fx? 63: 67, 17, 32, 32 };
-  int height = result->gui.default_width * result->gui.aspect_ratio_height / result->gui.aspect_ratio_width;
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
-  if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
-  result->gui.dimension.row_sizes = gui_vertical_distribution(height, result->gui.font_height, section_vsizes);
-
+  result->gui.default_theme = "Firefly";
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
-  auto make_title_section_ui = [custom_color, is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& { 
-    return make_title_section(gui, lnf, custom_color, store, is_fx); };
+  result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
+  auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
+    return make_title_section(gui, lnf, store, is_fx); };
   result->gui.custom_sections[custom_section_title] = make_custom_section_gui(
-    custom_section_title, { 0, 0, 1, 1 }, custom_colors, make_title_section_ui);
+    custom_section_title, "Title", { 0, 0, 1, 1 }, make_title_section_ui);
   result->gui.custom_sections[custom_section_patch_controls] = make_custom_section_gui(
-    custom_section_patch_controls, { 0, 4, 1, 1 }, custom_colors,
-      [custom_color](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, custom_color, store); });
+    custom_section_patch_controls, "Patch", { 0, 4, 1, 1 }, 
+      [](auto gui, auto lnf, auto store) -> juce::Component& { return make_patch_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_edit_controls] = make_custom_section_gui(
-    custom_section_edit_controls, { 0, 3, 1, 1 }, custom_colors,
-      [custom_color](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, custom_color, store); });
+    custom_section_edit_controls, "Tweak", { 0, 3, 1, 1 }, 
+      [](auto gui, auto lnf, auto store) -> juce::Component& { return make_edit_controls_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_main_graph] = make_custom_section_gui(
-    custom_section_main_graph, { 0, 2, 1, 1 }, custom_colors, [](auto* gui, auto* lnf, auto store)
+    custom_section_main_graph, main_graph_name, { 0, 2, 1, 1 }, [](auto* gui, auto* lnf, auto store)
     -> Component& { return make_main_graph_section(gui, lnf, store); });
   result->gui.custom_sections[custom_section_gfx_graph] = make_custom_section_gui(
-    custom_section_gfx_graph, { 2, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, false, false, {}); });
+    custom_section_gfx_graph, gfx_graph_name, { 2, 2, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_gfx, gfx_graph_name, false, false, {}); });
   result->gui.custom_sections[custom_section_glfo_graph] = make_custom_section_gui(
-    custom_section_glfo_graph, { 3, 2, 1, 1 }, global_colors, [](auto* gui, auto* lnf, auto store)
-    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, false, false, {}); });
+    custom_section_glfo_graph, glfo_graph_name, { 3, 2, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+    -> Component& { return make_module_graph_section(gui, lnf, store, module_glfo, glfo_graph_name, false, false, {}); });
   if (is_fx)
   {
     result->gui.custom_sections[custom_section_fx_only_matrix_graphs] = make_custom_section_gui(
-      custom_section_fx_only_matrix_graphs, { 3, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_fx_only_matrices); });
+      custom_section_fx_only_matrix_graphs, fx_only_matrix_graphs_name, { 3, 3, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, true, module_section_fx_only_matrices, fx_only_matrix_graphs_name); });
   }
   else
   {
     result->gui.custom_sections[custom_section_osc_graph] = make_custom_section_gui(
-      custom_section_osc_graph, { 4, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, false, false, { module_osc_osc_matrix, module_voice_in }); });
+      custom_section_osc_graph, osc_graph_name, { 4, 2, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc, osc_graph_name, false, false, { module_osc_osc_matrix, module_voice_in }); });
     result->gui.custom_sections[custom_section_vfx_graph] = make_custom_section_gui(
-      custom_section_vfx_graph, { 6, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, false, false, {}); });
+      custom_section_vfx_graph, vfx_graph_name, { 6, 2, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_vfx, vfx_graph_name, false, false, {}); });
     result->gui.custom_sections[custom_section_vlfo_graph] = make_custom_section_gui(
-      custom_section_vlfo_graph, { 7, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, false, false, {}); });
+      custom_section_vlfo_graph, vlfo_graph_name, { 7, 2, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_vlfo, vlfo_graph_name, false, false, {}); });
     result->gui.custom_sections[custom_section_env_graph] = make_custom_section_gui(
-      custom_section_env_graph, { 8, 2, 1, 1 }, voice_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_env, false, false, {}); });
+      custom_section_env_graph, env_graph_name, { 8, 2, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_env, env_graph_name, false, false, {}); });
     result->gui.custom_sections[custom_section_osc_osc_matrix_graph] = make_custom_section_gui(
-      custom_section_osc_osc_matrix_graph, { 4, 3, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc_osc_matrix, true, false, { module_osc, module_voice_in }, 0.075f); });
+      custom_section_osc_osc_matrix_graph, osc_mod_graph_name, { 4, 3, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_module_graph_section(gui, lnf, store, module_osc_osc_matrix, osc_mod_graph_name, true, false, { module_osc, module_voice_in }, 0.075f); });
     result->gui.custom_sections[custom_section_audio_matrix_graphs] = make_custom_section_gui(
-      custom_section_audio_matrix_graphs, { 4, 4, 1, 1 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_audio_matrices); });
+      custom_section_audio_matrix_graphs, audio_matrix_graphs_name, { 4, 4, 1, 1 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_audio_matrices, audio_matrix_graphs_name); });
     result->gui.custom_sections[custom_section_cv_matrix_graphs] = make_custom_section_gui(
-      custom_section_cv_matrix_graphs, { 8, 3, 1, 2 }, matrix_colors, [](auto* gui, auto* lnf, auto store)
-      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_cv_matrices); });
+      custom_section_cv_matrix_graphs, cv_matrix_graphs_name, { 8, 3, 1, 2 }, [](auto* gui, auto* lnf, auto store)
+      -> Component& { return make_matrix_graphs_section(gui, lnf, store, false, module_section_cv_matrices, cv_matrix_graphs_name); });
   }
 
   result->gui.module_sections.resize(is_fx? module_section_fx_count: module_section_synth_count);
@@ -455,32 +443,32 @@ synth_topo(bool is_fx)
   result->modules[module_voice_note] = voice_note_topo(module_section_hidden);
   result->modules[module_voice_mix] = voice_mix_topo(module_section_hidden, is_fx);
   result->modules[module_external_audio] = external_audio_topo(module_section_hidden, is_fx);
-  result->modules[module_env] = env_topo(is_fx? module_section_hidden: module_section_env, voice_colors, { 0, 0 });
-  result->modules[module_gfx] = fx_topo(module_section_gfx, global_colors, { 0, 0 }, true, is_fx);
-  result->modules[module_vfx] = fx_topo(is_fx ? module_section_hidden : module_section_vfx, voice_colors, { 0, 0 }, false, is_fx);
-  result->modules[module_glfo] = lfo_topo(module_section_glfo, global_colors, { 0, 0 }, true, is_fx);
-  result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, voice_colors, { 0, 0 }, false, is_fx);
-  result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, voice_colors, { 0, 0 });
-  result->modules[module_master_in] = master_in_topo(module_section_master_in, is_fx, global_colors, { 0, 0 });
+  result->modules[module_env] = env_topo(is_fx? module_section_hidden: module_section_env, { 0, 0 });
+  result->modules[module_gfx] = fx_topo(module_section_gfx, { 0, 0 }, true, is_fx);
+  result->modules[module_vfx] = fx_topo(is_fx ? module_section_hidden : module_section_vfx, { 0, 0 }, false, is_fx);
+  result->modules[module_glfo] = lfo_topo(module_section_glfo, { 0, 0 }, true, is_fx);
+  result->modules[module_vlfo] = lfo_topo(is_fx ? module_section_hidden : module_section_vlfo, { 0, 0 }, false, is_fx);
+  result->modules[module_osc] = osc_topo(is_fx ? module_section_hidden : module_section_osc, { 0, 0 });
+  result->modules[module_master_in] = master_in_topo(module_section_master_in, is_fx, { 0, 0 });
   result->modules[module_voice_on_note] = voice_on_note_topo(result.get(), module_section_hidden); // must be after all global cv  
-  result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, voice_colors, { 0, 0 }); // must be after all cv
-  result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, voice_colors, { 0, 0 }, false, is_fx);
-  result->modules[module_master_out] = audio_out_topo(module_section_master_out, global_colors, { 0, 0 }, true, is_fx);
-  result->modules[module_monitor] = monitor_topo(module_section_monitor, monitor_colors, { 0, 0 }, result->audio_polyphony, is_fx);
-  result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_osc_osc_matrix, matrix_colors, { 0, 0 }, result.get());
-  result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_fx_only_matrices: module_section_audio_matrices, matrix_colors, { 0, 0 }, true, is_fx,
-    make_audio_audio_matrix_sources(result.get(), true, is_fx), make_audio_audio_matrix_targets(result.get(), true));
-  result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_hidden : module_section_audio_matrices, matrix_colors, { 0, 0 }, false, is_fx,
-    make_audio_audio_matrix_sources(result.get(), false, is_fx), make_audio_audio_matrix_targets(result.get(), false));
-  result->modules[module_gcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_fx_only_matrices : module_section_cv_matrices, matrix_colors, { 0, 0 }, false, true, is_fx,
+  result->modules[module_voice_in] = voice_in_topo(is_fx ? module_section_hidden : module_section_voice_in, { 0, 0 }); // must be after all cv
+  result->modules[module_voice_out] = audio_out_topo(is_fx ? module_section_hidden : module_section_voice_out, { 0, 0 }, false, is_fx);
+  result->modules[module_master_out] = audio_out_topo(module_section_master_out, { 0, 0 }, true, is_fx);
+  result->modules[module_monitor] = monitor_topo(module_section_monitor, { 0, 0 }, result->audio_polyphony, is_fx);
+  result->modules[module_osc_osc_matrix] = osc_osc_matrix_topo(is_fx ? module_section_hidden : module_section_osc_osc_matrix, { 0, 0 }, result.get());
+  result->modules[module_gaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_fx_only_matrices: module_section_audio_matrices, { 0, 0 }, true, is_fx,
+    make_audio_audio_matrix_sources(result.get(), true), make_audio_audio_matrix_targets(result.get(), true));
+  result->modules[module_vaudio_audio_matrix] = audio_audio_matrix_topo(is_fx ? module_section_hidden : module_section_audio_matrices, { 0, 0 }, false, is_fx,
+    make_audio_audio_matrix_sources(result.get(), false), make_audio_audio_matrix_targets(result.get(), false));
+  result->modules[module_gcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_fx_only_matrices : module_section_cv_matrices, { 0, 0 }, false, true, is_fx,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_audio_matrix_targets(result.get(), true));
-  result->modules[module_vcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_cv_matrices, matrix_colors, { 0, 0 }, false, false, is_fx,
+  result->modules[module_vcv_audio_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_cv_matrices, { 0, 0 }, false, false, is_fx,
     make_cv_matrix_sources(result.get(), false),
     make_cv_matrix_sources(result.get(), true),
     make_cv_audio_matrix_targets(result.get(), false));
-  result->modules[module_gcv_cv_matrix] = cv_matrix_topo(is_fx ? module_section_fx_only_matrices : module_section_cv_matrices, matrix_colors, { 0, 0 }, true, true, is_fx,
+  result->modules[module_gcv_cv_matrix] = cv_matrix_topo(is_fx ? module_section_fx_only_matrices : module_section_cv_matrices, { 0, 0 }, true, true, is_fx,
     make_cv_matrix_sources(result.get(), true), {}, make_cv_cv_matrix_targets(result.get(), true));
-  result->modules[module_vcv_cv_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_cv_matrices, matrix_colors, { 0, 0 }, true, false, is_fx,
+  result->modules[module_vcv_cv_matrix] = cv_matrix_topo(is_fx ? module_section_hidden : module_section_cv_matrices, { 0, 0 }, true, false, is_fx,
     make_cv_matrix_sources(result.get(), false),
     make_cv_matrix_sources(result.get(), true),
     make_cv_cv_matrix_targets(result.get(), false));

@@ -199,7 +199,7 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   engine->process_end();
 
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, 1.0f, { partition });
+  return graph_data(series, false, 1.0f, false, { partition });
 }
 
 bool
@@ -289,13 +289,13 @@ env_state_converter::post_process(load_handler const& handler, plugin_state& new
 }
 
 module_topo
-env_topo(int section, gui_colors const& colors, gui_position const& pos)
+env_topo(int section, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", true, "Envelope", "Envelope", "Env", module_env, 10),
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info_basic("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { 1, gui_dimension::auto_size } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 1, gui_dimension::auto_size } })));
   result.gui.autofit_column = 1;
   result.info.description = "DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.";
 

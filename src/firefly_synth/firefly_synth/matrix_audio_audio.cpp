@@ -51,8 +51,9 @@ init_voice_minimal(plugin_state& state)
 }
 
 static void
-init_global_minimal(plugin_state& state, bool is_fx)
+init_global_minimal(plugin_state& state)
 {
+  bool is_fx = state.desc().plugin->type == plugin_type::fx;
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx ? "Ext" : "VOut");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "MOut");
@@ -73,8 +74,9 @@ init_voice_default(plugin_state& state)
 }
 
 static void
-init_global_default(plugin_state& state, bool is_fx)
+init_global_default(plugin_state& state)
 {
+  bool is_fx = state.desc().plugin->type == plugin_type::fx;
   state.set_text_at(module_gaudio_audio_matrix, 0, param_on, 0, "On");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_source, 0, is_fx? "Ext": "VOut");
   state.set_text_at(module_gaudio_audio_matrix, 0, param_target, 0, "GFX 1");
@@ -124,7 +126,7 @@ render_graph(
 }
 
 audio_routing_audio_params
-make_audio_routing_audio_params(plugin_state* state, bool global, bool is_fx)
+make_audio_routing_audio_params(plugin_state* state, bool global)
 {
   audio_routing_audio_params result;
   result.off_value = 0;
@@ -133,15 +135,14 @@ make_audio_routing_audio_params(plugin_state* state, bool global, bool is_fx)
   result.matrix_source_params = { param_source };
   result.matrix_target_params = { param_target };
   result.matrix_module = global ? module_gaudio_audio_matrix : module_vaudio_audio_matrix;
-  result.sources = make_audio_matrix(make_audio_audio_matrix_sources(state->desc().plugin, global, is_fx), 0).mappings;
+  result.sources = make_audio_matrix(make_audio_audio_matrix_sources(state->desc().plugin, global), 0).mappings;
   result.targets = make_audio_matrix(make_audio_audio_matrix_targets(state->desc().plugin, global), 0).mappings;
   return result;
 }
 
 module_topo 
 audio_audio_matrix_topo(
-  int section, gui_colors const& colors,
-  gui_position const& pos, bool global, bool is_fx,
+  int section, gui_position const& pos, bool global, bool is_fx,
   std::vector<module_topo const*> const& sources,
   std::vector<module_topo const*> const& targets)
 {
@@ -160,7 +161,7 @@ audio_audio_matrix_topo(
     make_module_dsp(stage, module_output::audio, 0, { 
       make_module_dsp_output(false, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
       make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
-    make_module_gui(section, colors, pos, { 1, 1 })));
+    make_module_gui(section, pos, { 1, 1 })));
 
   result.graph_renderer = [tm = target_matrix.items](
     auto const& state, auto* engine, int param, auto const& mapping) {
@@ -168,8 +169,8 @@ audio_audio_matrix_topo(
   if (global)
   {
     result.gui.tabbed_name = "GAudio Matrix";
-    result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
-    result.minimal_initializer = [is_fx](auto& s) { init_global_minimal(s, is_fx); };
+    result.default_initializer = init_global_default;
+    result.minimal_initializer = init_global_minimal;
   }
   else
   {

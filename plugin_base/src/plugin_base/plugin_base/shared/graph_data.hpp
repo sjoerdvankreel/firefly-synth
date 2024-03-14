@@ -9,8 +9,9 @@ enum class graph_data_type { off, na, scalar, series, audio, multi_stereo };
 
 class graph_data {
   bool _bipolar = false;
-  float _stroke_thickness = 1.0f;
   graph_data_type _type = {};
+  bool _stroke_with_area = {};
+  float _stroke_thickness = 1.0f;
   std::vector<std::string> _partitions = {};
 
   float _scalar = {};
@@ -41,6 +42,7 @@ public:
 
   bool bipolar() const { return _bipolar; }
   graph_data_type type() const { return _type; }
+  bool stroke_with_area() const { return _stroke_with_area; }
   float stroke_thickness() const { return _stroke_thickness; }
   std::vector<std::string> const& partitions() const { return _partitions; }
 
@@ -49,14 +51,14 @@ public:
 
   graph_data(graph_data_type type, std::vector<std::string> const& partitions):
   _partitions(partitions), _type(type) {}
-  graph_data(jarray<float, 2> const& audio, float stroke_thickness, std::vector<std::string> const& partitions) :
-  _partitions(partitions), _stroke_thickness(stroke_thickness), _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
   graph_data(float scalar, bool bipolar, std::vector<std::string> const& partitions):
   _partitions(partitions), _bipolar(bipolar), _type(graph_data_type::scalar), _scalar(scalar) {}
-  graph_data(jarray<float, 1> const& series, bool bipolar, float stroke_thickness, std::vector<std::string> const& partitions) :
-  _partitions(partitions), _stroke_thickness(stroke_thickness), _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
   graph_data(std::vector<std::pair<float, float>> const& multi_stereo, std::vector<std::string> const& partitions) :
-    _partitions(partitions), _bipolar(false), _type(graph_data_type::multi_stereo), _multi_stereo(multi_stereo) {}
+  _partitions(partitions), _bipolar(false), _type(graph_data_type::multi_stereo), _multi_stereo(multi_stereo) {}
+  graph_data(jarray<float, 2> const& audio, float stroke_thickness, bool stroke_with_area, std::vector<std::string> const& partitions) :
+  _partitions(partitions), _stroke_thickness(stroke_thickness), _stroke_with_area(stroke_with_area), _bipolar(true), _type(graph_data_type::audio), _audio(audio) {}
+  graph_data(jarray<float, 1> const& series, bool bipolar, float stroke_thickness, bool stroke_with_area, std::vector<std::string> const& partitions) :
+  _partitions(partitions), _stroke_thickness(stroke_thickness), _stroke_with_area(stroke_with_area), _bipolar(bipolar), _type(graph_data_type::series), _series(series) {}
 };
 
 }

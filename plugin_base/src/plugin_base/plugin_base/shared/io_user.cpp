@@ -58,17 +58,10 @@ user_io_save_num(plugin_topo const& topo, user_io where, std::string const& key,
 }
 
 void
-user_io_save_text(plugin_topo const& topo, user_io where, std::string const& key, std::string const& val)
+user_io_save_list(plugin_topo const& topo, user_io where, std::string const& key, std::string const& val)
 {
   auto action = [val](auto store, auto const& k) { return store->setValue(k, var(val)); };
   return user_action(topo, where, key, action);
-}
-
-std::string 
-user_io_load_text(plugin_topo const& topo, user_io where, std::string const& key, std::string const& default_)
-{
-  auto action = [default_](auto store, auto const& k) { return store->getValue(k, default_); };
-  return user_action(topo, where, key, action).toStdString();
 }
 
 double
@@ -76,6 +69,25 @@ user_io_load_num(plugin_topo const& topo, user_io where, std::string const& key,
 {
   auto action = [default_](auto store, auto const& k) { return store->getDoubleValue(k, default_); };
   return std::clamp(user_action(topo, where, key, action), min, max);
+}
+
+std::string
+user_io_load_list(plugin_topo const& topo, user_io where, std::string const& key, std::string const& default_, std::vector<std::string> const& values)
+{
+  auto action = [default_, values](auto store, auto const& k) { 
+    auto result = store->getValue(k, default_);
+    bool found_result = false;
+    bool found_default = false;
+    for (int i = 0; i < values.size(); i++)
+    {
+      found_result |= values[i] == result;
+      found_default |= values[i] == default_;
+    }
+    assert(found_default);
+    if(!found_result) result = default_;
+    return result;
+  };
+  return user_action(topo, where, key, action).toStdString();
 }
 
 }

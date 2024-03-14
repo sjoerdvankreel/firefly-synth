@@ -165,7 +165,6 @@ graph::paint_series(
   float h = getHeight();
   float count = series.size();
 
-  auto foreground = _lnf->colors().graph_foreground;
   float y0 = (1 - std::clamp(series[0], 0.0f, 1.0f)) * h;
   pFill.startNewSubPath(0, bipolar? h * midpoint : h);
   pFill.lineTo(0, y0);
@@ -179,9 +178,10 @@ graph::paint_series(
   pFill.lineTo(w, bipolar? h * midpoint : h);
   pFill.closeSubPath();
 
-  g.setColour(foreground.withAlpha(0.5f));
+  g.setColour(_lnf->colors().graph_area);
   g.fillPath(pFill);
-  g.setColour(foreground);
+  if (!_data.stroke_with_area())
+    g.setColour(_lnf->colors().graph_line);
   g.strokePath(pStroke, PathStrokeType(stroke_thickness));
 }
 
@@ -193,21 +193,14 @@ graph::paint(Graphics& g)
   float h = getHeight();
   g.fillAll(_lnf->colors().graph_background);
 
-  // draw background partitions
-  for (int part = 0; part < _data.partitions().size(); part++)
+  // draw optional background image
+  plugin_base::lnf& lnf = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
+  auto const& bg_images = lnf.theme_settings().graph_background_images;
+  auto iter = bg_images.find(_params.name_in_theme);
+  if (iter != bg_images.end())
   {
-    Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
-    if(part % 2 == 1)
-    {
-      g.setColour(_lnf->colors().graph_foreground.withAlpha(0.33f));
-      g.fillRect(area);
-    }
-    g.setColour(_lnf->colors().graph_grid.withAlpha(0.75f));
-    if(_params.scale_type == graph_params::scale_h)
-      g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
-    else
-      g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
-    g.drawText(_data.partitions()[part], area, Justification::centred, false);
+    auto image = ImageCache::getFromFile(juce::File(juce::String(iter->second)));
+    g.drawImage(image, getLocalBounds().toFloat(), RectanglePlacement::fillDestination);
   }
 
   // figure out grid box size such that row count is even and line 
@@ -217,32 +210,49 @@ graph::paint(Graphics& g)
   if(row_count % 2 != 0) row_count++;
   float box_size = h / row_count;
   int col_count = std::round(w / box_size);
-  g.setColour(_lnf->colors().graph_grid.withAlpha(0.25f));
+  g.setColour(_lnf->colors().graph_grid);
   for(int i = 1; i < row_count; i++)
     g.fillRect(0.0f, i / (float)(row_count) * h, w, 1.0f);
   for (int i = 1; i < col_count; i++)
     g.fillRect(i / (float)(col_count) * w, 0.0f, 1.0f, h);
 
-  auto foreground = _lnf->colors().graph_foreground;
+  // draw background partitions
+  for (int part = 0; part < _data.partitions().size(); part++)
+  {
+    Rectangle<float> area(part / (float)_data.partitions().size() * w, 0.0f, w / _data.partitions().size(), h);
+    if (part % 2 == 1)
+    {
+      g.setColour(_lnf->colors().graph_area.withAlpha(0.33f));
+      g.fillRect(area);
+    }
+    g.setColour(_lnf->colors().graph_text);
+    if (_params.scale_type == graph_params::scale_h)
+      g.setFont(_lnf->font().withHeight(h * _params.partition_scale));
+    else
+      g.setFont(_lnf->font().withHeight(w * _params.partition_scale));
+    g.drawText(_data.partitions()[part], area, Justification::centred, false);
+  }
+       
   if (_data.type() == graph_data_type::off || _data.type() == graph_data_type::na)
   {
-    g.setColour(foreground.withAlpha(0.75f));
+    g.setColour(_lnf->colors().graph_text);
     auto text = _data.type() == graph_data_type::off ? "OFF" : "N/A";
-    g.setFont(dynamic_cast<lnf&>(getLookAndFeel()).font().boldened());
+    g.setFont(dynamic_cast<plugin_base::lnf&>(getLookAndFeel()).font().boldened());
     g.drawText(text, getLocalBounds().toFloat(), Justification::centred, false);
     return;
   }
 
   if (_data.type() == graph_data_type::multi_stereo)
   {
+    auto area = _lnf->colors().graph_area;
     for (int i = 0; i < _data.multi_stereo().size(); i++)
     {
       float l = 1 - _data.multi_stereo()[i].first;
       float r = 1 - _data.multi_stereo()[i].second;
-      g.setColour(foreground.withAlpha(0.5f / _data.multi_stereo().size()));
+      g.setColour(area.withAlpha(0.67f / _data.multi_stereo().size()));
       g.fillRect(0.0f, l * h, w * 0.5f, (1 - l) * h);
       g.fillRect(w * 0.5f, r * h, w * 0.5f, (1 - r) * h);
-      g.setColour(foreground);
+      g.setColour(area);
       g.fillRect(0.0f, l * h, w * 0.5f, 1.0f);
       g.fillRect(w * 0.5f, r * h, w * 0.5f, 1.0f);
     }
@@ -251,24 +261,25 @@ graph::paint(Graphics& g)
 
   if (_data.type() == graph_data_type::scalar)
   {
+    auto area = _lnf->colors().graph_area;
     float scalar = _data.scalar();
     if (_data.bipolar())
     {
       scalar = 1.0f - bipolar_to_unipolar(scalar);
-      g.setColour(foreground.withAlpha(0.5f));
+      g.setColour(area.withAlpha(0.67f));
       if (scalar <= 0.5f)
         g.fillRect(0.0f, scalar * h, w, (0.5f - scalar) * h);
       else
         g.fillRect(0.0f, 0.5f * h, w, (scalar - 0.5f) * h);
-      g.setColour(foreground);
+      g.setColour(area);
       g.fillRect(0.0f, scalar * h, w, 1.0f);
     }
     else
     {
       scalar = 1.0f - scalar;
-      g.setColour(foreground.withAlpha(0.5f));
+      g.setColour(area.withAlpha(0.67f));
       g.fillRect(0.0f, scalar * h, w, (1 - scalar) * h);
-      g.setColour(foreground);
+      g.setColour(area);
       g.fillRect(0.0f, scalar * h, w, 1.0f);
     }
     return;
@@ -283,7 +294,7 @@ graph::paint(Graphics& g)
     paint_series(g, audio[0], true, _data.stroke_thickness(), 0.25f);
     paint_series(g, audio[1], true, _data.stroke_thickness(), 0.75f);
     return;
-  }
+  }  
 
   assert(_data.type() == graph_data_type::series);
   jarray<float, 1> series(_data.series());

@@ -11,7 +11,7 @@
 #include <firefly_synth/synth.hpp>
 #include <firefly_synth/waves.hpp>
 
-#include <cmath>
+#include <cmath>        
 #include <array>
 #include <algorithm>
 
@@ -273,8 +273,9 @@ init_voice_default(plugin_state& state)
 }
 
 static void
-init_global_default(plugin_state& state, bool is_fx)
+init_global_default(plugin_state& state)
 {
+  bool is_fx = state.desc().plugin->type == plugin_type::fx;
   state.set_text_at(module_gfx, 0, param_type, 0, "SV Filter");
   state.set_text_at(module_gfx, 0, param_svf_mode, 0, "Low Pass");
   state.set_text_at(module_gfx, is_fx ? 0: 1, param_type, 0, "Delay");
@@ -381,11 +382,11 @@ render_graph(
   {
     auto response = fft(audio[0].data());
     if (type == type_cmb)
-      return graph_data(jarray<float, 1>(response), false, 1.0f, { "24 kHz" });
+      return graph_data(jarray<float, 1>(response), false, 1.0f, false, { "24 kHz" });
 
     // SVF remaps over 0.8 just to look pretty
     std::vector<float> response_mapped(log_remap_series_x(response, 0.8f));
-    return graph_data(jarray<float, 1>(response_mapped), false, 1.0f, { "24 kHz" });
+    return graph_data(jarray<float, 1>(response_mapped), false, 1.0f, false, { "24 kHz" });
   }
   
   // distortion - pick result of the last cycle (after filters kick in)
@@ -393,7 +394,7 @@ render_graph(
   {
     int last_cycle_start = (shp_cycle_count - 1) * shp_cycle_length;
     std::vector<float> series(audio[0].cbegin() + last_cycle_start, audio[0].cbegin() + frame_count);
-    return graph_data(jarray<float, 1>(series), true, 1.0f, { "Distortion" });
+    return graph_data(jarray<float, 1>(series), true, 1.0f, false, { "Distortion" });
   }
 
   // delay or reverb - do some autosizing so it looks pretty
@@ -429,10 +430,11 @@ render_graph(
     float one_bar_length = timesig_to_time(120, { 1, 1 });
     partition = float_to_string(length / one_bar_length, 2) + " Bar";
   }
+  bool stroke_with_area = type == type_reverb;
   float stroke = type == type_delay? 1.0f: 0.25f;
   return graph_data(jarray<float, 2>(
     std::vector<jarray<float, 1>>({ jarray<float, 1>(left), jarray<float, 1>(right) })), 
-    stroke, { partition });
+    stroke, stroke_with_area, { partition });
 }
 
 bool 
@@ -565,7 +567,7 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
 }
 
 module_topo
-fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
+fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
 {
   auto voice_info = make_topo_info("{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}", true, "Voice FX", "Voice FX", "VFX", module_vfx, 10);
   voice_info.description = "Per-voice FX module with state variable filter, comb filter and distortion.";
@@ -577,14 +579,14 @@ fx_topo(int section, gui_colors const& colors, gui_position const& pos, bool glo
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { 2, 7 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 2, 7 } })));
  
   result.graph_engine_factory = make_graph_engine;
-  if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s, is_fx); };
+  if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s); };
   if (!global) result.default_initializer = init_voice_default;
   result.graph_renderer = render_graph;
-  result.gui.menu_handler_factory = [global, is_fx](plugin_state* state) {
-    return make_audio_routing_menu_handler(state, global, is_fx); };
+  result.gui.menu_handler_factory = [global](plugin_state* state) {
+    return make_audio_routing_menu_handler(state, global); };
   result.engine_factory = [global](auto const&, int sample_rate, int max_frame_count) {
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<fx_state_converter>(desc, global); };

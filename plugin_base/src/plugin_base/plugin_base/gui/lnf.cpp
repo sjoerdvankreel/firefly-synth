@@ -15,10 +15,10 @@ static int const slider_thumb_width = 9;
 static int const slider_thumb_height = 6;
 
 static void
-draw_tabular_cell_bg(Graphics& g, Component* c, float alpha)
+draw_tabular_cell_bg(Graphics& g, Component* c, float alpha, int radius)
 {
   g.setColour(Colours::white.withAlpha(alpha));
-  g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), 3);
+  g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), radius);
 }
 
 static void 
@@ -42,30 +42,93 @@ draw_conic_arc(
   }
 }
 
+static Colour
+override_color_if_present(var const& json, std::string const& name, Colour const& current)
+{
+  auto juce_name = String(name);
+  if (!json.hasProperty(juce_name)) return current;
+  auto color_text = json[StringRef(juce_name)].toString();
+  return Colour::fromString(color_text);
+}
+
+static gui_colors 
+override_colors(gui_colors const& base, var const& json)
+{
+  gui_colors result = gui_colors(base);
+  result.tab_text = override_color_if_present(json, "tab_text", result.tab_text);
+  result.tab_text_inactive = override_color_if_present(json, "tab_text_inactive", result.tab_text_inactive);
+  result.tab_button = override_color_if_present(json, "tab_button", result.tab_button);
+  result.tab_header = override_color_if_present(json, "tab_header", result.tab_header);
+  result.tab_background1 = override_color_if_present(json, "tab_background1", result.tab_background1);
+  result.tab_background2 = override_color_if_present(json, "tab_background2", result.tab_background2);
+  result.graph_grid = override_color_if_present(json, "graph_grid", result.graph_grid);
+  result.graph_text = override_color_if_present(json, "graph_text", result.graph_text);
+  result.graph_background = override_color_if_present(json, "graph_background", result.graph_background);
+  result.graph_area = override_color_if_present(json, "graph_area", result.graph_area);
+  result.graph_line = override_color_if_present(json, "graph_line", result.graph_line);
+  result.bubble_outline = override_color_if_present(json, "bubble_outline", result.bubble_outline);
+  result.knob_thumb = override_color_if_present(json, "knob_thumb", result.knob_thumb);
+  result.knob_track1 = override_color_if_present(json, "knob_track1", result.knob_track1);
+  result.knob_track2 = override_color_if_present(json, "knob_track2", result.knob_track2);
+  result.knob_background1 = override_color_if_present(json, "knob_background1", result.knob_background1);
+  result.knob_background2 = override_color_if_present(json, "knob_background2", result.knob_background2);
+  result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);
+  result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
+  result.slider_thumb = override_color_if_present(json, "slider_thumb", result.slider_thumb);
+  result.slider_track1 = override_color_if_present(json, "slider_track1", result.slider_track1);
+  result.slider_track2 = override_color_if_present(json, "slider_track2", result.slider_track2);
+  result.slider_outline1 = override_color_if_present(json, "slider_outline1", result.slider_outline1);
+  result.slider_outline2 = override_color_if_present(json, "slider_outline2", result.slider_outline2);
+  result.slider_background = override_color_if_present(json, "slider_background", result.slider_background);
+  result.edit_text = override_color_if_present(json, "edit_text", result.edit_text);
+  result.label_text = override_color_if_present(json, "label_text", result.label_text);
+  result.table_header = override_color_if_present(json, "table_header", result.table_header);
+  result.control_tick = override_color_if_present(json, "control_tick", result.control_tick);
+  result.control_text = override_color_if_present(json, "control_text", result.control_text);
+  result.control_outline = override_color_if_present(json, "control_outline", result.control_outline);
+  result.control_background = override_color_if_present(json, "control_background", result.control_background);
+  result.custom_background1 = override_color_if_present(json, "custom_background1", result.custom_background1);
+  result.custom_background2 = override_color_if_present(json, "custom_background2", result.custom_background2);
+  result.scrollbar_thumb = override_color_if_present(json, "scrollbar_thumb", result.scrollbar_thumb);
+  result.scrollbar_background = override_color_if_present(json, "scrollbar_background", result.scrollbar_background);
+  return gui_colors(result); 
+}
+
 lnf::
-lnf(plugin_desc const* desc, int custom_section, int module_section, int module) :
-_desc(desc), _custom_section(custom_section), _module_section(module_section), _module(module)
+lnf(plugin_desc const* desc, std::string const& theme, int custom_section, int module_section, int module) :
+_theme(theme), _desc(desc), _custom_section(custom_section), _module_section(module_section), _module(module)
 {
   assert(module_section == -1 || module >= 0);
   assert(custom_section == -1 || module == -1);
 
-  auto font_path = get_resource_location(desc->config) / resource_folder_ui / desc->plugin->gui.typeface_file_name;
+  auto theme_folder = get_resource_location(desc->config) / resource_folder_themes / _theme;
+  auto font_path = theme_folder / "font.ttf";
   std::vector<char> typeface = file_load(font_path);
   assert(typeface.size());
   _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
   assert(-1 <= module && module < (int)_desc->plugin->modules.size());
 
-  auto control_text_high = colors().control_text.brighter(_desc->plugin->gui.lighten);
-  auto control_bg_high = colors().control_background.brighter(_desc->plugin->gui.lighten);
+  auto theme_path = theme_folder / "theme.json";
+  std::vector<char> theme_contents = file_load(theme_path);
+  theme_contents.push_back('\0');
+  assert(theme_contents.size());
+  juce::String theme_string = juce::String(theme_contents.data());
+  var theme_json;
+  auto parse_result = JSON::parse(theme_string, theme_json);
+  assert(parse_result.ok());
+  init_theme(theme_folder, theme_json);
+
+  auto control_text_high = colors().control_text.brighter(_theme_settings.lighten);
+  auto control_bg_high = colors().control_background.brighter(_theme_settings.lighten);
 
   setColour(Label::ColourIds::textColourId, colors().label_text);
 
   setColour(ToggleButton::ColourIds::textColourId, colors().control_text);
   setColour(ToggleButton::ColourIds::tickColourId, colors().control_tick);
-
-  setColour(TextButton::ColourIds::textColourOnId, control_text_high);
+  
+  setColour(TextButton::ColourIds::textColourOnId, colors().label_text);
+  setColour(TextButton::ColourIds::textColourOffId, colors().label_text);
   setColour(TextButton::ColourIds::buttonOnColourId, control_bg_high);
-  setColour(TextButton::ColourIds::textColourOffId, colors().control_text);
   setColour(TextButton::ColourIds::buttonColourId, colors().control_background);
 
   setColour(TextEditor::ColourIds::textColourId, colors().edit_text);
@@ -86,27 +149,151 @@ _desc(desc), _custom_section(custom_section), _module_section(module_section), _
   setColour(ScrollBar::ColourIds::thumbColourId, colors().scrollbar_thumb);
   setColour(ScrollBar::ColourIds::backgroundColourId, colors().scrollbar_background);
 
-  setColour(PopupMenu::ColourIds::textColourId, colors().control_text);
+  setColour(PopupMenu::ColourIds::textColourId, colors().label_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().control_text.brighter(_desc->plugin->gui.lighten));
-  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_desc->plugin->gui.lighten));
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_theme_settings.lighten));
+  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_theme_settings.lighten));
+}
+
+void 
+lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
+{
+  if (json.hasProperty("graph_background_images"))
+  {
+    var graph_background_images = json["graph_background_images"];
+    for (int i = 0; i < graph_background_images.size(); i++)
+    {
+      var this_bg_image = graph_background_images[i];
+      if (this_bg_image.hasProperty("graph") && this_bg_image.hasProperty("image"))
+      {
+        std::string image = this_bg_image["image"].toString().toStdString();
+        if(!image.empty())
+        {
+          std::string graph = this_bg_image["graph"].toString().toStdString();
+          std::string image_path = (theme_folder / image).string();
+          _theme_settings.graph_background_images[graph] = image_path;
+        }
+      }
+    }
+  }
+
+  assert(json.hasProperty("defaults"));
+  var defaults = json["defaults"];
+  assert(defaults.hasProperty("colors"));
+  _default_colors = override_colors(_default_colors, defaults["colors"]);
+  if (json.hasProperty("overrides"))
+  {
+    var overrides = json["overrides"];
+    assert(overrides.isArray());
+    for (int i = 0; i < overrides.size(); i++)
+    {
+      var this_override = overrides[i];
+      assert(this_override.hasProperty("colors"));
+      auto this_colors = override_colors(_default_colors, this_override["colors"]);
+      if (this_override.hasProperty("custom_sections"))
+      {
+        var custom_sections = this_override["custom_sections"];
+        assert(custom_sections.isArray());
+        for(int j = 0; j < custom_sections.size(); j++)
+          _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
+      }
+      if (this_override.hasProperty("module_sections"))
+      {
+        var module_sections = this_override["module_sections"];
+        assert(module_sections.isArray());
+        for (int j = 0; j < module_sections.size(); j++)
+          _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
+      }
+    }
+  }
+
+  assert(json.hasProperty("settings"));
+  var settings = json["settings"];
+  if (settings.hasProperty("lighten"))
+    _theme_settings.lighten = (float)settings["lighten"];
+  if (settings.hasProperty("windows_font_height"))
+    _theme_settings.windows_font_height = (float)settings["windows_font_height"];
+  if (settings.hasProperty("linux_font_height"))
+    _theme_settings.linux_font_height = (float)settings["linux_font_height"];
+  if (settings.hasProperty("table_cell_radius"))
+    _theme_settings.table_cell_radius = (int)settings["table_cell_radius"];
+  if (settings.hasProperty("text_editor_radius"))
+    _theme_settings.text_editor_radius = (int)settings["text_editor_radius"];
+  if (settings.hasProperty("scroll_thumb_radius"))
+    _theme_settings.scroll_thumb_radius = (int)settings["scroll_thumb_radius"];
+  if (settings.hasProperty("combo_radius"))
+    _theme_settings.combo_radius = (int)settings["combo_radius"];
+  if (settings.hasProperty("button_radius"))
+    _theme_settings.button_radius = (int)settings["button_radius"];
+  if (settings.hasProperty("module_tab_width"))
+    _theme_settings.module_tab_width = (int)settings["module_tab_width"];
+  if (settings.hasProperty("module_header_width"))
+    _theme_settings.module_header_width = (int)settings["module_header_width"];
+  if (settings.hasProperty("module_corner_radius"))
+    _theme_settings.module_corner_radius = (int)settings["module_corner_radius"];
+  if (settings.hasProperty("param_section_corner_radius"))
+    _theme_settings.param_section_corner_radius = (int)settings["param_section_corner_radius"];
+  if (settings.hasProperty("param_section_vpadding"))
+    _theme_settings.param_section_vpadding = (int)settings["param_section_vpadding"];
+  if (settings.hasProperty("knob_padding"))
+    _theme_settings.knob_padding = (int)settings["knob_padding"];
+  if (settings.hasProperty("tabular_knob_padding"))
+    _theme_settings.tabular_knob_padding = (int)settings["tabular_knob_padding"];
+  if (settings.hasProperty("min_scale"))
+    _theme_settings.min_scale = (float)settings["min_scale"];
+  if (settings.hasProperty("max_scale"))
+    _theme_settings.max_scale = (float)settings["max_scale"];
+  if (settings.hasProperty("default_width_fx"))
+    _theme_settings.default_width_fx = (int)settings["default_width_fx"];
+  if (settings.hasProperty("aspect_ratio_width_fx"))
+    _theme_settings.aspect_ratio_width_fx = (int)settings["aspect_ratio_width_fx"];
+  if (settings.hasProperty("aspect_ratio_height_fx"))
+    _theme_settings.aspect_ratio_height_fx = (int)settings["aspect_ratio_height_fx"];
+  if (settings.hasProperty("default_width_instrument"))
+    _theme_settings.default_width_instrument = (int)settings["default_width_instrument"];
+  if (settings.hasProperty("aspect_ratio_width_instrument"))
+    _theme_settings.aspect_ratio_width_instrument = (int)settings["aspect_ratio_width_instrument"];
+  if (settings.hasProperty("aspect_ratio_height_instrument"))
+    _theme_settings.aspect_ratio_height_instrument = (int)settings["aspect_ratio_height_instrument"];
+}
+
+gui_colors 
+lnf::module_gui_colors(std::string const& module_full_name)
+{ 
+  if(_module_colors.contains(module_full_name))
+    return gui_colors(_module_colors.at(module_full_name)); 
+  return gui_colors(_default_colors);
+}
+
+gui_colors 
+lnf::section_gui_colors(std::string const& section_full_name) 
+{ 
+  if (_section_colors.contains(section_full_name))
+    return gui_colors(_section_colors.at(section_full_name));
+  return gui_colors(_default_colors);
 }
 
 gui_colors const& 
 lnf::colors() const
 {
   if(_custom_section != -1)
-    return _desc->plugin->gui.custom_sections[_custom_section].colors;
+  {
+    auto full_name = _desc->plugin->gui.custom_sections[_custom_section].full_name;
+    return _section_colors.contains(full_name)? _section_colors.at(full_name): _default_colors;
+  }
   if(_module != -1)
-    return  _desc->plugin->modules[_module].gui.colors;
-  return _desc->plugin->gui.colors;
+  {
+    auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
+    return _module_colors.contains(full_name) ? _module_colors.at(full_name) : _default_colors;
+  }
+  return _default_colors;
 }
 
 Font 
 lnf::font() const
 {
   Font result(_typeface);
-  result.setHeight(_desc->plugin->gui.font_height);
+  result.setHeight(_theme_settings.get_font_height());
   result.setStyleFlags(_desc->plugin->gui.font_flags);
   return result;
 }
@@ -129,7 +316,7 @@ lnf::tab_width() const
 {
   assert(_module_section != -1);
   auto const& section = _desc->plugin->gui.module_sections[_module_section];
-  return section.tabbed ? -1 : _desc->plugin->gui.module_tab_width;
+  return section.tabbed ? -1 : _theme_settings.module_tab_width;
 }
 
 Path 
@@ -152,7 +339,7 @@ lnf::getTabButtonBestWidth(TabBarButton& b, int)
 { 
   int result = tab_width();
   if(result == -1) return b.getTabbedButtonBar().getWidth() / b.getTabbedButtonBar().getNumTabs();
-  if(b.getIndex() == 0) result += _desc->plugin->gui.module_header_width;
+  if(b.getIndex() == 0) result += _theme_settings.module_header_width;
   return result;
 }
 
@@ -160,14 +347,14 @@ void
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
   g.setColour(colors().tab_header);
-  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _desc->plugin->gui.module_corner_radius);
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _theme_settings.module_corner_radius);
 }
 
 void
 lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardHeight, int& w, int& h)
 {
   LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
-  h = _desc->plugin->gui.font_height + 8;
+  h = _theme_settings.get_font_height() + 8;
 }
 
 void
@@ -194,7 +381,7 @@ lnf::drawTooltip(Graphics& g, String const& text, int w, int h)
 void 
 lnf::drawTextEditorOutline(juce::Graphics& g, int w, int h, TextEditor& te)
 {
-  auto cornerSize = 6.0f;
+  auto cornerSize = theme_settings().text_editor_radius;
   if (!te.isEnabled()) return;
   if (dynamic_cast<AlertWindow*> (te.getParentComponent()) != nullptr) return;
   if (te.hasKeyboardFocus(true) && !te.isReadOnly())
@@ -228,11 +415,11 @@ lnf::drawPopupMenuItemWithOptions(
     new_item.isEnabled = true; // just for painting submenu headers, not actually enabled
   LookAndFeel_V4::drawPopupMenuItemWithOptions(g, area, highlighted, new_item, options);
 }
-
+ 
 void
 lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   bool vertical, int pos, int size, bool over, bool down)
-{
+{   
   g.setColour(findColour(ScrollBar::ColourIds::backgroundColourId));
   g.fillRect(bar.getLocalBounds());
 
@@ -241,7 +428,7 @@ lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   else thumbBounds = { pos, y, size, h };
   auto c = bar.findColour(ScrollBar::ColourIds::thumbColourId);
   g.setColour(over ? c.brighter(0.25f) : c);
-  g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), 2.0f);
+  g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), theme_settings().scroll_thumb_radius);
 }
 
 void
@@ -251,9 +438,9 @@ lnf::drawLabel(Graphics& g, Label& label)
 
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label, 0.075f);
+      draw_tabular_cell_bg(g, &label, 0.075f, theme_settings().table_cell_radius);
 
-  if (!label.isBeingEdited())
+  if (!label.isBeingEdited()) 
   {
     auto alpha = label.isEnabled() ? 1.0f : 0.5f;
     auto area = getLabelBorderSize(label).subtractedFrom(label.getLocalBounds());
@@ -294,8 +481,55 @@ lnf::drawButtonText(Graphics& g, TextButton& button, bool, bool)
   arrow.lineTo(x + w, y);
   arrow.lineTo(x + w / 2, y + h);
   arrow.closeSubPath();
-  g.setColour(colors().edit_text);
+  g.setColour(colors().control_text);
   g.fillPath(arrow);
+}
+
+void 
+lnf::drawButtonBackground(
+  Graphics& g, Button& button, Colour const& backgroundColour, 
+  bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
+{
+  // this is a 1:1 copy of LookAndFeel_V4::drawButtonBackground,
+  // with 1 modification: we pick the corner size from theme_settings
+  // whereas base class hardcodes it as 6
+
+  auto cornerSize = theme_settings().button_radius;
+
+  auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
+  auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
+    .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
+
+  if (shouldDrawButtonAsDown || shouldDrawButtonAsHighlighted)
+    baseColour = baseColour.contrasting(shouldDrawButtonAsDown ? 0.2f : 0.05f);
+  g.setColour(baseColour);
+
+  auto flatOnLeft = button.isConnectedOnLeft();
+  auto flatOnRight = button.isConnectedOnRight();
+  auto flatOnTop = button.isConnectedOnTop();
+  auto flatOnBottom = button.isConnectedOnBottom();
+
+  if (flatOnLeft || flatOnRight || flatOnTop || flatOnBottom)
+  {
+    Path path;
+    path.addRoundedRectangle(bounds.getX(), bounds.getY(),
+      bounds.getWidth(), bounds.getHeight(),
+      cornerSize, cornerSize,
+      !(flatOnLeft || flatOnTop),
+      !(flatOnRight || flatOnTop),
+      !(flatOnLeft || flatOnBottom),
+      !(flatOnRight || flatOnBottom));
+
+    g.fillPath(path);
+    g.setColour(button.findColour(ComboBox::outlineColourId));
+    g.strokePath(path, PathStrokeType(1.0f));
+  }
+  else
+  {
+    g.fillRoundedRectangle(bounds, cornerSize);
+    g.setColour(button.findColour(ComboBox::outlineColourId));
+    g.drawRoundedRectangle(bounds, cornerSize, 1.0f);
+  }
 }
 
 void
@@ -306,7 +540,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     if (ps->param()->param->gui.tabular)
     {
       tabular = true;
-      draw_tabular_cell_bg(g, &box, 0.05f);
+      draw_tabular_cell_bg(g, &box, 0.05f, theme_settings().table_cell_radius);
     }
 
   Path path;
@@ -315,14 +549,14 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int arrowHeight = 4;
   int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
-  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : 3.0f;
-  Rectangle<int> boxBounds(tabular? 2: 0, comboTop, width - (tabular? 4: 0), fixedHeight);
+  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : theme_settings().combo_radius;
+  Rectangle<int> boxBounds(tabular? 3: 1, comboTop, width - 2 - (tabular? 4: 0), fixedHeight);
   g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
   path.startNewSubPath(width - arrowWidth - arrowPad, height / 2 - arrowHeight / 2 + 1);
   path.lineTo(width - arrowWidth / 2 - arrowPad, height / 2 + arrowHeight / 2 + 1);
   path.lineTo(width - arrowPad, height / 2 - arrowHeight / 2 + 1);
-  path.closeSubPath();
+  path.closeSubPath();  
   g.setColour(box.findColour(ComboBox::arrowColourId).withAlpha((box.isEnabled() ? 0.9f : 0.2f)));
   g.fillPath(path);
 }
@@ -335,7 +569,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &tb, 0.05f);
+    draw_tabular_cell_bg(g, &tb, 0.05f, theme_settings().table_cell_radius);
 
   int left = 0;
   if(tabular) 
@@ -359,12 +593,12 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  int radius = _desc->plugin->gui.module_corner_radius;
+  int radius = _theme_settings.module_corner_radius;
   int strip_left = radius + 2;
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   
-  float button_lighten = button.getToggleState() || isMouseOver ? _desc->plugin->gui.lighten : 0;
+  float button_lighten = (button.getToggleState() || isMouseOver) ? _theme_settings.lighten : 0;
   auto text_color = (is_section || button.getToggleState()) ? colors().tab_text : colors().tab_text_inactive;
   g.setColour(colors().tab_button.brighter(button_lighten));
 
@@ -441,7 +675,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &s, 0.05f);
+    draw_tabular_cell_bg(g, &s, 0.05f, theme_settings().table_cell_radius);
 
   float scale_factor = 1;
   float size_base = s.getHeight();
@@ -451,7 +685,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     scale_factor = size_base / s.getHeight();
   }
 
-  float padding = tabular? 3: 5;
+  float padding = tabular? _theme_settings.tabular_knob_padding: _theme_settings.knob_padding;
   float size = size_base - padding - stroke / 2;
   float left = s.getWidth() - size - padding;
   if(tabular) left = (s.getWidth() - size) / 2;
@@ -533,7 +767,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     if(ps->param()->param->gui.tabular)
     {
       padh = 2;
-      draw_tabular_cell_bg(g, &s, 0.05f);
+      draw_tabular_cell_bg(g, &s, 0.05f, theme_settings().table_cell_radius);
     }
   }
 

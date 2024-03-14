@@ -178,7 +178,7 @@ make_osc_routing_menu_handler(plugin_state* state)
 {
   auto cv_params = make_audio_routing_cv_params(state, false);
   auto osc_mod_params = make_audio_routing_osc_mod_params(state);
-  auto audio_params = make_audio_routing_audio_params(state, false, false);
+  auto audio_params = make_audio_routing_audio_params(state, false);
   return std::make_unique<audio_routing_menu_handler>(state, cv_params, std::vector({ audio_params, osc_mod_params }));
 }
 
@@ -233,7 +233,7 @@ render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, boo
       engine.process<true>(block, &modulation);
     });
     jarray<float, 2> audio = jarray<float, 2>(block->state.own_audio[0][0]);
-    result.push_back(graph_data(audio, 1.0f, {}));
+    result.push_back(graph_data(audio, 1.0f, false, {}));
   }
   engine->process_end();
 
@@ -261,17 +261,17 @@ render_osc_graph(plugin_state const& state, graph_engine* engine, int param, par
     return graph_data(graph_data_type::off, {});
   auto data = render_osc_graphs(state, engine, mapping.module_slot, false)[mapping.module_slot];
   std::string partition = is_random(type)? "5 Cycles": "First Cycle";
-  return graph_data(data.audio(), 1.0f, { partition });
+  return graph_data(data.audio(), 1.0f, false, { partition });
 }
 
 module_topo
-osc_topo(int section, gui_colors const& colors, gui_position const& pos)
+osc_topo(int section, gui_position const& pos)
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_unison_voices)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { gui_dimension::auto_size, 1 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { gui_dimension::auto_size, 1 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
 
   result.minimal_initializer = init_minimal;

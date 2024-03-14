@@ -1,3 +1,9 @@
+### March 14, 2024 - V1.3.0.
+
+- Add theming support.
+- Add 4 themes: current, current flat, infernal, infernal flat (re-introduced everyone's favourite creepy images!)
+- Added a new preset.
+
 ### March 10, 2024 - V1.2.4 (No binaries).
 
 - Swap out native message boxes for juce alert windows so they react to content scaling.

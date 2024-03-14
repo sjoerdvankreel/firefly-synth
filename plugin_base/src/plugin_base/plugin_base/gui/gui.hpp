@@ -22,6 +22,11 @@ class grid_component;
 
 enum class gui_hover_type { param, module, custom };
 
+// saved gui stuff
+inline std::string const extra_state_tab_index = "tab";
+inline std::string const user_state_width_key = "width";
+inline std::string const user_state_theme_key = "theme";
+
 // for serialization
 inline std::string const factory_preset_key = "factory_preset";
 std::set<std::string> gui_extra_state_keyset(plugin_topo const& topo);
@@ -84,15 +89,16 @@ public juce::MouseListener
 {
   int const _slot;
   int const _module;
-  plugin_gui* const _gui;
+  plugin_gui* const _gui;  
+  lnf* const  _lnf;
   plugin_state* const _state;
   juce::TabBarButton* _button;
 
 public:
   void mouseUp(juce::MouseEvent const& event);
   ~gui_tab_menu_listener() { _button->removeMouseListener(this); }
-  gui_tab_menu_listener(plugin_gui* gui, plugin_state* state, juce::TabBarButton* button, int module, int slot):
-  _gui(gui), _state(state), _button(button), _module(module), _slot(slot) { _button->addMouseListener(this, true); }
+  gui_tab_menu_listener(plugin_gui* gui, plugin_state* state, lnf* lnf, juce::TabBarButton* button, int module, int slot):
+  _gui(gui), _lnf(lnf), _state(state), _button(button), _module(module), _slot(slot) { _button->addMouseListener(this, true); }
 };
 
 // triggers gui_mouse_listener
@@ -143,12 +149,15 @@ public:
 
   void reloaded();
   void resized() override;
+  void theme_changed(std::string const& theme_name);
+
   void param_end_changes(int index);
   void param_begin_changes(int index);
   void param_changed(int index, plain_value plain);
   void param_changing(int index, plain_value plain);
   graph_engine* get_module_graph_engine(module_topo const& module);
 
+  lnf const* get_lnf() const { return _lnf.get(); }
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state_() const { return _extra_state; }
   void paint(juce::Graphics& g) override { g.fillAll(juce::Colours::black); }
@@ -161,14 +170,14 @@ public:
   void add_tab_selection_listener(gui_tab_selection_listener* listener) { _tab_selection_listeners.push_back(listener); }
 
 private:
-  lnf _lnf;
+  std::unique_ptr<lnf> _lnf = {};
   plugin_state* const _gui_state;
   gui_undo_listener _undo_listener;
   int _last_mouse_enter_param = -1;
   int _last_mouse_enter_module = -1;
   int _last_mouse_enter_custom = -1;
   plugin_base::extra_state* const _extra_state;
-  std::unique_ptr<juce::TooltipWindow> _tooltip;
+  std::unique_ptr<juce::TooltipWindow> _tooltip = {};
   std::map<int, std::unique_ptr<lnf>> _module_lnfs = {};
   std::map<int, std::unique_ptr<lnf>> _custom_lnfs = {};
   std::map<int, std::unique_ptr<graph_engine>> _module_graph_engines = {};

@@ -99,13 +99,13 @@ make_param_section_gui(gui_position const& position, gui_dimension const& dimens
 }
 
 custom_section_gui
-make_custom_section_gui(int index, gui_position const& position, gui_colors const& colors, custom_gui_factory factory)
+make_custom_section_gui(int index, std::string const& full_name, gui_position const& position, custom_gui_factory factory)
 {
   custom_section_gui result = {};
   result.index = index;
   result.position = position;
   result.gui_factory = factory;
-  result.colors = gui_colors(colors);
+  result.full_name = full_name;
   return result;
 }
 
@@ -196,14 +196,13 @@ make_module_gui_none(int section)
 }
 
 module_topo_gui
-make_module_gui(int section, gui_colors const& colors, gui_position const& position, gui_dimension const& dimension)
+make_module_gui(int section, gui_position const& position, gui_dimension const& dimension)
 {
   module_topo_gui result = {};
   result.visible = true;
   result.section = section;
   result.position = position;
   result.dimension = dimension;
-  result.colors = gui_colors(colors);
   return result;
 }
 

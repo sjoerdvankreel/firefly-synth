@@ -91,11 +91,15 @@ public juce::Component,
 public autofit_component
 {
   int const _radius;
+  int const _vpadding;
   bool const _vertical;
   juce::Component* _child;
   juce::Colour const _color1;
   juce::Colour const _color2;
   rounded_container_mode const _mode;
+
+  int radius_and_padding() const { return _radius + _vpadding; }
+
 public:
   void resized() override;
   void paint(juce::Graphics& g) override;
@@ -103,9 +107,9 @@ public:
   int fixed_height(int parent_w, int parent_h) const override;
 
   rounded_container(
-    juce::Component* child, int radius, bool vertical, rounded_container_mode mode,
+    juce::Component* child, int radius, int vpadding, bool vertical, rounded_container_mode mode,
     juce::Colour const& color1, juce::Colour const& color2):
-  _radius(radius), _vertical(vertical), _child(child), _color1(color1), _color2(color2), _mode(mode)
+  _radius(radius), _vpadding(vpadding), _vertical(vertical), _child(child), _color1(color1), _color2(color2), _mode(mode)
   { add_and_make_visible(*this, *child); }
 };
 
@@ -115,10 +119,7 @@ public binding_component,
 public rounded_container
 {
 public:
-  param_section_container(plugin_gui* gui, module_desc const* module, param_section const* section, juce::Component* child) :
-  binding_component(gui, module, &section->gui.bindings, 0), 
-  rounded_container(child, gui->gui_state()->desc().plugin->gui.section_corner_radius, false, rounded_container_mode::both, 
-    module->module->gui.colors.section_outline1, module->module->gui.colors.section_outline2) { init(); }
+  param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child);
 };
 
 // grid component as opposed to grid layout

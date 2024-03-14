@@ -197,7 +197,7 @@ render_graph(
   });
   engine->process_end();
   jarray<float, 1> series(block->state.own_cv[0][0]);
-  return graph_data(series, false, 1.0f, { partition });
+  return graph_data(series, false, 1.0f, false, { partition });
 }
 
 bool
@@ -327,7 +327,7 @@ lfo_state_converter::post_process(load_handler const& handler, plugin_state& new
 }
 
 module_topo
-lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool global, bool is_fx)
+lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
 {
   auto const voice_info = make_topo_info("{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}", true, "Voice LFO", "Voice LFO", "VLFO", module_vlfo, 10);
   auto const global_info = make_topo_info("{FAF92753-C6E4-4D78-BD7C-584EF473E29F}", true, "Global LFO", "Global LFO", "GLFO", module_glfo, 10);
@@ -340,7 +340,7 @@ lfo_topo(int section, gui_colors const& colors, gui_position const& pos, bool gl
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, colors, pos, { { 1, 1 }, { 2, 7 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 2, 7 } })));
   
   result.graph_engine_factory = make_graph_engine;
   if(global && !is_fx) result.default_initializer = init_global_default;

@@ -34,6 +34,18 @@ extra_state_container::extra_state_changed()
   add_and_make_visible(*this, *_child.get());
 }
 
+param_section_container::
+param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child) :
+  binding_component(gui, module, &section->gui.bindings, 0),
+  rounded_container(child, 
+    lnf->theme_settings().param_section_corner_radius, 
+    lnf->theme_settings().param_section_vpadding,
+    false, rounded_container_mode::both,
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_outline1, 
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_outline2) {
+  init(); 
+}
+
 tabbed_module_section_container::
 tabbed_module_section_container(plugin_gui* gui, int section_index,
   std::function<std::unique_ptr<juce::Component>(int module_index)> factory):
@@ -67,17 +79,17 @@ rounded_container::fixed_width(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
   auto& fit = dynamic_cast<autofit_component&>(*child);
-  assert(fit.fixed_width(parent_w - _radius, parent_h - _radius) > 0);
-  return fit.fixed_width(parent_w - _radius, parent_h - _radius) + _radius;
-}
+  assert(fit.fixed_width(parent_w - _radius, parent_h - radius_and_padding()) > 0);
+  return fit.fixed_width(parent_w - _radius, parent_h - radius_and_padding()) + _radius;
+}   
 
 int 
 rounded_container::fixed_height(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
   auto& fit = dynamic_cast<autofit_component&>(*child);
-  assert(fit.fixed_height(parent_w - _radius, parent_h - _radius) > 0);
-  return fit.fixed_height(parent_w - _radius, parent_h - _radius) + _radius;
+  assert(fit.fixed_height(parent_w - _radius, parent_h - radius_and_padding()) > 0);
+  return fit.fixed_height(parent_w - _radius, parent_h - radius_and_padding()) + radius_and_padding();
 }
 
 void
@@ -86,9 +98,9 @@ rounded_container::resized()
   Rectangle<int> bounds(getLocalBounds());
   Rectangle<int> child_bounds(
     bounds.getX() + _radius / 2,
-    bounds.getY() + _radius / 2,
+    bounds.getY() + radius_and_padding() / 2,
     bounds.getWidth() - _radius,
-    bounds.getHeight() - _radius);
+    bounds.getHeight() - radius_and_padding());
   assert(getNumChildComponents() == 1);
   getChildComponent(0)->setBounds(child_bounds);
 }

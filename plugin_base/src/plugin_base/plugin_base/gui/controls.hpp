@@ -33,6 +33,7 @@ public juce::ImageComponent
 public:
   image_component(
   format_config const* config, 
+    std::string const& theme,
     std::string const& file_name, 
     juce::RectanglePlacement placement);
 };
@@ -145,11 +146,21 @@ public menu_button,
 public extra_state_listener
 {
   plugin_gui* const _gui;
-  std::vector<factory_preset> _presets = {};
+  std::vector<resource_item> _presets = {};
 public:
   preset_button(plugin_gui* gui);
   void extra_state_changed() override;
   ~preset_button() { _gui->extra_state_()->remove_listener(factory_preset_key, this); }
+};
+
+// binds theme selection preset to user config
+class theme_button:
+public menu_button
+{
+  plugin_gui* const _gui;
+  std::vector<std::string> _themes = {};
+public:
+  theme_button(plugin_gui* gui);
 };
 
 // binding_component that is additionally bound to a single parameter value

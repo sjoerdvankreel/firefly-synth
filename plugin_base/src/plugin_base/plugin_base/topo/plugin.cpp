@@ -7,8 +7,9 @@ void
 custom_section_gui::validate(plugin_topo const& plugin, int index_) const
 {
   assert(index == index_);
+  assert(full_name.size());
   assert(gui_factory != nullptr);
-  position.validate(plugin.gui.dimension);
+  position.validate(plugin.gui.dimension_factory(plugin_topo_gui_theme_settings()));
 }
 
 void 
@@ -19,7 +20,7 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
   if(!visible) return;
   auto always_visible = [](int) {return true; };
   auto include = [this, &plugin](int m) { return plugin.modules[m].gui.section == this->index; };
-  position.validate(plugin.gui.dimension); 
+  position.validate(plugin.gui.dimension_factory(plugin_topo_gui_theme_settings())); 
   if (tabbed) 
   {
     assert(tab_order.size());
@@ -37,16 +38,12 @@ plugin_topo::validate() const
   assert(version.major >= 0);
   assert(version.minor >= 0);
   assert(version.patch >= 0);
-  assert(gui.typeface_file_name.size());
-  assert(0 < gui.min_scale && gui.min_scale <= gui.max_scale);
   assert(audio_polyphony >= 0 && audio_polyphony < topo_max);
   assert(graph_polyphony >= 0 && graph_polyphony < topo_max);
-  assert(0 < gui.default_width && gui.default_width <= 16384);
-  assert(0 < gui.aspect_ratio_width && gui.aspect_ratio_width <= 1000);
-  assert(0 < gui.aspect_ratio_height && gui.aspect_ratio_height <= 1000);
-  assert(0 < gui.module_sections.size() && gui.module_sections.size() <= modules.size());
 
   tag.validate();
+  assert(gui.default_theme.size());
+  assert(gui.dimension_factory != nullptr);
 
   // need to validate module and custom sections together
   auto return_true = [](int) { return true; };
@@ -55,7 +52,7 @@ plugin_topo::validate() const
     all_sections.push_back(std::make_pair(gui.custom_sections[i].position, true));
   for (int i = 0; i < gui.module_sections.size(); i++)
     all_sections.push_back(std::make_pair(gui.module_sections[i].position, gui.module_sections[i].visible));
-  gui.dimension.validate(vector_map(all_sections,
+  gui.dimension_factory(plugin_topo_gui_theme_settings()).validate(vector_map(all_sections,
     [](auto const& s) { return s.first; }), 
     [&all_sections](int i) { return all_sections[i].second; }, return_true);
   

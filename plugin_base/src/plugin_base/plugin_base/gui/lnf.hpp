@@ -3,6 +3,9 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include <map>
+#include <filesystem>
+
 namespace plugin_base {
 
 class lnf:
@@ -11,17 +14,31 @@ public juce::LookAndFeel_V4 {
   int const _module = -1;
   int const _module_section = -1;
   int const _custom_section = -1;
+
+  std::string const _theme;
   plugin_desc const* const _desc;
   juce::Typeface::Ptr _typeface = {};
 
+  gui_colors _default_colors = {};
+  plugin_topo_gui_theme_settings _theme_settings = {};
+  std::map<std::string, gui_colors> _module_colors = {};
+  std::map<std::string, gui_colors> _section_colors = {};
+
   int tab_width() const;
+  void init_theme(std::filesystem::path const& theme_folder, juce::var const& json);
 
 public:
   juce::Font font() const;
   gui_colors const& colors() const;
-  int combo_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
-  int toggle_height(bool tabular) const { return _desc->plugin->gui.font_height + (tabular ? 8 : 4); }
-  lnf(plugin_desc const* desc, int custom_section, int module_section, int module); 
+  std::string const& theme() const { return _theme; }
+  lnf(plugin_desc const* desc, std::string const& theme, int custom_section, int module_section, int module);
+
+  gui_colors module_gui_colors(std::string const& module_full_name);
+  gui_colors section_gui_colors(std::string const& section_full_name);
+  
+  plugin_topo_gui_theme_settings const& theme_settings() const { return _theme_settings; }
+  int combo_height(bool tabular) const { return _theme_settings.get_font_height() + (tabular ? 8 : 4); }
+  int toggle_height(bool tabular) const { return _theme_settings.get_font_height() + (tabular ? 8 : 4); }
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }
@@ -51,6 +68,7 @@ public:
   void drawTickBox(juce::Graphics&, juce::Component&, float, float, float, float, bool, bool, bool, bool) override;
   void drawBubble(juce::Graphics&, juce::BubbleComponent&, juce::Point<float> const&, juce::Rectangle<float> const& body) override;
   void drawLinearSlider(juce::Graphics&, int, int, int, int, float, float, float, juce::Slider::SliderStyle, juce::Slider&) override;
+  void drawButtonBackground(juce::Graphics& g, juce::Button& button, juce::Colour const& background, bool highlighted, bool down) override;
   void drawPopupMenuItemWithOptions(juce::Graphics&, juce::Rectangle<int> const&, bool, juce::PopupMenu::Item const& item, juce::PopupMenu::Options const&) override;
 };
 

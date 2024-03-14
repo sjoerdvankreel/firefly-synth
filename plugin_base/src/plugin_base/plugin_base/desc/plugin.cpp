@@ -115,10 +115,22 @@ plugin(plugin), config(config)
   module_count = modules.size();
 }
 
-std::vector<factory_preset>
+std::vector<std::string>
+plugin_desc::themes() const
+{
+  std::vector<std::string> result;
+  auto themes_folder = get_resource_location(config) / resource_folder_themes;
+  for (auto const& entry : std::filesystem::directory_iterator{ themes_folder })
+    if (entry.is_directory())
+      result.push_back(entry.path().filename().string());
+  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { return l < r; });
+  return result;
+}
+
+std::vector<resource_item>
 plugin_desc::presets() const
 {
-  std::vector<factory_preset> result;
+  std::vector<resource_item> result;
   auto preset_folder = get_resource_location(config) / resource_folder_presets;
   for (auto const& entry : std::filesystem::directory_iterator{ preset_folder })
     if (entry.is_regular_file() && entry.path().extension().string() == std::string(".") + plugin->extension)

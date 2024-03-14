@@ -18,9 +18,6 @@ static int const margin_module = 2;
 static int const margin_section = 2;
 static int const margin_content = 2;
 
-static std::string const extra_state_tab_index = "tab";
-static std::string const user_state_width_key = "width";
-static BorderSize<int> const param_section_border(16, 6, 6, 6);
 static std::vector<std::string> tab_menu_module_actions = { 
   "", "Clear", "Clear All", "Delete", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
 
@@ -217,6 +214,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
 {
   if(!event.mods.isRightButtonDown()) return;
   auto const& topo = _state->desc().plugin->modules[_module];
+  auto colors = _lnf->module_gui_colors(topo.info.tag.full_name);
   int slots = topo.info.slot_count;
 
   PopupMenu menu;
@@ -232,7 +230,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
       if(dummy_menu.getNumItems() > 0)
       {
         if(!module_menus[m].name.empty())
-          menu.addColouredItem(-1, module_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+          menu.addColouredItem(-1, module_menus[m].name, colors.tab_text, false, false, nullptr);
         fill_module_tab_menu(menu, m * 1000, _slot, slots, module_menus[m].actions);
       }
     }
@@ -240,7 +238,7 @@ gui_tab_menu_listener::mouseUp(MouseEvent const& event)
     for(int m = 0; m < custom_menus.size(); m++)
     {
       if (!custom_menus[m].name.empty())
-        menu.addColouredItem(-1, custom_menus[m].name, topo.gui.colors.tab_text, false, false, nullptr);
+        menu.addColouredItem(-1, custom_menus[m].name, colors.tab_text, false, false, nullptr);
       for(int e = 0; e < custom_menus[m].entries.size(); e++)
         menu.addItem(10000 + m * 1000 + e * 100, custom_menus[m].entries[e].title);
     }
@@ -304,27 +302,60 @@ plugin_gui::
 
 plugin_gui::
 plugin_gui(plugin_state* gui_state, plugin_base::extra_state* extra_state):
-_lnf(&gui_state->desc(), -1, -1, -1), _tooltip(), 
 _gui_state(gui_state), _undo_listener(this), _extra_state(extra_state)
 {
   setOpaque(true);
-  setLookAndFeel(&_lnf);
   addMouseListener(&_undo_listener, true);
   auto const& topo = *gui_state->desc().plugin;
-  
-  for(int i = 0; i < gui_state->desc().plugin->gui.custom_sections.size(); i++)
-    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), i, -1, -1);
-  for(int i = 0; i < gui_state->desc().plugin->modules.size(); i++)
-    _module_lnfs[i] = std::make_unique<lnf>(& _gui_state->desc(), -1, gui_state->desc().plugin->modules[i].gui.section, i);
-
-  add_and_make_visible(*this, make_content());
-  float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
-  getChildComponent(0)->setSize(topo.gui.default_width, topo.gui.default_width * ratio);
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.default_width, 
-    (int)(topo.gui.default_width * topo.gui.min_scale), (int)(topo.gui.default_width * topo.gui.max_scale));
-  setSize(w, w * ratio);
-  _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
+  theme_changed(user_io_load_list(topo, user_io::base, user_state_theme_key, topo.gui.default_theme, gui_state->desc().themes()));
 }
+
+void
+plugin_gui::theme_changed(std::string const& theme_name)
+{
+  // don't just clear out everything!
+  // only stuff that gets rebuild by the gui must be reset
+  // stuff that get bound by the plugin (e.g. param_listener) must remain
+  
+  removeAllChildren();
+  _tooltip = {};
+  setLookAndFeel(nullptr);
+
+  // drop listeners before components
+  // they deregister themselves from components
+  _hover_listeners.clear();
+  _tab_menu_listeners.clear();
+  _gui_mouse_listeners.clear();
+  _tab_selection_listeners.clear();
+
+  // drop components before lnfs
+  _components.clear();
+
+  // finally drop lnfs
+  _module_lnfs.clear();
+  _custom_lnfs.clear();
+
+  _lnf = std::make_unique<lnf>(&gui_state()->desc(), theme_name, -1, -1, -1);
+  setLookAndFeel(_lnf.get());
+  auto const& topo = *gui_state()->desc().plugin;
+  bool is_fx = topo.type == plugin_type::fx;
+
+  for (int i = 0; i < gui_state()->desc().plugin->gui.custom_sections.size(); i++)
+    _custom_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), i, -1, -1);
+  for (int i = 0; i < gui_state()->desc().plugin->modules.size(); i++)
+    _module_lnfs[i] = std::make_unique<lnf>(&_gui_state->desc(), _lnf->theme(), -1, gui_state()->desc().plugin->modules[i].gui.section, i);
+
+  // note: default width and aspect ratios are contained in theme
+  add_and_make_visible(*this, make_content());
+  int default_width = _lnf->theme_settings().get_default_width(is_fx);
+  float ratio = _lnf->theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->theme_settings().get_aspect_ratio_width(is_fx);
+  getChildComponent(0)->setSize(default_width, default_width * ratio);
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, default_width,
+    (int)(default_width * _lnf->theme_settings().min_scale), (int)(default_width * _lnf->theme_settings().max_scale));
+  setSize(w, w * ratio);
+  resized();
+  _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
+} 
 
 void
 plugin_gui::param_changed(int index, plain_value plain)
@@ -417,7 +448,8 @@ void
 plugin_gui::custom_mouse_enter(int section)
 {
   if(_last_mouse_enter_custom == section) return;
-  _tooltip->setLookAndFeel(_custom_lnfs[section].get());
+  // tooltip may not be there yet during theme switching
+  if(_tooltip) _tooltip->setLookAndFeel(_custom_lnfs[section].get());
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->custom_mouse_enter(section);
   _last_mouse_enter_custom = section;
@@ -437,7 +469,8 @@ plugin_gui::module_mouse_enter(int module)
 {
   if(_last_mouse_enter_module == module) return;
   int index = gui_state()->desc().modules[module].module->info.index;
-  _tooltip->setLookAndFeel(_module_lnfs[index].get());
+  // tooltip may not be there yet during theme switching
+  if(_tooltip) _tooltip->setLookAndFeel(_module_lnfs[index].get());
   for(int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->module_mouse_enter(module);
   _last_mouse_enter_module = module;
@@ -446,7 +479,7 @@ plugin_gui::module_mouse_enter(int module)
 void
 plugin_gui::add_tab_menu_listener(juce::TabBarButton& button, int module, int slot)
 {
-  auto listener = std::make_unique<gui_tab_menu_listener>(this, gui_state(), &button, module, slot);
+  auto listener = std::make_unique<gui_tab_menu_listener>(this, gui_state(), _lnf.get(), &button, module, slot);
   _tab_menu_listeners.push_back(std::move(listener));
 }
 
@@ -470,7 +503,8 @@ void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
-  float scale = w / _gui_state->desc().plugin->gui.default_width;
+  bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
+  float scale = w / _lnf->theme_settings().get_default_width(is_fx);
   getChildComponent(0)->setTransform(AffineTransform::scale(scale));
   user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
 }
@@ -506,9 +540,12 @@ void
 plugin_gui::reloaded()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  float ratio = topo.gui.aspect_ratio_height / (float)topo.gui.aspect_ratio_width;
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, topo.gui.default_width, 
-    (int)(topo.gui.default_width * topo.gui.min_scale), (int)(topo.gui.default_width * topo.gui.max_scale));
+  auto settings = _lnf->theme_settings();
+  bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
+  int default_width = settings.get_default_width(is_fx);
+  float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
+  float w = user_io_load_num(topo, user_io::base, user_state_width_key, settings.get_default_width(is_fx),
+    (int)(default_width * settings.min_scale), (int)(default_width * settings.max_scale));
   setSize(w, (int)(w * ratio));
 }
 
@@ -516,7 +553,7 @@ Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& grid = make_component<grid_component>(topo.gui.dimension, margin_module);
+  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf->theme_settings()), margin_module);
   for(int s = 0; s < topo.gui.custom_sections.size(); s++)
     grid.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
   for(int s = 0; s < topo.gui.module_sections.size(); s++)
@@ -528,21 +565,22 @@ plugin_gui::make_content()
 Component& 
 plugin_gui::make_custom_section(custom_section_gui const& section)
 {
-  auto const& topo = *_gui_state->desc().plugin;
-  int radius = topo.gui.section_corner_radius;
-  auto outline1 = section.colors.section_outline1;
-  auto outline2 = section.colors.section_outline2;
-  auto background1 = section.colors.custom_background1;
-  auto background2 = section.colors.custom_background2;
+  int radius = _lnf->theme_settings().module_corner_radius;
+  int vpadding = _lnf->theme_settings().param_section_vpadding;
+  auto colors = _lnf->section_gui_colors(section.full_name);
+  auto outline1 = colors.section_outline1;
+  auto outline2 = colors.section_outline2;
+  auto background1 = colors.custom_background1;
+  auto background2 = colors.custom_background2;
   auto store = [this](std::unique_ptr<Component>&& owned) -> Component& { 
     auto result = owned.get(); 
     _components.emplace_back(std::move(owned)); 
     return *result; 
-  };
+  };      
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, false, rounded_container_mode::both, outline1, outline2);
-  auto& result = make_component<rounded_container>(&content_outline, radius, true, rounded_container_mode::fill, background1, background2);
+  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, false, rounded_container_mode::both, outline1, outline2);
+  auto& result = make_component<rounded_container>(&content_outline, radius, 0, true, rounded_container_mode::fill, background1, background2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
@@ -551,12 +589,11 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
 tab_component&
 plugin_gui::make_tab_component(std::string const& id, std::string const& title, int module)
 {
-  auto const& topo = *_gui_state->desc().plugin;
   auto& result = make_component<tab_component>(_extra_state, id + "/tab", TabbedButtonBar::Orientation::TabsAtTop);
   result.setOutline(0);
   result.setLookAndFeel(module_lnf(module));
   result.getTabbedButtonBar().setTitle(title);
-  result.setTabBarDepth(module_header_height(topo.gui.font_height));
+  result.setTabBarDepth(module_header_height(_lnf->theme_settings().get_font_height()));
   return result;
 }
 
@@ -564,12 +601,13 @@ void
 plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
 {
   auto const& topo = *_gui_state->desc().plugin;
-  int radius = topo.gui.module_corner_radius;
+  int radius = _lnf->theme_settings().module_corner_radius;
   int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
-  auto background1 = topo.modules[module_index].gui.colors.tab_background1;
-  auto background2 = topo.modules[module_index].gui.colors.tab_background2;
-  auto& corners = make_component<rounded_container>(&child, radius, true, rounded_container_mode::fill, background1, background2);
+  auto colors = _lnf->module_gui_colors(topo.modules[module_index].info.tag.full_name);
+  auto background1 = colors.tab_background1;
+  auto background2 = colors.tab_background2;
+  auto& corners = make_component<rounded_container>(&child, radius, 0, true, rounded_container_mode::fill, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
@@ -629,13 +667,14 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   bool vertical = param->gui.layout == param_layout::vertical;
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
+  auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
     std::string display_name = param->info.tag.display_name;
     auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), display_name, false, -1, true);
     header.setText(display_name, dontSendNotification);
-    header.setColour(Label::ColourIds::textColourId, module.module->gui.colors.table_header);
+    header.setColour(Label::ColourIds::textColourId, colors.table_header);
     result.add(header, vertical, 0);
   }
   for (int i = 0; i < param->info.slot_count; i++)
@@ -653,11 +692,11 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       grid.add(make_params(module, &(*iter)), iter->param->gui.position);
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<param_section_container>(this, &module, &section, &grid);
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid);
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
-  return make_component<param_section_container>(this, &module, &section, &viewer);
+  return make_component<param_section_container>(this, _lnf.get(), &module, &section, &viewer);
 }
 
 Component&
@@ -711,17 +750,18 @@ plugin_gui::make_param_label(module_desc const& module, param_desc const& param,
 Component&
 plugin_gui::make_param_editor(module_desc const& module, param_desc const& param)
 {
+  auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
   if(param.param->gui.edit_type == gui_edit_type::output)
   {
     auto& result = make_param_label(module, param, gui_label_contents::value);
-    result.setColour(Label::ColourIds::textColourId, module.module->gui.colors.control_text);
+    result.setColour(Label::ColourIds::textColourId, colors.control_text);
     return result;
   }
 
   if (param.param->gui.edit_type == gui_edit_type::output_module_name)
   {
     auto& result = make_component<module_name_label>(this, &module, &param, _module_lnfs[module.module->info.index].get());
-    result.setColour(Label::ColourIds::textColourId, module.module->gui.colors.control_text);
+    result.setColour(Label::ColourIds::textColourId, colors.control_text);
     return result;
   }
 
