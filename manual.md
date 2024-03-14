@@ -17,8 +17,9 @@ Just once, after that, the size is stored in a user settings file.
 ## Theming
 
 There's a couple of built-in themes. If you want to customize, look for the themes folder in the plugin bundle.<br/>
+You can either edit an existing theme or just copy-paste a theme folder and edit that, and it will get picked up.<>br/>
+Stuff you can override per-section: various colors and graph background images.<br/>
 Stuff you can override globally: title image, font (bring your own TTF), font size, various corner radii and element sizes and plugin size and aspect ratio.<br/>
-Stuff you can override per-section: various colors and graph background images.
 
 
 ## Context menus
