@@ -11,11 +11,11 @@ using namespace juce;
 using namespace plugin_base;
 
 namespace firefly_synth {
-
+  
 extern int const voice_in_param_mode;
 extern int const master_in_param_midi_smooth;
 extern int const master_in_param_tempo_smooth;
-
+  
 static std::string const main_graph_name = "Main Graph";
 static std::string const vfx_graph_name = "Voice FX Graph";
 static std::string const env_graph_name = "Envelope Graph";

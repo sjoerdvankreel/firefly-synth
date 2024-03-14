@@ -46,7 +46,6 @@ do copy/paste patch through clipboard
 bug: preset select jumps back to previous
 do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
-do basic theming support (e.g. config file with colors)
 automate zip/dist
 
 other:
