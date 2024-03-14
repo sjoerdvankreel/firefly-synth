@@ -26,7 +26,7 @@
   "defaults": {
     "colors": {
       "tab_text": "FFAA0000",
-      "tab_text_inactive": "FFAAAAAA",
+      "tab_text_inactive": "FF888888",
       "tab_button": "FF333333",
       "tab_header": "FF222222",
       "tab_background1": "FF222222",
@@ -50,11 +50,11 @@
       "slider_outline1": "FF444444",
       "slider_outline2": "FFBBBBBB",
       "slider_background": "FF000000",
-      "edit_text": "FFFFFFFF",
+      "edit_text": "FFAAAAAA",
       "table_header": "FFAA0000",
-      "label_text": "FFEEEEEE",
+      "label_text": "FFCCCCCC",
       "control_tick": "FFAA0000",
-      "control_text": "FFEEEEEE",
+      "control_text": "FFCCCCCC",
       "control_outline": "FFAAAAAA",
       "control_background": "FF111111",
       "custom_background1": "FF222222",
