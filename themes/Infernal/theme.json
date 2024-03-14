@@ -25,7 +25,7 @@
   },
   "defaults": {
     "colors": {
-      "tab_text": "FF900000",
+      "tab_text": "FFAA0000",
       "tab_text_inactive": "FFAAAAAA",
       "tab_button": "FF333333",
       "tab_header": "FF222222",
@@ -34,32 +34,32 @@
       "graph_grid": "40FFFFFF",
       "graph_text": "C0FFFFFF",
       "graph_background": "FF000000",
-      "graph_area": "80900000",
-      "graph_line": "FF900000",
-      "bubble_outline": "FF900000",
-      "knob_thumb": "FF900000",
+      "graph_area": "80AA0000",
+      "graph_line": "FFAA0000",
+      "bubble_outline": "FFAA0000",
+      "knob_thumb": "FFAA0000",
       "knob_track1": "FF222222",
-      "knob_track2": "FF900000",
+      "knob_track2": "FFAA0000",
       "knob_background1": "FF222222",
       "knob_background2": "FF999999",
       "section_outline1": "FF600000",
       "section_outline2": "FF444444",
-      "slider_thumb": "FF900000",
+      "slider_thumb": "FFAA0000",
       "slider_track1": "FF222222",
       "slider_track2": "FF999999",
       "slider_outline1": "FF444444",
       "slider_outline2": "FFBBBBBB",
       "slider_background": "FF000000",
       "edit_text": "FFFFFFFF",
-      "table_header": "FF900000",
+      "table_header": "FFAA0000",
       "label_text": "FFEEEEEE",
-      "control_tick": "FF900000",
+      "control_tick": "FFAA0000",
       "control_text": "FFEEEEEE",
       "control_outline": "FFAAAAAA",
       "control_background": "FF111111",
       "custom_background1": "FF222222",
       "custom_background2": "FF111111",
-      "scrollbar_thumb": "FF900000",
+      "scrollbar_thumb": "FFAA0000",
       "scrollbar_background": "FF444444"
     }
   },
@@ -81,7 +81,7 @@
       "custom_sections": ["Title", "Monitor", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
-        "control_text": "FF900000"
+        "control_text": "FFAA0000"
       }
     }
   ]  
