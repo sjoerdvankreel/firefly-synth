@@ -81,7 +81,7 @@ rounded_container::fixed_width(int parent_w, int parent_h) const
   auto& fit = dynamic_cast<autofit_component&>(*child);
   assert(fit.fixed_width(parent_w - _radius, parent_h - radius_and_padding()) > 0);
   return fit.fixed_width(parent_w - _radius, parent_h - radius_and_padding()) + _radius;
-}  
+}   
 
 int 
 rounded_container::fixed_height(int parent_w, int parent_h) const
