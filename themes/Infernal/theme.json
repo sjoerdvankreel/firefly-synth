@@ -78,11 +78,19 @@
   ],
   "overrides": [
     {
-      "custom_sections": ["Title", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "custom_sections": ["Title"],
+      "colors": {
+        "control_text": "FFAA0000",
+        "section_outline1": "FF000000",
+        "section_outline2": "FF000000"
+      }
+    },
+    {
+      "custom_sections": ["Monitor", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
         "control_text": "FFAA0000"
       }
     }
-  ]  
+  ]
 }
