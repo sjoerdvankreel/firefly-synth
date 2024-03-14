@@ -92,6 +92,8 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 - Special thanks to [oddyolynx](https://github.com/tank-trax) for supporting the project early-on.
 - Special thanks to [BaconPaul](https://baconpaul.org/) for helping me out with CLAP support.
 - Special thanks to host vendors who have set me up with an NFR license.
+- Infernal theme artwork by Dante Cyberman: [https://www.deviantart.com/dantecyberman](https://www.deviantart.com/dantecyberman).
+- Infernal theme artwork by Vlad Darkness Art: [https://www.deviantart.com/vladdarknessart](https://www.deviantart.com/vladdarknessart).
 - Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
 - Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
