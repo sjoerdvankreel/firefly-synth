@@ -1,4 +1,4 @@
-### ?, ? - V1.3.0.
+### March 14, 2024 - V1.3.0.
 
 - Add theming support.
 - Add 4 themes: current, current flat, infernal, infernal flat (re-introduced everyone's favourite creepy images!)
