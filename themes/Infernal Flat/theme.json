@@ -74,7 +74,7 @@
     { "graph": "Osc Mod Graph", "image": "osc_mod.png" },
     { "graph": "CV Matrix Graphs", "image": "cv.png" },
     { "graph": "Audio Matrix Graphs", "image": "audio.png" },
-    { "graph": "FX Only Matrix Graphs", "image": "" }
+    { "graph": "FX Only Matrix Graphs", "image": "cv.png" }
   ],
   "overrides": [
     {
