@@ -30,11 +30,6 @@ out gain/cpu meter
 normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
-basic theming:
-- new fun with patch
-- credit dantecyberman + vladdarknessart
-- update manual
-
 v1.4:
 some more basic themes (just color schemes + flat)
 do visual am/fm demo
