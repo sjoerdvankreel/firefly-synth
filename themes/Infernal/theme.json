@@ -27,8 +27,8 @@
     "colors": {
       "tab_text": "FFAA0000",
       "tab_text_inactive": "FF888888",
-      "tab_button": "FF333333",
-      "tab_header": "FF222222",
+      "tab_button": "FF000000",
+      "tab_header": "FF000000",
       "tab_background1": "FF222222",
       "tab_background2": "FF111111",
       "graph_grid": "40FFFFFF",
