@@ -32,6 +32,7 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 
 basic theming:
 - new fun with patch
+- credit dantecyberman + vladdarknessart
 - update manual
 - fix the reverb color
 - infernal skin + graph images
