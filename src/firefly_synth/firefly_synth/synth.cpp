@@ -11,7 +11,7 @@ using namespace juce;
 using namespace plugin_base;
 
 namespace firefly_synth {
-           
+            
 extern int const voice_in_param_mode;
 extern int const master_in_param_midi_smooth;
 extern int const master_in_param_tempo_smooth;

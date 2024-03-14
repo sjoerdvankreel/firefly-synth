@@ -64,7 +64,7 @@
     }
   },
   "graph_background_images": [
-    { "graph": "Main Graph", "image": "" },
+    { "graph": "Main Graph", "image": "osc_mod.png" },
     { "graph": "Voice FX Graph", "image": "fx.png" },
     { "graph": "Global FX Graph", "image": "fx.png" },
     { "graph": "Voice LFO Graph", "image": "lfo.png" },
