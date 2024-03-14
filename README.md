@@ -11,12 +11,22 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 ![Screenshot](static/screenshot.png)
 ![Screenshot](static/screenshot_fx.png)
 
-<table><tr>
-<td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
-<td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
-<td><img alt="VST logo" src="static/vst_logo.png"/></td>
-<td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
-</tr></table>
+<table>
+  <tr>
+    <td><img src="static/screenshot_flat.png"/></td>
+    <td><img src="static/screenshot_infernal.png"/></td>
+    <td><img src="static/screenshot_infernal_flat.png"/></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
+    <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
+    <td><img alt="VST logo" src="static/vst_logo.png"/></td>
+    <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
+  </tr>
+</table>
 
 # What does it sound like?
 
