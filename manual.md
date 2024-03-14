@@ -14,6 +14,13 @@ It's fully resizable by scaling (by dragging the bottom right corner), but it do
 That means, if you change your DPI settings, you'll have to resize manually.
 Just once, after that, the size is stored in a user settings file.
 
+## Theming
+
+There's a couple of built-in themes. If you want to customize, look for the themes folder in the plugin bundle.<br/>
+Stuff you can override globally: title image, font (bring your own TTF), font size, various corner radii and element sizes and plugin size and aspect ratio.<br/>
+Stuff you can override per-section: various colors and graph background images.
+
+
 ## Context menus
 - Right-click a parameter to show the host menu.
 - Right-click some empty space to show the undo/redo menu.
