@@ -32,6 +32,27 @@ public:
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
 };
 
+// paints a single child over background image
+class background_image_component:
+public juce::Component,
+public autofit_component
+{
+  juce::Component* const _child;
+  juce::RectanglePlacement _placement;
+  std::string const _background_image_path;
+public:
+  void paint(juce::Graphics& g) override;
+  int fixed_width(int parent_w, int parent_h) const override;
+  int fixed_height(int parent_w, int parent_h) const override;
+  
+  void resized() override { getChildComponent(0)->setBounds(getLocalBounds()); }
+  background_image_component(
+    juce::Component* child, juce::RectanglePlacement placement, std::string const& background_image_path) :
+    _child(child), _placement(placement), _background_image_path(background_image_path) {
+    add_and_make_visible(*this, *child);
+  }
+};
+
 // displays a child component based on extra state changes
 class extra_state_container:
 public juce::Component,

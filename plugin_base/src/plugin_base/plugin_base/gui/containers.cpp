@@ -139,6 +139,39 @@ rounded_container::paint(Graphics& g)
 }
 
 void
+background_image_component::paint(Graphics& g)
+{
+  if (_mode == rounded_container_mode::both)
+  {
+    if (!_vertical) g.setGradientFill(ColourGradient(
+      _color1.darker(1.75), 0, 0, _color2.darker(1.75), 0, getHeight(), false));
+    else g.setGradientFill(ColourGradient(
+      _color2.darker(1.75), 0, 0, _color1.darker(1.75), getWidth(), 0, false));
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+    if (_vertical) g.setGradientFill(ColourGradient(
+      _color1, 0, 0, _color2, 0, getHeight(), false));
+    else g.setGradientFill(ColourGradient(
+      _color2, 0, 0, _color1, getWidth(), 0, false));
+    g.drawRoundedRectangle(getLocalBounds().toFloat(), _radius, 1);
+    return;
+  }
+
+  if(_vertical)
+    g.setGradientFill(juce::ColourGradient(
+      _color1, 0, 0, _color2, 0, getHeight(), false));
+  else
+    g.setGradientFill(juce::ColourGradient(
+      _color2, 0, 0, _color1, getWidth(), 0, false));
+
+  if(_mode == rounded_container_mode::fill)
+    g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+  else if(_mode == rounded_container_mode::stroke)
+    g.drawRoundedRectangle(getLocalBounds().toFloat(), _radius, 1);
+  else
+    assert(false);
+}
+
+void
 grid_component::add(Component& child, gui_position const& position)
 {
   assert(position.row >= 0);
