@@ -60,7 +60,7 @@ Presets:
 
 # System requirements and supported environments
 - 64-bit cpu with AVX support.
-- Linux: tested on Ubuntu 22 only. Linux support is highly experimental.<br/>But, unlike InfernalSynth, it actually seems to work.
+- Linux: tested on Ubuntu 22 only. Known to work on Fedora, too.
 - Windows: tested on Windows 10. Windows 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Explicitly supported hosts: Reaper, Bitwig, FLStudio. Please use a recent version.
 - Explicitly NOT supported hosts:<br/>Waveform (too many problems), Renoise (bug), Cakewalk (same bug as renoise, probably).
@@ -76,9 +76,7 @@ Presets:
 Extract the zipped folder and copy it (the entire folder, not just the .dll/.so!) to your default VST3/CLAP folder. On Windows, this is "C:\Program Files\Common Files\\[VST3/CLAP]".
 
 There are also Linux binaries over here: [https://github.com/sjoerdvankreel/firefly-synth-storage/tree/main/release](https://github.com/sjoerdvankreel/firefly-synth-storage/tree/main/release),
-but they are built without AVX support, and also I have no idea how well they behave on non-Ubuntu-like distro's. It's probably better to build from source,
-but as I only built on Ubuntu 22, there's bound to be compiler errors on very different toolchains. Just report them to me and I'll fix it. Of course,
-even if it compiles on Arch or Debian or (your favorite distro here), there's still no guarantee that it will actually work.
+but they are built without AVX support, so it's probably better to build from source.
 
 # Build from source
 - git clone --recursive [this-project]
