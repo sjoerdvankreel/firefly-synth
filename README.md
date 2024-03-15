@@ -78,10 +78,7 @@ but they are built without AVX support, so it's probably better to build from so
 - Linux: scripts/build.sh [Debug|RelWithDebInfo|Release]
 - Windows: scripts/build.bat [Debug|RelWithDebInfo|Release]
 
-You'll need CMake and a very recent c++ compiler,
-plus maybe on Linux a couple dependencies that I forgot about.
-The final output ends up in the /dist folder.
-
+You'll need CMake and a very recent c++ compiler. The final output ends up in the /dist folder. <br/>
 Like noted above, the default Linux build does *not* enable AVX.
 To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synth/blob/main/plugin_base/cmake/plugin_base.config.cmake](https://github.com/sjoerdvankreel/firefly-synth/blob/main/plugin_base/cmake/plugin_base.config.cmake).
 
