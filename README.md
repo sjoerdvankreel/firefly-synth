@@ -8,39 +8,9 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 
-# Screenshots
+# Screenshot
 
 ![Screenshot](static/screenshot.png)
-![Screenshot](static/screenshot_fx.png)
-
-# Themes
-
-<table>
-  <tr>
-    <td><img src="static/screenshot_flat.png"/></td>
-    <td><img src="static/screenshot_infernal.png"/></td>
-    <td><img src="static/screenshot_infernal_flat.png"/></td>
-  </tr>
-  <tr>
-    <td><img src="static/screenshot_cyan.png"/></td>
-    <td><img src="static/screenshot_orange.png"/></td>
-    <td><img src="static/screenshot_cool_blue.png"/></td>
-  </tr>
-  <tr>
-    <td><img src="static/screenshot_cyan_flat.png"/></td>
-    <td><img src="static/screenshot_orange_flat.png"/></td>
-    <td><img src="static/screenshot_cool_blue_flat.png"/></td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
-    <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
-    <td><img alt="VST logo" src="static/vst_logo.png"/></td>
-    <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
-  </tr>
-</table>
 
 # What does it sound like?
 
@@ -120,3 +90,36 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
 - Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
 - Contains a verbatim implementation of [Moorer's DSF algorithm as described by Burkhard Reike](https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html).
+
+# Screenshot FX version
+
+![Screenshot](static/screenshot_fx.png)
+
+# Themes
+
+<table>
+  <tr>
+    <td><img src="static/screenshot_flat.png"/></td>
+    <td><img src="static/screenshot_infernal.png"/></td>
+    <td><img src="static/screenshot_infernal_flat.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_cyan.png"/></td>
+    <td><img src="static/screenshot_orange.png"/></td>
+    <td><img src="static/screenshot_cool_blue.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_cyan_flat.png"/></td>
+    <td><img src="static/screenshot_orange_flat.png"/></td>
+    <td><img src="static/screenshot_cool_blue_flat.png"/></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
+    <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
+    <td><img alt="VST logo" src="static/vst_logo.png"/></td>
+    <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
+  </tr>
+</table>
