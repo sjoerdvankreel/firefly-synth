@@ -1,3 +1,7 @@
+### March 15, 2024 - V1.3.1.
+
+- Add some themes (just basic color schemes).
+
 ### March 14, 2024 - V1.3.0.
 
 - Add theming support.

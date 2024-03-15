@@ -8,16 +8,11 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 
-![Screenshot](static/screenshot.png)
-![Screenshot](static/screenshot_fx.png)
+# Screenshot
 
-<table>
-  <tr>
-    <td><img src="static/screenshot_flat.png"/></td>
-    <td><img src="static/screenshot_infernal.png"/></td>
-    <td><img src="static/screenshot_infernal_flat.png"/></td>
-  </tr>
-</table>
+See below for some built-in themes.
+
+![Screenshot](static/screenshot.png)
 
 <table>
   <tr>
@@ -68,10 +63,10 @@ Presets:
 - All other hosts, you'll just have to try and see.
 
 # Download and install
-- Windows VST3:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.0_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.0_windows_vst3.zip)
-- Windows VST3 Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.0_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.0_windows_vst3.zip)
-- Windows CLAP:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.0_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.0_windows_clap.zip)
-- Windows CLAP Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.0_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.0_windows_clap.zip)
+- Windows VST3:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.1_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.1_windows_vst3.zip)
+- Windows VST3 Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.1_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.1_windows_vst3.zip)
+- Windows CLAP:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.1_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.3.1_windows_clap.zip)
+- Windows CLAP Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.1_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.3.1_windows_clap.zip)
 
 Extract the zipped folder and copy it (the entire folder, not just the .dll/.so!) to your default VST3/CLAP folder. On Windows, this is "C:\Program Files\Common Files\\[VST3/CLAP]".
 
@@ -106,3 +101,27 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
 - Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
 - Contains a verbatim implementation of [Moorer's DSF algorithm as described by Burkhard Reike](https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html).
+
+# Screenshot FX version
+
+![Screenshot](static/screenshot_fx.png)
+
+# Themes
+
+<table>
+  <tr>
+    <td><img src="static/screenshot_flat.png"/></td>
+    <td><img src="static/screenshot_infernal.png"/></td>
+    <td><img src="static/screenshot_infernal_flat.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_cyan.png"/></td>
+    <td><img src="static/screenshot_orange.png"/></td>
+    <td><img src="static/screenshot_cool_blue.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_cyan_flat.png"/></td>
+    <td><img src="static/screenshot_orange_flat.png"/></td>
+    <td><img src="static/screenshot_cool_blue_flat.png"/></td>
+  </tr>
+</table>
