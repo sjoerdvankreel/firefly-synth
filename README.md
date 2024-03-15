@@ -12,6 +12,15 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 ![Screenshot](static/screenshot.png)
 
+<table>
+  <tr>
+    <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
+    <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
+    <td><img alt="VST logo" src="static/vst_logo.png"/></td>
+    <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
+  </tr>
+</table>
+
 # What does it sound like?
 
 Pretty much like InfernalSynth. I reused most of the algorithms, although some of them got upgraded. In particular,
@@ -112,14 +121,5 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
     <td><img src="static/screenshot_cyan_flat.png"/></td>
     <td><img src="static/screenshot_orange_flat.png"/></td>
     <td><img src="static/screenshot_cool_blue_flat.png"/></td>
-  </tr>
-</table>
-
-<table>
-  <tr>
-    <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
-    <td><a href="https://github.com/free-audio/clap">https://github.com/free-audio/clap</a></td>
-    <td><img alt="VST logo" src="static/vst_logo.png"/></td>
-    <td>VST is a trademark of Steinberg Media Technologies GmbH, registered in Europe and other countries.</td>
   </tr>
 </table>
