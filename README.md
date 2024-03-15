@@ -17,6 +17,16 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
     <td><img src="static/screenshot_infernal.png"/></td>
     <td><img src="static/screenshot_infernal_flat.png"/></td>
   </tr>
+  <tr>
+    <td><img src="static/screenshot_cyan.png"/></td>
+    <td><img src="static/screenshot_orange.png"/></td>
+    <td><img src="static/screenshot_cool_blue.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_cyan_flat.png"/></td>
+    <td><img src="static/screenshot_orange_flat.png"/></td>
+    <td><img src="static/screenshot_cool_blue_flat.png"/></td>
+  </tr>
 </table>
 
 <table>
