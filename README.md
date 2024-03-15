@@ -12,6 +12,8 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 ![Screenshot](static/screenshot.png)
 
+See below for some built-in themes.
+
 <table>
   <tr>
     <td><img alt="CLAP logo" src="static/clap_logo.png"/></td>
