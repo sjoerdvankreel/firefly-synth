@@ -8,8 +8,12 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 - KVR: [https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel](https://www.kvraudio.com/product/firefly-synth-by-sjoerdvankreel)
 - Manual: [https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md](https://github.com/sjoerdvankreel/firefly-synth/blob/main/manual.md)
 
+# Screenshots
+
 ![Screenshot](static/screenshot.png)
 ![Screenshot](static/screenshot_fx.png)
+
+# Themes
 
 <table>
   <tr>
