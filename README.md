@@ -10,9 +10,9 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 # Screenshot
 
-![Screenshot](static/screenshot.png)
-
 See below for some built-in themes.
+
+![Screenshot](static/screenshot.png)
 
 <table>
   <tr>
