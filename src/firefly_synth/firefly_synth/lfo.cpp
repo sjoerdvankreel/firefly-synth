@@ -17,7 +17,7 @@
 using namespace plugin_base;
 
 namespace firefly_synth {
-                 
+                  
 static float const max_filter_time_ms = 500; 
 static float const log_half = std::log(0.5f);
 
