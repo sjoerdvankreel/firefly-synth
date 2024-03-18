@@ -1483,12 +1483,15 @@ fx_engine::process_dist_mode(plugin_block& block,
   switch (block_auto[param_dist_clip][0].step())
   {
   case dist_clip_tanh: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
-      return std::tanh(in); 
+    return std::tanh(in); 
   }); break;
   case dist_clip_hard: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) { 
     return std::clamp(in, -1.0f, 1.0f); 
   }); break;
-  case dist_clip_sin: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) { 
+  case dist_clip_inv: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+    return signum(in) * (1.0f - (1.0f / (1.0f + std::fabs(30.0f * in))));
+  }); break;
+  case dist_clip_sin: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
     float sgn = signum(in);
     if(std::fabs(in) > 2.0f / 3.0f) return sgn;
     return std::sin((in * 3.0f * pi32) / 4.0f); 
@@ -1496,22 +1499,19 @@ fx_engine::process_dist_mode(plugin_block& block,
   case dist_clip_exp: process_dist_mode_clip<Graph, Mode, true>(block, audio_in, modulation, [](float in, float exp) { 
     float sgn = signum(in);
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
-    return sgn * (1 - std::pow(std::fabs(1.5f * in - sgn), exp)); 
+    return sgn * (1.0f - std::pow(std::fabs(1.5f * in - sgn), exp));
   }); break;
   case dist_clip_cube: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
     float sgn = signum(in);
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
     return (9 * in * 0.25f) - (27 * in * in * in / 16.0f);
   }); break;
-  case dist_clip_inv: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
-    return in;
-  }); break;
   case dist_clip_tsq: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
     float sgn = signum(in);
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
-    if (-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2 * in;
-    float y = 2 - std::fabs(3 * in);
-    return sgn * (3 - y * y) / 3.0f;
+    if (-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2.0f * in;
+    float y = 2.0f - std::fabs(3.0f * in);
+    return sgn * (3.0f - y * y) / 3.0f;
   }); break;
   default: assert(false); break;
   }
