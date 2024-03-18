@@ -48,8 +48,8 @@ enum { dly_mode_fdbk, dly_mode_multi };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
-enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
+enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
 enum { section_main_top, section_main_bottom, section_svf_top, section_svf_bottom, 
   section_comb_top, section_comb_bottom, section_dist_top, section_dist_bottom, 
@@ -144,6 +144,9 @@ dist_clip_items()
   result.emplace_back("{E40AE5EA-2E84-436F-960E-2D8733F0AA42}", "Tanh");
   result.emplace_back("{BDBE513E-C0B4-4957-9FCC-00C3ED6D116E}", "Sin");
   result.emplace_back("{9D372B7F-F63F-418A-8FAC-48285E67D8D1}", "Exp");
+  result.emplace_back("{9F11465A-C46B-4157-BF6A-0135B3A530FA}", "TSQ");
+  result.emplace_back("{1D08261B-0980-41B5-955E-D0E093B6D5DA}", "Cube");
+  result.emplace_back("{0CC74F43-2741-4A60-B931-2F9B900A5BBA}", "Inv");
   return result;
 }
 
@@ -1479,14 +1482,35 @@ fx_engine::process_dist_mode(plugin_block& block,
   auto const& block_auto = block.state.own_block_automation;
   switch (block_auto[param_dist_clip][0].step())
   {
-  case dist_clip_tanh: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, 
-    [](float in, float exp) { return std::tanh(in); }); break;
-  case dist_clip_hard: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation,
-    [](float in, float exp) { return std::clamp(in, -1.0f, 1.0f); }); break;
-  case dist_clip_sin: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation,
-    [](float in, float exp) { return in < -2.0f/3.0f ? -1.0f : in > 2.0f / 3.0f ? 1.0f: std::sin((in * 3.0f * pi32) / 4.0f); }); break;
-  case dist_clip_exp: process_dist_mode_clip<Graph, Mode, true>(block, audio_in, modulation,
-    [](float in, float exp) { int sgn = signum(in); return in < -2.0f / 3.0f || in > 2.0f / 3.0f ? sgn: sgn * (1 - std::pow(std::fabs(1.5f * in - sgn), exp)); }); break;
+  case dist_clip_tanh: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+      return std::tanh(in); 
+  }); break;
+  case dist_clip_hard: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) { 
+    return std::clamp(in, -1.0f, 1.0f); 
+  }); break;
+  case dist_clip_sin: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) { 
+    float sgn = signum(in);
+    if(std::fabs(in) > 2.0f / 3.0f) return sgn;
+    return std::sin((in * 3.0f * pi32) / 4.0f); 
+  }); break;
+  case dist_clip_exp: process_dist_mode_clip<Graph, Mode, true>(block, audio_in, modulation, [](float in, float exp) { 
+    float sgn = signum(in);
+    if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+    return sgn * (1 - std::pow(std::fabs(1.5f * in - sgn), exp)); 
+  }); break;
+  case dist_clip_tsq: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) { 
+    float sgn = signum(in);
+    if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+    if(-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2 * in;
+    float y = 2 - std::fabs(3 * in);
+    return sgn * (3 - y * y) / 3.0f;
+  }); break;
+  case dist_clip_cube: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+      return in;
+  }); break;
+  case dist_clip_inv: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+    return in;
+  }); break;
   default: assert(false); break;
   }
 }
