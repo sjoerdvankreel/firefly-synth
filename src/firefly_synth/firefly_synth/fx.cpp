@@ -1498,18 +1498,20 @@ fx_engine::process_dist_mode(plugin_block& block,
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
     return sgn * (1 - std::pow(std::fabs(1.5f * in - sgn), exp)); 
   }); break;
-  case dist_clip_tsq: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) { 
+  case dist_clip_cube: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
     float sgn = signum(in);
     if (std::fabs(in) > 2.0f / 3.0f) return sgn;
-    if(-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2 * in;
-    float y = 2 - std::fabs(3 * in);
-    return sgn * (3 - y * y) / 3.0f;
-  }); break;
-  case dist_clip_cube: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
-      return in;
+    return (9 * in * 0.25f) - (27 * in * in * in / 16.0f);
   }); break;
   case dist_clip_inv: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
     return in;
+  }); break;
+  case dist_clip_tsq: process_dist_mode_clip<Graph, Mode, false>(block, audio_in, modulation, [](float in, float exp) {
+    float sgn = signum(in);
+    if (std::fabs(in) > 2.0f / 3.0f) return sgn;
+    if (-1.0f / 3.0f < in && in < 1.0f / 3.0f) return 2 * in;
+    float y = 2 - std::fabs(3 * in);
+    return sgn * (3 - y * y) / 3.0f;
   }); break;
   default: assert(false); break;
   }
