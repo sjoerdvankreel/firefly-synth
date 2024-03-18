@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.3.1</title>
+<title>Firefly Synth 1.4.0</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.3.1</h1>
+<h1>Firefly Synth 1.4.0</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -2958,12 +2958,28 @@
 <td>Voice</td>
 <td>Automate</td>
 <td>Hard</td>
-<td>Tanh</td>
+<td>Inv</td>
 <td>Hard</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
+<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Clip Exp</td>
+<td>Distortion Bottom</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.1</td>
+<td>10.0</td>
+<td>1.0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Mix</td>
@@ -3489,12 +3505,28 @@
 <td>Block</td>
 <td>None</td>
 <td>Hard</td>
-<td>Tanh</td>
+<td>Inv</td>
 <td>Hard</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).</td>
+<td colspan='11' class='description'>Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Clip Exp</td>
+<td>Distortion Bottom</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.1</td>
+<td>10.0</td>
+<td>1.0</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Mix</td>

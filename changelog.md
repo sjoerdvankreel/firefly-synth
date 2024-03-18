@@ -1,3 +1,7 @@
+### March 18, 2024 - V1.4.0.
+
+- Add some soft clippers.
+
 ### March 15, 2024 - V1.3.1.
 
 - Add some themes (just basic color schemes).
