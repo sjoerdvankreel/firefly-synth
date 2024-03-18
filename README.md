@@ -98,6 +98,7 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
 - Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
 - Contains a verbatim implementation of [Moorer's DSF algorithm as described by Burkhard Reike](https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html).
+- Contains soft clippers from [https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf](https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf).
 
 # Screenshot FX version
 
