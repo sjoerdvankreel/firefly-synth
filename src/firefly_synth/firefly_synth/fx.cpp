@@ -46,9 +46,9 @@ static float const reverb_comb_length[reverb_comb_count] = {
 
 enum { dly_mode_fdbk, dly_mode_multi };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
-enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
+enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
 enum { section_main_top, section_main_bottom, section_svf_top, section_svf_bottom, 
@@ -143,6 +143,7 @@ dist_clip_items()
   result.emplace_back("{FAE2F1EB-248D-4BA2-A008-07C2CD56EB71}", "Hard");
   result.emplace_back("{E40AE5EA-2E84-436F-960E-2D8733F0AA42}", "Tanh");
   result.emplace_back("{BDBE513E-C0B4-4957-9FCC-00C3ED6D116E}", "Sin");
+  result.emplace_back("{9D372B7F-F63F-418A-8FAC-48285E67D8D1}", "Exp");
   return result;
 }
 
@@ -1477,6 +1478,8 @@ fx_engine::process_dist_mode(plugin_block& block,
     [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
   case dist_clip_sin: process_dist_mode_clip<Graph, Mode>(block, audio_in, modulation, 
     [](float in) { return in < -2.0f/3.0f ? -1.0f : in > 2.0f / 3.0f ? 1.0f: std::sin((in * 3.0f * pi32) / 4.0f); }); break;
+  case dist_clip_exp: process_dist_mode_clip<Graph, Mode>(block, audio_in, modulation,
+    [](float in) { int sgn = signum(in); return in < -2.0f / 3.0f || in > 2.0f / 3.0f ? sgn: sgn * (1 - std::pow(std::fabs(1.5f * in - sgn), 2.0f)); }); break;
   default: assert(false); break;
   }
 }
