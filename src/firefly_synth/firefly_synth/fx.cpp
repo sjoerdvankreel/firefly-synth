@@ -45,8 +45,8 @@ static float const reverb_comb_length[reverb_comb_count] = {
   1422.0f / 44100.0f, 1491.0f / 44100.0f, 1557.0f / 44100.0f, 1617.0f / 44100.0f };
 
 enum { dly_mode_fdbk, dly_mode_multi };
-enum { dist_clip_hard, dist_clip_tanh };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
+enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin };
 enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
@@ -142,6 +142,7 @@ dist_clip_items()
   std::vector<list_item> result;
   result.emplace_back("{FAE2F1EB-248D-4BA2-A008-07C2CD56EB71}", "Hard");
   result.emplace_back("{E40AE5EA-2E84-436F-960E-2D8733F0AA42}", "Tanh");
+  result.emplace_back("{BDBE513E-C0B4-4957-9FCC-00C3ED6D116E}", "Sin");
   return result;
 }
 
@@ -797,7 +798,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_bottom, gui_edit_type::autofit_list, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or soft-clipping (tanh).";
+  dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.";
   auto& dist_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", true, "Dist Mix", "Mix", "Dst Mix", param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
@@ -1462,6 +1463,7 @@ fx_engine::process_dist(plugin_block& block,
   }
 }
 
+// https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf
 template <bool Graph, int Mode> void
 fx_engine::process_dist_mode(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
@@ -1469,8 +1471,12 @@ fx_engine::process_dist_mode(plugin_block& block,
   auto const& block_auto = block.state.own_block_automation;
   switch (block_auto[param_dist_clip][0].step())
   {
-  case dist_clip_tanh: process_dist_mode_clip<Graph, Mode>(block, audio_in, modulation, [](float in) { return std::tanh(in); }); break;
-  case dist_clip_hard: process_dist_mode_clip<Graph, Mode>(block, audio_in, modulation, [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
+  case dist_clip_tanh: process_dist_mode_clip<Graph, Mode>(block, audio_in, modulation, 
+    [](float in) { return std::tanh(in); }); break;
+  case dist_clip_hard: process_dist_mode_clip<Graph, Mode>(block, audio_in, modulation, 
+    [](float in) { return std::clamp(in, -1.0f, 1.0f); }); break;
+  case dist_clip_sin: process_dist_mode_clip<Graph, Mode>(block, audio_in, modulation, 
+    [](float in) { return in < -2.0f/3.0f ? -1.0f : in > 2.0f / 3.0f ? 1.0f: std::sin((in * 3.0f * pi32) / 4.0f); }); break;
   default: assert(false); break;
   }
 }
