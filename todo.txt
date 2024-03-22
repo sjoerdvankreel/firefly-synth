@@ -32,6 +32,7 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 
 v1.5:
 more undo
+undo is broken (undo 1 pops back all undo history)
 smooth noise osci ?
 folder-organize the presets
 do visual am/fm demo
