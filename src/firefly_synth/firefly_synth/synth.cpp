@@ -342,7 +342,7 @@ synth_topo(bool is_fx)
   }
   else
   {
-    result->type = plugin_type::synth;
+    result->type = plugin_type::synth; 
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
 
