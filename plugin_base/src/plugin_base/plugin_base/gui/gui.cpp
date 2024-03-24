@@ -201,11 +201,37 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
     redo_menu.addItem(i + 1000 + 1, redo_stack[i]);
   menu.addSubMenu("Redo", redo_menu);
 
+  menu.addItem(2001, "Copy Patch");
+  menu.addItem(2002, "Paste Patch");
+
   menu.showMenuAsync(options, [this](int result) {
     if(1 <= result && result < 1000)
       _gui->gui_state()->undo(result - 1);
     else if(1001 <= result && result < 2000)
       _gui->gui_state()->redo(result - 1001);
+    else if (2001 == result)
+    {
+      auto state = plugin_io_save_state(*_gui->gui_state());
+      state.push_back('\0');
+      juce::SystemClipboard::copyTextToClipboard(juce::String(state.data()));
+    }
+    else if (2002 == result)
+    {
+      plugin_state new_state(&_gui->gui_state()->desc(), false);
+      auto clip_contents = juce::SystemClipboard::getTextFromClipboard().toStdString();
+      std::vector<char> clip_data(clip_contents.begin(), clip_contents.end());
+      auto load_result = plugin_io_load_state(clip_data, new_state);
+      if (load_result.ok() && !load_result.warnings.size())
+        _gui->gui_state()->copy_from(new_state.state());
+      else
+      {
+        std::string message = "Clipboard does not contain valid patch data.";
+        auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::WarningIcon, "Error", message, String());
+        options = options.withAssociatedComponent(_gui->getChildComponent(0));
+        AlertWindow::showAsync(options, nullptr);
+        return;
+      }
+    }
   });
 }
 

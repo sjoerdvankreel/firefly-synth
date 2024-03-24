@@ -4,6 +4,7 @@
 - Add system DPI awareness.
 - Increase undo history size.
 - Organize presets in folders.
+- Copy/paste patch from system clipboard.
 
 ### March 18, 2024 - V1.4.0.
 
