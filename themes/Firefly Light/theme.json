@@ -35,8 +35,8 @@
       "graph_grid": "40FFFFFF",
       "graph_text": "C0FFFFFF",
       "graph_background": "FF000000",
-      "graph_area": "80FF8844",
-      "graph_line": "FFFF8844",
+      "graph_area": "80FF6633",
+      "graph_line": "FFFF6633",
       "bubble_outline": "FFFF8844",
       "knob_thumb": "FFFF8844",
       "knob_track1": "FF222222",
@@ -90,8 +90,8 @@
         "control_tick": "FFFF4488",
         "bubble_outline": "FFFF4488",
         "scrollbar_thumb": "FFFF4488",
-        "graph_area": "80FF4488",
-        "graph_line": "FFFF4488",
+        "graph_area": "80FF66CC",
+        "graph_line": "FFFF66CC",
         "table_header": "FFC43468",
         "section_outline1": "FF7F3366"
       }
@@ -107,8 +107,8 @@
         "control_tick": "FF4488FF",
         "bubble_outline": "FF4488FF",
         "scrollbar_thumb": "FF4488FF",
-        "graph_area": "804488FF",
-        "graph_line": "FF4488FF",
+        "graph_area": "8066CCFF",
+        "graph_line": "FF66CCFF",
         "table_header": "FF3468C4",
         "section_outline1": "FF33667F"
       }
@@ -124,8 +124,8 @@
         "control_tick": "FFFF8844",
         "bubble_outline": "FFFF8844",
         "scrollbar_thumb": "FFFF8844",
-        "graph_area": "80FF8844",
-        "graph_line": "FFFF8844",
+        "graph_area": "80FFCC66",
+        "graph_line": "FFFFCC66",
         "table_header": "FFC46834",
         "section_outline1": "FF7F6633"
       }
@@ -141,8 +141,8 @@
         "control_tick": "FF8888FF",
         "bubble_outline": "FF8888FF",
         "scrollbar_thumb": "FF8888FF",
-        "graph_area": "808888FF",
-        "graph_line": "FF8888FF",
+        "graph_area": "80CCCCFF",
+        "graph_line": "FFCCCCFF",
         "table_header": "FF6868C4",
         "section_outline1": "FF66667F"
       }
