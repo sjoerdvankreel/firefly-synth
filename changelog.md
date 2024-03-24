@@ -1,3 +1,7 @@
+### ?, ? - V1.4.1.
+
+- Increase undo history size.
+
 ### March 18, 2024 - V1.4.0.
 
 - Add some soft clippers.

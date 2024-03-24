@@ -37,8 +37,6 @@ public:
 };
 
 class plugin_state final {
-  static inline int const max_undo_size = 20;
-
   int _undo_region = 0;
   int _undo_position = 0;
   bool const _notify = {};

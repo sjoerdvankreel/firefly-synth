@@ -31,8 +31,7 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 v1.5:
-more undo
-undo is broken (undo 1 pops back all undo history)
+undo is broken (undo 1 pops back all undo history) ?
 folder-organize the presets
 do visual am/fm demo
 implement DPI awareness
