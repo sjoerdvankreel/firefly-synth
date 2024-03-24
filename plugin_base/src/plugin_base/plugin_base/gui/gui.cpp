@@ -201,11 +201,41 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
     redo_menu.addItem(i + 1000 + 1, redo_stack[i]);
   menu.addSubMenu("Redo", redo_menu);
 
+  menu.addItem(2001, "Copy Patch");
+  menu.addItem(2002, "Paste Patch");
+
   menu.showMenuAsync(options, [this](int result) {
     if(1 <= result && result < 1000)
       _gui->gui_state()->undo(result - 1);
     else if(1001 <= result && result < 2000)
       _gui->gui_state()->redo(result - 1001);
+    else if (2001 == result)
+    {
+      auto state = plugin_io_save_state(*_gui->gui_state());
+      state.push_back('\0');
+      juce::SystemClipboard::copyTextToClipboard(juce::String(state.data()));
+    }
+    else if (2002 == result)
+    {
+      plugin_state new_state(&_gui->gui_state()->desc(), false);
+      auto clip_contents = juce::SystemClipboard::getTextFromClipboard().toStdString();
+      std::vector<char> clip_data(clip_contents.begin(), clip_contents.end());
+      auto load_result = plugin_io_load_state(clip_data, new_state);
+      if (load_result.ok() && !load_result.warnings.size())
+      {
+        _gui->gui_state()->begin_undo_region();
+        _gui->gui_state()->copy_from(new_state.state());
+        _gui->gui_state()->end_undo_region("Paste", "Patch");
+      }
+      else
+      {
+        std::string message = "Clipboard does not contain valid patch data.";
+        auto options = MessageBoxOptions::makeOptionsOk(MessageBoxIconType::WarningIcon, "Error", message, String());
+        options = options.withAssociatedComponent(_gui->getChildComponent(0));
+        AlertWindow::showAsync(options, nullptr);
+        return;
+      }
+    }
   });
 }
 
@@ -350,8 +380,9 @@ plugin_gui::theme_changed(std::string const& theme_name)
   int default_width = _lnf->theme_settings().get_default_width(is_fx);
   float ratio = _lnf->theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->theme_settings().get_aspect_ratio_width(is_fx);
   getChildComponent(0)->setSize(default_width, default_width * ratio);
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, default_width,
-    (int)(default_width * _lnf->theme_settings().min_scale), (int)(default_width * _lnf->theme_settings().max_scale));
+  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+    _lnf->theme_settings().min_scale, _lnf->theme_settings().max_scale);
+  float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, w * ratio);
   resized();
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
@@ -499,14 +530,22 @@ plugin_gui::make_component(U&&... args)
   return *result;
 }
 
+void 
+plugin_gui::set_system_dpi_scale(float scale)
+{
+  float factor = scale / _system_dpi_scale;
+  _system_dpi_scale = scale;
+  setSize(getLocalBounds().getWidth() * factor, getLocalBounds().getHeight() * factor);
+}
+
 void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
-  float scale = w / _lnf->theme_settings().get_default_width(is_fx);
-  getChildComponent(0)->setTransform(AffineTransform::scale(scale));
-  user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
+  float user_scale = (w / _lnf->theme_settings().get_default_width(is_fx)) / _system_dpi_scale;
+  getChildComponent(0)->setTransform(AffineTransform::scale(user_scale * _system_dpi_scale));
+  user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_scale_key, user_scale);
 }
 
 graph_engine* 
@@ -544,8 +583,9 @@ plugin_gui::reloaded()
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   int default_width = settings.get_default_width(is_fx);
   float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, settings.get_default_width(is_fx),
-    (int)(default_width * settings.min_scale), (int)(default_width * settings.max_scale));
+  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+    settings.min_scale, settings.max_scale);
+  float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, (int)(w * ratio));
 }
 

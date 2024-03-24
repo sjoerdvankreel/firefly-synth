@@ -97,17 +97,20 @@ public:
 
 // button that opens a popupmenu
 // basically a combobox that shows a fixed button text
+struct menu_button_item { std::string name; std::string group; };
 class menu_button :
 public text_button
 {
   int _selected_index = -1;
-  std::vector<std::string> _items;
+  // popup filled by processing these in order
+  // should be sorted by group, empty group means no submenu
+  std::vector<menu_button_item> _items;
 protected:
   void clicked() override;
-public:
-  std::function<void(int)> selected_index_changed;
-  std::vector<std::string> const& get_items() const { return _items; }
-  void set_items(std::vector<std::string> const& items) { _items = items; }
+  std::function<void(int)> _selected_index_changed;
+public:  
+  std::vector<menu_button_item> const& get_items() const { return _items; }
+  void set_items(std::vector<menu_button_item> const& items) { _items = items; }
   void set_selected_index(int index) { _selected_index = std::clamp(index, 0, (int)_items.size() - 1); }
 };
 

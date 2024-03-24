@@ -73,7 +73,7 @@ plugin_state::undo_stack()
   assert(0 < _undo_position && _undo_position <= _undo_entries.size());
   std::vector<std::string> result;
   for(int i = _undo_position - 1; i >= 0; i--)
-    result.push_back(_undo_entries[i]->action + " " + _undo_entries[i]->item);
+    result.push_back(std::to_string(i + 1) + ": " +  _undo_entries[i]->action + " " + _undo_entries[i]->item);
   return result;
 }
 
@@ -84,7 +84,7 @@ plugin_state::redo_stack()
   assert(0 <= _undo_position && _undo_position < _undo_entries.size());
   std::vector<std::string> result;
   for(int i = _undo_position; i < _undo_entries.size(); i++)
-    result.push_back(_undo_entries[i]->action + " " + _undo_entries[i]->item);
+    result.push_back(std::to_string(i + 1) + ": " + _undo_entries[i]->action + " " + _undo_entries[i]->item);
   return result;
 }
 
@@ -126,6 +126,7 @@ plugin_state::begin_undo_region()
 void 
 plugin_state::end_undo_region(std::string const& action, std::string const& item)
 {
+  int const max_undo_size = 32;
   assert(_undo_region > 0);
   _undo_region--;
   if(_undo_region != 0) return;

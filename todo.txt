@@ -7,8 +7,9 @@ check if need update github social preview
 drop all conversion code on breaking plugin id
 dont forget to update the version nr in code and cmake
 
-always:
-keep cpu/mem profiling
+sometimes:
+update hosts
+cpu/mem profiling
 
 someday:
 mseg
@@ -31,23 +32,15 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 v1.5:
-more undo
-undo is broken (undo 1 pops back all undo history)
-smooth noise osci ?
-folder-organize the presets
 do visual am/fm demo
-implement DPI awareness
-fix clap resizing
-move route up/down
-copy voice<->global
-do copy/paste patch through clipboard
 bug: preset select jumps back to previous
-do async clear delay lines etc on patch select
 do forward compat checks - dont load newer versions
 automate zip/dist
+do async clear delay lines etc on patch select -> 
+  idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:
+  add a hidden readonly int parameter acting as a random token and flush stuff on the dsp side when it changes?
 
 other:
-update the hosts
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
 do indexed release schema + regular backwards compat

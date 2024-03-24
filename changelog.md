@@ -1,3 +1,12 @@
+### March 24, 2024 - V1.4.1.
+
+- Add some color schemes.
+- Add version info to gui.
+- Add system DPI awareness.
+- Increase undo history size.
+- Organize presets in folders.
+- Copy/paste patch from system clipboard.
+
 ### March 18, 2024 - V1.4.0.
 
 - Add some soft clippers.

@@ -84,6 +84,7 @@ public:
   void guiDestroy() noexcept override;
   bool guiSetParent(clap_window const* window) noexcept override;
   bool guiCreate(char const* api, bool is_floating) noexcept override;
+  bool guiSetScale(double scale) noexcept override;
   bool guiSetSize(uint32_t width, uint32_t height) noexcept override;
   bool guiGetSize(uint32_t* width, uint32_t* height) noexcept override;
   bool guiAdjustSize(uint32_t* width, uint32_t* height) noexcept override;
@@ -116,6 +117,7 @@ public:
   void any_state_changed(int index, plain_value plain) override { param_state_changed(index, plain); }
   void gui_param_changing(int index, plain_value plain) override { param_state_changed(index, plain); }
 
+  std::string format_name() const override { return "CLAP"; }
   std::unique_ptr<host_menu> context_menu(int param_id) const override;
   std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
   { return binary_path.parent_path(); }

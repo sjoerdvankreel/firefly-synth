@@ -23,6 +23,16 @@ pb_editor::getSize(ViewRect* new_size)
 }
 
 tresult PLUGIN_API
+pb_editor::setContentScaleFactor(ScaleFactor factor)
+{
+  ViewRect new_size;
+  _gui->set_system_dpi_scale(factor);
+  getSize(&new_size);
+  if(plugFrame) plugFrame->resizeView(this, &new_size);
+  return kResultTrue;
+}
+
+tresult PLUGIN_API
 pb_editor::onSize(ViewRect* new_size)
 {
   checkSizeConstraint(new_size);
@@ -37,8 +47,8 @@ pb_editor::checkSizeConstraint(ViewRect* new_size)
   auto settings = _gui->get_lnf()->theme_settings();
   auto const& topo = *_controller->gui_state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
-  int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale);
-  int max_width = (int)(settings.get_default_width(is_fx) * settings.max_scale);
+  int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale * _gui->get_system_dpi_scale());
+  int max_width = (int)(settings.get_default_width(is_fx) * settings.max_scale * _gui->get_system_dpi_scale());
   int new_width = std::clamp((int)new_size->getWidth(), min_width, max_width);
   new_size->right = new_size->left + new_width;
   new_size->bottom = new_size->top + (new_width * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx));
@@ -99,6 +109,7 @@ pb_editor::queryInterface(TUID const iid, void** obj)
 #if (defined __linux__) || (defined  __FreeBSD__)
   QUERY_INTERFACE(iid, obj, Steinberg::Linux::IEventHandler::iid, Steinberg::Linux::IEventHandler)
 #endif
+  QUERY_INTERFACE(iid, obj, Steinberg::IPlugViewContentScaleSupport::iid, Steinberg::IPlugViewContentScaleSupport);
   return EditorView::queryInterface(iid, obj);
 }
 

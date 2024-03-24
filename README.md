@@ -12,7 +12,7 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 See below for some built-in themes.
 
-![Screenshot](static/screenshot.png)
+![Screenshot](static/screenshot_firefly_dark.png)
 
 <table>
   <tr>
@@ -64,10 +64,10 @@ Presets:
 - All other hosts, you'll just have to try and see.
 
 # Download and install
-- Windows VST3:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.0_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.0_windows_vst3.zip)
-- Windows VST3 Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.0_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.0_windows_vst3.zip)
-- Windows CLAP:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.0_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.0_windows_clap.zip)
-- Windows CLAP Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.0_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.0_windows_clap.zip)
+- Windows VST3:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.1_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.1_windows_vst3.zip)
+- Windows VST3 Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.1_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.1_windows_vst3.zip)
+- Windows CLAP:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.1_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.4.1_windows_clap.zip)
+- Windows CLAP Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.1_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.4.1_windows_clap.zip)
 
 Extract the zipped folder and copy it (the entire folder, not just the .dll/.so!) to your default VST3/CLAP folder. On Windows, this is "C:\Program Files\Common Files\\[VST3/CLAP]".
 
@@ -103,24 +103,39 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 
 # Screenshot FX version
 
-![Screenshot](static/screenshot_fx.png)
+![Screenshot](static/screenshot_fx_firefly_dark.png)
 
 # Themes
 
 <table>
   <tr>
-    <td><img src="static/screenshot_flat.png"/></td>
-    <td><img src="static/screenshot_infernal.png"/></td>
+    <td><img src="static/screenshot_firefly_dark.png"/></td>
+    <td><img src="static/screenshot_firefly_light.png"/></td>
+    <td><img src="static/screenshot_firefly_flat.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_infernal_dark.png"/></td>
+    <td><img src="static/screenshot_infernal_light.png"/></td>
     <td><img src="static/screenshot_infernal_flat.png"/></td>
   </tr>
   <tr>
-    <td><img src="static/screenshot_cyan.png"/></td>
-    <td><img src="static/screenshot_orange.png"/></td>
-    <td><img src="static/screenshot_cool_blue.png"/></td>
+    <td><img src="static/screenshot_mauve_dark.png"/></td>
+    <td><img src="static/screenshot_mauve_light.png"/></td>
+    <td><img src="static/screenshot_mauve_flat.png"/></td>
   </tr>
   <tr>
+    <td><img src="static/screenshot_cyan_dark.png"/></td>
+    <td><img src="static/screenshot_cyan_light.png"/></td>
     <td><img src="static/screenshot_cyan_flat.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_orange_dark.png"/></td>
+    <td><img src="static/screenshot_orange_light.png"/></td>
     <td><img src="static/screenshot_orange_flat.png"/></td>
+  </tr>
+  <tr>
+    <td><img src="static/screenshot_cool_blue_dark.png"/></td>
+    <td><img src="static/screenshot_cool_blue_light.png"/></td>
     <td><img src="static/screenshot_cool_blue_flat.png"/></td>
   </tr>
 </table>

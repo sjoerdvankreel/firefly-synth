@@ -24,7 +24,7 @@ enum class gui_hover_type { param, module, custom };
 
 // saved gui stuff
 inline std::string const extra_state_tab_index = "tab";
-inline std::string const user_state_width_key = "width";
+inline std::string const user_state_scale_key = "scale";
 inline std::string const user_state_theme_key = "theme";
 
 // for serialization
@@ -157,6 +157,9 @@ public:
   void param_changing(int index, plain_value plain);
   graph_engine* get_module_graph_engine(module_topo const& module);
 
+  void set_system_dpi_scale(float scale);
+  float get_system_dpi_scale() const { return _system_dpi_scale; }
+
   lnf const* get_lnf() const { return _lnf.get(); }
   plugin_state* gui_state() const { return _gui_state; }
   extra_state* extra_state_() const { return _extra_state; }
@@ -170,6 +173,8 @@ public:
   void add_tab_selection_listener(gui_tab_selection_listener* listener) { _tab_selection_listeners.push_back(listener); }
 
 private:
+
+  float _system_dpi_scale = 1.0f;
   std::unique_ptr<lnf> _lnf = {};
   plugin_state* const _gui_state;
   gui_undo_listener _undo_listener;

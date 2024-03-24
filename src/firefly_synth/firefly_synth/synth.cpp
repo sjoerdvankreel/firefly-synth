@@ -205,11 +205,17 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   auto colors = lnf->section_gui_colors("Title");
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
-  auto& grid = store_component<grid_component>(store, gui_dimension({ { 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
-  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, lnf->theme(), "header.png", RectanglePlacement::xRight), {0, 1});
-  auto& label = store_component<autofit_label>(store, lnf, name, true, 15);
-  label.setColour(Label::ColourIds::textColourId, colors.control_text);
-  grid.add(label, { 0, 0 });
+  auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
+  grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, lnf->theme(), "header.png", RectanglePlacement::xRight), { 0, 1, 2, 1 });
+  auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
+  title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
+  title_label.setJustificationType(Justification::centredLeft);
+  grid.add(title_label, { 0, 0, 1, 1 });
+  std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().config->format_name();
+  auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 10);
+  version_label.setJustificationType(Justification::centredLeft);
+  version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
+  grid.add(version_label, { 1, 0, 1, 1 });
   return grid;
 }
 
@@ -336,11 +342,11 @@ synth_topo(bool is_fx)
   }
   else
   {
-    result->type = plugin_type::synth;
+    result->type = plugin_type::synth; 
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
-
-  result->gui.default_theme = "Firefly";
+     
+  result->gui.default_theme = "Firefly Dark";   
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
   auto make_title_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {

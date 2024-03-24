@@ -65,18 +65,31 @@ void
 menu_button::clicked()
 {
   PopupMenu menu;
+  PopupMenu sub_menu;
+  PopupMenu* current_menu = &menu;
+  std::string current_group = "";
   menu.setLookAndFeel(&getLookAndFeel());
   for (int i = 0; i < _items.size(); i++)
-    menu.addItem(i + 1, _items[i], true, i == _selected_index);
+  {
+    if (_items[i].group != current_group)
+    {
+      sub_menu = PopupMenu();
+      current_menu = &sub_menu;
+      current_group = _items[i].group;
+    }
+    current_menu->addItem(i + 1, _items[i].name, true, i == _selected_index);
+    if(!_items[i].group.empty() && (i == _items.size() - 1 || _items[i].group != _items[i + 1].group))
+      menu.addSubMenu(_items[i].group, sub_menu, true);
+  }
   PopupMenu::Options options;
   options = options.withTargetComponent(this);
   menu.showMenuAsync(options, [this](int id) {
     int index = id - 1;
     if (index == _selected_index) return;
     _selected_index = index;
-    if (selected_index_changed != nullptr)
-      selected_index_changed(index);
-    });
+    if (_selected_index_changed != nullptr)
+      _selected_index_changed(index);
+  });
 }
 
 static std::string
@@ -164,13 +177,13 @@ preset_button::
 preset_button(plugin_gui* gui) :
 _gui(gui), _presets(gui->gui_state()->desc().presets())
 { 
-  set_items(vector_map(_presets, [](auto const& p) { return p.name; }));
+  set_items(vector_map(_presets, [](auto const& p) { return menu_button_item { p.name, p.group }; }));
   extra_state_changed();
   setButtonText("Preset");
   _gui->extra_state_()->add_listener(factory_preset_key, this);
-  selected_index_changed = [this](int index) {
+  _selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
-    _gui->extra_state_()->set_text(factory_preset_key, get_items()[index]);
+    _gui->extra_state_()->set_text(factory_preset_key, get_items()[index].name);
     _gui->load_patch(_presets[index].path, true);
   };
 }
@@ -179,9 +192,12 @@ void
 preset_button::extra_state_changed()
 {
   std::string selected_preset = _gui->extra_state_()->get_text(factory_preset_key, "");
-  auto iter = std::find(get_items().begin(), get_items().end(), selected_preset);
-  if (iter != get_items().end())
-    set_selected_index((int)(iter - get_items().begin()));
+  for(int i = 0; i < get_items().size(); i++)
+    if(get_items()[i].name == selected_preset)
+    {
+      set_selected_index(i);
+      break;
+    }
 }
 
 theme_button::
@@ -191,12 +207,12 @@ _gui(gui), _themes(gui->gui_state()->desc().themes())
   auto const& topo = *gui->gui_state()->desc().plugin;
   std::string default_theme = topo.gui.default_theme;
   std::string theme = user_io_load_list(topo, user_io::base, user_state_theme_key, default_theme, _themes);
-  set_items(_themes);
+  set_items(vector_map(_themes, [](auto const& t) { return menu_button_item { t, ""}; }));
   setButtonText("Theme");
   for(int i = 0; i < _themes.size(); i++)
     if(_themes[i] == theme)
       set_selected_index(i);
-  selected_index_changed = [this](int index) {
+  _selected_index_changed = [this](int index) {
     index = std::clamp(index, 0, (int)get_items().size());
     // DONT run synchronously because theme_changed will destroy [this]!
     user_io_save_list(*_gui->gui_state()->desc().plugin, user_io::base, user_state_theme_key, _themes[index]);
