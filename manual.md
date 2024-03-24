@@ -9,7 +9,7 @@ There is also an fx version which routes external input instead of voice output 
 ## UI
 A knob with a circle in it or a slider with a small dot in it means it can be modulated by the CV matrices.<br/>
 Hover over a parameter to see a more detailed description.<br/>
-It's fully resizable by scaling (by dragging the bottom right corner) and also reacts to OS DPI settings.
+It's fully resizable by scaling (by dragging the bottom right corner) and also reacts to system DPI settings.
 
 ## Theming
 
