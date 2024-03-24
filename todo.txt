@@ -32,7 +32,6 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 
 v1.5:
 undo is broken (undo 1 pops back all undo history) ?
-folder-organize the presets
 do visual am/fm demo
 implement DPI awareness
 fix clap resizing

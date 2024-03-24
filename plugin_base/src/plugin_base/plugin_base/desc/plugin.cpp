@@ -118,6 +118,7 @@ plugin(plugin), config(config)
 std::vector<std::string>
 plugin_desc::themes() const
 {
+  // expect theme folders directly in the "themes" folder
   std::vector<std::string> result;
   auto themes_folder = get_resource_location(config) / resource_folder_themes;
   for (auto const& entry : std::filesystem::directory_iterator{ themes_folder })
@@ -130,12 +131,19 @@ plugin_desc::themes() const
 std::vector<resource_item>
 plugin_desc::presets() const
 {
+  // expect preset files nested 1 level deep, subfolders act as grouping
   std::vector<resource_item> result;
   auto preset_folder = get_resource_location(config) / resource_folder_presets;
-  for (auto const& entry : std::filesystem::directory_iterator{ preset_folder })
-    if (entry.is_regular_file() && entry.path().extension().string() == std::string(".") + plugin->extension)
-      result.push_back({ entry.path().stem().string(), entry.path().string() });
-  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { return l.name < r.name; });
+  for (auto const& group_entry : std::filesystem::directory_iterator{ preset_folder })
+    if(group_entry.is_directory())
+      for (auto const& entry : std::filesystem::directory_iterator{ group_entry.path()})
+        if (entry.is_regular_file() && entry.path().extension().string() == std::string(".") + plugin->extension)
+          result.push_back({ entry.path().stem().string(), entry.path().string(), group_entry.path().filename().string() });
+  std::sort(result.begin(), result.end(), [](auto const& l, auto const& r) { 
+    if(l.group < r.group) return true;
+    if(r.group < l.group) return false;
+    return l.name < r.name; 
+  });
   return result;
 }
 

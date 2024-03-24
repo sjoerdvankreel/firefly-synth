@@ -9,12 +9,12 @@
 
 namespace plugin_base {
 
-// from resources folder
-// used for presets and themes
+// from resources folder, used for presets
 struct resource_item
 {
   std::string name;
   std::string path;
+  std::string group;
 };
 
 enum { 
