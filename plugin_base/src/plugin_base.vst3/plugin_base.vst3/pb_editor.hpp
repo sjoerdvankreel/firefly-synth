@@ -4,12 +4,15 @@
 #include <plugin_base.vst3/pb_controller.hpp>
 
 #include <public.sdk/source/vst/vsteditcontroller.h>
+#include <pluginterfaces/gui/iplugviewcontentscalesupport.h>
+
 #include <utility>
 
 namespace plugin_base::vst3 {
 
 class pb_editor final:
-public Steinberg::Vst::EditorView
+public Steinberg::Vst::EditorView,
+public Steinberg::IPlugViewContentScaleSupport
 #if (defined __linux__) || (defined  __FreeBSD__)
 , public Steinberg::Linux::IEventHandler
 #endif
@@ -27,6 +30,7 @@ public:
   Steinberg::tresult PLUGIN_API removed() override;
   Steinberg::tresult PLUGIN_API onSize(Steinberg::ViewRect* new_size) override;
   Steinberg::tresult PLUGIN_API getSize(Steinberg::ViewRect* new_size) override;
+  Steinberg::tresult PLUGIN_API setContentScaleFactor(ScaleFactor factor) override;
   Steinberg::tresult PLUGIN_API checkSizeConstraint(Steinberg::ViewRect* rect) override;
   Steinberg::tresult PLUGIN_API attached(void* parent, Steinberg::FIDString type) override;
   Steinberg::tresult PLUGIN_API isPlatformTypeSupported(Steinberg::FIDString type) override;

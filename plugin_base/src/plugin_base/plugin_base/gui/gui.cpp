@@ -350,8 +350,9 @@ plugin_gui::theme_changed(std::string const& theme_name)
   int default_width = _lnf->theme_settings().get_default_width(is_fx);
   float ratio = _lnf->theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->theme_settings().get_aspect_ratio_width(is_fx);
   getChildComponent(0)->setSize(default_width, default_width * ratio);
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, default_width,
-    (int)(default_width * _lnf->theme_settings().min_scale), (int)(default_width * _lnf->theme_settings().max_scale));
+  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+    _lnf->theme_settings().min_scale, _lnf->theme_settings().max_scale);
+  float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, w * ratio);
   resized();
   _tooltip = std::make_unique<TooltipWindow>(getChildComponent(0));
@@ -499,14 +500,22 @@ plugin_gui::make_component(U&&... args)
   return *result;
 }
 
+void 
+plugin_gui::set_system_dpi_scale(float scale)
+{
+  float factor = scale / _system_dpi_scale;
+  _system_dpi_scale = scale;
+  setSize(getLocalBounds().getWidth() * factor, getLocalBounds().getHeight() * factor);
+}
+
 void
 plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
-  float scale = w / _lnf->theme_settings().get_default_width(is_fx);
-  getChildComponent(0)->setTransform(AffineTransform::scale(scale));
-  user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_width_key, w);
+  float user_scale = (w / _lnf->theme_settings().get_default_width(is_fx)) / _system_dpi_scale;
+  getChildComponent(0)->setTransform(AffineTransform::scale(user_scale * _system_dpi_scale));
+  user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_scale_key, user_scale);
 }
 
 graph_engine* 
@@ -544,8 +553,9 @@ plugin_gui::reloaded()
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   int default_width = settings.get_default_width(is_fx);
   float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
-  float w = user_io_load_num(topo, user_io::base, user_state_width_key, settings.get_default_width(is_fx),
-    (int)(default_width * settings.min_scale), (int)(default_width * settings.max_scale));
+  float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
+    settings.min_scale, settings.max_scale);
+  float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, (int)(w * ratio));
 }
 

@@ -1,5 +1,6 @@
 ### ?, ? - V1.4.1.
 
+- Add system DPI awareness.
 - Increase undo history size.
 - Organize presets in folders.
 
