@@ -218,6 +218,7 @@ bool
 pb_plugin::guiSetScale(double scale) noexcept
 {
   _gui->set_system_dpi_scale(scale);
+  _host.guiRequestResize(_gui->getWidth(), _gui->getHeight());
   return true;
 }
 
