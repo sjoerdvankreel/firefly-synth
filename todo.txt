@@ -36,7 +36,6 @@ linux test
 
 v1.5:
 do visual am/fm demo
-move route up/down
 copy voice<->global
 do copy/paste patch through clipboard
 bug: preset select jumps back to previous
