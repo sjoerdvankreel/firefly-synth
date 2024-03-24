@@ -1,5 +1,6 @@
 ### ?, ? - V1.4.1.
 
+- Add some color schemes.
 - Add version info to gui.
 - Add system DPI awareness.
 - Increase undo history size.
