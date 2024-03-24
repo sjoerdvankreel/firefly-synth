@@ -123,7 +123,7 @@ plugin_engine::init_from_state(plugin_state const* state)
   _state.copy_from(state->state());
   mark_all_params_as_automated(true);
   init_automation_from_state();
-}     
+}      
 
 void
 plugin_engine::release_block()
