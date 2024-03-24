@@ -222,7 +222,11 @@ gui_undo_listener::mouseUp(MouseEvent const& event)
       std::vector<char> clip_data(clip_contents.begin(), clip_contents.end());
       auto load_result = plugin_io_load_state(clip_data, new_state);
       if (load_result.ok() && !load_result.warnings.size())
+      {
+        _gui->gui_state()->begin_undo_region();
         _gui->gui_state()->copy_from(new_state.state());
+        _gui->gui_state()->end_undo_region("Paste", "Patch");
+      }
       else
       {
         std::string message = "Clipboard does not contain valid patch data.";
