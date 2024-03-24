@@ -215,6 +215,13 @@ pb_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
 }
 
 bool
+pb_plugin::guiSetScale(double scale) noexcept
+{
+  _gui->set_system_dpi_scale(scale);
+  return true;
+}
+
+bool
 pb_plugin::guiSetSize(uint32_t width, uint32_t height) noexcept
 {
   guiAdjustSize(&width, &height);
