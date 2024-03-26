@@ -325,7 +325,7 @@ synth_topo(bool is_fx)
   auto result = std::make_unique<plugin_topo>();
   result->graph_polyphony = 1;
   result->audio_polyphony = 32 * 8; // TODO
-  result->sub_voice_counter = [](auto) { return 4; }; // TODO
+  result->sub_voice_counter = [](bool graph, plugin_state const& state) { return graph? 1: 4; }; // TODO
 
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";

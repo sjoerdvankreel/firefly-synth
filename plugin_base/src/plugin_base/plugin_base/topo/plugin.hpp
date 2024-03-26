@@ -25,7 +25,7 @@ struct plugin_topo_gui_theme_settings;
 enum class plugin_type { synth, fx };
 
 // global unison support
-typedef int (*sub_voice_counter_t)(plugin_state const& state);
+typedef int (*sub_voice_counter_t)(bool graph, plugin_state const& state);
 
 typedef std::function<juce::Component&(std::unique_ptr<juce::Component>&&)>
 component_store;

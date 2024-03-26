@@ -42,7 +42,11 @@ enum engine_voice_mode {
 // global plugin audio processor
 class plugin_engine final {
 
+  // if engine is for graph, 
+  // we can forego voice management and just set to 1
+  bool const _graph;
   int const _polyphony;
+
   plugin_dims const _dims;
   plugin_state _state = {};
   plugin_state _block_automation = {};
@@ -106,7 +110,7 @@ class plugin_engine final {
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);
   plugin_engine(
-    plugin_desc const* desc, int polyphony,
+    plugin_desc const* desc, bool graph,
     thread_pool_voice_processor voice_processor,
     void* voice_processor_context);
 
@@ -116,6 +120,7 @@ public:
     int start_frame, int end_frame);
   plugin_voice_block make_voice_block(
     int v, int release_frame, note_id id, 
+    int sub_voice_count, int sub_voice_index,
     int last_note_key, int last_note_channel);
 
   void deactivate();

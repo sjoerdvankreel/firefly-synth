@@ -22,7 +22,7 @@ struct mono_note_state
 
 // for polyphonic synth
 struct voice_state final {
-  note_id id = {};
+  note_id note_id_ = {};
   // for mono mode
   note_id release_id = {};
 

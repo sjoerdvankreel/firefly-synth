@@ -1288,7 +1288,9 @@ fx_engine::process_svf_mode(plugin_block& block,
   auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
   auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
-  int kbd_current = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.id.key;
+
+  // TODO take global uni into account for svf kbd track
+  int kbd_current = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {

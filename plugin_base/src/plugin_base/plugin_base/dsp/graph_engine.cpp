@@ -4,7 +4,7 @@ namespace plugin_base {
 
 graph_engine::
 graph_engine(plugin_desc const* desc, graph_engine_params const& params):
-_engine(desc, desc->plugin->graph_polyphony, nullptr, nullptr), _desc(desc), _params(params)
+_engine(desc, true, nullptr, nullptr), _desc(desc), _params(params)
 { 
   _engine.activate(_params.max_frame_count);
   _engine.init_bpm_automation(params.bpm);
@@ -79,7 +79,7 @@ graph_engine::process(int module_index, int module_slot, graph_processor process
     id.key = _params.midi_key;
     _engine.voice_block_params_snapshot(voice);
     _last_voice_block = std::make_unique<plugin_voice_block>(
-      _engine.make_voice_block(voice, _voice_release_at, id, -1, -1));
+      _engine.make_voice_block(voice, _voice_release_at, id, 1, 0, -1, -1));
     _last_block->voice = _last_voice_block.get();
     processor(*_last_block.get());
   }

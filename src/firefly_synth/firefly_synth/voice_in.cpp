@@ -61,9 +61,9 @@ over_items()
 class voice_in_engine :
 public module_engine {
   int _position = -1;
-  int _to_note = -1;
-  int _from_note = -1;
   int _porta_samples = -1;
+  float _to_note_pitch = -1;
+  float _from_note_pitch = -1;
   float _mono_porta_time = -1;
   int _mono_porta_samples = -1;
   
@@ -191,10 +191,12 @@ void
 voice_in_engine::reset(plugin_block const* block)
 {
   _position = 0;
-  _to_note = block->voice->state.id.key;
-  _from_note = block->voice->state.id.key;
-  if (block->voice->state.id.channel == block->voice->state.last_note_channel)
-    _from_note = block->voice->state.last_note_key;
+
+  // TODO global unison
+  _to_note_pitch = block->voice->state.note_id_.key;
+  _from_note_pitch = block->voice->state.note_id_.key;
+  if (block->voice->state.note_id_.channel == block->voice->state.last_note_channel)
+    _from_note_pitch = block->voice->state.last_note_key;
 
   auto const& block_auto = block->state.own_block_automation;
   int porta_mode = block_auto[param_porta][0].step();
@@ -206,16 +208,17 @@ voice_in_engine::reset(plugin_block const* block)
   {
   case porta_off: _porta_samples = 0; break;
   case porta_auto: _porta_samples = porta_time * block->sample_rate; break;
-  case porta_on: _porta_samples = porta_time * block->sample_rate * std::abs(_from_note - _to_note); break;
+  case porta_on: _porta_samples = porta_time * block->sample_rate * std::abs(_from_note_pitch - _to_note_pitch); break;
   default: assert(false); break;
   }
 
   // in monophonic mode we do not glide the first note in 
   // monophonic section. instead the first note is "plain"
   // and all subsequent notes in mono section apply portamento
+  // TODO global unison
   if(block_auto[param_mode][0].step() != engine_voice_mode_poly)
   {
-    _from_note = _to_note;
+    _from_note_pitch = _to_note_pitch;
     _mono_porta_time = porta_time;
     _mono_porta_samples = _porta_samples;
     _porta_samples = 0;
@@ -255,30 +258,33 @@ voice_in_engine::process(plugin_block& block)
           // pitch switch, will be picked up by the oscs
           _position = 0;
           _porta_samples = 0;
-          _to_note = block.state.mono_note_stream[f].midi_key;
-          _from_note = _to_note;
+          // TODO global unison ?
+          _to_note_pitch = block.state.mono_note_stream[f].midi_key;
+          _from_note_pitch = _to_note_pitch;
         }
         else 
         {
           // start a new porta section within the current voice
           _position = 0;
-          _from_note = _to_note;
-          _to_note = block.state.mono_note_stream[f].midi_key;
+          _from_note_pitch = _to_note_pitch;
+          _to_note_pitch = block.state.mono_note_stream[f].midi_key;
 
           // need to recalc total glide time
+          // TODO global unison ?
           if (porta_mode == porta_on)
-            _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note - _to_note);
+            _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note_pitch - _to_note_pitch);
           _porta_samples = _mono_porta_samples;
         }
       }
     }
 
+    // TODO global unison
     float porta_note = 0;
     float pb = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pb, pb_curve[f]);
     float cent = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_cent, cent_curve[f]);
     float pitch = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pitch, pitch_curve[f]);
-    if(_position == _porta_samples) porta_note = _to_note;
-    else porta_note = _from_note + (_position++ / (float)_porta_samples * (_to_note - _from_note));
+    if(_position == _porta_samples) porta_note = _to_note_pitch;
+    else porta_note = _from_note_pitch + (_position++ / (float)_porta_samples * (_to_note_pitch - _from_note_pitch));
     block.state.own_cv[output_pitch_offset][0][f] = (note + cent - midi_middle_c) + (porta_note - midi_middle_c) + pitch + pb * master_pb_range;
   }
 }
