@@ -63,21 +63,36 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
     result.engine_factory = [](auto const&, int, int) { 
       return std::make_unique<voice_audio_out_engine>(); };
 
+  int bal_row = 0;
+  int bal_col = 1;
+  int gain_row = 0;
+  int gain_col = 0;
+  double gain_default_ = 1.0;
+  gui_dimension dimension({ 1 }, { 1, 1 });
+  gui_edit_type edit_type = gui_edit_type::knob;
+  if (global)
+  {
+    bal_col = 0;
+    bal_row = 1;
+    gain_default_ = 0.33;
+    edit_type = gui_edit_type::hslider;
+    dimension = gui_dimension({ 1, 1 }, { 1 });
+  }
+
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1, 1 }))));
+    make_param_section_gui({ 0, 0 }, dimension)));
 
-  double default_ = global? 0.5: 1.0;
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info_basic("{2156DEE6-A147-4B93-AEF3-ABE69F53DBF9}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(default_, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 0 }, 
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(gain_default_, 0, true),
+    make_param_gui_single(section_main, edit_type, { gain_row, gain_col },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   gain.info.description = "Output gain.";
   auto& bal = result.params.emplace_back(make_param(
     make_topo_info("{7CCD4A32-FD84-402E-B099-BB94AAAD3C9E}", true, "Balance", "Bal", "Bal", param_bal, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 1 }, 
+    make_param_gui_single(section_main, edit_type, { bal_row, bal_col },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   bal.info.description = "Output stereo balance.";
 
