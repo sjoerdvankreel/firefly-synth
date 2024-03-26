@@ -77,7 +77,7 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
     gain_default_ = 0.33;
     edit_type = gui_edit_type::hslider;
     dimension = gui_dimension({ 1, 1 }, { 1 });
-  }
+  } 
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),

@@ -32,6 +32,8 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 v1.5:
+fix the other themes aspect ratio
+fix the fx aspect ratio height
 do visual am/fm demo
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
