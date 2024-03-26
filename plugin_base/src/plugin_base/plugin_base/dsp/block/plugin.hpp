@@ -25,6 +25,7 @@ struct voice_state final {
   note_id id = {};
   // for mono mode
   note_id release_id = {};
+
   int end_frame = -1;
   int start_frame = -1;
   int release_frame = -1;
@@ -35,6 +36,10 @@ struct voice_state final {
   // for portamento
   int last_note_key = -1;
   int last_note_channel = -1;
+
+  // for global unison
+  int sub_voice_count = -1;
+  int sub_voice_index = -1;
 };
 
 // single output module process call

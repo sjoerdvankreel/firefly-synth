@@ -96,7 +96,12 @@ class plugin_engine final {
   int find_best_voice_slot();
   void init_automation_from_state();
   void process_voices_single_threaded();
-  void activate_voice(note_event const& event, int slot, int frame_count);
+
+  // Subvoice stuff is for global unison support.
+  // In plugin_base we treat global unison voices just like regular polyphonic voices.
+  // Or in other words, a polyphonic voice is a global unison voice with subvoice count 1.
+  // Subvoice count and index should be used by the plugin to apply detuning etc.
+  void activate_voice(note_event const& event, int slot, int sub_voice_count, int sub_voice_index, int frame_count);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_engine);

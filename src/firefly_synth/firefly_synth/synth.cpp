@@ -320,9 +320,13 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 std::unique_ptr<plugin_topo>
 synth_topo(bool is_fx)
 {
+  // TODO global uni
+  
   auto result = std::make_unique<plugin_topo>();
   result->graph_polyphony = 1;
-  result->audio_polyphony = 32;
+  result->audio_polyphony = 32 * 8; // TODO
+  result->sub_voice_counter = [](auto) { return 4; }; // TODO
+
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
   result->version.major = FF_SYNTH_VERSION_MAJOR;

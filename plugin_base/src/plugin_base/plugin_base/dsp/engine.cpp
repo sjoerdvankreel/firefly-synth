@@ -462,7 +462,7 @@ plugin_engine::find_best_voice_slot()
 }
 
 void 
-plugin_engine::activate_voice(note_event const& event, int slot, int frame_count)
+plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_count, int sub_voice_index, int frame_count)
 {
   assert(slot >= 0);
   auto& state = _voice_states[slot];
@@ -698,13 +698,21 @@ plugin_engine::process()
 
     if(voice_mode == engine_voice_mode_poly)
     {
+      // figure out subvoice count for global unison
+      int sub_voice_count = 1;
+      if (topo.sub_voice_counter) sub_voice_count = topo.sub_voice_counter(_state);
+
       // poly mode: steal voices for incoming notes by age
       for (int e = 0; e < _host_block->events.notes.size(); e++)
       {
         auto const& event = _host_block->events.notes[e];
         if (event.type != note_event_type::on) continue;
-        int slot = find_best_voice_slot();
-        activate_voice(event, slot, frame_count);
+
+        for(int sv = 0; sv < sub_voice_count; sv++)
+        {
+          int slot = find_best_voice_slot();
+          activate_voice(event, slot, sub_voice_count, sv, frame_count);
+        }
          
         // for portamento
         _last_note_key = event.id.key;
@@ -717,6 +725,8 @@ plugin_engine::process()
       // release mono mode: recycle the first active but not releasing voice, or set up a new one
       // note: we do not account for triggering more than 1 voice per block
       // note: need to play *all* incoming notes into this voice
+      // note: subvoice/global uni does NOT apply to mono mode!
+      // because subvoices may have unequal length, then stuff becomes too complicated
 
       int first_note_on_index = -1;
       for(int e = 0; e < _host_block->events.notes.size(); e++)
@@ -745,7 +755,7 @@ plugin_engine::process()
           if(slot == -1)
           {
             slot = 0;
-            activate_voice(first_event, 0, frame_count);
+            activate_voice(first_event, 0, 1, 0, frame_count);
           }
           else 
           {
@@ -761,7 +771,7 @@ plugin_engine::process()
           if (slot == -1)
           {
             slot = find_best_voice_slot();
-            activate_voice(first_event, slot, frame_count);
+            activate_voice(first_event, slot, 1, 0, frame_count);
           }
           else
           {
