@@ -59,7 +59,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { { 2 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
+      make_module_gui(section, pos, { { 1, 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -141,7 +141,19 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_spread.info.description = "Global unison stereo spread.";
-  
+  auto& glob_uni_lfo_amt = result.params.emplace_back(make_param(
+    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Amount", "LFO Amt", "Uni LFO", param_glob_uni_lfo_amt, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 3 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_lfo_amt.info.description = "Global unison LFO offset amount.";
+  auto& glob_uni_env_amt = result.params.emplace_back(make_param(
+    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Envelope Amount", "Env Amt", "Uni Env", param_glob_uni_env_amt, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_env_amt.info.description = "Global unison envelope offset amount.";
+
   return result;
 }
 
