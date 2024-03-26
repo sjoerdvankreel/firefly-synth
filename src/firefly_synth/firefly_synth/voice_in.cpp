@@ -193,10 +193,21 @@ voice_in_engine::reset(plugin_block const* block)
   _position = 0;
 
   // TODO global unison
-  _to_note_pitch = block->voice->state.note_id_.key;
-  _from_note_pitch = block->voice->state.note_id_.key;
+  // TODO figure out where to apply the stereo spread
+  // TODO figure out where to apply the env/lfo mod
+  float glob_uni_detune = 0;
+  float glob_uni_detune_temp = 0.33f;
+  if (block->voice->state.sub_voice_count > 1)
+  {
+    // global unison detuning for this voice
+    float detune_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
+    glob_uni_detune = (detune_pos - 0.5f) * glob_uni_detune_temp;
+  }
+
+  _to_note_pitch = block->voice->state.note_id_.key + glob_uni_detune;
+  _from_note_pitch = block->voice->state.note_id_.key + glob_uni_detune;
   if (block->voice->state.note_id_.channel == block->voice->state.last_note_channel)
-    _from_note_pitch = block->voice->state.last_note_key;
+    _from_note_pitch = block->voice->state.last_note_key + glob_uni_detune;
 
   auto const& block_auto = block->state.own_block_automation;
   int porta_mode = block_auto[param_porta][0].step();
@@ -215,7 +226,7 @@ voice_in_engine::reset(plugin_block const* block)
   // in monophonic mode we do not glide the first note in 
   // monophonic section. instead the first note is "plain"
   // and all subsequent notes in mono section apply portamento
-  // TODO global unison
+  // TODO global unison ?
   if(block_auto[param_mode][0].step() != engine_voice_mode_poly)
   {
     _from_note_pitch = _to_note_pitch;
