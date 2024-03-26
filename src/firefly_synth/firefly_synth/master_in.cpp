@@ -129,7 +129,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_glob_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
-  auto& glob_uni_dtn = result.params.emplace_back(make_param( // TODO needs modulatable?
+  auto& glob_uni_dtn = result.params.emplace_back(make_param( // TODO needs modulatable? --> NO! we the first one in the chain.
     make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Detune", "Uni Dtn", param_glob_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 1 },
@@ -142,13 +142,13 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_spread.info.description = "Global unison stereo spread.";
   auto& glob_uni_lfo_amt = result.params.emplace_back(make_param(
-    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Amount", "LFO Amt", "Uni LFO", param_glob_uni_lfo_amt, 1),
+    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO", "LFO", "Uni LFO", param_glob_uni_lfo_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_lfo_amt.info.description = "Global unison LFO offset amount.";
   auto& glob_uni_env_amt = result.params.emplace_back(make_param(
-    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Envelope Amount", "Env Amt", "Uni Env", param_glob_uni_env_amt, 1),
+    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Envelope", "Env", "Uni Env", param_glob_uni_env_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.0, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
