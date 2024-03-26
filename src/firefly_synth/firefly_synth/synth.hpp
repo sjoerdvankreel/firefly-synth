@@ -31,7 +31,7 @@ struct oscillator_context
 };
 
 // for osc and voice in
-inline int const max_unison_voices = 8;
+inline int const max_osc_unison_voices = 8;
 
 // everybody needs these
 typedef plugin_base::jarray<plugin_base::jarray<

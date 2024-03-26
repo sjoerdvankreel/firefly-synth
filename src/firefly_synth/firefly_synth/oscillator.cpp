@@ -95,30 +95,30 @@ class osc_engine:
 public module_engine {
 
   // basic and dsf
-  float _ref_phases[max_unison_voices];
-  float _sync_phases[max_unison_voices];
+  float _ref_phases[max_osc_unison_voices];
+  float _sync_phases[max_osc_unison_voices];
   // for lerp hardsync
-  int _unsync_samples[max_unison_voices];
-  float _unsync_phases[max_unison_voices];
+  int _unsync_samples[max_osc_unison_voices];
+  float _unsync_phases[max_osc_unison_voices];
 
   // oversampler and pointers into upsampled buffers
   oscillator_context _context = {};
-  oversampler<max_unison_voices + 1> _oversampler;
+  oversampler<max_osc_unison_voices + 1> _oversampler;
 
   // random (static and k+s)
-  std::array<dc_filter, max_unison_voices> _random_dcs = {};
+  std::array<dc_filter, max_osc_unison_voices> _random_dcs = {};
 
   // static
-  std::array<static_noise, max_unison_voices> _static_noises = {};
-  std::array<state_var_filter, max_unison_voices> _static_svfs = {};
+  std::array<static_noise, max_osc_unison_voices> _static_noises = {};
+  std::array<state_var_filter, max_osc_unison_voices> _static_svfs = {};
 
   // kps
   int _kps_max_length = {};
   bool _kps_initialized = false;
-  std::array<int, max_unison_voices> _kps_freqs = {};
-  std::array<int, max_unison_voices> _kps_lengths = {};
-  std::array<int, max_unison_voices> _kps_positions = {};
-  std::array<std::vector<float>, max_unison_voices> _kps_lines = {};
+  std::array<int, max_osc_unison_voices> _kps_freqs = {};
+  std::array<int, max_osc_unison_voices> _kps_lengths = {};
+  std::array<int, max_osc_unison_voices> _kps_positions = {};
+  std::array<std::vector<float>, max_osc_unison_voices> _kps_lines = {};
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(osc_engine);
@@ -270,7 +270,7 @@ osc_topo(int section, gui_position const& pos)
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
-      make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_unison_voices)) }),
+      make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
     make_module_gui(section, pos, { { 1, 1 }, { gui_dimension::auto_size, 1 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
 
@@ -527,7 +527,7 @@ osc_topo(int section, gui_position const& pos)
     make_param_section_gui({ 1, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", true, "Unison Voices", "Unison", "Unison", param_uni_voices, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_unison_voices, 1, 0),
+    make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_osc_unison_voices, 1, 0),
     make_param_gui_single(section_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   uni_voices.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off; });
@@ -648,7 +648,7 @@ _oversampler(max_frame_count)
 {
   float const kps_min_freq = 20.0f;
   _kps_max_length = (int)(std::ceil(sample_rate / kps_min_freq));
-  for (int v = 0; v < max_unison_voices; v++)
+  for (int v = 0; v < max_osc_unison_voices; v++)
   {
     _kps_freqs[v] = 0;
     _kps_lengths[v] = -1;
@@ -727,7 +727,7 @@ osc_engine::init_kps(plugin_block& block, cv_audio_matrix_mixdown const* modulat
   case rand_svf_peq: filter.init_peq(w, kps_res * kps_max_res); break;
   default: assert(false); break;
   }
-  for (int v = 0; v < max_unison_voices; v++)
+  for (int v = 0; v < max_osc_unison_voices; v++)
   {
     // we fix length at first call to generate_kps
     _kps_freqs[v] = 0;
@@ -1005,7 +1005,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     fm_modulator_sig = &fm_modulator->modulate_fm<Graph>(block, block.module_slot, modulation);
   }
 
-  std::array<jarray<float, 2>*, max_unison_voices + 1> lanes;
+  std::array<jarray<float, 2>*, max_osc_unison_voices + 1> lanes;
   for(int v = 0; v < uni_voices + 1; v++)
     lanes[v] = &block.state.own_audio[0][v];
 

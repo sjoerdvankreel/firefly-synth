@@ -13,12 +13,18 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-int const aux_count = 5;
-int const max_ext_smoothing_ms = 1000;
+static int const aux_count = 5;
+static int const max_global_uni_voices = 8;
+static int const max_ext_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
-enum { section_aux, section_smooth, section_linked };
-enum { param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, param_count };
+enum { section_aux, section_smooth, section_linked, section_glob_uni };
+
+enum { 
+  param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
+  param_glob_uni_voices, param_glob_uni_dtn, param_glob_uni_sprd, param_glob_uni_lfo_amt, param_glob_uni_env_amt, 
+  param_count };
+
 extern int const master_in_param_pb_range = param_pb_range;
 extern int const master_in_param_midi_smooth = param_midi_smooth;
 extern int const master_in_param_tempo_smooth = param_tempo_smooth;
@@ -53,7 +59,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
+      make_module_gui(section, pos, { { 2 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -112,6 +118,30 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
     make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
+
+  // TODO not allocate gui space for fx
+  result.sections.emplace_back(make_param_section(section_glob_uni,
+    make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison"),
+    make_param_section_gui({ 1, 0, 1, 3 }, gui_dimension({ 1 }, { 1, 1, 1, 1, 1 }))));
+  auto& glob_uni_voices = result.params.emplace_back(make_param(
+    make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Unison", "Global Unison", param_glob_uni_voices, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_uni_voices, 1, 0),
+    make_param_gui_single(section_glob_uni, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
+  auto& glob_uni_dtn = result.params.emplace_back(make_param( // TODO needs modulatable?
+    make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Detune", "Uni Dtn", param_glob_uni_dtn, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.33, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_dtn.info.description = "Detune global unison voices";
+  auto& glob_uni_spread = result.params.emplace_back(make_param(
+    make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Spread", "Uni Sprd", param_glob_uni_sprd, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_spread.info.description = "Global unison stereo spread.";
+  
   return result;
 }
 
