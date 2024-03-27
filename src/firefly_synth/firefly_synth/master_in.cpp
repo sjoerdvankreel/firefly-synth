@@ -149,8 +149,8 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_spread.info.description = "Global unison stereo spread.";
-  auto& glob_uni_lfo_phase = result.params.emplace_back(make_param( // TODO pick this up in the lfo phase
-    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Phase", "LFO Phase", "Uni LFO Phs", param_glob_uni_lfo_phase, 1),
+  auto& glob_uni_lfo_phase = result.params.emplace_back(make_param(
+    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Phase Offset", "LFO Phase", "Uni LFO Phs", param_glob_uni_lfo_phase, 1),
     make_param_dsp_block(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));

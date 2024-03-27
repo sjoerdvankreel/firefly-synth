@@ -516,6 +516,16 @@ lfo_engine::reset(plugin_block const* block)
   update_block_params(block);
   auto const& block_auto = block->state.own_block_automation;
   _phase = _global? 0: block_auto[param_phase][0].real();
+
+  // global unison
+  if (!_global && block->voice->state.sub_voice_count > 1)
+  {
+    float glob_uni_phs_offset = block->state.all_block_automation[module_master_in][0][master_in_param_glob_uni_lfo_phase][0].real();
+    float voice_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
+    _phase += voice_pos * glob_uni_phs_offset;
+    _phase -= (int)_phase;
+  }
+
   _static_noise.reset(block_auto[param_seed][0].step());
   reset_smooth_noise(block_auto[param_seed][0].step(), block_auto[param_steps][0].step());
 }
