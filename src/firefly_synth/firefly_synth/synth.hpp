@@ -18,8 +18,8 @@ class osc_osc_matrix_fm_modulator;
 
 // for osc and voice in
 inline int const max_osc_unison_voices = 8;
-// global unison
-inline int const max_global_unison_voices = 8;
+// global unison, very memory hungry so only 4
+inline int const max_global_unison_voices = 4;
 
 // some parameters need to be exposed to modules other than the one that declares them
 extern int const osc_param_type;
