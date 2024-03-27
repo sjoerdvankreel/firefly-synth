@@ -33,9 +33,9 @@ extern int const master_in_param_tempo_smooth;
 extern int const master_in_param_glob_uni_dtn;
 extern int const master_in_param_glob_uni_sprd;
 extern int const master_in_param_glob_uni_voices;
-extern int const master_in_param_glob_uni_lfo_rate;
+extern int const master_in_param_glob_uni_env_dtn;
+extern int const master_in_param_glob_uni_lfo_dtn;
 extern int const master_in_param_glob_uni_lfo_phase;
-extern int const master_in_param_glob_uni_env_speed;
 
 // these are needed by the osc
 struct osc_osc_matrix_context

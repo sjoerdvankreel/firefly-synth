@@ -728,7 +728,7 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
   if constexpr (GlobalUnison)
   {
     float voice_pos = unipolar_to_bipolar((float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f));
-    auto const& glob_uni_lfo_rate_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_lfo_rate][0];
+    auto const& glob_uni_lfo_rate_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_lfo_dtn][0];
     for(int f = block.start_frame; f < block.end_frame; f++)
       rate_curve[f] *= 1 + (voice_pos * glob_uni_lfo_rate_curve[f]);
   }
