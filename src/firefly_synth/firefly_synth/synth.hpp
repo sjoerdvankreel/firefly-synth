@@ -16,6 +16,27 @@ class osc_osc_matrix_engine;
 class osc_osc_matrix_am_modulator;
 class osc_osc_matrix_fm_modulator;
 
+// for osc and voice in
+inline int const max_osc_unison_voices = 8;
+// global unison
+inline int const max_global_unison_voices = 8;
+
+// some parameters need to be exposed to modules other than the one that declares them
+extern int const osc_param_type;
+extern int const osc_param_uni_voices;
+extern int const voice_in_output_pitch_offset;
+extern int const voice_in_param_mode;
+extern int const voice_in_param_oversmp;
+extern int const master_in_param_pb_range;
+extern int const master_in_param_midi_smooth;
+extern int const master_in_param_tempo_smooth;
+extern int const master_in_param_glob_uni_dtn;
+extern int const master_in_param_glob_uni_sprd;
+extern int const master_in_param_glob_uni_voices;
+extern int const master_in_param_glob_uni_lfo_amt;
+extern int const master_in_param_glob_uni_env_amt;
+
+
 // these are needed by the osc
 struct osc_osc_matrix_context
 {
@@ -29,9 +50,6 @@ struct oscillator_context
   // dimensions are [oversmp stage][lanes * channels][frames]
   std::array<float**, plugin_base::max_oversampler_stages + 1> oversampled_lanes_channels_ptrs;
 };
-
-// for osc and voice in
-inline int const max_osc_unison_voices = 8;
 
 // everybody needs these
 typedef plugin_base::jarray<plugin_base::jarray<

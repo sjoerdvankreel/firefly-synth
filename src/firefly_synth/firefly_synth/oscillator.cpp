@@ -31,11 +31,7 @@ enum {
   param_gain, param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
-extern int const voice_in_param_mode;
-extern int const voice_in_param_oversmp;
-extern int const master_in_param_pb_range;
 extern int const voice_in_output_pitch_offset;
-// mod matrix needs this
 extern int const osc_param_type = param_type;
 extern int const osc_param_uni_voices = param_uni_voices;
 

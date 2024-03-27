@@ -33,9 +33,6 @@ enum {
 };
 
 static int const route_count = 8;
-extern int const osc_param_type;
-extern int const osc_param_uni_voices;
-extern int const voice_in_param_oversmp;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix);

@@ -16,7 +16,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-extern int const voice_in_param_mode;
 static float const log_half = std::log(0.5f); 
 static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
