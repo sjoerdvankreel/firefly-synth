@@ -23,7 +23,7 @@ enum { section_aux, section_smooth, section_linked, section_glob_uni };
 enum { 
   param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
   param_glob_uni_voices, param_glob_uni_dtn, param_glob_uni_sprd, 
-  param_glob_uni_lfo_rate, param_glob_uni_lfo_phase, param_glob_uni_env_speed,
+  param_glob_uni_lfo_phase, param_glob_uni_lfo_rate, param_glob_uni_env_speed,
   param_count };
 
 // we provide the buttons, everyone else needs to implement it
