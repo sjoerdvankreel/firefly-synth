@@ -1,3 +1,8 @@
+### March 27, 2024 - V1.5.0.
+
+- Add global unison support. 
+  Heavy on the cpu, benefits from CLAP threadpool.
+
 ### March 24, 2024 - V1.4.1.
 
 - Add some color schemes.
