@@ -22,7 +22,8 @@ enum { section_aux, section_smooth, section_linked, section_glob_uni };
 
 enum { 
   param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
-  param_glob_uni_voices, param_glob_uni_dtn, param_glob_uni_sprd, param_glob_uni_lfo_amt, param_glob_uni_env_amt, 
+  param_glob_uni_voices, param_glob_uni_dtn, param_glob_uni_sprd, 
+  param_glob_uni_lfo_rate, param_glob_uni_lfo_phase, param_glob_uni_env_speed,
   param_count };
 
 // we provide the buttons, everyone else needs to implement it
@@ -32,8 +33,9 @@ extern int const master_in_param_tempo_smooth = param_tempo_smooth;
 extern int const master_in_param_glob_uni_dtn = param_glob_uni_dtn;
 extern int const master_in_param_glob_uni_sprd = param_glob_uni_sprd;
 extern int const master_in_param_glob_uni_voices = param_glob_uni_voices; 
-extern int const master_in_param_glob_uni_lfo_amt = param_glob_uni_lfo_amt;
-extern int const master_in_param_glob_uni_env_amt = param_glob_uni_env_amt;
+extern int const master_in_param_glob_uni_lfo_rate = param_glob_uni_lfo_rate;
+extern int const master_in_param_glob_uni_lfo_phase = param_glob_uni_lfo_phase;
+extern int const master_in_param_glob_uni_env_speed = param_glob_uni_env_speed;
 
 class master_in_engine :
 public module_engine {
@@ -128,14 +130,14 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   // TODO not allocate gui space for fx
   result.sections.emplace_back(make_param_section(section_glob_uni,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison"),
-    make_param_section_gui({ 1, 0, 1, 3 }, gui_dimension({ 1 }, { 1, 1, 1, 1, 1 }))));
+    make_param_section_gui({ 1, 0, 1, 3 }, gui_dimension({ 1 }, { 1, 1, 1, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Unison", "Global Unison", param_glob_uni_voices, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_uni_voices, 1, 0),
     make_param_gui_single(section_glob_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
-  auto& glob_uni_dtn = result.params.emplace_back(make_param( // TODO handle this CONTINUOUS in the voice_in module
+  auto& glob_uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Detune", "Uni Dtn", param_glob_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.33, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 1 },
@@ -147,18 +149,24 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_spread.info.description = "Global unison stereo spread.";
-  auto& glob_uni_lfo_amt = result.params.emplace_back(make_param( // TODO pick this up in the lfo speed
-    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Offset", "LFO Offset", "Uni LFO", param_glob_uni_lfo_amt, 1),
+  auto& glob_uni_lfo_phase = result.params.emplace_back(make_param( // TODO pick this up in the lfo phase
+    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Phase", "LFO Phase", "Uni LFO Phs", param_glob_uni_lfo_phase, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
-    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  glob_uni_lfo_amt.info.description = "Global unison LFO offset amount.";
-  auto& glob_uni_env_amt = result.params.emplace_back(make_param( // TODO need accurate? how we pick this up in the env?
-    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Env Offset", "Env Offset", "Uni Env", param_glob_uni_env_amt, 1),
+  glob_uni_lfo_phase.info.description = "Global unison voice LFO phase offset.";
+  auto& glob_uni_lfo_rate = result.params.emplace_back(make_param( // TODO pick this up in the lfo rate
+    make_topo_info("{1B61F48D-7995-4295-A8DB-3AA44E1BF346}", true, "Global Unison LFO Rate", "LFO Rate", "Uni LFO Rte", param_glob_uni_lfo_rate, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
-    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 4 },
+    make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  glob_uni_env_amt.info.description = "Global unison envelope offset amount.";
+  glob_uni_lfo_rate.info.description = "Global unison voice LFO rate multiplier.";
+  auto& glob_uni_env_speed = result.params.emplace_back(make_param( // TODO need accurate? how we pick this up in the env?
+    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Env Speed", "Env Speed", "Uni Env", param_glob_uni_env_speed, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 5 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_env_speed.info.description = "Global unison voice envelope speed multiplier.";
 
   return result;
 }

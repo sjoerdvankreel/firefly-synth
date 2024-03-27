@@ -33,6 +33,7 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 
 v1.5:
 make it heigher
+update the manual
 disable mono mode when global uni is on
 fix the other themes aspect ratio
 fix the fx aspect ratio height
