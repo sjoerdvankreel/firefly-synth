@@ -67,7 +67,9 @@ public module_engine {
   int _mono_porta_samples = -1;
   
   template <bool Monophonic>
-  void process(plugin_block& block);
+  void process_mode(plugin_block& block);
+  template <bool Monophonic, bool GlobalUnison>
+  void process_mode_unison(plugin_block& block);
 
 public:
   void reset(plugin_block const*) override;
@@ -190,23 +192,10 @@ void
 voice_in_engine::reset(plugin_block const* block)
 {
   _position = 0;
-
-  // TODO global unison
-  // TODO figure out where to apply the stereo spread
-  // TODO figure out where to apply the env/lfo mod
-  float glob_uni_detune = 0;
-  float glob_uni_detune_temp = 0.33f;
-  if (block->voice->state.sub_voice_count > 1)
-  {
-    // global unison detuning for this voice
-    float detune_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
-    glob_uni_detune = (detune_pos - 0.5f) * glob_uni_detune_temp;
-  }
-
-  _to_note_pitch = block->voice->state.note_id_.key + glob_uni_detune;
-  _from_note_pitch = block->voice->state.note_id_.key + glob_uni_detune;
+  _to_note_pitch = block->voice->state.note_id_.key;
+  _from_note_pitch = block->voice->state.note_id_.key;
   if (block->voice->state.note_id_.channel == block->voice->state.last_note_channel)
-    _from_note_pitch = block->voice->state.last_note_key + glob_uni_detune;
+    _from_note_pitch = block->voice->state.last_note_key;
 
   auto const& block_auto = block->state.own_block_automation;
   int porta_mode = block_auto[param_porta][0].step();
@@ -240,23 +229,39 @@ voice_in_engine::process(plugin_block& block)
 {
   auto const& block_auto = block.state.own_block_automation;
   if(block_auto[param_mode][0].step() == engine_voice_mode_poly)
-    process<false>(block);
+    process_mode<false>(block);
   else
-    process<true>(block);
+    process_mode<true>(block);
 }
 
-template <bool Monophonic> void 
-voice_in_engine::process(plugin_block& block)
+template <bool Monophonic> void
+voice_in_engine::process_mode(plugin_block& block)
 {
+  if (block.voice->state.sub_voice_count > 1)
+    process_mode_unison<Monophonic, true>(block);
+  else
+    process_mode_unison<Monophonic, false>(block);
+}
+
+template <bool Monophonic, bool GlobalUnison> void
+voice_in_engine::process_mode_unison(plugin_block& block)
+{  
+  auto const& block_auto = block.state.own_block_automation;
+  int note = block_auto[param_note][0].step();
+  int porta_mode = block_auto[param_porta][0].step();
+
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
   auto const& pb_curve = *(modulation)[module_voice_in][0][param_pb][0];
   auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
   auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  
-  
-  auto const& block_auto = block.state.own_block_automation;
-  int note = block_auto[param_note][0].step();
-  int porta_mode = block_auto[param_porta][0].step();
+
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
+  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+
+  // TODO global unison:
+  // TODO figure out where to apply the stereo spread
+  // TODO figure out where to apply the env/lfo mod
+  
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
     if constexpr (Monophonic)
@@ -288,14 +293,21 @@ voice_in_engine::process(plugin_block& block)
       }
     }
 
-    // TODO global unison
+    // global unison detuning for this voice
+    float glob_uni_detune = 0;
+    if constexpr (GlobalUnison)
+    {
+      float detune_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
+      glob_uni_detune = (detune_pos - 0.5f) * glob_uni_dtn_curve[f];
+    }
+
     float porta_note = 0;
     float pb = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pb, pb_curve[f]);
     float cent = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_cent, cent_curve[f]);
     float pitch = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pitch, pitch_curve[f]);
     if(_position == _porta_samples) porta_note = _to_note_pitch;
     else porta_note = _from_note_pitch + (_position++ / (float)_porta_samples * (_to_note_pitch - _from_note_pitch));
-    block.state.own_cv[output_pitch_offset][0][f] = (note + cent - midi_middle_c) + (porta_note - midi_middle_c) + pitch + pb * master_pb_range;
+    block.state.own_cv[output_pitch_offset][0][f] = (note + cent + glob_uni_detune - midi_middle_c) + (porta_note - midi_middle_c) + pitch + pb * master_pb_range;
   }
 }
 
