@@ -14,7 +14,6 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 static int const aux_count = 5;
-static int const max_global_uni_voices = 8;
 static int const max_ext_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
@@ -134,7 +133,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_section_gui({ 1, 0, 1, 3 }, gui_dimension({ 1 }, { 1, 1, 1, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Unison", "Global Unison", param_glob_uni_voices, 1),
-    make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_uni_voices, 1, 0),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_unison_voices, 1, 0),
     make_param_gui_single(section_glob_uni, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
