@@ -1,5 +1,6 @@
 on release:
 update kvr
+update screenshots
 dont forget to tag
 upload new binaries
 update the history
