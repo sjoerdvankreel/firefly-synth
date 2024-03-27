@@ -61,13 +61,15 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 module_topo
 master_in_topo(int section, bool is_fx, gui_position const& pos)
 {
+  std::vector<int> row_distribution = { 1, 1 };
+  if(is_fx) row_distribution = { 1 };
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", true, "Master In", "Master In", "MIn", module_master_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { { 1, 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
+      make_module_gui(section, pos, { row_distribution, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -127,7 +129,6 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
 
-  // TODO not allocate gui space for fx
   result.sections.emplace_back(make_param_section(section_glob_uni,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison"),
     make_param_section_gui({ 1, 0, 1, 3 }, gui_dimension({ 1 }, { 1, 1, 1, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
