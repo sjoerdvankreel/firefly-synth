@@ -214,7 +214,6 @@ voice_in_engine::reset(plugin_block const* block)
   // in monophonic mode we do not glide the first note in 
   // monophonic section. instead the first note is "plain"
   // and all subsequent notes in mono section apply portamento
-  // TODO global unison ?
   if(block_auto[param_mode][0].step() != engine_voice_mode_poly)
   {
     _from_note_pitch = _to_note_pitch;
@@ -257,9 +256,6 @@ voice_in_engine::process_mode_unison(plugin_block& block)
 
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
   auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
-
-  // TODO global unison:
-  // TODO figure out where to apply the env/lfo mod
   
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -272,7 +268,6 @@ voice_in_engine::process_mode_unison(plugin_block& block)
           // pitch switch, will be picked up by the oscs
           _position = 0;
           _porta_samples = 0;
-          // TODO global unison ?
           _to_note_pitch = block.state.mono_note_stream[f].midi_key;
           _from_note_pitch = _to_note_pitch;
         }
@@ -284,7 +279,6 @@ voice_in_engine::process_mode_unison(plugin_block& block)
           _to_note_pitch = block.state.mono_note_stream[f].midi_key;
 
           // need to recalc total glide time
-          // TODO global unison ?
           if (porta_mode == porta_on)
             _porta_samples = _mono_porta_time * block.sample_rate * std::abs(_from_note_pitch - _to_note_pitch);
           _porta_samples = _mono_porta_samples;
@@ -294,7 +288,7 @@ voice_in_engine::process_mode_unison(plugin_block& block)
 
     // global unison detuning for this voice
     float glob_uni_detune = 0;
-    if constexpr (GlobalUnison)
+    if constexpr (!Monophonic && GlobalUnison)
     {
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
       glob_uni_detune = (voice_pos - 0.5f) * glob_uni_dtn_curve[f];

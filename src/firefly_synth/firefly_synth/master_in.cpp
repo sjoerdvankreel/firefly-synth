@@ -161,7 +161,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_lfo_dtn.info.description = "Global unison voice LFO detune amount.";
-  auto& glob_uni_env_dtn = result.params.emplace_back(make_param( // TODO pick this up in the env
+  auto& glob_uni_env_dtn = result.params.emplace_back(make_param(
     make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Env Detune", "Env Detune", "Uni Env Dtn", param_glob_uni_env_dtn, 1),
     make_param_dsp_block(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 5 },
