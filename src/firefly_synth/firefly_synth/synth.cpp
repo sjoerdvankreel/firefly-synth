@@ -316,12 +316,7 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 std::unique_ptr<plugin_topo>
 synth_topo(bool is_fx)
 {
-  // TODO global uni
-  
   auto result = std::make_unique<plugin_topo>();
-  result->graph_polyphony = 1;
-  result->audio_polyphony = 32 * 8; // TODO
-  result->sub_voice_counter = [](bool graph, plugin_state const& state) { return graph? 1: 4; }; // TODO
 
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
@@ -334,6 +329,16 @@ synth_topo(bool is_fx)
   result->midi_smooth_param = master_in_param_midi_smooth;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
+
+  result->graph_polyphony = 1;
+  result->audio_polyphony = 32 * max_global_unison_voices;
+  result->sub_voice_counter = [](bool graph, plugin_state const& state) 
+  {
+    // Global unison needs some help from plugin_base as we treat 
+    // those voices just like regular polyphonic voices.
+    if (graph) return 1;
+    return state.get_plain_at(module_master_in, 0, master_in_param_glob_uni_voices, 0).step();
+  };
 
   if(is_fx)
   {

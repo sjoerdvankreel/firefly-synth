@@ -36,7 +36,6 @@ extern int const master_in_param_glob_uni_voices;
 extern int const master_in_param_glob_uni_lfo_amt;
 extern int const master_in_param_glob_uni_env_amt;
 
-
 // these are needed by the osc
 struct osc_osc_matrix_context
 {

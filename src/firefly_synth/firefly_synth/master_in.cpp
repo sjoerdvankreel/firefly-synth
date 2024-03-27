@@ -31,7 +31,7 @@ extern int const master_in_param_midi_smooth = param_midi_smooth;
 extern int const master_in_param_tempo_smooth = param_tempo_smooth;
 extern int const master_in_param_glob_uni_dtn = param_glob_uni_dtn;
 extern int const master_in_param_glob_uni_sprd = param_glob_uni_sprd;
-extern int const master_in_param_glob_uni_voices = param_glob_uni_voices;
+extern int const master_in_param_glob_uni_voices = param_glob_uni_voices; 
 extern int const master_in_param_glob_uni_lfo_amt = param_glob_uni_lfo_amt;
 extern int const master_in_param_glob_uni_env_amt = param_glob_uni_env_amt;
 
