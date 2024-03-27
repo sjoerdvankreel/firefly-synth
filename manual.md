@@ -85,7 +85,7 @@ See the parameter reference document for details.
 - Responds to MIDI pitchbend, modwheel and all 128 CC parameters.
 - Up to 32 voices (not counting global unison) in polyphonic mode.
 - Monitor module with active voice count, cpu and threadpool usage.
-- Global unison with pitch, lfo and envelope detuning, stereo spread and lfo offset.
+- Global unison with pitch, lfo and envelope detuning, stereo spread and osc/lfo phase offset.
 - Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
 - Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync.
 - Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.
