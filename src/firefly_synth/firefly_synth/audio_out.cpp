@@ -73,7 +73,7 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
   double gain_default_ = 1.0;
   gui_dimension dimension({ 1 }, { 1, 1 });
   gui_edit_type edit_type = gui_edit_type::knob;
-  if (global)
+  if (global && !is_fx)
   {
     bal_col = 0;
     bal_row = 1;
