@@ -40,9 +40,6 @@ do async clear delay lines etc on patch select ->
   idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:
   add a hidden readonly int parameter acting as a random token and flush stuff on the dsp side when it changes?
 
-v1.5:
-update the manual
-
 other:
 profile the pad preset
 CLAP gui not showing on qtractor/fedora
