@@ -42,6 +42,5 @@ do async clear delay lines etc on patch select ->
   add a hidden readonly int parameter acting as a random token and flush stuff on the dsp side when it changes?
 
 other:
-profile the pad preset
 CLAP gui not showing on qtractor/fedora
 do indexed release schema + regular backwards compat
