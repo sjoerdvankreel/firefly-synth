@@ -74,7 +74,6 @@ hence, not "true monophonic").
 See the parameter reference document for details.
 
 - Envelope 1 hardwired to voice gain.
-- Up to 32 voices in polyphonic mode.
 - Per-voice and global audio routing matrices.
 - Per-voice and global cv-to-cv routing matrices.
 - Per-voice and global cv-to-audio routing matrices.
@@ -84,7 +83,9 @@ See the parameter reference document for details.
 - Smoothing controls for MIDI input and host BPM changes.
 - Portamento with tempo syncing and regular/automatic glide mode.
 - Responds to MIDI pitchbend, modwheel and all 128 CC parameters.
+- Up to 32 voices (not counting global unison) in polyphonic mode.
 - Monitor module with active voice count, cpu and threadpool usage.
+- Global unison with pitch, lfo and envelope detuning, stereo spread and lfo offset.
 - Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
 - Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync.
 - Per-voice and global LFO's with tempo syncing, one-shot mode, various waveforms and horizontal and vertical skewing.

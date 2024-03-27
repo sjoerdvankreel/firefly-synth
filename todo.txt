@@ -42,8 +42,6 @@ do async clear delay lines etc on patch select ->
 
 v1.5:
 update the manual
-fix the other themes aspect ratio
-fix the fx aspect ratio height
 
 other:
 profile the pad preset
