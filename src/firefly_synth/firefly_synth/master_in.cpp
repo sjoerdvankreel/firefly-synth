@@ -142,13 +142,13 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_spread.info.description = "Global unison stereo spread.";
   auto& glob_uni_lfo_amt = result.params.emplace_back(make_param( // TODO pick this up in the lfo speed
-    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO", "LFO", "Uni LFO", param_glob_uni_lfo_amt, 1),
+    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Offset", "LFO Offset", "Uni LFO", param_glob_uni_lfo_amt, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   glob_uni_lfo_amt.info.description = "Global unison LFO offset amount.";
   auto& glob_uni_env_amt = result.params.emplace_back(make_param( // TODO need accurate? how we pick this up in the env?
-    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Envelope", "Env", "Uni Env", param_glob_uni_env_amt, 1),
+    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Env Offset", "Env Offset", "Uni Env", param_glob_uni_env_amt, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
     make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
