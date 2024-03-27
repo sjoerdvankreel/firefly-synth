@@ -35,6 +35,7 @@ extern int const master_in_param_glob_uni_voices = param_glob_uni_voices;
 extern int const master_in_param_glob_uni_env_dtn = param_glob_uni_env_dtn;
 extern int const master_in_param_glob_uni_lfo_dtn = param_glob_uni_lfo_dtn;
 extern int const master_in_param_glob_uni_lfo_phase = param_glob_uni_lfo_phase;
+extern int const master_in_param_glob_uni_osc_phase = param_glob_uni_osc_phase;
 
 class master_in_engine :
 public module_engine {

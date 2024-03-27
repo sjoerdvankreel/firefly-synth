@@ -666,11 +666,25 @@ osc_engine::reset(plugin_block const* block)
   for (int v = 0; v < uni_voices; v++)
   {
     _static_svfs[v].clear();
+
     // Unison over static noise doesnt do detune, but it can stereo spread.
     _static_noises[v].reset(block_auto[param_rand_seed][0].step() + v);
+
     // Block below 20hz, certain param combinations generate very low frequency content
     _random_dcs[v].init(block->sample_rate, 20);
+
+    // Adjust phase for osc unison.
     _ref_phases[v] = (float)v / uni_voices * (uni_voices == 1 ? 0.0f : uni_phase);
+
+    // Adjust phase for global unison.
+    if (block->voice->state.sub_voice_count > 1)
+    {
+      float glob_uni_phs_offset = block->state.all_block_automation[module_master_in][0][master_in_param_glob_uni_osc_phase][0].real();
+      float voice_pos = (float)block->voice->state.sub_voice_index / (block->voice->state.sub_voice_count - 1.0f);
+      _ref_phases[v] += voice_pos * glob_uni_phs_offset;
+      _ref_phases[v] -= (int)_ref_phases[v];
+    }
+
     _sync_phases[v] = _ref_phases[v];
     _unsync_phases[v] = 0;
     _unsync_samples[v] = 0;
