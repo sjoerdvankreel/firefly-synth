@@ -28,22 +28,22 @@ document the header files a bit
 basic osc waveform icons
 solo osc/fx
 out gain/cpu meter
+do visual am/fm demo
 normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
-v1.5:
-make it heigher
-update the manual
-disable mono mode when global uni is on
-fix the other themes aspect ratio
-fix the fx aspect ratio height
-do visual am/fm demo
+v1.6:
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 automate zip/dist
 do async clear delay lines etc on patch select -> 
   idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:
   add a hidden readonly int parameter acting as a random token and flush stuff on the dsp side when it changes?
+
+v1.5:
+update the manual
+fix the other themes aspect ratio
+fix the fx aspect ratio height
 
 other:
 profile the pad preset
