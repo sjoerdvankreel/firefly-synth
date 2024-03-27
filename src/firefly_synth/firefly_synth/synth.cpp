@@ -337,6 +337,7 @@ synth_topo(bool is_fx)
     // Global unison needs some help from plugin_base as we treat 
     // those voices just like regular polyphonic voices.
     if (graph) return 1;
+    if(state.get_plain_at(module_voice_in, 0, voice_in_param_mode, 0).step() != engine_voice_mode_poly) return 1;
     return state.get_plain_at(module_master_in, 0, master_in_param_glob_uni_voices, 0).step();
   };
 
