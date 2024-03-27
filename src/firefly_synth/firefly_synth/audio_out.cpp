@@ -22,6 +22,9 @@ public:
 
 class voice_audio_out_engine :
 public module_engine {
+
+  template <bool GlobalUnison>
+  void process_unison(plugin_block& block);
 public:
   void reset(plugin_block const*) override {}
   void process(plugin_block& block) override;
@@ -107,6 +110,7 @@ master_audio_out_engine::process(plugin_block& block)
   auto const& modulation = get_cv_audio_matrix_mixdown(block, true);
   auto const& bal_curve = *modulation[module_master_out][0][param_bal][0];
   auto const& gain_curve = *modulation[module_master_out][0][param_gain][0];
+
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_master_out, param_bal, bal_curve[f]);
@@ -115,8 +119,18 @@ master_audio_out_engine::process(plugin_block& block)
   }
 }
 
+
 void
 voice_audio_out_engine::process(plugin_block& block)
+{
+  if(block.voice->state.sub_voice_count > 1)
+    process_unison<true>(block);
+  else
+    process_unison<false>(block);
+}
+
+template <bool GlobalUnison> void 
+voice_audio_out_engine::process_unison(plugin_block& block)
 {
   auto& mixer = get_audio_audio_matrix_mixer(block, false);
   auto const& audio_in = mixer.mix(block, module_voice_out, 0);
@@ -124,12 +138,23 @@ voice_audio_out_engine::process(plugin_block& block)
   auto const& amp_env = block.voice->all_cv[module_env][0][0][0];
   auto const& bal_curve = *modulation[module_voice_out][0][param_bal][0];
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
+  auto const& glob_uni_sprd_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
+
+  float voice_pos = 0.0f;
+  float voice_bal = 0.0f;
+  if constexpr (GlobalUnison)
+  {
+    voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
+    voice_pos = unipolar_to_bipolar(voice_pos);
+  }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    if constexpr (GlobalUnison)
+      voice_bal = voice_pos * glob_uni_sprd_curve[f];
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_voice_out, param_bal, bal_curve[f]);
     for (int c = 0; c < 2; c++)
-      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal);
+      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal);
   }
 }
 

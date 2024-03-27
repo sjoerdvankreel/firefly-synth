@@ -259,7 +259,6 @@ voice_in_engine::process_mode_unison(plugin_block& block)
   auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
 
   // TODO global unison:
-  // TODO figure out where to apply the stereo spread
   // TODO figure out where to apply the env/lfo mod
   
   for(int f = block.start_frame; f < block.end_frame; f++)
@@ -297,8 +296,8 @@ voice_in_engine::process_mode_unison(plugin_block& block)
     float glob_uni_detune = 0;
     if constexpr (GlobalUnison)
     {
-      float detune_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
-      glob_uni_detune = (detune_pos - 0.5f) * glob_uni_dtn_curve[f];
+      float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
+      glob_uni_detune = (voice_pos - 0.5f) * glob_uni_dtn_curve[f];
     }
 
     float porta_note = 0;
