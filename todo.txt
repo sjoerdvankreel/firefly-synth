@@ -1,5 +1,6 @@
 on release:
 update kvr
+update screenshots
 dont forget to tag
 upload new binaries
 update the history
@@ -28,11 +29,11 @@ document the header files a bit
 basic osc waveform icons
 solo osc/fx
 out gain/cpu meter
+do visual am/fm demo
 normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
-v1.5:
-do visual am/fm demo
+v1.6:
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 automate zip/dist

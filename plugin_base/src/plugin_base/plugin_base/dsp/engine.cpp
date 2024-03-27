@@ -10,23 +10,31 @@ namespace plugin_base {
 
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
+
+static int 
+topo_polyphony(plugin_desc const* desc, bool graph)
+{
+  if(graph) return desc->plugin->graph_polyphony;
+  return desc->plugin->audio_polyphony;
+}
  
 plugin_engine::
 plugin_engine(
-  plugin_desc const* desc, int polyphony,
+  plugin_desc const* desc, bool graph,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context) :
-_polyphony(polyphony), 
+_graph(graph),
+_polyphony(topo_polyphony(desc, graph)),
 _state(desc, false), 
 _block_automation(desc, false),
-_voice_automation(polyphony, plugin_state(desc, false)),
-_dims(*desc->plugin, polyphony), 
+_voice_automation(_polyphony, plugin_state(desc, false)),
+_dims(*desc->plugin, _polyphony),
 _host_block(std::make_unique<host_block>()),
 _voice_processor(voice_processor),
-_voice_thread_ids(polyphony, std::thread::id()),
+_voice_thread_ids(_polyphony, std::thread::id()),
 _voice_processor_context(voice_processor_context)
 {
-  assert(polyphony >= 0);
+  assert(_polyphony >= 0);
 
   // validate here instead of plugin_desc ctor 
   // since that runs on module init so is hard to debug
@@ -62,12 +70,16 @@ _voice_processor_context(voice_processor_context)
 
 plugin_voice_block 
 plugin_engine::make_voice_block(
-  int v, int release_frame, note_id id, int last_note_key, int last_note_channel)
+  int v, int release_frame, note_id id, 
+  int sub_voice_count, int sub_voice_index, 
+  int last_note_key, int last_note_channel)
 {
-  _voice_states[v].id = id;
+  _voice_states[v].note_id_ = id;
   _voice_states[v].release_frame = release_frame;
   _voice_states[v].last_note_key = last_note_key;
   _voice_states[v].last_note_channel = last_note_channel;
+  _voice_states[v].sub_voice_count = sub_voice_count;
+  _voice_states[v].sub_voice_index = sub_voice_index;
   return {
     false, _voice_results[v], _voice_states[v], 
     _voice_cv_state[v], _voice_audio_state[v], _voice_context[v]
@@ -414,7 +426,8 @@ plugin_engine::process_voice(int v, bool threaded)
         // state has already been copied from note event to 
         // _voice_states during voice stealing (to allow per-voice init)
         plugin_voice_block voice_block(make_voice_block(v, _voice_states[v].release_frame, 
-          _voice_states[v].id, _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
+          _voice_states[v].note_id_, _voice_states[v].sub_voice_count, _voice_states[v].sub_voice_index,
+          _voice_states[v].last_note_key, _voice_states[v].last_note_channel));
         plugin_block block(make_plugin_block(v, m, mi, state.start_frame, state.end_frame));
         block.voice = &voice_block;
 
@@ -462,17 +475,19 @@ plugin_engine::find_best_voice_slot()
 }
 
 void 
-plugin_engine::activate_voice(note_event const& event, int slot, int frame_count)
+plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_count, int sub_voice_index, int frame_count)
 {
   assert(slot >= 0);
   auto& state = _voice_states[slot];
-  state.id = event.id;
+  state.note_id_ = event.id;
   state.release_id = event.id;
   state.end_frame = frame_count;
   state.start_frame = event.frame;
   state.velocity = event.velocity;
   state.stage = voice_stage::active;
   state.time = _stream_time + event.frame;
+  state.sub_voice_count = sub_voice_count;
+  state.sub_voice_index = sub_voice_index;
   assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame <= frame_count);
 
   // allow module engine to do once-per-voice init
@@ -481,7 +496,9 @@ plugin_engine::activate_voice(note_event const& event, int slot, int frame_count
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       if(_voice_engines[slot][m][mi])
       {
-        plugin_voice_block voice_block(make_voice_block(slot, _voice_states[slot].release_frame, event.id, _last_note_key, _last_note_channel));
+        plugin_voice_block voice_block(make_voice_block(
+          slot, _voice_states[slot].release_frame, event.id, _voice_states[slot].sub_voice_count, 
+          _voice_states[slot].sub_voice_index, _last_note_key, _last_note_channel));
         plugin_block block(make_plugin_block(slot, m, mi, state.start_frame, state.end_frame));
         block.voice = &voice_block;
         _voice_engines[slot][m][mi]->reset(&block);
@@ -698,13 +715,21 @@ plugin_engine::process()
 
     if(voice_mode == engine_voice_mode_poly)
     {
+      // figure out subvoice count for global unison
+      int sub_voice_count = 1;
+      if (topo.sub_voice_counter) sub_voice_count = topo.sub_voice_counter(_graph, _state);
+
       // poly mode: steal voices for incoming notes by age
       for (int e = 0; e < _host_block->events.notes.size(); e++)
       {
         auto const& event = _host_block->events.notes[e];
         if (event.type != note_event_type::on) continue;
-        int slot = find_best_voice_slot();
-        activate_voice(event, slot, frame_count);
+
+        for(int sv = 0; sv < sub_voice_count; sv++)
+        {
+          int slot = find_best_voice_slot();
+          activate_voice(event, slot, sub_voice_count, sv, frame_count);
+        }
          
         // for portamento
         _last_note_key = event.id.key;
@@ -717,6 +742,8 @@ plugin_engine::process()
       // release mono mode: recycle the first active but not releasing voice, or set up a new one
       // note: we do not account for triggering more than 1 voice per block
       // note: need to play *all* incoming notes into this voice
+      // note: subvoice/global uni does NOT apply to mono mode!
+      // because subvoices may have unequal length, then stuff becomes too complicated
 
       int first_note_on_index = -1;
       for(int e = 0; e < _host_block->events.notes.size(); e++)
@@ -745,7 +772,7 @@ plugin_engine::process()
           if(slot == -1)
           {
             slot = 0;
-            activate_voice(first_event, 0, frame_count);
+            activate_voice(first_event, 0, 1, 0, frame_count);
           }
           else 
           {
@@ -761,7 +788,7 @@ plugin_engine::process()
           if (slot == -1)
           {
             slot = find_best_voice_slot();
-            activate_voice(first_event, slot, frame_count);
+            activate_voice(first_event, slot, 1, 0, frame_count);
           }
           else
           {

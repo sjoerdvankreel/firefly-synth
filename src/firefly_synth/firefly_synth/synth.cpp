@@ -11,10 +11,6 @@ using namespace juce;
 using namespace plugin_base;
 
 namespace firefly_synth {
-                          
-extern int const voice_in_param_mode;
-extern int const master_in_param_midi_smooth;
-extern int const master_in_param_tempo_smooth;
   
 static std::string const main_graph_name = "Main Graph";
 static std::string const vfx_graph_name = "Voice FX Graph";
@@ -72,7 +68,7 @@ make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings
   gui_dimension result;
   result.column_sizes = { is_fx ? 30 : 26, is_fx ? 63 : 67, 17, 32, 32 };
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
-  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, 1 }, { true, 2 }, { true, 2 } };
+  std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, is_fx? 1.0f: 2.0f }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
   result.row_sizes = gui_vertical_distribution(height, settings.get_font_height(), section_vsizes);
   return result;
@@ -321,8 +317,7 @@ std::unique_ptr<plugin_topo>
 synth_topo(bool is_fx)
 {
   auto result = std::make_unique<plugin_topo>();
-  result->graph_polyphony = 1;
-  result->audio_polyphony = 32;
+
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
   result->version.major = FF_SYNTH_VERSION_MAJOR;
@@ -334,6 +329,17 @@ synth_topo(bool is_fx)
   result->midi_smooth_param = master_in_param_midi_smooth;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
+
+  result->graph_polyphony = 1;
+  result->audio_polyphony = 32 * max_global_unison_voices;
+  result->sub_voice_counter = [](bool graph, plugin_state const& state) 
+  {
+    // Global unison needs some help from plugin_base as we treat 
+    // those voices just like regular polyphonic voices.
+    if (graph) return 1;
+    if(state.get_plain_at(module_voice_in, 0, voice_in_param_mode, 0).step() != engine_voice_mode_poly) return 1;
+    return state.get_plain_at(module_master_in, 0, master_in_param_glob_uni_voices, 0).step();
+  };
 
   if(is_fx)
   {

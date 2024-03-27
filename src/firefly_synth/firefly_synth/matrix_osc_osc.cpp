@@ -33,9 +33,6 @@ enum {
 };
 
 static int const route_count = 8;
-extern int const osc_param_type;
-extern int const osc_param_uni_voices;
-extern int const voice_in_param_oversmp;
 
 std::unique_ptr<graph_engine> make_osc_graph_engine(plugin_desc const* desc);
 std::vector<graph_data> render_osc_graphs(plugin_state const& state, graph_engine* engine, int slot, bool for_osc_osc_matrix);
@@ -125,7 +122,7 @@ osc_osc_matrix_topo(int section, gui_position const& pos, plugin_topo const* plu
   // for FM we use oversampled mono series
   for(int r = 0; r < route_count; r++)
     outputs.push_back(make_module_dsp_output(false, make_topo_info_basic(
-      "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "AM", r, max_unison_voices + 1)));
+      "{1DABDF9D-E777-44FF-9720-3B09AAF07C6D}-" + std::to_string(r), "AM", r, max_osc_unison_voices + 1)));
 
   module_topo result(make_module(
     make_topo_info_basic("{8024F4DC-5BFC-4C3D-8E3E-C9D706787362}", "Osc Mod", module_osc_osc_matrix, 1),
@@ -249,8 +246,8 @@ _am_modulator(this), _fm_modulator(this)
   // for am we can return the unmodulated signal itself
   // but fm needs to return something that oscillator uses to adjust the phase
   // so in case no routes point to target Osc N we return a bunch of zeros
-  _no_fm.resize(jarray<int, 1>(max_unison_voices + 1, max_frame_count * (1 << max_oversampler_stages)));
-  _fm_modsig.resize(jarray<int, 2>(route_count, jarray<int, 1>(max_unison_voices + 1, max_frame_count * (1 << max_oversampler_stages))));
+  _no_fm.resize(jarray<int, 1>(max_osc_unison_voices + 1, max_frame_count * (1 << max_oversampler_stages)));
+  _fm_modsig.resize(jarray<int, 2>(route_count, jarray<int, 1>(max_osc_unison_voices + 1, max_frame_count * (1 << max_oversampler_stages))));
 }
 
 // unison-channel-frame

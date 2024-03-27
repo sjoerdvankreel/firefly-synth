@@ -16,7 +16,6 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-extern int const voice_in_param_mode;
 static float const log_half = std::log(0.5f); 
 static float const max_filter_time_ms = 500;
 enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end };
@@ -638,6 +637,20 @@ void env_engine::process_mono_type_sync_trigger_mode(plugin_block& block, cv_cv_
       _dly = timesig_to_time(block.host.bpm, params[param_delay_tempo].domain.timesigs[block_auto[param_delay_tempo][0].step()]);
       _att = timesig_to_time(block.host.bpm, params[param_attack_tempo].domain.timesigs[block_auto[param_attack_tempo][0].step()]);
       _rls = timesig_to_time(block.host.bpm, params[param_release_tempo].domain.timesigs[block_auto[param_release_tempo][0].step()]);
+    }
+
+    // global unison - be sure not to scale envelope length to 0%
+    if (block.voice->state.sub_voice_count > 1)
+    {
+      float const max_scale = 0.95f;
+      float glob_uni_env_dtn = block.state.all_block_automation[module_master_in][0][master_in_param_glob_uni_env_dtn][0].real();
+      float voice_pos = unipolar_to_bipolar((float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f));
+      float scale_length = 1 + (voice_pos * glob_uni_env_dtn * max_scale);
+      _hld *= scale_length;
+      _dcy *= scale_length;
+      _dly *= scale_length;
+      _att *= scale_length;
+      _rls *= scale_length;
     }
 
     if constexpr (is_exp_slope(Mode))

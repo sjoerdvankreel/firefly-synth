@@ -13,15 +13,29 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-int const aux_count = 5;
-int const max_ext_smoothing_ms = 1000;
+static int const aux_count = 5;
+static int const max_ext_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
-enum { section_aux, section_smooth, section_linked };
-enum { param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, param_count };
+enum { section_aux, section_smooth, section_linked, section_glob_uni };
+
+enum { 
+  param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
+  param_glob_uni_voices, param_glob_uni_dtn, param_glob_uni_sprd, 
+  param_glob_uni_osc_phase, param_glob_uni_env_dtn, param_glob_uni_lfo_phase, param_glob_uni_lfo_dtn,
+  param_count };
+
+// we provide the buttons, everyone else needs to implement it
 extern int const master_in_param_pb_range = param_pb_range;
 extern int const master_in_param_midi_smooth = param_midi_smooth;
 extern int const master_in_param_tempo_smooth = param_tempo_smooth;
+extern int const master_in_param_glob_uni_dtn = param_glob_uni_dtn;
+extern int const master_in_param_glob_uni_sprd = param_glob_uni_sprd;
+extern int const master_in_param_glob_uni_voices = param_glob_uni_voices; 
+extern int const master_in_param_glob_uni_env_dtn = param_glob_uni_env_dtn;
+extern int const master_in_param_glob_uni_lfo_dtn = param_glob_uni_lfo_dtn;
+extern int const master_in_param_glob_uni_lfo_phase = param_glob_uni_lfo_phase;
+extern int const master_in_param_glob_uni_osc_phase = param_glob_uni_osc_phase;
 
 class master_in_engine :
 public module_engine {
@@ -47,13 +61,15 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 module_topo
 master_in_topo(int section, bool is_fx, gui_position const& pos)
 {
+  std::vector<int> row_distribution = { 1, 1 };
+  if(is_fx) row_distribution = { 1 };
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", true, "Master In", "Master In", "MIn", module_master_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
+      make_module_gui(section, pos, { row_distribution, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -112,6 +128,61 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
     make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
+
+  result.sections.emplace_back(make_param_section(section_glob_uni,
+    make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison"),
+    make_param_section_gui({ 1, 0, 1, 3 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1,
+      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
+  auto& glob_uni_voices = result.params.emplace_back(make_param(
+    make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Unison", "Global Unison", param_glob_uni_voices, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_unison_voices, 1, 0),
+    make_param_gui_single(section_glob_uni, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_voices.info.description = "Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.";
+  glob_uni_voices.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+  auto& glob_uni_dtn = result.params.emplace_back(make_param(
+    make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Detune", "Uni Dtn", param_glob_uni_dtn, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.33, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_dtn.info.description = "Global unison voice pitch detune amount.";
+  glob_uni_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+  auto& glob_uni_spread = result.params.emplace_back(make_param(
+    make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Spread", "Uni Sprd", param_glob_uni_sprd, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::hslider, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_spread.info.description = "Global unison stereo spread.";
+  glob_uni_spread.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+  auto& glob_uni_osc_phase = result.params.emplace_back(make_param(
+    make_topo_info("{35D94C8A-3986-44EC-A4D6-485ACF199C4C}", true, "Global Unison Osc Phase Offset", "Osc Phs", "Uni Osc Phs", param_glob_uni_osc_phase, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 3 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_osc_phase.info.description = "Global unison voice osc phase offset.";
+  glob_uni_osc_phase.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+  auto& glob_uni_env_dtn = result.params.emplace_back(make_param(
+    make_topo_info("{52E0A939-296F-4F2A-A1E4-F283556B0BFD}", true, "Global Unison Env Detune", "Env Dtn", "Uni Env Dtn", param_glob_uni_env_dtn, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_env_dtn.info.description = "Global unison voice envelope detune amount.";
+  glob_uni_env_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+  auto& glob_uni_lfo_phase = result.params.emplace_back(make_param(
+    make_topo_info("{1799D722-B551-485F-A7F1-0590D97514EF}", true, "Global Unison LFO Phase Offset", "LFO Phs", "Uni LFO Phs", param_glob_uni_lfo_phase, 1),
+    make_param_dsp_block(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 5 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_lfo_phase.info.description = "Global unison voice LFO phase offset.";
+  glob_uni_lfo_phase.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+  auto& glob_uni_lfo_dtn = result.params.emplace_back(make_param(
+    make_topo_info("{1B61F48D-7995-4295-A8DB-3AA44E1BF346}", true, "Global Unison LFO Detune", "LFO Dtn", "Uni LFO Dtn", param_glob_uni_lfo_dtn, 1),
+    make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.0, 0, true),
+    make_param_gui_single(section_glob_uni, gui_edit_type::knob, { 0, 6 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+  glob_uni_lfo_dtn.info.description = "Global unison voice LFO detune amount.";
+  glob_uni_lfo_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
+
   return result;
 }
 

@@ -24,6 +24,9 @@ struct plugin_topo_gui_theme_settings;
 
 enum class plugin_type { synth, fx };
 
+// global unison support
+typedef int (*sub_voice_counter_t)(bool graph, plugin_state const& state);
+
 typedef std::function<juce::Component&(std::unique_ptr<juce::Component>&&)>
 component_store;
 typedef std::function<gui_dimension(plugin_topo_gui_theme_settings const& settings)>
@@ -141,6 +144,7 @@ struct plugin_topo final {
   // voice management is done by plugin_base so we need some cooperation
   int voice_mode_param = -1;
   int voice_mode_module = -1;
+  sub_voice_counter_t sub_voice_counter = {};
 
   void validate() const;
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_topo);

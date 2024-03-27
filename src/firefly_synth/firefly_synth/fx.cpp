@@ -234,8 +234,11 @@ public module_engine {
   // https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf
   void process_svf(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
-  template <class Init> 
-  void process_svf_mode(plugin_block& block, 
+  template <bool GlobalUnison>
+  void process_svf_uni(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation);
+  template <bool GlobalUnison, class Init>
+  void process_svf_uni_mode(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Init init);
   
   template <bool Graph>
@@ -1255,28 +1258,38 @@ fx_engine::process_reverb(plugin_block& block,
 }
 
 void
-fx_engine::process_svf(plugin_block& block, 
+fx_engine::process_svf(plugin_block& block,
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
+{
+  if(!_global && block.voice->state.sub_voice_count > 1)
+    process_svf_uni<true>(block, audio_in, modulation);
+  else
+    process_svf_uni<false>(block, audio_in, modulation);
+}
+
+template <bool GlobalUnison> void
+fx_engine::process_svf_uni(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation)
 {
   auto const& block_auto = block.state.own_block_automation;
   int svf_mode = block_auto[param_svf_mode][0].step();
   switch (svf_mode)
   {
-  case svf_mode_lpf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
-  case svf_mode_hpf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
-  case svf_mode_bpf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
-  case svf_mode_bsf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
-  case svf_mode_apf: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
-  case svf_mode_peq: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
-  case svf_mode_bll: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
-  case svf_mode_lsh: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
-  case svf_mode_hsh: process_svf_mode(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
+  case svf_mode_lpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lpf(w, res); }); break;
+  case svf_mode_hpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hpf(w, res); }); break;
+  case svf_mode_bpf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bpf(w, res); }); break;
+  case svf_mode_bsf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bsf(w, res); }); break;
+  case svf_mode_apf: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_apf(w, res); }); break;
+  case svf_mode_peq: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_peq(w, res); }); break;
+  case svf_mode_bll: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_bll(w, res, gn); }); break;
+  case svf_mode_lsh: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_lsh(w, res, gn); }); break;
+  case svf_mode_hsh: process_svf_uni_mode<GlobalUnison>(block, audio_in, modulation, [this](double w, double res, double gn) { _svf.init_hsh(w, res, gn); }); break;
   default: assert(false); break;
   }
 }
 
-template <class Init> void
-fx_engine::process_svf_mode(plugin_block& block, 
+template <bool GlobalUnison, class Init> void
+fx_engine::process_svf_uni_mode(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Init init)
 {
   double w, hz, gain, kbd;
@@ -1288,14 +1301,25 @@ fx_engine::process_svf_mode(plugin_block& block,
   auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
   auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
   auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
-  int kbd_current = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.id.key;
+  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+
+  double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_curve[f]);
     kbd = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_kbd, kbd_curve[f]);
     gain = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_gain, gain_curve[f]);
-    hz *= std::pow(2.0, (kbd_current - kbd_pivot) / 12.0 * kbd);
+
+    // correct keyboard tracking for global unison
+    double kbd_trk = kbd_trk_base;
+    if constexpr(GlobalUnison)
+    {
+      float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
+      kbd_trk += (voice_pos - 0.5f) * glob_uni_dtn_curve[f];
+    }
+
+    hz *= std::pow(2.0, (kbd_trk - kbd_pivot) / 12.0 * kbd);
     hz = std::clamp(hz, flt_min_freq, flt_max_freq);
     w = pi64 * hz / block.sample_rate;
     init(w, res_curve[f] * max_res, gain);
