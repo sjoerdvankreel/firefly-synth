@@ -1,3 +1,7 @@
+### March 28, 2024 - V1.5.1 (No binaries).
+
+- Add new preset (big pad 3 with global unison).
+
 ### March 27, 2024 - V1.5.0.
 
 - Add global unison support. 
