@@ -8,7 +8,7 @@
 
 #if (defined WIN32)
 #include <Windows.h>
-#elif (defined __linux__) || (defined __FreeBSD__)
+#elif (defined __linux__) || (defined __FreeBSD__) || (defined __APPLE__)
 #include <dlfcn.h>
 #else
 #error
@@ -30,7 +30,7 @@ close_library(void* handle)
 static void*
 library_get_address(void* handle, char const* sym)
 { return GetProcAddress((HMODULE)handle, sym); }
-#elif (defined __linux__) || (defined __FreeBSD__)
+#elif (defined __linux__) || (defined __FreeBSD__) || defined (__APPLE__)
 static void* 
 load_library(char const* path)
 { return dlopen(path, RTLD_NOW); }
