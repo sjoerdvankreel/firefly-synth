@@ -5,7 +5,7 @@ cd ..
 mkdir -p build/mac/"$1"
 cd build/mac/"$1"
 export XCODE_VERSION=15
-cmake -DCMAKE_BUILD_TYPE="$1" -DXCODE_VERSION="15" ../../..
+cmake -G Xcode -DCMAKE_BUILD_TYPE="$1" -DXCODE_VERSION="15" ../../..
 make
 
 cd ../../../dist/"$1"/mac
