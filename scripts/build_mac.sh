@@ -4,6 +4,7 @@ set -e
 cd ..
 mkdir -p build/mac/"$1"
 cd build/mac/"$1"
+export XCODE_VERSION=15 
 cmake -DCMAKE_BUILD_TYPE="$1" ../../..
 make
 
