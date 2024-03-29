@@ -78,8 +78,12 @@ but they are built without AVX support, so it's probably better to build from so
 
 # Build from source
 - git clone --recursive [this-project]
-- Linux: scripts/build.sh [Debug|RelWithDebInfo|Release]
-- Windows: scripts/build.bat [Debug|RelWithDebInfo|Release]
+- Mac: scripts/build_mac.sh [Debug|RelWithDebInfo|Release]
+- Linux: scripts/build_linux.sh [Debug|RelWithDebInfo|Release]
+- Windows: scripts/build_windows.bat [Debug|RelWithDebInfo|Release]
+
+Note: the build scripts and cmake files assume linux=gcc, windows=msvc and mac=clang.
+It is not possible to change compiler for any given OS without changing the build scripts and cmake files.
 
 You'll need CMake and a very recent c++ compiler. The final output ends up in the /dist folder. <br/>
 Like noted above, the default Linux build does *not* enable AVX.
