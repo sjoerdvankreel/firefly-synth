@@ -109,6 +109,7 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 # Dependencies
 - CLAP SDK: [https://github.com/free-audio/clap](https://github.com/free-audio/clap)
 - JUCE: [https://github.com/juce-framework/JUCE](https://github.com/juce-framework/JUCE)
+- sse2neon: [https://github.com/DLTcollab/sse2neon](https://github.com/DLTcollab/sse2neon)
 - Steinberg VST3 SDK: [https://github.com/steinbergmedia/vst3sdk](https://github.com/steinbergmedia/vst3sdk)
 - Readerwriterqueue: [https://github.com/cameron314/readerwriterqueue](https://github.com/cameron314/readerwriterqueue)
 
