@@ -1,3 +1,7 @@
+### March 31, 2024 - V1.6.0.
+
+- Add Mac support. Apple silicon only, no Intel Macs yet!
+
 ### March 28, 2024 - V1.5.1 (No binaries).
 
 - Add new preset (big pad 3 with global unison).

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist>
+  <dict>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Allow microphone input</string>
+    <key>NSBluetoothAlwaysUsageDescription</key>
+    <string>Allow BlueTooth usage</string>
+    <key>CFBundleExecutable</key>
+    <string>firefly_synth_1</string>
+    <key>CFBundleIdentifier</key>
+    <string>io.github.sjoerdvankreel.firefly_synth</string>
+    <key>CFBundleName</key>
+    <string>Firefly Synth/string>
+    <key>CFBundleDisplayName</key>
+    <string>Firefly Synth</string>
+    <key>CFBundlePackageType</key>
+    <string>BNDL</string>
+    <key>CFBundleSignature</key>
+    <string>????</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.6.0</string>
+    <key>CFBundleVersion</key>
+    <string>1.6.0</string>
+    <key>NSHumanReadableCopyright</key>
+    <string></string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+  </dict>
+</plist>

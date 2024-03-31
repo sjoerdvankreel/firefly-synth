@@ -211,6 +211,8 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
   var settings = json["settings"];
   if (settings.hasProperty("lighten"))
     _theme_settings.lighten = (float)settings["lighten"];
+  if (settings.hasProperty("mac_font_height"))
+    _theme_settings.mac_font_height = (float)settings["mac_font_height"];
   if (settings.hasProperty("windows_font_height"))
     _theme_settings.windows_font_height = (float)settings["windows_font_height"];
   if (settings.hasProperty("linux_font_height"))

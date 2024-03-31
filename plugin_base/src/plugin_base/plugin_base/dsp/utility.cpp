@@ -1,5 +1,11 @@
 #include <plugin_base/dsp/utility.hpp>
+
+// Note: sse2neon provides adapter macros to toggle the FPCR like it's done with immintrin.h.
+#ifdef __aarch64__
+#include <sse2neon.h>
+#else
 #include <immintrin.h>
+#endif
 
 namespace plugin_base {
 

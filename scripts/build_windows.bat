@@ -14,4 +14,10 @@ cd ..\..\dist\"%1"\win
 plugin_base.ref_gen.exe firefly_synth_1.vst3\Contents\x86_64-win\firefly_synth_1.vst3 ..\..\..\param_reference.html
 if %errorlevel% neq 0 exit /b !errorlevel!
 
+tar.exe -cf firefly_synth_1.6.0_windows_vst3_fx.zip firefly_synth_fx_1.vst3
+tar.exe -cf firefly_synth_1.6.0_windows_vst3_instrument.zip firefly_synth_1.vst3
+tar.exe -cf firefly_synth_1.6.0_windows_clap_fx.zip firefly_synth_fx_1.clap
+tar.exe -cf firefly_synth_1.6.0_windows_clap_instrument.zip firefly_synth_1.clap
+if %errorlevel% neq 0 exit /b !errorlevel!
+
 cd ..\..\..\..\scripts

@@ -25,11 +25,15 @@ pb_editor::getSize(ViewRect* new_size)
 tresult PLUGIN_API
 pb_editor::setContentScaleFactor(ScaleFactor factor)
 {
+#ifdef __APPLE__
+  return kResultFalse;
+#else
   ViewRect new_size;
   _gui->set_system_dpi_scale(factor);
   getSize(&new_size);
   if(plugFrame) plugFrame->resizeView(this, &new_size);
   return kResultTrue;
+#endif
 }
 
 tresult PLUGIN_API
@@ -66,6 +70,8 @@ pb_editor::isPlatformTypeSupported(FIDString type)
 {
 #if WIN32
   return strcmp(type, kPlatformTypeHWND) == 0? kResultTrue: kResultFalse;
+#elif (defined __APPLE__)
+    return strcmp(type, kPlatformTypeNSView) == 0? kResultTrue: kResultFalse;
 #elif (defined __linux__) || (defined  __FreeBSD__)
   return strcmp(type, kPlatformTypeX11EmbedWindowID) == 0 ? kResultTrue : kResultFalse;
 #else

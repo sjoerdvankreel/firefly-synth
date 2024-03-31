@@ -22,7 +22,7 @@
 
 #if (WIN32)
 #define PB_EXPORT __declspec(dllexport)
-#elif (defined __linux__) || (defined __FreeBSD__)
+#elif (defined __linux__) || (defined __FreeBSD__) || (defined __APPLE__)
 #define PB_EXPORT __attribute__((visibility("default")))
 #else
 #error

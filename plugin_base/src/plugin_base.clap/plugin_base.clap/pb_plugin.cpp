@@ -207,6 +207,8 @@ pb_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
   if (is_floating) return false;
 #if(WIN32)
   return !strcmp(api, CLAP_WINDOW_API_WIN32);
+#elif (defined __APPLE__)
+  return !strcmp(api, CLAP_WINDOW_API_COCOA);
 #elif (defined __linux__) || (defined  __FreeBSD__)
   return _host.canUsePosixFdSupport() && !strcmp(api, CLAP_WINDOW_API_X11);
 #else
@@ -217,9 +219,13 @@ pb_plugin::guiIsApiSupported(char const* api, bool is_floating) noexcept
 bool
 pb_plugin::guiSetScale(double scale) noexcept
 {
+#ifdef __APPLE__
+    return false;
+#else
   _gui->set_system_dpi_scale(scale);
   _host.guiRequestResize(_gui->getWidth(), _gui->getHeight());
   return true;
+#endif
 }
 
 bool
