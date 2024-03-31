@@ -18,7 +18,6 @@ midi mpe
 microtonal
 .com website 
 cheby shaper
-voice level unison
 cakewalk bug report
 phaser/flanger/chorus
 incorporate mts-esp
@@ -30,8 +29,6 @@ basic osc waveform icons
 solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
-normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
-=> how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 v1.7:
 intel mac
