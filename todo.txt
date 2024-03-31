@@ -34,6 +34,11 @@ normalized_to_raw/plain => no need to trigger the exponential conversion stuff o
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
 v1.6:
+Fix all the Mac font heights
+Fix all the todos
+Do we need to FTZ/DAZ?
+
+v1.7:
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 automate zip/dist
