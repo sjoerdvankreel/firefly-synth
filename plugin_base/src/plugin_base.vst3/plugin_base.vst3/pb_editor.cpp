@@ -25,11 +25,15 @@ pb_editor::getSize(ViewRect* new_size)
 tresult PLUGIN_API
 pb_editor::setContentScaleFactor(ScaleFactor factor)
 {
+#ifdef __APPLE__
+  return kResultFalse;
+#else
   ViewRect new_size;
   _gui->set_system_dpi_scale(factor);
   getSize(&new_size);
   if(plugFrame) plugFrame->resizeView(this, &new_size);
   return kResultTrue;
+#endif
 }
 
 tresult PLUGIN_API

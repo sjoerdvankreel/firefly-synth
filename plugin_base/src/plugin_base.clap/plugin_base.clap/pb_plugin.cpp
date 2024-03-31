@@ -220,7 +220,7 @@ bool
 pb_plugin::guiSetScale(double scale) noexcept
 {
 #ifdef __APPLE__
-    return false; // TODO must we also NOT scale for vst3?
+    return false;
 #else
   _gui->set_system_dpi_scale(scale);
   _host.guiRequestResize(_gui->getWidth(), _gui->getHeight());
