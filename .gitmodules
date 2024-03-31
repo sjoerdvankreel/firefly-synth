@@ -22,3 +22,6 @@
 [submodule "lib/readerwriterqueue"]
 	path = lib/readerwriterqueue
 	url = https://github.com/sjoerdvankreel/readerwriterqueue.git
+[submodule "lib/sse2neon"]
+	path = lib/sse2neon
+	url = https://github.com/sjoerdvankreel/sse2neon

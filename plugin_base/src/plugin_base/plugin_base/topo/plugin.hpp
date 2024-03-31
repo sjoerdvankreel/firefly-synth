@@ -71,7 +71,7 @@ struct plugin_topo_gui_theme_settings final {
   int tabular_knob_padding = 3;
   int linux_font_height = 11;
   int windows_font_height = 13;
-  int mac_font_height = 13; // TODO apply in theme files
+  int mac_font_height = 11;
 
   int combo_radius = 3;
   int button_radius = 6;

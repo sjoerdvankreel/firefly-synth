@@ -7,6 +7,7 @@ declare_local_target(FALSE STATIC plugin_base.clap plugin_base.clap)
 declare_local_target(FALSE STATIC plugin_base.vst3 plugin_base.vst3)
 declare_local_target(TRUE STATIC plugin_base.ref_gen plugin_base.ref_gen)
 
+target_include_directories(plugin_base SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/sse2neon)
 target_include_directories(plugin_base SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/JUCE/modules)
 target_include_directories(plugin_base.vst3 PRIVATE src/plugin_base)
 target_include_directories(plugin_base.vst3 SYSTEM PRIVATE ${CMAKE_SOURCE_DIR}/lib/vst3 ${CMAKE_SOURCE_DIR}/lib/JUCE/modules)
