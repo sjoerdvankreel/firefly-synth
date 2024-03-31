@@ -83,7 +83,7 @@ Presets:
 Note that Linux binaries are build without AVX support (otherwise i cannot test them in virtualbox)! You might want to build from source.
 
 # Install
-Extract the zipped folder and copy it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
+Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
 
 - Windows: https://helpcenter.steinberg.de/hc/en-us/articles/115000177084-VST-plug-in-locations-on-Windows (replace VST3 by CLAP for clap)
 - Mac: https://helpcenter.steinberg.de/hc/en-us/articles/115000171310-VST-plug-in-locations-on-Mac-OS-X-and-macOS (replace VST3 by CLAP for clap)
