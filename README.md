@@ -79,10 +79,12 @@ Presets:
 - Windows VST3 Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.6.0_windows_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.0_windows_vst3_fx.zip)
 - Windows CLAP:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.0_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.0_windows_clap_instrument.zip)
 - Windows CLAP Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.6.0_windows_clap.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.0_windows_clap_fx.zip)
+
 Note that Linux binaries are build without AVX support (otherwise i cannot test them in virtualbox)! You might want to build from source.
 
 # Install
 Extract the zipped folder and copy it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
+
 - Windows: https://helpcenter.steinberg.de/hc/en-us/articles/115000177084-VST-plug-in-locations-on-Windows (replace VST3 by CLAP for clap)
 - Mac: https://helpcenter.steinberg.de/hc/en-us/articles/115000171310-VST-plug-in-locations-on-Mac-OS-X-and-macOS (replace VST3 by CLAP for clap)
 - Linux: ~/.vst3 or ~/.clap
