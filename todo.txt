@@ -38,6 +38,7 @@ Fix all the Mac font heights
 Fix all the todos
 Do we need to FTZ/DAZ?
 automate zip/dist
+Do same folder structure for clap/vst3
 
 v1.7:
 bug: preset select jumps back to previous

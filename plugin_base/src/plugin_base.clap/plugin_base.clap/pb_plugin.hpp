@@ -120,7 +120,7 @@ public:
   std::string format_name() const override { return "CLAP"; }
   std::unique_ptr<host_menu> context_menu(int param_id) const override;
   std::filesystem::path resources_folder(std::filesystem::path const& binary_path) const override
-  { return binary_path.parent_path(); }
+  { return binary_path.parent_path().parent_path() / "Resources"; }
 };
 
 }
