@@ -37,11 +37,12 @@ v1.6:
 Fix all the Mac font heights
 Fix all the todos
 Do we need to FTZ/DAZ?
+automate zip/dist
 
 v1.7:
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
-automate zip/dist
+
 do async clear delay lines etc on patch select -> 
   idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:
   add a hidden readonly int parameter acting as a random token and flush stuff on the dsp side when it changes?
