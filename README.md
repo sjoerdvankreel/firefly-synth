@@ -89,6 +89,8 @@ Extract the zipped folder and copy/replace it (the entire folder, not just the .
 - Mac: https://helpcenter.steinberg.de/hc/en-us/articles/115000171310-VST-plug-in-locations-on-Mac-OS-X-and-macOS (replace VST3 by CLAP for clap)
 - Linux: ~/.vst3 or ~/.clap
 
+MacOS: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this: [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm).
+
 # Build from source
 - git clone --recursive [this-project]
 - Mac: scripts/build_mac.sh [Debug|RelWithDebInfo|Release]
