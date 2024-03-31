@@ -66,6 +66,8 @@ Presets:
 - Renoise support waits for this:<br/>https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684.
 - All other hosts, you'll just have to try and see.
 
+Mac users: currently only Apple Silicon is supported! Intel-based Macs are on the to-do list.
+
 # Download
 - Mac VST3:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.0_mac_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.0_mac_vst3_instrument.zip)
 - Mac VST3 Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_fx_1.6.0_mac_vst3.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.0_mac_vst3_fx.zip)

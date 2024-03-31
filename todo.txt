@@ -33,10 +33,8 @@ do visual am/fm demo
 normalized_to_raw/plain => no need to trigger the exponential conversion stuff on each sample, just when automation/modulation changed
 => how ? if done in plugin_base, lose out on inlining, if done in firefly, needs more scratch space
 
-v1.6:
-automate zip/dist
-
 v1.7:
+intel mac
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 
