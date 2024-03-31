@@ -6,7 +6,7 @@ upload new binaries
 update the history
 check if need update github social preview
 drop all conversion code on breaking plugin id
-dont forget to update the version nr in code and cmake and mac bundle
+dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts
 
 sometimes:
 update hosts
