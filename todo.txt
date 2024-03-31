@@ -37,7 +37,6 @@ v1.7:
 intel mac
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
-
 do async clear delay lines etc on patch select -> 
   idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:
   add a hidden readonly int parameter acting as a random token and flush stuff on the dsp side when it changes?
