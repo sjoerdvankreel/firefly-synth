@@ -1,3 +1,7 @@
+### April 2, 2024 - V1.6.1.
+
+- Add Intel Mac support.
+
 ### March 31, 2024 - V1.6.0.
 
 - Add Mac support. Apple silicon only, no Intel Macs yet!

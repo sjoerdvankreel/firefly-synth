@@ -1,4 +1,5 @@
 cmake_minimum_required(VERSION 3.21)
+set(CMAKE_OSX_ARCHITECTURES "arm64;x86_64" CACHE STRING "" FORCE)
 project(firefly_synth)
 set_property(GLOBAL PROPERTY USE_FOLDERS YES)
 add_compile_definitions(JUCE_GLOBAL_MODULE_SETTINGS_INCLUDED=1)
