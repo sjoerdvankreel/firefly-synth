@@ -207,7 +207,12 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   title_label.setJustificationType(Justification::centredLeft);
   grid.add(title_label, { 0, 0, 1, 1 });
-  std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().config->format_name();
+  std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().config->format_name() + " ";
+#ifdef __aarch64__
+  version_text += "ARM";
+#else
+  version_text += "X64";
+#endif
   auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 10);
   version_label.setJustificationType(Justification::centredLeft);
   version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
