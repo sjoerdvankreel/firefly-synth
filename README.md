@@ -66,7 +66,7 @@ Presets:
 - All other hosts, you'll just have to try and see.
 
 # Download
-- Mac VST3:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_vst3_instrument.zip)
+- Mac VST3:<br/>[firefly_synth_1.6.1_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_vst3_instrument.zip)
 - Mac VST3 Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_vst3_fx.zip)
 - Mac CLAP:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_clap_instrument.zip)
 - Mac CLAP Fx:<br/>[https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_clap_fx.zip)
