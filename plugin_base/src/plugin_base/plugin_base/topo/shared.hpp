@@ -157,7 +157,7 @@ struct gui_dimension final {
   void validate(
     gui_label_edit_cell_split cell_split,
     std::vector<gui_position> const& children,
-    std::vector<gui_label_align> label_align,
+    std::vector<gui_label_contents> label_contents,
     std::function<bool(int)> include,
     std::function<bool(int)> always_visible) const;
 

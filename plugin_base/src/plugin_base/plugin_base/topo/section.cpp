@@ -16,7 +16,7 @@ param_section::validate(plugin_topo const& plugin, module_topo const& module, in
   auto include = [this, &module](int p) { return module.params[p].gui.visible && module.params[p].gui.section == this->index; };
   gui.dimension.validate(gui.cell_split, 
     vector_map(module.params, [](auto const& p){ return p.gui.position; }), 
-    vector_map(module.params, [](auto const& p){ return p.gui.label.align; }),
+    vector_map(module.params, [](auto const& p){ return p.gui.label.contents; }),
     include, always_visible);
 }
 

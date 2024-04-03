@@ -151,27 +151,41 @@ void
 gui_dimension::validate(
   gui_label_edit_cell_split cell_split,
   std::vector<gui_position> const& children,
-  std::vector<gui_label_align> label_align,
+  std::vector<gui_label_contents> label_contents,
   std::function<bool(int)> include,
   std::function<bool(int)> always_visible) const
 {
-  assert(cell_split == gui_label_edit_cell_split::no_split && label_align.size() == 0
-   || cell_split != gui_label_edit_cell_split::no_split && label_align.size() == children.size());
+  assert(cell_split == gui_label_edit_cell_split::no_split || label_contents.size() == children.size());
 
   std::set<std::pair<int, int>> taken;
-  assert(0 < row_sizes.size() && row_sizes.size() < topo_max);
-  assert(0 < column_sizes.size() && column_sizes.size() < topo_max);
+  std::vector<int> split_row_sizes = row_sizes;
+  std::vector<int> split_column_sizes = column_sizes;
+
+  // adjust grid size for label/edit cell split
+  if (cell_split == gui_label_edit_cell_split::horizontal)
+  {
+    split_column_sizes.clear();
+    for(int i = 0; i < label_contents.size(); i++)
+      if(label_contents[i] == gui_label_contents::none)
+        split_column_sizes.insert(split_column_sizes.end(), 1);
+      else
+        split_column_sizes.insert(split_column_sizes.end(), { 1, 1});
+  }
+
+  assert(0 < split_row_sizes.size() && split_row_sizes.size() < topo_max);
+  assert(0 < split_column_sizes.size() && split_column_sizes.size() < topo_max);
 
   for (int k = 0; k < children.size(); k++)
   {
     if (!include(k)) continue;
     auto const& pos = children[k];
+    // TODO
     for (int r = pos.row; r < pos.row + pos.row_span; r++)
       for (int c = pos.column; c < pos.column + pos.column_span; c++)
         PB_ASSERT_EXEC(taken.insert(std::make_pair(r, c)).second || !always_visible(k));
   }
-  for (int r = 0; r < row_sizes.size(); r++)
-    for (int c = 0; c < column_sizes.size(); c++)
+  for (int r = 0; r < split_row_sizes.size(); r++)
+    for (int c = 0; c < split_column_sizes.size(); c++)
       assert(taken.find(std::make_pair(r, c)) != taken.end());
 }
 
