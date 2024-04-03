@@ -51,7 +51,7 @@ enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
-enum { section_main_top, section_main_bottom, section_svf_top, section_svf_bottom, 
+enum { section_main, section_svf_top, section_svf_bottom, 
   section_comb_top, section_comb_bottom, section_dist_top, section_dist_bottom, 
   section_delay_top, section_delay_bottom, section_reverb_top, section_reverb_bottom };
 
@@ -599,13 +599,13 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     return std::make_unique<fx_engine>(global, sample_rate, max_frame_count); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<fx_state_converter>(desc, global); };
 
-  result.sections.emplace_back(make_param_section(section_main_top,
-    make_topo_tag_basic("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main Top"),
-    make_param_section_gui({ 0, 0, 1, 1 }, { 1, 1 })));
+  result.sections.emplace_back(make_param_section(section_main,
+    make_topo_tag_basic("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
+    make_param_section_gui({ 0, 0, 2, 1 }, { 2, 1 })));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(global), ""),
-    make_param_gui_single(section_main_top, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
@@ -615,16 +615,10 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if (global) type.gui.submenu->indices.push_back(type_delay);
   if (global) type.gui.submenu->indices.push_back(type_reverb);
   type.info.description = "Selects the effect type.";
-
-  // for this we put an fx-type dependent control in it
-  result.sections.emplace_back(make_param_section(section_main_bottom,
-    make_topo_tag_basic("{D6B3BE3C-BE16-44FB-84D6-D34A381C3334}", "Main Bottom"),
-    make_param_section_gui({ 1, 0, 1, 1 }, { 1, 1 })));
-
   auto& svf_mode = result.params.emplace_back(make_param(
     make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", true, "SV Filter Mode", "Mode", "SVF.Mode", param_svf_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_mode_items(), ""),
-    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   svf_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf || vs[0] == type_off; });
@@ -648,7 +642,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_res.info.description = "Controls filter resonance.";
-
   auto& svf_bottom = result.sections.emplace_back(make_param_section(section_svf_bottom,
     make_topo_tag_basic("{F20AFB1F-CCD2-43EF-B658-F8C02310BD9D}", "SV Filter Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
@@ -672,7 +665,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& comb_mode = result.params.emplace_back(make_param(
     make_topo_info("{93E738FC-F0D1-471C-B46E-467C5869BB03}", true, "Comb Filter Mode", "Mode", "Cmb Mode", param_comb_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(comb_mode_items(), ""),
-    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   comb_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
@@ -695,7 +688,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_gain_plus.info.description = "Feed-forward amount.";
-
   auto& comb_bottom = result.sections.emplace_back(make_param_section(section_comb_bottom,
     make_topo_tag_basic("{BE96C1CA-8ED7-4E66-A9C6-65171C345352}", "Comb Filter Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
@@ -718,7 +710,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_mode = result.params.emplace_back(make_param(
     make_topo_info("{D62129D2-9818-4C05-9705-3D6AEAABA636}", true, "Dist Mode", "Mode", "Dst.Mode", param_dist_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_mode_items(), ""),
-    make_param_gui_single(section_main_bottom, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   dist_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
@@ -765,7 +757,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_out }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
-
   auto& distortion_bottom = result.sections.emplace_back(make_param_section(section_dist_bottom,
     make_topo_tag_basic("{A6A60A20-DADD-42B5-B307-D5B35AABB510}", "Distortion Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
@@ -827,7 +818,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& delay_mode = result.params.emplace_back(make_param(
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", true, "Delay Mode", "Mode", "Dly Mode", param_dly_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(dly_mode_items(), ""),
-    make_param_gui_single(section_main_bottom, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
@@ -857,7 +848,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   delay_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_mix.info.description = "Dry/wet control.";
-
   auto& delay_bottom = result.sections.emplace_back(make_param_section(section_delay_bottom,
     make_topo_tag_basic("{D8A8921D-C84F-4284-9F2C-03E286CBCDCF}", "Delay Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1 } })));
@@ -904,7 +894,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_fdbk_tempo_r.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_fdbk && vs[2] != 0; });
   delay_fdbk_tempo_r.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_fdbk && vs[2] != 0; });
   delay_fdbk_tempo_r.info.description = "Feedback delay right length in bars.";
-
   auto& delay_multi_time = result.params.emplace_back(make_param(
     make_topo_info("{8D1A0D44-3291-488F-AC86-9B2B608F9562}", true, "Multi Delay Time", "Time", "MDly Time", param_dly_multi_time, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
@@ -951,12 +940,11 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& reverb_mix = result.params.emplace_back(make_param(
     make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Rev Mix", param_reverb_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_main_bottom, gui_edit_type::hslider, { 0, 0 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   reverb_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_mix.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_mix.info.description = "Reverb dry/wet control.";
-
   auto& reverb_top = result.sections.emplace_back(make_param_section(section_reverb_top,
     make_topo_tag_basic("{92EFDFE7-41C5-4E9D-9BE6-DC56965C1C0D}", "Reverb Top"),
     make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1 } })));
@@ -975,7 +963,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   reverb_damp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_damp.info.description = "Reverb damping factor.";
-
   auto& reverb_bottom = result.sections.emplace_back(make_param_section(section_reverb_bottom,
     make_topo_tag_basic("{EA985925-E687-4168-9A2B-A13378FCEBF2}", "Reverb Bottom"),
     make_param_section_gui({ 1, 1 }, { { 1 }, { 1, 1 } })));
