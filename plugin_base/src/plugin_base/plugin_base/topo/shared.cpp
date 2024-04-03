@@ -149,10 +149,15 @@ gui_global_binding::validate(plugin_topo const& plugin) const
 
 void
 gui_dimension::validate(
+  gui_label_edit_cell_split cell_split,
   std::vector<gui_position> const& children,
+  std::vector<gui_label_align> label_align,
   std::function<bool(int)> include,
   std::function<bool(int)> always_visible) const
 {
+  assert(cell_split == gui_label_edit_cell_split::no_split && label_align.size() == 0
+   || cell_split != gui_label_edit_cell_split::no_split && label_align.size() == children.size());
+
   std::set<std::pair<int, int>> taken;
   assert(0 < row_sizes.size() && row_sizes.size() < topo_max);
   assert(0 < column_sizes.size() && column_sizes.size() < topo_max);

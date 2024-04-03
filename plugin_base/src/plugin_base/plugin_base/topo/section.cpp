@@ -14,7 +14,10 @@ param_section::validate(plugin_topo const& plugin, module_topo const& module, in
   assert(this->index == index_);
   auto always_visible = [&module](int p) { return !module.params[p].gui.bindings.visible.is_bound(); };
   auto include = [this, &module](int p) { return module.params[p].gui.visible && module.params[p].gui.section == this->index; };
-  gui.dimension.validate(vector_map(module.params, [](auto const& p){ return p.gui.position; }), include, always_visible);
+  gui.dimension.validate(gui.cell_split, 
+    vector_map(module.params, [](auto const& p){ return p.gui.position; }), 
+    vector_map(module.params, [](auto const& p){ return p.gui.label.align; }),
+    include, always_visible);
 }
 
 }

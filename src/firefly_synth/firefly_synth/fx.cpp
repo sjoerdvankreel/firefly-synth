@@ -601,7 +601,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{D32DC4C1-D0DD-462B-9AA9-A3B298F6F72F}", "Main"),
-    make_param_section_gui({ 0, 0, 2, 1 }, { 2, 1 })));
+    make_param_section_gui({ 0, 0, 2, 1 }, { 2, 2 }, gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(global), ""),

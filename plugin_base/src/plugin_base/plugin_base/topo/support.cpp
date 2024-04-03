@@ -90,9 +90,10 @@ make_param_section(int index, topo_tag const& tag, param_section_gui const& gui)
 }
 
 param_section_gui
-make_param_section_gui(gui_position const& position, gui_dimension const& dimension)
+make_param_section_gui(gui_position const& position, gui_dimension const& dimension, gui_label_edit_cell_split split)
 {
   param_section_gui result = {};
+  result.cell_split = split;
   result.position = position;
   result.dimension = dimension;
   return result;

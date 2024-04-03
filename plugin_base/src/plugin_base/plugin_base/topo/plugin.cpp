@@ -26,7 +26,7 @@ module_section_gui::validate(plugin_topo const& plugin, int index_) const
     assert(tab_order.size());
     assert(dimension.column_sizes.size() == 1 && dimension.row_sizes.size() == 1);
   } else
-    dimension.validate(vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), include, always_visible);
+    dimension.validate(gui_label_edit_cell_split::no_split, vector_map(plugin.modules, [](auto const& p) { return p.gui.position; }), {}, include, always_visible);
 }
 
 void
@@ -52,8 +52,8 @@ plugin_topo::validate() const
     all_sections.push_back(std::make_pair(gui.custom_sections[i].position, true));
   for (int i = 0; i < gui.module_sections.size(); i++)
     all_sections.push_back(std::make_pair(gui.module_sections[i].position, gui.module_sections[i].visible));
-  gui.dimension_factory(plugin_topo_gui_theme_settings()).validate(vector_map(all_sections,
-    [](auto const& s) { return s.first; }), 
+  gui.dimension_factory(plugin_topo_gui_theme_settings()).validate(gui_label_edit_cell_split::no_split, 
+    vector_map(all_sections, [](auto const& s) { return s.first; }), {},
     [&all_sections](int i) { return all_sections[i].second; }, return_true);
   
   for(int s = 0; s < gui.custom_sections.size(); s++)
