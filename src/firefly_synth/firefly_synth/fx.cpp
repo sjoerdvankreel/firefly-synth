@@ -624,7 +624,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   svf_mode.info.description = "Selects the state-variable filter mode.";
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag_basic("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter"),
-    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { 1, 1, 1, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, 1 } }, gui_label_edit_cell_split::horizontal)));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
