@@ -159,7 +159,7 @@ grid_component::fixed_width(int parent_w, int parent_h) const
   for(int c = 0; c < _dimension.column_sizes.size(); c++)
     for (int i = 0; i < _positions.size(); i++)
       if(_positions[i].column == c)
-        if(_positions[i].row == _autofit_row)
+        if(_positions[i].row == _autofit_row || _dimension.column_sizes[c] == gui_dimension::auto_size_all)
         {
           auto child_ptr = getChildComponent(i);
           assert(dynamic_cast<autofit_component*>(child_ptr));
@@ -167,9 +167,11 @@ grid_component::fixed_width(int parent_w, int parent_h) const
           assert(child.fixed_width(parent_w, parent_h) > 0);
           result += child.fixed_width(parent_w, parent_h);
         }
-  result += (_dimension.column_sizes.size() - 1) * _gap_size;
   // correct for rounding errors
-  return result + (int)std::ceil(_dimension.column_sizes.size() * 0.5f);
+  result += (_dimension.column_sizes.size() - 1) * _gap_size;
+  result = result + (int)std::ceil(_dimension.column_sizes.size() * 0.5f);
+  assert(result > 0);
+  return result;
 }
 
 int 
@@ -180,15 +182,17 @@ grid_component::fixed_height(int parent_w, int parent_h) const
   for (int r = 0; r < _dimension.row_sizes.size(); r++)
     for (int i = 0; i < _positions.size(); i++)
       if (_positions[i].row == r)
-        if (_positions[i].column == _autofit_column)
+        if (_positions[i].column == _autofit_column || _dimension.row_sizes[r] == gui_dimension::auto_size_all)
         {
           auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
           assert(child.fixed_height(parent_w, parent_h) > 0);
           result += child.fixed_height(parent_w, parent_h);
         }
-  result += (_dimension.row_sizes.size() - 1) * _gap_size + _dimension.row_sizes.size();
   // correct for rounding errors
-  return result + (int)std::ceil(_dimension.row_sizes.size() * 0.5f);
+  result += (_dimension.row_sizes.size() - 1) * _gap_size + _dimension.row_sizes.size();
+  result = result + (int)std::ceil(_dimension.row_sizes.size() * 0.5f);
+  assert(result > 0);
+  return result;
 }
 
 void 
@@ -203,12 +207,13 @@ grid_component::resized()
   float col_width_even_distrib = (getWidth() - _gap_size * (_dimension.column_sizes.size() - 1)) / (float)_dimension.column_sizes.size();
 
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
-    if (_dimension.row_sizes[i] == gui_dimension::auto_size)
+    if (_dimension.row_sizes[i] == gui_dimension::auto_size ||
+       _dimension.row_sizes[i] == gui_dimension::auto_size_all)
     {
       // autosize, dont bother with span
       int max_col_height = 0;
       for (int p = 0; p < _positions.size(); p++)
-        if (_positions[p].column == _autofit_column && _positions[p].row == i)
+        if ((_positions[p].row == i) && (_positions[p].column == _autofit_column || _dimension.row_sizes[i] == gui_dimension::auto_size_all))
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
           assert(autofit_child);
@@ -217,20 +222,20 @@ grid_component::resized()
           max_col_height = std::max(max_col_height, fixed_height);
         }
       grid.templateRows.add(Grid::Px(max_col_height));
-    }
-    else if(_dimension.row_sizes[i] > 0)
+    } else if(_dimension.row_sizes[i] > 0)
       grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
     else if (_dimension.row_sizes[i] < 0)
       grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
     else assert(false);
 
   for(int i = 0; i < _dimension.column_sizes.size(); i++)
-    if (_dimension.column_sizes[i] == gui_dimension::auto_size)
+    if (_dimension.column_sizes[i] == gui_dimension::auto_size ||
+        _dimension.column_sizes[i] == gui_dimension::auto_size_all)
     {
       // autosize, dont bother with span
       int max_row_width = 0;
       for (int p = 0; p < _positions.size(); p++)
-        if (_positions[p].row == _autofit_row && _positions[p].column == i)
+        if (_positions[p].column == i && (_positions[p].row == _autofit_row || _dimension.column_sizes[i] == gui_dimension::auto_size_all))
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
           assert(autofit_child);
