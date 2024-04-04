@@ -606,7 +606,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info_basic("{960E70F9-AB6E-4A9A-A6A7-B902B4223AF2}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(global), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_svf);
@@ -619,7 +619,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{784282D2-89DB-4053-9206-E11C01F37754}", true, "SV Filter Mode", "Mode", "SVF.Mode", param_svf_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(svf_mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   svf_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf || vs[0] == type_off; });
   svf_mode.info.description = "Selects the state-variable filter mode.";
@@ -666,7 +666,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{93E738FC-F0D1-471C-B46E-467C5869BB03}", true, "Comb Filter Mode", "Mode", "Cmb Mode", param_comb_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(comb_mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   comb_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.info.description = "Selects the comb filter mode.";
@@ -711,7 +711,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{D62129D2-9818-4C05-9705-3D6AEAABA636}", true, "Dist Mode", "Mode", "Dst.Mode", param_dist_mode, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::autofit_list, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   dist_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mode.info.description = std::string("Affects where the filter is placed.<br/ >") +
@@ -819,7 +819,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{C2E282BA-9E4F-4AE6-A055-8B5456780C66}", true, "Delay Mode", "Mode", "Dly Mode", param_dly_mode, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_item(dly_mode_items(), ""),
     make_param_gui_single(section_main, gui_edit_type::list, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   delay_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_mode.info.description = "Selects feedback or multi-tap delay.";
@@ -941,7 +941,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Rev Mix", param_reverb_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_main, gui_edit_type::hslider, { 1, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::far))));
   reverb_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_mix.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_mix.info.description = "Reverb dry/wet control.";
