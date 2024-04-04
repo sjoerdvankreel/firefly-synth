@@ -166,10 +166,15 @@ gui_dimension::validate(
   {
     split_column_sizes.clear();
     for(int i = 0; i < label_contents.size(); i++)
+    {
+      if (!include(i)) continue;
+      if (children[i].row != 0) continue;
+      assert(children[i].column_span == 1);
       if(label_contents[i] == gui_label_contents::none)
         split_column_sizes.insert(split_column_sizes.end(), 1);
       else
         split_column_sizes.insert(split_column_sizes.end(), { 1, 1});
+    }
   }
 
   assert(0 < split_row_sizes.size() && split_row_sizes.size() < topo_max);
@@ -179,10 +184,17 @@ gui_dimension::validate(
   {
     if (!include(k)) continue;
     auto const& pos = children[k];
-    // TODO
-    for (int r = pos.row; r < pos.row + pos.row_span; r++)
-      for (int c = pos.column; c < pos.column + pos.column_span; c++)
-        PB_ASSERT_EXEC(taken.insert(std::make_pair(r, c)).second || !always_visible(k));
+    if (cell_split == gui_label_edit_cell_split::no_split)
+      for (int r = pos.row; r < pos.row + pos.row_span; r++)
+        for (int c = pos.column; c < pos.column + pos.column_span; c++)
+          PB_ASSERT_EXEC(taken.insert(std::make_pair(r, c)).second || !always_visible(k));
+    else if (label_contents[k] == gui_label_contents::none)
+      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
+    else
+    {
+      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
+      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column + 1)).second || !always_visible(k));
+    }
   }
   for (int r = 0; r < split_row_sizes.size(); r++)
     for (int c = 0; c < split_column_sizes.size(); c++)
