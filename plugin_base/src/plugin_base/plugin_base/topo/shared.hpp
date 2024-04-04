@@ -107,6 +107,7 @@ struct gui_position final {
   int column_span = 1;
 
   void validate(gui_dimension const& parent_dimension) const;
+  gui_position move(int dy, int dx) const { return { row + dy, column + dx, row_span, column_span }; }
 };
 
 // binding to enabled/visible

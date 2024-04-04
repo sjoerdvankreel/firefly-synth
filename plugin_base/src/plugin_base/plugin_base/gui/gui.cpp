@@ -729,7 +729,18 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
   grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
-      grid.add(make_params(module, &(*iter)), iter->param->gui.position);
+      if(section.gui.cell_split == gui_label_edit_cell_split::no_split)
+        grid.add(make_params(module, &(*iter)), iter->param->gui.position);
+      else if (section.gui.cell_split == gui_label_edit_cell_split::horizontal)
+      {
+        assert(iter->param->info.slot_count == 1);
+        assert(iter->param->gui.label.align == gui_label_align::left || iter->param->gui.label.align == gui_label_align::right);
+        int label_dx = iter->param->gui.label.align == gui_label_align::left? 0: 1;
+        int edit_dx = iter->param->gui.label.align == gui_label_align::left ? 1: 0;
+        grid.add(make_param_label(module, *iter, iter->param->gui.label.contents), iter->param->gui.position.move(0, label_dx));
+        grid.add(make_param_editor(module, *iter), iter->param->gui.position.move(0, edit_dx));
+      }
+      else assert(false);
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
     return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid);
