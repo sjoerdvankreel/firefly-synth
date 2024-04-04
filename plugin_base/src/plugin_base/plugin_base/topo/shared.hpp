@@ -151,7 +151,8 @@ struct gui_bindings final {
 // dimensions of own grid (relative distribution)
 // positive is relative, negative is absolute, 0 is auto
 struct gui_dimension final {
-  static inline int const auto_size = 0;
+  static inline int constexpr auto_size = std::numeric_limits<int>::max();
+  static inline int constexpr auto_size_all = std::numeric_limits<int>::max() - 1;
   std::vector<int> row_sizes = { 1 };
   std::vector<int> column_sizes = { 1 };
 

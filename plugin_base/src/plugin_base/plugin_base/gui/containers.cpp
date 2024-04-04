@@ -203,16 +203,12 @@ grid_component::resized()
   float col_width_even_distrib = (getWidth() - _gap_size * (_dimension.column_sizes.size() - 1)) / (float)_dimension.column_sizes.size();
 
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
-    if(_dimension.row_sizes[i] > 0)
-      grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
-    else if (_dimension.row_sizes[i] < 0)
-      grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
-    else 
+    if (_dimension.row_sizes[i] == gui_dimension::auto_size)
     {
       // autosize, dont bother with span
       int max_col_height = 0;
-      for(int p = 0; p < _positions.size(); p++)
-        if(_positions[p].column == _autofit_column && _positions[p].row == i)
+      for (int p = 0; p < _positions.size(); p++)
+        if (_positions[p].column == _autofit_column && _positions[p].row == i)
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
           assert(autofit_child);
@@ -222,14 +218,15 @@ grid_component::resized()
         }
       grid.templateRows.add(Grid::Px(max_col_height));
     }
+    else if(_dimension.row_sizes[i] > 0)
+      grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
+    else if (_dimension.row_sizes[i] < 0)
+      grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
+    else assert(false);
 
   for(int i = 0; i < _dimension.column_sizes.size(); i++)
-    if(_dimension.column_sizes[i] > 0)
-      grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
-    else if (_dimension.column_sizes[i] < 0)
-      grid.templateColumns.add(Grid::Px(-_dimension.column_sizes[i]));
-    else 
-    { 
+    if (_dimension.column_sizes[i] == gui_dimension::auto_size)
+    {
       // autosize, dont bother with span
       int max_row_width = 0;
       for (int p = 0; p < _positions.size(); p++)
@@ -243,6 +240,11 @@ grid_component::resized()
         }
       grid.templateColumns.add(Grid::Px(max_row_width));
     }
+    else if(_dimension.column_sizes[i] > 0)
+      grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
+    else if (_dimension.column_sizes[i] < 0)
+      grid.templateColumns.add(Grid::Px(-_dimension.column_sizes[i]));
+    else assert(false);
 
   for (int i = 0; i < _positions.size(); i++)
   {

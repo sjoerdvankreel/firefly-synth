@@ -155,6 +155,10 @@ gui_dimension::validate(
   std::function<bool(int)> include,
   std::function<bool(int)> always_visible) const
 {
+  for(int i = 0; i < row_sizes.size(); i++)
+    assert(row_sizes[i] != 0);
+  for (int i = 0; i < column_sizes.size(); i++)
+    assert(column_sizes[i] != 0);
   assert(cell_split == gui_label_edit_cell_split::no_split || label_contents.size() == children.size());
 
   std::set<std::pair<int, int>> taken;
@@ -167,13 +171,15 @@ gui_dimension::validate(
     split_column_sizes.clear();
     for(int i = 0; i < label_contents.size(); i++)
     {
+      // we don't need to bother with autosizing here!
+      // this is just to make sure each cell is filled exactly once
       if (!include(i)) continue;
       if (children[i].row != 0) continue;
       assert(children[i].column_span == 1);
       if(label_contents[i] == gui_label_contents::none)
         split_column_sizes.insert(split_column_sizes.end(), 1);
       else
-        split_column_sizes.insert(split_column_sizes.end(), { 1, 1});
+        split_column_sizes.insert(split_column_sizes.end(), { 1, 1 });
     }
   }
 
