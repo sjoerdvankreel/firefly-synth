@@ -164,7 +164,7 @@ static Component&
 make_patch_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto colors = lnf->section_gui_colors("Patch");
-  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 3 }, 2);
+  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 3 }, 2, 2, 0, 0);
   result.add(gui->make_load_button(), { 0, 0 });
   result.add(gui->make_save_button(), { 0, 1 });
   result.add(gui->make_init_button(), { 1, 0 });
@@ -178,7 +178,7 @@ static Component&
 make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 {
   auto colors = lnf->section_gui_colors("Tweak");
-  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 4 }, 2);
+  auto& result = store_component<grid_component>(store, gui_dimension{ 2, 4 }, 2, 2, 0, 0);
   auto& tweak_name_label = store_component<juce::Label>(store);
   tweak_name_label.setText("Tweak", juce::dontSendNotification);
   tweak_name_label.setJustificationType(Justification::centredLeft);
@@ -201,7 +201,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   auto colors = lnf->section_gui_colors("Title");
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
-  auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { gui_dimension::auto_size, 1 } }), 2, 0, 1);
+  auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { gui_dimension::auto_size, 1 } }), 2, 2, 0, 1);
   grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, lnf->theme(), "header.png", RectanglePlacement::xRight), { 0, 1, 2, 1 });
   auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);

@@ -15,8 +15,9 @@ namespace plugin_base {
 
 static int const margin_param = 1;
 static int const margin_module = 2;
-static int const margin_section = 2;
 static int const margin_content = 2;
+static int const margin_vsection = 2;
+static int const margin_hsection = 3;
 
 static std::vector<std::string> tab_menu_module_actions = { 
   "", "Clear", "Clear All", "Delete", "Insert Before", "Insert After", "Copy To", "Move To", "Swap With" };
@@ -592,7 +593,7 @@ Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf->theme_settings()), margin_module);
+  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf->theme_settings()), margin_module, margin_module, 0, 0);
   for(int s = 0; s < topo.gui.custom_sections.size(); s++)
     grid.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
   for(int s = 0; s < topo.gui.module_sections.size(); s++)
@@ -671,7 +672,7 @@ Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  auto& result = make_component<grid_component>(topo.gui.dimension, margin_section, topo.gui.autofit_row, topo.gui.autofit_column);
+  auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, margin_hsection, topo.gui.autofit_row, topo.gui.autofit_column);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
   add_hover_listener(result, gui_hover_type::module, module.info.global);
@@ -707,7 +708,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
   auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
-  auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, autofit_row, autofit_column);
+  auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
     std::string display_name = param->info.tag.display_name;
@@ -725,7 +726,7 @@ Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section)
 {
   auto const& params = module.params;
-  grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param);
+  grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param, margin_param, 0, 0);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
       if(section.gui.cell_split == gui_label_edit_cell_split::no_split)
@@ -766,7 +767,7 @@ plugin_gui::make_module_section(module_section_gui const& section)
   auto const& modules = _gui_state->desc().modules;
   if (!section.tabbed)
   {
-    auto& grid = make_component<grid_component>(section.dimension, margin_module);
+    auto& grid = make_component<grid_component>(section.dimension, margin_module, margin_module, 0, 0);
     for (auto iter = modules.begin(); iter != modules.end(); iter += iter->module->info.slot_count)
       if (iter->module->gui.visible && iter->module->gui.section == section.index)
         grid.add(make_modules(&(*iter)), iter->module->gui.position);
@@ -880,7 +881,7 @@ plugin_gui::make_param_label_edit(module_desc const& module, param_desc const& p
     return *((Component*)nullptr);
   }
 
-  auto& result = make_component<grid_component>(dimension, 0);
+  auto& result = make_component<grid_component>(dimension, 0, 0, 0, 0);
   result.add(make_param_label(module, param, param.param->gui.label.contents), label_position);
   result.add(make_param_editor(module, param), edit_position);
   return result;

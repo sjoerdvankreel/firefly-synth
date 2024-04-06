@@ -168,7 +168,7 @@ grid_component::fixed_width(int parent_w, int parent_h) const
           result += child.fixed_width(parent_w, parent_h);
         }
   // correct for rounding errors
-  result += (_dimension.column_sizes.size() - 1) * _gap_size;
+  result += (_dimension.column_sizes.size() - 1) * _hgap_size;
   result = result + (int)std::ceil(_dimension.column_sizes.size() * 0.5f);
   assert(result > 0);
   return result;
@@ -189,7 +189,7 @@ grid_component::fixed_height(int parent_w, int parent_h) const
           result += child.fixed_height(parent_w, parent_h);
         }
   // correct for rounding errors
-  result += (_dimension.row_sizes.size() - 1) * _gap_size + _dimension.row_sizes.size();
+  result += (_dimension.row_sizes.size() - 1) * _vgap_size + _dimension.row_sizes.size();
   result = result + (int)std::ceil(_dimension.row_sizes.size() * 0.5f);
   assert(result > 0);
   return result;
@@ -199,12 +199,12 @@ void
 grid_component::resized()
 {
   Grid grid;
-  grid.rowGap = Grid::Px(_gap_size);
-  grid.columnGap = Grid::Px(_gap_size);
+  grid.rowGap = Grid::Px(_vgap_size);
+  grid.columnGap = Grid::Px(_hgap_size);
 
   // Note: this doesnt take into account autosizing interaction (i.e. multiple rows or cols being autosize target).
-  float row_height_even_distrib = (getHeight() - _gap_size * (_dimension.row_sizes.size() - 1)) / (float)_dimension.row_sizes.size();
-  float col_width_even_distrib = (getWidth() - _gap_size * (_dimension.column_sizes.size() - 1)) / (float)_dimension.column_sizes.size();
+  float row_height_even_distrib = (getHeight() - _vgap_size * (_dimension.row_sizes.size() - 1)) / (float)_dimension.row_sizes.size();
+  float col_width_even_distrib = (getWidth() - _hgap_size * (_dimension.column_sizes.size() - 1)) / (float)_dimension.column_sizes.size();
 
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
     if (_dimension.row_sizes[i] == gui_dimension::auto_size ||
