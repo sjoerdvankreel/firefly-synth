@@ -730,21 +730,27 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
     if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
       if(section.gui.cell_split == gui_label_edit_cell_split::no_split)
         grid.add(make_params(module, &(*iter)), iter->param->gui.position);
-      else if (section.gui.cell_split == gui_label_edit_cell_split::horizontal)
+      else
       {
         assert(iter->param->info.slot_count == 1);
-        assert(iter->param->gui.label.align == gui_label_align::left || iter->param->gui.label.align == gui_label_align::right);
         if (iter->param->gui.label.contents == gui_label_contents::none)
           grid.add(make_param_editor(module, *iter), iter->param->gui.position);
-        else
+        else if (section.gui.cell_split == gui_label_edit_cell_split::horizontal)
         {
+          assert(iter->param->gui.label.align == gui_label_align::left || iter->param->gui.label.align == gui_label_align::right);
           int label_dx = iter->param->gui.label.align == gui_label_align::left ? 0 : 1;
           int edit_dx = iter->param->gui.label.align == gui_label_align::left ? 1 : 0;
           grid.add(make_param_label(module, *iter, iter->param->gui.label.contents), iter->param->gui.position.move(0, label_dx));
           grid.add(make_param_editor(module, *iter), iter->param->gui.position.move(0, edit_dx));
-        }
+        } else if (section.gui.cell_split == gui_label_edit_cell_split::vertical)
+        {
+          assert(iter->param->gui.label.align == gui_label_align::top || iter->param->gui.label.align == gui_label_align::bottom);
+          int label_dy = iter->param->gui.label.align == gui_label_align::top ? 0 : 1;
+          int edit_dy = iter->param->gui.label.align == gui_label_align::top ? 1 : 0;
+          grid.add(make_param_label(module, *iter, iter->param->gui.label.contents), iter->param->gui.position.move(label_dy, 0));
+          grid.add(make_param_editor(module, *iter), iter->param->gui.position.move(edit_dy, 0));
+        } else assert(false);
       }
-      else assert(false);
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
     return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid);

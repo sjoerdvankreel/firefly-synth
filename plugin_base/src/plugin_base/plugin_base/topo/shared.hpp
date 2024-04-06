@@ -21,7 +21,7 @@ enum class gui_scroll_mode { none, vertical };
 enum class gui_label_justify { near, far, center };
 enum class gui_label_contents { none, name, value };
 enum class gui_label_align { top, bottom, left, right };
-enum class gui_label_edit_cell_split { no_split, horizontal };
+enum class gui_label_edit_cell_split { no_split, horizontal, vertical };
 enum class gui_edit_type { none, toggle, list, autofit_list, knob, hslider, vslider, output, output_module_name };
 
 typedef std::function<bool(int module_slot)>

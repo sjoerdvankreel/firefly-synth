@@ -709,7 +709,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     "Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>" +
     "Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.";
   auto& distortion_left = result.sections.emplace_back(make_param_section(section_dist,
-    make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
+    make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Left"),
     make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
@@ -814,14 +814,13 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_mode.info.description = "Selects feedback or multi-tap delay.";
   auto& delay_left = result.sections.emplace_back(make_param_section(section_delay_left,
     make_topo_tag_basic("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay Left"),
-    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { 1 } }, gui_label_edit_cell_split::vertical)));
   delay_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_sync = result.params.emplace_back(make_param(
     make_topo_info("{50E6B543-9BC2-490A-8CE3-CB80076BD8E1}", true, "Tempo Sync", "Sync", "Sync", param_dly_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
     make_param_gui_single(section_delay_left, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   delay_sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_sync.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_sync.info.description = "Toggles time or tempo-synced type.";
