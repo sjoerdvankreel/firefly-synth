@@ -686,8 +686,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   float padding = tabular? _theme_settings.tabular_knob_padding: _theme_settings.knob_padding;
   float size = size_base - padding - stroke / 2;
-  float left = s.getWidth() - size - padding;
-  if(tabular) left = (s.getWidth() - size) / 2;
+  float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 
   bool bipolar = s.getMinimum() < 0;
