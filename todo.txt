@@ -30,7 +30,12 @@ solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
 
-v1.7:
+v1.7
+align labels etc
+make it vertically smaller
+do distinction between voice/global/matrix in the ui for all themes
+
+v1.8:
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 do async clear delay lines etc on patch select -> 
