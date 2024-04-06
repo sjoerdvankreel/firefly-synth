@@ -24,7 +24,7 @@ static float const log_half = std::log(0.5f);
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
-enum { section_left_top, section_left_bottom, section_sync, section_right_top, section_right_bottom };
+enum { section_left, section_sync, section_right_top, section_right_bottom };
 enum { 
   param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_shape, param_skew_y, param_skew_y_amt,
@@ -352,25 +352,21 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     return render_graph(state, engine, param, mapping); };
   result.state_converter_factory = [global](auto desc) { return std::make_unique<lfo_state_converter>(desc, global); };
 
-  result.sections.emplace_back(make_param_section(section_left_top,
-    make_topo_tag_basic("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Left Top"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { { 1 } }))));
+  result.sections.emplace_back(make_param_section(section_left,
+    make_topo_tag_basic("{F0002F24-0CA7-4DF3-A5E3-5B33055FD6DC}", "Left"),
+    make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size_all, 1 } }), gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_left_top, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_left, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   type.info.description = std::string("Selects time or tempo-synced and repeating or one-shot type. ") +
     "For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. " + 
     "For phase one-shot type, the end value takes the phase offset parameter into account.";
-
-  result.sections.emplace_back(make_param_section(section_left_bottom,
-    make_topo_tag_basic("{98869A27-5991-4BA3-9481-01636BDACDCB}", "Left Bottom"),
-    make_param_section_gui({ 1, 0 }, gui_dimension({ 1 }, { 1 }))));
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
-    make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 0 },
+    make_param_gui_single(section_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
@@ -378,7 +374,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
-    make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 0 },
+    make_param_gui_single(section_left, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
