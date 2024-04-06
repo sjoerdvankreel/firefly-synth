@@ -585,7 +585,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 4, 7, 7 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 8, 9, 19 } })));
  
   result.graph_engine_factory = make_graph_engine;
   if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s); };
@@ -722,7 +722,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_skew_in_amt = result.params.emplace_back(make_param(
     make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew In Amt", "Skew In", "Dst Sk In", param_dist_skew_in_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_left, gui_edit_type::hslider, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_dist_left, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_in }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
@@ -736,7 +736,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Out Amt", "Skew Out", "Dst Sk Out", param_dist_skew_out_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_left, gui_edit_type::hslider, { 1, 2 }, make_label_none())));
+    make_param_gui_single(section_dist_left, gui_edit_type::knob, { 1, 2 }, make_label_none())));
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_out }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
