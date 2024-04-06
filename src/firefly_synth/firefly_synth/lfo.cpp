@@ -24,9 +24,9 @@ static float const log_half = std::log(0.5f);
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
-enum { section_left_top, section_left_bottom, section_right_top, section_right_bottom };
+enum { section_left_top, section_left_bottom, section_sync, section_right_top, section_right_bottom };
 enum { 
-  param_type, param_sync, param_rate, param_tempo, 
+  param_type, param_rate, param_tempo, param_sync,
   param_skew_x, param_skew_x_amt, param_shape, param_skew_y, param_skew_y_amt,
   param_seed, param_steps, param_filter, param_phase };
 
@@ -366,18 +366,11 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   result.sections.emplace_back(make_param_section(section_left_bottom,
     make_topo_tag_basic("{98869A27-5991-4BA3-9481-01636BDACDCB}", "Left Bottom"),
-    make_param_section_gui({ 1, 0 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, 1 } }))));
-  auto& sync = result.params.emplace_back(make_param(
-    make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
-    make_param_gui_single(section_left_bottom, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  sync.info.description = "Toggles time or tempo-synced type.";
+    make_param_section_gui({ 1, 0 }, gui_dimension({ 1 }, { 1 }))));
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
-    make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 1 },
+    make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
@@ -385,17 +378,28 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
-    make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 1 },
+    make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
   tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
   tempo.info.description = "LFO rate in bars.";
 
+  result.sections.emplace_back(make_param_section(section_sync,
+    make_topo_tag_basic("{404ADE73-7C3D-4BEF-8B5A-2E6DE467AB37}", "Sync"),
+    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical)));
+  auto& sync = result.params.emplace_back(make_param(
+    make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
+    make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+  sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  sync.info.description = "Toggles time or tempo-synced type.";
+
   // Don't include the phase param for global lfo.
   result.sections.emplace_back(make_param_section(section_right_top,
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right Top"),
-    make_param_section_gui({ 0, 1, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 2, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& x_mode = result.params.emplace_back(make_param(
     make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
@@ -437,7 +441,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if (!global) column_sizes.push_back(1);
   result.sections.emplace_back(make_param_section(section_right_bottom,
     make_topo_tag_basic("{898CC825-49AE-4A62-B7D8-76CE67D05F5C}", "Right Bottom"),
-    make_param_section_gui({ 1, 1, 1, 2 }, gui_dimension({ 1 }, column_sizes))));
+    make_param_section_gui({ 1, 2, 1, 1 }, gui_dimension({ 1 }, column_sizes))));
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info_basic("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", param_seed, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
