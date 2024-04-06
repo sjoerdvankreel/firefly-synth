@@ -586,7 +586,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 2, 7 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 4, 7, 7 } })));
  
   result.graph_engine_factory = make_graph_engine;
   if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s); };
@@ -625,7 +625,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   svf_mode.info.description = "Selects the state-variable filter mode.";
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag_basic("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter"),
-    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
@@ -667,7 +667,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   comb_mode.info.description = "Selects the comb filter mode.";
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag_basic("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter"),
-    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Cmb Dly+", param_comb_dly_plus, 1),
@@ -711,7 +711,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     "Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.";
   auto& distortion_top = result.sections.emplace_back(make_param_section(section_dist_top,
     make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Top"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 0, 1, 1, 2 }, { { 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   distortion_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_skew_in = result.params.emplace_back(make_param(
     make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew In Mode", "Skew In", "Dst Sk In", param_dist_skew_in, 1),
@@ -750,7 +750,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_skew_out_amt.info.description = "After-shape skew amount.";
   auto& distortion_bottom = result.sections.emplace_back(make_param_section(section_dist_bottom,
     make_topo_tag_basic("{A6A60A20-DADD-42B5-B307-D5B35AABB510}", "Distortion Bottom"),
-    make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+    make_param_section_gui({ 1, 1, 1, 2 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
   distortion_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "Oversample", "Dst.OverSmp", param_dist_over, 1),
@@ -816,7 +816,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_mode.info.description = "Selects feedback or multi-tap delay.";
   auto& delay_top = result.sections.emplace_back(make_param_section(section_delay_top,
     make_topo_tag_basic("{E92225CF-21BF-459C-8C9D-8E50285F26D4}", "Delay Top"),
-    make_param_section_gui({ 0, 1 }, { { 1 }, { 1, 1, 1 } })));
+    make_param_section_gui({ 0, 1, 1, 2 }, { { 1 }, { 1, 1, 1 } })));
   delay_top.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_amt = result.params.emplace_back(make_param(
     make_topo_info("{7CEE3B9A-99CF-46D3-847B-42F91A4F5227}", true, "Delay Amount", "Amount", "Dly Amt", param_dly_amt, 1),
@@ -841,7 +841,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_mix.info.description = "Dry/wet control.";
   auto& delay_bottom = result.sections.emplace_back(make_param_section(section_delay_bottom,
     make_topo_tag_basic("{D8A8921D-C84F-4284-9F2C-03E286CBCDCF}", "Delay Bottom"),
-    make_param_section_gui({ 1, 1 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1 } })));
+    make_param_section_gui({ 1, 1, 1, 2 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1 } })));
   delay_bottom.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   auto& delay_sync = result.params.emplace_back(make_param(
     make_topo_info("{50E6B543-9BC2-490A-8CE3-CB80076BD8E1}", true, "Tempo Sync", "Sync", "Sync", param_dly_sync, 1),
@@ -938,7 +938,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   reverb_mix.info.description = "Reverb dry/wet control.";
   auto& reverb = result.sections.emplace_back(make_param_section(section_reverb,
     make_topo_tag_basic("{92EFDFE7-41C5-4E9D-9BE6-DC56965C1C0D}", "Reverb Top"),
-    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   reverb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_size = result.params.emplace_back(make_param(
     make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", true, "Reverb Size", "Size", "Rev Size", param_reverb_size, 1),
