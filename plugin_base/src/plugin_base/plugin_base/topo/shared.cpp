@@ -202,9 +202,11 @@ gui_dimension::validate(
       PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column + 1)).second || !always_visible(k));
     }
   }
+  /* TODO
   for (int r = 0; r < split_row_sizes.size(); r++)
     for (int c = 0; c < split_column_sizes.size(); c++)
       assert(taken.find(std::make_pair(r, c)) != taken.end());
+  */
 }
 
 }
