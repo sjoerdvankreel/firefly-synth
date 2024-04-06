@@ -2950,22 +2950,6 @@
 <td colspan='11' class='description'>Before-shape skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Shaper</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist Skew Out Mode</td>
 <td>Distortion Top</td>
 <td>Yes</td>
@@ -2998,8 +2982,24 @@
 <td colspan='11' class='description'>After-shape skew amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Shaper</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Foldback</td>
+<td>Sin</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Oversampling</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3015,7 +3015,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Frequency</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3031,7 +3031,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Res</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3046,24 +3046,8 @@
 <td colspan='11' class='description'>Lowpass filter resonance inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Gain</td>
-<td>Distortion Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0.10</td>
-<td>32.00</td>
-<td>1.00</td>
-<td>1.00</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist Clip Mode</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3079,7 +3063,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Exp</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3094,8 +3078,24 @@
 <td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Gain</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.10</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Mix</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3497,22 +3497,6 @@
 <td colspan='11' class='description'>Before-shape skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Shaper</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist Skew Out Mode</td>
 <td>Distortion Top</td>
 <td>Yes</td>
@@ -3545,8 +3529,24 @@
 <td colspan='11' class='description'>After-shape skew amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Shaper</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Foldback</td>
+<td>Sin</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Oversampling</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3562,7 +3562,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Frequency</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3578,7 +3578,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Res</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3593,24 +3593,8 @@
 <td colspan='11' class='description'>Lowpass filter resonance inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Gain</td>
-<td>Distortion Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0.10</td>
-<td>32.00</td>
-<td>1.00</td>
-<td>1.00</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist Clip Mode</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3626,7 +3610,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Exp</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3641,8 +3625,24 @@
 <td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Gain</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.10</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Mix</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
