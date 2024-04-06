@@ -708,13 +708,13 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     "No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>" +
     "Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>" +
     "Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.";
-  auto& distortion_left = result.sections.emplace_back(make_param_section(section_dist,
-    make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Left"),
+  auto& distortion = result.sections.emplace_back(make_param_section(section_dist,
+    make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion"),
     make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
       gui_dimension::auto_size, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
-  distortion_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  distortion.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_skew_in = result.params.emplace_back(make_param(
     make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew In Mode", "Skew In", "Dst Sk In", param_dist_skew_in, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
@@ -745,7 +745,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_skew_out_amt.info.description = "After-shape skew amount.";
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dst.Shape", param_dist_shaper, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), "Sin"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), ""),
     make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 3 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
@@ -773,7 +773,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_res.info.description = "Lowpass filter resonance inside the oversampling stage.";
   auto& dist_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dst Clip", param_dist_clip, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Hard"),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Tanh"),
     make_param_gui_single(section_dist, gui_edit_type::autofit_list, { 0, 7 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });

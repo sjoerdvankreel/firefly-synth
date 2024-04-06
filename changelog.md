@@ -1,3 +1,7 @@
+### ?, ? - V1.7.0.
+
+- Changed default distortion mode to plain tanh clipper.
+
 ### April 2, 2024 - V1.6.1.
 
 - Add Intel Mac support.
