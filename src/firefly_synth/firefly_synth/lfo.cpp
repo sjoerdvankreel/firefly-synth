@@ -24,11 +24,11 @@ static float const log_half = std::log(0.5f);
 enum class lfo_stage { cycle, filter, end };
 enum { scratch_rate, scratch_count };
 enum { type_off, type_repeat, type_one_shot, type_one_phase };
-enum { section_left, section_sync, section_right_top, section_right_bottom };
-enum { 
+enum { section_left, section_sync, section_right, section_phase };
+enum {
   param_type, param_rate, param_tempo, param_sync,
-  param_skew_x, param_skew_x_amt, param_shape, param_skew_y, param_skew_y_amt,
-  param_seed, param_steps, param_filter, param_phase };
+  param_skew_x, param_skew_x_amt, param_skew_y, param_skew_y_amt,
+  param_shape, param_steps, param_seed, param_filter, param_phase };
 
 static bool is_noise(int shape) {
   return shape == wave_shape_type_smooth || shape == wave_shape_type_static || shape == wave_shape_type_static_free; }
@@ -339,10 +339,12 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     "static noise and free-running static noise, smoothing control, phase andjustment, stair-stepping " +
     "and horizontal and vertical skewing controls with various types.";
 
+  std::vector<int> column_sizes = { 16, 5, 51 };
+  if(!global) column_sizes = { 16, 5, 46, 5 };
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 16, 5, 51 } })));
+    make_module_gui(section, pos, { { 1, 1 }, column_sizes })));
   
   result.graph_engine_factory = make_graph_engine;
   if(global && !is_fx) result.default_initializer = init_global_default;
@@ -388,85 +390,82 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
     make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::near))));
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   sync.info.description = "Toggles time or tempo-synced type.";
 
-  // Don't include the phase param for global lfo.
-  result.sections.emplace_back(make_param_section(section_right_top,
-    make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right Top"),
-    make_param_section_gui({ 0, 2, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+  result.sections.emplace_back(make_param_section(section_right,
+    make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right"),
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({1, 1}, {
+    gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
+    gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& x_mode = result.params.emplace_back(make_param(
     make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_right, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   x_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   x_mode.info.description = "Horizontal skew mode.";
   auto& x_amt = result.params.emplace_back(make_param(
     make_topo_info("{8CEDE705-8901-4247-9854-83FB7BEB14F9}", true, "Skew X Amt", "Skew X", "Skew X", param_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_right_top, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_right, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   x_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_x }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
   x_amt.info.description = "Horizontal skew amount.";
-  auto& shape = result.params.emplace_back(make_param(
-    make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false), "Sin"),
-    make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  shape.info.description = std::string("Selects waveform plus horizontal and vertical skewing modes. ") +
-    "Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. " +
-    "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& y_mode = result.params.emplace_back(make_param(
     make_topo_info("{5D716AA7-CAE6-4965-8FC1-345DAA7141B6}", true, "Skew Y Mode", "Skew Y", "Skew Y", param_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_right_top, gui_edit_type::autofit_list, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_right, gui_edit_type::autofit_list, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   y_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   y_mode.info.description = "Vertical skew mode.";
   auto& y_amt = result.params.emplace_back(make_param(
     make_topo_info("{8939B05F-8677-4AA9-8C4C-E6D96D9AB640}", true, "Skew Y Amt", "Skew Y", "Skew Y", param_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_right_top, gui_edit_type::hslider, { 0, 4 }, make_label_none())));
+    make_param_gui_single(section_right, gui_edit_type::knob, { 1, 2 }, make_label_none())));
   y_amt.gui.bindings.enabled.bind_params({ param_type, param_skew_y }, [](auto const& vs) { return vs[0] != type_off && vs[1] != wave_skew_type_off; });
   y_amt.info.description = "Vertical skew amount.";
-
-  // Don't include the phase param for global lfo.
-  std::vector<int> column_sizes(3, 1);
-  if (!global) column_sizes.push_back(1);
-  result.sections.emplace_back(make_param_section(section_right_bottom,
-    make_topo_tag_basic("{898CC825-49AE-4A62-B7D8-76CE67D05F5C}", "Right Bottom"),
-    make_param_section_gui({ 1, 2, 1, 1 }, gui_dimension({ 1 }, column_sizes))));
-  auto& seed = result.params.emplace_back(make_param(
-    make_topo_info_basic("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", param_seed, 1),
-    make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
-    make_param_gui_single(section_right_bottom, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise(vs[1]); });
-  seed.info.description = "Seed value for static and smooth noise generators.";
+  auto& shape = result.params.emplace_back(make_param(
+    make_topo_info_basic("{7D48C09B-AC99-4B88-B880-4633BC8DFB37}", "Shape", param_shape, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(false), "Sin"),
+    make_param_gui_single(section_right, gui_edit_type::autofit_list, { 0, 3 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  shape.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  shape.info.description = std::string("Selects waveform plus horizontal and vertical skewing modes. ") +
+    "Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. " +
+    "Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& steps = result.params.emplace_back(make_param(
     make_topo_info_basic("{445CF696-0364-4638-9BD5-3E1C9A957B6A}", "Steps", param_steps, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 99, 1, 0),
-    make_param_gui_single(section_right_bottom, gui_edit_type::hslider, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_right, gui_edit_type::hslider, { 1, 3 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   steps.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  steps.info.description = std::string("Step count for static and smooth noise generators, set to > 1. ") + 
+  steps.info.description = std::string("Step count for static and smooth noise generators, set to > 1. ") +
     "Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.";
+  auto& seed = result.params.emplace_back(make_param(
+    make_topo_info_basic("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", param_seed, 1),
+    make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
+    make_param_gui_single(section_right, gui_edit_type::hslider, { 0, 5 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  seed.gui.bindings.enabled.bind_params({ param_type, param_shape }, [](auto const& vs) { return vs[0] != type_off && is_noise(vs[1]); });
+  seed.info.description = "Seed value for static and smooth noise generators.";
   auto& smooth = result.params.emplace_back(make_param(
     make_topo_info_basic("{21DBFFBE-79DA-45D4-B778-AC939B7EF785}", "Smooth", param_filter, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_right_bottom, gui_edit_type::hslider, { 0, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_right, gui_edit_type::hslider, { 1, 5 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   smooth.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   smooth.info.description = "Applies a lowpass filter to smooth out rough edges.";
 
   if(global) return result;
+  result.sections.emplace_back(make_param_section(section_phase,
+    make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
+    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   auto& phase = result.params.emplace_back(make_param(
     make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", param_phase, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_right_bottom, gui_edit_type::hslider, { 0, 3 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_phase, gui_edit_type::knob, { 0, 0 },
+    make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   phase.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   phase.info.description = "In per-voice module, allows for phase adjustment of periodic generators.";
 
