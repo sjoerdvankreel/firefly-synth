@@ -398,7 +398,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right"),
     make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({1, 1}, {
     gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
-    gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+    gui_dimension::auto_size_all, gui_dimension::auto_size, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& x_mode = result.params.emplace_back(make_param(
     make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
