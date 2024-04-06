@@ -359,7 +359,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info_basic("{252D76F2-8B36-4F15-94D0-2E974EC64522}", "Type", param_type, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(type_items(), ""),
     make_param_gui_single(section_left_top, gui_edit_type::list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   type.info.description = std::string("Selects time or tempo-synced and repeating or one-shot type. ") +
     "For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. " + 
     "For phase one-shot type, the end value takes the phase offset parameter into account.";
@@ -371,20 +371,22 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
     make_param_gui_single(section_left_bottom, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   sync.info.description = "Toggles time or tempo-synced type.";
   auto& rate = result.params.emplace_back(make_param(
     make_topo_info_basic("{EE68B03D-62F0-4457-9918-E3086B4BCA1C}", "Rate", param_rate, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.01, 20, 1, 1, 2, "Hz"),
-    make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_left_bottom, gui_edit_type::hslider, { 0, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   rate.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] == 0; });
   rate.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] == 0; });
   rate.info.description = "LFO rate in Hz.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info_basic("{5D05DF07-9B42-46BA-A36F-E32F2ADA75E0}", "Tempo", param_tempo, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_timesig_default(false, { 16, 1 }, { 1, 4 }),
-    make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 1 }, make_label_none())));
+    make_param_gui_single(section_left_bottom, gui_edit_type::list, { 0, 1 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[0] != type_off && vs[1] != 0; });
   tempo.gui.bindings.visible.bind_params({ param_type, param_sync }, [](auto const& vs) { return vs[1] != 0; });
