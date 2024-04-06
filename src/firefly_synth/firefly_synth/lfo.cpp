@@ -342,7 +342,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 2, 7 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 16, 5, 51 } })));
   
   result.graph_engine_factory = make_graph_engine;
   if(global && !is_fx) result.default_initializer = init_global_default;
@@ -395,7 +395,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   // Don't include the phase param for global lfo.
   result.sections.emplace_back(make_param_section(section_right_top,
     make_topo_tag_basic("{A5B5DC53-2E73-4C0B-9DD1-721A335EA076}", "Right Top"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 1, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& x_mode = result.params.emplace_back(make_param(
     make_topo_info("{A95BA410-6777-4386-8E86-38B5CBA3D9F1}", true, "Skew X Mode", "Skew X", "Skew X", param_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
@@ -437,7 +437,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
   if (!global) column_sizes.push_back(1);
   result.sections.emplace_back(make_param_section(section_right_bottom,
     make_topo_tag_basic("{898CC825-49AE-4A62-B7D8-76CE67D05F5C}", "Right Bottom"),
-    make_param_section_gui({ 1, 1 }, gui_dimension({ 1 }, column_sizes))));
+    make_param_section_gui({ 1, 1, 1, 2 }, gui_dimension({ 1 }, column_sizes))));
   auto& seed = result.params.emplace_back(make_param(
     make_topo_info_basic("{19ED9A71-F50A-47D6-BF97-70EA389A62EA}", "Seed", param_seed, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_step(1, 255, 1, 0),
