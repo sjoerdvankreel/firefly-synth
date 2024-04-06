@@ -126,7 +126,6 @@ gui_vertical_distribution(int total_height, int font_height,
   {
     total_vsection_size += section_sizes[i].size_relative;
     module_fixed_height[i] += margin_module;
-    module_fixed_height[i] += (section_sizes[i].size_relative - 1) * margin_section;
     module_fixed_height[i] += section_sizes[i].header ? header_height + margin_module : 0;
     total_module_fixed_height += module_fixed_height[i];
   }
@@ -464,7 +463,7 @@ plugin_gui::param_mouse_enter(int param)
   for (int i = 0; i < _gui_mouse_listeners.size(); i++)
     _gui_mouse_listeners[i]->param_mouse_enter(param);
   _last_mouse_enter_param = param;
-}
+} 
 
 void
 plugin_gui::custom_mouse_exit(int section)

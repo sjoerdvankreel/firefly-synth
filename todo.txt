@@ -33,6 +33,7 @@ do visual am/fm demo
 v1.7
 align labels etc
 make it vertically smaller
+fix all themes aspect ratio height
 do distinction between voice/global/matrix in the ui for all themes
 
 v1.8:
