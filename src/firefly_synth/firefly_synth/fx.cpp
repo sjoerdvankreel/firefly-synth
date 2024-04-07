@@ -51,7 +51,8 @@ enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
-enum { section_main, section_svf, section_comb, section_dist_flt, section_dist_skew, section_dist_right, section_delay_left, section_delay_right, section_reverb };
+enum { section_main, section_svf_left, section_svf_right, section_comb_left, section_comb_right, 
+  section_dist_flt, section_dist_skew, section_dist_right, section_delay_left, section_delay_right, section_reverb };
 
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
@@ -60,7 +61,7 @@ enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reve
 static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, (int)scratch_reverb_count });
 
 enum { param_type,
-  param_svf_mode, param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
+  param_svf_mode, param_svf_kbd, param_svf_gain, param_svf_freq, param_svf_res,
   param_comb_mode, param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
   param_dist_mode, param_dist_lp_frq, param_dist_lp_res, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt, 
   param_dist_shaper, param_dist_over, param_dist_clip, param_dist_clip_exp, param_dist_gain, param_dist_mix,
@@ -622,39 +623,45 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   svf_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf || vs[0] == type_off; });
   svf_mode.info.description = "Selects the state-variable filter mode.";
-  auto& svf = result.sections.emplace_back(make_param_section(section_svf,
-    make_topo_tag_basic("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter"),
-    make_param_section_gui({ 0, 1, 2, 4 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
-  svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
-  svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
-  auto& svf_freq = result.params.emplace_back(make_param(
-    make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", true, "SV Filter Freq", "Freq", "SVF Freq", param_svf_freq, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
-    make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
-  svf_freq.info.description = "Controls filter frequency.";
-  auto& svf_res = result.params.emplace_back(make_param(
-    make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", true, "SV Filter Reso", "Reso", "SVF Reso", param_svf_res, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_svf, gui_edit_type::hslider, { 0, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
-  svf_res.info.description = "Controls filter resonance.";
+  auto& svf_left = result.sections.emplace_back(make_param_section(section_svf_left,
+    make_topo_tag_basic("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter Left"),
+    make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  svf_left.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_kbd = result.params.emplace_back(make_param(
     make_topo_info("{9EEA6FE0-983E-4EC7-A47F-0DFD79D68BCB}", true, "SV Filter KTrk", "KTrk", "SVF KTrk", param_svf_kbd, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, global? 0: 1, 0, true),
-    make_param_gui_single(section_svf, gui_edit_type::hslider, { 1, 0 },
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-2, 2, global ? 0 : 1, 0, true),
+    make_param_gui_single(section_svf_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_kbd.info.description = "Controls keyboard tracking with -/+2 octaves.";
   auto& svf_gain = result.params.emplace_back(make_param(
     make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", true, "SV Filter Shelf Gain", "Gain", "SVF Gain", param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
-    make_param_gui_single(section_svf, gui_edit_type::hslider, { 1, 2 },
+    make_param_gui_single(section_svf_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_mode }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
   svf_gain.info.description = "Controls filter gain for shelving filters.";
+  
+  auto& svf_right = result.sections.emplace_back(make_param_section(section_svf_right,
+    make_topo_tag_basic("{0068DAD1-DE32-43CE-9BFE-1CB5B6B7CA3B}", "SV Filter Left"),
+    make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  svf_right.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
+  auto& svf_freq = result.params.emplace_back(make_param(
+    make_topo_info("{02D1D13E-7B78-4702-BB49-22B4E3AE1B1F}", true, "SV Filter Freq", "Freq", "SVF Freq", param_svf_freq, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_log(flt_min_freq, flt_max_freq, 1000, 1000, 0, "Hz"),
+    make_param_gui_single(section_svf_right, gui_edit_type::hslider, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_freq.info.description = "Controls filter frequency.";
+  auto& svf_res = result.params.emplace_back(make_param(
+    make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", true, "SV Filter Reso", "Reso", "SVF Reso", param_svf_res, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
+    make_param_gui_single(section_svf_right, gui_edit_type::hslider, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
+  svf_res.info.description = "Controls filter resonance.";
 
   auto& comb_mode = result.params.emplace_back(make_param(
     make_topo_info("{93E738FC-F0D1-471C-B46E-467C5869BB03}", true, "Comb Filter Mode", "Mode", "Cmb Mode", param_comb_mode, 1),
@@ -664,35 +671,40 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   comb_mode.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_mode.info.description = "Selects the comb filter mode.";
-  auto& comb = result.sections.emplace_back(make_param_section(section_comb,
+  auto& comb_left = result.sections.emplace_back(make_param_section(section_comb_left,
     make_topo_tag_basic("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter"),
-    make_param_section_gui({ 0, 1, 2, 4 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
-  comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
+    make_param_section_gui({ 0, 1, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  comb_left.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Cmb Dly+", param_comb_dly_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
-    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 0 },
+    make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_dly_plus.info.description = "Feed-forward time.";
   auto& comb_gain_plus = result.params.emplace_back(make_param(
     make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Cmb Gain+", param_comb_gain_plus, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0.5, 0, true),
-    make_param_gui_single(section_comb, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
   comb_gain_plus.info.description = "Feed-forward amount.";
+
+  auto& comb_right = result.sections.emplace_back(make_param_section(section_comb_right,
+    make_topo_tag_basic("{9B508F7D-1E8D-4775-96EA-6AE752EA6E55}", "Comb Filter"),
+    make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  comb_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_min = result.params.emplace_back(make_param(
     make_topo_info("{D4846933-6AED-4979-AA1C-2DD80B68404F}", true, "Comb Filter Delay-", "Delay-", "Cmb Dly-", param_comb_dly_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(comb_min_ms, comb_max_ms, 1, 2, "Ms"),
-    make_param_gui_single(section_comb, gui_edit_type::hslider, { 1, 0 },
+    make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_dly_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
   comb_dly_min.info.description = "Feed-back time.";
   auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Cmb Gain-", param_comb_gain_min, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_comb, gui_edit_type::hslider, { 1, 2 },
+    make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
   comb_gain_min.info.description = "Feed-back amount.";
