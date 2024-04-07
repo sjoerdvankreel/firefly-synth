@@ -221,10 +221,9 @@ gui_dimension::validate(
     }
     else assert(false);
   }
-  /* TODO for (int r = 0; r < split_row_sizes.size(); r++)
+  for (int r = 0; r < split_row_sizes.size(); r++)
     for (int c = 0; c < split_column_sizes.size(); c++)
       assert(taken.find(std::make_pair(r, c)) != taken.end());
-      */
 }
 
 }
