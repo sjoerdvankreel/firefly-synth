@@ -16,10 +16,10 @@ namespace firefly_synth {
 enum { output_pitch_offset };
 enum { over_1, over_2, over_4, over_8 };
 enum { porta_off, porta_on, porta_auto };
-enum { section_left, section_mid, section_right };
+enum { section_left, section_sync, section_mid, section_right };
 
 enum {
-  param_mode, param_porta, param_porta_sync, param_porta_time, param_porta_tempo, 
+  param_mode, param_porta_sync, param_porta, param_porta_time, param_porta_tempo,
   param_oversmp, param_note, param_cent, param_pitch, param_pb, param_count };
 
 extern int const voice_in_param_mode = param_mode;
@@ -94,7 +94,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "VIn", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, pos, { { 1 }, { 32, 47, 63 } } )));
+    make_module_gui(section, pos, { { 1 }, { 32, 13, 34, 63 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.";
   
   result.graph_renderer = render_graph;
@@ -116,9 +116,20 @@ voice_in_topo(int section, gui_position const& pos)
     "Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>"
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
 
+  result.sections.emplace_back(make_param_section(section_sync,
+    make_topo_tag_basic("{11E4DE4C-A824-424E-BC5E-014240518C0F}", "Sync"),
+    make_param_section_gui({ 0, 1 }, gui_dimension({ { 1 }, { { 1 } } }), gui_label_edit_cell_split::no_split)));
+  auto& sync = result.params.emplace_back(make_param(
+    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Porta Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
+    make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
+  sync.info.description = "Selects time or tempo-synced mode.";
+
   result.sections.emplace_back(make_param_section(section_mid,
     make_topo_tag_basic("{1C5D7493-AD1C-4F89-BF32-2D0092CB59EF}", "Mid"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ { 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } }))));
+    make_param_section_gui({ 0, 2 }, gui_dimension({ { 1 }, { { gui_dimension::auto_size, 1 } } }))));
   auto& porta = result.params.emplace_back(make_param(
     make_topo_info("{586BEE16-430A-483E-891B-48E89C4B8FC1}", true, "Porta Mode", "Porta", "Porta", param_porta, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(porta_items(), ""),
@@ -128,24 +139,17 @@ voice_in_topo(int section, gui_position const& pos)
     "Off - no portamento.<br/>" + 
     "On - glides 1 semitone in the specified time, so glide pitch is constant and glide time is variable.<br/>" +
     "Auto - glides pitch difference between old and new note in the specified time, so glide pitch is variable and glide time is constant.";
-  auto& sync = result.params.emplace_back(make_param(
-    make_topo_info("{FE70E21D-2104-4EB6-B852-6CD9690E5F72}", true, "Porta Tempo Sync", "Sync", "Sync", param_porta_sync, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_mid, gui_edit_type::toggle, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sync.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
-  sync.info.description = "Selects time or tempo-synced mode.";
   auto& time = result.params.emplace_back(make_param(
     make_topo_info("{E8301E86-B6EE-4F87-8181-959A05384866}", true, "Porta Time", "Time", "Time", param_porta_time, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_log(0.001, 10, 0.1, 1, 3, "Sec"),
-    make_param_gui_single(section_mid, gui_edit_type::hslider, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_mid, gui_edit_type::hslider, { 0, 1 }, make_label_none())));
   time.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   time.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 0; });
   time.info.description = "Pitch glide time in seconds.";
   auto& tempo = result.params.emplace_back(make_param(
     make_topo_info("{15271CBC-9876-48EC-BD3C-480FF68F9ACC}", true, "Porta Tempo", "Tempo", "Tempo", param_porta_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(false, {4, 1}, {1, 16}),
-    make_param_gui_single(section_mid, gui_edit_type::list, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_mid, gui_edit_type::list, { 0, 1 }, make_label_none())));
   tempo.gui.submenu = make_timesig_submenu(tempo.domain.timesigs);
   tempo.gui.bindings.enabled.bind_params({ param_porta }, [](auto const& vs) { return vs[0] != porta_off; });
   tempo.gui.bindings.visible.bind_params({ param_porta, param_porta_sync }, [](auto const& vs) { return vs[1] == 1; });
@@ -153,7 +157,7 @@ voice_in_topo(int section, gui_position const& pos)
  
   result.sections.emplace_back(make_param_section(section_right,
     make_topo_tag_basic("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Right"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+    make_param_section_gui({ 0, 3 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& oversmp = result.params.emplace_back(make_param(
     make_topo_info("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", true, "Osc Oversampling", "Osc OvrSmp", "Osc OvrSmp", param_oversmp, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
