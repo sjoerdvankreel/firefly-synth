@@ -23,7 +23,7 @@ enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end
 enum { type_sustain, type_follow, type_release };
 enum { trigger_legato, trigger_retrig, trigger_multi };
 enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split };
-enum { section_on, section_main, section_slope, section_dahdsr };
+enum { section_on, section_type, section_main, section_slope, section_dahdsr };
 enum {
   param_on, param_type, param_mode, param_trigger, param_filter,
   param_attack_slope, param_decay_slope, param_release_slope,
@@ -294,7 +294,7 @@ env_topo(int section, gui_position const& pos)
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", true, "Envelope", "Envelope", "Env", module_env, 10),
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info_basic("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { /*32 todo*/ 6, 39, 34, 63}})));
+    make_module_gui(section, pos, { { 1, 1 }, { 6, 26, 13, 34, 63 } })));
   result.gui.autofit_column = 1;
   result.info.description = "DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.";
 
@@ -317,23 +317,23 @@ env_topo(int section, gui_position const& pos)
   on.gui.bindings.enabled.bind_slot([](int slot) { return slot > 0; });
   on.info.description = "Toggles envelope on/off.";
 
-  result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
-    make_param_section_gui({ 0, 1, 1, 2 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 1 } })));
+  result.sections.emplace_back(make_param_section(section_type,
+    make_topo_tag_basic("{25E441B9-D023-4312-92C0-9B3E64D4DAF9}", "Type"),
+    make_param_section_gui({ 0, 1, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{E6025B4A-495C-421F-9A9A-8D2A247F94E7}", "Type", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_type, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });  
-  type.info.description = std::string("Selects envelope type.<br/>") + 
-    "Sustain - regular sustain type.<br/>" + 
+  type.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  type.info.description = std::string("Selects envelope type.<br/>") +
+    "Sustain - regular sustain type.<br/>" +
     "Follow - exactly follows the envelope ignoring note-off.<br/>" +
     "Release - follows the envelope (does not sustain) but respects note-off.";
   auto& mode = result.params.emplace_back(make_param(
     make_topo_info_basic("{C984B22A-68FB-44E4-8811-163D05CEC58B}", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
+    make_param_gui_single(section_type, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   mode.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   mode.info.description = std::string("Selects envelope slode mode.<br/>") +
@@ -341,10 +341,14 @@ env_topo(int section, gui_position const& pos)
     "Exponential unipolar - regular exponential slope.<br/>" +
     "Exponential bipolar - vertically splits section in 2 exponential parts.<br/>" +
     "Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.";
+
+  result.sections.emplace_back(make_param_section(section_main,
+    make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Main"),
+    make_param_section_gui({ 0, 2, 1, 2 }, { { 1 }, { gui_dimension::auto_size, 1 } })));
   auto& trigger = result.params.emplace_back(make_param(
     make_topo_info_basic("{84B6DC4D-D2FF-42B0-992D-49B561C46013}", "Trigger", param_trigger, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(trigger_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 2 },
+    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   trigger.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   trigger.info.description = std::string("Selects trigger mode for monophonic mode.<br/>") +
@@ -355,14 +359,14 @@ env_topo(int section, gui_position const& pos)
   auto& filter = result.params.emplace_back(make_param( 
     make_topo_info_basic("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smooth", param_filter, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
-    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 3 },
+    make_param_gui_single(section_main, gui_edit_type::hslider, { 0, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   filter.info.description = "Lowpass filter to smooth out rough edges.";
 
   result.sections.emplace_back(make_param_section(section_slope,
     make_topo_tag_basic("{9297FA9D-1C0B-4290-AC5F-BC63D38A40D4}", "Slope"),
-    make_param_section_gui({ 0, 3 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
+    make_param_section_gui({ 0, 4 }, { { 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size } })));
   auto& attack_slope = result.params.emplace_back(make_param(
     make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", true, "A Slope", "A Slp", "A Slp", param_attack_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
@@ -387,7 +391,7 @@ env_topo(int section, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_dahdsr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDSR"),
-    make_param_section_gui({ 1, 1, 1, 3 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 } })));
+    make_param_section_gui({ 1, 2, 1, 3 }, { { 1 }, { gui_dimension::auto_size, 1, 1, 1, 1, 1, 1 } })));
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
