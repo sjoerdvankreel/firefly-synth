@@ -104,7 +104,7 @@ voice_in_topo(int section, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_left,
     make_topo_tag_basic("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Left"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ { 1 } }, { { gui_dimension::auto_size } }))));
+    make_param_section_gui({ 0, 0 }, gui_dimension({ { 1 } }, { { 1 } }))));
   auto& voice_mode = result.params.emplace_back(make_param(
     make_topo_info("{F26D6913-63E8-4A23-97C0-9A17D859ED93}", true, "Voice Mode", "Mode", "Mode", param_mode, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(mode_items(), ""),
