@@ -585,7 +585,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{E7C21225-7ED5-45CC-9417-84A69BECA73C}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 34, 65 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 34, 53, 10 } })));
  
   result.graph_engine_factory = make_graph_engine;
   if (global) result.default_initializer = [is_fx](auto& s) { init_global_default(s); };
@@ -624,7 +624,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   svf_mode.info.description = "Selects the state-variable filter mode.";
   auto& svf = result.sections.emplace_back(make_param_section(section_svf,
     make_topo_tag_basic("{DFA6BD01-8F89-42CB-9D0E-E1902193DD5E}", "SV Filter"),
-    make_param_section_gui({ 0, 1, 2, 3 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 4 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   svf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_freq = result.params.emplace_back(make_param(
@@ -666,7 +666,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   comb_mode.info.description = "Selects the comb filter mode.";
   auto& comb = result.sections.emplace_back(make_param_section(section_comb,
     make_topo_tag_basic("{54CF060F-3EE7-4F42-921F-612F8EEA8EB0}", "Comb Filter"),
-    make_param_section_gui({ 0, 1, 2, 3 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 4 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   comb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   auto& comb_dly_plus = result.params.emplace_back(make_param(
     make_topo_info("{097ECBDB-1129-423C-9335-661D612A9945}", true, "Comb Filter Delay+", "Delay+", "Cmb Dly+", param_comb_dly_plus, 1),
@@ -765,7 +765,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
     make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),
-    make_param_section_gui({ 0, 3, 2, 1 }, { { 1, 1 }, {
+    make_param_section_gui({ 0, 3, 2, 2 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
       gui_dimension::auto_size, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
@@ -839,7 +839,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   
   auto& delay_right = result.sections.emplace_back(make_param_section(section_delay_right,
     make_topo_tag_basic("{DBD2F824-4B1F-4761-B0FB-46DD3C97A29F}", "Delay Right"),
-    make_param_section_gui({ 0, 2, 2, 2 }, { { 1, 1 }, {
+    make_param_section_gui({ 0, 2, 2, 3 }, { { 1, 1 }, {
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   delay_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
@@ -951,7 +951,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   reverb_mix.info.description = "Reverb dry/wet control.";
   auto& reverb = result.sections.emplace_back(make_param_section(section_reverb,
     make_topo_tag_basic("{92EFDFE7-41C5-4E9D-9BE6-DC56965C1C0D}", "Reverb Top"),
-    make_param_section_gui({ 0, 1, 2, 3 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 1, 2, 4 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   reverb.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   auto& reverb_size = result.params.emplace_back(make_param(
     make_topo_info("{E413FA18-420D-4510-80D1-54E2A0ED4CB2}", true, "Reverb Size", "Size", "Rev Size", param_reverb_size, 1),
