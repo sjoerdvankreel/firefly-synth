@@ -424,7 +424,7 @@ env_topo(int section, gui_position const& pos)
   hold_tempo.info.description = "Hold section length in bars.";
 
   auto& attack_time = result.params.emplace_back(make_param(
-    make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", true, "Att Time", "A", "A", param_attack_time, 1),
+    make_topo_info("{B1E6C162-07B6-4EE2-8EE1-EF5672FA86B4}", true, "Att Time", "Att", "Att", param_attack_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.03, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -441,7 +441,7 @@ env_topo(int section, gui_position const& pos)
   attack_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   attack_tempo.info.description = "Attack section length in bars.";
   auto& attack_slope = result.params.emplace_back(make_param(
-    make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", true, "A Slope", "S", "A Slp", param_attack_slope, 1),
+    make_topo_info("{7C2DBB68-164D-45A7-9940-AB96F05D1777}", true, "A Slope", "Slp", "A Slp", param_attack_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dahdr, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -449,7 +449,7 @@ env_topo(int section, gui_position const& pos)
   attack_slope.info.description = "Controls attack slope for exponential types. Modulation takes place only at voice start.";
 
   auto& decay_time = result.params.emplace_back(make_param(
-    make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", true, "Dcy Time", "D", "D", param_decay_time, 1),
+    make_topo_info("{45E37229-839F-4735-A31D-07DE9873DF04}", true, "Dcy Time", "Dcy", "Dcy", param_decay_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.1, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -457,7 +457,7 @@ env_topo(int section, gui_position const& pos)
   decay_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   decay_time.info.description = "Decay section length in seconds. Modulation takes place only at voice start.";
   auto& decay_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{47253C57-FBCA-4A49-AF88-88AC9F4781D7}", true, "Dcy Tempo", "D", "D", param_decay_tempo, 1),
+    make_topo_info("{47253C57-FBCA-4A49-AF88-88AC9F4781D7}", true, "Dcy Tempo", "Dcy", "Dcy", param_decay_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, { 1, 32 }),
     make_param_gui_single(section_dahdr, gui_edit_type::list, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
@@ -466,15 +466,15 @@ env_topo(int section, gui_position const& pos)
   decay_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   decay_tempo.info.description = "Decay section length in bars.";
   auto& decay_slope = result.params.emplace_back(make_param(
-    make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", true, "D Slope", "S", "D Slp", param_decay_slope, 1),
+    make_topo_info("{416C46E4-53E6-445E-8D21-1BA714E44EB9}", true, "D Slope", "Slp", "D Slp", param_decay_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dahdr, gui_edit_type::knob, { 1, 4 },
+    make_param_gui_single(section_dahdr, gui_edit_type::hslider, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   decay_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   decay_slope.info.description = "Controls decay slope for exponential types. Modulation takes place only at voice start.";
 
   auto& release_time = result.params.emplace_back(make_param(
-    make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", true, "Rls Time", "R", "R", param_release_time, 1),
+    make_topo_info("{FFC3002C-C3C8-4C10-A86B-47416DF9B8B6}", true, "Rls Time", "Rls", "Rls", param_release_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0.2, 1, 3, "Sec"),
     make_param_gui_single(section_dahdr, gui_edit_type::hslider, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -482,7 +482,7 @@ env_topo(int section, gui_position const& pos)
   release_time.gui.bindings.visible.bind_params({ param_sync }, [](auto const& vs) { return vs[0] == 0; });
   release_time.info.description = "Release section length in seconds. Modulation takes place only at voice start.";
   auto& release_tempo = result.params.emplace_back(make_param(
-    make_topo_info("{FDC00AA5-8648-4064-BE77-1A9CDB6B53EE}", true, "Rls Tempo", "R", "R", param_release_tempo, 1),
+    make_topo_info("{FDC00AA5-8648-4064-BE77-1A9CDB6B53EE}", true, "Rls Tempo", "Rls", "Rls", param_release_tempo, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_timesig_default(true, { 4, 1 }, {1, 16 }),
     make_param_gui_single(section_dahdr, gui_edit_type::list, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
@@ -491,9 +491,9 @@ env_topo(int section, gui_position const& pos)
   release_tempo.gui.bindings.visible.bind_params({ param_on, param_sync }, [](auto const& vs) { return vs[0] != 0 && vs[1] != 0; });
   release_tempo.info.description = "Release section length in bars.";
   auto& release_slope = result.params.emplace_back(make_param(
-    make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", true, "R Slope", "S", "R Slp", param_release_slope, 1),
+    make_topo_info("{11113DB9-583A-48EE-A99F-6C7ABB693951}", true, "R Slope", "Slp", "R Slp", param_release_slope, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dahdr, gui_edit_type::knob, { 1, 6 },
+    make_param_gui_single(section_dahdr, gui_edit_type::hslider, { 1, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   release_slope.info.description = "Controls release slope for exponential types. Modulation takes place only at voice start.";
