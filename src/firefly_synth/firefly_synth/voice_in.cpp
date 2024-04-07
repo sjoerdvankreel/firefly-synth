@@ -94,7 +94,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "VIn", module_voice_in, 1),
     make_module_dsp(module_stage::voice, module_output::cv, 0, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
-    make_module_gui(section, pos, { { 1 }, { 64, 26, 67, 127 } } ))); // why does it align different ?
+    make_module_gui(section, pos, { { 1 }, { 32, 13, 34, 63 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.";
   
   result.graph_renderer = render_graph;
