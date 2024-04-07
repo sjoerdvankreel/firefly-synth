@@ -34,10 +34,10 @@ v1.7
 put download/install section on top of github page
 align labels etc
 fix all themes aspect ratio height + fx
-re-check all the toggle button alignment
 do distinction between voice/global/matrix in the ui for all themes
 
 v1.8:
+disable env trigger modes for poly
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 do async clear delay lines etc on patch select -> 
