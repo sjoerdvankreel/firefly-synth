@@ -949,9 +949,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Env 1 A Slp</td>
+<td>Env 1 Dly</td>
 <td>VCV-A Max 30</td>
-<td>Env 1 A Slp</td>
+<td>Env 1 Dly</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1135,56 +1135,8 @@
 <td colspan='11' class='description'>Lowpass filter to smooth out rough edges.</td>
 </tr>
 <tr>
-<td rowspan='2'>A Slope</td>
-<td>Slope</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls attack slope for exponential types. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
-<td rowspan='2'>D Slope</td>
-<td>Slope</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls decay slope for exponential types. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
-<td rowspan='2'>R Slope</td>
-<td>Slope</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls release slope for exponential types. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dly Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1200,7 +1152,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dly Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1215,40 +1167,8 @@
 <td colspan='11' class='description'>Delay section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Att Time</td>
-<td>DAHDSR</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0.000 Sec</td>
-<td>10.000 Sec</td>
-<td>0.030 Sec</td>
-<td>1.000 Sec</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Attack section length in seconds. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
-<td rowspan='2'>Att Tempo</td>
-<td>DAHDSR</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0</td>
-<td>48/13</td>
-<td>1/64</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Attack section length in bars.</td>
-</tr>
-<tr>
 <td rowspan='2'>Hld Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1264,7 +1184,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Hld Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1279,8 +1199,56 @@
 <td colspan='11' class='description'>Hold section length in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>Att Time</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.000 Sec</td>
+<td>10.000 Sec</td>
+<td>0.030 Sec</td>
+<td>1.000 Sec</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Attack section length in seconds. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
+<td rowspan='2'>Att Tempo</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0</td>
+<td>48/13</td>
+<td>1/64</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Attack section length in bars.</td>
+</tr>
+<tr>
+<td rowspan='2'>A Slope</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls attack slope for exponential types. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dcy Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1296,7 +1264,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dcy Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1311,8 +1279,24 @@
 <td colspan='11' class='description'>Decay section length in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>D Slope</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls decay slope for exponential types. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
 <td rowspan='2'>Rls Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1328,7 +1312,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Rls Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1341,6 +1325,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Release section length in bars.</td>
+</tr>
+<tr>
+<td rowspan='2'>R Slope</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls release slope for exponential types. Modulation takes place only at voice start.</td>
 </tr>
 <tr>
 <td rowspan='2'>Stn</td>
