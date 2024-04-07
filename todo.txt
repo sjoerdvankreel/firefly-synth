@@ -31,6 +31,7 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7
+fix section margin vs padding
 put download/install section on top of github page
 align labels etc
 fix all themes aspect ratio height + fx
