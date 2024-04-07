@@ -155,7 +155,7 @@ voice_in_topo(int section, gui_position const& pos)
     make_topo_tag_basic("{3EB05593-E649-4460-929C-993B6FB7BBD3}", "Right"),
     make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
   auto& oversmp = result.params.emplace_back(make_param(
-    make_topo_info_basic("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", "Osc Oversample", param_oversmp, 1),
+    make_topo_info("{0A866D59-E7C1-4D45-9DAF-D0C62EA03E93}", true, "Osc Oversampling", "Osc OvrSmp", "Osc OvrSmp", param_oversmp, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(over_items(), ""),
     make_param_gui_single(section_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
