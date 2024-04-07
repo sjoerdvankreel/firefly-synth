@@ -1,6 +1,7 @@
 ### ?, ? - V1.7.0.
 
 - Changed default distortion mode to plain tanh clipper.
+- Renamed distortion skew in/out to x/y to align with lfo.
 
 ### April 2, 2024 - V1.6.1.
 

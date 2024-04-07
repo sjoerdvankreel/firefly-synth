@@ -50,8 +50,8 @@ enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
-enum { section_main, section_svf, section_comb, section_dist_flt, section_dist_right, section_delay_left, section_delay_right, section_reverb };
 enum { svf_mode_lpf, svf_mode_hpf, svf_mode_bpf, svf_mode_bsf, svf_mode_apf, svf_mode_peq, svf_mode_bll, svf_mode_lsh, svf_mode_hsh };
+enum { section_main, section_svf, section_comb, section_dist_flt, section_dist_skew, section_dist_right, section_delay_left, section_delay_right, section_reverb };
 
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
@@ -62,8 +62,8 @@ static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (in
 enum { param_type,
   param_svf_mode, param_svf_freq, param_svf_res, param_svf_kbd, param_svf_gain, 
   param_comb_mode, param_comb_dly_plus, param_comb_gain_plus, param_comb_dly_min, param_comb_gain_min,
-  param_dist_mode, param_dist_lp_frq, param_dist_lp_res, param_dist_skew_in, param_dist_skew_in_amt, param_dist_skew_out, param_dist_skew_out_amt, param_dist_shaper,
-  param_dist_over, param_dist_clip, param_dist_clip_exp, param_dist_gain, param_dist_mix,
+  param_dist_mode, param_dist_lp_frq, param_dist_lp_res, param_dist_skew_x, param_dist_skew_x_amt, param_dist_skew_y, param_dist_skew_y_amt, 
+  param_dist_shaper, param_dist_over, param_dist_clip, param_dist_clip_exp, param_dist_gain, param_dist_mix,
   param_dly_mode, param_dly_sync, param_dly_amt, param_dly_sprd, param_dly_mix,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
   param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps,  
@@ -251,12 +251,12 @@ public module_engine {
   template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape>
   void process_dist_mode_clip_shape(plugin_block& block, 
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape);
-  template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewIn>
-  void process_dist_mode_clip_shape_in(plugin_block& block,
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in);
-  template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewIn, class SkewOut>
-  void process_dist_mode_clip_shape_in_out(plugin_block& block,
-    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in, SkewOut skew_out);
+  template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX>
+  void process_dist_mode_clip_shape_x(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x);
+  template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX, class SkewY>
+  void process_dist_mode_clip_shape_xy(plugin_block& block,
+    jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
   void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
 
 public:
@@ -560,11 +560,11 @@ fx_state_converter::post_process(load_handler const& handler, plugin_state& new_
           for (int j = 0; j < skew_items.size(); j++)
           {
             if (skew_items[j].id == old_skew_x_guid)
-              new_state.set_plain_at(this_module, i, param_dist_skew_in, 0,
-                _desc->raw_to_plain_at(this_module, param_dist_skew_in, j));
+              new_state.set_plain_at(this_module, i, param_dist_skew_x, 0,
+                _desc->raw_to_plain_at(this_module, param_dist_skew_x, j));
             if (skew_items[j].id == old_skew_y_guid)
-              new_state.set_plain_at(this_module, i, param_dist_skew_out, 0,
-                _desc->raw_to_plain_at(this_module, param_dist_skew_out, j));
+              new_state.set_plain_at(this_module, i, param_dist_skew_y, 0,
+                _desc->raw_to_plain_at(this_module, param_dist_skew_y, j));
           }
         }
       }
@@ -729,73 +729,78 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   dist_res.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
   dist_res.info.description = "Lowpass filter resonance inside the oversampling stage.";
 
-  auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
-    make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),
-    make_param_section_gui({ 0, 2, 2, 2 }, { { 1, 1 }, { 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
-      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 
-      gui_dimension::auto_size, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
-  dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
+  auto& dist_skew = result.sections.emplace_back(make_param_section(section_dist_skew,
+    make_topo_tag_basic("{9BA32ACF-FA53-450A-A280-F0F76F30F240}", "Distortion Skew"),
+    make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, { 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all } }, gui_label_edit_cell_split::horizontal)));
+  dist_skew.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_skew_in = result.params.emplace_back(make_param(
-    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew In Mode", "Skew In", "Dst Sk In", param_dist_skew_in, 1),
+    make_topo_info("{DAF94A21-BCA4-4D49-BEC0-F0D70CE4F118}", true, "Dist Skew X Mode", "Skew X", "Dst SkX", param_dist_skew_x, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
+    make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_skew_in.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_in.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_in_amt = result.params.emplace_back(make_param(
-    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew In Amt", "Skew In", "Dst Sk In", param_dist_skew_in_amt, 1),
+    make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew X Amt", "Skew X", "Dst SkX", param_dist_skew_x_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 2 }, make_label_none())));
-  dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_in }, [](auto const& vs) {
+    make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 0, 2 }, make_label_none())));
+  dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
   auto& dist_skew_out = result.params.emplace_back(make_param(
-    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Out Mode", "Skew Out", "Dst Sk Out", param_dist_skew_out, 1),
+    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Y Mode", "Skew Y", "Dst Sky", param_dist_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
+    make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_out.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
-    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Out Amt", "Skew Out", "Dst Sk Out", param_dist_skew_out_amt, 1),
+    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Out Amt", "Skew Out", "Dst Sk Out", param_dist_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 2 }, make_label_none())));
-  dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_out }, [](auto const& vs) {
+    make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 1, 2 }, make_label_none())));
+  dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
+
+  auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
+    make_topo_tag_basic("{4FD908CC-0EBA-4ADD-8622-EB95013CD429}", "Distortion Right"),
+    make_param_section_gui({ 0, 3, 2, 1 }, { { 1, 1 }, {
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all,
+      gui_dimension::auto_size, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
+  dist_right.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   auto& dist_shaper = result.params.emplace_back(make_param(
     make_topo_info("{BFB5A04F-5372-4259-8198-6761BA52ADEB}", true, "Dist Shape", "Shape", "Dst.Shape", param_dist_shaper, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_shape_type_items(true), ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 3 },
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";  
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dst.OvrSmp", param_dist_over, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 3 },
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dst Clip", param_dist_clip, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_clip_items(), "Tanh"),
-    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 5 },
+    make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.";
   auto& dist_clip_expo = result.params.emplace_back(make_param(
     make_topo_info("{A0C0BCE3-1BC3-495F-950B-8849C802B4EA}", true, "Dist Clip Exp", "Exp", "Dst Exp", param_dist_clip_exp, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0.1, 10, 1, 1, ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 5 },
+    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return vs[0] == type_dst && vs[1] == dist_clip_exp; });
   dist_clip_expo.info.description = "Exponential clipper amount.";
   auto& dist_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", true, "Dist Gain", "Gain", "Dst Gain", param_dist_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0.1, 32, 1, 1, 2, ""),
-    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 0, 7 },
+    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_gain.info.description = std::string("Gain amount to drive the shaper and X/Y parameters. ") +
@@ -803,7 +808,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& dist_mix = result.params.emplace_back(make_param(
     make_topo_info("{667D9997-5BE1-48C7-9B50-4F178E2D9FE5}", true, "Dist Mix", "Mix", "Dst Mix", param_dist_mix, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 7 },
+    make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mix.info.description = "Dry/wet mix between input and output signal.";
@@ -1554,55 +1559,55 @@ template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape> void
 fx_engine::process_dist_mode_clip_shape(plugin_block& block, 
   jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape)
 {
-  switch (block.state.own_block_automation[param_dist_skew_in][0].step())
+  switch (block.state.own_block_automation[param_dist_skew_x][0].step())
   {
-  case wave_skew_type_off: process_dist_mode_clip_shape_in<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_mode_clip_shape_in<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_mode_clip_shape_in<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_mode_clip_shape_in<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_mode_clip_shape_in<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_mode_clip_shape_in<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_mode_clip_shape_x<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewIn> void
-fx_engine::process_dist_mode_clip_shape_in(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in)
+template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX> void
+fx_engine::process_dist_mode_clip_shape_x(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x)
 {
-  switch (block.state.own_block_automation[param_dist_skew_out][0].step())
+  switch (block.state.own_block_automation[param_dist_skew_y][0].step())
   {
-  case wave_skew_type_off: process_dist_mode_clip_shape_in_out<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_off); break;
-  case wave_skew_type_lin: process_dist_mode_clip_shape_in_out<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_lin); break;
-  case wave_skew_type_scu: process_dist_mode_clip_shape_in_out<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_scu); break;
-  case wave_skew_type_scb: process_dist_mode_clip_shape_in_out<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_scb); break;
-  case wave_skew_type_xpu: process_dist_mode_clip_shape_in_out<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_xpu); break;
-  case wave_skew_type_xpb: process_dist_mode_clip_shape_in_out<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_in, wave_skew_bi_xpb); break;
+  case wave_skew_type_off: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_off); break;
+  case wave_skew_type_lin: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_lin); break;
+  case wave_skew_type_scu: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scu); break;
+  case wave_skew_type_scb: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_scb); break;
+  case wave_skew_type_xpu: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpu); break;
+  case wave_skew_type_xpb: process_dist_mode_clip_shape_xy<Graph, Mode, ClipIsExp>(block, audio_in, modulation, clip, shape, skew_x, wave_skew_bi_xpb); break;
   default: assert(false); break;
   }
 }
 
-template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewIn, class SkewOut> void
-fx_engine::process_dist_mode_clip_shape_in_out(plugin_block& block, 
-  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewIn skew_in, SkewOut skew_out)
+template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX, class SkewY> void
+fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block, 
+  jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y)
 {
   int this_module = _global ? module_gfx : module_vfx;
   auto const& block_auto = block.state.own_block_automation;
   int oversmp_stages = block_auto[param_dist_over][0].step();
   int oversmp_factor = 1 << oversmp_stages;
-  int skew_in_type = block_auto[param_dist_skew_in][0].step();
-  int skew_out_type = block_auto[param_dist_skew_out][0].step();
+  int skew_x_type = block_auto[param_dist_skew_x][0].step();
+  int skew_y_type = block_auto[param_dist_skew_y][0].step();
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
   auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
   auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
   auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
-  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_in_amt][0];
-  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_out_amt][0];
+  auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_x_amt][0];
+  auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_y_amt][0];
   auto const& clip_exp_curve_plain = *modulation[this_module][block.module_slot][param_dist_clip_exp][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
-  if(wave_skew_is_exp(skew_in_type))
+  if(wave_skew_is_exp(skew_x_type))
   {
     auto& x_scratch = block.state.own_scratch[scratch_dist_x];
     for (int f = block.start_frame; f < block.end_frame; f++)
@@ -1611,7 +1616,7 @@ fx_engine::process_dist_mode_clip_shape_in_out(plugin_block& block,
   }
 
   jarray<float, 1> const* y_curve = &y_curve_plain;
-  if (wave_skew_is_exp(skew_out_type))
+  if (wave_skew_is_exp(skew_y_type))
   {
     auto& y_scratch = block.state.own_scratch[scratch_dist_y];
     for (int f = block.start_frame; f < block.end_frame; f++)
@@ -1647,8 +1652,8 @@ fx_engine::process_dist_mode_clip_shape_in_out(plugin_block& block,
       // so mind the bookkeeping
       int mod_index = block.start_frame + frame / oversmp_factor;
 
-      left = skew_in(left * gain_curve[mod_index], (*x_curve)[mod_index]);
-      right = skew_in(right * gain_curve[mod_index], (*x_curve)[mod_index]);
+      left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
+      right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_b)
         dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
       left = shape(left);
@@ -1660,8 +1665,8 @@ fx_engine::process_dist_mode_clip_shape_in_out(plugin_block& block,
       if constexpr (ClipIsExp)
         exp = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain[mod_index]);
 
-      left = clip(skew_out(left, (*y_curve)[mod_index]), exp);
-      right = clip(skew_out(right, (*y_curve)[mod_index]), exp);
+      left = clip(skew_y(left, (*y_curve)[mod_index]), exp);
+      right = clip(skew_y(right, (*y_curve)[mod_index]), exp);
 
       left = (1 - mix_curve[mod_index]) * left_in + mix_curve[mod_index] * left;
       right = (1 - mix_curve[mod_index]) * right_in + mix_curve[mod_index] * right;

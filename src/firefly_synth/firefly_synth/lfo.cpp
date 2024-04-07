@@ -390,7 +390,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_info("{7F59C0F3-739E-4068-B1FD-B1520775FFBA}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_toggle(false),
     make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::near))));
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   sync.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
   sync.info.description = "Toggles time or tempo-synced type.";
 
