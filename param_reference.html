@@ -2918,104 +2918,8 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Skew In Mode</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew In Amt</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Mode</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Amt</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Shape</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Oversampling</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1X</td>
-<td>8X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist LPF Frequency</td>
-<td>Distortion</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3031,7 +2935,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Res</td>
-<td>Distortion</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3046,8 +2950,104 @@
 <td colspan='11' class='description'>Lowpass filter resonance inside the oversampling stage.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Skew In Mode</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew In Amt</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Out Mode</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Out Amt</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Shape</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Foldback</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Oversampling</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1X</td>
+<td>8X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Clip Mode</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3063,7 +3063,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Exp</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3079,7 +3079,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Gain</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3095,7 +3095,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Mix</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3465,104 +3465,8 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Skew In Mode</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew In Amt</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Mode</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Amt</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Shape</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Oversampling</td>
-<td>Distortion</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1X</td>
-<td>8X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist LPF Frequency</td>
-<td>Distortion</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3578,7 +3482,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Res</td>
-<td>Distortion</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3593,8 +3497,104 @@
 <td colspan='11' class='description'>Lowpass filter resonance inside the oversampling stage.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Skew In Mode</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew In Amt</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Out Mode</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Out Amt</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Shape</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Foldback</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Oversampling</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1X</td>
+<td>8X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Clip Mode</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3610,7 +3610,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Exp</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3626,7 +3626,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Gain</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3642,7 +3642,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Mix</td>
-<td>Distortion</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
