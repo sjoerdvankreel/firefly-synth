@@ -294,7 +294,7 @@ env_topo(int section, gui_position const& pos)
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", true, "Envelope", "Envelope", "Env", module_env, 10),
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info_basic("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 34, 63 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { /*32 todo*/ 6, 39, 34, 63}})));
   result.gui.autofit_column = 1;
   result.info.description = "DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.";
 
