@@ -67,7 +67,7 @@ enum { param_type,
   param_dist_shaper, param_dist_over, param_dist_clip, param_dist_clip_exp, param_dist_gain, param_dist_mix,
   param_dly_mode, param_dly_sync, param_dly_amt, param_dly_mix, param_dly_sprd, param_dly_hold_time, param_dly_hold_tempo,
   param_dly_fdbk_time_l, param_dly_fdbk_tempo_l, param_dly_fdbk_time_r, param_dly_fdbk_tempo_r,
-  param_dly_multi_time, param_dly_multi_tempo, param_dly_multi_taps,  
+  param_dly_multi_taps, param_dly_multi_time, param_dly_multi_tempo,
   param_reverb_mix, param_reverb_spread, param_reverb_apf, param_reverb_size, param_reverb_damp
 };
 
@@ -883,7 +883,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& delay_hold_time = result.params.emplace_back(make_param(
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", true, "Multi Delay Hold Time", "Hold", "MDly Hold", param_dly_hold_time, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 0, 1, 3, "Sec"),
-    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 1, 0 },
+    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_hold_time.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[2] == 0; });
   delay_hold_time.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_multi && vs[2] == 0; });
@@ -891,7 +891,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& delay_hold_tempo = result.params.emplace_back(make_param(
     make_topo_info("{AED0D3A5-AB02-441F-A42D-7E2AEE88DF24}", true, "Multi Delay Hold Tempo", "Hold", "MDly Hold", param_dly_hold_tempo, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(true, { 4, 1 }, { 0, 1 }),
-    make_param_gui_single(section_delay_right, gui_edit_type::list, { 1, 0 },
+    make_param_gui_single(section_delay_right, gui_edit_type::list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_hold_tempo.gui.submenu = make_timesig_submenu(delay_hold_tempo.domain.timesigs);
   delay_hold_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[2] != 0; });
@@ -901,7 +901,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& delay_fdbk_time_l = result.params.emplace_back(make_param(
     make_topo_info("{E32F17BC-03D2-4F2D-8292-2B4C3AB24E8D}", true, "Fdbk Delay Time L", "L", "FDly L", param_dly_fdbk_time_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
-    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_fdbk_time_l.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_fdbk && vs[2] == 0; });
   delay_fdbk_time_l.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_fdbk && vs[2] == 0; });
@@ -909,7 +909,7 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& delay_fdbk_tempo_l = result.params.emplace_back(make_param(
     make_topo_info("{33BCF50C-C7DE-4630-A835-44D50DA3B8BB}", true, "Fdbk Delay Tempo L", "L", "FDly L", param_dly_fdbk_tempo_l, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
-    make_param_gui_single(section_delay_right, gui_edit_type::list, { 0, 2 },
+    make_param_gui_single(section_delay_right, gui_edit_type::list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_fdbk_tempo_l.gui.submenu = make_timesig_submenu(delay_fdbk_tempo_l.domain.timesigs);
   delay_fdbk_tempo_l.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_fdbk && vs[2] != 0; });
@@ -932,10 +932,18 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   delay_fdbk_tempo_r.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_fdbk && vs[2] != 0; });
   delay_fdbk_tempo_r.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_fdbk && vs[2] != 0; });
   delay_fdbk_tempo_r.info.description = "Feedback delay right length in bars.";
+  auto& delay_taps = result.params.emplace_back(make_param(
+    make_topo_info("{27572912-0A8E-4A97-9A54-379829E8E794}", true, "Multi Delay Tap Count", "Taps", "MDly Taps", param_dly_multi_taps, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_step(1, 8, 4, 0),
+    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  delay_taps.gui.bindings.visible.bind_params({ param_type, param_dly_mode }, [](auto const& vs) { return vs[1] == dly_mode_multi; });
+  delay_taps.gui.bindings.enabled.bind_params({ param_type, param_dly_mode }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_multi; });
+  delay_taps.info.description = "Multi-tap delay tap count.";
   auto& delay_multi_time = result.params.emplace_back(make_param(
     make_topo_info("{8D1A0D44-3291-488F-AC86-9B2B608F9562}", true, "Multi Delay Time", "Time", "MDly Time", param_dly_multi_time, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_log(0, dly_max_sec, 1, 1, 3, "Sec"),
-    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 0, 2 },
+    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_multi_time.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_multi && vs[2] == 0; });
   delay_multi_time.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_multi && vs[2] == 0; });
@@ -943,20 +951,12 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto& delay_multi_tempo = result.params.emplace_back(make_param(
     make_topo_info("{8DAED046-7F5F-4E76-A6BF-099510564500}", true, "Multi Delay Tempo", "Tempo", "MDly Tempo", param_dly_multi_tempo, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_timesig_default(false, { 4, 1 }, { 3, 16 }),
-    make_param_gui_single(section_delay_right, gui_edit_type::list, { 0, 2 },
+    make_param_gui_single(section_delay_right, gui_edit_type::list, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_multi_tempo.gui.submenu = make_timesig_submenu(delay_multi_tempo.domain.timesigs);
   delay_multi_tempo.gui.bindings.visible.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[1] == dly_mode_multi && vs[2] != 0; });
   delay_multi_tempo.gui.bindings.enabled.bind_params({ param_type, param_dly_mode, param_dly_sync }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_multi && vs[2] != 0; });
   delay_multi_tempo.info.description = "Multi-tap delay length in bars.";
-  auto& delay_taps = result.params.emplace_back(make_param(
-    make_topo_info("{27572912-0A8E-4A97-9A54-379829E8E794}", true, "Multi Delay Tap Count", "Taps", "MDly Taps", param_dly_multi_taps, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_step(1, 8, 4, 0),
-    make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 1, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  delay_taps.gui.bindings.visible.bind_params({ param_type, param_dly_mode }, [](auto const& vs) { return vs[1] == dly_mode_multi; });
-  delay_taps.gui.bindings.enabled.bind_params({ param_type, param_dly_mode }, [](auto const& vs) { return vs[0] == type_delay && vs[1] == dly_mode_multi; });
-  delay_taps.info.description = "Multi-tap delay tap count.";
 
   auto& reverb_mix = result.params.emplace_back(make_param(
     make_topo_info("{7F71B450-2EAA-4D4E-8919-A94D87645DB0}", true, "Reverb Mix", "Mix", "Rev Mix", param_reverb_mix, 1),
