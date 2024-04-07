@@ -161,7 +161,8 @@ gui_dimension::validate(
     assert(column_sizes[i] != 0);
   assert(cell_split == gui_label_edit_cell_split::no_split || label_contents.size() == children.size());
 
-  std::set<std::pair<int, int>> taken;
+  std::set<std::pair<int, int>> gui_taken;
+  std::set<std::pair<int, int>> validation_taken;
   std::vector<int> split_row_sizes = row_sizes;
   std::vector<int> split_column_sizes = column_sizes;
 
@@ -176,10 +177,11 @@ gui_dimension::validate(
       if (!include(i)) continue;
       if (children[i].row != 0) continue;
       assert(children[i].column_span == 1);
-      if(label_contents[i] == gui_label_contents::none)
-        split_column_sizes.insert(split_column_sizes.end(), 1);
-      else
-        split_column_sizes.insert(split_column_sizes.end(), { 1, 1 });
+      if(validation_taken.insert(std::make_pair(children[i].row, children[i].column)).second)
+        if(label_contents[i] == gui_label_contents::none)
+          split_column_sizes.insert(split_column_sizes.end(), 1);
+        else
+          split_column_sizes.insert(split_column_sizes.end(), { 1, 1 });
     }
   } else if (cell_split == gui_label_edit_cell_split::vertical)
   {
@@ -189,10 +191,11 @@ gui_dimension::validate(
       if (!include(i)) continue;
       if (children[i].column != 0) continue;
       assert(children[i].row_span == 1);
-      if (label_contents[i] == gui_label_contents::none)
-        split_row_sizes.insert(split_row_sizes.end(), 1);
-      else
-        split_row_sizes.insert(split_row_sizes.end(), { 1, 1 });
+      if (validation_taken.insert(std::make_pair(children[i].row, children[i].column)).second)
+        if (label_contents[i] == gui_label_contents::none)
+          split_row_sizes.insert(split_row_sizes.end(), 1);
+        else
+          split_row_sizes.insert(split_row_sizes.end(), { 1, 1 });
     }
   }
 
@@ -206,24 +209,24 @@ gui_dimension::validate(
     if (cell_split == gui_label_edit_cell_split::no_split)
       for (int r = pos.row; r < pos.row + pos.row_span; r++)
         for (int c = pos.column; c < pos.column + pos.column_span; c++)
-          PB_ASSERT_EXEC(taken.insert(std::make_pair(r, c)).second || !always_visible(k));
+          PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(r, c)).second || !always_visible(k));
     else if (label_contents[k] == gui_label_contents::none)
-      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
+      PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
     else if(cell_split == gui_label_edit_cell_split::horizontal)
     {
-      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
-      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column + 1)).second || !always_visible(k));
+      PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
+      PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(pos.row, pos.column + 1)).second || !always_visible(k));
     }
     else if (cell_split == gui_label_edit_cell_split::vertical)
     {
-      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
-      PB_ASSERT_EXEC(taken.insert(std::make_pair(pos.row + 1, pos.column)).second || !always_visible(k));
+      PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(pos.row, pos.column)).second || !always_visible(k));
+      PB_ASSERT_EXEC(gui_taken.insert(std::make_pair(pos.row + 1, pos.column)).second || !always_visible(k));
     }
     else assert(false);
   }
   for (int r = 0; r < split_row_sizes.size(); r++)
     for (int c = 0; c < split_column_sizes.size(); c++)
-      assert(taken.find(std::make_pair(r, c)) != taken.end());
+      assert(gui_taken.find(std::make_pair(r, c)) != gui_taken.end());
 }
 
 }
