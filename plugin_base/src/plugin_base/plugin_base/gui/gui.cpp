@@ -672,7 +672,7 @@ Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
   auto const& topo = *module.module;
-  auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, margin_hsection, topo.gui.autofit_row, topo.gui.autofit_column);
+  auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
   for (int s = 0; s < topo.sections.size(); s++)
     result.add(make_param_section(module, topo.sections[s]), topo.sections[s].gui.position);
   add_hover_listener(result, gui_hover_type::module, module.info.global);
@@ -754,7 +754,10 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       }
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid);
+  {
+    auto& container = make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid);
+    return make_component<margin_component>(&container, BorderSize<int>(0, 0, 0, margin_hsection));
+  }
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);

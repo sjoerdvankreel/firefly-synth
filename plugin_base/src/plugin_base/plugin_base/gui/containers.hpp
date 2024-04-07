@@ -22,12 +22,15 @@ public:
 
 // adds some margin around another component
 class margin_component :
-public juce::Component 
+public juce::Component,
+public autofit_component
 {
   juce::Component* const _child;
   juce::BorderSize<int> const _margin;
 public:
   void resized() override;
+  int fixed_width(int parent_w, int parent_h) const override;
+  int fixed_height(int parent_w, int parent_h) const override;
   margin_component(juce::Component* child, juce::BorderSize<int> const& margin):
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
 };

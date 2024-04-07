@@ -75,6 +75,22 @@ margin_component::resized()
 }
 
 int 
+margin_component::fixed_width(int parent_w, int parent_h) const
+{
+  auto child = dynamic_cast<autofit_component*>(getChildComponent(0));
+  assert(child);
+  return child->fixed_width(parent_w, parent_h) + _margin.getLeftAndRight();
+}
+
+int 
+margin_component::fixed_height(int parent_w, int parent_h) const
+{
+  auto child = dynamic_cast<autofit_component*>(getChildComponent(0));
+  assert(child);
+  return child->fixed_height(parent_w, parent_h) + _margin.getTopAndBottom();
+}
+
+int 
 rounded_container::fixed_width(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
