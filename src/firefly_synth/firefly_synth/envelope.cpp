@@ -23,14 +23,13 @@ enum class env_stage { delay, attack, hold, decay, sustain, release, filter, end
 enum { type_sustain, type_follow, type_release };
 enum { trigger_legato, trigger_retrig, trigger_multi };
 enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split };
-enum { section_on, section_type, section_sync, section_trigger, section_dahdr, section_stn };
+enum { section_on, section_type, section_sync, section_trigger, section_dahdr };
 enum {
-  param_on, param_type, param_mode, param_sync, param_trigger, param_filter,
+  param_on, param_type, param_mode, param_sync, param_sustain, param_trigger, param_filter,
   param_delay_time, param_delay_tempo, param_hold_time, param_hold_tempo,
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 
-  param_release_time, param_release_tempo, param_release_slope,
-  param_sustain };
+  param_release_time, param_release_tempo, param_release_slope };
 
 static constexpr bool is_exp_slope(int mode) { return mode != mode_linear; }
 
@@ -295,7 +294,7 @@ env_topo(int section, gui_position const& pos)
     make_topo_info("{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}", true, "Envelope", "Envelope", "Env", module_env, 10),
     make_module_dsp(module_stage::voice, module_output::cv, 0, { 
       make_module_dsp_output(true, make_topo_info_basic("{2CDB809A-17BF-4936-99A0-B90E1035CBE6}", "Output", 0, 1)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 6, 26, 13, 34, 53, 10 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 6, 26, 13, 34, 63 } })));
   result.gui.autofit_column = 1;
   result.info.description = "DAHDSR envelope generator with optional tempo-syncing, linear and exponential slopes and smoothing control.";
 
@@ -345,15 +344,22 @@ env_topo(int section, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_sync,
     make_topo_tag_basic("{B9A937AF-6807-438F-8F79-506C47F621BD}", "Sync"),
-    make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, { 1 } }, gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 2, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
   auto& sync = result.params.emplace_back(make_param(
     make_topo_info("{4E2B3213-8BCF-4F93-92C7-FA59A88D5B3C}", true, "Tempo Sync", "Sync", "Sync", param_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
     make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   sync.info.description = "Toggles time or tempo-synced mode.";
-  
+  auto& sustain = result.params.emplace_back(make_param(
+    make_topo_info_basic("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "Stn", param_sustain, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+    make_param_gui_single(section_sync, gui_edit_type::knob, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
+
   result.sections.emplace_back(make_param_section(section_trigger,
     make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Trigger"),
     make_param_section_gui({ 0, 3, 2, 1 }, { { 1, 1 }, { gui_dimension::auto_size, 1 } }, gui_label_edit_cell_split::horizontal)));
@@ -491,17 +497,6 @@ env_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   release_slope.gui.bindings.enabled.bind_params({ param_on, param_mode }, [](auto const& vs) { return vs[0] != 0 && is_exp_slope(vs[1]); });
   release_slope.info.description = "Controls release slope for exponential types. Modulation takes place only at voice start.";
-
-  result.sections.emplace_back(make_param_section(section_stn,
-    make_topo_tag_basic("{B3F459D2-44C3-4820-A682-6F002BA0FD90}", "Sustain"),
-    make_param_section_gui({ 0, 5, 2, 1 }, { { 1, 1 }, { 1 } }, gui_label_edit_cell_split::vertical)));
-  auto& sustain = result.params.emplace_back(make_param(
-    make_topo_info_basic("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "Stn", param_sustain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_stn, gui_edit_type::knob, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
-  sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
 
   return result;
 }
