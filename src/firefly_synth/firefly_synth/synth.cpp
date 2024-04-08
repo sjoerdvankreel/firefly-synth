@@ -205,7 +205,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   grid.add(store_component<image_component>(store, gui->gui_state()->desc().config, lnf->theme(), "header.png", RectanglePlacement::xRight), { 0, 1, 2, 1 });
   auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
-  title_label.setJustificationType(Justification::centredLeft);
+  title_label.setJustificationType(Justification::centredRight);
   grid.add(title_label, { 0, 0, 1, 1 });
   std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().config->format_name() + " ";
 #ifdef __aarch64__
@@ -214,7 +214,7 @@ make_title_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
   version_text += "X64";
 #endif
   auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 10);
-  version_label.setJustificationType(Justification::centredLeft);
+  version_label.setJustificationType(Justification::centredRight);
   version_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   grid.add(version_label, { 1, 0, 1, 1 });
   return grid;
