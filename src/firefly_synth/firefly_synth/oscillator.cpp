@@ -325,14 +325,14 @@ osc_topo(int section, gui_position const& pos)
     make_topo_tag_basic("{18204EB2-1066-4F27-8FD9-5C3D1505BDD7}", "Sync Params"),
     make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& sync_semi = result.params.emplace_back(make_param(
-    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard Sync Semis", "Semi", "HS Semi", param_hard_sync_semis, 1),
+    make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard Sync Semitones", "HST", "HS Semi", param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
     make_param_gui_single(section_sync_params, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
-    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard Sync XOver Time", "Xvr", "HS Xvr", param_hard_sync_xover, 1),
+    make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard Sync XOver Time", "HXO", "HS XOver", param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
     make_param_gui_single(section_sync_params, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
