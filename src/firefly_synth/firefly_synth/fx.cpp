@@ -634,14 +634,12 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   svf_kbd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
   svf_kbd.info.description = "Controls keyboard tracking with -/+2 octaves.";
-  svf_kbd.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   auto& svf_gain = result.params.emplace_back(make_param(
     make_topo_info("{FE108A32-770A-415B-9C85-449ABF6A944C}", true, "SV Filter Shelf Gain", "Gain", "SVF Gain", param_svf_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-24, 24, 0, 1, "dB"),
     make_param_gui_single(section_svf_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   svf_gain.gui.bindings.enabled.bind_params({ param_type, param_svf_mode }, [](auto const& vs) { return vs[0] == type_svf && svf_has_gain(vs[1]); });
-  svf_gain.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   svf_gain.info.description = "Controls filter gain for shelving filters.";
   
   auto& svf_right = result.sections.emplace_back(make_param_section(section_svf_right,
@@ -655,7 +653,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_svf_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   svf_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
-  svf_freq.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   svf_freq.info.description = "Controls filter frequency.";
   auto& svf_res = result.params.emplace_back(make_param(
     make_topo_info("{71A30AC8-5291-467A-9662-BE09F0278A3B}", true, "SV Filter Reso", "Reso", "SVF Reso", param_svf_res, 1),
@@ -663,7 +660,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_svf_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   svf_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_svf; });
-  svf_res.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_off || vs[0] == type_svf; });
   svf_res.info.description = "Controls filter resonance.";
 
   auto& comb_mode = result.params.emplace_back(make_param(
@@ -684,7 +680,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_dly_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
-  comb_dly_plus.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_dly_plus.info.description = "Feed-forward time.";
   auto& comb_gain_plus = result.params.emplace_back(make_param(
     make_topo_info("{3069FB5E-7B17-4FC4-B45F-A9DFA383CAA9}", true, "Comb Filter Gain+", "Gain+", "Cmb Gain+", param_comb_gain_plus, 1),
@@ -692,7 +687,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_comb_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_gain_plus.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedforward(vs[1]); });
-  comb_gain_plus.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_gain_plus.info.description = "Feed-forward amount.";
 
   auto& comb_right = result.sections.emplace_back(make_param_section(section_comb_right,
@@ -705,7 +699,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_dly_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
-  comb_dly_min.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_dly_min.info.description = "Feed-back time.";
   auto& comb_gain_min = result.params.emplace_back(make_param(
     make_topo_info("{9684165E-897B-4EB7-835D-D5AAF8E61E65}", true, "Comb Filter Gain-", "Gain-", "Cmb Gain-", param_comb_gain_min, 1),
@@ -713,7 +706,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_comb_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   comb_gain_min.gui.bindings.enabled.bind_params({ param_type, param_comb_mode }, [](auto const& vs) { return vs[0] == type_cmb && comb_has_feedback(vs[1]); });
-  comb_gain_min.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_cmb; });
   comb_gain_min.info.description = "Feed-back amount.";
 
   auto& dist_mode = result.params.emplace_back(make_param(
@@ -739,7 +731,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_flt, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_lp.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
-  dist_lp.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_lp.info.description = "Lowpass filter frequency inside the oversampling stage.";
   auto& dist_res = result.params.emplace_back(make_param(
     make_topo_info("{A9F6D41F-3C99-44DD-AAAA-BDC1FEEFB250}", true, "Dist LPF Res", "Res", "Dst Res", param_dist_lp_res, 1),
@@ -747,7 +738,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_flt, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_res.gui.bindings.enabled.bind_params({ param_type, param_dist_mode }, [](auto const& vs) { return vs[0] == type_dst && vs[1] != dist_mode_a; });
-  dist_res.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_res.info.description = "Lowpass filter resonance inside the oversampling stage.";
 
   auto& dist_skew = result.sections.emplace_back(make_param_section(section_dist_skew,
@@ -761,7 +751,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_skew_in.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_skew_in.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_in.info.description = "Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_in_amt = result.params.emplace_back(make_param(
     make_topo_info("{94A94B06-6217-4EF5-8BA1-9F77AE54076B}", true, "Dist Skew X Amt", "Skew X", "Dst SkX", param_dist_skew_x_amt, 1),
@@ -769,7 +758,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 0, 2 }, make_label_none())));
   dist_skew_in_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_x }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
-  dist_skew_in_amt.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
   auto& dist_skew_out = result.params.emplace_back(make_param(
     make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Y Mode", "Skew Y", "Dst Sky", param_dist_skew_y, 1),
@@ -777,7 +765,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_skew_out.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_out.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
     make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Out Amt", "Skew Out", "Dst Sk Out", param_dist_skew_y_amt, 1),
@@ -785,7 +772,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 1, 2 }, make_label_none())));
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
-  dist_skew_out_amt.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_out_amt.info.description = "After-shape skew amount.";
 
   auto& dist_right = result.sections.emplace_back(make_param_section(section_dist_right,
@@ -800,15 +786,13 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_shaper.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_shaper.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";
+  dist_shaper.info.description = "Selects waveshaper type: various periodic functions plus foldback distortion.";  
   auto& dist_over = result.params.emplace_back(make_param(
     make_topo_info("{99C6E4A8-F90A-41DC-8AC7-4078A6DE0031}", true, "Dist Oversampling", "OvrSmp", "Dst.OvrSmp", param_dist_over, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(dist_over_items(), ""),
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_over.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_over.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_over.info.description = "Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.";
   auto& dist_clip = result.params.emplace_back(make_param(
     make_topo_info("{810325E4-C3AB-48DA-A770-65887DF57845}", true, "Dist Clip Mode", "Clip", "Dst Clip", param_dist_clip, 1),
@@ -816,7 +800,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::autofit_list, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_clip.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip.info.description = "Selects hard clipping (clamp to [-1, 1]) or various soft clipping functions.";
   auto& dist_clip_expo = result.params.emplace_back(make_param(
     make_topo_info("{A0C0BCE3-1BC3-495F-950B-8849C802B4EA}", true, "Dist Clip Exp", "Exp", "Dst Exp", param_dist_clip_exp, 1),
@@ -824,7 +807,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_clip_expo.gui.bindings.enabled.bind_params({ param_type, param_dist_clip }, [](auto const& vs) { return vs[0] == type_dst && vs[1] == dist_clip_exp; });
-  dist_clip_expo.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_clip_expo.info.description = "Exponential clipper amount.";
   auto& dist_gain = result.params.emplace_back(make_param(
     make_topo_info("{3FC57F28-075F-44A2-8D0D-6908447AE87C}", true, "Dist Gain", "Gain", "Dst Gain", param_dist_gain, 1),
@@ -832,7 +814,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 0, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_gain.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_gain.info.description = std::string("Gain amount to drive the shaper and X/Y parameters. ") +
     "Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.";
   auto& dist_mix = result.params.emplace_back(make_param(
@@ -841,7 +822,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_dist_right, gui_edit_type::knob, { 1, 4 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
-  dist_mix.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_mix.info.description = "Dry/wet mix between input and output signal.";
 
   // delay lines and reverb global only, per-voice uses too much memory
@@ -879,7 +859,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_delay_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_amt.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-  delay_amt.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_amt.info.description = "Feedback-amount or tap-amount control.";
   auto& delay_mix = result.params.emplace_back(make_param(
     make_topo_info("{6933B1F7-886F-41F0-8D23-175AA537327E}", true, "Delay Mix", "Mix", "Dly Mix", param_dly_mix, 1),
@@ -887,7 +866,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_delay_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_mix.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-  delay_mix.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_mix.info.description = "Dry/wet control.";
 
   auto& delay_right = result.sections.emplace_back(make_param_section(section_delay_right,
@@ -901,7 +879,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_delay_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   delay_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
-  delay_sprd.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_delay; });
   delay_sprd.info.description = "Stereo spread control.";
   auto& delay_hold_time = result.params.emplace_back(make_param(
     make_topo_info("{037E4A64-8F80-4E0A-88A0-EE1BB83C99C6}", true, "Multi Delay Hold Time", "Hold", "MDly Hold", param_dly_hold_time, 1),
@@ -999,7 +976,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_reverb_left, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_sprd.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
-  reverb_sprd.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_sprd.info.description = "Reverb stereo-spread control.";
   auto& reverb_apf = result.params.emplace_back(make_param(
     make_topo_info("{09DF58B0-4155-47F2-9AEB-927B2D8FD250}", true, "Reverb APF", "APF", "Rev APF", param_reverb_apf, 1),
@@ -1007,7 +983,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_reverb_left, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_apf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
-  reverb_apf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_apf.info.description = "Reverb all-pass filter amount.";
 
   auto& reverb_right = result.sections.emplace_back(make_param_section(section_reverb_right,
@@ -1020,7 +995,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_reverb_right, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_size.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
-  reverb_size.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_size.info.description = "Reverb room size.";
   auto& reverb_damp = result.params.emplace_back(make_param(
     make_topo_info("{44EE5538-9920-4F39-A68E-51E86E96943B}", true, "Reverb Damping", "Damp", "Rev Damp", param_reverb_damp, 1),
@@ -1028,7 +1002,6 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_param_gui_single(section_reverb_right, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   reverb_damp.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
-  reverb_damp.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_reverb; });
   reverb_damp.info.description = "Reverb damping factor.";
 
   return result;
