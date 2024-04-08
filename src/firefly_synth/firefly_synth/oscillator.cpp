@@ -317,7 +317,7 @@ osc_topo(int section, gui_position const& pos)
     make_topo_info_basic("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
     make_param_gui_single(section_type, gui_edit_type::knob, { 1, 2 }, 
-      make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::near))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   cent.info.description = "Oscillator cents, also reacts to Voice-In cents.";
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
 
