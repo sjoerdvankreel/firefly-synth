@@ -268,7 +268,7 @@ osc_topo(int section, gui_position const& pos)
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 9, 25, 63 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 9, 25, 53, 10 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
 
   result.minimal_initializer = init_minimal;
@@ -385,7 +385,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag_basic("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
-    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1 }, { 
+    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, gui_dimension::auto_size }))));
   basic.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
@@ -452,7 +452,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
     make_topo_tag_basic("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
-    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1, 1 }))));
+    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1 }))));
   dsf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   auto& dsf_partials = result.params.emplace_back(make_param(
@@ -479,7 +479,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
     make_topo_tag_basic("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
-    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1 }, {
+    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1 }, {
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
       gui_dimension::auto_size, 1 }))));
