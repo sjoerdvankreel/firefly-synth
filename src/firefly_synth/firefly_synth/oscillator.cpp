@@ -29,7 +29,7 @@ enum {
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
-  param_kps_mid, param_kps_fdbk, param_kps_stretch,
+  param_kps_fdbk, param_kps_mid, param_kps_stretch,
   param_pitch, param_pb };
 
 extern int const voice_in_output_pitch_offset;
@@ -483,9 +483,6 @@ osc_topo(int section, gui_position const& pos)
   dsf_dcy.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf_dcy.info.description = "Controls the amplitude decay of successive partials.";
 
-//  param_rand_svf, param_rand_rate, param_rand_freq, param_rand_res, param_rand_seed, // shared k+s/noise
-  //  param_kps_mid, param_kps_fdbk, param_kps_stretch,
-
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
     make_topo_tag_basic("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
     make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, {
@@ -531,23 +528,23 @@ osc_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   random_seed.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_seed.info.description = "On-voice-init random seed for static noise and initial-excite stage of Karplus-Strong.";
+  auto& kps_fdbk = result.params.emplace_back(make_param(
+    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", true, "K+S Feedback", "Fdbk", "KPS Fdbk", param_kps_fdbk, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
+    make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 4 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
+  kps_fdbk.info.description = "Use to shorten low-frequency notes.";
   auto& kps_mid = result.params.emplace_back(make_param(
     make_topo_info("{AE914D18-C5AB-4ABB-A43B-C80E24868F78}", true, "K+S Midpoint", "Mid", "KPS Mid", param_kps_mid, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, 127, midi_middle_c, 0),
-    make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 4 },
+    make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 6 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   kps_mid.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_kps2; });
   kps_mid.info.description = std::string("In Karplus-Strong2 mode, controls the midpoint MIDI note (C4=60). ") +
     "Lower notes will be stretched less, higher notes will be stretched more. " +
     "This tries to keep audible note lengths relatively equal.";
-  auto& kps_fdbk = result.params.emplace_back(make_param(
-    make_topo_info("{E1907E30-9C17-42C4-B8B6-F625A388C257}", true, "K+S Feedback", "Fdbk", "KPS Fdbk", param_kps_fdbk, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1, 0, true),
-    make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 6 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  kps_fdbk.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_kps(vs[0]); });
-  kps_fdbk.info.description = "Use to shorten low-frequency notes.";
-  auto& kps_stretch = result.params.emplace_back(make_param( 
+  auto& kps_stretch = result.params.emplace_back(make_param(
     make_topo_info("{9EC580EA-33C6-48E4-8C7E-300DAD341F57}", true, "K+S Stretch", "Strt", "KPS Strt", param_kps_stretch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 6 },
