@@ -336,7 +336,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag_basic("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, gui_dimension::auto_size }))));
   basic.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
@@ -403,7 +403,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
     make_topo_tag_basic("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
   dsf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   auto& dsf_partials = result.params.emplace_back(make_param(
@@ -430,7 +430,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
     make_topo_tag_basic("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1 }, {
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
       gui_dimension::auto_size, 1 }))));
@@ -499,7 +499,7 @@ osc_topo(int section, gui_position const& pos)
   
   result.sections.emplace_back(make_param_section(section_sync,
     make_topo_tag_basic("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync"),
-    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
+    make_param_section_gui({ 0, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   auto& sync_on = result.params.emplace_back(make_param(
     make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard Sync On", "Hard Sync", "Hard Sync", param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
@@ -523,7 +523,7 @@ osc_topo(int section, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag_basic("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
-    make_param_section_gui({ 1, 2, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
+    make_param_section_gui({ 1, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", true, "Unison Voices", "Unison", "Unison", param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_osc_unison_voices, 1, 0),
