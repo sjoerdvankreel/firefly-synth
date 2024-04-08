@@ -619,8 +619,8 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   };      
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, false, rounded_container_mode::both, outline1, outline2);
-  auto& result = make_component<rounded_container>(&content_outline, radius, 0, true, rounded_container_mode::fill, background1, background2);
+  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, 0, false, rounded_container_mode::both, outline1, outline2);
+  auto& result = make_component<rounded_container>(&content_outline, radius, 0, 0, true, rounded_container_mode::fill, background1, background2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
@@ -647,7 +647,7 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   auto colors = _lnf->module_gui_colors(topo.modules[module_index].info.tag.full_name);
   auto background1 = colors.tab_background1;
   auto background2 = colors.tab_background2;
-  auto& corners = make_component<rounded_container>(&child, radius, 0, true, rounded_container_mode::fill, background1, background2);
+  auto& corners = make_component<rounded_container>(&child, radius, 0, 0, true, rounded_container_mode::fill, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
@@ -757,14 +757,12 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       }
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-  {
-    auto& container = make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid);
-    return make_component<margin_component>(&container, BorderSize<int>(0, 0, 0, last_horizontal? 0: margin_hsection));
-  }
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, last_horizontal ? 0 : margin_hsection);
+
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
   viewer.setScrollBarsShown(true, false);
-  return make_component<param_section_container>(this, _lnf.get(), &module, &section, &viewer);
+  return make_component<param_section_container>(this, _lnf.get(), &module, &section, &viewer, 0);
 }
 
 Component&

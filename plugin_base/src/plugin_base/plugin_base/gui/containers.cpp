@@ -35,12 +35,12 @@ extra_state_container::extra_state_changed()
 }
 
 param_section_container::
-param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child) :
+param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child, int margin_right) :
   binding_component(gui, module, &section->gui.bindings, 0),
   rounded_container(child, 
     lnf->theme_settings().param_section_corner_radius, 
     lnf->theme_settings().param_section_vpadding,
-    false, rounded_container_mode::both,
+    margin_right, false, rounded_container_mode::both,
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline1, 
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline2) {
   init(); 
@@ -111,7 +111,9 @@ rounded_container::fixed_height(int parent_w, int parent_h) const
 void
 rounded_container::resized()
 {
-  Rectangle<int> bounds(getLocalBounds());
+  Rectangle<int> bounds(
+    getLocalBounds().getX(), getLocalBounds().getY(), 
+    getLocalBounds().getWidth() - _margin_right, getLocalBounds().getHeight());
   Rectangle<int> child_bounds(
     bounds.getX() + _radius / 2,
     bounds.getY() + radius_and_padding() / 2,
@@ -124,18 +126,22 @@ rounded_container::resized()
 void
 rounded_container::paint(Graphics& g)
 {
+  Rectangle<float> bounds(
+    getLocalBounds().getX(), getLocalBounds().getY(),
+    getLocalBounds().getWidth() - _margin_right, getLocalBounds().getHeight());
+
   if (_mode == rounded_container_mode::both)
   {
     if (!_vertical) g.setGradientFill(ColourGradient(
       _color1.darker(1.75), 0, 0, _color2.darker(1.75), 0, getHeight(), false));
     else g.setGradientFill(ColourGradient(
       _color2.darker(1.75), 0, 0, _color1.darker(1.75), getWidth(), 0, false));
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+    g.fillRoundedRectangle(bounds, _radius);
     if (_vertical) g.setGradientFill(ColourGradient(
       _color1, 0, 0, _color2, 0, getHeight(), false));
     else g.setGradientFill(ColourGradient(
       _color2, 0, 0, _color1, getWidth(), 0, false));
-    g.drawRoundedRectangle(getLocalBounds().toFloat(), _radius, 1);
+    g.drawRoundedRectangle(bounds, _radius, 1);
     return;
   }
 
@@ -147,9 +153,9 @@ rounded_container::paint(Graphics& g)
       _color2, 0, 0, _color1, getWidth(), 0, false));
 
   if(_mode == rounded_container_mode::fill)
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+    g.fillRoundedRectangle(bounds, _radius);
   else if(_mode == rounded_container_mode::stroke)
-    g.drawRoundedRectangle(getLocalBounds().toFloat(), _radius, 1);
+    g.drawRoundedRectangle(bounds, _radius, 1);
   else
     assert(false);
 }
