@@ -23,14 +23,14 @@ enum { section_type, section_basic, section_dsf, section_rand, section_sync, sec
 
 enum {
   param_type, param_gain, param_note, param_cent, 
-  param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_freq, param_rand_res, param_rand_seed, param_rand_rate, // shared k+s/noise
   param_kps_fdbk, param_kps_stretch, param_kps_mid,
   param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
-  param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
+  param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd,
+  param_pitch, param_pb };
 
 extern int const voice_in_output_pitch_offset;
 extern int const osc_param_type = param_type;
@@ -321,19 +321,6 @@ osc_topo(int section, gui_position const& pos)
   cent.info.description = "Oscillator cents, also reacts to Voice-In cents.";
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
 
-  auto& pitch = result.params.emplace_back(make_param(
-    make_topo_info_basic("{6E9030AF-EC7A-4473-B194-5DA200E7F90C}", "Pitch", param_pitch, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-128, 128, 0, 0, ""),
-    make_param_gui_none()));
-  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
-  pitch.info.description = "Absolute pitch modulation target, also reacts to Voice-in pitch modulation.";
-  auto& pb = result.params.emplace_back(make_param(
-    make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_none()));
-  pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
-  pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.";
-
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag_basic("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
     make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1 }, { 
@@ -552,6 +539,19 @@ osc_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   uni_spread.gui.bindings.enabled.bind_params({ param_type, param_uni_voices }, [](auto const& vs) { return vs[0] != type_off && vs[1] > 1; });
   uni_spread.info.description = "Unison stereo spread, works on all oscillator modes.";
+
+  auto& pitch = result.params.emplace_back(make_param(
+    make_topo_info_basic("{6E9030AF-EC7A-4473-B194-5DA200E7F90C}", "Pitch", param_pitch, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-128, 128, 0, 0, ""),
+    make_param_gui_none()));
+  pitch.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
+  pitch.info.description = "Absolute pitch modulation target, also reacts to Voice-in pitch modulation.";
+  auto& pb = result.params.emplace_back(make_param(
+    make_topo_info("{D310300A-A143-4866-8356-F82329A76BAE}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
+    make_param_gui_none()));
+  pb.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
+  pb.info.description = "Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.";
 
   return result;
 }
