@@ -486,8 +486,8 @@ osc_topo(int section, gui_position const& pos)
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
     make_topo_tag_basic("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
     make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, {
-      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all }), gui_label_edit_cell_split::horizontal)));
   random.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   auto& random_svf = result.params.emplace_back(make_param(
@@ -508,7 +508,7 @@ osc_topo(int section, gui_position const& pos)
   auto& random_freq = result.params.emplace_back(make_param(
     make_topo_info("{289B4EA4-4A0E-4D33-98BA-7DF475B342E9}", true, "Rnd Filter Freq", "Frq", "Rnd Freq", param_rand_freq, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(20, 20000, 20000, 1000, 0, "Hz"),
-    make_param_gui_single(section_rand, gui_edit_type::knob, { 0, 2 },
+    make_param_gui_single(section_rand, gui_edit_type::hslider, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   random_freq.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_freq.info.description = std::string("Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. ") + 
@@ -516,7 +516,7 @@ osc_topo(int section, gui_position const& pos)
   auto& random_res = result.params.emplace_back(make_param(
     make_topo_info("{3E68ACDC-9800-4A4B-9BB6-984C5A7F624B}", true, "Rnd Filter Res", "Res", "Rnd Res", param_rand_res, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui_single(section_rand, gui_edit_type::knob, { 1, 2 },
+    make_param_gui_single(section_rand, gui_edit_type::hslider, { 1, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   random_res.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return is_random(vs[0]); });
   random_res.info.description = std::string("Continuous filter resonance for static noise or initial-excite filter resonance for Karplus-Strong. ") + 
