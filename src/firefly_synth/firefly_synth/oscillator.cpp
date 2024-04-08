@@ -19,16 +19,17 @@ namespace firefly_synth {
 
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
-enum { section_main, section_basic, section_dsf, section_rand, section_sync_gain, section_uni };
+enum { section_type, section_basic, section_dsf, section_rand, section_sync, section_uni };
 
 enum {
-  param_type, param_note, param_cent, param_pitch, param_pb,
+  param_type, param_gain, param_note, param_cent, 
+  param_pitch, param_pb,
   param_basic_sin_on, param_basic_sin_mix, param_basic_saw_on, param_basic_saw_mix,
   param_basic_tri_on, param_basic_tri_mix, param_basic_sqr_on, param_basic_sqr_mix, param_basic_sqr_pw,
   param_dsf_parts, param_dsf_dist, param_dsf_dcy,
   param_rand_svf, param_rand_freq, param_rand_res, param_rand_seed, param_rand_rate, // shared k+s/noise
   param_kps_fdbk, param_kps_stretch, param_kps_mid,
-  param_gain, param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
+  param_hard_sync, param_hard_sync_semis, param_hard_sync_xover,
   param_uni_voices, param_uni_phase, param_uni_dtn, param_uni_sprd };
 
 extern int const voice_in_output_pitch_offset;
@@ -267,7 +268,7 @@ osc_topo(int section, gui_position const& pos)
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
     make_module_dsp(module_stage::voice, module_output::audio, 0, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
-    make_module_gui(section, pos, { { 1, 1 }, { gui_dimension::auto_size, 1 } })));
+    make_module_gui(section, pos, { { 1, 1 }, { 32, 47, 63 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
 
   result.minimal_initializer = init_minimal;
@@ -277,14 +278,15 @@ osc_topo(int section, gui_position const& pos)
   result.gui.menu_handler_factory = make_osc_routing_menu_handler;
   result.engine_factory = [](auto const&, int sr, int max_frame_count) { return std::make_unique<osc_engine>(max_frame_count, sr); };
 
-  result.sections.emplace_back(make_param_section(section_main,
-    make_topo_tag_basic("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Main"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, 1 }))));
+  result.sections.emplace_back(make_param_section(section_type,
+    make_topo_tag_basic("{A64046EE-82EB-4C02-8387-4B9EFF69E06A}", "Type"),
+    make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { 
+      gui_dimension::auto_size_all, gui_dimension::auto_size_all, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& type = result.params.emplace_back(make_param(
     make_topo_info_basic("{960D3483-4B3E-47FD-B1C5-ACB29F15E78D}", "Type", param_type, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_item(type_items(), ""),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_type, gui_edit_type::autofit_list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   type.gui.submenu = std::make_shared<gui_submenu>();
   type.gui.submenu->indices.push_back(type_off);
   type.gui.submenu->indices.push_back(type_basic);
@@ -294,21 +296,31 @@ osc_topo(int section, gui_position const& pos)
   type.info.description = std::string("Selects the oscillator algorithm. ") + 
     "Only Basic and DSF can be used as an FM target, react to oversampling, and are capable of hard-sync. " + 
     "KPS1 is regular Karplus-Strong, KPS2 is a modified version which auto-adjusts feedback according to pitch.";
+  auto& gain = result.params.emplace_back(make_param(
+    make_topo_info_basic("{F4224036-9246-4D90-BD0F-5867FF318D1C}", "Gain", param_gain, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
+    make_param_gui_single(section_type, gui_edit_type::knob, { 0, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
+  gain.info.description = std::string("Per-osc gain control. The same result may be had through the audio routing matrices, ") +
+    "but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it "
+    "when the oscillator is routed through a distortion module.";
   auto& note = result.params.emplace_back(make_param(
     make_topo_info_basic("{78856BE3-31E2-4E06-A6DF-2C9BB534789F}", "Note", param_note, 1), 
     make_param_dsp_voice(param_automate::automate), make_domain_item(make_midi_note_list(), "C4"),
-    make_param_gui_single(section_main, gui_edit_type::autofit_list, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_type, gui_edit_type::autofit_list, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   note.gui.submenu = make_midi_note_submenu();
   note.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
   note.info.description = "Oscillator base pitch. Also reacts to Voice-In base pitch.";
   auto& cent = result.params.emplace_back(make_param(
     make_topo_info_basic("{691F82E5-00C8-4962-89FE-9862092131CB}", "Cent", param_cent, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, false),
-    make_param_gui_single(section_main, gui_edit_type::knob, { 0, 2 }, 
+    make_param_gui_single(section_type, gui_edit_type::knob, { 1, 2 }, 
       make_label(gui_label_contents::value, gui_label_align::left, gui_label_justify::near))));
   cent.info.description = "Oscillator cents, also reacts to Voice-In cents.";
   cent.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_pitch(vs[0]); });
+
   auto& pitch = result.params.emplace_back(make_param(
     make_topo_info_basic("{6E9030AF-EC7A-4473-B194-5DA200E7F90C}", "Pitch", param_pitch, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(-128, 128, 0, 0, ""),
@@ -324,7 +336,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& basic = result.sections.emplace_back(make_param_section(section_basic,
     make_topo_tag_basic("{8E776EAB-DAC7-48D6-8C41-29214E338693}", "Basic"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
+    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, gui_dimension::auto_size }))));
   basic.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_basic; });
@@ -391,7 +403,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& dsf = result.sections.emplace_back(make_param_section(section_dsf,
     make_topo_tag_basic("{F6B06CEA-AF28-4AE2-943E-6225510109A3}", "DSF"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
+    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 1, 1, 1 }))));
   dsf.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   dsf.gui.bindings.visible.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dsf; });
   auto& dsf_partials = result.params.emplace_back(make_param(
@@ -418,7 +430,7 @@ osc_topo(int section, gui_position const& pos)
 
   auto& random = result.sections.emplace_back(make_param_section(section_rand,
     make_topo_tag_basic("{AB9E6684-243D-4579-A0AF-5BEF2C72EBA6}", "Random"),
-    make_param_section_gui({ 0, 1 }, gui_dimension({ 1 }, { 
+    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size,
       gui_dimension::auto_size, 1 }))));
@@ -485,42 +497,33 @@ osc_topo(int section, gui_position const& pos)
     "Lower notes will be stretched less, higher notes will be stretched more. " + 
     "This tries to keep audible note lengths relatively equal.";
   
-  result.sections.emplace_back(make_param_section(section_sync_gain,
-    make_topo_tag_basic("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync+Gain"),
-    make_param_section_gui({ 1, 0, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
-  auto& gain = result.params.emplace_back(make_param(
-    make_topo_info_basic("{F4224036-9246-4D90-BD0F-5867FF318D1C}", "Gain", param_gain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(1.0, 0, true),
-    make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
-  gain.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] != type_off; });
-  gain.info.description = std::string("Per-osc gain control. The same result may be had through the audio routing matrices, ") +
-    "but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it "
-    "when the oscillator is routed through a distortion module.";
+  result.sections.emplace_back(make_param_section(section_sync,
+    make_topo_tag_basic("{D5A040EE-5F64-4771-8581-CDC5C0CC11A8}", "Sync"),
+    make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   auto& sync_on = result.params.emplace_back(make_param(
     make_topo_info("{900958A4-74BC-4912-976E-45E66D4F00C7}", true, "Hard Sync On", "Hard Sync", "Hard Sync", param_hard_sync, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_toggle(false),
-    make_param_gui_single(section_sync_gain, gui_edit_type::toggle, { 0, 1 },
+    make_param_gui_single(section_sync, gui_edit_type::toggle, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync_on.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return can_do_phase(vs[0]); });
   sync_on.info.description = "Enables hard-sync against an internal reference oscillator.";
   auto& sync_semi = result.params.emplace_back(make_param(
     make_topo_info("{FBD5ADB5-63E2-42E0-BF90-71B694E6F52C}", true, "Hard Sync Semis", "Semi", "HS Semi", param_hard_sync_semis, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_linear(0, 48, 0, 2, "Semi"),
-    make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_sync, gui_edit_type::knob, { 0, 1 }, make_label_none())));
   sync_semi.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_semi.info.description = "Pitch offset of the actual oscillator against the reference oscillator.";
   auto& sync_xover = result.params.emplace_back(make_param(
     make_topo_info("{FE055A0E-4619-438B-9129-24E56437A54E}", true, "Hard Sync XOver Time", "XOver", "HS XOver", param_hard_sync_xover, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_linear(0, 5, 2.5, 2, "Ms"),
-    make_param_gui_single(section_sync_gain, gui_edit_type::knob, { 0, 3 },
+    make_param_gui_single(section_sync, gui_edit_type::knob, { 0, 2 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   sync_xover.gui.bindings.enabled.bind_params({ param_type, param_hard_sync }, [](auto const& vs) { return can_do_phase(vs[0]) && vs[1]; });
   sync_xover.info.description = "Controls cross-over time between the synced and unsyced signal after a phase reset occurs.";
 
   result.sections.emplace_back(make_param_section(section_uni,
     make_topo_tag_basic("{D91778EE-63D7-4346-B857-64B2D64D0441}", "Unison"),
-    make_param_section_gui({ 1, 1, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
+    make_param_section_gui({ 1, 2, 1, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1, 1 }))));
   auto& uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{376DE9EF-1CC4-49A0-8CA7-9CF20D33F4D8}", true, "Unison Voices", "Unison", "Unison", param_uni_voices, 1),
     make_param_dsp_voice(param_automate::automate), make_domain_step(1, max_osc_unison_voices, 1, 0),

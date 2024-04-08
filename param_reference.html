@@ -2182,7 +2182,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Type</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2197,8 +2197,24 @@
 <td colspan='11' class='description'>Selects the oscillator algorithm. Only Basic and DSF can be used as an FM target, react to oversampling, and are capable of hard-sync. KPS1 is regular Karplus-Strong, KPS2 is a modified version which auto-adjusts feedback according to pitch.</td>
 </tr>
 <tr>
+<td rowspan='2'>Gain</td>
+<td>Type</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>100 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Per-osc gain control. The same result may be had through the audio routing matrices, but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it when the oscillator is routed through a distortion module.</td>
+</tr>
+<tr>
 <td rowspan='2'>Note</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2214,7 +2230,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Cent</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2230,7 +2246,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Pitch</td>
-<td>Main</td>
+<td>Type</td>
 <td>No</td>
 <td>1</td>
 <td>Input</td>
@@ -2246,7 +2262,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Pitch Bend</td>
-<td>Main</td>
+<td>Type</td>
 <td>No</td>
 <td>1</td>
 <td>Input</td>
@@ -2581,24 +2597,8 @@
 <td colspan='11' class='description'>In Karplus-Strong2 mode, controls the midpoint MIDI note (C4=60). Lower notes will be stretched less, higher notes will be stretched more. This tries to keep audible note lengths relatively equal.</td>
 </tr>
 <tr>
-<td rowspan='2'>Gain</td>
-<td>Sync+Gain</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>100 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Per-osc gain control. The same result may be had through the audio routing matrices, but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it when the oscillator is routed through a distortion module.</td>
-</tr>
-<tr>
 <td rowspan='2'>Hard Sync On</td>
-<td>Sync+Gain</td>
+<td>Sync</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2614,7 +2614,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Hard Sync Semis</td>
-<td>Sync+Gain</td>
+<td>Sync</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2630,7 +2630,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Hard Sync XOver Time</td>
-<td>Sync+Gain</td>
+<td>Sync</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
