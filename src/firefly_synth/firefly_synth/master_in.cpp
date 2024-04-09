@@ -79,7 +79,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
-    make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1, 1 }))));
+    make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1, 1, 1, 1, 1 }))));
   auto& aux = result.params.emplace_back(make_param(
     make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),

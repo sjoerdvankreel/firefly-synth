@@ -707,17 +707,7 @@ Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
   auto const& param = slots[0].param;
-  if (param->gui.layout == param_layout::single_grid)
-  {
-    int slot = 0;
-    auto dimension = module.module->sections[slots[0].param->gui.section].gui.dimension;
-    auto& result = make_component<grid_component>(dimension, 0, 0, 0, 0);
-    for(int r = 0; r < dimension.row_sizes.size(); r++)
-      for(int c = 0; c < dimension.column_sizes.size(); c++)
-        result.add(make_single_param(module, slots[slot++]), { r, c });
-    return result;
-  }
-
+  assert(param->gui.layout != param_layout::single_grid);
   bool vertical = param->gui.layout == param_layout::vertical;
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
@@ -740,20 +730,31 @@ Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool last_horizontal)
 {
   auto const& params = module.params;
-  bool is_single_grid_param = false;
-  gui_dimension dimension = section.gui.dimension;
+  bool is_single_grid_param = false; 
+  grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param, margin_param, 0, 0);
   
   for(int p = 0; p < module.module->params.size(); p++)
     if(module.module->params[p].gui.section == section.index)
       if (module.module->params[p].gui.layout == param_layout::single_grid)
       {
-        // make multi param will handle the grid layout, set to single cell
         assert(!is_single_grid_param);
         is_single_grid_param = true;
-        dimension = { 1, 1 };
       }
+  
+  // multi-slot param being only param in section
+  if (is_single_grid_param)
+  {
+    int slot = 0;
+    for(int r = 0; r < section.gui.dimension.row_sizes.size(); r++)
+      for (int c = 0; c < section.gui.dimension.column_sizes.size(); c += 2)
+      {
+        grid.add(make_param_label(module, params[slot], params[slot].param->gui.label.contents), { r, c });
+        grid.add(make_param_editor(module, params[slot++]), { r, c + 1 });
+      }
+    assert(section.gui.scroll_mode == gui_scroll_mode::none);
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, last_horizontal ? 0 : margin_hsection);
+  }
 
-  grid_component& grid = make_component<grid_component>(dimension, margin_param, margin_param, 0, 0);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
       if(section.gui.cell_split == gui_label_edit_cell_split::no_split)

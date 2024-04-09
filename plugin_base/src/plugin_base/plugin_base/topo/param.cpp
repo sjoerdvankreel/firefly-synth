@@ -90,8 +90,9 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
 
   if (gui.layout == param_layout::single_grid)
   {
+    // assert * 2 is for the labels
     auto dimension = module.sections[gui.section].gui.dimension;
-    assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count);
+    assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count * 2);
   }
 }
 
