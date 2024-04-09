@@ -340,7 +340,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     "and horizontal and vertical skewing controls with various types.";
 
   std::vector<int> column_sizes = { 32, 13, 34, 63 };
-  if(!global) column_sizes = { 32, 13, 34, 53, 10 };
+  if(!global) column_sizes = { 32, 13, 34, 55, 8 };
   module_topo result(make_module(info,
     make_module_dsp(stage, module_output::cv, 1, {
       make_module_dsp_output(true, make_topo_info_basic("{197CB1D4-8A48-4093-A5E7-2781C731BBFC}", "Output", 0, 1)) }),
@@ -466,7 +466,7 @@ lfo_topo(int section, gui_position const& pos, bool global, bool is_fx)
     make_topo_tag_basic("{8EB0A04C-5D69-4B0E-89BD-884BC2EFDFBE}", "Phase"),
     make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   auto& phase = result.params.emplace_back(make_param(
-    make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phase", param_phase, 1),
+    make_topo_info_basic("{B23E9732-ECE3-4D5D-8EC1-FF299C6926BB}", "Phs", param_phase, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_phase, gui_edit_type::knob, { 0, 0 },
     make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));

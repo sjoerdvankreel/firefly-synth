@@ -69,7 +69,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { row_distribution, { 32, 13, 19, 15, 8, 45, 10 } } )));
+      make_module_gui(section, pos, { row_distribution, { 32, 13, 20, 14, 8, 47, 8 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -140,12 +140,12 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_glob_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
     make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size, 1, gui_dimension::auto_size, 
-      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }), gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, 
+      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
   auto& glob_uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Dtn", "Uni Dtn", param_glob_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.33, 0, true),
-    make_param_gui_single(section_glob_uni_prms, gui_edit_type::hslider, { 0, 0 },
+    make_param_gui_single(section_glob_uni_prms, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   glob_uni_dtn.info.description = "Global unison voice pitch detune amount.";
   glob_uni_dtn.gui.bindings.enabled.bind_params({ param_glob_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
@@ -153,7 +153,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& glob_uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Sprd", "Uni Sprd", param_glob_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_glob_uni_prms, gui_edit_type::hslider, { 1, 0 },
+    make_param_gui_single(section_glob_uni_prms, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   glob_uni_spread.info.description = "Global unison stereo spread.";
   glob_uni_spread.gui.bindings.enabled.bind_params({ param_glob_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
