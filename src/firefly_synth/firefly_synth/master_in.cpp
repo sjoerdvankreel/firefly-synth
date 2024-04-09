@@ -140,8 +140,8 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_glob_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
     make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, 
-      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), 
+        gui_label_edit_cell_split::horizontal)));
   auto& glob_uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Dtn", "Uni Dtn", param_glob_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.33, 0, true),
