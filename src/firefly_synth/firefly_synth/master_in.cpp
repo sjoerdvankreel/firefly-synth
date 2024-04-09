@@ -133,11 +133,12 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_glob_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
     make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size, 1, gui_dimension::auto_size, 1, gui_dimension::auto_size, 1 }), gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size, 1, gui_dimension::auto_size, 
+      gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }), gui_label_edit_cell_split::horizontal)));
   auto& glob_uni_dtn = result.params.emplace_back(make_param(
     make_topo_info("{2F0E199D-7B8A-497E-BED4-BC0FC55F1720}", true, "Global Unison Detune", "Dtn", "Uni Dtn", param_glob_uni_dtn, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.33, 0, true),
-    make_param_gui_single(section_glob_uni_prms, gui_edit_type::knob, { 0, 0 },
+    make_param_gui_single(section_glob_uni_prms, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   glob_uni_dtn.info.description = "Global unison voice pitch detune amount.";
   glob_uni_dtn.gui.bindings.enabled.bind_params({ param_glob_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
@@ -145,7 +146,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& glob_uni_spread = result.params.emplace_back(make_param(
     make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Sprd", "Uni Sprd", param_glob_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
-    make_param_gui_single(section_glob_uni_prms, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_glob_uni_prms, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   glob_uni_spread.info.description = "Global unison stereo spread.";
   glob_uni_spread.gui.bindings.enabled.bind_params({ param_glob_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
