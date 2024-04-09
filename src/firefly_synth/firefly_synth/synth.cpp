@@ -205,7 +205,7 @@ make_title_text_section(plugin_gui* gui, lnf* lnf, component_store store, bool i
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { 1 } }), 2, 2, 0, 1);
   auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
-  title_label.setJustificationType(Justification::centredRight);
+  title_label.setJustificationType(Justification::centred);
   grid.add(title_label, { 0, 0, 1, 1 });
   std::string version_text = std::string(FF_SYNTH_VERSION_TEXT) + " " + gui->gui_state()->desc().config->format_name() + " ";
 #ifdef __aarch64__
