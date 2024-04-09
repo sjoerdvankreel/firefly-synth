@@ -199,7 +199,7 @@ make_edit_controls_section(plugin_gui* gui, lnf* lnf, component_store store)
 static Component&
 make_title_text_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
 {
-  auto colors = lnf->section_gui_colors("Title");
+  auto colors = lnf->section_gui_colors("Title Text");
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { 1 } }), 2, 2, 0, 1);
