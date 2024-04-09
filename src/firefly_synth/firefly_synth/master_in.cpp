@@ -69,7 +69,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { row_distribution, { 32, 13, 17, 17, 53, 10 } } )));
+      make_module_gui(section, pos, { row_distribution, { 32, 13, 19, 15, 53, 10 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -92,18 +92,18 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal)));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
     make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI parameter changes.";
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", true, "BPM Smoothing", "BPM Smt", "BPM Smt", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 1 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_smooth, gui_edit_type::knob, { 1, 0 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
   std::vector<int> column_distribution = { 1, 1 };
