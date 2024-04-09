@@ -1,6 +1,7 @@
 ### ?, ? - V1.7.0.
 
 - TODO lots of gui alignment/rearrange.
+- add additional aux param just to fit the gui
 - Bug: disable glob uni prms when voicecount=1.
 - Changed default distortion mode to plain tanh clipper.
 - Renamed distortion skew in/out to x/y to align with lfo.

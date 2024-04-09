@@ -707,6 +707,7 @@ Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
   auto const& param = slots[0].param;
+  // todo
   bool vertical = param->gui.layout == param_layout::vertical;
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;

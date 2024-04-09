@@ -87,6 +87,12 @@ param_topo::validate(plugin_topo const& plugin, module_topo const& module, int i
   assert(dsp.direction == param_direction::input || !gui.bindings.global_enabled.is_bound());
   assert(gui.edit_type != gui_edit_type::toggle || domain.type == domain_type::toggle);
   assert(dsp.direction != param_direction::output || module.dsp.stage == module_stage::output);
+
+  if (gui.layout == param_layout::single_grid)
+  {
+    auto dimension = module.sections[gui.section].gui.dimension;
+    assert(dimension.row_sizes.size() * dimension.column_sizes.size() == info.slot_count);
+  }
 }
 
 }

@@ -13,7 +13,7 @@ using namespace plugin_base;
 
 namespace firefly_synth {
 
-static int const aux_count = 5;
+static int const aux_count = 6;
 static int const max_ext_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
@@ -80,11 +80,11 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
-    make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1 }, { 1 }))));
+    make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1, 1 }, { 1, 1, 1 }))));
   auto& aux = result.params.emplace_back(make_param(
     make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_aux, gui_edit_type::knob, param_layout::horizontal, { 0, 0 },
+    make_param_gui(section_aux, gui_edit_type::knob, param_layout::single_grid, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   
