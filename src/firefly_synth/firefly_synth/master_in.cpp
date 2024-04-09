@@ -61,15 +61,13 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
 module_topo
 master_in_topo(int section, bool is_fx, gui_position const& pos)
 {
-  std::vector<int> row_distribution = { 1, 1 };
-  if(is_fx) row_distribution = { 1 };
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", true, "Master In", "Master In", "MIn", module_master_in, 1),
     make_module_dsp(module_stage::input, module_output::cv, 0, {
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { row_distribution, { 32, 13, 20, 14, 9, 46, 8 } } )));
+      make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 20, 14, 9, 46, 8 } })));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -92,7 +90,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 2, 2, is_fx? 2: 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal)));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
@@ -108,7 +106,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), 
+    make_param_section_gui({ 0, is_fx? 4: 3, 2, is_fx? 3: 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), 
       gui_label_edit_cell_split::horizontal)));
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
