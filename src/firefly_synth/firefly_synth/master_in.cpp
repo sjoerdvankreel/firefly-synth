@@ -17,7 +17,7 @@ static int const aux_count = 6;
 static int const max_ext_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
-enum { section_aux, section_smooth, section_linked, section_glob_uni_prms, section_glob_uni_count };
+enum { section_aux, section_smooth, section_linked, section_linked_pbrange, section_glob_uni_prms, section_glob_uni_count };
 
 enum { 
   param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
@@ -106,35 +106,40 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
-  std::vector<int> column_distribution = { 1, 1 };
-  if(!is_fx) column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size, 1 };
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1 }, column_distribution))));
+    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), 
+      gui_label_edit_cell_split::horizontal)));
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod", "Mod", param_mod, 1),
     make_param_dsp_midi({ module_midi, 0, 1 }), make_domain_percentage_identity(0, 0, true),
     make_param_gui_single(section_linked, edit_type, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   mod_wheel.info.description = "Linked to MIDI mod wheel, updates on incoming MIDI events.";
   auto& pitch_bend = result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_linked, edit_type, { 0, 1 },
-    make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+    make_param_gui_single(section_linked, edit_type, { 1, 0 },
+    make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
 
   if(is_fx) return result;
+
+  result.sections.emplace_back(make_param_section(section_linked_pbrange,
+    make_topo_tag_basic("{12EAD382-DF92-486C-A451-E19EC1C009BD}", "Linked PB Range"),
+    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }),
+      gui_label_edit_cell_split::vertical)));
   auto& pb_range = result.params.emplace_back(make_param(
-    make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "PB Range", "Range", "Range", param_pb_range, 1),
+    make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "PB Range", "Rng", "Range", param_pb_range, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, 24, 12, 0),
-    make_param_gui_single(section_linked, gui_edit_type::autofit_list, { 0, 2 }, make_label_none())));
+    make_param_gui_single(section_linked_pbrange, gui_edit_type::list, { 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   pb_range.info.description = "Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.";
 
   result.sections.emplace_back(make_param_section(section_glob_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
-    make_param_section_gui({ 0, 4, 2, 2 }, gui_dimension({ 1, 1 }, { 
+    make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }), gui_label_edit_cell_split::horizontal)));
   auto& glob_uni_dtn = result.params.emplace_back(make_param(
