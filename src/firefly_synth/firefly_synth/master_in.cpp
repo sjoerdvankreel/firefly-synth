@@ -69,7 +69,8 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { row_distribution, { gui_dimension::auto_size, gui_dimension::auto_size, 1 } } )));
+      make_module_gui(section, pos, { row_distribution, { 32, 13, 97 } } )));
+  // TODO 32, 13, 34, 53, 10
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -79,7 +80,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
-    make_param_section_gui({ 0, 0 }, gui_dimension({ 1 }, { 1 }))));
+    make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1 }, { 1 }))));
   auto& aux = result.params.emplace_back(make_param(
     make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
@@ -131,7 +132,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison"),
-    make_param_section_gui({ 1, 0, 1, 3 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1,
+    make_param_section_gui({ 1, 1, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1,
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Unison", "Global Unison", param_glob_uni_voices, 1),
