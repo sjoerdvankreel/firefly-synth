@@ -69,7 +69,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { row_distribution, { 32, 13, 34, 53, 10 } } )));
+      make_module_gui(section, pos, { row_distribution, { 32, 13, 17, 17, 53, 10 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -92,7 +92,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
-    make_param_section_gui({ 0, 2 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
+    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1 }, { { gui_dimension::auto_size, gui_dimension::auto_size } }))));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
@@ -110,7 +110,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   if(!is_fx) column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size, 1 };
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 1, 2 }, gui_dimension({ 1 }, column_distribution))));
+    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1 }, column_distribution))));
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod", "Mod", param_mod, 1),
@@ -134,7 +134,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { 
+    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size, 1, gui_dimension::auto_size, 
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }), gui_label_edit_cell_split::horizontal)));
   auto& glob_uni_dtn = result.params.emplace_back(make_param(
@@ -188,7 +188,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Global Unison Voices"),
-    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Uni", "Uni", param_glob_uni_voices, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_unison_voices, 1, 0),
