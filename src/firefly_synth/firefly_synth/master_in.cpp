@@ -108,7 +108,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   if(!is_fx) column_distribution = { gui_dimension::auto_size, gui_dimension::auto_size, 1 };
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, 3 }, gui_dimension({ 1 }, column_distribution))));
+    make_param_section_gui({ 1, 2 }, gui_dimension({ 1 }, column_distribution))));
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod", "Mod", param_mod, 1),
@@ -132,7 +132,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison"),
-    make_param_section_gui({ 1, 2, 1, 2 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1,
+    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1 }, { gui_dimension::auto_size, 1, 1,
       gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size, gui_dimension::auto_size }))));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Global Unison", "Global Unison", param_glob_uni_voices, 1),
