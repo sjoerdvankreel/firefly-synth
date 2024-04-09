@@ -707,15 +707,25 @@ Component&
 plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 {
   auto const& param = slots[0].param;
-  // todo
+  if (param->gui.layout == param_layout::single_grid)
+  {
+    int slot = 0;
+    auto dimension = module.module->sections[slots[0].param->gui.section].gui.dimension;
+    auto& result = make_component<grid_component>(dimension, 0, 0, 0, 0);
+    for(int r = 0; r < dimension.row_sizes.size(); r++)
+      for(int c = 0; c < dimension.column_sizes.size(); c++)
+        result.add(make_single_param(module, slots[slot++]), { r, c });
+    return result;
+  }
+
   bool vertical = param->gui.layout == param_layout::vertical;
   int autofit_row = param->gui.tabular && vertical ? 1 : 0;
   int autofit_column = param->gui.tabular && !vertical ? 1 : 0;
-  auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
   auto& result = make_component<grid_component>(vertical, param->info.slot_count + (param->gui.tabular? 1: 0), 0, 0, autofit_row, autofit_column);
   if (param->gui.tabular)
   {
     std::string display_name = param->info.tag.display_name;
+    auto colors = _lnf->module_gui_colors(module.module->info.tag.full_name);
     auto& header = make_component<autofit_label>(module_lnf(module.module->info.index), display_name, false, -1, true);
     header.setText(display_name, dontSendNotification);
     header.setColour(Label::ColourIds::textColourId, colors.table_header);
@@ -730,7 +740,20 @@ Component&
 plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool last_horizontal)
 {
   auto const& params = module.params;
-  grid_component& grid = make_component<grid_component>(section.gui.dimension, margin_param, margin_param, 0, 0);
+  bool is_single_grid_param = false;
+  gui_dimension dimension = section.gui.dimension;
+  
+  for(int p = 0; p < module.module->params.size(); p++)
+    if(module.module->params[p].gui.section == section.index)
+      if (module.module->params[p].gui.layout == param_layout::single_grid)
+      {
+        // make multi param will handle the grid layout, set to single cell
+        assert(!is_single_grid_param);
+        is_single_grid_param = true;
+        dimension = { 1, 1 };
+      }
+
+  grid_component& grid = make_component<grid_component>(dimension, margin_param, margin_param, 0, 0);
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
     if(iter->param->gui.edit_type != gui_edit_type::none && iter->param->gui.section == section.index)
       if(section.gui.cell_split == gui_label_edit_cell_split::no_split)
