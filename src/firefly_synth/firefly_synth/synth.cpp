@@ -211,7 +211,7 @@ make_title_text_section(plugin_gui* gui, lnf* lnf, component_store store, bool i
 #ifdef __aarch64__
   version_text += "ARM";
 #else
-  version_text += "X64";
+  version_text += "X64"; 
 #endif
   auto& version_label = store_component<autofit_label>(store, lnf, version_text, false, 10);
   version_label.setJustificationType(Justification::centredRight);
