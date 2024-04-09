@@ -69,7 +69,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info_basic("{9D36E713-80F9-49CA-9E81-17E424FF66EE}", "Aux", output_aux, aux_count)),
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
-      make_module_gui(section, pos, { row_distribution, { 32, 13, 20, 14, 8, 47, 8 } } )));
+      make_module_gui(section, pos, { row_distribution, { 32, 13, 20, 14, 9, 46, 8 } } )));
   result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
@@ -151,7 +151,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   glob_uni_dtn.gui.bindings.enabled.bind_params({ param_glob_uni_voices }, [](auto const& vs) { return vs[0] > 1; });
   glob_uni_dtn.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v == engine_voice_mode_poly; });
   auto& glob_uni_spread = result.params.emplace_back(make_param(
-    make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Sprd", "Uni Sprd", param_glob_uni_sprd, 1),
+    make_topo_info("{356468BC-59A0-40D0-AC14-C7DDBB16F4CE}", true, "Global Unison Spread", "Spr", "Uni Spr", param_glob_uni_sprd, 1),
     make_param_dsp_accurate(param_automate::automate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_glob_uni_prms, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
