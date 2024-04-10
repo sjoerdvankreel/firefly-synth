@@ -123,37 +123,17 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 
 ![Screenshot](static/screenshot_fx_firefly_dark.png)
 
-# Themes
+# Theme examples
 
 <table>
   <tr>
-    <td><img src="static/screenshot_firefly_dark.png"/></td>
-    <td><img src="static/screenshot_firefly_light.png"/></td>
-    <td><img src="static/screenshot_firefly_flat.png"/></td>
-  </tr>
-  <tr>
-    <td><img src="static/screenshot_infernal_dark.png"/></td>
-    <td><img src="static/screenshot_infernal_light.png"/></td>
-    <td><img src="static/screenshot_infernal_flat.png"/></td>
-  </tr>
-  <tr>
-    <td><img src="static/screenshot_mauve_dark.png"/></td>
-    <td><img src="static/screenshot_mauve_light.png"/></td>
-    <td><img src="static/screenshot_mauve_flat.png"/></td>
-  </tr>
-  <tr>
-    <td><img src="static/screenshot_cyan_dark.png"/></td>
-    <td><img src="static/screenshot_cyan_light.png"/></td>
     <td><img src="static/screenshot_cyan_flat.png"/></td>
-  </tr>
-  <tr>
-    <td><img src="static/screenshot_orange_dark.png"/></td>
+    <td><img src="static/screenshot_cool_blue_dark"/></td>
     <td><img src="static/screenshot_orange_light.png"/></td>
-    <td><img src="static/screenshot_orange_flat.png"/></td>
   </tr>
   <tr>
-    <td><img src="static/screenshot_cool_blue_dark.png"/></td>
-    <td><img src="static/screenshot_cool_blue_light.png"/></td>
-    <td><img src="static/screenshot_cool_blue_flat.png"/></td>
+    <td><img src="static/screenshot_firefly_flat.png"/></td>
+    <td><img src="static/screenshot_infernal_flat.png"/></td>
+    <td><img src="static/screenshot_infernal_light.png"/></td>
   </tr>
 </table>
