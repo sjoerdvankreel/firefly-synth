@@ -223,7 +223,9 @@ make_title_text_section(plugin_gui* gui, lnf* lnf, component_store store, bool i
 static Component&
 make_title_image_section(plugin_gui* gui, lnf* lnf, component_store store, bool is_fx)
 {
-  return store_component<image_component>(store, gui->gui_state()->desc().config, lnf->theme(), "header.png", RectanglePlacement::xRight);
+  return store_component<image_component>(
+    store, gui->gui_state()->desc().config, 
+    lnf->theme(), "header.png", RectanglePlacement::centred);
 }
 
 std::unique_ptr<module_tab_menu_handler>
