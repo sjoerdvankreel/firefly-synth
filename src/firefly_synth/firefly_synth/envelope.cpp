@@ -369,6 +369,7 @@ env_topo(int section, gui_position const& pos)
     make_param_gui_single(section_trigger, gui_edit_type::list, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   trigger.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  trigger.gui.bindings.global_enabled.bind_param(module_voice_in, voice_in_param_mode, [](int v) { return v != engine_voice_mode_poly; });
   trigger.info.description = std::string("Selects trigger mode for monophonic mode.<br/>") +
     "Legato - envelope will not reset.<br/>" + 
     "Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>" +
@@ -596,7 +597,9 @@ void env_engine::process_mono_type(plugin_block& block, cv_cv_matrix_mixdown con
 template <bool Monophonic, int Type, bool Sync>
 void env_engine::process_mono_type_sync(plugin_block& block, cv_cv_matrix_mixdown const* modulation)
 {
-  switch (block.state.own_block_automation[param_trigger][0].step())
+  int trigger = block.state.own_block_automation[param_trigger][0].step();
+  if constexpr(!Monophonic) trigger = trigger_legato;
+  switch (trigger)
   {
   case trigger_legato: process_mono_type_sync_trigger<Monophonic, Type, Sync, trigger_legato>(block, modulation); break;
   case trigger_retrig: process_mono_type_sync_trigger<Monophonic, Type, Sync, trigger_retrig>(block, modulation); break;
