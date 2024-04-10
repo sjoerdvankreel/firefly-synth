@@ -5,6 +5,7 @@
 - Renamed distortion skew in/out to x/y to align with lfo.
 - Add additional global aux parameter just to fit the gui.
 - Bugfix: disable global unison parameters when voice count is 1.
+- Bugfix + breaking change: when global unison is enabled voices are attenuated by sqrt(voice-count).
 
 ### April 2, 2024 - V1.6.1.
 

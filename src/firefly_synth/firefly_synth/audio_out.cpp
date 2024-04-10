@@ -138,10 +138,12 @@ voice_audio_out_engine::process_unison(plugin_block& block)
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
   auto const& glob_uni_sprd_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
 
+  float attn = 1.0f;
   float voice_pos = 0.0f;
   float voice_bal = 0.0f;
   if constexpr (GlobalUnison)
   {
+    attn = std::sqrt(block.voice->state.sub_voice_count);
     voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
     voice_pos = unipolar_to_bipolar(voice_pos);
   }
@@ -152,7 +154,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
       voice_bal = voice_pos * glob_uni_sprd_curve[f];
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_voice_out, param_bal, bal_curve[f]);
     for (int c = 0; c < 2; c++)
-      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal);
+      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal) / attn;
   }
 }
 
