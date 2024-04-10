@@ -96,9 +96,13 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   
+  auto smooth_gui = make_param_section_gui(
+    { 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal);
+  if(is_fx)
+    smooth_gui = make_param_section_gui(
+    { 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_smooth,
-    make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
-    make_param_section_gui({ 0, is_fx? 4: 2, is_fx ? 1 : 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal)));
+    make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"), smooth_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
@@ -108,7 +112,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", true, "BPM Smoothing", "BPM Smt", "BPM Smt", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_smooth, gui_edit_type::knob, { is_fx? 0: 1, is_fx? 1: 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
