@@ -363,8 +363,8 @@ load_state_internal(
     // check for changed module slot count
     var module_slot_count = json["modules"][m]["slot_count"];
     auto const& new_module = state.desc().plugin->modules[module_iter->second];
-    if ((int)module_slot_count != new_module.info.slot_count)
-      result.warnings.push_back("Module '" + new_module.info.tag.full_name + "' changed slot count.");
+    if ((int)module_slot_count > new_module.info.slot_count)
+      result.warnings.push_back("Module '" + new_module.info.tag.full_name + "' decreased slot count.");
 
     for (int p = 0; p < json["modules"][m]["params"].size(); p++)
     {
@@ -381,8 +381,8 @@ load_state_internal(
       // check for changed param slot count
       var param_slot_count = json["modules"][m]["params"][p]["slot_count"];
       auto const& new_param = state.desc().plugin->modules[module_iter->second].params[param_iter->second];
-      if ((int)param_slot_count != new_param.info.slot_count)
-        result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "' slot count changed.");
+      if ((int)param_slot_count > new_param.info.slot_count)
+        result.warnings.push_back("Param '" + new_module.info.tag.full_name + " " + new_param.info.tag.full_name + "' decreased slot count.");
     }
   }
 
