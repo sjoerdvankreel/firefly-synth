@@ -34,6 +34,7 @@ v1.7
 put download/install section on top of github page
 
 v1.8:
+Title size clips on mac
 bug: preset select jumps back to previous
 do distinction between voice/global/matrix in the ui for all themes
 do forward compat checks - dont load newer versions
