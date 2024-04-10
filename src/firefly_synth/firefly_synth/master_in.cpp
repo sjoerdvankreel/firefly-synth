@@ -82,16 +82,17 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
-  result.sections.emplace_back(make_param_section(section_aux,
-    make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
-    make_param_section_gui({ 0, 0, is_fx? 1: 2, is_fx? 4: 2 }, gui_dimension({ 1, 1 }, { 
-      gui_dimension::auto_size_all, 1, 
+  auto section_aux_gui = make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1, }), gui_label_edit_cell_split::horizontal)));
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1, }), gui_label_edit_cell_split::horizontal);
+  if(is_fx) section_aux_gui = make_param_section_gui({ 0, 0, 1, 4 }, gui_dimension({ 1 }, { 1 }), gui_label_edit_cell_split::no_split);
+  result.sections.emplace_back(make_param_section(section_aux,
+    make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"), section_aux_gui));
   auto& aux = result.params.emplace_back(make_param(
     make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_aux, gui_edit_type::knob, param_layout::single_grid, { 0, 0 },
+    make_param_gui(section_aux, gui_edit_type::knob, is_fx? param_layout::horizontal: param_layout::single_grid, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   
