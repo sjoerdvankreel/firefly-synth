@@ -84,7 +84,7 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),
-    make_param_section_gui({ 0, 0 }, dimension, global? gui_label_edit_cell_split::horizontal: gui_label_edit_cell_split::no_split)));
+    make_param_section_gui({ 0, 0 }, dimension, (global && !is_fx) ? gui_label_edit_cell_split::horizontal: gui_label_edit_cell_split::no_split)));
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info_basic("{2156DEE6-A147-4B93-AEF3-ABE69F53DBF9}", "Gain", param_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(gain_default_, 0, true),

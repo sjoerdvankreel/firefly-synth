@@ -79,7 +79,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"),
-    make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1, 1 }, { 
+    make_param_section_gui({ 0, 0, is_fx? 1: 2, 2 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size_all, 1, 
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, }), gui_label_edit_cell_split::horizontal)));
@@ -92,7 +92,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"),
-    make_param_section_gui({ 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal)));
+    make_param_section_gui({ 0, 2, is_fx ? 1 : 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal)));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
@@ -108,7 +108,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_linked,
     make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), 
+    make_param_section_gui({ 0, 3, is_fx? 1: 2, is_fx? 4: 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), 
       gui_label_edit_cell_split::horizontal)));
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
@@ -128,7 +128,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_linked_pbrange,
     make_topo_tag_basic("{12EAD382-DF92-486C-A451-E19EC1C009BD}", "Linked PB Range"),
-    make_param_section_gui({ 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }),
+    make_param_section_gui({ 0, 4, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }),
       gui_label_edit_cell_split::vertical)));
   auto& pb_range = result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "PB Range", "Rng", "Range", param_pb_range, 1),
@@ -139,7 +139,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
-    make_param_section_gui({ 0, 5, 2, 1 }, gui_dimension({ 1, 1 }, { 
+    make_param_section_gui({ 0, 5, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), 
         gui_label_edit_cell_split::horizontal)));
   auto& glob_uni_dtn = result.params.emplace_back(make_param(
@@ -193,7 +193,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Global Unison Voices"),
-    make_param_section_gui({ 0, 6, 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 6, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Uni", "Uni", param_glob_uni_voices, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_unison_voices, 1, 0),
