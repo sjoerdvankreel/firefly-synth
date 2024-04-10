@@ -128,7 +128,7 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 <table>
   <tr>
     <td><img src="static/screenshot_cyan_flat.png"/></td>
-    <td><img src="static/screenshot_cool_blue_dark"/></td>
+    <td><img src="static/screenshot_cool_blue_dark.png"/></td>
     <td><img src="static/screenshot_orange_light.png"/></td>
   </tr>
   <tr>
