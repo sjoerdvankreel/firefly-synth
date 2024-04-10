@@ -229,4 +229,4 @@ gui_dimension::validate(
       assert(gui_taken.find(std::make_pair(r, c)) != gui_taken.end());
 }
 
-}
+}  
