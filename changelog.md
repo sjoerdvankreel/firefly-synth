@@ -1,10 +1,10 @@
-### ?, ? - V1.7.0.
+### April 10, 2024 - V1.7.0.
 
-- TODO lots of gui alignment/rearrange.
-- add additional aux param just to fit the gui
-- Bug: disable glob uni prms when voicecount=1.
+- Rearranged the gui to have elements more aligned.
 - Changed default distortion mode to plain tanh clipper.
 - Renamed distortion skew in/out to x/y to align with lfo.
+- Add additional global aux parameter just to fit the gui.
+- Bugfix: disable global unison parameters when voice count is 1.
 
 ### April 2, 2024 - V1.6.1.
 

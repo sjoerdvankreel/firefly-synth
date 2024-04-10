@@ -31,7 +31,6 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7
-disable globuni parms
 global uni scale by sqrt
 recheck all the menu items
 put download/install section on top of github page
