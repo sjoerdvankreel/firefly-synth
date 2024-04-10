@@ -32,7 +32,6 @@ do visual am/fm demo
 
 v1.7
 put download/install section on top of github page
-fix all themes aspect ratio height + fx
 
 v1.8:
 bug: preset select jumps back to previous
