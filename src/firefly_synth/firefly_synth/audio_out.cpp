@@ -98,7 +98,7 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bal.info.description = "Output stereo balance.";
   return result;
-}
+} 
 
 void
 master_audio_out_engine::process(plugin_block& block)
