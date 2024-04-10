@@ -760,14 +760,14 @@ fx_topo(int section, gui_position const& pos, bool global, bool is_fx)
     return vs[0] == type_dst && vs[1] != wave_skew_type_off; });
   dist_skew_in_amt.info.description = "Before-shape skew amount.";
   auto& dist_skew_out = result.params.emplace_back(make_param(
-    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Y Mode", "Skew Y", "Dst Sky", param_dist_skew_y, 1),
+    make_topo_info("{BF8BB684-50E5-414D-9DAD-6290330C0C40}", true, "Dist Skew Y Mode", "Skew Y", "Dst SkY", param_dist_skew_y, 1),
     make_param_dsp_automate_if_voice(!global), make_domain_item(wave_skew_type_items(), "Off"),
     make_param_gui_single(section_dist_skew, gui_edit_type::autofit_list, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   dist_skew_out.gui.bindings.enabled.bind_params({ param_type }, [](auto const& vs) { return vs[0] == type_dst; });
   dist_skew_out.info.description = "After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.";
   auto& dist_skew_out_amt = result.params.emplace_back(make_param(
-    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Out Amt", "Skew Out", "Dst Sk Out", param_dist_skew_y_amt, 1),
+    make_topo_info("{042570BF-6F02-4F91-9805-6C49FE9A3954}", true, "Dist Skew Y Amt", "Skew Y", "Dst SkY", param_dist_skew_y_amt, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_dist_skew, gui_edit_type::knob, { 1, 2 }, make_label_none())));
   dist_skew_out_amt.gui.bindings.enabled.bind_params({ param_type, param_dist_skew_y }, [](auto const& vs) {
