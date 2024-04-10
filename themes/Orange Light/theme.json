@@ -80,7 +80,7 @@
   ],
   "overrides": [
     {
-      "custom_sections": ["Title", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
         "control_text": "FFFF8844"

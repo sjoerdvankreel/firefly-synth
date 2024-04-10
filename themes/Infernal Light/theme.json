@@ -80,7 +80,7 @@
   ],
   "overrides": [
     {
-      "custom_sections": ["Title"],
+      "custom_sections": ["Title Text", "Title Image"],
       "colors": {
         "control_text": "FFAA0000",
         "section_outline1": "FF000000",
