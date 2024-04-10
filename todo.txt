@@ -30,9 +30,6 @@ solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
 
-v1.7
-put download/install section on top of github page
-
 v1.8:
 Title size clips on mac
 bug: preset select jumps back to previous
