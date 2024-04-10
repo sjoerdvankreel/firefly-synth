@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.6.1</title>
+<title>Firefly Synth 1.7.0</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.6.1</h1>
+<h1>Firefly Synth 1.7.0</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -350,7 +350,7 @@
 <td rowspan='2'>Aux</td>
 <td>Aux</td>
 <td>Yes</td>
-<td>5</td>
+<td>6</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
@@ -428,7 +428,7 @@
 </tr>
 <tr>
 <td rowspan='2'>PB Range</td>
-<td>Linked</td>
+<td>Linked PB Range</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -443,24 +443,8 @@
 <td colspan='11' class='description'>Pitch bend range. Together with Pitch Bend this affects the base pitch of all oscillators.</td>
 </tr>
 <tr>
-<td rowspan='2'>Global Unison Voices</td>
-<td>Global Unison</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>1</td>
-<td>4</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.</td>
-</tr>
-<tr>
 <td rowspan='2'>Global Unison Detune</td>
-<td>Global Unison</td>
+<td>Global Unison Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -476,7 +460,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Global Unison Spread</td>
-<td>Global Unison</td>
+<td>Global Unison Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -491,40 +475,8 @@
 <td colspan='11' class='description'>Global unison stereo spread.</td>
 </tr>
 <tr>
-<td rowspan='2'>Global Unison Osc Phase Offset</td>
-<td>Global Unison</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice osc phase offset.</td>
-</tr>
-<tr>
-<td rowspan='2'>Global Unison Env Detune</td>
-<td>Global Unison</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Global unison voice envelope detune amount.</td>
-</tr>
-<tr>
 <td rowspan='2'>Global Unison LFO Phase Offset</td>
-<td>Global Unison</td>
+<td>Global Unison Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -540,7 +492,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Global Unison LFO Detune</td>
-<td>Global Unison</td>
+<td>Global Unison Params</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -553,6 +505,54 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Global unison voice LFO detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Osc Phase Offset</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice osc phase offset.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Env Detune</td>
+<td>Global Unison Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice envelope detune amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Global Unison Voices</td>
+<td>Global Unison Voices</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>Automate</td>
+<td>1</td>
+<td>4</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Global unison voice count. Global unison spawns an entire polyphonic synth voice per unison voice. This includes per-voice oscillators, effects, lfo's and envelopes.</td>
 </tr>
 </table>
 <a name='5'/>
@@ -573,7 +573,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Type</td>
-<td>Left Top</td>
+<td>Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -588,24 +588,8 @@
 <td colspan='11' class='description'>Selects time or tempo-synced and repeating or one-shot type. For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. For phase one-shot type, the end value takes the phase offset parameter into account.</td>
 </tr>
 <tr>
-<td rowspan='2'>Tempo Sync</td>
-<td>Left Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>On</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
-</tr>
-<tr>
 <td rowspan='2'>Rate</td>
-<td>Left Bottom</td>
+<td>Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -621,7 +605,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Tempo</td>
-<td>Left Bottom</td>
+<td>Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -636,8 +620,24 @@
 <td colspan='11' class='description'>LFO rate in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>Tempo Sync</td>
+<td>Sync</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
+</tr>
+<tr>
 <td rowspan='2'>Skew X Mode</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -653,7 +653,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Skew X Amt</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -668,24 +668,8 @@
 <td colspan='11' class='description'>Horizontal skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Shape</td>
-<td>Right Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Saw</td>
-<td>Free Static</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
 <td rowspan='2'>Skew Y Mode</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -701,7 +685,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Skew Y Amt</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -716,24 +700,24 @@
 <td colspan='11' class='description'>Vertical skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Seed</td>
-<td>Right Bottom</td>
+<td rowspan='2'>Shape</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Block</td>
 <td>None</td>
-<td>1</td>
-<td>255</td>
-<td>1</td>
+<td>Saw</td>
+<td>Free Static</td>
+<td>Sin</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
+<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
 <td rowspan='2'>Steps</td>
-<td>Right Bottom</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -748,8 +732,24 @@
 <td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
 </tr>
 <tr>
+<td rowspan='2'>Seed</td>
+<td>Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1</td>
+<td>255</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
+</tr>
+<tr>
 <td rowspan='2'>Smooth</td>
-<td>Right Bottom</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -820,9 +820,9 @@
 <td>Input</td>
 <td>Block</td>
 <td>Automate</td>
-<td>GFX 1 SVF Freq</td>
+<td>GFX 1 SVF KTrk</td>
 <td>MOut Bal</td>
-<td>GFX 1 SVF Freq</td>
+<td>GFX 1 SVF KTrk</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -949,9 +949,9 @@
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>Env 1 A Slp</td>
+<td>Env 1 Stn</td>
 <td>VCV-A Max 30</td>
-<td>Env 1 A Slp</td>
+<td>Env 1 Stn</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -1040,7 +1040,7 @@
 </tr>
 <tr>
 <td rowspan='2'>On</td>
-<td>Main</td>
+<td>On</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1056,7 +1056,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Type</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1072,7 +1072,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Mode</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1087,88 +1087,8 @@
 <td colspan='11' class='description'>Selects envelope slode mode.<br/>Linear - linear slope, most cpu efficient.<br/>Exponential unipolar - regular exponential slope.<br/>Exponential bipolar - vertically splits section in 2 exponential parts.<br/>Exponential split - horizontally and vertically splits section in 2 exponential parts to generate smooth curves.</td>
 </tr>
 <tr>
-<td rowspan='2'>Trigger</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Legato</td>
-<td>Multi</td>
-<td>Legato</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects trigger mode for monophonic mode.<br/>Legato - envelope will not reset.<br/>Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>Multi - upon note-on event, envelope will start over from the current level.<br/>To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.</td>
-</tr>
-<tr>
-<td rowspan='2'>Smooth</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 Ms</td>
-<td>500 Ms</td>
-<td>0 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Lowpass filter to smooth out rough edges.</td>
-</tr>
-<tr>
-<td rowspan='2'>A Slope</td>
-<td>Slope</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls attack slope for exponential types. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
-<td rowspan='2'>D Slope</td>
-<td>Slope</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls decay slope for exponential types. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
-<td rowspan='2'>R Slope</td>
-<td>Slope</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls release slope for exponential types. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
 <td rowspan='2'>Tempo Sync</td>
-<td>DAHDSR</td>
+<td>Sync</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1183,8 +1103,56 @@
 <td colspan='11' class='description'>Toggles time or tempo-synced mode.</td>
 </tr>
 <tr>
+<td rowspan='2'>Stn</td>
+<td>Sync</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Sustain level. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
+<td rowspan='2'>Trigger</td>
+<td>Trigger</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Legato</td>
+<td>Multi</td>
+<td>Legato</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects trigger mode for monophonic mode.<br/>Legato - envelope will not reset.<br/>Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>Multi - upon note-on event, envelope will start over from the current level.<br/>To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.</td>
+</tr>
+<tr>
+<td rowspan='2'>Smth</td>
+<td>Trigger</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 Ms</td>
+<td>500 Ms</td>
+<td>0 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Lowpass filter to smooth out rough edges.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dly Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1200,7 +1168,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dly Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1215,40 +1183,8 @@
 <td colspan='11' class='description'>Delay section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Att Time</td>
-<td>DAHDSR</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0.000 Sec</td>
-<td>10.000 Sec</td>
-<td>0.030 Sec</td>
-<td>1.000 Sec</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Attack section length in seconds. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
-<td rowspan='2'>Att Tempo</td>
-<td>DAHDSR</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0</td>
-<td>48/13</td>
-<td>1/64</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Attack section length in bars.</td>
-</tr>
-<tr>
 <td rowspan='2'>Hld Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1264,7 +1200,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Hld Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1279,8 +1215,56 @@
 <td colspan='11' class='description'>Hold section length in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>Att Time</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.000 Sec</td>
+<td>10.000 Sec</td>
+<td>0.030 Sec</td>
+<td>1.000 Sec</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Attack section length in seconds. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
+<td rowspan='2'>Att Tempo</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0</td>
+<td>48/13</td>
+<td>1/64</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Attack section length in bars.</td>
+</tr>
+<tr>
+<td rowspan='2'>A Slope</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls attack slope for exponential types. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dcy Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1296,7 +1280,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dcy Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1311,8 +1295,8 @@
 <td colspan='11' class='description'>Decay section length in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Stn</td>
-<td>DAHDSR</td>
+<td rowspan='2'>D Slope</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1324,11 +1308,11 @@
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Sustain level. Modulation takes place only at voice start.</td>
+<td colspan='11' class='description'>Controls decay slope for exponential types. Modulation takes place only at voice start.</td>
 </tr>
 <tr>
 <td rowspan='2'>Rls Time</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1344,7 +1328,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Rls Tempo</td>
-<td>DAHDSR</td>
+<td>DAHDR</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1357,6 +1341,22 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Release section length in bars.</td>
+</tr>
+<tr>
+<td rowspan='2'>R Slope</td>
+<td>DAHDR</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls release slope for exponential types. Modulation takes place only at voice start.</td>
 </tr>
 </table>
 <a name='11'/>
@@ -1377,7 +1377,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Type</td>
-<td>Left Top</td>
+<td>Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1392,24 +1392,8 @@
 <td colspan='11' class='description'>Selects time or tempo-synced and repeating or one-shot type. For regular one-shot type, the LFO stays at it's end value after exactly 1 cycle. For phase one-shot type, the end value takes the phase offset parameter into account.</td>
 </tr>
 <tr>
-<td rowspan='2'>Tempo Sync</td>
-<td>Left Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>On</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
-</tr>
-<tr>
 <td rowspan='2'>Rate</td>
-<td>Left Bottom</td>
+<td>Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1425,7 +1409,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Tempo</td>
-<td>Left Bottom</td>
+<td>Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1440,8 +1424,24 @@
 <td colspan='11' class='description'>LFO rate in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>Tempo Sync</td>
+<td>Sync</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
+</tr>
+<tr>
 <td rowspan='2'>Skew X Mode</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1457,7 +1457,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Skew X Amt</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1472,24 +1472,8 @@
 <td colspan='11' class='description'>Horizontal skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Shape</td>
-<td>Right Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Saw</td>
-<td>Free Static</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
 <td rowspan='2'>Skew Y Mode</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1505,7 +1489,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Skew Y Amt</td>
-<td>Right Top</td>
+<td>Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1520,24 +1504,24 @@
 <td colspan='11' class='description'>Vertical skew amount.</td>
 </tr>
 <tr>
-<td rowspan='2'>Seed</td>
-<td>Right Bottom</td>
+<td rowspan='2'>Shape</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Voice</td>
 <td>Automate</td>
-<td>1</td>
-<td>255</td>
-<td>1</td>
+<td>Saw</td>
+<td>Free Static</td>
+<td>Sin</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
+<td colspan='11' class='description'>Selects waveform plus horizontal and vertical skewing modes. Waveforms are various periodic functions plus smooth noise, static noise and free-running static noise. Skewing modes are off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
 </tr>
 <tr>
 <td rowspan='2'>Steps</td>
-<td>Right Bottom</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1552,8 +1536,24 @@
 <td colspan='11' class='description'>Step count for static and smooth noise generators, set to > 1. Stair-stepping for periodic generators. Set to 1 for continuous or > 1 for stair-stepping.</td>
 </tr>
 <tr>
+<td rowspan='2'>Seed</td>
+<td>Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>255</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Seed value for static and smooth noise generators.</td>
+</tr>
+<tr>
 <td rowspan='2'>Smooth</td>
-<td>Right Bottom</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1568,8 +1568,8 @@
 <td colspan='11' class='description'>Applies a lowpass filter to smooth out rough edges.</td>
 </tr>
 <tr>
-<td rowspan='2'>Phase</td>
-<td>Right Bottom</td>
+<td rowspan='2'>Phs</td>
+<td>Phase</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1731,7 +1731,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Voice Mode</td>
-<td>Main</td>
+<td>Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1746,24 +1746,8 @@
 <td colspan='11' class='description'>Selects poly/mono mode.<br/>Poly - regular polyphonic mode.<br/>Mono - true monophonic mode, may cause clicks.<br/>Release - monophonic untill a mono section is released. So, multiple mono sections may overlap.<br/>To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.</td>
 </tr>
 <tr>
-<td rowspan='2'>Porta Mode</td>
-<td>Main</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Auto</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects portamento mode.<br/>Off - no portamento.<br/>On - glides 1 semitone in the specified time, so glide pitch is constant and glide time is variable.<br/>Auto - glides pitch difference between old and new note in the specified time, so glide pitch is variable and glide time is constant.</td>
-</tr>
-<tr>
 <td rowspan='2'>Porta Tempo Sync</td>
-<td>Main</td>
+<td>Sync</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1778,8 +1762,24 @@
 <td colspan='11' class='description'>Selects time or tempo-synced mode.</td>
 </tr>
 <tr>
+<td rowspan='2'>Porta Mode</td>
+<td>Mid</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Auto</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects portamento mode.<br/>Off - no portamento.<br/>On - glides 1 semitone in the specified time, so glide pitch is constant and glide time is variable.<br/>Auto - glides pitch difference between old and new note in the specified time, so glide pitch is variable and glide time is constant.</td>
+</tr>
+<tr>
 <td rowspan='2'>Porta Time</td>
-<td>Main</td>
+<td>Mid</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1795,7 +1795,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Porta Tempo</td>
-<td>Main</td>
+<td>Mid</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1810,8 +1810,8 @@
 <td colspan='11' class='description'>Pitch glide time in bars.</td>
 </tr>
 <tr>
-<td rowspan='2'>Osc Oversample</td>
-<td>Osc Oversample</td>
+<td rowspan='2'>Osc Oversampling</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1827,7 +1827,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Note</td>
-<td>Pitch</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1843,7 +1843,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Cent</td>
-<td>Pitch</td>
+<td>Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -1859,7 +1859,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Pitch</td>
-<td>Main</td>
+<td>Left</td>
 <td>No</td>
 <td>1</td>
 <td>Input</td>
@@ -1875,7 +1875,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Pitch Bend</td>
-<td>Main</td>
+<td>Left</td>
 <td>No</td>
 <td>1</td>
 <td>Input</td>
@@ -2182,7 +2182,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Type</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2197,8 +2197,24 @@
 <td colspan='11' class='description'>Selects the oscillator algorithm. Only Basic and DSF can be used as an FM target, react to oversampling, and are capable of hard-sync. KPS1 is regular Karplus-Strong, KPS2 is a modified version which auto-adjusts feedback according to pitch.</td>
 </tr>
 <tr>
+<td rowspan='2'>Gain</td>
+<td>Type</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>100 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Per-osc gain control. The same result may be had through the audio routing matrices, but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it when the oscillator is routed through a distortion module.</td>
+</tr>
+<tr>
 <td rowspan='2'>Note</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2214,7 +2230,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Cent</td>
-<td>Main</td>
+<td>Type</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2229,36 +2245,116 @@
 <td colspan='11' class='description'>Oscillator cents, also reacts to Voice-In cents.</td>
 </tr>
 <tr>
-<td rowspan='2'>Pitch</td>
-<td>Main</td>
-<td>No</td>
+<td rowspan='2'>Hard Sync Semitones</td>
+<td>Sync Params</td>
+<td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>-128</td>
-<td>+128</td>
-<td>+0</td>
+<td>0.00 Semi</td>
+<td>48.00 Semi</td>
+<td>0.00 Semi</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Absolute pitch modulation target, also reacts to Voice-in pitch modulation.</td>
+<td colspan='11' class='description'>Pitch offset of the actual oscillator against the reference oscillator.</td>
 </tr>
 <tr>
-<td rowspan='2'>Pitch Bend</td>
-<td>Main</td>
-<td>No</td>
+<td rowspan='2'>Hard Sync XOver Time</td>
+<td>Sync Params</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0.00 Ms</td>
+<td>5.00 Ms</td>
+<td>2.50 Ms</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls cross-over time between the synced and unsyced signal after a phase reset occurs.</td>
+</tr>
+<tr>
+<td rowspan='2'>Hard Sync On</td>
+<td>Sync On</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>On</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Enables hard-sync against an internal reference oscillator.</td>
+</tr>
+<tr>
+<td rowspan='2'>Unison Voices</td>
+<td>Unison</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1</td>
+<td>8</td>
+<td>1</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Unison voice count. Oversampling, hard-sync, AM and FM are applied per-unison-voice.</td>
+</tr>
+<tr>
+<td rowspan='2'>Unison Spread</td>
+<td>Unison</td>
+<td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>-100 %</td>
-<td>+100 %</td>
-<td>+0 %</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.</td>
+<td colspan='11' class='description'>Unison stereo spread, works on all oscillator modes.</td>
+</tr>
+<tr>
+<td rowspan='2'>Unison Detune</td>
+<td>Unison</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>33 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Detune unison voices. Only applicable to Basic and DSF generators.</td>
+</tr>
+<tr>
+<td rowspan='2'>Unison Phase</td>
+<td>Unison</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Phase offset for subsequent voices, to get that unison effect 'right from the start'. Only applicable to Basic and DSF generators.</td>
 </tr>
 <tr>
 <td rowspan='2'>Basic Sin On</td>
@@ -2390,7 +2486,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Basic Sqr PW</td>
-<td>Basic</td>
+<td>Basic PW</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2469,6 +2565,22 @@
 <td colspan='11' class='description'>Continuous filter type for static noise or initial-excite filter type for Karplus-Strong.</td>
 </tr>
 <tr>
+<td rowspan='2'>Rnd Rate</td>
+<td>Random</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>1.0 %</td>
+<td>100.0 %</td>
+<td>10.0 %</td>
+<td>10.0 %</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>On-voice-init step count for static noise and initial-excite stage of Karplus-Strong. Modulation takes place only at voice start.</td>
+</tr>
+<tr>
 <td rowspan='2'>Rnd Filter Freq</td>
 <td>Random</td>
 <td>Yes</td>
@@ -2485,7 +2597,7 @@
 <td colspan='11' class='description'>Continuous filter frequency for static noise or initial-excite filter frequency for Karplus-Strong. Modulation takes place only at voice start.</td>
 </tr>
 <tr>
-<td rowspan='2'>Rnd Filter Res</td>
+<td rowspan='2'>Rnd Filter Reso</td>
 <td>Random</td>
 <td>Yes</td>
 <td>1</td>
@@ -2517,22 +2629,6 @@
 <td colspan='11' class='description'>On-voice-init random seed for static noise and initial-excite stage of Karplus-Strong.</td>
 </tr>
 <tr>
-<td rowspan='2'>Rnd Rate</td>
-<td>Random</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>1.0 %</td>
-<td>100.0 %</td>
-<td>10.0 %</td>
-<td>10.0 %</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>On-voice-init step count for static noise and initial-excite stage of Karplus-Strong. Modulation takes place only at voice start.</td>
-</tr>
-<tr>
 <td rowspan='2'>K+S Feedback</td>
 <td>Random</td>
 <td>Yes</td>
@@ -2547,22 +2643,6 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Use to shorten low-frequency notes.</td>
-</tr>
-<tr>
-<td rowspan='2'>K+S Stretch</td>
-<td>Random</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Use to stretch high-frequency notes.</td>
 </tr>
 <tr>
 <td rowspan='2'>K+S Midpoint</td>
@@ -2581,8 +2661,8 @@
 <td colspan='11' class='description'>In Karplus-Strong2 mode, controls the midpoint MIDI note (C4=60). Lower notes will be stretched less, higher notes will be stretched more. This tries to keep audible note lengths relatively equal.</td>
 </tr>
 <tr>
-<td rowspan='2'>Gain</td>
-<td>Sync+Gain</td>
+<td rowspan='2'>K+S Stretch</td>
+<td>Random</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2590,123 +2670,43 @@
 <td>Modulate</td>
 <td>0 %</td>
 <td>100 %</td>
-<td>100 %</td>
+<td>0 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Per-osc gain control. The same result may be had through the audio routing matrices, but it's just easier to work with a dedicated parameter. In particular, this control is very handy when applying an envelope to it when the oscillator is routed through a distortion module.</td>
+<td colspan='11' class='description'>Use to stretch high-frequency notes.</td>
 </tr>
 <tr>
-<td rowspan='2'>Hard Sync On</td>
-<td>Sync+Gain</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>On</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Enables hard-sync against an internal reference oscillator.</td>
-</tr>
-<tr>
-<td rowspan='2'>Hard Sync Semis</td>
-<td>Sync+Gain</td>
-<td>Yes</td>
+<td rowspan='2'>Pitch</td>
+<td>Type</td>
+<td>No</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>0.00 Semi</td>
-<td>48.00 Semi</td>
-<td>0.00 Semi</td>
+<td>-128</td>
+<td>+128</td>
+<td>+0</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Pitch offset of the actual oscillator against the reference oscillator.</td>
+<td colspan='11' class='description'>Absolute pitch modulation target, also reacts to Voice-in pitch modulation.</td>
 </tr>
 <tr>
-<td rowspan='2'>Hard Sync XOver Time</td>
-<td>Sync+Gain</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0.00 Ms</td>
-<td>5.00 Ms</td>
-<td>2.50 Ms</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls cross-over time between the synced and unsyced signal after a phase reset occurs.</td>
-</tr>
-<tr>
-<td rowspan='2'>Unison Voices</td>
-<td>Unison</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1</td>
-<td>8</td>
-<td>1</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Unison voice count. Oversampling, hard-sync, AM and FM are applied per-unison-voice.</td>
-</tr>
-<tr>
-<td rowspan='2'>Unison Phase</td>
-<td>Unison</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Phase offset for subsequent voices, to get that unison effect 'right from the start'. Only applicable to Basic and DSF generators.</td>
-</tr>
-<tr>
-<td rowspan='2'>Unison Detune</td>
-<td>Unison</td>
-<td>Yes</td>
+<td rowspan='2'>Pitch Bend</td>
+<td>Type</td>
+<td>No</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>33 %</td>
+<td>-100 %</td>
+<td>+100 %</td>
+<td>+0 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Detune unison voices. Only applicable to Basic and DSF generators.</td>
-</tr>
-<tr>
-<td rowspan='2'>Unison Spread</td>
-<td>Unison</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Unison stereo spread, works on all oscillator modes.</td>
+<td colspan='11' class='description'>Pitch-bend modulation target. Also reacts to Voice-in PB modulation and master pitchbend range.</td>
 </tr>
 </table>
 <a name='17'/>
@@ -2727,7 +2727,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Type</td>
-<td>Main Top</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2743,7 +2743,7 @@
 </tr>
 <tr>
 <td rowspan='2'>SV Filter Mode</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2758,40 +2758,8 @@
 <td colspan='11' class='description'>Selects the state-variable filter mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>SV Filter Freq</td>
-<td>SV Filter Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>20 Hz</td>
-<td>20000 Hz</td>
-<td>1000 Hz</td>
-<td>1000 Hz</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls filter frequency.</td>
-</tr>
-<tr>
-<td rowspan='2'>SV Filter Res</td>
-<td>SV Filter Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls filter resonance.</td>
-</tr>
-<tr>
-<td rowspan='2'>SV Filter Keytrack</td>
-<td>SV Filter Bottom</td>
+<td rowspan='2'>SV Filter KTrk</td>
+<td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2807,7 +2775,7 @@
 </tr>
 <tr>
 <td rowspan='2'>SV Filter Shelf Gain</td>
-<td>SV Filter Bottom</td>
+<td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2822,8 +2790,40 @@
 <td colspan='11' class='description'>Controls filter gain for shelving filters.</td>
 </tr>
 <tr>
+<td rowspan='2'>SV Filter Freq</td>
+<td>SV Filter Left</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>20 Hz</td>
+<td>20000 Hz</td>
+<td>1000 Hz</td>
+<td>1000 Hz</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls filter frequency.</td>
+</tr>
+<tr>
+<td rowspan='2'>SV Filter Reso</td>
+<td>SV Filter Left</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls filter resonance.</td>
+</tr>
+<tr>
 <td rowspan='2'>Comb Filter Mode</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2839,7 +2839,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Delay+</td>
-<td>Comb Filter Top</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2855,7 +2855,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Gain+</td>
-<td>Comb Filter Top</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2871,7 +2871,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Delay-</td>
-<td>Comb Filter Bottom</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2887,7 +2887,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Gain-</td>
-<td>Comb Filter Bottom</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2903,7 +2903,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Mode</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -2918,104 +2918,8 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Skew In Mode</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew In Amt</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Shaper</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Mode</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Amt</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Oversampling</td>
-<td>Distortion Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>1X</td>
-<td>8X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist LPF Frequency</td>
-<td>Distortion Bottom</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3031,7 +2935,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Res</td>
-<td>Distortion Bottom</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3046,24 +2950,104 @@
 <td colspan='11' class='description'>Lowpass filter resonance inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Gain</td>
-<td>Distortion Bottom</td>
+<td rowspan='2'>Dist Skew X Mode</td>
+<td>Distortion Skew</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew X Amt</td>
+<td>Distortion Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>0.10</td>
-<td>32.00</td>
-<td>1.00</td>
-<td>1.00</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+<td colspan='11' class='description'>Before-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Y Mode</td>
+<td>Distortion Skew</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Y Amt</td>
+<td>Distortion Skew</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Shape</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>Off</td>
+<td>Foldback</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Oversampling</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>1X</td>
+<td>8X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Mode</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3071,7 +3055,7 @@
 <td>Automate</td>
 <td>Hard</td>
 <td>Inv</td>
-<td>Hard</td>
+<td>Tanh</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -3079,7 +3063,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Exp</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3094,8 +3078,24 @@
 <td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Gain</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.10</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Mix</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3274,7 +3274,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Type</td>
-<td>Main Top</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3290,7 +3290,7 @@
 </tr>
 <tr>
 <td rowspan='2'>SV Filter Mode</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3305,40 +3305,8 @@
 <td colspan='11' class='description'>Selects the state-variable filter mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>SV Filter Freq</td>
-<td>SV Filter Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>20 Hz</td>
-<td>20000 Hz</td>
-<td>1000 Hz</td>
-<td>1000 Hz</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls filter frequency.</td>
-</tr>
-<tr>
-<td rowspan='2'>SV Filter Res</td>
-<td>SV Filter Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Controls filter resonance.</td>
-</tr>
-<tr>
-<td rowspan='2'>SV Filter Keytrack</td>
-<td>SV Filter Bottom</td>
+<td rowspan='2'>SV Filter KTrk</td>
+<td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3354,7 +3322,7 @@
 </tr>
 <tr>
 <td rowspan='2'>SV Filter Shelf Gain</td>
-<td>SV Filter Bottom</td>
+<td>SV Filter Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3369,8 +3337,40 @@
 <td colspan='11' class='description'>Controls filter gain for shelving filters.</td>
 </tr>
 <tr>
+<td rowspan='2'>SV Filter Freq</td>
+<td>SV Filter Left</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>20 Hz</td>
+<td>20000 Hz</td>
+<td>1000 Hz</td>
+<td>1000 Hz</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls filter frequency.</td>
+</tr>
+<tr>
+<td rowspan='2'>SV Filter Reso</td>
+<td>SV Filter Left</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>0 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Controls filter resonance.</td>
+</tr>
+<tr>
 <td rowspan='2'>Comb Filter Mode</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3386,7 +3386,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Delay+</td>
-<td>Comb Filter Top</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3402,7 +3402,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Gain+</td>
-<td>Comb Filter Top</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3418,7 +3418,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Delay-</td>
-<td>Comb Filter Bottom</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3434,7 +3434,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Comb Filter Gain-</td>
-<td>Comb Filter Bottom</td>
+<td>Comb Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3450,7 +3450,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Mode</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3465,104 +3465,8 @@
 <td colspan='11' class='description'>Affects where the filter is placed.<br/ >No Filter: filter is not used, schema is Input => Gain => Skew In => Shape => Skew Out => Clip => Mix.<br/>Filter To Shaper: filter before shape, schema is Input => Gain => Skew In => Filter => Shape => Skew Out => Clip => Mix.<br/>Shaper To Filter: filter after shape, schema is Input => Gain => Skew In => Shape => Filter => Skew Out => Clip => Mix.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Skew In Mode</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew In Amt</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Before-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Shaper</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Foldback</td>
-<td>Sin</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Mode</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>Off</td>
-<td>Exp Bi</td>
-<td>Off</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Skew Out Amt</td>
-<td>Distortion Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>After-shape skew amount.</td>
-</tr>
-<tr>
-<td rowspan='2'>Dist Oversampling</td>
-<td>Distortion Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1X</td>
-<td>8X</td>
-<td>1X</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
-</tr>
-<tr>
 <td rowspan='2'>Dist LPF Frequency</td>
-<td>Distortion Bottom</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3578,7 +3482,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist LPF Res</td>
-<td>Distortion Bottom</td>
+<td>Distortion Filter</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3593,24 +3497,104 @@
 <td colspan='11' class='description'>Lowpass filter resonance inside the oversampling stage.</td>
 </tr>
 <tr>
-<td rowspan='2'>Dist Gain</td>
-<td>Distortion Bottom</td>
+<td rowspan='2'>Dist Skew X Mode</td>
+<td>Distortion Skew</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Before-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew X Amt</td>
+<td>Distortion Skew</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
 <td>Accurate</td>
 <td>Modulate</td>
-<td>0.10</td>
-<td>32.00</td>
-<td>1.00</td>
-<td>1.00</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+<td colspan='11' class='description'>Before-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Y Mode</td>
+<td>Distortion Skew</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Exp Bi</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew: off (cpu efficient, so use it if you dont need the extra control), linear, scale unipolar/bipolar and exponential unipolar/bipolar.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Skew Y Amt</td>
+<td>Distortion Skew</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>After-shape skew amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Shape</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>Off</td>
+<td>Foldback</td>
+<td>Off</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Selects waveshaper type: various periodic functions plus foldback distortion.</td>
+</tr>
+<tr>
+<td rowspan='2'>Dist Oversampling</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1X</td>
+<td>8X</td>
+<td>1X</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Oversampling factor. If you go really crazy with distortion, this might tip the scale from just-not-acceptible to just-acceptible.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Mode</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3618,7 +3602,7 @@
 <td>None</td>
 <td>Hard</td>
 <td>Inv</td>
-<td>Hard</td>
+<td>Tanh</td>
 <td>N/A</td>
 </tr>
 <tr>
@@ -3626,7 +3610,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Dist Clip Exp</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3641,8 +3625,24 @@
 <td colspan='11' class='description'>Exponential clipper amount.</td>
 </tr>
 <tr>
+<td rowspan='2'>Dist Gain</td>
+<td>Distortion Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0.10</td>
+<td>32.00</td>
+<td>1.00</td>
+<td>1.00</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Gain amount to drive the shaper and X/Y parameters. Use an Osc with gain envelope to have the effect of the distortion gradually fall-off.</td>
+</tr>
+<tr>
 <td rowspan='2'>Dist Mix</td>
-<td>Distortion Bottom</td>
+<td>Distortion Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3658,7 +3658,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Delay Mode</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3673,56 +3673,8 @@
 <td colspan='11' class='description'>Selects feedback or multi-tap delay.</td>
 </tr>
 <tr>
-<td rowspan='2'>Delay Amount</td>
-<td>Delay Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Feedback-amount or tap-amount control.</td>
-</tr>
-<tr>
-<td rowspan='2'>Delay Spread</td>
-<td>Delay Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>-100 %</td>
-<td>+100 %</td>
-<td>+0 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Stereo spread control.</td>
-</tr>
-<tr>
-<td rowspan='2'>Delay Mix</td>
-<td>Delay Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Dry/wet control.</td>
-</tr>
-<tr>
 <td rowspan='2'>Tempo Sync</td>
-<td>Delay Bottom</td>
+<td>Delay Sync</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3737,120 +3689,56 @@
 <td colspan='11' class='description'>Toggles time or tempo-synced type.</td>
 </tr>
 <tr>
-<td rowspan='2'>Fdbk Delay Time L</td>
-<td>Delay Bottom</td>
+<td rowspan='2'>Delay Amount</td>
+<td>Delay Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>0.000 Sec</td>
-<td>10.000 Sec</td>
-<td>1.000 Sec</td>
-<td>1.000 Sec</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Feedback delay left length in seconds.</td>
-</tr>
-<tr>
-<td rowspan='2'>Fdbk Delay Tempo L</td>
-<td>Delay Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1/1</td>
-<td>48/13</td>
-<td>3/16</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Feedback delay left length in bars.</td>
+<td colspan='11' class='description'>Feedback-amount or tap-amount control.</td>
 </tr>
 <tr>
-<td rowspan='2'>Fdbk Delay Time R</td>
-<td>Delay Bottom</td>
+<td rowspan='2'>Delay Mix</td>
+<td>Delay Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>0.000 Sec</td>
-<td>10.000 Sec</td>
-<td>1.000 Sec</td>
-<td>1.000 Sec</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Feedback delay right length in seconds.</td>
-</tr>
-<tr>
-<td rowspan='2'>Fdbk Delay Tempo R</td>
-<td>Delay Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1/1</td>
-<td>48/13</td>
-<td>5/16</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Feedback delay right length in bars.</td>
+<td colspan='11' class='description'>Dry/wet control.</td>
 </tr>
 <tr>
-<td rowspan='2'>Multi Delay Time</td>
-<td>Delay Bottom</td>
+<td rowspan='2'>Delay Spread</td>
+<td>Delay Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>0.000 Sec</td>
-<td>10.000 Sec</td>
-<td>1.000 Sec</td>
-<td>1.000 Sec</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Multi-tap delay length in seconds.</td>
-</tr>
-<tr>
-<td rowspan='2'>Multi Delay Tempo</td>
-<td>Delay Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1/1</td>
-<td>48/13</td>
-<td>3/16</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>-100 %</td>
+<td>+100 %</td>
+<td>+0 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Multi-tap delay length in bars.</td>
-</tr>
-<tr>
-<td rowspan='2'>Multi Delay Tap Count</td>
-<td>Delay Bottom</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Block</td>
-<td>None</td>
-<td>1</td>
-<td>8</td>
-<td>4</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Multi-tap delay tap count.</td>
+<td colspan='11' class='description'>Stereo spread control.</td>
 </tr>
 <tr>
 <td rowspan='2'>Multi Delay Hold Time</td>
-<td>Delay Bottom</td>
+<td>Delay Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3866,7 +3754,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Multi Delay Hold Tempo</td>
-<td>Delay Bottom</td>
+<td>Delay Right</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3881,8 +3769,120 @@
 <td colspan='11' class='description'>Multi-tap delay hold time in bars.</td>
 </tr>
 <tr>
+<td rowspan='2'>Fdbk Delay Time L</td>
+<td>Delay Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>0.000 Sec</td>
+<td>10.000 Sec</td>
+<td>1.000 Sec</td>
+<td>1.000 Sec</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Feedback delay left length in seconds.</td>
+</tr>
+<tr>
+<td rowspan='2'>Fdbk Delay Tempo L</td>
+<td>Delay Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1/1</td>
+<td>48/13</td>
+<td>3/16</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Feedback delay left length in bars.</td>
+</tr>
+<tr>
+<td rowspan='2'>Fdbk Delay Time R</td>
+<td>Delay Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>0.000 Sec</td>
+<td>10.000 Sec</td>
+<td>1.000 Sec</td>
+<td>1.000 Sec</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Feedback delay right length in seconds.</td>
+</tr>
+<tr>
+<td rowspan='2'>Fdbk Delay Tempo R</td>
+<td>Delay Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1/1</td>
+<td>48/13</td>
+<td>5/16</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Feedback delay right length in bars.</td>
+</tr>
+<tr>
+<td rowspan='2'>Multi Delay Tap Count</td>
+<td>Delay Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1</td>
+<td>8</td>
+<td>4</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Multi-tap delay tap count.</td>
+</tr>
+<tr>
+<td rowspan='2'>Multi Delay Time</td>
+<td>Delay Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>0.000 Sec</td>
+<td>10.000 Sec</td>
+<td>1.000 Sec</td>
+<td>1.000 Sec</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Multi-tap delay length in seconds.</td>
+</tr>
+<tr>
+<td rowspan='2'>Multi Delay Tempo</td>
+<td>Delay Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Block</td>
+<td>None</td>
+<td>1/1</td>
+<td>48/13</td>
+<td>3/16</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Multi-tap delay length in bars.</td>
+</tr>
+<tr>
 <td rowspan='2'>Reverb Mix</td>
-<td>Main Bottom</td>
+<td>Main</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3897,40 +3897,8 @@
 <td colspan='11' class='description'>Reverb dry/wet control.</td>
 </tr>
 <tr>
-<td rowspan='2'>Reverb Size</td>
-<td>Reverb Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>80 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Reverb room size.</td>
-</tr>
-<tr>
-<td rowspan='2'>Reverb Damping</td>
-<td>Reverb Top</td>
-<td>Yes</td>
-<td>1</td>
-<td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>80 %</td>
-<td>N/A</td>
-</tr>
-<tr>
-<td colspan='11' class='description'>Reverb damping factor.</td>
-</tr>
-<tr>
 <td rowspan='2'>Reverb Spread</td>
-<td>Reverb Bottom</td>
+<td>Reverb Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3946,7 +3914,7 @@
 </tr>
 <tr>
 <td rowspan='2'>Reverb APF</td>
-<td>Reverb Bottom</td>
+<td>Reverb Left</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
@@ -3959,6 +3927,38 @@
 </tr>
 <tr>
 <td colspan='11' class='description'>Reverb all-pass filter amount.</td>
+</tr>
+<tr>
+<td rowspan='2'>Reverb Size</td>
+<td>Reverb Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>80 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Reverb room size.</td>
+</tr>
+<tr>
+<td rowspan='2'>Reverb Damping</td>
+<td>Reverb Right</td>
+<td>Yes</td>
+<td>1</td>
+<td>Input</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>80 %</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td colspan='11' class='description'>Reverb damping factor.</td>
 </tr>
 </table>
 <a name='22'/>

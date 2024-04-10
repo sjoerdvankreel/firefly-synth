@@ -79,28 +79,26 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
     bal_row = 1;
     gain_default_ = 0.33;
     edit_type = gui_edit_type::hslider;
-    dimension = gui_dimension({ 1, 1 }, { 1 });
+    dimension = gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 });
   } 
 
   result.sections.emplace_back(make_param_section(section_main,
     make_topo_tag_basic("{34BF24A3-696C-48F5-A49F-7CA445DEF38E}", "Main"),
-    make_param_section_gui({ 0, 0 }, dimension)));
-
+    make_param_section_gui({ 0, 0 }, dimension, (global && !is_fx) ? gui_label_edit_cell_split::horizontal: gui_label_edit_cell_split::no_split)));
   auto& gain = result.params.emplace_back(make_param(
     make_topo_info_basic("{2156DEE6-A147-4B93-AEF3-ABE69F53DBF9}", "Gain", param_gain, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(gain_default_, 0, true),
     make_param_gui_single(section_main, edit_type, { gain_row, gain_col },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   gain.info.description = "Output gain.";
   auto& bal = result.params.emplace_back(make_param(
     make_topo_info("{7CCD4A32-FD84-402E-B099-BB94AAAD3C9E}", true, "Balance", "Bal", "Bal", param_bal, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage(-1, 1, 0, 0, true),
     make_param_gui_single(section_main, edit_type, { bal_row, bal_col },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::center))));
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bal.info.description = "Output stereo balance.";
-
   return result;
-}
+} 
 
 void
 master_audio_out_engine::process(plugin_block& block)
@@ -140,10 +138,12 @@ voice_audio_out_engine::process_unison(plugin_block& block)
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
   auto const& glob_uni_sprd_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
 
+  float attn = 1.0f;
   float voice_pos = 0.0f;
   float voice_bal = 0.0f;
   if constexpr (GlobalUnison)
   {
+    attn = std::sqrt(block.voice->state.sub_voice_count);
     voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
     voice_pos = unipolar_to_bipolar(voice_pos);
   }
@@ -154,7 +154,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
       voice_bal = voice_pos * glob_uni_sprd_curve[f];
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_voice_out, param_bal, bal_curve[f]);
     for (int c = 0; c < 2; c++)
-      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal);
+      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal) / attn;
   }
 }
 

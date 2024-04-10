@@ -39,7 +39,7 @@ module_topo::validate(plugin_topo const& plugin, int index) const
   if(!gui.visible) return;
   auto include = [](int) { return true; };
   auto always_visible = [this](int s) { return !sections[s].gui.bindings.visible.is_bound(); };
-  gui.dimension.validate(vector_map(sections, [](auto const& s) { return s.gui.position; }), include, always_visible);
+  gui.dimension.validate(gui_label_edit_cell_split::no_split, vector_map(sections, [](auto const& s) { return s.gui.position; }), {}, include, always_visible);
   gui.position.validate(plugin.gui.module_sections[gui.section].dimension);
 }
 

@@ -22,12 +22,15 @@ public:
 
 // adds some margin around another component
 class margin_component :
-public juce::Component 
+public juce::Component,
+public autofit_component
 {
   juce::Component* const _child;
   juce::BorderSize<int> const _margin;
 public:
   void resized() override;
+  int fixed_width(int parent_w, int parent_h) const override;
+  int fixed_height(int parent_w, int parent_h) const override;
   margin_component(juce::Component* child, juce::BorderSize<int> const& margin):
   _child(child), _margin(margin) { add_and_make_visible(*this, *child); }
 };
@@ -92,6 +95,7 @@ public autofit_component
 {
   int const _radius;
   int const _vpadding;
+  int const _margin_right;
   bool const _vertical;
   juce::Component* _child;
   juce::Colour const _color1;
@@ -107,9 +111,9 @@ public:
   int fixed_height(int parent_w, int parent_h) const override;
 
   rounded_container(
-    juce::Component* child, int radius, int vpadding, bool vertical, rounded_container_mode mode,
+    juce::Component* child, int radius, int vpadding, int margin_right, bool vertical, rounded_container_mode mode,
     juce::Colour const& color1, juce::Colour const& color2):
-  _radius(radius), _vpadding(vpadding), _vertical(vertical), _child(child), _color1(color1), _color2(color2), _mode(mode)
+  _radius(radius), _vpadding(vpadding), _margin_right(margin_right), _vertical(vertical), _child(child), _color1(color1), _color2(color2), _mode(mode)
   { add_and_make_visible(*this, *child); }
 };
 
@@ -119,7 +123,7 @@ public binding_component,
 public rounded_container
 {
 public:
-  param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child);
+  param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child, int margin_right);
 };
 
 // grid component as opposed to grid layout
@@ -128,7 +132,8 @@ class grid_component:
 public juce::Component,
 public autofit_component
 {
-  float const _gap_size;
+  float const _vgap_size;
+  float const _hgap_size;
   int const _autofit_row;
   int const _autofit_column;
   gui_dimension const _dimension;
@@ -145,11 +150,11 @@ public:
 
   // Can't intercept mouse as we may be invisible on top of 
   // another grid in case of param or section dependent visibility.
-  grid_component(gui_dimension const& dimension, float gap_size, int autofit_row = 0, int autofit_column = 0) :
-  _gap_size(gap_size), _dimension(dimension), _autofit_row(autofit_row), _autofit_column(autofit_column)
+  grid_component(gui_dimension const& dimension, float vgap_size, float hgap_size, int autofit_row, int autofit_column) :
+  _vgap_size(vgap_size), _hgap_size(hgap_size), _dimension(dimension), _autofit_row(autofit_row), _autofit_column(autofit_column)
   { setInterceptsMouseClicks(false, true); }
-  grid_component(bool vertical, int count, float gap_size, int autofit_row = 0, int autofit_column = 0) :
-  grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, gap_size, autofit_row, autofit_column) {}
+  grid_component(bool vertical, int count, float vgap_size, float hgap_size, int autofit_row, int autofit_column) :
+  grid_component(gui_dimension { vertical ? count : 1, vertical ? 1 : count }, vgap_size, hgap_size, autofit_row, autofit_column) {}
 };
 
 }

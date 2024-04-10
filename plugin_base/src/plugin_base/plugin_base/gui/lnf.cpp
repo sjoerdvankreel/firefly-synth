@@ -573,10 +573,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   if(tabular)
     draw_tabular_cell_bg(g, &tb, 0.05f, theme_settings().table_cell_radius);
 
-  int left = 0;
-  if(tabular) 
-    left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
-
+  int left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
   int pad = tabular? 3: 1;
   int height = tb.getHeight();
   int const fixedHeight = toggle_height(tabular);
@@ -689,8 +686,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
 
   float padding = tabular? _theme_settings.tabular_knob_padding: _theme_settings.knob_padding;
   float size = size_base - padding - stroke / 2;
-  float left = s.getWidth() - size - padding;
-  if(tabular) left = (s.getWidth() - size) / 2;
+  float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 
   bool bipolar = s.getMinimum() < 0;

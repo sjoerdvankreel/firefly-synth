@@ -15,6 +15,7 @@ struct param_section_gui final {
   gui_position position;
   gui_dimension dimension;
   gui_scroll_mode scroll_mode;
+  gui_label_edit_cell_split cell_split = gui_label_edit_cell_split::no_split;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(param_section_gui);
 };

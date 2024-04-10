@@ -21,6 +21,7 @@ enum class gui_scroll_mode { none, vertical };
 enum class gui_label_justify { near, far, center };
 enum class gui_label_contents { none, name, value };
 enum class gui_label_align { top, bottom, left, right };
+enum class gui_label_edit_cell_split { no_split, horizontal, vertical };
 enum class gui_edit_type { none, toggle, list, autofit_list, knob, hslider, vslider, output, output_module_name };
 
 typedef std::function<bool(int module_slot)>
@@ -106,6 +107,7 @@ struct gui_position final {
   int column_span = 1;
 
   void validate(gui_dimension const& parent_dimension) const;
+  gui_position move(int dy, int dx) const { return { row + dy, column + dx, row_span, column_span }; }
 };
 
 // binding to enabled/visible
@@ -149,13 +151,16 @@ struct gui_bindings final {
 // dimensions of own grid (relative distribution)
 // positive is relative, negative is absolute, 0 is auto
 struct gui_dimension final {
-  static inline int const auto_size = 0;
+  static inline int constexpr auto_size = std::numeric_limits<int>::max();
+  static inline int constexpr auto_size_all = std::numeric_limits<int>::max() - 1;
   std::vector<int> row_sizes = { 1 };
   std::vector<int> column_sizes = { 1 };
 
   void validate(
-    std::vector<gui_position> const& children, 
-    std::function<bool(int)> include, 
+    gui_label_edit_cell_split cell_split,
+    std::vector<gui_position> const& children,
+    std::vector<gui_label_contents> label_contents,
+    std::function<bool(int)> include,
     std::function<bool(int)> always_visible) const;
 
   gui_dimension() = default;

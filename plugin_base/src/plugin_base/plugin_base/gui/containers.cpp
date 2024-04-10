@@ -35,12 +35,12 @@ extra_state_container::extra_state_changed()
 }
 
 param_section_container::
-param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child) :
+param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child, int margin_right) :
   binding_component(gui, module, &section->gui.bindings, 0),
   rounded_container(child, 
     lnf->theme_settings().param_section_corner_radius, 
     lnf->theme_settings().param_section_vpadding,
-    false, rounded_container_mode::both,
+    margin_right, false, rounded_container_mode::both,
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline1, 
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline2) {
   init(); 
@@ -75,6 +75,22 @@ margin_component::resized()
 }
 
 int 
+margin_component::fixed_width(int parent_w, int parent_h) const
+{
+  auto child = dynamic_cast<autofit_component*>(getChildComponent(0));
+  assert(child);
+  return child->fixed_width(parent_w, parent_h) + _margin.getLeftAndRight();
+}
+
+int 
+margin_component::fixed_height(int parent_w, int parent_h) const
+{
+  auto child = dynamic_cast<autofit_component*>(getChildComponent(0));
+  assert(child);
+  return child->fixed_height(parent_w, parent_h) + _margin.getTopAndBottom();
+}
+
+int 
 rounded_container::fixed_width(int parent_w, int parent_h) const
 {
   auto child = getChildComponent(0);
@@ -95,7 +111,9 @@ rounded_container::fixed_height(int parent_w, int parent_h) const
 void
 rounded_container::resized()
 {
-  Rectangle<int> bounds(getLocalBounds());
+  Rectangle<int> bounds(
+    getLocalBounds().getX(), getLocalBounds().getY(), 
+    getLocalBounds().getWidth() - _margin_right, getLocalBounds().getHeight());
   Rectangle<int> child_bounds(
     bounds.getX() + _radius / 2,
     bounds.getY() + radius_and_padding() / 2,
@@ -108,18 +126,22 @@ rounded_container::resized()
 void
 rounded_container::paint(Graphics& g)
 {
+  Rectangle<float> bounds(
+    getLocalBounds().getX(), getLocalBounds().getY(),
+    getLocalBounds().getWidth() - _margin_right, getLocalBounds().getHeight());
+
   if (_mode == rounded_container_mode::both)
   {
     if (!_vertical) g.setGradientFill(ColourGradient(
       _color1.darker(1.75), 0, 0, _color2.darker(1.75), 0, getHeight(), false));
     else g.setGradientFill(ColourGradient(
       _color2.darker(1.75), 0, 0, _color1.darker(1.75), getWidth(), 0, false));
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+    g.fillRoundedRectangle(bounds, _radius);
     if (_vertical) g.setGradientFill(ColourGradient(
       _color1, 0, 0, _color2, 0, getHeight(), false));
     else g.setGradientFill(ColourGradient(
       _color2, 0, 0, _color1, getWidth(), 0, false));
-    g.drawRoundedRectangle(getLocalBounds().toFloat(), _radius, 1);
+    g.drawRoundedRectangle(bounds, _radius, 1);
     return;
   }
 
@@ -131,9 +153,9 @@ rounded_container::paint(Graphics& g)
       _color2, 0, 0, _color1, getWidth(), 0, false));
 
   if(_mode == rounded_container_mode::fill)
-    g.fillRoundedRectangle(getLocalBounds().toFloat(), _radius);
+    g.fillRoundedRectangle(bounds, _radius);
   else if(_mode == rounded_container_mode::stroke)
-    g.drawRoundedRectangle(getLocalBounds().toFloat(), _radius, 1);
+    g.drawRoundedRectangle(bounds, _radius, 1);
   else
     assert(false);
 }
@@ -159,7 +181,7 @@ grid_component::fixed_width(int parent_w, int parent_h) const
   for(int c = 0; c < _dimension.column_sizes.size(); c++)
     for (int i = 0; i < _positions.size(); i++)
       if(_positions[i].column == c)
-        if(_positions[i].row == _autofit_row)
+        if(_positions[i].row == _autofit_row || _dimension.column_sizes[c] == gui_dimension::auto_size_all)
         {
           auto child_ptr = getChildComponent(i);
           assert(dynamic_cast<autofit_component*>(child_ptr));
@@ -167,9 +189,11 @@ grid_component::fixed_width(int parent_w, int parent_h) const
           assert(child.fixed_width(parent_w, parent_h) > 0);
           result += child.fixed_width(parent_w, parent_h);
         }
-  result += (_dimension.column_sizes.size() - 1) * _gap_size;
   // correct for rounding errors
-  return result + (int)std::ceil(_dimension.column_sizes.size() * 0.5f);
+  result += (_dimension.column_sizes.size() - 1) * _hgap_size;
+  result = result + (int)std::ceil(_dimension.column_sizes.size() * 0.5f);
+  assert(result > 0);
+  return result;
 }
 
 int 
@@ -180,39 +204,38 @@ grid_component::fixed_height(int parent_w, int parent_h) const
   for (int r = 0; r < _dimension.row_sizes.size(); r++)
     for (int i = 0; i < _positions.size(); i++)
       if (_positions[i].row == r)
-        if (_positions[i].column == _autofit_column)
+        if (_positions[i].column == _autofit_column || _dimension.row_sizes[r] == gui_dimension::auto_size_all)
         {
           auto& child = dynamic_cast<autofit_component&>(*getChildComponent(i));
           assert(child.fixed_height(parent_w, parent_h) > 0);
           result += child.fixed_height(parent_w, parent_h);
         }
-  result += (_dimension.row_sizes.size() - 1) * _gap_size + _dimension.row_sizes.size();
   // correct for rounding errors
-  return result + (int)std::ceil(_dimension.row_sizes.size() * 0.5f);
+  result += (_dimension.row_sizes.size() - 1) * _vgap_size + _dimension.row_sizes.size();
+  result = result + (int)std::ceil(_dimension.row_sizes.size() * 0.5f);
+  assert(result > 0);
+  return result;
 }
 
 void 
 grid_component::resized()
 {
   Grid grid;
-  grid.rowGap = Grid::Px(_gap_size);
-  grid.columnGap = Grid::Px(_gap_size);
+  grid.rowGap = Grid::Px(_vgap_size);
+  grid.columnGap = Grid::Px(_hgap_size);
 
   // Note: this doesnt take into account autosizing interaction (i.e. multiple rows or cols being autosize target).
-  float row_height_even_distrib = (getHeight() - _gap_size * (_dimension.row_sizes.size() - 1)) / (float)_dimension.row_sizes.size();
-  float col_width_even_distrib = (getWidth() - _gap_size * (_dimension.column_sizes.size() - 1)) / (float)_dimension.column_sizes.size();
+  float row_height_even_distrib = (getHeight() - _vgap_size * (_dimension.row_sizes.size() - 1)) / (float)_dimension.row_sizes.size();
+  float col_width_even_distrib = (getWidth() - _hgap_size * (_dimension.column_sizes.size() - 1)) / (float)_dimension.column_sizes.size();
 
   for(int i = 0; i < _dimension.row_sizes.size(); i++)
-    if(_dimension.row_sizes[i] > 0)
-      grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
-    else if (_dimension.row_sizes[i] < 0)
-      grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
-    else 
+    if (_dimension.row_sizes[i] == gui_dimension::auto_size ||
+       _dimension.row_sizes[i] == gui_dimension::auto_size_all)
     {
       // autosize, dont bother with span
       int max_col_height = 0;
-      for(int p = 0; p < _positions.size(); p++)
-        if(_positions[p].column == _autofit_column && _positions[p].row == i)
+      for (int p = 0; p < _positions.size(); p++)
+        if ((_positions[p].row == i) && (_positions[p].column == _autofit_column || _dimension.row_sizes[i] == gui_dimension::auto_size_all))
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
           assert(autofit_child);
@@ -221,19 +244,20 @@ grid_component::resized()
           max_col_height = std::max(max_col_height, fixed_height);
         }
       grid.templateRows.add(Grid::Px(max_col_height));
-    }
+    } else if(_dimension.row_sizes[i] > 0)
+      grid.templateRows.add(Grid::Fr(_dimension.row_sizes[i]));
+    else if (_dimension.row_sizes[i] < 0)
+      grid.templateRows.add(Grid::Px(-_dimension.row_sizes[i]));
+    else assert(false);
 
   for(int i = 0; i < _dimension.column_sizes.size(); i++)
-    if(_dimension.column_sizes[i] > 0)
-      grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
-    else if (_dimension.column_sizes[i] < 0)
-      grid.templateColumns.add(Grid::Px(-_dimension.column_sizes[i]));
-    else 
-    { 
+    if (_dimension.column_sizes[i] == gui_dimension::auto_size ||
+        _dimension.column_sizes[i] == gui_dimension::auto_size_all)
+    {
       // autosize, dont bother with span
       int max_row_width = 0;
       for (int p = 0; p < _positions.size(); p++)
-        if (_positions[p].row == _autofit_row && _positions[p].column == i)
+        if (_positions[p].column == i && (_positions[p].row == _autofit_row || _dimension.column_sizes[i] == gui_dimension::auto_size_all))
         {
           auto autofit_child = dynamic_cast<autofit_component*>(getChildComponent(p));
           assert(autofit_child);
@@ -243,6 +267,11 @@ grid_component::resized()
         }
       grid.templateColumns.add(Grid::Px(max_row_width));
     }
+    else if(_dimension.column_sizes[i] > 0)
+      grid.templateColumns.add(Grid::Fr(_dimension.column_sizes[i]));
+    else if (_dimension.column_sizes[i] < 0)
+      grid.templateColumns.add(Grid::Px(-_dimension.column_sizes[i]));
+    else assert(false);
 
   for (int i = 0; i < _positions.size(); i++)
   {

@@ -6,7 +6,7 @@ upload new binaries
 update the history
 check if need update github social preview
 drop all conversion code on breaking plugin id
-dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts
+dont forget to update the version nr in code and cmake and mac bundle and build/zip scripts and downloads
 
 sometimes:
 update hosts
@@ -30,8 +30,10 @@ solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
 
-v1.7:
+v1.8:
+Title size clips on mac
 bug: preset select jumps back to previous
+do distinction between voice/global/matrix in the ui for all themes
 do forward compat checks - dont load newer versions
 do async clear delay lines etc on patch select -> 
   idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:

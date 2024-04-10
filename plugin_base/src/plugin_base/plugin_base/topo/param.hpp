@@ -19,8 +19,11 @@ class plugin_state;
 
 enum class param_direction { input, output };
 enum class param_rate { block, voice, accurate };
-enum class param_layout { single, horizontal, vertical };
 enum class param_automate { none, midi, automate, modulate };
+enum class param_layout { 
+  single, horizontal, vertical, 
+  single_grid // must be single child in parent container
+};
 
 // allows to extend right-click menu on parameters
 class param_menu_handler {
