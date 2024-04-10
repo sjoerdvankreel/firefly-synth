@@ -112,10 +112,12 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
+  auto linked_gui = make_param_section_gui(
+    { 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
+  if(is_fx) linked_gui = make_param_section_gui(
+    { 0, 5, 1, 1 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_linked,
-    make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"),
-    make_param_section_gui({ 0, is_fx? 5: 3, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), 
-      gui_label_edit_cell_split::horizontal)));
+    make_topo_tag_basic("{56FD2FEB-3084-4E28-B56C-06D31406EB42}", "Linked"), linked_gui));
   gui_edit_type edit_type = is_fx? gui_edit_type::hslider: gui_edit_type::knob;
   auto& mod_wheel = result.params.emplace_back(make_param(
     make_topo_info("{7696305C-28F3-4C54-A6CA-7C9DB5635153}", true, "Mod Wheel", "Mod", "Mod", param_mod, 1),
@@ -126,7 +128,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& pitch_bend = result.params.emplace_back(make_param(
     make_topo_info("{D1B334A6-FA2F-4AE4-97A0-A28DD0C1B48D}", true, "Pitch Bend", "PB", "PB", param_pb, 1),
     make_param_dsp_midi({ module_midi, 0, midi_source_pb }), make_domain_percentage(-1, 1, 0, 0, true),
-    make_param_gui_single(section_linked, edit_type, { 1, 0 },
+    make_param_gui_single(section_linked, edit_type, { is_fx? 0: 1, is_fx? 1: 0 },
     make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   pitch_bend.info.description = "Linked to MIDI pitch bend, updates on incoming MIDI events.";
 
