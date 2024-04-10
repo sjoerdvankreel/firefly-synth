@@ -31,15 +31,14 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7
+disable env trigger modes for poly
 recheck all the menu items
 put download/install section on top of github page
-align labels etc
 fix all themes aspect ratio height + fx
-do distinction between voice/global/matrix in the ui for all themes
 
 v1.8:
-disable env trigger modes for poly
 bug: preset select jumps back to previous
+do distinction between voice/global/matrix in the ui for all themes
 do forward compat checks - dont load newer versions
 do async clear delay lines etc on patch select -> 
   idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:
