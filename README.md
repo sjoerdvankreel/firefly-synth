@@ -66,18 +66,18 @@ Presets:
 - All other hosts, you'll just have to try and see.
 
 # Download
-- Mac VST3: [firefly_synth_1.6.1_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_vst3_instrument.zip)
-- Mac VST3 Fx: [firefly_synth_1.6.1_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_vst3_fx.zip)
-- Mac CLAP: [firefly_synth_1.6.1_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_clap_instrument.zip)
-- Mac CLAP Fx: [firefly_synth_1.6.1_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_mac_clap_fx.zip)
-- Linux VST3: [firefly_synth_1.6.1_linux_vst3_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_linux_vst3_instrument.tar.gz)
-- Linux VST3 Fx: [release/firefly_synth_1.6.1_linux_vst3_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_linux_vst3_fx.tar.gz)
-- Linux CLAP: [firefly_synth_1.6.1_linux_clap_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_linux_clap_instrument.tar.gz)
-- Linux CLAP Fx: [firefly_synth_1.6.1_linux_clap_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_linux_clap_fx.tar.gz)
-- Windows VST3: [firefly_synth_1.6.1_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_windows_vst3_instrument.zip)
-- Windows VST3 Fx: [firefly_synth_1.6.1_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_windows_vst3_fx.zip)
-- Windows CLAP: [firefly_synth_1.6.1_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_windows_clap_instrument.zip)
-- Windows CLAP Fx: [firefly_synth_1.6.1_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.6.1_windows_clap_fx.zip)
+- Mac VST3: [firefly_synth_1.7.0_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_vst3_instrument.zip)
+- Mac VST3 Fx: [firefly_synth_1.7.0_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_vst3_fx.zip)
+- Mac CLAP: [firefly_synth_1.7.0_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_clap_instrument.zip)
+- Mac CLAP Fx: [firefly_synth_1.7.0_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_clap_fx.zip)
+- Linux VST3: [firefly_synth_1.7.0_linux_vst3_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_vst3_instrument.tar.gz)
+- Linux VST3 Fx: [release/firefly_synth_1.7.0_linux_vst3_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_vst3_fx.tar.gz)
+- Linux CLAP: [firefly_synth_1.7.0_linux_clap_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_clap_instrument.tar.gz)
+- Linux CLAP Fx: [firefly_synth_1.7.0_linux_clap_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_clap_fx.tar.gz)
+- Windows VST3: [firefly_synth_1.7.0_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_vst3_instrument.zip)
+- Windows VST3 Fx: [firefly_synth_1.7.0_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_vst3_fx.zip)
+- Windows CLAP: [firefly_synth_1.7.0_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_clap_instrument.zip)
+- Windows CLAP Fx: [firefly_synth_1.7.0_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_clap_fx.zip)
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
