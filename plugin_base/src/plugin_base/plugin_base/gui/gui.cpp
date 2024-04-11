@@ -655,7 +655,7 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   add_hover_listener(*tab_button, gui_hover_type::module, module);
   if(topo.modules[module_index].gui.enable_tab_menu)
     add_tab_menu_listener(*tab_button, module_index, module_slot);
-} 
+}     
 
 Component&
 plugin_gui::make_modules(module_desc const* slots)
