@@ -14,9 +14,9 @@ using namespace juce;
 namespace plugin_base {
 
 static int const margin_param = 1;
-static int const margin_module = 2;
-static int const margin_content = 2;
-static int const margin_vsection = 2;
+static int const margin_module = 3;
+static int const margin_content = 3;
+static int const margin_vsection = 3;
 static int const margin_hsection = 3;
 
 static std::vector<std::string> tab_menu_module_actions = { 
