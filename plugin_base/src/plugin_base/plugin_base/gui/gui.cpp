@@ -610,8 +610,8 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   auto colors = _lnf->section_gui_colors(section.full_name);
   auto outline1 = colors.section_outline1;
   auto outline2 = colors.section_outline2;
-  auto background1 = colors.custom_background1;
-  auto background2 = colors.custom_background2;
+  auto background1 = colors.section_background1;
+  auto background2 = colors.section_background2;
   auto store = [this](std::unique_ptr<Component>&& owned) -> Component& { 
     auto result = owned.get(); 
     _components.emplace_back(std::move(owned)); 
@@ -619,8 +619,10 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
   };      
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, 0, false, rounded_container_mode::both, outline1, outline2);
-  auto& result = make_component<rounded_container>(&content_outline, radius, 0, 0, true, rounded_container_mode::fill, background1, background2);
+  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, 0, false, 
+    rounded_container_mode::both, background1, background2, outline1, outline2);
+  auto& result = make_component<rounded_container>(&content_outline, radius, 0, 0, true, 
+    rounded_container_mode::fill, background1, background2, outline1, outline2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
@@ -647,13 +649,13 @@ plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module,
   auto colors = _lnf->module_gui_colors(topo.modules[module_index].info.tag.full_name);
   auto background1 = colors.tab_background1;
   auto background2 = colors.tab_background2;
-  auto& corners = make_component<rounded_container>(&child, radius, 0, 0, true, rounded_container_mode::fill, background1, background2);
+  auto& corners = make_component<rounded_container>(&child, radius, 0, 0, true, rounded_container_mode::fill, background1, background2, background1, background2);
   tc.addTab(title, Colours::transparentBlack, &corners, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
   if(topo.modules[module_index].gui.enable_tab_menu)
     add_tab_menu_listener(*tab_button, module_index, module_slot);
-}
+} 
 
 Component&
 plugin_gui::make_modules(module_desc const* slots)

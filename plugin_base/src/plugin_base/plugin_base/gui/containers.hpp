@@ -98,8 +98,10 @@ public autofit_component
   int const _margin_right;
   bool const _vertical;
   juce::Component* _child;
-  juce::Colour const _color1;
-  juce::Colour const _color2;
+  juce::Colour const _background1;
+  juce::Colour const _background2;
+  juce::Colour const _outline1;
+  juce::Colour const _outline2;
   rounded_container_mode const _mode;
 
   int radius_and_padding() const { return _radius + _vpadding; }
@@ -112,8 +114,9 @@ public:
 
   rounded_container(
     juce::Component* child, int radius, int vpadding, int margin_right, bool vertical, rounded_container_mode mode,
-    juce::Colour const& color1, juce::Colour const& color2):
-  _radius(radius), _vpadding(vpadding), _margin_right(margin_right), _vertical(vertical), _child(child), _color1(color1), _color2(color2), _mode(mode)
+    juce::Colour const& background1, juce::Colour const& background2, juce::Colour const& outline1, juce::Colour const& outline2):
+  _radius(radius), _vpadding(vpadding), _margin_right(margin_right), _vertical(vertical), 
+  _background1(background1), _background2(background2), _outline1(outline1), _outline2(outline2), _mode(mode)
   { add_and_make_visible(*this, *child); }
 };
 

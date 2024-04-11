@@ -41,6 +41,8 @@ param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, pa
     lnf->theme_settings().param_section_corner_radius, 
     lnf->theme_settings().param_section_vpadding,
     margin_right, false, rounded_container_mode::both,
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_background1,
+    lnf->module_gui_colors(module->module->info.tag.full_name).section_background2,
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline1, 
     lnf->module_gui_colors(module->module->info.tag.full_name).section_outline2) {
   init(); 
@@ -130,34 +132,23 @@ rounded_container::paint(Graphics& g)
     getLocalBounds().getX(), getLocalBounds().getY(),
     getLocalBounds().getWidth() - _margin_right, getLocalBounds().getHeight());
 
-  if (_mode == rounded_container_mode::both)
+  if (_mode == rounded_container_mode::both || _mode == rounded_container_mode::fill)
   {
     if (!_vertical) g.setGradientFill(ColourGradient(
-      _color1.darker(1.75), 0, 0, _color2.darker(1.75), 0, getHeight(), false));
+      _background1, 0, 0, _background2, 0, getHeight(), false));
     else g.setGradientFill(ColourGradient(
-      _color2.darker(1.75), 0, 0, _color1.darker(1.75), getWidth(), 0, false));
+      _background2, 0, 0, _background1, getWidth(), 0, false));
     g.fillRoundedRectangle(bounds, _radius);
-    if (_vertical) g.setGradientFill(ColourGradient(
-      _color1, 0, 0, _color2, 0, getHeight(), false));
-    else g.setGradientFill(ColourGradient(
-      _color2, 0, 0, _color1, getWidth(), 0, false));
-    g.drawRoundedRectangle(bounds, _radius, 1);
-    return;
   }
 
-  if(_vertical)
-    g.setGradientFill(juce::ColourGradient(
-      _color1, 0, 0, _color2, 0, getHeight(), false));
-  else
-    g.setGradientFill(juce::ColourGradient(
-      _color2, 0, 0, _color1, getWidth(), 0, false));
-
-  if(_mode == rounded_container_mode::fill)
-    g.fillRoundedRectangle(bounds, _radius);
-  else if(_mode == rounded_container_mode::stroke)
+  if (_mode == rounded_container_mode::both || _mode == rounded_container_mode::stroke)
+  {
+    if (_vertical) g.setGradientFill(ColourGradient(
+      _outline1, 0, 0, _outline2, 0, getHeight(), false));
+    else g.setGradientFill(ColourGradient(
+      _outline2, 0, 0, _outline1, getWidth(), 0, false));
     g.drawRoundedRectangle(bounds, _radius, 1);
-  else
-    assert(false);
+  }
 }
 
 void

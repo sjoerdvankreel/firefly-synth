@@ -30,6 +30,9 @@ solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
 
+v1.7.1
+fix other themes for custom_background
+
 v1.8:
 Title size clips on mac
 bug: preset select jumps back to previous

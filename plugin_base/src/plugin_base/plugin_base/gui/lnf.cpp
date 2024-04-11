@@ -74,6 +74,8 @@ override_colors(gui_colors const& base, var const& json)
   result.knob_background2 = override_color_if_present(json, "knob_background2", result.knob_background2);
   result.section_outline1 = override_color_if_present(json, "section_outline1", result.section_outline1);
   result.section_outline2 = override_color_if_present(json, "section_outline2", result.section_outline2);
+  result.section_background1 = override_color_if_present(json, "section_background1", result.section_background1);
+  result.section_background2 = override_color_if_present(json, "section_background2", result.section_background2);
   result.slider_thumb = override_color_if_present(json, "slider_thumb", result.slider_thumb);
   result.slider_track1 = override_color_if_present(json, "slider_track1", result.slider_track1);
   result.slider_track2 = override_color_if_present(json, "slider_track2", result.slider_track2);
@@ -87,8 +89,6 @@ override_colors(gui_colors const& base, var const& json)
   result.control_text = override_color_if_present(json, "control_text", result.control_text);
   result.control_outline = override_color_if_present(json, "control_outline", result.control_outline);
   result.control_background = override_color_if_present(json, "control_background", result.control_background);
-  result.custom_background1 = override_color_if_present(json, "custom_background1", result.custom_background1);
-  result.custom_background2 = override_color_if_present(json, "custom_background2", result.custom_background2);
   result.scrollbar_thumb = override_color_if_present(json, "scrollbar_thumb", result.scrollbar_thumb);
   result.scrollbar_background = override_color_if_present(json, "scrollbar_background", result.scrollbar_background);
   return gui_colors(result); 

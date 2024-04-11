@@ -190,6 +190,8 @@ struct gui_colors final {
   juce::Colour knob_background2 = juce::Colour(0xFF999999);
   juce::Colour section_outline1 = juce::Colour(0xFF884422);
   juce::Colour section_outline2 = juce::Colour(0xFF444444);
+  juce::Colour section_background1 = juce::Colour(0xFF884422).darker(1.75f);
+  juce::Colour section_background2 = juce::Colour(0xFF444444).darker(1.75f);
   juce::Colour slider_thumb = juce::Colour(0xFFFF8844);
   juce::Colour slider_track1 = juce::Colour(0xFF222222);
   juce::Colour slider_track2 = juce::Colour(0xFF999999);
@@ -203,8 +205,6 @@ struct gui_colors final {
   juce::Colour control_text = juce::Colour(0xFFEEEEEE);
   juce::Colour control_outline = juce::Colour(0xFFAAAAAA);
   juce::Colour control_background = juce::Colour(0xFF111111);
-  juce::Colour custom_background1 = juce::Colour(0xFF222222);
-  juce::Colour custom_background2 = juce::Colour(0xFF111111);
   juce::Colour scrollbar_thumb = juce::Colour(0xFFFF8844);
   juce::Colour scrollbar_background = juce::Colour(0xFF444444);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(gui_colors);
