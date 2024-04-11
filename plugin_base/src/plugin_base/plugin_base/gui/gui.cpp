@@ -643,14 +643,10 @@ void
 plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
 {
   auto const& topo = *_gui_state->desc().plugin;
-  int radius = _lnf->theme_settings().module_corner_radius;
   int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
-  auto colors = _lnf->module_gui_colors(topo.modules[module_index].info.tag.full_name);
-  auto background1 = colors.tab_background1;
-  auto background2 = colors.tab_background2;
-  auto& corners = make_component<rounded_container>(&child, radius, 0, 0, true, rounded_container_mode::fill, background1, background2, background1, background2);
-  tc.addTab(title, Colours::transparentBlack, &corners, false);
+  auto& margin = make_component<margin_component>(&child, BorderSize<int>(margin_module, 0, 0, 0));
+  tc.addTab(title, Colours::transparentBlack, &margin, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
   if(topo.modules[module_index].gui.enable_tab_menu)
