@@ -616,7 +616,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
 
   // any tab not left or rightmost
   if (!left_no_header && !right_most && button.getIndex() > 0)
-    g.fillRect(button.getActiveArea());
+    g.fillRoundedRectangle(button.getActiveArea().toFloat(), 0);
 
   // fill text for all tab types excluding left with header
   if(left_no_header || button.getIndex() > 0)
