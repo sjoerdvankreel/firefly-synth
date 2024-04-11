@@ -636,7 +636,7 @@ lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isM
   g.setColour(colors().tab_button);
   if(button.getTabbedButtonBar().getNumTabs() == 1)
     g.fillRoundedRectangle(headerArea, radius);
-  else
+  else   
   {
     Path path;
     path.addRoundedRectangle(
