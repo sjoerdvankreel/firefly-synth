@@ -641,7 +641,7 @@ plugin_gui::make_tab_component(std::string const& id, std::string const& title, 
 
 void 
 plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
-{
+{ 
   auto const& topo = *_gui_state->desc().plugin;
   int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
