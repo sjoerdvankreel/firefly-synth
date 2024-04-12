@@ -669,13 +669,10 @@ plugin_gui::make_modules(module_desc const* slots)
 Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
-  int last_horizontal = 0;
   auto const& topo = *module.module;
   auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
   for (int s = 0; s < topo.sections.size(); s++)
-    last_horizontal = std::max(last_horizontal, topo.sections[s].gui.position.column);
-  for (int s = 0; s < topo.sections.size(); s++)
-    result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == last_horizontal), topo.sections[s].gui.position);
+    result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == 0), topo.sections[s].gui.position);
   add_hover_listener(result, gui_hover_type::module, module.info.global);
   return result;
 }
@@ -725,7 +722,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 }
 
 Component&
-plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool last_horizontal)
+plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool first_horizontal)
 {
   auto const& params = module.params;
   bool is_single_grid_param = false; 
@@ -750,7 +747,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
         grid.add(make_param_editor(module, params[slot++]), { r, c + 1 });
       }
     assert(section.gui.scroll_mode == gui_scroll_mode::none);
-    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, last_horizontal ? 0 : margin_hsection);
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal ? 0: margin_hsection);
   }
 
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
@@ -780,7 +777,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
       }
 
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, last_horizontal ? 0 : margin_hsection);
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal? 0: margin_hsection);
 
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);
