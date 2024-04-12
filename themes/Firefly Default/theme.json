@@ -89,7 +89,7 @@
     {
       "module_sections": ["Oscillator"],
       "settings": {
-        "tab_width": "58",
+        "tab_width": "59",
         "header_width": "80"
       }
     }

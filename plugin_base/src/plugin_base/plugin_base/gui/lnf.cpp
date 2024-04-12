@@ -353,7 +353,7 @@ lnf::positionComboBoxText(ComboBox& box, Label& label)
 {
   label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
   label.setFont(getComboBoxFont(box));
-} 
+}   
 
 int	
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
