@@ -605,7 +605,7 @@ plugin_gui::make_content()
 Component& 
 plugin_gui::make_custom_section(custom_section_gui const& section)
 {
-  int radius = _lnf->global_settings().module_radius;
+  int radius = _lnf->global_settings().section_radius;
   int vpadding = _lnf->global_settings().param_section_vpadding;
   auto colors = _lnf->section_gui_colors(section.full_name);
   auto outline1 = colors.section_outline1;

@@ -248,10 +248,10 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     _global_settings.combo_radius = (int)global_settings["combo_radius"];
   if (global_settings.hasProperty("button_radius"))
     _global_settings.button_radius = (int)global_settings["button_radius"];
-  if (global_settings.hasProperty("module_corner_radius"))
-    _global_settings.module_radius = (int)global_settings["module_radius"];
+  if (global_settings.hasProperty("section_radius"))
+    _global_settings.section_radius = (int)global_settings["section_radius"];
   if (global_settings.hasProperty("param_section_radius"))
-    _global_settings.param_section_radius = (int)global_settings["param_section_corner_radius"];
+    _global_settings.param_section_radius = (int)global_settings["param_section_radius"];
   if (global_settings.hasProperty("param_section_vpadding"))
     _global_settings.param_section_vpadding = (int)global_settings["param_section_vpadding"];
   if (global_settings.hasProperty("knob_padding"))
@@ -371,7 +371,7 @@ void
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
   g.setColour(colors().tab_header);
-  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _global_settings.module_radius);
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _global_settings.section_radius);
 }
 
 void
@@ -614,7 +614,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  int radius = _global_settings.module_radius;
+  int radius = _global_settings.section_radius;
   int strip_left = radius + 2;
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;

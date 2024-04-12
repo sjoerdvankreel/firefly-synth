@@ -80,7 +80,7 @@ struct plugin_topo_gui_theme_settings final {
   int mac_font_height = 11;
 
   int combo_radius = 3;
-  int module_radius = 4;
+  int section_radius = 4;
   int button_radius = 6;
   int table_cell_radius = 3;
   int text_editor_radius = 6;
