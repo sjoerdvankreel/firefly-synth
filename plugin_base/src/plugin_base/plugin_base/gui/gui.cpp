@@ -775,7 +775,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
           grid.add(make_param_editor(module, *iter), iter->param->gui.position.move(edit_dy, 0));
         } else assert(false);
       }
-
+        
   if(section.gui.scroll_mode == gui_scroll_mode::none)
     return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal? 0: margin_hsection);
 
