@@ -37,8 +37,8 @@
     "graph_grid": "40FFFFFF",
     "graph_text": "C0FFFFFF",
     "graph_background": "FF000000",
-    "graph_area": "80FFAA66",
-    "graph_line": "FFFFAA66",
+    "graph_area": "80FF6633",
+    "graph_line": "FFFF6633",
     "bubble_outline": "FFFF8844",
     "knob_thumb": "FFFF8844",
     "knob_track1": "FF222222",
@@ -80,17 +80,75 @@
   ],
   "overrides": [
     {
-      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
-      "module_sections": ["Monitor"],
-      "colors": {
-        "control_text": "FFFF8844"
-      }
-    },
-    {
       "module_sections": ["Oscillator"],
       "settings": {
         "tab_width": "59",
         "header_width": "80"
+      }
+    },
+    {
+      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "module_sections": ["Monitor"],
+      "colors": {
+        "tab_text": "FFFF4488",
+        "knob_thumb": "FFFF4488",
+        "knob_track2": "FFFF4488",
+        "control_text": "FFFF4488",
+        "slider_thumb": "FFFF4488",
+        "control_tick": "FFFF4488",
+        "bubble_outline": "FFFF4488",
+        "scrollbar_thumb": "FFFF4488",
+        "graph_area": "80FF55AA",
+        "graph_line": "FFFF55AA",
+        "table_header": "FFC43468"
+      }
+    },
+    {
+      "custom_sections": ["Global FX Graph", "Global LFO Graph"],
+      "module_sections": ["Master In", "Master Out", "Global FX", "Global LFO"],
+      "colors": {
+        "tab_text": "FF4488FF",
+        "knob_thumb": "FF4488FF",
+        "knob_track2": "FF4488FF",
+        "slider_thumb": "FF4488FF",
+        "control_tick": "FF4488FF",
+        "bubble_outline": "FF4488FF",
+        "scrollbar_thumb": "FF4488FF",
+        "graph_area": "8055AAFF",
+        "graph_line": "FF55AAFF",
+        "table_header": "FF3468C4"
+      }
+    },
+    {
+      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph"],
+      "module_sections": ["Oscillator", "Voice In", "Voice Out", "Voice FX", "Voice LFO", "Envelope"],
+      "colors": {
+        "tab_text": "FFFF8844",
+        "knob_thumb": "FFFF8844",
+        "knob_track2": "FFFF8844",
+        "slider_thumb": "FFFF8844",
+        "control_tick": "FFFF8844",
+        "bubble_outline": "FFFF8844",
+        "scrollbar_thumb": "FFFF8844",
+        "graph_area": "80FFAA55",
+        "graph_line": "FFFFAA55",
+        "table_header": "FFC46834"
+      }
+    },
+    {
+      "custom_sections": ["Osc Mod Graph", "Audio Matrix Graphs", "CV Matrix Graphs", "FX Only Matrix Graphs"],
+      "module_sections": ["Osc Mod", "VAudio", "GAudio", "VCV-A", "VCV-CV", "GCV-A", "GCV-CV"],
+      "colors": {
+        "tab_text": "FF8888FF",
+        "knob_thumb": "FF8888FF",
+        "knob_track2": "FF8888FF",
+        "slider_thumb": "FF8888FF",
+        "control_tick": "FF8888FF",
+        "bubble_outline": "FF8888FF",
+        "scrollbar_thumb": "FF8888FF",
+        "graph_area": "80CCCCFF",
+        "graph_line": "FFCCCCFF",
+        "table_header": "FF6868C4"
       }
     }
   ]

@@ -459,7 +459,7 @@ void
 lnf::drawLabel(Graphics& g, Label& label)
 {
   g.fillAll(label.findColour(Label::backgroundColourId));
-
+    
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
       draw_tabular_cell_bg(g, &label, 0.075f, global_settings().table_cell_radius);
