@@ -258,7 +258,7 @@ pb_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
   assert(_gui.get());
   auto const& topo = *_engine.state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
-  auto settings = _gui->get_lnf()->theme_settings();
+  auto settings = _gui->get_lnf()->global_settings();
   int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale * _gui->get_system_dpi_scale());
   int max_width = (int)(settings.get_default_width(is_fx) * settings.max_scale * _gui->get_system_dpi_scale());
   *width = std::clamp((int)*width, min_width, max_width);
@@ -274,7 +274,7 @@ pb_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
   hints->can_resize_horizontally = true;
   auto const& topo = *_engine.state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
-  auto settings = _gui->get_lnf()->theme_settings();
+  auto settings = _gui->get_lnf()->global_settings();
   hints->aspect_ratio_width = settings.get_aspect_ratio_width(is_fx);
   hints->aspect_ratio_height = settings.get_aspect_ratio_height(is_fx);
   return true;

@@ -51,6 +51,15 @@ override_color_if_present(var const& json, std::string const& name, Colour const
   return Colour::fromString(color_text);
 }
 
+static section_topo_gui_theme_settings 
+override_settings(section_topo_gui_theme_settings const& base, var const& json)
+{
+  section_topo_gui_theme_settings result = section_topo_gui_theme_settings(base);
+  if (json.hasProperty("tab_width")) result.tab_width = (int)json["tab_width"];
+  if (json.hasProperty("header_width")) result.header_width = (int)json["header_width"];
+  return result;
+}
+
 static gui_colors 
 override_colors(gui_colors const& base, var const& json)
 {
@@ -118,8 +127,8 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   assert(parse_result.ok());
   init_theme(theme_folder, theme_json);
 
-  auto control_text_high = colors().control_text.brighter(_theme_settings.lighten);
-  auto control_bg_high = colors().control_background.brighter(_theme_settings.lighten);
+  auto control_text_high = colors().control_text.brighter(_global_settings.lighten);
+  auto control_bg_high = colors().control_background.brighter(_global_settings.lighten);
 
   setColour(Label::ColourIds::textColourId, colors().label_text);
 
@@ -151,8 +160,8 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 
   setColour(PopupMenu::ColourIds::textColourId, colors().label_text);
   setColour(PopupMenu::ColourIds::backgroundColourId, colors().control_background);
-  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_theme_settings.lighten));
-  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_theme_settings.lighten));
+  setColour(PopupMenu::ColourIds::highlightedTextColourId, colors().label_text.brighter(_global_settings.lighten));
+  setColour(PopupMenu::ColourIds::highlightedBackgroundColourId, colors().control_background.brighter(_global_settings.lighten));
 }
 
 void 
@@ -171,16 +180,20 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
         {
           std::string graph = this_bg_image["graph"].toString().toStdString();
           std::string image_path = (theme_folder / image).string();
-          _theme_settings.graph_background_images[graph] = image_path;
+          _global_settings.graph_background_images[graph] = image_path;
         }
       }
     }
   }
 
-  assert(json.hasProperty("defaults"));
-  var defaults = json["defaults"];
-  assert(defaults.hasProperty("colors"));
-  _default_colors = override_colors(_default_colors, defaults["colors"]);
+  assert(json.hasProperty("default_colors"));
+  var default_colors = json["default_colors"];
+  _default_colors = override_colors(_default_colors, default_colors);
+
+  assert(json.hasProperty("default_settings"));
+  var default_settings = json["default_settings"];
+  _default_settings = override_settings(_default_settings, default_settings);
+
   if (json.hasProperty("overrides"))
   {
     var overrides = json["overrides"];
@@ -188,75 +201,79 @@ lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
     for (int i = 0; i < overrides.size(); i++)
     {
       var this_override = overrides[i];
-      assert(this_override.hasProperty("colors"));
-      auto this_colors = override_colors(_default_colors, this_override["colors"]);
+      auto this_settings = _default_settings;
+      auto this_colors = gui_colors(_default_colors);
+      if(this_override.hasProperty("colors")) this_colors = override_colors(_default_colors, this_override["colors"]);
+      if (this_override.hasProperty("settings")) this_settings = override_settings(_default_settings, this_override["settings"]);
       if (this_override.hasProperty("custom_sections"))
       {
         var custom_sections = this_override["custom_sections"];
         assert(custom_sections.isArray());
         for(int j = 0; j < custom_sections.size(); j++)
+        {
+          _section_settings[custom_sections[j].toString().toStdString()] = this_settings;
           _section_colors[custom_sections[j].toString().toStdString()] = gui_colors(this_colors);
+        }
       }
       if (this_override.hasProperty("module_sections"))
       {
         var module_sections = this_override["module_sections"];
         assert(module_sections.isArray());
         for (int j = 0; j < module_sections.size(); j++)
+        {
+          _module_settings[module_sections[j].toString().toStdString()] = this_settings;
           _module_colors[module_sections[j].toString().toStdString()] = gui_colors(this_colors);
+        }
       }
     }
   }
 
-  assert(json.hasProperty("settings"));
-  var settings = json["settings"];
-  if (settings.hasProperty("lighten"))
-    _theme_settings.lighten = (float)settings["lighten"];
-  if (settings.hasProperty("mac_font_height"))
-    _theme_settings.mac_font_height = (float)settings["mac_font_height"];
-  if (settings.hasProperty("windows_font_height"))
-    _theme_settings.windows_font_height = (float)settings["windows_font_height"];
-  if (settings.hasProperty("linux_font_height"))
-    _theme_settings.linux_font_height = (float)settings["linux_font_height"];
-  if (settings.hasProperty("table_cell_radius"))
-    _theme_settings.table_cell_radius = (int)settings["table_cell_radius"];
-  if (settings.hasProperty("text_editor_radius"))
-    _theme_settings.text_editor_radius = (int)settings["text_editor_radius"];
-  if (settings.hasProperty("scroll_thumb_radius"))
-    _theme_settings.scroll_thumb_radius = (int)settings["scroll_thumb_radius"];
-  if (settings.hasProperty("combo_radius"))
-    _theme_settings.combo_radius = (int)settings["combo_radius"];
-  if (settings.hasProperty("button_radius"))
-    _theme_settings.button_radius = (int)settings["button_radius"];
-  if (settings.hasProperty("module_tab_width"))
-    _theme_settings.module_tab_width = (int)settings["module_tab_width"];
-  if (settings.hasProperty("module_header_width"))
-    _theme_settings.module_header_width = (int)settings["module_header_width"];
-  if (settings.hasProperty("module_corner_radius"))
-    _theme_settings.module_corner_radius = (int)settings["module_corner_radius"];
-  if (settings.hasProperty("param_section_corner_radius"))
-    _theme_settings.param_section_corner_radius = (int)settings["param_section_corner_radius"];
-  if (settings.hasProperty("param_section_vpadding"))
-    _theme_settings.param_section_vpadding = (int)settings["param_section_vpadding"];
-  if (settings.hasProperty("knob_padding"))
-    _theme_settings.knob_padding = (int)settings["knob_padding"];
-  if (settings.hasProperty("tabular_knob_padding"))
-    _theme_settings.tabular_knob_padding = (int)settings["tabular_knob_padding"];
-  if (settings.hasProperty("min_scale"))
-    _theme_settings.min_scale = (float)settings["min_scale"];
-  if (settings.hasProperty("max_scale"))
-    _theme_settings.max_scale = (float)settings["max_scale"];
-  if (settings.hasProperty("default_width_fx"))
-    _theme_settings.default_width_fx = (int)settings["default_width_fx"];
-  if (settings.hasProperty("aspect_ratio_width_fx"))
-    _theme_settings.aspect_ratio_width_fx = (int)settings["aspect_ratio_width_fx"];
-  if (settings.hasProperty("aspect_ratio_height_fx"))
-    _theme_settings.aspect_ratio_height_fx = (int)settings["aspect_ratio_height_fx"];
-  if (settings.hasProperty("default_width_instrument"))
-    _theme_settings.default_width_instrument = (int)settings["default_width_instrument"];
-  if (settings.hasProperty("aspect_ratio_width_instrument"))
-    _theme_settings.aspect_ratio_width_instrument = (int)settings["aspect_ratio_width_instrument"];
-  if (settings.hasProperty("aspect_ratio_height_instrument"))
-    _theme_settings.aspect_ratio_height_instrument = (int)settings["aspect_ratio_height_instrument"];
+  assert(json.hasProperty("global_settings"));
+  var global_settings = json["global_settings"];
+  if (global_settings.hasProperty("lighten"))
+    _global_settings.lighten = (float)global_settings["lighten"];
+  if (global_settings.hasProperty("mac_font_height"))
+    _global_settings.mac_font_height = (float)global_settings["mac_font_height"];
+  if (global_settings.hasProperty("windows_font_height"))
+    _global_settings.windows_font_height = (float)global_settings["windows_font_height"];
+  if (global_settings.hasProperty("linux_font_height"))
+    _global_settings.linux_font_height = (float)global_settings["linux_font_height"];
+  if (global_settings.hasProperty("table_cell_radius"))
+    _global_settings.table_cell_radius = (int)global_settings["table_cell_radius"];
+  if (global_settings.hasProperty("text_editor_radius"))
+    _global_settings.text_editor_radius = (int)global_settings["text_editor_radius"];
+  if (global_settings.hasProperty("scroll_thumb_radius"))
+    _global_settings.scroll_thumb_radius = (int)global_settings["scroll_thumb_radius"];
+  if (global_settings.hasProperty("combo_radius"))
+    _global_settings.combo_radius = (int)global_settings["combo_radius"];
+  if (global_settings.hasProperty("button_radius"))
+    _global_settings.button_radius = (int)global_settings["button_radius"];
+  if (global_settings.hasProperty("module_corner_radius"))
+    _global_settings.module_radius = (int)global_settings["module_radius"];
+  if (global_settings.hasProperty("param_section_radius"))
+    _global_settings.param_section_radius = (int)global_settings["param_section_corner_radius"];
+  if (global_settings.hasProperty("param_section_vpadding"))
+    _global_settings.param_section_vpadding = (int)global_settings["param_section_vpadding"];
+  if (global_settings.hasProperty("knob_padding"))
+    _global_settings.knob_padding = (int)global_settings["knob_padding"];
+  if (global_settings.hasProperty("tabular_knob_padding"))
+    _global_settings.tabular_knob_padding = (int)global_settings["tabular_knob_padding"];
+  if (global_settings.hasProperty("min_scale"))
+    _global_settings.min_scale = (float)global_settings["min_scale"];
+  if (global_settings.hasProperty("max_scale"))
+    _global_settings.max_scale = (float)global_settings["max_scale"];
+  if (global_settings.hasProperty("default_width_fx"))
+    _global_settings.default_width_fx = (int)global_settings["default_width_fx"];
+  if (global_settings.hasProperty("aspect_ratio_width_fx"))
+    _global_settings.aspect_ratio_width_fx = (int)global_settings["aspect_ratio_width_fx"];
+  if (global_settings.hasProperty("aspect_ratio_height_fx"))
+    _global_settings.aspect_ratio_height_fx = (int)global_settings["aspect_ratio_height_fx"];
+  if (global_settings.hasProperty("default_width_instrument"))
+    _global_settings.default_width_instrument = (int)global_settings["default_width_instrument"];
+  if (global_settings.hasProperty("aspect_ratio_width_instrument"))
+    _global_settings.aspect_ratio_width_instrument = (int)global_settings["aspect_ratio_width_instrument"];
+  if (global_settings.hasProperty("aspect_ratio_height_instrument"))
+    _global_settings.aspect_ratio_height_instrument = (int)global_settings["aspect_ratio_height_instrument"];
 }
 
 gui_colors 
@@ -295,7 +312,7 @@ Font
 lnf::font() const
 {
   Font result(_typeface);
-  result.setHeight(_theme_settings.get_font_height());
+  result.setHeight(_global_settings.get_font_height());
   result.setStyleFlags(_desc->plugin->gui.font_flags);
   return result;
 }
@@ -318,7 +335,9 @@ lnf::tab_width() const
 {
   assert(_module_section != -1);
   auto const& section = _desc->plugin->gui.module_sections[_module_section];
-  return section.tabbed ? -1 : _theme_settings.module_tab_width;
+  if(section.tabbed) return -1;
+  auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
+  return _module_settings.contains(full_name) ? _module_settings.at(full_name).tab_width : _default_settings.tab_width;
 }
 
 Path 
@@ -334,14 +353,17 @@ lnf::positionComboBoxText(ComboBox& box, Label& label)
 {
   label.setBounds(1, 1, box.getWidth() - 10, box.getHeight() - 2);
   label.setFont(getComboBoxFont(box));
-}
+} 
 
 int	
 lnf::getTabButtonBestWidth(TabBarButton& b, int)
 { 
   int result = tab_width();
   if(result == -1) return b.getTabbedButtonBar().getWidth() / b.getTabbedButtonBar().getNumTabs();
-  if(b.getIndex() == 0) result += _theme_settings.module_header_width;
+  auto full_name = _desc->plugin->modules[_module].info.tag.full_name;
+  int header_width = _default_settings.header_width;
+  if(_module_settings.contains(full_name)) header_width = _module_settings.at(full_name).header_width;
+  if(b.getIndex() == 0) result += header_width;
   return result;
 }
 
@@ -349,14 +371,14 @@ void
 lnf::drawTabbedButtonBarBackground(TabbedButtonBar& bar, juce::Graphics& g)
 {
   g.setColour(colors().tab_header);
-  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _theme_settings.module_corner_radius);
+  g.fillRoundedRectangle(bar.getLocalBounds().toFloat(), _global_settings.module_radius);
 }
 
 void
 lnf::getIdealPopupMenuItemSize(String const& text, bool separator, int standardHeight, int& w, int& h)
 {
   LookAndFeel_V4::getIdealPopupMenuItemSize(text, separator, standardHeight, w, h);
-  h = _theme_settings.get_font_height() + 8;
+  h = _global_settings.get_font_height() + 8;
 }
 
 void
@@ -383,7 +405,7 @@ lnf::drawTooltip(Graphics& g, String const& text, int w, int h)
 void 
 lnf::drawTextEditorOutline(juce::Graphics& g, int w, int h, TextEditor& te)
 {
-  auto cornerSize = theme_settings().text_editor_radius;
+  auto cornerSize = global_settings().text_editor_radius;
   if (!te.isEnabled()) return;
   if (dynamic_cast<AlertWindow*> (te.getParentComponent()) != nullptr) return;
   if (te.hasKeyboardFocus(true) && !te.isReadOnly())
@@ -430,7 +452,7 @@ lnf::drawScrollbar(Graphics& g, ScrollBar& bar, int x, int y, int w, int h,
   else thumbBounds = { pos, y, size, h };
   auto c = bar.findColour(ScrollBar::ColourIds::thumbColourId);
   g.setColour(over ? c.brighter(0.25f) : c);
-  g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), theme_settings().scroll_thumb_radius);
+  g.fillRoundedRectangle(thumbBounds.reduced(1).toFloat(), global_settings().scroll_thumb_radius);
 }
 
 void
@@ -440,7 +462,7 @@ lnf::drawLabel(Graphics& g, Label& label)
 
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label, 0.075f, theme_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, &label, 0.075f, global_settings().table_cell_radius);
 
   if (!label.isBeingEdited()) 
   {
@@ -496,7 +518,7 @@ lnf::drawButtonBackground(
   // with 1 modification: we pick the corner size from theme_settings
   // whereas base class hardcodes it as 6
 
-  auto cornerSize = theme_settings().button_radius;
+  auto cornerSize = global_settings().button_radius;
 
   auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
   auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
@@ -542,7 +564,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     if (ps->param()->param->gui.tabular)
     {
       tabular = true;
-      draw_tabular_cell_bg(g, &box, 0.05f, theme_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, &box, 0.05f, global_settings().table_cell_radius);
     }
 
   Path path;
@@ -551,7 +573,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
   int arrowHeight = 4;
   int const fixedHeight = combo_height(tabular) - (tabular? 4: 0);
   int const comboTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
-  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : theme_settings().combo_radius;
+  auto cornerSize = box.findParentComponentOfClass<ChoicePropertyComponent>() != nullptr ? 0.0f : global_settings().combo_radius;
   Rectangle<int> boxBounds(tabular? 3: 1, comboTop, width - 2 - (tabular? 4: 0), fixedHeight);
   g.setColour(Colours::white.withAlpha(0.125f));
   g.fillRoundedRectangle(boxBounds.toFloat(), cornerSize);
@@ -571,7 +593,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &tb, 0.05f, theme_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, &tb, 0.05f, global_settings().table_cell_radius);
 
   int left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
   int pad = tabular? 3: 1;
@@ -592,12 +614,12 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
 void 
 lnf::drawTabButton(TabBarButton& button, Graphics& g, bool isMouseOver, bool isMouseDown)
 {
-  int radius = _theme_settings.module_corner_radius;
+  int radius = _global_settings.module_radius;
   int strip_left = radius + 2;
   bool is_section = _module_section != -1 && _desc->plugin->gui.module_sections[_module_section].tabbed;
   auto justify = is_section ? Justification::left : Justification::centred;
   
-  float button_lighten = (button.getToggleState() || isMouseOver) ? _theme_settings.lighten : 0;
+  float button_lighten = (button.getToggleState() || isMouseOver) ? _global_settings.lighten : 0;
   auto text_color = (is_section || button.getToggleState()) ? colors().tab_text : colors().tab_text_inactive;
   g.setColour(colors().tab_button.brighter(button_lighten));
 
@@ -674,7 +696,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &s, 0.05f, theme_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, &s, 0.05f, global_settings().table_cell_radius);
 
   float scale_factor = 1;
   float size_base = s.getHeight();
@@ -684,7 +706,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     scale_factor = size_base / s.getHeight();
   }
 
-  float padding = tabular? _theme_settings.tabular_knob_padding: _theme_settings.knob_padding;
+  float padding = tabular? _global_settings.tabular_knob_padding: _global_settings.knob_padding;
   float size = size_base - padding - stroke / 2;
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
@@ -765,7 +787,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     if(ps->param()->param->gui.tabular)
     {
       padh = 2;
-      draw_tabular_cell_bg(g, &s, 0.05f, theme_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, &s, 0.05f, global_settings().table_cell_radius);
     }
   }
 

@@ -195,7 +195,7 @@ graph::paint(Graphics& g)
 
   // draw optional background image
   plugin_base::lnf& lnf = dynamic_cast<plugin_base::lnf&>(getLookAndFeel());
-  auto const& bg_images = lnf.theme_settings().graph_background_images;
+  auto const& bg_images = lnf.global_settings().graph_background_images;
   auto iter = bg_images.find(_params.name_in_theme);
   if (iter != bg_images.end())
   {

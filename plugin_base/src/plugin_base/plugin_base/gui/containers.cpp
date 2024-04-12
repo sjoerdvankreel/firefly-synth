@@ -38,8 +38,8 @@ param_section_container::
 param_section_container(plugin_gui* gui, lnf* lnf, module_desc const* module, param_section const* section, juce::Component* child, int margin_left) :
   binding_component(gui, module, &section->gui.bindings, 0),
   rounded_container(child, 
-    lnf->theme_settings().param_section_corner_radius, 
-    lnf->theme_settings().param_section_vpadding,
+    lnf->global_settings().param_section_radius,
+    lnf->global_settings().param_section_vpadding,
     margin_left, false, rounded_container_mode::both,
     lnf->module_gui_colors(module->module->info.tag.full_name).section_background1,
     lnf->module_gui_colors(module->module->info.tag.full_name).section_background2,
