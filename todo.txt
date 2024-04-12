@@ -31,6 +31,7 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7.1
+up the patch version
 fix osc header width
 document breaks theme
 fix the custom sections

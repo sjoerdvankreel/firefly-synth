@@ -101,7 +101,7 @@
         "graph_area": "80FF4488",
         "graph_line": "FFFF4488",
         "table_header": "FFC43468",
-        "section_background1": "FF7F2244"
+        "section_background1": "FF401122"
       }
     },
     {
@@ -118,7 +118,7 @@
         "graph_area": "804488FF",
         "graph_line": "FF4488FF",
         "table_header": "FF3468C4",
-        "section_background1": "FF22447F"
+        "section_background1": "FF112240"
       }
     },
     {
@@ -135,7 +135,7 @@
         "graph_area": "80FF8844",
         "graph_line": "FFFF8844",
         "table_header": "FFC46834",
-        "section_background1": "FF7F4422"
+        "section_background1": "FF402211"
       }
     },
     {
@@ -152,7 +152,7 @@
         "graph_area": "808888FF",
         "graph_line": "FF8888FF",
         "table_header": "FF6868C4",
-        "section_background1": "FF44447F"
+        "section_background1": "FF222240"
       }
     }
   ]
