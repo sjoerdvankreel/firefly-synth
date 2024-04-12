@@ -364,8 +364,8 @@ synth_topo(bool is_fx)
     result->type = plugin_type::synth; 
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
-     
-  result->gui.default_theme = "Firefly Dark";       
+      
+  result->gui.default_theme = "Firefly Default";       
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
   auto make_title_text_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {
