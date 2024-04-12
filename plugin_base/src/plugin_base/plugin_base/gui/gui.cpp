@@ -616,13 +616,11 @@ plugin_gui::make_custom_section(custom_section_gui const& section)
     auto result = owned.get(); 
     _components.emplace_back(std::move(owned)); 
     return *result; 
-  };      
+  };        
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, 0, false, 
+  auto& result = make_component<rounded_container>(&content, radius, vpadding, 0, false,
     rounded_container_mode::both, background1, background2, outline1, outline2);
-  auto& result = make_component<rounded_container>(&content_outline, radius, 0, 0, true, 
-    rounded_container_mode::fill, background1, background2, outline1, outline2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
