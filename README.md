@@ -119,10 +119,6 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 - Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
 - Contains a verbatim implementation of [Moorer's DSF algorithm as described by Burkhard Reike](https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html).
 
-# Screenshot FX version
-
-![Screenshot](static/screenshot_fx_firefly_dark.png)
-
 # Theme examples
 
 <table>
