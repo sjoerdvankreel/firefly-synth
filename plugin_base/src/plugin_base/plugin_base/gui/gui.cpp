@@ -14,9 +14,9 @@ using namespace juce;
 namespace plugin_base {
 
 static int const margin_param = 1;
-static int const margin_module = 2;
-static int const margin_content = 2;
-static int const margin_vsection = 2;
+static int const margin_module = 3;
+static int const margin_content = 3;
+static int const margin_vsection = 3;
 static int const margin_hsection = 3;
 
 static std::vector<std::string> tab_menu_module_actions = { 
@@ -377,11 +377,11 @@ plugin_gui::theme_changed(std::string const& theme_name)
 
   // note: default width and aspect ratios are contained in theme
   add_and_make_visible(*this, make_content());
-  int default_width = _lnf->theme_settings().get_default_width(is_fx);
-  float ratio = _lnf->theme_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->theme_settings().get_aspect_ratio_width(is_fx);
+  int default_width = _lnf->global_settings().get_default_width(is_fx);
+  float ratio = _lnf->global_settings().get_aspect_ratio_height(is_fx) / (float)_lnf->global_settings().get_aspect_ratio_width(is_fx);
   getChildComponent(0)->setSize(default_width, default_width * ratio);
   float user_scale = user_io_load_num(topo, user_io::base, user_state_scale_key, 1.0,
-    _lnf->theme_settings().min_scale, _lnf->theme_settings().max_scale);
+    _lnf->global_settings().min_scale, _lnf->global_settings().max_scale);
   float w = default_width * user_scale * _system_dpi_scale;
   setSize(w, w * ratio);
   resized();
@@ -543,7 +543,7 @@ plugin_gui::resized()
 {
   float w = getLocalBounds().getWidth();
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
-  float user_scale = (w / _lnf->theme_settings().get_default_width(is_fx)) / _system_dpi_scale;
+  float user_scale = (w / _lnf->global_settings().get_default_width(is_fx)) / _system_dpi_scale;
   getChildComponent(0)->setTransform(AffineTransform::scale(user_scale * _system_dpi_scale));
   user_io_save_num(*_gui_state->desc().plugin, user_io::base, user_state_scale_key, user_scale);
 }
@@ -579,7 +579,7 @@ void
 plugin_gui::reloaded()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto settings = _lnf->theme_settings();
+  auto settings = _lnf->global_settings();
   bool is_fx = _gui_state->desc().plugin->type == plugin_type::fx;
   int default_width = settings.get_default_width(is_fx);
   float ratio = settings.get_aspect_ratio_height(is_fx) / (float)settings.get_aspect_ratio_width(is_fx);
@@ -593,7 +593,7 @@ Component&
 plugin_gui::make_content()
 {
   auto const& topo = *_gui_state->desc().plugin;
-  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf->theme_settings()), margin_module, margin_module, 0, 0);
+  auto& grid = make_component<grid_component>(topo.gui.dimension_factory(_lnf->global_settings()), margin_module, margin_module, 0, 0);
   for(int s = 0; s < topo.gui.custom_sections.size(); s++)
     grid.add(make_custom_section(topo.gui.custom_sections[s]), topo.gui.custom_sections[s].position);
   for(int s = 0; s < topo.gui.module_sections.size(); s++)
@@ -605,22 +605,22 @@ plugin_gui::make_content()
 Component& 
 plugin_gui::make_custom_section(custom_section_gui const& section)
 {
-  int radius = _lnf->theme_settings().module_corner_radius;
-  int vpadding = _lnf->theme_settings().param_section_vpadding;
+  int radius = _lnf->global_settings().section_radius;
+  int vpadding = _lnf->global_settings().param_section_vpadding;
   auto colors = _lnf->section_gui_colors(section.full_name);
   auto outline1 = colors.section_outline1;
   auto outline2 = colors.section_outline2;
-  auto background1 = colors.custom_background1;
-  auto background2 = colors.custom_background2;
+  auto background1 = colors.section_background1;
+  auto background2 = colors.section_background2;
   auto store = [this](std::unique_ptr<Component>&& owned) -> Component& { 
     auto result = owned.get(); 
     _components.emplace_back(std::move(owned)); 
     return *result; 
-  };      
+  };        
   lnf* lnf = custom_lnf(section.index);
   auto& content = section.gui_factory(this, lnf, store);
-  auto& content_outline = make_component<rounded_container>(&content, radius, vpadding, 0, false, rounded_container_mode::both, outline1, outline2);
-  auto& result = make_component<rounded_container>(&content_outline, radius, 0, 0, true, rounded_container_mode::fill, background1, background2);
+  auto& result = make_component<rounded_container>(&content, radius, vpadding, 0, false,
+    rounded_container_mode::both, background1, background2, outline1, outline2);
   result.setLookAndFeel(lnf);
   add_hover_listener(result, gui_hover_type::custom, section.index);
   return result;
@@ -633,27 +633,23 @@ plugin_gui::make_tab_component(std::string const& id, std::string const& title, 
   result.setOutline(0);
   result.setLookAndFeel(module_lnf(module));
   result.getTabbedButtonBar().setTitle(title);
-  result.setTabBarDepth(module_header_height(_lnf->theme_settings().get_font_height()));
+  result.setTabBarDepth(module_header_height(_lnf->global_settings().get_font_height()));
   return result;
 }
 
 void 
 plugin_gui::add_component_tab(TabbedComponent& tc, Component& child, int module, std::string const& title)
-{
+{ 
   auto const& topo = *_gui_state->desc().plugin;
-  int radius = _lnf->theme_settings().module_corner_radius;
   int module_slot = _gui_state->desc().modules[module].info.slot;
   int module_index = _gui_state->desc().modules[module].info.topo;
-  auto colors = _lnf->module_gui_colors(topo.modules[module_index].info.tag.full_name);
-  auto background1 = colors.tab_background1;
-  auto background2 = colors.tab_background2;
-  auto& corners = make_component<rounded_container>(&child, radius, 0, 0, true, rounded_container_mode::fill, background1, background2);
-  tc.addTab(title, Colours::transparentBlack, &corners, false);
+  auto& margin = make_component<margin_component>(&child, BorderSize<int>(margin_module, 0, 0, 0));
+  tc.addTab(title, Colours::transparentBlack, &margin, false);
   auto tab_button = tc.getTabbedButtonBar().getTabButton(tc.getTabbedButtonBar().getNumTabs() - 1);
   add_hover_listener(*tab_button, gui_hover_type::module, module);
   if(topo.modules[module_index].gui.enable_tab_menu)
     add_tab_menu_listener(*tab_button, module_index, module_slot);
-}
+}     
 
 Component&
 plugin_gui::make_modules(module_desc const* slots)
@@ -671,13 +667,10 @@ plugin_gui::make_modules(module_desc const* slots)
 Component&
 plugin_gui::make_param_sections(module_desc const& module)
 {
-  int last_horizontal = 0;
   auto const& topo = *module.module;
   auto& result = make_component<grid_component>(topo.gui.dimension, margin_vsection, 0, topo.gui.autofit_row, topo.gui.autofit_column);
   for (int s = 0; s < topo.sections.size(); s++)
-    last_horizontal = std::max(last_horizontal, topo.sections[s].gui.position.column);
-  for (int s = 0; s < topo.sections.size(); s++)
-    result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == last_horizontal), topo.sections[s].gui.position);
+    result.add(make_param_section(module, topo.sections[s], topo.sections[s].gui.position.column == 0), topo.sections[s].gui.position);
   add_hover_listener(result, gui_hover_type::module, module.info.global);
   return result;
 }
@@ -727,7 +720,7 @@ plugin_gui::make_multi_param(module_desc const& module, param_desc const* slots)
 }
 
 Component&
-plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool last_horizontal)
+plugin_gui::make_param_section(module_desc const& module, param_section const& section, bool first_horizontal)
 {
   auto const& params = module.params;
   bool is_single_grid_param = false; 
@@ -752,7 +745,7 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
         grid.add(make_param_editor(module, params[slot++]), { r, c + 1 });
       }
     assert(section.gui.scroll_mode == gui_scroll_mode::none);
-    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, last_horizontal ? 0 : margin_hsection);
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal ? 0: margin_hsection);
   }
 
   for (auto iter = params.begin(); iter != params.end(); iter += iter->param->info.slot_count)
@@ -780,9 +773,9 @@ plugin_gui::make_param_section(module_desc const& module, param_section const& s
           grid.add(make_param_editor(module, *iter), iter->param->gui.position.move(edit_dy, 0));
         } else assert(false);
       }
-
+        
   if(section.gui.scroll_mode == gui_scroll_mode::none)
-    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, last_horizontal ? 0 : margin_hsection);
+    return make_component<param_section_container>(this, _lnf.get(), &module, &section, &grid, first_horizontal? 0: margin_hsection);
 
   auto& viewer = make_component<autofit_viewport>(module_lnf(module.module->info.index));
   viewer.setViewedComponent(&grid, false);

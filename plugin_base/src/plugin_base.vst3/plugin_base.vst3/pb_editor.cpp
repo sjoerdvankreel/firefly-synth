@@ -48,7 +48,7 @@ tresult PLUGIN_API
 pb_editor::checkSizeConstraint(ViewRect* new_size)
 {
   assert(_gui.get());
-  auto settings = _gui->get_lnf()->theme_settings();
+  auto settings = _gui->get_lnf()->global_settings();
   auto const& topo = *_controller->gui_state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
   int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale * _gui->get_system_dpi_scale());

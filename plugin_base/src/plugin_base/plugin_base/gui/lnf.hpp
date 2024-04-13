@@ -20,9 +20,12 @@ public juce::LookAndFeel_V4 {
   juce::Typeface::Ptr _typeface = {};
 
   gui_colors _default_colors = {};
-  plugin_topo_gui_theme_settings _theme_settings = {};
+  plugin_topo_gui_theme_settings _global_settings = {};
+  section_topo_gui_theme_settings _default_settings = {};
   std::map<std::string, gui_colors> _module_colors = {};
   std::map<std::string, gui_colors> _section_colors = {};
+  std::map<std::string, section_topo_gui_theme_settings> _module_settings = {};
+  std::map<std::string, section_topo_gui_theme_settings> _section_settings = {};
 
   int tab_width() const;
   void init_theme(std::filesystem::path const& theme_folder, juce::var const& json);
@@ -36,9 +39,9 @@ public:
   gui_colors module_gui_colors(std::string const& module_full_name);
   gui_colors section_gui_colors(std::string const& section_full_name);
   
-  plugin_topo_gui_theme_settings const& theme_settings() const { return _theme_settings; }
-  int combo_height(bool tabular) const { return _theme_settings.get_font_height() + (tabular ? 8 : 4); }
-  int toggle_height(bool tabular) const { return _theme_settings.get_font_height() + (tabular ? 8 : 4); }
+  plugin_topo_gui_theme_settings const& global_settings() const { return _global_settings; }
+  int combo_height(bool tabular) const { return _global_settings.get_font_height() + (tabular ? 10 : 4); }
+  int toggle_height(bool tabular) const { return _global_settings.get_font_height() + (tabular ? 10 : 4); }
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }

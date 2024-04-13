@@ -61,6 +61,12 @@ struct module_section_gui final {
 };
 
 // from theme json
+struct section_topo_gui_theme_settings final {
+  int tab_width = 30;
+  int header_width = 80;
+};
+
+// from theme json
 struct plugin_topo_gui_theme_settings final {
 
   float lighten = 0.15f;
@@ -74,17 +80,14 @@ struct plugin_topo_gui_theme_settings final {
   int mac_font_height = 11;
 
   int combo_radius = 3;
+  int section_radius = 4;
   int button_radius = 6;
   int table_cell_radius = 3;
   int text_editor_radius = 6;
   int scroll_thumb_radius = 2;
 
-  int module_tab_width = 30;
-  int module_header_width = 80;
-  int module_corner_radius = 4;
-
   int param_section_vpadding = 0;
-  int param_section_corner_radius = 4;
+  int param_section_radius = 4;
   
   int default_width_fx = 800;
   int aspect_ratio_width_fx = 4;

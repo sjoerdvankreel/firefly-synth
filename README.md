@@ -12,7 +12,8 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 See below for some built-in themes.
 
-![Screenshot](static/screenshot_firefly_dark.png)
+![Screenshot](static/screenshot_instrument_firefly_default.png)
+![Screenshot](static/screenshot_fx_firefly_default.png)
 
 <table>
   <tr>
@@ -24,18 +25,18 @@ See below for some built-in themes.
 </table>
 
 # Download
-- Mac VST3: [firefly_synth_1.7.0_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_vst3_instrument.zip)
-- Mac VST3 Fx: [firefly_synth_1.7.0_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_vst3_fx.zip)
-- Mac CLAP: [firefly_synth_1.7.0_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_clap_instrument.zip)
-- Mac CLAP Fx: [firefly_synth_1.7.0_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_mac_clap_fx.zip)
-- Linux VST3: [firefly_synth_1.7.0_linux_vst3_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_vst3_instrument.tar.gz)
-- Linux VST3 Fx: [release/firefly_synth_1.7.0_linux_vst3_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_vst3_fx.tar.gz)
-- Linux CLAP: [firefly_synth_1.7.0_linux_clap_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_clap_instrument.tar.gz)
-- Linux CLAP Fx: [firefly_synth_1.7.0_linux_clap_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_linux_clap_fx.tar.gz)
-- Windows VST3: [firefly_synth_1.7.0_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_vst3_instrument.zip)
-- Windows VST3 Fx: [firefly_synth_1.7.0_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_vst3_fx.zip)
-- Windows CLAP: [firefly_synth_1.7.0_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_clap_instrument.zip)
-- Windows CLAP Fx: [firefly_synth_1.7.0_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.0_windows_clap_fx.zip)
+- Mac VST3: [firefly_synth_1.7.1_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_mac_vst3_instrument.zip)
+- Mac VST3 Fx: [firefly_synth_1.7.1_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_mac_vst3_fx.zip)
+- Mac CLAP: [firefly_synth_1.7.1_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_mac_clap_instrument.zip)
+- Mac CLAP Fx: [firefly_synth_1.7.1_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_mac_clap_fx.zip)
+- Linux VST3: [firefly_synth_1.7.1_linux_vst3_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_linux_vst3_instrument.tar.gz)
+- Linux VST3 Fx: [release/firefly_synth_1.7.1_linux_vst3_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_linux_vst3_fx.tar.gz)
+- Linux CLAP: [firefly_synth_1.7.1_linux_clap_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_linux_clap_instrument.tar.gz)
+- Linux CLAP Fx: [firefly_synth_1.7.1_linux_clap_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_linux_clap_fx.tar.gz)
+- Windows VST3: [firefly_synth_1.7.1_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_windows_vst3_instrument.zip)
+- Windows VST3 Fx: [firefly_synth_1.7.1_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_windows_vst3_fx.zip)
+- Windows CLAP: [firefly_synth_1.7.1_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_windows_clap_instrument.zip)
+- Windows CLAP Fx: [firefly_synth_1.7.1_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_windows_clap_fx.zip)
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
@@ -112,28 +113,21 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 - Special thanks to [BaconPaul](https://baconpaul.org/) for helping me out with CLAP support.
 - Special thanks to host vendors who have set me up with an NFR license.
 - Infernal theme artwork by Dante Cyberman: [https://www.deviantart.com/dantecyberman](https://www.deviantart.com/dantecyberman).
-- Infernal theme artwork by Vlad Darkness Art: [https://www.deviantart.com/vladdarknessart](https://www.deviantart.com/vladdarknessart).
 - Contains soft clippers by [Sean Enderby and Zlatko Baracskai](https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf).
 - Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
 - Contains a verbatim implementation of [Andrew Simper's state variable filter equations](https://cytomic.com/files/dsp/SvfLinearTrapOptimised2.pdf).
 - Contains a verbatim implementation of [Moorer's DSF algorithm as described by Burkhard Reike](https://www.verklagekasper.de/synths/dsfsynthesis/dsfsynthesis.html).
 
-# Screenshot FX version
-
-![Screenshot](static/screenshot_fx_firefly_dark.png)
-
 # Theme examples
 
 <table>
   <tr>
-    <td><img src="static/screenshot_cyan_flat.png"/></td>
-    <td><img src="static/screenshot_cool_blue_dark.png"/></td>
-    <td><img src="static/screenshot_orange_light.png"/></td>
+    <td><img src="static/screenshot_instrument_firefly_pink.png"/></td>
+    <td><img src="static/screenshot_instrument_firefly_orange.png"/></td>
   </tr>
   <tr>
-    <td><img src="static/screenshot_firefly_flat.png"/></td>
-    <td><img src="static/screenshot_infernal_flat.png"/></td>
-    <td><img src="static/screenshot_infernal_light.png"/></td>
+    <td><img src="static/screenshot_instrument_firefly_blue.png"/></td>
+    <td><img src="static/screenshot_instrument_infernal_default.png"/></td>
   </tr>
 </table>

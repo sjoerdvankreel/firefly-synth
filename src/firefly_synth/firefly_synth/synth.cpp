@@ -67,7 +67,7 @@ static gui_dimension
 make_plugin_dimension(bool is_fx, plugin_topo_gui_theme_settings const& settings)
 {
   gui_dimension result;
-  result.column_sizes = { 42, 17, 127, 34, 64, 64 }; // TODO fx
+  result.column_sizes = { 42, 17, 127, 34, 64, 64 };
   int height = settings.get_default_width(is_fx) * settings.get_aspect_ratio_height(is_fx) / settings.get_aspect_ratio_width(is_fx);
   std::vector<gui_vertical_section_size> section_vsizes = { { true, 1 }, { true, is_fx? 1.0f: 2.0f }, { true, 2 }, { true, 2 } };
   if (!is_fx) section_vsizes.insert(section_vsizes.end(), { { true, 2 }, { true, 1 }, { true, 2 }, { true, 2 }, { true, 2 } });
@@ -364,8 +364,8 @@ synth_topo(bool is_fx)
     result->type = plugin_type::synth; 
     result->tag = make_topo_tag_basic(FF_SYNTH_INST_ID, FF_SYNTH_INST_NAME);
   }
-     
-  result->gui.default_theme = "Firefly Dark";   
+              
+  result->gui.default_theme = "Firefly Default";       
   result->gui.custom_sections.resize(is_fx? custom_section_fx_count: custom_section_synth_count);
   result->gui.dimension_factory = [is_fx](auto const& settings) { return make_plugin_dimension(is_fx, settings); };
   auto make_title_text_section_ui = [is_fx](plugin_gui* gui, lnf* lnf, auto store) -> Component& {

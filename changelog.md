@@ -1,3 +1,7 @@
+### April 13, 2024 - V1.7.1.
+
+- Changed built-in themes (and dropped some).
+
 ### April 10, 2024 - V1.7.0.
 
 - Rearranged the gui to have elements more aligned.

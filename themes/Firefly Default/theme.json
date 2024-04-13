@@ -1,0 +1,172 @@
+{
+  "global_settings": {
+    "lighten": "0.15",
+    "windows_font_height": "13",
+    "linux_font_height": "11",
+    "mac_font_height": "11",
+    "combo_radius": "3",
+    "button_radius": "6",
+    "table_cell_radius": "3",
+    "text_editor_radius": "6",
+    "scroll_thumb_radius": "2",
+    "section_radius": "4",
+    "param_section_radius": "4",
+    "param_section_vpadding": "0",
+    "knob_padding": "5",
+    "tabular_knob_padding": "3",
+    "min_scale": "0.5",
+    "max_scale": "8.0",
+    "default_width_fx": "1280",
+    "aspect_ratio_width_fx": "118",
+    "aspect_ratio_height_fx": "24",
+    "default_width_instrument": "1280",
+    "aspect_ratio_width_instrument": "118",
+    "aspect_ratio_height_instrument": "60"
+  },
+  "default_settings": {
+    "tab_width": "29",
+    "header_width": "80"
+  },
+  "default_colors": {
+    "tab_text": "FFFF8844",
+    "tab_text_inactive": "FFAAAAAA",
+    "tab_button": "FF333333",
+    "tab_header": "FF222222",
+    "tab_background1": "00000000",
+    "tab_background2": "00000000",
+    "graph_grid": "40FFFFFF",
+    "graph_text": "C0FFFFFF",
+    "graph_background": "FF000000",
+    "graph_area": "80FF6633",
+    "graph_line": "FFFF6633",
+    "bubble_outline": "FFFF8844",
+    "knob_thumb": "FFFF8844",
+    "knob_track1": "FF222222",
+    "knob_track2": "FFFF8844",
+    "knob_background1": "FF222222",
+    "knob_background2": "FF999999",
+    "section_outline1": "00000000",
+    "section_outline2": "00000000",
+    "section_background1": "FF222222",
+    "section_background2": "FF111111",
+    "slider_thumb": "FFFF8844",
+    "slider_track1": "FF222222",
+    "slider_track2": "FF999999",
+    "slider_outline1": "FF444444",
+    "slider_outline2": "FFBBBBBB",
+    "slider_background": "FF000000",
+    "edit_text": "FFFFFFFF",
+    "table_header": "FFFF8844",
+    "label_text": "FFDDDDDD",
+    "control_tick": "FFFF8844",
+    "control_text": "FFEEEEEE",
+    "control_outline": "FFAAAAAA",
+    "control_background": "FF111111",
+    "scrollbar_thumb": "FFFF8844",
+    "scrollbar_background": "FF444444"
+  },
+  "graph_background_images": [
+    { "graph": "Main Graph", "image": "" },
+    { "graph": "Voice FX Graph", "image": "" },
+    { "graph": "Global FX Graph", "image": "" },
+    { "graph": "Voice LFO Graph", "image": "" },
+    { "graph": "Global LFO Graph", "image": "" },
+    { "graph": "Envelope Graph", "image": "" },
+    { "graph": "Oscillator Graph", "image": "" },
+    { "graph": "Osc Mod Graph", "image": "" },
+    { "graph": "CV Matrix Graphs", "image": "" },
+    { "graph": "Audio Matrix Graphs", "image": "" },
+    { "graph": "FX Only Matrix Graphs", "image": "" }
+  ],
+  "overrides": [
+    {
+      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "module_sections": ["Monitor"],
+      "colors": {
+        "tab_text": "FFFF4488",
+        "knob_thumb": "FFFF4488",
+        "knob_track2": "FFFF4488",
+        "control_text": "FFFF4488",
+        "slider_thumb": "FFFF4488",
+        "control_tick": "FFFF4488",
+        "bubble_outline": "FFFF4488",
+        "scrollbar_thumb": "FFFF4488",
+        "graph_area": "80FF4488",
+        "graph_line": "FFFF4488",
+        "table_header": "FFC43468",
+        "section_background1": "FF601933"
+      }
+    },
+    {
+      "custom_sections": ["Global FX Graph", "Global LFO Graph"],
+      "module_sections": ["Master In", "Master Out", "Global FX", "Global LFO"],
+      "colors": {
+        "tab_text": "FF4488FF",
+        "knob_thumb": "FF4488FF",
+        "knob_track2": "FF4488FF",
+        "slider_thumb": "FF4488FF",
+        "control_tick": "FF4488FF",
+        "bubble_outline": "FF4488FF",
+        "scrollbar_thumb": "FF4488FF",
+        "graph_area": "804488FF",
+        "graph_line": "FF4488FF",
+        "table_header": "FF3468C4",
+        "section_background1": "FF223360"
+      }
+    },
+    {
+      "module_sections": ["Oscillator"],
+      "settings": {
+        "tab_width": "59",
+        "header_width": "80"
+      },
+      "colors": {
+        "tab_text": "FFFF8844",
+        "knob_thumb": "FFFF8844",
+        "knob_track2": "FFFF8844",
+        "slider_thumb": "FFFF8844",
+        "control_tick": "FFFF8844",
+        "bubble_outline": "FFFF8844",
+        "scrollbar_thumb": "FFFF8844",
+        "graph_area": "80FF8844",
+        "graph_line": "FFFF8844",
+        "table_header": "FFC46834",
+        "section_background1": "FF603319"
+      }
+    },
+    {
+      "custom_sections": ["Oscillator Graph", "Voice FX Graph", "Voice LFO Graph", "Envelope Graph"],
+      "module_sections": ["Voice In", "Voice Out", "Voice FX", "Voice LFO", "Envelope"],
+      "colors": {
+        "tab_text": "FFFF8844",
+        "knob_thumb": "FFFF8844",
+        "knob_track2": "FFFF8844",
+        "slider_thumb": "FFFF8844",
+        "control_tick": "FFFF8844",
+        "bubble_outline": "FFFF8844",
+        "scrollbar_thumb": "FFFF8844",
+        "graph_area": "80FF8844",
+        "graph_line": "FFFF8844",
+        "table_header": "FFC46834",
+        "section_background1": "FF603319"
+      }
+    },
+    {
+      "custom_sections": ["Osc Mod Graph", "Audio Matrix Graphs", "CV Matrix Graphs", "FX Only Matrix Graphs"],
+      "module_sections": ["Osc Mod", "VAudio", "GAudio", "VCV-A", "VCV-CV", "GCV-A", "GCV-CV"],
+      "colors": {
+        "tab_text": "FF8888FF",
+        "knob_thumb": "FF8888FF",
+        "knob_track2": "FF8888FF",
+        "slider_thumb": "FF8888FF",
+        "control_tick": "FF8888FF",
+        "bubble_outline": "FF8888FF",
+        "scrollbar_thumb": "FF8888FF",
+        "graph_area": "808888FF",
+        "graph_line": "FF8888FF",
+        "table_header": "FF6868C4",
+        "section_background1": "FF333360"
+      }
+    }
+  ]
+}

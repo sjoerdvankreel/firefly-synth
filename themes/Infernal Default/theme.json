@@ -1,0 +1,97 @@
+{
+  "global_settings": {
+    "lighten": "0.15",
+    "windows_font_height": "13",
+    "linux_font_height": "11",
+    "mac_font_height": "11",
+    "combo_radius": "3",
+    "button_radius": "6",
+    "table_cell_radius": "3",
+    "text_editor_radius": "6",
+    "scroll_thumb_radius": "2",
+    "section_radius": "4",
+    "param_section_radius": "4",
+    "param_section_vpadding": "0",
+    "knob_padding": "5",
+    "tabular_knob_padding": "3",
+    "min_scale": "0.5",
+    "max_scale": "8.0",
+    "default_width_fx": "1280",
+    "aspect_ratio_width_fx": "118",
+    "aspect_ratio_height_fx": "24",
+    "default_width_instrument": "1280",
+    "aspect_ratio_width_instrument": "118",
+    "aspect_ratio_height_instrument": "60"
+  },
+  "default_settings": {
+    "tab_width": "29",
+    "header_width": "80"
+  },
+  "default_colors": {
+    "tab_text": "FFCC0000",
+    "tab_text_inactive": "FFAAAAAA",
+    "tab_button": "FF101010",
+    "tab_header": "FF080808",
+    "tab_background1": "00000000",
+    "tab_background2": "00000000",
+    "graph_grid": "40FFFFFF",
+    "graph_text": "C0FFFFFF",
+    "graph_background": "FF000000",
+    "graph_area": "80CC0000",
+    "graph_line": "FFCC0000",
+    "bubble_outline": "FFCC0000",
+    "knob_thumb": "FFCC0000",
+    "knob_track1": "FF111111",
+    "knob_track2": "FFCC0000",
+    "knob_background1": "FF111111",
+    "knob_background2": "FF666666",
+    "section_outline1": "00000000",
+    "section_outline2": "00000000",
+    "section_background1": "FF330000",
+    "section_background2": "FF111111",
+    "slider_thumb": "FFCC0000",
+    "slider_track1": "FF222222",
+    "slider_track2": "FF999999",
+    "slider_outline1": "FF444444",
+    "slider_outline2": "FFBBBBBB",
+    "slider_background": "FF000000",
+    "edit_text": "FFAAAAAA",
+    "table_header": "FFCC0000",
+    "label_text": "FFCCCCCC",
+    "control_tick": "FFCC0000",
+    "control_text": "FFCCCCCC",
+    "control_outline": "FFAAAAAA",
+    "control_background": "FF111111",
+    "scrollbar_thumb": "FFCC0000",
+    "scrollbar_background": "FF444444"
+  },
+  "graph_background_images": [
+    { "graph": "Main Graph", "image": "osc_mod.png" },
+    { "graph": "Voice FX Graph", "image": "fx.png" },
+    { "graph": "Global FX Graph", "image": "fx.png" },
+    { "graph": "Voice LFO Graph", "image": "lfo.png" },
+    { "graph": "Global LFO Graph", "image": "lfo.png" },
+    { "graph": "Envelope Graph", "image": "env.png" },
+    { "graph": "Oscillator Graph", "image": "osc.png" },
+    { "graph": "Osc Mod Graph", "image": "osc_mod.png" },
+    { "graph": "CV Matrix Graphs", "image": "cv.png" },
+    { "graph": "Audio Matrix Graphs", "image": "audio.png" },
+    { "graph": "FX Only Matrix Graphs", "image": "cv.png" }
+  ],
+  "overrides": [
+    {
+      "module_sections": ["Oscillator"],
+      "settings": {
+        "tab_width": "59",
+        "header_width": "80"
+      }
+    },
+    {
+      "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
+      "module_sections": ["Monitor"],
+      "colors": {
+        "control_text": "FFCC0000"
+      }
+    }
+  ]
+}
