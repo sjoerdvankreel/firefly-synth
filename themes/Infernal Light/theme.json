@@ -39,30 +39,30 @@
     "graph_background": "FF000000",
     "graph_area": "80CC0000",
     "graph_line": "FFCC0000",
-    "bubble_outline": "FFAA0000",
-    "knob_thumb": "FFAA0000",
+    "bubble_outline": "FFCC0000",
+    "knob_thumb": "FFCC0000",
     "knob_track1": "FF111111",
-    "knob_track2": "FFAA0000",
+    "knob_track2": "FFCC0000",
     "knob_background1": "FF111111",
     "knob_background2": "FF666666",
     "section_outline1": "00000000",
     "section_outline2": "00000000",
     "section_background1": "FF330000",
     "section_background2": "FF111111",
-    "slider_thumb": "FFAA0000",
+    "slider_thumb": "FFCC0000",
     "slider_track1": "FF222222",
     "slider_track2": "FF999999",
     "slider_outline1": "FF444444",
     "slider_outline2": "FFBBBBBB",
     "slider_background": "FF000000",
     "edit_text": "FFAAAAAA",
-    "table_header": "FFAA0000",
+    "table_header": "FFCC0000",
     "label_text": "FFCCCCCC",
-    "control_tick": "FFAA0000",
+    "control_tick": "FFCC0000",
     "control_text": "FFCCCCCC",
     "control_outline": "FFAAAAAA",
     "control_background": "FF111111",
-    "scrollbar_thumb": "FFAA0000",
+    "scrollbar_thumb": "FFCC0000",
     "scrollbar_background": "FF444444"
   },
   "graph_background_images": [
@@ -90,7 +90,7 @@
       "custom_sections": ["Title Text", "Title Image", "Monitor", "Main Graph", "Tweak", "Patch"],
       "module_sections": ["Monitor"],
       "colors": {
-        "control_text": "FFAA0000"
+        "control_text": "FFCC0000"
       }
     }
   ]
