@@ -31,7 +31,7 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.8:
-Title size clips on mac
+Title fx size clips on mac
 bug: preset select jumps back to previous
 do distinction between voice/global/matrix in the ui for all themes
 do forward compat checks - dont load newer versions
