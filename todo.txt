@@ -31,7 +31,6 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7.1
-fix tabular
 document breaks theme
 fix other themes for custom_background
 
