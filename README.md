@@ -112,7 +112,6 @@ To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synt
 - Special thanks to [BaconPaul](https://baconpaul.org/) for helping me out with CLAP support.
 - Special thanks to host vendors who have set me up with an NFR license.
 - Infernal theme artwork by Dante Cyberman: [https://www.deviantart.com/dantecyberman](https://www.deviantart.com/dantecyberman).
-- Infernal theme artwork by Vlad Darkness Art: [https://www.deviantart.com/vladdarknessart](https://www.deviantart.com/vladdarknessart).
 - Contains soft clippers by [Sean Enderby and Zlatko Baracskai](https://dafx.de/paper-archive/2012/papers/dafx12_submission_45.pdf).
 - Contains a slightly adapted implementation of [Jezar's Freeverb](https://github.com/sinshu/freeverb).
 - Contains a slightly adapted implementation of the [Karplus-Strong algorithm](https://blog.demofox.org/2016/06/16/synthesizing-a-pluked-string-sound-with-the-karplus-strong-algorithm).
