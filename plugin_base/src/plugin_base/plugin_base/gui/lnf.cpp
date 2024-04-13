@@ -601,7 +601,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
   int const fixedHeight = toggle_height(tabular);
   int const toggleTop = height < fixedHeight ? 0 : (height - fixedHeight) / 2;
   Rectangle<int> boxBounds(left + pad, toggleTop + pad, fixedHeight - pad * 2, fixedHeight - pad * 2);
-  g.setColour(Colours::white.withAlpha(0.125f));
+  g.setColour(Colours::black.withAlpha(0.167f));
   g.fillEllipse(boxBounds.toFloat());
   g.setColour(findColour(ComboBox::outlineColourId).darker());
   g.drawEllipse(boxBounds.toFloat(), 1);
