@@ -17,7 +17,7 @@ static int const slider_thumb_height = 6;
 static void
 draw_tabular_cell_bg(Graphics& g, Component* c, float alpha, int radius)
 {
-  g.setColour(Colours::white.withAlpha(alpha));
+  g.setColour(Colours::black.withAlpha(0.5f));
   g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), radius);
 }
 
