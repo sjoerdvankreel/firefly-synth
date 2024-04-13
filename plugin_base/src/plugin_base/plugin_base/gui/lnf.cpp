@@ -514,13 +514,13 @@ lnf::drawButtonBackground(
   Graphics& g, Button& button, Colour const& backgroundColour, 
   bool shouldDrawButtonAsHighlighted, bool shouldDrawButtonAsDown)
 {
-  // this is a 1:1 copy of LookAndFeel_V4::drawButtonBackground,
-  // with 1 modification: we pick the corner size from theme_settings
-  // whereas base class hardcodes it as 6
+  // this is a 1:1 copy of LookAndFeel_V4::drawButtonBackground with 2 modifications: 
+  // 1: we pick the corner size from theme_settings, whereas base class hardcodes it as 6
+  // 2: reduce local bounds by more than 0.5
 
   auto cornerSize = global_settings().button_radius;
 
-  auto bounds = button.getLocalBounds().toFloat().reduced(0.5f, 0.5f);
+  auto bounds = button.getLocalBounds().toFloat().reduced(2, 2);
   auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
     .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
 
