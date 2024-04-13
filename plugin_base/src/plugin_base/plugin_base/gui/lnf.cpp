@@ -520,7 +520,7 @@ lnf::drawButtonBackground(
 
   auto cornerSize = global_settings().button_radius;
 
-  auto bounds = button.getLocalBounds().toFloat().reduced(2, 2);
+  auto bounds = button.getLocalBounds().toFloat().reduced(1, 1);
   auto baseColour = backgroundColour.withMultipliedSaturation(button.hasKeyboardFocus(true) ? 1.3f : 0.9f)
     .withMultipliedAlpha(button.isEnabled() ? 1.0f : 0.5f);
 
