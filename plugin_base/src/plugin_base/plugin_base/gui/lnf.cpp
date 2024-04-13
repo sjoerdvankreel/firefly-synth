@@ -711,6 +711,13 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
   float left = (s.getWidth() - size) / 2;
   float top = (s.getHeight() - size) / 2;
 
+  if (tabular)
+  {
+    left += 1;
+    top += 1;
+    size -= 2;
+  }
+
   bool bipolar = s.getMinimum() < 0;
   float end_angle = (180 + 340) * pi32 / 180;
   float start_angle = (180 + 20) * pi32 / 180;

@@ -40,8 +40,8 @@ public:
   gui_colors section_gui_colors(std::string const& section_full_name);
   
   plugin_topo_gui_theme_settings const& global_settings() const { return _global_settings; }
-  int combo_height(bool tabular) const { return _global_settings.get_font_height() + (tabular ? 8 : 4); }
-  int toggle_height(bool tabular) const { return _global_settings.get_font_height() + (tabular ? 8 : 4); }
+  int combo_height(bool tabular) const { return _global_settings.get_font_height() + (tabular ? 10 : 4); }
+  int toggle_height(bool tabular) const { return _global_settings.get_font_height() + (tabular ? 10 : 4); }
 
   int getDefaultScrollbarWidth() override { return 8; }
   bool areScrollbarButtonsVisible() override { return true; }
