@@ -15,7 +15,7 @@ static int const slider_thumb_width = 9;
 static int const slider_thumb_height = 6;
 
 static void
-draw_tabular_cell_bg(Graphics& g, Component* c, float alpha, int radius)
+draw_tabular_cell_bg(Graphics& g, Component* c, int radius)
 {
   g.setColour(Colours::black.withAlpha(0.5f));
   g.fillRoundedRectangle(c->getLocalBounds().reduced(1).toFloat(), radius);
@@ -462,7 +462,7 @@ lnf::drawLabel(Graphics& g, Label& label)
      
   if (auto afl = dynamic_cast<autofit_label*>(&label))
     if (afl->tabular())
-      draw_tabular_cell_bg(g, &label, 0.075f, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, &label, global_settings().table_cell_radius);
 
   if (!label.isBeingEdited()) 
   {
@@ -564,7 +564,7 @@ lnf::drawComboBox(Graphics& g, int width, int height, bool, int, int, int, int, 
     if (ps->param()->param->gui.tabular)
     {
       tabular = true;
-      draw_tabular_cell_bg(g, &box, 0.05f, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, &box, global_settings().table_cell_radius);
     }
 
   Path path;
@@ -593,7 +593,7 @@ lnf::drawToggleButton(Graphics& g, ToggleButton& tb, bool highlighted, bool down
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &tb, 0.05f, global_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, &tb, global_settings().table_cell_radius);
 
   int left = tb.getWidth() / 2 - toggle_height(tabular) / 2;
   int pad = tabular? 3: 1;
@@ -696,7 +696,7 @@ lnf::drawRotarySlider(Graphics& g, int, int, int, int, float pos, float, float, 
     if (ps->param()->param->gui.tabular)
       tabular = true;
   if(tabular)
-    draw_tabular_cell_bg(g, &s, 0.05f, global_settings().table_cell_radius);
+    draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
 
   float scale_factor = 1;
   float size_base = s.getHeight();
@@ -794,7 +794,7 @@ lnf::drawLinearSlider(Graphics& g, int x, int y, int w, int h, float p, float, f
     if(ps->param()->param->gui.tabular)
     {
       padh = 2;
-      draw_tabular_cell_bg(g, &s, 0.05f, global_settings().table_cell_radius);
+      draw_tabular_cell_bg(g, &s, global_settings().table_cell_radius);
     }
   }
 
