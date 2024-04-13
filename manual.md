@@ -3,8 +3,8 @@ A semi-modular polyphonic synthesizer plugin with different oscillator and effec
 AM+FM osc-to-osc routing matrices and both global and per-voice audio and cv routing matrices.<br/>
 There is also an fx version which routes external input instead of voice output to the global effect section.
 
-![Screenshot](static/screenshot_firefly_dark.png)
-![Screenshot](static/screenshot_fx_firefly_dark.png)
+![Screenshot](static/screenshot_instrument_firefly_default.png)
+![Screenshot](static/screenshot_fx_firefly_default.png)
 
 ## UI
 It's fully resizable by scaling (by dragging the bottom right corner) and also reacts to system DPI settings.<br/>
