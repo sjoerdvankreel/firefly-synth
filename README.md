@@ -12,7 +12,8 @@ It's basically [InfernalSynth](https://github.com/sjoerdvankreel/infernal-synth)
 
 See below for some built-in themes.
 
-![Screenshot](static/screenshot_firefly_dark.png)
+![Screenshot](static/screenshot_instrument_firefly_default.png)
+![Screenshot](static/screenshot_fx_firefly_default.png)
 
 <table>
   <tr>
