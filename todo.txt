@@ -31,6 +31,7 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.8:
+flip env stn/smt
 Title fx size clips on mac
 bug: preset select jumps back to previous
 do distinction between voice/global/matrix in the ui for all themes
