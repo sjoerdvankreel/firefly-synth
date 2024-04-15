@@ -593,13 +593,13 @@ pb_plugin::context_menu(int param_id) const
   target->id = param_id;
   target->kind = CLAP_CONTEXT_MENU_TARGET_KIND_PARAM;
   // bitwig returns false
-  _host.contextMenuPopulate(_host.host(), target.get(), &builder);
+  _host.contextMenuPopulate(target.get(), &builder);
   assert(menu_stack.size() == 1);
   menu_stack.pop();
 
   if(result->root.children.empty()) return {};
   result->clicked = [this, target = target.release()](int action) {
-    _host.contextMenuPerform(_host.host(), target, action);
+    _host.contextMenuPerform(target, action);
     delete target;
   };
   return result;
