@@ -10,6 +10,7 @@ dont forget to update the version nr in code and cmake and mac bundle and build/
 
 sometimes:
 update hosts
+update submodules
 cpu/mem profiling
 
 someday:
