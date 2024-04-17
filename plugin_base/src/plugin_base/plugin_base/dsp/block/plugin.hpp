@@ -20,6 +20,81 @@ struct mono_note_state
   bool note_on = false;
 };
 
+// view of automation event stream
+// which presents as a series of values
+// note this class is mutable so need separate
+// copies of this for per-voice threaded processing
+// the underlying data itself is immutable
+class sparse_buffer
+{
+  int const _sample_count;
+  int const _point_count;
+  int const* const _point_positions;
+  int const* const _next_point_positions;
+  double const* const _normalized_values;
+
+  double _delta = 0;
+  double _current = 0;
+  int _position = 0;
+  int _point_index = 0;
+  int _next_point_position = 0;
+
+  void init_section(int point_index);
+
+public: 
+  double next();
+  double current() const { return _current; }
+
+  sparse_buffer(
+    int sample_count, int point_count, 
+    int const* point_positions, int const* next_point_positions,
+    double const* normalized_values);
+};
+
+inline sparse_buffer::
+sparse_buffer(
+  int sample_count, int point_count, 
+  int const* point_positions, int const* next_point_positions,
+  double const* normalized_values) :
+_sample_count(sample_count), _point_count(point_count), 
+_point_positions(point_positions), _next_point_positions(next_point_positions),
+_normalized_values(normalized_values)
+{
+  assert(sample_count > 0);
+  assert(point_count > 1); // needs first and last at the least
+  assert(point_count <= sample_count);
+  assert(point_positions[0] == 0);
+  assert(point_positions[point_count - 1] == sample_count - 1);
+  assert(next_point_positions[point_count - 1] == -1);
+  for(int i = 0; i < point_count; i++)
+    check_unipolar(normalized_values[i]);
+  for(int i = 1; i < point_count; i++)
+  {
+    assert(_point_positions[i] > _point_positions[i - 1]);
+    assert(_next_point_positions[i - 1] == _point_positions[i]);
+  }
+
+  init_section(0);
+}
+
+inline void
+sparse_buffer::init_section(int point_index)
+{
+  _point_index = point_index;
+  _current = _normalized_values[point_index];
+  _next_point_position = _next_point_positions[point_index];
+  _delta = (_normalized_values[point_index + 1] - _current) / (_next_point_position - _position);
+}
+
+inline double
+sparse_buffer::next()
+{
+  double result = _current;
+  _current += _delta;
+  if(_position++ == _next_point_position) init_section(_point_index + 1);
+  return result;
+}
+
 // for polyphonic synth
 struct voice_state final {
   note_id note_id_ = {};
