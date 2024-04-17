@@ -95,8 +95,8 @@ protected:
   // need to remember this for access during the cv->cv mix() call
   jarray<float, 3>* _own_cv = {};
   jarray<float, 2>* _own_scratch = {};
-  jarray<float, 3> const* _own_accurate_automation = {};
   jarray<plain_value, 2> const* _own_block_automation = {};
+  jarray<sparse_buffer, 2> const* _own_accurate_automation = {};
 
   cv_matrix_engine_base(
     bool cv, bool global, plugin_topo const& topo,

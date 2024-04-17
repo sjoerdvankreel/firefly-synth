@@ -30,6 +30,7 @@ class sparse_buffer
 
 public:
   friend class sparse_buffer_view;
+  void copy_to(int start, int end, jarray<float, 1>& rhs) const;
 
   // init with zeros, need default ctor so we can reserve space up-front in engine
   sparse_buffer() {}
@@ -105,6 +106,13 @@ sparse_buffer_view::next()
   _current += _delta;
   if(_position++ == _next_point_position) init_section(_point_index + 1);
   return result;
+}
+
+inline void
+sparse_buffer::copy_to(int start, int end, jarray<float, 1>& rhs) const
+{
+  sparse_buffer_view view(this, start);
+  for(int i = start; i < end; i++) rhs[i] = (float)view.next();
 }
 
 // for polyphonic synth
