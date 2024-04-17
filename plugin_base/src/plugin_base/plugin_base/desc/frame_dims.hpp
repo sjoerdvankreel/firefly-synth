@@ -15,7 +15,6 @@ struct plugin_frame_dims final {
   jarray<int, 6> module_voice_audio;
   jarray<int, 5> module_global_audio;
   jarray<int, 3> midi_automation;
-  jarray<int, 4> accurate_automation;
   jarray<int, 4> module_voice_scratch;
   jarray<int, 3> module_global_scratch;
 
