@@ -32,10 +32,14 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7.2
+- allow to disable env 1, use external env ?
+- flstudio clap
+- multitrack studio
 - clap polymod
 - todo are mod events normalized ?
 - todo allow mod events on midi linked params
 - todo polyphonic mod
+- how does this work with global unison?
 
 v1.8:
 retest bitwig clap resizing
