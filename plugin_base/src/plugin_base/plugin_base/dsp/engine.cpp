@@ -57,24 +57,15 @@ _voice_processor_context(voice_processor_context)
   _input_engines.resize(_dims.module_slot);
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
+  _accurate_frames.resize(_state.desc().param_count);
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
   _param_was_automated.resize(_dims.module_slot_param_slot);
-
   _host_block->events.notes.reserve(note_limit_guess);
   _host_block->events.out.reserve(block_events_guess);
   _host_block->events.block.reserve(block_events_guess);
   _host_block->events.midi.reserve(midi_events_guess);
   _host_block->events.accurate.reserve(accurate_events_guess);
-
-  _sorted_accurate_events.resize(accurate_events_guess);
-  _accurate_automation.resize(_dims.module_slot_param_slot);
-  _accurate_automation_point_positions.resize(accurate_events_guess);
-  _accurate_automation_next_point_positions.resize(accurate_events_guess);
-  _accurate_automation_point_normalized_values.resize(accurate_events_guess);
-  _accurate_automation_inactive_point_positions.resize(_state.desc().param_count * 2);
-  _accurate_automation_inactive_next_point_positions.resize(_state.desc().param_count * 2);
-  _accurate_automation_inactive_point_normalized_values.resize(_state.desc().param_count * 2);
 }
 
 plugin_voice_block 
@@ -127,8 +118,8 @@ plugin_engine::make_plugin_block(
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
-    own_block_auto, all_block_auto,
     _accurate_automation[module][slot], _accurate_automation,
+    own_block_auto, all_block_auto
   };
   return {
     start_frame, end_frame, slot,
@@ -276,6 +267,7 @@ plugin_engine::activate(int max_frame_count)
   _global_scratch_state.resize(frame_dims.module_global_scratch);
   _global_audio_state.resize(frame_dims.module_global_audio);
   _midi_automation.resize(frame_dims.midi_automation);
+  _accurate_automation.resize(frame_dims.accurate_automation);
   _bpm_automation.resize(max_frame_count);
   _mono_note_stream.resize(max_frame_count);
 
@@ -399,19 +391,10 @@ plugin_engine::init_automation_from_state()
               // However this is completely within the vst3 spec so we should accomodate it.
               // Note to self: this was a full day not fun debugging session. Please keep
               // variable block sizes in mind.
-              double state_value = _state.get_normalized_at(m, mi, p, pi).value();
-              int param_index = _state.desc().param_mappings.topo_to_index[m][mi][p][pi];
-              _accurate_automation_inactive_point_normalized_values[param_index * 2 + 0] = state_value;
-              _accurate_automation_inactive_point_normalized_values[param_index * 2 + 1] = state_value;
-              _accurate_automation_inactive_point_positions[param_index * 2 + 0] = 0;
-              _accurate_automation_inactive_point_positions[param_index * 2 + 1] = _max_frame_count - 1;
-              _accurate_automation_inactive_next_point_positions[param_index * 2 + 0] = _max_frame_count - 1;
-              _accurate_automation_inactive_next_point_positions[param_index * 2 + 1] = -1;
-              _accurate_automation[m][mi][p][pi] = sparse_buffer(
-                _max_frame_count, 2, 
-                _accurate_automation_inactive_point_positions.data() + 2 * param_index,
-                _accurate_automation_inactive_next_point_positions.data() + 2 * param_index,
-                _accurate_automation_inactive_point_normalized_values.data() + 2 * param_index);
+              std::fill(
+                _accurate_automation[m][mi][p][pi].begin(),
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
+                (float)_state.get_normalized_at(m, mi, p, pi).value());
             }
         }
       }
@@ -560,47 +543,26 @@ plugin_engine::process()
   /*********************************************/
 
   // 1) events can come in at any frame position and
-  // 2) interpolation needs to be done on normalized (linear) values (done by sparse_buffer) (plugin needs to scale to plain) and
+  // 2) interpolation needs to be done on normalized (linear) values (plugin needs to scale to plain) and
   // 3) the host must provide a value at the end of the buffer if that event would have effect w.r.t. the next block
-
-  // first need a copy of the events that is sorted by (param, timestamp)
-  _sorted_accurate_events.clear();
-  _sorted_accurate_events.insert(_sorted_accurate_events.begin(), _host_block->events.accurate.begin(), _host_block->events.accurate.end());
-  auto event_comparator = [](auto const& l, auto const& r) {
-    if(l.param < r.param) return true;
-    if(l.param > r.param) return false;
-    if(l.frame < r.frame) return true;
-    return false;
-  };
-  int current_sparse_point_count = 0;
-  int current_sparse_point_start = 0;
-  _accurate_automation_point_positions.clear();
-  _accurate_automation_next_point_positions.clear();
-  _accurate_automation_point_normalized_values.clear();
-  for (int e = 0; e < _sorted_accurate_events.size(); e++)
+  std::fill(_accurate_frames.begin(), _accurate_frames.end(), 0);
+  for (int e = 0; e < _host_block->events.accurate.size(); e++)
   {
-    current_sparse_point_count++;
-    auto const& event = _sorted_accurate_events[e];
+    // linear interpolate as normalized
+    auto const& event = _host_block->events.accurate[e];
     auto const& mapping = _state.desc().param_mappings.params[event.param];
-    _accurate_automation_point_positions.push_back(event.frame);
-    _accurate_automation_point_normalized_values.push_back(event.normalized.value());
-    if(e == _sorted_accurate_events.size() - 1 || _sorted_accurate_events[e + 1].param != event.param)
-    {
-      _accurate_automation_next_point_positions.push_back(-1);
-      mapping.topo.value_at(_accurate_automation) = sparse_buffer(
-        frame_count, current_sparse_point_count, 
-        _accurate_automation_point_positions.data() + current_sparse_point_start,
-        _accurate_automation_next_point_positions.data() + current_sparse_point_start,
-        _accurate_automation_inactive_point_normalized_values.data() + current_sparse_point_start);
-      current_sparse_point_start += current_sparse_point_count;
-      current_sparse_point_count = 0;
-    }
-    else
-      _accurate_automation_next_point_positions.push_back(_sorted_accurate_events[e + 1].frame);
+    auto& curve = mapping.topo.value_at(_accurate_automation);
+    int prev_frame = _accurate_frames[event.param];
+    float range_frames = event.frame - prev_frame + 1;
+    float range = event.normalized.value() - curve[prev_frame];
+    for(int f = prev_frame; f <= event.frame; f++)
+      curve[f] = curve[prev_frame] + (f - prev_frame + 1) / range_frames * range;
 
     // update current state
+    _accurate_frames[event.param] = event.frame;
     _state.set_normalized_at_index(event.param, event.normalized);
-    // make sure to re-setup the sparse automation buffer on the next round
+
+    // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;
   }
 
@@ -679,8 +641,6 @@ plugin_engine::process()
     }
 
     if (!_midi_was_automated[ms]) continue;
-
-#if 0 // TODO
     auto last_value = midi_mapping.topo.value_at(_midi_automation)[frame_count - 1];
     for (int lp = 0; lp < midi_mapping.linked_params.size(); lp++)
     {
@@ -703,9 +663,7 @@ plugin_engine::process()
       out_event.normalized = normalized_value(last_value);
       _host_block->events.out.push_back(out_event);
     }
-#endif
   }
-
 
   /*********************************************************/
   /* STEP 4: Run global input modules (typically CV stuff) */

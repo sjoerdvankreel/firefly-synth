@@ -20,37 +20,35 @@ struct mono_note_state
   bool note_on = false;
 };
 
+// view of automation event stream
+// which presents as a series of values
+// note this class is mutable so need separate
+// copies of this for per-voice threaded processing
+// the underlying data itself is immutable
 class sparse_buffer
 {
-  int _sample_count;
-  int _point_count;
-  int const* _point_positions;
-  int const* _next_point_positions;
-  double const* _normalized_values;
+  int const _sample_count;
+  int const _point_count;
+  int const* const _point_positions;
+  int const* const _next_point_positions;
+  double const* const _normalized_values;
 
-public:
-  friend class sparse_buffer_view;
-  sparse_buffer(
-    int sample_count, int point_count,
-    int const* point_positions, int const* next_point_positions,
-    double const* normalized_values);
-};
-
-class sparse_buffer_view
-{
   double _delta = 0;
   double _current = 0;
   int _position = 0;
   int _point_index = 0;
   int _next_point_position = 0;
-  sparse_buffer const* const _buffer;
+
   void init_section(int point_index);
 
 public: 
-  void reset();
   double next();
   double current() const { return _current; }
-  sparse_buffer_view(sparse_buffer const* buffer);
+
+  sparse_buffer(
+    int sample_count, int point_count, 
+    int const* point_positions, int const* next_point_positions,
+    double const* normalized_values);
 };
 
 inline sparse_buffer::
@@ -75,32 +73,22 @@ _normalized_values(normalized_values)
     assert(_point_positions[i] > _point_positions[i - 1]);
     assert(_next_point_positions[i - 1] == _point_positions[i]);
   }
-}
 
-inline sparse_buffer_view::
-sparse_buffer_view(sparse_buffer const* buffer):
-_buffer(buffer) { init_section(0); }
-
-inline void
-sparse_buffer_view::reset()
-{
-  _position = 0;
   init_section(0);
 }
 
 inline void
-sparse_buffer_view::init_section(int point_index)
+sparse_buffer::init_section(int point_index)
 {
   _point_index = point_index;
-  _current = _buffer->_normalized_values[point_index];
-  _next_point_position = _buffer->_next_point_positions[point_index];
-  _delta = (_buffer->_normalized_values[point_index + 1] - _current) / (_next_point_position - _position);
+  _current = _normalized_values[point_index];
+  _next_point_position = _next_point_positions[point_index];
+  _delta = (_normalized_values[point_index + 1] - _current) / (_next_point_position - _position);
 }
 
 inline double
-sparse_buffer_view::next()
+sparse_buffer::next()
 {
-  assert(_position < _buffer->_sample_count);
   double result = _current;
   _current += _delta;
   if(_position++ == _next_point_position) init_section(_point_index + 1);
@@ -169,10 +157,10 @@ struct plugin_block_state final {
   jarray<float, 4> const& all_midi_automation;
   jarray<int, 1> const& own_midi_active_selection;
   jarray<int, 3> const& all_midi_active_selection;
+  jarray<float, 3> const& own_accurate_automation;
+  jarray<float, 5> const& all_accurate_automation;
   jarray<plain_value, 2> const& own_block_automation;
   jarray<plain_value, 4> const& all_block_automation;
-  jarray<sparse_buffer, 2> const& own_accurate_automation;
-  jarray<sparse_buffer, 4> const& all_accurate_automation;
 };
 
 // single module process call

@@ -67,6 +67,7 @@ class plugin_engine final {
   jarray<double, 2> _global_module_process_duration_sec = {};
 
   std::vector<mono_note_state> _mono_note_stream = {};
+  std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};
   jarray<float, 6> _voice_cv_state = {};
@@ -76,25 +77,10 @@ class plugin_engine final {
   jarray<float, 1> _bpm_automation = {};
   jarray<float, 4> _midi_automation = {};
   jarray<int, 3> _midi_active_selection = {};
+  jarray<float, 5> _accurate_automation = {};
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};
   jarray<int, 4> _param_was_automated = {};
-
-  // sparse buffers draw data from shared pool
-  // we grow if needed, but assumption is the amount
-  // of incoming events is significantly smaller than
-  // "total number of params" * "maximum buffer frame count"
-  jarray<sparse_buffer, 4> _accurate_automation = {};
-  std::vector<accurate_event> _sorted_accurate_events = {};
-  std::vector<int> _accurate_automation_point_positions = {};
-  std::vector<int> _accurate_automation_next_point_positions = {};
-  std::vector<double> _accurate_automation_point_normalized_values = {};
-
-  // these are used for start=end=current automation value
-  std::vector<int> _accurate_automation_inactive_point_positions = {};
-  std::vector<int> _accurate_automation_inactive_next_point_positions = {};
-  std::vector<double> _accurate_automation_inactive_point_normalized_values = {};
-
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
   std::vector<block_filter> _midi_filters = {};
