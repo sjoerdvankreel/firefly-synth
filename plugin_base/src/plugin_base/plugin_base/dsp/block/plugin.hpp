@@ -22,14 +22,17 @@ struct mono_note_state
 
 class sparse_buffer
 {
-  int _sample_count;
-  int _point_count;
-  int const* _point_positions;
-  int const* _next_point_positions;
-  double const* _normalized_values;
+  int _sample_count = 0;
+  int _point_count = 0;
+  int const* _point_positions = nullptr;
+  int const* _next_point_positions = nullptr;
+  double const* _normalized_values = nullptr;
 
 public:
   friend class sparse_buffer_view;
+
+  // init with zeros, need default ctor so we can reserve space up-front in engine
+  sparse_buffer() {}
   sparse_buffer(
     int sample_count, int point_count,
     int const* point_positions, int const* next_point_positions,
@@ -47,10 +50,9 @@ class sparse_buffer_view
   void init_section(int point_index);
 
 public: 
-  void reset();
   double next();
   double current() const { return _current; }
-  sparse_buffer_view(sparse_buffer const* buffer);
+  sparse_buffer_view(sparse_buffer const* buffer, int pos);
 };
 
 inline sparse_buffer::
@@ -78,14 +80,12 @@ _normalized_values(normalized_values)
 }
 
 inline sparse_buffer_view::
-sparse_buffer_view(sparse_buffer const* buffer):
-_buffer(buffer) { init_section(0); }
-
-inline void
-sparse_buffer_view::reset()
-{
-  _position = 0;
-  init_section(0);
+sparse_buffer_view(sparse_buffer const* buffer, int pos):
+_buffer(buffer) 
+{ 
+  init_section(0); 
+  for (int i = 0; i < pos; i++) next();
+  assert(0 <= pos && pos < buffer->_sample_count);
 }
 
 inline void

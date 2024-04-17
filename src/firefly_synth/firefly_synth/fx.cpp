@@ -1314,6 +1314,7 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
 
   double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
 
+  sparse_buffer_view glob_uni_dtn_curve_view(&glob_uni_dtn_curve, block.start_frame);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_curve[f]);
@@ -1325,7 +1326,7 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
     if constexpr(GlobalUnison)
     {
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
-      kbd_trk += (voice_pos - 0.5f) * glob_uni_dtn_curve[f];
+      kbd_trk += (voice_pos - 0.5f) * glob_uni_dtn_curve_view.next();
     }
 
     hz *= std::pow(2.0, (kbd_trk - kbd_pivot) / 12.0 * kbd);

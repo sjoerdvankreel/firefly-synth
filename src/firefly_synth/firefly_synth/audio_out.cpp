@@ -148,10 +148,11 @@ voice_audio_out_engine::process_unison(plugin_block& block)
     voice_pos = unipolar_to_bipolar(voice_pos);
   }
 
+  sparse_buffer_view glob_uni_sprd_curve_view(&glob_uni_sprd_curve, block.start_frame);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if constexpr (GlobalUnison)
-      voice_bal = voice_pos * glob_uni_sprd_curve[f];
+      voice_bal = voice_pos * glob_uni_sprd_curve_view.next();
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_voice_out, param_bal, bal_curve[f]);
     for (int c = 0; c < 2; c++)
       block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal) / attn;
