@@ -261,8 +261,7 @@ voice_in_engine::process_mode_unison(plugin_block& block)
 
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
   auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
-  sparse_buffer_view glob_uni_dtn_curve_view(&glob_uni_dtn_curve, block.start_frame);
-
+  
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
     if constexpr (Monophonic)
@@ -297,7 +296,7 @@ voice_in_engine::process_mode_unison(plugin_block& block)
     if constexpr (!Monophonic && GlobalUnison)
     {
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
-      glob_uni_detune = (voice_pos - 0.5f) * glob_uni_dtn_curve_view.next();
+      glob_uni_detune = (voice_pos - 0.5f) * glob_uni_dtn_curve[f];
     }
 
     float porta_note = 0;
