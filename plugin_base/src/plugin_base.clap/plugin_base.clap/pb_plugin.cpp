@@ -64,13 +64,13 @@ pb_plugin(
   clap_host const* host, plugin_topo const* topo):
 Plugin(clap_desc, host), 
 _desc(std::make_unique<plugin_desc>(topo, this)),
-_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
+_splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
 _extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
 { 
   _gui_state.add_any_listener(this);
-  _block_automation_seen.resize(_engine.state().desc().param_count); 
+  _block_automation_seen.resize(_splice_engine.state().desc().param_count);
 }
 
 void
@@ -147,10 +147,10 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
     _gui_state.discard_undo_region();
     return false;
   }
-  for (int p = 0; p < _engine.state().desc().param_count; p++)
+  for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();
-  _engine.mark_all_params_as_automated(true);
+  _splice_engine.mark_all_params_as_automated(true);
   return true;
 }
 
@@ -256,7 +256,7 @@ bool
 pb_plugin::guiAdjustSize(uint32_t* width, uint32_t* height) noexcept
 {
   assert(_gui.get());
-  auto const& topo = *_engine.state().desc().plugin;
+  auto const& topo = *_splice_engine.state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
   auto settings = _gui->get_lnf()->global_settings();
   int min_width = (int)(settings.get_default_width(is_fx) * settings.min_scale * _gui->get_system_dpi_scale());
@@ -272,7 +272,7 @@ pb_plugin::guiGetResizeHints(clap_gui_resize_hints_t* hints) noexcept
   hints->preserve_aspect_ratio = true;
   hints->can_resize_vertically = true;
   hints->can_resize_horizontally = true;
-  auto const& topo = *_engine.state().desc().plugin;
+  auto const& topo = *_splice_engine.state().desc().plugin;
   bool is_fx = topo.type == plugin_type::fx;
   auto settings = _gui->get_lnf()->global_settings();
   hints->aspect_ratio_width = settings.get_aspect_ratio_width(is_fx);
@@ -303,7 +303,7 @@ void
 pb_plugin::push_to_gui(int index, clap_value clap)
 {
   sync_event e;
-  auto const& topo = *_engine.state().desc().param_at_index(index).param;
+  auto const& topo = *_splice_engine.state().desc().param_at_index(index).param;
   e.index = index;
   e.type = sync_event_type::value_changing;
   e.plain = topo.domain.normalized_to_plain(clap_to_normalized(topo, clap));
@@ -313,8 +313,8 @@ pb_plugin::push_to_gui(int index, clap_value clap)
 std::int32_t
 pb_plugin::getParamIndexForParamId(clap_id param_id) const noexcept
 {
-  auto iter = _engine.state().desc().param_mappings.tag_to_index.find(param_id);
-  if (iter == _engine.state().desc().param_mappings.tag_to_index.end())
+  auto iter = _splice_engine.state().desc().param_mappings.tag_to_index.find(param_id);
+  if (iter == _splice_engine.state().desc().param_mappings.tag_to_index.end())
   {
     assert(false);
     return -1;
@@ -346,9 +346,9 @@ bool
 pb_plugin::paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept
 {
   normalized_value normalized;
-  int index = _engine.state().desc().param_mappings.tag_to_index.at(param_id);
-  auto const& param = *_engine.state().desc().param_at_tag(param_id).param;
-  if (!_engine.state().text_to_normalized_at_index(false, index, display, normalized)) return false;
+  int index = _splice_engine.state().desc().param_mappings.tag_to_index.at(param_id);
+  auto const& param = *_splice_engine.state().desc().param_at_tag(param_id).param;
+  if (!_splice_engine.state().text_to_normalized_at_index(false, index, display, normalized)) return false;
   *value = normalized_to_clap(param, normalized).value();
   return true;
 }
@@ -356,10 +356,10 @@ pb_plugin::paramsTextToValue(clap_id param_id, char const* display, double* valu
 bool
 pb_plugin::paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept
 {
-  int index = _engine.state().desc().param_mappings.tag_to_index.at(param_id);
-  auto const& param = *_engine.state().desc().param_at_tag(param_id).param;
+  int index = _splice_engine.state().desc().param_mappings.tag_to_index.at(param_id);
+  auto const& param = *_splice_engine.state().desc().param_at_tag(param_id).param;
   normalized_value normalized = clap_to_normalized(param, clap_value(value));
-  std::string text = _engine.state().normalized_to_text_at_index(false, index, normalized);
+  std::string text = _splice_engine.state().normalized_to_text_at_index(false, index, normalized);
   from_8bit_string(display, size, text.c_str());
   return true;
 }
@@ -367,9 +367,9 @@ pb_plugin::paramsValueToText(clap_id param_id, double value, char* display, std:
 bool
 pb_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
 {
-  param_desc const& param = _engine.state().desc().param_at_index(index);
-  param_mapping const& mapping(_engine.state().desc().param_mappings.params[index]);
-  module_desc const& module = _engine.state().desc().modules[mapping.module_global];
+  param_desc const& param = _splice_engine.state().desc().param_at_index(index);
+  param_mapping const& mapping(_splice_engine.state().desc().param_mappings.params[index]);
+  module_desc const& module = _splice_engine.state().desc().modules[mapping.module_global];
   
   info->cookie = nullptr;
   info->id = param.info.id_hash;
@@ -413,7 +413,7 @@ pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* ou
     if (header->space_id != CLAP_CORE_EVENT_SPACE_ID) continue;
     auto event = reinterpret_cast<clap_event_param_value const*>(header);
     int index = getParamIndexForParamId(event->param_id);
-    auto const& param = *_engine.state().desc().param_at_index(index).param;
+    auto const& param = *_splice_engine.state().desc().param_at_index(index).param;
     auto normalized = clap_to_normalized(param, clap_value(event->value));
     if (main_thread)
     {
@@ -421,7 +421,7 @@ pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* ou
       push_to_audio(index, param.domain.normalized_to_plain(normalized));
     } else
     {
-      _engine.state().set_normalized_at_index(index, normalized);
+      _splice_engine.state().set_normalized_at_index(index, normalized);
       push_to_gui(index, clap_value(event->value));
     }
   }
@@ -433,21 +433,21 @@ std::uint32_t
 pb_plugin::notePortsCount(bool is_input) const noexcept
 {
   if (!is_input) return 0;
-  return _engine.state().desc().plugin->type == plugin_type::synth ? 1 : 0;
+  return _splice_engine.state().desc().plugin->type == plugin_type::synth ? 1 : 0;
 }
 
 std::uint32_t
 pb_plugin::audioPortsCount(bool is_input) const noexcept
 {
   if (!is_input) return 1;
-  return _engine.state().desc().plugin->type == plugin_type::fx ? 1 : 0;
+  return _splice_engine.state().desc().plugin->type == plugin_type::fx ? 1 : 0;
 }
 
 bool
 pb_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
 {
   if (!is_input || index != 0) return false;
-  if (_engine.state().desc().plugin->type == plugin_type::fx) return false;
+  if (_splice_engine.state().desc().plugin->type == plugin_type::fx) return false;
   info->id = 0;
   info->preferred_dialect = CLAP_NOTE_DIALECT_CLAP;
   info->supported_dialects = CLAP_NOTE_DIALECT_CLAP | CLAP_NOTE_DIALECT_MIDI;
@@ -458,7 +458,7 @@ bool
 pb_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
 {
   if (index != 0) return false;
-  if (is_input && _engine.state().desc().plugin->type == plugin_type::synth) return false;
+  if (is_input && _splice_engine.state().desc().plugin->type == plugin_type::synth) return false;
   info->id = 0;
   info->channel_count = 2;
   info->port_type = CLAP_PORT_STEREO;
@@ -470,7 +470,7 @@ pb_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_in
 void 
 pb_plugin::deactivate() noexcept 
 { 
-  _engine.deactivate(); 
+  _splice_engine.deactivate();
   _is_active.store(false);
 }
 
@@ -478,9 +478,9 @@ bool
 pb_plugin::activate(double sample_rate, std::uint32_t min_frame_count, std::uint32_t max_frame_count) noexcept
 {
   _is_active.store(true);
-  _engine.activate(max_frame_count);
-  _engine.set_sample_rate(sample_rate);
-  _engine.activate_modules();
+  _splice_engine.activate(max_frame_count);
+  _splice_engine.set_sample_rate(sample_rate);
+  _splice_engine.activate_modules();
   return true;
 }
 
@@ -490,8 +490,8 @@ pb_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
   sync_event e;
   while (_to_audio_events->try_dequeue(e))
   {
-    int tag = _engine.state().desc().param_mappings.index_to_tag[e.index];
-    auto m = _engine.state().desc().param_mappings.params[e.index].topo;
+    int tag = _splice_engine.state().desc().param_mappings.index_to_tag[e.index];
+    auto m = _splice_engine.state().desc().param_mappings.params[e.index].topo;
     switch(e.type) 
     {
     case sync_event_type::value_changing:
@@ -503,10 +503,10 @@ pb_plugin::process_gui_to_audio_events(const clap_output_events_t* out)
       event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
       event.header.size = sizeof(clap_event_param_value);
       event.header.type = (uint16_t)CLAP_EVENT_PARAM_VALUE;
-      auto const& topo = *_engine.state().desc().param_at_index(e.index).param;
+      auto const& topo = *_splice_engine.state().desc().param_at_index(e.index).param;
       event.value = normalized_to_clap(topo, topo.domain.plain_to_normalized(e.plain)).value();
-      _engine.state().set_plain_at_index(e.index, e.plain);
-      _engine.mark_param_as_automated(m.module_index, m.module_slot, m.param_index, m.param_slot);
+      _splice_engine.state().set_plain_at_index(e.index, e.plain);
+      _splice_engine.mark_param_as_automated(m.module_index, m.module_slot, m.param_index, m.param_slot);
       out->try_push(out, &(event.header));
       break;
     }
@@ -608,7 +608,7 @@ pb_plugin::context_menu(int param_id) const
 clap_process_status
 pb_plugin::process(clap_process const* process) noexcept
 {
-  host_block& block = _engine.prepare_block();
+  host_block& block = _splice_engine.prepare_block();
   block.frame_count = process->frames_count;
   block.audio_out = process->audio_outputs[0].data32;
   block.shared.bpm = process->transport? process->transport->tempo: 0;
@@ -647,7 +647,7 @@ pb_plugin::process(clap_process const* process) noexcept
     {
       auto event = reinterpret_cast<clap_event_param_value const*>(header);
       int index = getParamIndexForParamId(event->param_id);
-      auto const& param = _engine.state().desc().param_at_index(index);
+      auto const& param = _splice_engine.state().desc().param_at_index(index);
       push_to_gui(index, clap_value(event->value));
       if (param.param->dsp.rate != param_rate::accurate)
       {
@@ -715,16 +715,16 @@ pb_plugin::process(clap_process const* process) noexcept
     }
   }
 
-  _engine.process();
+  _splice_engine.process();
   for (int e = 0; e < block.events.out.size(); e++)
   {
     sync_event to_gui_event = {};
     auto const& out_event = block.events.out[e];
     to_gui_event.index = out_event.param;
-    to_gui_event.plain =  _engine.state().desc().normalized_to_plain_at_index(out_event.param, out_event.normalized);
+    to_gui_event.plain = _splice_engine.state().desc().normalized_to_plain_at_index(out_event.param, out_event.normalized);
     _to_gui_events->enqueue(to_gui_event);
   }
-  _engine.release_block();
+  _splice_engine.release_block();
   return CLAP_PROCESS_CONTINUE;
 }
 

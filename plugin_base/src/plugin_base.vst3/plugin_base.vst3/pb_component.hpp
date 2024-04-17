@@ -1,6 +1,6 @@
 #pragma once
 
-#include <plugin_base/dsp/engine.hpp>
+#include <plugin_base/dsp/splice_engine.hpp>
 #include <plugin_base/dsp/block/host.hpp>
 #include <plugin_base/shared/utility.hpp>
 
@@ -14,7 +14,7 @@ public Steinberg::Vst::AudioEffect {
   
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
-  plugin_engine _engine;
+  plugin_splice_engine _splice_engine;
   std::map<int, int> _param_to_midi_id = {};
 
   // when we get passed a null buffer ptr
