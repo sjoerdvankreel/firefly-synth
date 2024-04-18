@@ -25,6 +25,9 @@ See below for some built-in themes.
 </table>
 
 # Download
+
+See warning notes for Mac and Windows below!
+
 - Mac VST3: [firefly_synth_1.7.1_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_mac_vst3_instrument.zip)
 - Mac VST3 Fx: [firefly_synth_1.7.1_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_mac_vst3_fx.zip)
 - Mac CLAP: [firefly_synth_1.7.1_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_mac_clap_instrument.zip)
@@ -45,6 +48,10 @@ Extract the zipped folder and copy/replace it (the entire folder, not just the .
 - Mac: https://helpcenter.steinberg.de/hc/en-us/articles/115000171310-VST-plug-in-locations-on-Mac-OS-X-and-macOS (replace VST3 by CLAP for clap)
 - Linux: ~/.vst3 or ~/.clap
 
+Windows: I screwed up the build scripts, so what you are actually downloading are .tar files, not .zip files.
+Some archive tools handle this, some don't. If if says "corrupt", change extension to .tar.
+See https://github.com/sjoerdvankreel/firefly-synth/issues/5.
+<p/>
 MacOS: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this: [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm).
 
 # System requirements and supported environments
