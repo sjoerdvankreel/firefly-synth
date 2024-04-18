@@ -4,6 +4,19 @@ namespace plugin_base {
 
 // baseline = ~250mb, with each 64 samples is ~100mb of extra data
 // should investigate
+
+// with all route count set to 4: baseline = 220
+// each extra 64 samples = 100
+
+// with polyphony set to 4: baseline = 80
+// each extra 64 samples = 4
+
+// ok so its not the automation buffers since those are not per-voice
+// maybe the oversamplers ?
+
+// with no changes but oversampling: 
+// baseline = 220
+// each extra 64 samples = 100
 static int const default_block_size = 128;
 
 plugin_splice_engine::
