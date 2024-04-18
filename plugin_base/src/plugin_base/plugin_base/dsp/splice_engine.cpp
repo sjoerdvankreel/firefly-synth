@@ -29,7 +29,15 @@ namespace plugin_base {
 // ok so it's one of the per-voice modules
 // investigate more
 
-static int const default_block_size = 128;
+// 2 osc and 2 vfx
+// baseline = 150
+// extra 64  = 70
+
+// no changes but max_osc_unison_voices = 2
+// baseline = 180
+// extra 64 = 60
+
+static int const default_block_size = 4;
   
 plugin_splice_engine::
 plugin_splice_engine(
