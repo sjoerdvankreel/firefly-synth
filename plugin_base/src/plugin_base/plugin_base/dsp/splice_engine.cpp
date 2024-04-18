@@ -17,8 +17,20 @@ namespace plugin_base {
 // with no changes but oversampling: 
 // baseline = 220
 // each extra 64 samples = 100
-static int const default_block_size = 128;
 
+// don't activate() and dont activate_modules()
+// baseline = 50 
+// extra 64 = 0
+
+// activate() but dont activate_modules()
+// baseline = 60
+// extra 64 = 20
+
+// ok so it's one of the per-voice modules
+// investigate more
+
+static int const default_block_size = 128;
+  
 plugin_splice_engine::
 plugin_splice_engine(
   plugin_desc const* desc, bool graph, int block_size,

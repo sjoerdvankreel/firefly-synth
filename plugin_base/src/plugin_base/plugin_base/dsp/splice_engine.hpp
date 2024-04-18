@@ -30,7 +30,7 @@ public:
   plugin_state const& state() const { return _engine.state(); }
 
   void release_block() {}
-  void activate_modules() { _engine.activate_modules(); }
+  void activate_modules() { /* _engine.activate_modules(); */ }
   void set_sample_rate(int sample_rate) { _engine.set_sample_rate(sample_rate); }
   void process_voice(int v, bool threaded) { _engine.process_voice(v, threaded); }
   void mark_all_params_as_automated(bool automated) { _engine.mark_all_params_as_automated(automated); }
