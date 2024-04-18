@@ -44,8 +44,11 @@ See warning notes for Mac and Windows below!
 Windows: I screwed up the build scripts, so what you are actually downloading are .tar files, not .zip files.
 Some archive tools handle this, some don't. If if says "corrupt", change extension to .tar.
 See https://github.com/sjoerdvankreel/firefly-synth/issues/5.
+
 <p/>
-MacOS: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this: [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm).
+
+MacOS: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this: 
+[https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm)
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
