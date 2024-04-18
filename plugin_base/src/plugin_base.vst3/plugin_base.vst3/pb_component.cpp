@@ -15,7 +15,7 @@ namespace plugin_base::vst3 {
 pb_component::
 pb_component(plugin_topo const* topo, FUID const& controller_id) :
 _desc(std::make_unique<plugin_desc>(topo, nullptr)),
-_splice_engine(_desc.get(), false, nullptr, nullptr)
+_splice_engine(_desc.get(), false, default_splice_block_size, nullptr, nullptr)
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();

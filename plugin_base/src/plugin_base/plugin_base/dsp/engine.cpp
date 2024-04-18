@@ -40,13 +40,6 @@ _voice_processor_context(voice_processor_context)
   // since that runs on module init so is hard to debug
   desc->validate();
 
-  // reserve this much but allocate on the audio thread if necessary
-  // still seems better than dropping events
-  int note_limit_guess = _polyphony * 64;
-  int block_events_guess = _state.desc().param_count;
-  int midi_events_guess = _state.desc().midi_count * 64;
-  int accurate_events_guess = _state.desc().param_count * 64;
-
   // init everything that is not frame-count dependent
   _global_module_process_duration_sec.resize(_dims.module_slot);
   _voice_module_process_duration_sec.resize(_dims.voice_module_slot);
@@ -61,11 +54,6 @@ _voice_processor_context(voice_processor_context)
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
   _param_was_automated.resize(_dims.module_slot_param_slot);
-  _host_block->events.notes.reserve(note_limit_guess);
-  _host_block->events.out.reserve(block_events_guess);
-  _host_block->events.block.reserve(block_events_guess);
-  _host_block->events.midi.reserve(midi_events_guess);
-  _host_block->events.accurate.reserve(accurate_events_guess);
 }
 
 plugin_voice_block 
@@ -174,16 +162,8 @@ host_block&
 plugin_engine::prepare_block()
 {
   // host calls this and should provide the current block values
+  _host_block->prepare();
   _block_start_time_sec = seconds_since_epoch();
-  _host_block->audio_out = nullptr;
-  _host_block->events.out.clear();
-  _host_block->events.notes.clear();
-  _host_block->events.block.clear();
-  _host_block->events.midi.clear();
-  _host_block->events.accurate.clear();
-  _host_block->frame_count = 0;
-  _host_block->shared.bpm = 0;
-  _host_block->shared.audio_in = nullptr;
   return *_host_block;
 }
 
@@ -228,10 +208,7 @@ plugin_engine::deactivate()
   _accurate_automation = {};
   _voice_scratch_state = {};
   _global_scratch_state = {};
-  _host_block->events.out.clear();
-  _host_block->events.midi.clear();
-  _host_block->events.block.clear();
-  _host_block->events.accurate.clear();
+  _host_block->events.deactivate();
 
   for(int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -270,6 +247,7 @@ plugin_engine::activate(int max_frame_count)
   _accurate_automation.resize(frame_dims.accurate_automation);
   _bpm_automation.resize(max_frame_count);
   _mono_note_stream.resize(max_frame_count);
+  _host_block->events.activate(_state.desc().param_count, _state.desc().midi_count, _polyphony, max_frame_count);
 
   // set automation values to current state, events may overwrite
   mark_all_params_as_automated(true);

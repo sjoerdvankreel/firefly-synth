@@ -64,7 +64,7 @@ pb_plugin(
   clap_host const* host, plugin_topo const* topo):
 Plugin(clap_desc, host), 
 _desc(std::make_unique<plugin_desc>(topo, this)),
-_splice_engine(_desc.get(), false, forward_thread_pool_voice_processor, this),
+_splice_engine(_desc.get(), false, default_splice_block_size, forward_thread_pool_voice_processor, this),
 _extra_state(gui_extra_state_keyset(*_desc->plugin)), _gui_state(_desc.get(), true),
 _to_gui_events(std::make_unique<event_queue>(default_q_size)), 
 _to_audio_events(std::make_unique<event_queue>(default_q_size))
