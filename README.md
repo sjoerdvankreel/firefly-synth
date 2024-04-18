@@ -42,7 +42,7 @@ See warning notes for Mac and Windows below!
 - Windows CLAP Fx: [firefly_synth_1.7.1_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.1_windows_clap_fx.zip)
 
 Windows: I screwed up the build scripts, so what you are actually downloading are .tar files, not .zip files.
-Some archive tools handle this, some don't. If if says "corrupt", change extension to .tar.
+Some archive tools handle this, some don't. If it says "corrupt", change extension to .tar.
 See https://github.com/sjoerdvankreel/firefly-synth/issues/5.
 
 <p/>
