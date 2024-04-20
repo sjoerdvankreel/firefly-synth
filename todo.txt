@@ -32,8 +32,8 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7.2:
-- dont allocate events for graphs
 - oversampling conversion
+- make voice count adjustable with default 16 + reallocate on switch and switch of global unison
 
 v1.7.3
 - allow to disable env 1, use external env ?
