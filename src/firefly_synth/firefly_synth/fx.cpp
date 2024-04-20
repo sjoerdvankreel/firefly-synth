@@ -155,7 +155,6 @@ dist_over_items()
   result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "1X");
   result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "2X");
   result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "4X");
-  result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "8X");
   return result;
 }
 

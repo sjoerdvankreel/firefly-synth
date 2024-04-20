@@ -53,7 +53,6 @@ over_items()
   result.emplace_back("{F9C54B64-3635-417F-86A9-69B439548F3C}", "1X");
   result.emplace_back("{937686E8-AC03-420B-A3FF-0ECE1FF9B23E}", "2X");
   result.emplace_back("{64F2A767-DE91-41DF-B2F1-003FCC846384}", "4X");
-  result.emplace_back("{9C6E560D-4999-40D9-85E4-C02468296206}", "8X");
   return result;
 }
 
