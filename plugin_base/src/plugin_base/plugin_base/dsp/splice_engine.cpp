@@ -112,7 +112,7 @@ void
 plugin_splice_engine::activate(int max_frame_count)
 {
   _engine.activate(_splice_block_size);
-  _host_block.events.activate(state().desc().param_count, state().desc().midi_count, state().desc().plugin->audio_polyphony, max_frame_count);
+  _host_block.events.activate(false, state().desc().param_count, state().desc().midi_count, state().desc().plugin->audio_polyphony, max_frame_count);
 }
 
 void

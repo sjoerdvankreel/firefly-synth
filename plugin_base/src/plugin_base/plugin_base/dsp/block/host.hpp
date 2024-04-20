@@ -48,7 +48,7 @@ struct host_events final {
   std::vector<accurate_event> accurate;
 
   void deactivate();
-  void activate(int param_count, int midi_count, int polyphony, int max_frame_count);
+  void activate(bool graph, int param_count, int midi_count, int polyphony, int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_events);
 };
 
