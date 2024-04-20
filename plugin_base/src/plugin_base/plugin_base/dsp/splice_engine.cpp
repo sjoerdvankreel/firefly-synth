@@ -35,9 +35,8 @@ plugin_splice_engine::activate(int max_frame_count)
 void
 plugin_splice_engine::process()
 {
-  // TODO breakpoint this
-  // process in blocks of splice_size/2, with any remaining allocated to the last block
-  int min_block_frames = _splice_block_size / 2;
+  // process in blocks of splice_size, plus 1 times remaining
+  int min_block_frames = _splice_block_size;
   int min_block_count = _host_block.frame_count / min_block_frames;
   int rest_block_frames = _host_block.frame_count - min_block_count * min_block_frames;
   assert(min_block_count * min_block_frames + rest_block_frames == _host_block.frame_count);
