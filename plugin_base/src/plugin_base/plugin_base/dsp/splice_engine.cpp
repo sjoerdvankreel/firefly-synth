@@ -81,7 +81,12 @@ namespace plugin_base {
 // block 64 = 230
 // 30 mb block size = good!
 
-static int const default_block_size = 64;
+// with max oversampling = 4x
+// block 4 = 210 
+// block 64 = 270
+// 60 mb block size is mweh
+
+static int const default_block_size = 4;
   
 plugin_splice_engine::
 plugin_splice_engine(
