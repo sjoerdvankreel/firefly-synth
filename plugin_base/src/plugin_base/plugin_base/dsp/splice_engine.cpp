@@ -43,14 +43,13 @@ plugin_splice_engine::process()
   assert(min_block_count * min_block_frames + rest_block_frames == _host_block.frame_count);
   int total_block_count = min_block_count + (rest_block_frames == 0? 0: 1);
 
-  _host_block.events.out.clear();
   for (int i = 0; i < total_block_count; i++)
   {
     int this_block_start = i * min_block_frames;
     int this_block_frames = i < min_block_count? min_block_frames: rest_block_frames;
 
     auto& inner_block = _engine.prepare_block();
-    inner_block.frame_count = _host_block.frame_count;
+    inner_block.frame_count = this_block_frames;
     inner_block.shared.bpm = _host_block.shared.bpm;
 
     float* this_audio_out[2];
@@ -58,10 +57,13 @@ plugin_splice_engine::process()
     this_audio_out[1] = _host_block.audio_out[1] + this_block_start;
     inner_block.audio_out = this_audio_out;
 
-    float const* this_audio_in[2];
-    this_audio_in[0] = _host_block.shared.audio_in[0] + this_block_start;
-    this_audio_in[1] = _host_block.shared.audio_in[1] + this_block_start;
-    inner_block.shared.audio_in = this_audio_in;
+    float const* this_audio_in[2] = { nullptr, nullptr };
+    if(this->state().desc().plugin->type == plugin_type::fx)
+    {
+      this_audio_in[0] = _host_block.shared.audio_in[0] + this_block_start;
+      this_audio_in[1] = _host_block.shared.audio_in[1] + this_block_start;
+      inner_block.shared.audio_in = this_audio_in;
+    }
 
     inner_block.events.midi.clear();
     inner_block.events.block.clear();
@@ -96,9 +98,16 @@ plugin_splice_engine::process()
 
     _engine.process();
 
+    // copy over audio out
+    std::copy(inner_block.audio_out[0], inner_block.audio_out[0] + this_block_frames, _host_block.audio_out[0] + this_block_start);
+    std::copy(inner_block.audio_out[1], inner_block.audio_out[1] + this_block_frames, _host_block.audio_out[1] + this_block_start);
+
     // copy last out block events
     if(i == total_block_count - 1)
-      std::copy(inner_block.events.out.begin(), inner_block.events.out.end(), _host_block.events.out.begin());
+    {
+      _host_block.events.out.clear();
+      _host_block.events.out.insert(_host_block.events.out.begin(), inner_block.events.out.begin(), inner_block.events.out.end());
+    }
 
     _engine.release_block();
   }
