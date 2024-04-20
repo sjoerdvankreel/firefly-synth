@@ -41,6 +41,10 @@ namespace plugin_base {
 // base = 220
 // extra 64  = 100
 
+// just dont activate per-voice modules
+// base = 100
+// extra 64 = 18 
+
 static int const default_block_size = 64;
   
 plugin_splice_engine::
