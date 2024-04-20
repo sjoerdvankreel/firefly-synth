@@ -76,6 +76,10 @@ namespace plugin_base {
 // 10 * fx = 50
 // = 200
 
+// without oversampling
+// block 4 = 200 
+// block 64 = 230
+// 30 mb block size = good!
 
 static int const default_block_size = 64;
   
