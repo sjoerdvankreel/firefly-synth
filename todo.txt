@@ -31,7 +31,10 @@ solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
 
-v1.7.2
+v1.7.2:
+- oversampling conversion
+
+v1.7.3
 - allow to disable env 1, use external env ?
 - flstudio clap
 - multitrack studio
