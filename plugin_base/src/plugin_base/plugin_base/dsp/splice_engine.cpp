@@ -45,7 +45,7 @@ namespace plugin_base {
 // base = 100
 // extra 64 = 18 
 
-static int const default_block_size = 64;
+static int const default_block_size = 4;
   
 plugin_splice_engine::
 plugin_splice_engine(
