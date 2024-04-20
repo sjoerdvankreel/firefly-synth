@@ -45,22 +45,29 @@ library_get_address(void* handle, char const* sym)
 #endif
 
 static void
-print_topo_stats(
-  plugin_topo const& topo);
+generate_modules_ref(
+  plugin_topo const& topo, std::ostream& out,
+  int& module_count, int& module_slot_count);
 
 static void
-generate_modules_ref(
-  plugin_topo const& topo, std::ostream& out);
-static void
 generate_plugin_ref(
-  plugin_topo const& topo, std::ostream& out);
+  plugin_topo const& topo, std::ostream& out,
+  int& module_count, int& module_slot_count,
+  int& visible_param_count, int& visible_param_slot_count);
+
 static void
 generate_params_ref(
-  plugin_topo const& topo, std::ostream& out);
+  plugin_topo const& topo, std::ostream& out,
+  int& visible_param_count, int& visible_param_slot_count);
 
 int 
 main(int argc, char** argv)
 {
+  int module_count = 0;
+  int module_slot_count = 0;
+  int visible_param_count = 0;
+  int visible_param_slot_count = 0;
+
   std::ofstream out;
   std::string err = "";
   void* library = nullptr;
@@ -98,9 +105,16 @@ main(int argc, char** argv)
     goto end;
   }
 
-  generate_plugin_ref(*topo, out);
+  generate_plugin_ref(
+    *topo, out, 
+    module_count, module_slot_count, 
+    visible_param_count, visible_param_slot_count);
   out.flush();
-  print_topo_stats(*topo);
+
+  std::cout << "Module count " << module_count << "\n";
+  std::cout << "Module slot count " << module_slot_count << "\n";
+  std::cout << "Visible param count " << visible_param_count << "\n";
+  std::cout << "Visible param slot count " << visible_param_slot_count << "\n";
 
 end:  
   if(topo != nullptr)
@@ -111,45 +125,11 @@ end:
   return err == "" ? 0 : 1;
 }
 
-static void
-print_topo_stats(
-  plugin_topo const& topo)
-{
-  int cv_count = 0;
-  int audio_count = 0;
-  int buffer_count = 0;
-  int scratch_count = 0;
-  //int accurate_param_count = 0;
-
-  for (int m = 0; m < topo.modules.size(); m++)
-  {
-    int module_cv_count = 0;
-    int module_audio_count = 0;
-    //int module_accurate_param_count = 0;
-
-    int module_voice_count = topo.modules[m].dsp.stage == module_stage::voice? topo.audio_polyphony: 1;
-    int module_scratch_count = topo.modules[m].dsp.scratch_count;
-    if(topo.modules[m].dsp.output == module_output::cv) module_cv_count = topo.modules[m].dsp.outputs.size();
-    if(topo.modules[m].dsp.output == module_output::audio) module_audio_count = topo.modules[m].dsp.outputs.size() * 2;
-    int module_buffer_count = topo.modules[m].info.slot_count * module_voice_count * (module_audio_count + module_cv_count + module_scratch_count);
-    int module_buffer_size = module_buffer_count * topo.splice_block_size * sizeof(float);
-    std::cout << topo.modules[m].info.tag.full_name + " internal buffers count: " << module_buffer_count << "\n";
-    std::cout << topo.modules[m].info.tag.full_name + " internal buffers size MB: " << (module_buffer_size / (1024.0f * 1024.0f)) << "\n\n";
-
-    cv_count += module_cv_count;
-    audio_count += module_audio_count;
-    scratch_count += module_scratch_count;
-    buffer_count += module_buffer_count;
-  }
-
-  int buffer_size = buffer_count * topo.splice_block_size * sizeof(float);
-  std::cout << "Total internal buffers count: " << buffer_count << "\n";
-  std::cout << "Total internal buffers size MB: " << (buffer_size / (1024.0f * 1024.0f)) << "\n";
-}
-
 void
 generate_plugin_ref(
-  plugin_topo const& topo, std::ostream& out)
+  plugin_topo const& topo, std::ostream& out, 
+  int& module_count, int& module_slot_count, 
+  int& param_count, int& param_slot_count)
 {
   std::string name_and_version = topo.tag.full_name + " " + 
     std::to_string(topo.version.major) + "." + 
@@ -176,15 +156,16 @@ generate_plugin_ref(
   out << "</head>\n";
   out << "<body>\n";
   out << "<h1>" << name_and_version << "</h1>\n";
-  generate_modules_ref(topo, out);
-  generate_params_ref(topo, out);
+  generate_modules_ref(topo, out, module_count, module_slot_count);
+  generate_params_ref(topo, out, param_count, param_slot_count);
   out << "</body>\n";
   out << "</html>\n";
 }
 
 static void
 generate_modules_ref(
-  plugin_topo const& topo, std::ostream& out)
+  plugin_topo const& topo, std::ostream& out,
+  int& module_count, int& module_slot_count)
 {
   out << "<h2>Module Overview</h2>\n";
   out << "<table>\n";
@@ -202,6 +183,9 @@ generate_modules_ref(
     auto const& module = topo.modules[m];
     assert(module.info.description.size());
     assert(module.info.tag.full_name.size());
+
+    module_count++;
+    module_slot_count += module.info.slot_count;
 
     out << "<tr>\n";
     if(module.gui.visible)
@@ -223,7 +207,8 @@ generate_modules_ref(
 
 static void
 generate_params_ref(
-  plugin_topo const& topo, std::ostream& out)
+  plugin_topo const& topo, std::ostream& out,
+  int& visible_param_count, int& visible_param_slot_count)
 {
   out << "<h2>Parameter Overview</h2>\n";
   for(int m = 0; m < topo.modules.size(); m++)
@@ -254,6 +239,9 @@ generate_params_ref(
         auto const& param = module.params[p];
         assert(param.info.description.size());
         assert(param.info.tag.full_name.size());
+
+        visible_param_count++;
+        visible_param_slot_count += module.info.slot_count * param.info.slot_count;
         int reference_param_slot = param.info.slot_count == 1 ? 0 : 1;
 
         std::string direction = "";
