@@ -35,6 +35,7 @@ v1.7.2:
 - oversampling conversion
 - make voice count adjustable with default 16 + reallocate on switch and switch of global unison
 - >> plus conversion on that. but that trims down to 100mb which is acceptable
+- plus make drain warning
 
 v1.7.3
 - allow to disable env 1, use external env ?
