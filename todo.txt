@@ -32,6 +32,7 @@ out gain/cpu meter
 do visual am/fm demo
 
 v1.7.2:
+- dont allocate events for graphs
 - oversampling conversion
 
 v1.7.3
