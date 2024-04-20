@@ -4,8 +4,6 @@
 
 namespace plugin_base {
 
-inline int constexpr default_splice_block_size = -1;
-
 // block-splice version of engine to reduce memory usage
 class plugin_splice_engine final {
 
@@ -17,7 +15,7 @@ public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_splice_engine);
 
   plugin_splice_engine(
-    plugin_desc const* desc, bool graph, int block_size,
+    plugin_desc const* desc, bool graph,
     thread_pool_voice_processor voice_processor,
     void* voice_processor_context);
 

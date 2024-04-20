@@ -85,16 +85,14 @@ namespace plugin_base {
 // block 4 = 210 
 // block 64 = 270
 // 60 mb block size is mweh
-
-static int const default_block_size = 4;
   
 plugin_splice_engine::
 plugin_splice_engine(
-  plugin_desc const* desc, bool graph, int block_size,
+  plugin_desc const* desc, bool graph,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context):
 _engine(desc, graph, voice_processor, voice_processor_context),
-_splice_block_size(block_size == default_splice_block_size? default_block_size: block_size) {}
+_splice_block_size(desc->plugin->splice_block_size) {}
 
 host_block&
 plugin_splice_engine::prepare_block()
