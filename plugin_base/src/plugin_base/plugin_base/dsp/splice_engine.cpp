@@ -45,7 +45,39 @@ namespace plugin_base {
 // base = 100
 // extra 64 = 18 
 
-static int const default_block_size = 4;
+// ----
+// ----
+
+// baseline = ~250mb, with each 64 samples is ~100mb of extra data
+// should investigate
+
+// set osc count to 2
+// base = 190
+// extra 64 = 70 
+// osc = 20 + 10
+
+// and set vfx count to 2
+// base = 160
+// extra 64 = 60
+// vfx = 4 + 1
+
+// and set vlfo count to 2
+// base = 150
+// extra 64 = 60
+// vlfo = 1 + 0
+
+// and set venv count to 2
+// base = 150
+// extra 64 = 60
+// venv = 0 + 0
+
+// total voice size on 64 samples = 
+// 5 * osc = 150
+// 10 * fx = 50
+// = 200
+
+
+static int const default_block_size = 64;
   
 plugin_splice_engine::
 plugin_splice_engine(
