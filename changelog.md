@@ -1,3 +1,7 @@
+### ?, ? - V1.7.2.
+
+- Breaking change: reduced max oversampling to 4x.
+
 ### April 13, 2024 - V1.7.1.
 
 - Changed built-in themes (and dropped some).
