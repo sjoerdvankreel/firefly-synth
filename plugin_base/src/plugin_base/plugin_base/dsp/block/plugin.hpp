@@ -111,7 +111,7 @@ struct plugin_block final {
   template <domain_type DomainType>
   float normalized_to_raw_fast(int module_, int param_, float normalized) const;
   template <domain_type DomainType>
-  void normalized_to_raw_block(int module_, int param_, float const* in, float* out) const;
+  void normalized_to_raw_block(int module_, int param_, jarray<float, 1> const& in, jarray<float, 1>& out) const;
 };
 
 inline void*
@@ -157,7 +157,7 @@ plugin_block::normalized_to_raw_fast(int module_, int param_, float normalized) 
 }
 
 template <domain_type DomainType> inline void
-plugin_block::normalized_to_raw_block(int module_, int param_, float const* in, float* out) const
+plugin_block::normalized_to_raw_block(int module_, int param_, jarray<float, 1> const& in, jarray<float, 1>& out) const
 {
   for(int f = start_frame; f < end_frame; f++) check_unipolar(in[f]);
   auto const& param_topo = plugin.modules[module_].params[param_];

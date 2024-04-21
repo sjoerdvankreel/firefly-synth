@@ -646,8 +646,8 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
     auto& scale_curve = (*_own_scratch)[scratch_scale];
     auto& offset_curve = (*_own_scratch)[scratch_offset];
     auto& transformed_source = (*_own_scratch)[scratch_transform_source];
-    block.normalized_to_raw_block<domain_type::linear>(this_module, param_scale, scale_curve_norm->data().data(), scale_curve.data().data());
-    block.normalized_to_raw_block<domain_type::linear>(this_module, param_offset, offset_curve_norm->data().data(), offset_curve.data().data());
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_scale, *scale_curve_norm, scale_curve);
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_offset, *offset_curve_norm, offset_curve);
     for (int f = block.start_frame; f < block.end_frame; f++)
       transformed_source[f] = std::clamp((offset_curve[f] + source_curve[f]) * scale_curve[f], 0.0f, 1.0f);
 

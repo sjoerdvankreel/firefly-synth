@@ -3,6 +3,7 @@
 #include <plugin_base/topo/shared.hpp>
 #include <plugin_base/shared/value.hpp>
 #include <plugin_base/shared/utility.hpp>
+#include <plugin_base/shared/jarray.hpp>
 
 #include <cmath>
 #include <vector>
@@ -107,7 +108,7 @@ struct param_domain final {
   template <domain_type DomainType>
   plain_value normalized_to_plain_fast(normalized_value normalized) const;
   template <domain_type DomainType> void
-  normalized_to_raw_block(float const* in, float* out, int start, int count) const;
+  normalized_to_raw_block(jarray<float, 1> const& in, jarray<float, 1>& out, int start, int count) const;
 };
 
 inline list_item::
@@ -192,7 +193,7 @@ param_domain::plain_to_raw_fast(plain_value plain) const
 }
 
 template <domain_type DomainType> inline void
-param_domain::normalized_to_raw_block(float const* in, float* out, int start, int end) const
+param_domain::normalized_to_raw_block(jarray<float, 1> const& in, jarray<float, 1>& out, int start, int end) const
 {
   static_assert(DomainType == domain_type::linear);
   float range = (float)(max - min);
