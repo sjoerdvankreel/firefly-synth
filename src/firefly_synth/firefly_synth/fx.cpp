@@ -58,7 +58,10 @@ enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
 enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
-static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, (int)scratch_reverb_count });
+enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
+static int constexpr scratch_count = std::max({ 
+  (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, 
+  (int)scratch_reverb_count, (int)scratch_flt_comb_gain_count });
 
 enum { param_type,
   param_svf_mode, param_svf_kbd, param_svf_gain, param_svf_freq, param_svf_res,
@@ -1144,10 +1147,28 @@ void fx_engine::process_comb_mode(plugin_block& block,
   
   float const feedback_factor = 0.98;
   int this_module = _global ? module_gfx : module_vfx;
-  auto const& dly_min_curve = *modulation[this_module][block.module_slot][param_comb_dly_min][0];
-  auto const& dly_plus_curve = *modulation[this_module][block.module_slot][param_comb_dly_plus][0];
-  auto const& gain_min_curve = *modulation[this_module][block.module_slot][param_comb_gain_min][0];
-  auto const& gain_plus_curve = *modulation[this_module][block.module_slot][param_comb_gain_plus][0];
+  
+  auto const& dly_min_curve_norm = *modulation[this_module][block.module_slot][param_comb_dly_min][0];
+  auto const& dly_plus_curve_norm = *modulation[this_module][block.module_slot][param_comb_dly_plus][0];
+  auto const& gain_min_curve_norm = *modulation[this_module][block.module_slot][param_comb_gain_min][0];
+  auto const& gain_plus_curve_norm = *modulation[this_module][block.module_slot][param_comb_gain_plus][0];
+
+  auto& dly_min_curve = block.state.own_scratch[scratch_flt_comb_dly_min];
+  auto& dly_plus_curve = block.state.own_scratch[scratch_flt_comb_dly_plus];
+  auto& gain_min_curve = block.state.own_scratch[scratch_flt_comb_gain_min];
+  auto& gain_plus_curve = block.state.own_scratch[scratch_flt_comb_gain_plus];
+
+  if constexpr (Feedback)
+  {
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_dly_min, dly_min_curve_norm, dly_min_curve);
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_gain_min, gain_min_curve_norm, gain_min_curve);
+  }
+
+  if constexpr (Feedforward)
+  {
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_dly_plus, dly_plus_curve_norm, dly_plus_curve);
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_gain_plus, gain_plus_curve_norm, gain_plus_curve);
+  }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -1163,8 +1184,8 @@ void fx_engine::process_comb_mode(plugin_block& block,
 
     if constexpr (Feedback)
     {
-      gain_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_min, gain_min_curve[f]);
-      float dly_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_min, dly_min_curve[f]);
+      gain_min = gain_min_curve[f];
+      float dly_min = dly_min_curve[f];
       float dly_min_samples_t = dly_min * block.sample_rate * 0.001;
       dly_min_t = dly_min_samples_t - (int)dly_min_samples_t;
       dly_min_samples_0 = (int)dly_min_samples_t;
@@ -1173,8 +1194,8 @@ void fx_engine::process_comb_mode(plugin_block& block,
 
     if constexpr (Feedforward)
     {
-      gain_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_plus, gain_plus_curve[f]);
-      float dly_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_plus, dly_plus_curve[f]);
+      gain_plus = gain_plus_curve[f];
+      float dly_plus = dly_plus_curve[f];
       float dly_plus_samples_t = dly_plus * block.sample_rate * 0.001;
       dly_plus_t = dly_plus_samples_t - (int)dly_plus_samples_t;
       dly_plus_samples_0 = (int)dly_plus_samples_t;
