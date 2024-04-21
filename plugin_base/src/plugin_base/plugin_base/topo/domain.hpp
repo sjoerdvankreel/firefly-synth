@@ -106,6 +106,8 @@ struct param_domain final {
   double normalized_to_raw_fast(normalized_value normalized) const;
   template <domain_type DomainType>
   plain_value normalized_to_plain_fast(normalized_value normalized) const;
+  template <domain_type DomainType> void
+  normalized_to_raw_block(float const* in, float* out, int start, int count) const;
 };
 
 inline list_item::
@@ -187,6 +189,14 @@ param_domain::plain_to_raw_fast(plain_value plain) const
   assert(type == DomainType);
   if constexpr(domain_is_real(DomainType)) return plain.real();
   else return plain.step();
+}
+
+template <domain_type DomainType> inline void
+param_domain::normalized_to_raw_block(float const* in, float* out, int start, int end) const
+{
+  static_assert(DomainType == domain_type::linear);
+  float range = (float)(max - min);
+  for (int f = start; f < end; f++) out[f] = min + in[f] * range;
 }
 
 template <domain_type DomainType> inline plain_value
