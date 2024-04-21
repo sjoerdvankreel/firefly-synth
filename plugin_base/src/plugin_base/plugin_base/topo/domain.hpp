@@ -195,9 +195,19 @@ param_domain::plain_to_raw_fast(plain_value plain) const
 template <domain_type DomainType> inline void
 param_domain::normalized_to_raw_block(jarray<float, 1> const& in, jarray<float, 1>& out, int start, int end) const
 {
-  static_assert(DomainType == domain_type::linear);
+  static_assert(DomainType == domain_type::linear || DomainType == domain_type::log);
+
+  // this is meant to be used with mod matrix output which is already clamped
+  for(int f = start; f < end; f++) 
+    assert(0 <= in[f] && in[f] <= 1);
+
   float range = (float)(max - min);
-  for (int f = start; f < end; f++) out[f] = min + in[f] * range;
+  if constexpr (DomainType == domain_type::linear)
+    for (int f = start; f < end; f++) 
+      out[f] = min + range * in[f];
+  else
+    for (int f = start; f < end; f++)
+      out[f] = min + range * std::pow(in[f], exp);
 }
 
 template <domain_type DomainType> inline plain_value

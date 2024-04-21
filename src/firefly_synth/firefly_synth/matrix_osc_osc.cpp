@@ -417,7 +417,7 @@ osc_osc_matrix_engine::modulate_fm(
     int source_osc = block_auto[param_fm_source][r].step();
     auto const& idx_curve_plain = *(*cv_modulation)[module_osc_osc_matrix][0][param_fm_idx][r];
     auto& idx_curve = (*_own_scratch)[scratch_fm_idx];
-    normalized_to_raw_into_fast<domain_type::log>(block, module_osc_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
+    block.normalized_to_raw_block<domain_type::log>(module_osc_osc_matrix, param_fm_idx, idx_curve_plain, idx_curve);
     int source_uni_voices = block.state.all_block_automation[module_osc][source_osc][osc_param_uni_voices][0].step();
     int oversmp_stages = block.state.all_block_automation[module_voice_in][0][voice_in_param_oversmp][0].step();
     int oversmp_factor = 1 << oversmp_stages;

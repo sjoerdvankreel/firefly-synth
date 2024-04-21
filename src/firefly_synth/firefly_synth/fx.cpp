@@ -1657,7 +1657,7 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
   }
 
   auto& gain_curve = block.state.own_scratch[scratch_dist_gain_raw];
-  normalized_to_raw_into_fast<domain_type::log>(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
+  block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_gain, gain_curve_plain, gain_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) 
