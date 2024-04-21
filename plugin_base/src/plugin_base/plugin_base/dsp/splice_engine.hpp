@@ -9,7 +9,7 @@ class plugin_splice_engine final {
 
   plugin_engine _engine;
   host_block _host_block;
-  int const _splice_block_size;
+  int _splice_block_size = -1;
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_splice_engine);

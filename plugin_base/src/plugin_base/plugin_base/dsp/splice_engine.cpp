@@ -7,9 +7,7 @@ plugin_splice_engine(
   plugin_desc const* desc, bool graph,
   thread_pool_voice_processor voice_processor,
   void* voice_processor_context):
-_engine(desc, graph, voice_processor, voice_processor_context),
-_splice_block_size(desc->plugin->splice_block_size)
-{ assert(_splice_block_size >= 64); }
+_engine(desc, graph, voice_processor, voice_processor_context) {}
 
 host_block&
 plugin_splice_engine::prepare_block()
@@ -23,11 +21,25 @@ plugin_splice_engine::deactivate()
 {
   _engine.deactivate();
   _host_block.events.deactivate();
+  _splice_block_size = -1;
 }
 
 void 
 plugin_splice_engine::activate(int max_frame_count)
 {
+  // WASAPI likes multiples of 32 (160 samples = 3ms @ 48khz).
+  // Other stuff likes powers of 2. 
+  // Below 128 samples performance impact gets noticeable. So:
+  // 1) if host size < 128, go with host size
+  // 2) if host size is multiple of 128, go with 128
+  // 3) if host size is multiple of 160, go with 160
+  // 4) else just go with 128 and hope for the best
+
+  if(max_frame_count < 128) _splice_block_size = max_frame_count;
+  else if(max_frame_count % 128 == 0) _splice_block_size = 128;
+  else if(max_frame_count % 160 == 0) _splice_block_size = 160;
+  else _splice_block_size = 128;
+
   _engine.activate(_splice_block_size);
   _host_block.events.activate(false, state().desc().param_count, state().desc().midi_count, state().desc().plugin->audio_polyphony, max_frame_count);
 }

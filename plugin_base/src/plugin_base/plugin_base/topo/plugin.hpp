@@ -131,7 +131,6 @@ struct plugin_topo_gui final {
 struct plugin_topo final {
   int audio_polyphony;
   int graph_polyphony;
-  int splice_block_size;
   plugin_version version;
 
   topo_tag tag;
