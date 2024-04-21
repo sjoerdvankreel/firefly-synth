@@ -37,8 +37,8 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   std::string partition = mapping.module_index == module_master_out? "Master": "Voice";
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();
   float gain = state.get_plain_at(mapping.module_index, mapping.module_slot, param_gain, 0).real();
-  float l = stereo_balance(0, bal) * gain;
-  float r = stereo_balance(1, bal) * gain;
+  float l = stereo_balance<0>(bal) * gain;
+  float r = stereo_balance<1>(bal) * gain;
   return graph_data({ { l, r } }, { partition });
 }
 
@@ -112,8 +112,8 @@ master_audio_out_engine::process(plugin_block& block)
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_master_out, param_bal, bal_curve[f]);
-    for(int c = 0; c < 2; c++)
-      block.out->host_audio[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
+    block.out->host_audio[0][f] = audio_in[0][f] * gain_curve[f] * stereo_balance<0>(bal);
+    block.out->host_audio[1][f] = audio_in[1][f] * gain_curve[f] * stereo_balance<1>(bal);
   }
 }
 
@@ -153,8 +153,8 @@ voice_audio_out_engine::process_unison(plugin_block& block)
     if constexpr (GlobalUnison)
       voice_bal = voice_pos * glob_uni_sprd_curve[f];
     float bal = block.normalized_to_raw_fast<domain_type::linear>(module_voice_out, param_bal, bal_curve[f]);
-    for (int c = 0; c < 2; c++)
-      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal) / attn;
+    block.voice->result[0][f] = audio_in[0][f] * gain_curve[f] * amp_env[f] * stereo_balance<0>(bal) * stereo_balance<0>(voice_bal) / attn;
+    block.voice->result[1][f] = audio_in[1][f] * gain_curve[f] * amp_env[f] * stereo_balance<1>(bal) * stereo_balance<1>(voice_bal) / attn;
   }
 }
 

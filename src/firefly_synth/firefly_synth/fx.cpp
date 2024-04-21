@@ -1471,7 +1471,7 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
       for (int t = 0; t < tap_count; t++)
       {
         int lr = (t + c) % 2;
-        float tap_bal = stereo_balance(lr, spread);
+        float tap_bal = stereo_balance2(lr, spread);
         float tap_samples_t = (t + 1) * time_samples_t + hold_samples_t;
         float tap_t = tap_samples_t - (int)tap_samples_t;
         int tap_samples_0 = (int)tap_samples_t % _dly_capacity;

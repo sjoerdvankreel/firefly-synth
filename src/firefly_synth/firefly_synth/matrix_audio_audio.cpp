@@ -118,8 +118,8 @@ render_graph(
       {
         float bal = state.get_plain_at(m.module_index, m.module_slot, param_bal, r).real();
         float gain = state.get_plain_at(m.module_index, m.module_slot, param_gain, r).real();
-        float left = stereo_balance(0, bal) * gain;
-        float right = stereo_balance(1, bal) * gain;
+        float left = stereo_balance<0>(bal) * gain;
+        float right = stereo_balance<1>(bal) * gain;
         multi_stereo.push_back({ left, right });
       }
   return graph_data(multi_stereo, { targets[ti].name });
@@ -291,12 +291,12 @@ audio_audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     auto const& modulation = get_cv_audio_matrix_mixdown(block, _global);
     auto const& bal_curve = *modulation[this_module][0][param_bal][r];
     auto const& gain_curve = *modulation[this_module][0][param_gain][r];
-    for(int c = 0; c < 2; c++)
-      for(int f = block.start_frame; f < block.end_frame; f++)
-      {
-        float bal = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_bal, bal_curve[f]);
-        mix[c][f] += gain_curve[f] * stereo_balance(c, bal) * source_audio[0][0][c][f];
-      }
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      float bal = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_bal, bal_curve[f]);
+      mix[0][f] += gain_curve[f] * stereo_balance<0>(bal) * source_audio[0][0][0][f];
+      mix[1][f] += gain_curve[f] * stereo_balance<1>(bal) * source_audio[0][0][1][f];
+    }
   }
 
   return *result;

@@ -1172,8 +1172,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
         }
       }
 
-      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt(0, pan) * synced_sample;
-      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt(1, pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt<0>(pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt<1>(pan) * synced_sample;
     }
   });
   
