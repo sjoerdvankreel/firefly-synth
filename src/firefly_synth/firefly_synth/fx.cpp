@@ -449,7 +449,7 @@ fx_state_converter::handle_invalid_param_value(
   std::string const& old_value, load_handler const& handler, 
   plain_value& new_value)
 {
-  // note param ids are equal between vfx/gfx, gfx just has more
+  // note: param ids are equal between vfx/gfx, gfx just has more
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
     // mode + sync in delay got split out to separate controls
@@ -501,6 +501,17 @@ fx_state_converter::handle_invalid_param_value(
         }
     }
   }
+
+  // Max distortion oversampling got reduced from 8x to 4x.
+  // note: param ids are equal between vfx/gfx, gfx just has more
+  if (handler.old_version() < plugin_version{ 1, 7, 2 })
+    if (new_param_id == _desc->plugin->modules[module_gfx].params[param_dist_over].info.tag.id)
+      if (old_value == "{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}")
+      {
+        new_value = _desc->raw_to_plain_at(module_gfx, param_dist_over, dist_over_4);
+        return true;
+      }
+
   return false;
 }
   
