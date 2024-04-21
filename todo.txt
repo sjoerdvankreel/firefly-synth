@@ -30,11 +30,10 @@ basic osc waveform icons
 solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
+make voice count adjustable with default 16 + reallocate on switch and switch of global unison
 
 v1.7.2:
-- big pad 1 and 3 are effed and also demo track 3
-- oversampling conversion
-- make voice count adjustable with default 16 + reallocate on switch and switch of global unison
+- fix win zip archives
 - >> plus conversion on that. but that trims down to 100mb which is acceptable
 - plus make drain warning
 
