@@ -56,8 +56,8 @@ enum { section_main, section_svf_left, section_svf_right, section_comb_left, sec
 
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
-enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_count };
 enum { scratch_flt_stvar_freq, scratch_flt_stvar_kbd, scratch_flt_stvar_gain, scratch_flt_stvar_count };
 enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
 static int constexpr scratch_count = std::max({ 
@@ -260,7 +260,7 @@ public module_engine {
   template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX, class SkewY>
   void process_dist_mode_clip_shape_xy(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
-  void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
+  void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_hz, double res, float& left, float& right);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
@@ -1522,12 +1522,10 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
 
 void  
 fx_engine::dist_svf_next(plugin_block const& block, int oversmp_factor,
-  double freq_plain, double res, float& left, float& right)
+  double freq_hz, double res, float& left, float& right)
 {
   double const max_res = 0.99;
-  int this_module = _global ? module_gfx : module_vfx;
-  double hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_plain);
-  double w = pi64 * hz / (block.sample_rate * oversmp_factor);
+  double w = pi64 * freq_hz / (block.sample_rate * oversmp_factor);
   _dst_svf.init_lpf(w, res * max_res);
   left = _dst_svf.next(0, left);
   right = _dst_svf.next(1, right);
@@ -1662,11 +1660,8 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
   auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
-  auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
-  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_x_amt][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_y_amt][0];
-  auto const& clip_exp_curve_plain = *modulation[this_module][block.module_slot][param_dist_clip_exp][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(skew_x_type))
@@ -1687,7 +1682,18 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
   }
 
   auto& gain_curve = block.state.own_scratch[scratch_dist_gain_raw];
+  auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
   block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_gain, gain_curve_plain, gain_curve);
+
+  auto& freq_curve = block.state.own_scratch[scratch_dist_svf_freq];
+  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
+  if constexpr (Mode == dist_mode_b || Mode == dist_mode_c)
+    block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_lp_frq, freq_curve_plain, freq_curve);
+
+  auto& clip_exp_curve = block.state.own_scratch[scratch_dist_clip_exp];
+  auto const& clip_exp_curve_plain = *modulation[this_module][block.module_slot][param_dist_clip_exp][0];
+  if constexpr (ClipIsExp)
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain, clip_exp_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) 
@@ -1717,15 +1723,15 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_b)
-        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+        dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
       left = shape(left);
       right = shape(right);
       if constexpr (Mode == dist_mode_c)
-        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+        dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
 
       float exp = 0.0f;
       if constexpr (ClipIsExp)
-        exp = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain[mod_index]);
+        exp = clip_exp_curve[mod_index];
 
       left = clip(skew_y(left, (*y_curve)[mod_index]), exp);
       right = clip(skew_y(right, (*y_curve)[mod_index]), exp);
