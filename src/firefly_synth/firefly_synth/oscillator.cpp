@@ -20,7 +20,10 @@ namespace firefly_synth {
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
 enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
-enum { scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, scratch_count };
+enum { 
+  scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
+  scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
+  scratch_rand_freq, scratch_rand_rate, scratch_count };
 
 enum {
   param_type, param_gain, param_note, param_cent, 
@@ -982,10 +985,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
 
   auto const& dsf_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
   auto const& kps_fdbk_curve = *(*modulation)[module_osc][block.module_slot][param_kps_fdbk][0];
-  auto const& rand_rate_curve = *(*modulation)[module_osc][block.module_slot][param_rand_rate][0];
   auto const& kps_stretch_curve = *(*modulation)[module_osc][block.module_slot][param_kps_stretch][0];
   auto const& stc_res_curve = *(*modulation)[module_osc][block.module_slot][param_rand_res][0];
-  auto const& stc_freq_curve = *(*modulation)[module_osc][block.module_slot][param_rand_freq][0];
 
   auto const& pw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pw][0];
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
@@ -1017,6 +1018,16 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   if constexpr (Saw) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_saw_mix, saw_mix_curve_norm, saw_mix_curve);
   if constexpr (Tri) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_tri_mix, tri_mix_curve_norm, tri_mix_curve);
   if constexpr (Sqr) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_mix_curve_norm, sqr_mix_curve);
+
+  auto& rand_rate_curve = block.state.own_scratch[scratch_rand_rate];
+  auto& rand_freq_curve = block.state.own_scratch[scratch_rand_freq];
+  auto const& rand_rate_curve_norm = *(*modulation)[module_osc][block.module_slot][param_rand_rate][0];
+  auto const& rand_freq_curve_norm = *(*modulation)[module_osc][block.module_slot][param_rand_freq][0];
+  if constexpr (Static)
+  {
+    block.normalized_to_raw_block<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve_norm, rand_rate_curve);
+    block.normalized_to_raw_block<domain_type::log>(module_osc, param_rand_freq, rand_freq_curve_norm, rand_freq_curve);
+  }
 
   // Fill the initial buffers.
   if constexpr (KPS)
@@ -1157,10 +1168,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
 
       if constexpr (Static)
       {
-        float rand_freq_hz = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, stc_freq_curve[mod_index]);
-        float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[mod_index]);
-        float rand_rate_hz = rand_rate_pct * 0.01 * oversampled_rate;
-        synced_sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_hz, stc_res_curve[mod_index], rand_seed, rand_rate_hz);
+        float rand_rate_hz = rand_rate_curve[mod_index] * 0.01 * oversampled_rate;
+        synced_sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_curve[mod_index], stc_res_curve[mod_index], rand_seed, rand_rate_hz);
       }
 
       increment_and_wrap_phase(_sync_phases[v], inc_sync);
