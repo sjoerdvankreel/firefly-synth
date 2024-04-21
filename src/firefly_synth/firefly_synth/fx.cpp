@@ -58,10 +58,11 @@ enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
 enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
 enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
+enum { scratch_flt_stvar_freq, scratch_flt_stvar_kbd, scratch_flt_stvar_gain, scratch_flt_stvar_count };
 enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
 static int constexpr scratch_count = std::max({ 
   (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, 
-  (int)scratch_reverb_count, (int)scratch_flt_comb_gain_count });
+  (int)scratch_reverb_count, (int)scratch_flt_comb_gain_count, (int)scratch_flt_stvar_count });
 
 enum { param_type,
   param_svf_mode, param_svf_kbd, param_svf_gain, param_svf_freq, param_svf_res,
@@ -1338,18 +1339,26 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
   int this_module = _global ? module_gfx : module_vfx;
 
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
-  auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
-  auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
-  auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
   auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
-
   double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
+
+  auto const& kbd_curve_norm = *modulation[this_module][block.module_slot][param_svf_kbd][0];
+  auto& kbd_curve = block.state.own_scratch[scratch_flt_stvar_kbd];
+  block.normalized_to_raw_block<domain_type::linear>(this_module, param_svf_kbd, kbd_curve_norm, kbd_curve);
+
+  auto const& freq_curve_norm = *modulation[this_module][block.module_slot][param_svf_freq][0];
+  auto& freq_curve = block.state.own_scratch[scratch_flt_stvar_freq];
+  block.normalized_to_raw_block<domain_type::log>(this_module, param_svf_freq, freq_curve_norm, freq_curve);
+
+  auto const& gain_curve_norm = *modulation[this_module][block.module_slot][param_svf_gain][0];
+  auto& gain_curve = block.state.own_scratch[scratch_flt_stvar_gain];
+  block.normalized_to_raw_block<domain_type::linear>(this_module, param_svf_gain, gain_curve_norm, gain_curve);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_curve[f]);
-    kbd = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_kbd, kbd_curve[f]);
-    gain = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_gain, gain_curve[f]);
+    hz = freq_curve[f];
+    kbd = kbd_curve[f];
+    gain = gain_curve[f];
 
     // correct keyboard tracking for global unison
     double kbd_trk = kbd_trk_base;
