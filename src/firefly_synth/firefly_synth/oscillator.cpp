@@ -20,9 +20,7 @@ namespace firefly_synth {
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
 enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
-
-enum { scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, scratch_basic_count };
-static int constexpr scratch_count = std::max({ (int)scratch_basic_count });
+enum { scratch_pb, scratch_cent, scratch_pitch, scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, scratch_count };
 
 enum {
   param_type, param_gain, param_note, param_cent, 
@@ -980,10 +978,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
   float uni_voice_range = uni_voices == 1 ? 1.0f : (float)(uni_voices - 1);
 
-  auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
-  auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *(*modulation)[module_osc][block.module_slot][param_gain][0];
-  auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
 
   auto const& dsf_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
   auto const& kps_fdbk_curve = *(*modulation)[module_osc][block.module_slot][param_kps_fdbk][0];
@@ -998,16 +993,24 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   auto const& sync_semis_curve = *(*modulation)[module_osc][block.module_slot][param_hard_sync_semis][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
+  auto& pb_curve = block.state.own_scratch[scratch_pb];
+  auto& cent_curve = block.state.own_scratch[scratch_cent];
+  auto& pitch_curve = block.state.own_scratch[scratch_pitch];
+  auto const& pb_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pb][0];
+  auto const& cent_curve_norm = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& pitch_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
+  block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pb, pb_curve_norm, pb_curve);
+  block.normalized_to_raw_block<domain_type::linear>(module_osc, param_cent, cent_curve_norm, cent_curve);
+  block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pitch, pitch_curve_norm, pitch_curve);
+
   auto& sin_mix_curve = block.state.own_scratch[scratch_basic_sin_mix];
   auto& saw_mix_curve = block.state.own_scratch[scratch_basic_saw_mix];
   auto& tri_mix_curve = block.state.own_scratch[scratch_basic_tri_mix];
-  auto& sqr_mix_curve = block.state.own_scratch[scratch_basic_sqr_mix];
-  
+  auto& sqr_mix_curve = block.state.own_scratch[scratch_basic_sqr_mix];  
   auto const& sin_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
   auto const& saw_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
   auto const& tri_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
-  auto const& sqr_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
-  
+  auto const& sqr_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];  
   if constexpr (Sin) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sin_mix, sin_mix_curve_norm, sin_mix_curve);
   if constexpr (Saw) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_saw_mix, saw_mix_curve_norm, saw_mix_curve);
   if constexpr (Tri) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_tri_mix, tri_mix_curve_norm, tri_mix_curve);
@@ -1054,17 +1057,15 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     // so mind the bookkeeping
     int mod_index = block.start_frame + frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
-    float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[mod_index]);
-    float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[mod_index]);
-    float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[mod_index]);
+    float base_pb = pb_curve[mod_index];
+    float base_cent = cent_curve[mod_index];
+    float base_pitch_auto = pitch_curve[mod_index];
     float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[mod_index];
     float base_pitch_sync = base_pitch_ref;
     (void)base_pitch_sync;
 
     if constexpr (Sync)
-    {
       base_pitch_sync += block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve[mod_index]);
-    }
 
     float detune_apply = uni_dtn_curve[mod_index] * uni_voice_apply * 0.5f;
     float spread_apply = uni_sprd_curve[mod_index] * uni_voice_apply * 0.5f;
