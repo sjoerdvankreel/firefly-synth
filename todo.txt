@@ -34,6 +34,7 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 
 v1.7.2:
+- test the fx
 - fix win zip archives
 
 v1.7.3
