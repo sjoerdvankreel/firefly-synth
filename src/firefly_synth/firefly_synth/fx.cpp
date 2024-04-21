@@ -46,7 +46,7 @@ static float const reverb_comb_length[reverb_comb_count] = {
 
 enum { dly_mode_fdbk, dly_mode_multi };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
-enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
+enum { dist_over_1, dist_over_2, dist_over_4 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };

@@ -5,6 +5,7 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
@@ -14,7 +15,7 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { output_pitch_offset };
-enum { over_1, over_2, over_4, over_8 };
+enum { over_1, over_2, over_4 };
 enum { porta_off, porta_on, porta_auto };
 enum { section_left, section_sync, section_mid, section_right };
 
@@ -56,6 +57,21 @@ over_items()
   return result;
 }
 
+class voice_in_state_converter :
+public state_converter
+{
+  plugin_desc const* const _desc;
+public:
+  voice_in_state_converter(plugin_desc const* const desc) : _desc(desc) {}
+  void post_process(load_handler const& handler, plugin_state& new_state) override {}
+
+  bool handle_invalid_param_value(
+    std::string const& new_module_id, int new_module_slot,
+    std::string const& new_param_id, int new_param_slot,
+    std::string const& old_value, load_handler const& handler,
+    plain_value& new_value) override;
+};
+
 class voice_in_engine :
 public module_engine {
   int _position = -1;
@@ -86,6 +102,25 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   return graph_data(graph_data_type::na, {});
 }
 
+bool
+voice_in_state_converter::handle_invalid_param_value(
+  std::string const& new_module_id, int new_module_slot,
+  std::string const& new_param_id, int new_param_slot,
+  std::string const& old_value, load_handler const& handler,
+  plain_value& new_value)
+{
+  // Max osc oversampling got reduced from 8x to 4x.
+  if (handler.old_version() < plugin_version{ 1, 7, 2 })
+    if (new_param_id == _desc->plugin->modules[module_voice_in].params[param_oversmp].info.tag.id)
+      if (old_value == "{9C6E560D-4999-40D9-85E4-C02468296206}")
+      {
+        new_value = _desc->raw_to_plain_at(module_voice_in, param_oversmp, over_4);
+        return true;
+      }
+
+  return false;
+}
+
 module_topo
 voice_in_topo(int section, gui_position const& pos)
 {
@@ -100,6 +135,7 @@ voice_in_topo(int section, gui_position const& pos)
   result.force_rerender_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_in_engine>(); };
+  result.state_converter_factory = [](auto desc) { return std::make_unique<voice_in_state_converter>(desc); };
 
   result.sections.emplace_back(make_param_section(section_left,
     make_topo_tag_basic("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Left"),
