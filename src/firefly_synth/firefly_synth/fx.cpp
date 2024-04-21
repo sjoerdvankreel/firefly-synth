@@ -55,8 +55,8 @@ enum { section_main, section_svf_left, section_svf_right, section_comb_left, sec
   section_dist_right, section_delay_sync, section_delay_left, section_delay_right, section_reverb_left, section_reverb_right };
 
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
-enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
+enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_sprd, scratch_dly_multi_count };
 enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_count };
 enum { scratch_flt_stvar_freq, scratch_flt_stvar_kbd, scratch_flt_stvar_gain, scratch_flt_stvar_count };
 enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
@@ -1470,7 +1470,10 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
   auto& hold_curve = block.state.own_scratch[scratch_dly_multi_hold];
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
-  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
+
+  auto& spread_curve = block.state.own_scratch[scratch_dly_multi_sprd];
+  auto const& spread_curve_norm = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
+  block.normalized_to_raw_block<domain_type::linear>(module_gfx, param_dly_sprd, spread_curve_norm, spread_curve);
   
   if constexpr (Sync)
   {
@@ -1490,9 +1493,9 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    float spread = spread_curve[f];
     float time_samples_t = time_curve[f] * block.sample_rate;
     float hold_samples_t = hold_curve[f] * block.sample_rate;
-    float spread = block.normalized_to_raw_fast<domain_type::linear>(module_gfx, param_dly_sprd, spread_curve[f]);
 
     for (int c = 0; c < 2; c++)
     {
