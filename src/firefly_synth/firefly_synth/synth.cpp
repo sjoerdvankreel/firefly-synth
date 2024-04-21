@@ -344,7 +344,8 @@ synth_topo(bool is_fx)
   result->voice_mode_param = voice_in_param_mode;
 
   result->graph_polyphony = 1;
-  result->splice_block_size = 128; // memory/cpu tradeoff
+  // TODO just testing for wasapi exclusive which likes 160 block size/3ms @ 48k
+  result->splice_block_size = 160; // memory/cpu tradeoff
   result->audio_polyphony = 32 * max_global_unison_voices;
   result->sub_voice_counter = [](bool graph, plugin_state const& state) 
   {

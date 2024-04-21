@@ -36,6 +36,7 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 v1.7.2:
 - fix win zip archives
 - re-test midi events
+- better block size tuning 
 
 v1.7.3
 - allow to disable env 1, use external env ?
