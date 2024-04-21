@@ -36,17 +36,18 @@ void
 plugin_splice_engine::process()
 {
   // process in blocks of splice_size, plus 1 times remaining
-  int min_block_frames = _splice_block_size;
-  int min_block_count = _host_block.frame_count / min_block_frames;
-  int rest_block_frames = _host_block.frame_count - min_block_count * min_block_frames;
-  assert(min_block_count * min_block_frames + rest_block_frames == _host_block.frame_count);
-  int total_block_count = min_block_count + (rest_block_frames == 0? 0: 1);
+  int spliced_block_frames = _splice_block_size;
+  int spliced_block_count = _host_block.frame_count / spliced_block_frames;
+  int rest_block_frames = _host_block.frame_count - spliced_block_count * spliced_block_frames;
+  assert(rest_block_frames < spliced_block_frames);
+  assert(spliced_block_count * spliced_block_frames + rest_block_frames == _host_block.frame_count);
+  int total_block_count = spliced_block_count + (rest_block_frames == 0? 0: 1);
 
   _host_block.events.out.clear();
   for (int i = 0; i < total_block_count; i++)
   {
-    int this_block_start = i * min_block_frames;
-    int this_block_frames = i < min_block_count? min_block_frames: rest_block_frames;
+    int this_block_start = i * spliced_block_frames;
+    int this_block_frames = i < spliced_block_count? spliced_block_frames: rest_block_frames;
 
     auto& inner_block = _engine.prepare_block();
     inner_block.frame_count = this_block_frames;
@@ -96,10 +97,7 @@ plugin_splice_engine::process()
         inner_block.events.notes.push_back(e);
       }
 
-    // process sub block and copy over audio and out events
     _engine.process();
-    std::copy(inner_block.audio_out[0], inner_block.audio_out[0] + this_block_frames, _host_block.audio_out[0] + this_block_start);
-    std::copy(inner_block.audio_out[1], inner_block.audio_out[1] + this_block_frames, _host_block.audio_out[1] + this_block_start);
     _host_block.events.out.insert(_host_block.events.out.begin(), inner_block.events.out.begin(), inner_block.events.out.end());
     _engine.release_block();
   }
