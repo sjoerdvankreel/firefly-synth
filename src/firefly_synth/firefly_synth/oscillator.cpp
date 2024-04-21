@@ -20,7 +20,7 @@ namespace firefly_synth {
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
 enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
-enum { scratch_pb, scratch_cent, scratch_pitch, scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, scratch_count };
+enum { scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, scratch_count };
 
 enum {
   param_type, param_gain, param_note, param_cent, 
@@ -990,18 +990,20 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   auto const& pw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pw][0];
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
-  auto const& sync_semis_curve = *(*modulation)[module_osc][block.module_slot][param_hard_sync_semis][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
 
   auto& pb_curve = block.state.own_scratch[scratch_pb];
   auto& cent_curve = block.state.own_scratch[scratch_cent];
   auto& pitch_curve = block.state.own_scratch[scratch_pitch];
+  auto& sync_semis_curve = block.state.own_scratch[scratch_sync_semi];
   auto const& pb_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pb][0];
   auto const& cent_curve_norm = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& pitch_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
+  auto const& sync_semis_curve_norm = *(*modulation)[module_osc][block.module_slot][param_hard_sync_semis][0];
   block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pb, pb_curve_norm, pb_curve);
   block.normalized_to_raw_block<domain_type::linear>(module_osc, param_cent, cent_curve_norm, cent_curve);
   block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pitch, pitch_curve_norm, pitch_curve);
+  if constexpr(Sync) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve_norm, sync_semis_curve);
 
   auto& sin_mix_curve = block.state.own_scratch[scratch_basic_sin_mix];
   auto& saw_mix_curve = block.state.own_scratch[scratch_basic_saw_mix];
@@ -1064,8 +1066,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     float base_pitch_sync = base_pitch_ref;
     (void)base_pitch_sync;
 
-    if constexpr (Sync)
-      base_pitch_sync += block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve[mod_index]);
+    if constexpr (Sync) base_pitch_sync += sync_semis_curve[mod_index];
 
     float detune_apply = uni_dtn_curve[mod_index] * uni_voice_apply * 0.5f;
     float spread_apply = uni_sprd_curve[mod_index] * uni_voice_apply * 0.5f;
