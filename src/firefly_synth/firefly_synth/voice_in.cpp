@@ -17,6 +17,7 @@ namespace firefly_synth {
 enum { output_pitch_offset };
 enum { over_1, over_2, over_4 };
 enum { porta_off, porta_on, porta_auto };
+enum { scratch_pb, scratch_cent, scratch_pitch, scratch_count };
 enum { section_left, section_sync, section_mid, section_right };
 
 enum {
@@ -126,7 +127,7 @@ voice_in_topo(int section, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "VIn", module_voice_in, 1),
-    make_module_dsp(module_stage::voice, module_output::cv, 0, {
+    make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 32, 13, 34, 63 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.";
@@ -290,12 +291,20 @@ voice_in_engine::process_mode_unison(plugin_block& block)
   int porta_mode = block_auto[param_porta][0].step();
 
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
-  auto const& pb_curve = *(modulation)[module_voice_in][0][param_pb][0];
-  auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
-  auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  
-
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
   auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+
+  auto const& pb_curve_norm = *(modulation)[module_voice_in][0][param_pb][0];
+  auto& pb_curve = block.state.own_scratch[scratch_pb];
+  block.normalized_to_raw_block<domain_type::linear>(module_voice_in, param_pb, pb_curve_norm, pb_curve);
+
+  auto const& cent_curve_norm = *(modulation)[module_voice_in][0][param_cent][0];
+  auto& cent_curve = block.state.own_scratch[scratch_cent];
+  block.normalized_to_raw_block<domain_type::linear>(module_voice_in, param_cent, cent_curve_norm, cent_curve);
+
+  auto const& pitch_curve_norm = *(modulation)[module_voice_in][0][param_pitch][0];
+  auto& pitch_curve = block.state.own_scratch[scratch_pitch];
+  block.normalized_to_raw_block<domain_type::linear>(module_voice_in, param_pitch, pitch_curve_norm, pitch_curve);
   
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -335,12 +344,11 @@ voice_in_engine::process_mode_unison(plugin_block& block)
     }
 
     float porta_note = 0;
-    float pb = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pb, pb_curve[f]);
-    float cent = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_cent, cent_curve[f]);
-    float pitch = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pitch, pitch_curve[f]);
     if(_position == _porta_samples) porta_note = _to_note_pitch;
     else porta_note = _from_note_pitch + (_position++ / (float)_porta_samples * (_to_note_pitch - _from_note_pitch));
-    block.state.own_cv[output_pitch_offset][0][f] = (note + cent + glob_uni_detune - midi_middle_c) + (porta_note - midi_middle_c) + pitch + pb * master_pb_range;
+    block.state.own_cv[output_pitch_offset][0][f] = 
+      (note + cent_curve[f] + glob_uni_detune - midi_middle_c) + 
+      (porta_note - midi_middle_c) + pitch_curve[f] + pb_curve[f] * master_pb_range;
   }
 }
 
