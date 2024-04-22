@@ -1,6 +1,7 @@
-### ?, ? - V1.7.2.
+### April 22, 2024 - V1.7.2.
 
 - Updated dependencies to latest (juce, vst3, clap).
+- Bugfix: the windows .zip archives are now actually .zip archives, not zipped .tar files.
 - Breaking change: reduced max oversampling to 4x to cut down on memory usage.
 - Breaking change: reduced max voice count from 128 to 64 (more memory cutdown). Global unison voices also come out of the 64 available!
 - Split up internal processing into multiple fixed size buffers to not have memory usage dependent on the host buffer size.
