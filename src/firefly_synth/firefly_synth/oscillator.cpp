@@ -20,6 +20,10 @@ namespace firefly_synth {
 enum { type_off, type_basic, type_dsf, type_kps1, type_kps2, type_static };
 enum { rand_svf_lpf, rand_svf_hpf, rand_svf_bpf, rand_svf_bsf, rand_svf_peq };
 enum { section_type, section_sync_params, section_sync_on, section_uni, section_basic, section_basic_pw, section_dsf, section_rand };
+enum { 
+  scratch_pb, scratch_cent, scratch_pitch, scratch_sync_semi, 
+  scratch_basic_sin_mix, scratch_basic_saw_mix, scratch_basic_tri_mix, scratch_basic_sqr_mix, 
+  scratch_rand_freq, scratch_rand_rate, scratch_count };
 
 enum {
   param_type, param_gain, param_note, param_cent, 
@@ -266,7 +270,7 @@ osc_topo(int section, gui_position const& pos)
 { 
   module_topo result(make_module(
     make_topo_info("{45C2CCFE-48D9-4231-A327-319DAE5C9366}", true, "Oscillator", "Oscillator", "Osc", module_osc, 5),
-    make_module_dsp(module_stage::voice, module_output::audio, 0, {
+    make_module_dsp(module_stage::voice, module_output::audio, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{FA702356-D73E-4438-8127-0FDD01526B7E}", "Output", 0, 1 + max_osc_unison_voices)) }),
     make_module_gui(section, pos, { { 1, 1 }, { 32, 13, 8, 26, 55, 8 } })));
   result.info.description = "Oscillator module with sine/saw/triangle/square/DSF/Karplus-Strong/noise generators, hardsync and unison support.";
@@ -977,28 +981,53 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
   float uni_voice_apply = uni_voices == 1 ? 0.0f : 1.0f;
   float uni_voice_range = uni_voices == 1 ? 1.0f : (float)(uni_voices - 1);
 
-  auto const& pb_curve = *(*modulation)[module_osc][block.module_slot][param_pb][0];
-  auto const& cent_curve = *(*modulation)[module_osc][block.module_slot][param_cent][0];
   auto const& gain_curve = *(*modulation)[module_osc][block.module_slot][param_gain][0];
-  auto const& pitch_curve = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
 
   auto const& dsf_dcy_curve = *(*modulation)[module_osc][block.module_slot][param_dsf_dcy][0];
   auto const& kps_fdbk_curve = *(*modulation)[module_osc][block.module_slot][param_kps_fdbk][0];
-  auto const& rand_rate_curve = *(*modulation)[module_osc][block.module_slot][param_rand_rate][0];
   auto const& kps_stretch_curve = *(*modulation)[module_osc][block.module_slot][param_kps_stretch][0];
   auto const& stc_res_curve = *(*modulation)[module_osc][block.module_slot][param_rand_res][0];
-  auto const& stc_freq_curve = *(*modulation)[module_osc][block.module_slot][param_rand_freq][0];
 
   auto const& pw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_pw][0];
-  auto const& sin_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
-  auto const& saw_curve = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
-  auto const& tri_curve = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
-  auto const& sqr_curve = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];
-
   auto const& uni_dtn_curve = *(*modulation)[module_osc][block.module_slot][param_uni_dtn][0];
   auto const& uni_sprd_curve = *(*modulation)[module_osc][block.module_slot][param_uni_sprd][0];
-  auto const& sync_semis_curve = *(*modulation)[module_osc][block.module_slot][param_hard_sync_semis][0];
   auto const& voice_pitch_offset_curve = block.voice->all_cv[module_voice_in][0][voice_in_output_pitch_offset][0];
+
+  auto& pb_curve = block.state.own_scratch[scratch_pb];
+  auto& cent_curve = block.state.own_scratch[scratch_cent];
+  auto& pitch_curve = block.state.own_scratch[scratch_pitch];
+  auto& sync_semis_curve = block.state.own_scratch[scratch_sync_semi];
+  auto const& pb_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pb][0];
+  auto const& cent_curve_norm = *(*modulation)[module_osc][block.module_slot][param_cent][0];
+  auto const& pitch_curve_norm = *(*modulation)[module_osc][block.module_slot][param_pitch][0];
+  auto const& sync_semis_curve_norm = *(*modulation)[module_osc][block.module_slot][param_hard_sync_semis][0];
+  block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pb, pb_curve_norm, pb_curve);
+  block.normalized_to_raw_block<domain_type::linear>(module_osc, param_cent, cent_curve_norm, cent_curve);
+  block.normalized_to_raw_block<domain_type::linear>(module_osc, param_pitch, pitch_curve_norm, pitch_curve);
+  if constexpr(Sync) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve_norm, sync_semis_curve);
+
+  auto& sin_mix_curve = block.state.own_scratch[scratch_basic_sin_mix];
+  auto& saw_mix_curve = block.state.own_scratch[scratch_basic_saw_mix];
+  auto& tri_mix_curve = block.state.own_scratch[scratch_basic_tri_mix];
+  auto& sqr_mix_curve = block.state.own_scratch[scratch_basic_sqr_mix];  
+  auto const& sin_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sin_mix][0];
+  auto const& saw_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_saw_mix][0];
+  auto const& tri_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_tri_mix][0];
+  auto const& sqr_mix_curve_norm = *(*modulation)[module_osc][block.module_slot][param_basic_sqr_mix][0];  
+  if constexpr (Sin) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sin_mix, sin_mix_curve_norm, sin_mix_curve);
+  if constexpr (Saw) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_saw_mix, saw_mix_curve_norm, saw_mix_curve);
+  if constexpr (Tri) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_tri_mix, tri_mix_curve_norm, tri_mix_curve);
+  if constexpr (Sqr) block.normalized_to_raw_block<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_mix_curve_norm, sqr_mix_curve);
+
+  auto& rand_rate_curve = block.state.own_scratch[scratch_rand_rate];
+  auto& rand_freq_curve = block.state.own_scratch[scratch_rand_freq];
+  auto const& rand_rate_curve_norm = *(*modulation)[module_osc][block.module_slot][param_rand_rate][0];
+  auto const& rand_freq_curve_norm = *(*modulation)[module_osc][block.module_slot][param_rand_freq][0];
+  if constexpr (Static)
+  {
+    block.normalized_to_raw_block<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve_norm, rand_rate_curve);
+    block.normalized_to_raw_block<domain_type::log>(module_osc, param_rand_freq, rand_freq_curve_norm, rand_freq_curve);
+  }
 
   // Fill the initial buffers.
   if constexpr (KPS)
@@ -1041,17 +1070,14 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
     // so mind the bookkeeping
     int mod_index = block.start_frame + frame / oversmp_factor;
     float oversampled_rate = block.sample_rate * oversmp_factor;
-    float base_pb = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pb, pb_curve[mod_index]);
-    float base_cent = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_cent, cent_curve[mod_index]);
-    float base_pitch_auto = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_pitch, pitch_curve[mod_index]);
+    float base_pb = pb_curve[mod_index];
+    float base_cent = cent_curve[mod_index];
+    float base_pitch_auto = pitch_curve[mod_index];
     float base_pitch_ref = note + base_cent + base_pitch_auto + base_pb * master_pb_range + voice_pitch_offset_curve[mod_index];
     float base_pitch_sync = base_pitch_ref;
     (void)base_pitch_sync;
 
-    if constexpr (Sync)
-    {
-      base_pitch_sync += block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_hard_sync_semis, sync_semis_curve[mod_index]);
-    }
+    if constexpr (Sync) base_pitch_sync += sync_semis_curve[mod_index];
 
     float detune_apply = uni_dtn_curve[mod_index] * uni_voice_apply * 0.5f;
     float spread_apply = uni_sprd_curve[mod_index] * uni_voice_apply * 0.5f;
@@ -1096,17 +1122,6 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
 
       float pan = min_pan + (max_pan - min_pan) * v / uni_voice_range;
 
-      // generated the synced sample
-      float saw_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_saw_mix, saw_curve[mod_index]);
-      float sin_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sin_mix, sin_curve[mod_index]);
-      float tri_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_tri_mix, tri_curve[mod_index]);
-      float sqr_mix = block.normalized_to_raw_fast<domain_type::linear>(module_osc, param_basic_sqr_mix, sqr_curve[mod_index]);
-
-      (void)saw_mix;
-      (void)sin_mix;
-      (void)tri_mix;
-      (void)sqr_mix;
-
       if constexpr (!KPS && !Static)
       {
         // FM is oversampled, so frame, not mod_index!
@@ -1117,10 +1132,10 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
         assert(0 <= _sync_phases[v] && _sync_phases[v] < 1);
       }
 
-      if constexpr (Saw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * saw_mix;
-      if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix;
-      if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix;
-      if constexpr (Sqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix;
+      if constexpr (Saw) synced_sample += generate_saw(_sync_phases[v], inc_sync) * saw_mix_curve[mod_index];
+      if constexpr (Sin) synced_sample += std::sin(2.0f * pi32 * _sync_phases[v]) * sin_mix_curve[mod_index];
+      if constexpr (Tri) synced_sample += generate_triangle(_sync_phases[v], inc_sync) * tri_mix_curve[mod_index];
+      if constexpr (Sqr) synced_sample += generate_sqr(_sync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix_curve[mod_index];
       if constexpr (DSF) synced_sample = generate_dsf(_sync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
       // generate the unsynced sample and crossover
@@ -1137,10 +1152,10 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
           if (_unsync_phases[v] == 1) _unsync_phases[v] = 0; // this could be more efficient?
           assert(0 <= _unsync_phases[v] && _unsync_phases[v] < 1);
 
-          if constexpr (Saw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * saw_mix;
-          if constexpr (Sin) unsynced_sample += std::sin(2.0f * pi32 * _unsync_phases[v]) * sin_mix;
-          if constexpr (Tri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * tri_mix;
-          if constexpr (Sqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix;
+          if constexpr (Saw) unsynced_sample += generate_saw(_unsync_phases[v], inc_sync) * saw_mix_curve[mod_index];
+          if constexpr (Sin) unsynced_sample += std::sin(2.0f * pi32 * _unsync_phases[v]) * sin_mix_curve[mod_index];
+          if constexpr (Tri) unsynced_sample += generate_triangle(_unsync_phases[v], inc_sync) * tri_mix_curve[mod_index];
+          if constexpr (Sqr) unsynced_sample += generate_sqr(_unsync_phases[v], inc_sync, pw_curve[mod_index]) * sqr_mix_curve[mod_index];
           if constexpr (DSF) unsynced_sample = generate_dsf(_unsync_phases[v], inc_sync, oversampled_rate, freq_sync, dsf_parts, dsf_dist, dsf_dcy_curve[mod_index]);
 
           increment_and_wrap_phase(_unsync_phases[v], inc_sync);
@@ -1153,10 +1168,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
 
       if constexpr (Static)
       {
-        float rand_freq_hz = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_freq, stc_freq_curve[mod_index]);
-        float rand_rate_pct = block.normalized_to_raw_fast<domain_type::log>(module_osc, param_rand_rate, rand_rate_curve[mod_index]);
-        float rand_rate_hz = rand_rate_pct * 0.01 * oversampled_rate;
-        synced_sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_hz, stc_res_curve[mod_index], rand_seed, rand_rate_hz);
+        float rand_rate_hz = rand_rate_curve[mod_index] * 0.01 * oversampled_rate;
+        synced_sample = generate_static<StaticSVFType>(v, oversampled_rate, rand_freq_curve[mod_index], stc_res_curve[mod_index], rand_seed, rand_rate_hz);
       }
 
       increment_and_wrap_phase(_sync_phases[v], inc_sync);
@@ -1172,8 +1185,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
         }
       }
 
-      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt(0, pan) * synced_sample;
-      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt(1, pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt<0>(pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt<1>(pan) * synced_sample;
     }
   });
   

@@ -343,9 +343,10 @@ synth_topo(bool is_fx)
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 
+  // this is INCLUDING global unison!
+  result->audio_polyphony = 64;
   result->graph_polyphony = 1;
-  result->audio_polyphony = 32 * max_global_unison_voices;
-  result->sub_voice_counter = [](bool graph, plugin_state const& state) 
+  result->sub_voice_counter = [](bool graph, plugin_state const& state)
   {
     // Global unison needs some help from plugin_base as we treat 
     // those voices just like regular polyphonic voices.

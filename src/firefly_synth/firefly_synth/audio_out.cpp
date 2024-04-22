@@ -11,6 +11,7 @@ namespace firefly_synth {
 
 enum { section_main };
 enum { param_gain, param_bal };
+enum { scratch_bal, scratch_count };
 
 class master_audio_out_engine :
 public module_engine {
@@ -37,8 +38,8 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   std::string partition = mapping.module_index == module_master_out? "Master": "Voice";
   float bal = state.get_plain_at(mapping.module_index, mapping.module_slot, param_bal, 0).real();
   float gain = state.get_plain_at(mapping.module_index, mapping.module_slot, param_gain, 0).real();
-  float l = stereo_balance(0, bal) * gain;
-  float r = stereo_balance(1, bal) * gain;
+  float l = stereo_balance<0>(bal) * gain;
+  float r = stereo_balance<1>(bal) * gain;
   return graph_data({ { l, r } }, { partition });
 }
 
@@ -53,7 +54,7 @@ audio_out_topo(int section, gui_position const& pos, bool global, bool is_fx)
   auto const info = topo_info(global ? master_info : voice_info);
 
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::none, 0, {}),
+    make_module_dsp(stage, module_output::none, scratch_count, {}),
     make_module_gui(section, pos, { 1, 1 })));
 
   result.graph_renderer = render_graph;
@@ -106,14 +107,15 @@ master_audio_out_engine::process(plugin_block& block)
   auto& mixer = get_audio_audio_matrix_mixer(block, true);
   auto const& audio_in = mixer.mix(block, module_master_out, 0);
   auto const& modulation = get_cv_audio_matrix_mixdown(block, true);
-  auto const& bal_curve = *modulation[module_master_out][0][param_bal][0];
+  auto const& bal_curve_norm = *modulation[module_master_out][0][param_bal][0];
   auto const& gain_curve = *modulation[module_master_out][0][param_gain][0];
 
+  auto& bal_curve = block.state.own_scratch[scratch_bal];
+  block.normalized_to_raw_block<domain_type::linear>(module_master_out, param_bal, bal_curve_norm, bal_curve);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    float bal = block.normalized_to_raw_fast<domain_type::linear>(module_master_out, param_bal, bal_curve[f]);
-    for(int c = 0; c < 2; c++)
-      block.out->host_audio[c][f] = audio_in[c][f] * gain_curve[f] * stereo_balance(c, bal);
+    block.out->host_audio[0][f] = audio_in[0][f] * gain_curve[f] * stereo_balance<0>(bal_curve[f]);
+    block.out->host_audio[1][f] = audio_in[1][f] * gain_curve[f] * stereo_balance<1>(bal_curve[f]);
   }
 }
 
@@ -134,8 +136,8 @@ voice_audio_out_engine::process_unison(plugin_block& block)
   auto const& audio_in = mixer.mix(block, module_voice_out, 0);
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
   auto const& amp_env = block.voice->all_cv[module_env][0][0][0];
-  auto const& bal_curve = *modulation[module_voice_out][0][param_bal][0];
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
+  auto const& bal_curve_norm = *modulation[module_voice_out][0][param_bal][0];
   auto const& glob_uni_sprd_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
 
   float attn = 1.0f;
@@ -148,13 +150,14 @@ voice_audio_out_engine::process_unison(plugin_block& block)
     voice_pos = unipolar_to_bipolar(voice_pos);
   }
 
+  auto& bal_curve = block.state.own_scratch[scratch_bal];
+  block.normalized_to_raw_block<domain_type::linear>(module_master_out, param_bal, bal_curve_norm, bal_curve);
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if constexpr (GlobalUnison)
       voice_bal = voice_pos * glob_uni_sprd_curve[f];
-    float bal = block.normalized_to_raw_fast<domain_type::linear>(module_voice_out, param_bal, bal_curve[f]);
-    for (int c = 0; c < 2; c++)
-      block.voice->result[c][f] = audio_in[c][f] * gain_curve[f] * amp_env[f] * stereo_balance(c, bal) * stereo_balance(c, voice_bal) / attn;
+    block.voice->result[0][f] = audio_in[0][f] * gain_curve[f] * amp_env[f] * stereo_balance<0>(bal_curve[f]) * stereo_balance<0>(voice_bal) / attn;
+    block.voice->result[1][f] = audio_in[1][f] * gain_curve[f] * amp_env[f] * stereo_balance<1>(bal_curve[f]) * stereo_balance<1>(voice_bal) / attn;
   }
 }
 

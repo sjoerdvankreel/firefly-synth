@@ -25,7 +25,7 @@ static int constexpr gaudio_route_count = 20;
 static int constexpr max_audio_route_count = std::max(vaudio_route_count, gaudio_route_count);
 
 enum { section_main };
-enum { transform_source_scratch, scratch_count };
+enum { scratch_transform_source, scratch_offset, scratch_scale, scratch_count };
 enum { param_type, param_source, param_target, param_offset, param_scale, param_min, param_max };
 enum { type_off, type_mul_abs, type_mul_rel, type_mul_stk, type_add_abs, type_add_rel, type_add_stk, type_ab_abs, type_ab_rel, type_ab_stk };
 
@@ -630,26 +630,26 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
 
     // pre-transform source signal, 
     // cv->cv matrix can modulate transformation params (scale/offset) of the cv->audio matrix
-    jarray<float, 1> const* scale_curve = nullptr;
-    jarray<float, 1> const* offset_curve = nullptr;
+    jarray<float, 1> const* scale_curve_norm = nullptr;
+    jarray<float, 1> const* offset_curve_norm = nullptr;
     if (_cv)
     {
-      scale_curve = &(*_own_accurate_automation)[param_scale][r];
-      offset_curve = &(*_own_accurate_automation)[param_offset][r];
+      scale_curve_norm = &(*_own_accurate_automation)[param_scale][r];
+      offset_curve_norm = &(*_own_accurate_automation)[param_offset][r];
     }
     else
     {
-      scale_curve = (*modulation)[param_scale][r];
-      offset_curve = (*modulation)[param_offset][r];
+      scale_curve_norm = (*modulation)[param_scale][r];
+      offset_curve_norm = (*modulation)[param_offset][r];
     }
 
-    auto& transformed_source = (*_own_scratch)[transform_source_scratch];
+    auto& scale_curve = (*_own_scratch)[scratch_scale];
+    auto& offset_curve = (*_own_scratch)[scratch_offset];
+    auto& transformed_source = (*_own_scratch)[scratch_transform_source];
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_scale, *scale_curve_norm, scale_curve);
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_offset, *offset_curve_norm, offset_curve);
     for (int f = block.start_frame; f < block.end_frame; f++)
-    {
-      float scale = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_scale, (*scale_curve)[f]);
-      float offset = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_offset, (*offset_curve)[f]);
-      transformed_source[f] = std::clamp((offset + source_curve[f]) * scale, 0.0f, 1.0f);
-    }
+      transformed_source[f] = std::clamp((offset_curve[f] + source_curve[f]) * scale_curve[f], 0.0f, 1.0f);
 
     // apply modulation
     // cv->cv matrix can modulate modulation params (min/max) of the cv->audio matrix

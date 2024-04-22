@@ -18,6 +18,7 @@ namespace firefly_synth {
 static int const route_count = 20;
 
 enum { section_main };
+enum { scratch_bal, scratch_count };
 enum { output_silence, output_mixed };
 enum { param_on, param_source, param_target, param_gain, param_bal };
 
@@ -118,8 +119,8 @@ render_graph(
       {
         float bal = state.get_plain_at(m.module_index, m.module_slot, param_bal, r).real();
         float gain = state.get_plain_at(m.module_index, m.module_slot, param_gain, r).real();
-        float left = stereo_balance(0, bal) * gain;
-        float right = stereo_balance(1, bal) * gain;
+        float left = stereo_balance<0>(bal) * gain;
+        float right = stereo_balance<1>(bal) * gain;
         multi_stereo.push_back({ left, right });
       }
   return graph_data(multi_stereo, { targets[ti].name });
@@ -158,7 +159,7 @@ audio_audio_matrix_topo(
   auto target_matrix = make_audio_matrix(targets, 0);
 
   module_topo result(make_module(info,
-    make_module_dsp(stage, module_output::audio, 0, { 
+    make_module_dsp(stage, module_output::audio, scratch_count, { 
       make_module_dsp_output(false, make_topo_info_basic("{59AF084C-927D-4AFD-BA81-055687FF6A79}", "Silence", output_silence, 1)), 
       make_module_dsp_output(false, make_topo_info_basic("{3EFFD54D-440A-4C91-AD4F-B1FA290208EB}", "Mixed", output_mixed, route_count)) }),
     make_module_gui(section, pos, { 1, 1 })));
@@ -289,14 +290,15 @@ audio_audio_matrix_engine::mix(plugin_block& block, int module, int slot)
     // add modulated amount to mixdown
     auto const& source_audio = block.module_audio(sm, smi);
     auto const& modulation = get_cv_audio_matrix_mixdown(block, _global);
-    auto const& bal_curve = *modulation[this_module][0][param_bal][r];
     auto const& gain_curve = *modulation[this_module][0][param_gain][r];
-    for(int c = 0; c < 2; c++)
-      for(int f = block.start_frame; f < block.end_frame; f++)
-      {
-        float bal = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_bal, bal_curve[f]);
-        mix[c][f] += gain_curve[f] * stereo_balance(c, bal) * source_audio[0][0][c][f];
-      }
+    auto const& bal_curve_norm = *modulation[this_module][0][param_bal][r];
+    auto& bal_curve = block.state.own_scratch[scratch_bal];
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_bal, bal_curve_norm, bal_curve);
+    for (int f = block.start_frame; f < block.end_frame; f++)
+    {
+      mix[0][f] += gain_curve[f] * stereo_balance<0>(bal_curve[f]) * source_audio[0][0][0][f];
+      mix[1][f] += gain_curve[f] * stereo_balance<1>(bal_curve[f]) * source_audio[0][0][1][f];
+    }
   }
 
   return *result;

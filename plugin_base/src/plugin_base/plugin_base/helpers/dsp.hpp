@@ -28,17 +28,6 @@ get_timesig_freq_value(plugin_block const& block, int module, int timesig_p)
   return timesig_to_freq(block.host.bpm, sig);
 }
 
-template <domain_type DomainType>
-inline jarray<float, 1> const&
-normalized_to_raw_into_fast(
-  plugin_block const& block, int m, int p,
-  jarray<float, 1> const& in, jarray<float, 1>& out)
-{
-  auto normalized_to_raw = [&block, m, p](float v) { return block.normalized_to_raw_fast<DomainType>(m, p, v); };
-  in.transform_to(block.start_frame, block.end_frame, out, normalized_to_raw);
-  return out;
-}
-
 template <class TransformTimesig>
 float sync_or_rate_from_state(
   plugin_state const& state, float bpm, bool sync, int module_index, 

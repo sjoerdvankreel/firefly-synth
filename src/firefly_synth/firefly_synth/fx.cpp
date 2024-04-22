@@ -46,7 +46,7 @@ static float const reverb_comb_length[reverb_comb_count] = {
 
 enum { dly_mode_fdbk, dly_mode_multi };
 enum { dist_mode_a, dist_mode_b, dist_mode_c };
-enum { dist_over_1, dist_over_2, dist_over_4, dist_over_8 };
+enum { dist_over_1, dist_over_2, dist_over_4 };
 enum { comb_mode_feedforward, comb_mode_feedback, comb_mode_both };
 enum { type_off, type_svf, type_cmb, type_dst, type_delay, type_reverb };
 enum { dist_clip_hard, dist_clip_tanh, dist_clip_sin, dist_clip_exp, dist_clip_tsq, dist_clip_cube, dist_clip_inv };
@@ -55,10 +55,14 @@ enum { section_main, section_svf_left, section_svf_right, section_comb_left, sec
   section_dist_right, section_delay_sync, section_delay_left, section_delay_right, section_reverb_left, section_reverb_right };
 
 enum { scratch_dly_fdbk_l, scratch_dly_fdbk_r, scratch_dly_fdbk_count };
-enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_count };
-enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_count };
 enum { scratch_reverb_damp, scratch_reverb_size, scratch_reverb_in, scratch_reverb_count };
-static int constexpr scratch_count = std::max({ (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, (int)scratch_reverb_count });
+enum { scratch_dly_multi_hold, scratch_dly_multi_time, scratch_dly_multi_sprd, scratch_dly_multi_count };
+enum { scratch_dist_x, scratch_dist_y, scratch_dist_gain_raw, scratch_dist_svf_freq, scratch_dist_clip_exp, scratch_dist_count };
+enum { scratch_flt_stvar_freq, scratch_flt_stvar_kbd, scratch_flt_stvar_gain, scratch_flt_stvar_count };
+enum { scratch_flt_comb_dly_plus, scratch_flt_comb_gain_plus, scratch_flt_comb_dly_min, scratch_flt_comb_gain_min, scratch_flt_comb_gain_count };
+static int constexpr scratch_count = std::max({ 
+  (int)scratch_dly_fdbk_count, (int)scratch_dly_multi_count, (int)scratch_dist_count, 
+  (int)scratch_reverb_count, (int)scratch_flt_comb_gain_count, (int)scratch_flt_stvar_count });
 
 enum { param_type,
   param_svf_mode, param_svf_kbd, param_svf_gain, param_svf_freq, param_svf_res,
@@ -155,7 +159,6 @@ dist_over_items()
   result.emplace_back("{AFE72C25-18F2-4DB5-A3F0-1A188032F6FB}", "1X");
   result.emplace_back("{0E961515-1089-4E65-99C0-3A493253CF07}", "2X");
   result.emplace_back("{59C0B496-3241-4D56-BE1F-D7B4B08DB64D}", "4X");
-  result.emplace_back("{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}", "8X");
   return result;
 }
 
@@ -257,7 +260,7 @@ public module_engine {
   template <bool Graph, int Mode, bool ClipIsExp, class Clip, class Shape, class SkewX, class SkewY>
   void process_dist_mode_clip_shape_xy(plugin_block& block,
     jarray<float, 2> const& audio_in, cv_audio_matrix_mixdown const& modulation, Clip clip, Shape shape, SkewX skew_x, SkewY skew_y);
-  void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_plain, double res, float& left, float& right);
+  void dist_svf_next(plugin_block const& block, int oversmp_factor, double freq_hz, double res, float& left, float& right);
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(fx_engine);
@@ -450,7 +453,7 @@ fx_state_converter::handle_invalid_param_value(
   std::string const& old_value, load_handler const& handler, 
   plain_value& new_value)
 {
-  // note param ids are equal between vfx/gfx, gfx just has more
+  // note: param ids are equal between vfx/gfx, gfx just has more
   if (handler.old_version() < plugin_version{ 1, 2, 0 })
   {
     // mode + sync in delay got split out to separate controls
@@ -502,6 +505,17 @@ fx_state_converter::handle_invalid_param_value(
         }
     }
   }
+
+  // Max distortion oversampling got reduced from 8x to 4x.
+  // note: param ids are equal between vfx/gfx, gfx just has more
+  if (handler.old_version() < plugin_version{ 1, 7, 2 })
+    if (new_param_id == _desc->plugin->modules[module_gfx].params[param_dist_over].info.tag.id)
+      if (old_value == "{BAA4877E-1A4A-4D71-8B80-1AC567B7A37B}")
+      {
+        new_value = _desc->raw_to_plain_at(module_gfx, param_dist_over, dist_over_4);
+        return true;
+      }
+
   return false;
 }
   
@@ -1134,10 +1148,28 @@ void fx_engine::process_comb_mode(plugin_block& block,
   
   float const feedback_factor = 0.98;
   int this_module = _global ? module_gfx : module_vfx;
-  auto const& dly_min_curve = *modulation[this_module][block.module_slot][param_comb_dly_min][0];
-  auto const& dly_plus_curve = *modulation[this_module][block.module_slot][param_comb_dly_plus][0];
-  auto const& gain_min_curve = *modulation[this_module][block.module_slot][param_comb_gain_min][0];
-  auto const& gain_plus_curve = *modulation[this_module][block.module_slot][param_comb_gain_plus][0];
+  
+  auto const& dly_min_curve_norm = *modulation[this_module][block.module_slot][param_comb_dly_min][0];
+  auto const& dly_plus_curve_norm = *modulation[this_module][block.module_slot][param_comb_dly_plus][0];
+  auto const& gain_min_curve_norm = *modulation[this_module][block.module_slot][param_comb_gain_min][0];
+  auto const& gain_plus_curve_norm = *modulation[this_module][block.module_slot][param_comb_gain_plus][0];
+
+  auto& dly_min_curve = block.state.own_scratch[scratch_flt_comb_dly_min];
+  auto& dly_plus_curve = block.state.own_scratch[scratch_flt_comb_dly_plus];
+  auto& gain_min_curve = block.state.own_scratch[scratch_flt_comb_gain_min];
+  auto& gain_plus_curve = block.state.own_scratch[scratch_flt_comb_gain_plus];
+
+  if constexpr (Feedback)
+  {
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_dly_min, dly_min_curve_norm, dly_min_curve);
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_gain_min, gain_min_curve_norm, gain_min_curve);
+  }
+
+  if constexpr (Feedforward)
+  {
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_dly_plus, dly_plus_curve_norm, dly_plus_curve);
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_comb_gain_plus, gain_plus_curve_norm, gain_plus_curve);
+  }
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -1153,8 +1185,8 @@ void fx_engine::process_comb_mode(plugin_block& block,
 
     if constexpr (Feedback)
     {
-      gain_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_min, gain_min_curve[f]);
-      float dly_min = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_min, dly_min_curve[f]);
+      gain_min = gain_min_curve[f];
+      float dly_min = dly_min_curve[f];
       float dly_min_samples_t = dly_min * block.sample_rate * 0.001;
       dly_min_t = dly_min_samples_t - (int)dly_min_samples_t;
       dly_min_samples_0 = (int)dly_min_samples_t;
@@ -1163,8 +1195,8 @@ void fx_engine::process_comb_mode(plugin_block& block,
 
     if constexpr (Feedforward)
     {
-      gain_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_gain_plus, gain_plus_curve[f]);
-      float dly_plus = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_comb_dly_plus, dly_plus_curve[f]);
+      gain_plus = gain_plus_curve[f];
+      float dly_plus = dly_plus_curve[f];
       float dly_plus_samples_t = dly_plus * block.sample_rate * 0.001;
       dly_plus_t = dly_plus_samples_t - (int)dly_plus_samples_t;
       dly_plus_samples_0 = (int)dly_plus_samples_t;
@@ -1307,18 +1339,26 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
   int this_module = _global ? module_gfx : module_vfx;
 
   auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
-  auto const& kbd_curve = *modulation[this_module][block.module_slot][param_svf_kbd][0];
-  auto const& freq_curve = *modulation[this_module][block.module_slot][param_svf_freq][0];
-  auto const& gain_curve = *modulation[this_module][block.module_slot][param_svf_gain][0];
   auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
-
   double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
+
+  auto const& kbd_curve_norm = *modulation[this_module][block.module_slot][param_svf_kbd][0];
+  auto& kbd_curve = block.state.own_scratch[scratch_flt_stvar_kbd];
+  block.normalized_to_raw_block<domain_type::linear>(this_module, param_svf_kbd, kbd_curve_norm, kbd_curve);
+
+  auto const& freq_curve_norm = *modulation[this_module][block.module_slot][param_svf_freq][0];
+  auto& freq_curve = block.state.own_scratch[scratch_flt_stvar_freq];
+  block.normalized_to_raw_block<domain_type::log>(this_module, param_svf_freq, freq_curve_norm, freq_curve);
+
+  auto const& gain_curve_norm = *modulation[this_module][block.module_slot][param_svf_gain][0];
+  auto& gain_curve = block.state.own_scratch[scratch_flt_stvar_gain];
+  block.normalized_to_raw_block<domain_type::linear>(this_module, param_svf_gain, gain_curve_norm, gain_curve);
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
-    hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_curve[f]);
-    kbd = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_kbd, kbd_curve[f]);
-    gain = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_svf_gain, gain_curve[f]);
+    hz = freq_curve[f];
+    kbd = kbd_curve[f];
+    gain = gain_curve[f];
 
     // correct keyboard tracking for global unison
     double kbd_trk = kbd_trk_base;
@@ -1430,7 +1470,10 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
   auto& hold_curve = block.state.own_scratch[scratch_dly_multi_hold];
   auto const& amt_curve = *modulation[module_gfx][block.module_slot][param_dly_amt][0];
   auto const& mix_curve = *modulation[module_gfx][block.module_slot][param_dly_mix][0];
-  auto const& spread_curve = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
+
+  auto& spread_curve = block.state.own_scratch[scratch_dly_multi_sprd];
+  auto const& spread_curve_norm = *modulation[module_gfx][block.module_slot][param_dly_sprd][0];
+  block.normalized_to_raw_block<domain_type::linear>(module_gfx, param_dly_sprd, spread_curve_norm, spread_curve);
   
   if constexpr (Sync)
   {
@@ -1450,9 +1493,9 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
 
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
+    float spread = spread_curve[f];
     float time_samples_t = time_curve[f] * block.sample_rate;
     float hold_samples_t = hold_curve[f] * block.sample_rate;
-    float spread = block.normalized_to_raw_fast<domain_type::linear>(module_gfx, param_dly_sprd, spread_curve[f]);
 
     for (int c = 0; c < 2; c++)
     {
@@ -1461,7 +1504,7 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
       for (int t = 0; t < tap_count; t++)
       {
         int lr = (t + c) % 2;
-        float tap_bal = stereo_balance(lr, spread);
+        float tap_bal = stereo_balance2(lr, spread);
         float tap_samples_t = (t + 1) * time_samples_t + hold_samples_t;
         float tap_t = tap_samples_t - (int)tap_samples_t;
         int tap_samples_0 = (int)tap_samples_t % _dly_capacity;
@@ -1482,12 +1525,10 @@ void fx_engine::process_dly_multi_sync(plugin_block& block,
 
 void  
 fx_engine::dist_svf_next(plugin_block const& block, int oversmp_factor,
-  double freq_plain, double res, float& left, float& right)
+  double freq_hz, double res, float& left, float& right)
 {
   double const max_res = 0.99;
-  int this_module = _global ? module_gfx : module_vfx;
-  double hz = block.normalized_to_raw_fast<domain_type::log>(this_module, param_svf_freq, freq_plain);
-  double w = pi64 * hz / (block.sample_rate * oversmp_factor);
+  double w = pi64 * freq_hz / (block.sample_rate * oversmp_factor);
   _dst_svf.init_lpf(w, res * max_res);
   left = _dst_svf.next(0, left);
   right = _dst_svf.next(1, right);
@@ -1622,11 +1663,8 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
 
   auto const& mix_curve = *modulation[this_module][block.module_slot][param_dist_mix][0];
   auto const& res_curve = *modulation[this_module][block.module_slot][param_dist_lp_res][0];
-  auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
-  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
   auto const& x_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_x_amt][0];
   auto const& y_curve_plain = *modulation[this_module][block.module_slot][param_dist_skew_y_amt][0];
-  auto const& clip_exp_curve_plain = *modulation[this_module][block.module_slot][param_dist_clip_exp][0];
 
   jarray<float, 1> const* x_curve = &x_curve_plain;
   if(wave_skew_is_exp(skew_x_type))
@@ -1647,7 +1685,18 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
   }
 
   auto& gain_curve = block.state.own_scratch[scratch_dist_gain_raw];
-  normalized_to_raw_into_fast<domain_type::log>(block, this_module, param_dist_gain, gain_curve_plain, gain_curve);
+  auto const& gain_curve_plain = *modulation[this_module][block.module_slot][param_dist_gain][0];
+  block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_gain, gain_curve_plain, gain_curve);
+
+  auto& freq_curve = block.state.own_scratch[scratch_dist_svf_freq];
+  auto const& freq_curve_plain = *modulation[this_module][block.module_slot][param_dist_lp_frq][0];
+  if constexpr (Mode == dist_mode_b || Mode == dist_mode_c)
+    block.normalized_to_raw_block<domain_type::log>(this_module, param_dist_lp_frq, freq_curve_plain, freq_curve);
+
+  auto& clip_exp_curve = block.state.own_scratch[scratch_dist_clip_exp];
+  auto const& clip_exp_curve_plain = *modulation[this_module][block.module_slot][param_dist_clip_exp][0];
+  if constexpr (ClipIsExp)
+    block.normalized_to_raw_block<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain, clip_exp_curve);
 
   // dont oversample for graphs
   if constexpr(Graph) 
@@ -1677,15 +1726,15 @@ fx_engine::process_dist_mode_clip_shape_xy(plugin_block& block,
       left = skew_x(left * gain_curve[mod_index], (*x_curve)[mod_index]);
       right = skew_x(right * gain_curve[mod_index], (*x_curve)[mod_index]);
       if constexpr(Mode == dist_mode_b)
-        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+        dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
       left = shape(left);
       right = shape(right);
       if constexpr (Mode == dist_mode_c)
-        dist_svf_next(block, oversmp_factor, freq_curve_plain[mod_index], res_curve[mod_index], left, right);
+        dist_svf_next(block, oversmp_factor, freq_curve[mod_index], res_curve[mod_index], left, right);
 
       float exp = 0.0f;
       if constexpr (ClipIsExp)
-        exp = block.normalized_to_raw_fast<domain_type::linear>(this_module, param_dist_clip_exp, clip_exp_curve_plain[mod_index]);
+        exp = clip_exp_curve[mod_index];
 
       left = clip(skew_y(left, (*y_curve)[mod_index]), exp);
       right = clip(skew_y(right, (*y_curve)[mod_index]), exp);

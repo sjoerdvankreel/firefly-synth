@@ -83,8 +83,8 @@ See the parameter reference document for details.
 - Smoothing controls for MIDI input and host BPM changes.
 - Portamento with tempo syncing and regular/automatic glide mode.
 - Responds to MIDI pitchbend, modwheel and all 128 CC parameters.
-- Up to 32 voices (not counting global unison) in polyphonic mode.
 - Monitor module with active voice count, cpu and threadpool usage.
+- Up to 64 voices in polyphonic mode. Global unison voices also count towards this limit.
 - Global unison with pitch, lfo and envelope detuning, stereo spread and osc/lfo phase offset.
 - Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.
 - Oscillators with classic waveforms, DSF synthesis, 2 Karplus-Strong modes, noise generator, unison and hard-sync.

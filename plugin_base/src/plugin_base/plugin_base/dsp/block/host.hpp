@@ -46,6 +46,9 @@ struct host_events final {
   std::vector<note_event> notes;
   std::vector<block_event> block;
   std::vector<accurate_event> accurate;
+
+  void deactivate();
+  void activate(bool graph, int param_count, int midi_count, int polyphony, int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_events);
 };
 
@@ -55,6 +58,8 @@ struct host_block final {
   host_events events;
   shared_block shared;
   float* const* audio_out;
+
+  void prepare();
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_block);
 };
 

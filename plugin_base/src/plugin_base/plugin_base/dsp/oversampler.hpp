@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-inline int constexpr max_oversampler_stages = 3;
+inline int constexpr max_oversampler_stages = 2;
 
 template <int MaxLanes>
 class oversampler {
@@ -19,12 +19,10 @@ class oversampler {
   jarray<float, 2> _1x;
   juce::dsp::Oversampling<float> _2x;
   juce::dsp::Oversampling<float> _4x;
-  juce::dsp::Oversampling<float> _8x;
 
   std::array<float*, MaxLanes * 2> _1x_lanes_channels_ptrs = {};
   std::array<float*, MaxLanes * 2> _2x_lanes_channels_ptrs = {};
   std::array<float*, MaxLanes * 2> _4x_lanes_channels_ptrs = {};
-  std::array<float*, MaxLanes * 2> _8x_lanes_channels_ptrs = {};
 
   template <class NonLinear>
   void process_off(
@@ -59,12 +57,10 @@ oversampler(int max_frame_count) :
   _max_frame_count(max_frame_count),
   _1x(MaxLanes * 2, jarray<float, 1>(max_frame_count, 0.0f)),
   _2x(MaxLanes * 2, 1, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, false),
-  _4x(MaxLanes * 2, 2, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, false),
-  _8x(MaxLanes * 2, 3, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, false)
+  _4x(MaxLanes * 2, 2, juce::dsp::Oversampling<float>::filterHalfBandPolyphaseIIR, false, false)
 {
   _2x.initProcessing(max_frame_count);
   _4x.initProcessing(max_frame_count);
-  _8x.initProcessing(max_frame_count);
 
   // feed the oversamplers some silence to get a hold of the channel pointers
   std::array<float*, MaxLanes * 2> silence_ptrs;
@@ -74,13 +70,11 @@ oversampler(int max_frame_count) :
   juce::dsp::AudioBlock<float> block(silence_ptrs.data(), MaxLanes * 2, 0, max_frame_count);
   auto x2up = _2x.processSamplesUp(block);
   auto x4up = _4x.processSamplesUp(block);
-  auto x8up = _8x.processSamplesUp(block);
   for (int lc = 0; lc < MaxLanes * 2; lc++)
   {
     _1x_lanes_channels_ptrs[lc] = _1x[lc].data().data();
     _2x_lanes_channels_ptrs[lc] = x2up.getChannelPointer(lc);
     _4x_lanes_channels_ptrs[lc] = x4up.getChannelPointer(lc);
-    _8x_lanes_channels_ptrs[lc] = x8up.getChannelPointer(lc);
   }
 }
 
@@ -92,7 +86,6 @@ oversampler<MaxLanes>::get_upsampled_lanes_channels_ptrs(int factor)
   case 1: return _1x_lanes_channels_ptrs.data();
   case 2: return _2x_lanes_channels_ptrs.data();
   case 4: return _4x_lanes_channels_ptrs.data();
-  case 8: return _8x_lanes_channels_ptrs.data();
   default: assert(false); return nullptr;
   }
 }
@@ -130,7 +123,7 @@ oversampler<MaxLanes>::process(
   std::array<jarray<float, 2>*, MaxLanes> const& inout,
   int active_lanes, int start_frame, int end_frame, bool upsample, NonLinear non_linear)
 {
-  static_assert(Factor == 1 || Factor == 2 || Factor == 4 || Factor == 8);
+  static_assert(Factor == 1 || Factor == 2 || Factor == 4);
   using juce::dsp::AudioBlock;
   int block_size = end_frame - start_frame;
   float* data[MaxLanes * 2] = { nullptr };
@@ -154,13 +147,12 @@ oversampler<MaxLanes>::process(
   int active_lanes, int start_frame, int end_frame, bool upsample, NonLinear non_linear)
 {
   using juce::dsp::AudioBlock;
-  assert(0 <= stages && stages <= 3);
+  assert(0 <= stages && stages <= 2);
   switch (stages)
   {
   case 0: process_off(inout, active_lanes, start_frame, end_frame, upsample, non_linear); break;
   case 1: process<2>(_2x, inout, active_lanes, start_frame, end_frame, upsample, non_linear); break;
   case 2: process<4>(_4x, inout, active_lanes, start_frame, end_frame, upsample, non_linear); break;
-  case 3: process<8>(_8x, inout, active_lanes, start_frame, end_frame, upsample, non_linear); break;
   default: assert(false); break;
   }
 }

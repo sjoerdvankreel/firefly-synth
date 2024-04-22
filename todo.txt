@@ -10,6 +10,7 @@ dont forget to update the version nr in code and cmake and mac bundle and build/
 
 sometimes:
 update hosts
+update submodules
 cpu/mem profiling
 
 someday:
@@ -29,12 +30,29 @@ basic osc waveform icons
 solo osc/fx
 out gain/cpu meter
 do visual am/fm demo
+make voice count adjustable with default 16 + reallocate on switch and switch of global unison
+>> plus make drain warning
+variable number of modules with +/- button in UI
+
+v1.7.2:
+- fix win zip archives
+- max 64 voices + differentiate regular + global unison
+
+v1.7.3
+- allow to disable env 1, use external env ?
+- flstudio clap
+- multitrack studio
+- clap polymod
+- todo are mod events normalized ?
+- todo allow mod events on midi linked params
+- todo polyphonic mod
+- how does this work with global unison?
 
 v1.8:
+retest bitwig clap resizing
 flip env stn/smt
 Title fx size clips on mac
 bug: preset select jumps back to previous
-do distinction between voice/global/matrix in the ui for all themes
 do forward compat checks - dont load newer versions
 do async clear delay lines etc on patch select -> 
   idea: since all the reset/reload stuff seems kinda fuzzy and different between clap/vst3:

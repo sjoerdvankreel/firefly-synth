@@ -211,32 +211,34 @@ inline bool
 increment_and_wrap_phase(float& phase, float freq, float rate)
 { return increment_and_wrap_phase(phase, phase_increment(freq, rate)); }
 
-inline float
-mono_pan_sqrt3(int channel, float panning)
+template <int Channel> inline float
+mono_pan_sqrt(float panning)
 {
-  assert(channel == 0 || channel == 1);
-  assert(0 <= panning && panning <= 1);
-  if (channel == 1) return std::sqrt(panning);
-  return std::sqrt(1 - panning);
+  static_assert(Channel == 0 || Channel == 1);
+  if constexpr (Channel == 1) return std::sqrt(panning);
+  else return std::sqrt(1.0f - panning);
 }
 
 inline float
-mono_pan_sqrt(int channel, float panning)
-{
-  assert(channel == 0 || channel == 1);
-  if (channel == 1) return std::sqrt(panning);
-  return std::sqrt(1.0f - panning);
-}
-
-inline float
-stereo_balance(int channel, float balance)
+stereo_balance2(int channel, float balance)
 {
   assert(channel == 0 || channel == 1);
   assert(-1 <= balance && balance <= 1);
-  if(channel == 0 && balance <= 0) return 1.0f;
-  if(channel == 1 && balance >= 0) return 1.0f;
-  if(channel == 0) return 1.0f - balance;
+  if (channel == 0 && balance <= 0) return 1.0f;
+  if (channel == 1 && balance >= 0) return 1.0f;
+  if (channel == 0) return 1.0f - balance;
   return 1.0f + balance;
+}
+
+template <int Channel> inline float
+stereo_balance(float balance)
+{
+  static_assert(Channel == 0 || Channel == 1);
+  assert(-1 <= balance && balance <= 1);
+  if constexpr (Channel == 0)
+    return 1.0f - std::clamp(balance, 0.0f, 1.0f);
+  else 
+    return 1.0f + std::clamp(balance, -1.0f, 0.0f);
 }
 
 }

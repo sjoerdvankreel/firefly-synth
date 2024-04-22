@@ -5,6 +5,7 @@
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
 #include <plugin_base/dsp/graph_engine.hpp>
+#include <plugin_base/shared/io_plugin.hpp>
 
 #include <firefly_synth/synth.hpp>
 #include <cmath>
@@ -14,8 +15,9 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 enum { output_pitch_offset };
-enum { over_1, over_2, over_4, over_8 };
+enum { over_1, over_2, over_4 };
 enum { porta_off, porta_on, porta_auto };
+enum { scratch_pb, scratch_cent, scratch_pitch, scratch_count };
 enum { section_left, section_sync, section_mid, section_right };
 
 enum {
@@ -53,9 +55,23 @@ over_items()
   result.emplace_back("{F9C54B64-3635-417F-86A9-69B439548F3C}", "1X");
   result.emplace_back("{937686E8-AC03-420B-A3FF-0ECE1FF9B23E}", "2X");
   result.emplace_back("{64F2A767-DE91-41DF-B2F1-003FCC846384}", "4X");
-  result.emplace_back("{9C6E560D-4999-40D9-85E4-C02468296206}", "8X");
   return result;
 }
+
+class voice_in_state_converter :
+public state_converter
+{
+  plugin_desc const* const _desc;
+public:
+  voice_in_state_converter(plugin_desc const* const desc) : _desc(desc) {}
+  void post_process(load_handler const& handler, plugin_state& new_state) override {}
+
+  bool handle_invalid_param_value(
+    std::string const& new_module_id, int new_module_slot,
+    std::string const& new_param_id, int new_param_slot,
+    std::string const& old_value, load_handler const& handler,
+    plain_value& new_value) override;
+};
 
 class voice_in_engine :
 public module_engine {
@@ -87,12 +103,31 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
   return graph_data(graph_data_type::na, {});
 }
 
+bool
+voice_in_state_converter::handle_invalid_param_value(
+  std::string const& new_module_id, int new_module_slot,
+  std::string const& new_param_id, int new_param_slot,
+  std::string const& old_value, load_handler const& handler,
+  plain_value& new_value)
+{
+  // Max osc oversampling got reduced from 8x to 4x.
+  if (handler.old_version() < plugin_version{ 1, 7, 2 })
+    if (new_param_id == _desc->plugin->modules[module_voice_in].params[param_oversmp].info.tag.id)
+      if (old_value == "{9C6E560D-4999-40D9-85E4-C02468296206}")
+      {
+        new_value = _desc->raw_to_plain_at(module_voice_in, param_oversmp, over_4);
+        return true;
+      }
+
+  return false;
+}
+
 module_topo
 voice_in_topo(int section, gui_position const& pos)
 {
   module_topo result(make_module(
     make_topo_info("{524138DF-1303-4961-915A-3CAABA69D53A}", true, "Voice In", "Voice In", "VIn", module_voice_in, 1),
-    make_module_dsp(module_stage::voice, module_output::cv, 0, {
+    make_module_dsp(module_stage::voice, module_output::cv, scratch_count, {
       make_module_dsp_output(false, make_topo_info_basic("{58E73C3A-CACD-48CC-A2B6-25861EC7C828}", "Pitch", 0, 1)) }),
     make_module_gui(section, pos, { { 1 }, { 32, 13, 34, 63 } } )));
   result.info.description = "Oscillator common module. Controls portamento, oversampling and base pitch for all oscillators.";
@@ -101,6 +136,7 @@ voice_in_topo(int section, gui_position const& pos)
   result.force_rerender_on_param_hover = true;
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<voice_in_engine>(); };
+  result.state_converter_factory = [](auto desc) { return std::make_unique<voice_in_state_converter>(desc); };
 
   result.sections.emplace_back(make_param_section(section_left,
     make_topo_tag_basic("{C85AA7CC-FBD1-4631-BB7A-831A2E084E9E}", "Left"),
@@ -255,12 +291,20 @@ voice_in_engine::process_mode_unison(plugin_block& block)
   int porta_mode = block_auto[param_porta][0].step();
 
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
-  auto const& pb_curve = *(modulation)[module_voice_in][0][param_pb][0];
-  auto const& cent_curve = *(modulation)[module_voice_in][0][param_cent][0];
-  auto const& pitch_curve = *(modulation)[module_voice_in][0][param_pitch][0];  
-
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
   auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+
+  auto const& pb_curve_norm = *(modulation)[module_voice_in][0][param_pb][0];
+  auto& pb_curve = block.state.own_scratch[scratch_pb];
+  block.normalized_to_raw_block<domain_type::linear>(module_voice_in, param_pb, pb_curve_norm, pb_curve);
+
+  auto const& cent_curve_norm = *(modulation)[module_voice_in][0][param_cent][0];
+  auto& cent_curve = block.state.own_scratch[scratch_cent];
+  block.normalized_to_raw_block<domain_type::linear>(module_voice_in, param_cent, cent_curve_norm, cent_curve);
+
+  auto const& pitch_curve_norm = *(modulation)[module_voice_in][0][param_pitch][0];
+  auto& pitch_curve = block.state.own_scratch[scratch_pitch];
+  block.normalized_to_raw_block<domain_type::linear>(module_voice_in, param_pitch, pitch_curve_norm, pitch_curve);
   
   for(int f = block.start_frame; f < block.end_frame; f++)
   {
@@ -300,12 +344,11 @@ voice_in_engine::process_mode_unison(plugin_block& block)
     }
 
     float porta_note = 0;
-    float pb = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pb, pb_curve[f]);
-    float cent = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_cent, cent_curve[f]);
-    float pitch = block.normalized_to_raw_fast<domain_type::linear>(module_voice_in, param_pitch, pitch_curve[f]);
     if(_position == _porta_samples) porta_note = _to_note_pitch;
     else porta_note = _from_note_pitch + (_position++ / (float)_porta_samples * (_to_note_pitch - _from_note_pitch));
-    block.state.own_cv[output_pitch_offset][0][f] = (note + cent + glob_uni_detune - midi_middle_c) + (porta_note - midi_middle_c) + pitch + pb * master_pb_range;
+    block.state.own_cv[output_pitch_offset][0][f] = 
+      (note + cent_curve[f] + glob_uni_detune - midi_middle_c) + 
+      (porta_note - midi_middle_c) + pitch_curve[f] + pb_curve[f] * master_pb_range;
   }
 }
 

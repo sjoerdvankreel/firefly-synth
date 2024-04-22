@@ -737,7 +737,7 @@ void lfo_engine::process_loop(plugin_block& block, cv_cv_matrix_mixdown const* m
   else
   {
     auto const& rate_curve_plain = *(*modulation)[param_rate][0];
-    normalized_to_raw_into_fast<domain_type::log>(block, this_module, param_rate, rate_curve_plain, rate_curve);
+    block.normalized_to_raw_block<domain_type::log>(this_module, param_rate, rate_curve_plain, rate_curve);
   }
 
   if constexpr (GlobalUnison)

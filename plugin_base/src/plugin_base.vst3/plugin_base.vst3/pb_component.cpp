@@ -15,7 +15,7 @@ namespace plugin_base::vst3 {
 pb_component::
 pb_component(plugin_topo const* topo, FUID const& controller_id) :
 _desc(std::make_unique<plugin_desc>(topo, nullptr)),
-_engine(_desc.get(), false, nullptr, nullptr)
+_splice_engine(_desc.get(), false, nullptr, nullptr)
 {
   setControllerClass(controller_id);
   processContextRequirements.needTempo();
@@ -38,16 +38,16 @@ _engine(_desc.get(), false, nullptr, nullptr)
 tresult PLUGIN_API
 pb_component::getState(IBStream* state)
 {
-  std::vector<char> data(plugin_io_save_state(_engine.state()));
+  std::vector<char> data(plugin_io_save_state(_splice_engine.state()));
   return state->write(data.data(), data.size());
 }
 
 tresult PLUGIN_API
 pb_component::setState(IBStream* state)
 {
-  if (!plugin_io_load_state(load_ibstream(state), _engine.state()).ok()) 
+  if (!plugin_io_load_state(load_ibstream(state), _splice_engine.state()).ok())
     return kResultFalse;
-  _engine.mark_all_params_as_automated(true);
+  _splice_engine.mark_all_params_as_automated(true);
   return kResultOk;
 }
 
@@ -65,9 +65,9 @@ pb_component::setupProcessing(ProcessSetup& setup)
   _scratch_in_r.resize(setup.maxSamplesPerBlock);
   _scratch_out_l.resize(setup.maxSamplesPerBlock);
   _scratch_out_r.resize(setup.maxSamplesPerBlock);
-  _engine.activate(setup.maxSamplesPerBlock);
-  _engine.set_sample_rate(setup.sampleRate);
-  _engine.activate_modules();
+  _splice_engine.activate(setup.maxSamplesPerBlock);
+  _splice_engine.set_sample_rate(setup.sampleRate);
+  _splice_engine.activate_modules();
   return AudioEffect::setupProcessing(setup);
 }
 
@@ -77,7 +77,7 @@ pb_component::initialize(FUnknown* context)
   if(AudioEffect::initialize(context) != kResultTrue) return kResultFalse;
   addEventInput(STR16("Event In"));
   addAudioOutput(STR16("Stereo Out"), SpeakerArr::kStereo);
-  if(_engine.state().desc().plugin->type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
+  if(_splice_engine.state().desc().plugin->type == plugin_type::fx) addAudioInput(STR16("Stereo In"), SpeakerArr::kStereo);
   return kResultTrue;
 }
 
@@ -86,16 +86,16 @@ pb_component::setBusArrangements(
   SpeakerArrangement* inputs, int32 input_count,
   SpeakerArrangement* outputs, int32 output_count)
 {
-  if (_engine.state().desc().plugin->type == plugin_type::synth && input_count != 0) return kResultFalse;
+  if (_splice_engine.state().desc().plugin->type == plugin_type::synth && input_count != 0) return kResultFalse;
   if (output_count != 1 || outputs[0] != SpeakerArr::kStereo) return kResultFalse;
-  if((_engine.state().desc().plugin->type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
+  if((_splice_engine.state().desc().plugin->type == plugin_type::fx) && (input_count != 1 || inputs[0] != SpeakerArr::kStereo))  return kResultFalse;
   return AudioEffect::setBusArrangements(inputs, input_count, outputs, output_count);
 }
 
 tresult PLUGIN_API
 pb_component::process(ProcessData& data)
 {
-  host_block& block = _engine.prepare_block();
+  host_block& block = _splice_engine.prepare_block();
   block.frame_count = data.numSamples;
   block.shared.bpm = data.processContext ? data.processContext->tempo : 0;
 
@@ -108,7 +108,7 @@ pb_component::process(ProcessData& data)
   }
 
   block.shared.audio_in = nullptr;
-  if(_engine.state().desc().plugin->type == plugin_type::fx)
+  if(_splice_engine.state().desc().plugin->type == plugin_type::fx)
     if(data.inputs && data.inputs[0].channelBuffers32)
       block.shared.audio_in = data.inputs[0].channelBuffers32;
     else
@@ -173,10 +173,10 @@ pb_component::process(ProcessData& data)
         {
           // regular parameter
           // vst3 validator hands us bogus sometimes
-          auto param_id_iter = _engine.state().desc().param_mappings.tag_to_index.find(queue->getParameterId());
-          if(param_id_iter != _engine.state().desc().param_mappings.tag_to_index.end())
+          auto param_id_iter = _splice_engine.state().desc().param_mappings.tag_to_index.find(queue->getParameterId());
+          if(param_id_iter != _splice_engine.state().desc().param_mappings.tag_to_index.end())
           {
-            auto rate = _engine.state().desc().param_at_index(param_id_iter->second).param->dsp.rate;
+            auto rate = _splice_engine.state().desc().param_at_index(param_id_iter->second).param->dsp.rate;
             if (rate != param_rate::accurate)
             {
               if(queue->getPoint(0, frame_index, value) == kResultTrue)
@@ -203,18 +203,18 @@ pb_component::process(ProcessData& data)
         }
       }
   
-  _engine.process();
+  _splice_engine.process();
   int unused_index = 0;
   if(data.outputParameterChanges)
     for (int e = 0; e < block.events.out.size(); e++)
     {
       auto const& event = block.events.out[e];
-      int tag = _engine.state().desc().param_mappings.index_to_tag[event.param];
+      int tag = _splice_engine.state().desc().param_mappings.index_to_tag[event.param];
       queue = data.outputParameterChanges->addParameterData(tag, unused_index);
       queue->addPoint(0, event.normalized.value(), unused_index);
     }
 
-  _engine.release_block();
+  _splice_engine.release_block();
   return kResultOk;
 }
 

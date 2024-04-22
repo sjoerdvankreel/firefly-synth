@@ -1,7 +1,7 @@
 #pragma once
 
 #include <plugin_base/gui/gui.hpp>
-#include <plugin_base/dsp/engine.hpp>
+#include <plugin_base/dsp/splice_engine.hpp>
 #include <plugin_base/dsp/block/host.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base.clap/utility.hpp>
@@ -28,7 +28,7 @@ public gui_param_listener
 
   // needs to be first, everyone else needs it
   std::unique_ptr<plugin_desc> _desc;
-  plugin_engine _engine;
+  plugin_splice_engine _splice_engine;
   extra_state _extra_state;
   plugin_state _gui_state = {};
   std::atomic<bool> _is_active = {};
@@ -64,12 +64,12 @@ public:
   bool stateLoad(clap_istream const* stream) noexcept override;
   
 #if (defined __linux__) || (defined  __FreeBSD__)
-  void onPosixFd(int fd, int flags) noexcept override;
+  void onPosixFd(int fd, clap_posix_fd_flags_t flags) noexcept override;
   bool implementsPosixFdSupport() const noexcept override { return true; }
 #endif
 
   void threadPoolExec(uint32_t task_index) noexcept override 
-  { _engine.process_voice(task_index, true); }  
+  { _splice_engine.process_voice(task_index, true); }  
 
   // We cannot pass nullptr for the threadpool callback in the constructor
   // because clap_init has not taken place yet. So instead we must report
@@ -100,7 +100,7 @@ public:
   bool paramsTextToValue(clap_id param_id, char const* display, double* value) noexcept override;
   void paramsFlush(clap_input_events const* in, clap_output_events const* out) noexcept override;
   bool paramsValueToText(clap_id param_id, double value, char* display, std::uint32_t size) noexcept override;
-  std::uint32_t paramsCount() const noexcept override { return _engine.state().desc().param_count; }
+  std::uint32_t paramsCount() const noexcept override { return _splice_engine.state().desc().param_count; }
 
   std::uint32_t notePortsCount(bool is_input) const noexcept override;
   bool notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept override;
