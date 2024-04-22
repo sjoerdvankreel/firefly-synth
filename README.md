@@ -107,6 +107,8 @@ You'll need CMake and a very recent c++ compiler. The final output ends up in th
 Like noted above, the default Linux build does *not* enable AVX.
 To fix that, you'll have to edit [https://github.com/sjoerdvankreel/firefly-synth/blob/main/plugin_base/cmake/plugin_base.config.cmake](https://github.com/sjoerdvankreel/firefly-synth/blob/main/plugin_base/cmake/plugin_base.config.cmake).
 
+Windows: the build scripts assume 7zip is installed. It will build fine without, but you'll error out on the final zip step.
+
 # Dependencies
 - CLAP SDK: [https://github.com/free-audio/clap](https://github.com/free-audio/clap)
 - JUCE: [https://github.com/juce-framework/JUCE](https://github.com/juce-framework/JUCE)
