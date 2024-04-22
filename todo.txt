@@ -32,10 +32,11 @@ out gain/cpu meter
 do visual am/fm demo
 make voice count adjustable with default 16 + reallocate on switch and switch of global unison
 >> plus make drain warning
+variable number of modules with +/- button in UI
 
 v1.7.2:
-- test the fx
 - fix win zip archives
+- max 64 voices + differentiate regular + global unison
 
 v1.7.3
 - allow to disable env 1, use external env ?

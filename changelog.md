@@ -2,7 +2,8 @@
 
 - Updated dependencies to latest (juce, vst3, clap).
 - Breaking change: reduced max oversampling to 4x to cut down on memory usage.
-- Split up internal processing into multiple fixed size buffers to not have memory usage dependent on the host buffer size. 
+- Breaking change: reduced max voice count from 128 to 64 (more memory cutdown). Global unison voices also come out of the 64 available!
+- Split up internal processing into multiple fixed size buffers to not have memory usage dependent on the host buffer size.
 -- This costs a bit of cpu, hopefully not too bad.
 
 ### April 13, 2024 - V1.7.1.
