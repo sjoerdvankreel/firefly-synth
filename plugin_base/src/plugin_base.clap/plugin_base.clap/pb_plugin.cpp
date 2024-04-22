@@ -170,7 +170,7 @@ pb_plugin::guiHide() noexcept
 
 #if (defined __linux__) || (defined  __FreeBSD__)
 void
-pb_plugin::onPosixFd(int fd, int flags) noexcept
+pb_plugin::onPosixFd(int fd, clap_posix_fd_flags_t flags) noexcept
 { LinuxEventLoopInternal::invokeEventLoopCallbackForFd(fd); }
 #endif
 

@@ -64,7 +64,7 @@ public:
   bool stateLoad(clap_istream const* stream) noexcept override;
   
 #if (defined __linux__) || (defined  __FreeBSD__)
-  void onPosixFd(int fd, int flags) noexcept override;
+  void onPosixFd(int fd, clap_posix_fd_flags_t flags) noexcept override;
   bool implementsPosixFdSupport() const noexcept override { return true; }
 #endif
 

@@ -1,4 +1,5 @@
 #include <plugin_base/dsp/block/host.hpp>
+#include <cmath>
 
 namespace plugin_base {
 
