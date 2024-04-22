@@ -45,29 +45,21 @@ library_get_address(void* handle, char const* sym)
 #endif
 
 static void
+print_topo_stats(
+  plugin_topo const& topo);
+static void
 generate_modules_ref(
-  plugin_topo const& topo, std::ostream& out,
-  int& module_count, int& module_slot_count);
-
+  plugin_topo const& topo, std::ostream& out);
 static void
 generate_plugin_ref(
-  plugin_topo const& topo, std::ostream& out,
-  int& module_count, int& module_slot_count,
-  int& visible_param_count, int& visible_param_slot_count);
-
+  plugin_topo const& topo, std::ostream& out);
 static void
 generate_params_ref(
-  plugin_topo const& topo, std::ostream& out,
-  int& visible_param_count, int& visible_param_slot_count);
+  plugin_topo const& topo, std::ostream& out);
 
 int 
 main(int argc, char** argv)
 {
-  int module_count = 0;
-  int module_slot_count = 0;
-  int visible_param_count = 0;
-  int visible_param_slot_count = 0;
-
   std::ofstream out;
   std::string err = "";
   void* library = nullptr;
@@ -105,16 +97,9 @@ main(int argc, char** argv)
     goto end;
   }
 
-  generate_plugin_ref(
-    *topo, out, 
-    module_count, module_slot_count, 
-    visible_param_count, visible_param_slot_count);
+  generate_plugin_ref(*topo, out);
   out.flush();
-
-  std::cout << "Module count " << module_count << "\n";
-  std::cout << "Module slot count " << module_slot_count << "\n";
-  std::cout << "Visible param count " << visible_param_count << "\n";
-  std::cout << "Visible param slot count " << visible_param_slot_count << "\n";
+  print_topo_stats(*topo);
 
 end:  
   if(topo != nullptr)
@@ -126,10 +111,61 @@ end:
 }
 
 void
+print_topo_stats(
+  plugin_topo const& topo)
+{
+  int total_mod_count = 0;
+  int total_param_count = 0;
+  int total_block_param_count = 0;
+  int total_accurate_param_count = 0;
+  int total_voice_start_param_count = 0;
+  int total_voice_accurate_param_count = 0;
+
+  int unique_mod_count = 0;
+  int unique_param_count = 0;
+  int unique_block_param_count = 0;
+  int unique_accurate_param_count = 0;
+  int unique_voice_start_param_count = 0;
+  int unique_voice_accurate_param_count = 0;
+
+  for (int m = 0; m < topo.modules.size(); m++)
+  {
+    auto const& module = topo.modules[m];
+    unique_mod_count++;
+    total_mod_count += topo.modules[m].info.slot_count;
+    for (int p = 0; p < module.params.size(); p++)
+    {
+      auto const& param = module.params[p];
+      unique_param_count++;
+      total_param_count += module.info.slot_count * param.info.slot_count;
+      if(param.dsp.rate == param_rate::block) unique_block_param_count++;
+      if(param.dsp.rate == param_rate::block) total_block_param_count += module.info.slot_count * param.info.slot_count;
+      if(param.dsp.rate == param_rate::voice) unique_voice_start_param_count++;
+      if(param.dsp.rate == param_rate::voice) total_voice_start_param_count += module.info.slot_count * param.info.slot_count;
+      if(param.dsp.rate == param_rate::accurate) unique_accurate_param_count++;
+      if(param.dsp.rate == param_rate::accurate) total_accurate_param_count += module.info.slot_count * param.info.slot_count;
+      if(param.dsp.rate == param_rate::accurate && module.dsp.stage == module_stage::voice) unique_voice_accurate_param_count++;
+      if(param.dsp.rate == param_rate::accurate && module.dsp.stage == module_stage::voice) total_voice_accurate_param_count += module.info.slot_count * param.info.slot_count;
+    }
+  }
+
+  std::cout << "Total modules: " << total_mod_count << ".\n";
+  std::cout << "Unique modules: " << unique_mod_count << ".\n";
+  std::cout << "Total params: " << total_param_count << ".\n";
+  std::cout << "Unique params: " << unique_param_count << ".\n";
+  std::cout << "Total block params: " << total_block_param_count << ".\n";
+  std::cout << "Unique block params: " << unique_block_param_count << ".\n";
+  std::cout << "Total voice-start params: " << total_voice_start_param_count << ".\n";
+  std::cout << "Unique voice-start params: " << unique_voice_start_param_count << ".\n";
+  std::cout << "Total accurate params: " << total_accurate_param_count << ".\n";
+  std::cout << "Unique accurate params: " << unique_accurate_param_count << ".\n";
+  std::cout << "Total per-voice accurate params: " << total_voice_accurate_param_count << ".\n";
+  std::cout << "Unique per-voice accurate params: " << unique_voice_accurate_param_count << ".\n";
+}
+
+void
 generate_plugin_ref(
-  plugin_topo const& topo, std::ostream& out, 
-  int& module_count, int& module_slot_count, 
-  int& param_count, int& param_slot_count)
+  plugin_topo const& topo, std::ostream& out)
 {
   std::string name_and_version = topo.tag.full_name + " " + 
     std::to_string(topo.version.major) + "." + 
@@ -156,16 +192,15 @@ generate_plugin_ref(
   out << "</head>\n";
   out << "<body>\n";
   out << "<h1>" << name_and_version << "</h1>\n";
-  generate_modules_ref(topo, out, module_count, module_slot_count);
-  generate_params_ref(topo, out, param_count, param_slot_count);
+  generate_modules_ref(topo, out);
+  generate_params_ref(topo, out);
   out << "</body>\n";
   out << "</html>\n";
 }
 
 static void
 generate_modules_ref(
-  plugin_topo const& topo, std::ostream& out,
-  int& module_count, int& module_slot_count)
+  plugin_topo const& topo, std::ostream& out)
 {
   out << "<h2>Module Overview</h2>\n";
   out << "<table>\n";
@@ -183,9 +218,6 @@ generate_modules_ref(
     auto const& module = topo.modules[m];
     assert(module.info.description.size());
     assert(module.info.tag.full_name.size());
-
-    module_count++;
-    module_slot_count += module.info.slot_count;
 
     out << "<tr>\n";
     if(module.gui.visible)
@@ -207,8 +239,7 @@ generate_modules_ref(
 
 static void
 generate_params_ref(
-  plugin_topo const& topo, std::ostream& out,
-  int& visible_param_count, int& visible_param_slot_count)
+  plugin_topo const& topo, std::ostream& out)
 {
   out << "<h2>Parameter Overview</h2>\n";
   for(int m = 0; m < topo.modules.size(); m++)
@@ -239,9 +270,6 @@ generate_params_ref(
         auto const& param = module.params[p];
         assert(param.info.description.size());
         assert(param.info.tag.full_name.size());
-
-        visible_param_count++;
-        visible_param_slot_count += module.info.slot_count * param.info.slot_count;
         int reference_param_slot = param.info.slot_count == 1 ? 0 : 1;
 
         std::string direction = "";
