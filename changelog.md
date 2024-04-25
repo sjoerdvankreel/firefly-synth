@@ -2,6 +2,7 @@
 
 - Shrunk FX title size to fit on mac.
 - Swapped envelope sustain and smoothing in the gui.
+- Do not store plugin settings directly under linux user home folder.
 
 ### April 22, 2024 - V1.7.2.
 

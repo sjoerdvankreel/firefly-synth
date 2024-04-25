@@ -1,7 +1,7 @@
 #include <plugin_base/shared/io_user.hpp>
-
 #include <juce_core/juce_core.h>
 
+#include <cstddef>
 #include <algorithm>
 #include <filesystem>
 
@@ -16,6 +16,11 @@ user_location(plugin_topo const& topo)
   result /= topo.tag.full_name;
   result /= topo.tag.id;
   result /= std::to_string(topo.version.major) + "." + std::to_string(topo.version.minor) + "." + std::to_string(topo.version.patch);
+#ifdef __linux__
+  char const* xdg_config_home = std::getenv("XDG_CONFIG_HOME");
+  if(xdg_config_home == nullptr) xdg_config_home = ".config";
+  result = std::filesystem::path(xdg_config_home) / result;
+#endif
   return result.string();
 }
 

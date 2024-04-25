@@ -37,7 +37,7 @@ variable number of modules with +/- button in UI
 v1.7.3:
 - V flip env stn/smt
 - V TODO RETEST Title fx size clips on mac
-- fix linux userprofile settings
+- V fix linux userprofile settings
 - fix sample accurate block splitting
 
 v1.7.4 clap mod
