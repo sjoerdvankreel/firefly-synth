@@ -1,3 +1,7 @@
+### ?, ? - V1.7.3.
+
+- Swapped envelope sustain and smoothing in the gui.
+
 ### April 22, 2024 - V1.7.2.
 
 - Updated dependencies to latest (juce, vst3, clap).

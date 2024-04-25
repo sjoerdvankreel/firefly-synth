@@ -35,10 +35,10 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 variable number of modules with +/- button in UI
 
 v1.7.3:
-flip env stn/smt
-Title fx size clips on mac
-fix linux userprofile settings
-fix sample accurate block splitting
+- flip env stn/smt
+- Title fx size clips on mac
+- fix linux userprofile settings
+- fix sample accurate block splitting
 
 v1.7.4 clap mod
 - allow to disable env 1, use external env ?
