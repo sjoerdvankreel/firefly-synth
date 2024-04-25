@@ -203,7 +203,7 @@ make_title_text_section(plugin_gui* gui, lnf* lnf, component_store store, bool i
   std::string name = is_fx? FF_SYNTH_FX_NAME: FF_SYNTH_INST_NAME;
   for(int i = 0; i < name.size(); i++) name[i] = std::toupper(name[i]);
   auto& grid = store_component<grid_component>(store, gui_dimension({ { 2, 1 }, { 1 } }), 2, 2, 0, 1);
-  auto& title_label = store_component<autofit_label>(store, lnf, name, true, 15);
+  auto& title_label = store_component<autofit_label>(store, lnf, name, true, is_fx? 14: 15);
   title_label.setColour(Label::ColourIds::textColourId, colors.control_text);
   title_label.setJustificationType(Justification::centredRight);
   grid.add(title_label, { 0, 0, 1, 1 });

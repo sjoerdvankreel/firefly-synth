@@ -35,8 +35,8 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 variable number of modules with +/- button in UI
 
 v1.7.3:
-- flip env stn/smt
-- Title fx size clips on mac
+- V flip env stn/smt
+- V TODO RETEST Title fx size clips on mac
 - fix linux userprofile settings
 - fix sample accurate block splitting
 
