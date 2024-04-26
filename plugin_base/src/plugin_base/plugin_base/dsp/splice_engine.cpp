@@ -56,6 +56,9 @@ plugin_splice_engine::process()
   int total_block_count = spliced_block_count + (rest_block_frames == 0? 0: 1);
 
   _host_block.events.out.clear();
+  auto comp = [](auto const& l, auto const& r) { return l.param < r.param ? true : l.param > r.param ? false : l.frame < r.frame; };
+  std::sort(_host_block.events.accurate.begin(), _host_block.events.accurate.end(), comp);
+
   for (int i = 0; i < total_block_count; i++)
   {
     int this_block_start = i * spliced_block_frames;
@@ -112,6 +115,8 @@ plugin_splice_engine::process()
     // host transmits minimum set of events that allows to reconstruct the curve
     // see https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Parameters+Automation/Index.html#problems
     // plugin_engine assumes exactly this format, so we have to accomodate that while splitting
+    
+    // copy over explicit events
     for (int a = 0; a < _host_block.events.accurate.size(); a++)
       if (_host_block.events.accurate[a].frame >= this_block_start && _host_block.events.accurate[a].frame < this_block_start + this_block_frames)
       {
@@ -119,6 +124,45 @@ plugin_splice_engine::process()
         e.frame -= this_block_start;
         inner_block.events.accurate.push_back(e);
       }
+    
+    // figure out implicit (block boundary) events
+    // plugin_engine handles defaults
+    std::sort(inner_block.events.accurate.begin(), inner_block.events.accurate.end(), comp);
+    for (int a = 0; a < inner_block.events.accurate.size(); a++)
+    {
+      accurate_event e = _host_block.events.accurate[a];
+      bool is_last_event_for_this_param_in_spliced_block = 
+        a < inner_block.events.accurate.size() - 1 && 
+        inner_block.events.accurate[a].param != inner_block.events.accurate[a + 1].param;
+      if (is_last_event_for_this_param_in_spliced_block && e.frame != this_block_frames - 1)
+      {
+        // just go with linear, we'll see if it pops up in the profiler
+        // TODO in theory there should always a "last" event if it matters
+        // but better do sample-and-hold in plugin_engine instead of relying on it
+        bool has_next_event_for_this_param_in_host_block = false;
+        for (int ha = 0; ha < _host_block.events.accurate.size(); ha++)
+          if(_host_block.events.accurate[ha].param == inner_block.events.accurate[a].param)
+            if (_host_block.events.accurate[ha].frame >= this_block_start + this_block_frames)
+            {
+              // Found the first event for this param that is within the host block but not in the spliced block.
+              // Now linear interpolate.
+              auto const& next_host_event_this_param = _host_block.events.accurate[ha];
+              int this_event_position_in_host_block = e.frame + this_block_start;
+              int next_event_position_in_host_block = next_host_event_this_param.frame;
+              int this_event_boundary_position_in_host_block = this_block_start + this_block_frames - 1;
+              double this_event_value = e.normalized.value();
+              double next_event_value = next_host_event_this_param.normalized.value();
+              accurate_event boundary_event;
+              boundary_event.param = e.param;
+              boundary_event.frame = this_block_frames - 1;
+              boundary_event.normalized = normalized_value(
+                this_event_value + next_event_value *
+                ((float)this_event_boundary_position_in_host_block - (float)this_event_position_in_host_block) /
+                ((float)next_event_position_in_host_block - (float)this_event_position_in_host_block));
+              break;
+            }
+      }
+    }
 
     _engine.process();
     _host_block.events.out.insert(_host_block.events.out.begin(), inner_block.events.out.begin(), inner_block.events.out.end());
