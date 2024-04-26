@@ -139,7 +139,6 @@ plugin_splice_engine::process()
         // just go with linear, we'll see if it pops up in the profiler
         // TODO in theory there should always a "last" event if it matters
         // but better do sample-and-hold in plugin_engine instead of relying on it
-        bool has_next_event_for_this_param_in_host_block = false;
         for (int ha = 0; ha < _host_block.events.accurate.size(); ha++)
           if(_host_block.events.accurate[ha].param == inner_block.events.accurate[a].param)
             if (_host_block.events.accurate[ha].frame >= this_block_start + this_block_frames)
