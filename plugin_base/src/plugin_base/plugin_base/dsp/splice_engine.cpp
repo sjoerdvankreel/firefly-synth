@@ -85,8 +85,21 @@ plugin_splice_engine::process()
 
     // this could be made more efficient but i doubt if it would matter
 
+    // for block events, just repeat on each start
     for (int b = 0; b < _host_block.events.block.size(); b++)
       inner_block.events.block.push_back(_host_block.events.block[b]);
+
+    // note events are easy, just adjust for block start
+    for (int n = 0; n < _host_block.events.notes.size(); n++)
+      if (_host_block.events.notes[n].frame >= this_block_start && _host_block.events.notes[n].frame < this_block_start + this_block_frames)
+      {
+        note_event e = _host_block.events.notes[n];
+        e.frame -= this_block_start;
+        inner_block.events.notes.push_back(e);
+      }
+
+    // midi events are easy too, also just adjust for block start
+    // plugin_engine will smooth jumps using lpf optionally controlled by the plugin
     for(int m = 0; m < _host_block.events.midi.size(); m++)
       if(_host_block.events.midi[m].frame >= this_block_start && _host_block.events.midi[m].frame < this_block_start + this_block_frames)
       {
@@ -94,19 +107,17 @@ plugin_splice_engine::process()
         e.frame -= this_block_start;
         inner_block.events.midi.push_back(e);
       }
+
+    // accurate is some bookkeeping
+    // host transmits minimum set of events that allows to reconstruct the curve
+    // see https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Parameters+Automation/Index.html#problems
+    // plugin_engine assumes exactly this format, so we have to accomodate that while splitting
     for (int a = 0; a < _host_block.events.accurate.size(); a++)
       if (_host_block.events.accurate[a].frame >= this_block_start && _host_block.events.accurate[a].frame < this_block_start + this_block_frames)
       {
         accurate_event e = _host_block.events.accurate[a];
         e.frame -= this_block_start;
         inner_block.events.accurate.push_back(e);
-      }
-    for (int n = 0; n < _host_block.events.notes.size(); n++)
-      if (_host_block.events.notes[n].frame >= this_block_start && _host_block.events.notes[n].frame < this_block_start + this_block_frames)
-      {
-        note_event e = _host_block.events.notes[n];
-        e.frame -= this_block_start;
-        inner_block.events.notes.push_back(e);
       }
 
     _engine.process();
