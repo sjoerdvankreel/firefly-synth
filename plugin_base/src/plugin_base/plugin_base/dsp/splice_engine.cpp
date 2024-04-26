@@ -19,9 +19,10 @@ plugin_splice_engine::prepare_block()
 void
 plugin_splice_engine::deactivate()
 {
+  _splice_block_size = -1;
   _engine.deactivate();
   _host_block.events.deactivate();
-  _splice_block_size = -1;
+  _inner_accurate_events = {};
 }
 
 void 
@@ -42,6 +43,12 @@ plugin_splice_engine::activate(int max_frame_count)
 
   _engine.activate(_splice_block_size);
   _host_block.events.activate(false, state().desc().param_count, state().desc().midi_count, state().desc().plugin->audio_polyphony, max_frame_count);
+
+  // make some room for the block boundary / interpolation events
+  _inner_accurate_events.resize(max_frame_count / _splice_block_size + 1);
+  int fill_guess = (int)std::ceil(_splice_block_size / 32.0f);
+  int inner_accurate_events_guess = state().desc().param_count * fill_guess;
+  for(int i = 0; i < _inner_accurate_events.size(); i++) _inner_accurate_events[i].resize(inner_accurate_events_guess);
 }
 
 void
@@ -58,6 +65,9 @@ plugin_splice_engine::process()
   _host_block.events.out.clear();
   auto comp = [](auto const& l, auto const& r) { return l.param < r.param ? true : l.param > r.param ? false : l.frame < r.frame; };
   std::sort(_host_block.events.accurate.begin(), _host_block.events.accurate.end(), comp);
+
+  // for accurate we need to do the bookkeeping on total level, cannot do per-block
+  // just go with linear search and see if it pops up in the profiler
 
   for (int i = 0; i < total_block_count; i++)
   {
