@@ -151,13 +151,16 @@ plugin_splice_engine::process()
               int this_event_boundary_position_in_host_block = this_block_start + this_block_frames - 1;
               double this_event_value = e.normalized.value();
               double next_event_value = next_host_event_this_param.normalized.value();
+
+              // Mind the bookkeeping.
               accurate_event boundary_event;
               boundary_event.param = e.param;
               boundary_event.frame = this_block_frames - 1;
               boundary_event.normalized = normalized_value(
-                this_event_value + next_event_value *
+                this_event_value + (next_event_value - this_event_value) *
                 ((float)this_event_boundary_position_in_host_block - (float)this_event_position_in_host_block) /
                 ((float)next_event_position_in_host_block - (float)this_event_position_in_host_block));
+
               break;
             }
       }
