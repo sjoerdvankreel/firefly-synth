@@ -22,7 +22,7 @@ plugin_splice_engine::deactivate()
   _splice_block_size = -1;
   _engine.deactivate();
   _host_block.events.deactivate();
-  _inner_accurate_events = {};
+  _spliced_accurate_events = {};
 }
 
 void 
@@ -45,10 +45,9 @@ plugin_splice_engine::activate(int max_frame_count)
   _host_block.events.activate(false, state().desc().param_count, state().desc().midi_count, state().desc().plugin->audio_polyphony, max_frame_count);
 
   // make some room for the block boundary / interpolation events
-  _inner_accurate_events.resize(max_frame_count / _splice_block_size + 1);
-  int fill_guess = (int)std::ceil(_splice_block_size / 32.0f);
-  int inner_accurate_events_guess = state().desc().param_count * fill_guess;
-  for(int i = 0; i < _inner_accurate_events.size(); i++) _inner_accurate_events[i].resize(inner_accurate_events_guess);
+  int fill_guess = (int)std::ceil(max_frame_count / 32.0f);
+  int accurate_events_guess = state().desc().param_count * fill_guess;
+  _spliced_accurate_events.resize(accurate_events_guess);
 }
 
 void
@@ -68,6 +67,14 @@ plugin_splice_engine::process()
 
   // for accurate we need to do the bookkeeping on total level, cannot do per-block
   // just go with linear search and see if it pops up in the profiler
+  // host transmits minimum set of events that allows to reconstruct the curve
+  // see https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Parameters+Automation/Index.html#problems
+  // plugin_engine assumes exactly this format, so we have to accomodate that while splitting
+  for (int i = 0; i < _host_block.events.accurate.size(); i++)
+  {
+    auto const& host_event = _host_block.events.accurate[i];
+    
+  }
 
   for (int i = 0; i < total_block_count; i++)
   {
@@ -121,60 +128,14 @@ plugin_splice_engine::process()
         inner_block.events.midi.push_back(e);
       }
 
-    // accurate is some bookkeeping
-    // host transmits minimum set of events that allows to reconstruct the curve
-    // see https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Parameters+Automation/Index.html#problems
-    // plugin_engine assumes exactly this format, so we have to accomodate that while splitting
-    
-    // copy over explicit events
-    for (int a = 0; a < _host_block.events.accurate.size(); a++)
-      if (_host_block.events.accurate[a].frame >= this_block_start && _host_block.events.accurate[a].frame < this_block_start + this_block_frames)
+    // bookkeeping done above
+    for (int a = 0; a < _spliced_accurate_events.size(); a++)
+      if (_spliced_accurate_events[a].frame >= this_block_start && _spliced_accurate_events[a].frame < this_block_start + this_block_frames)
       {
-        accurate_event e = _host_block.events.accurate[a];
+        accurate_event e = _spliced_accurate_events[a];
         e.frame -= this_block_start;
-        inner_block.events.accurate.push_back(e);
+        _spliced_accurate_events.push_back(e);
       }
-    
-    // figure out implicit (block boundary) events
-    // plugin_engine handles defaults
-    std::sort(inner_block.events.accurate.begin(), inner_block.events.accurate.end(), comp);
-    for (int a = 0; a < inner_block.events.accurate.size(); a++)
-    {
-      accurate_event e = _host_block.events.accurate[a];
-      bool is_last_event_for_this_param_in_spliced_block = 
-        a < inner_block.events.accurate.size() - 1 && 
-        inner_block.events.accurate[a].param != inner_block.events.accurate[a + 1].param;
-      if (is_last_event_for_this_param_in_spliced_block && e.frame != this_block_frames - 1)
-      {
-        // just go with linear, we'll see if it pops up in the profiler
-        // TODO in theory there should always a "last" event if it matters
-        // but better do sample-and-hold in plugin_engine instead of relying on it
-        for (int ha = 0; ha < _host_block.events.accurate.size(); ha++)
-          if(_host_block.events.accurate[ha].param == inner_block.events.accurate[a].param)
-            if (_host_block.events.accurate[ha].frame >= this_block_start + this_block_frames)
-            {
-              // Found the first event for this param that is within the host block but not in the spliced block.
-              // Now linear interpolate.
-              auto const& next_host_event_this_param = _host_block.events.accurate[ha];
-              int this_event_position_in_host_block = e.frame + this_block_start;
-              int next_event_position_in_host_block = next_host_event_this_param.frame;
-              int this_event_boundary_position_in_host_block = this_block_start + this_block_frames - 1;
-              double this_event_value = e.normalized.value();
-              double next_event_value = next_host_event_this_param.normalized.value();
-
-              // Mind the bookkeeping.
-              accurate_event boundary_event;
-              boundary_event.param = e.param;
-              boundary_event.frame = this_block_frames - 1;
-              boundary_event.normalized = normalized_value(
-                this_event_value + (next_event_value - this_event_value) *
-                ((float)this_event_boundary_position_in_host_block - (float)this_event_position_in_host_block) /
-                ((float)next_event_position_in_host_block - (float)this_event_position_in_host_block));
-
-              break;
-            }
-      }
-    }
 
     _engine.process();
     _host_block.events.out.insert(_host_block.events.out.begin(), inner_block.events.out.begin(), inner_block.events.out.end());
