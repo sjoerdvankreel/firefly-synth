@@ -37,8 +37,9 @@ v1.7.3:
 - V flip env stn/smt
 - V fix linux userprofile settings
 - V TODO RETEST Title fx size clips on mac
+- V fix the automation vst3 bug
 - fix sample accurate block splitting
-- fix the automation vst3 bug
+- recheck all demo files
 
 v1.7.4 clap mod
 - allow to disable env 1, use external env ?
