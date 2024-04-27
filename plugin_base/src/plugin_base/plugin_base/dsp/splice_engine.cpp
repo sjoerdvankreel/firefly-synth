@@ -70,11 +70,17 @@ plugin_splice_engine::process()
   // see https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Parameters+Automation/Index.html#problems
   // plugin_engine assumes exactly this format, so we have to accomodate that while splitting
   _spliced_accurate_events.clear();
-  for (int i = 0; i < (int)_host_block.events.accurate.size() - 1; i++)
+  for (int i = 0; i < (int)_host_block.events.accurate.size(); i++)
   {
+    // copy over host events
     auto const& this_event = _host_block.events.accurate[i];
+    _spliced_accurate_events.push_back(this_event);
+
+    // see if we need to split blocks
+    if(i == _host_block.events.accurate.size() - 1) break;
     auto const& next_event = _host_block.events.accurate[i + 1];
     if(this_event.param != next_event.param) continue;
+
     int this_event_block = this_event.frame / _splice_block_size;
     int next_event_block = next_event.frame / _splice_block_size;
 
@@ -86,11 +92,24 @@ plugin_splice_engine::process()
       int splice_block_last = splice_block_start + splice_block_frames - 1;
       double splice_weight = (splice_block_last - (double)this_event.frame) / (next_event.frame - (double)this_event.frame);
       double value_distance = next_event.normalized.value() - this_event.normalized.value();
-      accurate_event splice_event;
-      splice_event.param = this_event.param;
-      splice_event.frame = splice_block_start + splice_block_frames - 1;
-      splice_event.normalized = normalized_value(this_event.normalized.value() + splice_weight * value_distance);
-      _spliced_accurate_events.push_back(splice_event);
+      auto splice_value = normalized_value(this_event.normalized.value() + splice_weight * value_distance);
+
+      // last frame of spliced block
+      accurate_event splice_last_event;
+      splice_last_event.param = this_event.param;
+      splice_last_event.normalized = splice_value;
+      splice_last_event.frame = splice_block_start + splice_block_frames - 1;
+      _spliced_accurate_events.push_back(splice_last_event);
+
+      // first frame of next spliced block
+      if(splice_block_start + spliced_block_frames < _host_block.frame_count)
+      {
+        accurate_event splice_first_event;
+        splice_first_event.param = this_event.param;
+        splice_first_event.normalized = splice_value;
+        splice_first_event.frame = splice_block_start + splice_block_frames;
+        _spliced_accurate_events.push_back(splice_first_event);
+      }
     }
   }
 
