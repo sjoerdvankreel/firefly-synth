@@ -66,14 +66,32 @@ plugin_splice_engine::process()
   std::sort(_host_block.events.accurate.begin(), _host_block.events.accurate.end(), comp);
 
   // for accurate we need to do the bookkeeping on total level, cannot do per-block
-  // just go with linear search and see if it pops up in the profiler
   // host transmits minimum set of events that allows to reconstruct the curve
   // see https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Parameters+Automation/Index.html#problems
   // plugin_engine assumes exactly this format, so we have to accomodate that while splitting
-  for (int i = 0; i < _host_block.events.accurate.size(); i++)
+  _spliced_accurate_events.clear();
+  for (int i = 0; i < (int)_host_block.events.accurate.size() - 1; i++)
   {
-    auto const& host_event = _host_block.events.accurate[i];
-    
+    auto const& this_event = _host_block.events.accurate[i];
+    auto const& next_event = _host_block.events.accurate[i + 1];
+    if(this_event.param != next_event.param) continue;
+    int this_event_block = this_event.frame / _splice_block_size;
+    int next_event_block = next_event.frame / _splice_block_size;
+
+    // for events in N blocks, need to insert N-1 splice points
+    for (int b = this_event_block; b < next_event_block; b++)
+    {
+      int splice_block_start = b * spliced_block_frames;
+      int splice_block_frames = b < spliced_block_count ? spliced_block_frames : rest_block_frames;
+      int splice_block_last = splice_block_start + splice_block_frames - 1;
+      double splice_weight = (splice_block_last - this_event.frame) / (next_event.frame - this_event.frame);
+      double value_distance = next_event.normalized.value() - this_event.normalized.value();
+      accurate_event splice_event;
+      splice_event.param = this_event.param;
+      splice_event.frame = splice_block_frames - 1;
+      splice_event.normalized = normalized_value(this_event.normalized.value() + splice_weight * value_distance);
+      _spliced_accurate_events.push_back(splice_event);
+    }
   }
 
   for (int i = 0; i < total_block_count; i++)
