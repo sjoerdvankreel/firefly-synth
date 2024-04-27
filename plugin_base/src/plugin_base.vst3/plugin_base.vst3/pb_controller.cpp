@@ -81,12 +81,17 @@ pb_controller::setComponentState(IBStream* state)
 tresult PLUGIN_API 
 pb_controller::setParamNormalized(ParamID tag, ParamValue value)
 {
+  _inside_set_param_normalized = true;
   if(EditControllerEx1::setParamNormalized(tag, value) != kResultTrue) 
+  {
+    _inside_set_param_normalized = false;
     return kResultFalse;
+  }
   // fake midi params are not mapped
   auto iter = gui_state().desc().param_mappings.tag_to_index.find(tag);
   if(iter != gui_state().desc().param_mappings.tag_to_index.end())
     _gui_state.set_normalized_at_index(iter->second, normalized_value(value));
+  _inside_set_param_normalized = false;
   return kResultTrue;
 }
 
@@ -103,6 +108,7 @@ pb_controller::getMidiControllerAssignment(int32 bus, int16 channel, CtrlNumber 
 void
 pb_controller::param_state_changed(int index, plain_value plain)
 {
+  if(_inside_set_param_normalized) return;
   if (_gui_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
   int tag = gui_state().desc().param_mappings.index_to_tag[index];
   auto normalized = gui_state().desc().plain_to_normalized_at_index(index, plain).value();
