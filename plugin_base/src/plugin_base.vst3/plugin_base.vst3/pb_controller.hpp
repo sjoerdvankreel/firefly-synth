@@ -28,8 +28,8 @@ public Steinberg::Vst::EditControllerEx1
   extra_state _extra_state;
   std::map<int, int> _midi_id_to_param = {};
 
-  // hack, see param_state_changed and setParamNormalized
-  // when host comes us with an automation value, that is
+  // see param_state_changed and setParamNormalized
+  // when host comes at us with an automation value, that is
   // reported through setParamNormalized, which through a
   // bunch of gui event handlers comes back to us at param_state_changed
   // which then AGAIN calls setParamNormalized and (even worse) performEdit

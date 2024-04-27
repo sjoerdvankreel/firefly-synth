@@ -37,6 +37,11 @@ public gui_param_listener
   std::unique_ptr<event_queue> _to_gui_events = {};
   std::unique_ptr<event_queue> _to_audio_events = {};
 
+  // see param_state_changed and timerCallback()
+  // and vst3 pb_controller _inside_set_param_normalized
+  // for the gory details
+  bool _inside_timer_callback = false;
+
   // Pull in values from audio->main regardless of whether ui is present.
   void timerCallback() override;
   void param_state_changed(int index, plain_value plain);

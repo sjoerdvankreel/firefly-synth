@@ -4,7 +4,7 @@
 - Swapped envelope sustain and smoothing in the gui.
 - Do not store plugin settings directly under linux user home folder.
 - Bugfix: internal block splitting did not respect sample accurate automation.
-- Bugfix: VST3 version would report automation changes back to the host, which caused automation to stop working entirely in bitwig and flstudio.
+- Bugfix: automation changes were reported back to the host, which caused automation to stop working entirely in bitwig and flstudio.
 
 ### April 22, 2024 - V1.7.2.
 

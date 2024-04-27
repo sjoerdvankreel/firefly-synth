@@ -90,6 +90,7 @@ pb_plugin::gui_param_end_changes(int index)
 void
 pb_plugin::param_state_changed(int index, plain_value plain)
 {
+  if(_inside_timer_callback) return;
   if (_gui_state.desc().params[index]->param->dsp.direction == param_direction::output) return;
   push_to_audio(index, plain);
   _gui_state.set_plain_at_index(index, plain);
@@ -108,8 +109,10 @@ void
 pb_plugin::timerCallback()
 {
   sync_event e;
+  _inside_timer_callback = true;
   while (_to_gui_events->try_dequeue(e))
     _gui_state.set_plain_at_index(e.index, e.plain);
+  _inside_timer_callback = false;
 }
 
 bool 
