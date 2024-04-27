@@ -38,6 +38,7 @@ v1.7.3:
 - V fix linux userprofile settings
 - V TODO RETEST Title fx size clips on mac
 - fix sample accurate block splitting
+- fix the automation vst3 bug
 
 v1.7.4 clap mod
 - allow to disable env 1, use external env ?
