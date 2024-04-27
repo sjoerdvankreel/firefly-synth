@@ -84,11 +84,11 @@ plugin_splice_engine::process()
       int splice_block_start = b * spliced_block_frames;
       int splice_block_frames = b < spliced_block_count ? spliced_block_frames : rest_block_frames;
       int splice_block_last = splice_block_start + splice_block_frames - 1;
-      double splice_weight = (splice_block_last - this_event.frame) / (next_event.frame - this_event.frame);
+      double splice_weight = (splice_block_last - (double)this_event.frame) / (next_event.frame - (double)this_event.frame);
       double value_distance = next_event.normalized.value() - this_event.normalized.value();
       accurate_event splice_event;
       splice_event.param = this_event.param;
-      splice_event.frame = splice_block_frames - 1;
+      splice_event.frame = splice_block_start + splice_block_frames - 1;
       splice_event.normalized = normalized_value(this_event.normalized.value() + splice_weight * value_distance);
       _spliced_accurate_events.push_back(splice_event);
     }
