@@ -152,7 +152,7 @@ plugin_splice_engine::process()
       {
         accurate_event e = _spliced_accurate_events[a];
         e.frame -= this_block_start;
-        _spliced_accurate_events.push_back(e);
+        inner_block.events.accurate.push_back(e);
       }
 
     _engine.process();
