@@ -1,4 +1,4 @@
-### ?, ? - V1.7.3.
+### April 28, 2024 - V1.7.3.
 
 - Swapped envelope sustain and smoothing in the gui.
 - Bugfix: Shrunk FX title size to fit on mac.
