@@ -25,7 +25,7 @@ enum { trigger_legato, trigger_retrig, trigger_multi };
 enum { mode_linear, mode_exp_uni, mode_exp_bi, mode_exp_split };
 enum { section_on, section_type, section_sync, section_trigger, section_dahdr };
 enum {
-  param_on, param_type, param_mode, param_sync, param_sustain, param_trigger, param_filter,
+  param_on, param_type, param_mode, param_sync, param_filter, param_trigger, param_sustain,
   param_delay_time, param_delay_tempo, param_hold_time, param_hold_tempo,
   param_attack_time, param_attack_tempo, param_attack_slope, 
   param_decay_time, param_decay_tempo, param_decay_slope, 
@@ -352,13 +352,13 @@ env_topo(int section, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   sync.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
   sync.info.description = "Toggles time or tempo-synced mode.";
-  auto& sustain = result.params.emplace_back(make_param(
-    make_topo_info_basic("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", "Stn", param_sustain, 1),
-    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
+  auto& filter = result.params.emplace_back(make_param(
+    make_topo_info_basic("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smt", param_filter, 1),
+    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
     make_param_gui_single(section_sync, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
+  filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  filter.info.description = "Lowpass filter to smooth out rough edges.";
 
   result.sections.emplace_back(make_param_section(section_trigger,
     make_topo_tag_basic("{2764871C-8E30-4780-B804-9E0FDE1A63EE}", "Trigger"),
@@ -375,20 +375,19 @@ env_topo(int section, gui_position const& pos)
     "Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>" +
     "Multi - upon note-on event, envelope will start over from the current level.<br/>" + 
     "To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.";
-  auto& filter = result.params.emplace_back(make_param( 
-    make_topo_info_basic("{C4D23A93-4376-4F9C-A1FA-AF556650EF6E}", "Smth", param_filter, 1),
-    make_param_dsp_voice(param_automate::automate), make_domain_linear(0, max_filter_time_ms, 0, 0, "Ms"),
+  auto& sustain = result.params.emplace_back(make_param(
+    make_topo_info("{E5AB2431-1953-40E4-AFD3-735DB31A4A06}", true, "Sustain", "Sustn", "Stn", param_sustain, 1),
+    make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0.5, 0, true),
     make_param_gui_single(section_trigger, gui_edit_type::hslider, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  filter.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
-  filter.info.description = "Lowpass filter to smooth out rough edges.";
+  sustain.gui.bindings.enabled.bind_params({ param_on }, [](auto const& vs) { return vs[0] != 0; });
+  sustain.info.description = "Sustain level. Modulation takes place only at voice start.";
 
   result.sections.emplace_back(make_param_section(section_dahdr,
     make_topo_tag_basic("{96BDC7C2-7DF4-4CC5-88F9-2256975D70AC}", "DAHDR"),
     make_param_section_gui({ 0, 4, 2, 1 }, { { 1, 1 }, { 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 } }, gui_label_edit_cell_split::horizontal)));
-
   auto& delay_time = result.params.emplace_back(make_param(
     make_topo_info("{E9EF839C-235D-4248-A4E1-FAD62089CC78}", true, "Dly Time", "Dly", "Dly", param_delay_time, 1),
     make_param_dsp_accurate(param_automate::modulate), make_domain_log(0, 10, 0, 1, 3, "Sec"),

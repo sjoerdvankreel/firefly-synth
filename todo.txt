@@ -23,7 +23,6 @@ cakewalk bug report
 phaser/flanger/chorus
 incorporate mts-esp
 vst3 note expressions
-clap (poly) modulation
 visual routing indicators
 document the header files a bit
 basic osc waveform icons
@@ -34,11 +33,7 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
-v1.7.2:
-- fix win zip archives
-- max 64 voices + differentiate regular + global unison
-
-v1.7.3
+v1.7.4 clap mod
 - allow to disable env 1, use external env ?
 - flstudio clap
 - multitrack studio
@@ -50,8 +45,6 @@ v1.7.3
 
 v1.8:
 retest bitwig clap resizing
-flip env stn/smt
-Title fx size clips on mac
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 do async clear delay lines etc on patch select -> 

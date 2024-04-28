@@ -1,10 +1,10 @@
 <html>
 <head>
-<title>Firefly Synth 1.7.2</title>
+<title>Firefly Synth 1.7.3</title>
 <style>th, td { padding: 3px; }a, a:visited { color: #666666; }.description { background:#EEEEEE; }h1 { font-size: 19px; color: black; }h2 { font-size: 17px; color: black; }h3 { font-size: 15px; color: black; }body { font-family: Verdana; color: black; }html { position: relative; max-width: 1024px; margin: auto; }tr td { width: auto; white-space: nowrap; } tr th { width: auto; white-space: nowrap; }table, th, td { font-size: 13px; border: 1px solid gray; border-collapse: collapse; text-align: left; }tr td:last-child { width: 100%; white-space: wrap; } tr th:last-child { width: 100%; white-space: wrap; }</style>
 </head>
 <body>
-<h1>Firefly Synth 1.7.2</h1>
+<h1>Firefly Synth 1.7.3</h1>
 <h2>Module Overview</h2>
 <table>
 <tr>
@@ -1103,20 +1103,20 @@
 <td colspan='11' class='description'>Toggles time or tempo-synced mode.</td>
 </tr>
 <tr>
-<td rowspan='2'>Stn</td>
+<td rowspan='2'>Smt</td>
 <td>Sync</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
-<td>Accurate</td>
-<td>Modulate</td>
-<td>0 %</td>
-<td>100 %</td>
-<td>50 %</td>
+<td>Voice</td>
+<td>Automate</td>
+<td>0 Ms</td>
+<td>500 Ms</td>
+<td>0 Ms</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Sustain level. Modulation takes place only at voice start.</td>
+<td colspan='11' class='description'>Lowpass filter to smooth out rough edges.</td>
 </tr>
 <tr>
 <td rowspan='2'>Trigger</td>
@@ -1135,20 +1135,20 @@
 <td colspan='11' class='description'>Selects trigger mode for monophonic mode.<br/>Legato - envelope will not reset.<br/>Retrig - upon note-on event, envelope will start over from zero, may cause clicks.<br/>Multi - upon note-on event, envelope will start over from the current level.<br/>To avoid clicks it is best to use release-monophonic mode with multi-triggered envelopes.</td>
 </tr>
 <tr>
-<td rowspan='2'>Smth</td>
+<td rowspan='2'>Sustain</td>
 <td>Trigger</td>
 <td>Yes</td>
 <td>1</td>
 <td>Input</td>
-<td>Voice</td>
-<td>Automate</td>
-<td>0 Ms</td>
-<td>500 Ms</td>
-<td>0 Ms</td>
+<td>Accurate</td>
+<td>Modulate</td>
+<td>0 %</td>
+<td>100 %</td>
+<td>50 %</td>
 <td>N/A</td>
 </tr>
 <tr>
-<td colspan='11' class='description'>Lowpass filter to smooth out rough edges.</td>
+<td colspan='11' class='description'>Sustain level. Modulation takes place only at voice start.</td>
 </tr>
 <tr>
 <td rowspan='2'>Dly Time</td>

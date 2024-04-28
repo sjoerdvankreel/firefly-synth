@@ -1,3 +1,11 @@
+### April 28, 2024 - V1.7.3.
+
+- Swapped envelope sustain and smoothing in the gui.
+- Bugfix: Shrunk FX title size to fit on mac.
+- Bugfix: Do not store plugin settings directly under linux user home folder.
+- Bugfix: internal block splitting did not respect sample accurate automation.
+- Bugfix: automation changes were reported back to the host, which caused automation to stop working entirely in bitwig and flstudio.
+
 ### April 22, 2024 - V1.7.2.
 
 - Updated dependencies to latest (juce, vst3, clap).
