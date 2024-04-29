@@ -13,6 +13,9 @@ update hosts
 update submodules
 cpu/mem profiling
 
+host:
+check out carla 2.6
+
 someday:
 mseg
 midi mpe
