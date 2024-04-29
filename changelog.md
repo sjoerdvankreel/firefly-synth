@@ -1,7 +1,7 @@
-### ?, ? - V1.7.4.
+### April 29, 2024 - V1.7.4.
 
-- Add some more host test files.
-- Added waveform 13 to the list of supported hosts. No idea if some update between waveform 12 and 13 fixed it, or (more likely), there was a bug on firefly's side that got fixed.
+- Added waveform 13 to the list of supported hosts. No idea if some update between waveform 12 and 13 fixed it, or there was a bug on firefly's side that got fixed.
+- Unfortunately still no renoise and cakewalk.
 
 ### April 28, 2024 - V1.7.3.
 
