@@ -36,7 +36,7 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
-v1.7.4 clap mod
+v1.7.5 clap mod
 - allow to disable env 1, use external env ?
 - flstudio clap
 - multitrack studio
