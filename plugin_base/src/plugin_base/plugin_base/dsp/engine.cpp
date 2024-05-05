@@ -8,6 +8,7 @@
 
 namespace plugin_base {
 
+static float const param_filter_millis = 1.0f;
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
 
@@ -53,6 +54,7 @@ _voice_processor_context(voice_processor_context)
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
   _param_was_automated.resize(_dims.module_slot_param_slot);
+  _automation_filters.resize(_dims.module_slot_param_slot);
 }
 
 plugin_voice_block 
@@ -274,6 +276,16 @@ plugin_engine::activate_modules()
   for(int ms = 0; ms < _state.desc().midi_count; ms++)
     _midi_filters.push_back(block_filter(_sample_rate, default_midi_filter_millis * 0.001, _state.desc().midi_sources[ms]->source->default_));
 
+  for(int m = 0; m < _state.desc().plugin->modules.size(); m++)
+    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+      for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+        if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+          {
+            _automation_filters[m][mi][p][pi].init(_sample_rate, param_filter_millis * 0.001f);
+            _automation_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
+          }
+
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
     {
@@ -355,19 +367,26 @@ plugin_engine::init_automation_from_state()
         }
         else
         {
+          // NOTE! We *really* need max frame count here, not current block size.
+          // This is because if the parameter is *not* automated in the current
+          // block, and the host comes at us with a larger block size on the next round,
+          // we end up with invalid values between current block size and next round block
+          // size. This happens only on hosts which employ variable block sizes (e.g. FLStudio).
+          // However this is completely within the vst3 spec so we should accomodate it.
+          // Note to self: this was a full day not fun debugging session. Please keep
+          // variable block sizes in mind.
+          
+          // NOTE 2: Automation filters may still be active / have run-off.
+          // In that case don't copy the plugin state proper, but the current value of the filter.
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if (_param_was_automated[m][mi][p][pi] != 0)
+            if (_automation_filters[m][mi][p][pi].active())
+              std::fill(
+                _accurate_automation[m][mi][p][pi].begin(),
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
+                _automation_filters[m][mi][p][pi].current());
+            else if (_param_was_automated[m][mi][p][pi] != 0)
             {
               _param_was_automated[m][mi][p][pi] = 0;
-
-              // NOTE! We *really* need max frame count here, not current block size.
-              // This is because if the parameter is *not* automated in the current
-              // block, and the host comes at us with a larger block size on the next round,
-              // we end up with invalid values between current block size and next round block
-              // size. This happens only on hosts which employ variable block sizes (e.g. FLStudio).
-              // However this is completely within the vst3 spec so we should accomodate it.
-              // Note to self: this was a full day not fun debugging session. Please keep
-              // variable block sizes in mind.
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
@@ -519,7 +538,26 @@ plugin_engine::process()
   /* STEP 2: Set up sample-accurate automation */
   /*********************************************/
 
-  // TODO fix the comments
+  // The idea is to construct dense buffers from incoming events
+  // *without* smoothing stuff that has not changed.
+  // Init_automation_from_state will just dump current
+  // plugin state into these buffers, taking into account
+  // any filters that are still "active".
+
+  // deal with unfinished filters from the previous round
+  // automation events may overwrite below but i think thats ok
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+      for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+        if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+          {
+            int f = 0;
+            while(_automation_filters[m][mi][p][pi].active())
+              _accurate_automation[m][mi][p][pi][f++] = _automation_filters[m][mi][p][pi].next().first;
+          }
+
+  // deal with new events from the current round
   for (int e = 0; e < _host_block->events.accurate.size(); e++)
   {
     // sorting should be param first, frame second
@@ -532,14 +570,20 @@ plugin_engine::process()
       (_host_block->events.accurate[e + 1].param == event.param &&
        _host_block->events.accurate[e + 1].frame >= event.frame));
 
-    // TODO staircase for now
+    // run the automation curve untill the next event
+    // which may reside in the next block, incase we'll pick it up later
     int next_event_pos = frame_count;
     auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
+    auto& filter = mapping.topo.value_at(_automation_filters);
     if(!is_last_event && event.param == _host_block->events.accurate[e + 1].param)
       next_event_pos = _host_block->events.accurate[e + 1].frame;
+
+    // start tracking the next value
+    // may cross block boundary, see init_automation_from_state
+    filter.set(event.normalized.value());
     for(int f = event.frame; f < next_event_pos; f++)
-      curve[f] = (float)event.normalized.value();
+      curve[f] = filter.next().first;
 
     // update current state
     _state.set_normalized_at_index(event.param, event.normalized);
@@ -566,12 +610,8 @@ plugin_engine::process()
     }
   }
 
-  // TODO fix the comments
   // process midi automation values
-  // this works a bit different from parameter automation
-  // as the host is not expected (or cannot, in the case of external controllers)
-  // to provide events at block boundaries so we cannot interpolate as for parameters
-  // also for vst3 events come from different queues, so have to sort by frame pos first
+  // plugin gui may provide smoothing amount params
   auto frame_comp = [](auto const& l, auto const& r) { return l.frame < r.frame; };
   std::sort(_host_block->events.midi.begin(), _host_block->events.midi.end(), frame_comp);
   std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);

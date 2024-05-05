@@ -15,7 +15,7 @@ int const midi_middle_c = 60;
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 
-// for smoothing midi or block value changes
+// for smoothing midi or host granularity changes
 class block_filter
 {
   int _length;
@@ -29,6 +29,8 @@ public:
   void init(float rate, float duration);
   
   block_filter(): _length(0) {}
+  float current() const { return _current; }
+  bool active() const { return _pos < _length; }
   block_filter(float rate, float duration, float default_):
   _length(duration * rate), _from(default_), _to(default_), _current(default_) {}
 };
@@ -58,7 +60,7 @@ block_filter::next()
   return std::make_pair(_current, true);
 }
 
-// for smoothing control signals
+// for smoothing internal control signals
 // https://www.musicdsp.org/en/latest/Filters/257-1-pole-lpf-for-smooth-parameter-changes.html
 class cv_filter
 {

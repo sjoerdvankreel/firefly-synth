@@ -80,6 +80,7 @@ class plugin_engine final {
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};
   jarray<int, 4> _param_was_automated = {};
+  jarray<block_filter, 4> _automation_filters = {};
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
   std::vector<block_filter> _midi_filters = {};
