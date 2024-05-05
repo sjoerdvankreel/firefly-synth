@@ -10,7 +10,6 @@ class plugin_splice_engine final {
   plugin_engine _engine;
   host_block _host_block;
   int _splice_block_size = -1;
-  std::vector<accurate_event> _spliced_accurate_events = {};
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_splice_engine);

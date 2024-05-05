@@ -50,7 +50,6 @@ _voice_processor_context(voice_processor_context)
   _input_engines.resize(_dims.module_slot);
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
-  _accurate_frames.resize(_state.desc().param_count);
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
   _param_was_automated.resize(_dims.module_slot_param_slot);
@@ -520,24 +519,29 @@ plugin_engine::process()
   /* STEP 2: Set up sample-accurate automation */
   /*********************************************/
 
-  // 1) events can come in at any frame position and
-  // 2) interpolation needs to be done on normalized (linear) values (plugin needs to scale to plain) and
-  // 3) the host must provide a value at the end of the buffer if that event would have effect w.r.t. the next block
-  std::fill(_accurate_frames.begin(), _accurate_frames.end(), 0);
+  // TODO fix the comments
   for (int e = 0; e < _host_block->events.accurate.size(); e++)
   {
-    // linear interpolate as normalized
+    // sorting should be param first, frame second
+    // see splice_engine
     auto const& event = _host_block->events.accurate[e];
+    bool is_last_event = e == _host_block->events.accurate.size() - 1;
+
+    assert(is_last_event ||
+      _host_block->events.accurate[e + 1].param > event.param ||
+      (_host_block->events.accurate[e + 1].param == event.param &&
+       _host_block->events.accurate[e + 1].frame >= event.frame));
+
+    // TODO staircase for now
+    int next_event_pos = frame_count;
     auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
-    int prev_frame = _accurate_frames[event.param];
-    float range_frames = event.frame - prev_frame + 1;
-    float range = event.normalized.value() - curve[prev_frame];
-    for(int f = prev_frame; f <= event.frame; f++)
-      curve[f] = curve[prev_frame] + (f - prev_frame + 1) / range_frames * range;
+    if(!is_last_event && event.param == _host_block->events.accurate[e + 1].param)
+      next_event_pos = _host_block->events.accurate[e + 1].frame;
+    for(int f = event.frame; f < next_event_pos; f++)
+      curve[f] = (float)event.normalized.value();
 
     // update current state
-    _accurate_frames[event.param] = event.frame;
     _state.set_normalized_at_index(event.param, event.normalized);
 
     // make sure to re-fill the automation buffer on the next round
@@ -562,6 +566,7 @@ plugin_engine::process()
     }
   }
 
+  // TODO fix the comments
   // process midi automation values
   // this works a bit different from parameter automation
   // as the host is not expected (or cannot, in the case of external controllers)

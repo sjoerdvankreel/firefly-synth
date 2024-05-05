@@ -67,7 +67,6 @@ class plugin_engine final {
   jarray<double, 2> _global_module_process_duration_sec = {};
 
   std::vector<mono_note_state> _mono_note_stream = {};
-  std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};
   jarray<float, 6> _voice_cv_state = {};
