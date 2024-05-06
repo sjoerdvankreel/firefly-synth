@@ -47,7 +47,7 @@ pb_component::setState(IBStream* state)
 {
   if (!plugin_io_load_state(load_ibstream(state), _splice_engine.state()).ok())
     return kResultFalse;
-  _splice_engine.mark_all_params_as_automated(true);
+  _splice_engine.automation_state_dirty();
   return kResultOk;
 }
 

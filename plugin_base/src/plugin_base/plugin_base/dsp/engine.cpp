@@ -54,6 +54,7 @@ _voice_processor_context(voice_processor_context)
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
   _param_was_automated.resize(_dims.module_slot_param_slot);
+  _current_modulation.resize(_dims.module_slot_param_slot);
   _automation_filters.resize(_dims.module_slot_param_slot);
 }
 
@@ -122,7 +123,7 @@ void
 plugin_engine::init_from_state(plugin_state const* state)
 {
   _state.copy_from(state->state());
-  mark_all_params_as_automated(true);
+  automation_state_dirty();
   init_automation_from_state();
 }        
 
@@ -251,18 +252,22 @@ plugin_engine::activate(int max_frame_count)
   _host_block->events.activate(_graph, _state.desc().param_count, _state.desc().midi_count, _polyphony, max_frame_count);
 
   // set automation values to current state, events may overwrite
-  mark_all_params_as_automated(true);
+  automation_state_dirty();
   init_automation_from_state();
 }
 
 void
-plugin_engine::mark_all_params_as_automated(bool automated)
+plugin_engine::automation_state_dirty()
 {
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
         for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-          _param_was_automated[m][mi][p][pi] = automated? 1: 0;
+        {
+          // mod is transient
+          _current_modulation[m][mi][p][pi] = 0;
+          _param_was_automated[m][mi][p][pi] = 1;
+        }
 }
 
 void
@@ -390,7 +395,7 @@ plugin_engine::init_automation_from_state()
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
-                (float)_state.get_normalized_at(m, mi, p, pi).value());
+                (float)_state.get_normalized_at(m, mi, p, pi).value() + _current_modulation[m][mi][p][pi]);
             }
         }
       }

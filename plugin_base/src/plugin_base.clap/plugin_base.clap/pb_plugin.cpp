@@ -153,7 +153,7 @@ pb_plugin::stateLoad(clap_istream const* stream) noexcept
   for (int p = 0; p < _splice_engine.state().desc().param_count; p++)
     gui_param_changed(p, _gui_state.get_plain_at_index(p));
   _gui_state.discard_undo_region();
-  _splice_engine.mark_all_params_as_automated(true);
+  _splice_engine.automation_state_dirty();
   return true;
 }
 
@@ -386,6 +386,8 @@ pb_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
   {
     info->flags |= CLAP_PARAM_IS_AUTOMATABLE;
     info->flags |= CLAP_PARAM_REQUIRES_PROCESS;
+    if (param.param->dsp.can_modulate(module.info.slot))
+      info->flags |= CLAP_PARAM_IS_MODULATABLE;
   }
 
   // this is what clap_value is for
@@ -670,6 +672,21 @@ pb_plugin::process(clap_process const* process) noexcept
         automation_event.value_or_offset = (float)check_unipolar(event->value);
         block.events.accurate_automation.push_back(automation_event);
       }
+      break;
+    }
+    case CLAP_EVENT_PARAM_MOD:
+    {
+      auto event = reinterpret_cast<clap_event_param_mod const*>(header);
+      int index = getParamIndexForParamId(event->param_id);
+      auto const& param = _splice_engine.state().desc().param_at_index(index);
+      assert(param.param->dsp.rate == param_rate::accurate);
+      (void)param;
+      accurate_event mod_event;
+      mod_event.param = index;
+      mod_event.is_mod = true;
+      mod_event.frame = header->time;
+      mod_event.value_or_offset = check_bipolar(event->amount);
+      block.events.accurate_modulation.push_back(mod_event);
       break;
     }
     case CLAP_EVENT_MIDI:

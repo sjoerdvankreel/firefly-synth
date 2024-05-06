@@ -76,11 +76,17 @@ class plugin_engine final {
   jarray<float, 1> _bpm_automation = {};
   jarray<float, 4> _midi_automation = {};
   jarray<int, 3> _midi_active_selection = {};
-  jarray<float, 5> _accurate_automation = {};
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};
+
+  // both automation and modulation
   jarray<int, 4> _param_was_automated = {};
+  jarray<float, 5> _accurate_automation = {};
   jarray<block_filter, 4> _automation_filters = {};
+
+  // offset wrt _state
+  jarray<float, 4> _current_modulation = {};
+
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
   std::vector<block_filter> _midi_filters = {};
@@ -136,9 +142,9 @@ public:
   plugin_state const& state() const { return _state; }
 
   void activate_modules();
+  void automation_state_dirty();
   void activate(int max_frame_count);
   void init_from_state(plugin_state const* state);
-  void mark_all_params_as_automated(bool automated);
 
   void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
   void mark_param_as_automated(int m, int mi, int p, int pi) { _param_was_automated[m][mi][p][pi] = 1; }
