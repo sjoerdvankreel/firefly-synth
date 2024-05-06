@@ -82,7 +82,8 @@ class plugin_engine final {
   // both automation and modulation
   jarray<int, 4> _param_was_automated = {};
   jarray<float, 5> _accurate_automation = {};
-  jarray<block_filter, 4> _automation_filters = {};
+  jarray<block_filter, 4> _automation_filters = {}; // todo lerp_filters
+  jarray<cv_filter, 4> _automation_cv_filters = {};
 
   // offset wrt _state
   jarray<float, 4> _current_modulation = {};
