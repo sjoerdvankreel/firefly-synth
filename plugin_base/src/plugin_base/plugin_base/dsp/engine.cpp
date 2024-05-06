@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-static float const param_filter_millis = 1.0f;
+static float const param_filter_millis = 10.0f;
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
 
@@ -641,6 +641,7 @@ plugin_engine::process()
     mapping.topo.value_at(_param_was_automated) = 1;
   }
 
+#if 0
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
@@ -649,6 +650,7 @@ plugin_engine::process()
             if(_automation_lp_filters[m][mi][p][pi].active())
               for(int f = 0; f < frame_count; f++)
                 _accurate_automation[m][mi][p][pi][f] = _automation_lp_filters[m][mi][p][pi].next(_accurate_automation[m][mi][p][pi][f]);
+#endif
 
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */
