@@ -11,7 +11,9 @@ host_block::prepare()
   events.notes.clear();
   events.block.clear();
   events.midi.clear();
-  events.accurate.clear();
+  events.accurate_automation.clear();
+  events.accurate_modulation.clear();
+
   frame_count = 0;
   shared.bpm = 0;
   shared.audio_in = nullptr;
@@ -24,7 +26,8 @@ host_events::deactivate()
   out = {};
   block = {};
   midi = {};
-  accurate = {};
+  accurate_automation = {};
+  accurate_modulation = {};
 }
 
 void 
@@ -43,7 +46,8 @@ host_events::activate(bool graph, int param_count, int midi_count, int polyphony
   out.reserve(block_events_guess);
   block.reserve(block_events_guess);
   midi.reserve(midi_events_guess);
-  accurate.reserve(accurate_events_guess);
+  accurate_automation.reserve(accurate_events_guess);
+  accurate_modulation.reserve(accurate_events_guess);
 }
 
 }

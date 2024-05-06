@@ -558,17 +558,17 @@ plugin_engine::process()
           }
 
   // deal with new events from the current round
-  for (int e = 0; e < _host_block->events.accurate.size(); e++)
+  for (int e = 0; e < _host_block->events.accurate_automation.size(); e++)
   {
     // sorting should be param first, frame second
     // see splice_engine
-    auto const& event = _host_block->events.accurate[e];
-    bool is_last_event = e == _host_block->events.accurate.size() - 1;
+    auto const& event = _host_block->events.accurate_automation[e];
+    bool is_last_event = e == _host_block->events.accurate_automation.size() - 1;
 
     assert(is_last_event ||
-      _host_block->events.accurate[e + 1].param > event.param ||
-      (_host_block->events.accurate[e + 1].param == event.param &&
-       _host_block->events.accurate[e + 1].frame >= event.frame));
+      _host_block->events.accurate_automation[e + 1].param > event.param ||
+      (_host_block->events.accurate_automation[e + 1].param == event.param &&
+       _host_block->events.accurate_automation[e + 1].frame >= event.frame));
 
     // run the automation curve untill the next event
     // which may reside in the next block, incase we'll pick it up later
@@ -576,17 +576,17 @@ plugin_engine::process()
     auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
     auto& filter = mapping.topo.value_at(_automation_filters);
-    if(!is_last_event && event.param == _host_block->events.accurate[e + 1].param)
-      next_event_pos = _host_block->events.accurate[e + 1].frame;
+    if(!is_last_event && event.param == _host_block->events.accurate_automation[e + 1].param)
+      next_event_pos = _host_block->events.accurate_automation[e + 1].frame;
 
     // start tracking the next value
     // may cross block boundary, see init_automation_from_state
-    filter.set(event.normalized.value());
+    filter.set(event.value_or_offset);
     for(int f = event.frame; f < next_event_pos; f++)
       curve[f] = filter.next().first;
 
     // update current state
-    _state.set_normalized_at_index(event.param, event.normalized);
+    _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
 
     // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;

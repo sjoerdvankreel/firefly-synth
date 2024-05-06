@@ -663,11 +663,12 @@ pb_plugin::process(clap_process const* process) noexcept
           _block_automation_seen[index] = 1;
         }
       } else {
-        accurate_event accurate_event;
-        accurate_event.frame = header->time;
-        accurate_event.param = index;
-        accurate_event.normalized = clap_to_normalized(*param.param, clap_value(event->value));
-        block.events.accurate.push_back(accurate_event);
+        accurate_event automation_event;
+        automation_event.is_mod = false;
+        automation_event.frame = header->time;
+        automation_event.param = index;
+        automation_event.value_or_offset = (float)check_unipolar(event->value);
+        block.events.accurate_automation.push_back(automation_event);
       }
       break;
     }
