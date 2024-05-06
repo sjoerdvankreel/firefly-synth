@@ -287,7 +287,7 @@ plugin_engine::activate_modules()
         if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
           {
-            _automation_filters[m][mi][p][pi].init(_sample_rate, param_filter_millis * 0.001f);
+            _automation_filters[m][mi][p][pi].init_samples(_sample_rate, 64);
             _automation_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
           }
 
@@ -526,7 +526,7 @@ plugin_engine::process()
   _bpm_filter.set(_host_block->shared.bpm);
   auto const& topo = *_state.desc().plugin;
   if(topo.bpm_smooth_module >= 0 && topo.bpm_smooth_param >= 0)
-    _bpm_filter.init(_sample_rate, _state.get_plain_at(topo.bpm_smooth_module, 0, topo.bpm_smooth_param, 0).real() * 0.001);
+    _bpm_filter.init_duration(_sample_rate, _state.get_plain_at(topo.bpm_smooth_module, 0, topo.bpm_smooth_param, 0).real() * 0.001);
   for(int f = 0; f < frame_count; f++)
     _bpm_automation[f] = _bpm_filter.next().first;
    
@@ -686,7 +686,7 @@ plugin_engine::process()
         if(midi_index == ms)
         {
           _midi_filters[midi_index].set(event.normalized.value());
-          _midi_filters[midi_index].init(_sample_rate, midi_filter_millis * 0.001);
+          _midi_filters[midi_index].init_duration(_sample_rate, midi_filter_millis * 0.001);
         }
       }
 

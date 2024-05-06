@@ -26,7 +26,8 @@ class block_filter
 public:
   void set(float val);
   std::pair<float, bool> next();
-  void init(float rate, float duration);
+  void init_samples(float rate, int samples);
+  void init_duration(float rate, float duration);
   
   block_filter(): _length(0) {}
   float current() const { return _current; }
@@ -45,10 +46,18 @@ block_filter::set(float val)
 }
 
 inline void 
-block_filter::init(float rate, float duration)
+block_filter::init_samples(float rate, int samples)
+{
+  if(samples == _length) return;
+  _pos = 0;
+  _length = samples;
+}
+
+inline void
+block_filter::init_duration(float rate, float duration)
 {
   int new_length = duration * rate;
-  if(new_length == _length) return;
+  if (new_length == _length) return;
   _pos = 0;
   _length = new_length;
 }
