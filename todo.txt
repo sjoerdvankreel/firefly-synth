@@ -37,6 +37,9 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 variable number of modules with +/- button in UI
 
 v1.7.5 clap mod
+- polymod
+- monphonic mode polymod
+- dont run inactive filters
 - allow to disable env 1, use external env ?
 - flstudio clap
 - multitrack studio

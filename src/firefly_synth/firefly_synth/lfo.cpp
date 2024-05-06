@@ -505,7 +505,7 @@ lfo_engine::update_block_params(plugin_block const* block)
 {
   auto const& block_auto = block->state.own_block_automation;
   float filter = block_auto[param_filter][0].real();
-  _filter.set(block->sample_rate, filter / 1000.0f);
+  _filter.init(block->sample_rate, filter / 1000.0f);
 }
 
 void

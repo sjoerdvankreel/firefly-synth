@@ -72,7 +72,8 @@ class cv_filter
   float _response_time = 0;
 public:
   float next(float in);
-  void set(float sample_rate, float response_time);
+  void set(float val) { _z = val; }
+  void init(float sample_rate, float response_time);
 };
 
 inline float
@@ -83,7 +84,7 @@ cv_filter::next(float in)
 }
 
 inline void
-cv_filter::set(float sample_rate, float response_time)
+cv_filter::init(float sample_rate, float response_time)
 {
   // no need to throw out the history if we're not updating
   if(_sample_rate == sample_rate && _response_time == response_time) 
