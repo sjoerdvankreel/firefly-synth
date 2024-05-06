@@ -56,7 +56,6 @@ _voice_processor_context(voice_processor_context)
   _param_was_automated.resize(_dims.module_slot_param_slot);
   _current_modulation.resize(_dims.module_slot_param_slot);
   _automation_filters.resize(_dims.module_slot_param_slot);
-  _automation_cv_filters.resize(_dims.module_slot_param_slot);
 }
 
 plugin_voice_block 
@@ -290,8 +289,6 @@ plugin_engine::activate_modules()
           {
             _automation_filters[m][mi][p][pi].init(_sample_rate, param_filter_millis * 0.001f);
             _automation_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
-            _automation_cv_filters[m][mi][p][pi].set(_sample_rate, param_filter_millis * 0.001f);
-            // TODO swap init/set and do actual SET value
           }
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
@@ -638,15 +635,6 @@ plugin_engine::process()
     // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;
   }
-
-  // TEMP TODO just lpf the whole damn thing, see how it works out
-  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
-        if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
-          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-            for(int f = 0; f < frame_count; f++)
-              _accurate_automation[m][mi][p][pi][f] = _automation_cv_filters[m][mi][p][pi].next(_accurate_automation[m][mi][p][pi][f]);
 
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */
