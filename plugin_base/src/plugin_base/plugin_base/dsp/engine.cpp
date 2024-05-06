@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-static float const param_filter_millis = 1.0f;
+static float const param_filter_millis = 10.0f;
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
 
@@ -646,7 +646,7 @@ plugin_engine::process()
       for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
         if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-            if(_automation_lp_filters[m][mi][p][pi].active())
+            //if(_automation_lp_filters[m][mi][p][pi].active())
               for(int f = 0; f < frame_count; f++)
                 _accurate_automation[m][mi][p][pi][f] = _automation_lp_filters[m][mi][p][pi].next(_accurate_automation[m][mi][p][pi][f]);
 
