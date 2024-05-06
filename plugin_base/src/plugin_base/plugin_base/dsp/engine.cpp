@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-static float const param_filter_millis = 1.0f;
+static float const param_filter_millis = 10.0f;
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
 
