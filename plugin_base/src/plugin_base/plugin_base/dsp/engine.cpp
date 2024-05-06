@@ -551,16 +551,20 @@ plugin_engine::process()
 
   // deal with unfinished filters from the previous round
   // automation events may overwrite below but i think thats ok
+  // also need to run filter to completion for the entire block
+  // i.e. even when filter is inactive rest of the block needs the end value
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
         if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-          {
-            int f = 0;
-            while(_automation_filters[m][mi][p][pi].active())
-              _accurate_automation[m][mi][p][pi][f++] = _automation_filters[m][mi][p][pi].next().first;
-          }
+            if (_automation_filters[m][mi][p][pi].active())
+            {
+              auto& curve = _accurate_automation[m][mi][p][pi];
+              for(int f = 0; f < frame_count; f++)
+                curve[f] = _automation_filters[m][mi][p][pi].next().first;
+              (void)curve;
+            }
 
   // deal with new events from the current round
   // interpolate auto and mod together
@@ -621,6 +625,9 @@ plugin_engine::process()
 
     // start tracking the next value - lerp with delay
     // may cross block boundary, see init_automation_from_state
+    // need to restore current value to current frame since filters
+    // are already run to completion above
+    filter.current(curve[event.frame]);
     filter.set(new_target_value);
     for(int f = event.frame; f < next_event_pos; f++)
       curve[f] = filter.next().first;

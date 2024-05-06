@@ -30,6 +30,7 @@ public:
   
   block_filter(): _length(0) {}
   float current() const { return _current; }
+  void current(float current) { _current = current; }
   bool active() const { return _pos < _length; }
   block_filter(float rate, float duration, float default_):
   _length(duration * rate), _from(default_), _to(default_), _current(default_) {}
