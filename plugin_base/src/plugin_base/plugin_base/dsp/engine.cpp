@@ -563,17 +563,36 @@ plugin_engine::process()
           }
 
   // deal with new events from the current round
-  for (int e = 0; e < _host_block->events.accurate_automation.size(); e++)
+  // interpolate auto and mod together
+  auto& auto_and_mod = _host_block->events.accurate_automation_and_modulation;
+  auto_and_mod.clear();
+  auto_and_mod.insert(auto_and_mod.begin(),
+    _host_block->events.accurate_automation.begin(),
+    _host_block->events.accurate_automation.end());
+  auto_and_mod.insert(auto_and_mod.begin(),
+    _host_block->events.accurate_modulation.begin(),
+    _host_block->events.accurate_modulation.end());
+  auto comp = [](auto const& l, auto const& r) {
+    if (l.param < r.param) return true;
+    if (l.param > r.param) return false;
+    if (l.frame < r.frame) return true;
+    if (l.frame > r.frame) return false;
+    if (l.is_mod < r.is_mod) return true;
+    if (l.is_mod > r.is_mod) return false;
+    return false; };
+  std::sort(auto_and_mod.begin(), auto_and_mod.end(), comp);
+
+  for (int e = 0; e < auto_and_mod.size(); e++)
   {
     // sorting should be param first, frame second
     // see splice_engine
-    auto const& event = _host_block->events.accurate_automation[e];
-    bool is_last_event = e == _host_block->events.accurate_automation.size() - 1;
+    auto const& event = auto_and_mod[e];
+    bool is_last_event = e == auto_and_mod.size() - 1;
 
     assert(is_last_event ||
-      _host_block->events.accurate_automation[e + 1].param > event.param ||
-      (_host_block->events.accurate_automation[e + 1].param == event.param &&
-       _host_block->events.accurate_automation[e + 1].frame >= event.frame));
+      auto_and_mod[e + 1].param > event.param || (
+      auto_and_mod[e + 1].param == event.param &&
+      auto_and_mod[e + 1].frame >= event.frame));
 
     // run the automation curve untill the next event
     // which may reside in the next block, incase we'll pick it up later
@@ -581,17 +600,30 @@ plugin_engine::process()
     auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
     auto& filter = mapping.topo.value_at(_automation_filters);
-    if(!is_last_event && event.param == _host_block->events.accurate_automation[e + 1].param)
-      next_event_pos = _host_block->events.accurate_automation[e + 1].frame;
+    if(!is_last_event && event.param == auto_and_mod[e + 1].param)
+      next_event_pos = auto_and_mod[e + 1].frame;
 
-    // start tracking the next value
+    // update patch state or mod state and figure out new lerp target
+    double new_target_value;
+    if (event.is_mod)
+    {
+      new_target_value = _state.get_normalized_at_index(event.param).value();
+      new_target_value += check_bipolar(event.value_or_offset);
+      mapping.topo.value_at(_current_modulation) = event.value_or_offset;
+    }
+    else
+    {
+      new_target_value = mapping.topo.value_at(_current_modulation);
+      new_target_value += check_unipolar(event.value_or_offset);
+      _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
+    }
+    new_target_value = std::clamp(new_target_value, 0.0, 1.0);
+
+    // start tracking the next value - lerp with delay
     // may cross block boundary, see init_automation_from_state
-    filter.set(event.value_or_offset);
+    filter.set(new_target_value);
     for(int f = event.frame; f < next_event_pos; f++)
       curve[f] = filter.next().first;
-
-    // update current state
-    _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
 
     // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;

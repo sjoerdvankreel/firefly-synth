@@ -49,6 +49,9 @@ struct host_events final {
   std::vector<accurate_event> accurate_automation;
   std::vector<accurate_event> accurate_modulation;
 
+  // plugin_engine interpolates these as one
+  std::vector<accurate_event> accurate_automation_and_modulation;
+
   void deactivate();
   void activate(bool graph, int param_count, int midi_count, int polyphony, int max_frame_count);
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(host_events);
