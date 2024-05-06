@@ -70,16 +70,21 @@ class cv_filter
   float _z = 0;
   float _sample_rate = 0;
   float _response_time = 0;
+  std::int64_t _active_samples = 0;
+  std::int64_t _response_samples = 0;
 public:
   float next(float in);
   void set(float val) { _z = val; }
   void init(float sample_rate, float response_time);
+  bool active() const { return _active_samples < _response_samples; }
 };
 
 inline float
 cv_filter::next(float in)
 {
   _z = (in * _b) + (_z * _a);
+  if(in != _z) _active_samples = 0;
+  _active_samples++;
   return _z;
 }
 
@@ -90,8 +95,10 @@ cv_filter::init(float sample_rate, float response_time)
   if(_sample_rate == sample_rate && _response_time == response_time) 
     return;
 
+  _active_samples = 0;
   _sample_rate = sample_rate;
   _response_time = response_time;
+  _response_samples = (std::int64_t)std::ceil(response_time * sample_rate);
   _a = std::exp(-2.0f * pi32 / (response_time * sample_rate));
   _b = 1.0f - _a;
   _z = 0.0f;
