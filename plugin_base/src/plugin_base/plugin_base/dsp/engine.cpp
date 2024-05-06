@@ -600,7 +600,7 @@ plugin_engine::process()
 
     // run the automation curve untill the next event
     // which may reside in the next block, incase we'll pick it up later
-    int next_event_pos = frame_count;
+    int next_event_pos = frame_count - 1;
     auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
     auto& filter = mapping.topo.value_at(_automation_filters);
@@ -629,7 +629,7 @@ plugin_engine::process()
     // are already run to completion above
     filter.current(curve[event.frame]);
     filter.set(new_target_value);
-    for(int f = event.frame; f < next_event_pos; f++)
+    for(int f = event.frame; f <= next_event_pos; f++)
       curve[f] = filter.next().first;
 
     // make sure to re-fill the automation buffer on the next round
