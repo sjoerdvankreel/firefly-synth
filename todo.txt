@@ -37,16 +37,13 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 variable number of modules with +/- button in UI
 
 v1.7.5 clap mod
+- 1 smoothing for all or per-param ?
+- check if we are inverted
 - polymod
 - monphonic mode polymod
-- dont run inactive filters
 - allow to disable env 1, use external env ?
 - flstudio clap
 - multitrack studio
-- clap polymod
-- todo are mod events normalized ?
-- todo allow mod events on midi linked params
-- todo polyphonic mod
 - how does this work with global unison?
 
 v1.8:
