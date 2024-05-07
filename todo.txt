@@ -38,6 +38,7 @@ variable number of modules with +/- button in UI
 
 v1.7.5 clap mod
 - 1 smoothing for all or per-param ?
+- store the smoothing value
 - check if we are inverted
 - polymod
 - monphonic mode polymod
