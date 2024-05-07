@@ -553,6 +553,11 @@ plugin_engine::process()
   // plugin state into these buffers, taking into account
   // any filters that are still "active".
 
+  // midi smoothing control
+  float midi_filter_millis = default_midi_filter_millis;
+  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
+    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
+
   // deal with unfinished filters from the previous round
   // automation events may overwrite below but i think thats ok
   // also need to run filter to completion for the entire block
@@ -564,6 +569,8 @@ plugin_engine::process()
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
             if (_automation_lerp_filters[m][mi][p][pi].active() || _automation_lp_filters[m][mi][p][pi].active())
             {
+              _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
+              _automation_lp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
               auto& curve = _accurate_automation[m][mi][p][pi];
               for(int f = 0; f < frame_count; f++)
                 curve[f] = _automation_lp_filters[m][mi][p][pi].next(_automation_lerp_filters[m][mi][p][pi].next().first);
@@ -665,11 +672,6 @@ plugin_engine::process()
   auto frame_comp = [](auto const& l, auto const& r) { return l.frame < r.frame; };
   std::sort(_host_block->events.midi.begin(), _host_block->events.midi.end(), frame_comp);
   std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);
-
-  // midi smoothing control
-  float midi_filter_millis = default_midi_filter_millis;
-  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
-    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
 
   // note: midi_source * frame_count loop rather than frame_count * midi_source loop for performance
   for (int ms = 0; ms < _midi_filters.size(); ms++)
