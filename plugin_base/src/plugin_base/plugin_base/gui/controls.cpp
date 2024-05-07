@@ -332,25 +332,6 @@ param_component::mouseUp(MouseEvent const& evt)
   auto lnf = dynamic_cast<plugin_base::lnf*>(&self.getLookAndFeel());
   auto colors = lnf->module_gui_colors(_module->module->info.tag.full_name);
 
-  if (_param->param->dsp.rate == param_rate::accurate)
-  {
-    have_menu = true;
-    menu.addColouredItem(-1, "Param", colors.tab_text, false, false, nullptr);
-    PopupMenu smoothing_menu;
-    smoothing_menu.addItem(100001, "1 Ms");
-    smoothing_menu.addItem(100002, "2 Ms");
-    smoothing_menu.addItem(100003, "3 Ms");
-    smoothing_menu.addItem(100005, "5 Ms");
-    smoothing_menu.addItem(100008, "8 Ms");
-    smoothing_menu.addItem(100010, "10 Ms");
-    smoothing_menu.addItem(100020, "20 Ms");
-    smoothing_menu.addItem(100030, "30 Ms");
-    smoothing_menu.addItem(100050, "50 Ms");
-    smoothing_menu.addItem(100080, "80 Ms");
-    smoothing_menu.addItem(100100, "100 Ms");
-    menu.addSubMenu("Automation Smoothing", smoothing_menu);
-  }
-
   std::unique_ptr<param_menu_handler> plugin_handler = {};
   param_menu_handler_factory plugin_handler_factory = _param->param->gui.menu_handler_factory;
   if(plugin_handler_factory)
@@ -380,7 +361,7 @@ param_component::mouseUp(MouseEvent const& evt)
 
   menu.showMenuAsync(options, [this, host_menu = host_menu.release(), plugin_handler = plugin_handler.release()](int id) {
     if(1 <= id && id < 10000) host_menu->clicked(id - 1);
-    else if(10000 <= id && id < 100000)
+    else if(10000 <= id)
     {
       auto plugin_menus = plugin_handler->menus();
       auto const& menu = plugin_menus[(id - 10000) / 1000];
