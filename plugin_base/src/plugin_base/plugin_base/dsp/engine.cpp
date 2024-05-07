@@ -289,9 +289,10 @@ plugin_engine::activate_modules()
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
           {
             _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, param_filter_millis * 0.001f);
+            _automation_lerp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
             _automation_lerp_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
             _automation_lp_filters[m][mi][p][pi].init(_sample_rate, param_filter_millis * 0.001f);
-            _automation_lp_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
+            _automation_lp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
           }
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
@@ -386,14 +387,12 @@ plugin_engine::init_automation_from_state()
           
           // NOTE 2: Automation filters may still be active / have run-off.
           // In that case don't copy the plugin state proper, but the current value of the filter.
-          // NOTE 3: Lerp filters are followed by lp filters.
-          // They might *still* run regardless of whats happening here. See process().
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if (_automation_lerp_filters[m][mi][p][pi].active())
+            if (_automation_lp_filters[m][mi][p][pi].active())
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
-                _automation_lerp_filters[m][mi][p][pi].current());
+                _automation_lp_filters[m][mi][p][pi].current());
             else if (_param_was_automated[m][mi][p][pi] != 0)
             {
               _param_was_automated[m][mi][p][pi] = 0;
@@ -563,11 +562,11 @@ plugin_engine::process()
       for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
         if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-            if (_automation_lerp_filters[m][mi][p][pi].active())
+            if (_automation_lerp_filters[m][mi][p][pi].active() || _automation_lp_filters[m][mi][p][pi].active())
             {
               auto& curve = _accurate_automation[m][mi][p][pi];
               for(int f = 0; f < frame_count; f++)
-                curve[f] = _automation_lerp_filters[m][mi][p][pi].next().first;
+                curve[f] = _automation_lp_filters[m][mi][p][pi].next(_automation_lerp_filters[m][mi][p][pi].next().first);
               (void)curve;
             }
 
@@ -608,7 +607,8 @@ plugin_engine::process()
     int next_event_pos = frame_count - 1;
     auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
-    auto& filter = mapping.topo.value_at(_automation_lerp_filters);
+    auto& lerp_filter = mapping.topo.value_at(_automation_lerp_filters);
+    auto& lp_filter = mapping.topo.value_at(_automation_lp_filters);
     if(!is_last_event && event.param == auto_and_mod[e + 1].param)
       next_event_pos = auto_and_mod[e + 1].frame;
 
@@ -628,27 +628,19 @@ plugin_engine::process()
     }
     new_target_value = std::clamp(new_target_value, 0.0, 1.0);
 
-    // start tracking the next value - lerp with delay
+    // start tracking the next value - lerp with delay + lp filter
     // may cross block boundary, see init_automation_from_state
     // need to restore current value to current frame since filters
     // are already run to completion above
-    filter.current(curve[event.frame]);
-    filter.set(new_target_value);
+    lp_filter.current(curve[event.frame]);
+    lerp_filter.current(curve[event.frame]);
+    lerp_filter.set(new_target_value);
     for(int f = event.frame; f <= next_event_pos; f++)
-      curve[f] = filter.next().first;
+      curve[f] = lp_filter.next(lerp_filter.next().first);
 
     // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;
   }
-
-  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for(int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
-        if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
-          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-            if(_automation_lp_filters[m][mi][p][pi].active())
-              for(int f = 0; f < frame_count; f++)
-                _accurate_automation[m][mi][p][pi][f] = _automation_lp_filters[m][mi][p][pi].next(_accurate_automation[m][mi][p][pi][f]);
 
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */

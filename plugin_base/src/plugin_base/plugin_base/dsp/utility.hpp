@@ -74,8 +74,10 @@ class cv_filter
   std::int64_t _response_samples = 0;
 public:
   float next(float in);
-  void set(float val) { _z = val; }
   void init(float sample_rate, float response_time);
+
+  float current() const { return _z; }
+  void current(float val) { _z = val; _active_samples = 0; }
   bool active() const { return _active_samples < _response_samples; }
 };
 
