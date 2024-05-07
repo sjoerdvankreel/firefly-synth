@@ -58,7 +58,7 @@ Extract the zipped folder and copy/replace it (the entire folder, not just the .
 - All other hosts, you'll just have to try and see.
 
 Renoise note:<br/>
-Still not really supported. It will work, but updating the plugin version will cause loss of automation data. 
+Still not really supported. It will work on 3.4.4+, but updating the plugin version will cause loss of automation data. 
 See https://forum.renoise.com/t/saved-automation-data-does-not-respect-vst3s-parameter-id/68461.
 
 # What does it sound like?
