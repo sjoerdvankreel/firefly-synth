@@ -78,6 +78,7 @@ Other:
 - Another acid line bipolar FM: [another_acid_line_bipolar_fm.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/another_acid_line_bipolar_fm.mp3)
 - Another acid line unipolar FM: [another_acid_line_unipolar_fm.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/another_acid_line_unipolar_fm.mp3)
 - I Love Distortion + Global Unison: [i_love_distortion_global_unison.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_global_unison.mp3)
+- Renoise test (yet another acid line): [renoise_test_yet_another_acid_line.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_yet_another_acid_line.mp3)
 
 Presets:
 - Big Pad (Preset): [big_pad.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/big_pad.mp3)
