@@ -399,12 +399,16 @@ plugin_engine::init_automation_from_state()
                 (float)_state.get_normalized_at(m, mi, p, pi).value());
             }
             else if (_automation_lp_filters[m][mi][p][pi].active())
+            {
+              // filter needs run-off
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
                 _automation_lp_filters[m][mi][p][pi].current());
+            }
             else if (_param_was_automated[m][mi][p][pi] != 0)
             {
+              // filter ran to completion but new events came in
               _param_was_automated[m][mi][p][pi] = 0;
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
