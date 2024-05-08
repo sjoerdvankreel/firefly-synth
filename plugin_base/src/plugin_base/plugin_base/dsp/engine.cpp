@@ -57,6 +57,7 @@ _voice_processor_context(voice_processor_context)
   _current_modulation.resize(_dims.module_slot_param_slot);
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
+  _debug_automation_state_last_round_end.resize(_dims.module_slot_param_slot);
 }
 
 plugin_voice_block 
@@ -176,6 +177,7 @@ plugin_engine::deactivate()
   _cpu_usage = 0;
   _sample_rate = 0;
   _stream_time = 0;
+  _blocks_processed = 0;
   _max_frame_count = 0;
   _output_updated_sec = 0;
   _block_start_time_sec = 0;
@@ -230,6 +232,7 @@ plugin_engine::activate(int max_frame_count)
 {  
   deactivate();
   _stream_time = 0;
+  _blocks_processed = 0;
   _last_note_key = -1;
   _last_note_channel = -1;
   _max_frame_count = max_frame_count;
@@ -399,7 +402,7 @@ plugin_engine::init_automation_from_state()
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
-                (float)_state.get_normalized_at(m, mi, p, pi).value() + _current_modulation[m][mi][p][pi]);
+                std::clamp((float)_state.get_normalized_at(m, mi, p, pi).value() + _current_modulation[m][mi][p][pi], 0.0f, 1.0f));
             }
         }
       }
@@ -510,6 +513,32 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
       }
 }
 
+void
+plugin_engine::automation_sanity_check(int frame_count)
+{
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        if (param.dsp.rate == param_rate::accurate)
+        {
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+          {
+            auto const& curve = _accurate_automation[m][mi][p][pi];
+            for (int f = 1; f < frame_count; f++)
+              assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
+            if (_blocks_processed > 0)
+              assert(std::fabs(curve[0] - _debug_automation_state_last_round_end[m][mi][p][pi]) < 0.01f);
+            _debug_automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
+          }
+        }
+      }
+  }
+}
+
 void 
 plugin_engine::process()
 {
@@ -576,6 +605,9 @@ plugin_engine::process()
                 curve[f] = _automation_lp_filters[m][mi][p][pi].next(_automation_lerp_filters[m][mi][p][pi].next().first);
               (void)curve;
             }
+
+  // debug make sure theres no jumps in the curve
+  automation_sanity_check(frame_count);
 
   // deal with new events from the current round
   // interpolate auto and mod together
@@ -647,7 +679,16 @@ plugin_engine::process()
 
     // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;
+
+    // sanity check
+    for (int f = 1; f <= next_event_pos; f++)
+      assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
+    if (_blocks_processed > 0)
+      assert(std::fabs(curve[0] - mapping.topo.value_at(_debug_automation_state_last_round_end)) < 0.01f);
   }
+
+  // debug make sure theres no jumps in the curve
+  automation_sanity_check(frame_count);
 
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */
@@ -1022,6 +1063,7 @@ plugin_engine::process()
 
   // keep track of running time in frames
   _stream_time += frame_count;
+  _blocks_processed++;
   restore_denormals(denormal_state);
 }
 

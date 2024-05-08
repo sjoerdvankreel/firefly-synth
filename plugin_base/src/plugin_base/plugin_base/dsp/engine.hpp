@@ -61,6 +61,7 @@ class plugin_engine final {
   double _output_updated_sec = {};
   double _block_start_time_sec = {};
   std::int64_t _stream_time = {};
+  std::int64_t _blocks_processed = {};
   int _high_cpu_module = {};
   double _high_cpu_module_usage = {};
   jarray<double, 3> _voice_module_process_duration_sec = {};
@@ -84,6 +85,7 @@ class plugin_engine final {
   jarray<float, 5> _accurate_automation = {};
   jarray<cv_filter, 4> _automation_lp_filters = {};
   jarray<block_filter, 4> _automation_lerp_filters = {};
+  jarray<float, 4> _debug_automation_state_last_round_end = {};
 
   // offset wrt _state
   jarray<float, 4> _current_modulation = {};
@@ -107,6 +109,7 @@ class plugin_engine final {
   int find_best_voice_slot();
   void init_automation_from_state();
   void process_voices_single_threaded();
+  void automation_sanity_check(int frame_count);
 
   // Subvoice stuff is for global unison support.
   // In plugin_base we treat global unison voices just like regular polyphonic voices.
