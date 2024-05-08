@@ -514,7 +514,7 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
 }
 
 void
-plugin_engine::automation_sanity_check(int frame_count)
+plugin_engine::automation_sanity_check(int frame_count, bool update_to_last)
 {
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
@@ -532,7 +532,8 @@ plugin_engine::automation_sanity_check(int frame_count)
               assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
             if (_blocks_processed > 0)
               assert(std::fabs(curve[0] - _debug_automation_state_last_round_end[m][mi][p][pi]) < 0.01f);
-            _debug_automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
+            if(update_to_last)
+              _debug_automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
           }
         }
       }
@@ -607,7 +608,7 @@ plugin_engine::process()
             }
 
   // debug make sure theres no jumps in the curve
-  automation_sanity_check(frame_count);
+  automation_sanity_check(frame_count, false);
 
   // deal with new events from the current round
   // interpolate auto and mod together
@@ -688,7 +689,7 @@ plugin_engine::process()
   }
 
   // debug make sure theres no jumps in the curve
-  automation_sanity_check(frame_count);
+  automation_sanity_check(frame_count, true);
 
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */

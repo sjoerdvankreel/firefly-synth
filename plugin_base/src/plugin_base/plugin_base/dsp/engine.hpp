@@ -109,7 +109,7 @@ class plugin_engine final {
   int find_best_voice_slot();
   void init_automation_from_state();
   void process_voices_single_threaded();
-  void automation_sanity_check(int frame_count);
+  void automation_sanity_check(int frame_count, bool update_to_last);
 
   // Subvoice stuff is for global unison support.
   // In plugin_base we treat global unison voices just like regular polyphonic voices.
