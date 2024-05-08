@@ -388,16 +388,21 @@ plugin_engine::init_automation_from_state()
           // Note to self: this was a full day not fun debugging session. Please keep
           // variable block sizes in mind.
           
-          // If anything happened at all on the previous round (i.e filters active or new events came in)
-          // extrapolate from the last value. Process() will run filters to completion and optionally pick up new events.
+          // NOTE 2: Automation filters may still be active / have run-off.
+          // In that case don't copy the plugin state proper, but the current value of the filter.
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if (_automation_lp_filters[m][mi][p][pi].active() || _automation_lerp_filters[m][mi][p][pi].active() || _param_was_automated[m][mi][p][pi])
+            if (_automation_lp_filters[m][mi][p][pi].active())
+              std::fill(
+                _accurate_automation[m][mi][p][pi].begin(),
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
+                _automation_lp_filters[m][mi][p][pi].current());
+            else if (_param_was_automated[m][mi][p][pi] != 0)
             {
               _param_was_automated[m][mi][p][pi] = 0;
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
-                _automation_state_last_round_end[m][mi][p][pi]);
+                std::clamp((float)_state.get_normalized_at(m, mi, p, pi).value() + _current_modulation[m][mi][p][pi], 0.0f, 1.0f));
             }
         }
       }
