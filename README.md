@@ -54,9 +54,12 @@ Extract the zipped folder and copy/replace it (the entire folder, not just the .
 - Linux: 64-bit (X64) cpu. Provided binaries do not require AVX support, but you might want to build with march=native for better performance. Tested on Ubuntu 22. Known to work on Fedora and Mint, too.
 - Windows: 64-bit (X64) cpu with AVX support. Tested on Windows 10. Windows 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Explicitly supported hosts: Reaper, Bitwig, FLStudio, Waveform 13+. Please use a recent version.
-- Explicitly NOT supported hosts:<br/>Renoise (bug), Cakewalk (same bug as renoise, probably).
-- Renoise support waits for this:<br/>https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684.
+- Explicitly NOT supported hosts:<br/>Renoise (bug), Cakewalk (probable same as this: https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684/9).
 - All other hosts, you'll just have to try and see.
+
+Renoise note:<br/>
+Still not really supported. It will work on 3.4.4+, but updating the plugin version will cause loss of automation data. 
+See https://forum.renoise.com/t/saved-automation-data-does-not-respect-vst3s-parameter-id/68461.
 
 # What does it sound like?
 Pretty much like InfernalSynth. I reused most of the algorithms, although some of them got upgraded. In particular,
@@ -78,6 +81,7 @@ Other:
 - Another acid line bipolar FM: [another_acid_line_bipolar_fm.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/another_acid_line_bipolar_fm.mp3)
 - Another acid line unipolar FM: [another_acid_line_unipolar_fm.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/another_acid_line_unipolar_fm.mp3)
 - I Love Distortion + Global Unison: [i_love_distortion_global_unison.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_global_unison.mp3)
+- Renoise test (yet another acid line): [renoise_test_yet_another_acid_line.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_yet_another_acid_line.mp3)
 
 Presets:
 - Big Pad (Preset): [big_pad.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/big_pad.mp3)
