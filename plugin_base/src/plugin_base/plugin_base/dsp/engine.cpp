@@ -388,18 +388,25 @@ plugin_engine::init_automation_from_state()
           // variable block sizes in mind.
           
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if (_automation_lp_filters[m][mi][p][pi].active())
-              std::fill(
-                _accurate_automation[m][mi][p][pi].begin(),
-                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
-                _automation_lp_filters[m][mi][p][pi].current());
-            else if (_param_was_automated[m][mi][p][pi] != 0)
+            if (_blocks_processed == 0)
             {
+              // First time around!
+              // Fill all automation buffers with plugin state.
               _param_was_automated[m][mi][p][pi] = 0;
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
-                std::clamp((float)_state.get_normalized_at(m, mi, p, pi).value() + _current_modulation[m][mi][p][pi], 0.0f, 1.0f));
+                (float)_state.get_normalized_at(m, mi, p, pi).value());
+            }
+            else if (_automation_lp_filters[m][mi][p][pi].active() || _automation_lerp_filters[m][mi][p][pi].active() || _param_was_automated[m][mi][p][pi])
+            {
+              // If anything happened at all on the previous round (i.e filters active or new events came in)
+              // extrapolate from the last value. Process() will run filters to completion and optionally pick up new events.
+              _param_was_automated[m][mi][p][pi] = 0;
+              std::fill(
+                _accurate_automation[m][mi][p][pi].begin(),
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
+                _automation_state_last_round_end[m][mi][p][pi]);
             }
         }
       }
@@ -595,8 +602,8 @@ plugin_engine::process()
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
             if (_automation_lerp_filters[m][mi][p][pi].active() || _automation_lp_filters[m][mi][p][pi].active())
             {
-              //_automation_lerp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
-              //_automation_lp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
+              _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
+              _automation_lp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
               auto& curve = _accurate_automation[m][mi][p][pi];
               for(int f = 0; f < frame_count; f++)
                 curve[f] = _automation_lp_filters[m][mi][p][pi].next(_automation_lerp_filters[m][mi][p][pi].next().first);
