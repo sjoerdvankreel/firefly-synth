@@ -728,7 +728,7 @@ plugin_engine::process()
             _automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
           }
         }
-      }
+      } 
   }
 
   /***************************************************************/
