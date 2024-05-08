@@ -37,6 +37,8 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 variable number of modules with +/- button in UI
 
 v1.7.5 clap mod
+- recheck midi smoothing
+- split controls for gui
 - check if we can drop lerp filters
 - 1 smoothing for all or per-param ?
 - store the smoothing value
