@@ -388,7 +388,17 @@ plugin_engine::init_automation_from_state()
           // variable block sizes in mind.
           
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if (_automation_lp_filters[m][mi][p][pi].active())
+            if (_blocks_processed == 0)
+            {
+              // First time around!
+              // Fill all automation buffers with plugin state.
+              // Do NOT mark as un-automated, filters need to catch up.
+              std::fill(
+                _accurate_automation[m][mi][p][pi].begin(),
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
+                (float)_state.get_normalized_at(m, mi, p, pi).value());
+            }
+            else if (_automation_lp_filters[m][mi][p][pi].active())
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
