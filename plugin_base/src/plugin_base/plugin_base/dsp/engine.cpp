@@ -523,7 +523,6 @@ plugin_engine::automation_sanity_check(int frame_count)
           for (int pi = 0; pi < param.info.slot_count; pi++)
           {
             auto const& curve = _accurate_automation[m][mi][p][pi];
-            (void)curve;
             for (int f = 1; f < frame_count; f++)
               assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
             if (_blocks_processed > 0)
