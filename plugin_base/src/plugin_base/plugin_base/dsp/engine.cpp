@@ -57,7 +57,7 @@ _voice_processor_context(voice_processor_context)
   _current_modulation.resize(_dims.module_slot_param_slot);
   _automation_lerp_filters.resize(_dims.module_slot_param_slot);
   _automation_lp_filters.resize(_dims.module_slot_param_slot);
-  _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
+  _debug_automation_state_last_round_end.resize(_dims.module_slot_param_slot);
 }
 
 plugin_voice_block 
@@ -514,7 +514,7 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
 }
 
 void
-plugin_engine::automation_sanity_check(int frame_count)
+plugin_engine::automation_sanity_check(int frame_count, bool update_to_last)
 {
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
@@ -531,7 +531,9 @@ plugin_engine::automation_sanity_check(int frame_count)
             for (int f = 1; f < frame_count; f++)
               assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
             if (_blocks_processed > 0)
-              assert(std::fabs(curve[0] - _automation_state_last_round_end[m][mi][p][pi]) < 0.01f);
+              assert(std::fabs(curve[0] - _debug_automation_state_last_round_end[m][mi][p][pi]) < 0.01f);
+            if(update_to_last)
+              _debug_automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
           }
         }
       }
@@ -606,7 +608,7 @@ plugin_engine::process()
             }
 
   // debug make sure theres no jumps in the curve
-  automation_sanity_check(frame_count);
+  automation_sanity_check(frame_count, false);
 
   // deal with new events from the current round
   // interpolate auto and mod together
@@ -668,19 +670,10 @@ plugin_engine::process()
 
     // start tracking the next value - lerp with delay + lp filter
     // may cross block boundary, see init_automation_from_state
-    // need to restore current filter value to one-before-event-frame 
-    // since filters are already run to completion above
-    if(event.frame == 0)
-    {
-      lp_filter.current(mapping.topo.value_at(_automation_state_last_round_end));
-      lerp_filter.current(mapping.topo.value_at(_automation_state_last_round_end));
-    }
-    else
-    {
-      lp_filter.current(curve[event.frame - 1]);
-      lerp_filter.current(curve[event.frame - 1]);
-    }
-
+    // need to restore current value to current frame since filters
+    // are already run to completion above
+    lp_filter.current(curve[event.frame]);
+    lerp_filter.current(curve[event.frame]);
     lerp_filter.set(new_target_value);
     for(int f = event.frame; f <= next_event_pos; f++)
       curve[f] = lp_filter.next(lerp_filter.next().first);
@@ -692,31 +685,11 @@ plugin_engine::process()
     for (int f = 1; f <= next_event_pos; f++)
       assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
     if (_blocks_processed > 0)
-      assert(std::fabs(curve[0] - mapping.topo.value_at(_automation_state_last_round_end)) < 0.01f);
+      assert(std::fabs(curve[0] - mapping.topo.value_at(_debug_automation_state_last_round_end)) < 0.01f);
   }
 
   // debug make sure theres no jumps in the curve
-  automation_sanity_check(frame_count);
-
-  // need to remember last value so we can restart filtering from there
-  // in case an event comes in on the next round
-  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-  {
-    auto const& module = _state.desc().plugin->modules[m];
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        if (param.dsp.rate == param_rate::accurate)
-        {
-          for (int pi = 0; pi < param.info.slot_count; pi++)
-          {
-            auto const& curve = _accurate_automation[m][mi][p][pi];
-            _automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
-          }
-        }
-      }
-  }
+  automation_sanity_check(frame_count, true);
 
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */
