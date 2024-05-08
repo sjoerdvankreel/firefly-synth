@@ -594,7 +594,8 @@ plugin_engine::process()
         if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
             if (_automation_lerp_filters[m][mi][p][pi].active() || _automation_lp_filters[m][mi][p][pi].active())
-            {
+            {   
+              // TODO i need to restore this
               //_automation_lerp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
               //_automation_lp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
               auto& curve = _accurate_automation[m][mi][p][pi];
