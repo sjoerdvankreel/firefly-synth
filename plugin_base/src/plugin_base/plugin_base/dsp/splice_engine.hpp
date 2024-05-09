@@ -10,7 +10,10 @@ class plugin_splice_engine final {
   plugin_engine _engine;
   host_block _host_block;
   int _splice_block_size = -1;
-  std::vector<accurate_event> _spliced_accurate_events = {};
+
+  // splice auto and mod separately
+  std::vector<accurate_event> _spliced_accurate_automation_events = {};
+  std::vector<accurate_event> _spliced_accurate_modulation_events = {};
 
 public:
   PB_PREVENT_ACCIDENTAL_COPY(plugin_splice_engine);
@@ -30,9 +33,9 @@ public:
 
   void release_block() {}
   void activate_modules() { _engine.activate_modules(); }
+  void automation_state_dirty() { _engine.automation_state_dirty(); }
   void set_sample_rate(int sample_rate) { _engine.set_sample_rate(sample_rate); }
   void process_voice(int v, bool threaded) { _engine.process_voice(v, threaded); }
-  void mark_all_params_as_automated(bool automated) { _engine.mark_all_params_as_automated(automated); }
   void mark_param_as_automated(int m, int mi, int p, int pi) { _engine.mark_param_as_automated(m, mi, p, pi); }
 };
 

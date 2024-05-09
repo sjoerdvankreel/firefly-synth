@@ -12,6 +12,7 @@
 
 namespace plugin_base {
 
+struct param_desc;
 struct param_topo;
 struct module_topo;
 struct plugin_topo;
@@ -39,6 +40,8 @@ public:
   virtual std::string execute(int menu_id, int action, int module_index, int module_slot, int param_index, int param_slot) = 0;
 };
 
+typedef std::function<std::string(param_desc const& desc)> 
+param_display_formatter;
 typedef std::function<param_automate(int module_slot)>
 automate_selector;
 typedef std::function<bool(int that_val, int this_val)>
@@ -69,9 +72,14 @@ struct param_topo_gui final {
   gui_position position;
   gui_bindings bindings;
   gui_edit_type edit_type;
+
   // autosize to these if not empty
   std::string label_reference_text; 
   std::string value_reference_text;
+
+  // optional customization of display text
+  param_display_formatter display_formatter = {};
+
   gui_item_binding item_enabled = {};
   std::shared_ptr<gui_submenu> submenu;
   param_menu_handler_factory menu_handler_factory;

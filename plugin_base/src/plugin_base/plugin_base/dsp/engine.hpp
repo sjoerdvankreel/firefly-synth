@@ -61,13 +61,13 @@ class plugin_engine final {
   double _output_updated_sec = {};
   double _block_start_time_sec = {};
   std::int64_t _stream_time = {};
+  std::int64_t _blocks_processed = {};
   int _high_cpu_module = {};
   double _high_cpu_module_usage = {};
   jarray<double, 3> _voice_module_process_duration_sec = {};
   jarray<double, 2> _global_module_process_duration_sec = {};
 
   std::vector<mono_note_state> _mono_note_stream = {};
-  std::vector<int> _accurate_frames = {};
   jarray<float, 2> _voices_mixdown = {};
   jarray<float, 3> _voice_results = {};
   jarray<float, 6> _voice_cv_state = {};
@@ -77,10 +77,19 @@ class plugin_engine final {
   jarray<float, 1> _bpm_automation = {};
   jarray<float, 4> _midi_automation = {};
   jarray<int, 3> _midi_active_selection = {};
-  jarray<float, 5> _accurate_automation = {};
   jarray<float, 5> _voice_scratch_state = {};
   jarray<float, 4> _global_scratch_state = {};
+
+  // both automation and modulation
   jarray<int, 4> _param_was_automated = {};
+  jarray<float, 5> _accurate_automation = {};
+  jarray<cv_filter, 4> _automation_lp_filters = {};
+  jarray<block_filter, 4> _automation_lerp_filters = {};
+  jarray<float, 4> _automation_state_last_round_end = {};
+
+  // offset wrt _state
+  jarray<float, 4> _current_modulation = {};
+
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
   std::vector<block_filter> _midi_filters = {};
@@ -100,6 +109,7 @@ class plugin_engine final {
   int find_best_voice_slot();
   void init_automation_from_state();
   void process_voices_single_threaded();
+  void automation_sanity_check(int frame_count);
 
   // Subvoice stuff is for global unison support.
   // In plugin_base we treat global unison voices just like regular polyphonic voices.
@@ -136,9 +146,9 @@ public:
   plugin_state const& state() const { return _state; }
 
   void activate_modules();
+  void automation_state_dirty();
   void activate(int max_frame_count);
   void init_from_state(plugin_state const* state);
-  void mark_all_params_as_automated(bool automated);
 
   void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
   void mark_param_as_automated(int m, int mi, int p, int pi) { _param_was_automated[m][mi][p][pi] = 1; }

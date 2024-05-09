@@ -15,7 +15,7 @@ int const midi_middle_c = 60;
 std::pair<std::uint32_t, std::uint32_t> disable_denormals();
 void restore_denormals(std::pair<std::uint32_t, std::uint32_t> state);
 
-// for smoothing midi or block value changes
+// for smoothing midi or host granularity changes
 class block_filter
 {
   int _length;
@@ -24,14 +24,24 @@ class block_filter
   float _from = 0;
   float _current = 0;
 public:
+  bool active() const;
   void set(float val);
   std::pair<float, bool> next();
   void init(float rate, float duration);
   
+  float current() const { return _current; }
+  void current(float current) { _current = current; }
+
   block_filter(): _length(0) {}
   block_filter(float rate, float duration, float default_):
   _length(duration * rate), _from(default_), _to(default_), _current(default_) {}
 };
+
+inline bool
+block_filter::active() const
+{
+  return _pos < _length;
+}
 
 inline void
 block_filter::set(float val)
@@ -58,7 +68,7 @@ block_filter::next()
   return std::make_pair(_current, true);
 }
 
-// for smoothing control signals
+// for smoothing internal control signals
 // https://www.musicdsp.org/en/latest/Filters/257-1-pole-lpf-for-smooth-parameter-changes.html
 class cv_filter
 {
@@ -67,27 +77,44 @@ class cv_filter
   float _z = 0;
   float _sample_rate = 0;
   float _response_time = 0;
+  std::int64_t _active_samples = 0;
+  std::int64_t _response_samples = 0;
 public:
+  bool active() const;
   float next(float in);
-  void set(float sample_rate, float response_time);
+  void init(float sample_rate, float response_time);
+
+  float current() const { return _z; }
+  void current(float val) { _z = val; _active_samples = 0; }
 };
+
+inline bool
+cv_filter::active() const
+{
+  return _active_samples < _response_samples;
+}
 
 inline float
 cv_filter::next(float in)
 {
+  float const epsilon = 1.0e-5f;
   _z = (in * _b) + (_z * _a);
+  if(std::fabs(in - _z) > epsilon) _active_samples = 0;
+  _active_samples++;
   return _z;
 }
 
 inline void
-cv_filter::set(float sample_rate, float response_time)
+cv_filter::init(float sample_rate, float response_time)
 {
   // no need to throw out the history if we're not updating
   if(_sample_rate == sample_rate && _response_time == response_time) 
     return;
 
+  _active_samples = 0;
   _sample_rate = sample_rate;
   _response_time = response_time;
+  _response_samples = (std::int64_t)std::ceil(response_time * sample_rate);
   _a = std::exp(-2.0f * pi32 / (response_time * sample_rate));
   _b = 1.0f - _a;
   _z = 0.0f;

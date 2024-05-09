@@ -8,6 +8,7 @@
 
 namespace plugin_base {
 
+static float const default_auto_filter_millis = 1.0f;
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
 
@@ -50,10 +51,13 @@ _voice_processor_context(voice_processor_context)
   _input_engines.resize(_dims.module_slot);
   _output_engines.resize(_dims.module_slot);
   _voice_engines.resize(_dims.voice_module_slot);
-  _accurate_frames.resize(_state.desc().param_count);
   _midi_was_automated.resize(_state.desc().midi_count);
   _midi_active_selection.resize(_dims.module_slot_midi);
   _param_was_automated.resize(_dims.module_slot_param_slot);
+  _current_modulation.resize(_dims.module_slot_param_slot);
+  _automation_lerp_filters.resize(_dims.module_slot_param_slot);
+  _automation_lp_filters.resize(_dims.module_slot_param_slot);
+  _automation_state_last_round_end.resize(_dims.module_slot_param_slot);
 }
 
 plugin_voice_block 
@@ -121,7 +125,7 @@ void
 plugin_engine::init_from_state(plugin_state const* state)
 {
   _state.copy_from(state->state());
-  mark_all_params_as_automated(true);
+  automation_state_dirty();
   init_automation_from_state();
 }        
 
@@ -173,6 +177,7 @@ plugin_engine::deactivate()
   _cpu_usage = 0;
   _sample_rate = 0;
   _stream_time = 0;
+  _blocks_processed = 0;
   _max_frame_count = 0;
   _output_updated_sec = 0;
   _block_start_time_sec = 0;
@@ -227,6 +232,7 @@ plugin_engine::activate(int max_frame_count)
 {  
   deactivate();
   _stream_time = 0;
+  _blocks_processed = 0;
   _last_note_key = -1;
   _last_note_channel = -1;
   _max_frame_count = max_frame_count;
@@ -250,18 +256,22 @@ plugin_engine::activate(int max_frame_count)
   _host_block->events.activate(_graph, _state.desc().param_count, _state.desc().midi_count, _polyphony, max_frame_count);
 
   // set automation values to current state, events may overwrite
-  mark_all_params_as_automated(true);
+  automation_state_dirty();
   init_automation_from_state();
 }
 
 void
-plugin_engine::mark_all_params_as_automated(bool automated)
+plugin_engine::automation_state_dirty()
 {
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
         for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-          _param_was_automated[m][mi][p][pi] = automated? 1: 0;
+        {
+          // mod is transient
+          _current_modulation[m][mi][p][pi] = 0;
+          _param_was_automated[m][mi][p][pi] = 1;
+        }
 }
 
 void
@@ -274,6 +284,19 @@ plugin_engine::activate_modules()
   _bpm_filter = block_filter(_sample_rate, default_bpm_filter_millis * 0.001, 120);
   for(int ms = 0; ms < _state.desc().midi_count; ms++)
     _midi_filters.push_back(block_filter(_sample_rate, default_midi_filter_millis * 0.001, _state.desc().midi_sources[ms]->source->default_));
+
+  for(int m = 0; m < _state.desc().plugin->modules.size(); m++)
+    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+      for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+        if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+          {
+            _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
+            _automation_lerp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
+            _automation_lerp_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
+            _automation_lp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
+            _automation_lp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
+          }
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -336,8 +359,7 @@ void
 plugin_engine::init_automation_from_state()
 {
   // set automation values to state, automation may overwrite
-  // note that we cannot initialize current midi state since
-  // midi smoothing filters introduce delay
+  // note that we cannot initialize current midi state since it may be anything
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
     auto const& module = _state.desc().plugin->modules[m];
@@ -356,23 +378,42 @@ plugin_engine::init_automation_from_state()
         }
         else
         {
+          // NOTE! We *really* need max frame count here, not current block size.
+          // This is because if the parameter is *not* automated in the current
+          // block, and the host comes at us with a larger block size on the next round,
+          // we end up with invalid values between current block size and next round block
+          // size. This happens only on hosts which employ variable block sizes (e.g. FLStudio).
+          // However this is completely within the vst3 spec so we should accomodate it.
+          // Note to self: this was a full day not fun debugging session. Please keep
+          // variable block sizes in mind.
+          
           for (int pi = 0; pi < param.info.slot_count; pi++)
-            if (_param_was_automated[m][mi][p][pi] != 0)
+            if (_blocks_processed == 0)
             {
-              _param_was_automated[m][mi][p][pi] = 0;
-
-              // NOTE! We *really* need max frame count here, not current block size.
-              // This is because if the parameter is *not* automated in the current
-              // block, and the host comes at us with a larger block size on the next round,
-              // we end up with invalid values between current block size and next round block
-              // size. This happens only on hosts which employ variable block sizes (e.g. FLStudio).
-              // However this is completely within the vst3 spec so we should accomodate it.
-              // Note to self: this was a full day not fun debugging session. Please keep
-              // variable block sizes in mind.
+              // First time around!
+              // Fill all automation buffers with plugin state.
+              // Do NOT mark as un-automated, filters need to catch up.
               std::fill(
                 _accurate_automation[m][mi][p][pi].begin(),
                 _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
                 (float)_state.get_normalized_at(m, mi, p, pi).value());
+            }
+            else if (_automation_lp_filters[m][mi][p][pi].active())
+            {
+              // filter needs run-off
+              std::fill(
+                _accurate_automation[m][mi][p][pi].begin(),
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
+                _automation_lp_filters[m][mi][p][pi].current());
+            }
+            else if (_param_was_automated[m][mi][p][pi] != 0)
+            {
+              // filter ran to completion but new events came in
+              _param_was_automated[m][mi][p][pi] = 0;
+              std::fill(
+                _accurate_automation[m][mi][p][pi].begin(),
+                _accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
+                std::clamp((float)_state.get_normalized_at(m, mi, p, pi).value() + _current_modulation[m][mi][p][pi], 0.0f, 1.0f));
             }
         }
       }
@@ -483,6 +524,36 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
       }
 }
 
+void
+plugin_engine::automation_sanity_check(int frame_count)
+{
+  // This is a nice debugging tool but it does sometimes
+  // also fire assertions on fast smoothing changes, which are fine.
+#if 0
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        if (param.dsp.rate == param_rate::accurate)
+        {
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+          {
+            auto const& curve = _accurate_automation[m][mi][p][pi];
+            (void)curve; 
+            for (int f = 1; f < frame_count; f++)
+              assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
+            if (_blocks_processed > 0)
+              assert(std::fabs(curve[0] - _automation_state_last_round_end[m][mi][p][pi]) < 0.01f);
+          }
+        }
+      }
+  }
+#endif
+}
+
 void 
 plugin_engine::process()
 {
@@ -520,33 +591,160 @@ plugin_engine::process()
   /* STEP 2: Set up sample-accurate automation */
   /*********************************************/
 
-  // 1) events can come in at any frame position and
-  // 2) interpolation needs to be done on normalized (linear) values (plugin needs to scale to plain) and
-  // 3) the host must provide a value at the end of the buffer if that event would have effect w.r.t. the next block
-  std::fill(_accurate_frames.begin(), _accurate_frames.end(), 0);
-  for (int e = 0; e < _host_block->events.accurate.size(); e++)
+  // The idea is to construct dense buffers from incoming events
+  // *without* smoothing stuff that has not changed.
+  // Init_automation_from_state will just dump current
+  // plugin state into these buffers, taking into account
+  // any filters that are still "active".
+
+  // param smoothing control
+  float auto_filter_millis = default_auto_filter_millis;
+  if (topo.auto_smooth_module >= 0 && topo.auto_smooth_param >= 0)
+    auto_filter_millis = _state.get_plain_at(topo.auto_smooth_module, 0, topo.auto_smooth_param, 0).real();
+
+  // deal with unfinished filters from the previous round
+  // automation events may overwrite below but i think thats ok
+  // also need to run filter to completion for the entire block
+  // i.e. even when filter is inactive rest of the block needs the end value
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+      for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+        if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+            if (_automation_lerp_filters[m][mi][p][pi].active() || _automation_lp_filters[m][mi][p][pi].active())
+            {   
+              _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
+              _automation_lp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
+              auto& curve = _accurate_automation[m][mi][p][pi];
+              for(int f = 0; f < frame_count; f++)
+                curve[f] = _automation_lp_filters[m][mi][p][pi].next(_automation_lerp_filters[m][mi][p][pi].next().first);
+              (void)curve;
+            }
+
+  // debug make sure theres no jumps in the curve
+  automation_sanity_check(frame_count);
+
+  // deal with new events from the current round
+  // interpolate auto and mod together
+  auto& auto_and_mod = _host_block->events.accurate_automation_and_modulation;
+  auto_and_mod.clear();
+  auto_and_mod.insert(auto_and_mod.begin(),
+    _host_block->events.accurate_automation.begin(),
+    _host_block->events.accurate_automation.end());
+  auto_and_mod.insert(auto_and_mod.begin(),
+    _host_block->events.accurate_modulation.begin(),
+    _host_block->events.accurate_modulation.end());
+  auto comp = [](auto const& l, auto const& r) {
+    if (l.param < r.param) return true;
+    if (l.param > r.param) return false;
+    if (l.frame < r.frame) return true;
+    if (l.frame > r.frame) return false;
+    if (l.is_mod < r.is_mod) return true;
+    if (l.is_mod > r.is_mod) return false;
+    return false; };
+  std::sort(auto_and_mod.begin(), auto_and_mod.end(), comp);
+
+  for (int e = 0; e < auto_and_mod.size(); e++)
   {
-    // linear interpolate as normalized
-    auto const& event = _host_block->events.accurate[e];
+    // sorting should be param first, frame second
+    // see splice_engine
+    auto const& event = auto_and_mod[e];
+    bool is_last_event = e == auto_and_mod.size() - 1;
+
+    assert(is_last_event ||
+      auto_and_mod[e + 1].param > event.param || (
+      auto_and_mod[e + 1].param == event.param &&
+      auto_and_mod[e + 1].frame >= event.frame));
+
+    // run the automation curve untill the next event
+    // which may reside in the next block, incase we'll pick it up later
+    int next_event_pos = frame_count - 1;
     auto const& mapping = _state.desc().param_mappings.params[event.param];
     auto& curve = mapping.topo.value_at(_accurate_automation);
-    int prev_frame = _accurate_frames[event.param];
-    float range_frames = event.frame - prev_frame + 1;
-    float range = event.normalized.value() - curve[prev_frame];
-    for(int f = prev_frame; f <= event.frame; f++)
-      curve[f] = curve[prev_frame] + (f - prev_frame + 1) / range_frames * range;
+    auto& lerp_filter = mapping.topo.value_at(_automation_lerp_filters);
+    auto& lp_filter = mapping.topo.value_at(_automation_lp_filters);
+    if(!is_last_event && event.param == auto_and_mod[e + 1].param)
+      next_event_pos = auto_and_mod[e + 1].frame;
 
-    // update current state
-    _accurate_frames[event.param] = event.frame;
-    _state.set_normalized_at_index(event.param, event.normalized);
+    // update patch state or mod state and figure out new lerp target
+    double new_target_value;
+    if (event.is_mod)
+    {
+      new_target_value = _state.get_normalized_at_index(event.param).value();
+      new_target_value += check_bipolar(event.value_or_offset);
+      mapping.topo.value_at(_current_modulation) = event.value_or_offset;
+    }
+    else
+    {
+      new_target_value = mapping.topo.value_at(_current_modulation);
+      new_target_value += check_unipolar(event.value_or_offset);
+      _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
+    }
+    new_target_value = std::clamp(new_target_value, 0.0, 1.0);
+
+    // start tracking the next value - lerp with delay + lp filter
+    // may cross block boundary, see init_automation_from_state
+    // need to restore current filter value to one-before-event-frame 
+    // since filters are already run to completion above
+    if(event.frame == 0)
+    {
+      lp_filter.current(mapping.topo.value_at(_automation_state_last_round_end));
+      lerp_filter.current(mapping.topo.value_at(_automation_state_last_round_end));
+    }
+    else
+    {
+      lp_filter.current(curve[event.frame - 1]);
+      lerp_filter.current(curve[event.frame - 1]);
+    }
+
+    lerp_filter.set(new_target_value);
+    for(int f = event.frame; f <= next_event_pos; f++)
+      curve[f] = lp_filter.next(lerp_filter.next().first);
 
     // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;
+
+    // This is a nice debugging tool but it does sometimes
+    // also fire assertions on fast smoothing changes, which are fine.
+#if 0
+    for (int f = 1; f <= next_event_pos; f++)
+      assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
+    if (_blocks_processed > 0)
+      assert(std::fabs(curve[0] - mapping.topo.value_at(_automation_state_last_round_end)) < 0.01f);
+#endif
+  }
+
+  // debug make sure theres no jumps in the curve
+  automation_sanity_check(frame_count);
+
+  // need to remember last value so we can restart filtering from there
+  // in case an event comes in on the next round
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+  {
+    auto const& module = _state.desc().plugin->modules[m];
+    for (int mi = 0; mi < module.info.slot_count; mi++)
+      for (int p = 0; p < module.params.size(); p++)
+      {
+        auto const& param = module.params[p];
+        if (param.dsp.rate == param_rate::accurate)
+        {
+          for (int pi = 0; pi < param.info.slot_count; pi++)
+          {
+            auto const& curve = _accurate_automation[m][mi][p][pi];
+            _automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
+          }
+        }
+      } 
   }
 
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */
   /***************************************************************/
+
+  // midi smoothing control
+  float midi_filter_millis = default_midi_filter_millis;
+  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
+    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
 
   // find out which midi sources are actually used
   // since it is quite expensive to just keep them all active
@@ -563,18 +761,10 @@ plugin_engine::process()
   }
 
   // process midi automation values
-  // this works a bit different from parameter automation
-  // as the host is not expected (or cannot, in the case of external controllers)
-  // to provide events at block boundaries so we cannot interpolate as for parameters
-  // also for vst3 events come from different queues, so have to sort by frame pos first
+  // plugin gui may provide smoothing amount params
   auto frame_comp = [](auto const& l, auto const& r) { return l.frame < r.frame; };
   std::sort(_host_block->events.midi.begin(), _host_block->events.midi.end(), frame_comp);
   std::fill(_midi_was_automated.begin(), _midi_was_automated.end(), 0);
-
-  // midi smoothing control
-  float midi_filter_millis = default_midi_filter_millis;
-  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
-    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
 
   // note: midi_source * frame_count loop rather than frame_count * midi_source loop for performance
   for (int ms = 0; ms < _midi_filters.size(); ms++)
@@ -925,6 +1115,7 @@ plugin_engine::process()
 
   // keep track of running time in frames
   _stream_time += frame_count;
+  _blocks_processed++;
   restore_denormals(denormal_state);
 }
 

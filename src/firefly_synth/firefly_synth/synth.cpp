@@ -340,6 +340,8 @@ synth_topo(bool is_fx)
   result->bpm_smooth_param = master_in_param_tempo_smooth;
   result->midi_smooth_module = module_master_in;
   result->midi_smooth_param = master_in_param_midi_smooth;
+  result->auto_smooth_module = module_master_in;
+  result->auto_smooth_param = master_in_param_auto_smooth;
   result->voice_mode_module = module_voice_in;
   result->voice_mode_param = voice_in_param_mode;
 

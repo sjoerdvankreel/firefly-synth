@@ -95,6 +95,8 @@ menu_button::clicked()
 static std::string
 param_slot_name(param_desc const* param)
 {
+  if(param->param->gui.display_formatter != nullptr)
+    return param->param->gui.display_formatter(*param);
   std::string result = param->param->info.tag.display_name;
   if (param->param->info.slot_count > 1)
     result += " " + std::to_string(param->info.slot + 1);
@@ -114,7 +116,8 @@ binding_component(gui, module, &param->param->gui.bindings, param->info.slot),
 autofit_label(lnf, label_ref_text(param)), _param(param)
 {
   std::string name = param_slot_name(param);
-  setText(name, juce::dontSendNotification); init();
+  setText(name, juce::dontSendNotification); 
+  init();
 }
 
 last_tweaked_label::

@@ -28,7 +28,8 @@ struct midi_event final {
 struct accurate_event final {
   int frame;
   int param;
-  normalized_value normalized;
+  bool is_mod; // is_mod = clap nondestructive
+  double value_or_offset; // [0, 1] automation value or [-1, 1] mod value
 };
 
 // keyboard event
@@ -45,7 +46,11 @@ struct host_events final {
   std::vector<block_event> out;
   std::vector<note_event> notes;
   std::vector<block_event> block;
-  std::vector<accurate_event> accurate;
+  std::vector<accurate_event> accurate_automation;
+  std::vector<accurate_event> accurate_modulation;
+
+  // plugin_engine interpolates these as one
+  std::vector<accurate_event> accurate_automation_and_modulation;
 
   void deactivate();
   void activate(bool graph, int param_count, int midi_count, int polyphony, int max_frame_count);

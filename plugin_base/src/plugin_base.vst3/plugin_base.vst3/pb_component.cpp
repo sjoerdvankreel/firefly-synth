@@ -47,7 +47,7 @@ pb_component::setState(IBStream* state)
 {
   if (!plugin_io_load_state(load_ibstream(state), _splice_engine.state()).ok())
     return kResultFalse;
-  _splice_engine.mark_all_params_as_automated(true);
+  _splice_engine.automation_state_dirty();
   return kResultOk;
 }
 
@@ -192,11 +192,12 @@ pb_component::process(ProcessData& data)
               for(int p = 0; p < queue->getPointCount(); p++)
                 if (queue->getPoint(p, frame_index, value) == kResultTrue)
                 {
-                  accurate_event event;
-                  event.frame = frame_index;
-                  event.param = param_id_iter->second;
-                  event.normalized = normalized_value(value);
-                  block.events.accurate.push_back(event);
+                  accurate_event automation_event;
+                  automation_event.is_mod = false;
+                  automation_event.frame = frame_index;
+                  automation_event.param = param_id_iter->second;
+                  automation_event.value_or_offset = (float)check_unipolar(value);
+                  block.events.accurate_automation.push_back(automation_event);
                 }
             }
           }

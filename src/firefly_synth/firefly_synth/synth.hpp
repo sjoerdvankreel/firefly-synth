@@ -28,6 +28,7 @@ extern int const voice_in_output_pitch_offset;
 extern int const voice_in_param_mode;
 extern int const voice_in_param_oversmp;
 extern int const master_in_param_pb_range;
+extern int const master_in_param_auto_smooth;
 extern int const master_in_param_midi_smooth;
 extern int const master_in_param_tempo_smooth;
 extern int const master_in_param_glob_uni_dtn;

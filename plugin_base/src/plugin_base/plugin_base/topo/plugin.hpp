@@ -140,12 +140,14 @@ struct plugin_topo final {
   std::string extension;
   std::vector<module_topo> modules;
 
-  // smooths midi and bpm changes, use -1 for defaults,
+  // smooths parameter automation, midi and bpm changes, use -1 for defaults,
   // must resolve to real parameter indicating nr of milliseconds to smooth
   int bpm_smooth_param = -1;
   int bpm_smooth_module = -1;
   int midi_smooth_param = -1;
   int midi_smooth_module = -1;
+  int auto_smooth_param = -1;
+  int auto_smooth_module = -1;
 
   // voice management is done by plugin_base so we need some cooperation
   int voice_mode_param = -1;
