@@ -18,7 +18,7 @@ static int const aux_count = 6;
 static int const max_ext_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
-enum { section_aux, section_smooth, section_linked, section_linked_pbrange, section_glob_uni_prms, section_glob_uni_count };
+enum { section_aux, section_auto_smooth, section_other_smooth, section_linked, section_linked_pbrange, section_glob_uni_prms, section_glob_uni_count };
 
 enum { 
   param_aux, param_auto_smooth, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
@@ -64,7 +64,7 @@ module_topo
 master_in_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1, 1 };
-  std::vector<int> column_distribution = { 64, 26, 40, 28, 18, 92, 16 };
+  std::vector<int> column_distribution = { 27, 37, 26, 40, 28, 18, 92, 16 };
   if(is_fx) 
   {
     row_distribution = { 1 };
@@ -84,7 +84,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
-  auto section_aux_gui = make_param_section_gui({ 0, 1, 2, 2 }, gui_dimension({ 1, 1 }, {
+  auto section_aux_gui = make_param_section_gui({ 0, 2, 2, 2 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, }), gui_label_edit_cell_split::horizontal);
@@ -98,35 +98,40 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   aux.gui.display_formatter = [](auto const& desc) { return desc.info.slot == 0 || desc.info.slot == 3? desc.info.name: std::to_string(desc.info.slot + 1); };
-  
-  auto smooth_gui = make_param_section_gui(
-    { 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
-  if(is_fx)
-    smooth_gui = make_param_section_gui(
-    { 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
-  result.sections.emplace_back(make_param_section(section_smooth,
-    make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"), smooth_gui));
+
+  auto auto_smooth_gui = make_param_section_gui(
+    { 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical);
+  result.sections.emplace_back(make_param_section(section_auto_smooth,
+    make_topo_tag_basic("{E55E8C1C-84CD-4965-97FF-8F0779775EC1}", "Automation Smoothing"), auto_smooth_gui));
   auto& auto_smooth = result.params.emplace_back(make_param(
     make_topo_info("{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", true, "Automation Smoothing", "Auto Smt", "Auto Smt", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 0, 1, 2 },
-      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+    make_param_gui_single(section_auto_smooth, gui_edit_type::knob, { 0, 0, 0, 0 },
+      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
+
+  auto other_smooth_gui = make_param_section_gui(
+    { 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::no_split);
+  if(is_fx)
+    other_smooth_gui = make_param_section_gui(
+    { 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
+  result.sections.emplace_back(make_param_section(section_other_smooth,
+    make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Other Smoothing"), other_smooth_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_other_smooth, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI controller changes.";
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", true, "BPM Smoothing", "BPM Smt", "BPM Smt", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::knob, { 1, 1 },
+    make_param_gui_single(section_other_smooth, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
   auto linked_gui = make_param_section_gui(
-    { 0, 3, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
+    { 0, 4, 2, 1 }, gui_dimension({ 1, 1 }, { gui_dimension::auto_size_all, 1 }), gui_label_edit_cell_split::horizontal);
   if(is_fx) linked_gui = make_param_section_gui(
     { 0, 5, 1, 1 }, gui_dimension({ 1 }, { 1, 1 }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_linked,
@@ -148,7 +153,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_linked_pbrange,
     make_topo_tag_basic("{12EAD382-DF92-486C-A451-E19EC1C009BD}", "Linked PB Range"),
-    make_param_section_gui({ 0, 4, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }),
+    make_param_section_gui({ 0, 5, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }),
       gui_label_edit_cell_split::vertical)));
   auto& pb_range = result.params.emplace_back(make_param(
     make_topo_info("{79B7592A-4911-4B04-8F71-5DD4B2733F4F}", true, "PB Range", "Rng", "Range", param_pb_range, 1),
@@ -159,7 +164,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni_prms,
     make_topo_tag_basic("{7DCA43C8-CD48-4414-9017-EC1B982281FF}", "Global Unison Params"),
-    make_param_section_gui({ 0, 5, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 
+    make_param_section_gui({ 0, 6, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 
       gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1, gui_dimension::auto_size_all, 1 }), 
         gui_label_edit_cell_split::horizontal)));
   auto& glob_uni_dtn = result.params.emplace_back(make_param(
@@ -213,7 +218,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
 
   result.sections.emplace_back(make_param_section(section_glob_uni_count,
     make_topo_tag_basic("{550AAF78-C95A-4D4E-814C-0C5CC26C6457}", "Global Unison Voices"),
-    make_param_section_gui({ 0, 6, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
+    make_param_section_gui({ 0, 7, is_fx? 1: 2, 1 }, gui_dimension({ 1, 1 }, { 1 }), gui_label_edit_cell_split::vertical)));
   auto& glob_uni_voices = result.params.emplace_back(make_param(
     make_topo_info("{C2B06E63-0283-4564-BABB-F20D9B30AD68}", true, "Global Unison Voices", "Uni", "Uni", param_glob_uni_voices, 1),
     make_param_dsp_block(param_automate::automate), make_domain_step(1, max_global_unison_voices, 1, 0),
