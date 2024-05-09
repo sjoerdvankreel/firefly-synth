@@ -57,6 +57,9 @@ Extract the zipped folder and copy/replace it (the entire folder, not just the .
 - Explicitly NOT supported hosts:<br/>Renoise (bug), Cakewalk (probable same as this: https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684/9).
 - All other hosts, you'll just have to try and see.
 
+Waveform note:<br/>
+It is necessary to re-scan plugins after updating.
+
 FLStudio note:<br/>
 Firefly has a relatively large per-block overhead.
 If you notice large spikes in CPU usage, try enabling fixed-size buffers.
