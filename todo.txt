@@ -36,9 +36,6 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
-v1.7.5
-- retest flstudio beta
-
 v1.7.6 clap polymod
 - polymod
 - monophonic mode polymod
@@ -46,6 +43,7 @@ v1.7.6 clap polymod
 - allow to disable env 1, use external env ?
 
 v1.8:
+flstudio beta CLAP automation test is broken, retest when the thing is released
 do not include plugin version in the name, waveform seeks for it
 do automated tests somehow
 retest bitwig clap resizing
