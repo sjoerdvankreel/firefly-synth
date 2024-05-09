@@ -109,7 +109,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& auto_smooth = result.params.emplace_back(make_param(
     make_topo_info("{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", true, "Automation Smoothing", "AutoSmt", "Auto Smt", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
-    make_param_gui_single(section_auto_smooth, gui_edit_type::hslider, { 0, 0, 0, 0 },
+    make_param_gui_single(section_auto_smooth, gui_edit_type::hslider, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
 
