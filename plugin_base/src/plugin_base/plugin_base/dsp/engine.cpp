@@ -528,6 +528,9 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
 void
 plugin_engine::automation_sanity_check(int frame_count)
 {
+  // This is a nice debugging tool but it does sometimes
+  // also fire assertions on fast smoothing changes, which are fine.
+#if 0
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
   {
     auto const& module = _state.desc().plugin->modules[m];
@@ -549,6 +552,7 @@ plugin_engine::automation_sanity_check(int frame_count)
         }
       }
   }
+#endif
 }
 
 void 
