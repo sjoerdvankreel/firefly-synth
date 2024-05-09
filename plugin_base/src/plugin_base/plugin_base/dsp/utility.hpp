@@ -75,17 +75,20 @@ class cv_filter
   float _a = 0;
   float _b = 0;
   float _z = 0;
+  float _prev_z = 0;
+
   float _sample_rate = 0;
   float _response_time = 0;
   std::int64_t _active_samples = 0;
   std::int64_t _response_samples = 0;
+
 public:
+  void current(float val);
+  float current() const { return _z; }
+
   bool active() const;
   float next(float in);
   void init(float sample_rate, float response_time);
-
-  float current() const { return _z; }
-  void current(float val) { _z = val; _active_samples = 0; }
 };
 
 inline bool
@@ -94,11 +97,21 @@ cv_filter::active() const
   return _active_samples < _response_samples;
 }
 
+
+inline void 
+cv_filter::current(float val) 
+{ 
+  _z = val; 
+  _prev_z = val;
+  _active_samples = 0; 
+}
+
 inline float
 cv_filter::next(float in)
 {
   _z = (in * _b) + (_z * _a);
-  if(in != _z) _active_samples = 0;
+  if(_z != _prev_z) _active_samples = 0;
+  _prev_z = _z;
   _active_samples++;
   return _z;
 }
