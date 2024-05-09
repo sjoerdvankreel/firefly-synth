@@ -42,7 +42,7 @@ v1.7.6 clap polymod
 - how does this work with global unison?
 - allow to disable env 1, use external env ?
 
-v1.8:
+v1.7.7:
 flstudio beta CLAP automation test is broken, retest when the thing is released
 do not include plugin version in the name, waveform seeks for it
 do automated tests somehow
