@@ -291,10 +291,11 @@ plugin_engine::activate_modules()
         if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
           {
-            _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, param_filter_millis * 0.001f);
+            // TODO user controllable filter length
+            _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, default_midi_filter_millis * 0.001f);
             _automation_lerp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
             _automation_lerp_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
-            _automation_lp_filters[m][mi][p][pi].init(_sample_rate, param_filter_millis * 0.001f);
+            _automation_lp_filters[m][mi][p][pi].init(_sample_rate, default_midi_filter_millis * 0.001f);
             _automation_lp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
           }
 
@@ -609,9 +610,8 @@ plugin_engine::process()
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
             if (_automation_lerp_filters[m][mi][p][pi].active() || _automation_lp_filters[m][mi][p][pi].active())
             {   
-              // TODO i need to restore this
-              //_automation_lerp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
-              //_automation_lp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
+              _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
+              _automation_lp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
               auto& curve = _accurate_automation[m][mi][p][pi];
               for(int f = 0; f < frame_count; f++)
                 curve[f] = _automation_lp_filters[m][mi][p][pi].next(_automation_lerp_filters[m][mi][p][pi].next().first);
