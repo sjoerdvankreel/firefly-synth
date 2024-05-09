@@ -1,6 +1,7 @@
 #include <plugin_base/helpers/dsp.hpp>
 #include <plugin_base/topo/plugin.hpp>
 #include <plugin_base/topo/support.hpp>
+#include <plugin_base/desc/param.hpp>
 #include <plugin_base/shared/state.hpp>
 #include <plugin_base/dsp/engine.hpp>
 #include <plugin_base/dsp/utility.hpp>
@@ -82,7 +83,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.gui.menu_handler_factory = make_cv_routing_menu_handler;
   result.engine_factory = [](auto const&, int, int) { return std::make_unique<master_in_engine>(); };
 
-  auto section_aux_gui = make_param_section_gui({ 0, 0, 2, 2 }, gui_dimension({ 1, 1 }, {
+  auto section_aux_gui = make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1, }), gui_label_edit_cell_split::horizontal);
@@ -95,9 +96,10 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_param_gui(section_aux, gui_edit_type::knob, is_fx? param_layout::horizontal: param_layout::single_grid, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
+  aux.gui.display_formatter = [](auto const& desc) { return desc.info.slot == 0 || desc.info.slot == 3? desc.info.name: std::to_string(desc.info.slot + 1); };
   
   auto smooth_gui = make_param_section_gui(
-    { 0, 2, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal);
+    { 0, 1, 2, 2 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal);
   if(is_fx)
     smooth_gui = make_param_section_gui(
     { 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
