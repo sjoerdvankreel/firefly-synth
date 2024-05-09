@@ -21,13 +21,14 @@ enum { output_aux, output_mod, output_pb };
 enum { section_aux, section_smooth, section_linked, section_linked_pbrange, section_glob_uni_prms, section_glob_uni_count };
 
 enum { 
-  param_aux, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
+  param_aux, param_auto_smooth, param_midi_smooth, param_tempo_smooth, param_mod, param_pb, param_pb_range, 
   param_glob_uni_dtn, param_glob_uni_sprd, param_glob_uni_lfo_phase, 
   param_glob_uni_lfo_dtn, param_glob_uni_osc_phase, param_glob_uni_env_dtn, 
   param_glob_uni_voices, param_count };
 
 // we provide the buttons, everyone else needs to implement it
 extern int const master_in_param_pb_range = param_pb_range;
+extern int const master_in_param_auto_smooth = param_auto_smooth;
 extern int const master_in_param_midi_smooth = param_midi_smooth;
 extern int const master_in_param_tempo_smooth = param_tempo_smooth;
 extern int const master_in_param_glob_uni_dtn = param_glob_uni_dtn;
@@ -99,22 +100,28 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   aux.gui.display_formatter = [](auto const& desc) { return desc.info.slot == 0 || desc.info.slot == 3? desc.info.name: std::to_string(desc.info.slot + 1); };
   
   auto smooth_gui = make_param_section_gui(
-    { 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { gui_dimension::auto_size, 1 } }), gui_label_edit_cell_split::horizontal);
+    { 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
   if(is_fx)
     smooth_gui = make_param_section_gui(
     { 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_smooth,
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Smooth"), smooth_gui));
+  auto& auto_smooth = result.params.emplace_back(make_param(
+    make_topo_info("{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", true, "Automation Smoothing", "Auto Smt", "Auto Smt", param_auto_smooth, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
+    make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 0, 1, 2 },
+      make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
+  auto_smooth.info.description = "Smoothing automation parameter changes.";
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::knob, { 0, 0 },
+    make_param_gui_single(section_smooth, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
-  midi_smooth.info.description = "Smoothing MIDI parameter changes.";
+  midi_smooth.info.description = "Smoothing MIDI controller changes.";
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", true, "BPM Smoothing", "BPM Smt", "BPM Smt", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_smooth, gui_edit_type::knob, { is_fx? 0: 1, is_fx? 1: 0 },
+    make_param_gui_single(section_smooth, gui_edit_type::knob, { 1, 1 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
