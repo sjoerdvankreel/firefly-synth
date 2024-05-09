@@ -39,7 +39,7 @@ variable number of modules with +/- button in UI
 v1.7.5 clap monomod
 - flstudio clap
 - multitrack studio
-- test demo file bitwig
+- test demo file mtstudio
 
 v1.7.6 clap polymod
 - polymod
