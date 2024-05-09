@@ -55,9 +55,9 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
-  if(param == param_auto_smooth)
+  if(mapping.param_index == param_auto_smooth)
     value /= max_auto_smoothing_ms;
-  if(param == param_midi_smooth || param == param_tempo_smooth)
+  if(mapping.param_index == param_midi_smooth || mapping.param_index == param_tempo_smooth)
     value /= max_other_smoothing_ms;
   std::string partition = state.desc().params[param]->info.name;
   return graph_data(value, bipolar, { partition });
