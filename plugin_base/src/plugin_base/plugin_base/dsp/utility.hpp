@@ -97,8 +97,9 @@ cv_filter::active() const
 inline float
 cv_filter::next(float in)
 {
+  float const epsilon = 1.0e-5f;
   _z = (in * _b) + (_z * _a);
-  if(in != _z) _active_samples = 0;
+  if(std::fabs(in - _z) > epsilon) _active_samples = 0;
   _active_samples++;
   return _z;
 }
