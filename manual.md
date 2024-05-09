@@ -20,6 +20,7 @@ Stuff you can override globally: title image, font (bring your own TTF), font si
 various corner radii and element sizes and plugin size and aspect ratio.
 
 ## Context menus
+
 - Right-click a parameter to show the host menu.
 - Right-click some empty space to show the undo/redo menu.
 - Right-click a matrix header to show clear/tidy matrix options.
@@ -30,7 +31,7 @@ various corner radii and element sizes and plugin size and aspect ratio.
 
 - Most parameters can be automated
 - Most continuous-valued parameters can be automated per sample
-- Most continuous-valued parameters can be modulated per sample
+- Most continuous-valued parameters can be modulated per sample. This includes both internal modulation through the mod matrices and host modulation by the CLAP bindings.
 - Some global discrete-valued parameters can be automated per block
 - Most per-voice discrete-valued parameters can be automated "at voice start"
 
@@ -80,10 +81,10 @@ See the parameter reference document for details.
 - On-note versions of all global modulation sources.
 - Oscillator-to-oscillator AM and FM routing matrices.
 - Pitchbend and modwheel linked to external MIDI input.
-- Smoothing controls for MIDI input and host BPM changes.
 - Portamento with tempo syncing and regular/automatic glide mode.
 - Responds to MIDI pitchbend, modwheel and all 128 CC parameters.
 - Monitor module with active voice count, cpu and threadpool usage.
+- Smoothing controls for parameter automation, MIDI input and host BPM changes.
 - Up to 64 voices in polyphonic mode. Global unison voices also count towards this limit.
 - Global unison with pitch, lfo and envelope detuning, stereo spread and osc/lfo phase offset.
 - Per-voice DAHDSR envelopes with tempo syncing, linear and exponential slopes and 3 envelope modes.

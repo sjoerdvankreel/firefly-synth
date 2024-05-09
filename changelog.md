@@ -1,3 +1,9 @@
+### May 9, 2024 - V1.7.5.
+
+- Add CLAP modulation support. Only global, not per-voice yet!
+- Add automation smoothing parameter in addition to MIDI and BPM smoothing. Reacts to CLAP modulators too, this is mainly useful for host-provided square lfo's etc.
+- Breaking change: changed the way parameter smoothing works. This will not break the plugin proper but may have small audible differences w.r.t. previous versions.
+
 ### April 29, 2024 - V1.7.4 (No binaries).
 
 - Added waveform 13 to the list of supported hosts. No idea if some update between waveform 12 and 13 fixed it, or there was a bug on firefly's side that got fixed.
