@@ -8,7 +8,7 @@
 
 namespace plugin_base {
 
-static float const param_filter_millis = 1.0f;
+static float const default_auto_filter_millis = 1.0f;
 static float const default_bpm_filter_millis = 200;
 static float const default_midi_filter_millis = 50;
 
@@ -291,11 +291,10 @@ plugin_engine::activate_modules()
         if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
           {
-            // TODO user controllable filter length
-            _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, default_midi_filter_millis * 0.001f);
+            _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
             _automation_lerp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
             _automation_lerp_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
-            _automation_lp_filters[m][mi][p][pi].init(_sample_rate, default_midi_filter_millis * 0.001f);
+            _automation_lp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
             _automation_lp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
           }
 
@@ -598,10 +597,10 @@ plugin_engine::process()
   // plugin state into these buffers, taking into account
   // any filters that are still "active".
 
-  // midi smoothing control
-  float midi_filter_millis = default_midi_filter_millis;
-  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
-    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
+  // param smoothing control
+  float auto_filter_millis = default_auto_filter_millis;
+  if (topo.auto_smooth_module >= 0 && topo.auto_smooth_param >= 0)
+    auto_filter_millis = _state.get_plain_at(topo.auto_smooth_module, 0, topo.auto_smooth_param, 0).real();
 
   // deal with unfinished filters from the previous round
   // automation events may overwrite below but i think thats ok
@@ -614,8 +613,8 @@ plugin_engine::process()
           for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
             if (_automation_lerp_filters[m][mi][p][pi].active() || _automation_lp_filters[m][mi][p][pi].active())
             {   
-              _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
-              _automation_lp_filters[m][mi][p][pi].init(_sample_rate, midi_filter_millis * 0.001f);
+              _automation_lerp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
+              _automation_lp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
               auto& curve = _accurate_automation[m][mi][p][pi];
               for(int f = 0; f < frame_count; f++)
                 curve[f] = _automation_lp_filters[m][mi][p][pi].next(_automation_lerp_filters[m][mi][p][pi].next().first);
@@ -741,6 +740,11 @@ plugin_engine::process()
   /***************************************************************/
   /* STEP 3: Set up MIDI automation (treated as sample-accurate) */
   /***************************************************************/
+
+  // midi smoothing control
+  float midi_filter_millis = default_midi_filter_millis;
+  if (topo.midi_smooth_module >= 0 && topo.midi_smooth_param >= 0)
+    midi_filter_millis = _state.get_plain_at(topo.midi_smooth_module, 0, topo.midi_smooth_param, 0).real();
 
   // find out which midi sources are actually used
   // since it is quite expensive to just keep them all active
