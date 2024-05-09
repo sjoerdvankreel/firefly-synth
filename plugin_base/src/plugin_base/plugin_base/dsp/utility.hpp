@@ -24,17 +24,24 @@ class block_filter
   float _from = 0;
   float _current = 0;
 public:
+  bool active() const;
   void set(float val);
   std::pair<float, bool> next();
   void init(float rate, float duration);
   
-  block_filter(): _length(0) {}
   float current() const { return _current; }
   void current(float current) { _current = current; }
-  bool active() const { return _pos < _length; }
+
+  block_filter(): _length(0) {}
   block_filter(float rate, float duration, float default_):
   _length(duration * rate), _from(default_), _to(default_), _current(default_) {}
 };
+
+inline bool
+block_filter::active() const
+{
+  return _pos < _length;
+}
 
 inline void
 block_filter::set(float val)
@@ -73,13 +80,19 @@ class cv_filter
   std::int64_t _active_samples = 0;
   std::int64_t _response_samples = 0;
 public:
+  bool active() const;
   float next(float in);
   void init(float sample_rate, float response_time);
 
   float current() const { return _z; }
   void current(float val) { _z = val; _active_samples = 0; }
-  bool active() const { return _active_samples < _response_samples; }
 };
+
+inline bool
+cv_filter::active() const
+{
+  return _active_samples < _response_samples;
+}
 
 inline float
 cv_filter::next(float in)
