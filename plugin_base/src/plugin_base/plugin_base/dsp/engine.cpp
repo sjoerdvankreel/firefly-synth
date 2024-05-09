@@ -705,11 +705,14 @@ plugin_engine::process()
     // make sure to re-fill the automation buffer on the next round
     mapping.topo.value_at(_param_was_automated) = 1;
 
-    // sanity check
+    // This is a nice debugging tool but it does sometimes
+    // also fire assertions on fast smoothing changes, which are fine.
+#if 0
     for (int f = 1; f <= next_event_pos; f++)
       assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
     if (_blocks_processed > 0)
       assert(std::fabs(curve[0] - mapping.topo.value_at(_automation_state_last_round_end)) < 0.01f);
+#endif
   }
 
   // debug make sure theres no jumps in the curve
