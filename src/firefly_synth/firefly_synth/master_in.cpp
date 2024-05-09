@@ -15,7 +15,8 @@ using namespace plugin_base;
 namespace firefly_synth {
 
 static int const aux_count = 6;
-static int const max_ext_smoothing_ms = 1000;
+static int const max_auto_smoothing_ms = 50;
+static int const max_other_smoothing_ms = 1000;
 
 enum { output_aux, output_mod, output_pb };
 enum { section_aux, section_auto_smooth, section_other_smooth, section_linked, section_linked_pbrange, section_glob_uni_prms, section_glob_uni_count };
@@ -54,8 +55,10 @@ render_graph(plugin_state const& state, graph_engine* engine, int param, param_t
     return graph_data(graph_data_type::na, {});
   float value = state.get_plain_at(mapping).real();
   bool bipolar = mapping.param_index == param_pb;
+  if(param == param_auto_smooth)
+    value /= max_auto_smoothing_ms;
   if(param == param_midi_smooth || param == param_tempo_smooth)
-    value /= max_ext_smoothing_ms;
+    value /= max_other_smoothing_ms;
   std::string partition = state.desc().params[param]->info.name;
   return graph_data(value, bipolar, { partition });
 }
@@ -64,7 +67,7 @@ module_topo
 master_in_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1, 1 };
-  std::vector<int> column_distribution = { 27, 37, 26, 40, 28, 18, 92, 16 };
+  std::vector<int> column_distribution = { 26, 38, 26, 40, 28, 18, 92, 16 };
   if(is_fx) 
   {
     row_distribution = { 1 };
@@ -77,7 +80,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_module_dsp_output(true, make_topo_info("{91B915D6-0DCA-4F59-A396-6AF31DA28DBB}", true, "Mod Wheel", "Mod", "Mod", output_mod, 1)),
       make_module_dsp_output(true, make_topo_info("{EB8CBA31-212A-42EA-956E-69063BF93C58}", true, "Pitch Bend", "PB", "PB", output_pb, 1)) }),
       make_module_gui(section, pos, { row_distribution, column_distribution } )));
-  result.info.description = "Master CV module with MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
+  result.info.description = "Master CV module with automation, MIDI and BPM smoothing, MIDI-linked modwheel and pitchbend plus some additional freely-assignable parameters.";
 
   result.graph_renderer = render_graph;
   result.force_rerender_on_param_hover = true;
@@ -104,9 +107,9 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   result.sections.emplace_back(make_param_section(section_auto_smooth,
     make_topo_tag_basic("{E55E8C1C-84CD-4965-97FF-8F0779775EC1}", "Automation Smoothing"), auto_smooth_gui));
   auto& auto_smooth = result.params.emplace_back(make_param(
-    make_topo_info("{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", true, "Automation Smoothing", "Auto Smt", "Auto Smt", param_auto_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
-    make_param_gui_single(section_auto_smooth, gui_edit_type::knob, { 0, 0, 0, 0 },
+    make_topo_info("{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", true, "Automation Smoothing", "AutoSmt", "Auto Smt", param_auto_smooth, 1),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
+    make_param_gui_single(section_auto_smooth, gui_edit_type::hslider, { 0, 0, 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
 
@@ -119,13 +122,13 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Other Smoothing"), other_smooth_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(
     make_topo_info("{EEA24DB4-220A-4C13-A895-B157BF6158A9}", true, "MIDI Smoothing", "MIDI Smt", "MIDI Smt", param_midi_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 50, 0, "Ms"),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 50, 0, "Ms"),
     make_param_gui_single(section_other_smooth, gui_edit_type::knob, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   midi_smooth.info.description = "Smoothing MIDI controller changes.";
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", true, "BPM Smoothing", "BPM Smt", "BPM Smt", param_tempo_smooth, 1),
-    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_ext_smoothing_ms, 200, 0, "Ms"),
+    make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
     make_param_gui_single(section_other_smooth, gui_edit_type::knob, { 1, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
