@@ -55,7 +55,7 @@ Within a single module you can only modulate upwards, for example env1->env2 or 
 ## File and plugin format
 - Ffpreset files are shareable between CLAP and VST3.
 - VST3: does sample accurate automation, no note expressions.
-- CLAP: does sample accurate automation, does threadpool, no modulation, no polyphonic modulation.
+- CLAP: does sample accurate automation, does threadpool, does global modulation, no polyphonic modulation.
 
 ## Monophonic mode
 
