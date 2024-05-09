@@ -46,6 +46,7 @@ v1.7.6 clap polymod
 - allow to disable env 1, use external env ?
 
 v1.8:
+do not include plugin version in the name, waveform seeks for it
 do automated tests somehow
 retest bitwig clap resizing
 bug: preset select jumps back to previous
