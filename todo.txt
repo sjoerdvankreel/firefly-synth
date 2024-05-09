@@ -36,6 +36,8 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
+TODO get rid of flstudio variable blocksize by delay?
+
 v1.7.5 clap monomod
 - flstudio clap
 - multitrack studio
