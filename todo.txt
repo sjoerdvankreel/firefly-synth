@@ -39,7 +39,6 @@ variable number of modules with +/- button in UI
 v1.7.5 clap monomod
 - flstudio clap
 - multitrack studio
-- check the fx gui
 - make renoise midi smt test
 
 v1.7.6 clap polymod

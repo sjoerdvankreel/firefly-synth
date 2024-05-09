@@ -71,7 +71,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   if(is_fx) 
   {
     row_distribution = { 1 };
-    column_distribution = { 64, 26, 40, 28, 73, 53 };
+    column_distribution = { 64, 26, 30, 38, 73, 53 };
   }
   module_topo result(make_module(
     make_topo_info("{E22B3B9D-2337-4DE5-AA34-EB3351948D6A}", true, "Master In", "Master In", "MIn", module_master_in, 1),
@@ -90,27 +90,35 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto section_aux_gui = make_param_section_gui({ 0, 2, 2, 2 }, gui_dimension({ 1, 1 }, {
       gui_dimension::auto_size_all, 1,
       gui_dimension::auto_size_all, 1,
-      gui_dimension::auto_size_all, 1, }), gui_label_edit_cell_split::horizontal);
-  if(is_fx) section_aux_gui = make_param_section_gui({ 0, 0, 1, 4 }, gui_dimension({ 1 }, { 1 }), gui_label_edit_cell_split::no_split);
+      gui_dimension::auto_size_all, 1, }), 
+      gui_label_edit_cell_split::horizontal);
+  if(is_fx) section_aux_gui = make_param_section_gui({ 0, 0, 1, 3 }, gui_dimension({ 1 }, { 
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1,
+      gui_dimension::auto_size_all, 1, }),
+      gui_label_edit_cell_split::horizontal);
   result.sections.emplace_back(make_param_section(section_aux,
     make_topo_tag_basic("{BB12B605-4EEF-4FEA-9F2C-FACEEA39644A}", "Aux"), section_aux_gui));
   auto& aux = result.params.emplace_back(make_param(
     make_topo_info_basic("{9EC93CE9-6BD6-4D17-97A6-403ED34BBF38}", "Aux", param_aux, aux_count),
     make_param_dsp_accurate(param_automate::modulate), make_domain_percentage_identity(0, 0, true),
-    make_param_gui(section_aux, gui_edit_type::knob, is_fx? param_layout::horizontal: param_layout::single_grid, { 0, 0 },
+    make_param_gui(section_aux, gui_edit_type::knob, param_layout::single_grid, { 0, 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
-  aux.gui.display_formatter = [](auto const& desc) { return desc.info.slot == 0 || desc.info.slot == 3? desc.info.name: std::to_string(desc.info.slot + 1); };
+  aux.gui.display_formatter = [is_fx](auto const& desc) { return (desc.info.slot == 0 || (!is_fx && desc.info.slot == 3))? desc.info.name: std::to_string(desc.info.slot + 1); };
 
-  auto auto_smooth_gui = make_param_section_gui(
-    { 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical);
+  auto auto_smooth_gui = make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical);
+  if(is_fx) auto_smooth_gui = make_param_section_gui({ 0, 3, 1, 1 }, gui_dimension({ 1 }, { { 1 } }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_auto_smooth,
     make_topo_tag_basic("{E55E8C1C-84CD-4965-97FF-8F0779775EC1}", "Automation Smoothing"), auto_smooth_gui));
   auto& auto_smooth = result.params.emplace_back(make_param(
     make_topo_info("{468FE12E-C1A1-43DF-8D87-ED6C93B2C08D}", true, "Automation Smoothing", "AutoSmt", "Auto Smt", param_auto_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_auto_smoothing_ms, 1, 0, "Ms"),
-    make_param_gui_single(section_auto_smooth, gui_edit_type::hslider, { 0, 0 },
-      make_label(gui_label_contents::name, gui_label_align::top, gui_label_justify::center))));
+    make_param_gui_single(section_auto_smooth, is_fx? gui_edit_type::knob: gui_edit_type::hslider, { 0, 0 },
+      make_label(gui_label_contents::name, is_fx? gui_label_align::left: gui_label_align::top, is_fx ? gui_label_justify::near: gui_label_justify::center))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
 
   auto other_smooth_gui = make_param_section_gui(
@@ -129,7 +137,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   auto& bpm_smooth = result.params.emplace_back(make_param(
     make_topo_info("{75053CE4-1543-4595-869D-CC43C6F8CB85}", true, "BPM Smoothing", "BPM Smt", "BPM Smt", param_tempo_smooth, 1),
     make_param_dsp_input(false, param_automate::none), make_domain_linear(1, max_other_smoothing_ms, 200, 0, "Ms"),
-    make_param_gui_single(section_other_smooth, gui_edit_type::knob, { 1, 0 },
+    make_param_gui_single(section_other_smooth, gui_edit_type::knob, { is_fx? 0: 1, is_fx? 1: 0 },
       make_label(gui_label_contents::name, gui_label_align::left, gui_label_justify::near))));
   bpm_smooth.info.description = "Smoothing host BPM parameter changes. Affects tempo-synced delay lines.";
 
