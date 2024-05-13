@@ -732,22 +732,33 @@ plugin_engine::process()
     if (l.param > r.param) return false;
     if (l.frame < r.frame) return true;
     if (l.frame > r.frame) return false;
-    if (l.is_mod < r.is_mod) return true;
-    if (l.is_mod > r.is_mod) return false;
-    return false; };
+
+    // this sorting is important!
+    // we need to process parameters linear by frame
+    if (l.note_id < r.note_id) return true;
+    if (l.note_id > r.note_id) return false;
+    return l.is_mod < r.is_mod;
+  };
   std::sort(auto_and_mod.begin(), auto_and_mod.end(), comp);
 
   for (int e = 0; e < auto_and_mod.size(); e++)
   {
-    // sorting should be param first, frame second
+    // sorting should be param first, note_id second, frame third
     // see splice_engine
     auto const& event = auto_and_mod[e];
     bool is_last_event = e == auto_and_mod.size() - 1;
 
     assert(is_last_event ||
-      auto_and_mod[e + 1].param > event.param || (
-      auto_and_mod[e + 1].param == event.param &&
-      auto_and_mod[e + 1].frame >= event.frame));
+      auto_and_mod[e + 1].param > event.param || 
+      (auto_and_mod[e + 1].param == event.param &&
+       auto_and_mod[e + 1].frame > event.frame) ||
+      (auto_and_mod[e + 1].param == event.param &&
+        auto_and_mod[e + 1].param == event.frame &&
+        auto_and_mod[e + 1].note_id > event.note_id) ||
+      (auto_and_mod[e + 1].param == event.param &&
+        auto_and_mod[e + 1].param == event.frame &&
+        auto_and_mod[e + 1].note_id == event.note_id &&
+        auto_and_mod[e + 1].is_mod > event.is_mod));
 
     // run the automation curve untill the next event
     // which may reside in the next block, incase we'll pick it up later
@@ -756,12 +767,18 @@ plugin_engine::process()
 
     // TODO if it is a global event, set mod value for all active voices
     // TODO otherwise set it to active voice by noteid or pck
+    // TODO deal with all voices
 
-
+    assert(event.is_mod == false || event.note_id == -1);
+    if(!event.is_mod)
+    {
+      
+    }
+ 
     auto& curve = mapping.topo.value_at(_global_accurate_automation);
     auto& lerp_filter = mapping.topo.value_at(_global_automation_lerp_filters);
     auto& lp_filter = mapping.topo.value_at(_global_automation_lp_filters);
-    if(!is_last_event && event.param == auto_and_mod[e + 1].param)
+    if (!is_last_event && event.param == auto_and_mod[e + 1].param)
       next_event_pos = auto_and_mod[e + 1].frame;
 
     // update patch state or mod state and figure out new lerp target
@@ -785,7 +802,7 @@ plugin_engine::process()
     // need to restore current filter value to one-before-event-frame 
     // since filters are already run to completion above
     // TODO also for voice
-    if(event.frame == 0)
+    if (event.frame == 0)
     {
       lp_filter.current(mapping.topo.value_at(_global_automation_state_last_round_end));
       lerp_filter.current(mapping.topo.value_at(_global_automation_state_last_round_end));
@@ -797,7 +814,7 @@ plugin_engine::process()
     }
 
     lerp_filter.set(new_target_value);
-    for(int f = event.frame; f <= next_event_pos; f++)
+    for (int f = event.frame; f <= next_event_pos; f++)
       curve[f] = lp_filter.next(lerp_filter.next().first);
 
     // make sure to re-fill the automation buffer on the next round
