@@ -8,10 +8,18 @@ plugin_dims(plugin_topo const& plugin, int polyphony)
   for (int v = 0; v < polyphony; v++)
   {
     voice_module_slot.emplace_back();
+    voice_module_slot_param_slot.emplace_back();
     for (int m = 0; m < plugin.modules.size(); m++)
     {
       auto const& module = plugin.modules[m];
       voice_module_slot[v].push_back(module.info.slot_count);
+      voice_module_slot_param_slot[v].emplace_back();
+      for (int mi = 0; mi < module.info.slot_count; mi++)
+      {
+        voice_module_slot_param_slot[v][m].emplace_back();
+        for (int p = 0; p < module.params.size(); p++)
+          voice_module_slot_param_slot[v][m][mi].emplace_back(module.params[p].info.slot_count);
+      }
     }
   }
 
@@ -37,11 +45,22 @@ void
 plugin_dims::validate(plugin_topo const& plugin, int polyphony) const
 {
   assert(voice_module_slot.size() == polyphony);
+  assert(voice_module_slot_param_slot.size() == polyphony);
   for (int v = 0; v < polyphony; v++)
   {
     assert(voice_module_slot[v].size() == plugin.modules.size());
+    assert(voice_module_slot_param_slot[v].size() == plugin.modules.size());
     for (int m = 0; m < plugin.modules.size(); m++)
+    {
       assert(voice_module_slot[v][m] == plugin.modules[m].info.slot_count);
+      assert(voice_module_slot_param_slot[v][m].size() == plugin.modules[m].info.slot_count);
+      for (int mi = 0; mi < plugin.modules[m].info.slot_count; mi++)
+      {
+        assert(voice_module_slot_param_slot[v][m][mi].size() == plugin.modules[m].params.size());
+        for (int p = 0; p < plugin.modules[m].params.size(); p++)
+          assert(voice_module_slot_param_slot[v][m][mi][p] == plugin.modules[m].params[p].info.slot_count);
+      }
+    }
   }
 
   assert(module_slot.size() == plugin.modules.size());

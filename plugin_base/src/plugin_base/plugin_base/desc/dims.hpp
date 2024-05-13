@@ -12,6 +12,7 @@ struct plugin_dims final {
   jarray<int, 2> module_slot_midi;
   jarray<int, 2> voice_module_slot;
   jarray<int, 3> module_slot_param_slot;
+  jarray<int, 4> voice_module_slot_param_slot;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_dims);
   plugin_dims(plugin_topo const& plugin, int polyphony);
