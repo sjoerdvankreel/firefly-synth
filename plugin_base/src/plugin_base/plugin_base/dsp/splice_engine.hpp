@@ -12,6 +12,7 @@ class plugin_splice_engine final {
   int _splice_block_size = -1;
 
   // splice auto and mod separately
+  // TODO splice per voice
   std::vector<accurate_event> _spliced_accurate_automation_events = {};
   std::vector<accurate_event> _spliced_accurate_modulation_events = {};
 

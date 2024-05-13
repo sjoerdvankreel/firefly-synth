@@ -37,6 +37,8 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 variable number of modules with +/- button in UI
 
 v1.7.6 clap polymod
+- deal with pck
+- check out mem usage again
 - flip autosmt/other smt
 - polymod
 - monophonic mode polymod

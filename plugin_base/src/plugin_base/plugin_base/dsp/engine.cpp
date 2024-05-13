@@ -109,13 +109,21 @@ plugin_engine::make_plugin_block(
     ? _block_automation.state()
     : _voice_automation[voice].state();
 
+  // dealing with clap polymod
+  jarray<float, 3> const& own_accurate_auto = voice < 0
+    ? _global_accurate_automation[module][slot]
+    : _voice_accurate_automation[voice][module][slot];
+  jarray<float, 5> const& all_accurate_auto = voice < 0
+    ? _global_accurate_automation
+    : _voice_accurate_automation[voice];
+
   plugin_block_state state = {
     _last_note_key, context_out, _mono_note_stream,
     cv_out, audio_out, scratch, _bpm_automation,
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
-    _global_accurate_automation[module][slot], _global_accurate_automation, // TODO
+    own_accurate_auto, all_accurate_auto,
     own_block_auto, all_block_auto
   };
   return {
@@ -293,33 +301,21 @@ plugin_engine::activate_modules()
     _midi_filters.push_back(block_filter(_sample_rate, default_midi_filter_millis * 0.001, _state.desc().midi_sources[ms]->source->default_));
 
   for(int m = 0; m < _state.desc().plugin->modules.size(); m++)
-    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
-        if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
-          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-          {
-            // TODO NOT ALLOCATE GLOBAL FOR VOICE
-            _global_automation_lerp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
-            _global_automation_lerp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
-            _global_automation_lerp_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
-            _global_automation_lp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
-            _global_automation_lp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
-          }
-
-  // TODO ZERO OUT/INIT ON VOICE START
-  for(int v = 0; v < _polyphony; v++)
-    for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+    if(_state.desc().plugin->modules[m].dsp.stage != module_stage::voice)
       for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
         for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
-          if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+          if(_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
             for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
             {
-              _voice_automation_lerp_filters[v][m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
-              _voice_automation_lerp_filters[v][m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
-              _voice_automation_lerp_filters[v][m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
-              _voice_automation_lp_filters[v][m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
-              _voice_automation_lp_filters[v][m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
+              _global_automation_lerp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
+              _global_automation_lerp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
+              _global_automation_lerp_filters[m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
+              _global_automation_lp_filters[m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
+              _global_automation_lp_filters[m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
             }
+
+  for(int v = 0; v < _polyphony; v++)
+    init_voice_filters_and_modulation(v);
 
   for (int m = 0; m < _state.desc().module_voice_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
@@ -410,7 +406,6 @@ plugin_engine::init_automation_from_state()
           // Note to self: this was a full day not fun debugging session. Please keep
           // variable block sizes in mind.
           
-          // TODO also for per-voice
           for (int pi = 0; pi < param.info.slot_count; pi++)
             if (_blocks_processed == 0)
             {
@@ -439,6 +434,38 @@ plugin_engine::init_automation_from_state()
                 _global_accurate_automation[m][mi][p][pi].begin() + _max_frame_count,
                 std::clamp((float)_state.get_normalized_at(m, mi, p, pi).value() + _global_current_modulation[m][mi][p][pi], 0.0f, 1.0f));
             }
+
+          // dealing with clap polymod
+          for (int v = 0; v < _polyphony; v++)
+            if(_voice_states[v].stage != voice_stage::unused)
+              for (int pi = 0; pi < param.info.slot_count; pi++)
+                if (_blocks_processed == 0)
+                {
+                  // First time around!
+                  // Fill all automation buffers with plugin state.
+                  // Do NOT mark as un-automated, filters need to catch up.
+                  std::fill(
+                    _voice_accurate_automation[v][m][mi][p][pi].begin(),
+                    _voice_accurate_automation[v][m][mi][p][pi].begin() + _max_frame_count,
+                    (float)_state.get_normalized_at(m, mi, p, pi).value());
+                }
+                else if (_voice_automation_lp_filters[v][m][mi][p][pi].active())
+                {
+                  // filter needs run-off
+                  std::fill(
+                    _voice_accurate_automation[v][m][mi][p][pi].begin(),
+                    _voice_accurate_automation[v][m][mi][p][pi].begin() + _max_frame_count,
+                    _voice_automation_lp_filters[v][m][mi][p][pi].current());
+                }
+                else if (_voice_param_was_automated[v][m][mi][p][pi] != 0)
+                {
+                  // filter ran to completion but new events came in
+                  _voice_param_was_automated[v][m][mi][p][pi] = 0;
+                  std::fill(
+                    _voice_accurate_automation[v][m][mi][p][pi].begin(),
+                    _voice_accurate_automation[v][m][mi][p][pi].begin() + _max_frame_count,
+                    std::clamp((float)_state.get_normalized_at(m, mi, p, pi).value() + _voice_current_modulation[v][m][mi][p][pi], 0.0f, 1.0f));
+                }
         }
       }
   }
@@ -535,6 +562,10 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
 
   // allow module engine to do once-per-voice init
   voice_block_params_snapshot(slot);
+
+  // reset CLAP polymod stuff
+  init_voice_filters_and_modulation(slot);
+
   for (int m = _state.desc().module_voice_start; m < _state.desc().module_output_start; m++)
     for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
       if(_voice_engines[slot][m][mi])
@@ -546,6 +577,25 @@ plugin_engine::activate_voice(note_event const& event, int slot, int sub_voice_c
         block.voice = &voice_block;
         _voice_engines[slot][m][mi]->reset(&block);
       }
+}
+
+void 
+plugin_engine::init_voice_filters_and_modulation(int voice)
+{
+  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+    if (_state.desc().plugin->modules[m].dsp.stage == module_stage::voice)
+      for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+        for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+          if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+            for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+            {
+              _voice_current_modulation[voice][m][mi][p][pi] = 0.0f;
+              _voice_automation_lerp_filters[voice][m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
+              _voice_automation_lerp_filters[voice][m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
+              _voice_automation_lerp_filters[voice][m][mi][p][pi].set((float)_state.get_normalized_at(m, mi, p, pi).value());
+              _voice_automation_lp_filters[voice][m][mi][p][pi].init(_sample_rate, default_auto_filter_millis * 0.001f);
+              _voice_automation_lp_filters[voice][m][mi][p][pi].current((float)_state.get_normalized_at(m, mi, p, pi).value());
+            }
 }
 
 void
@@ -626,26 +676,43 @@ plugin_engine::process()
   if (topo.auto_smooth_module >= 0 && topo.auto_smooth_param >= 0)
     auto_filter_millis = _state.get_plain_at(topo.auto_smooth_module, 0, topo.auto_smooth_param, 0).real();
 
-  // TODO also do this per voice!
   // deal with unfinished filters from the previous round
   // automation events may overwrite below but i think thats ok
   // also need to run filter to completion for the entire block
   // i.e. even when filter is inactive rest of the block needs the end value
   for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-    for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
-      for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
-        // TODO only do this if not per-voice
-        if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
-          for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
-            if (_global_automation_lerp_filters[m][mi][p][pi].active() || _global_automation_lp_filters[m][mi][p][pi].active())
-            {   
-              _global_automation_lerp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
-              _global_automation_lp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
-              auto& curve = _global_accurate_automation[m][mi][p][pi];
-              for(int f = 0; f < frame_count; f++)
-                curve[f] = _global_automation_lp_filters[m][mi][p][pi].next(_global_automation_lerp_filters[m][mi][p][pi].next().first);
-              (void)curve;
-            }
+    if(_state.desc().plugin->modules[m].dsp.stage != module_stage::voice)
+      for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+        for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+          if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+            for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+              if (_global_automation_lerp_filters[m][mi][p][pi].active() || _global_automation_lp_filters[m][mi][p][pi].active())
+              {   
+                _global_automation_lerp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
+                _global_automation_lp_filters[m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
+                auto& curve = _global_accurate_automation[m][mi][p][pi];
+                for(int f = 0; f < frame_count; f++)
+                  curve[f] = _global_automation_lp_filters[m][mi][p][pi].next(_global_automation_lerp_filters[m][mi][p][pi].next().first);
+                (void)curve;
+              }
+
+  for (int v = 0; v < _polyphony; v++)
+    if (_voice_states[v].stage != voice_stage::unused)
+      for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
+        if (_state.desc().plugin->modules[m].dsp.stage == module_stage::voice)
+          for (int mi = 0; mi < _state.desc().plugin->modules[m].info.slot_count; mi++)
+            for (int p = 0; p < _state.desc().plugin->modules[m].params.size(); p++)
+              if (_state.desc().plugin->modules[m].params[p].dsp.rate == param_rate::accurate)
+                for (int pi = 0; pi < _state.desc().plugin->modules[m].params[p].info.slot_count; pi++)
+                  if (_voice_automation_lerp_filters[v][m][mi][p][pi].active() || _voice_automation_lp_filters[v][m][mi][p][pi].active())
+                  {
+                    _voice_automation_lerp_filters[v][m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
+                    _voice_automation_lp_filters[v][m][mi][p][pi].init(_sample_rate, auto_filter_millis * 0.001f);
+                    auto& curve = _voice_accurate_automation[v][m][mi][p][pi];
+                    for (int f = 0; f < frame_count; f++)
+                      curve[f] = _voice_automation_lp_filters[v][m][mi][p][pi].next(_voice_automation_lerp_filters[v][m][mi][p][pi].next().first);
+                    (void)curve;
+                  }
 
   // debug make sure theres no jumps in the curve
   automation_sanity_check(frame_count);
@@ -689,6 +756,8 @@ plugin_engine::process()
 
     // TODO if it is a global event, set mod value for all active voices
     // TODO otherwise set it to active voice by noteid or pck
+
+
     auto& curve = mapping.topo.value_at(_global_accurate_automation);
     auto& lerp_filter = mapping.topo.value_at(_global_automation_lerp_filters);
     auto& lp_filter = mapping.topo.value_at(_global_automation_lp_filters);
