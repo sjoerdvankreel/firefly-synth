@@ -387,7 +387,11 @@ pb_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
     info->flags |= CLAP_PARAM_IS_AUTOMATABLE;
     info->flags |= CLAP_PARAM_REQUIRES_PROCESS;
     if (param.param->dsp.can_modulate(module.info.slot))
+    {
       info->flags |= CLAP_PARAM_IS_MODULATABLE;
+      if(module.module->dsp.stage == module_stage::voice)
+        info->flags |= CLAP_PARAM_IS_MODULATABLE_PER_NOTE_ID; // TODO report voice end to clap host
+    }
   }
 
   // this is what clap_value is for
@@ -666,6 +670,7 @@ pb_plugin::process(clap_process const* process) noexcept
         }
       } else {
         accurate_event automation_event;
+        automation_event.note_id = -1;
         automation_event.is_mod = false;
         automation_event.frame = header->time;
         automation_event.param = index;
@@ -685,6 +690,7 @@ pb_plugin::process(clap_process const* process) noexcept
       mod_event.param = index;
       mod_event.is_mod = true;
       mod_event.frame = header->time;
+      mod_event.note_id = event->note_id; // TODO polymod by pck
       mod_event.value_or_offset = check_bipolar(event->amount);
       block.events.accurate_modulation.push_back(mod_event);
       break;

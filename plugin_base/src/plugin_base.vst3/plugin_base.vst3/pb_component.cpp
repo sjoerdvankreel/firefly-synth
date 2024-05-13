@@ -193,6 +193,7 @@ pb_component::process(ProcessData& data)
                 if (queue->getPoint(p, frame_index, value) == kResultTrue)
                 {
                   accurate_event automation_event;
+                  automation_event.note_id = -1;
                   automation_event.is_mod = false;
                   automation_event.frame = frame_index;
                   automation_event.param = param_id_iter->second;

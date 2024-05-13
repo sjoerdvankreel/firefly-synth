@@ -28,6 +28,7 @@ struct midi_event final {
 struct accurate_event final {
   int frame;
   int param;
+  int note_id = -1; // TODO polymod by pck
   bool is_mod; // is_mod = clap nondestructive
   double value_or_offset; // [0, 1] automation value or [-1, 1] mod value
 };

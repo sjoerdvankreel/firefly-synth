@@ -11,7 +11,14 @@ splice_accurate_events(
   int spliced_block_frames,
   int rest_block_frames)
 {
-  auto comp = [](auto const& l, auto const& r) { return l.param < r.param ? true : l.param > r.param ? false : l.frame < r.frame; };
+  // plugin_engine expects this sorting!
+  // note_id is for clap polymod, -1 for global
+  auto comp = [](auto const& l, auto const& r) { return 
+    l.param < r.param ? true : 
+    l.param > r.param ? false : 
+    l.note_id < r.note_id? true: 
+    l.note_id > r.note_id? false: 
+    l.frame < r.frame; };
   std::sort(host_events.begin(), host_events.end(), comp);
 
   // for accurate we need to do the bookkeeping on total level, cannot do per-block
@@ -30,6 +37,7 @@ splice_accurate_events(
     if (i == host_events.size() - 1) break;
     auto const& next_event = host_events[i + 1];
     if (this_event.param != next_event.param) continue;
+    if (this_event.note_id != next_event.note_id) continue;
 
     int this_event_block = this_event.frame / spliced_block_frames;
     int next_event_block = next_event.frame / spliced_block_frames;
@@ -47,6 +55,7 @@ splice_accurate_events(
       // last frame of spliced block
       accurate_event splice_last_event;
       splice_last_event.is_mod = this_event.is_mod;
+      splice_last_event.note_id = this_event.note_id;
       splice_last_event.param = this_event.param;
       splice_last_event.value_or_offset = splice_value;
       splice_last_event.frame = splice_block_start + splice_block_frames - 1;
@@ -57,6 +66,7 @@ splice_accurate_events(
       {
         accurate_event splice_first_event;
         splice_first_event.is_mod = this_event.is_mod;
+        splice_first_event.note_id = this_event.note_id;
         splice_first_event.param = this_event.param;
         splice_first_event.value_or_offset = splice_value;
         splice_first_event.frame = splice_block_start + splice_block_frames;
