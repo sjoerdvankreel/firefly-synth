@@ -16,9 +16,11 @@ splice_accurate_events(
   auto comp = [](auto const& l, auto const& r) { return 
     l.param < r.param ? true : 
     l.param > r.param ? false : 
-    l.note_id < r.note_id? true: 
-    l.note_id > r.note_id? false: 
-    l.frame < r.frame; };
+    l.frame < r.frame ? true:
+    l.frame > r.frame ? false:
+    l.note_id < r.note_id? true:
+    l.note_id > r.note_id ? false:
+    l.is_mod < r.is_mod; };
   std::sort(host_events.begin(), host_events.end(), comp);
 
   // for accurate we need to do the bookkeeping on total level, cannot do per-block
