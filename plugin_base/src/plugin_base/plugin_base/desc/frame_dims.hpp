@@ -15,9 +15,12 @@ struct plugin_frame_dims final {
   jarray<int, 6> module_voice_audio;
   jarray<int, 5> module_global_audio;
   jarray<int, 3> midi_automation;
-  jarray<int, 4> accurate_automation;
   jarray<int, 4> module_voice_scratch;
   jarray<int, 3> module_global_scratch;
+
+  // automation and modulation
+  jarray<int, 4> global_accurate_automation;
+  jarray<int, 5> voice_accurate_automation;
 
   PB_PREVENT_ACCIDENTAL_COPY_DEFAULT_CTOR(plugin_frame_dims);
   plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count);

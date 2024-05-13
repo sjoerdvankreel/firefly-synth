@@ -11,6 +11,7 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
     module_voice_cv.emplace_back();
     module_voice_audio.emplace_back();
     module_voice_scratch.emplace_back();
+    voice_accurate_automation.emplace_back();
     voices_audio.emplace_back(2, frame_count);
     for (int m = 0; m < plugin.modules.size(); m++)
     {
@@ -23,10 +24,12 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
       module_voice_cv[v].emplace_back();
       module_voice_audio[v].emplace_back();
       module_voice_scratch[v].emplace_back();
+      voice_accurate_automation[v].emplace_back();
       for (int mi = 0; mi < module.info.slot_count; mi++)
       {
         module_voice_cv[v][m].emplace_back();
         module_voice_audio[v][m].emplace_back();
+        voice_accurate_automation[v][m].emplace_back();
         module_voice_scratch[v][m].emplace_back(module.dsp.scratch_count, frame_count);
         for (int o = 0; o < module.dsp.outputs.size(); o++)
         {
@@ -34,6 +37,11 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
           module_voice_cv[v][m][mi].emplace_back(module.dsp.outputs[o].info.slot_count, cv_frames);
           for (int oi = 0; oi < module.dsp.outputs[o].info.slot_count; oi++)
             module_voice_audio[v][m][mi][o].emplace_back(2, audio_frames);
+        }
+        for (int p = 0; p < module.params.size(); p++)
+        {
+          int param_voice_frames = (module.dsp.stage == module_stage::voice && module.params[p].dsp.rate == param_rate::accurate) ? frame_count : 0;
+          voice_accurate_automation[v][m][mi].emplace_back(module.params[p].info.slot_count, param_voice_frames);
         }
       }
     }
@@ -51,10 +59,10 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
     module_global_cv.emplace_back();
     module_global_audio.emplace_back();
     module_global_scratch.emplace_back();
-    accurate_automation.emplace_back();
+    global_accurate_automation.emplace_back();
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
-      accurate_automation[m].emplace_back();
+      global_accurate_automation[m].emplace_back();
       module_global_cv[m].emplace_back();
       module_global_audio[m].emplace_back();
       midi_automation[m].emplace_back(module.midi_sources.size(), frame_count);
@@ -69,7 +77,7 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
       for (int p = 0; p < module.params.size(); p++)
       {
         int param_frames = module.params[p].dsp.rate == param_rate::accurate ? frame_count : 0;
-        accurate_automation[m][mi].emplace_back(module.params[p].info.slot_count, param_frames);
+        global_accurate_automation[m][mi].emplace_back(module.params[p].info.slot_count, param_frames);
       }
     }
   }
@@ -87,6 +95,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
   assert(module_voice_cv.size() == polyphony);
   assert(module_voice_audio.size() == polyphony);
   assert(module_voice_scratch.size() == polyphony);
+  assert(voice_accurate_automation.size() == polyphony);
 
   for (int v = 0; v < polyphony; v++)
   {
@@ -96,6 +105,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
     assert(module_voice_cv[v].size() == plugin.modules.size());
     assert(module_voice_audio[v].size() == plugin.modules.size());
     assert(module_voice_scratch[v].size() == plugin.modules.size());
+    assert(voice_accurate_automation[v].size() == plugin.modules.size());
 
     for (int m = 0; m < plugin.modules.size(); m++)
     {
@@ -110,11 +120,13 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
       assert(module_voice_cv[v][m].size() == module.info.slot_count);
       assert(module_voice_audio[v][m].size() == module.info.slot_count);
       assert(module_voice_scratch[v][m].size() == module.info.slot_count);
+      assert(voice_accurate_automation[v][m].size() == module.info.slot_count);
       for (int mi = 0; mi < module.info.slot_count; mi++)
       {
         assert(module_voice_cv[v][m][mi].size() == module.dsp.outputs.size());
         assert(module_voice_audio[v][m][mi].size() == module.dsp.outputs.size());
         assert(module_voice_scratch[v][m][mi].size() == module.dsp.scratch_count);
+        assert(voice_accurate_automation[v][m][mi].size() == module.params.size());
 
         for (int s = 0; s < module.dsp.scratch_count; s++)
           assert(module_voice_scratch[v][m][mi][s] == frame_count);
@@ -126,6 +138,15 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
             for(int c = 0; c < 2; c++)
               assert(module_voice_audio[v][m][mi][o][oi][c] == audio_frames);
         }
+        for (int p = 0; p < module.params.size(); p++)
+        {
+          assert(voice_accurate_automation[v][m][mi][p].size() == module.params[p].info.slot_count);
+          for(int pi = 0; pi < module.params[p].info.slot_count; pi++)
+          {
+            int param_voice_frames = (module.dsp.stage == module_stage::voice && module.params[p].dsp.rate == param_rate::accurate) ? frame_count : 0;
+            assert(voice_accurate_automation[v][m][mi][p][pi] == param_voice_frames);
+          }
+        }
       }
     }
   }
@@ -134,7 +155,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
   assert(module_global_cv.size() == plugin.modules.size());
   assert(module_global_audio.size() == plugin.modules.size());
   assert(module_global_scratch.size() == plugin.modules.size());
-  assert(accurate_automation.size() == plugin.modules.size());
+  assert(global_accurate_automation.size() == plugin.modules.size());
   for (int m = 0; m < plugin.modules.size(); m++)
   {
     auto const& module = plugin.modules[m];
@@ -149,7 +170,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
     assert(module_global_cv[m].size() == module.info.slot_count);
     assert(module_global_audio[m].size() == module.info.slot_count);
     assert(module_global_scratch[m].size() == module.info.slot_count);
-    assert(accurate_automation[m].size() == module.info.slot_count);
+    assert(global_accurate_automation[m].size() == module.info.slot_count);
 
     for (int mi = 0; mi < module.info.slot_count; mi++)
     {
@@ -170,15 +191,15 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
             assert(module_global_audio[m][mi][o][oi][c] == audio_frames);
         }
 
-      assert(accurate_automation[m][mi].size() == module.params.size());
+      assert(global_accurate_automation[m][mi].size() == module.params.size());
       for (int p = 0; p < module.params.size(); p++)
       {
         auto const& param = module.params[p];
         int accurate_frames = param.dsp.rate == param_rate::accurate? frame_count: 0;
         (void)accurate_frames;
-        assert(accurate_automation[m][mi][p].size() == param.info.slot_count);
+        assert(global_accurate_automation[m][mi][p].size() == param.info.slot_count);
         for(int pi = 0; pi < param.info.slot_count; pi++)
-          assert(accurate_automation[m][mi][p][pi] == accurate_frames);
+          assert(global_accurate_automation[m][mi][p][pi] == accurate_frames);
       }
     }
   }

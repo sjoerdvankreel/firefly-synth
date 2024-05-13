@@ -250,7 +250,7 @@ plugin_engine::activate(int max_frame_count)
   _global_scratch_state.resize(frame_dims.module_global_scratch);
   _global_audio_state.resize(frame_dims.module_global_audio);
   _midi_automation.resize(frame_dims.midi_automation);
-  _accurate_automation.resize(frame_dims.accurate_automation);
+  _accurate_automation.resize(frame_dims.global_accurate_automation);
   _bpm_automation.resize(max_frame_count);
   _mono_note_stream.resize(max_frame_count);
   _host_block->events.activate(_graph, _state.desc().param_count, _state.desc().midi_count, _polyphony, max_frame_count);
