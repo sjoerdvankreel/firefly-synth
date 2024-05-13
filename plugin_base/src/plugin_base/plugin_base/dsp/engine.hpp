@@ -81,14 +81,20 @@ class plugin_engine final {
   jarray<float, 4> _global_scratch_state = {};
 
   // both automation and modulation
-  jarray<int, 4> _param_was_automated = {};
-  jarray<float, 5> _accurate_automation = {};
-  jarray<cv_filter, 4> _automation_lp_filters = {};
-  jarray<block_filter, 4> _automation_lerp_filters = {};
-  jarray<float, 4> _automation_state_last_round_end = {};
+  jarray<int, 5> _voice_param_was_automated = {};
+  jarray<int, 4> _global_param_was_automated = {};
+  jarray<float, 6> _voice_accurate_automation = {};
+  jarray<float, 5> _global_accurate_automation = {};
+  jarray<cv_filter, 5> _voice_automation_lp_filters = {};
+  jarray<cv_filter, 4> _global_automation_lp_filters = {};
+  jarray<block_filter, 5> _voice_automation_lerp_filters = {};
+  jarray<block_filter, 4> _global_automation_lerp_filters = {};
+  jarray<float, 5> _voice_automation_state_last_round_end = {};
+  jarray<float, 4> _global_automation_state_last_round_end = {};
 
   // offset wrt _state
-  jarray<float, 4> _current_modulation = {};
+  jarray<float, 5> _voice_current_modulation = {};
+  jarray<float, 4> _global_current_modulation = {};
 
   block_filter _bpm_filter = {};
   std::vector<int> _midi_was_automated = {};
@@ -151,7 +157,7 @@ public:
   void init_from_state(plugin_state const* state);
 
   void set_sample_rate(int sample_rate) { _sample_rate = sample_rate; }
-  void mark_param_as_automated(int m, int mi, int p, int pi) { _param_was_automated[m][mi][p][pi] = 1; }
+  void mark_param_as_automated(int m, int mi, int p, int pi) { _global_param_was_automated[m][mi][p][pi] = 1; }
 };
 
 }
