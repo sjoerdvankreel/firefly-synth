@@ -3,7 +3,7 @@ Instead, it's capable of producing a huge range of powerfully complex sounds, fr
 It does all this from a user interface totally unlike any other software synth, replacing skeuomorphism with practical and instant access to dozens of its features.
 The only downside is that there are so many features, it's difficult to cram them all into the user interface, making it all look more complicated than it really is."
 
-- FOSSPicks 282, May 2024
+-- FOSSPicks 282, May 2024
 
 # About
 
