@@ -1,3 +1,10 @@
+"This wouldn't be FOSSPicks without a new open source software synthesizer, and this time it's Firefly Synth's turn – which isn't a synth designed to recreate the sound of flying insects.
+Instead, it's capable of producing a huge range of powerfully complex sounds, from beautifully warm analog strings and brass-like melodies to percussion and eardrum-piercing leads.
+It does all this from a user interface totally unlike any other software synth, replacing skeuomorphism with practical and instant access to dozens of its features.
+The only downside is that there are so many features, it's difficult to cram them all into the user interface, making it all look more complicated than it really is."
+
+- FOSSPicks 282, May 2024
+
 # About
 
 A semi-modular software synthesizer and fx plugin.
