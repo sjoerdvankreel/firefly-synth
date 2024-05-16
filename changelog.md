@@ -1,3 +1,7 @@
+### May 16, 2024 - V1.7.6 (No binaries).
+
+- Add some presets.
+
 ### May 9, 2024 - V1.7.5.
 
 - Add CLAP modulation support. Only global, not per-voice yet!
