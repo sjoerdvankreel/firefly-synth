@@ -36,18 +36,18 @@ See below for some built-in themes.
 MacOS: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this: 
 [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm)
 
-- Mac VST3: [firefly_synth_1.7.5_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_mac_vst3_instrument.zip)
-- Mac VST3 Fx: [firefly_synth_1.7.5_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_mac_vst3_fx.zip)
-- Mac CLAP: [firefly_synth_1.7.5_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_mac_clap_instrument.zip)
-- Mac CLAP Fx: [firefly_synth_1.7.5_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_mac_clap_fx.zip)
-- Linux VST3: [firefly_synth_1.7.5_linux_vst3_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_linux_vst3_instrument.tar.gz)
-- Linux VST3 Fx: [release/firefly_synth_1.7.5_linux_vst3_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_linux_vst3_fx.tar.gz)
-- Linux CLAP: [firefly_synth_1.7.5_linux_clap_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_linux_clap_instrument.tar.gz)
-- Linux CLAP Fx: [firefly_synth_1.7.5_linux_clap_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_linux_clap_fx.tar.gz)
-- Windows VST3: [firefly_synth_1.7.5_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_windows_vst3_instrument.zip)
-- Windows VST3 Fx: [firefly_synth_1.7.5_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_windows_vst3_fx.zip)
-- Windows CLAP: [firefly_synth_1.7.5_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_windows_clap_instrument.zip)
-- Windows CLAP Fx: [firefly_synth_1.7.5_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.5_windows_clap_fx.zip)
+- Mac VST3: [firefly_synth_1.7.6_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_mac_vst3_instrument.zip)
+- Mac VST3 Fx: [firefly_synth_1.7.6_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_mac_vst3_fx.zip)
+- Mac CLAP: [firefly_synth_1.7.6_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_mac_clap_instrument.zip)
+- Mac CLAP Fx: [firefly_synth_1.7.6_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_mac_clap_fx.zip)
+- Linux VST3: [firefly_synth_1.7.6_linux_vst3_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_linux_vst3_instrument.tar.gz)
+- Linux VST3 Fx: [release/firefly_synth_1.7.6_linux_vst3_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_linux_vst3_fx.tar.gz)
+- Linux CLAP: [firefly_synth_1.7.6_linux_clap_instrument.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_linux_clap_instrument.tar.gz)
+- Linux CLAP Fx: [firefly_synth_1.7.6_linux_clap_fx.tar.gz](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_linux_clap_fx.tar.gz)
+- Windows VST3: [firefly_synth_1.7.6_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_windows_vst3_instrument.zip)
+- Windows VST3 Fx: [firefly_synth_1.7.6_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_windows_vst3_fx.zip)
+- Windows CLAP: [firefly_synth_1.7.6_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_windows_clap_instrument.zip)
+- Windows CLAP Fx: [firefly_synth_1.7.6_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.6_windows_clap_fx.zip)
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
@@ -61,7 +61,7 @@ Extract the zipped folder and copy/replace it (the entire folder, not just the .
 - Linux: 64-bit (X64) cpu. Provided binaries do not require AVX support, but you might want to build with march=native for better performance. Tested on Ubuntu 22. Known to work on Fedora and Mint, too.
 - Windows: 64-bit (X64) cpu with AVX support. Tested on Windows 10. Windows 7+ should work but you might need this:<br/>[https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170](https://learn.microsoft.com/en-US/cpp/windows/latest-supported-vc-redist?view=msvc-170).
 - Explicitly supported hosts: Reaper, Bitwig, FLStudio, Waveform 13+. Please use a recent version.
-- Explicitly NOT supported hosts:<br/>Renoise (bug), Cakewalk (probable same as this: https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684/9).
+- Explicitly NOT supported hosts:<br/>Renoise (bug), Cakewalk (probably same as this: https://forum.renoise.com/t/possible-probable-bug-w-r-t-vst3-parameter-flushing/70684/9).
 - All other hosts, you'll just have to try and see.
 
 Waveform note:<br/>

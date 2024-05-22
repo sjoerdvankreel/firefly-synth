@@ -1,3 +1,4 @@
+### May 22, 2024 - V1.7.6 (With binaries).
 ### May 16, 2024 - V1.7.6 (No binaries).
 
 - Add some presets.
