@@ -36,6 +36,8 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
+Re-do infernal synth kick
+
 v1.7.6 clap polymod
 - flip autosmt/other smt
 - polymod
