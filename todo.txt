@@ -36,6 +36,7 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
+studiorack
 Title not visible on renoise mac
 Re-do infernal synth kick
 use the github release system
