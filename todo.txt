@@ -38,6 +38,8 @@ variable number of modules with +/- button in UI
 
 Title not visible on renoise mac
 Re-do infernal synth kick
+use the github release system
+add readme to the zipfile not to copy only the binary
 
 v1.7.6 clap polymod
 - flip autosmt/other smt
