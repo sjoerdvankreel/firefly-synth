@@ -121,6 +121,7 @@ plugin_desc::themes() const
   // expect theme folders directly in the "themes" folder
   std::vector<std::string> result;
   auto themes_folder = get_resource_location(config) / resource_folder_themes;
+  if(!std::filesystem::exists(themes_folder)) return {};
   for (auto const& entry : std::filesystem::directory_iterator{ themes_folder })
     if (entry.is_directory())
       result.push_back(entry.path().filename().string());
@@ -134,6 +135,7 @@ plugin_desc::presets() const
   // expect preset files nested 1 level deep, subfolders act as grouping
   std::vector<resource_item> result;
   auto preset_folder = get_resource_location(config) / resource_folder_presets;
+  if (!std::filesystem::exists(preset_folder)) return {};
   for (auto const& group_entry : std::filesystem::directory_iterator{ preset_folder })
     if(group_entry.is_directory())
       for (auto const& entry : std::filesystem::directory_iterator{ group_entry.path()})
