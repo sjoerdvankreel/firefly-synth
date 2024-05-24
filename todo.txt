@@ -43,14 +43,14 @@ Re-do infernal synth kick
 use the github release system
 add readme to the zipfile not to copy only the binary
 
-v1.7.6 clap polymod
+v1.7.8 clap polymod
 - flip autosmt/other smt
 - polymod
 - monophonic mode polymod
 - how does this work with global unison?
 - allow to disable env 1, use external env ?
 
-v1.7.7:
+v1.7.9:
 flstudio beta CLAP automation test is broken, retest when the thing is released
 do not include plugin version in the name, waveform seeks for it
 do automated tests somehow
