@@ -36,12 +36,15 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
-make it not crash on missing resources
-studiorack
-Title not visible on renoise mac
+1.7.7
+v make it not crash on missing resources
+v add readme to the zipfile not to copy only the binary
+v zip linux instead of targz
 Re-do infernal synth kick
 use the github release system
-add readme to the zipfile not to copy only the binary
+
+studiorack
+Title not visible on renoise mac
 
 v1.7.8 clap polymod
 - flip autosmt/other smt
