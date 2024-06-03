@@ -41,11 +41,8 @@ v make it not crash on missing resources
 v add readme to the zipfile not to copy only the binary
 v zip linux instead of targz
 v flip autosmt/other smt
-use the github release system
-double-check mac resources (.readme vs plist)
-
 studiorack
-Title not visible on renoise mac
+use the github release system
 
 vnext clap polymod
 - polymod
@@ -54,6 +51,7 @@ vnext clap polymod
 - allow to disable env 1, use external env ?
 
 vnext next:
+Title not visible on renoise mac
 flstudio beta CLAP automation test is broken, retest when the thing is released
 do not include plugin version in the name, waveform seeks for it
 do automated tests somehow
