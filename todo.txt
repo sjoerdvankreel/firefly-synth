@@ -36,25 +36,25 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
-make it not crash on missing resources
+1.7.7
+v make it not crash on missing resources
+v add readme to the zipfile not to copy only the binary
+v zip linux instead of targz
+v flip autosmt/other smt
 studiorack
-Title not visible on renoise mac
-Re-do infernal synth kick
 use the github release system
-add readme to the zipfile not to copy only the binary
 
-v1.7.6 clap polymod
-- flip autosmt/other smt
+vnext clap polymod
 - polymod
 - monophonic mode polymod
 - how does this work with global unison?
 - allow to disable env 1, use external env ?
 
-v1.7.7:
+vnext next:
+Title not visible on renoise mac
 flstudio beta CLAP automation test is broken, retest when the thing is released
 do not include plugin version in the name, waveform seeks for it
 do automated tests somehow
-retest bitwig clap resizing
 bug: preset select jumps back to previous
 do forward compat checks - dont load newer versions
 do async clear delay lines etc on patch select -> 
