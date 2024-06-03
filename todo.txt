@@ -36,6 +36,11 @@ make voice count adjustable with default 16 + reallocate on switch and switch of
 >> plus make drain warning
 variable number of modules with +/- button in UI
 
+studiorack:
+automate the json creation
+how to do multi-format release?
+how to do multi-plugin release?
+
 1.7.7
 v make it not crash on missing resources
 v add readme to the zipfile not to copy only the binary

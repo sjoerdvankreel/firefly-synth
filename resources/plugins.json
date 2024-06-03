@@ -1,0 +1,36 @@
+{
+  "plugins": [
+    {
+      "author": "Sjoerd van Kreel",
+      "homepage": "https://github.com/sjoerdvankreel/firefly-synth",
+      "name": "Firefly Synth",
+      "description": "Firefly Synth",
+      "tags": [ "Instrument", "Synth" ],
+      "version": "1.7.7",
+      "id": "56AFFFF7565F48348C4359D5E6C856A4",
+      "date": "2024-06-03T17:25:12.081Z",
+      "files": {
+        "audio": {
+          "name": "studiorack.mp3",
+          "size": 242496
+        },
+        "image": {
+          "name": "screenshot_instrument_firefly_default.png",
+          "size": 418262
+        },
+        "linux": {
+          "name": "firefly_synth_1.7.7_linux_vst3_instrument.zip",
+          "size": 5787856
+        },
+        "mac": {
+          "name": "firefly_synth_1.7.7_mac_vst3_instrument.zip",
+          "size": 8549464
+        },
+        "win": {
+          "name": "firefly_synth_1.7.7_windows_vst3_instrument.zip",
+          "size": 3087348
+        }
+      }
+    }
+  ]
+}
