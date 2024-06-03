@@ -1,3 +1,8 @@
+### ?, ? - V1.7.7.
+
+- Don't crash on missing resources, just make the gui look ugly.
+- Add a .readme that explains to copy all resources, not just the binary.
+
 ### May 22, 2024 - V1.7.6 (With binaries).
 ### May 16, 2024 - V1.7.6 (No binaries).
 

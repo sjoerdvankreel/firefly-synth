@@ -42,6 +42,7 @@ v add readme to the zipfile not to copy only the binary
 v zip linux instead of targz
 flip autosmt/other smt
 use the github release system
+double-check mac resources (.readme vs plist)
 
 studiorack
 Title not visible on renoise mac

@@ -1,0 +1,1 @@
+Be sure to copy the entire VST3/CLAP folder to your plugin directory, not just the binary (.vst3/.clap/.dll/.so/.dylib)!
