@@ -41,13 +41,13 @@ v make it not crash on missing resources
 v add readme to the zipfile not to copy only the binary
 v zip linux instead of targz
 Re-do infernal synth kick
+flip autosmt/other smt
 use the github release system
 
 studiorack
 Title not visible on renoise mac
 
 v1.7.8 clap polymod
-- flip autosmt/other smt
 - polymod
 - monophonic mode polymod
 - how does this work with global unison?
