@@ -40,7 +40,7 @@ variable number of modules with +/- button in UI
 v make it not crash on missing resources
 v add readme to the zipfile not to copy only the binary
 v zip linux instead of targz
-flip autosmt/other smt
+v flip autosmt/other smt
 use the github release system
 double-check mac resources (.readme vs plist)
 
