@@ -1,6 +1,7 @@
 ### ?, ? - V1.7.7.
 
 - Flipped automation smoothing / other smoothing gui.
+- Changed linux distribution to .zip instead of .tar.gz.
 - Don't crash on missing resources, just make the gui look ugly.
 - Add a .readme that explains to copy all resources, not just the binary.
 
