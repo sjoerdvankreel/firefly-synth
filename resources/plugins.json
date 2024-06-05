@@ -7,7 +7,7 @@
       "description": "Firefly Synth",
       "tags": [ "Instrument", "Synth" ],
       "version": "1.7.7",
-      "id": "56AFFFF7565F48348C4359D5E6C856A4",
+      "id": "io.github.sjoerdvankreel.firefly_synth",
       "date": "2024-06-03T17:25:12.081Z",
       "files": {
         "audio": {
