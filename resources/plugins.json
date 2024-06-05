@@ -11,12 +11,12 @@
       "date": "2024-06-03T17:25:12.081Z",
       "files": {
         "audio": {
-          "name": "https://github.com/sjoerdvankreel/firefly-synth/raw/main/resources/studiorack.mp3",
-          "size": 242496
+          "name": "studiorack.flac",
+          "size": 826259
         },
         "image": {
-          "name": "screenshot_instrument_firefly_default.png",
-          "size": 418262
+          "name": "studiorack.jpg",
+          "size": 784884
         },
         "linux": {
           "name": "firefly_synth_1.7.7_linux_vst3_instrument.zip",
