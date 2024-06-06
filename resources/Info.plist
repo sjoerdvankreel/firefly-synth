@@ -20,12 +20,12 @@
     <key>CFBundleSignature</key>
     <string>????</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.7.7</string>
+    <string>1.7.8</string>
     <key>CFBundleVersion</key>
-    <string>1.7.7</string>
+    <string>1.7.8</string>
     <key>NSHumanReadableCopyright</key>
     <string></string>
     <key>NSHighResolutionCapable</key>
-    <true/>  
+    <true/>
   </dict>
 </plist>
