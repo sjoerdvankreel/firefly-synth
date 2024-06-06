@@ -1185,8 +1185,8 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
         }
       }
 
-      lanes_channels[(v + 1) * 2 + 0][frame] = mono_pan_sqrt<0>(pan) * synced_sample;
-      lanes_channels[(v + 1) * 2 + 1][frame] = mono_pan_sqrt<1>(pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 0][frame] = gain_curve[mod_index] * mono_pan_sqrt<0>(pan) * synced_sample;
+      lanes_channels[(v + 1) * 2 + 1][frame] = gain_curve[mod_index] * mono_pan_sqrt<1>(pan) * synced_sample;
     }
   });
   
@@ -1209,7 +1209,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       float uni_total = 0;
       for (int v = 0; v < uni_voices; v++)
         uni_total += block.state.own_audio[0][v + 1][c][f];
-      block.state.own_audio[0][0][c][f] = uni_total * gain_curve[f] / attn;
+      block.state.own_audio[0][0][c][f] = uni_total * attn;
     }
 }
 

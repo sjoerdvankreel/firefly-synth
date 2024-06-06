@@ -1,3 +1,7 @@
+### ?, ? - V1.7.8.
+
+- AM/FM bugfix. TODO breaking change.
+
 ### June 3, 2024 - V1.7.7.
 
 - Flipped automation smoothing / other smoothing gui.
