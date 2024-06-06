@@ -1,6 +1,11 @@
-### ?, ? - V1.7.8.
+### June 6, 2024 - V1.7.8 (No binaries).
 
-- AM/FM bugfix. TODO breaking change.
+- Bugfix + breaking change: 
+Oscillator gain modulation was applied on osc-unison-sum level,
+but AM and FM are applied per osc-unison-voice. This basically
+rendered per-oscillator gain useless for AM/FM amount control.
+The new setup much more closely resembles the FM "operator"
+approach, but is unfortunately a breaking change.
 
 ### June 3, 2024 - V1.7.7.
 
