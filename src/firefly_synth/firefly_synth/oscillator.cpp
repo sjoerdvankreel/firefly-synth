@@ -1209,7 +1209,7 @@ osc_engine::process_unison(plugin_block& block, cv_audio_matrix_mixdown const* m
       float uni_total = 0;
       for (int v = 0; v < uni_voices; v++)
         uni_total += block.state.own_audio[0][v + 1][c][f];
-      block.state.own_audio[0][0][c][f] = uni_total * attn;
+      block.state.own_audio[0][0][c][f] = uni_total / attn;
     }
 }
 
