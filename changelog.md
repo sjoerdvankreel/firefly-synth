@@ -1,3 +1,4 @@
+### June 8, 2024 - V1.7.8 (With binaries).
 ### June 6, 2024 - V1.7.8 (No binaries).
 
 - Bugfix + breaking change: 
