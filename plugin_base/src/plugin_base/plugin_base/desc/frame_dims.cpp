@@ -144,6 +144,7 @@ plugin_frame_dims::validate(plugin_topo const& plugin, int polyphony, int frame_
           for(int pi = 0; pi < module.params[p].info.slot_count; pi++)
           {
             int param_voice_frames = (module.dsp.stage == module_stage::voice && module.params[p].dsp.rate == param_rate::accurate) ? frame_count : 0;
+            (void)param_voice_frames;
             assert(voice_accurate_automation[v][m][mi][p][pi] == param_voice_frames);
           }
         }
