@@ -88,7 +88,6 @@ user_io_load_list(plugin_topo const& topo, user_io where, std::string const& key
       found_result |= values[i] == result;
       found_default |= values[i] == default_;
     }
-    assert(found_default);
     if(!found_result) result = default_;
     return result;
   };

@@ -67,7 +67,7 @@ module_topo
 master_in_topo(int section, bool is_fx, gui_position const& pos)
 {
   std::vector<int> row_distribution = { 1, 1 };
-  std::vector<int> column_distribution = { 26, 38, 26, 40, 28, 18, 92, 16 };
+  std::vector<int> column_distribution = { 37, 27, 26, 40, 28, 18, 92, 16 };
   if(is_fx) 
   {
     row_distribution = { 1 };
@@ -110,7 +110,7 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
   aux.info.description = "Auxilliary controls to be used through automation and the CV matrices.";
   aux.gui.display_formatter = [is_fx](auto const& desc) { return (desc.info.slot == 0 || (!is_fx && desc.info.slot == 3))? desc.info.name: std::to_string(desc.info.slot + 1); };
 
-  auto auto_smooth_gui = make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical);
+  auto auto_smooth_gui = make_param_section_gui({ 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::vertical);
   if(is_fx) auto_smooth_gui = make_param_section_gui({ 0, 3, 1, 1 }, gui_dimension({ 1 }, { { 1 } }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_auto_smooth,
     make_topo_tag_basic("{E55E8C1C-84CD-4965-97FF-8F0779775EC1}", "Automation Smoothing"), auto_smooth_gui));
@@ -121,11 +121,8 @@ master_in_topo(int section, bool is_fx, gui_position const& pos)
       make_label(gui_label_contents::name, is_fx? gui_label_align::left: gui_label_align::top, is_fx ? gui_label_justify::near: gui_label_justify::center))));
   auto_smooth.info.description = "Smoothing automation parameter changes.";
 
-  auto other_smooth_gui = make_param_section_gui(
-    { 0, 1, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::no_split);
-  if(is_fx)
-    other_smooth_gui = make_param_section_gui(
-    { 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
+  auto other_smooth_gui = make_param_section_gui({ 0, 0, 2, 1 }, gui_dimension({ 1, 1 }, { { 1 } }), gui_label_edit_cell_split::no_split);
+  if(is_fx) other_smooth_gui = make_param_section_gui({ 0, 4, 1, 1 }, gui_dimension({ 1 }, { { 1, 1 } }), gui_label_edit_cell_split::no_split);
   result.sections.emplace_back(make_param_section(section_other_smooth,
     make_topo_tag_basic("{22B9E1E5-EC4E-47E0-ABED-6265C6CB03A9}", "Other Smoothing"), other_smooth_gui));
   auto& midi_smooth = result.params.emplace_back(make_param(

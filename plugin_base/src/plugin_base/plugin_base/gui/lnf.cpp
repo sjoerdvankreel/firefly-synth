@@ -113,8 +113,9 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
   auto theme_folder = get_resource_location(desc->config) / resource_folder_themes / _theme;
   auto font_path = theme_folder / "font.ttf";
   std::vector<char> typeface = file_load(font_path);
-  assert(typeface.size());
-  _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
+
+  // If resource data is missing we go with the default font.
+  if(typeface.size()) _typeface = Typeface::createSystemTypefaceFor(typeface.data(), typeface.size());
   assert(-1 <= module && module < (int)_desc->plugin->modules.size());
 
   auto theme_path = theme_folder / "theme.json";
@@ -167,6 +168,11 @@ _theme(theme), _desc(desc), _custom_section(custom_section), _module_section(mod
 void 
 lnf::init_theme(std::filesystem::path const& theme_folder, var const& json)
 {
+  // keep these in sync with required elements
+  if(!json.hasProperty("default_colors")) return;
+  if (!json.hasProperty("global_settings")) return;
+  if (!json.hasProperty("default_settings")) return; 
+
   if (json.hasProperty("graph_background_images"))
   {
     var graph_background_images = json["graph_background_images"];
@@ -311,7 +317,10 @@ lnf::colors() const
 Font 
 lnf::font() const
 {
-  Font result(_typeface);
+  // Handle the case for missing resources.
+  Font result;
+  if(_typeface.get())
+    result = Font(_typeface);
   result.setHeight(_global_settings.get_font_height());
   result.setStyleFlags(_desc->plugin->gui.font_flags);
   return result;
