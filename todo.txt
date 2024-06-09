@@ -42,6 +42,9 @@ automate the json creation
 how to do multi-format release?
 how to do multi-plugin release?
 
+nice to have and make: 
+* DSF falloff to the left
+
 vnext clap polymod
 - polymod
 - monophonic mode polymod
