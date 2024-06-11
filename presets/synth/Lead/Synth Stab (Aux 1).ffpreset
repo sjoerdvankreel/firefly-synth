@@ -1,5 +1,5 @@
 {
-  "checksum": "fe936e23522bf2395da2bb91831346a8",
+  "checksum": "53da559d253b1f4d135547da3d43d79c",
   "checked": {
     "meta": {
       "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -8,11 +8,11 @@
       "plugin_name": "Firefly Synth",
       "plugin_version_major": 1,
       "plugin_version_minor": 7,
-      "plugin_version_patch": 8
+      "plugin_version_patch": 9
     },
     "content": {
       "extra": {
-        "checksum": "541bb289e7210a1bd22ff9ec05195076",
+        "checksum": "a2455e17263adf8d30ff11c14395ae05",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -21,22 +21,16 @@
             "plugin_name": "Firefly Synth",
             "plugin_version_major": 1,
             "plugin_version_minor": 7,
-            "plugin_version_patch": 8
+            "plugin_version_patch": 9
           },
           "content": {
-            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 1,
-            "{31EF3492-FE63-4A59-91DA-C2B4DD4A8891}/tab": 0,
-            "{45C2CCFE-48D9-4231-A327-319DAE5C9366}/tab": 0,
-            "{4901E1B1-BFD6-4C85-83C4-699DC27C6BC4}/tab": 0,
-            "{58205EAB-FB60-4E46-B2AB-7D27F069CDD3}/tab": 0,
-            "{D450B51E-468E-457E-B954-FF1B9645CADB}/tab": 0,
-            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 1,
-            "{FAF92753-C6E4-4D78-BD7C-584EF473E29F}/tab": 0
+            "{11A46FE6-9009-4C17-B177-467243E171C8}/tab": 0,
+            "{DE952BFA-88AC-4F05-B60A-2CEAF9EE8BF9}/tab": 0
           }
         }
       },
       "plugin": {
-        "checksum": "1d1ebf491cc63567ded4f0a163348ee0",
+        "checksum": "82e3fc1dc6906be18aef6d9e29928bc1",
         "checked": {
           "meta": {
             "file_magic": "{296BBDE2-6411-4A85-BFAF-A9A7B9703DF0}",
@@ -45,7 +39,7 @@
             "plugin_name": "Firefly Synth",
             "plugin_version_major": 1,
             "plugin_version_minor": 7,
-            "plugin_version_patch": 8
+            "plugin_version_patch": 9
           },
           "content": {
             "modules": [
@@ -9310,7 +9304,7 @@
                     "params": [
                       {
                         "slots": [
-                          "71 %"
+                          "50 %"
                         ]
                       },
                       {
