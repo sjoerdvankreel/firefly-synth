@@ -61,7 +61,14 @@ splice_accurate_events(
       splice_last_event.param = this_event.param;
       splice_last_event.value_or_offset = splice_value;
       splice_last_event.frame = splice_block_start + splice_block_frames - 1;
-      spliced_events.push_back(splice_last_event);
+
+      // take care of NOT matching to host
+      if(
+        splice_last_event.param != this_event.param ||
+        splice_last_event.is_mod != this_event.is_mod ||
+        splice_last_event.note_id != this_event.note_id ||
+        splice_last_event.frame != this_event.frame)
+        spliced_events.push_back(splice_last_event);
 
       // first frame of next spliced block
       if (splice_block_start + spliced_block_frames < host_frame_count)
@@ -72,7 +79,13 @@ splice_accurate_events(
         splice_first_event.param = this_event.param;
         splice_first_event.value_or_offset = splice_value;
         splice_first_event.frame = splice_block_start + splice_block_frames;
-        spliced_events.push_back(splice_first_event);
+
+        if (
+          splice_first_event.param != this_event.param ||
+          splice_first_event.is_mod != this_event.is_mod ||
+          splice_first_event.note_id != this_event.note_id ||
+          splice_first_event.frame != this_event.frame)
+          spliced_events.push_back(splice_first_event);
       }
     }
   }
