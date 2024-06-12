@@ -50,8 +50,10 @@ nice to have and make:
 vnext clap polymod
 - polymod
 - monophonic mode polymod
-- how does this work with global unison?
-- allow to disable env 1, use external env ?
+v how does this work with global unison?
+- uses too much cpu
+- global lfo crashes
+- voice env not painting
 
 vnext next:
 Title not visible on renoise mac
