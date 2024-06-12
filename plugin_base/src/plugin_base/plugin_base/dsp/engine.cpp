@@ -639,6 +639,7 @@ plugin_engine::process()
         // if this was the last voice with the same note-id (global unison)
         // we also need to tell the clap host about it
         // TODO polymod by pck
+        // TODO debug this and make sure we hit it
         int voice_count_this_note_id = 0;
         for(int v = 0; v < _polyphony; v++)
           if(_voice_states[v].stage != voice_stage::unused && _voice_states[v].note_id_.id == state.note_id_.id)

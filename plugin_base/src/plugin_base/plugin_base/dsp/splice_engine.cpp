@@ -140,6 +140,8 @@ plugin_splice_engine::process()
   int total_block_count = spliced_block_count + (rest_block_frames == 0? 0: 1);
 
   _host_block.events.out.clear();
+  _host_block.events.finished_voices.clear();
+
   splice_accurate_events(
     _host_block.events.accurate_automation, _spliced_accurate_automation_events, 
     _host_block.frame_count, spliced_block_count, spliced_block_frames, rest_block_frames);
@@ -219,7 +221,8 @@ plugin_splice_engine::process()
       }
 
     _engine.process();
-    _host_block.events.out.insert(_host_block.events.out.begin(), inner_block.events.out.begin(), inner_block.events.out.end());
+    _host_block.events.out.insert(_host_block.events.out.end(), inner_block.events.out.begin(), inner_block.events.out.end());
+    _host_block.events.finished_voices.insert(_host_block.events.finished_voices.end(), inner_block.events.finished_voices.begin(), inner_block.events.finished_voices.end());
     _engine.release_block();
   }
 }

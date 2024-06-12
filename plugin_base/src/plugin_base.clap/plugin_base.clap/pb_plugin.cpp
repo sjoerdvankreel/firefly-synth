@@ -743,6 +743,8 @@ pb_plugin::process(clap_process const* process) noexcept
   }
 
   _splice_engine.process();
+
+  // report out events back to host
   for (int e = 0; e < block.events.out.size(); e++)
   {
     sync_event to_gui_event = {};
@@ -751,6 +753,25 @@ pb_plugin::process(clap_process const* process) noexcept
     to_gui_event.plain = _splice_engine.state().desc().normalized_to_plain_at_index(out_event.param, out_event.normalized);
     _to_gui_events->enqueue(to_gui_event);
   }
+
+  // report finished voices for polymod back to host
+  for (int v = 0; v < block.events.finished_voices.size(); v++)
+  {
+    auto const& fv = block.events.finished_voices[v];
+    clap_event_note note_end_event = {};
+    note_end_event.header.size = sizeof(clap_event_note);
+    note_end_event.header.flags = 0;
+    note_end_event.header.time = process->frames_count - 1;
+    note_end_event.header.type = CLAP_EVENT_NOTE_END;
+    note_end_event.header.space_id = CLAP_CORE_EVENT_SPACE_ID;
+    note_end_event.port_index = 0;
+    note_end_event.velocity = 0.0;
+    note_end_event.key = fv.key;
+    note_end_event.note_id = fv.id;
+    note_end_event.channel = fv.channel;
+    process->out_events->try_push(process->out_events, &note_end_event.header);
+  }
+
   _splice_engine.release_block();
   return CLAP_PROCESS_CONTINUE;
 }
