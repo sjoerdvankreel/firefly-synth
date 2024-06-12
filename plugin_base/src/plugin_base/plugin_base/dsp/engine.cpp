@@ -890,7 +890,7 @@ plugin_engine::process()
 
   for (int e = 0; e < auto_and_mod.size(); e++)
   {
-    // sorting should be param first, frame second, note_id third
+    // sorting should be param first, frame second, note_id third, is_mod last
     // see splice_engine
     auto const& event = auto_and_mod[e];
     bool is_last_event = e == auto_and_mod.size() - 1;
@@ -900,10 +900,10 @@ plugin_engine::process()
       (auto_and_mod[e + 1].param == event.param &&
        auto_and_mod[e + 1].frame > event.frame) ||
       (auto_and_mod[e + 1].param == event.param &&
-        auto_and_mod[e + 1].param == event.frame &&
+        auto_and_mod[e + 1].frame == event.frame &&
         auto_and_mod[e + 1].note_id > event.note_id) ||
       (auto_and_mod[e + 1].param == event.param &&
-        auto_and_mod[e + 1].param == event.frame &&
+        auto_and_mod[e + 1].frame == event.frame &&
         auto_and_mod[e + 1].note_id == event.note_id &&
         auto_and_mod[e + 1].is_mod > event.is_mod));
 
