@@ -79,7 +79,8 @@ plugin_engine::make_voice_block(
   _voice_states[v].sub_voice_index = sub_voice_index;
   return {
     false, _voice_results[v], _voice_states[v], 
-    _voice_cv_state[v], _voice_audio_state[v], _voice_context[v]
+    _voice_cv_state[v], _voice_audio_state[v], _voice_context[v],
+    _voice_accurate_automation[v]
   };
 };
 
@@ -110,14 +111,9 @@ plugin_engine::make_plugin_block(
     : _voice_automation[voice].state();
 
   // dealing with clap polymod
-
-  // TODO oh god this needs to be split out per-voice/per-global
   jarray<float, 3> const& own_accurate_auto = voice < 0
     ? _global_accurate_automation[module][slot]
     : _voice_accurate_automation[voice][module][slot];
-  jarray<float, 5> const& all_accurate_auto = voice < 0
-    ? _global_accurate_automation
-    : _voice_accurate_automation[voice];
 
   plugin_block_state state = {
     _last_note_key, context_out, _mono_note_stream,
@@ -125,7 +121,7 @@ plugin_engine::make_plugin_block(
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
-    own_accurate_auto, all_accurate_auto,
+    own_accurate_auto, _global_accurate_automation,
     own_block_auto, all_block_auto
   };
   return {
