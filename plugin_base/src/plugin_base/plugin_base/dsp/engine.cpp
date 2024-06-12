@@ -606,6 +606,7 @@ plugin_engine::process()
   auto const& topo = *_state.desc().plugin;
 
   _host_block->events.out.clear();
+  _host_block->events.finished_voices.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
 
   // set automation values to current state, events may overwrite
@@ -634,7 +635,18 @@ plugin_engine::process()
         state.release_frame = frame_count;
       }
       else if (state.stage == voice_stage::finishing)
+      {
+        // if this was the last voice with the same note-id (global unison)
+        // we also need to tell the clap host about it
+        // TODO polymod by pck
+        int voice_count_this_note_id = 0;
+        for(int v = 0; v < _polyphony; v++)
+          if(_voice_states[v].stage != voice_stage::unused && _voice_states[v].note_id_.id == state.note_id_.id)
+            voice_count_this_note_id++;
+        if(voice_count_this_note_id == 1)
+          _host_block->events.finished_voices.push_back(state.note_id_);
         state = voice_state();
+      }
     }
 
     int voice_mode = -1;
@@ -1026,6 +1038,7 @@ plugin_engine::process()
           mapping.topo.value_at(_voice_param_was_automated[v]) = 1;
         }
     }
+  }
 
   // need to remember last value so we can restart filtering from there
   // in case an event comes in on the next round

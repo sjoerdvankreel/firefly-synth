@@ -48,6 +48,7 @@ host_events::activate(bool graph, int param_count, int midi_count, int polyphony
   out.reserve(block_events_guess);
   block.reserve(block_events_guess);
   midi.reserve(midi_events_guess);
+  finished_voices.reserve(polyphony);
   accurate_automation.reserve(accurate_events_guess);
   accurate_modulation.reserve(accurate_events_guess);
   accurate_automation_and_modulation.reserve(accurate_events_guess);

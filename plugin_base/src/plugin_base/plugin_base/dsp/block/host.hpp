@@ -47,6 +47,7 @@ struct host_events final {
   std::vector<block_event> out;
   std::vector<note_event> notes;
   std::vector<block_event> block;
+  std::vector<note_id> finished_voices;
   std::vector<accurate_event> accurate_automation;
   std::vector<accurate_event> accurate_modulation;
 
