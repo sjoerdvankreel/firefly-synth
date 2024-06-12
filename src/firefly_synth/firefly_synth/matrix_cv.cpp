@@ -574,8 +574,16 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
       int tm = _targets[m].module_index;
       int tmi = _targets[m].module_slot;
       _modulation_indices[tm][tmi][tp][tpi] = -1;
-      auto const& curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-      _mixdown[tm][tmi][tp][tpi] = &curve;
+      if(this->_global)
+      {
+        auto const& curve = block.state.all_global_accurate_automation[tm][tmi][tp][tpi];
+        _mixdown[tm][tmi][tp][tpi] = &curve;
+      }
+      else
+      {
+        auto const& curve = block.voice->all_accurate_automation[tm][tmi][tp][tpi];
+        _mixdown[tm][tmi][tp][tpi] = &curve;
+      }
     }
 
   // apply modulation routing
@@ -596,7 +604,9 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
     int tmi = _targets[selected_target].module_slot;
 
     if (module != -1 && (tm != module || tmi != slot)) continue;
-    auto const& target_curve = block.state.all_accurate_automation[tm][tmi][tp][tpi];
+    auto const& target_curve = this->_global? 
+      block.state.all_global_accurate_automation[tm][tmi][tp][tpi]:
+      block.voice->all_accurate_automation[tm][tmi][tp][tpi];
 
     // if already modulated, set target curve to own buffer
     int existing_modulation_index = _modulation_indices[tm][tmi][tp][tpi];
@@ -606,8 +616,7 @@ cv_matrix_engine_base::perform_mixdown(plugin_block const& block, int module, in
     {
       // else pick the next of our own cv outputs
       modulated_curve_ptr = &(*_own_cv)[0][modulation_index];
-      auto const& target_automation = block.state.all_accurate_automation[tm][tmi][tp][tpi];
-      target_automation.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
+      target_curve.copy_to(block.start_frame, block.end_frame, *modulated_curve_ptr);
       modulated_curve_ptrs[r] = modulated_curve_ptr;
       _mixdown[tm][tmi][tp][tpi] = modulated_curve_ptr;
       _modulation_indices[tm][tmi][tp][tpi] = modulation_index++;
