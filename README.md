@@ -36,18 +36,18 @@ See below for some built-in themes.
 MacOS: if you get a warning like "archive damaged" or "failed to open" etc, it's probably this: 
 [https://syntheway.com/fix-au-vst-vst3-macos.htm](https://syntheway.com/fix-au-vst-vst3-macos.htm)
 
-- Mac VST3: [firefly_synth_1.7.7_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_mac_vst3_instrument.zip)
-- Mac VST3 Fx: [firefly_synth_1.7.7_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_mac_vst3_fx.zip)
-- Mac CLAP: [firefly_synth_1.7.7_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_mac_clap_instrument.zip)
-- Mac CLAP Fx: [firefly_synth_1.7.7_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_mac_clap_fx.zip)
-- Linux VST3: [firefly_synth_1.7.7_linux_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_linux_vst3_instrument.zip)
-- Linux VST3 Fx: [release/firefly_synth_1.7.7_linux_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_linux_vst3_fx.zip)
-- Linux CLAP: [firefly_synth_1.7.7_linux_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_linux_clap_instrument.zip)
-- Linux CLAP Fx: [firefly_synth_1.7.7_linux_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_linux_clap_fx.zip)
-- Windows VST3: [firefly_synth_1.7.7_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_windows_vst3_instrument.zip)
-- Windows VST3 Fx: [firefly_synth_1.7.7_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_windows_vst3_fx.zip)
-- Windows CLAP: [firefly_synth_1.7.7_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_windows_clap_instrument.zip)
-- Windows CLAP Fx: [firefly_synth_1.7.7_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.7_windows_clap_fx.zip)
+- Mac VST3: [firefly_synth_1.7.8_mac_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_vst3_instrument.zip)
+- Mac VST3 Fx: [firefly_synth_1.7.8_mac_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_vst3_fx.zip)
+- Mac CLAP: [firefly_synth_1.7.8_mac_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_clap_instrument.zip)
+- Mac CLAP Fx: [firefly_synth_1.7.8_mac_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_mac_clap_fx.zip)
+- Linux VST3: [firefly_synth_1.7.8_linux_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_vst3_instrument.zip)
+- Linux VST3 Fx: [release/firefly_synth_1.7.8_linux_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_vst3_fx.zip)
+- Linux CLAP: [firefly_synth_1.7.8_linux_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_clap_instrument.zip)
+- Linux CLAP Fx: [firefly_synth_1.7.8_linux_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_linux_clap_fx.zip)
+- Windows VST3: [firefly_synth_1.7.8_windows_vst3_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_vst3_instrument.zip)
+- Windows VST3 Fx: [firefly_synth_1.7.8_windows_vst3_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_vst3_fx.zip)
+- Windows CLAP: [firefly_synth_1.7.8_windows_clap_instrument.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_clap_instrument.zip)
+- Windows CLAP Fx: [firefly_synth_1.7.8_windows_clap_fx.zip](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/release/firefly_synth_1.7.8_windows_clap_fx.zip)
 
 # Install
 Extract the zipped folder and copy/replace it (the entire folder, not just the .dll/.so/.dylib!) to your VST3/CLAP folder:
@@ -87,15 +87,16 @@ Demo tunes:
 - Demo track 1: [demo_track_1.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_1.mp3)
 - Demo track 2: [demo_track_2.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_2.mp3)
 - Demo track 3: [demo_track_3.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_3.mp3)
+- Renoise test (sort of trance melody hard edit) (Rave Synth Preset): [renoise_test_sort_of_trance_melody_hard_edit.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_trance_melody_hard_edit.mp3)
+- Renoise test (sort of goa trance) (Trance Pad 2 Preset + Goa Bass Preset + Some more): [renoise_test_sort_of_goa_trance.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_goa_trance.mp3)
 
 Other:
 - FX Demo: [fx_demo_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fx_demo_reaper_clap.mp3)
 - Noise generator demo: [stereo_noise_reaper_clap.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/stereo_noise_reaper_clap.mp3)
 - Distortion modulation demo: [distortion_modulation.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/distortion_modulation.mp3)
 - I Love Distortion + Global Unison: [i_love_distortion_global_unison.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/i_love_distortion_global_unison.mp3)
-- Renoise test (yet another acid line) (Yet Another Acid Preset): [renoise_test_yet_another_acid_line.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_yet_another_acid_line.mp3)
 - Renoise test (sort of trance melody) (Trance Pad Preset): [renoise_test_sort_of_trance_melody.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_trance_melody.mp3)
-- Renoise test (sort of trance melody hard edit) (Rave Synth Preset): [renoise_test_sort_of_trance_melody_hard_edit.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_trance_melody_hard_edit.mp3)
+- Renoise test (yet another acid line) (Yet Another Acid Preset): [renoise_test_yet_another_acid_line.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_yet_another_acid_line.mp3)
 
 Presets:
 - Big Pad (Preset): [big_pad.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/big_pad.mp3)
