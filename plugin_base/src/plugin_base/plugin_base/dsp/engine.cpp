@@ -110,6 +110,8 @@ plugin_engine::make_plugin_block(
     : _voice_automation[voice].state();
 
   // dealing with clap polymod
+
+  // TODO oh god this needs to be split out per-voice/per-global
   jarray<float, 3> const& own_accurate_auto = voice < 0
     ? _global_accurate_automation[module][slot]
     : _voice_accurate_automation[voice][module][slot];
