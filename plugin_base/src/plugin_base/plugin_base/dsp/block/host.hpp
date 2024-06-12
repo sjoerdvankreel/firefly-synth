@@ -31,6 +31,8 @@ struct accurate_event final {
   int note_id = -1; // TODO polymod by pck
   bool is_mod; // is_mod = clap nondestructive
   double value_or_offset; // [0, 1] automation value or [-1, 1] mod value
+
+  bool operator==(accurate_event const&) const = default;
 };
 
 // keyboard event
