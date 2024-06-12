@@ -598,36 +598,6 @@ plugin_engine::init_voice_filters_and_modulation(int voice)
             }
 }
 
-void
-plugin_engine::automation_sanity_check(int frame_count)
-{
-  // This is a nice debugging tool but it does sometimes
-  // also fire assertions on fast smoothing changes, which are fine.
-#if 0
-  for (int m = 0; m < _state.desc().plugin->modules.size(); m++)
-  {
-    auto const& module = _state.desc().plugin->modules[m];
-    for (int mi = 0; mi < module.info.slot_count; mi++)
-      for (int p = 0; p < module.params.size(); p++)
-      {
-        auto const& param = module.params[p];
-        if (param.dsp.rate == param_rate::accurate)
-        {
-          for (int pi = 0; pi < param.info.slot_count; pi++)
-          {
-            auto const& curve = _accurate_automation[m][mi][p][pi];
-            (void)curve; 
-            for (int f = 1; f < frame_count; f++)
-              assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
-            if (_blocks_processed > 0)
-              assert(std::fabs(curve[0] - _automation_state_last_round_end[m][mi][p][pi]) < 0.01f);
-          }
-        }
-      }
-  }
-#endif
-}
-
 void 
 plugin_engine::process()
 {
@@ -881,9 +851,6 @@ plugin_engine::process()
                     (void)curve;
                   }
 
-  // debug make sure theres no jumps in the curve
-  automation_sanity_check(frame_count);
-
   // deal with new events from the current round
   // interpolate auto and mod together
   auto& auto_and_mod = _host_block->events.accurate_automation_and_modulation;
@@ -1059,19 +1026,6 @@ plugin_engine::process()
           mapping.topo.value_at(_voice_param_was_automated[v]) = 1;
         }
     }
-
-    // This is a nice debugging tool but it does sometimes
-    // also fire assertions on fast smoothing changes, which are fine.
-#if 0
-    for (int f = 1; f <= next_event_pos; f++)
-      assert(std::fabs(curve[f] - curve[f - 1]) < 0.01f);
-    if (_blocks_processed > 0)
-      assert(std::fabs(curve[0] - mapping.topo.value_at(_automation_state_last_round_end)) < 0.01f);
-#endif
-  }
-
-  // debug make sure theres no jumps in the curve
-  automation_sanity_check(frame_count);
 
   // need to remember last value so we can restart filtering from there
   // in case an event comes in on the next round
