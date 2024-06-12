@@ -743,7 +743,7 @@ plugin_engine::process()
 
   for (int e = 0; e < auto_and_mod.size(); e++)
   {
-    // sorting should be param first, note_id second, frame third
+    // sorting should be param first, frame second, note_id third
     // see splice_engine
     auto const& event = auto_and_mod[e];
     bool is_last_event = e == auto_and_mod.size() - 1;
@@ -831,6 +831,64 @@ plugin_engine::process()
 
       // make sure to re-fill the automation buffer on the next round
       mapping.topo.value_at(_global_param_was_automated) = 1;
+    }
+
+    // Case 2. Event is automation, param is per-voice -> update N buffers (1 for each active voice)
+    // And Case 4. Event is global modulation, param is per-voice -> update N buffers (1 for each active voice)
+    if (event.note_id == -1 && param_is_per_voice)
+    {
+      for(int v = 0; v < _polyphony; v++)
+        if(_voice_states[v].stage != voice_stage::unused)
+        {
+          // update patch state or mod state and figure out new lerp target
+          double new_target_value;
+          if (event.is_mod)
+          {
+            // case 4
+            new_target_value = _state.get_normalized_at_index(event.param).value();
+            new_target_value += check_bipolar(event.value_or_offset);
+            mapping.topo.value_at(_voice_current_modulation[v]) = event.value_or_offset;
+          }
+          else
+          {
+            // case 2
+            new_target_value = mapping.topo.value_at(_voice_current_modulation[v]);
+            new_target_value += check_unipolar(event.value_or_offset);
+            _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
+          }
+          new_target_value = std::clamp(new_target_value, 0.0, 1.0);
+
+          auto& curve = mapping.topo.value_at(_voice_accurate_automation[v]);
+          auto& lerp_filter = mapping.topo.value_at(_voice_automation_lerp_filters[v]);
+          auto& lp_filter = mapping.topo.value_at(_voice_automation_lp_filters[v]);
+
+          // TODO pick up per-voice start values from global
+          // NOTE: mixed global/per-voice mod on the same param is not supported!
+          if (!is_last_event && event.param == auto_and_mod[e + 1].param && auto_and_mod[e + 1].note_id == -1)
+            next_event_pos = auto_and_mod[e + 1].frame;
+
+          // start tracking the next value - lerp with delay + lp filter
+          // may cross block boundary, see init_automation_from_state
+          // need to restore current filter value to one-before-event-frame 
+          // since filters are already run to completion above
+          if (event.frame == 0)
+          {
+            lp_filter.current(mapping.topo.value_at(_voice_automation_state_last_round_end[v]));
+            lerp_filter.current(mapping.topo.value_at(_voice_automation_state_last_round_end[v]));
+          }
+          else
+          {
+            lp_filter.current(curve[event.frame - 1]);
+            lerp_filter.current(curve[event.frame - 1]);
+          }
+
+          lerp_filter.set(new_target_value);
+          for (int f = event.frame; f <= next_event_pos; f++)
+            curve[f] = lp_filter.next(lerp_filter.next().first);
+
+          // make sure to re-fill the automation buffer on the next round
+          mapping.topo.value_at(_voice_param_was_automated[v]) = 1;
+        }
     }
 
     // This is a nice debugging tool but it does sometimes
