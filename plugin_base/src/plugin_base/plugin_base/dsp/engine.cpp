@@ -764,61 +764,74 @@ plugin_engine::process()
     // which may reside in the next block, incase we'll pick it up later
     int next_event_pos = frame_count - 1;
     auto const& mapping = _state.desc().param_mappings.params[event.param];
+    int module_topo_index = _state.desc().modules[mapping.module_global].info.topo;
+    bool param_is_per_voice = _state.desc().plugin->modules[module_topo_index].dsp.stage == module_stage::voice;
 
-    // TODO if it is a global event, set mod value for all active voices
-    // TODO otherwise set it to active voice by noteid or pck
-    // TODO deal with all voices
+    // automation is only applied on global level
+    assert(event.is_mod || event.note_id == -1);
 
-    assert(event.is_mod == false || event.note_id == -1);
-    if(!event.is_mod)
+    // be sure we per-voice-modulate only per-voice-params
+    assert(param_is_per_voice || event.note_id == -1);
+
+    // These are the cases we need to deal with:
+    // 1. Event is automation, param is global -> update 1 global buffer
+    // 2. Event is automation, param is per-voice -> update N buffers (1 for each active voice)
+    // 3. Event is global modulation, param is global -> update 1 global buffer
+    // 4. Event is global modulation, param is per-voice -> update N buffers (1 for each active voice)
+    // 5. Event is per-voice modulation, param is per-voice -> update 1 per-voice buffer
+
+    // So, here we go.
+
+    // Case 1. Event is automation, param is global -> update 1 global buffer
+    // And Case 3. Event is global modulation, param is global -> update 1 global buffer
+    if(!param_is_per_voice)
     {
-      
-    }
- 
-    auto& curve = mapping.topo.value_at(_global_accurate_automation);
-    auto& lerp_filter = mapping.topo.value_at(_global_automation_lerp_filters);
-    auto& lp_filter = mapping.topo.value_at(_global_automation_lp_filters);
-    if (!is_last_event && event.param == auto_and_mod[e + 1].param)
-      next_event_pos = auto_and_mod[e + 1].frame;
+      // update patch state or mod state and figure out new lerp target
+      double new_target_value;
+      if (event.is_mod)
+      {
+        // case 3
+        new_target_value = _state.get_normalized_at_index(event.param).value();
+        new_target_value += check_bipolar(event.value_or_offset);
+        mapping.topo.value_at(_global_current_modulation) = event.value_or_offset;
+      }
+      else
+      {
+        // case 1
+        new_target_value = mapping.topo.value_at(_global_current_modulation);
+        new_target_value += check_unipolar(event.value_or_offset);
+        _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
+      }
+      new_target_value = std::clamp(new_target_value, 0.0, 1.0);
 
-    // update patch state or mod state and figure out new lerp target
-    double new_target_value;
-    if (event.is_mod)
-    {
-      new_target_value = _state.get_normalized_at_index(event.param).value();
-      new_target_value += check_bipolar(event.value_or_offset);
-      mapping.topo.value_at(_global_current_modulation) = event.value_or_offset;
-    }
-    else
-    {
-      new_target_value = mapping.topo.value_at(_global_current_modulation);
-      new_target_value += check_unipolar(event.value_or_offset);
-      _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
-    }
-    new_target_value = std::clamp(new_target_value, 0.0, 1.0);
+      auto& curve = mapping.topo.value_at(_global_accurate_automation);
+      auto& lerp_filter = mapping.topo.value_at(_global_automation_lerp_filters);
+      auto& lp_filter = mapping.topo.value_at(_global_automation_lp_filters);
+      if (!is_last_event && event.param == auto_and_mod[e + 1].param)
+        next_event_pos = auto_and_mod[e + 1].frame;
 
-    // start tracking the next value - lerp with delay + lp filter
-    // may cross block boundary, see init_automation_from_state
-    // need to restore current filter value to one-before-event-frame 
-    // since filters are already run to completion above
-    // TODO also for voice
-    if (event.frame == 0)
-    {
-      lp_filter.current(mapping.topo.value_at(_global_automation_state_last_round_end));
-      lerp_filter.current(mapping.topo.value_at(_global_automation_state_last_round_end));
-    }
-    else
-    {
-      lp_filter.current(curve[event.frame - 1]);
-      lerp_filter.current(curve[event.frame - 1]);
-    }
+      // start tracking the next value - lerp with delay + lp filter
+      // may cross block boundary, see init_automation_from_state
+      // need to restore current filter value to one-before-event-frame 
+      // since filters are already run to completion above
+      if (event.frame == 0)
+      {
+        lp_filter.current(mapping.topo.value_at(_global_automation_state_last_round_end));
+        lerp_filter.current(mapping.topo.value_at(_global_automation_state_last_round_end));
+      }
+      else
+      {
+        lp_filter.current(curve[event.frame - 1]);
+        lerp_filter.current(curve[event.frame - 1]);
+      }
 
-    lerp_filter.set(new_target_value);
-    for (int f = event.frame; f <= next_event_pos; f++)
-      curve[f] = lp_filter.next(lerp_filter.next().first);
+      lerp_filter.set(new_target_value);
+      for (int f = event.frame; f <= next_event_pos; f++)
+        curve[f] = lp_filter.next(lerp_filter.next().first);
 
-    // make sure to re-fill the automation buffer on the next round
-    mapping.topo.value_at(_global_param_was_automated) = 1;
+      // make sure to re-fill the automation buffer on the next round
+      mapping.topo.value_at(_global_param_was_automated) = 1;
+    }
 
     // This is a nice debugging tool but it does sometimes
     // also fire assertions on fast smoothing changes, which are fine.
