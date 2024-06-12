@@ -252,10 +252,11 @@ make_static_cv_matrix_mixdown(plugin_block& block)
         if (param.dsp.can_modulate(mi))
           for (int pi = 0; pi < param.info.slot_count; pi++)
           {
-            if(module.dsp.stage != module_stage::voice)
-              result[m][mi][p][pi] = &block.state.all_global_accurate_automation[m][mi][p][pi];
-            else
+            // TODO is this really correct ?
+            if(block.voice)
               result[m][mi][p][pi] = &block.voice->all_accurate_automation[m][mi][p][pi];
+            else
+              result[m][mi][p][pi] = &block.state.all_global_accurate_automation[m][mi][p][pi];
           }
       }
   }
