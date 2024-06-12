@@ -76,6 +76,10 @@ splice_accurate_events(
       }
     }
   }
+
+  // sanity check (this actually did happen)
+  for(int i = 0; i < spliced_events.size() - 1; i++)
+    assert(spliced_events[i] != spliced_events[i + 1]);
 }
   
 plugin_splice_engine::
