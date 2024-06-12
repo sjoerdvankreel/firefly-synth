@@ -1001,17 +1001,20 @@ plugin_engine::process()
     }
 
     // Case 2. Event is automation, param is per-voice -> update N buffers (1 for each active voice)
-    // And Case 4. Event is global modulation, param is per-voice -> update N buffers (1 for each active voice)
-    if (event.note_id == -1 && param_is_per_voice)
+    // Case 4. Event is global modulation, param is per-voice -> update N buffers (1 for each active voice)
+    // Case 5. Event is per-voice modulation, param is per-voice -> update 1 per-voice buffer
+    else
     {
       for(int v = 0; v < _polyphony; v++)
-        if(_voice_states[v].stage != voice_stage::unused)
+        if(_voice_states[v].stage != voice_stage::unused && (_voice_states[v].note_id_.id == event.note_id || event.note_id == -1))
         {
+          next_event_pos = frame_count - 1;
+
           // update patch state or mod state and figure out new lerp target
           double new_target_value;
           if (event.is_mod)
           {
-            // case 4
+            // case 4 and 5
             new_target_value = _state.get_normalized_at_index(event.param).value();
             new_target_value += check_bipolar(event.value_or_offset);
             mapping.topo.value_at(_voice_current_modulation[v]) = event.value_or_offset;
@@ -1029,9 +1032,8 @@ plugin_engine::process()
           auto& lerp_filter = mapping.topo.value_at(_voice_automation_lerp_filters[v]);
           auto& lp_filter = mapping.topo.value_at(_voice_automation_lp_filters[v]);
 
-          // TODO pick up per-voice start values from global
-          // NOTE: mixed global/per-voice mod on the same param is not supported!
-          if (!is_last_event && event.param == auto_and_mod[e + 1].param && auto_and_mod[e + 1].note_id == -1)
+          if (!is_last_event && event.param == auto_and_mod[e + 1].param && 
+            (auto_and_mod[e + 1].note_id == -1 || _voice_states[v].note_id_.id == auto_and_mod[e + 1].note_id))
             next_event_pos = auto_and_mod[e + 1].frame;
 
           // start tracking the next value - lerp with delay + lp filter
