@@ -63,7 +63,7 @@ splice_accurate_events(
       splice_last_event.frame = splice_block_start + splice_block_frames - 1;
       spliced_events.push_back(splice_last_event);
 
-      // first frame of next spliced block
+      // first frame of next spliced block - make sure not to replicate host
       if (splice_block_start + spliced_block_frames < host_frame_count)
       {
         accurate_event splice_first_event;
@@ -72,14 +72,19 @@ splice_accurate_events(
         splice_first_event.param = this_event.param;
         splice_first_event.value_or_offset = splice_value;
         splice_first_event.frame = splice_block_start + splice_block_frames;
-        spliced_events.push_back(splice_first_event);
+
+        if(i == host_events.size() - 1)
+          spliced_events.push_back(splice_first_event);
+        // TODO take care of pck
+        else if(
+          host_events[i + 1].frame != splice_first_event.frame ||
+          host_events[i + 1].is_mod != splice_first_event.is_mod ||
+          host_events[i + 1].param != splice_first_event.param ||
+          host_events[i + 1].note_id != splice_first_event.note_id)
+          spliced_events.push_back(splice_first_event);
       }
     }
   }
-
-  // sanity check (this actually did happen)
-  for(int i = 0; i < spliced_events.size() - 1; i++)
-    assert(spliced_events[i] != spliced_events[i + 1]);
 }
   
 plugin_splice_engine::
