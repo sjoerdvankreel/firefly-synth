@@ -633,6 +633,7 @@ plugin_engine::process()
 {
   int voice_count = 0;
   int frame_count = _host_block->frame_count;
+  auto const& topo = *_state.desc().plugin;
 
   _host_block->events.out.clear();
   std::pair<std::uint32_t, std::uint32_t> denormal_state = disable_denormals();  
@@ -640,13 +641,179 @@ plugin_engine::process()
   // set automation values to current state, events may overwrite
   init_automation_from_state();
 
+  /********************************************************/
+  /* STEP 1: Voice management in case of polyphonic synth */
+  /********************************************************/
+
+  // This must be done before dealing with automation/modulation since 
+  // clap modulation may target specific voices which must be activated first.
+
+  if (_state.desc().plugin->type == plugin_type::synth)
+  {
+    // always take a voice for an entire block,
+    // module processor is handed appropriate start/end_frame.
+    // and return voices completed the previous block
+    for (int i = 0; i < _voice_states.size(); i++)
+    {
+      auto& state = _voice_states[i];
+      if (state.stage == voice_stage::active || state.stage == voice_stage::releasing)
+      {
+        voice_count++;
+        state.start_frame = 0;
+        state.end_frame = frame_count;
+        state.release_frame = frame_count;
+      }
+      else if (state.stage == voice_stage::finishing)
+        state = voice_state();
+    }
+
+    int voice_mode = -1;
+    assert(topo.voice_mode_module >= 0);
+    assert(topo.voice_mode_param >= 0);
+    voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
+    assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
+
+    // for mono mode
+    std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state{ _last_note_key, false });
+
+    if (voice_mode == engine_voice_mode_poly)
+    {
+      // figure out subvoice count for global unison
+      int sub_voice_count = 1;
+      if (topo.sub_voice_counter) sub_voice_count = topo.sub_voice_counter(_graph, _state);
+
+      // poly mode: steal voices for incoming notes by age
+      for (int e = 0; e < _host_block->events.notes.size(); e++)
+      {
+        auto const& event = _host_block->events.notes[e];
+        if (event.type != note_event_type::on) continue;
+
+        for (int sv = 0; sv < sub_voice_count; sv++)
+        {
+          int slot = find_best_voice_slot();
+          activate_voice(event, slot, sub_voice_count, sv, frame_count);
+        }
+
+        // for portamento
+        _last_note_key = event.id.key;
+        _last_note_channel = event.id.channel;
+      }
+    }
+    else
+    {
+      // true mono mode: recycle the first active or releasing voice, or set up a new one
+      // release mono mode: recycle the first active but not releasing voice, or set up a new one
+      // note: we do not account for triggering more than 1 voice per block
+      // note: need to play *all* incoming notes into this voice
+      // note: subvoice/global uni does NOT apply to mono mode!
+      // because subvoices may have unequal length, then stuff becomes too complicated
+
+      int first_note_on_index = -1;
+      for (int e = 0; e < _host_block->events.notes.size(); e++)
+        if (_host_block->events.notes[e].type == note_event_type::on)
+        {
+          first_note_on_index = e;
+          break;
+        }
+
+      if (first_note_on_index != -1)
+      {
+        auto& first_event = _host_block->events.notes[first_note_on_index];
+
+        int slot = -1;
+        for (int v = 0; v < _voice_states.size(); v++)
+          if (_voice_states[v].stage == voice_stage::active ||
+            (_voice_states[v].stage == voice_stage::releasing && voice_mode == engine_voice_mode::engine_voice_mode_mono))
+          {
+            slot = v;
+            break;
+          }
+
+        if (voice_mode == engine_voice_mode_mono)
+        {
+          // no slot found, for real mono mode take slot 0
+          if (slot == -1)
+          {
+            slot = 0;
+            activate_voice(first_event, 0, 1, 0, frame_count);
+          }
+          else
+          {
+            // needed for later release by id or pck
+            _voice_states[slot].release_id = first_event.id;
+            _voice_states[slot].time = _stream_time + first_event.frame;
+          }
+        }
+
+        // for release mono mode, need to do the recycling again
+        if (voice_mode == engine_voice_mode_release)
+        {
+          if (slot == -1)
+          {
+            slot = find_best_voice_slot();
+            activate_voice(first_event, slot, 1, 0, frame_count);
+          }
+          else
+          {
+            // needed for later release by id or pck
+            _voice_states[slot].release_id = first_event.id;
+            _voice_states[slot].time = _stream_time + first_event.frame;
+          }
+        }
+
+        // set up note stream, plugin will have to do something with it
+        for (int e = 0; e < _host_block->events.notes.size(); e++)
+          if (_host_block->events.notes[e].type == note_event_type::on)
+          {
+            auto const& event = _host_block->events.notes[e];
+            _last_note_key = event.id.key;
+            _last_note_channel = event.id.channel;
+            std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state{ event.id.key, false });
+            _mono_note_stream[event.frame].note_on = true;
+          }
+      }
+    }
+
+    // mark voices for completion the next block
+    // be sure to check the note was on (earlier in time than the event) before we turn it off
+    // not sure how to handle note id vs pck: 
+    // clap on bitwig hands us note-on events with note id and note-off events without them
+    // so i choose to allow note-off with note-id to only kill the same note-id
+    // but allow note-off without note-id to kill any matching pck regardless of note-id
+    for (int e = 0; e < _host_block->events.notes.size(); e++)
+    {
+      auto const& event = _host_block->events.notes[e];
+      if (event.type == note_event_type::on) continue;
+      for (int v = 0; v < _voice_states.size(); v++)
+      {
+        auto& state = _voice_states[v];
+        if (state.stage == voice_stage::active &&
+          state.time < _stream_time + event.frame &&
+          ((event.id.id != -1 && state.release_id.id == event.id.id) ||
+            (event.id.id == -1 && (state.release_id.key == event.id.key && state.release_id.channel == event.id.channel))))
+        {
+          if (event.type == note_event_type::cut)
+          {
+            state.end_frame = event.frame;
+            state.stage = voice_stage::finishing;
+            assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
+          }
+          else {
+            state.release_frame = event.frame;
+            state.stage = voice_stage::releasing;
+            assert(0 <= state.start_frame && state.start_frame <= state.release_frame && state.release_frame < frame_count);
+          }
+        }
+      }
+    }
+  }
+  
   /***************************************/
-  /* STEP 1: Set up per-block automation */
+  /* STEP 2: Set up per-block automation */
   /***************************************/
 
   // smoothing per-block bpm values
   _bpm_filter.set(_host_block->shared.bpm);
-  auto const& topo = *_state.desc().plugin;
   if(topo.bpm_smooth_module >= 0 && topo.bpm_smooth_param >= 0)
     _bpm_filter.init(_sample_rate, _state.get_plain_at(topo.bpm_smooth_module, 0, topo.bpm_smooth_param, 0).real() * 0.001);
   for(int f = 0; f < frame_count; f++)
@@ -662,7 +829,7 @@ plugin_engine::process()
   }
 
   /*********************************************/
-  /* STEP 2: Set up sample-accurate automation */
+  /* STEP 3: Set up sample-accurate automation */
   /*********************************************/
 
   // The idea is to construct dense buffers from incoming events
@@ -915,17 +1082,26 @@ plugin_engine::process()
         auto const& param = module.params[p];
         if (param.dsp.rate == param_rate::accurate)
         {
-          for (int pi = 0; pi < param.info.slot_count; pi++)
-          {
-            auto const& curve = _global_accurate_automation[m][mi][p][pi];
-            _global_automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
-          }
+          if(module.dsp.stage != module_stage::voice)
+            for (int pi = 0; pi < param.info.slot_count; pi++)
+            {
+              auto const& curve = _global_accurate_automation[m][mi][p][pi];
+              _global_automation_state_last_round_end[m][mi][p][pi] = curve[frame_count - 1];
+            }
+          else
+            for(int v = 0; v < _polyphony; v++)
+              if(_voice_states[v].stage != voice_stage::unused)
+                for (int pi = 0; pi < param.info.slot_count; pi++)
+                {
+                  auto const& curve = _voice_accurate_automation[v][m][mi][p][pi];
+                  _voice_automation_state_last_round_end[v][m][mi][p][pi] = curve[frame_count - 1];
+                }
         }
       } 
   }
 
   /***************************************************************/
-  /* STEP 3: Set up MIDI automation (treated as sample-accurate) */
+  /* STEP 4: Set up MIDI automation (treated as sample-accurate) */
   /***************************************************************/
 
   // midi smoothing control
@@ -1021,7 +1197,7 @@ plugin_engine::process()
   }
 
   /*********************************************************/
-  /* STEP 4: Run global input modules (typically CV stuff) */
+  /* STEP 5: Run global input modules (typically CV stuff) */
   /*********************************************************/
 
   // run input modules in order
@@ -1035,170 +1211,6 @@ plugin_engine::process()
         _input_engines[m][mi]->process(block);
         _global_module_process_duration_sec[m][mi] = seconds_since_epoch() - start_time;
       }
-
-  /********************************************************/
-  /* STEP 5: Voice management in case of polyphonic synth */
-  /********************************************************/
-
-  if(_state.desc().plugin->type == plugin_type::synth)
-  {
-    // always take a voice for an entire block,
-    // module processor is handed appropriate start/end_frame.
-    // and return voices completed the previous block
-    for (int i = 0; i < _voice_states.size(); i++)
-    {
-      auto& state = _voice_states[i];
-      if (state.stage == voice_stage::active || state.stage == voice_stage::releasing)
-      {
-        voice_count++;
-        state.start_frame = 0;
-        state.end_frame = frame_count;
-        state.release_frame = frame_count;
-      }
-      else if (state.stage == voice_stage::finishing)
-        state = voice_state();
-    }
-
-    int voice_mode = -1;
-    assert(topo.voice_mode_module >= 0);
-    assert(topo.voice_mode_param >= 0);
-    voice_mode = _state.get_plain_at(topo.voice_mode_module, 0, topo.voice_mode_param, 0).step();
-    assert(voice_mode == engine_voice_mode_mono || voice_mode == engine_voice_mode_poly || voice_mode == engine_voice_mode_release);
-
-    // for mono mode
-    std::fill(_mono_note_stream.begin(), _mono_note_stream.end(), mono_note_state { _last_note_key, false });
-
-    if(voice_mode == engine_voice_mode_poly)
-    {
-      // figure out subvoice count for global unison
-      int sub_voice_count = 1;
-      if (topo.sub_voice_counter) sub_voice_count = topo.sub_voice_counter(_graph, _state);
-
-      // poly mode: steal voices for incoming notes by age
-      for (int e = 0; e < _host_block->events.notes.size(); e++)
-      {
-        auto const& event = _host_block->events.notes[e];
-        if (event.type != note_event_type::on) continue;
-
-        for(int sv = 0; sv < sub_voice_count; sv++)
-        {
-          int slot = find_best_voice_slot();
-          activate_voice(event, slot, sub_voice_count, sv, frame_count);
-        }
-         
-        // for portamento
-        _last_note_key = event.id.key;
-        _last_note_channel = event.id.channel;
-      }
-    }
-    else
-    {
-      // true mono mode: recycle the first active or releasing voice, or set up a new one
-      // release mono mode: recycle the first active but not releasing voice, or set up a new one
-      // note: we do not account for triggering more than 1 voice per block
-      // note: need to play *all* incoming notes into this voice
-      // note: subvoice/global uni does NOT apply to mono mode!
-      // because subvoices may have unequal length, then stuff becomes too complicated
-
-      int first_note_on_index = -1;
-      for(int e = 0; e < _host_block->events.notes.size(); e++)
-        if (_host_block->events.notes[e].type == note_event_type::on)
-        {
-          first_note_on_index = e;
-          break;
-        }
-
-      if(first_note_on_index != -1)
-      {
-        auto& first_event = _host_block->events.notes[first_note_on_index];
-
-        int slot = -1;
-        for(int v = 0; v < _voice_states.size(); v++)
-          if (_voice_states[v].stage == voice_stage::active ||
-          (_voice_states[v].stage == voice_stage::releasing && voice_mode == engine_voice_mode::engine_voice_mode_mono))
-          {
-            slot = v;
-            break;
-          }
-
-        if (voice_mode == engine_voice_mode_mono)
-        {
-          // no slot found, for real mono mode take slot 0
-          if(slot == -1)
-          {
-            slot = 0;
-            activate_voice(first_event, 0, 1, 0, frame_count);
-          }
-          else 
-          {
-            // needed for later release by id or pck
-            _voice_states[slot].release_id = first_event.id;
-            _voice_states[slot].time = _stream_time + first_event.frame;
-          }
-        }
-
-        // for release mono mode, need to do the recycling again
-        if (voice_mode == engine_voice_mode_release)
-        {
-          if (slot == -1)
-          {
-            slot = find_best_voice_slot();
-            activate_voice(first_event, slot, 1, 0, frame_count);
-          }
-          else
-          {
-            // needed for later release by id or pck
-            _voice_states[slot].release_id = first_event.id;
-            _voice_states[slot].time = _stream_time + first_event.frame;
-          }
-        }
-
-        // set up note stream, plugin will have to do something with it
-        for(int e = 0; e < _host_block->events.notes.size(); e++)
-          if(_host_block->events.notes[e].type == note_event_type::on)
-          {
-            auto const& event = _host_block->events.notes[e];
-            _last_note_key = event.id.key;
-            _last_note_channel = event.id.channel;
-            std::fill(_mono_note_stream.begin() + event.frame, _mono_note_stream.end(), mono_note_state { event.id.key, false });
-            _mono_note_stream[event.frame].note_on = true;
-          }
-      }
-    }
-
-    // mark voices for completion the next block
-    // be sure to check the note was on (earlier in time than the event) before we turn it off
-    // not sure how to handle note id vs pck: 
-    // clap on bitwig hands us note-on events with note id and note-off events without them
-    // so i choose to allow note-off with note-id to only kill the same note-id
-    // but allow note-off without note-id to kill any matching pck regardless of note-id
-    for (int e = 0; e < _host_block->events.notes.size(); e++)
-    {
-      auto const& event = _host_block->events.notes[e];
-      if (event.type == note_event_type::on) continue;
-      for (int v = 0; v < _voice_states.size(); v++)
-      {
-        auto& state = _voice_states[v];
-        if (state.stage == voice_stage::active &&
-          state.time < _stream_time + event.frame &&
-          ((event.id.id != -1 && state.release_id.id == event.id.id) ||
-            (event.id.id == -1 && (state.release_id.key == event.id.key && state.release_id.channel == event.id.channel))))
-        {
-          if (event.type == note_event_type::cut)
-          {
-            state.end_frame = event.frame;
-            state.stage = voice_stage::finishing;
-            assert(0 <= state.start_frame && state.start_frame <= state.end_frame && state.end_frame < frame_count);
-          }
-          else {
-            state.release_frame = event.frame;
-            state.stage = voice_stage::releasing;
-            assert(0 <= state.start_frame && state.start_frame <= state.release_frame && state.release_frame < frame_count);
-          }
-        }
-      }
-    }
-  }
 
   /*************************************************************/
   /* STEP 6: Run per-voice modules in case of polyphonic synth */
