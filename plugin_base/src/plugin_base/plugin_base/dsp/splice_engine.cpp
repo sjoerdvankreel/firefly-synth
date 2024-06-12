@@ -79,11 +79,7 @@ splice_accurate_events(
 
   // sanity check (this actually did happen)
   for(int i = 0; i < static_cast<int>(spliced_events.size()) - 1; i++)
-    assert(
-      spliced_events[i].frame != spliced_events[i + 1].frame ||
-      spliced_events[i].param != spliced_events[i + 1].param ||
-      spliced_events[i].note_id != spliced_events[i + 1].note_id ||
-      spliced_events[i].is_mod != spliced_events[i + 1].is_mod);
+    assert(spliced_events[i] != spliced_events[i + 1]);
 }
   
 plugin_splice_engine::
