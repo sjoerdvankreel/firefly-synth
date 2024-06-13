@@ -62,9 +62,6 @@ struct plugin_voice_block final {
   jarray<float, 5> const& all_cv;
   jarray<float, 6> const& all_audio;
   jarray<void*, 2> const& all_context;
-
-  // all automation of all modules which participate in the current voice
-  jarray<float, 5> const& all_accurate_automation;
 };
 
 // state and automation
@@ -85,17 +82,8 @@ struct plugin_block_state final {
   jarray<float, 4> const& all_midi_automation;
   jarray<int, 1> const& own_midi_active_selection;
   jarray<int, 3> const& all_midi_active_selection;
-
-  // own is either global or per-voice, but always for the current voice
-  // i.e. no peeking into other voices, which makes perfect sense
   jarray<float, 3> const& own_accurate_automation;
-
-  // each voice may look into global automation state
-  // and also into per-voice automation (modulation) state but
-  // ONLY for its own voice! this is needed for per-voice mod matrix
-  jarray<float, 5> const& all_global_accurate_automation;
-
-  // block auto is never per-voice
+  jarray<float, 5> const& all_accurate_automation;
   jarray<plain_value, 2> const& own_block_automation;
   jarray<plain_value, 4> const& all_block_automation;
 };

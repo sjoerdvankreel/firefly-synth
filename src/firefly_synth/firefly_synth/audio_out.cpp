@@ -138,7 +138,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
   auto const& amp_env = block.voice->all_cv[module_env][0][0][0];
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
   auto const& bal_curve_norm = *modulation[module_voice_out][0][param_bal][0];
-  auto const& glob_uni_sprd_curve = block.state.all_global_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
+  auto const& glob_uni_sprd_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
 
   float attn = 1.0f;
   float voice_pos = 0.0f;

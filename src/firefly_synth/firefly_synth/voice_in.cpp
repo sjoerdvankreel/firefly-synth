@@ -292,7 +292,7 @@ voice_in_engine::process_mode_unison(plugin_block& block)
 
   auto const& modulation = get_cv_audio_matrix_mixdown(block, false);
   int master_pb_range = block.state.all_block_automation[module_master_in][0][master_in_param_pb_range][0].step();
-  auto const& glob_uni_dtn_curve = block.state.all_global_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
 
   auto const& pb_curve_norm = *(modulation)[module_voice_in][0][param_pb][0];
   auto& pb_curve = block.state.own_scratch[scratch_pb];
