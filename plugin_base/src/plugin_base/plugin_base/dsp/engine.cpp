@@ -109,21 +109,13 @@ plugin_engine::make_plugin_block(
     ? _block_automation.state()
     : _voice_automation[voice].state();
 
-  // dealing with clap polymod
-  jarray<float, 3> const& own_accurate_auto = voice < 0
-    ? _global_accurate_automation[module][slot]
-    : _voice_accurate_automation[voice][module][slot];
-  jarray<float, 5> const& all_accurate_auto = voice < 0
-    ? _global_accurate_automation
-    : _voice_accurate_automation[voice];
-
   plugin_block_state state = {
     _last_note_key, context_out, _mono_note_stream,
     cv_out, audio_out, scratch, _bpm_automation,
     _global_cv_state, _global_audio_state, _global_context, 
     _midi_automation[module][slot], _midi_automation,
     _midi_active_selection[module][slot], _midi_active_selection,
-    own_accurate_auto, all_accurate_auto,
+    _global_accurate_automation[module][slot], _global_accurate_automation,
     own_block_auto, all_block_auto
   };
   return {
@@ -922,16 +914,15 @@ plugin_engine::process()
 
     // These are the cases we need to deal with:
     // 1. Event is automation, param is global -> update 1 global buffer
-    // 2. Event is automation, param is per-voice -> update N buffers (1 for each active voice)
+    // 2. Event is automation, param is per-voice -> update 1 global buffer
     // 3. Event is global modulation, param is global -> update 1 global buffer
-    // 4. Event is global modulation, param is per-voice -> update N buffers (1 for each active voice)
+    // 4. Event is global modulation, param is per-voice -> update 1 global buffer
     // 5. Event is per-voice modulation, param is per-voice -> update 1 per-voice buffer
 
     // So, here we go.
 
-    // Case 1. Event is automation, param is global -> update 1 global buffer
-    // And Case 3. Event is global modulation, param is global -> update 1 global buffer
-    if(!param_is_per_voice)
+    // Case 1, 2, 3 and 4.
+    if(event.note_id == -1 || !param_is_per_voice)
     {
       // update patch state or mod state and figure out new lerp target
       double new_target_value;
@@ -980,32 +971,21 @@ plugin_engine::process()
       mapping.topo.value_at(_global_param_was_automated) = 1;
     }
 
-    // Case 2. Event is automation, param is per-voice -> update N buffers (1 for each active voice)
-    // Case 4. Event is global modulation, param is per-voice -> update N buffers (1 for each active voice)
     // Case 5. Event is per-voice modulation, param is per-voice -> update 1 per-voice buffer
-    else
+    // TODO - actually use these buffers somewhere.
+    else if(event.note_id >= 0 && param_is_per_voice)
     {
+      assert(event.is_mod);
       for(int v = 0; v < _polyphony; v++)
-        if(_voice_states[v].stage != voice_stage::unused && (_voice_states[v].note_id_.id == event.note_id || event.note_id == -1))
+        if(_voice_states[v].stage != voice_stage::unused && _voice_states[v].note_id_.id == event.note_id)
         {
           next_event_pos = frame_count - 1;
 
           // update patch state or mod state and figure out new lerp target
           double new_target_value;
-          if (event.is_mod)
-          {
-            // case 4 and 5
-            new_target_value = _state.get_normalized_at_index(event.param).value();
-            new_target_value += check_bipolar(event.value_or_offset);
-            mapping.topo.value_at(_voice_current_modulation[v]) = event.value_or_offset;
-          }
-          else
-          {
-            // case 2
-            new_target_value = mapping.topo.value_at(_voice_current_modulation[v]);
-            new_target_value += check_unipolar(event.value_or_offset);
-            _state.set_normalized_at_index(event.param, normalized_value(event.value_or_offset));
-          }
+          new_target_value = _state.get_normalized_at_index(event.param).value();
+          new_target_value += check_bipolar(event.value_or_offset);
+          mapping.topo.value_at(_voice_current_modulation[v]) = event.value_or_offset;
           new_target_value = std::clamp(new_target_value, 0.0, 1.0);
 
           auto& curve = mapping.topo.value_at(_voice_accurate_automation[v]);
@@ -1013,7 +993,7 @@ plugin_engine::process()
           auto& lp_filter = mapping.topo.value_at(_voice_automation_lp_filters[v]);
 
           if (!is_last_event && event.param == auto_and_mod[e + 1].param && 
-            (auto_and_mod[e + 1].note_id == -1 || _voice_states[v].note_id_.id == auto_and_mod[e + 1].note_id))
+            _voice_states[v].note_id_.id == auto_and_mod[e + 1].note_id)
             next_event_pos = auto_and_mod[e + 1].frame;
 
           // start tracking the next value - lerp with delay + lp filter
@@ -1039,6 +1019,9 @@ plugin_engine::process()
           mapping.topo.value_at(_voice_param_was_automated[v]) = 1;
         }
     }
+
+    // Just checking.
+    else assert(false);
   }
 
   // need to remember last value so we can restart filtering from there

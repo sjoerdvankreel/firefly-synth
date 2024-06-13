@@ -390,7 +390,7 @@ pb_plugin::paramsInfo(std::uint32_t index, clap_param_info* info) const noexcept
     {
       info->flags |= CLAP_PARAM_IS_MODULATABLE;
       if(module.module->dsp.stage == module_stage::voice)
-        info->flags |= CLAP_PARAM_IS_MODULATABLE_PER_NOTE_ID; // TODO report voice end to clap host
+        info->flags |= CLAP_PARAM_IS_MODULATABLE_PER_NOTE_ID;
     }
   }
 
