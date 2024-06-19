@@ -87,7 +87,7 @@ Demo tunes:
 - Demo track 1: [demo_track_1.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_1.mp3)
 - Demo track 2: [demo_track_2.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_2.mp3)
 - Demo track 3: [demo_track_3.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/demo_track_3.mp3)
-- Fun with rave synth (rave synth preset): [fun_with_rave_synth.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fun_with_rave_synth.mp3)
+- Fun with rave synth (Rave Synth Preset + Big Pad 2 Preset): [fun_with_rave_synth.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/fun_with_rave_synth.mp3)
 - Renoise test (sort of trance melody hard edit) (Rave Synth Preset): [renoise_test_sort_of_trance_melody_hard_edit.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_trance_melody_hard_edit.mp3)
 - Renoise test (sort of goa trance) (Trance Pad 2 Preset + Goa Bass Preset + Some more): [renoise_test_sort_of_goa_trance.mp3](https://github.com/sjoerdvankreel/firefly-synth-storage/raw/main/render/renoise_test_sort_of_goa_trance.mp3)
 
