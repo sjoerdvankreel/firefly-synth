@@ -48,6 +48,10 @@ nice to have and make:
 * maybe do a tutorial ?
 * fix global unison for mono mode
 
+missing demo presets:
+downtempo goa
+fun with rave synth
+
 vnext clap polymod
 - polymod
 - monophonic mode polymod
