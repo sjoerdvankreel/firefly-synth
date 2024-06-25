@@ -1,3 +1,8 @@
+### June 25, 2024 - V1.8.0.
+
+- Add some more presets.
+- Add another demo tune to go with it.
+
 ### June 11, 2024 - V1.7.9 (No binaries).
 
 - Add some presets.
