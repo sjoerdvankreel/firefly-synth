@@ -45,6 +45,7 @@ how to do multi-plugin release?
 
 nice to have and make: 
 * DSF falloff to the left
+* FM backwards (sub from phase)
 * maybe do a tutorial ?
 * fix global unison for mono mode
 
