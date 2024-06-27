@@ -34,12 +34,14 @@ init_logging(std::string const& vendor, std::string const& full_name)
 }
 
 void 
-write_log(std::string const& message)
+write_log(std::string const& file, int line, std::string const& func, std::string const& message)
 {
+  std::filesystem::path path(file);
+  auto file_name = path.filename().string();
   auto now = std::chrono::system_clock::now();
   std::string date_time = std::format("{:%d-%m-%Y %H:%M:%OS}", now);
   std::string instance_id = _instance_id->toString().toStdString();
-  std::string full_message = date_time + ": " + "instance " + instance_id + ": " + message;
+  std::string full_message = date_time + ": " + "instance " + instance_id + ": " + file_name + " line " + std::to_string(line) + ", " + func + ": " + message;
   _logger->logMessage(full_message);
 }
 
