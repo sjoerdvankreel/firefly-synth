@@ -1338,8 +1338,11 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
   int const kbd_pivot = midi_middle_c;
   int this_module = _global ? module_gfx : module_vfx;
 
-  auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];
-  auto const& glob_uni_dtn_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+  jarray<float, 1> const* glob_uni_dtn_curve = nullptr;
+  if constexpr(GlobalUnison)
+    glob_uni_dtn_curve = &block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_dtn][0];
+
+  auto const& res_curve = *modulation[this_module][block.module_slot][param_svf_res][0];  
   double kbd_trk_base = _global ? (block.state.last_midi_note == -1 ? midi_middle_c : block.state.last_midi_note) : block.voice->state.note_id_.key;
 
   auto const& kbd_curve_norm = *modulation[this_module][block.module_slot][param_svf_kbd][0];
@@ -1365,7 +1368,7 @@ fx_engine::process_svf_uni_mode(plugin_block& block,
     if constexpr(GlobalUnison)
     {
       float voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
-      kbd_trk += (voice_pos - 0.5f) * glob_uni_dtn_curve[f];
+      kbd_trk += (voice_pos - 0.5f) * (*glob_uni_dtn_curve)[f];
     }
 
     hz *= std::pow(2.0, (kbd_trk - kbd_pivot) / 12.0 * kbd);

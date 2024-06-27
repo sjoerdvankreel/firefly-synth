@@ -138,7 +138,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
   auto const& amp_env = block.voice->all_cv[module_env][0][0][0];
   auto const& gain_curve = *modulation[module_voice_out][0][param_gain][0];
   auto const& bal_curve_norm = *modulation[module_voice_out][0][param_bal][0];
-  auto const& glob_uni_sprd_curve = block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
+  jarray<float, 1> const* glob_uni_sprd_curve = nullptr;
 
   float attn = 1.0f;
   float voice_pos = 0.0f;
@@ -148,6 +148,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
     attn = std::sqrt(block.voice->state.sub_voice_count);
     voice_pos = (float)block.voice->state.sub_voice_index / (block.voice->state.sub_voice_count - 1.0f);
     voice_pos = unipolar_to_bipolar(voice_pos);
+    glob_uni_sprd_curve = &block.state.all_accurate_automation[module_master_in][0][master_in_param_glob_uni_sprd][0];
   }
 
   auto& bal_curve = block.state.own_scratch[scratch_bal];
@@ -155,7 +156,7 @@ voice_audio_out_engine::process_unison(plugin_block& block)
   for (int f = block.start_frame; f < block.end_frame; f++)
   {
     if constexpr (GlobalUnison)
-      voice_bal = voice_pos * glob_uni_sprd_curve[f];
+      voice_bal = voice_pos * (*glob_uni_sprd_curve)[f];
     block.voice->result[0][f] = audio_in[0][f] * gain_curve[f] * amp_env[f] * stereo_balance<0>(bal_curve[f]) * stereo_balance<0>(voice_bal) / attn;
     block.voice->result[1][f] = audio_in[1][f] * gain_curve[f] * amp_env[f] * stereo_balance<1>(bal_curve[f]) * stereo_balance<1>(voice_bal) / attn;
   }
