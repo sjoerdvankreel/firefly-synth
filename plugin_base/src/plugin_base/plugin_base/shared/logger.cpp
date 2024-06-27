@@ -4,6 +4,8 @@
 #include <juce_core/juce_core.h>
 
 #include <memory>
+#include <chrono>
+#include <format>
 #include <filesystem>
 
 namespace plugin_base {
@@ -34,7 +36,11 @@ init_logging(std::string const& vendor, std::string const& full_name)
 void 
 write_log(std::string const& message)
 {
-  _logger->logMessage(message);
+  auto now = std::chrono::system_clock::now();
+  std::string date_time = std::format("{:%d-%m-%Y %H:%M:%OS}", now);
+  std::string instance_id = _instance_id->toString().toStdString();
+  std::string full_message = date_time + ": " + "instance " + instance_id + ": " + message;
+  _logger->logMessage(full_message);
 }
 
 }
