@@ -2,7 +2,6 @@
 #include <firefly_synth/plugin.hpp>
 
 #include <plugin_base/gui/gui.hpp>
-#include <plugin_base/shared/logger.hpp>
 #include <plugin_base/gui/utility.hpp>
 #include <plugin_base.clap/pb_plugin.hpp>
 
@@ -36,14 +35,12 @@ deinit()
 {
   juce::shutdownJuce_GUI();
   _topo.reset();
-  cleanup_logging();
 }
 
 static bool CLAP_ABI
 init(char const*)
 {
-  init_logging(FF_SYNTH_VENDOR_NAME, FF_SYNTH_FULL_NAME);
-  _topo = synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME);
+  _topo = synth_topo(PB_IS_FX);
   juce::initialiseJuce_GUI();
   return true;
 }
@@ -89,6 +86,6 @@ clap_plugin_entry_t const clap_entry =
 
 // for param list generator
 extern "C" PB_EXPORT plugin_topo const*
-pb_plugin_topo_create() { return synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME).release(); }
+pb_plugin_topo_create() { return synth_topo(PB_IS_FX).release(); }
 extern "C" PB_EXPORT void
 pb_plugin_topo_destroy(plugin_topo const* topo) { delete topo; }

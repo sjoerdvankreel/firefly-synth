@@ -1,5 +1,4 @@
 #include <plugin_base/shared/io_user.hpp>
-#include <plugin_base/shared/io_shared.hpp>
 #include <juce_core/juce_core.h>
 
 #include <cstddef>
@@ -9,6 +8,21 @@
 using namespace juce;
 
 namespace plugin_base {
+
+static std::string
+user_location(plugin_topo const& topo)
+{
+  std::filesystem::path result = topo.vendor;
+  result /= topo.tag.full_name;
+  result /= topo.tag.id;
+  result /= std::to_string(topo.version.major) + "." + std::to_string(topo.version.minor) + "." + std::to_string(topo.version.patch);
+#ifdef __linux__
+  char const* xdg_config_home = std::getenv("XDG_CONFIG_HOME");
+  if(xdg_config_home == nullptr) xdg_config_home = ".config";
+  result = std::filesystem::path(xdg_config_home) / result;
+#endif
+  return result.string();
+}
 
 static std::unique_ptr<InterProcessLock>
 user_lock(plugin_topo const& topo)
@@ -23,7 +37,7 @@ user_options(plugin_topo const& topo, InterProcessLock* lock)
   PropertiesFile::Options result;
   result.processLock = lock;
   result.filenameSuffix = ".xml";
-  result.applicationName = "user_state";
+  result.applicationName = "plugin";
   result.folderName = user_location(topo);
   result.storageFormat = PropertiesFile::StorageFormat::storeAsXML;
   return result;

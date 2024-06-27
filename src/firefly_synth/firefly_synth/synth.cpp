@@ -327,13 +327,12 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 }
 
 std::unique_ptr<plugin_topo>
-synth_topo(bool is_fx, std::string const& full_name)
+synth_topo(bool is_fx)
 {
   auto result = std::make_unique<plugin_topo>();
 
   result->extension = "ffpreset";
   result->vendor = "Sjoerd van Kreel";
-  result->full_name = full_name;
   result->version.major = FF_SYNTH_VERSION_MAJOR;
   result->version.minor = FF_SYNTH_VERSION_MINOR;
   result->version.patch = FF_SYNTH_VERSION_PATCH;
