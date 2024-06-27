@@ -1,4 +1,5 @@
 on release: 
+run some debug builds
 *** add missing presets from demos
 update kvr
 update screenshots

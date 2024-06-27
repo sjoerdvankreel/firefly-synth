@@ -1,7 +1,8 @@
-### June 25, 2024 - V1.8.0.
+### ?, ?, 2024 - V1.8.0.
 
 - Add some more presets.
 - Add another demo tune to go with it.
+- Bugfix: FX version tried to read global unison params.
 
 ### June 11, 2024 - V1.7.9 (No binaries).
 
