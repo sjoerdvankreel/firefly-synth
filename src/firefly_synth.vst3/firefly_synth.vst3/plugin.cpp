@@ -46,6 +46,7 @@ bool
 InitModule() 
 { 
   init_logging(FF_SYNTH_VENDOR_NAME, FF_SYNTH_FULL_NAME);
+  write_log("HAHA!");
   _topo = synth_topo(PB_IS_FX, FF_SYNTH_FULL_NAME);
   juce::initialiseJuce_GUI();
   return true; 
