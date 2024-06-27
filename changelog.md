@@ -2,7 +2,8 @@
 
 - Add some more presets.
 - Add another demo tune to go with it.
-- Bugfix: FX version tried to read global unison params.
+- Bugfix: FX version tried to read global unison params causing the plugin to crash on windows 11.
+- Changed location of user settings (gui size and selected theme). Also these are no longer shared between clap/vst3.
 
 ### June 11, 2024 - V1.7.9 (No binaries).
 
