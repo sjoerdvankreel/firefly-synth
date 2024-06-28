@@ -6,6 +6,7 @@
 #include <plugin_base/gui/graph.hpp>
 #include <plugin_base/gui/controls.hpp>
 #include <plugin_base/gui/containers.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 using namespace juce;
 using namespace plugin_base;
@@ -329,6 +330,8 @@ make_cv_matrix_sources(plugin_topo const* topo, bool global)
 std::unique_ptr<plugin_topo>
 synth_topo(bool is_fx, std::string const& full_name)
 {
+  PB_WRITE_LOG_FUNC_ENTER();
+   
   auto result = std::make_unique<plugin_topo>();
 
   result->extension = "ffpreset";
@@ -505,6 +508,9 @@ synth_topo(bool is_fx, std::string const& full_name)
     make_cv_matrix_sources(result.get(), false),
     make_cv_matrix_sources(result.get(), true),
     make_cv_cv_matrix_targets(result.get(), false));
+
+  PB_WRITE_LOG_FUNC_EXIT();
+
   return result;
 }
 

@@ -1,10 +1,13 @@
 #include <plugin_base/desc/frame_dims.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 namespace plugin_base {
 
 plugin_frame_dims::
 plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
 {
+  PB_WRITE_LOG_FUNC_ENTER();
+
   audio = jarray<int, 1>(2, frame_count);
   for (int v = 0; v < polyphony; v++)
   {
@@ -75,6 +78,8 @@ plugin_frame_dims(plugin_topo const& plugin, int polyphony, int frame_count)
   }
 
   validate(plugin, polyphony, frame_count);
+
+  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 void

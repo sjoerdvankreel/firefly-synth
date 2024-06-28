@@ -1,5 +1,8 @@
 #include <plugin_base/desc/plugin.hpp>
 #include <plugin_base/shared/utility.hpp> 
+#include <plugin_base/shared/logger.hpp>
+
+
 #include <set>
 
 namespace plugin_base {
@@ -8,6 +11,8 @@ plugin_desc::
 plugin_desc(plugin_topo const* plugin, format_config const* config):
 plugin(plugin), config(config)
 {
+  PB_WRITE_LOG_FUNC_ENTER();
+    
   assert(plugin);
 
   int param_global = 0;
@@ -113,6 +118,8 @@ plugin(plugin), config(config)
   param_count = param_global;
   midi_count = midi_source_global;
   module_count = modules.size();
+
+  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 std::vector<std::string>

@@ -1,10 +1,13 @@
 #include <plugin_base/desc/dims.hpp>
+#include <plugin_base/shared/logger.hpp>
 
 namespace plugin_base {
 
 plugin_dims::
 plugin_dims(plugin_topo const& plugin, int polyphony)
 {
+  PB_WRITE_LOG_FUNC_ENTER();
+
   for (int v = 0; v < polyphony; v++)
   {
     voice_module_slot.emplace_back();
@@ -31,6 +34,8 @@ plugin_dims(plugin_topo const& plugin, int polyphony)
   }
 
   validate(plugin, polyphony);
+
+  PB_WRITE_LOG_FUNC_EXIT();
 }
 
 void
