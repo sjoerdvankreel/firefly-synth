@@ -36,6 +36,9 @@ init_logging(std::string const& vendor, std::string const& full_name)
 void 
 write_log(std::string const& file, int line, std::string const& func, std::string const& message)
 {
+  // allow unitialized usage for reference generator
+  if (!_instance_id) return;
+
   std::filesystem::path path(file);
   auto file_name = path.filename().string();
   auto now = std::chrono::system_clock::now();
