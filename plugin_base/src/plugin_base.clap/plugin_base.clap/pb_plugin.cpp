@@ -452,7 +452,6 @@ pb_plugin::paramsFlush(clap_input_events const* in, clap_output_events const* ou
 std::uint32_t
 pb_plugin::notePortsCount(bool is_input) const noexcept
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
   if (!is_input) return 0;
   return _splice_engine.state().desc().plugin->type == plugin_type::synth ? 1 : 0;
 }
@@ -460,7 +459,6 @@ pb_plugin::notePortsCount(bool is_input) const noexcept
 std::uint32_t
 pb_plugin::audioPortsCount(bool is_input) const noexcept
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
   if (!is_input) return 1;
   return _splice_engine.state().desc().plugin->type == plugin_type::fx ? 1 : 0;
 }
@@ -468,7 +466,6 @@ pb_plugin::audioPortsCount(bool is_input) const noexcept
 bool
 pb_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info* info) const noexcept
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
   if (!is_input || index != 0) return false;
   if (_splice_engine.state().desc().plugin->type == plugin_type::fx) return false;
   info->id = 0;
@@ -480,7 +477,6 @@ pb_plugin::notePortsInfo(std::uint32_t index, bool is_input, clap_note_port_info
 bool
 pb_plugin::audioPortsInfo(std::uint32_t index, bool is_input, clap_audio_port_info* info) const noexcept
 {
-  PB_LOG_FUNC_ENTRY_EXIT();
   if (index != 0) return false;
   if (is_input && _splice_engine.state().desc().plugin->type == plugin_type::synth) return false;
   info->id = 0;
