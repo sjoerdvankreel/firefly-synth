@@ -52,7 +52,7 @@ V logger
 V some new presets
 - DSF falloff to the left
 - FM backwards (sub from phase)
-- fix the actual bug that caused need logger
+V? fix the actual bug that caused need logger
 - static link win
 - make zip work again
 
