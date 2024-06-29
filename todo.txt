@@ -54,7 +54,9 @@ V some new presets
 - FM backwards (sub from phase)
 V? fix the actual bug that caused need logger
 - static link win
-- make zip work again
+vst3 5458, clap 6414
+27304, 26707
+V make zip work again
 
 nice to have and make: 
 * DSF falloff to the left
